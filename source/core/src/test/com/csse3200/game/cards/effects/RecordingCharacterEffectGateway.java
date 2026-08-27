@@ -5,20 +5,23 @@ import java.util.List;
 
 /** In-memory character boundary used to verify effect execution without Team 7 dependencies. */
 class RecordingCharacterEffectGateway implements CharacterEffectGateway {
-  int damage;
+  private final int strengthModifier;
   int block;
   int healing;
-  int poison;
-  int poisonDuration;
-  int vulnerable;
-  int vulnerableDuration;
   int strength;
   final List<String> events = new ArrayList<>();
 
+  RecordingCharacterEffectGateway() {
+    this(0);
+  }
+
+  RecordingCharacterEffectGateway(int strengthModifier) {
+    this.strengthModifier = strengthModifier;
+  }
+
   @Override
-  public void damage(int amount) {
-    damage += amount;
-    events.add("DAMAGE:" + amount);
+  public int getStrengthModifier() {
+    return strengthModifier;
   }
 
   @Override
@@ -31,20 +34,6 @@ class RecordingCharacterEffectGateway implements CharacterEffectGateway {
   public void heal(int amount) {
     healing += amount;
     events.add("HEAL:" + amount);
-  }
-
-  @Override
-  public void applyPoison(int stacks, int duration) {
-    poison += stacks;
-    poisonDuration = duration;
-    events.add("POISON:" + stacks + ":" + duration);
-  }
-
-  @Override
-  public void applyVulnerable(int stacks, int duration) {
-    vulnerable += stacks;
-    vulnerableDuration = duration;
-    events.add("VULNERABLE:" + stacks + ":" + duration);
   }
 
   @Override

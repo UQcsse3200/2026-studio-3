@@ -3,73 +3,130 @@ package com.csse3200.game.cards.effects;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.csse3200.game.cards.EffectType;
-import com.csse3200.game.cards.configs.EffectConfig;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class EffectExecutorTest {
   private EffectExecutor executor;
-  private RecordingCharacterEffectGateway target;
 
   @BeforeEach
   void setUp() {
     executor = new EffectExecutor();
-    target = new RecordingCharacterEffectGateway();
   }
 
   @Test
-  void shouldExecuteEveryTeam6EffectType() {
-    executor.execute(new EffectConfig(EffectType.DAMAGE, 6), target);
-    executor.execute(new EffectConfig(EffectType.BLOCK, 5), target);
-    executor.execute(new EffectConfig(EffectType.HEAL, 4), target);
-    executor.execute(new EffectConfig(EffectType.POISON, 3, 2), target);
-    executor.execute(new EffectConfig(EffectType.VULNERABLE, 2, 1), target);
-    executor.execute(new EffectConfig(EffectType.STRENGTH, 2), target);
+  void shouldResolveEnemyDamageWithPlayerStrength() {
+    RecordingCharacterEffectGateway player = new RecordingCharacterEffectGateway(5);
 
-    assertEquals(6, target.damage);
-    assertEquals(5, target.block);
-    assertEquals(4, target.healing);
-    assertEquals(3, target.poison);
-    assertEquals(2, target.poisonDuration);
-    assertEquals(2, target.vulnerable);
-    assertEquals(1, target.vulnerableDuration);
-    assertEquals(2, target.strength);
+    List<ResolvedCardEffect> results =
+        executor.execute(
+            "strike", new CardEffect(EffectType.DAMAGE, 6), TargetType.SINGLE_ENEMY, player);
+
     assertEquals(
-        List.of("DAMAGE:6", "BLOCK:5", "HEAL:4", "POISON:3:2", "VULNERABLE:2:1", "STRENGTH:2"),
-        target.events);
+        List.of(
+            new ResolvedCardEffect("strike", EffectType.DAMAGE, TargetType.SINGLE_ENEMY, 11, 0)),
+        results);
+    assertEquals(List.of(), player.events);
   }
 
   @Test
-  void shouldRejectMissingEffectOrTarget() {
-    assertThrows(IllegalArgumentException.class, () -> executor.execute(null, target));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> executor.execute(new EffectConfig(EffectType.DAMAGE, 1), null));
+  void shouldClampOutgoingDamageAtZero() {
+    RecordingCharacterEffectGateway player = new RecordingCharacterEffectGateway(-10);
+
+    List<ResolvedCardEffect> results =
+        executor.execute(
+            "weakened_strike",
+            new CardEffect(EffectType.DAMAGE, 6),
+            TargetType.SINGLE_ENEMY,
+            player);
+
+    assertEquals(
+        List.of(
+            new ResolvedCardEffect(
+                "weakened_strike", EffectType.DAMAGE, TargetType.SINGLE_ENEMY, 0, 0)),
+        results);
   }
 
   @Test
-  void shouldRejectNullTypeAndNonPositiveValue() {
-    EffectConfig nullType = new EffectConfig(EffectType.DAMAGE, 1);
-    nullType.type = null;
+  void shouldReturnEnemyStatusesForCombatSystemsToApply() {
+    RecordingCharacterEffectGateway player = new RecordingCharacterEffectGateway();
 
-    assertThrows(IllegalArgumentException.class, () -> executor.execute(nullType, target));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> executor.execute(new EffectConfig(EffectType.DAMAGE, 0), target));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> executor.execute(new EffectConfig(EffectType.DAMAGE, -1), target));
+    assertEquals(
+        List.of(new ResolvedCardEffect("toxin", EffectType.POISON, TargetType.ALL_ENEMIES, 3, 2)),
+        executor.execute(
+            "toxin", new CardEffect(EffectType.POISON, 3, 2), TargetType.ALL_ENEMIES, player));
+    assertEquals(
+        List.of(
+            new ResolvedCardEffect("expose", EffectType.VULNERABLE, TargetType.SINGLE_ENEMY, 2, 1)),
+        executor.execute(
+            "expose",
+            new CardEffect(EffectType.VULNERABLE, 2, 1),
+            TargetType.SINGLE_ENEMY,
+            player));
+    assertEquals(List.of(), player.events);
   }
 
   @Test
-  void shouldEnforceTeam6DurationContract() {
+  void shouldApplySelfEffectsToPlayerGateway() {
+    RecordingCharacterEffectGateway player = new RecordingCharacterEffectGateway();
+
+    assertEquals(
+        List.of(),
+        executor.execute("defend", new CardEffect(EffectType.BLOCK, 5), TargetType.SELF, player));
+    assertEquals(
+        List.of(),
+        executor.execute("bandage", new CardEffect(EffectType.HEAL, 4), TargetType.SELF, player));
+    assertEquals(
+        List.of(),
+        executor.execute("focus", new CardEffect(EffectType.STRENGTH, 2), TargetType.SELF, player));
+
+    assertEquals(List.of("BLOCK:5", "HEAL:4", "STRENGTH:2"), player.events);
+  }
+
+  @Test
+  void shouldRejectUnsupportedTargetCombinations() {
+    RecordingCharacterEffectGateway player = new RecordingCharacterEffectGateway();
+
     assertThrows(
         IllegalArgumentException.class,
-        () -> executor.execute(new EffectConfig(EffectType.POISON, 3), target));
+        () ->
+            executor.execute(
+                "burn", new CardEffect(EffectType.DAMAGE, 1), TargetType.SELF, player));
     assertThrows(
         IllegalArgumentException.class,
-        () -> executor.execute(new EffectConfig(EffectType.DAMAGE, 6, 2), target));
+        () ->
+            executor.execute(
+                "enemy_heal", new CardEffect(EffectType.HEAL, 1), TargetType.SINGLE_ENEMY, player));
+  }
+
+  @Test
+  void shouldRejectInvalidArguments() {
+    RecordingCharacterEffectGateway player = new RecordingCharacterEffectGateway();
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            executor.execute(
+                "", new CardEffect(EffectType.DAMAGE, 1), TargetType.SINGLE_ENEMY, player));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> executor.execute("strike", null, TargetType.SINGLE_ENEMY, player));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> executor.execute("strike", new CardEffect(EffectType.DAMAGE, 1), null, player));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            executor.execute(
+                "strike", new CardEffect(EffectType.DAMAGE, 1), TargetType.SINGLE_ENEMY, null));
+  }
+
+  @Test
+  void shouldValidateRawEffects() {
+    assertThrows(IllegalArgumentException.class, () -> new CardEffect(null, 1));
+    assertThrows(IllegalArgumentException.class, () -> new CardEffect(EffectType.DAMAGE, 0));
+    assertThrows(IllegalArgumentException.class, () -> new CardEffect(EffectType.DAMAGE, 1, 1));
+    assertThrows(IllegalArgumentException.class, () -> new CardEffect(EffectType.POISON, 1));
   }
 }

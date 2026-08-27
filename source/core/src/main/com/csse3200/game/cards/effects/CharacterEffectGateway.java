@@ -1,28 +1,21 @@
 package com.csse3200.game.cards.effects;
 
 /**
- * Runtime boundary used by card effects to modify a character.
+ * Runtime boundary used by card effects to interact with the player's combat stats.
  *
- * <p>The resolver deliberately depends on this small interface rather than a concrete player or
- * enemy implementation. Team 7 character and status components can be connected through an adapter
- * without coupling the card system to their internal representation.
+ * <p>Team 5 resolves what a card is trying to do. The player stats system remains responsible for
+ * storing the actual player health, block, energy, and status values behind this gateway.
  */
 public interface CharacterEffectGateway {
-  /** Applies immediate damage. */
-  void damage(int amount);
+  /** Current outgoing damage modifier from player-side stats such as strength. */
+  int getStrengthModifier();
 
-  /** Grants block. */
+  /** Grants block to the player. */
   void gainBlock(int amount);
 
-  /** Restores health. */
+  /** Restores player health. */
   void heal(int amount);
 
-  /** Applies poison stacks for a fixed number of turns. */
-  void applyPoison(int stacks, int duration);
-
-  /** Applies vulnerable stacks for a fixed number of turns. */
-  void applyVulnerable(int stacks, int duration);
-
-  /** Grants strength for the remainder of combat. */
+  /** Grants player strength for the remainder of combat. */
   void gainStrength(int amount);
 }
