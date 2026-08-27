@@ -1,0 +1,21 @@
+{
+  "cards": [
+    {
+      "id": "unknown_type",
+      "name": "Unknown Type",
+      "description": "This card has an unsupported type.",
+      "cost": 1,
+      "type": "NOT_A_CARD_TYPE",
+      "rarity": "COMMON",
+      "target": "SINGLE_ENEMY",
+      "effects": [
+        {
+          "type": "DAMAGE",
+          "value": 5,
+          "duration": 0
+        }
+      ],
+      "texturePath": "images/cards/unknown.png"
+    }
+  ]
+}

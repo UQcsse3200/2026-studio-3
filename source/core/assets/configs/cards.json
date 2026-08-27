@@ -1,82 +1,73 @@
 {
-  "cards": [
-    {
-      "id": "strike",
-      "name": "Strike",
-      "description": "Deal 6 damage.",
-      "cost": 1,
-      "effects": [
-        {
-          "type": "DAMAGE",
-          "target": "SINGLE_ENEMY",
-          "amount": 6
-        }
-      ]
-    },
-    {
-      "id": "defend",
-      "name": "Defend",
-      "description": "Gain 5 block.",
-      "cost": 1,
-      "effects": [
-        {
-          "type": "BLOCK",
-          "target": "SELF",
-          "amount": 5
-        }
-      ]
-    },
-    {
-      "id": "first_aid",
-      "name": "First Aid",
-      "description": "Restore 4 health.",
-      "cost": 1,
-      "effects": [
-        {
-          "type": "HEAL",
-          "target": "SELF",
-          "amount": 4
-        }
-      ]
-    },
-    {
-      "id": "toxic_cloud",
-      "name": "Toxic Cloud",
-      "description": "Apply 3 poison to all enemies.",
-      "cost": 2,
-      "effects": [
-        {
-          "type": "POISON",
-          "target": "ALL_ENEMIES",
-          "amount": 3
-        }
-      ]
-    },
-    {
-      "id": "expose",
-      "name": "Expose",
-      "description": "Apply 2 vulnerable.",
-      "cost": 1,
-      "effects": [
-        {
-          "type": "VULNERABLE",
-          "target": "SINGLE_ENEMY",
-          "amount": 2
-        }
-      ]
-    },
-    {
-      "id": "rally",
-      "name": "Rally",
-      "description": "Gain 2 strength.",
-      "cost": 1,
-      "effects": [
-        {
-          "type": "STRENGTH",
-          "target": "SELF",
-          "amount": 2
-        }
-      ]
-    }
-  ]
-}
+    "cards": [
+      {
+        "id": "strike",
+        "name": "Strike",
+        "description": "Deal 6 damage.",
+        "cost": 1,
+        "type": "ATTACK",
+        "rarity": "COMMON",
+        "target": "SINGLE_ENEMY",
+        "effects": [{ "type": "DAMAGE", "value": 6, "duration": 0 }],
+        "texturePath": "images/cards/strike.png"
+      },
+      {
+        "id": "defend",
+        "name": "Defend",
+        "description": "Gain 5 block.",
+        "cost": 1,
+        "type": "SKILL",
+        "rarity": "COMMON",
+        "target": "SELF",
+        "effects": [{ "type": "BLOCK", "value": 5, "duration": 0 }],
+        "texturePath": "images/cards/defend.png"
+      },
+      {
+        "id": "poison_dagger",
+        "name": "Poison Dagger",
+        "description": "Deal 4 damage. Apply 3 Poison for 3 turns.",
+        "cost": 1,
+        "type": "ATTACK",
+        "rarity": "UNCOMMON",
+        "target": "SINGLE_ENEMY",
+        "effects": [
+          { "type": "DAMAGE", "value": 4, "duration": 0 },
+          { "type": "POISON", "value": 3, "duration": 3 }
+        ],
+        "texturePath": "images/cards/poison_dagger.png"
+      },
+      {
+        "id": "expose",
+        "name": "Expose",
+        "description": "Apply 2 Vulnerable to all enemies for 2 turns.",
+        "cost": 1,
+        "type": "SKILL",
+        "rarity": "UNCOMMON",
+        "target": "ALL_ENEMIES",
+        "effects": [{ "type": "VULNERABLE", "value": 2, "duration": 2 }],
+        "texturePath": "images/cards/expose.png"
+      },
+      {
+        "id": "inner_focus",
+        "name": "Inner Focus",
+        "description": "Gain 2 Strength for the rest of combat.",
+        "cost": 2,
+        "type": "POWER",
+        "rarity": "RARE",
+        "target": "SELF",
+        "effects": [{ "type": "STRENGTH", "value": 2, "duration": 0 }],
+        "texturePath": "images/cards/inner_focus.png"
+      },
+      {
+        "id": "bandage",
+        "name": "Bandage",
+        "description": "Heal 6 health.",
+        "cost": 1,
+        "type": "SKILL",
+        "rarity": "COMMON",
+        "target": "SELF",
+        "effects": [{ "type": "HEAL", "value": 6, "duration": 0 }],
+        "texturePath": "images/cards/bandage.png"
+      }
+    ]
+  }
