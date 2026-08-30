@@ -123,11 +123,11 @@ public abstract class Clickable extends Component {
   }
 
   public void draw() {
-      int screenHeight = Gdx.graphics.getHeight();
-      btn.setPosition(this.getX(), screenHeight - this.getY());
+    int screenHeight = Gdx.graphics.getHeight();
+    btn.setPosition(this.getX(), screenHeight - this.getY());
 
-      if (this.getWidth() > 0 && this.getHeight() > 0) {
-          btn.setSize(this.getWidth(), this.getHeight());
-      }
+    if (this.getWidth() > 0 && this.getHeight() > 0) {
+      btn.setSize(this.getWidth(), this.getHeight());
+    }
   }
 }

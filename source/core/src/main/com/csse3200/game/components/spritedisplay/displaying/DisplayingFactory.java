@@ -23,7 +23,7 @@ public class DisplayingFactory extends UIComponent {
   static {
     registerVariant(DEFAULT_VARIANT, record -> new Displaying(record) {});
     registerVariant("health", HealthDisplay::new);
-      registerVariant("cardDisplay", CardDisplay::new);
+    registerVariant("cardDisplay", CardDisplay::new);
     // Add more variants here as needed
   }
 
