@@ -30,6 +30,7 @@ loadScripts(document, 'script');</script>
 <li>Package</li>
 <li>Class</li>
 <li><a href="overview-tree.html">Tree</a></li>
+<li><a href="deprecated-list.html">Deprecated</a></li>
 <li class="nav-bar-cell1-rev">Index</li>
 <li><a href="help-doc.html#index">Help</a></li>
 </ul>
@@ -90,6 +91,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Adds block to the entity.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeck.html#addCard(java.lang.String)" class="member-name-link">addCard(String)</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></dt>
+<dd>
+<div class="block">Adds one card to the end of the deck.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/player/InventoryComponent.html#addCard(java.lang.String)" class="member-name-link">addCard(String)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/InventoryComponent.html" title="class in com.csse3200.game.components.player">InventoryComponent</a></dt>
 <dd>
 <div class="block">Adds one card to the inventory.</div>
@@ -105,6 +110,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/player/InventoryComponent.html#addCard(java.lang.String,int)" class="member-name-link">addCard(String, int)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/InventoryComponent.html" title="class in com.csse3200.game.components.player">InventoryComponent</a></dt>
 <dd>
 <div class="block">Adds a quantity of a card to the inventory.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeck.html#addCards(java.util.Collection)" class="member-name-link">addCards(Collection&lt;String&gt;)</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></dt>
+<dd>
+<div class="block">Adds every provided card ID to the deck in iteration order.</div>
 </dd>
 <dt><a href="com/csse3200/game/ui/terminal/Terminal.html#addCommand(java.lang.String,com.csse3200.game.ui.terminal.commands.Command)" class="member-name-link">addCommand(String, Command)</a> - Method in class com.csse3200.game.ui.terminal.<a href="com/csse3200/game/ui/terminal/Terminal.html" title="class in com.csse3200.game.ui.terminal">Terminal</a></dt>
 <dd>
@@ -148,6 +157,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Adds a node to the graph.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/effects/PlayerEffectState.html#addStrength(int)" class="member-name-link">addStrength(int)</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/PlayerEffectState.html" title="class in com.csse3200.game.cards.effects">PlayerEffectState</a></dt>
+<dd>
+<div class="block">Adds strength to the Team 5 calculation state.</div>
+</dd>
 <dt><a href="com/csse3200/game/ai/tasks/AITaskComponent.html#addTask(com.csse3200.game.ai.tasks.PriorityTask)" class="member-name-link">addTask(PriorityTask)</a> - Method in class com.csse3200.game.ai.tasks.<a href="com/csse3200/game/ai/tasks/AITaskComponent.html" title="class in com.csse3200.game.ai.tasks">AITaskComponent</a></dt>
 <dd>
 <div class="block">Add a priority task to the list of tasks.</div>
@@ -168,6 +181,12 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/TargetType.html#ALL_ENEMIES" class="member-name-link">ALL_ENEMIES</a> - Enum constant in enum class com.csse3200.game.cards.<a href="com/csse3200/game/cards/TargetType.html" title="enum class in com.csse3200.game.cards">TargetType</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayTarget.html#allEnemies()" class="member-name-link">allEnemies()</a> - Static method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayTarget.html" title="class in com.csse3200.game.cards.play">CardPlayTarget</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayRequest.html#allEnemies(java.lang.String)" class="member-name-link">allEnemies(String)</a> - Static method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></dt>
+<dd>
+<div class="block">Creates a request for a card targeting every enemy.</div>
+</dd>
 <dt><a href="com/csse3200/game/physics/raycast/AllHitCallback.html" class="type-name-link" title="class in com.csse3200.game.physics.raycast">AllHitCallback</a> - Class in <a href="com/csse3200/game/physics/raycast/package-summary.html">com.csse3200.game.physics.raycast</a></dt>
 <dd>
 <div class="block">Cast a ray against all colliders that match the layer mask.</div>
@@ -206,6 +225,18 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Applies both health and currency changes as one logical operation.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/play/integration/EnemyEffectConsumer.html#applyEnemyEffects(com.csse3200.game.cards.play.CardPlayTarget,java.util.List)" class="member-name-link">applyEnemyEffects(CardPlayTarget, List&lt;ResolvedCardEffect&gt;)</a> - Method in interface com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/EnemyEffectConsumer.html" title="interface in com.csse3200.game.cards.play.integration">EnemyEffectConsumer</a></dt>
+<dd>
+<div class="block">Applies a successful card play's enemy-owned effects to the selected target or targets.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/Team1EnemyStateAdapter.html#applyEnemyEffects(com.csse3200.game.cards.play.CardPlayTarget,java.util.List)" class="member-name-link">applyEnemyEffects(CardPlayTarget, List&lt;ResolvedCardEffect&gt;)</a> - Method in class com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/Team1EnemyStateAdapter.html" title="class in com.csse3200.game.cards.play.integration">Team1EnemyStateAdapter</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/PlayerEffectConsumer.html#applyPlayerEffects(java.util.List)" class="member-name-link">applyPlayerEffects(List&lt;ResolvedCardEffect&gt;)</a> - Method in interface com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/PlayerEffectConsumer.html" title="interface in com.csse3200.game.cards.play.integration">PlayerEffectConsumer</a></dt>
+<dd>
+<div class="block">Applies a successful card play's player-owned effects to the real player state.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/Team7PlayerStateAdapter.html#applyPlayerEffects(java.util.List)" class="member-name-link">applyPlayerEffects(List&lt;ResolvedCardEffect&gt;)</a> - Method in class com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/Team7PlayerStateAdapter.html" title="class in com.csse3200.game.cards.play.integration">Team7PlayerStateAdapter</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/files/UserSettings.html#applySettings(com.csse3200.game.files.UserSettings.Settings)" class="member-name-link">applySettings(UserSettings.Settings)</a> - Static method in class com.csse3200.game.files.<a href="com/csse3200/game/files/UserSettings.html" title="class in com.csse3200.game.files">UserSettings</a></dt>
 <dd>
 <div class="block">Apply the given settings without storing them.</div>
@@ -245,6 +276,10 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:B">B</h2>
 <dl class="index">
+<dt><a href="com/csse3200/game/cards/deck/CardIdRegistry.html#BANDAGE" class="member-name-link">BANDAGE</a> - Static variable in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/CardIdRegistry.html" title="class in com.csse3200.game.cards.deck">CardIdRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html#BANDAGE" class="member-name-link">BANDAGE</a> - Static variable in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html" title="class in com.csse3200.game.cards.deck">PlayerDeckFactory</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/entities/configs/BaseEntityConfig.html#baseAttack" class="member-name-link">baseAttack</a> - Variable in class com.csse3200.game.entities.configs.<a href="com/csse3200/game/entities/configs/BaseEntityConfig.html" title="class in com.csse3200.game.entities.configs">BaseEntityConfig</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/entities/configs/BaseEntityConfig.html" class="type-name-link" title="class in com.csse3200.game.entities.configs">BaseEntityConfig</a> - Class in <a href="com/csse3200/game/entities/configs/package-summary.html">com.csse3200.game.entities.configs</a></dt>
@@ -254,6 +289,14 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/entities/configs/BaseEntityConfig.html#%3Cinit%3E()" class="member-name-link">BaseEntityConfig()</a> - Constructor for class com.csse3200.game.entities.configs.<a href="com/csse3200/game/entities/configs/BaseEntityConfig.html" title="class in com.csse3200.game.entities.configs">BaseEntityConfig</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/BattleDeck.html" class="type-name-link" title="class in com.csse3200.game.cards.deck">BattleDeck</a> - Class in <a href="com/csse3200/game/cards/deck/package-summary.html">com.csse3200.game.cards.deck</a></dt>
+<dd>
+<div class="block">Runtime deck state for a single combat encounter.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#%3Cinit%3E(com.csse3200.game.cards.deck.PlayerDeck)" class="member-name-link">BattleDeck(PlayerDeck)</a> - Constructor for class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
+<dd>
+<div class="block">Creates battle deck state from a player deck.</div>
+</dd>
 <dt><a href="com/csse3200/game/physics/PhysicsContactListener.html#beginContact(com.badlogic.gdx.physics.box2d.Contact)" class="member-name-link">beginContact(Contact)</a> - Method in class com.csse3200.game.physics.<a href="com/csse3200/game/physics/PhysicsContactListener.html" title="class in com.csse3200.game.physics">PhysicsContactListener</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/entities/configs/EnemyConfig.html#behaviour" class="member-name-link">behaviour</a> - Variable in class com.csse3200.game.entities.configs.<a href="com/csse3200/game/entities/configs/EnemyConfig.html" title="class in com.csse3200.game.entities.configs">EnemyConfig</a></dt>
@@ -291,6 +334,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/CameraComponent.html#%3Cinit%3E(com.badlogic.gdx.graphics.Camera)" class="member-name-link">CameraComponent(Camera)</a> - Constructor for class com.csse3200.game.components.<a href="com/csse3200/game/components/CameraComponent.html" title="class in com.csse3200.game.components">CameraComponent</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeck.html#canAddCard(java.lang.String)" class="member-name-link">canAddCard(String)</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></dt>
+<dd>
+<div class="block">Checks whether a card may be added to this player deck.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/player/EnergyComponent.html#canAfford(int)" class="member-name-link">canAfford(int)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/EnergyComponent.html" title="class in com.csse3200.game.components.player">EnergyComponent</a></dt>
 <dd>
 <div class="block">Checks whether the player currently has enough energy to cover the given cost.</div>
@@ -302,6 +349,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html#canDefeatPlayer()" class="member-name-link">canDefeatPlayer()</a> - Method in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIContext</a></dt>
 <dd>
 <div class="block">* Checks whether a normal attack can defeat the player.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayService.html#canPlay(com.csse3200.game.cards.play.CardPlayRequest)" class="member-name-link">canPlay(CardPlayRequest)</a> - Method in class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayService.html" title="class in com.csse3200.game.cards.play">CardPlayService</a></dt>
+<dd>
+<div class="block">Read-only preview for the unified Team 3 request flow.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayService.html#canPlay(java.lang.String)" class="member-name-link">canPlay(String)</a> - Method in class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayService.html" title="class in com.csse3200.game.cards.play">CardPlayService</a></dt>
+<dd>
+<div class="block">Read-only check for whether a card is currently playable.</div>
 </dd>
 <dt><a href="com/csse3200/game/shop/ShopEncounter.html#canPurchase(java.lang.String)" class="member-name-link">canPurchase(String)</a> - Method in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopEncounter.html" title="class in com.csse3200.game.shop">ShopEncounter</a></dt>
 <dd>&nbsp;</dd>
@@ -323,6 +378,12 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/shop/PurchaseResult.Status.html#CARD_NOT_FOUND" class="member-name-link">CARD_NOT_FOUND</a> - Enum constant in enum class com.csse3200.game.shop.<a href="com/csse3200/game/shop/PurchaseResult.Status.html" title="enum class in com.csse3200.game.shop">PurchaseResult.Status</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayFailureReason.html#CARD_NOT_IN_HAND" class="member-name-link">CARD_NOT_IN_HAND</a> - Enum constant in enum class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayFailureReason.html" title="enum class in com.csse3200.game.cards.play">CardPlayFailureReason</a></dt>
+<dd>
+<div class="block">The requested card is not currently in the battle deck hand.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/Team3CardPlayAdapter.html#CARD_PLAY_RESULT_EVENT" class="member-name-link">CARD_PLAY_RESULT_EVENT</a> - Static variable in class com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/Team3CardPlayAdapter.html" title="class in com.csse3200.game.cards.play.integration">Team3CardPlayAdapter</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/encounters/integration/CardCatalogGateway.html" class="type-name-link" title="interface in com.csse3200.game.encounters.integration">CardCatalogGateway</a> - Interface in <a href="com/csse3200/game/encounters/integration/package-summary.html">com.csse3200.game.encounters.integration</a></dt>
 <dd>
 <div class="block">Read-only boundary to the Cards / Library system owned by Team 6.</div>
@@ -339,8 +400,88 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Loads and validates card definitions from a JSON configuration file.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/debug/CardEffectDebugComponent.html" class="type-name-link" title="class in com.csse3200.game.cards.debug">CardEffectDebugComponent</a> - Class in <a href="com/csse3200/game/cards/debug/package-summary.html">com.csse3200.game.cards.debug</a></dt>
+<dd>
+<div class="block">State tracker for the card effect debug dialog.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/debug/CardEffectDebugComponent.html#%3Cinit%3E(com.csse3200.game.cards.effects.CardEffectResolutionService)" class="member-name-link">CardEffectDebugComponent(CardEffectResolutionService)</a> - Constructor for class com.csse3200.game.cards.debug.<a href="com/csse3200/game/cards/debug/CardEffectDebugComponent.html" title="class in com.csse3200.game.cards.debug">CardEffectDebugComponent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/debug/CardEffectDebugDisplay.html" class="type-name-link" title="class in com.csse3200.game.cards.debug">CardEffectDebugDisplay</a> - Class in <a href="com/csse3200/game/cards/debug/package-summary.html">com.csse3200.game.cards.debug</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/debug/CardEffectDebugDisplay.html#%3Cinit%3E()" class="member-name-link">CardEffectDebugDisplay()</a> - Constructor for class com.csse3200.game.cards.debug.<a href="com/csse3200/game/cards/debug/CardEffectDebugDisplay.html" title="class in com.csse3200.game.cards.debug">CardEffectDebugDisplay</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolution.html" class="type-name-link" title="class in com.csse3200.game.cards.effects">CardEffectResolution</a> - Record Class in <a href="com/csse3200/game/cards/effects/package-summary.html">com.csse3200.game.cards.effects</a></dt>
+<dd>
+<div class="block">Immutable result of resolving one played card.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolution.html#%3Cinit%3E(java.lang.String,java.util.List)" class="member-name-link">CardEffectResolution(String, List&lt;ResolvedCardEffect&gt;)</a> - Constructor for record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolution.html" title="class in com.csse3200.game.cards.effects">CardEffectResolution</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>CardEffectResolution</code> record class.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html" class="type-name-link" title="class in com.csse3200.game.cards.effects">CardEffectResolutionContext</a> - Record Class in <a href="com/csse3200/game/cards/effects/package-summary.html">com.csse3200.game.cards.effects</a></dt>
+<dd>
+<div class="block">Immutable combat-state snapshot used while resolving one card.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html#%3Cinit%3E(int,int,int)" class="member-name-link">CardEffectResolutionContext(int, int, int)</a> - Constructor for record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionContext</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>CardEffectResolutionContext</code> record class.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html" class="type-name-link" title="class in com.csse3200.game.cards.effects">CardEffectResolutionService</a> - Class in <a href="com/csse3200/game/cards/effects/package-summary.html">com.csse3200.game.cards.effects</a></dt>
+<dd>
+<div class="block">Public Team 5 entry point for resolving cards and querying the current turn's results.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html#%3Cinit%3E(com.csse3200.game.cards.CardService)" class="member-name-link">CardEffectResolutionService(CardService)</a> - Constructor for class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionService</a></dt>
+<dd>
+<div class="block">Creates a combat-scoped service backed by Team 6's public card retrieval API.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html#%3Cinit%3E(com.csse3200.game.cards.effects.CardEffectResolver,com.csse3200.game.cards.effects.PlayerEffectState,com.csse3200.game.cards.effects.CardEffectResultStore)" class="member-name-link">CardEffectResolutionService(CardEffectResolver, PlayerEffectState, CardEffectResultStore)</a> - Constructor for class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionService</a></dt>
+<dd>
+<div class="block">Creates a service with explicit dependencies for integration and testing.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolver.html" class="type-name-link" title="class in com.csse3200.game.cards.effects">CardEffectResolver</a> - Class in <a href="com/csse3200/game/cards/effects/package-summary.html">com.csse3200.game.cards.effects</a></dt>
+<dd>
+<div class="block">Resolves Team 6 card configs into Team 5 card effect results.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolver.html#%3Cinit%3E()" class="member-name-link">CardEffectResolver()</a> - Constructor for class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolver.html" title="class in com.csse3200.game.cards.effects">CardEffectResolver</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolver.html#%3Cinit%3E(com.csse3200.game.cards.CardService)" class="member-name-link">CardEffectResolver(CardService)</a> - Constructor for class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolver.html" title="class in com.csse3200.game.cards.effects">CardEffectResolver</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolver.html#%3Cinit%3E(com.csse3200.game.cards.CardService,com.csse3200.game.cards.effects.EffectExecutor)" class="member-name-link">CardEffectResolver(CardService, EffectExecutor)</a> - Constructor for class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolver.html" title="class in com.csse3200.game.cards.effects">CardEffectResolver</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolver.html#%3Cinit%3E(com.csse3200.game.cards.effects.EffectExecutor)" class="member-name-link">CardEffectResolver(EffectExecutor)</a> - Constructor for class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolver.html" title="class in com.csse3200.game.cards.effects">CardEffectResolver</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResultStore.html" class="type-name-link" title="interface in com.csse3200.game.cards.effects">CardEffectResultStore</a> - Interface in <a href="com/csse3200/game/cards/effects/package-summary.html">com.csse3200.game.cards.effects</a></dt>
+<dd>
+<div class="block">Read-only query boundary for resolved card effects recorded during the current turn.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/cards/CardHandDisplay.html" class="type-name-link" title="class in com.csse3200.game.components.cards">CardHandDisplay</a> - Class in <a href="com/csse3200/game/components/cards/package-summary.html">com.csse3200.game.components.cards</a></dt>
+<dd>
+<div class="block">Displays a card-library style overlay for Team 5 deck UI work.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/cards/CardHandDisplay.html#%3Cinit%3E()" class="member-name-link">CardHandDisplay()</a> - Constructor for class com.csse3200.game.components.cards.<a href="com/csse3200/game/components/cards/CardHandDisplay.html" title="class in com.csse3200.game.components.cards">CardHandDisplay</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/shop/ShopItem.html#cardId" class="member-name-link">cardId</a> - Variable in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopItem.html" title="class in com.csse3200.game.shop">ShopItem</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolution.html#cardId()" class="member-name-link">cardId()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolution.html" title="class in com.csse3200.game.cards.effects">CardEffectResolution</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>cardId</code> record component.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html#cardId()" class="member-name-link">cardId()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html" title="class in com.csse3200.game.cards.effects">ResolvedCardEffect</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>cardId</code> record component.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayRequest.html#cardId()" class="member-name-link">cardId()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>cardId</code> record component.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#cardId()" class="member-name-link">cardId()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>cardId</code> record component.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/deck/CardIdRegistry.html" class="type-name-link" title="class in com.csse3200.game.cards.deck">CardIdRegistry</a> - Class in <a href="com/csse3200/game/cards/deck/package-summary.html">com.csse3200.game.cards.deck</a></dt>
+<dd>
+<div class="block">Registry of card IDs that may be stored in a player deck.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/CardLibrary.html" class="type-name-link" title="class in com.csse3200.game.cards">CardLibrary</a> - Class in <a href="com/csse3200/game/cards/package-summary.html">com.csse3200.game.cards</a></dt>
 <dd>
 <div class="block">Central registry of valid <a href="com/csse3200/game/cards/configs/CardConfig.html" title="class in com.csse3200.game.cards.configs"><code>CardConfig</code></a> definitions.</div>
@@ -364,6 +505,58 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/cards/CardLoadingException.html#%3Cinit%3E(java.lang.String,java.lang.Throwable)" class="member-name-link">CardLoadingException(String, Throwable)</a> - Constructor for exception class com.csse3200.game.cards.<a href="com/csse3200/game/cards/CardLoadingException.html" title="class in com.csse3200.game.cards">CardLoadingException</a></dt>
 <dd>
 <div class="block">Creates a card loading exception caused by another exception.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayFailureReason.html" class="type-name-link" title="enum class in com.csse3200.game.cards.play">CardPlayFailureReason</a> - Enum Class in <a href="com/csse3200/game/cards/play/package-summary.html">com.csse3200.game.cards.play</a></dt>
+<dd>
+<div class="block">Reason a card play request could not be completed.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayRequest.html" class="type-name-link" title="class in com.csse3200.game.cards.play">CardPlayRequest</a> - Record Class in <a href="com/csse3200/game/cards/play/package-summary.html">com.csse3200.game.cards.play</a></dt>
+<dd>
+<div class="block">Immutable request sent by Team 3/battle flow when a player attempts to play one card.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayRequest.html#%3Cinit%3E(java.lang.String,com.csse3200.game.cards.play.CardPlayTarget)" class="member-name-link">CardPlayRequest(String, CardPlayTarget)</a> - Constructor for record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>CardPlayRequest</code> record class.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html" class="type-name-link" title="class in com.csse3200.game.cards.play">CardPlayResult</a> - Record Class in <a href="com/csse3200/game/cards/play/package-summary.html">com.csse3200.game.cards.play</a></dt>
+<dd>
+<div class="block">Immutable result of attempting to play one card from the player's current hand.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#%3Cinit%3E(java.lang.String,boolean,int,com.csse3200.game.cards.effects.CardEffectResolution,com.csse3200.game.cards.play.CardPlayFailureReason)" class="member-name-link">CardPlayResult(String, boolean, int, CardEffectResolution, CardPlayFailureReason)</a> - Constructor for record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>
+<div class="block">Backwards-compatible constructor for callers that do not yet send target/deck information.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#%3Cinit%3E(java.lang.String,com.csse3200.game.cards.play.CardPlayTarget,boolean,int,com.csse3200.game.cards.effects.CardEffectResolution,com.csse3200.game.cards.play.CardPlayFailureReason,com.csse3200.game.cards.play.DeckSnapshot)" class="member-name-link">CardPlayResult(String, CardPlayTarget, boolean, int, CardEffectResolution, CardPlayFailureReason, DeckSnapshot)</a> - Constructor for record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>CardPlayResult</code> record class.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayService.html" class="type-name-link" title="class in com.csse3200.game.cards.play">CardPlayService</a> - Class in <a href="com/csse3200/game/cards/play/package-summary.html">com.csse3200.game.cards.play</a></dt>
+<dd>
+<div class="block">Coordinates Team 5 card play with Team 7 energy state.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayService.html#%3Cinit%3E(com.csse3200.game.cards.CardService,com.csse3200.game.cards.deck.BattleDeck,com.csse3200.game.components.player.EnergyComponent)" class="member-name-link">CardPlayService(CardService, BattleDeck, EnergyComponent)</a> - Constructor for class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayService.html" title="class in com.csse3200.game.cards.play">CardPlayService</a></dt>
+<dd>
+<div class="block">Creates a play service using Team 6 card retrieval, Team 5 effect resolution and Team 7 energy.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayService.html#%3Cinit%3E(com.csse3200.game.cards.CardService,com.csse3200.game.cards.deck.BattleDeck,com.csse3200.game.components.player.EnergyComponent,com.csse3200.game.cards.play.PlayerStateView,com.csse3200.game.cards.play.EnemyStateView)" class="member-name-link">CardPlayService(CardService, BattleDeck, EnergyComponent, PlayerStateView, EnemyStateView)</a> - Constructor for class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayService.html" title="class in com.csse3200.game.cards.play">CardPlayService</a></dt>
+<dd>
+<div class="block">Creates a play service that can resolve damage from Team 7/Team 1 read-only state views.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayService.html#%3Cinit%3E(com.csse3200.game.cards.CardService,com.csse3200.game.cards.effects.CardEffectResolutionService,com.csse3200.game.cards.deck.BattleDeck,com.csse3200.game.components.player.EnergyComponent)" class="member-name-link">CardPlayService(CardService, CardEffectResolutionService, BattleDeck, EnergyComponent)</a> - Constructor for class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayService.html" title="class in com.csse3200.game.cards.play">CardPlayService</a></dt>
+<dd>
+<div class="block">Creates a play service with explicit dependencies for integration and testing.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayService.html#%3Cinit%3E(com.csse3200.game.cards.CardService,com.csse3200.game.cards.effects.CardEffectResolutionService,com.csse3200.game.cards.deck.BattleDeck,com.csse3200.game.components.player.EnergyComponent,com.csse3200.game.cards.play.PlayerStateView,com.csse3200.game.cards.play.EnemyStateView)" class="member-name-link">CardPlayService(CardService, CardEffectResolutionService, BattleDeck, EnergyComponent, PlayerStateView, EnemyStateView)</a> - Constructor for class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayService.html" title="class in com.csse3200.game.cards.play">CardPlayService</a></dt>
+<dd>
+<div class="block">Creates a play service with explicit dependencies and optional read-only state views.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayTarget.html" class="type-name-link" title="class in com.csse3200.game.cards.play">CardPlayTarget</a> - Record Class in <a href="com/csse3200/game/cards/play/package-summary.html">com.csse3200.game.cards.play</a></dt>
+<dd>
+<div class="block">Immutable target selected by the battle flow for one card play attempt.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayTarget.html#%3Cinit%3E(com.csse3200.game.cards.TargetType,java.lang.String)" class="member-name-link">CardPlayTarget(TargetType, String)</a> - Constructor for record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayTarget.html" title="class in com.csse3200.game.cards.play">CardPlayTarget</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>CardPlayTarget</code> record class.</div>
 </dd>
 <dt><a href="com/csse3200/game/cards/CardService.html" class="type-name-link" title="interface in com.csse3200.game.cards">CardService</a> - Interface in <a href="com/csse3200/game/cards/package-summary.html">com.csse3200.game.cards</a></dt>
 <dd>
@@ -461,6 +654,16 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/files/FileLoader.Location.html#CLASSPATH" class="member-name-link">CLASSPATH</a> - Enum constant in enum class com.csse3200.game.files.<a href="com/csse3200/game/files/FileLoader.Location.html" title="enum class in com.csse3200.game.files">FileLoader.Location</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeck.html#clear()" class="member-name-link">clear()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></dt>
+<dd>
+<div class="block">Removes all cards from the deck.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResultStore.html#clear()" class="member-name-link">clear()</a> - Method in interface com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResultStore.html" title="interface in com.csse3200.game.cards.effects">CardEffectResultStore</a></dt>
+<dd>
+<div class="block">Clears the recorded turn results without changing Team 5's combat-long modifier state.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/TurnEffectStore.html#clear()" class="member-name-link">clear()</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/TurnEffectStore.html" title="class in com.csse3200.game.cards.effects">TurnEffectStore</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/services/ServiceLocator.html#clear()" class="member-name-link">clear()</a> - Static method in class com.csse3200.game.services.<a href="com/csse3200/game/services/ServiceLocator.html" title="class in com.csse3200.game.services">ServiceLocator</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/utils/SortedIntMap.html#clear()" class="member-name-link">clear()</a> - Method in class com.csse3200.game.utils.<a href="com/csse3200/game/utils/SortedIntMap.html" title="class in com.csse3200.game.utils">SortedIntMap</a></dt>
@@ -474,6 +677,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/CombatStatsComponent.html#clearArmor()" class="member-name-link">clearArmor()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/CombatStatsComponent.html" title="class in com.csse3200.game.components">CombatStatsComponent</a></dt>
 <dd>
 <div class="block">Clears all armor from the entity, setting it to 0.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html#clearTurnResults()" class="member-name-link">clearTurnResults()</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionService</a></dt>
+<dd>
+<div class="block">Clears queryable turn results while preserving combat-long calculation state such as strength.</div>
 </dd>
 <dt><a href="com/csse3200/game/physics/components/ColliderComponent.html" class="type-name-link" title="class in com.csse3200.game.physics.components">ColliderComponent</a> - Class in <a href="com/csse3200/game/physics/components/package-summary.html">com.csse3200.game.physics.components</a></dt>
 <dd>
@@ -495,9 +702,21 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/configs/package-summary.html">com.csse3200.game.cards.configs</a> - package com.csse3200.game.cards.configs</dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/debug/package-summary.html">com.csse3200.game.cards.debug</a> - package com.csse3200.game.cards.debug</dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/package-summary.html">com.csse3200.game.cards.deck</a> - package com.csse3200.game.cards.deck</dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/package-summary.html">com.csse3200.game.cards.effects</a> - package com.csse3200.game.cards.effects</dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/package-summary.html">com.csse3200.game.cards.play</a> - package com.csse3200.game.cards.play</dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/package-summary.html">com.csse3200.game.cards.play.integration</a> - package com.csse3200.game.cards.play.integration</dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/chance/package-summary.html">com.csse3200.game.chance</a> - package com.csse3200.game.chance</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/package-summary.html">com.csse3200.game.components</a> - package com.csse3200.game.components</dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/cards/package-summary.html">com.csse3200.game.components.cards</a> - package com.csse3200.game.components.cards</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/chance/package-summary.html">com.csse3200.game.components.chance</a> - package com.csse3200.game.components.chance</dt>
 <dd>&nbsp;</dd>
@@ -628,6 +847,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/physics/PhysicsLayer.html#contains(short,short)" class="member-name-link">contains(short, short)</a> - Static method in class com.csse3200.game.physics.<a href="com/csse3200/game/physics/PhysicsLayer.html" title="class in com.csse3200.game.physics">PhysicsLayer</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeck.html#contains(java.lang.String)" class="member-name-link">contains(String)</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></dt>
+<dd>
+<div class="block">Checks whether the deck contains at least one copy of a card.</div>
+</dd>
 <dt><a href="com/csse3200/game/entities/configs/EnemyConfigs.html#contains(java.lang.String)" class="member-name-link">contains(String)</a> - Method in class com.csse3200.game.entities.configs.<a href="com/csse3200/game/entities/configs/EnemyConfigs.html" title="class in com.csse3200.game.entities.configs">EnemyConfigs</a></dt>
 <dd>
 <div class="block">Checks whether an enemy id exists in the roster.</div>
@@ -648,9 +871,17 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/utils/SortedIntMap.html#containsKey(int)" class="member-name-link">containsKey(int)</a> - Method in class com.csse3200.game.utils.<a href="com/csse3200/game/utils/SortedIntMap.html" title="class in com.csse3200.game.utils">SortedIntMap</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeck.html#copy()" class="member-name-link">copy()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></dt>
+<dd>
+<div class="block">Creates an independent copy of this player deck.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/configs/CardConfig.html#cost" class="member-name-link">cost</a> - Variable in class com.csse3200.game.cards.configs.<a href="com/csse3200/game/cards/configs/CardConfig.html" title="class in com.csse3200.game.cards.configs">CardConfig</a></dt>
 <dd>
 <div class="block">Energy required to play this card.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeck.html#count(java.lang.String)" class="member-name-link">count(String)</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></dt>
+<dd>
+<div class="block">Counts how many copies of a card are in the deck.</div>
 </dd>
 <dt><a href="com/csse3200/game/areas/ForestGameArea.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.areas.<a href="com/csse3200/game/areas/ForestGameArea.html" title="class in com.csse3200.game.areas">ForestGameArea</a></dt>
 <dd>
@@ -660,6 +891,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Create the game area in the world.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/debug/CardEffectDebugDisplay.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.cards.debug.<a href="com/csse3200/game/cards/debug/CardEffectDebugDisplay.html" title="class in com.csse3200.game.cards.debug">CardEffectDebugDisplay</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/debug/KeyboardCardEffectDebugInputComponent.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.cards.debug.<a href="com/csse3200/game/cards/debug/KeyboardCardEffectDebugInputComponent.html" title="class in com.csse3200.game.cards.debug">KeyboardCardEffectDebugInputComponent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/Team3CardPlayAdapter.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/Team3CardPlayAdapter.html" title="class in com.csse3200.game.cards.play.integration">Team3CardPlayAdapter</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/cards/CardHandDisplay.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.cards.<a href="com/csse3200/game/components/cards/CardHandDisplay.html" title="class in com.csse3200.game.components.cards">CardHandDisplay</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/chance/ChanceEncounterDisplay.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.chance.<a href="com/csse3200/game/components/chance/ChanceEncounterDisplay.html" title="class in com.csse3200.game.components.chance">ChanceEncounterDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/Component.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/Component.html" title="class in com.csse3200.game.components">Component</a></dt>
@@ -794,6 +1033,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/entities/factories/RenderFactory.html#createRenderer()" class="member-name-link">createRenderer()</a> - Static method in class com.csse3200.game.entities.factories.<a href="com/csse3200/game/entities/factories/RenderFactory.html" title="class in com.csse3200.game.entities.factories">RenderFactory</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html#createStarterDeck()" class="member-name-link">createStarterDeck()</a> - Static method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html" title="class in com.csse3200.game.cards.deck">PlayerDeckFactory</a></dt>
+<dd>
+<div class="block">Creates a default player deck using Team 6's six initial cards.</div>
+</dd>
 <dt><a href="com/csse3200/game/areas/terrain/TerrainFactory.html#createTerrain(com.csse3200.game.areas.terrain.TerrainFactory.TerrainType)" class="member-name-link">createTerrain(TerrainFactory.TerrainType)</a> - Method in class com.csse3200.game.areas.terrain.<a href="com/csse3200/game/areas/terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a></dt>
 <dd>
 <div class="block">Create a terrain of the given type, using the orientation of the factory.</div>
@@ -811,6 +1054,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Currency update failed and the deck change was rolled back.</div>
 </dd>
 <dt><a href="com/csse3200/game/maps/NodeState.html#CURRENT" class="member-name-link">CURRENT</a> - Enum constant in enum class com.csse3200.game.maps.<a href="com/csse3200/game/maps/NodeState.html" title="enum class in com.csse3200.game.maps">NodeState</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/Team7PlayerStateAdapter.html#currentEnergy()" class="member-name-link">currentEnergy()</a> - Method in class com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/Team7PlayerStateAdapter.html" title="class in com.csse3200.game.cards.play.integration">Team7PlayerStateAdapter</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/PlayerStateView.html#currentEnergy()" class="member-name-link">currentEnergy()</a> - Method in interface com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/PlayerStateView.html" title="interface in com.csse3200.game.cards.play">PlayerStateView</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/CardType.html#CURSE" class="member-name-link">CURSE</a> - Enum constant in enum class com.csse3200.game.cards.<a href="com/csse3200/game/cards/CardType.html" title="enum class in com.csse3200.game.cards">CardType</a></dt>
 <dd>
@@ -871,6 +1118,18 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Boundary used to add purchased or rewarded cards to the player's persistent deck.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#deckSnapshot()" class="member-name-link">deckSnapshot()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>deckSnapshot</code> record component.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/DeckSnapshot.html" class="type-name-link" title="class in com.csse3200.game.cards.play">DeckSnapshot</a> - Record Class in <a href="com/csse3200/game/cards/play/package-summary.html">com.csse3200.game.cards.play</a></dt>
+<dd>
+<div class="block">Immutable battle-deck state returned after a card play attempt.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/DeckSnapshot.html#%3Cinit%3E(java.util.List,java.util.List,java.util.List)" class="member-name-link">DeckSnapshot(List&lt;String&gt;, List&lt;String&gt;, List&lt;String&gt;)</a> - Constructor for record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/DeckSnapshot.html" title="class in com.csse3200.game.cards.play">DeckSnapshot</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>DeckSnapshot</code> record class.</div>
+</dd>
 <dt><a href="com/csse3200/game/shop/ShopItem.html#decreaseStock()" class="member-name-link">decreaseStock()</a> - Method in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopItem.html" title="class in com.csse3200.game.shop">ShopItem</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/physics/PhysicsLayer.html#DEFAULT" class="member-name-link">DEFAULT</a> - Static variable in class com.csse3200.game.physics.<a href="com/csse3200/game/physics/PhysicsLayer.html" title="class in com.csse3200.game.physics">PhysicsLayer</a></dt>
@@ -894,6 +1153,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/IntentType.html#DEFEND" class="member-name-link">DEFEND</a> - Enum constant in enum class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/IntentType.html" title="enum class in com.csse3200.game.components.enemy">IntentType</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/CardIdRegistry.html#DEFEND" class="member-name-link">DEFEND</a> - Static variable in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/CardIdRegistry.html" title="class in com.csse3200.game.cards.deck">CardIdRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html#DEFEND" class="member-name-link">DEFEND</a> - Static variable in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html" title="class in com.csse3200.game.cards.deck">PlayerDeckFactory</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/IntentIcons.html#DEFEND" class="member-name-link">DEFEND</a> - Static variable in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/IntentIcons.html" title="class in com.csse3200.game.components.enemy">IntentIcons</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/configs/CardConfig.html#description" class="member-name-link">description</a> - Variable in class com.csse3200.game.cards.configs.<a href="com/csse3200/game/cards/configs/CardConfig.html" title="class in com.csse3200.game.cards.configs">CardConfig</a></dt>
@@ -908,6 +1171,14 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/physics/raycast/SingleHitCallback.html#didHit" class="member-name-link">didHit</a> - Variable in class com.csse3200.game.physics.raycast.<a href="com/csse3200/game/physics/raycast/SingleHitCallback.html" title="class in com.csse3200.game.physics.raycast">SingleHitCallback</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#discardCard(java.lang.String)" class="member-name-link">discardCard(String)</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
+<dd>
+<div class="block">Removes one matching card from the hand and moves it to the discard pile.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#discardHand()" class="member-name-link">discardHand()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
+<dd>
+<div class="block">Moves every card currently in the hand to the discard pile.</div>
+</dd>
 <dt><a href="com/csse3200/game/files/UserSettings.Settings.html#displayMode" class="member-name-link">displayMode</a> - Variable in class com.csse3200.game.files.<a href="com/csse3200/game/files/UserSettings.Settings.html" title="class in com.csse3200.game.files">UserSettings.Settings</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/files/UserSettings.DisplaySettings.html#%3Cinit%3E()" class="member-name-link">DisplaySettings()</a> - Constructor for class com.csse3200.game.files.<a href="com/csse3200/game/files/UserSettings.DisplaySettings.html" title="class in com.csse3200.game.files">UserSettings.DisplaySettings</a></dt>
@@ -923,6 +1194,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Dispose of all internal entities in the area</div>
 </dd>
 <dt><a href="com/csse3200/game/areas/terrain/TerrainComponent.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.areas.terrain.<a href="com/csse3200/game/areas/terrain/TerrainComponent.html" title="class in com.csse3200.game.areas.terrain">TerrainComponent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/debug/CardEffectDebugDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.cards.debug.<a href="com/csse3200/game/cards/debug/CardEffectDebugDisplay.html" title="class in com.csse3200.game.cards.debug">CardEffectDebugDisplay</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/cards/CardHandDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.cards.<a href="com/csse3200/game/components/cards/CardHandDisplay.html" title="class in com.csse3200.game.components.cards">CardHandDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/chance/ChanceEncounterDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.chance.<a href="com/csse3200/game/components/chance/ChanceEncounterDisplay.html" title="class in com.csse3200.game.components.chance">ChanceEncounterDisplay</a></dt>
 <dd>&nbsp;</dd>
@@ -984,6 +1259,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/areas/terrain/TerrainComponent.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.areas.terrain.<a href="com/csse3200/game/areas/terrain/TerrainComponent.html" title="class in com.csse3200.game.areas.terrain">TerrainComponent</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/debug/CardEffectDebugDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.cards.debug.<a href="com/csse3200/game/cards/debug/CardEffectDebugDisplay.html" title="class in com.csse3200.game.cards.debug">CardEffectDebugDisplay</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/cards/CardHandDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.cards.<a href="com/csse3200/game/components/cards/CardHandDisplay.html" title="class in com.csse3200.game.components.cards">CardHandDisplay</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/chance/ChanceEncounterDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.chance.<a href="com/csse3200/game/components/chance/ChanceEncounterDisplay.html" title="class in com.csse3200.game.components.chance">ChanceEncounterDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/gamearea/GameAreaDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.gamearea.<a href="com/csse3200/game/components/gamearea/GameAreaDisplay.html" title="class in com.csse3200.game.components.gamearea">GameAreaDisplay</a></dt>
@@ -1010,6 +1289,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ui/terminal/TerminalDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.ui.terminal.<a href="com/csse3200/game/ui/terminal/TerminalDisplay.html" title="class in com.csse3200.game.ui.terminal">TerminalDisplay</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#drawCards(int)" class="member-name-link">drawCards(int)</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
+<dd>
+<div class="block">Draws up to the requested number of cards from the draw pile into the hand.</div>
+</dd>
 <dt><a href="com/csse3200/game/rendering/DebugRenderer.html#drawLine(com.badlogic.gdx.math.Vector2,com.badlogic.gdx.math.Vector2)" class="member-name-link">drawLine(Vector2, Vector2)</a> - Method in class com.csse3200.game.rendering.<a href="com/csse3200/game/rendering/DebugRenderer.html" title="class in com.csse3200.game.rendering">DebugRenderer</a></dt>
 <dd>
 <div class="block">Draw a line between two positions</div>
@@ -1017,6 +1300,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/rendering/DebugRenderer.html#drawLine(com.badlogic.gdx.math.Vector2,com.badlogic.gdx.math.Vector2,com.badlogic.gdx.graphics.Color,float)" class="member-name-link">drawLine(Vector2, Vector2, Color, float)</a> - Method in class com.csse3200.game.rendering.<a href="com/csse3200/game/rendering/DebugRenderer.html" title="class in com.csse3200.game.rendering">DebugRenderer</a></dt>
 <dd>
 <div class="block">Draw a line between two positions</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#drawOne()" class="member-name-link">drawOne()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
+<dd>
+<div class="block">Draws one card from the draw pile into the hand.</div>
 </dd>
 <dt><a href="com/csse3200/game/rendering/DebugRenderer.html#drawRectangle(com.badlogic.gdx.math.Vector2,com.badlogic.gdx.math.Vector2)" class="member-name-link">drawRectangle(Vector2, Vector2)</a> - Method in class com.csse3200.game.rendering.<a href="com/csse3200/game/rendering/DebugRenderer.html" title="class in com.csse3200.game.rendering">DebugRenderer</a></dt>
 <dd>
@@ -1029,6 +1316,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/cards/configs/EffectConfig.html#duration" class="member-name-link">duration</a> - Variable in class com.csse3200.game.cards.configs.<a href="com/csse3200/game/cards/configs/EffectConfig.html" title="class in com.csse3200.game.cards.configs">EffectConfig</a></dt>
 <dd>
 <div class="block">Number of turns the effect lasts, unused by instant and combat-long effects.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html#duration()" class="member-name-link">duration()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html" title="class in com.csse3200.game.cards.effects">ResolvedCardEffect</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>duration</code> record component.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:E">E</h2>
@@ -1061,10 +1352,26 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Creates an effect with an explicit duration.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/effects/EffectExecutor.html" class="type-name-link" title="class in com.csse3200.game.cards.effects">EffectExecutor</a> - Class in <a href="com/csse3200/game/cards/effects/package-summary.html">com.csse3200.game.cards.effects</a></dt>
+<dd>
+<div class="block">Resolves one Team 6 effect config into a Team 5 card effect result.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/EffectExecutor.html#%3Cinit%3E()" class="member-name-link">EffectExecutor()</a> - Constructor for class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/EffectExecutor.html" title="class in com.csse3200.game.cards.effects">EffectExecutor</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#effectResolution()" class="member-name-link">effectResolution()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>effectResolution</code> record component.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/configs/CardConfig.html#effects" class="member-name-link">effects</a> - Variable in class com.csse3200.game.cards.configs.<a href="com/csse3200/game/cards/configs/CardConfig.html" title="class in com.csse3200.game.cards.configs">CardConfig</a></dt>
 <dd>
 <div class="block">Effects applied in order when the card is played.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolution.html#effects()" class="member-name-link">effects()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolution.html" title="class in com.csse3200.game.cards.effects">CardEffectResolution</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>effects</code> record component.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolution.html#effectsOfType(com.csse3200.game.cards.EffectType)" class="member-name-link">effectsOfType(EffectType)</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolution.html" title="class in com.csse3200.game.cards.effects">CardEffectResolution</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/EffectType.html" class="type-name-link" title="enum class in com.csse3200.game.cards">EffectType</a> - Enum Class in <a href="com/csse3200/game/cards/package-summary.html">com.csse3200.game.cards</a></dt>
 <dd>
 <div class="block">The kinds of effect a card can apply.</div>
@@ -1073,6 +1380,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">higher statistics and at least one special mechanic.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/play/DeckSnapshot.html#empty()" class="member-name-link">empty()</a> - Static method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/DeckSnapshot.html" title="class in com.csse3200.game.cards.play">DeckSnapshot</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/Component.html#enabled" class="member-name-link">enabled</a> - Variable in class com.csse3200.game.components.<a href="com/csse3200/game/components/Component.html" title="class in com.csse3200.game.components">Component</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/encounters/integration/ChanceResolution.Status.html#ENCOUNTER_CLOSED" class="member-name-link">ENCOUNTER_CLOSED</a> - Enum constant in enum class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></dt>
@@ -1139,6 +1448,14 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/entities/configs/EnemyConfigs.html#%3Cinit%3E()" class="member-name-link">EnemyConfigs()</a> - Constructor for class com.csse3200.game.entities.configs.<a href="com/csse3200/game/entities/configs/EnemyConfigs.html" title="class in com.csse3200.game.entities.configs">EnemyConfigs</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/EnemyEffectConsumer.html" class="type-name-link" title="interface in com.csse3200.game.cards.play.integration">EnemyEffectConsumer</a> - Interface in <a href="com/csse3200/game/cards/play/integration/package-summary.html">com.csse3200.game.cards.play.integration</a></dt>
+<dd>
+<div class="block">Team 1 boundary used by the battle flow to apply resolved enemy effects.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolution.html#enemyEffects()" class="member-name-link">enemyEffects()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolution.html" title="class in com.csse3200.game.cards.effects">CardEffectResolution</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#enemyEffects()" class="member-name-link">enemyEffects()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/entities/factories/EnemyFactory.html" class="type-name-link" title="class in com.csse3200.game.entities.factories">EnemyFactory</a> - Class in <a href="com/csse3200/game/entities/factories/package-summary.html">com.csse3200.game.entities.factories</a></dt>
 <dd>
 <div class="block">Creates enemy entities from configuration loaded from <code>configs/enemies.json</code>.</div>
@@ -1152,6 +1469,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/entities/configs/EnemyScaling.html" class="type-name-link" title="class in com.csse3200.game.entities.configs">EnemyScaling</a> - Class in <a href="com/csse3200/game/entities/configs/package-summary.html">com.csse3200.game.entities.configs</a></dt>
 <dd>
 <div class="block">Applies progression-based stat scaling to enemy configurations.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/EnemyStateView.html" class="type-name-link" title="interface in com.csse3200.game.cards.play">EnemyStateView</a> - Interface in <a href="com/csse3200/game/cards/play/package-summary.html">com.csse3200.game.cards.play</a></dt>
+<dd>
+<div class="block">Read-only Team 5 boundary for target-enemy values that can affect card resolution.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyStatsComponent.html" class="type-name-link" title="class in com.csse3200.game.components.enemy">EnemyStatsComponent</a> - Class in <a href="com/csse3200/game/components/enemy/package-summary.html">com.csse3200.game.components.enemy</a></dt>
 <dd>
@@ -1171,6 +1492,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/components/player/EnergyComponent.html#%3Cinit%3E(int)" class="member-name-link">EnergyComponent(int)</a> - Constructor for class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/EnergyComponent.html" title="class in com.csse3200.game.components.player">EnergyComponent</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#energyCost()" class="member-name-link">energyCost()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>energyCost</code> record component.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/Component.html#entity" class="member-name-link">entity</a> - Variable in class com.csse3200.game.components.<a href="com/csse3200/game/components/Component.html" title="class in com.csse3200.game.components">Component</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/physics/BodyUserData.html#entity" class="member-name-link">entity</a> - Variable in class com.csse3200.game.physics.<a href="com/csse3200/game/physics/BodyUserData.html" title="class in com.csse3200.game.physics">BodyUserData</a></dt>
@@ -1189,6 +1514,34 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/entities/EntityService.html#%3Cinit%3E()" class="member-name-link">EntityService()</a> - Constructor for class com.csse3200.game.entities.<a href="com/csse3200/game/entities/EntityService.html" title="class in com.csse3200.game.entities">EntityService</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolution.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolution.html" title="class in com.csse3200.game.cards.effects">CardEffectResolution</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionContext</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html" title="class in com.csse3200.game.cards.effects">ResolvedCardEffect</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayRequest.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayTarget.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayTarget.html" title="class in com.csse3200.game.cards.play">CardPlayTarget</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/DeckSnapshot.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/DeckSnapshot.html" title="class in com.csse3200.game.cards.play">DeckSnapshot</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyIntent.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></dt>
 <dd>
 <div class="block">Two intents are equal when their type and value match.</div>
@@ -1231,6 +1584,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Exit the game.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/deck/CardIdRegistry.html#EXPOSE" class="member-name-link">EXPOSE</a> - Static variable in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/CardIdRegistry.html" title="class in com.csse3200.game.cards.deck">CardIdRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html#EXPOSE" class="member-name-link">EXPOSE</a> - Static variable in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html" title="class in com.csse3200.game.cards.deck">PlayerDeckFactory</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/files/FileLoader.Location.html#EXTERNAL" class="member-name-link">EXTERNAL</a> - Enum constant in enum class com.csse3200.game.files.<a href="com/csse3200/game/files/FileLoader.Location.html" title="enum class in com.csse3200.game.files">FileLoader.Location</a></dt>
 <dd>&nbsp;</dd>
 </dl>
@@ -1242,6 +1599,18 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/shop/PurchaseResult.html#failure(com.csse3200.game.shop.PurchaseResult.Status,com.csse3200.game.shop.ShopItem,java.lang.String)" class="member-name-link">failure(PurchaseResult.Status, ShopItem, String)</a> - Static method in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/PurchaseResult.html" title="class in com.csse3200.game.shop">PurchaseResult</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#failure(java.lang.String,int,com.csse3200.game.cards.play.CardPlayFailureReason)" class="member-name-link">failure(String, int, CardPlayFailureReason)</a> - Static method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>
+<div class="block">Creates a failed play result.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#failure(java.lang.String,com.csse3200.game.cards.play.CardPlayTarget,int,com.csse3200.game.cards.play.CardPlayFailureReason,com.csse3200.game.cards.play.DeckSnapshot)" class="member-name-link">failure(String, CardPlayTarget, int, CardPlayFailureReason, DeckSnapshot)</a> - Static method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>
+<div class="block">Creates a failed result for the unified card-play request flow.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#failureReason()" class="member-name-link">failureReason()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>failureReason</code> record component.</div>
+</dd>
 <dt><a href="com/csse3200/game/entities/configs/PlayerConfig.html#favouriteColour" class="member-name-link">favouriteColour</a> - Variable in class com.csse3200.game.entities.configs.<a href="com/csse3200/game/entities/configs/PlayerConfig.html" title="class in com.csse3200.game.entities.configs">PlayerConfig</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/EffectType.html#FEEBLE" class="member-name-link">FEEBLE</a> - Enum constant in enum class com.csse3200.game.cards.<a href="com/csse3200/game/cards/EffectType.html" title="enum class in com.csse3200.game.cards">EffectType</a></dt>
@@ -1288,6 +1657,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/files/UserSettings.Settings.html#fps" class="member-name-link">fps</a> - Variable in class com.csse3200.game.files.<a href="com/csse3200/game/files/UserSettings.Settings.html" title="class in com.csse3200.game.files">UserSettings.Settings</a></dt>
 <dd>
 <div class="block">FPS cap of the game.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/DeckSnapshot.html#from(com.csse3200.game.cards.deck.BattleDeck)" class="member-name-link">from(BattleDeck)</a> - Static method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/DeckSnapshot.html" title="class in com.csse3200.game.cards.play">DeckSnapshot</a></dt>
+<dd>
+<div class="block">Captures the current state of a battle deck.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html#from(com.csse3200.game.cards.effects.PlayerEffectState)" class="member-name-link">from(PlayerEffectState)</a> - Static method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionContext</a></dt>
+<dd>
+<div class="block">Creates a context using only Team 5's backwards-compatible calculation state.</div>
 </dd>
 <dt><a href="com/csse3200/game/files/UserSettings.Settings.html#fullscreen" class="member-name-link">fullscreen</a> - Variable in class com.csse3200.game.files.<a href="com/csse3200/game/files/UserSettings.Settings.html" title="class in com.csse3200.game.files">UserSettings.Settings</a></dt>
 <dd>&nbsp;</dd>
@@ -1407,6 +1784,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns how many copies of a card are in the inventory.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeck.html#getCardIds()" class="member-name-link">getCardIds()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></dt>
+<dd>
+<div class="block">Returns a snapshot of card IDs in deck order.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/player/InventoryComponent.html#getCards()" class="member-name-link">getCards()</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/InventoryComponent.html" title="class in com.csse3200.game.components.player">InventoryComponent</a></dt>
 <dd>
 <div class="block">Returns an immutable view of owned card quantities.</div>
@@ -1479,14 +1860,30 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/shop/ShopItem.html#getDescription()" class="member-name-link">getDescription()</a> - Method in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopItem.html" title="class in com.csse3200.game.shop">ShopItem</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#getDiscardPile()" class="member-name-link">getDiscardPile()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#getDiscardPileSize()" class="member-name-link">getDiscardPileSize()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyStatsComponent.html#getDisplayName()" class="member-name-link">getDisplayName()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsComponent.html" title="class in com.csse3200.game.components.enemy">EnemyStatsComponent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/shop/ShopItem.html#getDisplayName()" class="member-name-link">getDisplayName()</a> - Method in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopItem.html" title="class in com.csse3200.game.shop">ShopItem</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#getDrawPile()" class="member-name-link">getDrawPile()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#getDrawPileSize()" class="member-name-link">getDrawPileSize()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/StatusEffect.html#getDuration()" class="member-name-link">getDuration()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatusEffect.html" title="class in com.csse3200.game.components">StatusEffect</a></dt>
 <dd>
 <div class="block">Returns the number of turns remaining before this effect expires.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html#getEffectsOfType(com.csse3200.game.cards.EffectType)" class="member-name-link">getEffectsOfType(EffectType)</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionService</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResultStore.html#getEffectsOfType(com.csse3200.game.cards.EffectType)" class="member-name-link">getEffectsOfType(EffectType)</a> - Method in interface com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResultStore.html" title="interface in com.csse3200.game.cards.effects">CardEffectResultStore</a></dt>
+<dd>
+<div class="block">Returns all recorded effects of one type.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/TurnEffectStore.html#getEffectsOfType(com.csse3200.game.cards.EffectType)" class="member-name-link">getEffectsOfType(EffectType)</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/TurnEffectStore.html" title="class in com.csse3200.game.cards.effects">TurnEffectStore</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/encounters/integration/ChanceEncounterSession.html#getEncounter()" class="member-name-link">getEncounter()</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceEncounterSession.html" title="class in com.csse3200.game.encounters.integration">ChanceEncounterSession</a></dt>
 <dd>
 <div class="block">Returns the immutable encounter definition displayed by the UI.</div>
@@ -1494,6 +1891,12 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html#getEnemyArmour()" class="member-name-link">getEnemyArmour()</a> - Method in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIContext</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html#getEnemyAttack()" class="member-name-link">getEnemyAttack()</a> - Method in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIContext</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html#getEnemyEffects()" class="member-name-link">getEnemyEffects()</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionService</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResultStore.html#getEnemyEffects()" class="member-name-link">getEnemyEffects()</a> - Method in interface com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResultStore.html" title="interface in com.csse3200.game.cards.effects">CardEffectResultStore</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/TurnEffectStore.html#getEnemyEffects()" class="member-name-link">getEnemyEffects()</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/TurnEffectStore.html" title="class in com.csse3200.game.cards.effects">TurnEffectStore</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html#getEnemyHealth()" class="member-name-link">getEnemyHealth()</a> - Method in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIContext</a></dt>
 <dd>&nbsp;</dd>
@@ -1525,6 +1928,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the player's gold.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#getHand()" class="member-name-link">getHand()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#getHandSize()" class="member-name-link">getHandSize()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/CombatStatsComponent.html#getHealth()" class="member-name-link">getHealth()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/CombatStatsComponent.html" title="class in com.csse3200.game.components">CombatStatsComponent</a></dt>
 <dd>
 <div class="block">Returns the entity's health.</div>
@@ -1653,6 +2060,12 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/services/ServiceLocator.html#getPhysicsService()" class="member-name-link">getPhysicsService()</a> - Static method in class com.csse3200.game.services.<a href="com/csse3200/game/services/ServiceLocator.html" title="class in com.csse3200.game.services">ServiceLocator</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html#getPlayerEffects()" class="member-name-link">getPlayerEffects()</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionService</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResultStore.html#getPlayerEffects()" class="member-name-link">getPlayerEffects()</a> - Method in interface com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResultStore.html" title="interface in com.csse3200.game.cards.effects">CardEffectResultStore</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/TurnEffectStore.html#getPlayerEffects()" class="member-name-link">getPlayerEffects()</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/TurnEffectStore.html" title="class in com.csse3200.game.cards.effects">TurnEffectStore</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html#getPlayerHealth()" class="member-name-link">getPlayerHealth()</a> - Method in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIContext</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/StatusEffectCalculator.html#getPoisonDamage(com.csse3200.game.components.CombatStatsComponent)" class="member-name-link">getPoisonDamage(CombatStatsComponent)</a> - Static method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatusEffectCalculator.html" title="class in com.csse3200.game.components">StatusEffectCalculator</a></dt>
@@ -1689,6 +2102,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the successful resolution retained by this session.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/debug/CardEffectDebugComponent.html#getResolutions()" class="member-name-link">getResolutions()</a> - Method in class com.csse3200.game.cards.debug.<a href="com/csse3200/game/cards/debug/CardEffectDebugComponent.html" title="class in com.csse3200.game.cards.debug">CardEffectDebugComponent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html#getResolutions()" class="member-name-link">getResolutions()</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionService</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResultStore.html#getResolutions()" class="member-name-link">getResolutions()</a> - Method in interface com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResultStore.html" title="interface in com.csse3200.game.cards.effects">CardEffectResultStore</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/TurnEffectStore.html#getResolutions()" class="member-name-link">getResolutions()</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/TurnEffectStore.html" title="class in com.csse3200.game.cards.effects">TurnEffectStore</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/services/ServiceLocator.html#getResourceService()" class="member-name-link">getResourceService()</a> - Static method in class com.csse3200.game.services.<a href="com/csse3200/game/services/ServiceLocator.html" title="class in com.csse3200.game.services">ServiceLocator</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/maps/MapNode.html#getRoomType()" class="member-name-link">getRoomType()</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/MapNode.html" title="class in com.csse3200.game.maps">MapNode</a></dt>
@@ -1701,6 +2122,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/rendering/RenderService.html#getStage()" class="member-name-link">getStage()</a> - Method in class com.csse3200.game.rendering.<a href="com/csse3200/game/rendering/RenderService.html" title="class in com.csse3200.game.rendering">RenderService</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html#getStarterDeckCardIds()" class="member-name-link">getStarterDeckCardIds()</a> - Static method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html" title="class in com.csse3200.game.cards.deck">PlayerDeckFactory</a></dt>
+<dd>
+<div class="block">Returns the card IDs used by the starter deck.</div>
+</dd>
 <dt><a href="com/csse3200/game/maps/MapNode.html#getState()" class="member-name-link">getState()</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/MapNode.html" title="class in com.csse3200.game.maps">MapNode</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ai/tasks/DefaultTask.html#getStatus()" class="member-name-link">getStatus()</a> - Method in class com.csse3200.game.ai.tasks.<a href="com/csse3200/game/ai/tasks/DefaultTask.html" title="class in com.csse3200.game.ai.tasks">DefaultTask</a></dt>
@@ -1719,6 +2144,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the active status effect with the given type, or null if not present.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/effects/PlayerEffectState.html#getStrength()" class="member-name-link">getStrength()</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/PlayerEffectState.html" title="class in com.csse3200.game.cards.effects">PlayerEffectState</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ai/movement/MovementController.html#getTarget()" class="member-name-link">getTarget()</a> - Method in interface com.csse3200.game.ai.movement.<a href="com/csse3200/game/ai/movement/MovementController.html" title="interface in com.csse3200.game.ai.movement">MovementController</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/physics/components/PhysicsMovementComponent.html#getTarget()" class="member-name-link">getTarget()</a> - Method in class com.csse3200.game.physics.components.<a href="com/csse3200/game/physics/components/PhysicsMovementComponent.html" title="class in com.csse3200.game.physics.components">PhysicsMovementComponent</a></dt>
@@ -1752,6 +2179,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/physics/PhysicsEngine.html#getWorld()" class="member-name-link">getWorld()</a> - Method in class com.csse3200.game.physics.<a href="com/csse3200/game/physics/PhysicsEngine.html" title="class in com.csse3200.game.physics">PhysicsEngine</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/areas/terrain/TerrainComponent.html#getZIndex()" class="member-name-link">getZIndex()</a> - Method in class com.csse3200.game.areas.terrain.<a href="com/csse3200/game/areas/terrain/TerrainComponent.html" title="class in com.csse3200.game.areas.terrain">TerrainComponent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/debug/CardEffectDebugDisplay.html#getZIndex()" class="member-name-link">getZIndex()</a> - Method in class com.csse3200.game.cards.debug.<a href="com/csse3200/game/cards/debug/CardEffectDebugDisplay.html" title="class in com.csse3200.game.cards.debug">CardEffectDebugDisplay</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/cards/CardHandDisplay.html#getZIndex()" class="member-name-link">getZIndex()</a> - Method in class com.csse3200.game.components.cards.<a href="com/csse3200/game/components/cards/CardHandDisplay.html" title="class in com.csse3200.game.components.cards">CardHandDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/chance/ChanceEncounterDisplay.html#getZIndex()" class="member-name-link">getZIndex()</a> - Method in class com.csse3200.game.components.chance.<a href="com/csse3200/game/components/chance/ChanceEncounterDisplay.html" title="class in com.csse3200.game.components.chance">ChanceEncounterDisplay</a></dt>
 <dd>&nbsp;</dd>
@@ -1823,6 +2254,34 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns if the player has a certain amount of gold.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolution.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolution.html" title="class in com.csse3200.game.cards.effects">CardEffectResolution</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionContext</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html" title="class in com.csse3200.game.cards.effects">ResolvedCardEffect</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayRequest.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayTarget.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayTarget.html" title="class in com.csse3200.game.cards.play">CardPlayTarget</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/DeckSnapshot.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/DeckSnapshot.html" title="class in com.csse3200.game.cards.play">DeckSnapshot</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyIntent.html#hashCode()" class="member-name-link">hashCode()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/entities/Entity.html#hashCode()" class="member-name-link">hashCode()</a> - Method in class com.csse3200.game.entities.<a href="com/csse3200/game/entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a></dt>
@@ -1880,6 +2339,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/shop/ShopItem.html#increaseStock(int)" class="member-name-link">increaseStock(int)</a> - Method in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopItem.html" title="class in com.csse3200.game.shop">ShopItem</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/CardIdRegistry.html#INNER_FOCUS" class="member-name-link">INNER_FOCUS</a> - Static variable in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/CardIdRegistry.html" title="class in com.csse3200.game.cards.deck">CardIdRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html#INNER_FOCUS" class="member-name-link">INNER_FOCUS</a> - Static variable in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html" title="class in com.csse3200.game.cards.deck">PlayerDeckFactory</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/input/InputComponent.html" class="type-name-link" title="class in com.csse3200.game.input">InputComponent</a> - Class in <a href="com/csse3200/game/input/package-summary.html">com.csse3200.game.input</a></dt>
 <dd>
 <div class="block">An InputComponent that supports keyboard and touch input and touch gestures.</div>
@@ -1924,6 +2387,12 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Player cannot afford the price.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayFailureReason.html#INSUFFICIENT_ENERGY" class="member-name-link">INSUFFICIENT_ENERGY</a> - Enum constant in enum class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayFailureReason.html" title="enum class in com.csse3200.game.cards.play">CardPlayFailureReason</a></dt>
+<dd>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated.</span>
+<div class="deprecation-comment">use <a href="com/csse3200/game/cards/play/CardPlayFailureReason.html#NOT_ENOUGH_ENERGY"><code>CardPlayFailureReason.NOT_ENOUGH_ENERGY</code></a>.</div>
+</div>
+</dd>
 <dt><a href="com/csse3200/game/shop/PurchaseResult.Status.html#INSUFFICIENT_GOLD" class="member-name-link">INSUFFICIENT_GOLD</a> - Enum constant in enum class com.csse3200.game.shop.<a href="com/csse3200/game/shop/PurchaseResult.Status.html" title="enum class in com.csse3200.game.shop">PurchaseResult.Status</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/encounters/integration/IntegratedShopTransactionGateway.html" class="type-name-link" title="class in com.csse3200.game.encounters.integration">IntegratedShopTransactionGateway</a> - Class in <a href="com/csse3200/game/encounters/integration/package-summary.html">com.csse3200.game.encounters.integration</a></dt>
@@ -1944,9 +2413,19 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/files/FileLoader.Location.html#INTERNAL" class="member-name-link">INTERNAL</a> - Enum constant in enum class com.csse3200.game.files.<a href="com/csse3200/game/files/FileLoader.Location.html" title="enum class in com.csse3200.game.files">FileLoader.Location</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayFailureReason.html#INVALID_CARD" class="member-name-link">INVALID_CARD</a> - Enum constant in enum class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayFailureReason.html" title="enum class in com.csse3200.game.cards.play">CardPlayFailureReason</a></dt>
+<dd>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated.</span>
+<div class="deprecation-comment">use <a href="com/csse3200/game/cards/play/CardPlayFailureReason.html#INVALID_CARD_CONFIG"><code>CardPlayFailureReason.INVALID_CARD_CONFIG</code></a>.</div>
+</div>
+</dd>
 <dt><a href="com/csse3200/game/encounters/integration/ShopTransactionStatus.html#INVALID_CARD" class="member-name-link">INVALID_CARD</a> - Enum constant in enum class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ShopTransactionStatus.html" title="enum class in com.csse3200.game.encounters.integration">ShopTransactionStatus</a></dt>
 <dd>
 <div class="block">Card identifier was null or blank.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayFailureReason.html#INVALID_CARD_CONFIG" class="member-name-link">INVALID_CARD_CONFIG</a> - Enum constant in enum class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayFailureReason.html" title="enum class in com.csse3200.game.cards.play">CardPlayFailureReason</a></dt>
+<dd>
+<div class="block">The retrieved Team 6 card config does not satisfy the card validation contract.</div>
 </dd>
 <dt><a href="com/csse3200/game/encounters/integration/ChanceResolution.Status.html#INVALID_CHOICE" class="member-name-link">INVALID_CHOICE</a> - Enum constant in enum class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></dt>
 <dd>
@@ -1963,6 +2442,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/encounters/integration/ShopTransactionStatus.html#INVALID_PRICE" class="member-name-link">INVALID_PRICE</a> - Enum constant in enum class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ShopTransactionStatus.html" title="enum class in com.csse3200.game.encounters.integration">ShopTransactionStatus</a></dt>
 <dd>
 <div class="block">Price was negative.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayFailureReason.html#INVALID_TARGET" class="member-name-link">INVALID_TARGET</a> - Enum constant in enum class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayFailureReason.html" title="enum class in com.csse3200.game.cards.play">CardPlayFailureReason</a></dt>
+<dd>
+<div class="block">The selected target does not match the target required by the card config.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/player/InventoryComponent.html" class="type-name-link" title="class in com.csse3200.game.components.player">InventoryComponent</a> - Class in <a href="com/csse3200/game/components/player/package-summary.html">com.csse3200.game.components.player</a></dt>
 <dd>
@@ -1996,6 +2479,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns true if the entity's has 0 health, otherwise false.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeck.html#isEmpty()" class="member-name-link">isEmpty()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/encounters/integration/EncounterFlowController.html#isEncounterActive()" class="member-name-link">isEncounterActive()</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/EncounterFlowController.html" title="class in com.csse3200.game.encounters.integration">EncounterFlowController</a></dt>
 <dd>
 <div class="block">Reports whether the controller owns an unfinished encounter.</div>
@@ -2012,10 +2497,16 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/areas/terrain/TerrainComponent.TerrainOrientation.html#ISOMETRIC" class="member-name-link">ISOMETRIC</a> - Enum constant in enum class com.csse3200.game.areas.terrain.<a href="com/csse3200/game/areas/terrain/TerrainComponent.TerrainOrientation.html" title="enum class in com.csse3200.game.areas.terrain">TerrainComponent.TerrainOrientation</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/debug/CardEffectDebugComponent.html#isOpen()" class="member-name-link">isOpen()</a> - Method in class com.csse3200.game.cards.debug.<a href="com/csse3200/game/cards/debug/CardEffectDebugComponent.html" title="class in com.csse3200.game.cards.debug">CardEffectDebugComponent</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ui/terminal/Terminal.html#isOpen()" class="member-name-link">isOpen()</a> - Method in class com.csse3200.game.ui.terminal.<a href="com/csse3200/game/ui/terminal/Terminal.html" title="class in com.csse3200.game.ui.terminal">Terminal</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/shop/ShopItem.html#isPurchasable()" class="member-name-link">isPurchasable()</a> - Method in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopItem.html" title="class in com.csse3200.game.shop">ShopItem</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/CardIdRegistry.html#isRegistered(java.lang.String)" class="member-name-link">isRegistered(String)</a> - Static method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/CardIdRegistry.html" title="class in com.csse3200.game.cards.deck">CardIdRegistry</a></dt>
+<dd>
+<div class="block">Checks whether a card ID is registered for use by Sprint 1 systems.</div>
+</dd>
 <dt><a href="com/csse3200/game/encounters/integration/ChanceEncounterSession.html#isResolved()" class="member-name-link">isResolved()</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceEncounterSession.html" title="class in com.csse3200.game.encounters.integration">ChanceEncounterSession</a></dt>
 <dd>
 <div class="block">Reports whether a choice has been committed.</div>
@@ -2025,6 +2516,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Reports whether this resolution committed its outcome.</div>
 </dd>
 <dt><a href="com/csse3200/game/shop/PurchaseResult.html#isSuccess()" class="member-name-link">isSuccess()</a> - Method in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/PurchaseResult.html" title="class in com.csse3200.game.shop">PurchaseResult</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/EnemyStateView.html#isTargetAvailable(java.lang.String)" class="member-name-link">isTargetAvailable(String)</a> - Method in interface com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/EnemyStateView.html" title="interface in com.csse3200.game.cards.play">EnemyStateView</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/Team1EnemyStateAdapter.html#isTargetAvailable(java.lang.String)" class="member-name-link">isTargetAvailable(String)</a> - Method in class com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/Team1EnemyStateAdapter.html" title="class in com.csse3200.game.cards.play.integration">Team1EnemyStateAdapter</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/shop/ShopItem.html#isValid()" class="member-name-link">isValid()</a> - Method in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopItem.html" title="class in com.csse3200.game.shop">ShopItem</a></dt>
 <dd>&nbsp;</dd>
@@ -2048,6 +2543,12 @@ loadScripts(document, 'script');</script>
 <dl class="index">
 <dt><a href="com/csse3200/game/input/InputFactory.InputType.html#KEYBOARD" class="member-name-link">KEYBOARD</a> - Enum constant in enum class com.csse3200.game.input.<a href="com/csse3200/game/input/InputFactory.InputType.html" title="enum class in com.csse3200.game.input">InputFactory.InputType</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/debug/KeyboardCardEffectDebugInputComponent.html" class="type-name-link" title="class in com.csse3200.game.cards.debug">KeyboardCardEffectDebugInputComponent</a> - Class in <a href="com/csse3200/game/cards/debug/package-summary.html">com.csse3200.game.cards.debug</a></dt>
+<dd>
+<div class="block">Input handler for the card effect debug dialog.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/debug/KeyboardCardEffectDebugInputComponent.html#%3Cinit%3E()" class="member-name-link">KeyboardCardEffectDebugInputComponent()</a> - Constructor for class com.csse3200.game.cards.debug.<a href="com/csse3200/game/cards/debug/KeyboardCardEffectDebugInputComponent.html" title="class in com.csse3200.game.cards.debug">KeyboardCardEffectDebugInputComponent</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/input/KeyboardInputFactory.html" class="type-name-link" title="class in com.csse3200.game.input">KeyboardInputFactory</a> - Class in <a href="com/csse3200/game/input/package-summary.html">com.csse3200.game.input</a></dt>
 <dd>
 <div class="block">KeyboardInputFactory creates input handlers that process keyboard and touch support.</div>
@@ -2068,6 +2569,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ui/terminal/KeyboardTerminalInputComponent.html#%3Cinit%3E(com.csse3200.game.ui.terminal.Terminal)" class="member-name-link">KeyboardTerminalInputComponent(Terminal)</a> - Constructor for class com.csse3200.game.ui.terminal.<a href="com/csse3200/game/ui/terminal/KeyboardTerminalInputComponent.html" title="class in com.csse3200.game.ui.terminal">KeyboardTerminalInputComponent</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/debug/KeyboardCardEffectDebugInputComponent.html#keyDown(int)" class="member-name-link">keyDown(int)</a> - Method in class com.csse3200.game.cards.debug.<a href="com/csse3200/game/cards/debug/KeyboardCardEffectDebugInputComponent.html" title="class in com.csse3200.game.cards.debug">KeyboardCardEffectDebugInputComponent</a></dt>
+<dd>
+<div class="block">If the toggle key is pressed, the dialog opens/closes.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/player/KeyboardPlayerInputComponent.html#keyDown(int)" class="member-name-link">keyDown(int)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/KeyboardPlayerInputComponent.html" title="class in com.csse3200.game.components.player">KeyboardPlayerInputComponent</a></dt>
 <dd>
 <div class="block">Triggers player events on specific keycodes.</div>
@@ -2312,6 +2817,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Represents the player's progress state of a map node.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayFailureReason.html#NONE" class="member-name-link">NONE</a> - Enum constant in enum class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayFailureReason.html" title="enum class in com.csse3200.game.cards.play">CardPlayFailureReason</a></dt>
+<dd>
+<div class="block">The card was played successfully.</div>
+</dd>
 <dt><a href="com/csse3200/game/physics/PhysicsLayer.html#NONE" class="member-name-link">NONE</a> - Static variable in class com.csse3200.game.physics.<a href="com/csse3200/game/physics/PhysicsLayer.html" title="class in com.csse3200.game.physics">PhysicsLayer</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/physics/raycast/RaycastHit.html#normal" class="member-name-link">normal</a> - Variable in class com.csse3200.game.physics.raycast.<a href="com/csse3200/game/physics/raycast/RaycastHit.html" title="class in com.csse3200.game.physics.raycast">RaycastHit</a></dt>
@@ -2321,6 +2830,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/entities/configs/EnemyTier.html#NORMAL" class="member-name-link">NORMAL</a> - Enum constant in enum class com.csse3200.game.entities.configs.<a href="com/csse3200/game/entities/configs/EnemyTier.html" title="enum class in com.csse3200.game.entities.configs">EnemyTier</a></dt>
 <dd>
 <div class="block">modest statistics and a single behaviour pattern.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayFailureReason.html#NOT_ENOUGH_ENERGY" class="member-name-link">NOT_ENOUGH_ENERGY</a> - Enum constant in enum class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayFailureReason.html" title="enum class in com.csse3200.game.cards.play">CardPlayFailureReason</a></dt>
+<dd>
+<div class="block">Team 7's energy component rejected the card cost.</div>
 </dd>
 <dt><a href="com/csse3200/game/physics/PhysicsLayer.html#NPC" class="member-name-link">NPC</a> - Static variable in class com.csse3200.game.physics.<a href="com/csse3200/game/physics/PhysicsLayer.html" title="class in com.csse3200.game.physics">PhysicsLayer</a></dt>
 <dd>&nbsp;</dd>
@@ -2367,6 +2880,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/shop/PurchaseResult.Status.html#OUT_OF_STOCK" class="member-name-link">OUT_OF_STOCK</a> - Enum constant in enum class com.csse3200.game.shop.<a href="com/csse3200/game/shop/PurchaseResult.Status.html" title="enum class in com.csse3200.game.shop">PurchaseResult.Status</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html#outgoingFeeble()" class="member-name-link">outgoingFeeble()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionContext</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./com/csse3200/game/cards/effects/CardEffectResolutionContext.html#param-outgoingFeeble"><code>outgoingFeeble</code></a> record component.</div>
+</dd>
 <dt><a href="com/csse3200/game/ai/tasks/DefaultTask.html#owner" class="member-name-link">owner</a> - Variable in class com.csse3200.game.ai.tasks.<a href="com/csse3200/game/ai/tasks/DefaultTask.html" title="class in com.csse3200.game.ai.tasks">DefaultTask</a></dt>
 <dd>&nbsp;</dd>
 </dl>
@@ -2466,6 +2983,20 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Wrapper for pinch stop that can be overridden.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/play/integration/Team3CardPlayAdapter.html#PLAY_CARD_EVENT" class="member-name-link">PLAY_CARD_EVENT</a> - Static variable in class com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/Team3CardPlayAdapter.html" title="class in com.csse3200.game.cards.play.integration">Team3CardPlayAdapter</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayService.html#playCard(com.csse3200.game.cards.play.CardPlayRequest)" class="member-name-link">playCard(CardPlayRequest)</a> - Method in class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayService.html" title="class in com.csse3200.game.cards.play">CardPlayService</a></dt>
+<dd>
+<div class="block">Unified Team 5 entry point for a card play attempt from Team 3/battle flow.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#playCard(java.lang.String)" class="member-name-link">playCard(String)</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
+<dd>
+<div class="block">Plays a card from the hand and moves it to the discard pile.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayService.html#playCard(java.lang.String)" class="member-name-link">playCard(String)</a> - Method in class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayService.html" title="class in com.csse3200.game.cards.play">CardPlayService</a></dt>
+<dd>
+<div class="block">Attempts to play a card from the current hand.</div>
+</dd>
 <dt><a href="com/csse3200/game/physics/PhysicsLayer.html#PLAYER" class="member-name-link">PLAYER</a> - Static variable in class com.csse3200.game.physics.<a href="com/csse3200/game/physics/PhysicsLayer.html" title="class in com.csse3200.game.physics">PhysicsLayer</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/encounters/integration/ChanceResolution.Status.html#PLAYER_UPDATE_FAILED" class="member-name-link">PLAYER_UPDATE_FAILED</a> - Enum constant in enum class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></dt>
@@ -2484,6 +3015,42 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/entities/configs/PlayerConfig.html#%3Cinit%3E()" class="member-name-link">PlayerConfig()</a> - Constructor for class com.csse3200.game.entities.configs.<a href="com/csse3200/game/entities/configs/PlayerConfig.html" title="class in com.csse3200.game.entities.configs">PlayerConfig</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeck.html" class="type-name-link" title="class in com.csse3200.game.cards.deck">PlayerDeck</a> - Class in <a href="com/csse3200/game/cards/deck/package-summary.html">com.csse3200.game.cards.deck</a></dt>
+<dd>
+<div class="block">Stores the cards owned by the player outside a single combat encounter.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeck.html#%3Cinit%3E()" class="member-name-link">PlayerDeck()</a> - Constructor for class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></dt>
+<dd>
+<div class="block">Creates an empty player deck.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeck.html#%3Cinit%3E(java.util.Collection)" class="member-name-link">PlayerDeck(Collection&lt;String&gt;)</a> - Constructor for class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></dt>
+<dd>
+<div class="block">Creates a player deck containing the given card IDs in order.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html" class="type-name-link" title="class in com.csse3200.game.cards.deck">PlayerDeckFactory</a> - Class in <a href="com/csse3200/game/cards/deck/package-summary.html">com.csse3200.game.cards.deck</a></dt>
+<dd>
+<div class="block">Creates standard player decks from the initial Team 6 card IDs.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/PlayerEffectConsumer.html" class="type-name-link" title="interface in com.csse3200.game.cards.play.integration">PlayerEffectConsumer</a> - Interface in <a href="com/csse3200/game/cards/play/integration/package-summary.html">com.csse3200.game.cards.play.integration</a></dt>
+<dd>
+<div class="block">Team 7 boundary used by the battle flow to apply resolved player effects.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolution.html#playerEffects()" class="member-name-link">playerEffects()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolution.html" title="class in com.csse3200.game.cards.effects">CardEffectResolution</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#playerEffects()" class="member-name-link">playerEffects()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/PlayerEffectState.html" class="type-name-link" title="class in com.csse3200.game.cards.effects">PlayerEffectState</a> - Class in <a href="com/csse3200/game/cards/effects/package-summary.html">com.csse3200.game.cards.effects</a></dt>
+<dd>
+<div class="block">Player-side effect state that Team 5 needs when resolving later card effects.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/PlayerEffectState.html#%3Cinit%3E()" class="member-name-link">PlayerEffectState()</a> - Constructor for class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/PlayerEffectState.html" title="class in com.csse3200.game.cards.effects">PlayerEffectState</a></dt>
+<dd>
+<div class="block">Creates player effect state with no active modifiers.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/PlayerEffectState.html#%3Cinit%3E(int)" class="member-name-link">PlayerEffectState(int)</a> - Constructor for class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/PlayerEffectState.html" title="class in com.csse3200.game.cards.effects">PlayerEffectState</a></dt>
+<dd>
+<div class="block">Creates player effect state with an initial strength modifier.</div>
+</dd>
 <dt><a href="com/csse3200/game/entities/factories/PlayerFactory.html" class="type-name-link" title="class in com.csse3200.game.entities.factories">PlayerFactory</a> - Class in <a href="com/csse3200/game/entities/factories/package-summary.html">com.csse3200.game.entities.factories</a></dt>
 <dd>
 <div class="block">Factory to create a player entity.</div>
@@ -2491,6 +3058,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/encounters/integration/PlayerStateGateway.html" class="type-name-link" title="interface in com.csse3200.game.encounters.integration">PlayerStateGateway</a> - Interface in <a href="com/csse3200/game/encounters/integration/package-summary.html">com.csse3200.game.encounters.integration</a></dt>
 <dd>
 <div class="block">Minimal player-state contract required by non-battle encounters.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/PlayerStateView.html" class="type-name-link" title="interface in com.csse3200.game.cards.play">PlayerStateView</a> - Interface in <a href="com/csse3200/game/cards/play/package-summary.html">com.csse3200.game.cards.play</a></dt>
+<dd>
+<div class="block">Read-only Team 5 boundary for player values that can affect card resolution.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/player/PlayerStatsDisplay.html" class="type-name-link" title="class in com.csse3200.game.components.player">PlayerStatsDisplay</a> - Class in <a href="com/csse3200/game/components/player/package-summary.html">com.csse3200.game.components.player</a></dt>
 <dd>
@@ -2506,6 +3077,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Damage over time applied at the start of the target's turn.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/deck/CardIdRegistry.html#POISON_DAGGER" class="member-name-link">POISON_DAGGER</a> - Static variable in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/CardIdRegistry.html" title="class in com.csse3200.game.cards.deck">CardIdRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html#POISON_DAGGER" class="member-name-link">POISON_DAGGER</a> - Static variable in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html" title="class in com.csse3200.game.cards.deck">PlayerDeckFactory</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/physics/PhysicsContactListener.html#postSolve(com.badlogic.gdx.physics.box2d.Contact,com.badlogic.gdx.physics.box2d.ContactImpulse)" class="member-name-link">postSolve(Contact, ContactImpulse)</a> - Method in class com.csse3200.game.physics.<a href="com/csse3200/game/physics/PhysicsContactListener.html" title="class in com.csse3200.game.physics">PhysicsContactListener</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/CardType.html#POWER" class="member-name-link">POWER</a> - Enum constant in enum class com.csse3200.game.cards.<a href="com/csse3200/game/cards/CardType.html" title="enum class in com.csse3200.game.cards">CardType</a></dt>
@@ -2619,6 +3194,12 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Validation succeeded and the transaction may be attempted.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResultStore.html#record(com.csse3200.game.cards.effects.CardEffectResolution)" class="member-name-link">record(CardEffectResolution)</a> - Method in interface com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResultStore.html" title="interface in com.csse3200.game.cards.effects">CardEffectResultStore</a></dt>
+<dd>
+<div class="block">Records the immutable result produced for one played card.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/TurnEffectStore.html#record(com.csse3200.game.cards.effects.CardEffectResolution)" class="member-name-link">record(CardEffectResolution)</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/TurnEffectStore.html" title="class in com.csse3200.game.cards.effects">TurnEffectStore</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/files/UserSettings.DisplaySettings.html#refreshRate" class="member-name-link">refreshRate</a> - Variable in class com.csse3200.game.files.<a href="com/csse3200/game/files/UserSettings.DisplaySettings.html" title="class in com.csse3200.game.files">UserSettings.DisplaySettings</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/CardLibrary.html#register(com.csse3200.game.cards.configs.CardConfig)" class="member-name-link">register(CardConfig)</a> - Method in class com.csse3200.game.cards.<a href="com/csse3200/game/cards/CardLibrary.html" title="class in com.csse3200.game.cards">CardLibrary</a></dt>
@@ -2647,11 +3228,19 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/services/ServiceLocator.html#registerResourceService(com.csse3200.game.services.ResourceService)" class="member-name-link">registerResourceService(ResourceService)</a> - Static method in class com.csse3200.game.services.<a href="com/csse3200/game/services/ServiceLocator.html" title="class in com.csse3200.game.services">ServiceLocator</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/Team1EnemyStateAdapter.html#registerTarget(java.lang.String,com.csse3200.game.entities.Entity)" class="member-name-link">registerTarget(String, Entity)</a> - Method in class com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/Team1EnemyStateAdapter.html" title="class in com.csse3200.game.cards.play.integration">Team1EnemyStateAdapter</a></dt>
+<dd>
+<div class="block">Registers the opaque target ID used by Team 3 for one Team 1 enemy entity.</div>
+</dd>
 <dt><a href="com/csse3200/game/services/ServiceLocator.html#registerTimeSource(com.csse3200.game.services.GameTime)" class="member-name-link">registerTimeSource(GameTime)</a> - Static method in class com.csse3200.game.services.<a href="com/csse3200/game/services/ServiceLocator.html" title="class in com.csse3200.game.services">ServiceLocator</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/rendering/AnimationRenderComponent.html#removeAnimation(java.lang.String)" class="member-name-link">removeAnimation(String)</a> - Method in class com.csse3200.game.rendering.<a href="com/csse3200/game/rendering/AnimationRenderComponent.html" title="class in com.csse3200.game.rendering">AnimationRenderComponent</a></dt>
 <dd>
 <div class="block">Remove an animation from this animator.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeck.html#removeCard(java.lang.String)" class="member-name-link">removeCard(String)</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></dt>
+<dd>
+<div class="block">Removes the first matching card ID from the deck.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/player/InventoryComponent.html#removeCard(java.lang.String)" class="member-name-link">removeCard(String)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/InventoryComponent.html" title="class in com.csse3200.game.components.player">InventoryComponent</a></dt>
 <dd>
@@ -2665,6 +3254,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/encounters/integration/InventoryDeckAdapter.html#removeCard(java.lang.String)" class="member-name-link">removeCard(String)</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/InventoryDeckAdapter.html" title="class in com.csse3200.game.encounters.integration">InventoryDeckAdapter</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeck.html#removeCardAt(int)" class="member-name-link">removeCardAt(int)</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></dt>
+<dd>
+<div class="block">Removes the card at a specific deck position.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/CombatStatsComponent.html#removeStatusEffect(java.lang.String)" class="member-name-link">removeStatusEffect(String)</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/CombatStatsComponent.html" title="class in com.csse3200.game.components">CombatStatsComponent</a></dt>
 <dd>
 <div class="block">Explicitly removes a status effect from this entity, if present.</div>
@@ -2731,6 +3324,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Resets block to 0.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#reshuffleDiscardIntoDrawPile()" class="member-name-link">reshuffleDiscardIntoDrawPile()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
+<dd>
+<div class="block">Moves the discard pile into an empty draw pile and shuffles it.</div>
+</dd>
 <dt><a href="com/csse3200/game/rendering/Renderer.html#resize(int,int)" class="member-name-link">resize(int, int)</a> - Method in class com.csse3200.game.rendering.<a href="com/csse3200/game/rendering/Renderer.html" title="class in com.csse3200.game.rendering">Renderer</a></dt>
 <dd>
 <div class="block">Resize the renderer to a new screen size.</div>
@@ -2743,9 +3340,57 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/CameraComponent.html#resize(int,int,float)" class="member-name-link">resize(int, int, float)</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/CameraComponent.html" title="class in com.csse3200.game.components">CameraComponent</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#resolution()" class="member-name-link">resolution()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>
+<div class="block">Backwards-compatible alias for the earlier result API.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayFailureReason.html#RESOLUTION_FAILED" class="member-name-link">RESOLUTION_FAILED</a> - Enum constant in enum class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayFailureReason.html" title="enum class in com.csse3200.game.cards.play">CardPlayFailureReason</a></dt>
+<dd>
+<div class="block">Effect resolution or the local deck commit failed after validation.</div>
+</dd>
 <dt><a href="com/csse3200/game/chance/ChanceChoice.html#resolve()" class="member-name-link">resolve()</a> - Method in class com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceChoice.html" title="class in com.csse3200.game.chance">ChanceChoice</a></dt>
 <dd>
 <div class="block">Resolves this choice to its associated outcome.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html#resolve(com.csse3200.game.cards.configs.CardConfig)" class="member-name-link">resolve(CardConfig)</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionService</a></dt>
+<dd>
+<div class="block">Resolves an already retrieved Team 6 card config and records the successful result.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html#resolve(com.csse3200.game.cards.configs.CardConfig,com.csse3200.game.cards.effects.CardEffectResolutionContext)" class="member-name-link">resolve(CardConfig, CardEffectResolutionContext)</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionService</a></dt>
+<dd>
+<div class="block">Resolves an already retrieved card config with read-only combat state.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolver.html#resolve(com.csse3200.game.cards.configs.CardConfig,com.csse3200.game.cards.effects.CardEffectResolutionContext)" class="member-name-link">resolve(CardConfig, CardEffectResolutionContext)</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolver.html" title="class in com.csse3200.game.cards.effects">CardEffectResolver</a></dt>
+<dd>
+<div class="block">Resolves a card using read-only combat state supplied by the unified card-play flow.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolver.html#resolve(com.csse3200.game.cards.configs.CardConfig,com.csse3200.game.cards.effects.PlayerEffectState)" class="member-name-link">resolve(CardConfig, PlayerEffectState)</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolver.html" title="class in com.csse3200.game.cards.effects">CardEffectResolver</a></dt>
+<dd>
+<div class="block">Resolves a card that has already been retrieved from Team 6's card library.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html#resolve(java.lang.String)" class="member-name-link">resolve(String)</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionService</a></dt>
+<dd>
+<div class="block">Resolves a card by ID and records the successful result for current-turn consumers.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/EffectExecutor.html#resolve(java.lang.String,com.csse3200.game.cards.configs.EffectConfig,com.csse3200.game.cards.TargetType,int,com.csse3200.game.cards.effects.CardEffectResolutionContext)" class="member-name-link">resolve(String, EffectConfig, TargetType, int, CardEffectResolutionContext)</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/EffectExecutor.html" title="class in com.csse3200.game.cards.effects">EffectExecutor</a></dt>
+<dd>
+<div class="block">Resolves one effect using a read-only combat-state snapshot.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/EffectExecutor.html#resolve(java.lang.String,com.csse3200.game.cards.configs.EffectConfig,com.csse3200.game.cards.TargetType,int,com.csse3200.game.cards.effects.PlayerEffectState)" class="member-name-link">resolve(String, EffectConfig, TargetType, int, PlayerEffectState)</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/EffectExecutor.html" title="class in com.csse3200.game.cards.effects">EffectExecutor</a></dt>
+<dd>
+<div class="block">Resolves one effect from a card.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html#resolve(java.lang.String,com.csse3200.game.cards.effects.CardEffectResolutionContext)" class="member-name-link">resolve(String, CardEffectResolutionContext)</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionService</a></dt>
+<dd>
+<div class="block">Resolves a card by ID with read-only combat state and records the successful result.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolver.html#resolve(java.lang.String,com.csse3200.game.cards.effects.CardEffectResolutionContext)" class="member-name-link">resolve(String, CardEffectResolutionContext)</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolver.html" title="class in com.csse3200.game.cards.effects">CardEffectResolver</a></dt>
+<dd>
+<div class="block">Resolves a card by ID using read-only combat state supplied by the caller.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolver.html#resolve(java.lang.String,com.csse3200.game.cards.effects.PlayerEffectState)" class="member-name-link">resolve(String, PlayerEffectState)</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolver.html" title="class in com.csse3200.game.cards.effects">CardEffectResolver</a></dt>
+<dd>
+<div class="block">Resolves a card by ID through the Team 6 card service supplied to this resolver.</div>
 </dd>
 <dt><a href="com/csse3200/game/chance/ChanceEncounter.html#resolveChoice(java.lang.String)" class="member-name-link">resolveChoice(String)</a> - Method in class com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceEncounter.html" title="class in com.csse3200.game.chance">ChanceEncounter</a></dt>
 <dd>
@@ -2754,6 +3399,18 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/encounters/integration/ChanceEncounterSession.html#resolveChoice(java.lang.String)" class="member-name-link">resolveChoice(String)</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceEncounterSession.html" title="class in com.csse3200.game.encounters.integration">ChanceEncounterSession</a></dt>
 <dd>
 <div class="block">Resolves one choice and applies its outcome to the player.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html#resolveDamage(int)" class="member-name-link">resolveDamage(int)</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionContext</a></dt>
+<dd>
+<div class="block">Applies Strength, Feeble and Vulnerable once, then rounds final damage down.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html" class="type-name-link" title="class in com.csse3200.game.cards.effects">ResolvedCardEffect</a> - Record Class in <a href="com/csse3200/game/cards/effects/package-summary.html">com.csse3200.game.cards.effects</a></dt>
+<dd>
+<div class="block">One card effect after Team 5 has applied card resolution rules and player-side modifiers.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html#%3Cinit%3E(java.lang.String,com.csse3200.game.cards.EffectType,com.csse3200.game.cards.TargetType,int,int,int)" class="member-name-link">ResolvedCardEffect(String, EffectType, TargetType, int, int, int)</a> - Constructor for record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html" title="class in com.csse3200.game.cards.effects">ResolvedCardEffect</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>ResolvedCardEffect</code> record class.</div>
 </dd>
 <dt><a href="com/csse3200/game/services/ResourceService.html" class="type-name-link" title="class in com.csse3200.game.services">ResourceService</a> - Class in <a href="com/csse3200/game/services/package-summary.html">com.csse3200.game.services</a></dt>
 <dd>
@@ -2831,8 +3488,18 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Scrolling up will open the terminal and scrolling down will close the terminal.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayTarget.html#self()" class="member-name-link">self()</a> - Static method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayTarget.html" title="class in com.csse3200.game.cards.play">CardPlayTarget</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayRequest.html#self(java.lang.String)" class="member-name-link">self(String)</a> - Static method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></dt>
+<dd>
+<div class="block">Creates a request for a self-targeting card.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/TargetType.html#SELF" class="member-name-link">SELF</a> - Enum constant in enum class com.csse3200.game.cards.<a href="com/csse3200/game/cards/TargetType.html" title="enum class in com.csse3200.game.cards">TargetType</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html#sequence()" class="member-name-link">sequence()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html" title="class in com.csse3200.game.cards.effects">ResolvedCardEffect</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>sequence</code> record component.</div>
+</dd>
 <dt><a href="com/csse3200/game/services/ServiceLocator.html" class="type-name-link" title="class in com.csse3200.game.services">ServiceLocator</a> - Class in <a href="com/csse3200/game/services/package-summary.html">com.csse3200.game.services</a></dt>
 <dd>
 <div class="block">A simplified implementation of the Service Locator pattern:
@@ -3113,13 +3780,25 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Result of validating or executing a cross-system shop transaction.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#shuffleDrawPile()" class="member-name-link">shuffleDrawPile()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
+<dd>
+<div class="block">Randomises the current draw pile order.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/TargetType.html#SINGLE_ENEMY" class="member-name-link">SINGLE_ENEMY</a> - Enum constant in enum class com.csse3200.game.cards.<a href="com/csse3200/game/cards/TargetType.html" title="enum class in com.csse3200.game.cards">TargetType</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayTarget.html#singleEnemy(java.lang.String)" class="member-name-link">singleEnemy(String)</a> - Static method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayTarget.html" title="class in com.csse3200.game.cards.play">CardPlayTarget</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayRequest.html#singleEnemy(java.lang.String,java.lang.String)" class="member-name-link">singleEnemy(String, String)</a> - Static method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></dt>
+<dd>
+<div class="block">Creates a request for a card targeting one selected enemy.</div>
+</dd>
 <dt><a href="com/csse3200/game/physics/raycast/SingleHitCallback.html" class="type-name-link" title="class in com.csse3200.game.physics.raycast">SingleHitCallback</a> - Class in <a href="com/csse3200/game/physics/raycast/package-summary.html">com.csse3200.game.physics.raycast</a></dt>
 <dd>
 <div class="block">Cast a ray against all colliders that match the layermask.</div>
 </dd>
 <dt><a href="com/csse3200/game/physics/raycast/SingleHitCallback.html#%3Cinit%3E()" class="member-name-link">SingleHitCallback()</a> - Constructor for class com.csse3200.game.physics.raycast.<a href="com/csse3200/game/physics/raycast/SingleHitCallback.html" title="class in com.csse3200.game.physics.raycast">SingleHitCallback</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeck.html#size()" class="member-name-link">size()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/CardType.html#SKILL" class="member-name-link">SKILL</a> - Enum constant in enum class com.csse3200.game.cards.<a href="com/csse3200/game/cards/CardType.html" title="enum class in com.csse3200.game.cards">CardType</a></dt>
 <dd>
@@ -3203,6 +3882,18 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/components/StatusEffectCalculator.html" class="type-name-link" title="class in com.csse3200.game.components">StatusEffectCalculator</a> - Class in <a href="com/csse3200/game/components/package-summary.html">com.csse3200.game.components</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/Team7PlayerStateAdapter.html#statusValue(com.csse3200.game.cards.EffectType)" class="member-name-link">statusValue(EffectType)</a> - Method in class com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/Team7PlayerStateAdapter.html" title="class in com.csse3200.game.cards.play.integration">Team7PlayerStateAdapter</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/PlayerStateView.html#statusValue(com.csse3200.game.cards.EffectType)" class="member-name-link">statusValue(EffectType)</a> - Method in interface com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/PlayerStateView.html" title="interface in com.csse3200.game.cards.play">PlayerStateView</a></dt>
+<dd>
+<div class="block">Returns the current value/stacks for a card-related status, or zero when it is not active.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/EnemyStateView.html#statusValue(java.lang.String,com.csse3200.game.cards.EffectType)" class="member-name-link">statusValue(String, EffectType)</a> - Method in interface com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/EnemyStateView.html" title="interface in com.csse3200.game.cards.play">EnemyStateView</a></dt>
+<dd>
+<div class="block">Returns the current value/stacks for a target status, or zero when it is not active.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/Team1EnemyStateAdapter.html#statusValue(java.lang.String,com.csse3200.game.cards.EffectType)" class="member-name-link">statusValue(String, EffectType)</a> - Method in class com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/Team1EnemyStateAdapter.html" title="class in com.csse3200.game.cards.play.integration">Team1EnemyStateAdapter</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/shop/ShopItem.html#stock" class="member-name-link">stock</a> - Variable in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopItem.html" title="class in com.csse3200.game.shop">ShopItem</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ai/tasks/DefaultTask.html#stop()" class="member-name-link">stop()</a> - Method in class com.csse3200.game.ai.tasks.<a href="com/csse3200/game/ai/tasks/DefaultTask.html" title="class in com.csse3200.game.ai.tasks">DefaultTask</a></dt>
@@ -3219,10 +3910,18 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Stop the currently running animation.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html#strength()" class="member-name-link">strength()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionContext</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./com/csse3200/game/cards/effects/CardEffectResolutionContext.html#param-strength"><code>strength</code></a> record component.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/EffectType.html#STRENGTH" class="member-name-link">STRENGTH</a> - Enum constant in enum class com.csse3200.game.cards.<a href="com/csse3200/game/cards/EffectType.html" title="enum class in com.csse3200.game.cards">EffectType</a></dt>
 <dd>
 <div class="block">Increases damage the target deals for the rest of the combat.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/deck/CardIdRegistry.html#STRIKE" class="member-name-link">STRIKE</a> - Static variable in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/CardIdRegistry.html" title="class in com.csse3200.game.cards.deck">CardIdRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html#STRIKE" class="member-name-link">STRIKE</a> - Static variable in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html" title="class in com.csse3200.game.cards.deck">PlayerDeckFactory</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/utils/StringDecorator.html" class="type-name-link" title="class in com.csse3200.game.utils">StringDecorator&lt;T&gt;</a> - Class in <a href="com/csse3200/game/utils/package-summary.html">com.csse3200.game.utils</a></dt>
 <dd>
 <div class="block">Apply a custom toString() for a class without overriding the class, using a decorator.</div>
@@ -3235,14 +3934,30 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Subtracts a specific amount of gold from the player's inventory.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#success()" class="member-name-link">success()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>success</code> record component.</div>
+</dd>
 <dt><a href="com/csse3200/game/shop/PurchaseResult.html#success(com.csse3200.game.shop.ShopItem)" class="member-name-link">success(ShopItem)</a> - Static method in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/PurchaseResult.html" title="class in com.csse3200.game.shop">PurchaseResult</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#success(java.lang.String,int,com.csse3200.game.cards.effects.CardEffectResolution)" class="member-name-link">success(String, int, CardEffectResolution)</a> - Static method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>
+<div class="block">Creates a successful play result.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#success(java.lang.String,com.csse3200.game.cards.play.CardPlayTarget,int,com.csse3200.game.cards.effects.CardEffectResolution,com.csse3200.game.cards.play.DeckSnapshot)" class="member-name-link">success(String, CardPlayTarget, int, CardEffectResolution, DeckSnapshot)</a> - Static method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>
+<div class="block">Creates a successful result for the unified card-play request flow.</div>
+</dd>
 <dt><a href="com/csse3200/game/encounters/integration/ShopTransactionStatus.html#SUCCESS" class="member-name-link">SUCCESS</a> - Enum constant in enum class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ShopTransactionStatus.html" title="enum class in com.csse3200.game.encounters.integration">ShopTransactionStatus</a></dt>
 <dd>
 <div class="block">Card and currency changes were committed.</div>
 </dd>
 <dt><a href="com/csse3200/game/shop/PurchaseResult.Status.html#SUCCESS" class="member-name-link">SUCCESS</a> - Enum constant in enum class com.csse3200.game.shop.<a href="com/csse3200/game/shop/PurchaseResult.Status.html" title="enum class in com.csse3200.game.shop">PurchaseResult.Status</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#successful()" class="member-name-link">successful()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>
+<div class="block">Backwards-compatible alias for the earlier result API.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:T">T</h2>
 <dl class="index">
@@ -3261,9 +3976,29 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Who the card's effects are applied to.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html#target()" class="member-name-link">target()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html" title="class in com.csse3200.game.cards.effects">ResolvedCardEffect</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>target</code> record component.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayRequest.html#target()" class="member-name-link">target()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>target</code> record component.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#target()" class="member-name-link">target()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>target</code> record component.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayTarget.html#targetId()" class="member-name-link">targetId()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayTarget.html" title="class in com.csse3200.game.cards.play">CardPlayTarget</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>targetId</code> record component.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/TargetType.html" class="type-name-link" title="enum class in com.csse3200.game.cards">TargetType</a> - Enum Class in <a href="com/csse3200/game/cards/package-summary.html">com.csse3200.game.cards</a></dt>
 <dd>
 <div class="block">Who a card's effects are applied to when it is played.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html#targetVulnerable()" class="member-name-link">targetVulnerable()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionContext</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./com/csse3200/game/cards/effects/CardEffectResolutionContext.html#param-targetVulnerable"><code>targetVulnerable</code></a> record component.</div>
 </dd>
 <dt><a href="com/csse3200/game/ai/tasks/Task.html" class="type-name-link" title="interface in com.csse3200.game.ai.tasks">Task</a> - Interface in <a href="com/csse3200/game/ai/tasks/package-summary.html">com.csse3200.game.ai.tasks</a></dt>
 <dd>
@@ -3273,6 +4008,32 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ai/tasks/TaskRunner.html" class="type-name-link" title="interface in com.csse3200.game.ai.tasks">TaskRunner</a> - Interface in <a href="com/csse3200/game/ai/tasks/package-summary.html">com.csse3200.game.ai.tasks</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/Team1EnemyStateAdapter.html" class="type-name-link" title="class in com.csse3200.game.cards.play.integration">Team1EnemyStateAdapter</a> - Class in <a href="com/csse3200/game/cards/play/integration/package-summary.html">com.csse3200.game.cards.play.integration</a></dt>
+<dd>
+<div class="block">Adapts Team 1 enemy entities to Team 5's read-only resolution view and result consumer.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/Team1EnemyStateAdapter.html#%3Cinit%3E(java.util.Map)" class="member-name-link">Team1EnemyStateAdapter(Map&lt;String, Entity&gt;)</a> - Constructor for class com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/Team1EnemyStateAdapter.html" title="class in com.csse3200.game.cards.play.integration">Team1EnemyStateAdapter</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/Team3CardPlayAdapter.html" class="type-name-link" title="class in com.csse3200.game.cards.play.integration">Team3CardPlayAdapter</a> - Class in <a href="com/csse3200/game/cards/play/integration/package-summary.html">com.csse3200.game.cards.play.integration</a></dt>
+<dd>
+<div class="block">Connects Team 3's existing <code>playCard(cardId, targetId)</code> event to Team 5's unified API.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/Team3CardPlayAdapter.html#%3Cinit%3E(com.csse3200.game.cards.CardService,com.csse3200.game.cards.play.CardPlayService)" class="member-name-link">Team3CardPlayAdapter(CardService, CardPlayService)</a> - Constructor for class com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/Team3CardPlayAdapter.html" title="class in com.csse3200.game.cards.play.integration">Team3CardPlayAdapter</a></dt>
+<dd>
+<div class="block">Creates an adapter that returns results to Team 3 without applying external state changes.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/Team7PlayerStateAdapter.html" class="type-name-link" title="class in com.csse3200.game.cards.play.integration">Team7PlayerStateAdapter</a> - Class in <a href="com/csse3200/game/cards/play/integration/package-summary.html">com.csse3200.game.cards.play.integration</a></dt>
+<dd>
+<div class="block">Adapts Team 7's player components to Team 5's read-only resolution view and result consumer.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/Team7PlayerStateAdapter.html#%3Cinit%3E(com.csse3200.game.components.player.EnergyComponent,com.csse3200.game.components.CombatStatsComponent)" class="member-name-link">Team7PlayerStateAdapter(EnergyComponent, CombatStatsComponent)</a> - Constructor for class com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/Team7PlayerStateAdapter.html" title="class in com.csse3200.game.cards.play.integration">Team7PlayerStateAdapter</a></dt>
+<dd>
+<div class="block">Creates an adapter from explicit Team 7 components, useful for assembly and testing.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/Team7PlayerStateAdapter.html#%3Cinit%3E(com.csse3200.game.entities.Entity)" class="member-name-link">Team7PlayerStateAdapter(Entity)</a> - Constructor for class com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/Team7PlayerStateAdapter.html" title="class in com.csse3200.game.cards.play.integration">Team7PlayerStateAdapter</a></dt>
+<dd>
+<div class="block">Creates an adapter from a player entity containing Team 7's required components.</div>
+</dd>
 <dt><a href="com/csse3200/game/ui/terminal/Terminal.html" class="type-name-link" title="class in com.csse3200.game.ui.terminal">Terminal</a> - Class in <a href="com/csse3200/game/ui/terminal/package-summary.html">com.csse3200.game.ui.terminal</a></dt>
 <dd>
 <div class="block">State tracker for a debug terminal.</div>
@@ -3346,8 +4107,38 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Toggles between the terminal being open and closed.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/debug/CardEffectDebugComponent.html#toggleOpen()" class="member-name-link">toggleOpen()</a> - Method in class com.csse3200.game.cards.debug.<a href="com/csse3200/game/cards/debug/CardEffectDebugComponent.html" title="class in com.csse3200.game.cards.debug">CardEffectDebugComponent</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/physics/components/PhysicsComponent.AlignY.html#TOP" class="member-name-link">TOP</a> - Enum constant in enum class com.csse3200.game.physics.components.<a href="com/csse3200/game/physics/components/PhysicsComponent.AlignY.html" title="enum class in com.csse3200.game.physics.components">PhysicsComponent.AlignY</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolution.html#toString()" class="member-name-link">toString()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolution.html" title="class in com.csse3200.game.cards.effects">CardEffectResolution</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html#toString()" class="member-name-link">toString()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionContext</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html#toString()" class="member-name-link">toString()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html" title="class in com.csse3200.game.cards.effects">ResolvedCardEffect</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayRequest.html#toString()" class="member-name-link">toString()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#toString()" class="member-name-link">toString()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayTarget.html#toString()" class="member-name-link">toString()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayTarget.html" title="class in com.csse3200.game.cards.play">CardPlayTarget</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/DeckSnapshot.html#toString()" class="member-name-link">toString()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/DeckSnapshot.html" title="class in com.csse3200.game.cards.play">DeckSnapshot</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/Component.html#toString()" class="member-name-link">toString()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/Component.html" title="class in com.csse3200.game.components">Component</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyIntent.html#toString()" class="member-name-link">toString()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></dt>
@@ -3456,6 +4247,12 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Used to trigger the component to update itself.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/effects/TurnEffectStore.html" class="type-name-link" title="class in com.csse3200.game.cards.effects">TurnEffectStore</a> - Class in <a href="com/csse3200/game/cards/effects/package-summary.html">com.csse3200.game.cards.effects</a></dt>
+<dd>
+<div class="block">In-memory record of card resolutions produced during the current turn.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/TurnEffectStore.html#%3Cinit%3E()" class="member-name-link">TurnEffectStore()</a> - Constructor for class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/TurnEffectStore.html" title="class in com.csse3200.game.cards.effects">TurnEffectStore</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/configs/CardConfig.html#type" class="member-name-link">type</a> - Variable in class com.csse3200.game.cards.configs.<a href="com/csse3200/game/cards/configs/CardConfig.html" title="class in com.csse3200.game.cards.configs">CardConfig</a></dt>
 <dd>
 <div class="block">Category of the card, kept separate from what the card actually does.</div>
@@ -3463,6 +4260,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/cards/configs/EffectConfig.html#type" class="member-name-link">type</a> - Variable in class com.csse3200.game.cards.configs.<a href="com/csse3200/game/cards/configs/EffectConfig.html" title="class in com.csse3200.game.cards.configs">EffectConfig</a></dt>
 <dd>
 <div class="block">The kind of effect applied.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html#type()" class="member-name-link">type()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html" title="class in com.csse3200.game.cards.effects">ResolvedCardEffect</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>type</code> record component.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayTarget.html#type()" class="member-name-link">type()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayTarget.html" title="class in com.csse3200.game.cards.play">CardPlayTarget</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>type</code> record component.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:U">U</h2>
@@ -3487,6 +4292,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/components/enemy/IntentIcons.html#UNKNOWN" class="member-name-link">UNKNOWN</a> - Static variable in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/IntentIcons.html" title="class in com.csse3200.game.components.enemy">IntentIcons</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayFailureReason.html#UNKNOWN_CARD" class="member-name-link">UNKNOWN_CARD</a> - Enum constant in enum class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayFailureReason.html" title="enum class in com.csse3200.game.cards.play">CardPlayFailureReason</a></dt>
+<dd>
+<div class="block">Team 6's card service does not contain the requested card ID.</div>
+</dd>
 <dt><a href="com/csse3200/game/entities/factories/EnemyFactory.html#unloadAssets()" class="member-name-link">unloadAssets()</a> - Static method in class com.csse3200.game.entities.factories.<a href="com/csse3200/game/entities/factories/EnemyFactory.html" title="class in com.csse3200.game.entities.factories">EnemyFactory</a></dt>
 <dd>
 <div class="block">Releases every enemy atlas and intent icon previously queued by <a href="com/csse3200/game/entities/factories/EnemyFactory.html#loadAssets()"><code>EnemyFactory.loadAssets()</code></a>.</div>
@@ -3504,6 +4313,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/rendering/RenderService.html#unregister(com.csse3200.game.rendering.Renderable)" class="member-name-link">unregister(Renderable)</a> - Method in class com.csse3200.game.rendering.<a href="com/csse3200/game/rendering/RenderService.html" title="class in com.csse3200.game.rendering">RenderService</a></dt>
 <dd>
 <div class="block">Unregister a renderable.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/integration/Team1EnemyStateAdapter.html#unregisterTarget(java.lang.String)" class="member-name-link">unregisterTarget(String)</a> - Method in class com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/Team1EnemyStateAdapter.html" title="class in com.csse3200.game.cards.play.integration">Team1EnemyStateAdapter</a></dt>
+<dd>
+<div class="block">Removes an enemy from future target validation and all-enemy effect application.</div>
 </dd>
 <dt><a href="com/csse3200/game/utils/math/Vector2Utils.html#UP" class="member-name-link">UP</a> - Static variable in class com.csse3200.game.utils.math.<a href="com/csse3200/game/utils/math/Vector2Utils.html" title="class in com.csse3200.game.utils.math">Vector2Utils</a></dt>
 <dd>&nbsp;</dd>
@@ -3549,6 +4362,24 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/physics/PhysicsEngine.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.physics.<a href="com/csse3200/game/physics/PhysicsEngine.html" title="class in com.csse3200.game.physics">PhysicsEngine</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#updatedDiscardPile()" class="member-name-link">updatedDiscardPile()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/DeckSnapshot.html#updatedDiscardPile()" class="member-name-link">updatedDiscardPile()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/DeckSnapshot.html" title="class in com.csse3200.game.cards.play">DeckSnapshot</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>updatedDiscardPile</code> record component.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#updatedDrawPile()" class="member-name-link">updatedDrawPile()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/DeckSnapshot.html#updatedDrawPile()" class="member-name-link">updatedDrawPile()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/DeckSnapshot.html" title="class in com.csse3200.game.cards.play">DeckSnapshot</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>updatedDrawPile</code> record component.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#updatedHand()" class="member-name-link">updatedHand()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/cards/play/DeckSnapshot.html#updatedHand()" class="member-name-link">updatedHand()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/DeckSnapshot.html" title="class in com.csse3200.game.cards.play">DeckSnapshot</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>updatedHand</code> record component.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/player/PlayerStatsDisplay.html#updatePlayerHealthUI(int)" class="member-name-link">updatePlayerHealthUI(int)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsDisplay</a></dt>
 <dd>
 <div class="block">Updates the player's health on the ui.</div>
@@ -3590,6 +4421,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Magnitude of the effect, interpreted according to the effect type.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html#value()" class="member-name-link">value()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html" title="class in com.csse3200.game.cards.effects">ResolvedCardEffect</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>value</code> record component.</div>
+</dd>
 <dt><a href="com/csse3200/game/ai/tasks/Task.Status.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class com.csse3200.game.ai.tasks.<a href="com/csse3200/game/ai/tasks/Task.Status.html" title="enum class in com.csse3200.game.ai.tasks">Task.Status</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
@@ -3607,6 +4442,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
 <dt><a href="com/csse3200/game/cards/EffectType.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class com.csse3200.game.cards.<a href="com/csse3200/game/cards/EffectType.html" title="enum class in com.csse3200.game.cards">EffectType</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayFailureReason.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayFailureReason.html" title="enum class in com.csse3200.game.cards.play">CardPlayFailureReason</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
@@ -3691,6 +4530,11 @@ the order they are declared.</div>
 the order they are declared.</div>
 </dd>
 <dt><a href="com/csse3200/game/cards/EffectType.html#values()" class="member-name-link">values()</a> - Static method in enum class com.csse3200.game.cards.<a href="com/csse3200/game/cards/EffectType.html" title="enum class in com.csse3200.game.cards">EffectType</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/play/CardPlayFailureReason.html#values()" class="member-name-link">values()</a> - Static method in enum class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayFailureReason.html" title="enum class in com.csse3200.game.cards.play">CardPlayFailureReason</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum class, in
 the order they are declared.</div>
