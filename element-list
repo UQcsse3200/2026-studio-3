@@ -5,7 +5,9 @@ com.csse3200.game.areas
 com.csse3200.game.areas.terrain
 com.csse3200.game.cards
 com.csse3200.game.cards.configs
+com.csse3200.game.chance
 com.csse3200.game.components
+com.csse3200.game.components.chance
 com.csse3200.game.components.enemy
 com.csse3200.game.components.enemy.EnemyAI
 com.csse3200.game.components.gamearea
@@ -14,8 +16,10 @@ com.csse3200.game.components.mainmenu
 com.csse3200.game.components.npc
 com.csse3200.game.components.player
 com.csse3200.game.components.settingsmenu
+com.csse3200.game.components.shop
 com.csse3200.game.components.tasks
 com.csse3200.game.concurrency
+com.csse3200.game.encounters.integration
 com.csse3200.game.entities
 com.csse3200.game.entities.configs
 com.csse3200.game.entities.factories
@@ -23,12 +27,14 @@ com.csse3200.game.events
 com.csse3200.game.events.listeners
 com.csse3200.game.files
 com.csse3200.game.input
+com.csse3200.game.maps
 com.csse3200.game.physics
 com.csse3200.game.physics.components
 com.csse3200.game.physics.raycast
 com.csse3200.game.rendering
 com.csse3200.game.screens
 com.csse3200.game.services
+com.csse3200.game.shop
 com.csse3200.game.ui
 com.csse3200.game.ui.terminal
 com.csse3200.game.ui.terminal.commands

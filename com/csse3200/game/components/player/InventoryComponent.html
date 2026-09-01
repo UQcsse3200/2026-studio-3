@@ -95,8 +95,8 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="../Component.html" title="class in com.csse3200.game.components">Component</a></span></div>
 <div class="block">A component intended to be used by the player to track their inventory.
 
- <p>Currently only stores the gold amount but can be extended for more advanced functionality such
- as storing items. Can also be used as a more generic component for other entities.</div>
+ <p>Tracks the player's gold and card quantities. Can also be used as a more generic component for
+ other entities.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -133,26 +133,66 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addCard(java.lang.String)" class="member-name-link">addCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Adds one card to the inventory.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addCard(java.lang.String,int)" class="member-name-link">addCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId,
+ int&nbsp;quantity)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Adds a quantity of a card to the inventory.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addGold(int)" class="member-name-link">addGold</a><wbr>(int&nbsp;gold)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adds to the player's gold.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCardCount(java.lang.String)" class="member-name-link">getCardCount</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns how many copies of a card are in the inventory.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCards()" class="member-name-link">getCards</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns an immutable view of owned card quantities.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getGold()" class="member-name-link">getGold</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the player's gold.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Boolean.html" title="class or interface in java.lang" class="external-link">Boolean</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hasGold(int)" class="member-name-link">hasGold</a><wbr>(int&nbsp;gold)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hasCard(java.lang.String)" class="member-name-link">hasCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns if the inventory contains at least one copy of a card.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hasGold(int)" class="member-name-link">hasGold</a><wbr>(int&nbsp;gold)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns if the player has a certain amount of gold.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setGold(int)" class="member-name-link">setGold</a><wbr>(int&nbsp;gold)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#purchaseCard(java.lang.String,int)" class="member-name-link">purchaseCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId,
+ int&nbsp;price)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Attempts to buy a card atomically from the inventory perspective.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeCard(java.lang.String)" class="member-name-link">removeCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Removes one copy of a card from the temporary Sprint 1 collection.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setGold(int)" class="member-name-link">setGold</a><wbr>(int&nbsp;gold)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the player's gold.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#spendGold(int)" class="member-name-link">spendGold</a><wbr>(int&nbsp;gold)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#subtractGold(int)" class="member-name-link">subtractGold</a><wbr>(int&nbsp;amount)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -206,7 +246,7 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="hasGold(int)">
 <h3>hasGold</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Boolean.html" title="class or interface in java.lang" class="external-link">Boolean</a></span>&nbsp;<span class="element-name">hasGold</span><wbr><span class="parameters">(int&nbsp;gold)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">hasGold</span><wbr><span class="parameters">(int&nbsp;gold)</span></div>
 <div class="block">Returns if the player has a certain amount of gold.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -235,6 +275,109 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>gold</code> - gold to add</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="spendGold(int)">
+<h3>spendGold</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">spendGold</span><wbr><span class="parameters">(int&nbsp;gold)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="addCard(java.lang.String)">
+<h3>addCard</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">addCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</span></div>
+<div class="block">Adds one card to the inventory.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>cardId</code> - stable card identifier</dd>
+<dt>Returns:</dt>
+<dd>true if the card was added</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="addCard(java.lang.String,int)">
+<h3>addCard</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">addCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId,
+ int&nbsp;quantity)</span></div>
+<div class="block">Adds a quantity of a card to the inventory.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>cardId</code> - stable card identifier</dd>
+<dd><code>quantity</code> - number of cards to add</dd>
+<dt>Returns:</dt>
+<dd>true if the cards were added</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getCardCount(java.lang.String)">
+<h3>getCardCount</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getCardCount</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</span></div>
+<div class="block">Returns how many copies of a card are in the inventory.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>cardId</code> - stable card identifier</dd>
+<dt>Returns:</dt>
+<dd>card quantity, or 0 when not owned</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="hasCard(java.lang.String)">
+<h3>hasCard</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">hasCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</span></div>
+<div class="block">Returns if the inventory contains at least one copy of a card.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>cardId</code> - stable card identifier</dd>
+<dt>Returns:</dt>
+<dd>true if the card is owned</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="removeCard(java.lang.String)">
+<h3>removeCard</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">removeCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</span></div>
+<div class="block">Removes one copy of a card from the temporary Sprint 1 collection.
+
+ <p>This is primarily used to roll back a shop purchase if the matching currency update fails.
+ Team 5's persistent deck will replace this temporary storage after cross-team integration.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>cardId</code> - stable card identifier</dd>
+<dt>Returns:</dt>
+<dd>true if one copy was removed</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getCards()">
+<h3>getCards</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&gt;</span>&nbsp;<span class="element-name">getCards</span>()</div>
+<div class="block">Returns an immutable view of owned card quantities.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>card quantities by card id</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="purchaseCard(java.lang.String,int)">
+<h3>purchaseCard</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">purchaseCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId,
+ int&nbsp;price)</span></div>
+<div class="block">Attempts to buy a card atomically from the inventory perspective. Gold is only deducted if the
+ card can also be added.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>cardId</code> - stable card identifier</dd>
+<dd><code>price</code> - card price in gold</dd>
+<dt>Returns:</dt>
+<dd>true if the card was added and gold was deducted</dd>
 </dl>
 </section>
 </li>
