@@ -6,6 +6,8 @@ com.csse3200.game.areas.terrain
 com.csse3200.game.cards
 com.csse3200.game.cards.configs
 com.csse3200.game.components
+com.csse3200.game.components.enemy
+com.csse3200.game.components.enemy.EnemyAI
 com.csse3200.game.components.gamearea
 com.csse3200.game.components.maingame
 com.csse3200.game.components.mainmenu

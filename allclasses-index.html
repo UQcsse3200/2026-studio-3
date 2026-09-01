@@ -131,6 +131,14 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Internal type system for components.</div>
 </div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="com/csse3200/game/components/enemy/EnemyAI/CycleAttackDefendAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">CycleAttackDefendAI</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Basic enemy AI that alternates between attacking and defending.</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="com/csse3200/game/components/enemy/EnemyAI/CycleFourStanceAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">CycleFourStanceAI</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="block">A stance-based behaviour that alternates between pressure and defence.</div>
+</div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="com/csse3200/game/ui/terminal/commands/DebugCommand.html" title="class in com.csse3200.game.ui.terminal.commands">DebugCommand</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">A command for toggling debug mode on and off.</div>
@@ -151,6 +159,54 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="com/csse3200/game/cards/EffectType.html" title="enum class in com.csse3200.game.cards">EffectType</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab3">
 <div class="block">The kinds of effect a card can apply.</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAI.html" title="interface in com.csse3200.game.components.enemy.EnemyAI">EnemyAI</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
+<div class="block">Determines the next intent for an enemy based on the current battle state.</div>
+</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIContext</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Read-only battle information used by an enemy AI to select its next intent.</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIFactory.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIFactory</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Creates enemy AI implementations from behaviour identifiers.</div>
+</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="com/csse3200/game/components/enemy/EnemyAnimationController.html" title="class in com.csse3200.game.components.enemy">EnemyAnimationController</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Drives an enemy's <a href="com/csse3200/game/rendering/AnimationRenderComponent.html" title="class in com.csse3200.game.rendering"><code>AnimationRenderComponent</code></a> from combat events.</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html" title="class in com.csse3200.game.components.enemy">EnemyBehaviourComponent</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Decides and telegraphs an enemy's action each round, then resolves it.</div>
+</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="com/csse3200/game/entities/configs/EnemyConfig.html" title="class in com.csse3200.game.entities.configs">EnemyConfig</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Configuration for a single enemy, loaded from <code>configs/enemies.json</code>.</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="com/csse3200/game/entities/configs/EnemyConfigs.html" title="class in com.csse3200.game.entities.configs">EnemyConfigs</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Roster of all enemies, loaded from <code>configs/enemies.json</code>.</div>
+</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="com/csse3200/game/entities/factories/EnemyFactory.html" title="class in com.csse3200.game.entities.factories">EnemyFactory</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Creates enemy entities from configuration loaded from <code>configs/enemies.json</code>.</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="com/csse3200/game/components/enemy/EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="block">An enemy's telegraphed action for the coming round.</div>
+</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="com/csse3200/game/entities/configs/EnemyScaling.html" title="class in com.csse3200.game.entities.configs">EnemyScaling</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Applies progression-based stat scaling to enemy configurations.</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="com/csse3200/game/components/enemy/EnemyStatsComponent.html" title="class in com.csse3200.game.components.enemy">EnemyStatsComponent</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Health, attack and armor for an enemy, and the resolution of incoming damage.</div>
+</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="com/csse3200/game/entities/configs/EnemyTier.html" title="enum class in com.csse3200.game.entities.configs">EnemyTier</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab3">
+<div class="block">Difficulty tier of an enemy, determining both stat magnitude and behaviour complexity.</div>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="com/csse3200/game/components/player/EnergyComponent.html" title="class in com.csse3200.game.components.player">EnergyComponent</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
@@ -252,6 +308,14 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="com/csse3200/game/input/InputService.html" title="class in com.csse3200.game.input">InputService</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Provides a global access point for handling user input and creating input handlers.</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="com/csse3200/game/components/enemy/IntentIcons.html" title="class in com.csse3200.game.components.enemy">IntentIcons</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Maps <a href="com/csse3200/game/components/enemy/IntentType.html" title="enum class in com.csse3200.game.components.enemy"><code>IntentType</code></a> values to their HUD icon textures.</div>
+</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="com/csse3200/game/components/enemy/IntentType.html" title="enum class in com.csse3200.game.components.enemy">IntentType</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab3">
+<div class="block">Category of action an enemy has telegraphed for the coming round.</div>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="com/csse3200/game/components/player/InventoryComponent.html" title="class in com.csse3200.game.components.player">InventoryComponent</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
