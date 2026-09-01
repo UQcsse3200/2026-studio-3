@@ -93,9 +93,19 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">CombatStatsComponent</span>
 <span class="extends-implements">extends <a href="Component.html" title="class in com.csse3200.game.components">Component</a></span></div>
-<div class="block">Component used to store information related to combat such as health, attack, etc. Any entities
- which engage it combat should have an instance of this class registered. This class can be
- extended for more specific combat needs.</div>
+<div class="block">Component used to store information related to combat such as health, attack, armor, block and
+ status effects. Any entities which engage it combat should have an instance of this class
+ registered. This class can be extended for more specific combat needs. SCOPE NOTE: this class
+ owns the generic mechanics of armor, block and status effects - how they are stored, applied,
+ queried, removed and expired. It deliberately does NOT own the specific calculation rules for any
+ individual effect (e.g. exactly how "Vulnerable" or "Strength" changes a number). Those
+ calculations are owned by whichever system/teammate needs them. ARMOR vs BLOCK: these are two
+ distinct mechanics, not two names for the same thing. Armor is a permanent damage-reduction pool.
+ It persists until consumed by incoming damage or explicitly cleared via clearArmor() - it does
+ not reset automatically at any point in the turn cycle. Block is a per-turn damage-reduction
+ pool, matching the "Slay the Spire" style block mechanic (Team 6). It is intended to reset to 0
+ once per turn via resetBlock(), regardless of whether it was consumed. TODO: exact reset timing
+ (start vs end of turn) is not yet wired up - depends on Team 3's turn/battle-sequence event.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -118,7 +128,15 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(int,int)" class="member-name-link">CombatStatsComponent</a><wbr>(int&nbsp;health,
  int&nbsp;baseAttack)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Entity's base constructor</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(int,int,int)" class="member-name-link">CombatStatsComponent</a><wbr>(int&nbsp;health,
+ int&nbsp;baseAttack,
+ int&nbsp;maxHealth)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Overload constructor with maxHealth as the third param</div>
+</div>
 </div>
 </section>
 </li>
@@ -133,38 +151,150 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#absorbDamageWithArmor(int)" class="member-name-link">absorbDamageWithArmor</a><wbr>(int&nbsp;incomingDamage)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Uses current armor to absorb as much of the incoming damage as possible, reducing armor
+ accordingly, and returns whatever damage remains to be applied to health.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#absorbDamageWithBlock(int)" class="member-name-link">absorbDamageWithBlock</a><wbr>(int&nbsp;incomingDamage)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Uses current block to absorb as much of the incoming damage as possible, reducing block
+ accordingly, and returns whatever damage remains.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addArmor(int)" class="member-name-link">addArmor</a><wbr>(int&nbsp;amount)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Adds armor to the entity.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addBlock(int)" class="member-name-link">addBlock</a><wbr>(int&nbsp;amount)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Adds block to the entity.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addHealth(int)" class="member-name-link">addHealth</a><wbr>(int&nbsp;health)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Adds to the player's health.</div>
+<div class="block">Unused will remove in later sprint</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addMaxHealth(int)" class="member-name-link">addMaxHealth</a><wbr>(int&nbsp;healthAmount)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">A function to increase the max health.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyStatusEffect(com.csse3200.game.components.StatusEffect)" class="member-name-link">applyStatusEffect</a><wbr>(<a href="StatusEffect.html" title="class in com.csse3200.game.components">StatusEffect</a>&nbsp;effect)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Applies a status effect to this entity.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyStatusEffect(java.lang.String,int,int)" class="member-name-link">applyStatusEffect</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;type,
+ int&nbsp;value,
+ int&nbsp;duration)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Convenience overload of applyStatusEffect that constructs the StatusEffect internally.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#clearArmor()" class="member-name-link">clearArmor</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Clears all armor from the entity, setting it to 0.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getBaseAttack()" class="member-name-link">getBaseAttack</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getArmor()" class="member-name-link">getArmor</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the entity's current armor value.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getBaseAttack()" class="member-name-link">getBaseAttack</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the entity's base attack damage.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getBlock()" class="member-name-link">getBlock</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the entity's current block value.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getHealth()" class="member-name-link">getHealth</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the entity's health.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaxHealth()" class="member-name-link">getMaxHealth</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the entity's max health.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="StatusEffect.html" title="class in com.csse3200.game.components">StatusEffect</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStatusEffect(java.lang.String)" class="member-name-link">getStatusEffect</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;type)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the active status effect with the given type, or null if not present.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hasStatusEffect(java.lang.String)" class="member-name-link">hasStatusEffect</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;type)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns true if a status effect with the given type is currently active.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#heal(int)" class="member-name-link">heal</a><wbr>(int&nbsp;health)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Heals.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hit(com.csse3200.game.components.CombatStatsComponent)" class="member-name-link">hit</a><wbr>(<a href="CombatStatsComponent.html" title="class in com.csse3200.game.components">CombatStatsComponent</a>&nbsp;attacker)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Unused will remove in later sprint</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Boolean.html" title="class or interface in java.lang" class="external-link">Boolean</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isDead()" class="member-name-link">isDead</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns true if the entity's has 0 health, otherwise false.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setBaseAttack(int)" class="member-name-link">setBaseAttack</a><wbr>(int&nbsp;attack)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeStatusEffect(java.lang.String)" class="member-name-link">removeStatusEffect</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;type)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Explicitly removes a status effect from this entity, if present.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetBlock()" class="member-name-link">resetBlock</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resets block to 0.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setArmor(int)" class="member-name-link">setArmor</a><wbr>(int&nbsp;armor)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the entity's armor.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setBaseAttack(int)" class="member-name-link">setBaseAttack</a><wbr>(int&nbsp;attack)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the entity's attack damage.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setBlock(int)" class="member-name-link">setBlock</a><wbr>(int&nbsp;block)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the entity's block.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setHealth(int)" class="member-name-link">setHealth</a><wbr>(int&nbsp;health)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the entity's health.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMaxHealth(int)" class="member-name-link">setMaxHealth</a><wbr>(int&nbsp;healthAmount)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">A setter function for maxHealth, contains a safegaurd to avoid MaxHealth going lower than 1
+ send an update to every listener is changed to ensure real time changes updated.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#takeDamage(int)" class="member-name-link">takeDamage</a><wbr>(int&nbsp;damage)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Damage the entity's health.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateStatusEffects()" class="member-name-link">updateStatusEffects</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Ticks down the duration of all active status effects by one and removes any that have expired.</div>
 </div>
 </div>
 </div>
@@ -191,6 +321,27 @@ loadScripts(document, 'script');</script>
 <h3>CombatStatsComponent</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">CombatStatsComponent</span><wbr><span class="parameters">(int&nbsp;health,
  int&nbsp;baseAttack)</span></div>
+<div class="block">Entity's base constructor</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>health</code> - entity's health</dd>
+<dd><code>baseAttack</code> - entity's base attack</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(int,int,int)">
+<h3>CombatStatsComponent</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">CombatStatsComponent</span><wbr><span class="parameters">(int&nbsp;health,
+ int&nbsp;baseAttack,
+ int&nbsp;maxHealth)</span></div>
+<div class="block">Overload constructor with maxHealth as the third param</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>health</code> - entity's health</dd>
+<dd><code>baseAttack</code> - entity's base attack</dd>
+<dd><code>maxHealth</code> - entity's max Health</dd>
+</dl>
 </section>
 </li>
 </ul>
@@ -224,6 +375,17 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="getMaxHealth()">
+<h3>getMaxHealth</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getMaxHealth</span>()</div>
+<div class="block">Returns the entity's max health.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>entity's max health</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="setHealth(int)">
 <h3>setHealth</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setHealth</span><wbr><span class="parameters">(int&nbsp;health)</span></div>
@@ -235,13 +397,54 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="addHealth(int)">
-<h3>addHealth</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addHealth</span><wbr><span class="parameters">(int&nbsp;health)</span></div>
-<div class="block">Adds to the player's health. The amount added can be negative.</div>
+<section class="detail" id="heal(int)">
+<h3>heal</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">heal</span><wbr><span class="parameters">(int&nbsp;health)</span></div>
+<div class="block">Heals. Health has a maximum bound of the max health</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>health</code> - health to add</dd>
+<dd><code>health</code> - health</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="takeDamage(int)">
+<h3>takeDamage</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">takeDamage</span><wbr><span class="parameters">(int&nbsp;damage)</span></div>
+<div class="block">Damage the entity's health. Incoming damage is first absorbed by armor, and the remainder is
+ applied to health. If health reaches 0 the entity dies.
+
+ <p>NOTE: this method does NOT apply any status-effect-based damage modifiers (e.g. Vulnerable).
+ Callers that need a status effect to change the amount of incoming damage should calculate the
+ final damage value themselves (e.g. by reading the relevant StatusEffect via getStatusEffect())
+ before calling this method. This keeps this class limited to armor/status-effect storage and
+ lifecycle management, not the specific calculation rules for any individual effect type.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>damage</code> - damage</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="setMaxHealth(int)">
+<h3>setMaxHealth</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setMaxHealth</span><wbr><span class="parameters">(int&nbsp;healthAmount)</span></div>
+<div class="block">A setter function for maxHealth, contains a safegaurd to avoid MaxHealth going lower than 1
+ send an update to every listener is changed to ensure real time changes updated.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>healthAmount</code> - to be set as the MaxHealth</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="addMaxHealth(int)">
+<h3>addMaxHealth</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addMaxHealth</span><wbr><span class="parameters">(int&nbsp;healthAmount)</span></div>
+<div class="block">A function to increase the max health. It uses setMaxHealth function to avoid redundancy</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>healthAmount</code> - to be set as the MaxHealth</dd>
 </dl>
 </section>
 </li>
@@ -268,9 +471,212 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="addHealth(int)">
+<h3>addHealth</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addHealth</span><wbr><span class="parameters">(int&nbsp;health)</span></div>
+<div class="block">Unused will remove in later sprint</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>health</code> - entity's health</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="hit(com.csse3200.game.components.CombatStatsComponent)">
 <h3>hit</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">hit</span><wbr><span class="parameters">(<a href="CombatStatsComponent.html" title="class in com.csse3200.game.components">CombatStatsComponent</a>&nbsp;attacker)</span></div>
+<div class="block">Unused will remove in later sprint</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>attacker</code> - attacker parameter</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getArmor()">
+<h3>getArmor</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getArmor</span>()</div>
+<div class="block">Returns the entity's current armor value.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>armor</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="setArmor(int)">
+<h3>setArmor</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setArmor</span><wbr><span class="parameters">(int&nbsp;armor)</span></div>
+<div class="block">Sets the entity's armor. Armor is clamped to a minimum of 0.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>armor</code> - armor value</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="addArmor(int)">
+<h3>addArmor</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addArmor</span><wbr><span class="parameters">(int&nbsp;amount)</span></div>
+<div class="block">Adds armor to the entity. Non-positive amounts are ignored.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>amount</code> - amount of armor to add</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="clearArmor()">
+<h3>clearArmor</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">clearArmor</span>()</div>
+<div class="block">Clears all armor from the entity, setting it to 0.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="absorbDamageWithArmor(int)">
+<h3>absorbDamageWithArmor</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">absorbDamageWithArmor</span><wbr><span class="parameters">(int&nbsp;incomingDamage)</span></div>
+<div class="block">Uses current armor to absorb as much of the incoming damage as possible, reducing armor
+ accordingly, and returns whatever damage remains to be applied to health.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>incomingDamage</code> - damage to be absorbed (after status-effect modifiers)</dd>
+<dt>Returns:</dt>
+<dd>damage remaining after armor absorption</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getBlock()">
+<h3>getBlock</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getBlock</span>()</div>
+<div class="block">Returns the entity's current block value.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>block</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="setBlock(int)">
+<h3>setBlock</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setBlock</span><wbr><span class="parameters">(int&nbsp;block)</span></div>
+<div class="block">Sets the entity's block. Block is clamped to a minimum of 0.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>block</code> - block value</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="addBlock(int)">
+<h3>addBlock</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addBlock</span><wbr><span class="parameters">(int&nbsp;amount)</span></div>
+<div class="block">Adds block to the entity. Non-positive amounts are ignored.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>amount</code> - amount of block to add</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="resetBlock()">
+<h3>resetBlock</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">resetBlock</span>()</div>
+<div class="block">Resets block to 0. Intended to be called once per turn, regardless of whether the block was
+ consumed. TODO: wire this up to Team 3's turn event, same as updateStatusEffects() - timing
+ (start vs end of turn) still needs confirmation.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="absorbDamageWithBlock(int)">
+<h3>absorbDamageWithBlock</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">absorbDamageWithBlock</span><wbr><span class="parameters">(int&nbsp;incomingDamage)</span></div>
+<div class="block">Uses current block to absorb as much of the incoming damage as possible, reducing block
+ accordingly, and returns whatever damage remains.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>incomingDamage</code> - damage to be absorbed</dd>
+<dt>Returns:</dt>
+<dd>damage remaining after block absorption</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="applyStatusEffect(com.csse3200.game.components.StatusEffect)">
+<h3>applyStatusEffect</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">applyStatusEffect</span><wbr><span class="parameters">(<a href="StatusEffect.html" title="class in com.csse3200.game.components">StatusEffect</a>&nbsp;effect)</span></div>
+<div class="block">Applies a status effect to this entity. If an effect with the same id is already active, it is
+ overwritten by the new one (design choice: overwrite, not stack. To be confirmed with Team 5/6
+ if card design expects stacking behaviour instead).</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>effect</code> - status effect to apply</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="applyStatusEffect(java.lang.String,int,int)">
+<h3>applyStatusEffect</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">applyStatusEffect</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;type,
+ int&nbsp;value,
+ int&nbsp;duration)</span></div>
+<div class="block">Convenience overload of applyStatusEffect that constructs the StatusEffect internally. Provided
+ so callers can apply a status effect without constructing a StatusEffect object themselves.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>type</code> - identifier for the effect, e.g. "VULNERABLE"</dd>
+<dd><code>value</code> - magnitude of the effect</dd>
+<dd><code>duration</code> - number of turns the effect remains active for; 0 or fewer means permanent</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getStatusEffect(java.lang.String)">
+<h3>getStatusEffect</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="StatusEffect.html" title="class in com.csse3200.game.components">StatusEffect</a></span>&nbsp;<span class="element-name">getStatusEffect</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;type)</span></div>
+<div class="block">Returns the active status effect with the given type, or null if not present.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>type</code> - status effect type identifier</dd>
+<dt>Returns:</dt>
+<dd>active StatusEffect, or null</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="hasStatusEffect(java.lang.String)">
+<h3>hasStatusEffect</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">hasStatusEffect</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;type)</span></div>
+<div class="block">Returns true if a status effect with the given type is currently active.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>type</code> - status effect type identifier</dd>
+<dt>Returns:</dt>
+<dd>whether the effect is active</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="removeStatusEffect(java.lang.String)">
+<h3>removeStatusEffect</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">removeStatusEffect</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;type)</span></div>
+<div class="block">Explicitly removes a status effect from this entity, if present.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>type</code> - status effect type identifier</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="updateStatusEffects()">
+<h3>updateStatusEffects</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">updateStatusEffects</span>()</div>
+<div class="block">Ticks down the duration of all active status effects by one and removes any that have expired.
+ This method's internal logic (tick/expire/cleanup) is self-contained. IMPORTANT - external
+ dependency: this method must be called exactly once per turn for durations to mean "number of
+ turns". WHEN it gets called is not yet wired up - it depends on Team 3's turn/battle-sequence
+ event, which is not confirmed yet.</div>
 </section>
 </li>
 </ul>
