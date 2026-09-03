@@ -39,11 +39,6 @@ public class InOutOnTrigger extends Clickable {
     int screenHeight = Gdx.graphics.getHeight();
     offScreenY = -btn.getHeight() - 50; // 50px extra padding
 
-    // Start the button off-screen
-    btn.setPosition(targetX, offScreenY);
-
-    logger.info("InOutOnTrigger created! Listening for 'up' and 'down'");
-
     // Listen for events that trigger the animation
     entity.getEvents().addListener("up", this::slideUp);
     entity.getEvents().addListener("down", this::slideDown);
