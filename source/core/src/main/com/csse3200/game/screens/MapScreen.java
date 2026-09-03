@@ -8,6 +8,7 @@ import com.csse3200.game.input.InputDecorator;
 import com.csse3200.game.input.InputService;
 import com.csse3200.game.maps.MapDisplay;
 import com.csse3200.game.maps.MapGraph;
+import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.NodePoolGenerator;
 import com.csse3200.game.maps.RoomDistributionConfig;
 import com.csse3200.game.maps.RunState;
@@ -33,6 +34,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
   private static final int COMBAT_WEIGHT = 70;
   private static final int EVENT_WEIGHT = 20;
   private static final int SHOP_WEIGHT = 10;
+  private static final int STARTING_ROW_HEIGHT = 1;
 
   private final Renderer renderer;
 
@@ -53,7 +55,16 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
       RoomDistributionConfig config =
           new RoomDistributionConfig(
               MapGraph.MAX_NODE_COUNT, COMBAT_WEIGHT, EVENT_WEIGHT, SHOP_WEIGHT);
-      runState.setMapGraph(new MapGraph(NodePoolGenerator.generate(config)));
+      MapGraph mapGraph = new MapGraph(NodePoolGenerator.generate(config));
+      Integer startNodeId =
+          mapGraph.getNodesByHeight(STARTING_ROW_HEIGHT).stream()
+              .map(MapNode::getNodeId)
+              .min(Integer::compareTo)
+              .orElseThrow(() -> new IllegalStateException("Generated map has no starting node"));
+
+      if (!runState.startRun(mapGraph, startNodeId)) {
+        throw new IllegalStateException("Generated map could not be started");
+      }
     }
 
     createUi(game, runState);
