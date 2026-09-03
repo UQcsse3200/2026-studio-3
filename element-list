@@ -12,8 +12,10 @@ com.csse3200.game.cards.play
 com.csse3200.game.cards.play.integration
 com.csse3200.game.chance
 com.csse3200.game.components
+com.csse3200.game.components.battle
 com.csse3200.game.components.cards
 com.csse3200.game.components.chance
+com.csse3200.game.components.combat
 com.csse3200.game.components.enemy
 com.csse3200.game.components.enemy.EnemyAI
 com.csse3200.game.components.gamearea
@@ -23,6 +25,9 @@ com.csse3200.game.components.npc
 com.csse3200.game.components.player
 com.csse3200.game.components.settingsmenu
 com.csse3200.game.components.shop
+com.csse3200.game.components.spritedisplay.clickable
+com.csse3200.game.components.spritedisplay.displaying
+com.csse3200.game.components.spritedisplay.reactive
 com.csse3200.game.components.tasks
 com.csse3200.game.concurrency
 com.csse3200.game.encounters.integration
