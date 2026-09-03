@@ -20,6 +20,7 @@ public class MainMenuActions extends Component {
   @Override
   public void create() {
     entity.getEvents().addListener("start", this::onStart);
+    entity.getEvents().addListener("map", this::onStart);
     entity.getEvents().addListener("load", this::onLoad);
     entity.getEvents().addListener("exit", this::onExit);
     entity.getEvents().addListener("settings", this::onSettings);
@@ -28,7 +29,7 @@ public class MainMenuActions extends Component {
 
   /** Discards any run in progress and opens a fresh map. */
   private void onStart() {
-    logger.info("Start game");
+    logger.info("Opening map");
     game.getRunState().endRun();
     game.setScreen(GdxGame.ScreenType.MAP);
   }

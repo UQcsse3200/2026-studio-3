@@ -12,6 +12,13 @@
       "x": 100,
       "y": 200,
       "trigger": "battle"
+    },
+    {
+      "text": "map",
+      "skinFile": "flat-earth/skin/flat-earth-ui.json",
+      "x": 100,
+      "y": 300,
+      "trigger": "map"
     }
   ]
 }
