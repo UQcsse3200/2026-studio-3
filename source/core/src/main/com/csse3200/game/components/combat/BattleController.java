@@ -229,9 +229,6 @@ public class BattleController {
   /** Player decides to end their turn */
   public void endPlayerTurn() {
     this.currentPlayerIntent = PlayerIntent.END_PLAYER_TURN;
-    if (canHandle(BattleEvent.PLAYER_END_REQUESTED)) {
-      handle(BattleEvent.PLAYER_END_REQUESTED);
-    }
   }
 
   /**
