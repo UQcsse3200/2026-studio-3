@@ -18,6 +18,7 @@ import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import java.util.Comparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,10 +56,31 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
       RoomDistributionConfig config =
           new RoomDistributionConfig(
               MapGraph.MAX_NODE_COUNT, COMBAT_WEIGHT, EVENT_WEIGHT, SHOP_WEIGHT);
-      runState.setMapGraph(new MapGraph(NodePoolGenerator.generate(config)));
+      MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
+      startNewRun(runState, graph);
     }
 
     createUi(game, runState);
+  }
+
+  /**
+   * Places the player on a bottom-row node so the map is actually playable: {@link
+   * RunState#startRun} flips that node to {@code CURRENT} and its neighbours to {@code AVAILABLE},
+   * which is what makes {@code MapInputHandler} clicks fire {@code nodeSelected} instead of {@code
+   * nodeLocked}. Falls back to just holding the map (no start node) if seeding fails.
+   */
+  private void startNewRun(RunState runState, MapGraph graph) {
+    int lowestHeight =
+        graph.getNodes().values().stream().mapToInt(MapNode::getHeight).min().orElse(0);
+    MapNode start =
+        graph.getNodesByHeight(lowestHeight).stream()
+            .min(Comparator.comparingInt(MapNode::getNodeId))
+            .orElse(null);
+
+    if (start == null || !runState.startRun(graph, start.getNodeId())) {
+      logger.warn("Could not seed a start node, map will open with everything locked");
+      runState.setMapGraph(graph);
+    }
   }
 
   /** Puts the map display on a UI entity so it is rendered and receives input. */
