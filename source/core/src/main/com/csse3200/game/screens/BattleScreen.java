@@ -19,7 +19,7 @@ import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
-import com.csse3200.game.cards.effects.CardResolutionService;
+import com.csse3200.game.cards.effects.CardEffectResolver;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
@@ -121,10 +121,14 @@ public class BattleScreen extends ScreenAdapter {
     battleDeck.shuffleDrawPile();
     battleDeck.drawCards(5);
 
-    CardResolutionService resolutionService = new CardResolutionService(library);
+    CardEffectResolver effectResolver = new CardEffectResolver(library);
     controller =
         new BattleController(
-            forestGameArea.getPlayer(), forestGameArea.getEnemies(), resolutionService, battleDeck);
+            forestGameArea.getPlayer(),
+            forestGameArea.getEnemies(),
+            effectResolver,
+            library,
+            battleDeck);
 
     createUI();
     controller.start();

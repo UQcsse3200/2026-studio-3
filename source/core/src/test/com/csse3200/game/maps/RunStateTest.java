@@ -120,7 +120,8 @@ public class RunStateTest {
 
     assertSame(graph, runState.getMapGraph());
     assertEquals(NodeState.COMPLETED, graph.getNode(1).getState());
-    assertEquals(3, runState.getMapGraph().getNodes().size());
+    // Same map instance, same nodes — it was not regenerated while the encounter ran.
+    assertEquals(graph.getNodes().size(), runState.getMapGraph().getNodes().size());
   }
 
   @Test

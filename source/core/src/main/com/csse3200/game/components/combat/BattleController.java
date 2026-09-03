@@ -1,15 +1,18 @@
 package com.csse3200.game.components.combat;
 
 import com.csse3200.game.cards.CardPlayRequest;
+import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
+import com.csse3200.game.cards.effects.CardEffectResolution;
+import com.csse3200.game.cards.effects.CardEffectResolver;
 import com.csse3200.game.cards.effects.CardPlayResult;
-import com.csse3200.game.cards.effects.CardResolutionService;
+import com.csse3200.game.cards.effects.PlayerEffectState;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
-import com.csse3200.game.components.enemy.EnemyStatsComponent;
 import com.csse3200.game.components.enemy.IntentType;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.PlayerIntent;
@@ -22,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * The central controller of the current state of the battle loop. Controls what phase the battle is
@@ -47,32 +51,41 @@ public class BattleController {
   private boolean pendingEvent;
   private CardPlayRequest pendingCard;
 
-  /**
-   * Team 5 entry point (currently a Team 3-side stand-in); null when the loop runs without cards.
-   */
-  private final CardResolutionService resolutionService;
+  /** Team 5's card-effect resolver (Team 6 configs -> resolved effects); null without cards. */
+  private final CardEffectResolver effectResolver;
+
+  /** Team 6 card library, used to look up a played card's config; null without cards. */
+  private final CardService cardService;
+
+  /** Team 5's per-battle player effect state, carrying Strength between plays. */
+  private final PlayerEffectState playerEffectState;
 
   /** Team 5-owned deck state; null when the loop runs without cards. */
   private final BattleDeck battleDeck;
 
   public BattleController(Entity player, List<Entity> enemies) throws IllegalArgumentException {
-    this(player, enemies, null, null);
+    this(player, enemies, null, null, null);
   }
 
   /**
    * @param player the player entity
    * @param enemies the enemies in the encounter
-   * @param resolutionService the card-play entry point, or {@code null} to run without cards
+   * @param effectResolver Team 5's card-effect resolver, or {@code null} to run without cards
+   * @param cardService Team 6's card library for config lookup, or {@code null} to run without
+   *     cards
    * @param battleDeck the battle deck state, or {@code null} to run without cards
    */
   public BattleController(
       Entity player,
       List<Entity> enemies,
-      CardResolutionService resolutionService,
+      CardEffectResolver effectResolver,
+      CardService cardService,
       BattleDeck battleDeck)
       throws IllegalArgumentException {
 
-    this.resolutionService = resolutionService;
+    this.effectResolver = effectResolver;
+    this.cardService = cardService;
+    this.playerEffectState = new PlayerEffectState();
     this.battleDeck = battleDeck;
     this.player = player;
     if (player == null) {
@@ -157,11 +170,11 @@ public class BattleController {
    */
   private void phaseChange(BattlePhase phase) {
     switch (phase) {
-      // Setup States
+        // Setup States
       case SETUP -> enterSetup();
       case REVEAL_INTENTS -> enterRevealIntents();
 
-      // Player States
+        // Player States
       case PLAYER_START -> enterPlayerStart();
       case PLAYER_TURN -> enterPlayerTurn();
       case PLAYER_ATTACK -> enterPlayerAttack();
@@ -170,14 +183,14 @@ public class BattleController {
       case PLAYER_END -> enterPlayerEnd();
       case PLAYER_RESOLVED -> enterPlayerResolved();
 
-      // Enemy States
+        // Enemy States
       case ENEMY_TURN -> enterEnemyTurn();
       case ENEMY_ATTACK -> enterEnemyAttack();
       case ENEMY_DEFEND -> enterEnemyDefend();
       case ENEMY_OTHER -> enterEnemyOther();
       case ENEMY_RESOLVED -> enterEnemyResolved();
 
-      // Terminal States
+        // Terminal States
       case VICTORY -> enterVictory();
       case DEFEAT -> enterDefeat();
     }
@@ -187,6 +200,7 @@ public class BattleController {
 
   /**
    * Starts the battle encounter
+   *
    * @throws IllegalStateException if the battle has already begun
    */
   public void start() throws IllegalStateException {
@@ -196,30 +210,22 @@ public class BattleController {
     handle(BattleEvent.SETUP_COMPLETE);
   }
 
-  /**
-   * Player intends to attack the enemy on their turn
-   */
+  /** Player intends to attack the enemy on their turn */
   public void selectAttack() {
     this.currentPlayerIntent = PlayerIntent.ATTACK;
   }
 
-  /**
-   * Player intends to defend themselves on their turn
-   */
+  /** Player intends to defend themselves on their turn */
   public void selectDefend() {
     this.currentPlayerIntent = PlayerIntent.DEFEND;
   }
 
-  /**
-   * Player intends to do other actions on their turn
-   */
+  /** Player intends to do other actions on their turn */
   public void selectOther() {
     this.currentPlayerIntent = PlayerIntent.OTHER;
   }
 
-  /**
-   * Player decides to end their turn
-   */
+  /** Player decides to end their turn */
   public void endPlayerTurn() {
     this.currentPlayerIntent = PlayerIntent.END_PLAYER_TURN;
     if (canHandle(BattleEvent.PLAYER_END_REQUESTED)) {
@@ -228,8 +234,8 @@ public class BattleController {
   }
 
   /**
-   * Resets the current battle to a completely new battle that has no previous player and
-   * enemy turns
+   * Resets the current battle to a completely new battle that has no previous player and enemy
+   * turns
    */
   public void resetBattle() {
     if (this.pendingEvent) {
@@ -251,6 +257,7 @@ public class BattleController {
 
   /**
    * Retrieves the current phase of the battle (e.g. player turn, enemy turn, player attack, etc.)
+   *
    * @return the current phase of the BattleController instance
    */
   public BattlePhase getCurrentPhase() {
@@ -361,7 +368,10 @@ public class BattleController {
   private void setEnemyIntent(EnemyIntent intent) {
     this.currentEnemyIntent = intent;
   }
-  private void setPlayerIntent(PlayerIntent intent) {this.currentPlayerIntent = intent;}
+
+  private void setPlayerIntent(PlayerIntent intent) {
+    this.currentPlayerIntent = intent;
+  }
 
   /*------------------------- Helper functions ----------------------------*/
 
@@ -608,15 +618,49 @@ public class BattleController {
   }
 
   /**
-   * Calls Team 5's single card-play entry point (currently the Team 3-side stand-in).
+   * Plays the submitted card: looks its config up in Team 6's library, checks it is in hand and
+   * affordable, resolves its effects through Team 5's {@link CardEffectResolver}, then commits the
+   * energy spend, moves the card to the discard pile and draws a replacement so the hand stays
+   * topped up.
    *
    * @return the result, or {@code null} when no card system is wired in
    */
   private CardPlayResult playCardThroughCardSystem(CardPlayRequest request) {
-    if (resolutionService == null || battleDeck == null) {
+    if (effectResolver == null || cardService == null || battleDeck == null) {
       return null;
     }
-    return resolutionService.play(request, battleDeck, playerEnergy());
+
+    Optional<CardConfig> maybeCard = cardService.getCard(request.cardID());
+    if (maybeCard.isEmpty()) {
+      return CardPlayResult.failure(
+          "Unknown card: " + request.cardID(), request.cardID(), request.targetID(), battleDeck);
+    }
+    CardConfig card = maybeCard.get();
+
+    if (!battleDeck.getHand().contains(card.id)) {
+      return CardPlayResult.failure("Card not in hand", card.id, request.targetID(), battleDeck);
+    }
+
+    EnergyComponent energy = playerEnergy();
+    if (energy != null && !energy.canAfford(card.cost)) {
+      return CardPlayResult.failure("Not enough energy", card.id, request.targetID(), battleDeck);
+    }
+
+    CardEffectResolution resolution = effectResolver.resolve(card, playerEffectState);
+
+    if (energy != null) {
+      energy.spendEnergy(card.cost);
+    }
+    battleDeck.playCard(card.id);
+    battleDeck.drawOne();
+
+    return CardPlayResult.success(
+        card.id,
+        request.targetID(),
+        resolution.enemyEffects(),
+        resolution.playerEffects(),
+        battleDeck,
+        card.cost);
   }
 
   /**
@@ -634,7 +678,7 @@ public class BattleController {
     applyEnemyEffects(livingEnemyTargets(request), enemyEffects);
     applyPlayerEffects(playerEffects);
 
-    // The played card has left the hand (see CardResolutionService) — tell the UI to refresh.
+    // The played card has left the hand (see playCardThroughCardSystem) — tell the UI to refresh.
     eventHandler.trigger(HAND_CHANGED_EVENT, result.updatedHand());
   }
 
@@ -746,18 +790,18 @@ public class BattleController {
   private void enterEnemyAttack() {
     Entity enemy = getEnemy();
 
+    // Team 1's executeIntent now applies the hit to the player's CombatStatsComponent itself, so
+    // the controller no longer re-applies the damage. Read the player's HP either side of the call
+    // to narrate how hard the hit landed.
+    CombatStatsComponent playerStats = this.player.getComponent(CombatStatsComponent.class);
+    int healthBefore = playerStats != null ? playerStats.getHealth() : 0;
+
     EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
     if (behaviour != null) {
       behaviour.executeIntent(this.player);
     }
 
-    // Placeholder until Team 1's executeIntent can reach a player CombatStatsComponent: apply the
-    // telegraphed attack damage to the player here so the loop can actually threaten a defeat.
-    int damage = this.currentEnemyIntent != null ? this.currentEnemyIntent.getValue() : 0;
-    CombatStatsComponent playerStats = this.player.getComponent(CombatStatsComponent.class);
-    if (damage > 0 && playerStats != null) {
-      playerStats.takeDamage(damage);
-    }
+    int damage = playerStats != null ? Math.max(0, healthBefore - playerStats.getHealth()) : 0;
     narrate(
         "Enemy attacks for "
             + damage

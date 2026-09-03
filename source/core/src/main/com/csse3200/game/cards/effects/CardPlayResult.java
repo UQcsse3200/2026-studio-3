@@ -8,8 +8,8 @@ import java.util.List;
  *
  * <p>This mirrors the shape Team 5's card system is moving towards: Team 3 makes one call for a
  * card play and everything it needs to refresh the UI and hand work to other systems comes back
- * here. Until Team 5's real entry point lands, {@link CardResolutionService} fills this in on the
- * Team 3 side.
+ * here. {@code BattleController.playCardThroughCardSystem} assembles it from Team 5's {@link
+ * CardEffectResolver} plus the deck and energy bookkeeping.
  *
  * <p>On failure no effects are produced and the card stays in hand. On success the deck snapshots
  * already reflect the played card moved from hand to discard, and {@link #energyCost()} is the

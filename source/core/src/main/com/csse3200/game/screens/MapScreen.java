@@ -8,8 +8,10 @@ import com.csse3200.game.input.InputDecorator;
 import com.csse3200.game.input.InputService;
 import com.csse3200.game.maps.MapDisplay;
 import com.csse3200.game.maps.MapGraph;
+import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.NodePoolGenerator;
 import com.csse3200.game.maps.RoomDistributionConfig;
+import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
@@ -75,11 +77,25 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     ServiceLocator.getEntityService().register(ui);
   }
 
-  /** Records the node being entered and switches to its encounter. */
+  /**
+   * Records the node being entered and switches to the screen that owns it: a battle for combat and
+   * boss nodes, the placeholder encounter screen for everything else (shop, event). Coming back is
+   * handled by whichever screen the run lands on ({@code BattleActions} for a battle, {@code
+   * EncounterScreen} otherwise), which reports the result to the run state and returns here.
+   */
   private void enterEncounter(GdxGame game, RunState runState, Integer nodeId) {
-    logger.info("Node {} selected, entering encounter", nodeId);
     runState.enterEncounter(nodeId);
-    game.setScreen(GdxGame.ScreenType.ENCOUNTER);
+
+    MapNode node = runState.getMapGraph() == null ? null : runState.getMapGraph().getNode(nodeId);
+    RoomType roomType = node == null ? null : node.getRoomType();
+
+    if (roomType == RoomType.COMBAT || roomType == RoomType.FINAL) {
+      logger.info("Node {} ({}) selected, entering battle", nodeId, roomType);
+      game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
+    } else {
+      logger.info("Node {} ({}) selected, entering encounter", nodeId, roomType);
+      game.setScreen(GdxGame.ScreenType.ENCOUNTER);
+    }
   }
 
   @Override

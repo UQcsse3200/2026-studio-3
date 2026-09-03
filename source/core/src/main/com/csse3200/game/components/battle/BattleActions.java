@@ -92,6 +92,13 @@ public class BattleActions extends Component {
   private void onBattleEnd(Boolean won) {
     boolean win = Boolean.TRUE.equals(won);
     entity.getEvents().trigger(win ? BATTLE_WON_EVENT : BATTLE_LOST_EVENT);
+
+    // Report the result to the run so the map node is marked done (win) or the run stays put
+    // (loss). The end screen reads this to decide whether to go back to the map or the menu.
+    if (game.getRunState() != null) {
+      game.getRunState().completeEncounter(win);
+    }
+
     GdxGame.ScreenType target = win ? GdxGame.ScreenType.VICTORY : GdxGame.ScreenType.DEFEAT;
     if (Gdx.app != null) {
       Gdx.app.postRunnable(() -> game.setScreen(target));

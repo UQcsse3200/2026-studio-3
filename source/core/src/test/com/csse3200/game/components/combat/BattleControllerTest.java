@@ -18,7 +18,6 @@ import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.player.PlayerActions;
 import com.csse3200.game.components.player.PlayerIntent;
 import com.csse3200.game.entities.Entity;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -216,11 +215,11 @@ class BattleControllerTest {
   }
 
   @Test
-  void shouldDamagePlayer() throws ReflectiveOperationException {
+  void shouldDamagePlayer() {
+    // The AI opens with an attack; executeIntent hits the player for the enemy's base attack (5).
     EnemyBehaviourComponent attackingBehaviour = new EnemyBehaviourComponent("test");
-    setCurrentIntent(attackingBehaviour, EnemyIntent.attack(5));
     Entity enemy =
-        new Entity().addComponent(new CombatStatsComponent(10, 1)).addComponent(attackingBehaviour);
+        new Entity().addComponent(new CombatStatsComponent(10, 5)).addComponent(attackingBehaviour);
     controller = new BattleController(player, List.of(enemy));
 
     controller.start();
@@ -335,14 +334,7 @@ class BattleControllerTest {
     when(enemy.getComponent(EnemyBehaviourComponent.class)).thenReturn(behaviour);
     when(enemy.getComponent(CombatStatsComponent.class)).thenReturn(stats);
     when(behaviour.rollIntent()).thenReturn(EnemyIntent.defend(1));
-    when(!stats.isDead()).thenReturn(alive);
+    when(stats.isDead()).thenReturn(!alive);
     return enemy;
-  }
-
-  private void setCurrentIntent(EnemyBehaviourComponent behaviour, EnemyIntent intent)
-      throws ReflectiveOperationException {
-    Field currentIntent = EnemyBehaviourComponent.class.getDeclaredField("currentIntent");
-    currentIntent.setAccessible(true);
-    currentIntent.set(behaviour, intent);
   }
 }

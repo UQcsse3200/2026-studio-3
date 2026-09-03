@@ -26,11 +26,11 @@ public class MainMenuActions extends Component {
     entity.getEvents().addListener("battle", this::onBattle);
   }
 
-  /** Swaps to the Main Game screen. */
+  /** Discards any run in progress and opens a fresh map. */
   private void onStart() {
     logger.info("Start game");
     game.getRunState().endRun();
-    game.setScreen(GdxGame.ScreenType.MAIN_GAME);
+    game.setScreen(GdxGame.ScreenType.MAP);
   }
 
   /** Intended for loading a saved game state. Load functionality is not actually implemented. */
