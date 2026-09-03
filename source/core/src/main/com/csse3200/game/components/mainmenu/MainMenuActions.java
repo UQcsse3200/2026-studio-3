@@ -25,6 +25,7 @@ public class MainMenuActions extends Component {
     entity.getEvents().addListener("exit", this::onExit);
     entity.getEvents().addListener("settings", this::onSettings);
     entity.getEvents().addListener("battle", this::onBattle);
+    entity.getEvents().addListener("shop", this::onShop);
   }
 
   /** Discards any run in progress and opens a fresh map. */
@@ -54,5 +55,11 @@ public class MainMenuActions extends Component {
   private void onBattle() {
     logger.info("Battle game");
     game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
+  }
+
+  /** Opens the non-combat encounter screen (Chance encounter into the Shop). */
+  private void onShop() {
+    logger.info("Opening shop encounter");
+    game.setScreen(GdxGame.ScreenType.MAIN_GAME);
   }
 }
