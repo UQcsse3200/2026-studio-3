@@ -13,9 +13,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.components.Component;
-import com.csse3200.game.services.ServiceLocator;
-
-import java.nio.file.Paths;
 
 public abstract class Clickable extends Component {
   // Shared default skin, only loaded if the record doesn't provide one.
@@ -191,6 +188,7 @@ public abstract class Clickable extends Component {
 
   /**
    * Action to take after the specific component is added to the stage
+   *
    * @param stage the stage that the component is added to
    */
   public void onAddedToStage(Stage stage) {

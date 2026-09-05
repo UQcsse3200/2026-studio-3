@@ -22,7 +22,6 @@ import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.cards.effects.CardEffectResolver;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.combat.BattleController;
-import com.csse3200.game.components.gamearea.PerformanceDisplay;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;

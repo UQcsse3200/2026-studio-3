@@ -22,7 +22,7 @@ public class PlayerStatsDisplay extends UIComponent {
   private Label moneyLabel;
   private static final float FONT_SCALE = 0.75f;
 
-    /** Creates reusable ui styles and adds actors to the stage. */
+  /** Creates reusable ui styles and adds actors to the stage. */
   @Override
   public void create() {
     super.create();
