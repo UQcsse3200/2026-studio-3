@@ -109,9 +109,10 @@ loadScripts(document, 'script');</script>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.entities.Entity,java.util.List)" class="member-name-link">BattleController</a><wbr>(<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&gt;&nbsp;enemies)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.entities.Entity,java.util.List,com.csse3200.game.cards.effects.CardResolutionService,com.csse3200.game.cards.deck.BattleDeck)" class="member-name-link">BattleController</a><wbr>(<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player,
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.entities.Entity,java.util.List,com.csse3200.game.cards.effects.CardEffectResolver,com.csse3200.game.cards.CardService,com.csse3200.game.cards.deck.BattleDeck)" class="member-name-link">BattleController</a><wbr>(<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&gt;&nbsp;enemies,
- <a href="../../cards/effects/CardResolutionService.html" title="class in com.csse3200.game.cards.effects">CardResolutionService</a>&nbsp;resolutionService,
+ <a href="../../cards/effects/CardEffectResolver.html" title="class in com.csse3200.game.cards.effects">CardEffectResolver</a>&nbsp;effectResolver,
+ <a href="../../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
  <a href="../../cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a>&nbsp;battleDeck)</code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 </div>
@@ -195,8 +196,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetBattle()" class="member-name-link">resetBattle</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Resets the current battle to a completely new battle that has no previous player and
- enemy turns</div>
+<div class="block">Resets the current battle to a completely new battle that has no previous player and enemy
+ turns</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#selectAttack()" class="member-name-link">selectAttack</a>()</code></div>
@@ -252,18 +253,21 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="&lt;init&gt;(com.csse3200.game.entities.Entity,java.util.List,com.csse3200.game.cards.effects.CardResolutionService,com.csse3200.game.cards.deck.BattleDeck)">
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.entities.Entity,java.util.List,com.csse3200.game.cards.effects.CardEffectResolver,com.csse3200.game.cards.CardService,com.csse3200.game.cards.deck.BattleDeck)">
 <h3>BattleController</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">BattleController</span><wbr><span class="parameters">(<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&gt;&nbsp;enemies,
- <a href="../../cards/effects/CardResolutionService.html" title="class in com.csse3200.game.cards.effects">CardResolutionService</a>&nbsp;resolutionService,
+ <a href="../../cards/effects/CardEffectResolver.html" title="class in com.csse3200.game.cards.effects">CardEffectResolver</a>&nbsp;effectResolver,
+ <a href="../../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
  <a href="../../cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a>&nbsp;battleDeck)</span>
                  throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></span></div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>player</code> - the player entity</dd>
 <dd><code>enemies</code> - the enemies in the encounter</dd>
-<dd><code>resolutionService</code> - the card-play entry point, or <code>null</code> to run without cards</dd>
+<dd><code>effectResolver</code> - Team 5's card-effect resolver, or <code>null</code> to run without cards</dd>
+<dd><code>cardService</code> - Team 6's card library for config lookup, or <code>null</code> to run without
+     cards</dd>
 <dd><code>battleDeck</code> - the battle deck state, or <code>null</code> to run without cards</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code></dd>
@@ -333,8 +337,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="resetBattle()">
 <h3>resetBattle</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">resetBattle</span>()</div>
-<div class="block">Resets the current battle to a completely new battle that has no previous player and
- enemy turns</div>
+<div class="block">Resets the current battle to a completely new battle that has no previous player and enemy
+ turns</div>
 </section>
 </li>
 <li>
