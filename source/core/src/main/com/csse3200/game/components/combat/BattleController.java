@@ -50,6 +50,7 @@ public class BattleController {
   private static final String HAND_CHANGED_EVENT = "handChanged";
   private boolean pendingEvent;
   private CardPlayRequest pendingCard;
+  private boolean lastCardPlaySucceeded;
 
   /** Team 5's card-effect resolver (Team 6 configs -> resolved effects); null without cards. */
   private final CardEffectResolver effectResolver;
@@ -486,10 +487,11 @@ public class BattleController {
     if (!canHandle(event)) {
       return false;
     }
+    lastCardPlaySucceeded = false;
     pendingCard = cardPlayRequest;
     currentPlayerIntent = playerIntent;
     handle(event);
-    return true;
+    return lastCardPlaySucceeded;
   }
 
   /*------------------------- Possible Action Branches ----------------------------*/
@@ -600,6 +602,7 @@ public class BattleController {
     CardPlayResult result = playCardThroughCardSystem(request);
     if (result == null) {
       // Card system not wired in (e.g. unit tests without a resolution service).
+      lastCardPlaySucceeded = true;
       narrate("You played " + request.cardID() + ".");
       finishPlayerCardAction();
       return;
@@ -607,11 +610,13 @@ public class BattleController {
 
     if (!result.success()) {
       // No effects produced; the card stays in hand and the player keeps their turn.
+      lastCardPlaySucceeded = false;
       narrate("Couldn't play " + request.cardID() + ": " + result.failureReason());
       finishPlayerCardAction();
       return;
     }
 
+    lastCardPlaySucceeded = true;
     dispatchCardEffects(request, result);
     narrate(summarise(request, result));
     finishPlayerCardAction();

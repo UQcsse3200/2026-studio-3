@@ -12,17 +12,20 @@ import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
+import com.csse3200.game.cards.deck.BattleDeck;
+import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.effects.CardEffectResolver;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattleEvent;
 import com.csse3200.game.components.combat.BattlePhase;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
+import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.PlayerIntent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,8 +58,9 @@ class BattleActionsTest {
                 CardType.ATTACK,
                 TargetType.SINGLE_ENEMY,
                 new EffectConfig(EffectType.DAMAGE, 6)),
+            card("defend", CardType.SKILL, TargetType.SELF, new EffectConfig(EffectType.BLOCK, 5)),
             card(
-                "defend", CardType.SKILL, TargetType.SELF, new EffectConfig(EffectType.BLOCK, 5))));
+                "bandage", CardType.SKILL, TargetType.SELF, new EffectConfig(EffectType.HEAL, 4))));
   }
 
   private static CardConfig card(String id, CardType type, TargetType target, EffectConfig effect) {
@@ -96,22 +100,133 @@ class BattleActionsTest {
   }
 
   @Test
-  void shouldSubmitStrikeWithBoneCrawlerTarget() {
+  void shouldSubmitAttackCardWithAttackIntent() {
     BattleController mockController = mock(BattleController.class);
     GdxGame mockGame = mock(GdxGame.class);
-    CardLibrary mockLibrary = mock(CardLibrary.class);
-    CardConfig strike = new CardConfig();
-    strike.id = "strike";
-    strike.name = "Strike";
-    strike.type = CardType.ATTACK;
-    strike.effects = new EffectConfig[0];
-    when(mockLibrary.getCard("strike")).thenReturn(Optional.of(strike));
+    CardLibrary library = realLibrary();
     Entity battleUI =
-        new Entity().addComponent(new BattleActions(mockController, mockGame, mockLibrary));
+        new Entity().addComponent(new BattleActions(mockController, mockGame, library));
     battleUI.create();
+
     battleUI.getEvents().trigger("playCard", "strike", "bone_crawler");
+
     verify(mockController)
         .submitCardPlayRequest(new CardPlayRequest("strike", "bone_crawler"), PlayerIntent.ATTACK);
+  }
+
+  @Test
+  void shouldSubmitBlockCardWithDefendIntent() {
+    BattleController mockController = mock(BattleController.class);
+    Entity battleUI =
+        new Entity()
+            .addComponent(new BattleActions(mockController, mock(GdxGame.class), realLibrary()));
+    battleUI.create();
+
+    battleUI.getEvents().trigger("playCard", "defend", "player");
+
+    verify(mockController)
+        .submitCardPlayRequest(new CardPlayRequest("defend", "player"), PlayerIntent.DEFEND);
+  }
+
+  @Test
+  void shouldSubmitNonAttackCardWithOtherIntent() {
+    BattleController mockController = mock(BattleController.class);
+    Entity battleUI =
+        new Entity()
+            .addComponent(new BattleActions(mockController, mock(GdxGame.class), realLibrary()));
+    battleUI.create();
+
+    battleUI.getEvents().trigger("playCard", "bandage", "player");
+
+    verify(mockController)
+        .submitCardPlayRequest(new CardPlayRequest("bandage", "player"), PlayerIntent.OTHER);
+  }
+
+  @Test
+  void shouldNotSubmitUnknownCard() {
+    BattleController mockController = mock(BattleController.class);
+    Entity battleUI =
+        new Entity()
+            .addComponent(new BattleActions(mockController, mock(GdxGame.class), realLibrary()));
+    battleUI.create();
+
+    battleUI.getEvents().trigger("playCard", "missing", "bone_crawler");
+
+    verify(mockController, never()).submitCardPlayRequest(any(), any());
+  }
+
+  @Test
+  void shouldNotFireCardPlayedWhenControllerRejectsRequest() {
+    BattleController mockController = mock(BattleController.class);
+    when(mockController.submitCardPlayRequest(any(), any())).thenReturn(false);
+    Entity battleUI =
+        new Entity()
+            .addComponent(new BattleActions(mockController, mock(GdxGame.class), realLibrary()));
+    battleUI.create();
+    List<String> playedEvents = new ArrayList<>();
+    battleUI
+        .getEvents()
+        .addListener(
+            "cardPlayed",
+            (String cardName, String targetId) -> playedEvents.add(cardName + ":" + targetId));
+
+    battleUI.getEvents().trigger("playCard", "strike", "bone_crawler");
+
+    assertTrue(playedEvents.isEmpty());
+  }
+
+  @Test
+  void shouldEndTurnWhenProductionEndTurnEventFires() {
+    BattleController mockController = mock(BattleController.class);
+    Entity battleUI =
+        new Entity()
+            .addComponent(new BattleActions(mockController, mock(GdxGame.class), realLibrary()));
+    battleUI.create();
+
+    battleUI.getEvents().trigger("endturn");
+
+    verify(mockController).endPlayerTurn();
+  }
+
+  @Test
+  void shouldNotFireCardPlayedWhenCardSystemRejectsRequest() {
+    CardConfig expensiveStrike =
+        card(
+            "strike",
+            CardType.ATTACK,
+            TargetType.SINGLE_ENEMY,
+            new EffectConfig(EffectType.DAMAGE, 6));
+    expensiveStrike.cost = 4;
+    CardLibrary library = new CardLibrary(List.of(expensiveStrike));
+    BattleDeck deck = new BattleDeck(new PlayerDeck(List.of("strike", "bandage")));
+    deck.drawCards(1);
+    Entity player =
+        new Entity()
+            .addComponent(new CombatStatsComponent(20, 0))
+            .addComponent(new EnergyComponent(3));
+    Entity enemy =
+        new Entity()
+            .addComponent(new CombatStatsComponent(20, 1))
+            .addComponent(new EnemyBehaviourComponent("test"));
+    BattleController realController =
+        new BattleController(
+            player, List.of(enemy), new CardEffectResolver(library), library, deck);
+    Entity battleUI =
+        new Entity().addComponent(new BattleActions(realController, mock(GdxGame.class), library));
+    battleUI.create();
+    List<String> playedEvents = new ArrayList<>();
+    battleUI
+        .getEvents()
+        .addListener(
+            "cardPlayed",
+            (String cardName, String targetId) -> playedEvents.add(cardName + ":" + targetId));
+    realController.start();
+
+    battleUI.getEvents().trigger("playCard", "strike", "enemy");
+
+    assertTrue(playedEvents.isEmpty());
+    assertEquals(3, player.getComponent(EnergyComponent.class).getCurrentEnergy());
+    assertEquals(List.of("strike"), deck.getHand());
   }
 
   @Test
