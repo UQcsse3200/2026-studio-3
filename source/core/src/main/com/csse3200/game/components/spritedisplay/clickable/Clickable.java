@@ -34,20 +34,20 @@ public abstract class Clickable extends Component {
     return defaultSkin;
   }
 
-  public Clickable(ClickableRecord record) {
-    this.x = record.x();
-    this.y = record.y();
-    this.width = record.width();
-    this.height = record.height();
-    this.btnSkin = (record.btnSkin() != null) ? record.btnSkin() : getDefaultSkin();
-    this.args = record.args();
-    this.label = record.label();
+  protected Clickable(ClickableRecord rec) {
+    this.x = rec.x();
+    this.y = rec.y();
+    this.width = rec.width();
+    this.height = rec.height();
+    this.btnSkin = (rec.btnSkin() != null) ? rec.btnSkin() : getDefaultSkin();
+    this.args = rec.args();
+    this.label = rec.label();
 
-    String text = record.text();
-    String styleName = record.styleName();
+    String text = rec.text();
+    String styleName = rec.styleName();
 
     this.btn =
-        switch (record.type()) {
+        switch (rec.type()) {
           case TEXT ->
               (styleName != null)
                   ? new TextButton(text, btnSkin, styleName)
@@ -60,7 +60,7 @@ public abstract class Clickable extends Component {
                   : new ImageTextButton(text, btnSkin);
         };
 
-    init(record.trigger());
+    init(rec.trigger());
   }
 
   protected void init(String trigger) {

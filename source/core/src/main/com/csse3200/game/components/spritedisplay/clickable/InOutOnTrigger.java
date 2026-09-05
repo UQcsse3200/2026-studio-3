@@ -24,11 +24,11 @@ public class InOutOnTrigger extends Clickable {
   // Track whether the button is currently animating
   protected boolean isAnimating = false;
 
-  public InOutOnTrigger(ClickableRecord record) {
-    super(record);
+  public InOutOnTrigger(ClickableRecord rec) {
+    super(rec);
     int screenHeight = Gdx.graphics.getHeight();
-    this.targetX = record.x();
-    this.targetY = screenHeight - record.y();
+    this.targetX = rec.x();
+    this.targetY = screenHeight - rec.y();
   }
 
   @Override
@@ -36,13 +36,7 @@ public class InOutOnTrigger extends Clickable {
     super.create();
 
     // Calculate off-screen position (just below the bottom of the screen)
-    int screenHeight = Gdx.graphics.getHeight();
     offScreenY = -btn.getHeight() - 50; // 50px extra padding
-
-    // Start the button off-screen
-    btn.setPosition(targetX, offScreenY);
-
-    logger.info("InOutOnTrigger created! Listening for 'up' and 'down'");
 
     // Listen for events that trigger the animation
     entity.getEvents().addListener("up", this::slideUp);
@@ -94,9 +88,6 @@ public class InOutOnTrigger extends Clickable {
     if (btn.getStage() == null) return;
     logger.info("down");
     btn.clearActions();
-    isAnimating = false; // reset flag
-
-    float startY = btn.getY();
     isAnimating = true;
     btn.addAction(
         Actions.sequence(

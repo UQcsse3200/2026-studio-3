@@ -21,18 +21,18 @@ public class ClickableJsonLoaderTest {
             Path.of("spritedisplay/assestsForTest/clickable-basic.json"));
 
     assertEquals(1, records.size());
-    ClickableRecord record = records.get(0);
+    ClickableRecord rec = records.get(0);
 
-    assertEquals("attackCard", record.trigger());
-    assertEquals("Attack", record.text());
-    assertEquals(100.5f, record.x());
-    assertEquals(200.25f, record.y());
-    assertEquals("default", record.styleName());
-    assertEquals("drag", record.variant());
-    assertEquals("Attack the enemy", record.label());
-    assertTrue(record.hasSize());
-    assertEquals(64f, record.width());
-    assertEquals(32f, record.height());
+    assertEquals("attackCard", rec.trigger());
+    assertEquals("Attack", rec.text());
+    assertEquals(100.5f, rec.x());
+    assertEquals(200.25f, rec.y());
+    assertEquals("default", rec.styleName());
+    assertEquals("drag", rec.variant());
+    assertEquals("Attack the enemy", rec.label());
+    assertTrue(rec.hasSize());
+    assertEquals(64f, rec.width());
+    assertEquals(32f, rec.height());
   }
 
   @Test
@@ -42,17 +42,17 @@ public class ClickableJsonLoaderTest {
             Path.of("spritedisplay/assestsForTest/clickable-minimal.json"));
 
     assertEquals(1, records.size());
-    ClickableRecord record = records.get(0);
+    ClickableRecord rec = records.get(0);
 
-    assertEquals("healCard", record.trigger());
-    assertNull(record.text());
-    assertNull(record.styleName());
-    assertEquals("Clickable", record.variant()); // DEFAULT_VARIANT
-    assertEquals("healCard", record.label()); // defaults to trigger
-    assertFalse(record.hasSize());
-    assertEquals(0, record.args().length);
-    assertEquals(ClickableRecord.ButtonType.IMAGE, record.type()); // no text -> IMAGE
-    assertNull(record.btnSkin()); // no skinFile/skinAtlas -> no skin loaded
+    assertEquals("healCard", rec.trigger());
+    assertNull(rec.text());
+    assertNull(rec.styleName());
+    assertEquals("Clickable", rec.variant()); // DEFAULT_VARIANT
+    assertEquals("healCard", rec.label()); // defaults to trigger
+    assertFalse(rec.hasSize());
+    assertEquals(0, rec.args().length);
+    assertEquals(ClickableRecord.ButtonType.IMAGE, rec.type()); // no text -> IMAGE
+    assertNull(rec.btnSkin()); // no skinFile/skinAtlas -> no skin loaded
   }
 
   @Test

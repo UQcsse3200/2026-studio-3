@@ -17,8 +17,8 @@ public class BattleLogDisplay extends Displaying {
   private static final float HOLD = 2.5f;
   private static final float FADE_OUT = 0.4f;
 
-  public BattleLogDisplay(DisplayingRecord record) {
-    super(record);
+  public BattleLogDisplay(DisplayingRecord rec) {
+    super(rec);
   }
 
   @Override

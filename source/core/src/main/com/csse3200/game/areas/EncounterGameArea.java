@@ -1,37 +1,64 @@
 package com.csse3200.game.areas;
 
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.areas.terrain.TerrainFactory.TerrainType;
+import com.csse3200.game.chance.ChanceEncounterFactory;
+import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.chance.ChanceEncounterDisplay;
 import com.csse3200.game.components.gamearea.GameAreaDisplay;
+import com.csse3200.game.components.player.InventoryComponent;
+import com.csse3200.game.components.shop.ShopDisplay;
+import com.csse3200.game.encounters.integration.ComponentPlayerStateAdapter;
+import com.csse3200.game.encounters.integration.EncounterFlowController;
+import com.csse3200.game.encounters.integration.FunctionalCardCatalogAdapter;
+import com.csse3200.game.encounters.integration.IntegratedShopTransactionGateway;
+import com.csse3200.game.encounters.integration.InventoryDeckAdapter;
 import com.csse3200.game.entities.Entity;
-import com.csse3200.game.entities.factories.EnemyFactory;
 import com.csse3200.game.entities.factories.NPCFactory;
 import com.csse3200.game.entities.factories.ObstacleFactory;
 import com.csse3200.game.entities.factories.PlayerFactory;
+import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.shop.ShopConfig;
+import com.csse3200.game.shop.ShopEncounter;
+import com.csse3200.game.shop.ShopService;
 import com.csse3200.game.utils.math.GridPoint2Utils;
 import com.csse3200.game.utils.math.RandomUtils;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Forest area for the demo game with trees, a player, and some enemies. */
-public class ForestGameArea extends GameArea {
-  private static final Logger logger = LoggerFactory.getLogger(ForestGameArea.class);
+/**
+ * Non-combat encounter area (Team 2): a forest scene that runs a Chance encounter and then, on a
+ * successful outcome, opens the Shop.
+ *
+ * <p>This is Team 2's {@code ForestGameArea} from the {@code Feature-2} branch, restored as its own
+ * area after the battle team's {@code ForestGameArea} replaced it on {@code main}. It still needs a
+ * host screen that has registered the entity, render, resource and physics services (as {@code
+ * MainGameScreen} does) before {@link #create()} is called.
+ *
+ * <p>The one deviation from the original: the throwaway demo {@code MapGraph} it built is gone (the
+ * current {@code MapGraph} constructor forces full path generation and cannot hold three hand-made
+ * nodes). Nothing read that graph's state; the Chance -> Shop hand-off it drove now lives directly
+ * in the encounter-flow callback below.
+ */
+public class EncounterGameArea extends GameArea {
+  private static final Logger logger = LoggerFactory.getLogger(EncounterGameArea.class);
   private static final int NUM_TREES = 7;
   private static final int NUM_GHOSTS = 2;
-  private static final GridPoint2 PLAYER_SPAWN = new GridPoint2(5, 20);
-  private static final GridPoint2 ENEMY_SPAWN = new GridPoint2(20, PLAYER_SPAWN.y);
-  private static final float WALL_WIDTH = 3f;
+  private static final Integer SHOP_NODE_ID = 1;
+  private static final Integer CHANCE_NODE_ID = 2;
+  private static final String SHOP_CONFIG = "configs/shopItems.json";
+  private static final GridPoint2 PLAYER_SPAWN = new GridPoint2(10, 10);
+  private static final float WALL_WIDTH = 0.1f;
   private static final String[] forestTextures = {
     "images/star_player.png",
     "images/tree.png",
     "images/ghost_king.png",
     "images/ghost_1.png",
-    "images/enemy.png",
     "images/grass_1.png",
     "images/grass_2.png",
     "images/grass_3.png",
@@ -43,25 +70,24 @@ public class ForestGameArea extends GameArea {
     "images/iso_grass_3.png"
   };
   private static final String[] forestTextureAtlases = {
-    "images/terrain_iso_grass.atlas",
-    "images/ghost.atlas",
-    "images/ghostKing.atlas",
-    "images/enemies/bone_crawler.atlas"
+    "images/terrain_iso_grass.atlas", "images/ghost.atlas", "images/ghostKing.atlas"
   };
   private static final String[] forestSounds = {"sounds/Impact4.ogg"};
+  private static final String backgroundMusic = "sounds/BGM_03_mp3.mp3";
+  private static final String[] forestMusic = {backgroundMusic};
 
   private final TerrainFactory terrainFactory;
 
   private Entity player;
-  private Entity enemy;
+  private EncounterFlowController encounterFlow;
 
   /**
-   * Initialise this ForestGameArea to use the provided TerrainFactory.
+   * Initialise this EncounterGameArea to use the provided TerrainFactory.
    *
    * @param terrainFactory TerrainFactory used to create the terrain for the GameArea.
    * @requires terrainFactory != null
    */
-  public ForestGameArea(TerrainFactory terrainFactory) {
+  public EncounterGameArea(TerrainFactory terrainFactory) {
     super();
     this.terrainFactory = terrainFactory;
   }
@@ -70,17 +96,66 @@ public class ForestGameArea extends GameArea {
   @Override
   public void create() {
     loadAssets();
+
+    displayUI();
+
     spawnTerrain();
-
-    enemy = spawnEnemy();
+    spawnTrees();
     player = spawnPlayer();
+    initialiseEncounterFlow();
+    displayChanceEncounter();
+    spawnGhosts();
+    spawnGhostKing();
 
-    // playMusic();
+    playMusic();
   }
 
-  public void displayUI(Entity ui) {
-    ui.addComponent(new GameAreaDisplay("The Fall of Pantheons"));
+  public Entity getPlayer() {
+    return player;
+  }
+
+  private void displayUI() {
+    Entity ui = new Entity();
+    ui.addComponent(new GameAreaDisplay("Box Forest"));
     spawnEntity(ui);
+  }
+
+  private void displayShop() {
+    ShopService shopService = new ShopService(FileLoader.readClass(ShopConfig.class, SHOP_CONFIG));
+    ShopEncounter shopEncounter = encounterFlow.startShop(SHOP_NODE_ID, shopService);
+    Entity shopUi = new Entity();
+    shopUi.addComponent(new ShopDisplay(shopEncounter));
+    spawnEntity(shopUi);
+  }
+
+  private void displayChanceEncounter() {
+    Entity chanceUi = new Entity();
+    chanceUi.addComponent(
+        new ChanceEncounterDisplay(
+            encounterFlow.startChance(
+                CHANCE_NODE_ID, ChanceEncounterFactory.createInitialEncounters().get(0))));
+    spawnEntity(chanceUi);
+  }
+
+  private void initialiseEncounterFlow() {
+    InventoryComponent inventory = player.getComponent(InventoryComponent.class);
+    ComponentPlayerStateAdapter playerState =
+        new ComponentPlayerStateAdapter(player.getComponent(CombatStatsComponent.class), inventory);
+    IntegratedShopTransactionGateway shopTransactions =
+        new IntegratedShopTransactionGateway(
+            playerState,
+            new FunctionalCardCatalogAdapter(cardId -> true),
+            new InventoryDeckAdapter(inventory));
+
+    encounterFlow =
+        new EncounterFlowController(
+            playerState,
+            shopTransactions,
+            (nodeId, success) -> {
+              if (success && CHANCE_NODE_ID.equals(nodeId)) {
+                displayShop();
+              }
+            });
   }
 
   private void spawnTerrain() {
@@ -130,25 +205,6 @@ public class ForestGameArea extends GameArea {
     return newPlayer;
   }
 
-  /**
-   * Spawns a single enemy into the forest area so it's visible and present in the world. Uses the
-   * roster-driven EnemyFactory, so the enemy id must exist in configs/enemies.json (falls back to a
-   * default config otherwise).
-   */
-  private Entity spawnEnemy() {
-    Entity newEnemy = EnemyFactory.create("bone_crawler");
-    spawnEntityAt(newEnemy, ENEMY_SPAWN, true, true);
-    return newEnemy;
-  }
-
-  public Entity getPlayer() {
-    return player;
-  }
-
-  public List<Entity> getEnemies() {
-    return List.of(enemy);
-  }
-
   private void spawnGhosts() {
     GridPoint2 minPos = new GridPoint2(0, 0);
     GridPoint2 maxPos = terrain.getMapBounds(0).sub(2, 2);
@@ -169,12 +225,12 @@ public class ForestGameArea extends GameArea {
     spawnEntityAt(ghostKing, randomPos, true, true);
   }
 
-  //  private void playMusic() {
-  //    Music music = ServiceLocator.getResourceService().getAsset(backgroundMusic, Music.class);
-  //    music.setLooping(true);
-  //    music.setVolume(0.3f);
-  //    music.play();
-  //  }
+  private void playMusic() {
+    Music music = ServiceLocator.getResourceService().getAsset(backgroundMusic, Music.class);
+    music.setLooping(true);
+    music.setVolume(0.3f);
+    music.play();
+  }
 
   private void loadAssets() {
     logger.debug("Loading assets");
@@ -182,7 +238,7 @@ public class ForestGameArea extends GameArea {
     resourceService.loadTextures(forestTextures);
     resourceService.loadTextureAtlases(forestTextureAtlases);
     resourceService.loadSounds(forestSounds);
-    // resourceService.loadMusic(forestMusic);
+    resourceService.loadMusic(forestMusic);
 
     while (!resourceService.loadForMillis(10)) {
       // This could be upgraded to a loading screen
@@ -196,13 +252,13 @@ public class ForestGameArea extends GameArea {
     resourceService.unloadAssets(forestTextures);
     resourceService.unloadAssets(forestTextureAtlases);
     resourceService.unloadAssets(forestSounds);
-    // resourceService.unloadAssets(forestMusic);
+    resourceService.unloadAssets(forestMusic);
   }
 
   @Override
   public void dispose() {
     super.dispose();
-    // ServiceLocator.getResourceService().getAsset(backgroundMusic, Music.class).stop();
+    ServiceLocator.getResourceService().getAsset(backgroundMusic, Music.class).stop();
     this.unloadAssets();
   }
 }
