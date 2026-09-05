@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton;
@@ -12,6 +13,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.components.Component;
+import com.csse3200.game.services.ServiceLocator;
+
+import java.nio.file.Paths;
 
 public abstract class Clickable extends Component {
   // Shared default skin, only loaded if the record doesn't provide one.
@@ -176,11 +180,20 @@ public abstract class Clickable extends Component {
   }
 
   public void draw() {
-    int screenHeight = Gdx.graphics.getHeight();
-    btn.setPosition(this.getX(), screenHeight - this.getY());
+    // int screenHeight = Gdx.graphics.getHeight();
+    float stageHeight = btn.getStage().getViewport().getWorldHeight();
+    btn.setPosition(this.getX(), stageHeight - this.getY());
 
     if (this.getWidth() > 0 && this.getHeight() > 0) {
       btn.setSize(this.getWidth(), this.getHeight());
     }
+  }
+
+  /**
+   * Action to take after the specific component is added to the stage
+   * @param stage the stage that the component is added to
+   */
+  public void onAddedToStage(Stage stage) {
+    // default does nothing
   }
 }

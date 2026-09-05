@@ -22,6 +22,7 @@ import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.cards.effects.CardEffectResolver;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.gamearea.PerformanceDisplay;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
@@ -51,7 +52,7 @@ public class BattleScreen extends ScreenAdapter {
   private final GdxGame game;
   private static final Logger logger = LoggerFactory.getLogger(BattleScreen.class);
   private final Renderer renderer;
-  private ForestGameArea gameArea;
+  private final ForestGameArea gameArea;
 
   private static final String[] mainGameTextures = {
     "images/heart.png",
@@ -62,9 +63,11 @@ public class BattleScreen extends ScreenAdapter {
   };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
 
-  private static final float HAND_START_X = 50f;
-  private static final float HAND_Y = 1700f;
-  private static final float HAND_SPACING = 350f;
+  private static final float HAND_START_X = 25f;
+  private static final float HAND_Y = 1000f;
+  private static final float HAND_SPACING = 250f;
+  private static final float CARD_WIDTH = 225;
+  private static final float CARD_HEIGHT = 456;
 
   private final PhysicsEngine physicsEngine;
   private static final Map<String, Skin> textureSkinCache = new HashMap<>();
@@ -231,7 +234,7 @@ public class BattleScreen extends ScreenAdapter {
               .label(card.name)
               .variant(variant)
               .position(x, HAND_Y)
-              .size(300, 456)
+              .size(CARD_WIDTH, CARD_HEIGHT)
               .skin(cardSkin);
 
       if (selfTarget) {

@@ -89,6 +89,7 @@ public class ClickableFactory extends UIComponent {
     clickable.setEntity(this.entity);
     clickable.create();
     stage.addActor(clickable.getBtn());
+    clickable.onAddedToStage(stage);
 
     // Hand cards should be visible and playable straight away rather than waiting for an "up".
     if (HAND_TRIGGER.equals(rec.trigger())) {

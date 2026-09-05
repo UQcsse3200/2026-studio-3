@@ -20,8 +20,9 @@ public class PlayerStatsDisplay extends UIComponent {
   private Label pietyLabel;
   private Image moneyImage;
   private Label moneyLabel;
+  private static final float FONT_SCALE = 0.75f;
 
-  /** Creates reusable ui styles and adds actors to the stage. */
+    /** Creates reusable ui styles and adds actors to the stage. */
   @Override
   public void create() {
     super.create();
@@ -45,7 +46,7 @@ public class PlayerStatsDisplay extends UIComponent {
     table.padTop(45f).padLeft(5f);
 
     // Image size
-    float imageSideLength = 30f;
+    float imageSideLength = 20f;
 
     // Heart image
     heartImage =
@@ -55,6 +56,7 @@ public class PlayerStatsDisplay extends UIComponent {
     int health = entity.getComponent(CombatStatsComponent.class).getHealth();
     CharSequence healthText = String.format("Health: %d", health);
     healthLabel = new Label(healthText, skin, "large");
+    healthLabel.setFontScale(FONT_SCALE);
 
     // Energy image
     energyImage =
@@ -65,6 +67,7 @@ public class PlayerStatsDisplay extends UIComponent {
     int energy = energyComponent.getCurrentEnergy();
     CharSequence energyText = String.format("Energy: %d", energy);
     energyLabel = new Label(energyText, skin, "large");
+    energyLabel.setFontScale(FONT_SCALE);
 
     // Piety image
     pietyImage =
@@ -72,6 +75,7 @@ public class PlayerStatsDisplay extends UIComponent {
 
     // Piety text
     pietyLabel = new Label("Level: 1", skin, "large");
+    pietyLabel.setFontScale(FONT_SCALE);
 
     // Money image
     moneyImage =
@@ -82,6 +86,7 @@ public class PlayerStatsDisplay extends UIComponent {
     int money = inventoryComponent.getGold();
     CharSequence moneyText = String.format("Gold: $%d", money);
     moneyLabel = new Label(moneyText, skin, "large");
+    moneyLabel.setFontScale(FONT_SCALE);
 
     table.add(heartImage).size(imageSideLength).pad(5);
     table.add(healthLabel);

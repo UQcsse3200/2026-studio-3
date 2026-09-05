@@ -1,27 +1,27 @@
 {
   "Clickable": [
     {
-      "text": "exit",
-      "x": 100,
+      "text": "Exit",
+      "x": 20,
       "y": 100,
       "trigger": "exit"
     },
     {
-      "text": "up",
-      "x": 100,
-      "y": 200,
+      "text": "Up",
+      "x": 20,
+      "y": 150,
       "trigger": "up"
     },
     {
-      "text": "down",
-      "x": 100,
-      "y": 300,
+      "text": "Down",
+      "x": 20,
+      "y": 200,
       "trigger": "down"
     },
     {
-      "text": "EndTurn",
-      "x": 100,
-      "y": 400,
+      "text": "End Turn",
+      "x": 20,
+      "y": 250,
       "trigger": "endturn"
 
     }
@@ -29,10 +29,10 @@
   "Displaying": [
     {
       "text": "Click a card",
-      "x": 1000,
-      "y": 1000,
+      "x": 500,
+      "y": 500,
       "fontName": "large",
-      "scale": 1.2,
+      "scale": 1,
       "variant": "cardDisplay"
     },
     {
