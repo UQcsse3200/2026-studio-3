@@ -42,8 +42,8 @@ public class ShopDisplay extends UIComponent {
   private static final Logger logger = LoggerFactory.getLogger(ShopDisplay.class);
   private static final String SHOP_CONFIG = "configs/shopItems.json";
   private static final float Z_INDEX = 2f;
-  private static final float PANEL_WIDTH = 1540f;
-  private static final float CARD_WIDTH = 410f;
+  private static final float PANEL_WIDTH = 1080f;
+  private static final float CARD_WIDTH = 300f;
   private static final float CARD_PADDING = 30f;
   private static final float CARD_CONTENT_WIDTH = CARD_WIDTH - (CARD_PADDING * 2f);
 
@@ -254,7 +254,7 @@ public class ShopDisplay extends UIComponent {
     for (ShopItem item : shopEncounter.getItems()) {
       Table card = createItemCard(item);
       float rightPadding = itemNumber < itemCount - 1 ? 34f : 0f;
-      shopPanel.add(card).top().width(CARD_WIDTH).minHeight(590f).padRight(rightPadding);
+      shopPanel.add(card).top().width(CARD_WIDTH).minHeight(505f).padRight(rightPadding);
       itemNumber++;
     }
   }
@@ -303,9 +303,9 @@ public class ShopDisplay extends UIComponent {
     card.row();
     card.add(nameLabel).left().width(CARD_CONTENT_WIDTH).padTop(8f);
     card.row();
-    card.add(artPlaceholder).width(CARD_CONTENT_WIDTH).height(210f).padTop(18f);
+    card.add(artPlaceholder).width(CARD_CONTENT_WIDTH).height(147f).padTop(18f);
     card.row();
-    card.add(descriptionLabel).left().top().width(CARD_CONTENT_WIDTH).height(120f).padTop(18f);
+    card.add(descriptionLabel).left().top().width(CARD_CONTENT_WIDTH).height(84f).padTop(18f);
     card.row();
     card.add(priceLabel).left().padTop(16f);
     card.row();
