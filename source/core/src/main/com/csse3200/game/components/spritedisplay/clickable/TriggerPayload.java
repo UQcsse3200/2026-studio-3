@@ -1,5 +1,8 @@
 package com.csse3200.game.components.spritedisplay.clickable;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * Everything a drop target needs to fire the right event when something is dropped on it: the event
  * name to trigger, the arguments to trigger it with, and a human-readable label for UI feedback
@@ -24,5 +27,34 @@ public record TriggerPayload(String trigger, Object[] args, String label) {
 
   public static TriggerPayload of(String trigger, String label, Object... args) {
     return new TriggerPayload(trigger, args, label);
+  }
+
+  // Explicit equals/hashCode/toString because the auto-generated record versions compare the
+  // Object[] by reference, not content.
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    return o instanceof TriggerPayload(String otherTrigger, Object[] otherArgs, String otherLabel)
+        && Objects.equals(trigger, otherTrigger)
+        && Arrays.equals(args, otherArgs)
+        && Objects.equals(label, otherLabel);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(trigger, Arrays.hashCode(args), label);
+  }
+
+  @Override
+  public String toString() {
+    return "TriggerPayload[trigger="
+        + trigger
+        + ", args="
+        + Arrays.toString(args)
+        + ", label="
+        + label
+        + "]";
   }
 }

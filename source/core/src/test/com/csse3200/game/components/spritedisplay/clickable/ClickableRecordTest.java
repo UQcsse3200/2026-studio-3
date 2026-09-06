@@ -17,32 +17,32 @@ class ClickableRecordTest {
 
   @Test
   void compactConstructor_defaultsVariantToClickableWhenNull() {
-    ClickableRecord record =
+    ClickableRecord rec =
         new ClickableRecord(null, null, 0, 0, null, "attackCard", null, -1, -1, null, null, null);
 
-    assertEquals("Clickable", record.variant());
+    assertEquals("Clickable", rec.variant());
   }
 
   @Test
   void compactConstructor_defaultsArgsToEmptyArrayWhenNull() {
-    ClickableRecord record =
+    ClickableRecord rec =
         new ClickableRecord(null, null, 0, 0, null, "attackCard", null, -1, -1, "drag", null, null);
 
-    assertEquals(0, record.args().length);
+    assertEquals(0, rec.args().length);
   }
 
   @Test
   void compactConstructor_defaultsLabelToTriggerWhenNull() {
-    ClickableRecord record =
+    ClickableRecord rec =
         new ClickableRecord(null, null, 0, 0, null, "attackCard", null, -1, -1, "drag", null, null);
 
-    assertEquals("attackCard", record.label());
+    assertEquals("attackCard", rec.label());
   }
 
   @Test
   void compactConstructor_keepsExplicitValuesInsteadOfDefaulting() {
     Object[] args = {1, "poison"};
-    ClickableRecord record =
+    ClickableRecord rec =
         new ClickableRecord(
             "Attack",
             null,
@@ -57,67 +57,67 @@ class ClickableRecordTest {
             args,
             "custom label");
 
-    assertEquals("drag", record.variant());
-    assertEquals(args, record.args());
-    assertEquals("custom label", record.label());
+    assertEquals("drag", rec.variant());
+    assertEquals(args, rec.args());
+    assertEquals("custom label", rec.label());
   }
 
   // --- hasSize() ---
 
   @Test
   void hasSize_falseWhenBothDimensionsDefault() {
-    ClickableRecord record = ClickableRecord.builder("attackCard").build();
+    ClickableRecord rec = ClickableRecord.builder("attackCard").build();
 
-    assertFalse(record.hasSize());
+    assertFalse(rec.hasSize());
   }
 
   @Test
   void hasSize_trueWhenBothDimensionsSet() {
-    ClickableRecord record = ClickableRecord.builder("attackCard").size(64, 32).build();
+    ClickableRecord rec = ClickableRecord.builder("attackCard").size(64, 32).build();
 
-    assertTrue(record.hasSize());
+    assertTrue(rec.hasSize());
   }
 
   @Test
   void hasSize_falseWhenOnlyWidthSet() {
-    ClickableRecord record =
+    ClickableRecord rec =
         new ClickableRecord(
             "Attack", null, 0, 0, null, "attackCard", null, 64, -1, "drag", null, null);
 
-    assertFalse(record.hasSize());
+    assertFalse(rec.hasSize());
   }
 
   @Test
   void hasSize_falseWhenOnlyHeightSet() {
-    ClickableRecord record =
+    ClickableRecord rec =
         new ClickableRecord(
             "Attack", null, 0, 0, null, "attackCard", null, -1, 32, "drag", null, null);
 
-    assertFalse(record.hasSize());
+    assertFalse(rec.hasSize());
   }
 
   // --- Builder defaults ---
 
   @Test
   void builder_appliesDefaultsWhenOnlyTriggerGiven() {
-    ClickableRecord record = ClickableRecord.builder("attackCard").build();
+    ClickableRecord rec = ClickableRecord.builder("attackCard").build();
 
-    assertEquals("attackCard", record.trigger());
-    assertNull(record.text());
-    assertNull(record.btnSkin());
-    assertNull(record.styleName());
-    assertEquals("Clickable", record.variant());
-    assertEquals("attackCard", record.label()); // defaults to trigger
-    assertEquals(0, record.args().length);
-    assertFalse(record.hasSize());
-    assertEquals(ButtonType.IMAGE, record.type()); // no text -> IMAGE
+    assertEquals("attackCard", rec.trigger());
+    assertNull(rec.text());
+    assertNull(rec.btnSkin());
+    assertNull(rec.styleName());
+    assertEquals("Clickable", rec.variant());
+    assertEquals("attackCard", rec.label()); // defaults to trigger
+    assertEquals(0, rec.args().length);
+    assertFalse(rec.hasSize());
+    assertEquals(ButtonType.IMAGE, rec.type()); // no text -> IMAGE
   }
 
   @Test
   void builder_setsAllFieldsWhenProvided() {
     Skin skin = mock(Skin.class);
 
-    ClickableRecord record =
+    ClickableRecord rec =
         ClickableRecord.builder("attackCard")
             .text("Attack")
             .skin(skin)
@@ -129,57 +129,57 @@ class ClickableRecordTest {
             .label("Attack the enemy")
             .build();
 
-    assertEquals("attackCard", record.trigger());
-    assertEquals("Attack", record.text());
-    assertEquals(skin, record.btnSkin());
-    assertEquals(100.5f, record.x());
-    assertEquals(200.25f, record.y());
-    assertEquals("default", record.styleName());
-    assertEquals("drag", record.variant());
-    assertEquals("Attack the enemy", record.label());
-    assertTrue(record.hasSize());
-    assertEquals(64f, record.width());
-    assertEquals(32f, record.height());
-    assertArrayEquals(new Object[] {5, "poison", true}, record.args());
+    assertEquals("attackCard", rec.trigger());
+    assertEquals("Attack", rec.text());
+    assertEquals(skin, rec.btnSkin());
+    assertEquals(100.5f, rec.x());
+    assertEquals(200.25f, rec.y());
+    assertEquals("default", rec.styleName());
+    assertEquals("drag", rec.variant());
+    assertEquals("Attack the enemy", rec.label());
+    assertTrue(rec.hasSize());
+    assertEquals(64f, rec.width());
+    assertEquals(32f, rec.height());
+    assertArrayEquals(new Object[] {5, "poison", true}, rec.args());
   }
 
   @Test
   void builder_argsCalledWithNothing_producesEmptyArrayNotNull() {
-    ClickableRecord record = ClickableRecord.builder("attackCard").args().build();
+    ClickableRecord rec = ClickableRecord.builder("attackCard").args().build();
 
-    assertEquals(0, record.args().length);
+    assertEquals(0, rec.args().length);
   }
 
   // --- Builder.build() type inference ---
 
   @Test
   void inferType_noTextNoSkin_returnsImage() {
-    ClickableRecord record = ClickableRecord.builder("attackCard").build();
+    ClickableRecord rec = ClickableRecord.builder("attackCard").build();
 
-    assertEquals(ButtonType.IMAGE, record.type());
+    assertEquals(ButtonType.IMAGE, rec.type());
   }
 
   @Test
   void inferType_noTextWithSkin_stillReturnsImage() {
     // text==null short-circuits before the skin check, regardless of skin being present.
-    ClickableRecord record = ClickableRecord.builder("attackCard").skin(mock(Skin.class)).build();
+    ClickableRecord rec = ClickableRecord.builder("attackCard").skin(mock(Skin.class)).build();
 
-    assertEquals(ButtonType.IMAGE, record.type());
+    assertEquals(ButtonType.IMAGE, rec.type());
   }
 
   @Test
   void inferType_textWithoutSkin_returnsText() {
-    ClickableRecord record = ClickableRecord.builder("attackCard").text("Attack").build();
+    ClickableRecord rec = ClickableRecord.builder("attackCard").text("Attack").build();
 
-    assertEquals(ButtonType.TEXT, record.type());
+    assertEquals(ButtonType.TEXT, rec.type());
   }
 
   @Test
   void inferType_textWithSkin_returnsImageText() {
-    ClickableRecord record =
+    ClickableRecord rec =
         ClickableRecord.builder("attackCard").text("Attack").skin(mock(Skin.class)).build();
 
-    assertEquals(ButtonType.IMAGE_TEXT, record.type());
+    assertEquals(ButtonType.IMAGE_TEXT, rec.type());
   }
 
   private static void assertArrayEquals(Object[] expected, Object[] actual) {

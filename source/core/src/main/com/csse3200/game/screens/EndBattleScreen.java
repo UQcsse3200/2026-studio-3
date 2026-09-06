@@ -10,6 +10,7 @@ import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
 import com.csse3200.game.input.InputDecorator;
 import com.csse3200.game.input.InputService;
+import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.ResourceService;
@@ -24,10 +25,12 @@ public class EndBattleScreen extends ScreenAdapter {
 
   private final GdxGame game;
   private final Renderer renderer;
+  private final boolean won;
   private boolean returning = false;
 
   public EndBattleScreen(GdxGame game, boolean won) {
     this.game = game;
+    this.won = won;
 
     logger.debug("Initialising end-of-battle screen (won={})", won);
     ServiceLocator.registerInputService(new InputService());
@@ -53,11 +56,26 @@ public class EndBattleScreen extends ScreenAdapter {
     ui.getEvents().trigger(EndBattleDisplay.RESULT_EVENT, won ? "VICTORY" : "DEFEAT");
   }
 
+  /**
+   * Leaves the end screen. After a win the run continues, so it goes back to the map to pick the
+   * next node; after a loss (or once the run is over) the run is discarded and it returns to the
+   * main menu.
+   */
   private void returnToMenu() {
     if (returning) {
       return;
     }
     returning = true;
+
+    RunState runState = game.getRunState();
+    if (won && runState != null && runState.isRunActive()) {
+      game.setScreen(GdxGame.ScreenType.MAP);
+      return;
+    }
+
+    if (runState != null) {
+      runState.endRun();
+    }
     game.setScreen(GdxGame.ScreenType.MAIN_MENU);
   }
 

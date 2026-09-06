@@ -24,11 +24,9 @@ public class ClickableFactory extends UIComponent {
   private static final Map<String, ClickableSupplier> STATIC_VARIANTS = new HashMap<>();
 
   static {
-    registerVariant(DEFAULT_VARIANT, record -> new Clickable(record) {});
+    registerVariant(DEFAULT_VARIANT, rec -> new Clickable(rec) {});
     registerVariant("inout", InOutOnTrigger::new);
     registerVariant("drag", DragNDrop::new);
-    // add future built-in variants here, e.g.:
-    // registerVariant("toggle", ToggleClickable::new);
   }
 
   public static void registerVariant(String name, ClickableSupplier supplier) {
@@ -73,27 +71,27 @@ public class ClickableFactory extends UIComponent {
   @Override
   public void create() {
     super.create();
-    for (ClickableRecord record : records) {
-      clickables.add(buildClickable(record));
+    for (ClickableRecord rec : records) {
+      clickables.add(buildClickable(rec));
     }
   }
 
-  private Clickable buildClickable(ClickableRecord record) {
-    ClickableSupplier supplier = resolveVariant(record.variant());
+  private Clickable buildClickable(ClickableRecord rec) {
+    ClickableSupplier supplier = resolveVariant(rec.variant());
     if (supplier == null) {
       Gdx.app.error(
           "ClickableFactory",
-          "Unknown clickable variant \"" + record.variant() + "\", falling back to default");
+          "Unknown clickable variant \"" + rec.variant() + "\", falling back to default");
       supplier = STATIC_VARIANTS.get(DEFAULT_VARIANT);
     }
 
-    Clickable clickable = supplier.create(record);
+    Clickable clickable = supplier.create(rec);
     clickable.setEntity(this.entity);
     clickable.create();
     stage.addActor(clickable.getBtn());
 
     // Hand cards should be visible and playable straight away rather than waiting for an "up".
-    if (HAND_TRIGGER.equals(record.trigger())) {
+    if (HAND_TRIGGER.equals(rec.trigger())) {
       clickable.showNow();
     }
     return clickable;
@@ -116,8 +114,8 @@ public class ClickableFactory extends UIComponent {
         iterator.remove();
       }
     }
-    for (ClickableRecord record : handRecords) {
-      clickables.add(buildClickable(record));
+    for (ClickableRecord rec : handRecords) {
+      clickables.add(buildClickable(rec));
     }
   }
 

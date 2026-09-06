@@ -22,8 +22,8 @@ public class EndBattleDisplay extends Displaying {
 
   private boolean fired = false;
 
-  public EndBattleDisplay(DisplayingRecord record) {
-    super(record);
+  public EndBattleDisplay(DisplayingRecord rec) {
+    super(rec);
   }
 
   @Override

@@ -34,7 +34,7 @@ final class ClickableJsonLoader {
     Map<String, Skin> skinCache = new HashMap<>();
 
     JsonValue root = new JsonReader().parse(Gdx.files.internal(file.toString()));
-    JsonValue clickableArray = root.get("Clickable");
+    JsonValue clickableArray = root.get(DEFAULT_VARIANT);
 
     for (JsonValue entry : clickableArray) {
       Skin skin =

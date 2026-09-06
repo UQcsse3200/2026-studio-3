@@ -20,15 +20,29 @@ public class MapGraph implements EncounterCallback {
   public static final int BRANCH_CHANCE = 10;
 
   /**
-   * Creates a graph containing an existing node pool.
+   * Creates a graph containing an existing node pool and runs procedural path generation over it.
    *
    * @param nodes nodes keyed by their unique identifiers
    */
   public MapGraph(Map<Integer, MapNode> nodes) {
+    this(nodes, true);
+  }
+
+  /**
+   * Creates a graph containing an existing node pool, optionally running procedural path
+   * generation. Passing {@code false} builds the graph exactly as given, which lets callers set up
+   * controlled maps (for example in tests) without triggering full generation.
+   *
+   * @param nodes nodes keyed by their unique identifiers
+   * @param generate whether to run procedural path generation
+   */
+  public MapGraph(Map<Integer, MapNode> nodes, boolean generate) {
     this.nodes = new HashMap<>(nodes);
 
-    while (generatePathing() != 0) {
-      clearConnections();
+    if (generate) {
+      while (generatePathing() != 0) {
+        clearConnections();
+      }
     }
   }
 

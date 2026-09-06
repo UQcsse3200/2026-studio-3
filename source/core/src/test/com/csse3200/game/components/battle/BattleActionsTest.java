@@ -17,7 +17,6 @@ import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattleEvent;
 import com.csse3200.game.components.combat.BattlePhase;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
-import com.csse3200.game.components.enemy.EnemyStatsComponent;
 import com.csse3200.game.components.player.PlayerIntent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
@@ -40,7 +39,7 @@ class BattleActionsTest {
     player.addComponent(new CombatStatsComponent(20, 0));
     Entity enemy =
         new Entity()
-            .addComponent(new EnemyStatsComponent(20, 1))
+            .addComponent(new CombatStatsComponent(20, 1))
             .addComponent(new EnemyBehaviourComponent("test"));
     controller = new BattleController(player, List.of(enemy));
     GdxGame game = mock(GdxGame.class);

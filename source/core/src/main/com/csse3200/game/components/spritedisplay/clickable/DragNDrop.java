@@ -14,8 +14,8 @@ public class DragNDrop extends InOutOnTrigger {
 
   private DragAndDrop.Source dragSource;
 
-  public DragNDrop(ClickableRecord record) {
-    super(record);
+  public DragNDrop(ClickableRecord rec) {
+    super(rec);
   }
 
   /** Also unregister this card's drag source so a removed widget can't still start a drag. */
@@ -112,12 +112,11 @@ public class DragNDrop extends InOutOnTrigger {
 
   private Button createDragVisual(Button original) {
     if (original instanceof ImageButton ib) {
-      return new ImageButton((ImageButton.ImageButtonStyle) ib.getStyle());
+      return new ImageButton(ib.getStyle());
     } else if (original instanceof ImageTextButton itb) {
-      return new ImageTextButton(
-          itb.getText().toString(), (ImageTextButton.ImageTextButtonStyle) itb.getStyle());
+      return new ImageTextButton(itb.getText().toString(), itb.getStyle());
     } else if (original instanceof TextButton tb) {
-      return new TextButton(tb.getText().toString(), (TextButton.TextButtonStyle) tb.getStyle());
+      return new TextButton(tb.getText().toString(), tb.getStyle());
     }
     return new Button(original.getStyle());
   }

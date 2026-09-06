@@ -7,11 +7,18 @@
       "trigger": "exit"
     },
     {
-      "text": "battle",
+      "text": "map",
       "skinFile": "flat-earth/skin/flat-earth-ui.json",
       "x": 100,
       "y": 200,
-      "trigger": "battle"
+      "trigger": "map"
+    },
+    {
+      "text": "shop",
+      "skinFile": "flat-earth/skin/flat-earth-ui.json",
+      "x": 100,
+      "y": 300,
+      "trigger": "shop"
     }
   ]
 }

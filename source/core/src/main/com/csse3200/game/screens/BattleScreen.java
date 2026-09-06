@@ -19,7 +19,7 @@ import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
-import com.csse3200.game.cards.effects.CardResolutionService;
+import com.csse3200.game.cards.effects.CardEffectResolver;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
@@ -43,12 +43,10 @@ import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/***scene when clicked on map and display the stag will probably take reuseable
- *stages and setting stuff up
- *
- *
+/**
+ * The battle screen: the forest arena plus the card-hand UI, driven by {@link BattleController}.
+ * Entered from a combat/boss map node (or the debug shortcut).
  */
-/// scene component for ease of building multiple stages and setting stuff up
 public class BattleScreen extends ScreenAdapter {
   private final GdxGame game;
   private static final Logger logger = LoggerFactory.getLogger(BattleScreen.class);
@@ -64,7 +62,6 @@ public class BattleScreen extends ScreenAdapter {
   };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
 
-  private static final int HAND_SIZE = 4;
   private static final float HAND_START_X = 50f;
   private static final float HAND_Y = 1700f;
   private static final float HAND_SPACING = 350f;
@@ -75,8 +72,6 @@ public class BattleScreen extends ScreenAdapter {
   private CardLibrary library;
   private BattleDeck battleDeck;
   private List<ClickableRecord> staticUiRecords;
-  private ClickableFactory uiFactory;
-  private Entity battleUi;
 
   public BattleScreen(GdxGame game) {
     this.game = game;
@@ -121,10 +116,14 @@ public class BattleScreen extends ScreenAdapter {
     battleDeck.shuffleDrawPile();
     battleDeck.drawCards(5);
 
-    CardResolutionService resolutionService = new CardResolutionService(library);
+    CardEffectResolver effectResolver = new CardEffectResolver(library);
     controller =
         new BattleController(
-            forestGameArea.getPlayer(), forestGameArea.getEnemies(), resolutionService, battleDeck);
+            forestGameArea.getPlayer(),
+            forestGameArea.getEnemies(),
+            effectResolver,
+            library,
+            battleDeck);
 
     createUI();
     controller.start();
@@ -141,7 +140,7 @@ public class BattleScreen extends ScreenAdapter {
 
     staticUiRecords = ClickableFactory.loadRecordsFromJson(battleUiJson);
 
-    uiFactory = new ClickableFactory(buildAllRecords());
+    ClickableFactory uiFactory = new ClickableFactory(buildAllRecords());
 
     Stage stage = ServiceLocator.getRenderService().getStage();
     Entity battleUi =
@@ -150,8 +149,6 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(uiFactory)
             .addComponent(displays)
             .addComponent(new BattleActions(controller, game, library));
-
-    this.battleUi = battleUi;
 
     // Keep the on-screen hand in sync with the deck: after a card is played (and a replacement
     // drawn) rebuild the hand widgets from the live deck, so the played card's button is gone and
@@ -165,6 +162,7 @@ public class BattleScreen extends ScreenAdapter {
     gameArea.displayUI(battleUi);
   }
 
+  @Override
   public void render(float delta) {
     ServiceLocator.getEntityService().update();
     renderer.render();

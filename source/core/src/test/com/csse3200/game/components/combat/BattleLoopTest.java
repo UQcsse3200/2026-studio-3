@@ -13,10 +13,9 @@ import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
-import com.csse3200.game.cards.effects.CardResolutionService;
+import com.csse3200.game.cards.effects.CardEffectResolver;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
-import com.csse3200.game.components.enemy.EnemyStatsComponent;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.PlayerIntent;
 import com.csse3200.game.entities.Entity;
@@ -40,10 +39,6 @@ class BattleLoopTest {
     return strike;
   }
 
-  private static CardResolutionService resolutionWithStrike() {
-    return new CardResolutionService(new CardLibrary(List.of(strikeCard())));
-  }
-
   @Test
   void playerWinsWhenCardKillsTheLastEnemy() {
     Entity player =
@@ -52,15 +47,17 @@ class BattleLoopTest {
             .addComponent(new EnergyComponent(3));
     Entity enemy =
         new Entity()
-            .addComponent(new EnemyStatsComponent(6, 4))
+            .addComponent(new CombatStatsComponent(6, 4))
             .addComponent(new EnemyBehaviourComponent("test"));
 
     // Hand of 1 (strike) with a spare in the draw pile so the played card is replaced by a draw.
     BattleDeck deck = new BattleDeck(new PlayerDeck(List.of("strike", "bandage")));
     deck.drawCards(1);
 
+    CardLibrary library = new CardLibrary(List.of(strikeCard()));
     BattleController controller =
-        new BattleController(player, List.of(enemy), resolutionWithStrike(), deck);
+        new BattleController(
+            player, List.of(enemy), new CardEffectResolver(library), library, deck);
     AtomicReference<Boolean> outcome = new AtomicReference<>();
     List<String> log = new ArrayList<>();
     controller.addBattleEndListener(outcome::set);
@@ -71,7 +68,7 @@ class BattleLoopTest {
 
     assertEquals(BattlePhase.VICTORY, controller.getCurrentPhase());
     assertEquals(Boolean.TRUE, outcome.get());
-    assertEquals(0, enemy.getComponent(EnemyStatsComponent.class).getHealth());
+    assertEquals(0, enemy.getComponent(CombatStatsComponent.class).getHealth());
     assertFalse(deck.getHand().contains("strike"));
     assertTrue(deck.getDiscardPile().contains("strike"));
     assertEquals(List.of("bandage"), deck.getHand()); // played strike replaced by a draw
@@ -86,7 +83,7 @@ class BattleLoopTest {
             .addComponent(new EnergyComponent(3));
     Entity enemy =
         new Entity()
-            .addComponent(new EnemyStatsComponent(200, 25))
+            .addComponent(new CombatStatsComponent(200, 25))
             .addComponent(new EnemyBehaviourComponent("test"));
 
     BattleController controller = new BattleController(player, List.of(enemy));
@@ -110,7 +107,7 @@ class BattleLoopTest {
             .addComponent(new EnergyComponent(3));
     Entity enemy =
         new Entity()
-            .addComponent(new EnemyStatsComponent(200, 3))
+            .addComponent(new CombatStatsComponent(200, 3))
             .addComponent(new EnemyBehaviourComponent("test"));
 
     BattleController controller = new BattleController(player, List.of(enemy));
@@ -118,10 +115,17 @@ class BattleLoopTest {
     controller.start();
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
 
+    // Round 1: the enemy AI opens by attacking, hitting the player for its base attack of 3.
     controller.endPlayerTurn();
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
     assertEquals(197, player.getComponent(CombatStatsComponent.class).getHealth());
 
+    // Round 2: the AI cycles to DEFEND, so the player takes no damage but the loop still resumes.
+    controller.endPlayerTurn();
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+    assertEquals(197, player.getComponent(CombatStatsComponent.class).getHealth());
+
+    // Round 3: the AI attacks again.
     controller.endPlayerTurn();
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
     assertEquals(194, player.getComponent(CombatStatsComponent.class).getHealth());
