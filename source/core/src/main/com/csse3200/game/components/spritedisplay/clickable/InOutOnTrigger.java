@@ -121,6 +121,13 @@ public class InOutOnTrigger extends Clickable {
   }
 
   @Override
+  public void draw() {
+    if (this.getWidth() > 0 && this.getHeight() > 0) {
+      btn.setSize(this.getWidth(), this.getHeight());
+    }
+  }
+
+  @Override
   protected void onExit() {
     // Cancel any ongoing animation
     btn.clearActions();
