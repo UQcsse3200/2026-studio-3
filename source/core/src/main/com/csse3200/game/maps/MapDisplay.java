@@ -18,11 +18,10 @@ import java.util.Map;
  * MapDisplay
  *
  * <p>Displays the procedural map for the game. This class is responsible for displaying the map to
- * the player. It converts nodes given by @param MapGraph to @param MapNodeActor which then is
- * wrapped with the
- *
- * @param MapInputHandler to handle clicking by the player. The nodes are arranged in a grid layout
- *     7 wide and @param MAP_HEIGHT . UI elements are Actors which are displayed in the group.
+ * the player. It converts nodes given by {@link MapGraph} to {@link MapNodeActor} which then is
+ * wrapped with the {@link MapInputHandler} to handle clicking by the player. The nodes are arranged
+ * in a grid layout 7 wide and MAP_HEIGHT tall. UI elements are Actors which are displayed in the
+ * group.
  */
 public class MapDisplay extends UIComponent {
 
