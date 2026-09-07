@@ -21,9 +21,28 @@ public class EnemyBehaviourComponent extends Component {
   private EnemyIntent currentIntent = EnemyIntent.unknown();
   private int turnNumber = 0;
 
+  /**
+   * Creates a behaviour that resolves its AI from a behaviour identifier.
+   *
+   * @param behaviourId behaviour identifier loaded from enemy configuration
+   */
   public EnemyBehaviourComponent(String behaviourId) {
+    this(behaviourId, EnemyAIFactory.create(behaviourId));
+  }
+
+  /**
+   * Creates a behaviour with a given AI, bypassing the factory.
+   *
+   * <p>Package-private so tests and future behaviours can supply an AI directly instead of routing
+   * through {@link EnemyAIFactory}. Production code should use the single-argument constructor so
+   * behaviour stays configuration-driven.
+   *
+   * @param behaviourId behaviour identifier recorded for reference
+   * @param ai the AI that decides this enemy's intents
+   */
+  EnemyBehaviourComponent(String behaviourId, EnemyAI ai) {
     this.behaviourId = behaviourId;
-    this.ai = EnemyAIFactory.create(behaviourId);
+    this.ai = ai;
   }
 
   public String getBehaviourId() {
