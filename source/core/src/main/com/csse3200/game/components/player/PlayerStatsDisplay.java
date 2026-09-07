@@ -21,6 +21,7 @@ public class PlayerStatsDisplay extends UIComponent {
   private Image moneyImage;
   private Label moneyLabel;
   private static final float FONT_SCALE = 0.75f;
+  private static final String STYLE_NAME_LARGE = "large";
 
   /** Creates reusable ui styles and adds actors to the stage. */
   @Override
@@ -56,7 +57,7 @@ public class PlayerStatsDisplay extends UIComponent {
     int currentHealth = entity.getComponent(CombatStatsComponent.class).getHealth();
     int maxHealth = entity.getComponent(CombatStatsComponent.class).getMaxHealth();
     CharSequence healthText = String.format("Health: %d / %d", currentHealth, maxHealth);
-    healthLabel = new Label(healthText, skin, "large");
+    healthLabel = new Label(healthText, skin, STYLE_NAME_LARGE);
     healthLabel.setFontScale(FONT_SCALE);
 
     // Energy image
@@ -68,7 +69,7 @@ public class PlayerStatsDisplay extends UIComponent {
     int currentEnergy = energyComponent.getCurrentEnergy();
     int maxEnergy = energyComponent.getMaxEnergy();
     CharSequence energyText = String.format("Energy: %d / %d", currentEnergy, maxEnergy);
-    energyLabel = new Label(energyText, skin, "large");
+    energyLabel = new Label(energyText, skin, STYLE_NAME_LARGE);
     energyLabel.setFontScale(FONT_SCALE);
 
     // Piety image
@@ -76,7 +77,7 @@ public class PlayerStatsDisplay extends UIComponent {
         new Image(ServiceLocator.getResourceService().getAsset("images/piety.png", Texture.class));
 
     // Piety text
-    pietyLabel = new Label("Level: 1", skin, "large");
+    pietyLabel = new Label("Level: 1", skin, STYLE_NAME_LARGE);
     pietyLabel.setFontScale(FONT_SCALE);
 
     // Money image
@@ -87,7 +88,7 @@ public class PlayerStatsDisplay extends UIComponent {
     InventoryComponent inventoryComponent = entity.getComponent(InventoryComponent.class);
     int money = inventoryComponent.getGold();
     CharSequence moneyText = String.format("Gold: $%d", money);
-    moneyLabel = new Label(moneyText, skin, "large");
+    moneyLabel = new Label(moneyText, skin, STYLE_NAME_LARGE);
     moneyLabel.setFontScale(FONT_SCALE);
 
     table.add(heartImage).size(imageSideLength).pad(5);

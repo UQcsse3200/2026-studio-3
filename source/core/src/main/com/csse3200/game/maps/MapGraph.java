@@ -18,6 +18,7 @@ public class MapGraph implements EncounterCallback {
   public static final int MAP_HEIGHT = 10;
   public static final int MAX_NODE_COUNT = MAP_WIDTH * MAP_HEIGHT;
   public static final int BRANCH_CHANCE = 10;
+  private final Random random = new Random();
 
   /**
    * Creates a graph containing an existing node pool.
@@ -32,7 +33,7 @@ public class MapGraph implements EncounterCallback {
     }
   }
 
-  /*
+  /**
    * Clears the connections of nodes on the graph.
    *
    */
@@ -49,11 +50,10 @@ public class MapGraph implements EncounterCallback {
    */
   private int generatePathing() {
 
-    Random rand = new Random();
     List<MapNode> row = getNodesByHeight(MAP_HEIGHT - 1);
     MapNode finalNode = getNode(MAX_NODE_COUNT);
 
-    int pathCount = rand.nextInt(3, row.size() - 1);
+    int pathCount = random.nextInt(3, row.size() - 1);
     pruneRandomNodes(row, pathCount);
 
     Set<MapNode> visited = new HashSet<>();
@@ -87,7 +87,7 @@ public class MapGraph implements EncounterCallback {
         newNodes.add(child);
 
         // creates random additional branches off of the paths for variety
-        if (newNodes.size() < 6 && rand.nextInt(100) < BRANCH_CHANCE) {
+        if (newNodes.size() < 6 && random.nextInt(100) < BRANCH_CHANCE) {
 
           MapNode branch = chooseNextNode(parentNode, row, visited);
 
@@ -105,7 +105,7 @@ public class MapGraph implements EncounterCallback {
     return 0;
   }
 
-  /*
+  /**
    * Heuristic helper function for map generation. Finds a random node in range
    * that hasn't already been visited.
    *
@@ -128,12 +128,10 @@ public class MapGraph implements EncounterCallback {
       return null;
     }
 
-    Random rand = new Random();
-
-    return inRange.get(rand.nextInt(inRange.size()));
+    return inRange.get(random.nextInt(inRange.size()));
   }
 
-  /*
+  /**
    * Returns a list of nodes that are within the given x coordinate range of a
    * provided node on a neighboring row.
    *
@@ -176,10 +174,8 @@ public class MapGraph implements EncounterCallback {
    */
   private void pruneRandomNodes(List<MapNode> nodelist, int count) {
 
-    Random rand = new Random();
-
     for (int i = 0; i < count; i++) {
-      nodelist.remove(rand.nextInt(0, nodelist.size() - 1));
+      nodelist.remove(random.nextInt(0, nodelist.size() - 1));
     }
   }
 

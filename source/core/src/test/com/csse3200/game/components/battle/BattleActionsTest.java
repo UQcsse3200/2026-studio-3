@@ -200,7 +200,7 @@ class BattleActionsTest {
     CardLibrary library = new CardLibrary(List.of(expensiveStrike));
     BattleDeck deck = new BattleDeck(new PlayerDeck(List.of("strike", "bandage")));
     deck.drawCards(1);
-    Entity player =
+    Entity testPlayer =
         new Entity()
             .addComponent(new CombatStatsComponent(20, 0))
             .addComponent(new EnergyComponent(3));
