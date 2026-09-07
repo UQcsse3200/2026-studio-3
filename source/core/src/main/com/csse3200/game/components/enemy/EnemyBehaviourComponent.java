@@ -84,8 +84,9 @@ public class EnemyBehaviourComponent extends Component {
     switch (currentIntent.getType()) {
       case ATTACK -> attack(target);
       case DEFEND -> defend();
+      case DEBUFF -> applyDebuff(target);
       default -> {
-        // No behaviour currently produces BUFF or DEBUFF; UNKNOWN is intentionally inert.
+        // No behaviour produces BUFF yet; UNKNOWN is intentionally inert.
       }
     }
   }
@@ -108,6 +109,32 @@ public class EnemyBehaviourComponent extends Component {
     CombatStatsComponent stats = entity.getComponent(CombatStatsComponent.class);
     if (stats != null) {
       stats.addArmor(currentIntent.getValue());
+    }
+  }
+
+  /**
+   * Applies the intent's status effect to the target.
+   *
+   * <p>The effect type is converted to a string here because {@link CombatStatsComponent} stores
+   * active effects in a string-keyed map. An intent without an effect type is ignored rather than
+   * treated as an error, so a misconfigured behaviour does not break the battle.
+   *
+   * @param target the entity the effect is applied to
+   */
+  private void applyDebuff(Entity target) {
+    if (target == null) {
+      return;
+    }
+
+    IntentEffectType effectType = currentIntent.getEffectType();
+    if (effectType == null) {
+      return;
+    }
+
+    CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
+    if (targetStats != null) {
+      targetStats.applyStatusEffect(
+          effectType.name(), currentIntent.getValue(), currentIntent.getDuration());
     }
   }
 }
