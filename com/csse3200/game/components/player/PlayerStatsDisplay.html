@@ -158,12 +158,14 @@ loadScripts(document, 'script');</script>
 <div class="block">Draw the renderable.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updatePlayerEnergyUI(int)" class="member-name-link">updatePlayerEnergyUI</a><wbr>(int&nbsp;energy)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updatePlayerEnergyUI(int,int)" class="member-name-link">updatePlayerEnergyUI</a><wbr>(int&nbsp;currentEnergy,
+ int&nbsp;maxEnergy)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Updates the player's energy on the ui.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updatePlayerHealthUI(int)" class="member-name-link">updatePlayerHealthUI</a><wbr>(int&nbsp;health)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updatePlayerHealthUI(int,int)" class="member-name-link">updatePlayerHealthUI</a><wbr>(int&nbsp;currentHealth,
+ int&nbsp;maxHealth)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Updates the player's health on the ui.</div>
 </div>
@@ -249,24 +251,28 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="updatePlayerHealthUI(int)">
+<section class="detail" id="updatePlayerHealthUI(int,int)">
 <h3>updatePlayerHealthUI</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">updatePlayerHealthUI</span><wbr><span class="parameters">(int&nbsp;health)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">updatePlayerHealthUI</span><wbr><span class="parameters">(int&nbsp;currentHealth,
+ int&nbsp;maxHealth)</span></div>
 <div class="block">Updates the player's health on the ui.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>health</code> - player health</dd>
+<dd><code>currentHealth</code> - player's current health</dd>
+<dd><code>maxHealth</code> - player's max health</dd>
 </dl>
 </section>
 </li>
 <li>
-<section class="detail" id="updatePlayerEnergyUI(int)">
+<section class="detail" id="updatePlayerEnergyUI(int,int)">
 <h3>updatePlayerEnergyUI</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">updatePlayerEnergyUI</span><wbr><span class="parameters">(int&nbsp;energy)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">updatePlayerEnergyUI</span><wbr><span class="parameters">(int&nbsp;currentEnergy,
+ int&nbsp;maxEnergy)</span></div>
 <div class="block">Updates the player's energy on the ui.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>energy</code> - player energy</dd>
+<dd><code>currentEnergy</code> - player's current energy</dd>
+<dd><code>maxEnergy</code> - player's max energy</dd>
 </dl>
 </section>
 </li>
