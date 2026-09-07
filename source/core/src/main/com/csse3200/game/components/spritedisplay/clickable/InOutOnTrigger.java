@@ -1,7 +1,7 @@
 package com.csse3200.game.components.spritedisplay.clickable;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import java.util.Random;
 import org.slf4j.Logger;
@@ -26,9 +26,8 @@ public class InOutOnTrigger extends Clickable {
 
   public InOutOnTrigger(ClickableRecord rec) {
     super(rec);
-    int screenHeight = Gdx.graphics.getHeight();
     this.targetX = rec.x();
-    this.targetY = screenHeight - rec.y();
+    this.targetY = rec.y(); // temporarily store the y JSON value
   }
 
   @Override
@@ -106,10 +105,9 @@ public class InOutOnTrigger extends Clickable {
   }
 
   @Override
-  public void draw() {
-    if (this.getWidth() > 0 && this.getHeight() > 0) {
-      btn.setSize(this.getWidth(), this.getHeight());
-    }
+  public void onAddedToStage(Stage stage) {
+    float stageHeight = btn.getStage().getViewport().getWorldHeight();
+    this.targetY = stageHeight - targetY;
   }
 
   @Override
@@ -120,6 +118,13 @@ public class InOutOnTrigger extends Clickable {
     // Move up by 10 pixels from current position
     // Using "moveBy" with a curved easing (slow in, fast out)
     btn.addAction(Actions.moveTo(targetX, targetY + 120, 0.3f, Interpolation.sineOut));
+  }
+
+  @Override
+  public void draw() {
+    if (this.getWidth() > 0 && this.getHeight() > 0) {
+      btn.setSize(this.getWidth(), this.getHeight());
+    }
   }
 
   @Override

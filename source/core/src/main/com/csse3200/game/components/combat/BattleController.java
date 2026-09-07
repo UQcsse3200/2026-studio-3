@@ -48,8 +48,10 @@ public class BattleController {
   private static final String ENEMY_EFFECTS_EVENT = "enemyEffects";
   private static final String PLAYER_EFFECTS_EVENT = "playerEffects";
   private static final String HAND_CHANGED_EVENT = "handChanged";
+  private static final String LISTENER_NOT_NULL = "Listener must not be null.";
   private boolean pendingEvent;
   private CardPlayRequest pendingCard;
+  private boolean lastCardPlaySucceeded;
 
   /** Team 5's card-effect resolver (Team 6 configs -> resolved effects); null without cards. */
   private final CardEffectResolver effectResolver;
@@ -228,6 +230,7 @@ public class BattleController {
   /** Player decides to end their turn */
   public void endPlayerTurn() {
     this.currentPlayerIntent = PlayerIntent.END_PLAYER_TURN;
+
     if (canHandle(BattleEvent.PLAYER_END_REQUESTED)) {
       handle(BattleEvent.PLAYER_END_REQUESTED);
     }
@@ -271,7 +274,7 @@ public class BattleController {
    * @param listener The instantiated external listener.
    */
   public void addPhaseChangeListener(EventListener2<BattlePhase, BattlePhase> listener) {
-    Objects.requireNonNull(listener, "Listener must not be null.");
+    Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(PHASE_CHANGED_EVENT, listener);
   }
 
@@ -282,7 +285,7 @@ public class BattleController {
    * @param listener receives the message text
    */
   public void addBattleLogListener(EventListener1<String> listener) {
-    Objects.requireNonNull(listener, "Listener must not be null.");
+    Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(BATTLE_LOG_EVENT, listener);
   }
 
@@ -294,7 +297,7 @@ public class BattleController {
    * @param listener receives the win/loss flag
    */
   public void addBattleEndListener(EventListener1<Boolean> listener) {
-    Objects.requireNonNull(listener, "Listener must not be null.");
+    Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(BATTLE_ENDED_EVENT, listener);
   }
 
@@ -305,7 +308,7 @@ public class BattleController {
    * @param listener receives the resolved effects
    */
   public void addEnemyEffectsListener(EventListener1<List<ResolvedCardEffect>> listener) {
-    Objects.requireNonNull(listener, "Listener must not be null.");
+    Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(ENEMY_EFFECTS_EVENT, listener);
   }
 
@@ -316,7 +319,7 @@ public class BattleController {
    * @param listener receives the resolved effects
    */
   public void addPlayerEffectsListener(EventListener1<List<ResolvedCardEffect>> listener) {
-    Objects.requireNonNull(listener, "Listener must not be null.");
+    Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(PLAYER_EFFECTS_EVENT, listener);
   }
 
@@ -327,7 +330,7 @@ public class BattleController {
    * @param listener receives the updated hand
    */
   public void addHandChangedListener(EventListener1<List<String>> listener) {
-    Objects.requireNonNull(listener, "Listener must not be null.");
+    Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(HAND_CHANGED_EVENT, listener);
   }
 
@@ -486,10 +489,11 @@ public class BattleController {
     if (!canHandle(event)) {
       return false;
     }
+    lastCardPlaySucceeded = false;
     pendingCard = cardPlayRequest;
     currentPlayerIntent = playerIntent;
     handle(event);
-    return true;
+    return lastCardPlaySucceeded;
   }
 
   /*------------------------- Possible Action Branches ----------------------------*/
@@ -600,6 +604,7 @@ public class BattleController {
     CardPlayResult result = playCardThroughCardSystem(request);
     if (result == null) {
       // Card system not wired in (e.g. unit tests without a resolution service).
+      lastCardPlaySucceeded = true;
       narrate("You played " + request.cardID() + ".");
       finishPlayerCardAction();
       return;
@@ -607,11 +612,13 @@ public class BattleController {
 
     if (!result.success()) {
       // No effects produced; the card stays in hand and the player keeps their turn.
+      lastCardPlaySucceeded = false;
       narrate("Couldn't play " + request.cardID() + ": " + result.failureReason());
       finishPlayerCardAction();
       return;
     }
 
+    lastCardPlaySucceeded = true;
     dispatchCardEffects(request, result);
     narrate(summarise(request, result));
     finishPlayerCardAction();
