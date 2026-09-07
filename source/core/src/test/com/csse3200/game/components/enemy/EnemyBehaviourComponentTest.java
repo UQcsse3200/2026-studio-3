@@ -2,12 +2,16 @@ package com.csse3200.game.components.enemy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.StatusEffect;
+import com.csse3200.game.components.enemy.EnemyAI.EnemyAI;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIFactory;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.events.listeners.EventListener1;
@@ -32,6 +36,11 @@ class EnemyBehaviourComponentTest {
   /** Combat stats matching the enemy previously used across these tests. */
   private static CombatStatsComponent enemyStats() {
     return new CombatStatsComponent(20, 6);
+  }
+
+  /** An AI that always returns the same intent, so intent resolution can be tested directly. */
+  private static EnemyAI fixedAi(EnemyIntent intent) {
+    return context -> intent;
   }
 
   @Test
@@ -162,5 +171,74 @@ class EnemyBehaviourComponentTest {
     behaviour.rollIntent();
 
     behaviour.executeIntent(null);
+  }
+
+  @Test
+  void shouldApplyTheStatusEffectWhenResolvingDebuff() {
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent(
+            "test_debuff", fixedAi(EnemyIntent.debuff(IntentEffectType.SILENCE, 1, 2)));
+    enemyWith(behaviour, enemyStats());
+
+    Entity player = new Entity();
+    CombatStatsComponent playerStats = new CombatStatsComponent(30, 4);
+    player.addComponent(playerStats);
+    player.create();
+
+    behaviour.rollIntent();
+    behaviour.executeIntent(player);
+
+    assertTrue(playerStats.hasStatusEffect("SILENCE"));
+  }
+
+  @Test
+  void shouldPassTheEffectNameValueAndDurationToTheTarget() {
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent(
+            "test_debuff", fixedAi(EnemyIntent.debuff(IntentEffectType.SILENCE, 3, 2)));
+    enemyWith(behaviour, enemyStats());
+
+    Entity player = new Entity();
+    CombatStatsComponent playerStats = new CombatStatsComponent(30, 4);
+    player.addComponent(playerStats);
+    player.create();
+
+    behaviour.rollIntent();
+    behaviour.executeIntent(player);
+
+    StatusEffect applied = playerStats.getStatusEffect("SILENCE");
+    assertNotNull(applied);
+    assertEquals("SILENCE", applied.getType());
+    assertEquals(3, applied.getValue());
+    assertEquals(2, applied.getDuration());
+  }
+
+  @Test
+  void shouldIgnoreDebuffAgainstNullTarget() {
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent(
+            "test_debuff", fixedAi(EnemyIntent.debuff(IntentEffectType.SILENCE, 1, 2)));
+    enemyWith(behaviour, enemyStats());
+
+    behaviour.rollIntent();
+
+    behaviour.executeIntent(null);
+  }
+
+  @Test
+  void shouldIgnoreADebuffIntentCarryingNoEffectType() {
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent("test_debuff", fixedAi(new EnemyIntent(IntentType.DEBUFF, 1)));
+    enemyWith(behaviour, enemyStats());
+
+    Entity player = new Entity();
+    CombatStatsComponent playerStats = new CombatStatsComponent(30, 4);
+    player.addComponent(playerStats);
+    player.create();
+
+    behaviour.rollIntent();
+    behaviour.executeIntent(player);
+
+    assertNull(playerStats.getStatusEffect("SILENCE"));
   }
 }
