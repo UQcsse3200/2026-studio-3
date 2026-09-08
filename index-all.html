@@ -1141,6 +1141,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAnimationController.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyAnimationController.html" title="class in com.csse3200.game.components.enemy">EnemyAnimationController</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyIntentDisplay.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyIntentDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyIntentDisplay</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyStatsComponent.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsComponent.html" title="class in com.csse3200.game.components.enemy">EnemyStatsComponent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/gamearea/GameAreaDisplay.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.gamearea.<a href="com/csse3200/game/components/gamearea/GameAreaDisplay.html" title="class in com.csse3200.game.components.gamearea">GameAreaDisplay</a></dt>
@@ -1345,6 +1347,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/cards/EffectType.html#DAMAGE" class="member-name-link">DAMAGE</a> - Enum constant in enum class com.csse3200.game.cards.<a href="com/csse3200/game/cards/EffectType.html" title="enum class in com.csse3200.game.cards">EffectType</a></dt>
 <dd>
 <div class="block">Immediate damage dealt to the target.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/IntentEffectType.html#DAMAGE_ON_CARD_PLAY" class="member-name-link">DAMAGE_ON_CARD_PLAY</a> - Enum constant in enum class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/IntentEffectType.html" title="enum class in com.csse3200.game.components.enemy">IntentEffectType</a></dt>
+<dd>
+<div class="block">Damages the target each time it plays a card.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyIntent.html#debuff(com.csse3200.game.components.enemy.IntentEffectType,int,int)" class="member-name-link">debuff(IntentEffectType, int, int)</a> - Static method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></dt>
+<dd>
+<div class="block">Creates an intent that inflicts a status effect on the target.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/enemy/IntentType.html#DEBUFF" class="member-name-link">DEBUFF</a> - Enum constant in enum class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/IntentType.html" title="enum class in com.csse3200.game.components.enemy">IntentType</a></dt>
 <dd>
@@ -1606,6 +1616,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/cards/CardHandDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.cards.<a href="com/csse3200/game/components/cards/CardHandDisplay.html" title="class in com.csse3200.game.components.cards">CardHandDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/chance/ChanceEncounterDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.chance.<a href="com/csse3200/game/components/chance/ChanceEncounterDisplay.html" title="class in com.csse3200.game.components.chance">ChanceEncounterDisplay</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyIntentDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyIntentDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyIntentDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/gamearea/GameAreaDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.gamearea.<a href="com/csse3200/game/components/gamearea/GameAreaDisplay.html" title="class in com.csse3200.game.components.gamearea">GameAreaDisplay</a></dt>
 <dd>&nbsp;</dd>
@@ -1876,7 +1888,9 @@ loadScripts(document, 'script');</script>
 <div class="block">Decides and telegraphs an enemy's action each round, then resolves it.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html#%3Cinit%3E(java.lang.String)" class="member-name-link">EnemyBehaviourComponent(String)</a> - Constructor for class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html" title="class in com.csse3200.game.components.enemy">EnemyBehaviourComponent</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Creates a behaviour that resolves its AI from a behaviour identifier.</div>
+</dd>
 <dt><a href="com/csse3200/game/entities/configs/EnemyConfig.html" class="type-name-link" title="class in com.csse3200.game.entities.configs">EnemyConfig</a> - Class in <a href="com/csse3200/game/entities/configs/package-summary.html">com.csse3200.game.entities.configs</a></dt>
 <dd>
 <div class="block">Configuration for a single enemy, loaded from <code>configs/enemies.json</code>.</div>
@@ -1914,6 +1928,19 @@ loadScripts(document, 'script');</script>
 <div class="block">An enemy's telegraphed action for the coming round.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyIntent.html#%3Cinit%3E(com.csse3200.game.components.enemy.IntentType,int)" class="member-name-link">EnemyIntent(IntentType, int)</a> - Constructor for class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></dt>
+<dd>
+<div class="block">Creates an intent that inflicts no status effect.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyIntent.html#%3Cinit%3E(com.csse3200.game.components.enemy.IntentType,int,com.csse3200.game.components.enemy.IntentEffectType,int)" class="member-name-link">EnemyIntent(IntentType, int, IntentEffectType, int)</a> - Constructor for class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></dt>
+<dd>
+<div class="block">Creates an intent, optionally carrying a status effect to inflict.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyIntentDisplay.html" class="type-name-link" title="class in com.csse3200.game.components.enemy">EnemyIntentDisplay</a> - Class in <a href="com/csse3200/game/components/enemy/package-summary.html">com.csse3200.game.components.enemy</a></dt>
+<dd>
+<div class="block">Draws the enemy's telegraphed intent above the enemy, so the player can see what is coming before
+ choosing their cards.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyIntentDisplay.html#%3Cinit%3E()" class="member-name-link">EnemyIntentDisplay()</a> - Constructor for class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyIntentDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyIntentDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/entities/configs/EnemyScaling.html" class="type-name-link" title="class in com.csse3200.game.entities.configs">EnemyScaling</a> - Class in <a href="com/csse3200/game/entities/configs/package-summary.html">com.csse3200.game.entities.configs</a></dt>
 <dd>
@@ -2015,7 +2042,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyIntent.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></dt>
 <dd>
-<div class="block">Two intents are equal when their type and value match.</div>
+<div class="block">Two intents are equal when their type, value, effect type and duration all match.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/clickable/ClickableRecord.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class com.csse3200.game.components.spritedisplay.clickable.<a href="com/csse3200/game/components/spritedisplay/clickable/ClickableRecord.html" title="class in com.csse3200.game.components.spritedisplay.clickable">ClickableRecord</a></dt>
 <dd>
@@ -2415,6 +2442,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#getDrawPileSize()" class="member-name-link">getDrawPileSize()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyIntent.html#getDuration()" class="member-name-link">getDuration()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/StatusEffect.html#getDuration()" class="member-name-link">getDuration()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatusEffect.html" title="class in com.csse3200.game.components">StatusEffect</a></dt>
 <dd>
 <div class="block">Returns the number of turns remaining before this effect expires.</div>
@@ -2427,13 +2456,15 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/cards/effects/TurnEffectStore.html#getEffectsOfType(com.csse3200.game.cards.EffectType)" class="member-name-link">getEffectsOfType(EffectType)</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/TurnEffectStore.html" title="class in com.csse3200.game.cards.effects">TurnEffectStore</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyIntent.html#getEffectType()" class="member-name-link">getEffectType()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/encounters/integration/ChanceEncounterSession.html#getEncounter()" class="member-name-link">getEncounter()</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceEncounterSession.html" title="class in com.csse3200.game.encounters.integration">ChanceEncounterSession</a></dt>
 <dd>
 <div class="block">Returns the immutable encounter definition displayed by the UI.</div>
 </dd>
 <dt><a href="com/csse3200/game/areas/ForestGameArea.html#getEnemies()" class="member-name-link">getEnemies()</a> - Method in class com.csse3200.game.areas.<a href="com/csse3200/game/areas/ForestGameArea.html" title="class in com.csse3200.game.areas">ForestGameArea</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html#getEnemyArmour()" class="member-name-link">getEnemyArmour()</a> - Method in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIContext</a></dt>
+<dt><a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html#getEnemyArmor()" class="member-name-link">getEnemyArmor()</a> - Method in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIContext</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html#getEnemyAttack()" class="member-name-link">getEnemyAttack()</a> - Method in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIContext</a></dt>
 <dd>&nbsp;</dd>
@@ -3110,6 +3141,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/encounters/integration/IntegratedShopTransactionGateway.html#%3Cinit%3E(com.csse3200.game.encounters.integration.PlayerStateGateway,com.csse3200.game.encounters.integration.CardCatalogGateway,com.csse3200.game.encounters.integration.DeckGateway)" class="member-name-link">IntegratedShopTransactionGateway(PlayerStateGateway, CardCatalogGateway, DeckGateway)</a> - Constructor for class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/IntegratedShopTransactionGateway.html" title="class in com.csse3200.game.encounters.integration">IntegratedShopTransactionGateway</a></dt>
 <dd>
 <div class="block">Creates the transaction coordinator for one Player, Card Library, and Deck combination.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/IntentEffectType.html" class="type-name-link" title="enum class in com.csse3200.game.components.enemy">IntentEffectType</a> - Enum Class in <a href="com/csse3200/game/components/enemy/package-summary.html">com.csse3200.game.components.enemy</a></dt>
+<dd>
+<div class="block">A status effect an enemy intent can inflict on its target.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/enemy/IntentIcons.html" class="type-name-link" title="class in com.csse3200.game.components.enemy">IntentIcons</a> - Class in <a href="com/csse3200/game/components/enemy/package-summary.html">com.csse3200.game.components.enemy</a></dt>
 <dd>
@@ -4007,6 +4042,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Factory to create a player entity.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/combat/BattleController.html#playerHasStatusEffect(java.lang.String)" class="member-name-link">playerHasStatusEffect(String)</a> - Method in class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a></dt>
+<dd>
+<div class="block">Reports whether the player currently has the given status effect.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/player/PlayerIntent.html" class="type-name-link" title="enum class in com.csse3200.game.components.player">PlayerIntent</a> - Enum Class in <a href="com/csse3200/game/components/player/package-summary.html">com.csse3200.game.components.player</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/encounters/integration/PlayerStateGateway.html" class="type-name-link" title="interface in com.csse3200.game.encounters.integration">PlayerStateGateway</a> - Interface in <a href="com/csse3200/game/encounters/integration/package-summary.html">com.csse3200.game.encounters.integration</a></dt>
@@ -4695,6 +4734,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Opens the terminal.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html#setPlayerStats(com.csse3200.game.components.CombatStatsComponent)" class="member-name-link">setPlayerStats(CombatStatsComponent)</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html" title="class in com.csse3200.game.components.enemy">EnemyBehaviourComponent</a></dt>
+<dd>
+<div class="block">Supplies the player's combat stats so intents can react to the player's condition.</div>
+</dd>
 <dt><a href="com/csse3200/game/entities/Entity.html#setPosition(float,float)" class="member-name-link">setPosition(float, float)</a> - Method in class com.csse3200.game.entities.<a href="com/csse3200/game/entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a></dt>
 <dd>
 <div class="block">Set the entity's game position.</div>
@@ -4872,6 +4915,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#shuffleDrawPile()" class="member-name-link">shuffleDrawPile()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
 <dd>
 <div class="block">Randomises the current draw pile order.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/IntentEffectType.html#SILENCE" class="member-name-link">SILENCE</a> - Enum constant in enum class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/IntentEffectType.html" title="enum class in com.csse3200.game.components.enemy">IntentEffectType</a></dt>
+<dd>
+<div class="block">Prevents the target from playing cards while active.</div>
 </dd>
 <dt><a href="com/csse3200/game/cards/TargetType.html#SINGLE_ENEMY" class="member-name-link">SINGLE_ENEMY</a> - Enum constant in enum class com.csse3200.game.cards.<a href="com/csse3200/game/cards/TargetType.html" title="enum class in com.csse3200.game.cards">TargetType</a></dt>
 <dd>&nbsp;</dd>
@@ -5726,6 +5773,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/enemy/IntentEffectType.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/IntentEffectType.html" title="enum class in com.csse3200.game.components.enemy">IntentEffectType</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/enemy/IntentType.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/IntentType.html" title="enum class in com.csse3200.game.components.enemy">IntentType</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
@@ -5832,6 +5883,11 @@ the order they are declared.</div>
 the order they are declared.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/combat/BattlePhase.html#values()" class="member-name-link">values()</a> - Static method in enum class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattlePhase.html" title="enum class in com.csse3200.game.components.combat">BattlePhase</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/IntentEffectType.html#values()" class="member-name-link">values()</a> - Static method in enum class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/IntentEffectType.html" title="enum class in com.csse3200.game.components.enemy">IntentEffectType</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum class, in
 the order they are declared.</div>
