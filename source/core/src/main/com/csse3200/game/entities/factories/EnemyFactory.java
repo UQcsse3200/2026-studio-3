@@ -3,10 +3,7 @@ package com.csse3200.game.entities.factories;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.csse3200.game.components.CombatStatsComponent;
-import com.csse3200.game.components.enemy.EnemyAnimationController;
-import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
-import com.csse3200.game.components.enemy.EnemyStatsComponent;
-import com.csse3200.game.components.enemy.IntentIcons;
+import com.csse3200.game.components.enemy.*;
 import com.csse3200.game.components.spritedisplay.reactive.EnemyDropTargetComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.configs.EnemyConfig;
@@ -106,6 +103,12 @@ public class EnemyFactory {
       enemy.addComponent(
           new EnemyDropTargetComponent(
               dragAndDrop.getDragAndDrop(), ServiceLocator.getCamera(), config.id));
+    }
+    // The intent display draws into the world through the render service, which only exists while
+    // the game is rendering, so it is skipped when absent (e.g. headless tests) rather than
+    // failing enemy creation.
+    if (ServiceLocator.getRenderService() != null) {
+      enemy.addComponent(new EnemyIntentDisplay());
     }
 
     return enemy;
