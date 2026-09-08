@@ -14,7 +14,7 @@ class NodePoolGeneratorTest {
 
   @Test
   void generatesNormalNodesAndOneFinalNode() {
-    RoomDistributionConfig config = new RoomDistributionConfig(10, 60, 30, 10, 12345L);
+    MapGenerationConfig config = new MapGenerationConfig(10, 60, 30, 10, 12345L);
 
     Map<Integer, MapNode> nodes = NodePoolGenerator.generate(config);
 
@@ -33,7 +33,7 @@ class NodePoolGeneratorTest {
 
   @Test
   void followsConfiguredDistribution() {
-    RoomDistributionConfig config = new RoomDistributionConfig(10, 60, 30, 10, 12345L);
+    MapGenerationConfig config = new MapGenerationConfig(10, 60, 30, 10, 12345L);
 
     Map<Integer, MapNode> nodes = NodePoolGenerator.generate(config);
 
@@ -44,7 +44,7 @@ class NodePoolGeneratorTest {
 
   @Test
   void allocatesRemainderNodesToClosestWeightedDistribution() {
-    RoomDistributionConfig config = new RoomDistributionConfig(7, 60, 30, 10, 12345L);
+    MapGenerationConfig config = new MapGenerationConfig(7, 60, 30, 10, 12345L);
 
     Map<Integer, MapNode> nodes = NodePoolGenerator.generate(config);
 
@@ -55,8 +55,8 @@ class NodePoolGeneratorTest {
 
   @Test
   void usesLongArithmeticForLargeWeights() {
-    RoomDistributionConfig config =
-        new RoomDistributionConfig(
+    MapGenerationConfig config =
+        new MapGenerationConfig(
             7, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 12345L);
 
     Map<Integer, MapNode> nodes = NodePoolGenerator.generate(config);
@@ -68,8 +68,8 @@ class NodePoolGeneratorTest {
 
   @Test
   void sameSeedProducesSameRoomAssignments() {
-    RoomDistributionConfig firstConfig = new RoomDistributionConfig(20, 60, 30, 10, 98765L);
-    RoomDistributionConfig secondConfig = new RoomDistributionConfig(20, 60, 30, 10, 98765L);
+    MapGenerationConfig firstConfig = new MapGenerationConfig(20, 60, 30, 10, 98765L);
+    MapGenerationConfig secondConfig = new MapGenerationConfig(20, 60, 30, 10, 98765L);
 
     List<RoomType> firstTypes = roomTypesById(NodePoolGenerator.generate(firstConfig));
     List<RoomType> secondTypes = roomTypesById(NodePoolGenerator.generate(secondConfig));
@@ -79,7 +79,7 @@ class NodePoolGeneratorTest {
 
   @Test
   void excludesZeroWeightRoomTypes() {
-    RoomDistributionConfig config = new RoomDistributionConfig(8, 1, 0, 0, 1L);
+    MapGenerationConfig config = new MapGenerationConfig(8, 1, 0, 0, 1L);
 
     Map<Integer, MapNode> nodes = NodePoolGenerator.generate(config);
 
@@ -91,7 +91,7 @@ class NodePoolGeneratorTest {
   @Test
   void returnsImmutableNodePool() {
     Map<Integer, MapNode> nodes =
-        NodePoolGenerator.generate(new RoomDistributionConfig(3, 1, 1, 1, 1L));
+        NodePoolGenerator.generate(new MapGenerationConfig(3, 1, 1, 1, 1L));
 
     assertThrows(UnsupportedOperationException.class, () -> nodes.put(99, nodes.get(0)));
   }
@@ -104,7 +104,7 @@ class NodePoolGeneratorTest {
   @Test
   void doesNotCreateGraphConnections() {
     Map<Integer, MapNode> nodes =
-        NodePoolGenerator.generate(new RoomDistributionConfig(5, 3, 2, 1, 1L));
+        NodePoolGenerator.generate(new MapGenerationConfig(5, 3, 2, 1, 1L));
 
     assertFalse(nodes.isEmpty());
     assertTrue(nodes.values().stream().allMatch(node -> node.getConnections().isEmpty()));

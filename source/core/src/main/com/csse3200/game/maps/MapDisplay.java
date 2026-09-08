@@ -17,10 +17,15 @@ import java.util.Map;
 /**
  * MapDisplay
  *
- * <p>Displays the procedural map for the game. This class is responsible for displaying the map to
- * the player. It converts nodes given by {@link MapGraph} to {@link MapNodeActor} which then is
- * wrapped with the {@link MapInputHandler} to handle clicking by the player. The nodes are arranged
- * in a grid layout 7 wide and MAP_HEIGHT tall. UI elements are Actors which are displayed in the
+ * <p>
+ * Displays the procedural map for the game. This class is responsible for
+ * displaying the map to
+ * the player. It converts nodes given by {@link MapGraph} to
+ * {@link MapNodeActor} which then is
+ * wrapped with the {@link MapInputHandler} to handle clicking by the player.
+ * The nodes are arranged
+ * in a grid layout 7 wide and MAP_HEIGHT tall. UI elements are Actors which are
+ * displayed in the
  * group.
  */
 public class MapDisplay extends UIComponent {
@@ -47,27 +52,29 @@ public class MapDisplay extends UIComponent {
     this.mapGraph = mapGraph;
     this.mapSelectionController = new MapSelectionController(mapGraph);
     this.mapInputHandler = new MapInputHandler(mapSelectionController);
-    this.mapHeight =
-        MapGraph.MAP_HEIGHT
-            * 1.5f
-            * borderPadding; // this to be changed for a constant in RoomDistributionConfig
+    this.mapHeight = MapGenerationConfig.MAP_HEIGHT
+        * 1.5f
+        * borderPadding; // this to be changed for a constant in MapGenerationConfig
   }
 
   /**
-   * Adds the background to the screen by accessing it through ResourceService backgroud is set to
+   * Adds the background to the screen by accessing it through ResourceService
+   * backgroud is set to
    * the size of the group.
    */
   private void addBackground() {
-    Image background =
-        new Image(
-            ServiceLocator.getResourceService()
-                .getAsset("images/map_background.png", Texture.class));
+    Image background = new Image(
+        ServiceLocator.getResourceService()
+            .getAsset("images/map_background.png", Texture.class));
     background.setSize(group.getWidth(), group.getHeight());
     background.setPosition(0, 0);
     group.addActor(background);
   }
 
-  /** Creates the three visual elements of the UI. Background, Nodes, and Connections. */
+  /**
+   * Creates the three visual elements of the UI. Background, Nodes, and
+   * Connections.
+   */
   @Override
   public void create() {
     super.create();
@@ -100,18 +107,19 @@ public class MapDisplay extends UIComponent {
   }
 
   /**
-   * Iterates through the list of nodes provided by @param mapGraph and attaches the @param
-   * MapNodeActor and @param mapInputHandler to each Node The node position is stored for
+   * Iterates through the list of nodes provided by @param mapGraph and attaches
+   * the @param
+   * MapNodeActor and @param mapInputHandler to each Node The node position is
+   * stored for
    * Connections to create a line between nodes
    */
   private void addNodes() {
     for (MapNode node : mapGraph.getNodes().values()) {
       MapNodeActor nodeActor = new MapNodeActor(node);
       mapInputHandler.attach(nodeActor);
-      float x =
-          (node.getRoomType() == RoomType.FINAL)
-              ? mapWidth / 2f - nodeWidth / 2f
-              : getNodeX(node.getNodeId(), nodeWidth);
+      float x = (node.getRoomType() == RoomType.FINAL)
+          ? mapWidth / 2f - nodeWidth / 2f
+          : getNodeX(node.getNodeId(), nodeWidth);
       float y = getNodeY(node);
 
       nodePositions.put(node.getNodeId(), new Vector2(x, y).add(nodeWidth / 2f, nodeWidth / 2f));
@@ -122,10 +130,11 @@ public class MapDisplay extends UIComponent {
   }
 
   /**
-   * Calculates the x position a node needs to be to spread it evenly along each layer. nodeId % 7
+   * Calculates the x position a node needs to be to spread it evenly along each
+   * layer. nodeId % 7
    * is done because there are 7 nodes max per layer
    *
-   * @param nodeId ID of the node
+   * @param nodeId    ID of the node
    * @param nodeWidth Width to ensure spacing is equal
    * @return float x value to position the Node and Connection
    */
@@ -145,8 +154,10 @@ public class MapDisplay extends UIComponent {
   }
 
   /**
-   * Adds connections between nodes that have a link. Iterates through each node to find it's
-   * connections and iterates through each one to find a start and end Vector 2 position to
+   * Adds connections between nodes that have a link. Iterates through each node
+   * to find it's
+   * connections and iterates through each one to find a start and end Vector 2
+   * position to
    * calculate length and angle to draw a line
    */
   private void addConnections() {
@@ -174,7 +185,8 @@ public class MapDisplay extends UIComponent {
    * @return group of Nodes, connections and background
    */
   /**
-   * Gets the selection controller driving this display, so a screen can listen for node selection
+   * Gets the selection controller driving this display, so a screen can listen
+   * for node selection
    * and start the matching encounter.
    *
    * @return selection controller for this map
@@ -202,19 +214,19 @@ public class MapDisplay extends UIComponent {
   /** Loads all assets needed to render the Map UI */
   private void loadMapAssets() {
     String[] mapAssets = {
-      "images/combat_icon.png",
-      "images/shop_icon.png",
-      "images/event_icon.png",
-      "images/final_icon.png",
-      "images/combat_icon_completed.png",
-      "images/shop_icon_completed.png",
-      "images/event_icon_completed.png",
-      "images/final_icon_current.png",
-      "images/combat_icon_current.png",
-      "images/shop_icon_current.png",
-      "images/event_icon_current.png",
-      "images/nodeLine.png",
-      "images/map_background.png"
+        "images/combat_icon.png",
+        "images/shop_icon.png",
+        "images/event_icon.png",
+        "images/final_icon.png",
+        "images/combat_icon_completed.png",
+        "images/shop_icon_completed.png",
+        "images/event_icon_completed.png",
+        "images/final_icon_current.png",
+        "images/combat_icon_current.png",
+        "images/shop_icon_current.png",
+        "images/event_icon_current.png",
+        "images/nodeLine.png",
+        "images/map_background.png"
     };
 
     ResourceService resourceService = ServiceLocator.getResourceService();

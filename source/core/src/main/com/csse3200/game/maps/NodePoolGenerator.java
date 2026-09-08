@@ -7,10 +7,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-/** Generates a seeded pool of typed map nodes without creating graph connections. */
+// TODO: i think i would like to move this stuff to MapGenerationController, single responsibility or whatever
+// even considering ECS, nothing besides a map is going to use this
+
+/**
+ * Generates a seeded pool of typed map nodes without creating graph
+ * connections.
+ */
 public final class NodePoolGenerator {
 
-  private NodePoolGenerator() {}
+  private NodePoolGenerator() {
+  }
 
   /**
    * Generates the configured normal nodes followed by exactly one final node.
@@ -19,7 +26,7 @@ public final class NodePoolGenerator {
    * @return immutable node pool keyed by unique, sequential IDs
    * @throws NullPointerException if the configuration is null
    */
-  public static Map<Integer, MapNode> generate(RoomDistributionConfig config) {
+  public static Map<Integer, MapNode> generate(MapGenerationConfig config) {
     if (config == null) {
       throw new NullPointerException("Config cannot be null!");
     }
@@ -42,9 +49,9 @@ public final class NodePoolGenerator {
   }
 
   /** Calculates proportional room counts and creates the room-type list. */
-  private static List<RoomType> createRoomTypes(RoomDistributionConfig config) {
-    RoomType[] types = {RoomType.COMBAT, RoomType.EVENT, RoomType.SHOP};
-    int[] weights = {config.getCombatWeight(), config.getEventWeight(), config.getShopWeight()};
+  private static List<RoomType> createRoomTypes(MapGenerationConfig config) {
+    RoomType[] types = { RoomType.COMBAT, RoomType.EVENT, RoomType.SHOP };
+    int[] weights = { config.getCombatWeight(), config.getEventWeight(), config.getShopWeight() };
 
     int nodeCount = config.getNormalNodeCount();
     long totalWeight = config.getTotalWeight();

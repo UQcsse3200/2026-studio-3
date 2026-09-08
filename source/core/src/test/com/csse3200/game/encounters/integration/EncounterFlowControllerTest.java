@@ -175,7 +175,7 @@ class EncounterFlowControllerTest {
   }
 
   private MapGraph createMap() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph map = new MapGraph(NodePoolGenerator.generate(config));
     MapNode chance = new MapNode(1, RoomType.EVENT);
     MapNode shop = new MapNode(2, RoomType.SHOP);

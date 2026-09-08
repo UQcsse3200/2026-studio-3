@@ -21,10 +21,10 @@ public class MapGraphTest {
 
   @Test
   void testMapGeneration() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
-    MapGraph map = new MapGraph(NodePoolGenerator.generate(config));
+    MapGenerationController mapGen = new MapGenerationController();
+    MapGraph map = mapGen.getMap();
 
-    assertTrue(map.getNodes().size() < MapGraph.MAX_NODE_COUNT);
+    assertTrue(map.getNodes().size() < MapGenerationConfig.MAX_NODE_COUNT);
     // for (int i = 0; i < MapGraph.MAP_HEIGHT; i++) {
 
     // assertTrue(map.moveToNode());
@@ -34,9 +34,8 @@ public class MapGraphTest {
 
   @Test
   void generatedMapCanStartWithReachableChoices() {
-    RoomDistributionConfig config =
-        new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10, 12345L);
-    MapGraph map = new MapGraph(NodePoolGenerator.generate(config));
+    MapGenerationController mapGen = new MapGenerationController();
+    MapGraph map = mapGen.getMap();
     MapNode startNode =
         map.getNodesByHeight(1).stream()
             .min((first, second) -> Integer.compare(first.getNodeId(), second.getNodeId()))
@@ -52,16 +51,16 @@ public class MapGraphTest {
 
   @Test
   void getCurrentNodeNull() {
-    RoomDistributionConfig config = new RoomDistributionConfig(70, 70, 20, 10);
-    MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
+    MapGenerationController mapGen = new MapGenerationController();
+    MapGraph map = mapGen.getMap();
 
-    assertNull(graph.getCurrentNode());
+    assertNull(map.getCurrentNode());
   }
 
   @Test
   void createsGraphFromGeneratedNodeMap() {
     Map<Integer, MapNode> nodes =
-        NodePoolGenerator.generate(new RoomDistributionConfig(70, 3, 2, 1, 12345L));
+        NodePoolGenerator.generate(new MapGenerationConfig());
 
     MapGraph graph = new MapGraph(nodes);
     graph.addNodes(nodes);
@@ -74,7 +73,7 @@ public class MapGraphTest {
 
   @Test
   void getNodesByState() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph map = new MapGraph(NodePoolGenerator.generate(config));
 
     MapNode node1 = createNode(1, NodeState.AVAILABLE);
@@ -98,7 +97,7 @@ public class MapGraphTest {
 
   @Test
   void getNodesByStateEmpty() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph map = new MapGraph(NodePoolGenerator.generate(config));
 
     MapNode node1 = createNode(1, NodeState.AVAILABLE);
@@ -114,7 +113,7 @@ public class MapGraphTest {
 
   @Test
   void completeNodeSuccess() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
 
     MapNode node = createNode(1, NodeState.CURRENT);
@@ -127,7 +126,7 @@ public class MapGraphTest {
 
   @Test
   void completeNodeUnlocksConnected() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
 
     MapNode current = createNode(1, NodeState.CURRENT);
@@ -150,7 +149,7 @@ public class MapGraphTest {
 
   @Test
   void completeNodePreservesNonLocked() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
 
     MapNode current = createNode(1, NodeState.CURRENT);
@@ -172,7 +171,7 @@ public class MapGraphTest {
 
   @Test
   void completeNodeFailure() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
 
     MapNode current = createNode(1, NodeState.CURRENT);
@@ -190,7 +189,7 @@ public class MapGraphTest {
 
   @Test
   void completeNodeInvalidId() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
 
     MapNode node = createNode(1, NodeState.CURRENT);
