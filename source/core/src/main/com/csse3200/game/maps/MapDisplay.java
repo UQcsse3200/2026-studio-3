@@ -159,8 +159,8 @@ public class MapDisplay extends UIComponent {
 
         Vector2 start = nodePositions.get(node.getNodeId());
         Vector2 end = nodePositions.get(connection.getNodeId());
-        // if no connections are found it returns null so check unless error
-        if (end == null) {
+        // Only draw connections whose two endpoint actors were created.
+        if (start != null && end != null) {
           MapConnectionGroup mapConnectionGroup = new MapConnectionGroup(start, end);
           group.addActor(mapConnectionGroup);
         }
