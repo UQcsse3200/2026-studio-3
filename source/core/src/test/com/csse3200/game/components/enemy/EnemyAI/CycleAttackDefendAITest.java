@@ -35,7 +35,7 @@ class CycleAttackDefendAITest {
         24, // enemyHealth
         24, // enemyMaxHealth
         6, // enemyAttack
-        0, // enemyArmour
+        0, // enemyArmor
         EnemyIntent.unknown(), // previousIntent
         turnNumber);
   }

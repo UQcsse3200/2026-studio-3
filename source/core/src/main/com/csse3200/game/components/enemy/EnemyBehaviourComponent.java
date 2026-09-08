@@ -20,14 +20,46 @@ public class EnemyBehaviourComponent extends Component {
   private final EnemyAI ai;
   private EnemyIntent currentIntent = EnemyIntent.unknown();
   private int turnNumber = 0;
+  private CombatStatsComponent playerStats;
 
+  /**
+   * Creates a behaviour that resolves its AI from a behaviour identifier.
+   *
+   * @param behaviourId behaviour identifier loaded from enemy configuration
+   */
   public EnemyBehaviourComponent(String behaviourId) {
+    this(behaviourId, EnemyAIFactory.create(behaviourId));
+  }
+
+  /**
+   * Creates a behaviour with a given AI, bypassing the factory.
+   *
+   * <p>Package-private so tests and future behaviours can supply an AI directly instead of routing
+   * through {@link EnemyAIFactory}. Production code should use the single-argument constructor so
+   * behaviour stays configuration-driven.
+   *
+   * @param behaviourId behaviour identifier recorded for reference
+   * @param ai the AI that decides this enemy's intents
+   */
+  EnemyBehaviourComponent(String behaviourId, EnemyAI ai) {
     this.behaviourId = behaviourId;
-    this.ai = EnemyAIFactory.create(behaviourId);
+    this.ai = ai;
   }
 
   public String getBehaviourId() {
     return behaviourId;
+  }
+
+  /**
+   * Supplies the player's combat stats so intents can react to the player's condition.
+   *
+   * <p>Injected rather than looked up, because this component lives on the enemy entity and has no
+   * reference to the player. Until it is supplied, the AI context reports an unknown player health.
+   *
+   * @param playerStats the player's combat stats, or null to clear them
+   */
+  public void setPlayerStats(CombatStatsComponent playerStats) {
+    this.playerStats = playerStats;
   }
 
   /**
@@ -66,7 +98,7 @@ public class EnemyBehaviourComponent extends Component {
    */
   private EnemyAIContext buildContext(CombatStatsComponent stats) {
     return new EnemyAIContext(
-        UNKNOWN_PLAYER_HEALTH,
+        playerStats == null ? UNKNOWN_PLAYER_HEALTH : playerStats.getHealth(),
         stats.getHealth(),
         stats.getMaxHealth(),
         stats.getBaseAttack(),
@@ -84,8 +116,9 @@ public class EnemyBehaviourComponent extends Component {
     switch (currentIntent.getType()) {
       case ATTACK -> attack(target);
       case DEFEND -> defend();
+      case DEBUFF -> applyDebuff(target);
       default -> {
-        // No behaviour currently produces BUFF or DEBUFF; UNKNOWN is intentionally inert.
+        // No behaviour produces BUFF yet; UNKNOWN is intentionally inert.
       }
     }
   }
@@ -108,6 +141,32 @@ public class EnemyBehaviourComponent extends Component {
     CombatStatsComponent stats = entity.getComponent(CombatStatsComponent.class);
     if (stats != null) {
       stats.addArmor(currentIntent.getValue());
+    }
+  }
+
+  /**
+   * Applies the intent's status effect to the target.
+   *
+   * <p>The effect type is converted to a string here because {@link CombatStatsComponent} stores
+   * active effects in a string-keyed map. An intent without an effect type is ignored rather than
+   * treated as an error, so a misconfigured behaviour does not break the battle.
+   *
+   * @param target the entity the effect is applied to
+   */
+  private void applyDebuff(Entity target) {
+    if (target == null) {
+      return;
+    }
+
+    IntentEffectType effectType = currentIntent.getEffectType();
+    if (effectType == null) {
+      return;
+    }
+
+    CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
+    if (targetStats != null) {
+      targetStats.applyStatusEffect(
+          effectType.name(), currentIntent.getValue(), currentIntent.getDuration());
     }
   }
 }

@@ -34,14 +34,14 @@ class CycleFourStanceAITest {
   }
 
   @Test
-  void shouldAttackOnFourthTurnWhenArmourRemains() {
+  void shouldAttackOnFourthTurnWhenArmorRemains() {
     EnemyIntent intent = ai.decide(createContext(4, 2));
 
     assertEquals(IntentType.ATTACK, intent.getType());
   }
 
   @Test
-  void shouldDefendOnFourthTurnWhenArmourIsBroken() {
+  void shouldDefendOnFourthTurnWhenArmorIsBroken() {
     EnemyIntent intent = ai.decide(createContext(4, 0));
 
     assertEquals(IntentType.DEFEND, intent.getType());
@@ -55,7 +55,7 @@ class CycleFourStanceAITest {
     assertEquals(IntentType.ATTACK, intent.getType());
   }
 
-  private EnemyAIContext createContext(int turnNumber, int armour) {
-    return new EnemyAIContext(100, 30, 30, 7, armour, EnemyIntent.unknown(), turnNumber);
+  private EnemyAIContext createContext(int turnNumber, int armor) {
+    return new EnemyAIContext(100, 30, 30, 7, armor, EnemyIntent.unknown(), turnNumber);
   }
 }

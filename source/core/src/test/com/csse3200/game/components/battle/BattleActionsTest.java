@@ -210,7 +210,7 @@ class BattleActionsTest {
             .addComponent(new EnemyBehaviourComponent("test"));
     BattleController realController =
         new BattleController(
-            player, List.of(enemy), new CardEffectResolver(library), library, deck);
+            testPlayer, List.of(enemy), new CardEffectResolver(library), library, deck);
     Entity battleUI =
         new Entity().addComponent(new BattleActions(realController, mock(GdxGame.class), library));
     battleUI.create();
@@ -225,7 +225,7 @@ class BattleActionsTest {
     battleUI.getEvents().trigger("playCard", "strike", "enemy");
 
     assertTrue(playedEvents.isEmpty());
-    assertEquals(3, player.getComponent(EnergyComponent.class).getCurrentEnergy());
+    assertEquals(3, testPlayer.getComponent(EnergyComponent.class).getCurrentEnergy());
     assertEquals(List.of("strike"), deck.getHand());
   }
 

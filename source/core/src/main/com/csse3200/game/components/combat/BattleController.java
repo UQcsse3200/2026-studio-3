@@ -349,6 +349,20 @@ public class BattleController {
   }
 
   /**
+   * Reports whether the player currently has the given status effect.
+   *
+   * <p>Read-only: exposes a query about the player rather than the player entity itself, so callers
+   * cannot mutate player state through this controller.
+   *
+   * @param effectType identifier of the status effect, as stored by CombatStatsComponent
+   * @return true if the player carries an active effect with this identifier
+   */
+  public boolean playerHasStatusEffect(String effectType) {
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    return stats != null && stats.hasStatusEffect(effectType);
+  }
+
+  /**
    * Convenience function for returning if a given event can be handled within a state.
    *
    * @param event The event to check.
@@ -511,7 +525,11 @@ public class BattleController {
     // Rolls intent for alive each enemy.
     for (Entity enemy : this.enemies) {
       if (this.isEnemyAlive(enemy)) {
-        enemy.getComponent(EnemyBehaviourComponent.class).rollIntent();
+        EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+        // Enemies live on their own entity and cannot reach the player, so hand the player's stats
+        // over each round. Refreshing here keeps the AI reading the player's current condition.
+        behaviour.setPlayerStats(player.getComponent(CombatStatsComponent.class));
+        behaviour.rollIntent();
       }
     }
 
