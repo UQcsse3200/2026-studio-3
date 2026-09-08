@@ -135,7 +135,13 @@ implements <a href="EncounterCallback.html" title="interface in com.csse3200.gam
 <div class="table-header col-last">Description</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.util.Map)" class="member-name-link">MapGraph</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>,<wbr><a href="MapNode.html" title="class in com.csse3200.game.maps">MapNode</a>&gt;&nbsp;nodes)</code></div>
 <div class="col-last even-row-color">
-<div class="block">Creates a graph containing an existing node pool.</div>
+<div class="block">Creates a graph containing an existing node pool and runs procedural path generation over it.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(java.util.Map,boolean)" class="member-name-link">MapGraph</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>,<wbr><a href="MapNode.html" title="class in com.csse3200.game.maps">MapNode</a>&gt;&nbsp;nodes,
+ boolean&nbsp;generate)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a graph containing an existing node pool, optionally running procedural path
+ generation.</div>
 </div>
 </div>
 </section>
@@ -305,10 +311,25 @@ implements <a href="EncounterCallback.html" title="interface in com.csse3200.gam
 <section class="detail" id="&lt;init&gt;(java.util.Map)">
 <h3>MapGraph</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">MapGraph</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>,<wbr><a href="MapNode.html" title="class in com.csse3200.game.maps">MapNode</a>&gt;&nbsp;nodes)</span></div>
-<div class="block">Creates a graph containing an existing node pool.</div>
+<div class="block">Creates a graph containing an existing node pool and runs procedural path generation over it.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>nodes</code> - nodes keyed by their unique identifiers</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(java.util.Map,boolean)">
+<h3>MapGraph</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">MapGraph</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>,<wbr><a href="MapNode.html" title="class in com.csse3200.game.maps">MapNode</a>&gt;&nbsp;nodes,
+ boolean&nbsp;generate)</span></div>
+<div class="block">Creates a graph containing an existing node pool, optionally running procedural path
+ generation. Passing <code>false</code> builds the graph exactly as given, which lets callers set up
+ controlled maps (for example in tests) without triggering full generation.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>nodes</code> - nodes keyed by their unique identifiers</dd>
+<dd><code>generate</code> - whether to run procedural path generation</dd>
 </dl>
 </section>
 </li>
