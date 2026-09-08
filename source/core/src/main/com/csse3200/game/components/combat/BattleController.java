@@ -358,6 +358,20 @@ public class BattleController {
     eventHandler.trigger(BATTLE_LOG_EVENT, message);
   }
   /**
+   * Reports whether the player currently has the given status effect.
+   *
+   * <p>Read-only: exposes a query about the player rather than the player entity itself, so callers
+   * cannot mutate player state through this controller.
+   *
+   * @param effectType identifier of the status effect, as stored by CombatStatsComponent
+   * @return true if the player carries an active effect with this identifier
+   */
+  public boolean playerHasStatusEffect(String effectType) {
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    return stats != null && stats.hasStatusEffect(effectType);
+  }
+
+  /**
    * Convenience function for returning if a given event can be handled within a state.
    *
    * @param event The event to check.
