@@ -33,6 +33,24 @@ public class MapGraphTest {
   }
 
   @Test
+  void generatedMapCanStartWithReachableChoices() {
+    RoomDistributionConfig config =
+        new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10, 12345L);
+    MapGraph map = new MapGraph(NodePoolGenerator.generate(config));
+    MapNode startNode =
+        map.getNodesByHeight(1).stream()
+            .min((first, second) -> Integer.compare(first.getNodeId(), second.getNodeId()))
+            .orElseThrow();
+
+    assertTrue(map.startRun(startNode.getNodeId()));
+    assertEquals(NodeState.CURRENT, startNode.getState());
+    assertFalse(startNode.getConnections().isEmpty());
+    assertTrue(
+        startNode.getConnections().stream()
+            .allMatch(node -> node.getState() == NodeState.AVAILABLE));
+  }
+
+  @Test
   void getCurrentNodeNull() {
     RoomDistributionConfig config = new RoomDistributionConfig(70, 70, 20, 10);
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
