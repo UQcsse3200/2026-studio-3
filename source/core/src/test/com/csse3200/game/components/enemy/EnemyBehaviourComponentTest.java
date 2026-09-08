@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAI;
+import com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIFactory;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.events.listeners.EventListener1;
@@ -240,5 +241,58 @@ class EnemyBehaviourComponentTest {
     behaviour.executeIntent(player);
 
     assertNull(playerStats.getStatusEffect("SILENCE"));
+  }
+  @Test
+  void shouldReportUnknownPlayerHealthUntilPlayerStatsAreSupplied() {
+    EnemyAIContext[] captured = new EnemyAIContext[1];
+    EnemyBehaviourComponent behaviour =
+            new EnemyBehaviourComponent(
+                    "test_capture",
+                    context -> {
+                      captured[0] = context;
+                      return EnemyIntent.attack(1);
+                    });
+    enemyWith(behaviour, enemyStats());
+
+    behaviour.rollIntent();
+
+    assertEquals(0, captured[0].getPlayerHealth());
+  }
+
+  @Test
+  void shouldReportThePlayerHealthOnceSupplied() {
+    EnemyAIContext[] captured = new EnemyAIContext[1];
+    EnemyBehaviourComponent behaviour =
+            new EnemyBehaviourComponent(
+                    "test_capture",
+                    context -> {
+                      captured[0] = context;
+                      return EnemyIntent.attack(1);
+                    });
+    enemyWith(behaviour, enemyStats());
+
+    behaviour.setPlayerStats(new CombatStatsComponent(30, 4));
+    behaviour.rollIntent();
+
+    assertEquals(30, captured[0].getPlayerHealth());
+  }
+
+  @Test
+  void shouldReportUnknownPlayerHealthWhenPlayerStatsAreCleared() {
+    EnemyAIContext[] captured = new EnemyAIContext[1];
+    EnemyBehaviourComponent behaviour =
+            new EnemyBehaviourComponent(
+                    "test_capture",
+                    context -> {
+                      captured[0] = context;
+                      return EnemyIntent.attack(1);
+                    });
+    enemyWith(behaviour, enemyStats());
+
+    behaviour.setPlayerStats(new CombatStatsComponent(30, 4));
+    behaviour.setPlayerStats(null);
+    behaviour.rollIntent();
+
+    assertEquals(0, captured[0].getPlayerHealth());
   }
 }
