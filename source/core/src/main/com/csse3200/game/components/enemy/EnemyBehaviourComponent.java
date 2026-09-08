@@ -20,6 +20,7 @@ public class EnemyBehaviourComponent extends Component {
   private final EnemyAI ai;
   private EnemyIntent currentIntent = EnemyIntent.unknown();
   private int turnNumber = 0;
+  private CombatStatsComponent playerStats;
 
   /**
    * Creates a behaviour that resolves its AI from a behaviour identifier.
@@ -47,6 +48,18 @@ public class EnemyBehaviourComponent extends Component {
 
   public String getBehaviourId() {
     return behaviourId;
+  }
+
+  /**
+   * Supplies the player's combat stats so intents can react to the player's condition.
+   *
+   * <p>Injected rather than looked up, because this component lives on the enemy entity and has no
+   * reference to the player. Until it is supplied, the AI context reports an unknown player health.
+   *
+   * @param playerStats the player's combat stats, or null to clear them
+   */
+  public void setPlayerStats(CombatStatsComponent playerStats) {
+    this.playerStats = playerStats;
   }
 
   /**
@@ -85,7 +98,7 @@ public class EnemyBehaviourComponent extends Component {
    */
   private EnemyAIContext buildContext(CombatStatsComponent stats) {
     return new EnemyAIContext(
-        UNKNOWN_PLAYER_HEALTH,
+        playerStats == null ? UNKNOWN_PLAYER_HEALTH : playerStats.getHealth(),
         stats.getHealth(),
         stats.getMaxHealth(),
         stats.getBaseAttack(),
