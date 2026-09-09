@@ -8,6 +8,7 @@ public final class EnemyAIFactory {
   private static final Logger logger = LoggerFactory.getLogger(EnemyAIFactory.class);
   public static final String CYCLE_ATTACK_DEFEND = "cycle_attack_defend";
   public static final String CYCLE_FOUR_STANCE = "cycle_four_stance";
+  public static final String ENRAGE_LOW_HEALTH = "enrage_low_health";
 
   /** Behaviour used when a configuration names an unknown behaviour. */
   public static final String DEFAULT_BEHAVIOUR = CYCLE_ATTACK_DEFEND;
@@ -30,6 +31,7 @@ public final class EnemyAIFactory {
     return switch (behaviourId) {
       case CYCLE_ATTACK_DEFEND -> new CycleAttackDefendAI();
       case CYCLE_FOUR_STANCE -> new CycleFourStanceAI();
+      case ENRAGE_LOW_HEALTH -> new EnrageLowHealthAI();
       default -> {
         logger.warn(
             "Unknown enemy behaviour id '{}', falling back to {}", behaviourId, DEFAULT_BEHAVIOUR);
