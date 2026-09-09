@@ -36,7 +36,6 @@ public class BattleController {
   private BattlePhase currentPhase;
   private int currentEnemyIndex;
   private EnemyIntent currentEnemyIntent;
-  private PlayerIntent currentPlayerIntent;
   private final BattleTransitions battleTransitions;
   private final EventHandler eventHandler;
   private final Deque<BattleEvent> eventQueue;
@@ -108,8 +107,7 @@ public class BattleController {
     this.currentPhase = BattlePhase.SETUP;
     this.currentEnemyIndex = -1;
     this.currentEnemyIntent = null;
-    this.currentPlayerIntent = null;
-    this.eventHandler = new EventHandler();
+      this.eventHandler = new EventHandler();
     this.eventQueue = new ArrayDeque<>();
   }
 
@@ -216,24 +214,20 @@ public class BattleController {
 
   /** Player intends to attack the enemy on their turn */
   public void selectAttack() {
-    this.currentPlayerIntent = PlayerIntent.ATTACK;
   }
 
   /** Player intends to defend themselves on their turn */
   public void selectDefend() {
-    this.currentPlayerIntent = PlayerIntent.DEFEND;
   }
 
   /** Player intends to do other actions on their turn */
   public void selectOther() {
-    this.currentPlayerIntent = PlayerIntent.OTHER;
   }
 
   /** Player decides to end their turn */
   public void endPlayerTurn() {
-    this.currentPlayerIntent = PlayerIntent.END_PLAYER_TURN;
 
-    if (canHandle(BattleEvent.PLAYER_END_REQUESTED)) {
+      if (canHandle(BattleEvent.PLAYER_END_REQUESTED)) {
       handle(BattleEvent.PLAYER_END_REQUESTED);
     }
   }
@@ -389,7 +383,6 @@ public class BattleController {
   }
 
   private void setPlayerIntent(PlayerIntent intent) {
-    this.currentPlayerIntent = intent;
   }
 
   /*------------------------- Helper functions ----------------------------*/
@@ -509,8 +502,7 @@ public class BattleController {
     }
     lastCardPlaySucceeded = false;
     pendingCard = cardPlayRequest;
-    currentPlayerIntent = playerIntent;
-    handle(event);
+      handle(event);
     return lastCardPlaySucceeded;
   }
 
@@ -594,8 +586,7 @@ public class BattleController {
 
   private void finishPlayerCardAction() {
     pendingCard = null;
-    currentPlayerIntent = null;
-    handle(BattleEvent.PLAYER_ACTION_RESOLVED);
+      handle(BattleEvent.PLAYER_ACTION_RESOLVED);
   }
 
   private void enterPlayerAttack() {
