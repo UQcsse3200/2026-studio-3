@@ -42,6 +42,11 @@ public class BattleController {
   private final Deque<BattleEvent> eventQueue;
   private final Entity player;
   private final List<Entity> enemies;
+  private boolean processingEvents;
+  private CardPlayRequest pendingCard;
+  private boolean lastCardPlaySucceeded;
+
+  /** Logging Strings & Error messages*/
   private static final String PHASE_CHANGED_EVENT = "battlePhaseChanged";
   private static final String BATTLE_LOG_EVENT = "battleLog";
   private static final String BATTLE_ENDED_EVENT = "battleEnded";
@@ -49,9 +54,6 @@ public class BattleController {
   private static final String PLAYER_EFFECTS_EVENT = "playerEffects";
   private static final String HAND_CHANGED_EVENT = "handChanged";
   private static final String LISTENER_NOT_NULL = "Listener must not be null.";
-  private boolean pendingEvent;
-  private CardPlayRequest pendingCard;
-  private boolean lastCardPlaySucceeded;
 
   /** Team 5's card-effect resolver (Team 6 configs -> resolved effects); null without cards. */
   private final CardEffectResolver effectResolver;
@@ -121,11 +123,11 @@ public class BattleController {
     this.eventQueue.addLast(event);
 
     // Guards against recursion impacting order of events.
-    if (this.pendingEvent) {
+    if (this.processingEvents) {
       return;
     }
     // pendingEvent keeps events atomic.
-    this.pendingEvent = true;
+    this.processingEvents = true;
     // Takes an event from the queue, attempts to process atomically
     try {
       while (!this.eventQueue.isEmpty()) {
@@ -137,7 +139,7 @@ public class BattleController {
       this.eventQueue.clear();
       throw e;
     } finally {
-      this.pendingEvent = false;
+      this.processingEvents = false;
     }
   }
 
@@ -241,7 +243,7 @@ public class BattleController {
    * turns
    */
   public void resetBattle() {
-    if (this.pendingEvent) {
+    if (this.processingEvents) {
       throw new IllegalStateException("There is an event in progress.");
     }
 
