@@ -12,6 +12,17 @@
         "texturePath": "images/cards/strike.png"
       },
       {
+        "id": "warding_sweep",
+        "name": "Warding Sweep",
+        "description": "Deal 4 damage to all enemies.",
+        "cost": 2,
+        "type": "ATTACK",
+        "rarity": "COMMON",
+        "target": "ALL_ENEMIES",
+        "effects": [{ "type": "DAMAGE", "value": 4, "duration": 0 }],
+        "texturePath": "images/cards/warding_sweep.png"
+      },
+      {
         "id": "defend",
         "name": "Defend",
         "description": "Gain 5 block.",
