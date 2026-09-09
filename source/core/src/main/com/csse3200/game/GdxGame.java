@@ -8,6 +8,7 @@ import com.badlogic.gdx.Screen;
 import com.csse3200.game.files.UserSettings;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.screens.BattleScreen;
+import com.csse3200.game.screens.BestiaryScreen;
 import com.csse3200.game.screens.EncounterScreen;
 import com.csse3200.game.screens.EndBattleScreen;
 import com.csse3200.game.screens.MainGameScreen;
@@ -99,6 +100,8 @@ public class GdxGame extends Game {
         return new EndBattleScreen(this, true);
       case DEFEAT:
         return new EndBattleScreen(this, false);
+      case BESTIARY:
+        return new BestiaryScreen(this);
       default:
         return null;
     }
@@ -112,7 +115,8 @@ public class GdxGame extends Game {
     ENCOUNTER,
     BATTLE_SCREEN,
     VICTORY,
-    DEFEAT
+    DEFEAT,
+    BESTIARY
   }
 
   /** Exit the game. */

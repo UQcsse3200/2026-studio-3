@@ -25,6 +25,7 @@ public class MainMenuActions extends Component {
     entity.getEvents().addListener("exit", this::onExit);
     entity.getEvents().addListener("settings", this::onSettings);
     entity.getEvents().addListener("shop", this::onShop);
+    entity.getEvents().addListener("bestiary", this::onBestiary);
   }
 
   /** Discards any run in progress and opens a fresh map. */
@@ -55,5 +56,11 @@ public class MainMenuActions extends Component {
   private void onShop() {
     logger.info("Opening shop encounter");
     game.setScreen(GdxGame.ScreenType.MAIN_GAME);
+  }
+
+  /** Opens the enemy bestiary. */
+  private void onBestiary() {
+    logger.info("Opening bestiary");
+    game.setScreen(GdxGame.ScreenType.BESTIARY);
   }
 }
