@@ -72,11 +72,14 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
               node.getNodeId(), node.getRoomType().name(), node.getState().name(), connectionIds));
     }
 
-    Integer currentNodeId = runState.getActiveNodeId();
+    Integer currentNodeId =
+            mapGraph.getCurrentNode() != null ? mapGraph.getCurrentNode().getNodeId() : null;
 
-    // TODO: no concept of a separate "active encounter node" exists yet. Confirmed with Team 2
-    // (message sent 9/9) — update this once they clarify where it comes from.
-    Integer activeEncounterNodeId = null;
+    // RunState.activeNodeId tracks the node whose encounter is currently being resolved, which
+    // is exactly the 'active encounter node' concept — not the player's physical position (that
+    // was an earlier mistake, caught by the end-to-end test). No Team 2 clarification needed
+    // for this field.
+    Integer activeEncounterNodeId = runState.getActiveNodeId();
 
     return new MapSaveData(nodeSnapshots, currentNodeId, activeEncounterNodeId);
   }
