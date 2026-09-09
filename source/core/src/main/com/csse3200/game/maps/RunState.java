@@ -54,6 +54,28 @@ public class RunState {
   }
 
   /**
+   * Restores a saved run without replaying movement or encounter transitions.
+   *
+   * @param mapGraph restored map graph
+   * @param activeNodeId saved in-progress encounter node, or null if the player is between rooms
+   * @return true if the run state was restored
+   */
+  public boolean restoreRun(MapGraph mapGraph, Integer activeNodeId) {
+    if (mapGraph == null) {
+      logger.warn("Could not restore run without a map");
+      return false;
+    }
+    if (activeNodeId != null && mapGraph.getNode(activeNodeId) == null) {
+      logger.warn("Could not restore active encounter at unknown node {}", activeNodeId);
+      return false;
+    }
+
+    this.mapGraph = mapGraph;
+    this.activeNodeId = activeNodeId;
+    return true;
+  }
+
+  /**
    * Remembers the node the player entered so the encounter can report back against it. Any node
    * still marked current is one the player passed through without an encounter, i.e. the node they
    * started on, so it is closed off here.
