@@ -518,37 +518,25 @@ public class BattleController {
     return lastCardPlaySucceeded;
   }
 
-  /*--------------------------- Possible Action Branches ----------------------------*/
-
-  private void enterSetup() {
-    // Coordinate battle setup.
-    this.setCurrentEnemyIndex(0);
-    handle(BattleEvent.SETUP_COMPLETE);
-  }
-
-  private void enterRevealIntents() {
-    // reset enemy index to reduce the chance of buggy behaviour with dead enemies
-    this.resetEnemyCursor();
-
-    // Rolls intent for alive each enemy.
-    for (Entity enemy : this.enemies) {
-      if (this.isEnemyAlive(enemy)) {
-        EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
-        // Enemies live on their own entity and cannot reach the player, so hand the player's stats
-        // over each round. Refreshing here keeps the AI reading the player's current condition.
-        behaviour.setPlayerStats(player.getComponent(CombatStatsComponent.class));
-        behaviour.rollIntent();
-      }
+  private String summarise(CardPlayRequest request, CardPlayResult result) {
+    StringBuilder summary = new StringBuilder("You played ").append(request.cardID());
+    for (ResolvedCardEffect effect : result.enemyEffects()) {
+      summary
+          .append(" - ")
+          .append(effect.type())
+          .append(' ')
+          .append(effect.value())
+          .append(" to enemy");
     }
-
-    // If an enemy is alive set it to the current intent
-    if (this.advanceToNextLivingEnemy()) {
-      this.setEnemyIntent(resolveEnemyIntent(this.getActiveEnemy()));
-    } else {
-      // If no enemies are alive - remove stale intent
-      this.setEnemyIntent(null);
+    for (ResolvedCardEffect effect : result.playerEffects()) {
+      summary
+          .append(" - ")
+          .append(effect.type())
+          .append(' ')
+          .append(effect.value())
+          .append(" to you");
     }
-    handle(BattleEvent.INTENTS_REVEALED);
+    return summary.append('.').toString();
   }
 
   /**
@@ -588,27 +576,9 @@ public class BattleController {
     return this.player.getComponent(EnergyComponent.class);
   }
 
-  private void enterPlayerTurn() {
-    // Enable or accept player actions.
-    this.queueBattleOutcomeIfOver();
-    // wait for ui to submit card or end turn
-  }
-
   private void finishPlayerCardAction() {
     pendingCard = null;
     handle(BattleEvent.PLAYER_ACTION_RESOLVED);
-  }
-
-  private void enterPlayerAttack() {
-    resolvePlayerCard();
-  }
-
-  private void enterPlayerDefend() {
-    resolvePlayerCard();
-  }
-
-  private void enterPlayerOther() {
-    resolvePlayerCard();
   }
 
   /**
@@ -769,25 +739,55 @@ public class BattleController {
     }
   }
 
-  private String summarise(CardPlayRequest request, CardPlayResult result) {
-    StringBuilder summary = new StringBuilder("You played ").append(request.cardID());
-    for (ResolvedCardEffect effect : result.enemyEffects()) {
-      summary
-          .append(" - ")
-          .append(effect.type())
-          .append(' ')
-          .append(effect.value())
-          .append(" to enemy");
+  /*--------------------------- Possible Action Branches ----------------------------*/
+
+  private void enterSetup() {
+    // Coordinate battle setup.
+    this.setCurrentEnemyIndex(0);
+    handle(BattleEvent.SETUP_COMPLETE);
+  }
+
+  private void enterRevealIntents() {
+    // reset enemy index to reduce the chance of buggy behaviour with dead enemies
+    this.resetEnemyCursor();
+
+    // Rolls intent for alive each enemy.
+    for (Entity enemy : this.enemies) {
+      if (this.isEnemyAlive(enemy)) {
+        EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+        // Enemies live on their own entity and cannot reach the player, so hand the player's stats
+        // over each round. Refreshing here keeps the AI reading the player's current condition.
+        behaviour.setPlayerStats(player.getComponent(CombatStatsComponent.class));
+        behaviour.rollIntent();
+      }
     }
-    for (ResolvedCardEffect effect : result.playerEffects()) {
-      summary
-          .append(" - ")
-          .append(effect.type())
-          .append(' ')
-          .append(effect.value())
-          .append(" to you");
+
+    // If an enemy is alive set it to the current intent
+    if (this.advanceToNextLivingEnemy()) {
+      this.setEnemyIntent(resolveEnemyIntent(this.getActiveEnemy()));
+    } else {
+      // If no enemies are alive - remove stale intent
+      this.setEnemyIntent(null);
     }
-    return summary.append('.').toString();
+    handle(BattleEvent.INTENTS_REVEALED);
+  }
+
+  private void enterPlayerTurn() {
+    // Enable or accept player actions.
+    this.queueBattleOutcomeIfOver();
+    // wait for ui to submit card or end turn
+  }
+
+  private void enterPlayerAttack() {
+    resolvePlayerCard();
+  }
+
+  private void enterPlayerDefend() {
+    resolvePlayerCard();
+  }
+
+  private void enterPlayerOther() {
+    resolvePlayerCard();
   }
 
   private void enterPlayerEnd() {
