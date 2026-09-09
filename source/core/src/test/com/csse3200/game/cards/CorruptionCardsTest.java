@@ -35,6 +35,23 @@ class CorruptionCardsTest {
         () -> assertEquals("images/cards/poison_dagger.png", card.texturePath));
   }
 
+  @Test
+  void shouldLoadTaintedEdge() {
+    CardConfig card = library.getCard("tainted_edge").orElseThrow();
+
+    assertAll(
+        () -> assertEquals("Tainted Edge", card.name),
+        () -> assertEquals("Deal 10 damage. Apply 4 Poison for 2 turns.", card.description),
+        () -> assertEquals(2, card.cost),
+        () -> assertEquals(CardType.ATTACK, card.type),
+        () -> assertEquals(Rarity.UNCOMMON, card.rarity),
+        () -> assertEquals(TargetType.SINGLE_ENEMY, card.target),
+        () -> assertEquals(2, card.effects.length),
+        () -> assertEffect(card.effects[0], EffectType.DAMAGE, 10, 0),
+        () -> assertEffect(card.effects[1], EffectType.POISON, 4, 2),
+        () -> assertEquals("images/cards/poison_dagger.png", card.texturePath));
+  }
+
   private static void assertEffect(EffectConfig effect, EffectType type, int value, int duration) {
     assertEquals(type, effect.type);
     assertEquals(value, effect.value);
