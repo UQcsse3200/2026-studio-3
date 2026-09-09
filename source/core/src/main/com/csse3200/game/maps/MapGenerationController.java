@@ -51,12 +51,42 @@ public class MapGenerationController {
    * in some way
    */
   private int generatePathing() {
+    List<List<MapNode>> generatedPaths = initializePaths();
+
+    if (generatedPaths.isEmpty()) {
+      return -1;
+    }
 
     return 0;
   }
 
-  private void initializePaths() {
+  private void buildPath(List<MapNode> path) {
 
+  }
+
+  private List<List<MapNode>> initializePaths() {
+
+    List<List<MapNode>> generatedPaths = new ArrayList<>();
+
+    int pathCount = rand.nextInt(3, 5);
+    MapNode startNode = map.getNode(0);
+    List<MapNode> firstRow = map.getNodesByHeight(1);
+
+    for (int i = 0; i < pathCount; i++) {
+
+      firstRow.remove(rand.nextInt(0, firstRow.size()));
+    }
+
+    for (MapNode node : firstRow) {
+
+      map.connectNodes(startNode, node);
+
+      List<MapNode> path = new ArrayList<>();
+      path.add(node);
+      generatedPaths.add(path);
+    }
+
+    return generatedPaths;
   }
 
   public MapGraph getMap() {
