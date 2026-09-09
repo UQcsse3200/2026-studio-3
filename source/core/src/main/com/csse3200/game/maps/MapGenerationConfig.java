@@ -1,9 +1,6 @@
 package com.csse3200.game.maps;
 
-/**
- * Immutable configuration for generating and assigning room types to a map node
- * pool.
- */
+/** Immutable configuration for generating and assigning room types to a map node pool. */
 public final class MapGenerationConfig {
 
   // TODO: shouldnt be constants really, make these work like weights below
@@ -18,36 +15,33 @@ public final class MapGenerationConfig {
   private int shopWeight = 10;
   private final Long seed;
 
-  /**
-   * Creates and validates a room distribution configuration with default values
-   * and no seed.
-   */
+  /** Creates and validates a room distribution configuration with default values and no seed. */
   public MapGenerationConfig() {
     checkValid(normalNodeCount, combatWeight, eventWeight, shopWeight);
-    this.seed = null;
+    this.seed = System.nanoTime();
   }
 
   /**
    * Creates and validates a room distribution configuration without seed.
    *
    * @param normalNodeCount number of normal nodes
-   * @param combatWeight    relative combat-room weight
-   * @param eventWeight     relative event-room weight
-   * @param shopWeight      relative shop-room weight
+   * @param combatWeight relative combat-room weight
+   * @param eventWeight relative event-room weight
+   * @param shopWeight relative shop-room weight
    */
   public MapGenerationConfig(
       int normalNodeCount, int combatWeight, int eventWeight, int shopWeight) {
-    this(normalNodeCount, combatWeight, eventWeight, shopWeight, null);
+    this(normalNodeCount, combatWeight, eventWeight, shopWeight, System.nanoTime());
   }
 
   /**
    * Creates and validates a room distribution configuration.
    *
    * @param normalNodeCount number of normal nodes
-   * @param combatWeight    relative combat-room weight
-   * @param eventWeight     relative event-room weight
-   * @param shopWeight      relative shop-room weight
-   * @param seed            seed used for repeatable random generation
+   * @param combatWeight relative combat-room weight
+   * @param eventWeight relative event-room weight
+   * @param shopWeight relative shop-room weight
+   * @param seed seed used for repeatable random generation
    */
   public MapGenerationConfig(
       int normalNodeCount, int combatWeight, int eventWeight, int shopWeight, Long seed) {

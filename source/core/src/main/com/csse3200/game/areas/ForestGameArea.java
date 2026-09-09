@@ -27,30 +27,30 @@ public class ForestGameArea extends GameArea {
   private static final GridPoint2 ENEMY_SPAWN = new GridPoint2(20, PLAYER_SPAWN.y);
   private static final float WALL_WIDTH = 3f;
   private static final String[] forestTextures = {
-      "images/star_player.png",
-      "images/tree.png",
-      "images/ghost_king.png",
-      "images/ghost_1.png",
-      "images/enemy.png",
-      "images/grass_1.png",
-      "images/grass_2.png",
-      "images/grass_3.png",
-      "images/hex_grass_1.png",
-      "images/hex_grass_2.png",
-      "images/hex_grass_3.png",
-      "images/iso_grass_1.png",
-      "images/iso_grass_2.png",
-      "images/iso_grass_3.png",
-      "images/enemies/intents/attack.png",
-      "images/enemies/intents/defend.png"
+    "images/star_player.png",
+    "images/tree.png",
+    "images/ghost_king.png",
+    "images/ghost_1.png",
+    "images/enemy.png",
+    "images/grass_1.png",
+    "images/grass_2.png",
+    "images/grass_3.png",
+    "images/hex_grass_1.png",
+    "images/hex_grass_2.png",
+    "images/hex_grass_3.png",
+    "images/iso_grass_1.png",
+    "images/iso_grass_2.png",
+    "images/iso_grass_3.png",
+    "images/enemies/intents/attack.png",
+    "images/enemies/intents/defend.png"
   };
   private static final String[] forestTextureAtlases = {
-      "images/terrain_iso_grass.atlas",
-      "images/ghost.atlas",
-      "images/ghostKing.atlas",
-      "images/enemies/bone_crawler.atlas"
+    "images/terrain_iso_grass.atlas",
+    "images/ghost.atlas",
+    "images/ghostKing.atlas",
+    "images/enemies/bone_crawler.atlas"
   };
-  private static final String[] forestSounds = { "sounds/Impact4.ogg" };
+  private static final String[] forestSounds = {"sounds/Impact4.ogg"};
 
   private final TerrainFactory terrainFactory;
 
@@ -60,8 +60,7 @@ public class ForestGameArea extends GameArea {
   /**
    * Initialise this ForestGameArea to use the provided TerrainFactory.
    *
-   * @param terrainFactory TerrainFactory used to create the terrain for the
-   *                       GameArea.
+   * @param terrainFactory TerrainFactory used to create the terrain for the GameArea.
    * @requires terrainFactory != null
    */
   public ForestGameArea(TerrainFactory terrainFactory) {
@@ -69,10 +68,7 @@ public class ForestGameArea extends GameArea {
     this.terrainFactory = terrainFactory;
   }
 
-  /**
-   * Create the game area, including terrain, static entities (trees), dynamic
-   * entities (player)
-   */
+  /** Create the game area, including terrain, static entities (trees), dynamic entities (player) */
   @Override
   public void create() {
     loadAssets();
@@ -137,10 +133,8 @@ public class ForestGameArea extends GameArea {
   }
 
   /**
-   * Spawns a single enemy into the forest area so it's visible and present in the
-   * world. Uses the
-   * roster-driven EnemyFactory, so the enemy id must exist in
-   * configs/enemies.json (falls back to a
+   * Spawns a single enemy into the forest area so it's visible and present in the world. Uses the
+   * roster-driven EnemyFactory, so the enemy id must exist in configs/enemies.json (falls back to a
    * default config otherwise).
    */
   private Entity spawnEnemy() {

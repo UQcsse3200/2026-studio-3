@@ -56,8 +56,7 @@ class NodePoolGeneratorTest {
   @Test
   void usesLongArithmeticForLargeWeights() {
     MapGenerationConfig config =
-        new MapGenerationConfig(
-            7, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 12345L);
+        new MapGenerationConfig(7, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 12345L);
 
     Map<Integer, MapNode> nodes = NodePoolGenerator.generate(config);
 

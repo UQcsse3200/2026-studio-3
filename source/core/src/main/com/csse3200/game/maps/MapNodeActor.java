@@ -9,8 +9,7 @@ import com.csse3200.game.services.ServiceLocator;
 /**
  * MapNodeActor
  *
- * <p>
- * The UI element to visually render each node the player can travel to
+ * <p>The UI element to visually render each node the player can travel to
  */
 public class MapNodeActor extends Group {
 
@@ -19,10 +18,8 @@ public class MapNodeActor extends Group {
   private Image nodeIcon;
 
   /**
-   * Constructer class to intialize a MapNodeActor. The size of the node is
-   * determined from the
-   * width of the window to fill out the screen. 13f is derived from there being 7
-   * nodes in each
+   * Constructer class to intialize a MapNodeActor. The size of the node is determined from the
+   * width of the window to fill out the screen. 13f is derived from there being 7 nodes in each
    * layer, and thus 6 gaps between them 6 + 7 = 13
    *
    * @param node Node to be rendered
@@ -31,7 +28,8 @@ public class MapNodeActor extends Group {
     this.node = node;
     float mapWidth = Gdx.graphics.getWidth();
     this.size = mapWidth / 13f;
-    nodeIcon = new Image(ServiceLocator.getResourceService().getAsset(getNodeIcon(), Texture.class));
+    nodeIcon =
+        new Image(ServiceLocator.getResourceService().getAsset(getNodeIcon(), Texture.class));
 
     nodeIcon.setSize(size, size);
     checkNodeState();
@@ -48,7 +46,8 @@ public class MapNodeActor extends Group {
     this.node = node;
     this.size = size;
 
-    nodeIcon = new Image(ServiceLocator.getResourceService().getAsset(getNodeIcon(), Texture.class));
+    nodeIcon =
+        new Image(ServiceLocator.getResourceService().getAsset(getNodeIcon(), Texture.class));
 
     nodeIcon.setSize(size, size);
     checkNodeState();
@@ -120,8 +119,7 @@ public class MapNodeActor extends Group {
   }
 
   /**
-   * Determines which image should be used for the node based on it's NodeState
-   * and RoomType
+   * Determines which image should be used for the node based on it's NodeState and RoomType
    *
    * @return the path of the correct node image
    */

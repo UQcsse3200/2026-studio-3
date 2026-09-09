@@ -59,8 +59,7 @@ public class MapGraphTest {
 
   @Test
   void createsGraphFromGeneratedNodeMap() {
-    Map<Integer, MapNode> nodes =
-        NodePoolGenerator.generate(new MapGenerationConfig());
+    Map<Integer, MapNode> nodes = NodePoolGenerator.generate(new MapGenerationConfig());
 
     MapGraph graph = new MapGraph(nodes);
     graph.addNodes(nodes);
