@@ -5,5 +5,6 @@ public enum RoomType {
   COMBAT,
   SHOP,
   EVENT,
+  START,
   FINAL
 }

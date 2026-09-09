@@ -83,6 +83,24 @@ public class MapGraph implements EncounterCallback {
     return this.nodes;
   }
 
+  /*
+   * Returns a signed integer of the difference in X positions of nodes.
+   * Not particularly useful unless nodes are on neighbouring layers.
+   *
+   * @param node1
+   * 
+   * @param node2
+   *
+   * @return difference in x positions
+   */
+  public int getRelativeNodePos(MapNode node1, MapNode node2) {
+
+    int node1Pos = node1.getNodeId() % MapGenerationConfig.MAP_WIDTH;
+    int node2Pos = node2.getNodeId() % MapGenerationConfig.MAP_WIDTH;
+
+    return node1Pos - node2Pos;
+  }
+
   /**
    * Gets all nodes in the given row of the MapGraph.
    *
@@ -101,11 +119,11 @@ public class MapGraph implements EncounterCallback {
   }
 
   /** Connects two nodes. */
-  public void connectNodes(MapNode first, MapNode second) {
+  public void connectNodes(MapNode node1, MapNode node2) {
 
-    if (first != null && second != null) {
-      first.addConnection(second);
-      second.addConnection(first);
+    if (node1 != null && node2 != null) {
+      node1.addConnection(node2);
+      node2.addConnection(node1);
     }
   }
 

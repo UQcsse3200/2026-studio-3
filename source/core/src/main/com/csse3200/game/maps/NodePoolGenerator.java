@@ -40,10 +40,11 @@ public final class NodePoolGenerator {
     Map<Integer, MapNode> nodes = new HashMap<>(nodeCount + 1);
 
     // Using zero-based IDs here: 0 to nodeCount - 1.
-    for (int index = 0; index < roomTypes.size(); index++) {
+    for (int index = 1; index < roomTypes.size(); index++) {
       nodes.put(index, new MapNode(index, roomTypes.get(index)));
     }
 
+    nodes.put(0, new MapNode(0, RoomType.START));
     nodes.put(nodeCount, new MapNode(nodeCount, RoomType.FINAL));
     return Map.copyOf(nodes);
   }

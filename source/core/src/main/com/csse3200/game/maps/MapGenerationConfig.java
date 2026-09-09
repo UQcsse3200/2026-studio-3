@@ -6,11 +6,11 @@ package com.csse3200.game.maps;
  */
 public final class MapGenerationConfig {
 
-  // TODO: shouldnt be constants really, make these work like weights
+  // TODO: shouldnt be constants really, make these work like weights below
   public static final int MAP_WIDTH = 7;
   public static final int MAP_HEIGHT = 10;
   public static final int MAX_NODE_COUNT = MAP_WIDTH * MAP_HEIGHT;
-  public static final int BRANCH_CHANCE = 15;
+  public static final int BRANCH_CHANCE = 5;
 
   private int normalNodeCount = 70;
   private int combatWeight = 80;

@@ -117,7 +117,7 @@ public class MapDisplay extends UIComponent {
     for (MapNode node : mapGraph.getNodes().values()) {
       MapNodeActor nodeActor = new MapNodeActor(node);
       mapInputHandler.attach(nodeActor);
-      float x = (node.getRoomType() == RoomType.FINAL)
+      float x = (node.getRoomType() == RoomType.FINAL || node.getRoomType() == RoomType.START)
           ? mapWidth / 2f - nodeWidth / 2f
           : getNodeX(node.getNodeId(), nodeWidth);
       float y = getNodeY(node);
