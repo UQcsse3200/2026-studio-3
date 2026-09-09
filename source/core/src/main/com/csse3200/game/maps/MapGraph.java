@@ -85,7 +85,7 @@ public class MapGraph implements EncounterCallback {
 
   /*
    * Returns a signed integer of the difference in X positions of nodes.
-   * Not particularly useful unless nodes are on neighbouring layers.
+   * Only really relevant for nodes on neighbouring or same layer.
    *
    * @param node1
    * 

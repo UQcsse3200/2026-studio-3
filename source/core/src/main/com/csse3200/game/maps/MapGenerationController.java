@@ -57,11 +57,50 @@ public class MapGenerationController {
       return -1;
     }
 
+    pruneUnconnectedMapGraphNodes();
     return 0;
   }
 
   private void buildPath(List<MapNode> path) {
 
+  }
+
+  /**
+   * Heuristic function for map generation. Finds a random node in range
+   * that hasn't already been visited.
+   *
+   * @param parentNode Chosen node from which heuristic will be evaluated
+   *
+   */
+  private MapNode chooseNextNode(MapNode parentNode) {
+
+    List<MapNode> validNodes = getNodesInRange(parentNode);
+
+    for (MapNode node : validNodes) {
+
+      int distance = map.getRelativeNodePos(parentNode, node);
+      if (distance == 0 && !node.getConnections().isEmpty()) { // this entire check is to prevent nodes crossing
+
+        for (MapNode connected : node.getConnections()) {
+
+          int connectionDistance = map.getRelativeNodePos(parentNode, connected);
+          if (connectionDistance == -1) {
+
+            validNodes.removeIf(neighbour -> map.getRelativeNodePos(neighbour, parentNode) == -1);
+          } else if (connectionDistance == 1) {
+
+            validNodes.removeIf(neighbour -> map.getRelativeNodePos(neighbour, parentNode) == 1);
+          }
+
+        }
+      }
+    }
+
+    if (validNodes.isEmpty()) {
+      return null;
+    }
+
+    return validNodes.get(rand.nextInt(validNodes.size()));
   }
 
   private List<List<MapNode>> initializePaths() {
