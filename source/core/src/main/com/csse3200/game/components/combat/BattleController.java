@@ -45,8 +45,9 @@ public class BattleController {
   private CardPlayRequest pendingCard;
   private boolean lastCardPlaySucceeded;
 
-  /** Logging Strings & Error messages*/
+  /** Logging Strings & Error messages */
   private static final String PHASE_CHANGED_EVENT = "battlePhaseChanged";
+
   private static final String BATTLE_LOG_EVENT = "battleLog";
   private static final String BATTLE_ENDED_EVENT = "battleEnded";
   private static final String ENEMY_EFFECTS_EVENT = "enemyEffects";
@@ -107,14 +108,17 @@ public class BattleController {
     this.currentPhase = BattlePhase.SETUP;
     this.currentEnemyIndex = -1;
     this.currentEnemyIntent = null;
-      this.eventHandler = new EventHandler();
+    this.eventHandler = new EventHandler();
     this.eventQueue = new ArrayDeque<>();
   }
 
   /**
-   * Handles a single event atomically.
+   * Queues an event and processes queued events in order.
    *
-   * @param event The event within the Battle Loop to handle.
+   * <p>Events submitted during processing are queued until the current event finishes. If
+   * processing throws, remaining events are discarded; changes already made are not rolled back.
+   *
+   * @param event the battle event to handle
    */
   public void handle(BattleEvent event) {
     Objects.requireNonNull(event, "event cannot be null");
@@ -124,7 +128,7 @@ public class BattleController {
     if (this.processingEvents) {
       return;
     }
-    // pendingEvent keeps events atomic.
+    // Prevents nested calls from processing the queue recursively
     this.processingEvents = true;
     // Takes an event from the queue, attempts to process atomically
     try {
@@ -217,28 +221,25 @@ public class BattleController {
    *
    * @deprecated Cards are submitted through submitPlayCardRequest
    */
-  public void selectAttack() {
-  }
+  public void selectAttack() {}
 
   /**
-  * Player intends to defend themselves on their turn
-  *
-  * @deprecated Cards are submitted through submitPlayCardRequest
-  */
-  public void selectDefend() {
-  }
+   * Player intends to defend themselves on their turn
+   *
+   * @deprecated Cards are submitted through submitPlayCardRequest
+   */
+  public void selectDefend() {}
 
   /**
    * Player intends to do another action on the turn.
    *
    * @deprecated Cards are submitted through submitPlayCardRequest
    */
-  public void selectOther() {
-  }
+  public void selectOther() {}
 
   /** Player decides to end their turn */
   public void endPlayerTurn() {
-      if (canHandle(BattleEvent.PLAYER_END_REQUESTED)) {
+    if (canHandle(BattleEvent.PLAYER_END_REQUESTED)) {
       handle(BattleEvent.PLAYER_END_REQUESTED);
     }
   }
@@ -442,7 +443,7 @@ public class BattleController {
    *
    * @return the current active enemy instance in the battle
    */
-  private Entity getEnemy() {
+  private Entity getActiveEnemy() {
     if (this.currentEnemyIndex < 0 || this.currentEnemyIndex >= enemies.size()) {
       throw new IllegalStateException("No active enemy.");
     }
@@ -462,11 +463,12 @@ public class BattleController {
   }
 
   /**
-   * Checks the outcome of the battle.
+   * Checks whether the combat has ended, and queues the corresponding outcome event. If both sides
+   * are defeated, the player defeat takes precedence.
    *
    * @return True if the battle is over, False if it isn't.
    */
-  private boolean isBattleOver() {
+  private boolean queueBattleOutcomeIfOver() {
     CombatStatsComponent playerStats = this.player.getComponent(CombatStatsComponent.class);
     boolean allEnemiesDead = this.enemies.stream().noneMatch(this::isEnemyAlive);
 
@@ -483,7 +485,7 @@ public class BattleController {
   }
 
   /** Cleans up the variables after a round or the battle sequence is done. */
-  private void cleanUp() {
+  private void resetEnemyCursor() {
     this.setCurrentEnemyIndex(-1);
   }
 
@@ -509,7 +511,7 @@ public class BattleController {
     }
     lastCardPlaySucceeded = false;
     pendingCard = cardPlayRequest;
-      handle(event);
+    handle(event);
     return lastCardPlaySucceeded;
   }
 
@@ -538,7 +540,7 @@ public class BattleController {
 
     // If an enemy is alive set it to the current intent
     if (this.targetNextEnemy()) {
-      this.setEnemyIntent(resolveEnemyIntent(this.getEnemy()));
+      this.setEnemyIntent(resolveEnemyIntent(this.getActiveEnemy()));
     } else {
       // If no enemies are alive - remove stale intent
       this.setEnemyIntent(null);
@@ -568,7 +570,7 @@ public class BattleController {
   }
 
   private void enterPlayerStart() {
-    if (this.isBattleOver()) {
+    if (this.queueBattleOutcomeIfOver()) {
       return;
     }
     // Start-of-turn operations: refill energy for the new player turn.
@@ -585,15 +587,13 @@ public class BattleController {
 
   private void enterPlayerTurn() {
     // Enable or accept player actions.
-    if (this.isBattleOver()) {
-      return;
-    }
-    // wait for ui to submit card or end tyurn
+    this.queueBattleOutcomeIfOver();
+    // wait for ui to submit card or end turn
   }
 
   private void finishPlayerCardAction() {
     pendingCard = null;
-      handle(BattleEvent.PLAYER_ACTION_RESOLVED);
+    handle(BattleEvent.PLAYER_ACTION_RESOLVED);
   }
 
   private void enterPlayerAttack() {
@@ -787,9 +787,9 @@ public class BattleController {
     return summary.append('.').toString();
   }
 
-  public void enterPlayerEnd() {
+  private void enterPlayerEnd() {
     // Coordinate end-of-turn operations.
-    if (this.isBattleOver()) {
+    if (this.queueBattleOutcomeIfOver()) {
       return;
     }
     handle(BattleEvent.PLAYER_TURN_ENDED);
@@ -797,7 +797,7 @@ public class BattleController {
 
   private void enterPlayerResolved() {
     // Check battle outcome before allowing another action.
-    if (this.isBattleOver()) {
+    if (this.queueBattleOutcomeIfOver()) {
       return;
     }
     handle(BattleEvent.PLAYER_CONTINUES);
@@ -815,7 +815,7 @@ public class BattleController {
   }
 
   private void enterEnemyAttack() {
-    Entity enemy = getEnemy();
+    Entity enemy = getActiveEnemy();
 
     // Team 1's executeIntent now applies the hit to the player's CombatStatsComponent itself, so
     // the controller no longer re-applies the damage. Read the player's HP either side of the call
@@ -838,7 +838,7 @@ public class BattleController {
   }
 
   private void enterEnemyDefend() {
-    Entity enemy = getEnemy();
+    Entity enemy = getActiveEnemy();
 
     EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
     if (behaviour != null) {
@@ -849,7 +849,7 @@ public class BattleController {
   }
 
   private void enterEnemyOther() {
-    Entity enemy = getEnemy();
+    Entity enemy = getActiveEnemy();
 
     EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
     if (behaviour != null) {
@@ -861,29 +861,29 @@ public class BattleController {
 
   private void enterEnemyResolved() {
     // If the battle is over, abort and head straight to ending
-    if (this.isBattleOver()) {
+    if (this.queueBattleOutcomeIfOver()) {
       return;
     }
 
     // If another enemy is successfully targeted.
     if (this.targetNextEnemy()) {
-      this.setEnemyIntent(resolveEnemyIntent(this.getEnemy()));
+      this.setEnemyIntent(resolveEnemyIntent(this.getActiveEnemy()));
       handle(BattleEvent.MORE_ENEMIES);
       return;
     }
 
-    this.cleanUp();
+    this.resetEnemyCursor();
     handle(BattleEvent.ENEMY_PHASE_COMPLETE);
   }
 
   private void enterVictory() {
-    this.cleanUp();
+    this.resetEnemyCursor();
     narrate("Victory! Every enemy has been defeated.");
     eventHandler.trigger(BATTLE_ENDED_EVENT, Boolean.TRUE);
   }
 
   private void enterDefeat() {
-    this.cleanUp();
+    this.resetEnemyCursor();
     narrate("Defeat. The player has fallen.");
     eventHandler.trigger(BATTLE_ENDED_EVENT, Boolean.FALSE);
   }
