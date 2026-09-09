@@ -217,10 +217,25 @@ public class BattleController {
   }
 
   /**
+   * Reports whether the player currently has the given status effect.
+   *
+   * <p>Read-only: exposes a query about the player rather than the player entity itself, so callers
+   * cannot mutate player state through this controller.
+   *
+   * @param effectType identifier of the status effect, as stored by CombatStatsComponent
+   * @return true if the player carries an active effect with this identifier
+   */
+  public boolean playerHasStatusEffect(String effectType) {
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    return stats != null && stats.hasStatusEffect(effectType);
+  }
+
+  /**
    * Player intends to attack the enemy on their turn
    *
    * @deprecated Cards are submitted through submitPlayCardRequest
    */
+  @Deprecated
   public void selectAttack() {}
 
   /**
@@ -228,6 +243,7 @@ public class BattleController {
    *
    * @deprecated Cards are submitted through submitPlayCardRequest
    */
+  @Deprecated
   public void selectDefend() {}
 
   /**
@@ -235,6 +251,7 @@ public class BattleController {
    *
    * @deprecated Cards are submitted through submitPlayCardRequest
    */
+  @Deprecated
   public void selectOther() {}
 
   /** Player decides to end their turn */
@@ -356,20 +373,6 @@ public class BattleController {
   }
 
   /**
-   * Reports whether the player currently has the given status effect.
-   *
-   * <p>Read-only: exposes a query about the player rather than the player entity itself, so callers
-   * cannot mutate player state through this controller.
-   *
-   * @param effectType identifier of the status effect, as stored by CombatStatsComponent
-   * @return true if the player carries an active effect with this identifier
-   */
-  public boolean playerHasStatusEffect(String effectType) {
-    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
-    return stats != null && stats.hasStatusEffect(effectType);
-  }
-
-  /**
    * Convenience function for returning if a given event can be handled within a state.
    *
    * @param event The event to check.
@@ -400,7 +403,7 @@ public class BattleController {
    *
    * @return True if a new target has been chosen. False if all enemies are dead.
    */
-  private boolean targetNextEnemy() {
+  private boolean advanceToNextLivingEnemy() {
     // Starts from index after currently targeted enemy.
     for (int i = this.currentEnemyIndex + 1; i < this.enemies.size(); i++) {
       Entity currentEnemy = this.enemies.get(i);
@@ -515,7 +518,7 @@ public class BattleController {
     return lastCardPlaySucceeded;
   }
 
-  /*------------------------- Possible Action Branches ----------------------------*/
+  /*--------------------------- Possible Action Branches ----------------------------*/
 
   private void enterSetup() {
     // Coordinate battle setup.
@@ -525,7 +528,7 @@ public class BattleController {
 
   private void enterRevealIntents() {
     // reset enemy index to reduce the chance of buggy behaviour with dead enemies
-    this.setCurrentEnemyIndex(-1); // TODO: Probably a better way to do this.
+    this.resetEnemyCursor();
 
     // Rolls intent for alive each enemy.
     for (Entity enemy : this.enemies) {
@@ -539,7 +542,7 @@ public class BattleController {
     }
 
     // If an enemy is alive set it to the current intent
-    if (this.targetNextEnemy()) {
+    if (this.advanceToNextLivingEnemy()) {
       this.setEnemyIntent(resolveEnemyIntent(this.getActiveEnemy()));
     } else {
       // If no enemies are alive - remove stale intent
@@ -805,13 +808,13 @@ public class BattleController {
 
   private void enterEnemyTurn() {
     // Begin the current enemy's action.
-    if (currentEnemyIntent.getType() == IntentType.ATTACK) {
-      handle(BattleEvent.ENEMY_ATTACK_SELECTED);
-    } else if (currentEnemyIntent.getType() == IntentType.DEFEND) {
-      handle(BattleEvent.ENEMY_DEFEND_SELECTED);
-    } else {
-      handle(BattleEvent.ENEMY_OTHER_SELECTED);
-    }
+    BattleEvent event =
+        switch (currentEnemyIntent.getType()) {
+          case ATTACK -> BattleEvent.ENEMY_ATTACK_SELECTED;
+          case DEFEND -> BattleEvent.ENEMY_DEFEND_SELECTED;
+          default -> BattleEvent.ENEMY_OTHER_SELECTED;
+        };
+    handle(event);
   }
 
   private void enterEnemyAttack() {
@@ -866,7 +869,7 @@ public class BattleController {
     }
 
     // If another enemy is successfully targeted.
-    if (this.targetNextEnemy()) {
+    if (this.advanceToNextLivingEnemy()) {
       this.setEnemyIntent(resolveEnemyIntent(this.getActiveEnemy()));
       handle(BattleEvent.MORE_ENEMIES);
       return;
