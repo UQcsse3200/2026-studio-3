@@ -310,6 +310,65 @@ class BattleControllerTest {
     assertEquals(BattlePhase.SETUP, controller.getCurrentPhase());
   }
 
+    @Test
+    void shouldRejectCardSubmissionFromPhaseListener() {
+        AtomicBoolean attempted = new AtomicBoolean(false);
+
+        controller.addPhaseChangeListener(
+                (previous, next) -> {
+                    if (next == BattlePhase.PLAYER_TURN
+                            && attempted.compareAndSet(false, true)) {
+                        assertFalse(
+                                controller.submitCardPlayRequest(
+                                        new CardPlayRequest("strike", "enemy-1"),
+                                        PlayerIntent.ATTACK));
+                        assertFalse(
+                                controller.submitCardPlayRequest(
+                                        new CardPlayRequest("defend", "player"),
+                                        PlayerIntent.DEFEND));
+                        assertNull(controller.getCardPlayRequest());
+                    }
+                });
+
+        controller.start();
+
+        assertTrue(attempted.get());
+        assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+        assertFalse(phaseHistory.contains(BattlePhase.PLAYER_ATTACK));
+        assertFalse(phaseHistory.contains(BattlePhase.PLAYER_DEFEND));
+
+        // Normal submissions still work once event processing finishes.
+        assertTrue(
+                controller.submitCardPlayRequest(
+                        new CardPlayRequest("strike", "enemy-1"), PlayerIntent.ATTACK));
+    }
+
+    @Test
+    void shouldPreserveSuccessfulResultWhenListenerSubmitsAnotherCard() {
+        controller.start();
+        AtomicBoolean attempted = new AtomicBoolean(false);
+
+        controller.addPhaseChangeListener(
+                (previous, next) -> {
+                    if (next == BattlePhase.PLAYER_TURN
+                            && attempted.compareAndSet(false, true)) {
+                        assertFalse(
+                                controller.submitCardPlayRequest(
+                                        new CardPlayRequest("defend", "player"),
+                                        PlayerIntent.DEFEND));
+                    }
+                });
+
+        assertTrue(
+                controller.submitCardPlayRequest(
+                        new CardPlayRequest("strike", "enemy-1"), PlayerIntent.ATTACK));
+
+        assertTrue(attempted.get());
+        assertNull(controller.getCardPlayRequest());
+        assertFalse(phaseHistory.contains(BattlePhase.PLAYER_DEFEND));
+        assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+    }
+
   private void advanceToPlayerTurn() {
     controller.handle(BattleEvent.SETUP_COMPLETE);
   }

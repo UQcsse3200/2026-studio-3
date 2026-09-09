@@ -494,6 +494,7 @@ public class BattleController {
   public Boolean submitCardPlayRequest(CardPlayRequest cardPlayRequest, PlayerIntent playerIntent) {
     Objects.requireNonNull(cardPlayRequest, "cardPlayRequest cannot be null.");
     Objects.requireNonNull(playerIntent, "playerIntent cannot be null.");
+
     BattleEvent event =
         switch (playerIntent) {
           case ATTACK -> BattleEvent.PLAYER_ATTACK_SELECTED;
@@ -502,7 +503,8 @@ public class BattleController {
           case END_PLAYER_TURN ->
               throw new IllegalArgumentException("End turn is not a card action");
         };
-    if (!canHandle(event)) {
+
+    if (processingEvents || !canHandle(event)) {
       return false;
     }
     lastCardPlaySucceeded = false;
