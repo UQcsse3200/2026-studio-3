@@ -68,6 +68,19 @@
         "target": "SELF",
         "effects": [{ "type": "HEAL", "value": 6, "duration": 0 }],
         "texturePath": "images/cards/bandage.png"
+      },
+      {
+        "id": "venom_flask",
+        "name": "Venom Flask",
+        "description": "Apply 5 Poison for 3 turns.",
+        "cost": 1,
+        "type": "SKILL",
+        "rarity": "UNCOMMON",
+        "target": "SINGLE_ENEMY",
+        "effects": [
+          { "type": "POISON", "value": 5, "duration": 3 }
+        ],
+        "texturePath": "images/cards/poison_dagger.png"
       }
     ]
   }
