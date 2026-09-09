@@ -46,8 +46,9 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
     int maxHealth = stats != null ? stats.getMaxHealth() : 0;
     int gold = inventory != null ? inventory.getGold() : 0;
 
-    // TODO: piety has no live data source yet. Confirmed with Team 7 (message sent 9/9) —
-    // update this once they confirm where it will live.
+    // Piety is confirmed not implemented for this sprint (Amber_Teng, Team 7, 9/10) — dropped
+    // from scope in favor of concrete Status Effects. PlayerSaveData.piety is a leftover field
+    // from an earlier design; left at 0 intentionally, not a placeholder awaiting a real source.
     int piety = 0;
 
     return new PlayerSaveData(health, maxHealth, gold, piety);
