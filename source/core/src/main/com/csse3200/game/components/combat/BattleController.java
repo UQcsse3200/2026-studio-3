@@ -212,21 +212,32 @@ public class BattleController {
     handle(BattleEvent.SETUP_COMPLETE);
   }
 
-  /** Player intends to attack the enemy on their turn */
+  /**
+   * Player intends to attack the enemy on their turn
+   *
+   * @deprecated Cards are submitted through submitPlayCardRequest
+   */
   public void selectAttack() {
   }
 
-  /** Player intends to defend themselves on their turn */
+  /**
+  * Player intends to defend themselves on their turn
+  *
+  * @deprecated Cards are submitted through submitPlayCardRequest
+  */
   public void selectDefend() {
   }
 
-  /** Player intends to do other actions on their turn */
+  /**
+   * Player intends to do another action on the turn.
+   *
+   * @deprecated Cards are submitted through submitPlayCardRequest
+   */
   public void selectOther() {
   }
 
   /** Player decides to end their turn */
   public void endPlayerTurn() {
-
       if (canHandle(BattleEvent.PLAYER_END_REQUESTED)) {
       handle(BattleEvent.PLAYER_END_REQUESTED);
     }
@@ -248,7 +259,6 @@ public class BattleController {
     this.eventQueue.clear();
     this.setCurrentEnemyIndex(-1);
     this.setEnemyIntent(null);
-    this.setPlayerIntent(null);
     this.setCurrentPhase(BattlePhase.SETUP);
 
     this.notifyPhaseChange(previousPhase, BattlePhase.SETUP);
@@ -380,9 +390,6 @@ public class BattleController {
 
   private void setEnemyIntent(EnemyIntent intent) {
     this.currentEnemyIntent = intent;
-  }
-
-  private void setPlayerIntent(PlayerIntent intent) {
   }
 
   /*------------------------- Helper functions ----------------------------*/
