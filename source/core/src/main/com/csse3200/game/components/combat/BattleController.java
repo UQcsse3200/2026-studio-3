@@ -2,15 +2,12 @@ package com.csse3200.game.components.combat;
 
 import com.csse3200.game.cards.CardPlayRequest;
 import com.csse3200.game.cards.CardService;
-import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
-import com.csse3200.game.cards.effects.CardEffectResolution;
 import com.csse3200.game.cards.effects.CardEffectResolver;
 import com.csse3200.game.cards.effects.CardPlayResult;
 import com.csse3200.game.cards.effects.PlayerEffectState;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.components.CombatStatsComponent;
-import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.enemy.IntentType;
@@ -21,11 +18,9 @@ import com.csse3200.game.events.EventHandler;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.events.listeners.EventListener2;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * The central controller of the current state of the battle loop. Controls what phase the battle is
@@ -33,15 +28,19 @@ import java.util.Optional;
  * This is functionally the Finite State Machine.
  */
 public class BattleController {
-  private BattlePhase currentPhase;
+  private final Entity player;
+
+  private final List<Entity> enemies;
   private int currentEnemyIndex;
   private EnemyIntent currentEnemyIntent;
+
+  private BattlePhase currentPhase;
   private final BattleTransitions battleTransitions;
   private final EventHandler eventHandler;
   private final Deque<BattleEvent> eventQueue;
-  private final Entity player;
-  private final List<Entity> enemies;
   private boolean processingEvents;
+
+  private final CardEffectHandler effectHandler;
   private CardPlayRequest pendingCard;
   private boolean lastCardPlaySucceeded;
 
@@ -54,18 +53,6 @@ public class BattleController {
   private static final String PLAYER_EFFECTS_EVENT = "playerEffects";
   private static final String HAND_CHANGED_EVENT = "handChanged";
   private static final String LISTENER_NOT_NULL = "Listener must not be null.";
-
-  /** Team 5's card-effect resolver (Team 6 configs -> resolved effects); null without cards. */
-  private final CardEffectResolver effectResolver;
-
-  /** Team 6 card library, used to look up a played card's config; null without cards. */
-  private final CardService cardService;
-
-  /** Team 5's per-battle player effect state, carrying Strength between plays. */
-  private final PlayerEffectState playerEffectState;
-
-  /** Team 5-owned deck state; null when the loop runs without cards. */
-  private final BattleDeck battleDeck;
 
   public BattleController(Entity player, List<Entity> enemies) throws IllegalArgumentException {
     this(player, enemies, null, null, null);
@@ -87,14 +74,13 @@ public class BattleController {
       BattleDeck battleDeck)
       throws IllegalArgumentException {
 
-    this.effectResolver = effectResolver;
-    this.cardService = cardService;
-    this.playerEffectState = new PlayerEffectState();
-    this.battleDeck = battleDeck;
     this.player = player;
     if (player == null) {
       throw new IllegalArgumentException("Player cannot be null.");
     }
+
+    this.effectHandler = new CardEffectHandler(effectResolver, cardService, battleDeck,
+            new PlayerEffectState());
 
     // Guards against empty list or null enemies.
     this.enemies = enemies;
@@ -594,7 +580,7 @@ public class BattleController {
       return;
     }
 
-    CardPlayResult result = playCardThroughCardSystem(request);
+    CardPlayResult result = effectHandler.playCard(request, this.player);
     if (result == null) {
       // Card system not wired in (e.g. unit tests without a resolution service).
       lastCardPlaySucceeded = true;
@@ -618,55 +604,12 @@ public class BattleController {
   }
 
   /**
-   * Plays the submitted card: looks its config up in Team 6's library, checks it is in hand and
-   * affordable, resolves its effects through Team 5's {@link CardEffectResolver}, then commits the
-   * energy spend, moves the card to the discard pile and draws a replacement so the hand stays
-   * topped up.
-   *
-   * @return the result, or {@code null} when no card system is wired in
-   */
-  private CardPlayResult playCardThroughCardSystem(CardPlayRequest request) {
-    if (effectResolver == null || cardService == null || battleDeck == null) {
-      return null;
-    }
-
-    Optional<CardConfig> maybeCard = cardService.getCard(request.cardID());
-    if (maybeCard.isEmpty()) {
-      return CardPlayResult.failure(
-          "Unknown card: " + request.cardID(), request.cardID(), request.targetID(), battleDeck);
-    }
-    CardConfig card = maybeCard.get();
-
-    if (!battleDeck.getHand().contains(card.id)) {
-      return CardPlayResult.failure("Card not in hand", card.id, request.targetID(), battleDeck);
-    }
-
-    EnergyComponent energy = playerEnergy();
-    if (energy != null && !energy.canAfford(card.cost)) {
-      return CardPlayResult.failure("Not enough energy", card.id, request.targetID(), battleDeck);
-    }
-
-    CardEffectResolution resolution = effectResolver.resolve(card, playerEffectState);
-
-    if (energy != null) {
-      energy.spendEnergy(card.cost);
-    }
-    battleDeck.playCard(card.id);
-    battleDeck.drawOne();
-
-    return CardPlayResult.success(
-        card.id,
-        request.targetID(),
-        resolution.enemyEffects(),
-        resolution.playerEffects(),
-        battleDeck,
-        card.cost);
-  }
-
-  /**
    * Passes the resolved effects to the other systems ({@code enemyEffects} to Team 1, {@code
    * playerEffects} to Team 7) and also applies them directly so the encounter resolves even before
    * those systems subscribe.
+   *
+   * @param request the card the player intends to play
+   * @param result the result of the card play attempt
    */
   private void dispatchCardEffects(CardPlayRequest request, CardPlayResult result) {
     List<ResolvedCardEffect> enemyEffects = result.enemyEffects();
@@ -675,68 +618,12 @@ public class BattleController {
     eventHandler.trigger(ENEMY_EFFECTS_EVENT, enemyEffects);
     eventHandler.trigger(PLAYER_EFFECTS_EVENT, playerEffects);
 
-    applyEnemyEffects(livingEnemyTargets(request), enemyEffects);
-    applyPlayerEffects(playerEffects);
+    effectHandler.applyEnemyEffects(
+            effectHandler.getLivingEnemyTargets(request, this.enemies), enemyEffects);
+    effectHandler.applyPlayerEffects(playerEffects, this.player);
 
     // The played card has left the hand (see playCardThroughCardSystem) — tell the UI to refresh.
     eventHandler.trigger(HAND_CHANGED_EVENT, result.updatedHand());
-  }
-
-  /**
-   * Chooses which enemies a card's enemy effects hit. Self-targeting cards hit nothing; everything
-   * else hits every living enemy, which covers both the single-enemy encounter and ALL_ENEMIES
-   * cards. Precise single-target selection can be layered on when encounters have several enemies.
-   */
-  private List<Entity> livingEnemyTargets(CardPlayRequest request) {
-    if ("player".equalsIgnoreCase(request.targetID())) {
-      return List.of();
-    }
-    List<Entity> targets = new ArrayList<>();
-    for (Entity enemy : this.enemies) {
-      if (isEnemyAlive(enemy)) {
-        targets.add(enemy);
-      }
-    }
-    return targets;
-  }
-
-  private void applyEnemyEffects(List<Entity> targets, List<ResolvedCardEffect> effects) {
-    for (Entity enemy : targets) {
-      CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
-      if (stats == null) {
-        continue;
-      }
-      for (ResolvedCardEffect effect : effects) {
-        switch (effect.type()) {
-          case DAMAGE -> stats.takeDamage(effect.value());
-          case POISON ->
-              stats.applyStatusEffect(
-                  new StatusEffect("poison", effect.value(), effect.duration()));
-          case VULNERABLE ->
-              stats.applyStatusEffect(
-                  new StatusEffect("vulnerable", effect.value(), effect.duration()));
-          default -> {
-            // BLOCK / HEAL / STRENGTH are not enemy-facing.
-          }
-        }
-      }
-    }
-  }
-
-  private void applyPlayerEffects(List<ResolvedCardEffect> effects) {
-    CombatStatsComponent stats = this.player.getComponent(CombatStatsComponent.class);
-    if (stats == null) {
-      return;
-    }
-    for (ResolvedCardEffect effect : effects) {
-      switch (effect.type()) {
-        case BLOCK -> stats.addArmor(effect.value());
-        case HEAL -> stats.heal(effect.value());
-        default -> {
-          // STRENGTH is already folded into the resolver's running player state.
-        }
-      }
-    }
   }
 
   /*--------------------------- Possible Action Branches ----------------------------*/
