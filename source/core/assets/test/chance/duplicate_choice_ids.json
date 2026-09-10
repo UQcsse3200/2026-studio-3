@@ -1,0 +1,20 @@
+{
+  "encounters": [
+    {
+      "id": "duplicate-choices",
+      "description": "Contains duplicate choice IDs.",
+      "choices": [
+        {
+          "id": "duplicate",
+          "description": "First choice.",
+          "outcome": { "healthDelta": 0, "currencyDelta": 0 }
+        },
+        {
+          "id": "duplicate",
+          "description": "Second choice.",
+          "outcome": { "healthDelta": 0, "currencyDelta": 0 }
+        }
+      ]
+    }
+  ]
+}

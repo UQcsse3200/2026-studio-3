@@ -66,6 +66,110 @@ class ChanceEncounterConfigLoaderTest {
     assertTrue(exception.getMessage().contains("Malformed"));
   }
 
+  @Test
+  void shouldRejectInvalidEncounterIdsAndDescriptions() {
+    ChanceEncounterLoadingException exception = loadInvalid("invalid_encounter_fields.json");
+
+    assertMessageContains(
+        exception,
+        "encounter[0]: id must not be null or blank",
+        "encounter[1]: id must not be null or blank",
+        "encounter[2]: description must not be null or blank",
+        "encounter[3]: description must not be null or blank");
+  }
+
+  @Test
+  void shouldRejectDuplicateEncounterIds() {
+    ChanceEncounterLoadingException exception = loadInvalid("duplicate_encounter_ids.json");
+
+    assertMessageContains(exception, "duplicate encounter ID 'duplicate'");
+  }
+
+  @Test
+  void shouldRejectEncounterWithoutChoices() {
+    ChanceEncounterLoadingException exception = loadInvalid("no_choices.json");
+
+    assertMessageContains(exception, "encounter[0]: must define at least one choice");
+  }
+
+  @Test
+  void shouldRejectInvalidChoiceIdsAndDescriptions() {
+    ChanceEncounterLoadingException exception = loadInvalid("invalid_choice_fields.json");
+
+    assertMessageContains(
+        exception,
+        "choice[0]: id must not be null or blank",
+        "choice[1]: id must not be null or blank",
+        "choice[2]: description must not be null or blank",
+        "choice[3]: description must not be null or blank");
+  }
+
+  @Test
+  void shouldRejectDuplicateChoiceIdsWithinEncounter() {
+    ChanceEncounterLoadingException exception = loadInvalid("duplicate_choice_ids.json");
+
+    assertMessageContains(exception, "duplicate choice ID 'duplicate'");
+  }
+
+  @Test
+  void shouldRejectMissingNullAndIncompleteOutcomes() {
+    ChanceEncounterLoadingException exception = loadInvalid("invalid_outcomes.json");
+
+    assertMessageContains(
+        exception,
+        "choice[0]: outcome must not be null",
+        "choice[1]: outcome must not be null",
+        "choice[2].outcome: currencyDelta must be present",
+        "choice[3].outcome: healthDelta must be present");
+  }
+
+  @Test
+  void shouldRejectStructurallyInvalidOutcome() {
+    ChanceEncounterLoadingException exception = loadInvalid("invalid_outcome_structure.json");
+
+    assertMessageContains(exception, "choice[0]: outcome must be a JSON object");
+  }
+
+  @Test
+  void shouldRejectUnsafeNumericDeltas() {
+    ChanceEncounterLoadingException exception = loadInvalid("invalid_numeric_outcomes.json");
+
+    assertMessageContains(
+        exception,
+        "choice[0].outcome.healthDelta must be an integer",
+        "choice[1].outcome.healthDelta must be an exact 32-bit integer",
+        "choice[1].outcome.currencyDelta must be an exact 32-bit integer",
+        "choice[2].outcome.healthDelta must be an exact 32-bit integer");
+  }
+
+  @Test
+  void shouldAcceptNoEffectAndIntegerBoundaryDeltas() {
+    List<ChanceEncounter> encounters =
+        ChanceEncounterConfigLoader.loadEncounters(
+            TEST_DIRECTORY + "valid_outcome_boundaries.json");
+
+    ChanceEncounter encounter = encounters.get(0);
+    ChanceOutcome noEffect = encounter.resolveChoice("no-effect");
+    ChanceOutcome boundaries = encounter.resolveChoice("integer-boundaries");
+
+    assertTrue(noEffect.isNoEffect());
+    assertEquals(Integer.MIN_VALUE, boundaries.getHealthDelta());
+    assertEquals(Integer.MAX_VALUE, boundaries.getCurrencyDelta());
+  }
+
+  private static ChanceEncounterLoadingException loadInvalid(String filename) {
+    return assertThrows(
+        ChanceEncounterLoadingException.class,
+        () -> ChanceEncounterConfigLoader.loadEncounters(TEST_DIRECTORY + filename));
+  }
+
+  private static void assertMessageContains(
+      ChanceEncounterLoadingException exception, String... expectedFragments) {
+    for (String expectedFragment : expectedFragments) {
+      assertTrue(exception.getMessage().contains(expectedFragment), exception.getMessage());
+    }
+  }
+
   private static void assertEncounter(
       ChanceEncounter encounter,
       String expectedId,

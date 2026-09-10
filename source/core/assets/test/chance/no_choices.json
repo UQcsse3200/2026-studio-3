@@ -1,0 +1,9 @@
+{
+  "encounters": [
+    {
+      "id": "no-choices",
+      "description": "This encounter has no choices.",
+      "choices": []
+    }
+  ]
+}

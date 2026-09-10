@@ -1,0 +1,15 @@
+{
+  "encounters": [
+    {
+      "id": "invalid-outcome-structure",
+      "description": "Contains a structurally invalid outcome.",
+      "choices": [
+        {
+          "id": "invalid-outcome",
+          "description": "Uses an array instead of an outcome object.",
+          "outcome": []
+        }
+      ]
+    }
+  ]
+}

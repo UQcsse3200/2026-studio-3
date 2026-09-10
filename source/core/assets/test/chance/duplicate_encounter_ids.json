@@ -1,0 +1,26 @@
+{
+  "encounters": [
+    {
+      "id": "duplicate",
+      "description": "First encounter.",
+      "choices": [
+        {
+          "id": "continue",
+          "description": "Continue.",
+          "outcome": { "healthDelta": 0, "currencyDelta": 0 }
+        }
+      ]
+    },
+    {
+      "id": "duplicate",
+      "description": "Second encounter.",
+      "choices": [
+        {
+          "id": "continue",
+          "description": "Continue.",
+          "outcome": { "healthDelta": 0, "currencyDelta": 0 }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "encounters": [
+    {
+      "id": "invalid-outcomes",
+      "description": "Contains incomplete outcomes.",
+      "choices": [
+        {
+          "id": "missing-outcome",
+          "description": "Missing outcome."
+        },
+        {
+          "id": "null-outcome",
+          "description": "Null outcome.",
+          "outcome": null
+        },
+        {
+          "id": "missing-currency",
+          "description": "Missing currency delta.",
+          "outcome": { "healthDelta": 0 }
+        },
+        {
+          "id": "missing-health",
+          "description": "Missing health delta.",
+          "outcome": { "currencyDelta": 0 }
+        }
+      ]
+    }
+  ]
+}

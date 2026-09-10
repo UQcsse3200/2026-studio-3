@@ -1,0 +1,25 @@
+{
+  "encounters": [
+    {
+      "id": "invalid-numbers",
+      "description": "Contains unsafe numeric values.",
+      "choices": [
+        {
+          "id": "wrong-type",
+          "description": "Uses a string delta.",
+          "outcome": { "healthDelta": "five", "currencyDelta": 0 }
+        },
+        {
+          "id": "out-of-range",
+          "description": "Uses values outside the integer range.",
+          "outcome": { "healthDelta": 2147483648, "currencyDelta": -2147483649 }
+        },
+        {
+          "id": "fractional",
+          "description": "Uses a fractional delta.",
+          "outcome": { "healthDelta": 1.5, "currencyDelta": 0 }
+        }
+      ]
+    }
+  ]
+}

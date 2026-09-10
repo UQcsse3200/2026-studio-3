@@ -8,8 +8,8 @@ public class ChanceChoiceConfig {
   /** Player-facing choice description. */
   public String description = "";
 
-  /** Outcome produced by selecting this choice. */
-  public ChanceOutcomeConfig outcome = new ChanceOutcomeConfig();
+  /** Required outcome produced by selecting this choice. */
+  public ChanceOutcomeConfig outcome;
 
   /** Required by the JSON deserialiser. */
   public ChanceChoiceConfig() {}

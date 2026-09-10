@@ -1,0 +1,46 @@
+{
+  "encounters": [
+    {
+      "id": " ",
+      "description": "Blank ID",
+      "choices": [
+        {
+          "id": "continue",
+          "description": "Continue.",
+          "outcome": { "healthDelta": 0, "currencyDelta": 0 }
+        }
+      ]
+    },
+    {
+      "description": "Missing ID",
+      "choices": [
+        {
+          "id": "continue",
+          "description": "Continue.",
+          "outcome": { "healthDelta": 0, "currencyDelta": 0 }
+        }
+      ]
+    },
+    {
+      "id": "missing-description",
+      "choices": [
+        {
+          "id": "continue",
+          "description": "Continue.",
+          "outcome": { "healthDelta": 0, "currencyDelta": 0 }
+        }
+      ]
+    },
+    {
+      "id": "blank-description",
+      "description": " ",
+      "choices": [
+        {
+          "id": "continue",
+          "description": "Continue.",
+          "outcome": { "healthDelta": 0, "currencyDelta": 0 }
+        }
+      ]
+    }
+  ]
+}
