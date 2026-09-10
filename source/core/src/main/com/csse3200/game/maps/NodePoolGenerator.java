@@ -49,7 +49,7 @@ public final class NodePoolGenerator {
    */
   public static void rebalanceRoomTypes(MapGenerationConfig config, Random rand, MapGraph map) {
 
-    RoomType[] types = { RoomType.COMBAT, RoomType.EVENT, RoomType.SHOP };
+    RoomType[] types = { RoomType.COMBAT, RoomType.EVENT, RoomType.SHOP, RoomType.ELITE };
     int[] counts = getRoomTypeCounts(config, map.getNodes().size());
 
     for (int i = 0; i < types.length; i++) {
@@ -76,12 +76,17 @@ public final class NodePoolGenerator {
       case COMBAT:
         node.setRoomType(room);
         break;
-      case EVENT, SHOP:
+      case ELITE, EVENT:
+        if (node.getHeight() > 1) {
+          node.setRoomType(room);
+        }
+        break;
+      case SHOP:
         if (node.getHeight() > 2) {
           node.setRoomType(room);
         }
         break;
-        default:
+      default:
         break;
     }
   }
@@ -95,8 +100,8 @@ public final class NodePoolGenerator {
    * @return integer array of the required room counts from proportions
    */
   private static int[] getRoomTypeCounts(MapGenerationConfig config, int nodeCount) {
-    RoomType[] types = { RoomType.COMBAT, RoomType.EVENT, RoomType.SHOP };
-    int[] weights = { config.getCombatWeight(), config.getEventWeight(), config.getShopWeight() };
+    RoomType[] types = { RoomType.COMBAT, RoomType.EVENT, RoomType.SHOP, RoomType.ELITE };
+    int[] weights = { config.getCombatWeight(), config.getEventWeight(), config.getShopWeight(), config.getEliteWeight() };
 
     long totalWeight = config.getTotalWeight();
     int[] counts = new int[types.length];

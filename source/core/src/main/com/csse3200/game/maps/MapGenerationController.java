@@ -22,9 +22,9 @@ public class MapGenerationController {
   }
 
   public MapGenerationController(
-      int totalNodeCount, int combatWeight, int eventWeight, int shopWeight) {
+      int totalNodeCount, int combatWeight, int eventWeight, int shopWeight, int eliteWeight) {
 
-    this.config = new MapGenerationConfig(totalNodeCount, combatWeight, eventWeight, shopWeight);
+    this.config = new MapGenerationConfig(totalNodeCount, combatWeight, eventWeight, shopWeight, eliteWeight);
     this.map = new MapGraph(NodePoolGenerator.generate(config));
     this.rand = new Random(config.getSeed());
 

@@ -134,6 +134,15 @@ public class MapNodeActor extends Group {
         } else {
           return "images/combat_icon.png";
         }
+      case ELITE:
+        if (node.getState() == NodeState.COMPLETED) {
+          return "images/combat_icon_completed.png";
+        }
+        if (node.getState() == NodeState.CURRENT) {
+          return "images/combat_icon_current.png";
+        } else {
+          return "images/combat_icon.png";
+        }
       case SHOP:
         if (node.getState() == NodeState.COMPLETED) {
           return "images/shop_icon_completed.png";

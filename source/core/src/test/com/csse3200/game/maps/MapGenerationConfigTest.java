@@ -10,11 +10,12 @@ class MapGenerationConfigTest {
 
   @Test
   void storesConfiguredValues() {
-    MapGenerationConfig config = new MapGenerationConfig(10, 60, 30, 10, 12345L);
+    MapGenerationConfig config = new MapGenerationConfig(10, 60, 20, 10, 10, 12345L);
 
     assertEquals(10, config.getNormalNodeCount());
     assertEquals(60, config.getCombatWeight());
-    assertEquals(30, config.getEventWeight());
+    assertEquals(20, config.getEventWeight());
+    assertEquals(10, config.getEliteWeight());
     assertEquals(10, config.getShopWeight());
     assertEquals(100, config.getTotalWeight());
     assertEquals(12345L, config.getSeed());
@@ -22,33 +23,34 @@ class MapGenerationConfigTest {
 
   @Test
   void supportsMissingSeed() {
-    MapGenerationConfig config = new MapGenerationConfig(10, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig(10, 60, 20, 10, 10);
 
     assertNull(config.getSeed());
   }
 
   @Test
   void rejectsInvalidNodeCount() {
-    assertThrows(IllegalArgumentException.class, () -> new MapGenerationConfig(0, 60, 30, 10));
-    assertThrows(IllegalArgumentException.class, () -> new MapGenerationConfig(-1, 60, 30, 10));
+    assertThrows(IllegalArgumentException.class, () -> new MapGenerationConfig(0, 60, 20, 10, 10));
+    assertThrows(IllegalArgumentException.class, () -> new MapGenerationConfig(-1, 60, 20, 10, 10));
   }
 
   @Test
   void rejectsNegativeWeights() {
-    assertThrows(IllegalArgumentException.class, () -> new MapGenerationConfig(10, -1, 30, 10));
-    assertThrows(IllegalArgumentException.class, () -> new MapGenerationConfig(10, 60, -1, 10));
-    assertThrows(IllegalArgumentException.class, () -> new MapGenerationConfig(10, 60, 30, -1));
+    assertThrows(IllegalArgumentException.class, () -> new MapGenerationConfig(10, -1, 20, 10, 10));
+    assertThrows(IllegalArgumentException.class, () -> new MapGenerationConfig(10, 60, -1, 10, 10));
+    assertThrows(IllegalArgumentException.class, () -> new MapGenerationConfig(10, 60, 20, -1, 10));
+    assertThrows(IllegalArgumentException.class, () -> new MapGenerationConfig(10, 60, 20, 10, -1));
   }
 
   @Test
   void rejectsAllZeroWeights() {
-    assertThrows(IllegalArgumentException.class, () -> new MapGenerationConfig(10, 0, 0, 0));
+    assertThrows(IllegalArgumentException.class, () -> new MapGenerationConfig(10, 0, 0, 0, 0));
   }
 
   @Test
   void preservesLargeWeightTotal() {
     MapGenerationConfig config =
-        new MapGenerationConfig(3, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 1L);
+        new MapGenerationConfig(3, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 1L);
 
     assertEquals(6_442_450_941L, config.getTotalWeight());
   }

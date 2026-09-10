@@ -14,7 +14,7 @@ class NodePoolGeneratorTest {
 
   @Test
   void generatesNormalNodesAndOneFinalNode() {
-    MapGenerationConfig config = new MapGenerationConfig(10, 60, 30, 10, 12345L);
+    MapGenerationConfig config = new MapGenerationConfig(10, 60, 20, 10, 10, 1234L);
 
     Map<Integer, MapNode> nodes = NodePoolGenerator.generate(config);
 
@@ -33,20 +33,26 @@ class NodePoolGeneratorTest {
 
   @Test
   void followsConfiguredDistribution() {
-    MapGenerationConfig config = new MapGenerationConfig(10, 60, 30, 10, 12345L);
+    MapGenerationConfig config = new MapGenerationConfig(10, 60, 20, 10, 10, 12345L);
 
     Map<Integer, MapNode> nodes = NodePoolGenerator.generate(config);
 
     assertEquals(6, countRooms(nodes, RoomType.COMBAT));
-    assertEquals(3, countRooms(nodes, RoomType.EVENT));
+    assertEquals(2, countRooms(nodes, RoomType.EVENT));
+    assertEquals(1, countRooms(nodes, RoomType.ELITE));
     assertEquals(1, countRooms(nodes, RoomType.SHOP));
   }
 
   @Test
   void allocatesRemainderNodesToClosestWeightedDistribution() {
-    MapGenerationConfig config = new MapGenerationConfig(7, 60, 30, 10, 12345L);
+    MapGenerationConfig config = new MapGenerationConfig(9, 60, 20, 10, 10, 12345L);
 
     Map<Integer, MapNode> nodes = NodePoolGenerator.generate(config);
+
+    assertEquals(5, countRooms(nodes, RoomType.COMBAT));
+    assertEquals(2, countRooms(nodes, RoomType.EVENT));
+    assertEquals(1, countRooms(nodes, RoomType.ELITE));
+    assertEquals(1, countRooms(nodes, RoomType.SHOP));
 
     assertEquals(4, countRooms(nodes, RoomType.COMBAT));
     assertEquals(2, countRooms(nodes, RoomType.EVENT));
@@ -56,7 +62,7 @@ class NodePoolGeneratorTest {
   @Test
   void usesLongArithmeticForLargeWeights() {
     MapGenerationConfig config =
-        new MapGenerationConfig(7, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 12345L);
+        new MapGenerationConfig(7, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 12345L);
 
     Map<Integer, MapNode> nodes = NodePoolGenerator.generate(config);
 
@@ -67,8 +73,8 @@ class NodePoolGeneratorTest {
 
   @Test
   void sameSeedProducesSameRoomAssignments() {
-    MapGenerationConfig firstConfig = new MapGenerationConfig(20, 60, 30, 10, 98765L);
-    MapGenerationConfig secondConfig = new MapGenerationConfig(20, 60, 30, 10, 98765L);
+    MapGenerationConfig firstConfig = new MapGenerationConfig(20, 60, 20, 10, 10, 98765L);
+    MapGenerationConfig secondConfig = new MapGenerationConfig(20, 60, 20, 10, 10, 98765L);
 
     List<RoomType> firstTypes = roomTypesById(NodePoolGenerator.generate(firstConfig));
     List<RoomType> secondTypes = roomTypesById(NodePoolGenerator.generate(secondConfig));
@@ -78,7 +84,7 @@ class NodePoolGeneratorTest {
 
   @Test
   void excludesZeroWeightRoomTypes() {
-    MapGenerationConfig config = new MapGenerationConfig(8, 1, 0, 0, 1L);
+    MapGenerationConfig config = new MapGenerationConfig(8, 1, 0, 0, 0, 1L);
 
     Map<Integer, MapNode> nodes = NodePoolGenerator.generate(config);
 
@@ -90,7 +96,7 @@ class NodePoolGeneratorTest {
   @Test
   void returnsImmutableNodePool() {
     Map<Integer, MapNode> nodes =
-        NodePoolGenerator.generate(new MapGenerationConfig(3, 1, 1, 1, 1L));
+        NodePoolGenerator.generate(new MapGenerationConfig(3, 1, 1, 1, 1, 1L));
 
     assertThrows(UnsupportedOperationException.class, () -> nodes.put(99, nodes.get(0)));
   }
@@ -103,7 +109,7 @@ class NodePoolGeneratorTest {
   @Test
   void doesNotCreateGraphConnections() {
     Map<Integer, MapNode> nodes =
-        NodePoolGenerator.generate(new MapGenerationConfig(5, 3, 2, 1, 1L));
+        NodePoolGenerator.generate(new MapGenerationConfig(5, 3, 2, 1, 1, 1L));
 
     assertFalse(nodes.isEmpty());
     assertTrue(nodes.values().stream().allMatch(node -> node.getConnections().isEmpty()));

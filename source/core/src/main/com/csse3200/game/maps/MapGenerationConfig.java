@@ -11,12 +11,12 @@ public final class MapGenerationConfig {
   public static final int MAX_NODE_COUNT = MAP_WIDTH * MAP_HEIGHT;
   public static final int BRANCH_CHANCE = 5;
 
-  private int normalNodeCount = 70; // TODO: overlapping state, should weights also be constants? should this class
-                                    // exist?
+  private int normalNodeCount = 70;
 
   // Weights are used as a fixed point decimal with a scaling factor of 100
-  private int combatWeight = 70;
+  private int combatWeight = 60;
   private int eventWeight = 20;
+  private int eliteWeight = 10;
   private int shopWeight = 10;
   private final Long seed;
 
@@ -25,7 +25,7 @@ public final class MapGenerationConfig {
    * and no seed.
    */
   public MapGenerationConfig() {
-    checkValid(normalNodeCount, combatWeight, eventWeight, shopWeight);
+    checkValid(normalNodeCount, combatWeight, eventWeight, shopWeight, eliteWeight);
     this.seed = System.nanoTime();
   }
 
@@ -38,8 +38,8 @@ public final class MapGenerationConfig {
    * @param shopWeight      relative shop-room weight
    */
   public MapGenerationConfig(
-      int normalNodeCount, int combatWeight, int eventWeight, int shopWeight) {
-    this(normalNodeCount, combatWeight, eventWeight, shopWeight, System.nanoTime());
+      int normalNodeCount, int combatWeight, int eventWeight, int shopWeight, int eliteWeight) {
+    this(normalNodeCount, combatWeight, eliteWeight, eventWeight, shopWeight, System.nanoTime());
   }
 
   /**
@@ -52,27 +52,28 @@ public final class MapGenerationConfig {
    * @param seed            seed used for repeatable random generation
    */
   public MapGenerationConfig(
-      int normalNodeCount, int combatWeight, int eventWeight, int shopWeight, Long seed) {
+      int normalNodeCount, int combatWeight, int eventWeight, int shopWeight, int eliteWeight, Long seed) {
 
-    checkValid(normalNodeCount, combatWeight, eventWeight, shopWeight);
+    checkValid(normalNodeCount, combatWeight, eventWeight, shopWeight, eliteWeight);
 
     this.normalNodeCount = normalNodeCount;
     this.combatWeight = combatWeight;
     this.eventWeight = eventWeight;
+    this.eliteWeight = eliteWeight;
     this.shopWeight = shopWeight;
     this.seed = seed;
   }
 
   /** Checks that the node count and weights are valid. */
   private static void checkValid(
-      int normalNodeCount, int combatWeight, int eventWeight, int shopWeight) {
+      int normalNodeCount, int combatWeight, int eventWeight, int shopWeight, int eliteWeight) {
     if (normalNodeCount < 1) {
       throw new IllegalArgumentException("Normal node count must be at least one!");
     }
-    if (combatWeight < 0 || eventWeight < 0 || shopWeight < 0) {
+    if (combatWeight < 0 || eventWeight < 0 || shopWeight < 0 || eliteWeight < 0) {
       throw new IllegalArgumentException("Room weights cannot be negative!");
     }
-    if (combatWeight + eventWeight + shopWeight == 0) {
+    if (combatWeight + eventWeight + shopWeight + eliteWeight == 0) {
       throw new IllegalArgumentException("At least one room weight must be positive!");
     }
   }
@@ -90,6 +91,10 @@ public final class MapGenerationConfig {
   /** Returns the event-room weight. */
   public int getEventWeight() {
     return eventWeight;
+  }
+
+  public int getEliteWeight() {
+    return eliteWeight;
   }
 
   /** Returns the shop-room weight. */
