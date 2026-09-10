@@ -113,7 +113,7 @@ public class BattleScreen extends ScreenAdapter {
     library = new CardLibrary(configs);
     ServiceLocator.registerCardLibrary(library);
 
-    PlayerDeck playerDeck = PlayerDeckFactory.createStarterDeck();
+    PlayerDeck playerDeck = PlayerDeckFactory.createStarterDeck(library);
     battleDeck = new BattleDeck(playerDeck);
     battleDeck.shuffleDrawPile();
     battleDeck.drawCards(5);

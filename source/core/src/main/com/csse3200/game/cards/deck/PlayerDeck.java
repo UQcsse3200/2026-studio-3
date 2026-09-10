@@ -1,5 +1,8 @@
 package com.csse3200.game.cards.deck;
 
+import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardLibrary;
+import com.csse3200.game.cards.CardService;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -13,10 +16,25 @@ import java.util.List;
  * hand and discard pile.
  */
 public class PlayerDeck {
+  private final CardService cardService;
   private final List<String> cardIds = new ArrayList<>();
 
-  /** Creates an empty player deck. */
-  public PlayerDeck() {}
+  /** Creates an empty player deck backed by the configured card definitions. */
+  public PlayerDeck() {
+    this(loadDefaultCardService());
+  }
+
+  /**
+   * Creates an empty player deck using the supplied source of card definitions.
+   *
+   * @param cardService authoritative card lookup service
+   */
+  public PlayerDeck(CardService cardService) {
+    if (cardService == null) {
+      throw new IllegalArgumentException("cardService must not be null");
+    }
+    this.cardService = cardService;
+  }
 
   /**
    * Creates a player deck containing the given card IDs in order.
@@ -24,6 +42,18 @@ public class PlayerDeck {
    * @param cardIds card IDs to add to the deck
    */
   public PlayerDeck(Collection<String> cardIds) {
+    this(loadDefaultCardService(), cardIds);
+  }
+
+  /**
+   * Creates a player deck containing the given card IDs in order, validated by the supplied card
+   * service.
+   *
+   * @param cardService authoritative card lookup service
+   * @param cardIds card IDs to add to the deck
+   */
+  public PlayerDeck(CardService cardService, Collection<String> cardIds) {
+    this(cardService);
     addCards(cardIds);
   }
 
@@ -50,7 +80,7 @@ public class PlayerDeck {
    * @return true if the card can be added, otherwise false
    */
   public boolean canAddCard(String cardId) {
-    return CardIdRegistry.isRegistered(cardId);
+    return cardService.getCard(cardId).isPresent();
   }
 
   /**
@@ -129,7 +159,7 @@ public class PlayerDeck {
    * @return copied player deck
    */
   public PlayerDeck copy() {
-    return new PlayerDeck(cardIds);
+    return new PlayerDeck(cardService, cardIds);
   }
 
   /** Removes all cards from the deck. */
@@ -156,5 +186,9 @@ public class PlayerDeck {
       throw new IllegalArgumentException("cardId must not be null or blank");
     }
     return cardId;
+  }
+
+  private static CardService loadDefaultCardService() {
+    return new CardLibrary(CardConfigLoader.loadCards());
   }
 }
