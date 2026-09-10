@@ -1,0 +1,28 @@
+{
+  "items": [
+    {
+      "id": "shop_heal_card",
+      "cardId": "bandage",
+      "name": "Bandage",
+      "description": "Heal 6 health when this card is played.",
+      "price": 20,
+      "stock": 1
+    },
+    {
+      "id": "shop_shield_card",
+      "cardId": "defend",
+      "name": "Defend",
+      "description": "Gain 5 block when this card is played.",
+      "price": 35,
+      "stock": 1
+    },
+    {
+      "id": "shop_strike_card",
+      "cardId": "strike",
+      "name": "Strike",
+      "description": "Deal 6 damage to a single enemy.",
+      "price": 15,
+      "stock": 1
+    }
+  ]
+}

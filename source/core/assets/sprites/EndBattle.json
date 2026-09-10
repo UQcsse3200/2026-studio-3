@@ -1,0 +1,20 @@
+{
+  "Displaying": [
+    {
+      "text": "",
+      "x": 0,
+      "y": 300,
+      "fontName": "large",
+      "scale": 3,
+      "trigger": "endBattleResult",
+      "variant": "endBattle"
+    },
+    {
+      "text": "Click anywhere or press any key to return to the menu",
+      "x": 0,
+      "y": 380,
+      "scale": 1,
+      "variant": "endBattle"
+    }
+  ]
+}

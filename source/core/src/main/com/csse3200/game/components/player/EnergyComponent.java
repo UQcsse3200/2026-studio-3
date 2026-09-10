@@ -26,7 +26,7 @@ public class EnergyComponent extends Component {
 
   private void notifyEnergyChange() {
     if (entity != null) {
-      entity.getEvents().trigger(EVT_UPDATE_ENERGY, this.currentEnergy);
+      entity.getEvents().trigger(EVT_UPDATE_ENERGY, this.currentEnergy, this.maxEnergy);
     }
   }
 

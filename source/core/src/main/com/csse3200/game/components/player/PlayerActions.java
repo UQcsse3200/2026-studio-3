@@ -3,6 +3,7 @@ package com.csse3200.game.components.player;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.physics.components.PhysicsComponent;
 import com.csse3200.game.services.ServiceLocator;
@@ -24,6 +25,14 @@ public class PlayerActions extends Component {
     entity.getEvents().addListener("walk", this::walk);
     entity.getEvents().addListener("walkStop", this::stopWalking);
     entity.getEvents().addListener("attack", this::attack);
+
+    // Card effects land here as plain, game-agnostic events (see Card / CardService /
+    // EnemyDropTargetComponent) — this is the one place that decides what "damage" and
+    // "heal" actually mean for the player. CombatStatsComponent.setHealth() already fires
+    // "updateHealth" with the new value, so HealthDisplay updates automatically — no need
+    // to trigger "updateHealth" manually anywhere else.
+    entity.getEvents().addListener("damage", this::onDamage);
+    entity.getEvents().addListener("heal", this::onHeal);
   }
 
   @Override
@@ -60,9 +69,26 @@ public class PlayerActions extends Component {
   }
 
   /** Makes the player attack. */
-  void attack() {
+  public void attack() {
+    // TODO: Logic for player attack
     Sound attackSound =
         ServiceLocator.getResourceService().getAsset("sounds/Impact4.ogg", Sound.class);
     attackSound.play();
+  }
+
+  /** Applies a "damage" card effect, e.g. from Card(trigger="damage", args=[10]). */
+  private void onDamage(Integer amount) {
+    CombatStatsComponent combatStats = entity.getComponent(CombatStatsComponent.class);
+    if (combatStats != null) {
+      combatStats.addHealth(-amount);
+    }
+  }
+
+  /** Applies a "heal" card effect, e.g. from Card(trigger="heal", args=[15]). */
+  private void onHeal(Integer amount) {
+    CombatStatsComponent combatStats = entity.getComponent(CombatStatsComponent.class);
+    if (combatStats != null) {
+      combatStats.addHealth(amount);
+    }
   }
 }
