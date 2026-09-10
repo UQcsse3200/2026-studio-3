@@ -52,6 +52,22 @@ class CorruptionCardsTest {
         () -> assertEquals("images/cards/poison_dagger.png", card.texturePath));
   }
 
+  @Test
+  void shouldLoadArchiveMiasma() {
+    CardConfig card = library.getCard("archive_miasma").orElseThrow();
+
+    assertAll(
+        () -> assertEquals("Archive Miasma", card.name),
+        () -> assertEquals("Apply 3 Poison to all enemies for 3 turns.", card.description),
+        () -> assertEquals(2, card.cost),
+        () -> assertEquals(CardType.SKILL, card.type),
+        () -> assertEquals(Rarity.UNCOMMON, card.rarity),
+        () -> assertEquals(TargetType.ALL_ENEMIES, card.target),
+        () -> assertEquals(1, card.effects.length),
+        () -> assertEffect(card.effects[0], EffectType.POISON, 3, 3),
+        () -> assertEquals("images/cards/poison_dagger.png", card.texturePath));
+  }
+
   private static void assertEffect(EffectConfig effect, EffectType type, int value, int duration) {
     assertEquals(type, effect.type);
     assertEquals(value, effect.value);

@@ -95,6 +95,19 @@
           { "type": "POISON", "value": 4, "duration": 2 }
         ],
         "texturePath": "images/cards/poison_dagger.png"
+      },
+      {
+        "id": "archive_miasma",
+        "name": "Archive Miasma",
+        "description": "Apply 3 Poison to all enemies for 3 turns.",
+        "cost": 2,
+        "type": "SKILL",
+        "rarity": "UNCOMMON",
+        "target": "ALL_ENEMIES",
+        "effects": [
+          { "type": "POISON", "value": 3, "duration": 3 }
+        ],
+        "texturePath": "images/cards/poison_dagger.png"
       }
     ]
   }
