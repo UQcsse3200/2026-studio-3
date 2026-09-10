@@ -22,6 +22,9 @@ import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.cards.effects.CardEffectResolver;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.pausemenu.PauseMenuActions;
+import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
+import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
@@ -148,7 +151,10 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new InputDecorator(stage, 10))
             .addComponent(uiFactory)
             .addComponent(displays)
-            .addComponent(new BattleActions(controller, game, library));
+            .addComponent(new BattleActions(controller, game, library))
+            .addComponent(new PauseMenuDisplay())
+            .addComponent(new PauseMenuInput())
+            .addComponent(new PauseMenuActions(game));
 
     // Keep the on-screen hand in sync with the deck: after a card is played (and a replacement
     // drawn) rebuild the hand widgets from the live deck, so the played card's button is gone and

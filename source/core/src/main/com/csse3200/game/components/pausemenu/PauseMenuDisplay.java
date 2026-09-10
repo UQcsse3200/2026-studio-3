@@ -36,8 +36,11 @@ public class PauseMenuDisplay extends UIComponent {
   /** Fired only after the player confirms leaving the current run. */
   public static final String EXIT_TO_MENU_EVENT = "exitToMenu";
 
-  /** Received (not fired) to toggle the menu's visibility. */
-  public static final String TOGGLE_PAUSE_EVENT = "togglePause";
+  /**
+   * Received (not fired by the display) to open the pause menu. Opening is idempotent, so once
+   * paused, pressing Escape again does nothing; the menu is only closed via {@link #RESUME_EVENT}.
+   */
+  public static final String PAUSE_EVENT = "pause";
 
   private static final float BACKGROUND_OPACITY = 0.7f;
 
@@ -54,7 +57,8 @@ public class PauseMenuDisplay extends UIComponent {
   public void create() {
     super.create();
     addActors();
-    entity.getEvents().addListener(TOGGLE_PAUSE_EVENT, this::toggleVisibility);
+    entity.getEvents().addListener(PAUSE_EVENT, this::showMenu);
+    entity.getEvents().addListener(RESUME_EVENT, this::hideMenu);
   }
 
   private void addActors() {
@@ -147,9 +151,22 @@ public class PauseMenuDisplay extends UIComponent {
     return backgroundTexture;
   }
 
-  /** Shows the menu if hidden and hides it if shown. Fires no events. */
-  private void toggleVisibility() {
-    table.setVisible(!table.isVisible());
+  /**
+   * Shows the menu and lifts it above the rest of the screen's UI, so the dimmed background covers
+   * everything and only the menu's own buttons stay visible and clickable. Idempotent: showing an
+   * already-visible menu is a no-op, which is what stops a second Escape press from closing it.
+   */
+  private void showMenu() {
+    table.setVisible(true);
+    table.toFront();
+  }
+
+  /** Hides the menu (and any open confirmation dialog). Triggered by Resume. */
+  private void hideMenu() {
+    if (confirmDialog != null) {
+      confirmDialog.hide(null);
+    }
+    table.setVisible(false);
   }
 
   @Override

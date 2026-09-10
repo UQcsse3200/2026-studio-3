@@ -58,11 +58,22 @@ class PauseMenuDisplayTest {
   }
 
   @Test
-  void togglePauseShowsThenHidesMenu() {
-    display.getEntity().getEvents().trigger(PauseMenuDisplay.TOGGLE_PAUSE_EVENT);
+  void pauseEventOpensMenuButDoesNotCloseIt() {
+    display.getEntity().getEvents().trigger(PauseMenuDisplay.PAUSE_EVENT);
     assertTrue(display.isMenuVisible());
 
-    display.getEntity().getEvents().trigger(PauseMenuDisplay.TOGGLE_PAUSE_EVENT);
+    // A second pause event (Escape pressed again) must NOT close the menu.
+    display.getEntity().getEvents().trigger(PauseMenuDisplay.PAUSE_EVENT);
+    assertTrue(display.isMenuVisible());
+  }
+
+  @Test
+  void clickingResumeHidesMenu() {
+    display.getEntity().getEvents().trigger(PauseMenuDisplay.PAUSE_EVENT);
+    assertTrue(display.isMenuVisible());
+
+    click(display.getResumeButton());
+
     assertFalse(display.isMenuVisible());
   }
 

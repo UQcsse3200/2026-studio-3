@@ -12,28 +12,28 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-/** Tests for {@link PauseMenuInput}: Escape toggles the pause menu, other keys are ignored. */
+/** Tests for {@link PauseMenuInput}: Escape opens the pause menu, other keys are ignored. */
 @ExtendWith(GameExtension.class)
 class PauseMenuInputTest {
   private PauseMenuInput input;
-  private AtomicInteger toggleCount;
+  private AtomicInteger pauseCount;
 
   @BeforeEach
   void setUp() {
-    toggleCount = new AtomicInteger();
+    pauseCount = new AtomicInteger();
     input = new PauseMenuInput();
     Entity entity = new Entity().addComponent(input);
     entity
         .getEvents()
-        .addListener(PauseMenuDisplay.TOGGLE_PAUSE_EVENT, toggleCount::incrementAndGet);
+        .addListener(PauseMenuDisplay.PAUSE_EVENT, pauseCount::incrementAndGet);
   }
 
   @Test
-  void escapeFiresTogglePauseAndConsumesInput() {
+  void escapeFiresPauseEventAndConsumesInput() {
     boolean handled = input.keyDown(Keys.ESCAPE);
 
     assertTrue(handled);
-    assertEquals(1, toggleCount.get());
+    assertEquals(1, pauseCount.get());
   }
 
   @Test
@@ -41,6 +41,6 @@ class PauseMenuInputTest {
     boolean handled = input.keyDown(Keys.SPACE);
 
     assertFalse(handled);
-    assertEquals(0, toggleCount.get());
+    assertEquals(0, pauseCount.get());
   }
 }
