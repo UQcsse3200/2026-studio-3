@@ -79,8 +79,8 @@ public class BattleController {
       throw new IllegalArgumentException("Player cannot be null.");
     }
 
-    this.effectHandler = new CardEffectHandler(effectResolver, cardService, battleDeck,
-            new PlayerEffectState());
+    this.effectHandler =
+        new CardEffectHandler(effectResolver, cardService, battleDeck, new PlayerEffectState());
 
     // Guards against empty list or null enemies.
     this.enemies = enemies;
@@ -619,7 +619,7 @@ public class BattleController {
     eventHandler.trigger(PLAYER_EFFECTS_EVENT, playerEffects);
 
     effectHandler.applyEnemyEffects(
-            effectHandler.getLivingEnemyTargets(request, this.enemies), enemyEffects);
+        effectHandler.getLivingEnemyTargets(request, this.enemies), enemyEffects);
     effectHandler.applyPlayerEffects(playerEffects, this.player);
 
     // The played card has left the hand (see playCardThroughCardSystem) — tell the UI to refresh.

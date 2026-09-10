@@ -150,7 +150,7 @@ public class BattleActions extends Component {
   }
 
   private void selectEndTurn() {
-      controller.canHandle(BattleEvent.PLAYER_END_REQUESTED);
+    controller.canHandle(BattleEvent.PLAYER_END_REQUESTED);
   }
 
   private PlayerIntent classifyCard(CardConfig card) {
