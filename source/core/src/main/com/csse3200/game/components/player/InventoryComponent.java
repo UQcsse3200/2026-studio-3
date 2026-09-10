@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 public class InventoryComponent extends Component {
   private static final Logger logger = LoggerFactory.getLogger(InventoryComponent.class);
   private int gold;
+  private float goldBonusMultiplier = 0f;
 
   public InventoryComponent(int gold) {
     setGold(gold);
@@ -78,5 +79,13 @@ public class InventoryComponent extends Component {
 
     setGold(this.gold - amount);
     return true;
+  }
+
+  public float getGoldBonusMultiplier() {
+    return goldBonusMultiplier;
+  }
+
+  public void addGoldBonusMultiplier(float bonus) {
+    this.goldBonusMultiplier += bonus;
   }
 }
