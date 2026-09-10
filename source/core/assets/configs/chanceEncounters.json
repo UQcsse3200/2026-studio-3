@@ -1,0 +1,70 @@
+{
+  "encounters": [
+    {
+      "id": "mysterious-shrine",
+      "description": "An ancient shrine hums with an unsettling energy.",
+      "choices": [
+        {
+          "id": "make-offering",
+          "description": "Offer some of your vitality.",
+          "outcome": {
+            "healthDelta": -10,
+            "currencyDelta": 25
+          }
+        },
+        {
+          "id": "leave",
+          "description": "Leave the shrine untouched.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "healing-spring",
+      "description": "A clear spring glows softly beside the path.",
+      "choices": [
+        {
+          "id": "drink",
+          "description": "Drink from the spring.",
+          "outcome": {
+            "healthDelta": 15,
+            "currencyDelta": 0
+          }
+        },
+        {
+          "id": "leave",
+          "description": "Continue without drinking.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "forgotten-cache",
+      "description": "You discover an abandoned cache hidden beneath loose stones.",
+      "choices": [
+        {
+          "id": "take-coins",
+          "description": "Take the coins from the cache.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 15
+          }
+        },
+        {
+          "id": "leave",
+          "description": "Leave the cache untouched.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        }
+      ]
+    }
+  ]
+}
