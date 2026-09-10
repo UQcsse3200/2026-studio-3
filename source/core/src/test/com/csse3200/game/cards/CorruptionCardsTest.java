@@ -20,11 +20,11 @@ class CorruptionCardsTest {
   }
 
   @Test
-  void shouldLoadVenomFlask() {
-    CardConfig card = library.getCard("venom_flask").orElseThrow();
+  void shouldLoadPoisonFlask() {
+    CardConfig card = library.getCard("poison_flask").orElseThrow();
 
     assertAll(
-        () -> assertEquals("Venom Flask", card.name),
+        () -> assertEquals("Poison Flask", card.name),
         () -> assertEquals("Apply 5 Poison for 3 turns.", card.description),
         () -> assertEquals(1, card.cost),
         () -> assertEquals(CardType.SKILL, card.type),
@@ -36,11 +36,11 @@ class CorruptionCardsTest {
   }
 
   @Test
-  void shouldLoadTaintedEdge() {
-    CardConfig card = library.getCard("tainted_edge").orElseThrow();
+  void shouldLoadPoisonBlade() {
+    CardConfig card = library.getCard("poison_blade").orElseThrow();
 
     assertAll(
-        () -> assertEquals("Tainted Edge", card.name),
+        () -> assertEquals("Poison Blade", card.name),
         () -> assertEquals("Deal 10 damage. Apply 4 Poison for 2 turns.", card.description),
         () -> assertEquals(2, card.cost),
         () -> assertEquals(CardType.ATTACK, card.type),
@@ -53,11 +53,11 @@ class CorruptionCardsTest {
   }
 
   @Test
-  void shouldLoadArchiveMiasma() {
-    CardConfig card = library.getCard("archive_miasma").orElseThrow();
+  void shouldLoadPoisonCloud() {
+    CardConfig card = library.getCard("poison_cloud").orElseThrow();
 
     assertAll(
-        () -> assertEquals("Archive Miasma", card.name),
+        () -> assertEquals("Poison Cloud", card.name),
         () -> assertEquals("Apply 3 Poison to all enemies for 3 turns.", card.description),
         () -> assertEquals(2, card.cost),
         () -> assertEquals(CardType.SKILL, card.type),
@@ -69,11 +69,11 @@ class CorruptionCardsTest {
   }
 
   @Test
-  void shouldLoadBlightSeal() {
-    CardConfig card = library.getCard("blight_seal").orElseThrow();
+  void shouldLoadPoisonMark() {
+    CardConfig card = library.getCard("poison_mark").orElseThrow();
 
     assertAll(
-        () -> assertEquals("Blight Seal", card.name),
+        () -> assertEquals("Poison Mark", card.name),
         () ->
             assertEquals(
                 "Apply 2 Vulnerable and 2 Poison to an enemy for 2 turns.", card.description),

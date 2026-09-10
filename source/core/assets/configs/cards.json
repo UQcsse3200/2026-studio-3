@@ -70,8 +70,8 @@
         "texturePath": "images/cards/bandage.png"
       },
       {
-        "id": "venom_flask",
-        "name": "Venom Flask",
+        "id": "poison_flask",
+        "name": "Poison Flask",
         "description": "Apply 5 Poison for 3 turns.",
         "cost": 1,
         "type": "SKILL",
@@ -83,8 +83,8 @@
         "texturePath": "images/cards/poison_dagger.png"
       },
       {
-        "id": "tainted_edge",
-        "name": "Tainted Edge",
+        "id": "poison_blade",
+        "name": "Poison Blade",
         "description": "Deal 10 damage. Apply 4 Poison for 2 turns.",
         "cost": 2,
         "type": "ATTACK",
@@ -97,8 +97,8 @@
         "texturePath": "images/cards/poison_dagger.png"
       },
       {
-        "id": "archive_miasma",
-        "name": "Archive Miasma",
+        "id": "poison_cloud",
+        "name": "Poison Cloud",
         "description": "Apply 3 Poison to all enemies for 3 turns.",
         "cost": 2,
         "type": "SKILL",
@@ -110,8 +110,8 @@
         "texturePath": "images/cards/poison_dagger.png"
       },
       {
-        "id": "blight_seal",
-        "name": "Blight Seal",
+        "id": "poison_mark",
+        "name": "Poison Mark",
         "description": "Apply 2 Vulnerable and 2 Poison to an enemy for 2 turns.",
         "cost": 1,
         "type": "SKILL",
