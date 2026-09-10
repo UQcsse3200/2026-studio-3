@@ -11,9 +11,12 @@ public final class MapGenerationConfig {
   public static final int MAX_NODE_COUNT = MAP_WIDTH * MAP_HEIGHT;
   public static final int BRANCH_CHANCE = 5;
 
-  private int normalNodeCount = 70;
-  private int combatWeight = 80;
-  private int eventWeight = 10;
+  private int normalNodeCount = 70; // TODO: overlapping state, should weights also be constants? should this class
+                                    // exist?
+
+  // Weights are used as a fixed point decimal with a scaling factor of 100
+  private int combatWeight = 70;
+  private int eventWeight = 20;
   private int shopWeight = 10;
   private final Long seed;
 

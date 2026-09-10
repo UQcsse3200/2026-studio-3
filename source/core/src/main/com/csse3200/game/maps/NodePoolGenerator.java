@@ -1,15 +1,8 @@
 package com.csse3200.game.maps;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
-// TODO: i think i would like to move this stuff to MapGenerationController, single responsibility
-// or whatever
-// even considering ECS, nothing besides a map is going to use this
 
 /**
  * Generates a seeded pool of typed map nodes without creating graph
@@ -21,7 +14,8 @@ public final class NodePoolGenerator {
   }
 
   /**
-   * Generates the configured normal nodes followed by exactly one final node.
+   * Generates placeholder combat nodes followed by exactly one final node and one
+   * start node.
    *
    * @param config room distribution configuration
    * @return immutable node pool keyed by unique, sequential IDs
@@ -33,29 +27,77 @@ public final class NodePoolGenerator {
     }
 
     int nodeCount = config.getNormalNodeCount();
-    List<RoomType> roomTypes = createRoomTypes(config);
-    Long seed = config.getSeed();
-    Random random = seed == null ? new Random() : new Random(seed);
-
-    Collections.shuffle(roomTypes, random); // Shuffleeeee
     Map<Integer, MapNode> nodes = new HashMap<>(nodeCount + 1);
 
     // Using zero-based IDs here: 0 to nodeCount - 1.
-    for (int index = 1; index < roomTypes.size(); index++) {
-      nodes.put(index, new MapNode(index, roomTypes.get(index)));
+    for (int index = 1; index < config.getNormalNodeCount(); index++) {
+      nodes.put(index, new MapNode(index, RoomType.COMBAT));
     }
-
     nodes.put(0, new MapNode(0, RoomType.START));
+
     nodes.put(nodeCount, new MapNode(nodeCount, RoomType.FINAL));
     return Map.copyOf(nodes);
   }
 
-  /** Calculates proportional room counts and creates the room-type list. */
-  private static List<RoomType> createRoomTypes(MapGenerationConfig config) {
+  /**
+   * Assigns node types to a map after path generation is completed to ensure
+   * accurate weights.
+   * 
+   * @param config room distribution configuration
+   * @param rand   random type passed from superclass
+   * @param map    mapgraph to act on
+   */
+  public static void rebalanceRoomTypes(MapGenerationConfig config, Random rand, MapGraph map) {
+
+    RoomType[] types = { RoomType.COMBAT, RoomType.EVENT, RoomType.SHOP };
+    int[] counts = getRoomTypeCounts(config, map.getNodes().size());
+
+    for (int i = 0; i < types.length; i++) {
+      while (map.getNodesByType(types[i]).size() < counts[i]) {
+
+        MapNode node = map.getNode(rand.nextInt(1, MapGenerationConfig.MAX_NODE_COUNT - 1));
+        if (node != null) {
+          assignRoomType(node, types[i]);
+        }
+      }
+    }
+  }
+
+  /**
+   * Allows constraints to be placed on how room types are placed.
+   * For example, restricting shops from existing below layer 3.
+   * 
+   * @param config room distribution configuration
+   * @param rand   random type passed from superclass
+   * @param map    mapgraph to act on
+   */
+  private static void assignRoomType(MapNode node, RoomType room) {
+    switch (room) {
+      case COMBAT:
+        node.setRoomType(room);
+        break;
+      case EVENT, SHOP:
+        if (node.getHeight() > 2) {
+          node.setRoomType(room);
+        }
+        break;
+        default:
+        break;
+    }
+  }
+
+  /**
+   * Performs a fixed point arithmetic calculation to determine the proportion of
+   * room types required for given size.
+   *
+   * @param config    map generation config
+   * @param nodeCount number of nodes to get proportion of
+   * @return integer array of the required room counts from proportions
+   */
+  private static int[] getRoomTypeCounts(MapGenerationConfig config, int nodeCount) {
     RoomType[] types = { RoomType.COMBAT, RoomType.EVENT, RoomType.SHOP };
     int[] weights = { config.getCombatWeight(), config.getEventWeight(), config.getShopWeight() };
 
-    int nodeCount = config.getNormalNodeCount();
     long totalWeight = config.getTotalWeight();
     int[] counts = new int[types.length];
     long[] remainders = new long[types.length];
@@ -85,15 +127,6 @@ public final class NodePoolGenerator {
       allocated++;
     }
 
-    List<RoomType> roomTypes = new ArrayList<>(nodeCount);
-
-    // Chuck the room types node into the list :D
-    for (int index = 0; index < types.length; index++) {
-      for (int count = 0; count < counts[index]; count++) {
-        roomTypes.add(types[index]);
-      }
-    }
-
-    return roomTypes;
+    return counts;
   }
 }

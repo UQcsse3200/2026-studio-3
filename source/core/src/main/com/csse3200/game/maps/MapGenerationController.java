@@ -2,7 +2,6 @@ package com.csse3200.game.maps;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 public class MapGenerationController {
@@ -41,10 +40,7 @@ public class MapGenerationController {
    * branches if the option
    * is available.
    *
-   * <p>
-   * // TODO: need to rebalance room types based on weights // TODO: would like to
-   * have
-   * configurable constraints (enemy first, no back to back shops/events )
+   * @return Fail or success condition for regenerating untenable maps.
    */
   private int generatePathing() {
     List<List<MapNode>> generatedPaths = initializePaths();
@@ -60,7 +56,7 @@ public class MapGenerationController {
     }
 
     pruneUnconnectedMapGraphNodes();
-    rebalanceRoomTypes();
+    NodePoolGenerator.rebalanceRoomTypes(config, rand, map);
     return 0;
   }
 
@@ -135,6 +131,12 @@ public class MapGenerationController {
     return validNodes.get(rand.nextInt(validNodes.size()));
   }
 
+  /**
+   * Creates the nested list that stores x amount of paths generated.
+   * 
+   * @return List of paths generated on initialization. Paths are lists
+   *         themselves, containing the nodes in order of being added to the path.
+   */
   private List<List<MapNode>> initializePaths() {
 
     List<List<MapNode>> generatedPaths = new ArrayList<>();
@@ -160,28 +162,6 @@ public class MapGenerationController {
     return generatedPaths;
   }
 
-  private void rebalanceRoomTypes() {
-
-    // for (int i = 0; i < combatCount; i++) {
-    //
-    // MapNode node = map.getNode(rand.nextInt(1, MapGenerationConfig.MAX_NODE_COUNT
-    // - 1));
-    // node.setRoomType(RoomType.COMBAT);
-    // }
-    // for (int i = 0; i < eventCount; i++) {
-    //
-    // MapNode node = map.getNode(rand.nextInt(1, MapGenerationConfig.MAX_NODE_COUNT
-    // - 1));
-    // node.setRoomType(RoomType.EVENT);
-    // }
-    // for (int i = 0; i < shopCount; i++) {
-    //
-    // MapNode node = map.getNode(rand.nextInt(1, MapGenerationConfig.MAX_NODE_COUNT
-    // - 1));
-    // node.setRoomType(RoomType.SHOP);
-    // }
-  }
-
   public MapGraph getMap() {
     return map;
   }
@@ -198,6 +178,7 @@ public class MapGenerationController {
    * with.
    *
    * @param node Targeted node for getting nodes in range
+   * @return A list containing the nodes on the upper layer that are in range = 1.
    */
   private List<MapNode> getNodesInRange(MapNode node) {
 
@@ -219,8 +200,6 @@ public class MapGenerationController {
    * Removes all unconnected nodes from the MapGraph. Only called as the final
    * step of generation.
    *
-   * <p>
-   * TODO: consider moving this to MapGraph? just unsure about logistics
    */
   private void pruneUnconnectedMapGraphNodes() {
     if (!map.getNodes().isEmpty()) {
