@@ -55,9 +55,6 @@ public class BattleActions extends Component {
   public void create() {
     entity.getEvents().addListener("battle", this::onStart);
     entity.getEvents().addListener("exit", this::onExit);
-    entity.getEvents().addListener(ATTACK_SELECTED_EVENT, controller::selectAttack);
-
-    entity.getEvents().addListener(DEFEND_SELECTED_EVENT, controller::selectDefend);
 
     entity.getEvents().addListener(END_TURN_SELECTED_EVENT, controller::endPlayerTurn);
     entity.getEvents().addListener(PLAY_CARD_EVENT, this::onCardPlayed);
@@ -148,20 +145,12 @@ public class BattleActions extends Component {
     return false;
   }
 
-  //  private void selectAttack() {
-  //    handleIfAllowed(BattleEvent.PLAYER_ATTACK_SELECTED);
-  //  }
-  //
-  //  private void selectDefend() {
-  //    handleIfAllowed(BattleEvent.PLAYER_DEFEND_SELECTED);
-  //  }
-  //
   private void triggerEndTurn() {
     controller.endPlayerTurn();
   }
 
   private void selectEndTurn() {
-    if (controller.canHandle(BattleEvent.PLAYER_END_REQUESTED)) {}
+      controller.canHandle(BattleEvent.PLAYER_END_REQUESTED);
   }
 
   private PlayerIntent classifyCard(CardConfig card) {
@@ -177,13 +166,6 @@ public class BattleActions extends Component {
 
     return PlayerIntent.OTHER;
   }
-
-  //
-  //  private void handleIfAllowed(BattleEvent event) {
-  //    if (controller.canHandle(event)) {
-  //      controller.handle(event);
-  //    }
-  //  }
 
   private void onStart() {
     game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
