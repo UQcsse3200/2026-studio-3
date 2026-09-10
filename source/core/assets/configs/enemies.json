@@ -34,7 +34,7 @@
       "baseAttack": 10,
       "armour": 5,
       "tier": "ELITE",
-      "behaviour": "cycle_attack_defend"
+      "behaviour": "void_knight_retaliation"
     },
     {
       "id": "giant_skeleton",
