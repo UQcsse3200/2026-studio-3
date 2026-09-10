@@ -36,6 +36,23 @@ class CardConfigLoaderTest {
   }
 
   @Test
+  void shouldDeserializeNestedUpgradeAndKeepBackwardCompatibility() {
+    List<CardConfig> cards = CardConfigLoader.loadCards();
+    CardConfig strike =
+        cards.stream().filter(card -> "strike".equals(card.id)).findFirst().orElseThrow();
+    CardConfig defend =
+        cards.stream().filter(card -> "defend".equals(card.id)).findFirst().orElseThrow();
+
+    assertAll(
+        () -> assertEquals("Strike+", strike.upgrade.name),
+        () -> assertEquals("Deal 12 damage.", strike.upgrade.description),
+        () -> assertEquals(1, strike.upgrade.cost),
+        () -> assertEquals(Rarity.COMMON, strike.upgrade.rarity),
+        () -> assertEquals(12, strike.upgrade.effects[0].value),
+        () -> assertTrue(defend.upgrade == null));
+  }
+
+  @Test
   void shouldReturnImmutableCardList() {
     List<CardConfig> cards = CardConfigLoader.loadCards();
 
@@ -150,5 +167,70 @@ class CardConfigLoaderTest {
             () -> CardConfigLoader.loadCards(TEST_DIRECTORY + "null_card.json"));
 
     assertTrue(exception.getMessage().contains("must be a JSON object"));
+  }
+
+  @Test
+  void shouldRejectMissingUpgradeFields() {
+    CardLoadingException exception =
+        assertThrows(
+            CardLoadingException.class,
+            () -> CardConfigLoader.loadCards(TEST_DIRECTORY + "missing_upgrade_fields.json"));
+
+    assertAll(
+        () -> assertTrue(exception.getMessage().contains("card[0].upgrade")),
+        () -> assertTrue(exception.getMessage().contains("missing required field 'description'")),
+        () -> assertTrue(exception.getMessage().contains("missing required field 'cost'")),
+        () -> assertTrue(exception.getMessage().contains("missing required field 'rarity'")),
+        () -> assertTrue(exception.getMessage().contains("missing required field 'effects'")));
+  }
+
+  @Test
+  void shouldRejectUpgradeWithNegativeCost() {
+    CardLoadingException exception =
+        assertThrows(
+            CardLoadingException.class,
+            () -> CardConfigLoader.loadCards(TEST_DIRECTORY + "negative_upgrade_cost.json"));
+
+    assertTrue(exception.getMessage().contains("upgrade.cost must not be negative"));
+  }
+
+  @Test
+  void shouldRejectInvalidUpgradeEffectValue() {
+    CardLoadingException exception =
+        assertThrows(
+            CardLoadingException.class,
+            () -> CardConfigLoader.loadCards(TEST_DIRECTORY + "invalid_upgrade_value.json"));
+
+    assertTrue(exception.getMessage().contains("upgrade.effects[0].value"));
+  }
+
+  @Test
+  void shouldRejectInvalidUpgradeEffectDuration() {
+    CardLoadingException exception =
+        assertThrows(
+            CardLoadingException.class,
+            () -> CardConfigLoader.loadCards(TEST_DIRECTORY + "invalid_upgrade_duration.json"));
+
+    assertTrue(exception.getMessage().contains("upgrade.effects[0].duration"));
+  }
+
+  @Test
+  void shouldRejectMalformedNestedUpgradeJson() {
+    CardLoadingException exception =
+        assertThrows(
+            CardLoadingException.class,
+            () -> CardConfigLoader.loadCards(TEST_DIRECTORY + "malformed_upgrade.json"));
+
+    assertTrue(exception.getMessage().contains("Malformed"));
+  }
+
+  @Test
+  void shouldRejectUpgradeThatIsNotAnObject() {
+    CardLoadingException exception =
+        assertThrows(
+            CardLoadingException.class,
+            () -> CardConfigLoader.loadCards(TEST_DIRECTORY + "invalid_upgrade_shape.json"));
+
+    assertTrue(exception.getMessage().contains("upgrade must be a JSON object"));
   }
 }

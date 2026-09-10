@@ -1,0 +1,22 @@
+{
+  "cards": [
+    {
+      "id": "strike",
+      "name": "Strike",
+      "description": "Deal 6 damage.",
+      "cost": 1,
+      "type": "ATTACK",
+      "rarity": "COMMON",
+      "target": "SINGLE_ENEMY",
+      "effects": [{ "type": "DAMAGE", "value": 6, "duration": 0 }],
+      "texturePath": "images/cards/strike.png",
+      "upgrade": {
+        "name": "Strike+",
+        "description": "Invalid test upgrade.",
+        "cost": 1,
+        "rarity": "COMMON",
+        "effects": [{ "type": "DAMAGE", "value": 0, "duration": 0 }]
+      }
+    }
+  ]
+}
