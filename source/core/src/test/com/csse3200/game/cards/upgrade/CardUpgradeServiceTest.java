@@ -82,25 +82,25 @@ class CardUpgradeServiceTest {
     }
 
     @Test
-    void shouldFilterUpgradableCardTypeIds() {
+    void shouldFilterUpgradableCardIds() {
         StubCardService cardService = new StubCardService();
         cardService.add(buildCard("strike", false));
         cardService.add(buildCard("poison_dagger", true));
         CardUpgradeService service = new CardUpgradeService(cardService);
 
-        List<String> result = service.getUpgradableCardTypeIds(List.of("strike", "poison_dagger"));
+        List<String> result = service.getUpgradableCardIds(List.of("strike", "poison_dagger"));
 
         assertEquals(1, result.size());
         assertEquals("poison_dagger", result.get(0));
     }
 
     @Test
-    void shouldSkipUnknownCardTypeIds() {
+    void shouldSkipUnknownCardIds() {
         StubCardService cardService = new StubCardService();
         cardService.add(buildCard("poison_dagger", true));
         CardUpgradeService service = new CardUpgradeService(cardService);
 
-        List<String> result = service.getUpgradableCardTypeIds(List.of("poison_dagger", "unknown_card"));
+        List<String> result = service.getUpgradableCardIds(List.of("poison_dagger", "unknown_card"));
 
         assertEquals(1, result.size());
         assertEquals("poison_dagger", result.get(0));
@@ -109,14 +109,63 @@ class CardUpgradeServiceTest {
     @Test
     void shouldReturnEmptyListForNullInput() {
         CardUpgradeService service = new CardUpgradeService(new StubCardService());
-        List<String> result = service.getUpgradableCardTypeIds(null);
+        List<String> result = service.getUpgradableCardIds(null);
         assertTrue(result.isEmpty());
     }
 
     @Test
-    void shouldFailUpgradeForBlankInstanceId() {
+    void shouldGenerateUpgradedCardIdWithSuffix() {
+        CardUpgradeService service = new CardUpgradeService(new StubCardService());
+        assertEquals("strike_upgraded", service.getUpgradedCardId("strike"));
+    }
+
+    @Test
+    void shouldFailUpgradeForBlankCardId() {
         CardUpgradeService service = new CardUpgradeService(new StubCardService());
         UpgradeResult result = service.upgradeCard("");
         assertFalse(result.isSuccess());
+    }
+
+    @Test
+    void shouldFailUpgradeForUnknownBaseCard() {
+        CardUpgradeService service = new CardUpgradeService(new StubCardService());
+        UpgradeResult result = service.upgradeCard("does_not_exist");
+        assertFalse(result.isSuccess());
+    }
+
+    @Test
+    void shouldFailUpgradeForCardWithoutUpgradePath() {
+        StubCardService cardService = new StubCardService();
+        cardService.add(buildCard("strike", false));
+        CardUpgradeService service = new CardUpgradeService(cardService);
+
+        UpgradeResult result = service.upgradeCard("strike");
+        assertFalse(result.isSuccess());
+    }
+
+    @Test
+    void shouldFailUpgradeWhenUpgradedDefinitionNotRegistered() {
+        // "strike" supports upgrading, but "strike_upgraded" itself has not been registered yet -
+        // this documents the current gap pending Team 6's confirmation of how upgraded card
+        // definitions come to exist in the CardLibrary.
+        StubCardService cardService = new StubCardService();
+        cardService.add(buildCard("strike", true));
+        CardUpgradeService service = new CardUpgradeService(cardService);
+
+        UpgradeResult result = service.upgradeCard("strike");
+        assertFalse(result.isSuccess());
+    }
+
+    @Test
+    void shouldSucceedWhenUpgradedDefinitionExists() {
+        StubCardService cardService = new StubCardService();
+        cardService.add(buildCard("strike", true));
+        cardService.add(buildCard("strike_upgraded", false)); // the upgraded definition itself
+        CardUpgradeService service = new CardUpgradeService(cardService);
+
+        UpgradeResult result = service.upgradeCard("strike");
+
+        assertTrue(result.isSuccess());
+        assertEquals("strike_upgraded", result.getUpgradedCardId());
     }
 }
