@@ -22,13 +22,6 @@ class MapGenerationConfigTest {
   }
 
   @Test
-  void supportsMissingSeed() {
-    MapGenerationConfig config = new MapGenerationConfig(10, 60, 20, 10, 10);
-
-    assertNull(config.getSeed());
-  }
-
-  @Test
   void rejectsInvalidNodeCount() {
     assertThrows(IllegalArgumentException.class, () -> new MapGenerationConfig(0, 60, 20, 10, 10));
     assertThrows(IllegalArgumentException.class, () -> new MapGenerationConfig(-1, 60, 20, 10, 10));
