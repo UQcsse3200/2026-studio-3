@@ -1,5 +1,6 @@
 package com.csse3200.game.save;
 
+import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.player.InventoryComponent;
@@ -85,8 +86,21 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
   }
 
   private ProgressSaveData captureProgress() {
-    // TODO: no encounter-progress tracking exists yet anywhere in the codebase. Confirmed with
-    // Team 2 (message sent 9/9) — implement once they clarify ownership/source.
-    return new ProgressSaveData(List.of(), "", "");
+    // completedEncounterIds: pending Anran's call on whether this stays a stored field (fix the
+    // List<String>/Integer type mismatch) or gets dropped in favour of deriving completion from
+    // MapSaveData.nodes[].state directly. Left empty until that's settled.
+    List<String> completedEncounterIds = List.of();
+
+    // pendingRewardId: confirmed empty with Team 2 (Joel, 9/10) — Chance/Shop outcomes apply
+    // immediately, no pending-reward phase exists. Revisit only if a reward-claim screen is
+    // added later.
+    String pendingRewardId = "";
+
+    // resumeScreen: agreed with Team 2 (Joel, 9/10) that a load should always return to the Map,
+    // never resume mid-encounter, since outcomes apply immediately and nothing is ever left
+    // in-progress to replay. Always MAP for now — revisit if that rule changes.
+    String resumeScreen = GdxGame.ScreenType.MAP.name();
+
+    return new ProgressSaveData(completedEncounterIds, pendingRewardId, resumeScreen);
   }
 }
