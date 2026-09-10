@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 
+import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.entities.EntityService;
+import com.csse3200.game.entities.configs.EnemyConfigs;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.RenderService;
@@ -19,21 +21,25 @@ class ServiceLocatorTest {
     RenderService renderService = new RenderService();
     PhysicsService physicsService = mock(PhysicsService.class);
     GameTime gameTime = new GameTime();
+    BestiaryService bestiaryService = new BestiaryService(new EnemyConfigs());
 
     ServiceLocator.registerEntityService(entityService);
     ServiceLocator.registerRenderService(renderService);
     ServiceLocator.registerPhysicsService(physicsService);
     ServiceLocator.registerTimeSource(gameTime);
+    ServiceLocator.registerBestiaryService(bestiaryService);
 
     assertEquals(ServiceLocator.getEntityService(), entityService);
     assertEquals(ServiceLocator.getRenderService(), renderService);
     assertEquals(ServiceLocator.getPhysicsService(), physicsService);
     assertEquals(ServiceLocator.getTimeSource(), gameTime);
+    assertEquals(ServiceLocator.getBestiaryService(), bestiaryService);
 
     ServiceLocator.clear();
     assertNull(ServiceLocator.getEntityService());
     assertNull(ServiceLocator.getRenderService());
     assertNull(ServiceLocator.getPhysicsService());
     assertNull(ServiceLocator.getTimeSource());
+    assertNull(ServiceLocator.getBestiaryService());
   }
 }
