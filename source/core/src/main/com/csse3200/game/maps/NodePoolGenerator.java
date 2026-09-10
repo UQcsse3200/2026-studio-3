@@ -11,10 +11,14 @@ import java.util.Random;
 // or whatever
 // even considering ECS, nothing besides a map is going to use this
 
-/** Generates a seeded pool of typed map nodes without creating graph connections. */
+/**
+ * Generates a seeded pool of typed map nodes without creating graph
+ * connections.
+ */
 public final class NodePoolGenerator {
 
-  private NodePoolGenerator() {}
+  private NodePoolGenerator() {
+  }
 
   /**
    * Generates the configured normal nodes followed by exactly one final node.
@@ -48,8 +52,8 @@ public final class NodePoolGenerator {
 
   /** Calculates proportional room counts and creates the room-type list. */
   private static List<RoomType> createRoomTypes(MapGenerationConfig config) {
-    RoomType[] types = {RoomType.COMBAT, RoomType.EVENT, RoomType.SHOP};
-    int[] weights = {config.getCombatWeight(), config.getEventWeight(), config.getShopWeight()};
+    RoomType[] types = { RoomType.COMBAT, RoomType.EVENT, RoomType.SHOP };
+    int[] weights = { config.getCombatWeight(), config.getEventWeight(), config.getShopWeight() };
 
     int nodeCount = config.getNormalNodeCount();
     long totalWeight = config.getTotalWeight();

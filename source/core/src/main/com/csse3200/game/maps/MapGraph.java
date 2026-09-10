@@ -12,7 +12,8 @@ public class MapGraph implements EncounterCallback {
   private MapNode currentNode;
 
   /**
-   * Creates a graph containing an existing node pool and runs procedural path generation over it.
+   * Creates a graph containing an existing node pool and runs procedural path
+   * generation over it.
    *
    * @param nodes nodes keyed by their unique identifiers
    */
@@ -21,11 +22,13 @@ public class MapGraph implements EncounterCallback {
   }
 
   /**
-   * Creates a graph containing an existing node pool, optionally running procedural path
-   * generation. Passing {@code false} builds the graph exactly as given, which lets callers set up
+   * Creates a graph containing an existing node pool, optionally running
+   * procedural path
+   * generation. Passing {@code false} builds the graph exactly as given, which
+   * lets callers set up
    * controlled maps (for example in tests) without triggering full generation.
    *
-   * @param nodes nodes keyed by their unique identifiers
+   * @param nodes    nodes keyed by their unique identifiers
    * @param generate whether to run procedural path generation
    */
   public MapGraph(Map<Integer, MapNode> nodes, boolean generate) {
@@ -115,6 +118,17 @@ public class MapGraph implements EncounterCallback {
     return result;
   }
 
+  public List<MapNode> getNodesByType(RoomType type) {
+
+    List<MapNode> result = new ArrayList<>();
+    for (MapNode node : nodes.values()) {
+      if (node.getRoomType() == type) {
+        result.add(node);
+      }
+    }
+    return result;
+  }
+
   /** Connects two nodes. */
   public void connectNodes(MapNode node1, MapNode node2) {
 
@@ -125,10 +139,11 @@ public class MapGraph implements EncounterCallback {
   }
 
   /**
-   * Connects two nodes by id. Kept so callers outside this package can connect nodes without
+   * Connects two nodes by id. Kept so callers outside this package can connect
+   * nodes without
    * looking them up first, which the encounter integration relies on.
    *
-   * @param firstId id of the first node
+   * @param firstId  id of the first node
    * @param secondId id of the second node
    */
   public void connectNodes(Integer firstId, Integer secondId) {
@@ -138,7 +153,7 @@ public class MapGraph implements EncounterCallback {
   /**
    * Called after an encounter finishes.
    *
-   * @param nodeId completed node id
+   * @param nodeId  completed node id
    * @param success whether encounter completed successfully
    */
   public void completeNode(Integer nodeId, boolean success) {
@@ -180,7 +195,8 @@ public class MapGraph implements EncounterCallback {
   }
 
   /**
-   * Starts a run at the given node, unlocking its connections so there is somewhere to move.
+   * Starts a run at the given node, unlocking its connections so there is
+   * somewhere to move.
    *
    * @param nodeId id of the node the player starts on
    * @return true if the node exists
