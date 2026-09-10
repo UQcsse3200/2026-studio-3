@@ -1,5 +1,8 @@
 package com.csse3200.game.maps;
 
+import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +18,23 @@ public class RunState {
 
   private MapGraph mapGraph;
   private Integer activeNodeId;
+  private PlayerDeck playerDeck;
+
+  /**
+   * Create a deck if playerDeck is null and return the playerDeck
+   *
+   * @param cardService call cardservice to get starterdeck
+   * @return playerDeck Return the player's deck
+   */
+  public PlayerDeck getOrCreatePlayerDeck(CardService cardService) {
+    if (cardService == null) {
+      throw new IllegalArgumentException("cardService must not be null");
+    }
+    if (playerDeck == null) {
+      playerDeck = PlayerDeckFactory.createStarterDeck(cardService);
+    }
+    return playerDeck;
+  }
 
   /**
    * Starts a run on a generated map.
@@ -113,5 +133,6 @@ public class RunState {
   public void endRun() {
     mapGraph = null;
     activeNodeId = null;
+    playerDeck = null;
   }
 }
