@@ -2,6 +2,7 @@ package com.csse3200.game.cards.upgrade;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.cards.CardService;
@@ -120,10 +121,23 @@ class CardUpgradeServiceTest {
     }
 
     @Test
+    void shouldThrowForNullBaseCardIdInGetUpgradedCardId() {
+        CardUpgradeService service = new CardUpgradeService(new StubCardService());
+        assertThrows(IllegalArgumentException.class, () -> service.getUpgradedCardId(null));
+    }
+
+    @Test
+    void shouldThrowForBlankBaseCardIdInGetUpgradedCardId() {
+        CardUpgradeService service = new CardUpgradeService(new StubCardService());
+        assertThrows(IllegalArgumentException.class, () -> service.getUpgradedCardId("  "));
+    }
+
+    @Test
     void shouldFailUpgradeForBlankCardId() {
         CardUpgradeService service = new CardUpgradeService(new StubCardService());
         UpgradeResult result = service.upgradeCard("");
         assertFalse(result.isSuccess());
+        assertEquals(UpgradeFailureReason.BLANK_CARD_ID, result.getFailureReason());
     }
 
     @Test
@@ -131,6 +145,7 @@ class CardUpgradeServiceTest {
         CardUpgradeService service = new CardUpgradeService(new StubCardService());
         UpgradeResult result = service.upgradeCard("does_not_exist");
         assertFalse(result.isSuccess());
+        assertEquals(UpgradeFailureReason.UNKNOWN_CARD, result.getFailureReason());
     }
 
     @Test
@@ -141,6 +156,7 @@ class CardUpgradeServiceTest {
 
         UpgradeResult result = service.upgradeCard("strike");
         assertFalse(result.isSuccess());
+        assertEquals(UpgradeFailureReason.NO_UPGRADE_PATH, result.getFailureReason());
     }
 
     @Test
@@ -154,6 +170,7 @@ class CardUpgradeServiceTest {
 
         UpgradeResult result = service.upgradeCard("strike");
         assertFalse(result.isSuccess());
+        assertEquals(UpgradeFailureReason.UPGRADED_DEFINITION_MISSING, result.getFailureReason());
     }
 
     @Test
@@ -167,5 +184,6 @@ class CardUpgradeServiceTest {
 
         assertTrue(result.isSuccess());
         assertEquals("strike_upgraded", result.getUpgradedCardId());
+        assertEquals(UpgradeFailureReason.NONE, result.getFailureReason());
     }
 }

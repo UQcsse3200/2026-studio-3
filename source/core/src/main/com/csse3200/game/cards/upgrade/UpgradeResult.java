@@ -5,9 +5,9 @@ public final class UpgradeResult {
 
     private final boolean success;
     private final String upgradedCardId;
-    private final String failureReason;
+    private final UpgradeFailureReason failureReason;
 
-    private UpgradeResult(boolean success, String upgradedCardId, String failureReason) {
+    private UpgradeResult(boolean success, String upgradedCardId, UpgradeFailureReason failureReason) {
         this.success = success;
         this.upgradedCardId = upgradedCardId;
         this.failureReason = failureReason;
@@ -20,10 +20,17 @@ public final class UpgradeResult {
      *     the original card ID
      */
     public static UpgradeResult success(String upgradedCardId) {
-        return new UpgradeResult(true, upgradedCardId, null);
+        return new UpgradeResult(true, upgradedCardId, UpgradeFailureReason.NONE);
     }
 
-    public static UpgradeResult failure(String reason) {
+
+
+    /**
+     * Creates a failed result with the given reason.
+     *
+     * @param reason why the upgrade could not be completed
+     */
+    public static UpgradeResult failure(UpgradeFailureReason reason) {
         return new UpgradeResult(false, null, reason);
     }
 
@@ -39,8 +46,8 @@ public final class UpgradeResult {
         return upgradedCardId;
     }
 
-    /** Returns the failure reason, or null if this result represents a success. */
-    public String getFailureReason() {
+    /** Returns the failure reason. {@link UpgradeFailureReason#NONE} if this result is a success. */
+    public UpgradeFailureReason getFailureReason() {
         return failureReason;
     }
 }

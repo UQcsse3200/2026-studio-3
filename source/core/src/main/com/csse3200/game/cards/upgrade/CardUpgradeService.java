@@ -62,11 +62,48 @@ public class CardUpgradeService {
      * convention. This is a pure naming rule and does not check whether that card definition
      * actually exists yet - see {@link #upgradeCard} for the existence check.
      *
-     * @param baseCardId the original card's ID, e.g. "strike"
+     * @param baseCardId the original card's ID, e.g. "strike"; must not be null or blank
      * @return the upgraded card's ID, e.g. "strike_upgraded"
+     * @throws IllegalArgumentException if baseCardId is null or blank
      */
     public String getUpgradedCardId(String baseCardId) {
+        if (baseCardId == null || baseCardId.isBlank()) {
+            throw new IllegalArgumentException("baseCardId must not be null or blank");
+        }
         return baseCardId + UPGRADED_SUFFIX;
+    }
+
+    /**
+     * Checks whether a base card ID is fully eligible for upgrading, combining all conditions
+     * required for a successful upgrade: the card must exist, must have a defined upgrade path,
+     * and its upgraded variant must already be registered. Consolidated here so callers don't
+     * have to re-assemble these checks themselves.
+     *
+     * @param baseCardId the card ID to check
+     * @return a failed {@link UpgradeResult} if any condition is not met, or a successful one
+     *     carrying the resolved upgraded card ID if all conditions pass
+     */
+    private UpgradeResult checkUpgradeEligibility(String baseCardId) {
+        if (baseCardId == null || baseCardId.isBlank()) {
+            return UpgradeResult.failure(UpgradeFailureReason.BLANK_CARD_ID);
+        }
+
+        Optional<CardConfig> configOpt = cardService.getCard(baseCardId);
+        if (configOpt.isEmpty()) {
+            return UpgradeResult.failure(UpgradeFailureReason.UNKNOWN_CARD);
+        }
+
+        if (!canUpgrade(configOpt.get())) {
+            return UpgradeResult.failure(UpgradeFailureReason.NO_UPGRADE_PATH);
+        }
+
+        String upgradedCardId = getUpgradedCardId(baseCardId);
+        Optional<CardConfig> upgradedConfigOpt = cardService.getCard(upgradedCardId);
+        if (upgradedConfigOpt.isEmpty()) {
+            return UpgradeResult.failure(UpgradeFailureReason.UPGRADED_DEFINITION_MISSING);
+        }
+
+        return UpgradeResult.success(upgradedCardId);
     }
 
     /**
@@ -88,39 +125,6 @@ public class CardUpgradeService {
      *     contains the new card ID that should replace {@code baseCardId} in the deck
      */
     public UpgradeResult upgradeCard(String baseCardId) {
-        // Step 1: reject obviously invalid input before doing any lookups.
-        if (baseCardId == null || baseCardId.isBlank()) {
-            return UpgradeResult.failure("Card ID must not be null or blank");
-        }
-
-        // Step 2: confirm the base card actually exists in Team 6's card library.
-        Optional<CardConfig> configOpt = cardService.getCard(baseCardId);
-        if (configOpt.isEmpty()) {
-            return UpgradeResult.failure("Unknown card ID: " + baseCardId);
-        }
-
-        // Step 3: confirm this specific card has an upgrade path defined at all.
-        // A card with upgradedEffects == null was never designed to be upgradeable.
-        CardConfig config = configOpt.get();
-        if (!canUpgrade(config)) {
-            return UpgradeResult.failure("Card '" + baseCardId + "' has no defined upgrade path");
-        }
-
-        // Step 4: work out what the upgraded card's ID should be, using our naming convention.
-        String upgradedCardId = getUpgradedCardId(baseCardId);
-
-        // Step 5: confirm the upgraded card definition actually exists and is registered.
-        // TODO: how this definition comes to exist is still being confirmed with Team 6 -
-        // either they hand-write a "strike_upgraded" entry in cards.json, or we dynamically
-        // build and register one from upgradedEffects at runtime. Until that's settled, this
-        // lookup will fail for any card whose upgraded variant hasn't been registered yet.
-        Optional<CardConfig> upgradedConfigOpt = cardService.getCard(upgradedCardId);
-        if (upgradedConfigOpt.isEmpty()) {
-            return UpgradeResult.failure("Upgraded card definition not found: " + upgradedCardId);
-        }
-
-        // Step 6: everything checks out - hand back the new card ID for the caller to swap
-        // into PlayerDeck (remove baseCardId, add upgradedCardId).
-        return UpgradeResult.success(upgradedCardId);
+        return checkUpgradeEligibility(baseCardId);
     }
 }
