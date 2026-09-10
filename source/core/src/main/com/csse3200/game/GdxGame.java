@@ -5,6 +5,7 @@ import static com.badlogic.gdx.Gdx.app;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.files.UserSettings;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.screens.BattleScreen;
@@ -17,6 +18,7 @@ import com.csse3200.game.screens.MainMenuScreen;
 import com.csse3200.game.screens.MapScreen;
 import com.csse3200.game.screens.SaveLoadScreen;
 import com.csse3200.game.screens.SettingsScreen;
+import com.csse3200.game.services.ServiceLocator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +29,16 @@ import org.slf4j.LoggerFactory;
  */
 public class GdxGame extends Game {
   private static final Logger logger = LoggerFactory.getLogger(GdxGame.class);
+  private BestiaryService bestiaryService;
+
+  /**
+   * Gets discovery progress shared by all screens in this game session.
+   *
+   * @return process-lifetime Bestiary service
+   */
+  public BestiaryService getBestiaryService() {
+    return bestiaryService;
+  }
 
   // Lives here rather than on a screen, since setScreen() disposes the outgoing screen.
   private final RunState runState = new RunState();
@@ -39,6 +51,7 @@ public class GdxGame extends Game {
   public void create() {
     logger.info("Creating game");
     loadSettings();
+    bestiaryService = BestiaryService.loadDefault();
 
     // Sets background to light yellow
     Gdx.gl.glClearColor(248f / 255f, 249 / 255f, 178 / 255f, 1);
@@ -64,6 +77,7 @@ public class GdxGame extends Game {
     if (currentScreen != null) {
       currentScreen.dispose();
     }
+    ServiceLocator.registerBestiaryService(bestiaryService);
     setScreen(newScreen(screenType));
   }
 

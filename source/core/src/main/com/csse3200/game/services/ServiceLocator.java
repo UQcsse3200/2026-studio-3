@@ -1,6 +1,7 @@
 package com.csse3200.game.services;
 
 import com.badlogic.gdx.graphics.Camera;
+import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.input.InputService;
@@ -28,6 +29,7 @@ public class ServiceLocator {
   private static DragNDropService dragNDropService;
   private static Camera camera;
   private static CardLibrary cardLibrary;
+  private static BestiaryService bestiaryService;
 
   public static EntityService getEntityService() {
     return entityService;
@@ -59,6 +61,10 @@ public class ServiceLocator {
 
   public static Camera getCamera() {
     return camera;
+  }
+
+  public static BestiaryService getBestiaryService() {
+    return bestiaryService;
   }
 
   public static void registerEntityService(EntityService service) {
@@ -109,6 +115,11 @@ public class ServiceLocator {
     cardLibrary = library;
   }
 
+  public static void registerBestiaryService(BestiaryService service) {
+    logger.debug("Registering Bestiary service {}", service);
+    bestiaryService = service;
+  }
+
   public static void clear() {
     entityService = null;
     renderService = null;
@@ -119,6 +130,7 @@ public class ServiceLocator {
     dragNDropService = null;
     camera = null;
     cardLibrary = null;
+    bestiaryService = null;
   }
 
   private ServiceLocator() {

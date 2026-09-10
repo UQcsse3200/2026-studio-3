@@ -2,6 +2,8 @@ package com.csse3200.game.entities.factories;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.bestiary.BestiaryTrackingComponent;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.enemy.*;
 import com.csse3200.game.components.spritedisplay.reactive.EnemyDropTargetComponent;
@@ -109,6 +111,11 @@ public class EnemyFactory {
     // failing enemy creation.
     if (ServiceLocator.getRenderService() != null) {
       enemy.addComponent(new EnemyIntentDisplay());
+    }
+
+    BestiaryService bestiary = ServiceLocator.getBestiaryService();
+    if (bestiary != null && bestiary.contains(config.id)) {
+      enemy.addComponent(new BestiaryTrackingComponent(config.id, bestiary));
     }
 
     return enemy;
