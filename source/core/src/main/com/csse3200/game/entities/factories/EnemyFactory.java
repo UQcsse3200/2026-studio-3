@@ -3,10 +3,7 @@ package com.csse3200.game.entities.factories;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.csse3200.game.components.CombatStatsComponent;
-import com.csse3200.game.components.enemy.EnemyAnimationController;
-import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
-import com.csse3200.game.components.enemy.EnemyStatsComponent;
-import com.csse3200.game.components.enemy.IntentIcons;
+import com.csse3200.game.components.enemy.*;
 import com.csse3200.game.components.spritedisplay.reactive.EnemyDropTargetComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.configs.EnemyConfig;
@@ -96,7 +93,8 @@ public class EnemyFactory {
             .addComponent(new EnemyStatsComponent(config.name))
             .addComponent(new EnemyBehaviourComponent(config.behaviour))
             .addComponent(animator)
-            .addComponent(new EnemyAnimationController());
+            .addComponent(new EnemyAnimationController())
+            .addComponent(new EnemyStatsDisplay());
 
     // The drop target lets the player drag a card onto the enemy. It needs the drag-and-drop UI
     // service and a camera, which are only registered when the battle screen is running, so it is
