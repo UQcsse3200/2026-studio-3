@@ -1,6 +1,5 @@
 package com.csse3200.game.save;
 
-import com.csse3200.game.cards.deck.CardIdRegistry;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.player.InventoryComponent;
@@ -115,7 +114,7 @@ public class SaveGameRestoreService {
       return RestoreResult.failure(RestoreError.MISSING_DECK_DATA, "Save is missing deck data");
     }
     for (String cardId : deckData.cardIds) {
-      if (!CardIdRegistry.isRegistered(cardId)) {
+      if (!playerDeck.canAddCard(cardId)) {
         return RestoreResult.failure(
             RestoreError.INVALID_DECK_STATE, "Saved deck contains an unknown card ID: " + cardId);
       }

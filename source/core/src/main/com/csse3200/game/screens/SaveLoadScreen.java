@@ -3,7 +3,6 @@ package com.csse3200.game.screens;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.GdxGame;
-import com.csse3200.game.cards.deck.CardIdRegistry;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.player.InventoryComponent;
@@ -37,6 +36,9 @@ import org.slf4j.LoggerFactory;
 public class SaveLoadScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(SaveLoadScreen.class);
   private static final List<Integer> DEMO_SLOT_IDS = List.of(1, 2, 3);
+  private static final String STRIKE = "strike";
+  private static final String DEFEND = "defend";
+  private static final String BANDAGE = "bandage";
 
   private final GdxGame game;
   private final Renderer renderer;
@@ -62,7 +64,7 @@ public class SaveLoadScreen extends ScreenAdapter {
         new Entity()
             .addComponent(new CombatStatsComponent(75, 5, 100))
             .addComponent(new InventoryComponent(120));
-    PlayerDeck demoDeck = new PlayerDeck(List.of(CardIdRegistry.STRIKE, CardIdRegistry.DEFEND));
+    PlayerDeck demoDeck = new PlayerDeck(List.of(STRIKE, DEFEND));
 
     SaveGameService saveGameService =
         new SaveGameService(new JsonSaveGameRepository(), this::createDemoSaveData);
@@ -83,9 +85,7 @@ public class SaveLoadScreen extends ScreenAdapter {
   private SaveGameData createDemoSaveData() {
     SaveGameData data = new SaveGameData();
     data.player = new PlayerSaveData(75, 100, 120, 0);
-    data.deck =
-        new DeckSaveData(
-            List.of(CardIdRegistry.STRIKE, CardIdRegistry.DEFEND, CardIdRegistry.BANDAGE));
+    data.deck = new DeckSaveData(List.of(STRIKE, DEFEND, BANDAGE));
     data.map =
         new MapSaveData(
             List.of(
