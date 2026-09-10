@@ -21,6 +21,23 @@ public class RunState {
   private PlayerDeck playerDeck;
 
   /**
+   * Create a deck if playerDeck is null and return the playerDeck
+   *
+   * @param cardService call cardservice to get starterdeck
+   * @return playerDeck Return the player's deck
+   */
+  public PlayerDeck getOrCreatePlayerDeck(CardService cardService) {
+    if (cardService == null) {
+      throw new IllegalArgumentException("cardService must not be null");
+    }
+    if (playerDeck == null) {
+      playerDeck = PlayerDeckFactory.createStarterDeck(cardService);
+    }
+    return playerDeck;
+  }
+  private PlayerDeck playerDeck;
+
+  /**
    * Returns the run-scoped player deck, creating the starter deck on first access.
    *
    * @param cardService authoritative card lookup service used to validate starter card IDs
