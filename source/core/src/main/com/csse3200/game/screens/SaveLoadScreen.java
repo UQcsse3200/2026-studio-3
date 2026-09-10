@@ -97,7 +97,7 @@ public class SaveLoadScreen extends ScreenAdapter {
                     2, RoomType.EVENT.name(), NodeState.AVAILABLE.name(), List.of(1))),
             1,
             null);
-    data.progress = new ProgressSaveData(List.of(), "", "MAP");
+    data.progress = new ProgressSaveData("", "MAP");
     data.metadata.runLabel = "Sprint 2 Demo Run";
     return data;
   }

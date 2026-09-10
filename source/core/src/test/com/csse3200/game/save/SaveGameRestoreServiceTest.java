@@ -54,6 +54,7 @@ class SaveGameRestoreServiceTest {
     assertNotNull(runState.getMapGraph());
     assertEquals(1, runState.getMapGraph().getCurrentNode().getNodeId());
     assertEquals(2, runState.getActiveNodeId());
+    assertEquals(NodeState.COMPLETED, runState.getMapGraph().getNode(0).getState());
     assertEquals(NodeState.CURRENT, runState.getMapGraph().getNode(1).getState());
   }
 
@@ -135,7 +136,7 @@ class SaveGameRestoreServiceTest {
                     2, RoomType.EVENT.name(), NodeState.AVAILABLE.name(), List.of(1))),
             1,
             2);
-    data.progress = new ProgressSaveData(List.of(), "", "");
+    data.progress = new ProgressSaveData("", "");
     return data;
   }
 
