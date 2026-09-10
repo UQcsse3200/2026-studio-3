@@ -29,6 +29,18 @@ class CardValidatorTest {
   }
 
   @Test
+  void shouldAcceptImmediateAndTimedHealingButRejectNegativeDuration() {
+    CardConfig card = validCard();
+    card.target = TargetType.SELF;
+    card.effects = new EffectConfig[] {new EffectConfig(EffectType.HEAL, 6, 3)};
+    assertTrue(CardValidator.isValid(card));
+    card.effects[0].duration = 0;
+    assertTrue(CardValidator.isValid(card));
+    card.effects[0].duration = -1;
+    assertFalse(CardValidator.isValid(card));
+  }
+
+  @Test
   void shouldAcceptZeroCost() {
     CardConfig card = validCard();
     card.cost = 0;
