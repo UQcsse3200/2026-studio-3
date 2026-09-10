@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.utils.Align;
 import com.csse3200.game.services.ServiceLocator;
 
 /**
@@ -30,6 +31,10 @@ public class MapNodeActor extends Group {
     this.size = mapWidth / 13f;
     nodeIcon =
         new Image(ServiceLocator.getResourceService().getAsset(getNodeIcon(), Texture.class));
+
+    if (node.getRoomType() == RoomType.FINAL) {
+      this.size *= 2f;
+    }
 
     nodeIcon.setSize(size, size);
     checkNodeState();
@@ -126,45 +131,17 @@ public class MapNodeActor extends Group {
   private String getNodeIcon() {
     switch (node.getRoomType()) {
       case COMBAT:
-        if (node.getState() == NodeState.COMPLETED) {
-          return "images/combat_icon_completed.png";
-        }
-        if (node.getState() == NodeState.CURRENT) {
-          return "images/combat_icon_current.png";
-        } else {
-          return "images/combat_icon.png";
-        }
+        return "images/map/combat.png";
       case SHOP:
-        if (node.getState() == NodeState.COMPLETED) {
-          return "images/shop_icon_completed.png";
-        }
-        if (node.getState() == NodeState.CURRENT) {
-          return "images/shop_icon_current.png";
-        } else {
-          return "images/shop_icon.png";
-        }
+        return "images/map/shop.png";
       case EVENT:
-        if (node.getState() == NodeState.COMPLETED) {
-          return "images/event_icon_completed.png";
-        }
-        if (node.getState() == NodeState.CURRENT) {
-          return "images/event_icon_current.png";
-        } else {
-          return "images/event_icon.png";
-        }
+        return "images/map/event.png";
       case FINAL:
-        if (node.getState() == NodeState.CURRENT) {
-          return "images/final_icon_current.png";
-        } else {
-          return "images/final_icon.png";
-        }
-      case START: // TODO: temporary placement of START case, needs UI
-        if (node.getState() == NodeState.CURRENT) {
-          return "images/final_icon_current.png";
-        } else {
-          return "images/final_icon.png";
-        }
-
+        return "images/map/boss.png";
+      case START:
+        return "images/map/start.png";
+      case ELITE:
+        return "images/map/combat_elite.png";
       default:
         return "images/event_icon.png";
     }
@@ -184,7 +161,6 @@ public class MapNodeActor extends Group {
         nodeIcon.getColor().a = 0.5f;
         break;
       case CURRENT:
-        iconSize = size * 1.25f;
         break;
       default:
         break;

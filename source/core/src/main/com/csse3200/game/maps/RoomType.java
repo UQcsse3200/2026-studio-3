@@ -6,5 +6,6 @@ public enum RoomType {
   SHOP,
   EVENT,
   START,
-  FINAL
+  FINAL,
+  ELITE
 }

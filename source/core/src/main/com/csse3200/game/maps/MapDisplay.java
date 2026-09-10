@@ -34,7 +34,6 @@ public class MapDisplay extends UIComponent {
   private final float mapHeight;
   private final float mapWidth = Gdx.graphics.getWidth();
   private final float nodeWidth = mapWidth / 13f; // default size
-  private final float borderPadding = nodeWidth;
   // to store positions
   private final Map<Integer, Vector2> nodePositions = new HashMap<>();
 
@@ -48,9 +47,9 @@ public class MapDisplay extends UIComponent {
     this.mapSelectionController = new MapSelectionController(mapGraph);
     this.mapInputHandler = new MapInputHandler(mapSelectionController);
     this.mapHeight =
-        MapGenerationConfig.MAP_HEIGHT
-            * 1.5f
-            * borderPadding; // this to be changed for a constant in MapGenerationConfig
+        (MapGenerationConfig.MAP_HEIGHT + 1)
+            * 2f
+            * nodeWidth; // this to be changed for a constant in MapGenerationConfig
   }
 
   /**
@@ -61,7 +60,7 @@ public class MapDisplay extends UIComponent {
     Image background =
         new Image(
             ServiceLocator.getResourceService()
-                .getAsset("images/map_background.png", Texture.class));
+                .getAsset("images/map/background.png", Texture.class));
     background.setSize(group.getWidth(), group.getHeight());
     background.setPosition(0, 0);
     group.addActor(background);
@@ -110,7 +109,7 @@ public class MapDisplay extends UIComponent {
       mapInputHandler.attach(nodeActor);
       float x =
           (node.getRoomType() == RoomType.FINAL || node.getRoomType() == RoomType.START)
-              ? mapWidth / 2f - nodeWidth / 2f
+              ? mapWidth / 2f - nodeActor.getNodeSize() / 2f
               : getNodeX(node.getNodeId(), nodeWidth);
       float y = getNodeY(node);
 
@@ -141,7 +140,7 @@ public class MapDisplay extends UIComponent {
    * @return float y value to position the Node and Connection
    */
   private float getNodeY(MapNode node) {
-    return node.getHeight() * borderPadding + borderPadding;
+    return node.getHeight() * 1.5f * nodeWidth + 2.5f * nodeWidth;
   }
 
   /**
@@ -202,19 +201,14 @@ public class MapDisplay extends UIComponent {
   /** Loads all assets needed to render the Map UI */
   private void loadMapAssets() {
     String[] mapAssets = {
-      "images/combat_icon.png",
-      "images/shop_icon.png",
-      "images/event_icon.png",
-      "images/final_icon.png",
-      "images/combat_icon_completed.png",
-      "images/shop_icon_completed.png",
-      "images/event_icon_completed.png",
-      "images/final_icon_current.png",
-      "images/combat_icon_current.png",
-      "images/shop_icon_current.png",
-      "images/event_icon_current.png",
+      "images/map/combat.png",
+      "images/map/combat_elite.png",
+      "images/map/start.png",
+      "images/map/boss.png",
+      "images/map/event.png",
+      "images/map/shop.png",
       "images/nodeLine.png",
-      "images/map_background.png"
+      "images/map/background.png"
     };
 
     ResourceService resourceService = ServiceLocator.getResourceService();
