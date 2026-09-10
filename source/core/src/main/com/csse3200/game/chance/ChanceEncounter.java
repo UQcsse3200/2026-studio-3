@@ -9,6 +9,7 @@ public final class ChanceEncounter {
   private final String id;
   private final String description;
   private final List<ChanceChoice> choices;
+  private final int weight;
 
   /**
    * Creates a Chance Encounter definition.
@@ -21,9 +22,26 @@ public final class ChanceEncounter {
    * @param choices ordered choices available for this encounter
    */
   public ChanceEncounter(String id, String description, List<ChanceChoice> choices) {
+    this(id, description, choices, 1);
+  }
+
+  /**
+   * Creates a weighted Chance Encounter definition.
+   *
+   * @param id stable encounter definition identifier
+   * @param description player-facing encounter description
+   * @param choices ordered choices available for this encounter
+   * @param weight positive relative selection weight
+   * @throws IllegalArgumentException if {@code weight} is not positive
+   */
+  public ChanceEncounter(String id, String description, List<ChanceChoice> choices, int weight) {
+    if (weight <= 0) {
+      throw new IllegalArgumentException("Chance Encounter weight must be positive");
+    }
     this.id = id;
     this.description = description;
     this.choices = Collections.unmodifiableList(new ArrayList<>(choices));
+    this.weight = weight;
   }
 
   /**
@@ -51,6 +69,15 @@ public final class ChanceEncounter {
    */
   public List<ChanceChoice> getChoices() {
     return choices;
+  }
+
+  /**
+   * Gets the positive relative selection weight.
+   *
+   * @return encounter selection weight
+   */
+  public int getWeight() {
+    return weight;
   }
 
   /**

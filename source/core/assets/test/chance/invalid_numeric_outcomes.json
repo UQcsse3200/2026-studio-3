@@ -3,6 +3,7 @@
     {
       "id": "invalid-numbers",
       "description": "Contains unsafe numeric values.",
+      "weight": 1,
       "choices": [
         {
           "id": "wrong-type",

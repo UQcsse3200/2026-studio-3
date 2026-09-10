@@ -1,9 +1,9 @@
 {
   "encounters": [
     {
-      "id": "duplicate",
-      "description": "First encounter.",
-      "weight": 1,
+      "id": "maximum-weight",
+      "description": "Uses the maximum supported individual weight.",
+      "weight": 2147483647,
       "choices": [
         {
           "id": "continue",
@@ -13,8 +13,8 @@
       ]
     },
     {
-      "id": "duplicate",
-      "description": "Second encounter.",
+      "id": "overflowing-total",
+      "description": "Makes the pool total exceed the supported range.",
       "weight": 1,
       "choices": [
         {

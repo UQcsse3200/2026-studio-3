@@ -1,9 +1,9 @@
 {
   "encounters": [
     {
-      "id": "duplicate",
-      "description": "First encounter.",
-      "weight": 1,
+      "id": "wrong-weight-type",
+      "description": "Uses a string weight.",
+      "weight": "heavy",
       "choices": [
         {
           "id": "continue",
@@ -13,9 +13,9 @@
       ]
     },
     {
-      "id": "duplicate",
-      "description": "Second encounter.",
-      "weight": 1,
+      "id": "out-of-range-weight",
+      "description": "Uses an out-of-range weight.",
+      "weight": 2147483648,
       "choices": [
         {
           "id": "continue",

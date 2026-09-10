@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.extensions.GameExtension;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -22,6 +24,9 @@ class ChanceEncounterConfigLoaderTest {
     assertEquals("mysterious-shrine", encounters.get(0).getId());
     assertEquals("healing-spring", encounters.get(1).getId());
     assertEquals("forgotten-cache", encounters.get(2).getId());
+    assertEquals(3, encounters.get(0).getWeight());
+    assertEquals(2, encounters.get(1).getWeight());
+    assertEquals(3, encounters.get(2).getWeight());
   }
 
   @Test
@@ -155,6 +160,47 @@ class ChanceEncounterConfigLoaderTest {
     assertTrue(noEffect.isNoEffect());
     assertEquals(Integer.MIN_VALUE, boundaries.getHealthDelta());
     assertEquals(Integer.MAX_VALUE, boundaries.getCurrencyDelta());
+  }
+
+  @Test
+  void shouldRejectMissingZeroAndNegativeWeights() {
+    ChanceEncounterLoadingException exception = loadInvalid("invalid_weights.json");
+
+    assertMessageContains(
+        exception,
+        "encounter[0]: weight must be positive, was 0",
+        "encounter[1]: weight must be positive, was -1",
+        "encounter[2]: weight must be present");
+  }
+
+  @Test
+  void shouldRejectUnsafeNumericWeights() {
+    ChanceEncounterLoadingException exception = loadInvalid("invalid_numeric_weights.json");
+
+    assertMessageContains(
+        exception,
+        "encounter[0].weight must be an integer",
+        "encounter[1].weight must be an exact 32-bit integer");
+  }
+
+  @Test
+  void shouldRejectSelectionPoolTotalWeightOverflow() {
+    ChanceEncounterLoadingException exception = loadInvalid("total_weight_overflow.json");
+
+    assertMessageContains(
+        exception, "selection pool total weight must not exceed " + Integer.MAX_VALUE);
+  }
+
+  @Test
+  void shouldLoadAndSelectFromDefaultConfiguration() {
+    List<ChanceEncounter> encounters = ChanceEncounterConfigLoader.loadEncounters();
+    ChanceEncounterSelector selector = new ChanceEncounterSelector(encounters, new Random(148L));
+
+    ChanceEncounter selected = selector.select();
+
+    assertTrue(
+        Set.of("mysterious-shrine", "healing-spring", "forgotten-cache")
+            .contains(selected.getId()));
   }
 
   private static ChanceEncounterLoadingException loadInvalid(String filename) {

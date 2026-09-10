@@ -3,6 +3,7 @@
     {
       "id": "invalid-outcome-structure",
       "description": "Contains a structurally invalid outcome.",
+      "weight": 1,
       "choices": [
         {
           "id": "invalid-outcome",

@@ -3,6 +3,7 @@
     {
       "id": "duplicate-choices",
       "description": "Contains duplicate choice IDs.",
+      "weight": 1,
       "choices": [
         {
           "id": "duplicate",

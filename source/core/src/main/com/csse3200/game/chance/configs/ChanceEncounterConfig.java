@@ -8,6 +8,9 @@ public class ChanceEncounterConfig {
   /** Player-facing encounter description. */
   public String description = "";
 
+  /** Required positive selection weight. */
+  public Integer weight;
+
   /** Ordered choices available for this encounter. */
   public ChanceChoiceConfig[] choices = new ChanceChoiceConfig[0];
 

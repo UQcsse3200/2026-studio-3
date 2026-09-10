@@ -3,6 +3,7 @@
     {
       "id": "mysterious-shrine",
       "description": "An ancient shrine hums with an unsettling energy.",
+      "weight": 3,
       "choices": [
         {
           "id": "make-offering",
@@ -25,6 +26,7 @@
     {
       "id": "healing-spring",
       "description": "A clear spring glows softly beside the path.",
+      "weight": 2,
       "choices": [
         {
           "id": "drink",
@@ -47,6 +49,7 @@
     {
       "id": "forgotten-cache",
       "description": "You discover an abandoned cache hidden beneath loose stones.",
+      "weight": 3,
       "choices": [
         {
           "id": "take-coins",

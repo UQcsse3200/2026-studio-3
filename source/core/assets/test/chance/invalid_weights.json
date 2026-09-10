@@ -1,9 +1,9 @@
 {
   "encounters": [
     {
-      "id": " ",
-      "description": "Blank ID",
-      "weight": 1,
+      "id": "zero-weight",
+      "description": "Has zero weight.",
+      "weight": 0,
       "choices": [
         {
           "id": "continue",
@@ -13,8 +13,9 @@
       ]
     },
     {
-      "description": "Missing ID",
-      "weight": 1,
+      "id": "negative-weight",
+      "description": "Has negative weight.",
+      "weight": -1,
       "choices": [
         {
           "id": "continue",
@@ -24,20 +25,8 @@
       ]
     },
     {
-      "id": "missing-description",
-      "weight": 1,
-      "choices": [
-        {
-          "id": "continue",
-          "description": "Continue.",
-          "outcome": { "healthDelta": 0, "currencyDelta": 0 }
-        }
-      ]
-    },
-    {
-      "id": "blank-description",
-      "description": " ",
-      "weight": 1,
+      "id": "missing-weight",
+      "description": "Has no weight.",
       "choices": [
         {
           "id": "continue",

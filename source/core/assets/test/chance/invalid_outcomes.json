@@ -3,6 +3,7 @@
     {
       "id": "invalid-outcomes",
       "description": "Contains incomplete outcomes.",
+      "weight": 1,
       "choices": [
         {
           "id": "missing-outcome",

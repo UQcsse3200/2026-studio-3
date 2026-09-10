@@ -21,9 +21,22 @@ final class ChanceEncounterConfigValidator {
 
     List<String> errors = new ArrayList<>();
     Set<String> encounterIds = new HashSet<>();
+    long totalWeight = 0L;
 
     for (int i = 0; i < config.encounters.length; i++) {
-      validateEncounter(config.encounters[i], i, encounterIds, errors);
+      ChanceEncounterConfig encounter = config.encounters[i];
+      validateEncounter(encounter, i, encounterIds, errors);
+      if (encounter != null && encounter.weight != null && encounter.weight > 0) {
+        totalWeight += encounter.weight;
+      }
+    }
+
+    if (totalWeight > Integer.MAX_VALUE) {
+      errors.add(
+          "selection pool total weight must not exceed "
+              + Integer.MAX_VALUE
+              + ", was "
+              + totalWeight);
     }
 
     return List.copyOf(errors);
@@ -48,6 +61,12 @@ final class ChanceEncounterConfigValidator {
 
     if (encounter.description == null || encounter.description.isBlank()) {
       errors.add(label + ": description must not be null or blank");
+    }
+
+    if (encounter.weight == null) {
+      errors.add(label + ": weight must be present");
+    } else if (encounter.weight <= 0) {
+      errors.add(label + ": weight must be positive, was " + encounter.weight);
     }
 
     if (encounter.choices == null || encounter.choices.length == 0) {

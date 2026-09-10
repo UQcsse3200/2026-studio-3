@@ -3,6 +3,7 @@
     {
       "id": "invalid-choices",
       "description": "Contains invalid choice fields.",
+      "weight": 1,
       "choices": [
         {
           "id": " ",

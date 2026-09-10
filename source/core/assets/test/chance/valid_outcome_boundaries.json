@@ -3,6 +3,7 @@
     {
       "id": "valid-outcomes",
       "description": "Contains valid no-effect and boundary outcomes.",
+      "weight": 1,
       "choices": [
         {
           "id": "no-effect",

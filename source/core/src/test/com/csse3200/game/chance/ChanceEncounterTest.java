@@ -26,6 +26,31 @@ class ChanceEncounterTest {
   }
 
   @Test
+  void shouldDefaultEncounterWeightToOne() {
+    ChanceEncounter encounter = createShrineEncounter();
+
+    assertEquals(1, encounter.getWeight());
+  }
+
+  @Test
+  void shouldPreserveConfiguredEncounterWeight() {
+    ChanceEncounter encounter =
+        new ChanceEncounter("weighted", "A weighted encounter.", List.of(leaveChoice()), 7);
+
+    assertEquals(7, encounter.getWeight());
+  }
+
+  @Test
+  void shouldRejectNonPositiveEncounterWeight() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new ChanceEncounter("zero", "Zero weight.", List.of(leaveChoice()), 0));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new ChanceEncounter("negative", "Negative weight.", List.of(leaveChoice()), -1));
+  }
+
+  @Test
   void shouldPreserveChoiceOrder() {
     ChanceChoice sacrifice = sacrificeChoice();
     ChanceChoice leave = leaveChoice();

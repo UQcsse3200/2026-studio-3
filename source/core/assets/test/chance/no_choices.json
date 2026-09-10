@@ -3,6 +3,7 @@
     {
       "id": "no-choices",
       "description": "This encounter has no choices.",
+      "weight": 1,
       "choices": []
     }
   ]

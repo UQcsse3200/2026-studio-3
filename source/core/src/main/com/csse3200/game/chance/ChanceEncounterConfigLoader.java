@@ -73,7 +73,7 @@ public final class ChanceEncounterConfigLoader {
     }
 
     List<String> errors = new ArrayList<>();
-    validateOutcomeNumbers(encounterArray, errors);
+    validateNumericFields(encounterArray, errors);
     if (!errors.isEmpty()) {
       throw invalidDefinitions(filename, errors);
     }
@@ -108,10 +108,11 @@ public final class ChanceEncounterConfigLoader {
       choices.add(new ChanceChoice(choiceConfig.id, choiceConfig.description, outcome));
     }
 
-    return new ChanceEncounter(encounterConfig.id, encounterConfig.description, choices);
+    return new ChanceEncounter(
+        encounterConfig.id, encounterConfig.description, choices, encounterConfig.weight);
   }
 
-  private static void validateOutcomeNumbers(JsonValue encounterArray, List<String> errors) {
+  private static void validateNumericFields(JsonValue encounterArray, List<String> errors) {
     int encounterIndex = 0;
     for (JsonValue encounter = encounterArray.child;
         encounter != null;
@@ -119,6 +120,8 @@ public final class ChanceEncounterConfigLoader {
       if (!encounter.isObject()) {
         continue;
       }
+
+      validateInteger(encounter.get("weight"), "encounter[" + encounterIndex + "].weight", errors);
 
       JsonValue choices = encounter.get("choices");
       if (choices == null || !choices.isArray()) {
