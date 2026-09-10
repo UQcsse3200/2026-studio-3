@@ -68,6 +68,25 @@ class CorruptionCardsTest {
         () -> assertEquals("images/cards/poison_dagger.png", card.texturePath));
   }
 
+  @Test
+  void shouldLoadBlightSeal() {
+    CardConfig card = library.getCard("blight_seal").orElseThrow();
+
+    assertAll(
+        () -> assertEquals("Blight Seal", card.name),
+        () ->
+            assertEquals(
+                "Apply 2 Vulnerable and 2 Poison to an enemy for 2 turns.", card.description),
+        () -> assertEquals(1, card.cost),
+        () -> assertEquals(CardType.SKILL, card.type),
+        () -> assertEquals(Rarity.RARE, card.rarity),
+        () -> assertEquals(TargetType.SINGLE_ENEMY, card.target),
+        () -> assertEquals(2, card.effects.length),
+        () -> assertEffect(card.effects[0], EffectType.VULNERABLE, 2, 2),
+        () -> assertEffect(card.effects[1], EffectType.POISON, 2, 2),
+        () -> assertEquals("images/cards/expose.png", card.texturePath));
+  }
+
   private static void assertEffect(EffectConfig effect, EffectType type, int value, int duration) {
     assertEquals(type, effect.type);
     assertEquals(value, effect.value);

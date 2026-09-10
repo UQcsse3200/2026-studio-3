@@ -108,6 +108,20 @@
           { "type": "POISON", "value": 3, "duration": 3 }
         ],
         "texturePath": "images/cards/poison_dagger.png"
+      },
+      {
+        "id": "blight_seal",
+        "name": "Blight Seal",
+        "description": "Apply 2 Vulnerable and 2 Poison to an enemy for 2 turns.",
+        "cost": 1,
+        "type": "SKILL",
+        "rarity": "RARE",
+        "target": "SINGLE_ENEMY",
+        "effects": [
+          { "type": "VULNERABLE", "value": 2, "duration": 2 },
+          { "type": "POISON", "value": 2, "duration": 2 }
+        ],
+        "texturePath": "images/cards/expose.png"
       }
     ]
   }
