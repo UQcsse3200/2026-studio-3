@@ -224,6 +224,26 @@ public class MapGraph implements EncounterCallback {
   }
 
   /**
+   * Restores the current node from trusted save/load code without applying normal movement rules.
+   *
+   * @param nodeId saved current node id, or null when no node is current
+   * @return true when the node was restored, or false if the id is unknown
+   */
+  public boolean restoreCurrentNode(Integer nodeId) {
+    if (nodeId == null) {
+      currentNode = null;
+      return true;
+    }
+
+    MapNode restoredCurrentNode = nodes.get(nodeId);
+    if (restoredCurrentNode == null) {
+      return false;
+    }
+    currentNode = restoredCurrentNode;
+    return true;
+  }
+
+  /**
    * Gets all nodes in the graph.
    *
    * @return all map nodes

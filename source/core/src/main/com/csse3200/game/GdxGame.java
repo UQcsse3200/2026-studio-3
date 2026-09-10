@@ -8,11 +8,14 @@ import com.badlogic.gdx.Screen;
 import com.csse3200.game.files.UserSettings;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.screens.BattleScreen;
+import com.csse3200.game.screens.CardLibraryScreen;
 import com.csse3200.game.screens.EncounterScreen;
 import com.csse3200.game.screens.EndBattleScreen;
+import com.csse3200.game.screens.LibraryScreen;
 import com.csse3200.game.screens.MainGameScreen;
 import com.csse3200.game.screens.MainMenuScreen;
 import com.csse3200.game.screens.MapScreen;
+import com.csse3200.game.screens.SaveLoadScreen;
 import com.csse3200.game.screens.SettingsScreen;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,6 +92,12 @@ public class GdxGame extends Game {
         return new MainGameScreen(this);
       case SETTINGS:
         return new SettingsScreen(this);
+      case SAVE_LOAD:
+        return new SaveLoadScreen(this);
+      case LIBRARY:
+        return new LibraryScreen(this);
+      case CARD_LIBRARY:
+        return new CardLibraryScreen(this);
       case MAP:
         return new MapScreen(this);
       case ENCOUNTER:
@@ -108,6 +117,9 @@ public class GdxGame extends Game {
     MAIN_MENU,
     MAIN_GAME,
     SETTINGS,
+    SAVE_LOAD,
+    LIBRARY,
+    CARD_LIBRARY,
     MAP,
     ENCOUNTER,
     BATTLE_SCREEN,
