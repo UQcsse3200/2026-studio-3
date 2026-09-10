@@ -249,7 +249,7 @@ public class BattleController {
 
   /**
    * Resets the current battle to a completely new battle that has no previous player and enemy
-   * turns
+   * turns.
    */
   public void resetBattle() {
     if (this.processingEvents) {
@@ -261,10 +261,9 @@ public class BattleController {
 
     // Normal housekeeping for resetting the state machine.
     this.eventQueue.clear();
-    this.setCurrentEnemyIndex(-1);
+    this.resetEnemyCursor();
     this.setEnemyIntent(null);
     this.setCurrentPhase(BattlePhase.SETUP);
-
     this.notifyPhaseChange(previousPhase, BattlePhase.SETUP);
   }
 
@@ -276,6 +275,16 @@ public class BattleController {
   public BattlePhase getCurrentPhase() {
     return this.currentPhase;
   }
+
+  /**
+   * Returns the current targeted enemy.
+   *
+   * @return An int representing the targeted entity within the array.
+   */
+  public int getCurrentEnemyIndex() {
+    return this.currentEnemyIndex;
+  }
+
 
   /**
    * Adds a listener to the event handler, which ultimately informs external teams about a phase
@@ -348,16 +357,6 @@ public class BattleController {
   private void narrate(String message) {
     eventHandler.trigger(BATTLE_LOG_EVENT, message);
   }
-
-  /**
-   * Returns the current targeted enemy.
-   *
-   * @return An int representing the targeted entity within the array.
-   */
-  public int getCurrentEnemyIndex() {
-    return this.currentEnemyIndex;
-  }
-
   /**
    * Convenience function for returning if a given event can be handled within a state.
    *
@@ -368,7 +367,7 @@ public class BattleController {
     return this.battleTransitions.getNextPhase(this.currentPhase, event) != null;
   }
 
-  /*------------------------- Setters ----------------------------*/
+  /*----------------------------- Setters --------------------------------*/
 
   private void setCurrentPhase(BattlePhase nextPhase) {
     this.currentPhase = nextPhase;
@@ -473,7 +472,7 @@ public class BattleController {
     return false;
   }
 
-  /** Cleans up the variables after a round or the battle sequence is done. */
+  /** Resets the enemy cursor to the default 'no target' value */
   private void resetEnemyCursor() {
     this.setCurrentEnemyIndex(-1);
   }
@@ -504,6 +503,14 @@ public class BattleController {
     return lastCardPlaySucceeded;
   }
 
+  /**
+   * Prints a summary string for a game event that occurs. For use in printing
+   * actions within a battle sequence.
+   *
+   * @param request The card that is being played.
+   * @param result The result of the card being played.
+   * @return A string summarising the card being played and the resulting actions.
+   */
   private String summarise(CardPlayRequest request, CardPlayResult result) {
     StringBuilder summary = new StringBuilder("You played ").append(request.cardID());
     for (ResolvedCardEffect effect : result.enemyEffects()) {
@@ -546,17 +553,6 @@ public class BattleController {
     return EnemyIntent.attack(attack);
   }
 
-  private void enterPlayerStart() {
-    if (this.queueBattleOutcomeIfOver()) {
-      return;
-    }
-    // Start-of-turn operations: refill energy for the new player turn.
-    EnergyComponent energy = playerEnergy();
-    if (energy != null) {
-      energy.onTurnStart();
-    }
-    handle(BattleEvent.PLAYER_TURN_STARTED);
-  }
 
   private EnergyComponent playerEnergy() {
     return this.player.getComponent(EnergyComponent.class);
@@ -628,6 +624,7 @@ public class BattleController {
 
   /*--------------------------- Possible Action Branches ----------------------------*/
 
+
   private void enterSetup() {
     // Coordinate battle setup.
     this.setCurrentEnemyIndex(0);
@@ -647,6 +644,19 @@ public class BattleController {
         behaviour.setPlayerStats(player.getComponent(CombatStatsComponent.class));
         behaviour.rollIntent();
       }
+    }
+
+    /** Enters the 'player start' state of the FSM*/
+    private void enterPlayerStart() {
+      if (this.queueBattleOutcomeIfOver()) {
+        return;
+      }
+      // Start-of-turn operations: refill energy for the new player turn.
+      EnergyComponent energy = playerEnergy();
+      if (energy != null) {
+        energy.onTurnStart();
+      }
+      handle(BattleEvent.PLAYER_TURN_STARTED);
     }
 
     // If an enemy is alive set it to the current intent
