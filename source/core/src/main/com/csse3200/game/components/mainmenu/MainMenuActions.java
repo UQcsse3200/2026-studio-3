@@ -22,6 +22,7 @@ public class MainMenuActions extends Component {
     entity.getEvents().addListener("start", this::onStart);
     entity.getEvents().addListener("map", this::onStart);
     entity.getEvents().addListener("load", this::onLoad);
+    entity.getEvents().addListener("library", this::onLibrary);
     entity.getEvents().addListener("exit", this::onExit);
     entity.getEvents().addListener("settings", this::onSettings);
     entity.getEvents().addListener("shop", this::onShop);
@@ -38,6 +39,12 @@ public class MainMenuActions extends Component {
   private void onLoad() {
     logger.info("Opening save/load screen");
     game.setScreen(GdxGame.ScreenType.SAVE_LOAD);
+  }
+
+  /** Opens the library screen. */
+  private void onLibrary() {
+    logger.info("Opening library screen");
+    game.setScreen(GdxGame.ScreenType.LIBRARY);
   }
 
   /** Exits the game. */
