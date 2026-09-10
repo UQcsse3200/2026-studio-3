@@ -9,15 +9,15 @@ public class EnemyAIContext {
   private final int enemyHealth;
   private final int enemyMaxHealth;
   private final int enemyAttack;
-  private final int enemyArmour;
+  private final int enemyArmor;
   private final EnemyIntent previousIntent;
   private final int turnNumber;
 
   /**
    * * Creates a snapshot of the battle state for enemy decision-making. * * @param playerHealth
    * player's current health * @param enemyHealth enemy's current health * @param enemyMaxHealth
-   * enemy's maximum health * @param enemyAttack enemy's current base attack * @param enemyArmour
-   * enemy's current armour * @param previousIntent enemy's intent from the previous turn * @param
+   * enemy's maximum health * @param enemyAttack enemy's current base attack * @param enemyArmor
+   * enemy's current armor * @param previousIntent enemy's intent from the previous turn * @param
    * turnNumber current battle turn number
    */
   public EnemyAIContext(
@@ -25,14 +25,14 @@ public class EnemyAIContext {
       int enemyHealth,
       int enemyMaxHealth,
       int enemyAttack,
-      int enemyArmour,
+      int enemyArmor,
       EnemyIntent previousIntent,
       int turnNumber) {
     this.playerHealth = Math.max(0, playerHealth);
     this.enemyHealth = Math.max(0, enemyHealth);
     this.enemyMaxHealth = Math.max(0, enemyMaxHealth);
     this.enemyAttack = Math.max(0, enemyAttack);
-    this.enemyArmour = Math.max(0, enemyArmour);
+    this.enemyArmor = Math.max(0, enemyArmor);
     this.previousIntent = Objects.requireNonNull(previousIntent, "previousIntent cannot be null");
     this.turnNumber = Math.max(1, turnNumber);
   }
@@ -53,8 +53,8 @@ public class EnemyAIContext {
     return enemyAttack;
   }
 
-  public int getEnemyArmour() {
-    return enemyArmour;
+  public int getEnemyArmor() {
+    return enemyArmor;
   }
 
   public EnemyIntent getPreviousIntent() {

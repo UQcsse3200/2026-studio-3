@@ -1,5 +1,7 @@
 package com.csse3200.game.services;
 
+import com.badlogic.gdx.graphics.Camera;
+import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.input.InputService;
 import com.csse3200.game.physics.PhysicsService;
@@ -23,6 +25,9 @@ public class ServiceLocator {
   private static GameTime timeSource;
   private static InputService inputService;
   private static ResourceService resourceService;
+  private static DragNDropService dragNDropService;
+  private static Camera camera;
+  private static CardLibrary cardLibrary;
 
   public static EntityService getEntityService() {
     return entityService;
@@ -46,6 +51,14 @@ public class ServiceLocator {
 
   public static ResourceService getResourceService() {
     return resourceService;
+  }
+
+  public static DragNDropService getDragAndDropService() {
+    return dragNDropService;
+  }
+
+  public static Camera getCamera() {
+    return camera;
   }
 
   public static void registerEntityService(EntityService service) {
@@ -78,6 +91,24 @@ public class ServiceLocator {
     resourceService = source;
   }
 
+  public static void registerDragNDropService(DragNDropService service) {
+    dragNDropService = service;
+  }
+
+  public static void registerCamera(Camera cam) {
+    logger.debug("Registering camera {}", cam);
+    camera = cam;
+  }
+
+  public static CardLibrary getCardLibrary() {
+    return cardLibrary;
+  }
+
+  public static void registerCardLibrary(CardLibrary library) {
+    logger.debug("Registering card library {}", library);
+    cardLibrary = library;
+  }
+
   public static void clear() {
     entityService = null;
     renderService = null;
@@ -85,6 +116,9 @@ public class ServiceLocator {
     timeSource = null;
     inputService = null;
     resourceService = null;
+    dragNDropService = null;
+    camera = null;
+    cardLibrary = null;
   }
 
   private ServiceLocator() {

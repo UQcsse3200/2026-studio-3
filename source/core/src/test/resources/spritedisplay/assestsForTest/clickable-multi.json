@@ -1,0 +1,7 @@
+{
+  "Clickable": [
+    { "trigger": "cardOne", "x": 0, "y": 0 },
+    { "trigger": "cardTwo", "x": 0, "y": 0 },
+    { "trigger": "cardThree", "x": 0, "y": 0 }
+  ]
+}

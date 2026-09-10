@@ -4,7 +4,7 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.GdxGame;
-import com.csse3200.game.areas.ForestGameArea;
+import com.csse3200.game.areas.EncounterGameArea;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
@@ -16,6 +16,7 @@ import com.csse3200.game.cards.debug.KeyboardCardEffectDebugInputComponent;
 import com.csse3200.game.cards.effects.CardEffectResolutionService;
 import com.csse3200.game.components.cards.CardHandDisplay;
 import com.csse3200.game.components.gamearea.PerformanceDisplay;
+import com.csse3200.game.components.maingame.DebugShortcutInputComponent;
 import com.csse3200.game.components.maingame.MainGameActions;
 import com.csse3200.game.components.maingame.MainGameExitDisplay;
 import com.csse3200.game.entities.Entity;
@@ -24,6 +25,7 @@ import com.csse3200.game.entities.factories.RenderFactory;
 import com.csse3200.game.input.InputComponent;
 import com.csse3200.game.input.InputDecorator;
 import com.csse3200.game.input.InputService;
+import com.csse3200.game.maps.*;
 import com.csse3200.game.physics.PhysicsEngine;
 import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.RenderService;
@@ -37,6 +39,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/// To test if shortcut works!!!
 /**
  * The game screen containing the main game.
  *
@@ -44,7 +47,9 @@ import org.slf4j.LoggerFactory;
  */
 public class MainGameScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(MainGameScreen.class);
-  private static final String[] mainGameTextures = {"images/heart.png"};
+  private static final String[] mainGameTextures = {
+    "images/heart.png", "images/energy.png", "images/piety.png", "images/money.png"
+  };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
 
   private final GdxGame game;
@@ -76,8 +81,8 @@ public class MainGameScreen extends ScreenAdapter {
 
     logger.debug("Initialising main game screen entities");
     TerrainFactory terrainFactory = new TerrainFactory(renderer.getCamera());
-    ForestGameArea forestGameArea = new ForestGameArea(terrainFactory);
-    forestGameArea.create();
+    EncounterGameArea encounterGameArea = new EncounterGameArea(terrainFactory);
+    encounterGameArea.create();
   }
 
   @Override
@@ -155,7 +160,9 @@ public class MainGameScreen extends ScreenAdapter {
         .addComponent(new TerminalDisplay())
         .addComponent(new CardEffectDebugComponent(cardEffects))
         .addComponent(new KeyboardCardEffectDebugInputComponent())
-        .addComponent(new CardEffectDebugDisplay());
+        .addComponent(new CardEffectDebugDisplay())
+        .addComponent(new TerminalDisplay())
+        .addComponent(new DebugShortcutInputComponent(this.game));
 
     ServiceLocator.getEntityService().register(ui);
   }

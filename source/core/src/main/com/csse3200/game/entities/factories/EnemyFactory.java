@@ -3,10 +3,8 @@ package com.csse3200.game.entities.factories;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.csse3200.game.components.CombatStatsComponent;
-import com.csse3200.game.components.enemy.EnemyAnimationController;
-import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
-import com.csse3200.game.components.enemy.EnemyStatsComponent;
-import com.csse3200.game.components.enemy.IntentIcons;
+import com.csse3200.game.components.enemy.*;
+import com.csse3200.game.components.spritedisplay.reactive.EnemyDropTargetComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.configs.EnemyConfig;
 import com.csse3200.game.entities.configs.EnemyConfigs;
@@ -14,6 +12,7 @@ import com.csse3200.game.entities.configs.EnemyScaling;
 import com.csse3200.game.entities.configs.EnemyTier;
 import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.rendering.AnimationRenderComponent;
+import com.csse3200.game.services.DragNDropService;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import java.util.ArrayList;
@@ -88,12 +87,31 @@ public class EnemyFactory {
     CombatStatsComponent stats = new CombatStatsComponent(config.health, config.baseAttack);
     stats.setArmor(config.armour);
 
-    return new Entity()
-        .addComponent(stats)
-        .addComponent(new EnemyStatsComponent(config.name))
-        .addComponent(new EnemyBehaviourComponent(config.behaviour))
-        .addComponent(animator)
-        .addComponent(new EnemyAnimationController());
+    Entity enemy =
+        new Entity()
+            .addComponent(stats)
+            .addComponent(new EnemyStatsComponent(config.name))
+            .addComponent(new EnemyBehaviourComponent(config.behaviour))
+            .addComponent(animator)
+            .addComponent(new EnemyAnimationController());
+
+    // The drop target lets the player drag a card onto the enemy. It needs the drag-and-drop UI
+    // service and a camera, which are only registered when the battle screen is running, so it is
+    // skipped when they are absent (e.g. headless tests) rather than failing enemy creation.
+    DragNDropService dragAndDrop = ServiceLocator.getDragAndDropService();
+    if (dragAndDrop != null && ServiceLocator.getCamera() != null) {
+      enemy.addComponent(
+          new EnemyDropTargetComponent(
+              dragAndDrop.getDragAndDrop(), ServiceLocator.getCamera(), config.id));
+    }
+    // The intent display draws into the world through the render service, which only exists while
+    // the game is rendering, so it is skipped when absent (e.g. headless tests) rather than
+    // failing enemy creation.
+    if (ServiceLocator.getRenderService() != null) {
+      enemy.addComponent(new EnemyIntentDisplay());
+    }
+
+    return enemy;
   }
 
   /**
