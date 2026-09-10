@@ -111,7 +111,17 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">PlayerDeck</a>()</code></div>
 <div class="col-last even-row-color">
-<div class="block">Creates an empty player deck.</div>
+<div class="block">Creates an empty player deck backed by the configured card definitions.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.cards.CardService)" class="member-name-link">PlayerDeck</a><wbr>(<a href="../CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Creates an empty player deck using the supplied source of card definitions.</div>
+</div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.cards.CardService,java.util.Collection)" class="member-name-link">PlayerDeck</a><wbr>(<a href="../CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collection.html" title="class or interface in java.util" class="external-link">Collection</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;cardIds)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Creates a player deck containing the given card IDs in order, validated by the supplied card
+ service.</div>
 </div>
 <div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(java.util.Collection)" class="member-name-link">PlayerDeck</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collection.html" title="class or interface in java.util" class="external-link">Collection</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;cardIds)</code></div>
 <div class="col-last odd-row-color">
@@ -208,7 +218,18 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="&lt;init&gt;()">
 <h3>PlayerDeck</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">PlayerDeck</span>()</div>
-<div class="block">Creates an empty player deck.</div>
+<div class="block">Creates an empty player deck backed by the configured card definitions.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.cards.CardService)">
+<h3>PlayerDeck</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">PlayerDeck</span><wbr><span class="parameters">(<a href="../CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService)</span></div>
+<div class="block">Creates an empty player deck using the supplied source of card definitions.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>cardService</code> - authoritative card lookup service</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -218,6 +239,20 @@ loadScripts(document, 'script');</script>
 <div class="block">Creates a player deck containing the given card IDs in order.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
+<dd><code>cardIds</code> - card IDs to add to the deck</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.cards.CardService,java.util.Collection)">
+<h3>PlayerDeck</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">PlayerDeck</span><wbr><span class="parameters">(<a href="../CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collection.html" title="class or interface in java.util" class="external-link">Collection</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;cardIds)</span></div>
+<div class="block">Creates a player deck containing the given card IDs in order, validated by the supplied card
+ service.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>cardService</code> - authoritative card lookup service</dd>
 <dd><code>cardIds</code> - card IDs to add to the deck</dd>
 </dl>
 </section>

@@ -142,9 +142,14 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Creates a default player deck using Team 6's six initial cards.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getStarterDeckCardIds()" class="member-name-link">getStarterDeckCardIds</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#createStarterDeck(com.csse3200.game.cards.CardService)" class="member-name-link">createStarterDeck</a><wbr>(<a href="../CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Creates a default player deck validated by the supplied card service.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getStarterDeckCardIds()" class="member-name-link">getStarterDeckCardIds</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Returns the card IDs used by the starter deck.</div>
 </div>
 </div>
@@ -265,6 +270,19 @@ loadScripts(document, 'script');</script>
  <p>This is intentionally separate from battle deck state. Combat systems should copy this deck
  when a battle begins, then shuffle and mutate their own draw pile, hand and discard pile.</div>
 <dl class="notes">
+<dt>Returns:</dt>
+<dd>starter player deck</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="createStarterDeck(com.csse3200.game.cards.CardService)">
+<h3>createStarterDeck</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></span>&nbsp;<span class="element-name">createStarterDeck</span><wbr><span class="parameters">(<a href="../CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService)</span></div>
+<div class="block">Creates a default player deck validated by the supplied card service.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>cardService</code> - authoritative card lookup service</dd>
 <dt>Returns:</dt>
 <dd>starter player deck</dd>
 </dl>
