@@ -645,9 +645,10 @@ public class BattleController {
         behaviour.rollIntent();
       }
     }
+  }
 
-    /** Enters the 'player start' state of the FSM*/
-    private void enterPlayerStart() {
+    /** Enters the 'player start' state of the FSM */
+    private void enterPlayerStart () {
       if (this.queueBattleOutcomeIfOver()) {
         return;
       }
@@ -657,7 +658,7 @@ public class BattleController {
         energy.onTurnStart();
       }
       handle(BattleEvent.PLAYER_TURN_STARTED);
-    }
+
 
     // If an enemy is alive set it to the current intent
     if (this.advanceToNextLivingEnemy()) {
