@@ -5,8 +5,8 @@ import java.util.Set;
 /**
  * Registry of card IDs that may be stored in a player deck.
  *
- * <p>This registry contains the card IDs shared with the Shop system. When Team 6's card library
- * is available, registration checks can delegate to that library without changing the {@link
+ * <p>This registry contains the card IDs shared with the Shop system. When Team 6's card library is
+ * available, registration checks can delegate to that library without changing the {@link
  * PlayerDeck} API.
  */
 public final class CardIdRegistry {
