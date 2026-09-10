@@ -7,15 +7,21 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.TestCardService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class BattleDeckTest {
+  private static final CardService CARDS =
+      TestCardService.withCards(
+          "strike", "defend", "poison_dagger", "expose", "inner_focus", "bandage");
+
   @Test
   void shouldCreateDrawPileFromPlayerDeck() {
-    PlayerDeck playerDeck = new PlayerDeck(List.of("strike", "defend", "bandage"));
+    PlayerDeck playerDeck = new PlayerDeck(CARDS, List.of("strike", "defend", "bandage"));
     BattleDeck battleDeck = new BattleDeck(playerDeck);
 
     assertIterableEquals(List.of("strike", "defend", "bandage"), battleDeck.getDrawPile());
@@ -28,7 +34,7 @@ class BattleDeckTest {
 
   @Test
   void shouldNotMutateOriginalPlayerDeck() {
-    PlayerDeck playerDeck = new PlayerDeck(List.of("strike", "defend"));
+    PlayerDeck playerDeck = new PlayerDeck(CARDS, List.of("strike", "defend"));
     BattleDeck battleDeck = new BattleDeck(playerDeck);
 
     battleDeck.drawOne();
@@ -44,7 +50,7 @@ class BattleDeckTest {
 
   @Test
   void shouldDrawOneCardIntoHand() {
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike", "defend")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend")));
 
     String drawnCard = battleDeck.drawOne();
 
@@ -57,7 +63,7 @@ class BattleDeckTest {
 
   @Test
   void shouldReturnNullWhenDrawingFromEmptyDrawPile() {
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck());
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS));
 
     assertNull(battleDeck.drawOne());
     assertTrue(battleDeck.getDrawPile().isEmpty());
@@ -66,7 +72,8 @@ class BattleDeckTest {
 
   @Test
   void shouldDrawMultipleCardsIntoHand() {
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike", "defend", "bandage")));
+    BattleDeck battleDeck =
+        new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend", "bandage")));
 
     List<String> drawnCards = battleDeck.drawCards(2);
 
@@ -77,7 +84,7 @@ class BattleDeckTest {
 
   @Test
   void shouldDrawOnlyAvailableCards() {
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike", "defend")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend")));
 
     List<String> drawnCards = battleDeck.drawCards(5);
 
@@ -88,7 +95,7 @@ class BattleDeckTest {
 
   @Test
   void shouldDrawNoCardsWhenCountIsZero() {
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike", "defend")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend")));
 
     List<String> drawnCards = battleDeck.drawCards(0);
 
@@ -99,14 +106,14 @@ class BattleDeckTest {
 
   @Test
   void shouldRejectNegativeDrawCount() {
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike")));
 
     assertThrows(IllegalArgumentException.class, () -> battleDeck.drawCards(-1));
   }
 
   @Test
   void shouldReturnImmutableSnapshots() {
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike", "defend")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend")));
 
     assertThrows(
         UnsupportedOperationException.class, () -> battleDeck.getDrawPile().add("bandage"));
@@ -123,7 +130,7 @@ class BattleDeckTest {
   void shouldShuffleWithoutChangingCards() {
     List<String> startingCards =
         List.of("strike", "defend", "poison_dagger", "expose", "bandage", "inner_focus");
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(startingCards));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, startingCards));
 
     battleDeck.shuffleDrawPile();
 
@@ -138,7 +145,7 @@ class BattleDeckTest {
 
   @Test
   void shouldPlayCardFromHandIntoDiscardPile() {
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike", "defend")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend")));
     battleDeck.drawOne();
 
     boolean played = battleDeck.playCard("strike");
@@ -151,7 +158,7 @@ class BattleDeckTest {
 
   @Test
   void shouldNotPlayCardThatIsNotInHand() {
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike")));
 
     boolean played = battleDeck.playCard("strike");
 
@@ -163,7 +170,8 @@ class BattleDeckTest {
 
   @Test
   void shouldDiscardCardFromHand() {
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike", "defend", "bandage")));
+    BattleDeck battleDeck =
+        new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend", "bandage")));
     battleDeck.drawCards(2);
 
     boolean discarded = battleDeck.discardCard("defend");
@@ -176,7 +184,7 @@ class BattleDeckTest {
 
   @Test
   void shouldNotDiscardNullCard() {
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike")));
     battleDeck.drawOne();
 
     boolean discarded = battleDeck.discardCard(null);
@@ -188,7 +196,8 @@ class BattleDeckTest {
 
   @Test
   void shouldDiscardEntireHand() {
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike", "defend", "bandage")));
+    BattleDeck battleDeck =
+        new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend", "bandage")));
     battleDeck.drawCards(2);
 
     int discardedCount = battleDeck.discardHand();
@@ -201,7 +210,7 @@ class BattleDeckTest {
 
   @Test
   void shouldReturnZeroWhenDiscardingEmptyHand() {
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike")));
 
     int discardedCount = battleDeck.discardHand();
 
@@ -213,7 +222,7 @@ class BattleDeckTest {
 
   @Test
   void shouldReshuffleDiscardPileIntoEmptyDrawPile() {
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike")));
     battleDeck.drawOne();
     battleDeck.discardCard("strike");
 
@@ -227,7 +236,7 @@ class BattleDeckTest {
 
   @Test
   void shouldNotReshuffleWhenDrawPileIsNotEmpty() {
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike", "defend")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend")));
     battleDeck.drawOne();
     battleDeck.discardCard("strike");
 
@@ -240,7 +249,7 @@ class BattleDeckTest {
 
   @Test
   void shouldDrawFromReshuffledDiscardPile() {
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike")));
     assertEquals("strike", battleDeck.drawOne());
     assertTrue(battleDeck.discardCard("strike"));
 
