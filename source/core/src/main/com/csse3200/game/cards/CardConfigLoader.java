@@ -31,6 +31,9 @@ public final class CardConfigLoader {
           "effects",
           "texturePath");
 
+  private static final List<String> REQUIRED_UPGRADE_FIELDS =
+      List.of("name", "description", "cost", "rarity", "effects");
+
   private CardConfigLoader() {
     throw new IllegalStateException("Utility class");
   }
@@ -72,6 +75,7 @@ public final class CardConfigLoader {
       }
 
       checkRequiredFields(cardData, position, errors);
+      checkUpgradeFields(cardData, position, errors);
 
       CardConfig card;
       try {
@@ -103,8 +107,25 @@ public final class CardConfigLoader {
 
   private static void checkRequiredFields(
       JsonValue cardData, String position, List<String> errors) {
-    for (String field : REQUIRED_FIELDS) {
-      JsonValue value = cardData.get(field);
+    checkRequiredFields(cardData, position, REQUIRED_FIELDS, errors);
+  }
+
+  private static void checkUpgradeFields(JsonValue cardData, String position, List<String> errors) {
+    JsonValue upgradeData = cardData.get("upgrade");
+    if (upgradeData == null || upgradeData.isNull()) {
+      return;
+    }
+    if (!upgradeData.isObject()) {
+      errors.add(position + ".upgrade must be a JSON object");
+      return;
+    }
+    checkRequiredFields(upgradeData, position + ".upgrade", REQUIRED_UPGRADE_FIELDS, errors);
+  }
+
+  private static void checkRequiredFields(
+      JsonValue data, String position, List<String> requiredFields, List<String> errors) {
+    for (String field : requiredFields) {
+      JsonValue value = data.get(field);
       if (value == null || value.isNull()) {
         errors.add(position + ": missing required field '" + field + "'");
       }
