@@ -52,7 +52,11 @@ public final class CardValidator {
     if (effect.value <= 0) {
       errors.add(prefix + effect.type + " value must be positive, was " + effect.value);
     }
-    if (effect.type.usesDuration()) {
+    if (effect.type == EffectType.HEAL) {
+      if (effect.duration < 0) {
+        errors.add(prefix + "HEAL duration must not be negative");
+      }
+    } else if (effect.type.usesDuration()) {
       if (effect.duration <= 0) {
         errors.add(prefix + effect.type + " requires a positive duration, was " + effect.duration);
       }
