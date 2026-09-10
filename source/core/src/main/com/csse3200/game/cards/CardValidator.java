@@ -27,7 +27,7 @@ public final class CardValidator {
 
     validateBasicFields(card, errors);
     validateEffects(card.effects, errors);
-
+    validateUpgradedEffects(card.upgradedEffects, errors);
     return List.copyOf(errors);
   }
 
@@ -97,5 +97,22 @@ public final class CardValidator {
     for (int i = 0; i < effects.length; i++) {
       validateEffect(effects[i], i, errors);
     }
+  }
+  /**
+   * Validates the optional upgraded-effects array. Null is valid and means the card cannot be
+   * upgraded. If present, it must not be empty, and every entry follows the same rules as a
+   * normal effect.
+   */
+  private static void validateUpgradedEffects(EffectConfig[] upgradedEffects, List<String> errors) {
+      if (upgradedEffects == null) {
+          return;
+      }
+      if (upgradedEffects.length == 0) {
+          errors.add("upgradedEffects must not be an empty array; use null if the card cannot be upgraded");
+          return;
+      }
+      for (int i = 0; i < upgradedEffects.length; i++) {
+          validateEffect(upgradedEffects[i], i, errors);
+      }
   }
 }
