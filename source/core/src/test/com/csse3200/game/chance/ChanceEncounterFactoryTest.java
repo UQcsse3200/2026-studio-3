@@ -17,10 +17,16 @@ class ChanceEncounterFactoryTest {
   void shouldCreateInitialEncountersInDeterministicOrder() {
     List<ChanceEncounter> encounters = ChanceEncounterFactory.createInitialEncounters();
 
-    assertEquals(3, encounters.size());
-    assertEquals("mysterious-shrine", encounters.get(0).getId());
-    assertEquals("healing-spring", encounters.get(1).getId());
-    assertEquals("forgotten-cache", encounters.get(2).getId());
+    assertEquals(
+        List.of(
+            "mysterious-shrine",
+            "healing-spring",
+            "forgotten-cache",
+            "wandering-healer",
+            "flooded-crossing",
+            "abandoned-mine",
+            "roadside-riddle"),
+        encounters.stream().map(ChanceEncounter::getId).toList());
   }
 
   @Test

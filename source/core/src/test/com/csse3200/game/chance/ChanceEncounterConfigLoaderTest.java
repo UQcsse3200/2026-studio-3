@@ -17,16 +17,21 @@ class ChanceEncounterConfigLoaderTest {
   private static final String TEST_DIRECTORY = "test/chance/";
 
   @Test
-  void shouldLoadAllInitialEncountersFromDefaultFile() {
+  void shouldLoadAllConfiguredEncountersFromDefaultFile() {
     List<ChanceEncounter> encounters = ChanceEncounterConfigLoader.loadEncounters();
 
-    assertEquals(3, encounters.size());
-    assertEquals("mysterious-shrine", encounters.get(0).getId());
-    assertEquals("healing-spring", encounters.get(1).getId());
-    assertEquals("forgotten-cache", encounters.get(2).getId());
-    assertEquals(3, encounters.get(0).getWeight());
-    assertEquals(2, encounters.get(1).getWeight());
-    assertEquals(3, encounters.get(2).getWeight());
+    assertEquals(
+        List.of(
+            "mysterious-shrine",
+            "healing-spring",
+            "forgotten-cache",
+            "wandering-healer",
+            "flooded-crossing",
+            "abandoned-mine",
+            "roadside-riddle"),
+        encounters.stream().map(ChanceEncounter::getId).toList());
+    assertEquals(
+        List.of(3, 2, 3, 2, 3, 2, 2), encounters.stream().map(ChanceEncounter::getWeight).toList());
   }
 
   @Test
@@ -51,6 +56,31 @@ class ChanceEncounterConfigLoaderTest {
         "You discover an abandoned cache hidden beneath loose stones.",
         new ExpectedChoice("take-coins", "Take the coins from the cache.", 0, 15),
         new ExpectedChoice("leave", "Leave the cache untouched.", 0, 0));
+    assertEncounter(
+        encounters.get(3),
+        "wandering-healer",
+        "A wandering healer offers a restorative draught for a modest fee.",
+        new ExpectedChoice("purchase-remedy", "Buy the healer's restorative draught.", 20, -10),
+        new ExpectedChoice("decline", "Politely decline the healer's offer.", 0, 0));
+    assertEncounter(
+        encounters.get(4),
+        "flooded-crossing",
+        "A flooded crossing blocks the road ahead.",
+        new ExpectedChoice("hire-ferryman", "Pay a ferryman for safe passage.", 0, -8),
+        new ExpectedChoice("ford-river", "Attempt to ford the river alone.", -8, 0),
+        new ExpectedChoice("wait", "Wait for the water to recede.", 0, 0));
+    assertEncounter(
+        encounters.get(5),
+        "abandoned-mine",
+        "The mouth of an abandoned mine promises danger and forgotten riches.",
+        new ExpectedChoice("search-tunnels", "Search the unstable tunnels for valuables.", -12, 30),
+        new ExpectedChoice("leave", "Leave the mine undisturbed.", 0, 0));
+    assertEncounter(
+        encounters.get(6),
+        "roadside-riddle",
+        "A hooded traveller offers a coin reward for solving a riddle.",
+        new ExpectedChoice("answer-riddle", "Attempt to solve the traveller's riddle.", 0, 12),
+        new ExpectedChoice("walk-on", "Continue along the road.", 0, 0));
   }
 
   @Test
@@ -192,15 +222,23 @@ class ChanceEncounterConfigLoaderTest {
   }
 
   @Test
-  void shouldLoadAndSelectFromDefaultConfiguration() {
+  void shouldSelectEveryEncounterFromExpandedConfiguration() {
     List<ChanceEncounter> encounters = ChanceEncounterConfigLoader.loadEncounters();
-    ChanceEncounterSelector selector = new ChanceEncounterSelector(encounters, new Random(148L));
+    ChanceEncounterSelector selector =
+        new ChanceEncounterSelector(encounters, new SequenceRandom(0, 3, 5, 8, 10, 13, 15));
 
-    ChanceEncounter selected = selector.select();
+    List<String> selectedIds =
+        List.of(
+            selector.select().getId(),
+            selector.select().getId(),
+            selector.select().getId(),
+            selector.select().getId(),
+            selector.select().getId(),
+            selector.select().getId(),
+            selector.select().getId());
 
-    assertTrue(
-        Set.of("mysterious-shrine", "healing-spring", "forgotten-cache")
-            .contains(selected.getId()));
+    assertEquals(encounters.stream().map(ChanceEncounter::getId).toList(), selectedIds);
+    assertEquals(encounters.size(), Set.copyOf(selectedIds).size());
   }
 
   private static ChanceEncounterLoadingException loadInvalid(String filename) {
@@ -240,4 +278,24 @@ class ChanceEncounterConfigLoaderTest {
 
   private record ExpectedChoice(
       String id, String description, int healthDelta, int currencyDelta) {}
+
+  private static final class SequenceRandom extends Random {
+    private static final long serialVersionUID = 1L;
+
+    private final int[] values;
+    private int index;
+
+    private SequenceRandom(int... values) {
+      this.values = values.clone();
+    }
+
+    @Override
+    public int nextInt(int bound) {
+      int value = values[index++];
+      if (value < 0 || value >= bound) {
+        throw new IllegalArgumentException("Test value is outside random bound " + bound);
+      }
+      return value;
+    }
+  }
 }

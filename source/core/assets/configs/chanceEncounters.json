@@ -68,6 +68,106 @@
           }
         }
       ]
+    },
+    {
+      "id": "wandering-healer",
+      "description": "A wandering healer offers a restorative draught for a modest fee.",
+      "weight": 2,
+      "choices": [
+        {
+          "id": "purchase-remedy",
+          "description": "Buy the healer's restorative draught.",
+          "outcome": {
+            "healthDelta": 20,
+            "currencyDelta": -10
+          }
+        },
+        {
+          "id": "decline",
+          "description": "Politely decline the healer's offer.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "flooded-crossing",
+      "description": "A flooded crossing blocks the road ahead.",
+      "weight": 3,
+      "choices": [
+        {
+          "id": "hire-ferryman",
+          "description": "Pay a ferryman for safe passage.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": -8
+          }
+        },
+        {
+          "id": "ford-river",
+          "description": "Attempt to ford the river alone.",
+          "outcome": {
+            "healthDelta": -8,
+            "currencyDelta": 0
+          }
+        },
+        {
+          "id": "wait",
+          "description": "Wait for the water to recede.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "abandoned-mine",
+      "description": "The mouth of an abandoned mine promises danger and forgotten riches.",
+      "weight": 2,
+      "choices": [
+        {
+          "id": "search-tunnels",
+          "description": "Search the unstable tunnels for valuables.",
+          "outcome": {
+            "healthDelta": -12,
+            "currencyDelta": 30
+          }
+        },
+        {
+          "id": "leave",
+          "description": "Leave the mine undisturbed.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "roadside-riddle",
+      "description": "A hooded traveller offers a coin reward for solving a riddle.",
+      "weight": 2,
+      "choices": [
+        {
+          "id": "answer-riddle",
+          "description": "Attempt to solve the traveller's riddle.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 12
+          }
+        },
+        {
+          "id": "walk-on",
+          "description": "Continue along the road.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        }
+      ]
     }
   ]
 }
