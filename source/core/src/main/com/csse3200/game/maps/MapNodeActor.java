@@ -141,7 +141,7 @@ public class MapNodeActor extends Group {
         if (node.getState() == NodeState.CURRENT) {
           return "images/combat_icon_current.png";
         } else {
-          return "images/combat_icon.png";
+          return "images/final_icon.png";
         }
       case SHOP:
         if (node.getState() == NodeState.COMPLETED) {

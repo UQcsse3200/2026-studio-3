@@ -19,7 +19,7 @@ public class MapNode {
   /**
    * Creates a map node.
    *
-   * @param nodeId   unique identifier
+   * @param nodeId unique identifier
    * @param roomType type of room
    */
   public MapNode(Integer nodeId, RoomType roomType) {
@@ -27,7 +27,8 @@ public class MapNode {
     this.roomType = roomType;
 
     this.state = NodeState.LOCKED;
-    this.height = nodeId / MapGenerationConfig.MAP_WIDTH; // NOTE: this could be a problem but depends
+    this.height =
+        nodeId / MapGenerationConfig.MAP_WIDTH; // NOTE: this could be a problem but depends
     this.connections = new HashSet<>();
   }
 

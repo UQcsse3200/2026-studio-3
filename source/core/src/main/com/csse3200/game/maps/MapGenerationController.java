@@ -24,7 +24,8 @@ public class MapGenerationController {
   public MapGenerationController(
       int totalNodeCount, int combatWeight, int eventWeight, int shopWeight, int eliteWeight) {
 
-    this.config = new MapGenerationConfig(totalNodeCount, combatWeight, eventWeight, shopWeight, eliteWeight);
+    this.config =
+        new MapGenerationConfig(totalNodeCount, combatWeight, eventWeight, shopWeight, eliteWeight);
     this.map = new MapGraph(NodePoolGenerator.generate(config));
     this.rand = new Random(config.getSeed());
 
@@ -34,10 +35,8 @@ public class MapGenerationController {
   }
 
   /**
-   * Primary map generation function. The player is able to start from any of the
-   * nodes at height =
-   * 1. Distinct paths are generated and can have a chance to create random
-   * branches if the option
+   * Primary map generation function. The player is able to start from any of the nodes at height =
+   * 1. Distinct paths are generated and can have a chance to create random branches if the option
    * is available.
    *
    * @return Fail or success condition for regenerating untenable maps.
@@ -83,7 +82,6 @@ public class MapGenerationController {
         if (branch != null && !branch.getConnections().isEmpty()) {
 
           map.connectNodes(prevNode, branch);
-          path.add(branch);
         }
       }
 
@@ -94,8 +92,7 @@ public class MapGenerationController {
   }
 
   /**
-   * Heuristic function for map generation. Finds a random node in range that
-   * hasn't already been
+   * Heuristic function for map generation. Finds a random node in range that hasn't already been
    * visited.
    *
    * @param parentNode Chosen node from which heuristic will be evaluated
@@ -110,6 +107,11 @@ public class MapGenerationController {
       if (distance == 0 && !node.getConnections().isEmpty()) {
 
         for (MapNode connected : node.getConnections()) { // prevent crossover X-like connections
+          if (connected.getNodeId() == 0
+              || connected.equals(parentNode)
+              || connected.getHeight() != parentNode.getHeight() + 1) {
+            continue;
+          }
 
           int connectionDistance = map.getRelativeNodePos(parentNode, connected);
           if (connectionDistance == -1) {
@@ -133,9 +135,9 @@ public class MapGenerationController {
 
   /**
    * Creates the nested list that stores x amount of paths generated.
-   * 
-   * @return List of paths generated on initialization. Paths are lists
-   *         themselves, containing the nodes in order of being added to the path.
+   *
+   * @return List of paths generated on initialization. Paths are lists themselves, containing the
+   *     nodes in order of being added to the path.
    */
   private List<List<MapNode>> initializePaths() {
 
@@ -174,8 +176,7 @@ public class MapGenerationController {
   }
 
   /**
-   * Returns a the list of nodes that a given node is within range to connect
-   * with.
+   * Returns a the list of nodes that a given node is within range to connect with.
    *
    * @param node Targeted node for getting nodes in range
    * @return A list containing the nodes on the upper layer that are in range = 1.
@@ -197,9 +198,7 @@ public class MapGenerationController {
   }
 
   /**
-   * Removes all unconnected nodes from the MapGraph. Only called as the final
-   * step of generation.
-   *
+   * Removes all unconnected nodes from the MapGraph. Only called as the final step of generation.
    */
   private void pruneUnconnectedMapGraphNodes() {
     if (!map.getNodes().isEmpty()) {

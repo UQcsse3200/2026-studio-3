@@ -1,15 +1,12 @@
 package com.csse3200.game.maps;
 
-/**
- * Immutable configuration for generating and assigning room types to a map node
- * pool.
- */
+/** Immutable configuration for generating and assigning room types to a map node pool. */
 public final class MapGenerationConfig {
 
   public static final int MAP_WIDTH = 7;
   public static final int MAP_HEIGHT = 10;
   public static final int MAX_NODE_COUNT = MAP_WIDTH * MAP_HEIGHT;
-  public static final int BRANCH_CHANCE = 5;
+  public static final int BRANCH_CHANCE = 8;
 
   private int normalNodeCount = 70;
 
@@ -20,10 +17,7 @@ public final class MapGenerationConfig {
   private int shopWeight = 10;
   private final Long seed;
 
-  /**
-   * Creates and validates a room distribution configuration with default values
-   * and no seed.
-   */
+  /** Creates and validates a room distribution configuration with default values and no seed. */
   public MapGenerationConfig() {
     checkValid(normalNodeCount, combatWeight, eventWeight, shopWeight, eliteWeight);
     this.seed = System.nanoTime();
@@ -33,9 +27,9 @@ public final class MapGenerationConfig {
    * Creates and validates a room distribution configuration without seed.
    *
    * @param normalNodeCount number of normal nodes
-   * @param combatWeight    relative combat-room weight
-   * @param eventWeight     relative event-room weight
-   * @param shopWeight      relative shop-room weight
+   * @param combatWeight relative combat-room weight
+   * @param eventWeight relative event-room weight
+   * @param shopWeight relative shop-room weight
    */
   public MapGenerationConfig(
       int normalNodeCount, int combatWeight, int eventWeight, int shopWeight, int eliteWeight) {
@@ -46,13 +40,18 @@ public final class MapGenerationConfig {
    * Creates and validates a room distribution configuration.
    *
    * @param normalNodeCount number of normal nodes
-   * @param combatWeight    relative combat-room weight
-   * @param eventWeight     relative event-room weight
-   * @param shopWeight      relative shop-room weight
-   * @param seed            seed used for repeatable random generation
+   * @param combatWeight relative combat-room weight
+   * @param eventWeight relative event-room weight
+   * @param shopWeight relative shop-room weight
+   * @param seed seed used for repeatable random generation
    */
   public MapGenerationConfig(
-      int normalNodeCount, int combatWeight, int eventWeight, int shopWeight, int eliteWeight, Long seed) {
+      int normalNodeCount,
+      int combatWeight,
+      int eventWeight,
+      int shopWeight,
+      int eliteWeight,
+      Long seed) {
 
     checkValid(normalNodeCount, combatWeight, eventWeight, shopWeight, eliteWeight);
 
@@ -109,6 +108,6 @@ public final class MapGenerationConfig {
 
   /** Returns the combined room weight. */
   public int getTotalWeight() {
-    return combatWeight + eventWeight + shopWeight;
+    return combatWeight + eventWeight + shopWeight + eliteWeight;
   }
 }

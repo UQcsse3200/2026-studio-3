@@ -1,7 +1,6 @@
 package com.csse3200.game.maps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
@@ -43,7 +42,8 @@ class MapGenerationConfigTest {
   @Test
   void preservesLargeWeightTotal() {
     MapGenerationConfig config =
-        new MapGenerationConfig(3, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 1L);
+        new MapGenerationConfig(
+            3, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 1L);
 
     assertEquals(6_442_450_941L, config.getTotalWeight());
   }

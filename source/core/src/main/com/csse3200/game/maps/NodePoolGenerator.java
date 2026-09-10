@@ -4,18 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-/**
- * Generates a seeded pool of typed map nodes without creating graph
- * connections.
- */
+/** Generates a seeded pool of typed map nodes without creating graph connections. */
 public final class NodePoolGenerator {
 
-  private NodePoolGenerator() {
-  }
+  private NodePoolGenerator() {}
 
   /**
-   * Generates placeholder combat nodes followed by exactly one final node and one
-   * start node.
+   * Generates placeholder combat nodes followed by exactly one final node and one start node.
    *
    * @param config room distribution configuration
    * @return immutable node pool keyed by unique, sequential IDs
@@ -40,16 +35,15 @@ public final class NodePoolGenerator {
   }
 
   /**
-   * Assigns node types to a map after path generation is completed to ensure
-   * accurate weights.
-   * 
+   * Assigns node types to a map after path generation is completed to ensure accurate weights.
+   *
    * @param config room distribution configuration
-   * @param rand   random type passed from superclass
-   * @param map    mapgraph to act on
+   * @param rand random type passed from superclass
+   * @param map mapgraph to act on
    */
   public static void rebalanceRoomTypes(MapGenerationConfig config, Random rand, MapGraph map) {
 
-    RoomType[] types = { RoomType.COMBAT, RoomType.EVENT, RoomType.SHOP, RoomType.ELITE };
+    RoomType[] types = {RoomType.COMBAT, RoomType.EVENT, RoomType.SHOP, RoomType.ELITE};
     int[] counts = getRoomTypeCounts(config, map.getNodes().size());
 
     for (int i = 0; i < types.length; i++) {
@@ -64,12 +58,12 @@ public final class NodePoolGenerator {
   }
 
   /**
-   * Allows constraints to be placed on how room types are placed.
-   * For example, restricting shops from existing below layer 3.
-   * 
+   * Allows constraints to be placed on how room types are placed. For example, restricting shops
+   * from existing below layer 3.
+   *
    * @param config room distribution configuration
-   * @param rand   random type passed from superclass
-   * @param map    mapgraph to act on
+   * @param rand random type passed from superclass
+   * @param map mapgraph to act on
    */
   private static void assignRoomType(MapNode node, RoomType room) {
     switch (room) {
@@ -92,16 +86,21 @@ public final class NodePoolGenerator {
   }
 
   /**
-   * Performs a fixed point arithmetic calculation to determine the proportion of
-   * room types required for given size.
+   * Performs a fixed point arithmetic calculation to determine the proportion of room types
+   * required for given size.
    *
-   * @param config    map generation config
+   * @param config map generation config
    * @param nodeCount number of nodes to get proportion of
    * @return integer array of the required room counts from proportions
    */
   private static int[] getRoomTypeCounts(MapGenerationConfig config, int nodeCount) {
-    RoomType[] types = { RoomType.COMBAT, RoomType.EVENT, RoomType.SHOP, RoomType.ELITE };
-    int[] weights = { config.getCombatWeight(), config.getEventWeight(), config.getShopWeight(), config.getEliteWeight() };
+    RoomType[] types = {RoomType.COMBAT, RoomType.EVENT, RoomType.SHOP, RoomType.ELITE};
+    int[] weights = {
+      config.getCombatWeight(),
+      config.getEventWeight(),
+      config.getShopWeight(),
+      config.getEliteWeight()
+    };
 
     long totalWeight = config.getTotalWeight();
     int[] counts = new int[types.length];
