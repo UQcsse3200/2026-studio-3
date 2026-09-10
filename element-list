@@ -23,6 +23,7 @@ com.csse3200.game.components.maingame
 com.csse3200.game.components.mainmenu
 com.csse3200.game.components.npc
 com.csse3200.game.components.player
+com.csse3200.game.components.save
 com.csse3200.game.components.settingsmenu
 com.csse3200.game.components.shop
 com.csse3200.game.components.spritedisplay.clickable
@@ -43,6 +44,7 @@ com.csse3200.game.physics
 com.csse3200.game.physics.components
 com.csse3200.game.physics.raycast
 com.csse3200.game.rendering
+com.csse3200.game.save
 com.csse3200.game.screens
 com.csse3200.game.services
 com.csse3200.game.shop
