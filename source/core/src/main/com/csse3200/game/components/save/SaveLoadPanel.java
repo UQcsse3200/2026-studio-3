@@ -176,12 +176,25 @@ public class SaveLoadPanel extends UIComponent {
 
   private String formatRestoreMessage(RestoreResult result) {
     if (result.success()) {
-      String resumeScreen = result.resumeScreen().isBlank() ? "saved run" : result.resumeScreen();
-      return "Loaded and restored: " + resumeScreen;
+      String resumeScreen =
+          result.resumeScreen().isBlank()
+              ? "the saved run"
+              : readableResumeScreen(result.resumeScreen());
+      return "Save loaded successfully. Ready to resume from " + resumeScreen + ".";
     }
     return result.message().isBlank()
         ? "Load failed: unable to restore save data"
         : result.message();
+  }
+
+  private String readableResumeScreen(String resumeScreen) {
+    return switch (resumeScreen) {
+      case "MAP" -> "the Map";
+      case "BATTLE_SCREEN" -> "the Battle";
+      case "ENCOUNTER" -> "the Encounter";
+      case "MAIN_MENU" -> "the Main Menu";
+      default -> resumeScreen;
+    };
   }
 
   private void onDelete(int slotId) {
