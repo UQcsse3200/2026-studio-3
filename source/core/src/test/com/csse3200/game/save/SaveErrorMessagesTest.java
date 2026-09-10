@@ -33,8 +33,7 @@ class SaveErrorMessagesTest {
     for (SaveError error : SaveError.values()) {
       if (error == SaveError.NONE) continue;
       SaveResult result = SaveResult.failure(error, "");
-      assertTrue(
-          !SaveErrorMessages.forSave(result).isBlank(), "Missing message for " + error);
+      assertTrue(!SaveErrorMessages.forSave(result).isBlank(), "Missing message for " + error);
     }
   }
 }

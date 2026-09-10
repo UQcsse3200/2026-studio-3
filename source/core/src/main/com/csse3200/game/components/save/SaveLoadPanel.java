@@ -20,9 +20,9 @@ import java.util.List;
 /**
  * Self-contained Save/Load panel: slot list, save/load/delete actions, and status feedback.
  *
- * <p>Deliberately independent of any specific menu screen — it only needs a {@link
- * SaveGameService} and a list of slot IDs to display. Add it as a component to whatever entity
- * hosts the eventual menu UI; it doesn't assume where it's placed.
+ * <p>Deliberately independent of any specific menu screen — it only needs a {@link SaveGameService}
+ * and a list of slot IDs to display. Add it as a component to whatever entity hosts the eventual
+ * menu UI; it doesn't assume where it's placed.
  */
 public class SaveLoadPanel extends UIComponent {
   private static final DateTimeFormatter TIMESTAMP_FORMAT =
@@ -60,8 +60,9 @@ public class SaveLoadPanel extends UIComponent {
   public void refresh() {
     SaveSlotListResult listResult = saveGameService.listSaveSlots();
     if (!listResult.success()) {
-      statusLabel.setText(SaveErrorMessages.forDelete(DeleteSaveResult.failure(
-          listResult.error(), listResult.message())));
+      statusLabel.setText(
+          SaveErrorMessages.forDelete(
+              DeleteSaveResult.failure(listResult.error(), listResult.message())));
       return;
     }
 
