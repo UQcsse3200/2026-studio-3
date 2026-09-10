@@ -21,10 +21,10 @@ public class RunState {
   private PlayerDeck playerDeck;
 
   /**
-   * Create a deck if playerDeck is null and return the playerDeck
+   * Returns the run-scoped player deck, creating the starter deck on first access.
    *
-   * @param cardService call cardservice to get starterdeck
-   * @return playerDeck Return the player's deck
+   * @param cardService authoritative card lookup service used to validate starter card IDs
+   * @return the player's persistent deck for this run
    */
   public PlayerDeck getOrCreatePlayerDeck(CardService cardService) {
     if (cardService == null) {
