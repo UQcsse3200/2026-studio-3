@@ -86,11 +86,6 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
   }
 
   private ProgressSaveData captureProgress() {
-    // completedEncounterIds: pending Anran's call on whether this stays a stored field (fix the
-    // List<String>/Integer type mismatch) or gets dropped in favour of deriving completion from
-    // MapSaveData.nodes[].state directly. Left empty until that's settled.
-    List<String> completedEncounterIds = List.of();
-
     // pendingRewardId: confirmed empty with Team 2 (Joel, 9/10) — Chance/Shop outcomes apply
     // immediately, no pending-reward phase exists. Revisit only if a reward-claim screen is
     // added later.
@@ -101,6 +96,6 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
     // in-progress to replay. Always MAP for now — revisit if that rule changes.
     String resumeScreen = GdxGame.ScreenType.MAP.name();
 
-    return new ProgressSaveData(completedEncounterIds, pendingRewardId, resumeScreen);
+    return new ProgressSaveData(pendingRewardId, resumeScreen);
   }
 }
