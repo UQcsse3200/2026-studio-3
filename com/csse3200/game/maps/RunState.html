@@ -143,18 +143,23 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MapGraph.html" title="class in com.csse3200.game.maps">MapGraph</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMapGraph()" class="member-name-link">getMapGraph</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isRunActive()" class="member-name-link">isRunActive</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMapGraph(com.csse3200.game.maps.MapGraph)" class="member-name-link">setMapGraph</a><wbr>(<a href="MapGraph.html" title="class in com.csse3200.game.maps">MapGraph</a>&nbsp;mapGraph)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getOrCreatePlayerDeck(com.csse3200.game.cards.CardService)" class="member-name-link">getOrCreatePlayerDeck</a><wbr>(<a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the run-scoped player deck, creating the starter deck on first access.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isRunActive()" class="member-name-link">isRunActive</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMapGraph(com.csse3200.game.maps.MapGraph)" class="member-name-link">setMapGraph</a><wbr>(<a href="MapGraph.html" title="class in com.csse3200.game.maps">MapGraph</a>&nbsp;mapGraph)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the map for the current run without placing the player on it.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startRun(com.csse3200.game.maps.MapGraph,java.lang.Integer)" class="member-name-link">startRun</a><wbr>(<a href="MapGraph.html" title="class in com.csse3200.game.maps">MapGraph</a>&nbsp;mapGraph,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startRun(com.csse3200.game.maps.MapGraph,java.lang.Integer)" class="member-name-link">startRun</a><wbr>(<a href="MapGraph.html" title="class in com.csse3200.game.maps">MapGraph</a>&nbsp;mapGraph,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;startNodeId)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Starts a run on a generated map.</div>
 </div>
 </div>
@@ -188,6 +193,19 @@ loadScripts(document, 'script');</script>
 <section class="method-details" id="method-detail">
 <h2>Method Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="getOrCreatePlayerDeck(com.csse3200.game.cards.CardService)">
+<h3>getOrCreatePlayerDeck</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></span>&nbsp;<span class="element-name">getOrCreatePlayerDeck</span><wbr><span class="parameters">(<a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService)</span></div>
+<div class="block">Returns the run-scoped player deck, creating the starter deck on first access.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>cardService</code> - authoritative card lookup service used to validate starter card IDs</dd>
+<dt>Returns:</dt>
+<dd>the player's persistent deck for this run</dd>
+</dl>
+</section>
+</li>
 <li>
 <section class="detail" id="startRun(com.csse3200.game.maps.MapGraph,java.lang.Integer)">
 <h3>startRun</h3>
