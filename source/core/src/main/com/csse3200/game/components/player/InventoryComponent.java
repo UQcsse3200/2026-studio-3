@@ -14,6 +14,7 @@ public class InventoryComponent extends Component {
   private static final Logger logger = LoggerFactory.getLogger(InventoryComponent.class);
   private int gold;
   private float goldBonusMultiplier = 0f;
+  private float shopDiscount = 0f;
 
   public InventoryComponent(int gold) {
     setGold(gold);
@@ -81,6 +82,14 @@ public class InventoryComponent extends Component {
     return true;
   }
 
+  public void addShopDiscount(float amount) {
+    this.shopDiscount = Math.min(this.shopDiscount + amount, 0.5f);
+  }
+
+  public float getShopDiscount() {
+    return shopDiscount;
+  }
+
   public float getGoldBonusMultiplier() {
     return goldBonusMultiplier;
   }
@@ -89,3 +98,4 @@ public class InventoryComponent extends Component {
     this.goldBonusMultiplier += bonus;
   }
 }
+
