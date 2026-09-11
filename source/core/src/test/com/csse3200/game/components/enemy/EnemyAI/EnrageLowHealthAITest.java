@@ -37,6 +37,42 @@ class EnrageLowHealthAITest {
         assertEquals(BASE_ATTACK * 2, intent.getValue());
     }
 
+    @Test
+    void shouldStillDefendOnDefenceTurnWhileEnraged() {
+        EnemyIntent intent = ai.decide(
+                createContext(10, 40, 0, 2));
+
+        assertEquals(IntentType.DEFEND, intent.getType());
+        assertEquals(4, intent.getValue());
+    }
+
+    @Test
+    void shouldAttackOnFourthTurnWhenArmourRemains() {
+        EnemyIntent intent = ai.decide(
+                createContext(40, 40, 3, 4));
+
+        assertEquals(IntentType.ATTACK, intent.getType());
+        assertEquals(BASE_ATTACK, intent.getValue());
+    }
+
+    @Test
+    void shouldDefendOnFourthTurnWhenArmourIsBroken() {
+        EnemyIntent intent = ai.decide(
+                createContext(40, 40, 0, 4));
+
+        assertEquals(IntentType.DEFEND, intent.getType());
+        assertEquals(4, intent.getValue());
+    }
+
+    @Test
+    void shouldEnrageFourthTurnAttackWhenArmourRemains() {
+        EnemyIntent intent = ai.decide(
+                createContext(10, 40, 3, 4));
+
+        assertEquals(IntentType.ATTACK, intent.getType());
+        assertEquals(BASE_ATTACK * 2, intent.getValue());
+    }
+
     private EnemyAIContext createContext(
             int health,
             int maxHealth,
