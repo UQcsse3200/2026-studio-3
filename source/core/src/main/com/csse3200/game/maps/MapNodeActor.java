@@ -28,7 +28,7 @@ public class MapNodeActor extends Group {
   public MapNodeActor(MapNode node) {
     this.node = node;
     float mapWidth = Gdx.graphics.getWidth();
-    this.size = mapWidth / 13f;
+    this.size = (mapWidth - 512) / 13f;
     nodeIcon =
         new Image(ServiceLocator.getResourceService().getAsset(getNodeIcon(), Texture.class));
 
