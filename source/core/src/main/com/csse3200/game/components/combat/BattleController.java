@@ -12,7 +12,6 @@ import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.enemy.IntentType;
 import com.csse3200.game.components.player.EnergyComponent;
-import com.csse3200.game.components.player.PlayerIntent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.events.EventHandler;
 import com.csse3200.game.events.listeners.EventListener1;
@@ -169,11 +168,8 @@ public class BattleController {
         // Player States
       case PLAYER_START -> enterPlayerStart();
       case PLAYER_TURN -> enterPlayerTurn();
-      case PLAYER_ATTACK -> enterPlayerAttack();
-      case PLAYER_DEFEND -> enterPlayerDefend();
-      case PLAYER_OTHER -> enterPlayerOther();
+      case CARD_RESOLVING -> resolvePlayerCard();
       case PLAYER_END -> enterPlayerEnd();
-      case PLAYER_RESOLVED -> enterPlayerResolved();
 
         // Enemy States
       case ENEMY_TURN -> enterEnemyTurn();
@@ -202,69 +198,11 @@ public class BattleController {
     handle(BattleEvent.SETUP_COMPLETE);
   }
 
-  /**
-   * Reports whether the player currently has the given status effect.
-   *
-   * <p>Read-only: exposes a query about the player rather than the player entity itself, so callers
-   * cannot mutate player state through this controller.
-   *
-   * @param effectType identifier of the status effect, as stored by CombatStatsComponent
-   * @return true if the player carries an active effect with this identifier
-   */
-  public boolean playerHasStatusEffect(String effectType) {
-    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
-    return stats != null && stats.hasStatusEffect(effectType);
-  }
-
-  /**
-   * Player intends to attack the enemy on their turn
-   *
-   * @deprecated Cards are submitted through submitPlayCardRequest
-   */
-  @Deprecated
-  public void selectAttack() {}
-
-  /**
-   * Player intends to defend themselves on their turn
-   *
-   * @deprecated Cards are submitted through submitPlayCardRequest
-   */
-  @Deprecated
-  public void selectDefend() {}
-
-  /**
-   * Player intends to do another action on the turn.
-   *
-   * @deprecated Cards are submitted through submitPlayCardRequest
-   */
-  @Deprecated
-  public void selectOther() {}
-
   /** Player decides to end their turn */
   public void endPlayerTurn() {
     if (canHandle(BattleEvent.PLAYER_END_REQUESTED)) {
       handle(BattleEvent.PLAYER_END_REQUESTED);
     }
-  }
-
-  /**
-   * Resets the current battle to a completely new battle that has no previous player and enemy
-   * turns.
-   */
-  public void resetBattle() {
-    if (this.processingEvents) {
-      throw new IllegalStateException("There is an event in progress.");
-    }
-
-    // Saving the previous phase to inform the event listeners
-    BattlePhase previousPhase = this.currentPhase;
-
-    // Normal housekeeping for resetting the state machine.
-    this.eventQueue.clear();
-    this.resetEnemyCursor();
-    this.setEnemyIntent(null);
-    this.setCurrentPhase(BattlePhase.SETUP);
-    this.notifyPhaseChange(previousPhase, BattlePhase.SETUP);
   }
 
   /**
@@ -284,7 +222,6 @@ public class BattleController {
   public int getCurrentEnemyIndex() {
     return this.currentEnemyIndex;
   }
-
 
   /**
    * Adds a listener to the event handler, which ultimately informs external teams about a phase
@@ -482,31 +419,26 @@ public class BattleController {
     return this.pendingCard;
   }
 
-  public Boolean submitCardPlayRequest(CardPlayRequest cardPlayRequest, PlayerIntent playerIntent) {
+  /** Submits a card during the player's turn, rejecting submissions while an action is running. */
+  public boolean submitCardPlayRequest(CardPlayRequest cardPlayRequest) {
     Objects.requireNonNull(cardPlayRequest, "cardPlayRequest cannot be null.");
-    Objects.requireNonNull(playerIntent, "playerIntent cannot be null.");
 
-    BattleEvent event =
-        switch (playerIntent) {
-          case ATTACK -> BattleEvent.PLAYER_ATTACK_SELECTED;
-          case DEFEND -> BattleEvent.PLAYER_DEFEND_SELECTED;
-          case OTHER -> BattleEvent.PLAYER_OTHER_SELECTED;
-          case END_PLAYER_TURN ->
-              throw new IllegalArgumentException("End turn is not a card action");
-        };
-
-    if (processingEvents || !canHandle(event)) {
+    if (processingEvents || !canHandle(BattleEvent.CARD_PLAY_REQUESTED)) {
       return false;
     }
     lastCardPlaySucceeded = false;
     pendingCard = cardPlayRequest;
-    handle(event);
+    try {
+      handle(BattleEvent.CARD_PLAY_REQUESTED);
+    } finally {
+      pendingCard = null;
+    }
     return lastCardPlaySucceeded;
   }
 
   /**
-   * Prints a summary string for a game event that occurs. For use in printing
-   * actions within a battle sequence.
+   * Prints a summary string for a game event that occurs. For use in printing actions within a
+   * battle sequence.
    *
    * @param request The card that is being played.
    * @param result The result of the card being played.
@@ -554,14 +486,15 @@ public class BattleController {
     return EnemyIntent.attack(attack);
   }
 
-
   private EnergyComponent playerEnergy() {
     return this.player.getComponent(EnergyComponent.class);
   }
 
   private void finishPlayerCardAction() {
     pendingCard = null;
-    handle(BattleEvent.PLAYER_ACTION_RESOLVED);
+    if (!queueBattleOutcomeIfOver()) {
+      handle(BattleEvent.CARD_RESOLVED);
+    }
   }
 
   /**
@@ -625,7 +558,6 @@ public class BattleController {
 
   /*--------------------------- Possible Action Branches ----------------------------*/
 
-
   private void enterSetup() {
     // Coordinate battle setup.
     this.setCurrentEnemyIndex(0);
@@ -676,32 +608,12 @@ public class BattleController {
     // wait for ui to submit card or end turn
   }
 
-  private void enterPlayerAttack() {
-    resolvePlayerCard();
-  }
-
-  private void enterPlayerDefend() {
-    resolvePlayerCard();
-  }
-
-  private void enterPlayerOther() {
-    resolvePlayerCard();
-  }
-
   private void enterPlayerEnd() {
     // Coordinate end-of-turn operations.
     if (this.queueBattleOutcomeIfOver()) {
       return;
     }
     handle(BattleEvent.PLAYER_TURN_ENDED);
-  }
-
-  private void enterPlayerResolved() {
-    // Check battle outcome before allowing another action.
-    if (this.queueBattleOutcomeIfOver()) {
-      return;
-    }
-    handle(BattleEvent.PLAYER_CONTINUES);
   }
 
   private void enterEnemyTurn() {

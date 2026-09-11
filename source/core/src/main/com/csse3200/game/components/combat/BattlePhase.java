@@ -19,20 +19,11 @@ public enum BattlePhase {
   /** The controller is waiting for the player to choose an action. */
   PLAYER_TURN,
 
-  /** The player's selected attack is being resolved. */
-  PLAYER_ATTACK,
-
-  /** The player's selected defensive action is being resolved. */
-  PLAYER_DEFEND,
-
-  /** The player's selected non-attack, non-defence action is being resolved. */
-  PLAYER_OTHER,
+  /** The selected card's effects are being applied and the battle outcome checked. */
+  CARD_RESOLVING,
 
   /** End-of-player-turn effects and cleanup are being processed. */
   PLAYER_END,
-
-  /** A player action has resolved and its outcome is being checked. */
-  PLAYER_RESOLVED,
 
   // Enemy States
   /** The current enemy is choosing or beginning its action. */

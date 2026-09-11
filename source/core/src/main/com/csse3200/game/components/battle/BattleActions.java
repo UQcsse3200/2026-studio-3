@@ -4,15 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardPlayRequest;
-import com.csse3200.game.cards.CardType;
-import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.configs.CardConfig;
-import com.csse3200.game.cards.configs.EffectConfig;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattleEvent;
-import com.csse3200.game.components.player.PlayerIntent;
 import java.util.List;
 
 /** Connects battle UI events to valid transitions in the battle controller. */
@@ -124,9 +120,7 @@ public class BattleActions extends Component {
     }
     CardConfig cardConfig = optionalCard.get();
     CardPlayRequest request = new CardPlayRequest(cardID, targetID);
-    PlayerIntent intent = classifyCard(cardConfig);
-
-    if (controller.submitCardPlayRequest(request, intent)) {
+    if (controller.submitCardPlayRequest(request)) {
       entity.getEvents().trigger("cardPlayed", cardConfig.name, targetID);
     }
   }
@@ -151,20 +145,6 @@ public class BattleActions extends Component {
 
   private void selectEndTurn() {
     controller.canHandle(BattleEvent.PLAYER_END_REQUESTED);
-  }
-
-  private PlayerIntent classifyCard(CardConfig card) {
-    if (card.type == CardType.ATTACK) {
-      return PlayerIntent.ATTACK;
-    }
-
-    for (EffectConfig effect : card.effects) {
-      if (effect.type == EffectType.BLOCK) {
-        return PlayerIntent.DEFEND;
-      }
-    }
-
-    return PlayerIntent.OTHER;
   }
 
   private void onStart() {

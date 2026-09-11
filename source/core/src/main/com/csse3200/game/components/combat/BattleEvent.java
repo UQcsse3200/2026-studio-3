@@ -13,23 +13,14 @@ public enum BattleEvent {
   /** Start-of-turn processing has finished and player input can be accepted. */
   PLAYER_TURN_STARTED,
 
-  /** The player selected an attack action. */
-  PLAYER_ATTACK_SELECTED,
-
-  /** The player selected a defensive action. */
-  PLAYER_DEFEND_SELECTED,
-
-  /** The player selected an action that is neither attack nor defence. */
-  PLAYER_OTHER_SELECTED,
+  /** The player submitted a card to resolve. */
+  CARD_PLAY_REQUESTED,
 
   /** The player requested to finish their turn. */
   PLAYER_END_REQUESTED,
 
-  /** The selected player action has finished resolving. */
-  PLAYER_ACTION_RESOLVED,
-
-  /** The player may select another action during the same turn. */
-  PLAYER_CONTINUES,
+  /** Card resolution is complete and the player may play another card. */
+  CARD_RESOLVED,
 
   /** End-of-player-turn processing has finished. */
   PLAYER_TURN_ENDED,
