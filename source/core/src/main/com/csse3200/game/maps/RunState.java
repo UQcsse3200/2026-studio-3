@@ -35,23 +35,6 @@ public class RunState {
     }
     return playerDeck;
   }
-  private PlayerDeck playerDeck;
-
-  /**
-   * Returns the run-scoped player deck, creating the starter deck on first access.
-   *
-   * @param cardService authoritative card lookup service used to validate starter card IDs
-   * @return the player's persistent deck for this run
-   */
-  public PlayerDeck getOrCreatePlayerDeck(CardService cardService) {
-    if (cardService == null) {
-      throw new IllegalArgumentException("cardService must not be null");
-    }
-    if (playerDeck == null) {
-      playerDeck = PlayerDeckFactory.createStarterDeck(cardService);
-    }
-    return playerDeck;
-  }
 
   /**
    * Starts a run on a generated map.
@@ -101,7 +84,6 @@ public class RunState {
         node.setState(NodeState.COMPLETED);
       }
     }
-
     activeNodeId = nodeId;
   }
 
