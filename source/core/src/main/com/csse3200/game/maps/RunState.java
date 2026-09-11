@@ -91,6 +91,13 @@ public class RunState {
     return activeNodeId;
   }
 
+  /** Returns the height of the currently active node. */
+  public Integer getMapProgression () {
+      return mapGraph.getNode(
+              this.getActiveNodeId()
+      ).getHeight();
+  }
+
   /**
    * Reports the encounter result to the map. A failed encounter leaves the map alone so progression
    * doesn't advance.
