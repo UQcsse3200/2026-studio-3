@@ -22,37 +22,16 @@ public class BattleTransitions {
 
     this.addTransition(BattlePhase.PLAYER_START, BattleEvent.PLAYER_DEFEATED, BattlePhase.DEFEAT);
 
-    // Player Transitions
+    // All cards share one resolution path; their effects determine the action.
     this.addTransition(
-        BattlePhase.PLAYER_TURN, BattleEvent.PLAYER_ATTACK_SELECTED, BattlePhase.PLAYER_ATTACK);
-
-    this.addTransition(
-        BattlePhase.PLAYER_TURN, BattleEvent.PLAYER_DEFEND_SELECTED, BattlePhase.PLAYER_DEFEND);
-
-    this.addTransition(
-        BattlePhase.PLAYER_TURN, BattleEvent.PLAYER_OTHER_SELECTED, BattlePhase.PLAYER_OTHER);
-
+        BattlePhase.PLAYER_TURN, BattleEvent.CARD_PLAY_REQUESTED, BattlePhase.CARD_RESOLVING);
     this.addTransition(
         BattlePhase.PLAYER_TURN, BattleEvent.PLAYER_END_REQUESTED, BattlePhase.PLAYER_END);
-
     this.addTransition(
-        BattlePhase.PLAYER_ATTACK, BattleEvent.PLAYER_ACTION_RESOLVED, BattlePhase.PLAYER_RESOLVED);
-
+        BattlePhase.CARD_RESOLVING, BattleEvent.CARD_RESOLVED, BattlePhase.PLAYER_TURN);
+    this.addTransition(BattlePhase.CARD_RESOLVING, BattleEvent.PLAYER_DEFEATED, BattlePhase.DEFEAT);
     this.addTransition(
-        BattlePhase.PLAYER_DEFEND, BattleEvent.PLAYER_ACTION_RESOLVED, BattlePhase.PLAYER_RESOLVED);
-
-    this.addTransition(
-        BattlePhase.PLAYER_OTHER, BattleEvent.PLAYER_ACTION_RESOLVED, BattlePhase.PLAYER_RESOLVED);
-
-    this.addTransition(
-        BattlePhase.PLAYER_RESOLVED, BattleEvent.PLAYER_CONTINUES, BattlePhase.PLAYER_TURN);
-
-    this.addTransition(
-        BattlePhase.PLAYER_RESOLVED, BattleEvent.PLAYER_DEFEATED, BattlePhase.DEFEAT);
-
-    this.addTransition(
-        BattlePhase.PLAYER_RESOLVED, BattleEvent.ENEMIES_DEFEATED, BattlePhase.VICTORY);
-
+        BattlePhase.CARD_RESOLVING, BattleEvent.ENEMIES_DEFEATED, BattlePhase.VICTORY);
     this.addTransition(BattlePhase.PLAYER_END, BattleEvent.PLAYER_DEFEATED, BattlePhase.DEFEAT);
 
     this.addTransition(BattlePhase.PLAYER_END, BattleEvent.ENEMIES_DEFEATED, BattlePhase.VICTORY);
