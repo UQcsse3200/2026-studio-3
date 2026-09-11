@@ -1,0 +1,14 @@
+{
+  "Clickable": [
+    {
+      "trigger": "attackCard",
+      "text": "Attack",
+      "x": 100.5,
+      "y": 200.25,
+      "styleName": "default",
+      "variant": "drag",
+      "label": "Attack the enemy",
+      "size": [64, 32]
+    }
+  ]
+}

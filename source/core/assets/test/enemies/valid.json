@@ -1,0 +1,13 @@
+{
+  "enemies": [
+    {
+      "id": "test_enemy",
+      "name": "Test Enemy",
+      "health": 20,
+      "baseAttack": 5,
+      "armour": 2,
+      "tier": "NORMAL",
+      "behaviour": "cycle_attack_defend"
+    }
+  ]
+}

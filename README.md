@@ -10,3 +10,4 @@ You are welcome to use the game engine for your own purposes. It is released und
 
 - [JavaDoc](https://uqcsse3200.github.io/game-engine/)
 - [SonarCloud](https://sonarcloud.io/project/overview?id=UQcsse3200_2026-studio-3)
+- [Team 2 Encounter Integration](docs/encounter-integration.md)

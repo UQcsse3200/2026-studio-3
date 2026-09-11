@@ -1,0 +1,15 @@
+{
+  "cards": [
+    {
+      "id": "",
+      "name": "",
+      "description": "",
+      "cost": -1,
+      "type": "ATTACK",
+      "rarity": "COMMON",
+      "target": "SINGLE_ENEMY",
+      "effects": [],
+      "texturePath": ""
+    }
+  ]
+}
