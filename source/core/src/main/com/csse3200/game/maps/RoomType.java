@@ -8,5 +8,4 @@ public enum RoomType {
   ELITE,
   START,
   FINAL,
-  ELITE
 }
