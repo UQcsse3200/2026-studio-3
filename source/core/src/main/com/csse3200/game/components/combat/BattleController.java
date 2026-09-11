@@ -646,20 +646,6 @@ public class BattleController {
         behaviour.rollIntent();
       }
     }
-  }
-
-    /** Enters the 'player start' state of the FSM */
-    private void enterPlayerStart () {
-      if (this.queueBattleOutcomeIfOver()) {
-        return;
-      }
-      // Start-of-turn operations: refill energy for the new player turn.
-      EnergyComponent energy = playerEnergy();
-      if (energy != null) {
-        energy.onTurnStart();
-      }
-      handle(BattleEvent.PLAYER_TURN_STARTED);
-
 
     // If an enemy is alive set it to the current intent
     if (this.advanceToNextLivingEnemy()) {
@@ -669,6 +655,19 @@ public class BattleController {
       this.setEnemyIntent(null);
     }
     handle(BattleEvent.INTENTS_REVEALED);
+  }
+
+  /** Enters the 'player start' state of the FSM */
+  private void enterPlayerStart() {
+    if (this.queueBattleOutcomeIfOver()) {
+      return;
+    }
+    // Start-of-turn operations: refill energy for the new player turn.
+    EnergyComponent energy = playerEnergy();
+    if (energy != null) {
+      energy.onTurnStart();
+    }
+    handle(BattleEvent.PLAYER_TURN_STARTED);
   }
 
   private void enterPlayerTurn() {
