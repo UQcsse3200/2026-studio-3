@@ -99,7 +99,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     MapNode node = runState.getMapGraph() == null ? null : runState.getMapGraph().getNode(nodeId);
     RoomType roomType = node == null ? null : node.getRoomType();
 
-    if (roomType == RoomType.COMBAT || roomType == RoomType.FINAL) {
+    if (roomType == RoomType.COMBAT || roomType == RoomType.FINAL || roomType == RoomType.ELITE) {
       logger.info("Node {} ({}) selected, entering battle", nodeId, roomType);
       game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
     } else {

@@ -44,6 +44,10 @@ public class MapNode {
     return roomType;
   }
 
+  public void setRoomType(RoomType type) {
+    roomType = type;
+  }
+
   public NodeState getState() {
     return state;
   }

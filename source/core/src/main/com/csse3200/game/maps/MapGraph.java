@@ -115,6 +115,17 @@ public class MapGraph implements EncounterCallback {
     return result;
   }
 
+  public List<MapNode> getNodesByType(RoomType type) {
+
+    List<MapNode> result = new ArrayList<>();
+    for (MapNode node : nodes.values()) {
+      if (node.getRoomType() == type) {
+        result.add(node);
+      }
+    }
+    return result;
+  }
+
   /** Connects two nodes. */
   public void connectNodes(MapNode node1, MapNode node2) {
 

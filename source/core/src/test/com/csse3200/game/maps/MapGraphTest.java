@@ -25,11 +25,6 @@ public class MapGraphTest {
     MapGraph map = mapGen.getMap();
 
     assertTrue(map.getNodes().size() < MapGenerationConfig.MAX_NODE_COUNT);
-    // for (int i = 0; i < MapGraph.MAP_HEIGHT; i++) {
-
-    // assertTrue(map.moveToNode());
-    // }
-
   }
 
   @Test

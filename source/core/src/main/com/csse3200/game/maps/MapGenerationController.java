@@ -8,7 +8,6 @@ public class MapGenerationController {
 
   private MapGraph map;
   private final Random rand;
-
   private final MapGenerationConfig config;
 
   public MapGenerationController() {
@@ -23,9 +22,10 @@ public class MapGenerationController {
   }
 
   public MapGenerationController(
-      int totalNodeCount, int combatWeight, int eventWeight, int shopWeight) {
+      int totalNodeCount, int combatWeight, int eventWeight, int shopWeight, int eliteWeight) {
 
-    this.config = new MapGenerationConfig(totalNodeCount, combatWeight, eventWeight, shopWeight);
+    this.config =
+        new MapGenerationConfig(totalNodeCount, combatWeight, eventWeight, shopWeight, eliteWeight);
     this.map = new MapGraph(NodePoolGenerator.generate(config));
     this.rand = new Random(config.getSeed());
 
@@ -39,8 +39,7 @@ public class MapGenerationController {
    * 1. Distinct paths are generated and can have a chance to create random branches if the option
    * is available.
    *
-   * <p>// TODO: need to rebalance room types based on weights // TODO: would like to have
-   * configurable constraints (enemy first, no back to back shops/events )
+   * @return Fail or success condition for regenerating untenable maps.
    */
   private int generatePathing() {
     List<List<MapNode>> generatedPaths = initializePaths();
@@ -56,6 +55,7 @@ public class MapGenerationController {
     }
 
     pruneUnconnectedMapGraphNodes();
+    NodePoolGenerator.rebalanceRoomTypes(config, rand, map);
     return 0;
   }
 
@@ -82,7 +82,6 @@ public class MapGenerationController {
         if (branch != null && !branch.getConnections().isEmpty()) {
 
           map.connectNodes(prevNode, branch);
-          path.add(branch);
         }
       }
 
@@ -108,6 +107,11 @@ public class MapGenerationController {
       if (distance == 0 && !node.getConnections().isEmpty()) {
 
         for (MapNode connected : node.getConnections()) { // prevent crossover X-like connections
+          if (connected.getNodeId() == 0
+              || connected.equals(parentNode)
+              || connected.getHeight() != parentNode.getHeight() + 1) {
+            continue;
+          }
 
           int connectionDistance = map.getRelativeNodePos(parentNode, connected);
           if (connectionDistance == -1) {
@@ -129,6 +133,12 @@ public class MapGenerationController {
     return validNodes.get(rand.nextInt(validNodes.size()));
   }
 
+  /**
+   * Creates the nested list that stores x amount of paths generated.
+   *
+   * @return List of paths generated on initialization. Paths are lists themselves, containing the
+   *     nodes in order of being added to the path.
+   */
   private List<List<MapNode>> initializePaths() {
 
     List<List<MapNode>> generatedPaths = new ArrayList<>();
@@ -169,6 +179,7 @@ public class MapGenerationController {
    * Returns a the list of nodes that a given node is within range to connect with.
    *
    * @param node Targeted node for getting nodes in range
+   * @return A list containing the nodes on the upper layer that are in range = 1.
    */
   private List<MapNode> getNodesInRange(MapNode node) {
 
@@ -188,8 +199,6 @@ public class MapGenerationController {
 
   /**
    * Removes all unconnected nodes from the MapGraph. Only called as the final step of generation.
-   *
-   * <p>TODO: consider moving this to MapGraph? just unsure about logistics
    */
   private void pruneUnconnectedMapGraphNodes() {
     if (!map.getNodes().isEmpty()) {
