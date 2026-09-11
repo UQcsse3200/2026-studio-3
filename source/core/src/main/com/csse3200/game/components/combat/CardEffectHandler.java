@@ -149,7 +149,7 @@ public class CardEffectHandler {
    * @param enemy The enemy to be checked.
    * @return True if the enemy is alive, False if not.
    */
-  private boolean isEnemyAlive(Entity enemy) {
+  public boolean isEnemyAlive(Entity enemy) {
     CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
     return !stats.isDead();
   }

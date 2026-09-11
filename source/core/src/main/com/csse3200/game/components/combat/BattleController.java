@@ -394,7 +394,7 @@ public class BattleController {
     for (int i = this.currentEnemyIndex + 1; i < this.enemies.size(); i++) {
       Entity currentEnemy = this.enemies.get(i);
       // Checks status of each enemy
-      if (isEnemyAlive(currentEnemy)) {
+      if (effectHandler.isEnemyAlive(currentEnemy)) {
         this.setCurrentEnemyIndex(i);
         return true;
       }
@@ -440,18 +440,6 @@ public class BattleController {
   }
 
   /**
-   * Returns if the enemy is alive. NOTE: I couldn't find an existing helper/API for this, but in
-   * the future this should probably be put in another module.
-   *
-   * @param enemy The enemy to be checked.
-   * @return True if the enemy is alive, False if not.
-   */
-  private boolean isEnemyAlive(Entity enemy) {
-    CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
-    return !stats.isDead();
-  }
-
-  /**
    * Checks whether the combat has ended, and queues the corresponding outcome event. If both sides
    * are defeated, the player defeat takes precedence.
    *
@@ -459,7 +447,7 @@ public class BattleController {
    */
   private boolean queueBattleOutcomeIfOver() {
     CombatStatsComponent playerStats = this.player.getComponent(CombatStatsComponent.class);
-    boolean allEnemiesDead = this.enemies.stream().noneMatch(this::isEnemyAlive);
+    boolean allEnemiesDead = this.enemies.stream().noneMatch(effectHandler::isEnemyAlive);
 
     if (playerStats.isDead()) {
       handle(BattleEvent.PLAYER_DEFEATED);
@@ -638,7 +626,7 @@ public class BattleController {
 
     // Rolls intent for alive each enemy.
     for (Entity enemy : this.enemies) {
-      if (this.isEnemyAlive(enemy)) {
+      if (effectHandler.isEnemyAlive(enemy)) {
         EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
         // Enemies live on their own entity and cannot reach the player, so hand the player's stats
         // over each round. Refreshing here keeps the AI reading the player's current condition.
