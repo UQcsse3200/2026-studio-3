@@ -97,5 +97,10 @@ public record DisplayingRecord(
       return new DisplayingRecord(
           text, trigger, skin, fontName, colour, x, y, width, height, scale, variant);
     }
+
+    DisplayingRecord rewardRecord = DisplayingRecord.builder("")
+            .position(0, 500)
+            .variant("reward")
+            .build();
   }
 }
