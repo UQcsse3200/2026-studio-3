@@ -4,7 +4,9 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
+import com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord;
 import com.csse3200.game.components.spritedisplay.displaying.EndBattleDisplay;
+import com.csse3200.game.components.spritedisplay.displaying.RewardDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -13,6 +15,7 @@ import com.csse3200.game.input.InputService;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
+import com.csse3200.game.rewards.RewardService;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import java.nio.file.Path;
@@ -54,6 +57,13 @@ public class EndBattleScreen extends ScreenAdapter {
     ServiceLocator.getEntityService().register(ui);
 
     ui.getEvents().trigger(EndBattleDisplay.RESULT_EVENT, won ? "VICTORY" : "DEFEAT");
+
+    if (won) {
+      RewardService rewardService = new RewardService();
+      DisplayingRecord rewardRecord =
+          DisplayingRecord.builder("").position(0, 500).variant("reward").build();
+      ui.addComponent(new RewardDisplay(rewardRecord, rewardService, game.getRunState()));
+    }
   }
 
   /**

@@ -33,6 +33,8 @@ import com.csse3200.game.physics.PhysicsEngine;
 import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
+import com.csse3200.game.rewards.RewardOption;
+import com.csse3200.game.rewards.RewardService;
 import com.csse3200.game.services.DragNDropService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
@@ -118,13 +120,23 @@ public class BattleScreen extends ScreenAdapter {
     battleDeck.drawCards(5);
 
     CardEffectResolver effectResolver = new CardEffectResolver(library);
+    Entity player = forestGameArea.getPlayer();
+
     controller =
         new BattleController(
-            forestGameArea.getPlayer(),
-            forestGameArea.getEnemies(),
-            effectResolver,
-            library,
-            battleDeck);
+            player, forestGameArea.getEnemies(), effectResolver, library, battleDeck);
+
+    RewardOption pendingReward = game.getRunState().getPendingReward();
+    if (pendingReward != null) {
+      RewardService rewardService = new RewardService();
+      try {
+        rewardService.claimReward(player, pendingReward);
+      } catch (UnsupportedOperationException e) {
+        logger.warn("Could not apply pending reward: {}", e.getMessage());
+      } finally {
+        game.getRunState().clearPendingReward();
+      }
+    }
 
     createUI();
     controller.start();

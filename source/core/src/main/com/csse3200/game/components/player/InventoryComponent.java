@@ -215,4 +215,3 @@ public class InventoryComponent extends Component {
     this.goldBonusMultiplier += bonus;
   }
 }
-
