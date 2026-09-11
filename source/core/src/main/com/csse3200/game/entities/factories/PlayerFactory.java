@@ -11,6 +11,7 @@ import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.configs.PlayerConfig;
 import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.input.InputComponent;
+import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.physics.PhysicsLayer;
 import com.csse3200.game.physics.PhysicsUtils;
 import com.csse3200.game.physics.components.ColliderComponent;
@@ -56,6 +57,15 @@ public class PlayerFactory {
     player.getComponent(ColliderComponent.class).setDensity(1.5f);
     player.getComponent(TextureRenderComponent.class).scaleEntity();
     return player;
+  }
+
+  /**
+   * Creates the initial durable player state from the same config used by {@link #createPlayer()}.
+   *
+   * @return default health and gold for a new run
+   */
+  public static PlayerRunState createInitialRunState() {
+    return new PlayerRunState(stats.health, stats.maxHealth, stats.gold);
   }
 
   private PlayerFactory() {

@@ -8,13 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.cards.TestCardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
-import com.csse3200.game.components.CombatStatsComponent;
-import com.csse3200.game.components.player.InventoryComponent;
-import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.maps.MapGraph;
 import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.NodeState;
+import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import java.util.List;
@@ -30,10 +28,7 @@ class SaveGameRestoreServiceTest {
 
   @Test
   void restoresPlayerDeckAndMapState() {
-    Entity player =
-        new Entity()
-            .addComponent(new CombatStatsComponent(12, 5, 50))
-            .addComponent(new InventoryComponent(3));
+    PlayerRunState playerState = new PlayerRunState(12, 50, 3);
     PlayerDeck deck = testDeck(List.of(STRIKE));
     RunState runState = new RunState();
     runState.startRun(existingMap(), 0);
@@ -43,13 +38,14 @@ class SaveGameRestoreServiceTest {
     saveData.deck = new DeckSaveData(List.of(DEFEND, BANDAGE));
     saveData.progress.resumeScreen = "MAP";
 
-    RestoreResult result = new SaveGameRestoreService(player, deck, runState).restore(saveData);
+    RestoreResult result =
+        new SaveGameRestoreService(playerState, deck, runState).restore(saveData);
 
     assertTrue(result.success());
     assertEquals("MAP", result.resumeScreen());
-    assertEquals(80, player.getComponent(CombatStatsComponent.class).getHealth());
-    assertEquals(100, player.getComponent(CombatStatsComponent.class).getMaxHealth());
-    assertEquals(42, player.getComponent(InventoryComponent.class).getGold());
+    assertEquals(80, playerState.getCurrentHealth());
+    assertEquals(100, playerState.getMaxHealth());
+    assertEquals(42, playerState.getGold());
     assertEquals(List.of(DEFEND, BANDAGE), deck.getCardIds());
     assertNotNull(runState.getMapGraph());
     assertEquals(1, runState.getMapGraph().getCurrentNode().getNodeId());
@@ -60,10 +56,7 @@ class SaveGameRestoreServiceTest {
 
   @Test
   void rejectsInvalidDeckWithoutMutatingLiveState() {
-    Entity player =
-        new Entity()
-            .addComponent(new CombatStatsComponent(12, 5, 50))
-            .addComponent(new InventoryComponent(3));
+    PlayerRunState playerState = new PlayerRunState(12, 50, 3);
     PlayerDeck deck = testDeck(List.of(STRIKE));
     RunState runState = new RunState();
     runState.startRun(existingMap(), 0);
@@ -72,22 +65,20 @@ class SaveGameRestoreServiceTest {
     saveData.player = new PlayerSaveData(80, 100, 42, 0);
     saveData.deck = new DeckSaveData(List.of("unknown_card"));
 
-    RestoreResult result = new SaveGameRestoreService(player, deck, runState).restore(saveData);
+    RestoreResult result =
+        new SaveGameRestoreService(playerState, deck, runState).restore(saveData);
 
     assertFalse(result.success());
     assertEquals(RestoreError.INVALID_DECK_STATE, result.error());
-    assertEquals(12, player.getComponent(CombatStatsComponent.class).getHealth());
-    assertEquals(3, player.getComponent(InventoryComponent.class).getGold());
+    assertEquals(12, playerState.getCurrentHealth());
+    assertEquals(3, playerState.getGold());
     assertEquals(List.of(STRIKE), deck.getCardIds());
     assertEquals(0, runState.getMapGraph().getCurrentNode().getNodeId());
   }
 
   @Test
   void rejectsInvalidMapWithoutMutatingLiveState() {
-    Entity player =
-        new Entity()
-            .addComponent(new CombatStatsComponent(12, 5, 50))
-            .addComponent(new InventoryComponent(3));
+    PlayerRunState playerState = new PlayerRunState(12, 50, 3);
     PlayerDeck deck = testDeck(List.of(STRIKE));
     RunState runState = new RunState();
     runState.startRun(existingMap(), 0);
@@ -95,30 +86,29 @@ class SaveGameRestoreServiceTest {
     SaveGameData saveData = validSaveData();
     saveData.map.nodes.get(0).connectionIds.add(99);
 
-    RestoreResult result = new SaveGameRestoreService(player, deck, runState).restore(saveData);
+    RestoreResult result =
+        new SaveGameRestoreService(playerState, deck, runState).restore(saveData);
 
     assertFalse(result.success());
     assertEquals(RestoreError.INVALID_MAP_STATE, result.error());
-    assertEquals(12, player.getComponent(CombatStatsComponent.class).getHealth());
+    assertEquals(12, playerState.getCurrentHealth());
     assertEquals(List.of(STRIKE), deck.getCardIds());
     assertEquals(0, runState.getMapGraph().getCurrentNode().getNodeId());
   }
 
   @Test
   void validatesConstructorArguments() {
-    Entity player =
-        new Entity()
-            .addComponent(new CombatStatsComponent(12, 5, 50))
-            .addComponent(new InventoryComponent(3));
+    PlayerRunState playerState = new PlayerRunState(12, 50, 3);
     PlayerDeck deck = testDeck(List.of(STRIKE));
     RunState runState = new RunState();
 
     assertThrows(
         IllegalArgumentException.class, () -> new SaveGameRestoreService(null, deck, runState));
     assertThrows(
-        IllegalArgumentException.class, () -> new SaveGameRestoreService(player, null, runState));
+        IllegalArgumentException.class,
+        () -> new SaveGameRestoreService(playerState, null, runState));
     assertThrows(
-        IllegalArgumentException.class, () -> new SaveGameRestoreService(player, deck, null));
+        IllegalArgumentException.class, () -> new SaveGameRestoreService(playerState, deck, null));
   }
 
   private SaveGameData validSaveData() {

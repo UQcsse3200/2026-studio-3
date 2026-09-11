@@ -29,6 +29,8 @@ import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
 import com.csse3200.game.input.InputDecorator;
 import com.csse3200.game.input.InputService;
+import com.csse3200.game.maps.PlayerRunState;
+import com.csse3200.game.maps.RunState;
 import com.csse3200.game.physics.PhysicsEngine;
 import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.RenderService;
@@ -70,6 +72,7 @@ public class BattleScreen extends ScreenAdapter {
   private final PhysicsEngine physicsEngine;
   private static final Map<String, Skin> textureSkinCache = new HashMap<>();
   private final BattleController controller;
+  private final PlayerRunState playerState;
   private CardLibrary library;
   private BattleDeck battleDeck;
   private List<ClickableRecord> staticUiRecords;
@@ -106,13 +109,17 @@ public class BattleScreen extends ScreenAdapter {
     this.gameArea = forestGameArea;
     forestGameArea.create();
 
+    RunState runState = game.getRunState();
+    playerState = runState.getOrCreatePlayerState();
+    playerState.applyTo(forestGameArea.getPlayer());
+
     // Card + deck state has to exist before the controller so it can be handed the single
     // card-play entry point and the deck it mutates.
     List<CardConfig> configs = CardConfigLoader.loadCards(); // reads configs/cards.json
     library = new CardLibrary(configs);
     ServiceLocator.registerCardLibrary(library);
 
-    PlayerDeck playerDeck = game.getRunState().getOrCreatePlayerDeck(library);
+    PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(library);
     battleDeck = new BattleDeck(playerDeck);
     battleDeck.shuffleDrawPile();
     battleDeck.drawCards(5);
@@ -177,6 +184,7 @@ public class BattleScreen extends ScreenAdapter {
 
   @Override
   public void dispose() {
+    playerState.captureFrom(gameArea.getPlayer());
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
