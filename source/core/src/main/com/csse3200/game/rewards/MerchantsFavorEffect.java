@@ -10,6 +10,6 @@ public class MerchantsFavorEffect implements ItemEffect {
     @Override
     public void apply(Entity player) {
         InventoryComponent inventory = player.getComponent(InventoryComponent.class);
-        inventory.addShopDiscount(DISCOUNT_INCREMENT); // 需要在 InventoryComponent 里新增这个方法
+        inventory.addShopDiscount(DISCOUNT_INCREMENT);
     }
 }
