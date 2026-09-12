@@ -93,7 +93,8 @@ public class EnemyFactory {
             .addComponent(new EnemyStatsComponent(config.name))
             .addComponent(new EnemyBehaviourComponent(config.behaviour))
             .addComponent(animator)
-            .addComponent(new EnemyAnimationController());
+            .addComponent(new EnemyAnimationController())
+            .addComponent(new EnemyStatsDisplay());
 
     // The drop target lets the player drag a card onto the enemy. It needs the drag-and-drop UI
     // service and a camera, which are only registered when the battle screen is running, so it is
