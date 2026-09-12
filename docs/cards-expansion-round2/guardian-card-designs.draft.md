@@ -120,6 +120,13 @@ Descriptions state intended card rules. Part A's integration gaps remain unresol
 
 ### 4. Seal and Restore — protection-heavy recovery
 
+- status: Withdrawn
+- reason: block + heal falls under Member 4's Survival scope (Round 2 allocation); collides with Member 4's Makeshift Shelter draft (2 cost, SELF, BLOCK 7 + HEAL 3)
+- date: 2026-09-12
+- replacement: TBD — fourth Guardian card to be redesigned in the defence / defence-weakening space
+
+Original design retained below for audit:
+
 - `id`: `seal_and_restore`
 - `name`: Seal and Restore
 - `description`: Gain 7 block. Heal 4 health.
@@ -145,4 +152,4 @@ The previous Vulnerable → Sweep interaction is withdrawn: the inspected active
 
 ## Review boundary
 
-All four designs remain proposals. Keep cards.json and combat source unchanged. Review the numbers, overlap with other themes, and Part A integration dependencies before authorizing implementation. The master list's older ALL_ENEMIES note for Breach predates this revision; this document is the current proposal. That separate draft has not been edited in this revision request.
+The fourth Guardian slot is pending redesign following the withdrawal of Seal and Restore; its original proposal is retained above for audit. Keep cards.json and combat source unchanged. Review the numbers, overlap with other themes, and Part A integration dependencies before authorizing implementation. The master list's older ALL_ENEMIES note for Breach predates this revision; this document is the current proposal. That separate draft has not been edited in this revision request.
