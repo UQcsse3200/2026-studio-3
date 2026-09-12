@@ -80,7 +80,7 @@
         "effects": [
           { "type": "POISON", "value": 5, "duration": 3 }
         ],
-        "texturePath": "images/cards/poison_dagger.png"
+        "texturePath": "images/cards/poison_flask.png"
       },
       {
         "id": "poison_blade",
@@ -94,7 +94,7 @@
           { "type": "DAMAGE", "value": 10, "duration": 0 },
           { "type": "POISON", "value": 4, "duration": 2 }
         ],
-        "texturePath": "images/cards/poison_dagger.png"
+        "texturePath": "images/cards/poison_blade.png"
       },
       {
         "id": "poison_cloud",
@@ -107,7 +107,7 @@
         "effects": [
           { "type": "POISON", "value": 3, "duration": 3 }
         ],
-        "texturePath": "images/cards/poison_dagger.png"
+        "texturePath": "images/cards/poison_cloud.png"
       },
       {
         "id": "poison_mark",
@@ -121,7 +121,7 @@
           { "type": "VULNERABLE", "value": 2, "duration": 2 },
           { "type": "POISON", "value": 2, "duration": 2 }
         ],
-        "texturePath": "images/cards/expose.png"
+        "texturePath": "images/cards/poison_mark.png"
       },
       {
         "id": "starfall",

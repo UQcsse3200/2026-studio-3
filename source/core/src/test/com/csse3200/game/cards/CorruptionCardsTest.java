@@ -32,7 +32,7 @@ class CorruptionCardsTest {
         () -> assertEquals(TargetType.SINGLE_ENEMY, card.target),
         () -> assertEquals(1, card.effects.length),
         () -> assertEffect(card.effects[0], EffectType.POISON, 5, 3),
-        () -> assertEquals("images/cards/poison_dagger.png", card.texturePath));
+        () -> assertEquals("images/cards/poison_flask.png", card.texturePath));
   }
 
   @Test
@@ -49,7 +49,7 @@ class CorruptionCardsTest {
         () -> assertEquals(2, card.effects.length),
         () -> assertEffect(card.effects[0], EffectType.DAMAGE, 10, 0),
         () -> assertEffect(card.effects[1], EffectType.POISON, 4, 2),
-        () -> assertEquals("images/cards/poison_dagger.png", card.texturePath));
+        () -> assertEquals("images/cards/poison_blade.png", card.texturePath));
   }
 
   @Test
@@ -65,7 +65,7 @@ class CorruptionCardsTest {
         () -> assertEquals(TargetType.ALL_ENEMIES, card.target),
         () -> assertEquals(1, card.effects.length),
         () -> assertEffect(card.effects[0], EffectType.POISON, 3, 3),
-        () -> assertEquals("images/cards/poison_dagger.png", card.texturePath));
+        () -> assertEquals("images/cards/poison_cloud.png", card.texturePath));
   }
 
   @Test
@@ -84,7 +84,8 @@ class CorruptionCardsTest {
         () -> assertEquals(2, card.effects.length),
         () -> assertEffect(card.effects[0], EffectType.VULNERABLE, 2, 2),
         () -> assertEffect(card.effects[1], EffectType.POISON, 2, 2),
-        () -> assertEquals("images/cards/expose.png", card.texturePath));
+        () -> assertEquals("images/cards/poison_mark.png", card.texturePath));
+
   }
 
   private static void assertEffect(EffectConfig effect, EffectType type, int value, int duration) {
