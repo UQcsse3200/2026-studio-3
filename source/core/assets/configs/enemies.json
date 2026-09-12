@@ -1,0 +1,40 @@
+{
+  "enemies": [
+    {
+      "id": "lesser_shade",
+      "name": "Lesser Shade",
+      "health": 24,
+      "baseAttack": 6,
+      "armour": 0,
+      "tier": "NORMAL",
+      "behaviour": "cycle_attack_defend"
+    },
+    {
+      "id": "bone_crawler",
+      "name": "Bone Crawler",
+      "health": 30,
+      "baseAttack": 5,
+      "armour": 2,
+      "tier": "NORMAL",
+      "behaviour": "cycle_attack_defend"
+    },
+    {
+      "id": "dark_acolyte",
+      "name": "Dark Acolyte",
+      "health": 34,
+      "baseAttack": 7,
+      "armour": 1,
+      "tier": "NORMAL",
+      "behaviour": "cycle_attack_defend"
+    },
+    {
+      "id": "void_knight",
+      "name": "Void Knight",
+      "health": 72,
+      "baseAttack": 10,
+      "armour": 5,
+      "tier": "ELITE",
+      "behaviour": "cycle_attack_defend"
+    }
+  ]
+}
