@@ -12,8 +12,6 @@ import java.util.List;
 public class RewardDisplay extends Displaying {
   public static final String REWARD_CLAIMED_EVENT = "rewardClaimed";
 
-  private static final int NUM_OPTIONS = 3;
-
   private final RunState runState;
   private final RewardService rewardService;
   private List<RewardOption> options;
@@ -28,7 +26,7 @@ public class RewardDisplay extends Displaying {
   @Override
   public void create() {
     super.create();
-    options = rewardService.generateRewardOptions(NUM_OPTIONS);
+    options = rewardService.generateRewardOptions();
     buildOptionButtons();
   }
 

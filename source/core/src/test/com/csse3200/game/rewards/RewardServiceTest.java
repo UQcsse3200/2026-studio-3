@@ -14,35 +14,37 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(GameExtension.class)
 class RewardServiceTest {
 
-    @Test
-    void shouldGenerateRequestedNumberOfOptions() {
-        RewardService service = new RewardService(new RewardGenerator(new Random(1)));
-        List<RewardOption> options = service.generateRewardOptions(3);
-        assertEquals(3, options.size());
-    }
+  @Test
+  void shouldGenerateOneGoldAndOneItemOption() {
+    RewardService service = new RewardService(new RewardGenerator(new Random(1)));
+    List<RewardOption> options = service.generateRewardOptions();
 
-    @Test
-    void claimingGoldRewardShouldAddGoldToPlayer() {
-        Entity player = new Entity();
-        player.addComponent(new InventoryComponent(0));
+    assertEquals(2, options.size());
+    assertEquals(RewardType.GOLD, options.get(0).type);
+    assertEquals(RewardType.ITEM, options.get(1).type);
+  }
 
-        RewardService service = new RewardService(new RewardGenerator(new Random(1)));
-        RewardOption option = new RewardOption(RewardType.GOLD);
-        option.goldAmount = 25;
+  @Test
+  void claimingGoldRewardShouldAddGoldToPlayer() {
+    Entity player = new Entity();
+    player.addComponent(new InventoryComponent(0));
 
-        service.claimReward(player, option);
+    RewardService service = new RewardService(new RewardGenerator(new Random(1)));
+    RewardOption option = new RewardOption(RewardType.GOLD);
+    option.goldAmount = 25;
 
-        assertEquals(25, player.getComponent(InventoryComponent.class).getGold());
-    }
+    service.claimReward(player, option);
 
-    @Test
-    void claimingCardUpgradeShouldThrowUnsupportedForNow() {
-        // 目前 CARD_UPGRADE 还没接入 celia0419 的接口，验证它明确抛异常而不是静默失败
-        Entity player = new Entity();
-        RewardService service = new RewardService(new RewardGenerator(new Random(1)));
-        RewardOption option = new RewardOption(RewardType.CARD_UPGRADE);
-        option.cardId = "some-card-id";
+    assertEquals(25, player.getComponent(InventoryComponent.class).getGold());
+  }
 
-        assertThrows(UnsupportedOperationException.class, () -> service.claimReward(player, option));
-    }
+  @Test
+  void claimingCardUpgradeShouldThrowUnsupportedForNow() {
+    Entity player = new Entity();
+    RewardService service = new RewardService(new RewardGenerator(new Random(1)));
+    RewardOption option = new RewardOption(RewardType.CARD_UPGRADE);
+    option.cardId = "some-card-id";
+
+    assertThrows(UnsupportedOperationException.class, () -> service.claimReward(player, option));
+  }
 }
