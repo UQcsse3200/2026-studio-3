@@ -13,6 +13,7 @@ public record CardPlayResult(
     CardEffectResolution effectResolution,
     CardPlayFailureReason failureReason,
     DeckSnapshot deckSnapshot) {
+
   public CardPlayResult {
     if (cardId == null || cardId.isBlank()) {
       throw new IllegalArgumentException("Card ID cannot be null or blank");

@@ -3,12 +3,15 @@ package com.csse3200.game.components.battle;
 import com.badlogic.gdx.Gdx;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardLibrary;
-import com.csse3200.game.cards.CardPlayRequest;
+import com.csse3200.game.cards.TargetType;
+import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.cards.CardType;
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
+import com.csse3200.game.cards.play.CardPlayTarget;
+import com.csse3200.game.cards.play.integration.Team3CardPlayAdapter;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattleEvent;
@@ -116,14 +119,24 @@ public class BattleActions extends Component {
    */
   private void onCardPlayed(String cardID, String targetID) {
     var optionalCard = library.getCard(cardID);
+
     if (optionalCard.isEmpty()) {
       return;
     }
     if (playerIsBlockedFromPlayingCards()) {
       return;
     }
+
     CardConfig cardConfig = optionalCard.get();
-    CardPlayRequest request = new CardPlayRequest(cardID, targetID);
+
+    CardPlayTarget target;
+    if (targetID.equalsIgnoreCase("player")) {
+      target = new CardPlayTarget(TargetType.SELF, null);
+    } else {
+      target = new CardPlayTarget(TargetType.SINGLE_ENEMY, targetID);
+    }
+
+    CardPlayRequest request = new CardPlayRequest(cardID, target);
     PlayerIntent intent = classifyCard(cardConfig);
 
     if (controller.submitCardPlayRequest(request, intent)) {

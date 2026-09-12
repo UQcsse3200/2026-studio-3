@@ -1,12 +1,12 @@
 package com.csse3200.game.components.combat;
 
-import com.csse3200.game.cards.CardPlayRequest;
+import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.BattleDeck;
-import com.csse3200.game.cards.effects.CardEffectResolver;
-import com.csse3200.game.cards.effects.CardPlayResult;
-import com.csse3200.game.cards.effects.PlayerEffectState;
-import com.csse3200.game.cards.effects.ResolvedCardEffect;
+import com.csse3200.game.cards.play.CardPlayResult;
+import com.csse3200.game.cards.effects.*;
+import com.csse3200.game.cards.play.CardPlayService;
+import com.csse3200.game.cards.play.integration.Team3CardPlayAdapter;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
@@ -41,6 +41,7 @@ public class BattleController {
   private boolean processingEvents;
 
   private final CardEffectHandler effectHandler;
+  private final CardPlayService cardPlayService;
   private CardPlayRequest pendingCard;
   private boolean lastCardPlaySucceeded;
 
@@ -55,7 +56,7 @@ public class BattleController {
   private static final String LISTENER_NOT_NULL = "Listener must not be null.";
 
   public BattleController(Entity player, List<Entity> enemies) throws IllegalArgumentException {
-    this(player, enemies, null, null, null);
+    this(player, enemies, null, null, null, null);
   }
 
   /**
@@ -71,6 +72,7 @@ public class BattleController {
       List<Entity> enemies,
       CardEffectResolver effectResolver,
       CardService cardService,
+      CardPlayService cardPlayService,
       BattleDeck battleDeck)
       throws IllegalArgumentException {
 
@@ -81,6 +83,8 @@ public class BattleController {
 
     this.effectHandler =
         new CardEffectHandler(effectResolver, cardService, battleDeck, new PlayerEffectState());
+    this.cardPlayService = cardPlayService;
+//    this.cardPlayAdapter = new Team3CardPlayAdapter(cardService, cardPlayService);
 
     // Guards against empty list or null enemies.
     this.enemies = enemies;
@@ -394,7 +398,7 @@ public class BattleController {
     for (int i = this.currentEnemyIndex + 1; i < this.enemies.size(); i++) {
       Entity currentEnemy = this.enemies.get(i);
       // Checks status of each enemy
-      if (effectHandler.isEnemyAlive(currentEnemy)) {
+      if (isEnemyAlive(currentEnemy)) {
         this.setCurrentEnemyIndex(i);
         return true;
       }
@@ -447,7 +451,7 @@ public class BattleController {
    */
   private boolean queueBattleOutcomeIfOver() {
     CombatStatsComponent playerStats = this.player.getComponent(CombatStatsComponent.class);
-    boolean allEnemiesDead = this.enemies.stream().noneMatch(effectHandler::isEnemyAlive);
+    boolean allEnemiesDead = this.enemies.stream().noneMatch(this::isEnemyAlive);
 
     if (playerStats.isDead()) {
       handle(BattleEvent.PLAYER_DEFEATED);
@@ -501,7 +505,7 @@ public class BattleController {
    * @return A string summarising the card being played and the resulting actions.
    */
   private String summarise(CardPlayRequest request, CardPlayResult result) {
-    StringBuilder summary = new StringBuilder("You played ").append(request.cardID());
+    StringBuilder summary = new StringBuilder("You played ").append(request.getCardId());
     for (ResolvedCardEffect effect : result.enemyEffects()) {
       summary
           .append(" - ")
@@ -542,6 +546,16 @@ public class BattleController {
     return EnemyIntent.attack(attack);
   }
 
+  /**
+   * Returns if the enemy is alive.
+   *
+   * @param enemy The enemy to be checked.
+   * @return True if the enemy is alive, False if not.
+   */
+  public boolean isEnemyAlive(Entity enemy) {
+    CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
+    return !stats.isDead();
+  }
 
   private EnergyComponent playerEnergy() {
     return this.player.getComponent(EnergyComponent.class);
@@ -565,11 +579,12 @@ public class BattleController {
       return;
     }
 
-    CardPlayResult result = effectHandler.playCard(request, this.player);
+    CardPlayResult result = cardPlayService.playCard(request);
+
     if (result == null) {
       // Card system not wired in (e.g. unit tests without a resolution service).
       lastCardPlaySucceeded = true;
-      narrate("You played " + request.cardID() + ".");
+      narrate("You played " + request.cardId() + ".");
       finishPlayerCardAction();
       return;
     }
@@ -577,7 +592,7 @@ public class BattleController {
     if (!result.success()) {
       // No effects produced; the card stays in hand and the player keeps their turn.
       lastCardPlaySucceeded = false;
-      narrate("Couldn't play " + request.cardID() + ": " + result.failureReason());
+      narrate("Couldn't play " + request.cardId() + ": " + result.failureReason());
       finishPlayerCardAction();
       return;
     }
@@ -607,7 +622,7 @@ public class BattleController {
         effectHandler.getLivingEnemyTargets(request, this.enemies), enemyEffects);
     effectHandler.applyPlayerEffects(playerEffects, this.player);
 
-    // The played card has left the hand (see playCardThroughCardSystem) — tell the UI to refresh.
+    // The played card has left the hand — tell the UI to refresh.
     eventHandler.trigger(HAND_CHANGED_EVENT, result.updatedHand());
   }
 

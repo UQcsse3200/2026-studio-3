@@ -1,6 +1,6 @@
 package com.csse3200.game.components.combat;
 
-import com.csse3200.game.cards.CardPlayRequest;
+import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
@@ -48,49 +48,49 @@ public class CardEffectHandler {
    * @param player the player instance in the game
    * @return the result, or {@code null} when no card system is wired in
    */
-  public CardPlayResult playCard(CardPlayRequest request, Entity player) {
-    // check whether card systems exist
-    if (effectResolver == null || cardService == null || battleDeck == null) {
-      return null;
-    }
-
-    Optional<CardConfig> maybeCard = cardService.getCard(request.cardID());
-    if (maybeCard.isEmpty()) {
-      return CardPlayResult.failure(
-          "Unknown card: " + request.cardID(), request.cardID(), request.targetID(), battleDeck);
-    }
-    CardConfig card = maybeCard.get();
-
-    // check if card is in the player's hand
-    if (!battleDeck.getHand().contains(card.id)) {
-      return CardPlayResult.failure("Card not in hand", card.id, request.targetID(), battleDeck);
-    }
-
-    // check if player has enough energy
-    EnergyComponent energy = player.getComponent(EnergyComponent.class);
-    if (energy != null && !energy.canAfford(card.cost)) {
-      return CardPlayResult.failure("Not enough energy", card.id, request.targetID(), battleDeck);
-    }
-
-    // asks what the card does
-    CardEffectResolution resolution = effectResolver.resolve(card, playerEffectState);
-
-    // use up player's energy to play the card
-    if (energy != null) {
-      energy.spendEnergy(card.cost);
-    }
-    // card leaving the hand, and another one replaces it
-    battleDeck.playCard(card.id);
-    battleDeck.drawOne();
-
-    return CardPlayResult.success(
-        card.id,
-        request.targetID(),
-        resolution.enemyEffects(),
-        resolution.playerEffects(),
-        battleDeck,
-        card.cost);
-  }
+//  public CardPlayResult playCard(CardPlayRequest request, Entity player) {
+//    // check whether card systems exist
+//    if (effectResolver == null || cardService == null || battleDeck == null) {
+//      return null;
+//    }
+//
+//    Optional<CardConfig> maybeCard = cardService.getCard(request.cardID());
+//    if (maybeCard.isEmpty()) {
+//      return CardPlayResult.failure(
+//          "Unknown card: " + request.cardID(), request.cardID(), request.targetID(), battleDeck);
+//    }
+//    CardConfig card = maybeCard.get();
+//
+//    // check if card is in the player's hand
+//    if (!battleDeck.getHand().contains(card.id)) {
+//      return CardPlayResult.failure("Card not in hand", card.id, request.targetID(), battleDeck);
+//    }
+//
+//    // check if player has enough energy
+//    EnergyComponent energy = player.getComponent(EnergyComponent.class);
+//    if (energy != null && !energy.canAfford(card.cost)) {
+//      return CardPlayResult.failure("Not enough energy", card.id, request.targetID(), battleDeck);
+//    }
+//
+//    // asks what the card does
+//    CardEffectResolution resolution = effectResolver.resolve(card, playerEffectState);
+//
+//    // use up player's energy to play the card
+//    if (energy != null) {
+//      energy.spendEnergy(card.cost);
+//    }
+//    // card leaving the hand, and another one replaces it
+//    battleDeck.playCard(card.id);
+//    battleDeck.drawOne();
+//
+//    return CardPlayResult.success(
+//        card.id,
+//        request.targetID(),
+//        resolution.enemyEffects(),
+//        resolution.playerEffects(),
+//        battleDeck,
+//        card.cost);
+//  }
 
   /**
    * Applies the given card effects on the enemy targets
@@ -160,7 +160,7 @@ public class CardEffectHandler {
    * cards. Precise single-target selection can be layered on when encounters have several enemies.
    */
   public List<Entity> getLivingEnemyTargets(CardPlayRequest request, List<Entity> enemies) {
-    if ("player".equalsIgnoreCase(request.targetID())) {
+    if ("player".equalsIgnoreCase(request.target().targetId())) {
       return List.of();
     }
     List<Entity> targets = new ArrayList<>();
