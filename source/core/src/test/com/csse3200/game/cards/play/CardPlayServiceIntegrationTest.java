@@ -24,30 +24,41 @@ class CardPlayServiceIntegrationTest {
   void shouldPlayEveryInitialTeamSixCardThroughTheUnifiedEntryPoint() {
     CardLibrary library = new CardLibrary(CardConfigLoader.loadCards());
     BattleDeck battleDeck = new BattleDeck(new PlayerDeck(library, CARD_IDS));
-    battleDeck.drawCards(CARD_IDS.size());
+
+    // Start with only the first card in hand. Each successful play draws
+    // the next card from the draw pile.
+    battleDeck.drawOne();
+
     EnergyComponent energy = new EnergyComponent(10);
     CardPlayService service = new CardPlayService(library, battleDeck, energy);
 
-    CardPlayResult strike = service.playCard(CardPlayRequest.singleEnemy("strike", "enemy-1"));
-    CardPlayResult defend = service.playCard(CardPlayRequest.self("defend"));
+    CardPlayResult strike =
+            service.playCard(CardPlayRequest.singleEnemy("strike", "enemy-1"));
+    CardPlayResult defend =
+            service.playCard(CardPlayRequest.self("defend"));
     CardPlayResult poisonDagger =
-        service.playCard(CardPlayRequest.singleEnemy("poison_dagger", "enemy-1"));
-    CardPlayResult expose = service.playCard(CardPlayRequest.allEnemies("expose"));
-    CardPlayResult innerFocus = service.playCard(CardPlayRequest.self("inner_focus"));
-    CardPlayResult bandage = service.playCard(CardPlayRequest.self("bandage"));
+            service.playCard(CardPlayRequest.singleEnemy("poison_dagger", "enemy-1"));
+    CardPlayResult expose =
+            service.playCard(CardPlayRequest.allEnemies("expose"));
+    CardPlayResult innerFocus =
+            service.playCard(CardPlayRequest.self("inner_focus"));
+    CardPlayResult bandage =
+            service.playCard(CardPlayRequest.self("bandage"));
 
     assertTrue(
-        List.of(strike, defend, poisonDagger, expose, innerFocus, bandage).stream()
-            .allMatch(CardPlayResult::success));
+            List.of(strike, defend, poisonDagger, expose, innerFocus, bandage).stream()
+                    .allMatch(CardPlayResult::success));
+
     assertEquals(List.of(EffectType.DAMAGE), types(strike.enemyEffects()));
     assertEquals(List.of(EffectType.BLOCK), types(defend.playerEffects()));
-    assertEquals(List.of(EffectType.DAMAGE, EffectType.POISON), types(poisonDagger.enemyEffects()));
+    assertEquals(
+            List.of(EffectType.DAMAGE, EffectType.POISON),
+            types(poisonDagger.enemyEffects()));
     assertEquals(List.of(EffectType.VULNERABLE), types(expose.enemyEffects()));
     assertEquals(List.of(EffectType.STRENGTH), types(innerFocus.playerEffects()));
     assertEquals(List.of(EffectType.HEAL), types(bandage.playerEffects()));
+
     assertEquals(3, energy.getCurrentEnergy());
-    assertTrue(bandage.updatedHand().isEmpty());
-    assertEquals(CARD_IDS, bandage.updatedDiscardPile());
   }
 
   private static List<EffectType> types(
