@@ -8,7 +8,7 @@ Exactly 20 Round 2 expansion slots: four per member. Warding Sweep is implemente
 
 | Card Name | Owner | Theme | Status | Effect Dependencies | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Warding Sweep (proposed) | Hezhenyu (Member 1) | Guardian | Implemented (in config) | DAMAGE; ALL_ENEMIES | In source/core/assets/configs/cards.json: cost 2, ATTACK, COMMON, ALL_ENEMIES, DAMAGE 4. Shipped rarity is COMMON; original design proposed UNCOMMON — flagged for review. |
+| Warding Sweep (proposed) | Hezhenyu (Member 1) | Guardian | Implemented (in config) | DAMAGE; ALL_ENEMIES | In source/core/assets/configs/cards.json: cost 2, ATTACK, COMMON, ALL_ENEMIES, DAMAGE 4. Rarity confirmed COMMON; the design document has been aligned. |
 | Sentinel's Stance (proposed) | Hezhenyu (Member 1) | Guardian | Not started | BLOCK + STRENGTH; SELF | Design draft only; not approved or implemented. |
 | Unseal the Breach (proposed) | Hezhenyu (Member 1) | Guardian | Not started | DAMAGE + VULNERABLE; SINGLE_ENEMY | Design draft only; not approved or implemented. |
 | Seal and Restore (proposed) | Hezhenyu (Member 1) | Guardian | Withdrawn | BLOCK + HEAL; SELF | Block + heal role handed to Member 4 (Survival); slot awaits a redesigned Guardian card. |

@@ -73,11 +73,12 @@ Descriptions state intended card rules. Part A's integration gaps remain unresol
 - `description`: Deal 4 damage to all enemies.
 - `cost`: 2
 - `type`: ATTACK
-- `rarity`: UNCOMMON
+- `rarity`: COMMON
 - `target`: ALL_ENEMIES
 - `effects[]`: one entry — `type: DAMAGE`, `value: 4`, `duration: 0`.
 - `texturePath`: `images/cards/warding_sweep.png`
 - Archive technique: a broad blade arc along the perimeter of a ward.
+- Rarity decision (2026-09-12): confirmed COMMON and aligned to the shipped config value, because this is a plain DAMAGE 4 area attack with no additional mechanic.
 - Balance rationale: raised from 1 to 2 energy. Against one/two/three enemies, unmodified total damage is 4/8/12 for 2 energy; two Strikes give 12 total for the same energy if available. Sweep trades concentrated damage and energy flexibility for encounter-wide coverage and one-card convenience. Its advantage at larger enemy counts is deliberate but still needs playtesting, especially with Strength; rarity alone is not the balancing lever.
 - Difference from Strike: area coverage at twice the cost with lower damage per enemy, rather than a numerical upgrade to a focused attack. Difference from Defend: immediate offensive pressure with no protection.
 
