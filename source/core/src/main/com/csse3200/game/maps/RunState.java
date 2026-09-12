@@ -98,8 +98,7 @@ public class RunState {
       Integer mapNodeId = this.getActiveNodeId();
       MapNode activeNode = mapGraph.getNode(mapNodeId);
 
-      if (mapNodeId == null || !Objects.nonNull(activeNode)
-              || activeNode.getHeight() <= 0) {
+      if (mapNodeId == null || !Objects.nonNull(activeNode) || activeNode.getHeight() <= 0) {
           return 0;
       }
 
