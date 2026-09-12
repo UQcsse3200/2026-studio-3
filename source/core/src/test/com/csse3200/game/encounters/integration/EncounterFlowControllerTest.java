@@ -59,6 +59,61 @@ class EncounterFlowControllerTest {
   }
 
   @Test
+  void shouldStartAndCompleteChanceIndependently() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 100);
+    IntegratedShopTransactionGateway transactions =
+        new IntegratedShopTransactionGateway(
+            player, new MockCardCatalogGateway("card_heal"), new MockDeckGateway());
+    RecordingCallback callback = new RecordingCallback();
+
+    EncounterFlowController flow = new EncounterFlowController(player, transactions, callback);
+
+    ChanceEncounterSession chance = flow.startChance(41, createChanceEncounter());
+
+    assertTrue(flow.isEncounterActive());
+    assertEquals(41, flow.getActiveNodeId());
+    assertEquals(EncounterFlowController.EncounterType.CHANCE, flow.getActiveType());
+
+    assertTrue(chance.resolveChoice("risk").isSuccess());
+    assertTrue(chance.complete());
+
+    assertFalse(flow.isEncounterActive());
+    assertNull(flow.getActiveNodeId());
+    assertNull(flow.getActiveType());
+
+    assertEquals(1, callback.count);
+    assertEquals(41, callback.nodeId);
+    assertTrue(callback.success);
+  }
+
+  @Test
+  void shouldStartAndCompleteShopIndependently() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 100);
+    IntegratedShopTransactionGateway transactions =
+        new IntegratedShopTransactionGateway(
+            player, new MockCardCatalogGateway("card_heal"), new MockDeckGateway());
+    RecordingCallback callback = new RecordingCallback();
+
+    EncounterFlowController flow = new EncounterFlowController(player, transactions, callback);
+
+    ShopEncounter shop = flow.startShop(42, new ShopService(new ShopItem[0]));
+
+    assertTrue(flow.isEncounterActive());
+    assertEquals(42, flow.getActiveNodeId());
+    assertEquals(EncounterFlowController.EncounterType.SHOP, flow.getActiveType());
+
+    shop.leave();
+
+    assertFalse(flow.isEncounterActive());
+    assertNull(flow.getActiveNodeId());
+    assertNull(flow.getActiveType());
+
+    assertEquals(1, callback.count);
+    assertEquals(42, callback.nodeId);
+    assertTrue(callback.success);
+  }
+
+  @Test
   void shouldPreventTwoConcurrentEncounters() {
     MockPlayerStateGateway player = new MockPlayerStateGateway(100, 100);
     IntegratedShopTransactionGateway transactions =

@@ -107,6 +107,15 @@ public class ShopEncounter {
     return completedSuccessfully;
   }
 
+  /**
+   * Leaves the shop normally.
+   *
+   * <p>A normal player exit counts as successful encounter completion.
+   */
+  public void leave() {
+    complete(true);
+  }
+
   /** Completes the shop encounter and reports completion to the map framework. */
   public void complete(boolean success) {
     if (completed) {
