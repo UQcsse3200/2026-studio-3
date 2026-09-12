@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
 import org.junit.jupiter.api.Test;
+import java.util.List;
 
 class CardValidatorTest {
   private CardConfig validCard() {
@@ -145,4 +146,64 @@ class CardValidatorTest {
     card.cost = -5;
     assertEquals(3, CardValidator.validate(card).size());
   }
+    @Test
+    void shouldAcceptNullUpgradedEffects() {
+        CardConfig card = new CardConfig();
+        card.id = "test_card";
+        card.name = "Test Card";
+        card.description = "desc";
+        card.texturePath = "path.png";
+        card.effects = new EffectConfig[] { new EffectConfig(EffectType.DAMAGE, 5) };
+        card.upgradedEffects = null; // 不升级的卡
+
+        List<String> errors = CardValidator.validate(card);
+        assertTrue(errors.isEmpty(), "null upgradedEffects should be valid");
+    }
+
+    @Test
+    void shouldRejectEmptyUpgradedEffectsArray() {
+        CardConfig card = new CardConfig();
+        card.id = "test_card";
+        card.name = "Test Card";
+        card.description = "desc";
+        card.texturePath = "path.png";
+        card.effects = new EffectConfig[] { new EffectConfig(EffectType.DAMAGE, 5) };
+        card.upgradedEffects = new EffectConfig[0]; // 空数组,应该被拒绝
+
+        List<String> errors = CardValidator.validate(card);
+        assertFalse(errors.isEmpty());
+        assertTrue(errors.stream().anyMatch(e -> e.contains("upgradedEffects")));
+    }
+
+    @Test
+    void shouldValidateUpgradedEffectsContents() {
+        CardConfig card = new CardConfig();
+        card.id = "test_card";
+        card.name = "Test Card";
+        card.description = "desc";
+        card.texturePath = "path.png";
+        card.effects = new EffectConfig[] { new EffectConfig(EffectType.DAMAGE, 5) };
+        card.upgradedEffects = new EffectConfig[] {
+                new EffectConfig(EffectType.DAMAGE, -1) // 非法值,value必须为正
+        };
+
+        List<String> errors = CardValidator.validate(card);
+        assertFalse(errors.isEmpty(), "invalid upgradedEffects entries should be rejected");
+    }
+
+    @Test
+    void shouldAcceptValidUpgradedEffects() {
+        CardConfig card = new CardConfig();
+        card.id = "test_card";
+        card.name = "Test Card";
+        card.description = "desc";
+        card.texturePath = "path.png";
+        card.effects = new EffectConfig[] { new EffectConfig(EffectType.DAMAGE, 4) };
+        card.upgradedEffects = new EffectConfig[] {
+                new EffectConfig(EffectType.DAMAGE, 6) // 合法的升级版数值
+        };
+
+        List<String> errors = CardValidator.validate(card);
+        assertTrue(errors.isEmpty(), "valid upgradedEffects should pass");
+    }
 }
