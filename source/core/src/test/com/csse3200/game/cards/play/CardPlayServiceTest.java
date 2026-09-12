@@ -24,72 +24,129 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class CardPlayServiceTest {
+
   @Test
-  void shouldSpendEnergyResolveEffectsAndDiscardPlayedCard() {
+  void shouldSpendEnergyResolveEffectsDiscardPlayedCardAndDrawReplacement() {
     CardConfig strike =
-        card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
-    CardLibrary cardLibrary = new CardLibrary(List.of(strike));
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike")));
+            card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE,
+                    6));
+    CardConfig defend =
+            card("defend", 1, TargetType.SELF, new EffectConfig(EffectType.BLOCK, 3));
+
+    CardLibrary cardLibrary = new CardLibrary(List.of(strike, defend));
+
+    BattleDeck battleDeck =
+            new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike", "defend")));
+
     battleDeck.drawOne();
+
     EnergyComponent energyComponent = new EnergyComponent(3);
-    CardEffectResolutionService resolutionService = new CardEffectResolutionService(cardLibrary);
+    CardEffectResolutionService resolutionService =
+            new CardEffectResolutionService(cardLibrary);
+
     CardPlayService playService =
-        new CardPlayService(cardLibrary, resolutionService, battleDeck, energyComponent);
+            new CardPlayService(cardLibrary, resolutionService, battleDeck, energyComponent);
 
     CardPlayResult result = playService.playCard("strike");
 
     assertTrue(result.successful());
     assertEquals(CardPlayFailureReason.NONE, result.failureReason());
+
+    // Energy was spent for the played card.
     assertEquals(1, result.energyCost());
     assertEquals(2, energyComponent.getCurrentEnergy());
-    assertTrue(battleDeck.getHand().isEmpty());
+
+    // The played card was discarded.
     assertIterableEquals(List.of("strike"), battleDeck.getDiscardPile());
-    assertTrue(result.updatedHand().isEmpty());
-    assertTrue(result.updatedDrawPile().isEmpty());
     assertIterableEquals(List.of("strike"), result.updatedDiscardPile());
+
+    // The replacement card was drawn into the hand.
+    assertIterableEquals(List.of("defend"), battleDeck.getHand());
+    assertIterableEquals(List.of("defend"), result.updatedHand());
+
+    // No cards remain in the draw pile.
+    assertTrue(battleDeck.getDrawPile().isEmpty());
+    assertTrue(result.updatedDrawPile().isEmpty());
+
+    // The card's effects were resolved correctly.
     assertIterableEquals(
-        List.of(
-            new ResolvedCardEffect("strike", EffectType.DAMAGE, TargetType.SINGLE_ENEMY, 6, 0, 0)),
-        result.enemyEffects());
+            List.of(
+                    new ResolvedCardEffect(
+                            "strike",
+                            EffectType.DAMAGE,
+                            TargetType.SINGLE_ENEMY,
+                            6,
+                            0,
+                            0)),
+            result.enemyEffects());
+
     assertTrue(result.playerEffects().isEmpty());
-    assertIterableEquals(List.of(result.resolution()), resolutionService.getResolutions());
+
+    // The resolution was recorded by the resolution service.
+    assertIterableEquals(
+            List.of(result.resolution()),
+            resolutionService.getResolutions());
   }
 
   @Test
   void shouldReturnOneCompleteResultForUnifiedCardPlayRequest() {
     CardConfig strike =
-        card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
-    CardLibrary cardLibrary = new CardLibrary(List.of(strike));
+            card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
+    CardConfig defend =
+            card("defend", 1, TargetType.SELF, new EffectConfig(EffectType.BLOCK, 3));
+
+    CardLibrary cardLibrary = new CardLibrary(List.of(strike, defend));
+
     BattleDeck battleDeck =
-        new BattleDeck(
-            new PlayerDeck(
-                TestCardService.withCards("strike", "defend"), List.of("strike", "defend")));
-    battleDeck.drawCards(2);
+            new BattleDeck(
+                    new PlayerDeck(
+                            TestCardService.withCards("strike", "defend"),
+                            List.of("strike", "defend")));
+
+    battleDeck.drawOne();
+
     EnergyComponent energyComponent = new EnergyComponent(3);
-    CardPlayService playService = new CardPlayService(cardLibrary, battleDeck, energyComponent);
-    CardPlayRequest request = CardPlayRequest.singleEnemy("strike", "enemy-1");
+    CardPlayService playService =
+            new CardPlayService(cardLibrary, battleDeck, energyComponent);
+
+    CardPlayRequest request =
+            CardPlayRequest.singleEnemy("strike", "enemy-1");
 
     CardPlayResult result = playService.playCard(request);
 
     assertTrue(result.success());
-    assertTrue(result.successful());
     assertEquals(request.target(), result.target());
+
     assertEquals(result.effectResolution(), result.resolution());
     assertEquals(1, result.energyCost());
     assertEquals(2, energyComponent.getCurrentEnergy());
+
+    // strike was played and defend was drawn as its replacement.
     assertIterableEquals(List.of("defend"), result.updatedHand());
+
+    // No cards remain in the draw pile after drawing the replacement.
     assertTrue(result.updatedDrawPile().isEmpty());
+
+    // strike was moved to the discard pile.
     assertIterableEquals(List.of("strike"), result.updatedDiscardPile());
-    assertFalse(playService.canPlay(CardPlayRequest.singleEnemy("defend", "enemy-1")));
+
+    // defend is no longer playable because it is in the hand but has no valid
+    // single-enemy target for this card.
+    assertFalse(
+            playService.canPlay(
+                    CardPlayRequest.singleEnemy("defend", "enemy-1")));
   }
 
   @Test
   void shouldResolveDamageFromPlayerAndEnemyStateViews() {
     CardConfig strike =
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
-    CardLibrary cardLibrary = new CardLibrary(List.of(strike));
+    CardConfig defend =
+            card("defend", 1, TargetType.SELF, new EffectConfig(EffectType.BLOCK, 3));
+    CardLibrary cardLibrary = new CardLibrary(List.of(strike, defend));
     BattleDeck battleDeck =
-        new BattleDeck(new PlayerDeck(TestCardService.withCards("strike"), List.of("strike")));
+        new BattleDeck(new PlayerDeck(TestCardService.withCards("strike", "defend"
+        ), List.of("strike", "defend")));
     battleDeck.drawOne();
     EnergyComponent energyComponent = new EnergyComponent(3);
     PlayerStateView playerState = playerStateView(energyComponent, 2, 1);

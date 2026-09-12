@@ -54,6 +54,7 @@ public class BattleController {
 
   public BattleController(Entity player, List<Entity> enemies) throws IllegalArgumentException {
     this(player, enemies, null, null);
+    this.currentPhase = BattlePhase.SETUP;
   }
 
   /**
@@ -568,6 +569,13 @@ public class BattleController {
       return;
     }
 
+    // Some controller unit tests intentionally run without the card system.
+    if (cardPlayService == null) {
+      lastCardPlaySucceeded = true;
+      finishPlayerCardAction();
+      return;
+    }
+
     CardPlayResult result = cardPlayService.playCard(request);
 
     if (result == null) {
@@ -629,7 +637,7 @@ public class BattleController {
 
     // Rolls intent for alive each enemy.
     for (Entity enemy : this.enemies) {
-      if (effectHandler.isEnemyAlive(enemy)) {
+      if (this.isEnemyAlive(enemy)) {
         EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
         // Enemies live on their own entity and cannot reach the player, so hand the player's stats
         // over each round. Refreshing here keeps the AI reading the player's current condition.

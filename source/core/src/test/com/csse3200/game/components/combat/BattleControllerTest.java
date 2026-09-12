@@ -11,7 +11,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.csse3200.game.cards.CardPlayRequest;
+import com.csse3200.game.cards.TargetType;
+import com.csse3200.game.cards.play.CardPlayRequest;
+import com.csse3200.game.cards.play.CardPlayTarget;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
@@ -88,7 +90,8 @@ class BattleControllerTest {
   @Test
   void shouldResolveSubmittedAttackCardSynchronously() {
     advanceToPlayerTurn();
-    CardPlayRequest request = new CardPlayRequest("strike", "enemy-1");
+    CardPlayRequest request = new CardPlayRequest("strike",
+            new CardPlayTarget(TargetType.SINGLE_ENEMY, "enemy-1"));
 
     boolean accepted = controller.submitCardPlayRequest(request, PlayerIntent.ATTACK);
 
@@ -319,10 +322,14 @@ class BattleControllerTest {
           if (next == BattlePhase.PLAYER_TURN && attempted.compareAndSet(false, true)) {
             assertFalse(
                 controller.submitCardPlayRequest(
-                    new CardPlayRequest("strike", "enemy-1"), PlayerIntent.ATTACK));
+                    new CardPlayRequest("strike",
+                            new CardPlayTarget(TargetType.SINGLE_ENEMY, "enemy-1")),
+                            PlayerIntent.ATTACK));
             assertFalse(
                 controller.submitCardPlayRequest(
-                    new CardPlayRequest("defend", "player"), PlayerIntent.DEFEND));
+                    new CardPlayRequest("defend",
+                            new CardPlayTarget(TargetType.SELF, null)),
+                            PlayerIntent.DEFEND));
             assertNull(controller.getCardPlayRequest());
           }
         });
@@ -337,7 +344,9 @@ class BattleControllerTest {
     // Normal submissions still work once event processing finishes.
     assertTrue(
         controller.submitCardPlayRequest(
-            new CardPlayRequest("strike", "enemy-1"), PlayerIntent.ATTACK));
+            new CardPlayRequest("strike",
+                    new CardPlayTarget(TargetType.SINGLE_ENEMY, "enemy-1")),
+                    PlayerIntent.ATTACK));
   }
 
   @Test
@@ -350,13 +359,17 @@ class BattleControllerTest {
           if (next == BattlePhase.PLAYER_TURN && attempted.compareAndSet(false, true)) {
             assertFalse(
                 controller.submitCardPlayRequest(
-                    new CardPlayRequest("defend", "player"), PlayerIntent.DEFEND));
+                    new CardPlayRequest("defend",
+                            new CardPlayTarget(TargetType.SELF, null)),
+                            PlayerIntent.DEFEND));
           }
         });
 
     assertTrue(
         controller.submitCardPlayRequest(
-            new CardPlayRequest("strike", "enemy-1"), PlayerIntent.ATTACK));
+            new CardPlayRequest("strike",
+                    new CardPlayTarget(TargetType.SINGLE_ENEMY, "enemy-1")),
+                    PlayerIntent.ATTACK));
 
     assertTrue(attempted.get());
     assertNull(controller.getCardPlayRequest());

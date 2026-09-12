@@ -149,10 +149,10 @@ public class CardEffectHandler {
    * @param enemy The enemy to be checked.
    * @return True if the enemy is alive, False if not.
    */
-  public boolean isEnemyAlive(Entity enemy) {
-    CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
-    return !stats.isDead();
-  }
+//  public boolean isEnemyAlive(Entity enemy) {
+//    CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
+//    return !stats.isDead();
+//  }
 
   /**
    * Chooses which enemies a card's enemy effects hit. Self-targeting cards hit nothing; everything
@@ -165,7 +165,7 @@ public class CardEffectHandler {
     }
     List<Entity> targets = new ArrayList<>();
     for (Entity enemy : enemies) {
-      if (isEnemyAlive(enemy)) {
+      if (!enemy.getComponent(CombatStatsComponent.class).isDead()) {
         targets.add(enemy);
       }
     }
