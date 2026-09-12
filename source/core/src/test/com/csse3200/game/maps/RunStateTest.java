@@ -159,7 +159,6 @@ public class RunStateTest {
 
     assertEquals(graph.getCurrentNode().getHeight(), runState.getMapProgression());
   }
-
   @Test
   void returnsZeroWhenActiveNodeIsMissing() {
     RunState runState = new RunState();
