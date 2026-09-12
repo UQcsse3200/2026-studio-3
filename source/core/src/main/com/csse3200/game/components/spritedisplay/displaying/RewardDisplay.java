@@ -12,6 +12,8 @@ import java.util.List;
 public class RewardDisplay extends Displaying {
   public static final String REWARD_CLAIMED_EVENT = "rewardClaimed";
 
+  private static final int NUM_OPTIONS = 2;
+
   private final RunState runState;
   private final RewardService rewardService;
   private List<RewardOption> options;
@@ -26,12 +28,17 @@ public class RewardDisplay extends Displaying {
   @Override
   public void create() {
     super.create();
+    Thread.dumpStack();
     options = rewardService.generateRewardOptions();
     buildOptionButtons();
   }
 
   private void buildOptionButtons() {
     Table optionsTable = new Table();
+    optionsTable.setFillParent(true);
+    optionsTable.top();
+    optionsTable.padTop(400f);
+
     for (RewardOption option : options) {
       TextButton button = new TextButton(describeOption(option), skin);
       button.addListener(
@@ -41,17 +48,31 @@ public class RewardDisplay extends Displaying {
               claimOption(option);
             }
           });
-      optionsTable.add(button).pad(10f);
+      button.addListener(
+          new com.badlogic.gdx.scenes.scene2d.InputListener() {
+            @Override
+            public boolean touchDown(
+                com.badlogic.gdx.scenes.scene2d.InputEvent event,
+                float x,
+                float y,
+                int pointer,
+                int buttonCode) {
+              event.stop();
+              return true;
+            }
+          });
+      optionsTable.add(button).pad(10f).width(300f).height(80f);
       optionsTable.row();
     }
+
     stage.addActor(optionsTable);
   }
 
   private String describeOption(RewardOption option) {
     return switch (option.type) {
       case GOLD -> option.goldAmount + " Gold";
-      case CARD_UPGRADE -> "Upgrade: " + option.cardId; // placeholder, pending celia0419
-      case ITEM -> "Item: " + option.itemId; // placeholder display name
+      case CARD_UPGRADE -> "Upgrade: " + option.cardId;
+      case ITEM -> "Item: " + option.itemId;
     };
   }
 
@@ -62,6 +83,7 @@ public class RewardDisplay extends Displaying {
     claimed = true;
     runState.setPendingReward(option);
     entity.getEvents().trigger(REWARD_CLAIMED_EVENT);
+    entity.getEvents().trigger(EndBattleDisplay.RETURN_TO_MENU_EVENT);
   }
 
   @Override

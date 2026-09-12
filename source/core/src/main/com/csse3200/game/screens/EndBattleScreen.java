@@ -53,10 +53,6 @@ public class EndBattleScreen extends ScreenAdapter {
     DisplayingFactory displays = new DisplayingFactory(Path.of("sprites/EndBattle.json"));
 
     Entity ui = new Entity().addComponent(new InputDecorator(stage, 10)).addComponent(displays);
-    ui.getEvents().addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, this::returnToMenu);
-    ServiceLocator.getEntityService().register(ui);
-
-    ui.getEvents().trigger(EndBattleDisplay.RESULT_EVENT, won ? "VICTORY" : "DEFEAT");
 
     if (won) {
       RewardService rewardService = new RewardService();
@@ -64,6 +60,11 @@ public class EndBattleScreen extends ScreenAdapter {
           DisplayingRecord.builder("").position(0, 500).variant("reward").build();
       ui.addComponent(new RewardDisplay(rewardRecord, rewardService, game.getRunState()));
     }
+
+    ui.getEvents().addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, this::returnToMenu);
+    ServiceLocator.getEntityService().register(ui);
+
+    ui.getEvents().trigger(EndBattleDisplay.RESULT_EVENT, won ? "VICTORY" : "DEFEAT");
   }
 
   /**

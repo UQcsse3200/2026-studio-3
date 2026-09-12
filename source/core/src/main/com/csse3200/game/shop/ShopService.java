@@ -61,29 +61,6 @@ public class ShopService {
   }
 
   /**
-   * Attempts to purchase an item through the cross-team transaction boundary.
-   *
-   * @param itemId shop item identifier
-   * @param transactions Player/Card/Deck transaction boundary
-   * @return purchase result with success or failure reason
-   */
-  public PurchaseResult purchaseWithGateway(String itemId, ShopTransactionGateway transactions) {
-    PurchaseResult check = canPurchaseWithGateway(itemId, transactions);
-    if (!check.isSuccess()) {
-      return check;
-    }
-
-    ShopItem item = check.getItem();
-    ShopTransactionStatus transaction = transactions.purchaseCard(item.cardId, item.price);
-    if (transaction != ShopTransactionStatus.SUCCESS) {
-      return fromTransactionStatus(transaction, item);
-    }
-
-    item.decreaseStock();
-    return PurchaseResult.success(item);
-  }
-
-  /**
    * Checks whether a purchase can be made without changing gold, cards, or stock.
    *
    * @param itemId shop item identifier
@@ -118,12 +95,37 @@ public class ShopService {
       return PurchaseResult.failure(PurchaseResult.Status.INVALID_INVENTORY, item);
     }
 
-    ShopTransactionStatus validation = transactions.validatePurchase(item.cardId, item.price);
+    int finalPrice = applyDiscount(item.price, transactions);
+    ShopTransactionStatus validation = transactions.validatePurchase(item.cardId, finalPrice);
     if (validation != ShopTransactionStatus.READY) {
       return fromTransactionStatus(validation, item);
     }
 
     return PurchaseResult.available(item);
+  }
+
+  /**
+   * Attempts to purchase an item through the cross-team transaction boundary.
+   *
+   * @param itemId shop item identifier
+   * @param transactions Player/Card/Deck transaction boundary
+   * @return purchase result with success or failure reason
+   */
+  public PurchaseResult purchaseWithGateway(String itemId, ShopTransactionGateway transactions) {
+    PurchaseResult check = canPurchaseWithGateway(itemId, transactions);
+    if (!check.isSuccess()) {
+      return check;
+    }
+
+    ShopItem item = check.getItem();
+    int finalPrice = applyDiscount(item.price, transactions);
+    ShopTransactionStatus transaction = transactions.purchaseCard(item.cardId, finalPrice);
+    if (transaction != ShopTransactionStatus.SUCCESS) {
+      return fromTransactionStatus(transaction, item);
+    }
+
+    item.decreaseStock();
+    return PurchaseResult.success(item);
   }
 
   public boolean containsItem(String itemId) {
@@ -164,5 +166,9 @@ public class ShopService {
       return PurchaseResult.failure(PurchaseResult.Status.INVALID_ITEM, item);
     }
     return PurchaseResult.failure(PurchaseResult.Status.TRANSACTION_FAILED, item);
+  }
+
+  private int applyDiscount(int originalPrice, ShopTransactionGateway transactions) {
+    return Math.round(originalPrice * (1 - transactions.getShopDiscount()));
   }
 }
