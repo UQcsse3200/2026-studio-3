@@ -20,10 +20,24 @@ public class RewardGenerator {
     return new GoldReward(base);
   }
 
-  public RewardOption generateRewardOption() {
+  /** Generates a GOLD-type RewardOption with a randomly rolled amount. */
+  public RewardOption generateGoldRewardOption() {
     GoldReward goldReward = generateGoldOption();
     RewardOption option = new RewardOption(RewardType.GOLD);
     option.goldAmount = goldReward.getBaseAmount();
     return option;
+  }
+
+  /** Generates an ITEM-type RewardOption with a randomly picked item type. */
+  public RewardOption generateItemRewardOption() {
+    ItemType[] items = ItemType.values();
+    ItemType picked = items[random.nextInt(items.length)];
+    RewardOption option = new RewardOption(RewardType.ITEM);
+    option.itemId = picked;
+    return option;
+  }
+
+  public RewardOption generateRewardOption() {
+    return generateGoldRewardOption();
   }
 }

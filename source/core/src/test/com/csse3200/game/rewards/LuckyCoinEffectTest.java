@@ -11,40 +11,40 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(GameExtension.class)
 class LuckyCoinEffectTest {
 
-    @Test
-    void shouldIncreaseGoldBonusMultiplier() {
-        Entity player = new Entity();
-        InventoryComponent inventory = new InventoryComponent(0);
-        player.addComponent(inventory);
+  @Test
+  void shouldIncreaseGoldBonusMultiplier() {
+    Entity player = new Entity();
+    InventoryComponent inventory = new InventoryComponent(0);
+    player.addComponent(inventory);
 
-        new LuckyCoinEffect().apply(player);
+    new LuckyCoinEffect().apply(player);
 
-        assertEquals(0.1f, inventory.getGoldBonusMultiplier(), 0.001f);
-    }
+    assertEquals(0.1f, inventory.getGoldBonusMultiplier(), 0.001f);
+  }
 
-    @Test
-    void multipleLuckyCoinsShouldStack() {
-        // 验证是 += 而不是覆盖赋值，拿两次应该叠加
-        Entity player = new Entity();
-        InventoryComponent inventory = new InventoryComponent(0);
-        player.addComponent(inventory);
+  @Test
+  void multipleLuckyCoinsShouldStack() {
+    // 验证是 += 而不是覆盖赋值，拿两次应该叠加
+    Entity player = new Entity();
+    InventoryComponent inventory = new InventoryComponent(0);
+    player.addComponent(inventory);
 
-        new LuckyCoinEffect().apply(player);
-        new LuckyCoinEffect().apply(player);
+    new LuckyCoinEffect().apply(player);
+    new LuckyCoinEffect().apply(player);
 
-        assertEquals(0.2f, inventory.getGoldBonusMultiplier(), 0.001f);
-    }
+    assertEquals(0.2f, inventory.getGoldBonusMultiplier(), 0.001f);
+  }
 
-    @Test
-    void bonusShouldPersistAndAffectFutureGoldRewards() {
-        // 验证加成是永久的，拿到后再领取金币奖励，加成依然生效
-        Entity player = new Entity();
-        InventoryComponent inventory = new InventoryComponent(0);
-        player.addComponent(inventory);
+  @Test
+  void bonusShouldPersistAndAffectFutureGoldRewards() {
+    // 验证加成是永久的，拿到后再领取金币奖励，加成依然生效
+    Entity player = new Entity();
+    InventoryComponent inventory = new InventoryComponent(0);
+    player.addComponent(inventory);
 
-        new LuckyCoinEffect().apply(player);
-        new GoldReward(30).apply(player);
+    new LuckyCoinEffect().apply(player);
+    new GoldReward(30).apply(player);
 
-        assertEquals(33, inventory.getGold()); // 30 * 1.1 = 33
-    }
+    assertEquals(33, inventory.getGold()); // 30 * 1.1 = 33
+  }
 }
