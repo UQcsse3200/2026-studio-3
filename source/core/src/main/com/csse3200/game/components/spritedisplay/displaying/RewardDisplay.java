@@ -71,7 +71,6 @@ public class RewardDisplay extends Displaying {
   private String describeOption(RewardOption option) {
     return switch (option.type) {
       case GOLD -> option.goldAmount + " Gold";
-      case CARD_UPGRADE -> "Upgrade: " + option.cardId;
       case ITEM -> "Item: " + option.itemId;
     };
   }

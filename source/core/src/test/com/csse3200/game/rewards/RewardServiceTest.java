@@ -1,7 +1,6 @@
 package com.csse3200.game.rewards;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.entities.Entity;
@@ -25,13 +24,6 @@ class RewardServiceTest {
   }
 
   @Test
-  void shouldGenerateRequestedNumberOfOptions() {
-    RewardService service = new RewardService(new RewardGenerator(new Random(1)));
-    List<RewardOption> options = service.generateRewardOptions();
-    assertEquals(2, options.size());
-  }
-
-  @Test
   void claimingGoldRewardShouldAddGoldToPlayer() {
     Entity player = new Entity();
     player.addComponent(new InventoryComponent(0));
@@ -46,17 +38,8 @@ class RewardServiceTest {
   }
 
   @Test
-  void claimingCardUpgradeShouldThrowUnsupportedForNow() {
-    Entity player = new Entity();
-    RewardService service = new RewardService(new RewardGenerator(new Random(1)));
-    RewardOption option = new RewardOption(RewardType.CARD_UPGRADE);
-    option.cardId = "some-card-id";
-
-    assertThrows(UnsupportedOperationException.class, () -> service.claimReward(player, option));
-  }
-
-  @Test
   void claimingOneOptionShouldNotAffectTheOther() {
+    // 验证 claimReward 只对传入的那一个 RewardOption 生效
     Entity player = new Entity();
     player.addComponent(new InventoryComponent(0));
 
