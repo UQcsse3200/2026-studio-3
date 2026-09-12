@@ -47,4 +47,18 @@ class RewardServiceTest {
 
     assertThrows(UnsupportedOperationException.class, () -> service.claimReward(player, option));
   }
+
+  @Test
+  void claimingOneOptionShouldNotAffectTheOther() {
+    Entity player = new Entity();
+    player.addComponent(new InventoryComponent(0));
+
+    RewardService service = new RewardService(new RewardGenerator(new Random(1)));
+    RewardOption goldOption = new RewardOption(RewardType.GOLD);
+    goldOption.goldAmount = 25;
+
+    service.claimReward(player, goldOption);
+
+    assertEquals(25, player.getComponent(InventoryComponent.class).getGold());
+  }
 }

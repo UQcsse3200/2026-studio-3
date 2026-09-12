@@ -12,7 +12,6 @@ class RewardGeneratorTest {
 
   @Test
   void generatedGoldShouldAlwaysBeWithinRange() {
-    // 白盒测试：固定seed确保可复现，验证内部随机路径的边界
     RewardGenerator generator = new RewardGenerator(new Random(42));
     for (int i = 0; i < 100; i++) {
       int base = generator.generateGoldOption().getBaseAmount();

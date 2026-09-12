@@ -24,7 +24,6 @@ class LuckyCoinEffectTest {
 
   @Test
   void multipleLuckyCoinsShouldStack() {
-    // 验证是 += 而不是覆盖赋值，拿两次应该叠加
     Entity player = new Entity();
     InventoryComponent inventory = new InventoryComponent(0);
     player.addComponent(inventory);
@@ -37,7 +36,6 @@ class LuckyCoinEffectTest {
 
   @Test
   void bonusShouldPersistAndAffectFutureGoldRewards() {
-    // 验证加成是永久的，拿到后再领取金币奖励，加成依然生效
     Entity player = new Entity();
     InventoryComponent inventory = new InventoryComponent(0);
     player.addComponent(inventory);
