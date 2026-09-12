@@ -97,7 +97,7 @@ Descriptions state intended card rules. Part A's integration gaps remain unresol
 - `texturePath`: `images/cards/sentinels_stance.png`
 - Archive technique: brace behind an engraved shield and recover a disciplined attacking stance.
 - Balance rationale: lowered block from 6 to 5. Relative to Defend, the extra energy buys 1 Strength; relative to Inner Focus at the same cost, it trades 1 of the 2 Strength for 5 immediate block. It is a hybrid, not a better replacement for either baseline. Do not assume repeated plays accumulate Strength consistently across paths.
-- Difference from Defend: adds a persistent offensive preparation effect at a higher cost. Difference from Strike: no immediate damage, with value realized through later attacks.
+- Difference from Strike: no immediate damage, with value realized through later attacks. Difference from Defend: adds a persistent offensive preparation effect at a higher cost.
 - Integration note: intended combat-long Strength matches the contract, but reset cleanup differs as documented in Part A. BLOCK also becomes armor in BattleController versus block in Team7PlayerStateAdapter; do not claim a verified expiry time for its protection.
 
 ### 3. Unseal the Breach — modest single-enemy opening
@@ -141,7 +141,7 @@ Descriptions state intended card rules. Part A's integration gaps remain unresol
 
 The withdrawn section below retains its original slot number and text for audit; Warden's Judgement is the active fourth design.
 
-### 4. Seal and Restore — protection-heavy recovery
+### Withdrawn — Seal and Restore
 
 - status: Withdrawn
 - reason: block + heal falls under Member 4's Survival scope (Round 2 allocation); collides with Member 4's Makeshift Shelter draft (2 cost, SELF, BLOCK 7 + HEAL 3)
