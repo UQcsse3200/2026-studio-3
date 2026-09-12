@@ -6,6 +6,8 @@ import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
+
 /**
  * Holds the map and the player's progress for the length of a run.
  *
@@ -93,6 +95,14 @@ public class RunState {
 
   /** Returns the height of the currently active node. */
   public Integer getMapProgression () {
+      Integer mapNodeId = this.getActiveNodeId();
+      MapNode activeNode = mapGraph.getNode(mapNodeId);
+
+      if (mapNodeId == null || !Objects.nonNull(activeNode)
+              || activeNode.getHeight() <= 0) {
+          return 0;
+      }
+
       return mapGraph.getNode(
               this.getActiveNodeId()
       ).getHeight();
