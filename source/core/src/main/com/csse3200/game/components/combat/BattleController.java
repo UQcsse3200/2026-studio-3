@@ -1,12 +1,9 @@
 package com.csse3200.game.components.combat;
 
-import com.csse3200.game.cards.play.CardPlayRequest;
-import com.csse3200.game.cards.CardService;
-import com.csse3200.game.cards.deck.BattleDeck;
-import com.csse3200.game.cards.play.CardPlayResult;
 import com.csse3200.game.cards.effects.*;
+import com.csse3200.game.cards.play.CardPlayRequest;
+import com.csse3200.game.cards.play.CardPlayResult;
 import com.csse3200.game.cards.play.CardPlayService;
-import com.csse3200.game.cards.play.integration.Team3CardPlayAdapter;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
@@ -56,24 +53,19 @@ public class BattleController {
   private static final String LISTENER_NOT_NULL = "Listener must not be null.";
 
   public BattleController(Entity player, List<Entity> enemies) throws IllegalArgumentException {
-    this(player, enemies, null, null, null, null);
+    this(player, enemies, null, null);
   }
 
   /**
    * @param player the player entity
    * @param enemies the enemies in the encounter
-   * @param effectResolver Team 5's card-effect resolver, or {@code null} to run without cards
-   * @param cardService Team 6's card library for config lookup, or {@code null} to run without
-   *     cards
-   * @param battleDeck the battle deck state, or {@code null} to run without cards
+   * @param cardPlayService coordinator of the card play
    */
   public BattleController(
       Entity player,
       List<Entity> enemies,
-      CardEffectResolver effectResolver,
-      CardService cardService,
-      CardPlayService cardPlayService,
-      BattleDeck battleDeck)
+      CardEffectHandler effectHandler,
+      CardPlayService cardPlayService)
       throws IllegalArgumentException {
 
     this.player = player;
@@ -81,10 +73,8 @@ public class BattleController {
       throw new IllegalArgumentException("Player cannot be null.");
     }
 
-    this.effectHandler =
-        new CardEffectHandler(effectResolver, cardService, battleDeck, new PlayerEffectState());
+    this.effectHandler = effectHandler;
     this.cardPlayService = cardPlayService;
-//    this.cardPlayAdapter = new Team3CardPlayAdapter(cardService, cardPlayService);
 
     // Guards against empty list or null enemies.
     this.enemies = enemies;
@@ -288,7 +278,6 @@ public class BattleController {
   public int getCurrentEnemyIndex() {
     return this.currentEnemyIndex;
   }
-
 
   /**
    * Adds a listener to the event handler, which ultimately informs external teams about a phase
@@ -497,15 +486,15 @@ public class BattleController {
   }
 
   /**
-   * Prints a summary string for a game event that occurs. For use in printing
-   * actions within a battle sequence.
+   * Prints a summary string for a game event that occurs. For use in printing actions within a
+   * battle sequence.
    *
    * @param request The card that is being played.
    * @param result The result of the card being played.
    * @return A string summarising the card being played and the resulting actions.
    */
   private String summarise(CardPlayRequest request, CardPlayResult result) {
-    StringBuilder summary = new StringBuilder("You played ").append(request.getCardId());
+    StringBuilder summary = new StringBuilder("You played ").append(request.cardId());
     for (ResolvedCardEffect effect : result.enemyEffects()) {
       summary
           .append(" - ")
@@ -627,7 +616,6 @@ public class BattleController {
   }
 
   /*--------------------------- Possible Action Branches ----------------------------*/
-
 
   private void enterSetup() {
     // Coordinate battle setup.

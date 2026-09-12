@@ -18,12 +18,13 @@ import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
-import com.csse3200.game.cards.effects.CardEffectResolutionService;
 import com.csse3200.game.cards.effects.CardEffectResolver;
+import com.csse3200.game.cards.effects.PlayerEffectState;
 import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.cards.play.integration.Team3CardPlayAdapter;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.combat.CardEffectHandler;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
@@ -124,16 +125,14 @@ public class BattleScreen extends ScreenAdapter {
 
     Entity player = forestGameArea.getPlayer();
     EnergyComponent energy = player.getComponent(EnergyComponent.class);
+
     cardPlayService = new CardPlayService(library, battleDeck, energy);
     CardEffectResolver effectResolver = new CardEffectResolver(library);
+    CardEffectHandler effectHandler =
+        new CardEffectHandler(effectResolver, library, battleDeck, new PlayerEffectState());
+
     controller =
-        new BattleController(
-            player,
-            forestGameArea.getEnemies(),
-            effectResolver,
-            library,
-            cardPlayService,
-            battleDeck);
+        new BattleController(player, forestGameArea.getEnemies(), effectHandler, cardPlayService);
 
     createUI();
     controller.start();
@@ -161,7 +160,7 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(uiFactory)
             .addComponent(displays)
             .addComponent(new BattleActions(controller, game, library));
-            //.addComponent(cardPlayAdapter);
+    // .addComponent(cardPlayAdapter);
 
     // Keep the on-screen hand in sync with the deck: after a card is played (and a replacement
     // drawn) rebuild the hand widgets from the live deck, so the played card's button is gone and
