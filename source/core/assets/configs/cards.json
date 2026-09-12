@@ -9,7 +9,14 @@
         "rarity": "COMMON",
         "target": "SINGLE_ENEMY",
         "effects": [{ "type": "DAMAGE", "value": 6, "duration": 0 }],
-        "texturePath": "images/cards/strike.png"
+        "texturePath": "images/cards/strike.png",
+        "upgrade": {
+          "name": "Strike+",
+          "description": "Deal 12 damage.",
+          "cost": 1,
+          "rarity": "COMMON",
+          "effects": [{ "type": "DAMAGE", "value": 12, "duration": 0 }]
+        }
       },
       {
         "id": "defend",

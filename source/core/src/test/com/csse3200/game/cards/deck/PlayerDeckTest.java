@@ -6,13 +6,25 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.TestCardService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class PlayerDeckTest {
+  private static final CardService CARDS =
+      TestCardService.withCards(
+          "strike",
+          "defend",
+          "poison_dagger",
+          "expose",
+          "inner_focus",
+          "bandage",
+          "new_team_six_card");
+
   @Test
   void shouldCreateEmptyDeck() {
-    PlayerDeck deck = new PlayerDeck();
+    PlayerDeck deck = new PlayerDeck(CARDS);
 
     assertTrue(deck.isEmpty());
     assertEquals(0, deck.size());
@@ -21,7 +33,7 @@ class PlayerDeckTest {
 
   @Test
   void shouldCreateDeckFromCardIdsInOrder() {
-    PlayerDeck deck = new PlayerDeck(List.of("strike", "defend", "bandage"));
+    PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike", "defend", "bandage"));
 
     assertEquals(3, deck.size());
     assertIterableEquals(List.of("strike", "defend", "bandage"), deck.getCardIds());
@@ -29,7 +41,7 @@ class PlayerDeckTest {
 
   @Test
   void shouldAddAndCountDuplicateCards() {
-    PlayerDeck deck = new PlayerDeck();
+    PlayerDeck deck = new PlayerDeck(CARDS);
 
     deck.addCard("strike");
     deck.addCard("strike");
@@ -43,18 +55,19 @@ class PlayerDeckTest {
 
   @Test
   void shouldAllowRegisteredCardsToBeAdded() {
-    PlayerDeck deck = new PlayerDeck();
+    PlayerDeck deck = new PlayerDeck(CARDS);
 
     for (String cardId : PlayerDeckFactory.getStarterDeckCardIds()) {
       assertTrue(deck.canAddCard(cardId));
     }
+    assertTrue(deck.canAddCard("new_team_six_card"));
 
     assertTrue(deck.isEmpty());
   }
 
   @Test
   void shouldRejectInvalidCardsBeforeAdding() {
-    PlayerDeck deck = new PlayerDeck();
+    PlayerDeck deck = new PlayerDeck(CARDS);
 
     assertFalse(deck.canAddCard(null));
     assertFalse(deck.canAddCard(""));
@@ -65,7 +78,7 @@ class PlayerDeckTest {
 
   @Test
   void shouldRejectUnknownCardWithoutChangingDeck() {
-    PlayerDeck deck = new PlayerDeck(List.of("strike"));
+    PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike"));
 
     assertThrows(IllegalArgumentException.class, () -> deck.addCard("unknown_card"));
 
@@ -74,7 +87,7 @@ class PlayerDeckTest {
 
   @Test
   void shouldAddMultipleCardsInOrder() {
-    PlayerDeck deck = new PlayerDeck();
+    PlayerDeck deck = new PlayerDeck(CARDS);
 
     deck.addCards(List.of("strike", "defend", "poison_dagger"));
 
@@ -83,7 +96,7 @@ class PlayerDeckTest {
 
   @Test
   void shouldRemoveFirstMatchingCardOnly() {
-    PlayerDeck deck = new PlayerDeck(List.of("strike", "defend", "strike"));
+    PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike", "defend", "strike"));
 
     assertTrue(deck.removeCard("strike"));
 
@@ -93,7 +106,7 @@ class PlayerDeckTest {
 
   @Test
   void shouldReturnFalseWhenRemovingMissingCard() {
-    PlayerDeck deck = new PlayerDeck(List.of("strike", "defend"));
+    PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike", "defend"));
 
     assertFalse(deck.removeCard("bandage"));
 
@@ -102,7 +115,7 @@ class PlayerDeckTest {
 
   @Test
   void shouldRemoveCardAtPosition() {
-    PlayerDeck deck = new PlayerDeck(List.of("strike", "defend", "bandage"));
+    PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike", "defend", "bandage"));
 
     String removed = deck.removeCardAt(1);
 
@@ -112,19 +125,20 @@ class PlayerDeckTest {
 
   @Test
   void shouldRejectInvalidCardIds() {
-    PlayerDeck deck = new PlayerDeck();
+    PlayerDeck deck = new PlayerDeck(CARDS);
 
     assertThrows(IllegalArgumentException.class, () -> deck.addCard(null));
     assertThrows(IllegalArgumentException.class, () -> deck.addCard(""));
     assertThrows(IllegalArgumentException.class, () -> deck.addCard("  "));
     assertThrows(IllegalArgumentException.class, () -> deck.addCard("unknown_card"));
     assertThrows(IllegalArgumentException.class, () -> deck.addCards(null));
-    assertThrows(IllegalArgumentException.class, () -> new PlayerDeck(List.of("strike", "")));
+    assertThrows(
+        IllegalArgumentException.class, () -> new PlayerDeck(CARDS, List.of("strike", "")));
   }
 
   @Test
   void shouldReturnImmutableSnapshot() {
-    PlayerDeck deck = new PlayerDeck(List.of("strike", "defend"));
+    PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike", "defend"));
     List<String> snapshot = deck.getCardIds();
 
     assertThrows(UnsupportedOperationException.class, () -> snapshot.add("bandage"));
@@ -134,7 +148,7 @@ class PlayerDeckTest {
 
   @Test
   void shouldCopyIndependently() {
-    PlayerDeck original = new PlayerDeck(List.of("strike", "defend"));
+    PlayerDeck original = new PlayerDeck(CARDS, List.of("strike", "defend"));
     PlayerDeck copy = original.copy();
 
     copy.addCard("bandage");
@@ -146,7 +160,7 @@ class PlayerDeckTest {
 
   @Test
   void shouldClearDeck() {
-    PlayerDeck deck = new PlayerDeck(List.of("strike", "defend"));
+    PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike", "defend"));
 
     deck.clear();
 

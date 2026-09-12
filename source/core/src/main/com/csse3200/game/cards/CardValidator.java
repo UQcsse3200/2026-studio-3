@@ -1,6 +1,7 @@
 package com.csse3200.game.cards;
 
 import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.cards.configs.CardUpgradeConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ public final class CardValidator {
 
     validateBasicFields(card, errors);
     validateEffects(card.effects, errors);
+    validateUpgrade(card.upgrade, card.target, errors);
 
     return List.copyOf(errors);
   }
@@ -101,5 +103,78 @@ public final class CardValidator {
     for (int i = 0; i < effects.length; i++) {
       validateEffect(effects[i], i, errors);
     }
+  }
+
+  private static void validateUpgrade(
+      CardUpgradeConfig upgrade, TargetType inheritedTarget, List<String> errors) {
+    if (upgrade == null) {
+      return;
+    }
+    if (upgrade.name == null || upgrade.name.isBlank()) {
+      errors.add("upgrade.name must not be blank");
+    }
+    if (upgrade.description == null || upgrade.description.isBlank()) {
+      errors.add("upgrade.description must not be blank");
+    }
+    if (upgrade.cost < 0) {
+      errors.add("upgrade.cost must not be negative, was " + upgrade.cost);
+    }
+    if (upgrade.rarity == null) {
+      errors.add("upgrade.rarity must not be null");
+    }
+    if (upgrade.effects == null || upgrade.effects.length == 0) {
+      errors.add("upgrade.effects must define at least one effect");
+      return;
+    }
+
+    for (int i = 0; i < upgrade.effects.length; i++) {
+      validateUpgradeEffect(upgrade.effects[i], i, inheritedTarget, errors);
+    }
+  }
+
+  private static void validateUpgradeEffect(
+      EffectConfig effect, int index, TargetType inheritedTarget, List<String> errors) {
+    String path = "upgrade.effects[" + index + "]";
+    if (effect == null) {
+      errors.add(path + " must not be null");
+      return;
+    }
+    if (effect.type == null) {
+      errors.add(path + ".type must not be null");
+      return;
+    }
+    if (effect.value <= 0) {
+      errors.add(path + ".value must be positive, was " + effect.value);
+    }
+    if (effect.type == EffectType.HEAL) {
+      if (effect.duration < 0) {
+        errors.add(path + ".duration must not be negative for HEAL");
+      }
+    } else if (effect.type.usesDuration()) {
+      if (effect.duration <= 0) {
+        errors.add(
+            path + ".duration must be positive for " + effect.type + ", was " + effect.duration);
+      }
+    } else if (effect.duration != 0) {
+      errors.add(path + ".duration must be zero for " + effect.type + ", was " + effect.duration);
+    }
+
+    if (inheritedTarget != null && !isCompatibleWithTarget(effect.type, inheritedTarget)) {
+      errors.add(
+          path
+              + ".type "
+              + effect.type
+              + " is not compatible with inherited target "
+              + inheritedTarget);
+    }
+  }
+
+  private static boolean isCompatibleWithTarget(EffectType effectType, TargetType target) {
+    if (target == TargetType.SELF) {
+      return effectType == EffectType.BLOCK
+          || effectType == EffectType.HEAL
+          || effectType == EffectType.STRENGTH;
+    }
+    return effectType == EffectType.DAMAGE || effectType.usesDuration();
   }
 }
