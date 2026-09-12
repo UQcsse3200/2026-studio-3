@@ -64,6 +64,7 @@ loadScripts(document, 'script');</script>
 <li><a href="com/csse3200/game/cards/effects/package-tree.html">com.csse3200.game.cards.effects</a>, </li>
 <li><a href="com/csse3200/game/cards/play/package-tree.html">com.csse3200.game.cards.play</a>, </li>
 <li><a href="com/csse3200/game/cards/play/integration/package-tree.html">com.csse3200.game.cards.play.integration</a>, </li>
+<li><a href="com/csse3200/game/cards/runtime/package-tree.html">com.csse3200.game.cards.runtime</a>, </li>
 <li><a href="com/csse3200/game/chance/package-tree.html">com.csse3200.game.chance</a>, </li>
 <li><a href="com/csse3200/game/components/package-tree.html">com.csse3200.game.components</a>, </li>
 <li><a href="com/csse3200/game/components/battle/package-tree.html">com.csse3200.game.components.battle</a>, </li>
@@ -140,8 +141,11 @@ loadScripts(document, 'script');</script>
 <li class="circle">com.csse3200.game.cards.<a href="com/csse3200/game/cards/CardConfigLoader.html" class="type-name-link" title="class in com.csse3200.game.cards">CardConfigLoader</a></li>
 <li class="circle">com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionService.html" class="type-name-link" title="class in com.csse3200.game.cards.effects">CardEffectResolutionService</a></li>
 <li class="circle">com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolver.html" class="type-name-link" title="class in com.csse3200.game.cards.effects">CardEffectResolver</a></li>
+<li class="circle">com.csse3200.game.cards.runtime.<a href="com/csse3200/game/cards/runtime/CardInstanceFactory.html" class="type-name-link" title="class in com.csse3200.game.cards.runtime">CardInstanceFactory</a></li>
 <li class="circle">com.csse3200.game.cards.<a href="com/csse3200/game/cards/CardLibrary.html" class="type-name-link" title="class in com.csse3200.game.cards">CardLibrary</a> (implements com.csse3200.game.cards.<a href="com/csse3200/game/cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>)</li>
 <li class="circle">com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayService.html" class="type-name-link" title="class in com.csse3200.game.cards.play">CardPlayService</a></li>
+<li class="circle">com.csse3200.game.cards.runtime.<a href="com/csse3200/game/cards/runtime/CardResolver.html" class="type-name-link" title="class in com.csse3200.game.cards.runtime">CardResolver</a></li>
+<li class="circle">com.csse3200.game.cards.configs.<a href="com/csse3200/game/cards/configs/CardUpgradeConfig.html" class="type-name-link" title="class in com.csse3200.game.cards.configs">CardUpgradeConfig</a></li>
 <li class="circle">com.csse3200.game.cards.<a href="com/csse3200/game/cards/CardValidator.html" class="type-name-link" title="class in com.csse3200.game.cards">CardValidator</a></li>
 <li class="circle">com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceChoice.html" class="type-name-link" title="class in com.csse3200.game.chance">ChanceChoice</a></li>
 <li class="circle">com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceEncounter.html" class="type-name-link" title="class in com.csse3200.game.chance">ChanceEncounter</a></li>
@@ -469,6 +473,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">com.csse3200.game.cards.<a href="com/csse3200/game/cards/Card.html" class="type-name-link" title="class in com.csse3200.game.cards">Card</a></li>
 <li class="circle">com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolution.html" class="type-name-link" title="class in com.csse3200.game.cards.effects">CardEffectResolution</a></li>
 <li class="circle">com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html" class="type-name-link" title="class in com.csse3200.game.cards.effects">CardEffectResolutionContext</a></li>
+<li class="circle">com.csse3200.game.cards.runtime.<a href="com/csse3200/game/cards/runtime/CardInstance.html" class="type-name-link" title="class in com.csse3200.game.cards.runtime">CardInstance</a></li>
 <li class="circle">com.csse3200.game.cards.<a href="com/csse3200/game/cards/CardPlayRequest.html" class="type-name-link" title="class in com.csse3200.game.cards">CardPlayRequest</a></li>
 <li class="circle">com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayRequest.html" class="type-name-link" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></li>
 <li class="circle">com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardPlayResult.html" class="type-name-link" title="class in com.csse3200.game.cards.effects">CardPlayResult</a></li>
@@ -479,6 +484,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">com.csse3200.game.save.<a href="com/csse3200/game/save/DeleteSaveResult.html" class="type-name-link" title="class in com.csse3200.game.save">DeleteSaveResult</a></li>
 <li class="circle">com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/DisplayingRecord.html" class="type-name-link" title="class in com.csse3200.game.components.spritedisplay.displaying">DisplayingRecord</a></li>
 <li class="circle">com.csse3200.game.save.<a href="com/csse3200/game/save/LoadResult.html" class="type-name-link" title="class in com.csse3200.game.save">LoadResult</a></li>
+<li class="circle">com.csse3200.game.cards.runtime.<a href="com/csse3200/game/cards/runtime/ResolvedCard.html" class="type-name-link" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a></li>
 <li class="circle">com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/ResolvedCardEffect.html" class="type-name-link" title="class in com.csse3200.game.cards.effects">ResolvedCardEffect</a></li>
 <li class="circle">com.csse3200.game.save.<a href="com/csse3200/game/save/SaveResult.html" class="type-name-link" title="class in com.csse3200.game.save">SaveResult</a></li>
 <li class="circle">com.csse3200.game.save.<a href="com/csse3200/game/save/SaveSlotListResult.html" class="type-name-link" title="class in com.csse3200.game.save">SaveSlotListResult</a></li>
