@@ -46,4 +46,61 @@ class SprintTwoCardsIntegrationTest {
 
     assertTrue(CardValidator.validate(card).isEmpty());
   }
+
+  @Test
+  void shouldLoadSentinelsStanceWithExpectedFields() {
+    CardConfig card = library.getCard("sentinels_stance").orElseThrow();
+
+    assertAll(
+        () -> assertEquals("sentinels_stance", card.id),
+        () -> assertEquals("Sentinel's Stance", card.name),
+        () -> assertEquals("Gain 5 block. Gain 1 Strength for the rest of combat.", card.description),
+        () -> assertEquals(2, card.cost),
+        () -> assertEquals(CardType.SKILL, card.type),
+        () -> assertEquals(Rarity.UNCOMMON, card.rarity),
+        () -> assertEquals(TargetType.SELF, card.target),
+        () -> assertEquals("images/cards/sentinels_stance.png", card.texturePath));
+    assertEquals(2, card.effects.length);
+    assertAll(
+        () -> assertEquals(EffectType.BLOCK, card.effects[0].type),
+        () -> assertEquals(5, card.effects[0].value),
+        () -> assertEquals(0, card.effects[0].duration),
+        () -> assertEquals(EffectType.STRENGTH, card.effects[1].type),
+        () -> assertEquals(1, card.effects[1].value),
+        () -> assertEquals(0, card.effects[1].duration));
+  }
+
+  @Test
+  void shouldValidateLoadedSentinelsStance() {
+    CardConfig card = library.getCard("sentinels_stance").orElseThrow();
+
+    assertTrue(CardValidator.validate(card).isEmpty());
+  }
+
+  @Test
+  void shouldLoadWardensJudgementWithExpectedFields() {
+    CardConfig card = library.getCard("wardens_judgement").orElseThrow();
+
+    assertAll(
+        () -> assertEquals("wardens_judgement", card.id),
+        () -> assertEquals("Warden's Judgement", card.name),
+        () -> assertEquals("Deal 9 damage.", card.description),
+        () -> assertEquals(2, card.cost),
+        () -> assertEquals(CardType.ATTACK, card.type),
+        () -> assertEquals(Rarity.UNCOMMON, card.rarity),
+        () -> assertEquals(TargetType.SINGLE_ENEMY, card.target),
+        () -> assertEquals("images/cards/wardens_judgement.png", card.texturePath));
+    assertEquals(1, card.effects.length);
+    assertAll(
+        () -> assertEquals(EffectType.DAMAGE, card.effects[0].type),
+        () -> assertEquals(9, card.effects[0].value),
+        () -> assertEquals(0, card.effects[0].duration));
+  }
+
+  @Test
+  void shouldValidateLoadedWardensJudgement() {
+    CardConfig card = library.getCard("wardens_judgement").orElseThrow();
+
+    assertTrue(CardValidator.validate(card).isEmpty());
+  }
 }

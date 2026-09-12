@@ -79,6 +79,31 @@
         "target": "SELF",
         "effects": [{ "type": "HEAL", "value": 6, "duration": 0 }],
         "texturePath": "images/cards/bandage.png"
+      },
+      {
+        "id": "sentinels_stance",
+        "name": "Sentinel's Stance",
+        "description": "Gain 5 block. Gain 1 Strength for the rest of combat.",
+        "cost": 2,
+        "type": "SKILL",
+        "rarity": "UNCOMMON",
+        "target": "SELF",
+        "effects": [
+          { "type": "BLOCK", "value": 5, "duration": 0 },
+          { "type": "STRENGTH", "value": 1, "duration": 0 }
+        ],
+        "texturePath": "images/cards/sentinels_stance.png"
+      },
+      {
+        "id": "wardens_judgement",
+        "name": "Warden's Judgement",
+        "description": "Deal 9 damage.",
+        "cost": 2,
+        "type": "ATTACK",
+        "rarity": "UNCOMMON",
+        "target": "SINGLE_ENEMY",
+        "effects": [{ "type": "DAMAGE", "value": 9, "duration": 0 }],
+        "texturePath": "images/cards/wardens_judgement.png"
       }
     ]
   }
