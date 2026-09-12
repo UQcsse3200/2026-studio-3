@@ -32,8 +32,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Non-combat encounter area (Team 2): a forest scene that runs a Chance encounter and then, on a
- * successful outcome, opens the Shop.
+ * Non-combat encounter area used to host Team 2 encounter UI and lifecycle integration.
+ *
+ * <p>Chance and Shop encounters are intentionally not chained here. Each encounter is started
+ * independently, and completion is reported through the shared encounter callback. Map screen
+ * navigation and map refresh behaviour are left to the Map integration layer.
  *
  * <p>This is Team 2's {@code ForestGameArea} from the {@code Feature-2} branch, restored as its own
  * area after the battle team's {@code ForestGameArea} replaced it on {@code main}. It still needs a
@@ -151,11 +154,11 @@ public class EncounterGameArea extends GameArea {
         new EncounterFlowController(
             playerState,
             shopTransactions,
-            (nodeId, success) -> {
-              if (success && CHANCE_NODE_ID.equals(nodeId)) {
-                displayShop();
-              }
-            });
+            (nodeId, success) ->
+                logger.debug(
+                    "Encounter completed for node {} with success={}; awaiting map flow integration",
+                    nodeId,
+                    success));
   }
 
   private void spawnTerrain() {
