@@ -2,6 +2,7 @@ package com.csse3200.game.cards;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -29,6 +30,7 @@ class CardConfigTest {
     assertNotNull(card.effects);
     assertEquals(0, card.effects.length);
     assertEquals("", card.texturePath);
+    assertNull(card.upgrade);
   }
 
   @Test

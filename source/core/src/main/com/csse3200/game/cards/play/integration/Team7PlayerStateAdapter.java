@@ -60,7 +60,13 @@ public final class Team7PlayerStateAdapter implements PlayerStateView, PlayerEff
     for (ResolvedCardEffect effect : ordered) {
       switch (effect.type()) {
         case BLOCK -> combatStats.addBlock(effect.value());
-        case HEAL -> combatStats.heal(effect.value());
+        case HEAL -> {
+          if (effect.duration() > 0) {
+            combatStats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
+          } else {
+            combatStats.heal(effect.value());
+          }
+        }
         case STRENGTH ->
             combatStats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
         default -> throw unsupportedPlayerEffect(effect.type());
