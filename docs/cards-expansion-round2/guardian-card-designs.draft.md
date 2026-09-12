@@ -1,4 +1,4 @@
-# Guardian card concepts — DRAFT revision 2
+# Guardian card concepts — DRAFT revision 3
 
 Owner: Hezhenyu (Member 1), Team 6. Theme: archive guardian techniques.
 Design only; all names, numbers and rarities await review. Implementation status: Not started. No card configuration or artwork is created by this document. Each texturePath below is proposed, not an existing-asset claim.
@@ -45,6 +45,16 @@ A separate CardPlayService context-based path exists. Lines 235–245 read Stren
 - Same-key reapplication overwrites value and duration; no additive poison stacking is implemented by these consumers.
 - Production-source search found no caller of getPoisonDamage outside its definition and no wired poison-damage tick. Consequently actual damage per tick, tick timing, and number of ticks are NOT confirmed. Duration counts expiry-helper calls if invoked, not verified poison ticks. The helper decrements duration only; it does not decrement poison value.
 
+### ARMOUR (SUNDER target mechanic)
+
+- CombatStatsComponent.java stores armour in the private `int armor` field and exposes `public int getArmor()` and `public void setArmor(int)`. The setter clamps the supplied value to zero or greater and triggers the entity's `updateArmor` event.
+- CombatStatsComponent.java applies incoming damage through `absorbDamageWithBlock(damage)`, then `absorbDamageWithArmor(afterBlock)`, then subtracts the remainder from health. Armour therefore mitigates damage after block and before health.
+- EnemyFactory.java constructs each enemy's CombatStatsComponent from configured health and base attack, then initializes armour with `stats.setArmor(config.armour)`.
+- CombatStatsComponent.java documents armour as follows: “It persists until consumed by incoming damage or explicitly cleared via clearArmor() - it does not reset automatically at any point in the turn cycle.” Production-source search found no caller of `clearArmor()` outside its definition.
+- EnemyBehaviourComponent.java adds armour with `stats.addArmor(currentIntent.getValue())` when an enemy executes its DEFEND intent. EnemyConfig.java supplies `cycle_attack_defend` as the default behaviour, so enemies using that default can regain armour during combat rather than receiving a per-turn reset.
+- source/core/assets/configs/enemies.json assigns initial armour 0 to `lesser_shade`, 2 to `bone_crawler`, 1 to `dark_acolyte`, and 5 to `void_knight`. EnemyScaling.java copies `base.armour` unchanged into the scaled config.
+- Armour is a dedicated CombatStatsComponent integer field, not a StatusEffect entry. Its initialization, consumption and DEFEND-based replenishment therefore do not depend on the unwired `updateStatusEffects()` turn lifecycle described above.
+
 ### Source locations
 
 All paths below are relative to this document:
@@ -59,12 +69,14 @@ All paths below are relative to this document:
 - [BattleScreen.java](../../source/core/src/main/com/csse3200/game/screens/BattleScreen.java)
 - [BattleController.java](../../source/core/src/main/com/csse3200/game/components/combat/BattleController.java)
 - [CombatStatsComponent.java](../../source/core/src/main/com/csse3200/game/components/CombatStatsComponent.java)
+- [EnemyFactory.java](../../source/core/src/main/com/csse3200/game/entities/factories/EnemyFactory.java)
+- [EnemyBehaviourComponent.java](../../source/core/src/main/com/csse3200/game/components/enemy/EnemyBehaviourComponent.java)
 - [StatusEffect.java](../../source/core/src/main/com/csse3200/game/components/StatusEffect.java)
 - [StatusEffectCalculator.java](../../source/core/src/main/com/csse3200/game/components/StatusEffectCalculator.java)
 
 ## Part B — revised designs
 
-Descriptions state intended card rules. Part A's integration gaps remain unresolved and must be verified before gameplay acceptance. No new effects, per-effect targets, conditional bonuses or precision-dependent nukes are introduced.
+Descriptions state intended card rules. Part A's integration gaps remain unresolved and must be verified before gameplay acceptance. SUNDER is one proposed new effect and is explicitly blocked on the dependency recorded below; no per-effect targets, conditional bonuses or precision-dependent nukes are introduced.
 
 ### 1. Warding Sweep — deliberate area attack
 
@@ -100,24 +112,26 @@ Descriptions state intended card rules. Part A's integration gaps remain unresol
 - Difference from Strike: no immediate damage, with value realized through later attacks. Difference from Defend: adds a persistent offensive preparation effect at a higher cost.
 - Integration note: intended combat-long Strength matches the contract, but reset cleanup differs as documented in Part A. BLOCK also becomes armor in BattleController versus block in Team7PlayerStateAdapter; do not claim a verified expiry time for its protection.
 
-### 3. Unseal the Breach — modest single-enemy opening
+### 3. Unseal the Breach — focused armour opening
 
 - `id`: `unseal_the_breach`
 - `name`: Unseal the Breach
-- `description`: Deal 2 damage to an enemy. Apply 1 Vulnerable to that enemy for 1 turn.
+- `description`: Deal 2 damage to an enemy. Reduce that enemy's armour by 3.
 - `cost`: 1
 - `type`: ATTACK
 - `rarity`: UNCOMMON
 - `target`: SINGLE_ENEMY
 - `effects[]`, in order:
   1. `type: DAMAGE`, `value: 2`, `duration: 0`.
-  2. `type: VULNERABLE`, `value: 1`, `duration: 1`.
+  2. `type: SUNDER`, `value: 3`, `duration: 0`.
 - `texturePath`: `images/cards/unseal_the_breach.png`
 - Archive technique: cut a small opening through an intruder's protective inscription.
-- Balance rationale: lowered cost from 2 to 1, changed to SINGLE_ENEMY, and shortened Vulnerable from 2 turns to 1. Compared with Strike, it trades 4 immediate damage for debuff setup. Compared with Expose at the same cost, it trades enemy-wide coverage and one turn of debuff duration for 2 immediate damage. Unlike Poison Dagger, it offers neither 4 immediate damage nor poison's advertised long-term damage; its niche is enabling follow-up damage. Poison's baseline is a configuration reference, not verified ticks.
-- Precision tolerance: the base hit is only 2. If the existing bug spreads it to all enemies, the comparison with Expose is 2 area damage plus a shorter intended debuff, rather than a huge nuke or a free equal-duration upgrade. This does not declare bugged behavior balanced at every enemy count; correct targeting and duration handling still need acceptance checks.
-- Difference from Strike: combines a modest hit with a debuff, rather than concentrating on immediate damage. Difference from Defend: weakens enemy defense through increased damage taken, with no block. It does not remove or bypass armor.
-- Integration dependency: the Vulnerable multiplier and intended one-turn expiration are not functioning consistently in the inspected paths. This card satisfies the requested design role but is blocked from gameplay acceptance until those integrations are resolved. The primary set interaction below does not depend on it. Damage is listed before Vulnerable; no same-card amplification is assumed.
+- Revision note (2026-09-13): replaced VULNERABLE with the proposed SUNDER effect. Part A documents that the Vulnerable multiplier and duration expiry do not function consistently in the inspected paths. SUNDER is intended to resolve immediately with duration 0, so its design does not depend on the `updateStatusEffects()` wiring gap.
+- Balance rationale: SUNDER 3 fully removes the initial armour of `bone_crawler` (2) and `dark_acolyte` (1), and removes 3 of `void_knight`'s 5. `lesser_shade` has 0 armour, so SUNDER is wasted against it; selecting this card and its target is therefore a real decision rather than a strictly better attack. Enemies can regain armour through their DEFEND intent, making armour reduction repeatable in value rather than only a one-time strip. Compared with Strike at the same 1-energy cost, Unseal the Breach trades 4 immediate damage for removing a persistent damage-reduction pool. Compared with Expose at the same 1-energy cost, Expose is intended to cover ALL_ENEMIES with a Vulnerable damage multiplier, subject to the integration gaps in Part A; this card instead proposes concentrating on one enemy and permanently reducing its current armour pool, without preventing later DEFEND-based replenishment.
+- Resolution order — DESIGN INTENT, NOT VERIFIED: the 2 DAMAGE entry resolves before SUNDER. Existing block and armour can absorb that hit; SUNDER then reduces the selected enemy's remaining armour by 3, clamped at zero through CombatStatsComponent.setArmor. Precise single-enemy application remains an acceptance requirement.
+- Difference from Strike: exchanges 4 immediate damage for persistent single-enemy armour reduction and improved follow-up damage. Difference from Defend: removes an enemy's mitigation instead of adding protection to the player.
+- **NEW-EFFECT DEPENDENCY — BLOCKED:** SUNDER does not exist in EffectType. Adding it requires agreement with Team 5 through Member 2 under the Round 2 allocation. The required code changes are: add a SUNDER EffectType constant with `usesDuration = false`; add SUNDER acceptance to both EffectExecutor.resolveEnemyEffect overloads; add a SUNDER branch to BattleController.applyEnemyEffects; and add a SUNDER branch to Team1EnemyStateAdapter.applyEnemyEffects. This card is blocked from gameplay acceptance until that agreement is recorded. SUNDER must not be presented as implemented or verified before those changes land and are tested.
+- Scope note: SUNDER is the deliberate armour-reduction mechanic proposed for the Guardian set. Round 2 instructs authors not to assume an armour-break mechanic already exists; the verified findings show that no card effect currently supplies one, so this card proposes the extension rather than assuming existing support.
 
 ### 4. Warden's Judgement — dedicated single-target payoff
 
@@ -134,10 +148,10 @@ Descriptions state intended card rules. Part A's integration gaps remain unresol
 - Archive technique: a single sanctioned strike delivered by the warden against one intruder. The blow carries the authority of the archive's protective inscriptions.
 - Intended role: the set's dedicated single-target damage card and the payoff for setup provided by the other Guardian cards. It fills the fourth slot left by the withdrawn Seal and Restore.
 - Balance rationale: Strike costs 1 energy for 6 damage. Two Strikes give 12 damage for 2 energy but use two cards; Warden's Judgement gives 9 for the same energy on one card, trading 3 damage for card economy. Against Warding Sweep at the same cost, it offers 9 to one target versus 4 per target (4/8/12 against one/two/three enemies). One enemy favours Warden's Judgement, three favour Warding Sweep, and two is a genuine decision point between concentrated damage and area coverage. This is a different role, not a numerical variant. The starting value of 9 is provisional and subject to Member 3's balance review, which owns the cost-versus-benefit baseline.
-- Intra-set interaction — DESIGN INTENT, NOT VERIFIED: Sentinel's Stance grants STRENGTH and Unseal the Breach applies VULNERABLE; neither supplies the set's dedicated damage payoff (Breach has a modest 2-damage setup hit). Warden's Judgement is where that setup pays off. Nominal pre-mitigation damage would be 10 with STRENGTH 1, 13 with VULNERABLE (9 × 1.5, rounded down), and 15 with both ((9 + 1) × 1.5). These are design figures, not verified behaviour.
+- Intra-set interaction — DESIGN INTENT, NOT VERIFIED: Sentinel's Stance grants STRENGTH, raising Warden's Judgement from 9 to 10 pre-mitigation damage in the inspected resolver calculation. Unseal the Breach proposes SUNDER to remove armour before the payoff card is played, allowing more of Warden's Judgement's 9 damage to reach health instead of being absorbed by that persistent mitigation pool. The Strength figure follows existing calculation code; the SUNDER interaction remains unverified and blocked on the new-effect dependency above.
 - Difference from Strike: higher single-target damage at twice the cost, trading energy flexibility for card economy. Difference from Defend: pure offence, no protection.
-- Integration note: the card uses DAMAGE only. DAMAGE is confirmed resolvable through the active BattleScreen → BattleController path, so its standalone damage does not depend on status-effect integration. This does not verify precise single-target behaviour: Part A's active consumer applies enemy-facing effects to all living enemies, so the intended SINGLE_ENEMY targeting still requires acceptance verification. The STRENGTH and VULNERABLE interaction figures above are design intent only, blocked from verified gameplay acceptance by the same integration gaps already recorded for Sentinel's Stance and Unseal the Breach; they must not be presented as verified behaviour.
-- Scope note: this card deliberately uses no armour-break or defence-reduction mechanic. Round 2 permits no assumption of a separate armour-break mechanic; Unseal the Breach already holds the set's defence-weakening role.
+- Integration note: the card uses DAMAGE only. DAMAGE is confirmed resolvable through the active BattleScreen → BattleController path, so its standalone damage does not depend on status-effect integration. This does not verify precise single-target behaviour: Part A's active consumer applies enemy-facing effects to all living enemies, so the intended SINGLE_ENEMY targeting still requires acceptance verification. The STRENGTH interaction above remains subject to the state-path discrepancy documented for Sentinel's Stance, while the proposed SUNDER setup is blocked from verified gameplay acceptance until its new-effect dependency is agreed, implemented and tested.
+- Scope note: Warden's Judgement remains the Guardian set's dedicated single-target damage payoff. Unseal the Breach now proposes the set's separate armour-reduction role through SUNDER; Warden's Judgement itself does not reduce or bypass armour.
 
 The withdrawn section below retains its original slot number and text for audit; Warden's Judgement is the active fourth design.
 
@@ -175,4 +189,4 @@ The previous Vulnerable → Sweep interaction is withdrawn: the inspected active
 
 ## Review boundary
 
-Warden's Judgement is the replacement fourth Guardian design following the withdrawal of Seal and Restore; the withdrawn proposal is retained above for audit. Keep cards.json and combat source unchanged. Review the numbers, overlap with other themes, and Part A integration dependencies before authorizing implementation. The master list's older ALL_ENEMIES note for Breach predates this revision; this document is the current proposal. That separate draft has not been edited in this revision request.
+Warden's Judgement is the replacement fourth Guardian design following the withdrawal of Seal and Restore; the withdrawn proposal is retained above for audit. Keep cards.json and combat source unchanged. Review the numbers, overlap with other themes, and Part A integration dependencies before authorizing implementation. The master list's older ALL_ENEMIES and VULNERABLE notes for Breach predate this revision; the current proposal is SINGLE_ENEMY with the new SUNDER dependency documented above. That separate draft has not been edited in this revision request.
