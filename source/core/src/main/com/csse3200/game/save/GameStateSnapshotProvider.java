@@ -2,11 +2,9 @@ package com.csse3200.game.save;
 
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.deck.PlayerDeck;
-import com.csse3200.game.components.CombatStatsComponent;
-import com.csse3200.game.components.player.InventoryComponent;
-import com.csse3200.game.entities.Entity;
 import com.csse3200.game.maps.MapGraph;
 import com.csse3200.game.maps.MapNode;
+import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,17 +12,26 @@ import java.util.List;
 /**
  * Captures the live run as a {@link SaveGameData} snapshot.
  *
- * <p>Player/deck/map references are passed in explicitly, matching how the rest of the codebase
- * holds them (no global "get the player" service exists) — construct this with whatever screen
- * currently owns the player entity, deck, and run state.
+ * <p>The player, deck and map references are all run-scoped rather than screen-owned, so capturing
+ * a save never depends on a rendered player entity still being alive.
  */
 public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
-  private final Entity player;
+  private final PlayerRunState playerState;
   private final PlayerDeck playerDeck;
   private final RunState runState;
 
-  public GameStateSnapshotProvider(Entity player, PlayerDeck playerDeck, RunState runState) {
-    this.player = player;
+  public GameStateSnapshotProvider(
+      PlayerRunState playerState, PlayerDeck playerDeck, RunState runState) {
+    if (playerState == null) {
+      throw new IllegalArgumentException("playerState must not be null");
+    }
+    if (playerDeck == null) {
+      throw new IllegalArgumentException("playerDeck must not be null");
+    }
+    if (runState == null) {
+      throw new IllegalArgumentException("runState must not be null");
+    }
+    this.playerState = playerState;
     this.playerDeck = playerDeck;
     this.runState = runState;
   }
@@ -40,19 +47,13 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
   }
 
   private PlayerSaveData capturePlayer() {
-    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
-    InventoryComponent inventory = player.getComponent(InventoryComponent.class);
-
-    int health = stats != null ? stats.getHealth() : 0;
-    int maxHealth = stats != null ? stats.getMaxHealth() : 0;
-    int gold = inventory != null ? inventory.getGold() : 0;
-
     // Piety is confirmed not implemented for this sprint (Amber_Teng, Team 7, 9/10) — dropped
     // from scope in favor of concrete Status Effects. PlayerSaveData.piety is a leftover field
     // from an earlier design; left at 0 intentionally, not a placeholder awaiting a real source.
     int piety = 0;
 
-    return new PlayerSaveData(health, maxHealth, gold, piety);
+    return new PlayerSaveData(
+        playerState.getCurrentHealth(), playerState.getMaxHealth(), playerState.getGold(), piety);
   }
 
   private DeckSaveData captureDeck() {
@@ -86,11 +87,6 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
   }
 
   private ProgressSaveData captureProgress() {
-    // completedEncounterIds: pending Anran's call on whether this stays a stored field (fix the
-    // List<String>/Integer type mismatch) or gets dropped in favour of deriving completion from
-    // MapSaveData.nodes[].state directly. Left empty until that's settled.
-    List<String> completedEncounterIds = List.of();
-
     // pendingRewardId: confirmed empty with Team 2 (Joel, 9/10) — Chance/Shop outcomes apply
     // immediately, no pending-reward phase exists. Revisit only if a reward-claim screen is
     // added later.
@@ -101,6 +97,6 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
     // in-progress to replay. Always MAP for now — revisit if that rule changes.
     String resumeScreen = GdxGame.ScreenType.MAP.name();
 
-    return new ProgressSaveData(completedEncounterIds, pendingRewardId, resumeScreen);
+    return new ProgressSaveData(pendingRewardId, resumeScreen);
   }
 }

@@ -5,12 +5,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.badlogic.gdx.files.FileHandle;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
-import com.csse3200.game.components.CombatStatsComponent;
-import com.csse3200.game.components.player.InventoryComponent;
-import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.maps.MapGraph;
 import com.csse3200.game.maps.MapNode;
+import com.csse3200.game.maps.NodeState;
+import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import java.nio.file.Path;
@@ -24,7 +23,7 @@ import org.junit.jupiter.api.io.TempDir;
 /**
  * Proves the full save pipeline works against real game objects, not just isolated units: a live
  * player/deck/map is captured through {@link GameStateSnapshotProvider}, written to an actual JSON
- * file via {@link SaveGameService}, then read back and verified to match.
+ * file via {@link SaveGameService}, then restored into a fresh run as though the game relaunched.
  */
 @ExtendWith(GameExtension.class)
 class GameStateSnapshotEndToEndTest {
@@ -35,14 +34,11 @@ class GameStateSnapshotEndToEndTest {
 
   @BeforeEach
   void setUp() {
-    Entity player =
-        new Entity()
-            .addComponent(new CombatStatsComponent(65, 5, 100))
-            .addComponent(new InventoryComponent(120));
+    PlayerRunState playerState = new PlayerRunState(65, 100, 120);
     PlayerDeck deck = PlayerDeckFactory.createStarterDeck();
     RunState runState = buildRunStateWithConnectedNodes();
 
-    GameStateSnapshotProvider provider = new GameStateSnapshotProvider(player, deck, runState);
+    GameStateSnapshotProvider provider = new GameStateSnapshotProvider(playerState, deck, runState);
     JsonSaveGameRepository repository =
         new JsonSaveGameRepository(new FileHandle(temporaryDirectory.toFile()));
     saveGameService = new SaveGameService(repository, provider);
@@ -83,6 +79,33 @@ class GameStateSnapshotEndToEndTest {
         map.nodes.stream().filter(n -> n.nodeId == 0).findFirst().orElseThrow();
     assertEquals(1, nodeZero.connectionIds.size());
     assertEquals(1, (int) nodeZero.connectionIds.get(0));
+  }
+
+  @Test
+  void saveCloseRelaunchAndRestoreRecoversTheWholeRun() {
+    assertTrue(saveGameService.saveGame(1).success());
+
+    // Fresh objects simulate closing the game and starting a new process before loading.
+    PlayerRunState restoredPlayerState = new PlayerRunState(1, 10, 0);
+    PlayerDeck restoredDeck = PlayerDeckFactory.createStarterDeck();
+    restoredDeck.clear();
+    RunState restoredRunState = new RunState();
+
+    LoadResult loadResult = saveGameService.loadGame(1);
+    assertTrue(loadResult.success());
+
+    RestoreResult restoreResult =
+        new SaveGameRestoreService(restoredPlayerState, restoredDeck, restoredRunState)
+            .restore(loadResult.data());
+
+    assertTrue(restoreResult.success());
+    assertEquals("MAP", restoreResult.resumeScreen());
+    assertEquals(65, restoredPlayerState.getCurrentHealth());
+    assertEquals(100, restoredPlayerState.getMaxHealth());
+    assertEquals(120, restoredPlayerState.getGold());
+    assertEquals(PlayerDeckFactory.getStarterDeckCardIds(), restoredDeck.getCardIds());
+    assertEquals(0, restoredRunState.getMapGraph().getCurrentNode().getNodeId());
+    assertEquals(NodeState.AVAILABLE, restoredRunState.getMapGraph().getNode(1).getState());
   }
 
   private RunState buildRunStateWithConnectedNodes() {

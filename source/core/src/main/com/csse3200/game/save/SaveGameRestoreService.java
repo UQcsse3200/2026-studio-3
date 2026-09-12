@@ -1,12 +1,10 @@
 package com.csse3200.game.save;
 
 import com.csse3200.game.cards.deck.PlayerDeck;
-import com.csse3200.game.components.CombatStatsComponent;
-import com.csse3200.game.components.player.InventoryComponent;
-import com.csse3200.game.entities.Entity;
 import com.csse3200.game.maps.MapGraph;
 import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.NodeState;
+import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import java.util.HashMap;
@@ -22,13 +20,14 @@ import java.util.Set;
  * into current gameplay systems before mutating them.
  */
 public class SaveGameRestoreService {
-  private final Entity player;
+  private final PlayerRunState playerState;
   private final PlayerDeck playerDeck;
   private final RunState runState;
 
-  public SaveGameRestoreService(Entity player, PlayerDeck playerDeck, RunState runState) {
-    if (player == null) {
-      throw new IllegalArgumentException("player must not be null");
+  public SaveGameRestoreService(
+      PlayerRunState playerState, PlayerDeck playerDeck, RunState runState) {
+    if (playerState == null) {
+      throw new IllegalArgumentException("playerState must not be null");
     }
     if (playerDeck == null) {
       throw new IllegalArgumentException("playerDeck must not be null");
@@ -36,7 +35,7 @@ public class SaveGameRestoreService {
     if (runState == null) {
       throw new IllegalArgumentException("runState must not be null");
     }
-    this.player = player;
+    this.playerState = playerState;
     this.playerDeck = playerDeck;
     this.runState = runState;
   }
@@ -97,14 +96,6 @@ public class SaveGameRestoreService {
     if (playerData.gold < 0 || playerData.piety < 0) {
       return RestoreResult.failure(
           RestoreError.INVALID_PLAYER_STATE, "Saved player resources cannot be negative");
-    }
-    if (player.getComponent(CombatStatsComponent.class) == null) {
-      return RestoreResult.failure(
-          RestoreError.INVALID_PLAYER_STATE, "Player is missing CombatStatsComponent");
-    }
-    if (player.getComponent(InventoryComponent.class) == null) {
-      return RestoreResult.failure(
-          RestoreError.INVALID_PLAYER_STATE, "Player is missing InventoryComponent");
     }
     return RestoreResult.success("");
   }
@@ -181,12 +172,7 @@ public class SaveGameRestoreService {
   }
 
   private void restorePlayer(PlayerSaveData playerData) {
-    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
-    InventoryComponent inventory = player.getComponent(InventoryComponent.class);
-
-    stats.setMaxHealth(playerData.maxHealth);
-    stats.setHealth(playerData.currentHealth);
-    inventory.setGold(playerData.gold);
+    playerState.restore(playerData.currentHealth, playerData.maxHealth, playerData.gold);
   }
 
   private void restoreDeck(DeckSaveData deckData) {
