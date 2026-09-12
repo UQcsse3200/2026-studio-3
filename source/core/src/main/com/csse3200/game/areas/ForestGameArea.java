@@ -53,6 +53,7 @@ public class ForestGameArea extends GameArea {
   private static final String[] forestSounds = {"sounds/Impact4.ogg"};
 
   private final TerrainFactory terrainFactory;
+  private final Integer progression;
 
   private Entity player;
   private Entity enemy;
@@ -63,9 +64,10 @@ public class ForestGameArea extends GameArea {
    * @param terrainFactory TerrainFactory used to create the terrain for the GameArea.
    * @requires terrainFactory != null
    */
-  public ForestGameArea(TerrainFactory terrainFactory) {
+  public ForestGameArea(TerrainFactory terrainFactory, Integer progression) {
     super();
     this.terrainFactory = terrainFactory;
+    this.progression = progression;
   }
 
   /** Create the game area, including terrain, static entities (trees), dynamic entities (player) */
@@ -138,7 +140,7 @@ public class ForestGameArea extends GameArea {
    * default config otherwise).
    */
   private Entity spawnEnemy() {
-    Entity newEnemy = EnemyFactory.create("bone_crawler");
+    Entity newEnemy = EnemyFactory.create("bone_crawler", this.progression);
     spawnEntityAt(newEnemy, ENEMY_SPAWN, true, true);
     return newEnemy;
   }

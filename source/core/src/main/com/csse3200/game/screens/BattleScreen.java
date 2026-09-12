@@ -70,7 +70,7 @@ public class BattleScreen extends ScreenAdapter {
   private final PhysicsEngine physicsEngine;
   private static final Map<String, Skin> textureSkinCache = new HashMap<>();
   private final BattleController controller;
-  private CardLibrary library;
+    private CardLibrary library;
   private BattleDeck battleDeck;
   private List<ClickableRecord> staticUiRecords;
 
@@ -100,9 +100,12 @@ public class BattleScreen extends ScreenAdapter {
 
     ServiceLocator.registerCamera(renderer.getCamera().getCamera());
 
+    // Integer for scaling difficulty level
+    Integer mapProgression = game.getRunState().getMapProgression();
+
     logger.debug("Initialising main game screen entities");
     TerrainFactory terrainFactory = new TerrainFactory(renderer.getCamera());
-    ForestGameArea forestGameArea = new ForestGameArea(terrainFactory);
+    ForestGameArea forestGameArea = new ForestGameArea(terrainFactory, mapProgression);
     this.gameArea = forestGameArea;
     forestGameArea.create();
 
@@ -158,7 +161,7 @@ public class BattleScreen extends ScreenAdapter {
         .getEvents()
         .addListener(
             BattleActions.HAND_CHANGED_EVENT,
-            (java.util.List<String> hand) -> uiFactory.rebuildHand(buildHandRecords()));
+            (List<String> hand) -> uiFactory.rebuildHand(buildHandRecords()));
 
     gameArea.displayUI(battleUi);
   }
