@@ -18,7 +18,6 @@ import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
-import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.cards.effects.CardEffectResolver;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.combat.BattleController;
@@ -34,6 +33,8 @@ import com.csse3200.game.physics.PhysicsEngine;
 import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
+import com.csse3200.game.rewards.RewardOption;
+import com.csse3200.game.rewards.RewardService;
 import com.csse3200.game.services.DragNDropService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
@@ -113,19 +114,29 @@ public class BattleScreen extends ScreenAdapter {
     library = new CardLibrary(configs);
     ServiceLocator.registerCardLibrary(library);
 
-    PlayerDeck playerDeck = PlayerDeckFactory.createStarterDeck();
+    PlayerDeck playerDeck = game.getRunState().getOrCreatePlayerDeck(library);
     battleDeck = new BattleDeck(playerDeck);
     battleDeck.shuffleDrawPile();
     battleDeck.drawCards(5);
 
     CardEffectResolver effectResolver = new CardEffectResolver(library);
+    Entity player = forestGameArea.getPlayer();
+
     controller =
         new BattleController(
-            forestGameArea.getPlayer(),
-            forestGameArea.getEnemies(),
-            effectResolver,
-            library,
-            battleDeck);
+            player, forestGameArea.getEnemies(), effectResolver, library, battleDeck);
+
+    RewardOption pendingReward = game.getRunState().getPendingReward();
+    if (pendingReward != null) {
+      RewardService rewardService = new RewardService();
+      try {
+        rewardService.claimReward(player, pendingReward);
+      } catch (UnsupportedOperationException e) {
+        logger.warn("Could not apply pending reward: {}", e.getMessage());
+      } finally {
+        game.getRunState().clearPendingReward();
+      }
+    }
 
     createUI();
     controller.start();

@@ -10,6 +10,7 @@ import com.csse3200.game.cards.CardPlayRequest;
 import com.csse3200.game.cards.CardType;
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.TargetType;
+import com.csse3200.game.cards.TestCardService;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
@@ -198,7 +199,10 @@ class BattleActionsTest {
             new EffectConfig(EffectType.DAMAGE, 6));
     expensiveStrike.cost = 4;
     CardLibrary library = new CardLibrary(List.of(expensiveStrike));
-    BattleDeck deck = new BattleDeck(new PlayerDeck(List.of("strike", "bandage")));
+    BattleDeck deck =
+        new BattleDeck(
+            new PlayerDeck(
+                TestCardService.withCards("strike", "bandage"), List.of("strike", "bandage")));
     deck.drawCards(1);
     Entity testPlayer =
         new Entity()
