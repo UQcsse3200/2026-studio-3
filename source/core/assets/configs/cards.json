@@ -104,6 +104,20 @@
         "target": "SINGLE_ENEMY",
         "effects": [{ "type": "DAMAGE", "value": 9, "duration": 0 }],
         "texturePath": "images/cards/wardens_judgement.png"
+      },
+      {
+        "id": "unseal_the_breach",
+        "name": "Unseal the Breach",
+        "description": "Deal 2 damage. Reduce the enemy's armour by 3.",
+        "cost": 1,
+        "type": "ATTACK",
+        "rarity": "UNCOMMON",
+        "target": "SINGLE_ENEMY",
+        "effects": [
+          { "type": "DAMAGE", "value": 2, "duration": 0 },
+          { "type": "SUNDER", "value": 3, "duration": 0 }
+        ],
+        "texturePath": "images/cards/unseal_the_breach.png"
       }
     ]
   }

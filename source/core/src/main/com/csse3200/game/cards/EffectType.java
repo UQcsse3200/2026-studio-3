@@ -19,7 +19,9 @@ public enum EffectType {
   /** Decreases 25% the damage output to target while active. */
   FEEBLE(true),
   /** Increases damage the target deals for the rest of the combat. */
-  STRENGTH(false);
+  STRENGTH(false),
+  /** Immediate reduction of the target's armour pool. */
+  SUNDER(false);
 
   private final boolean usesDuration;
 

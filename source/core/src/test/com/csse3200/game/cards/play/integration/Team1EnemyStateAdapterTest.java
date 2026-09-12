@@ -64,6 +64,34 @@ class Team1EnemyStateAdapterTest {
   }
 
   @Test
+  void shouldReduceEnemyArmorWithSunder() {
+    CombatStatsComponent stats = new CombatStatsComponent(10, 1);
+    stats.addArmor(5);
+    Team1EnemyStateAdapter adapter =
+        new Team1EnemyStateAdapter(Map.of("enemy-1", enemyWith(stats)));
+
+    adapter.applyEnemyEffects(
+        CardPlayTarget.singleEnemy("enemy-1"),
+        List.of(enemyEffect(EffectType.SUNDER, TargetType.SINGLE_ENEMY, 3, 0, 0)));
+
+    assertEquals(2, stats.getArmor());
+  }
+
+  @Test
+  void shouldNotReduceEnemyArmorBelowZeroWithSunder() {
+    CombatStatsComponent stats = new CombatStatsComponent(10, 1);
+    stats.addArmor(2);
+    Team1EnemyStateAdapter adapter =
+        new Team1EnemyStateAdapter(Map.of("enemy-1", enemyWith(stats)));
+
+    adapter.applyEnemyEffects(
+        CardPlayTarget.singleEnemy("enemy-1"),
+        List.of(enemyEffect(EffectType.SUNDER, TargetType.SINGLE_ENEMY, 3, 0, 0)));
+
+    assertEquals(0, stats.getArmor());
+  }
+
+  @Test
   void shouldRejectUnavailableSingleEnemyWithoutMutatingAnotherEnemy() {
     CombatStatsComponent available = new CombatStatsComponent(10, 1);
     Team1EnemyStateAdapter adapter =

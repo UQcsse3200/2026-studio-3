@@ -103,4 +103,34 @@ class SprintTwoCardsIntegrationTest {
 
     assertTrue(CardValidator.validate(card).isEmpty());
   }
+
+  @Test
+  void shouldLoadUnsealTheBreachWithExpectedFields() {
+    CardConfig card = library.getCard("unseal_the_breach").orElseThrow();
+
+    assertAll(
+        () -> assertEquals("unseal_the_breach", card.id),
+        () -> assertEquals("Unseal the Breach", card.name),
+        () -> assertEquals("Deal 2 damage. Reduce the enemy's armour by 3.", card.description),
+        () -> assertEquals(1, card.cost),
+        () -> assertEquals(CardType.ATTACK, card.type),
+        () -> assertEquals(Rarity.UNCOMMON, card.rarity),
+        () -> assertEquals(TargetType.SINGLE_ENEMY, card.target),
+        () -> assertEquals("images/cards/unseal_the_breach.png", card.texturePath));
+    assertEquals(2, card.effects.length);
+    assertAll(
+        () -> assertEquals(EffectType.DAMAGE, card.effects[0].type),
+        () -> assertEquals(2, card.effects[0].value),
+        () -> assertEquals(0, card.effects[0].duration),
+        () -> assertEquals(EffectType.SUNDER, card.effects[1].type),
+        () -> assertEquals(3, card.effects[1].value),
+        () -> assertEquals(0, card.effects[1].duration));
+  }
+
+  @Test
+  void shouldValidateLoadedUnsealTheBreach() {
+    CardConfig card = library.getCard("unseal_the_breach").orElseThrow();
+
+    assertTrue(CardValidator.validate(card).isEmpty());
+  }
 }

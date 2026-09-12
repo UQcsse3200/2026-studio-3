@@ -81,6 +81,7 @@ public final class Team1EnemyStateAdapter implements EnemyStateView, EnemyEffect
           case DAMAGE -> stats.takeDamage(effect.value());
           case POISON, VULNERABLE, FEEBLE ->
               stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
+          case SUNDER -> stats.setArmor(stats.getArmor() - effect.value());
           default -> throw unsupportedEnemyEffect(effect.type());
         }
       }
@@ -132,7 +133,8 @@ public final class Team1EnemyStateAdapter implements EnemyStateView, EnemyEffect
       if (effect.type() != EffectType.DAMAGE
           && effect.type() != EffectType.POISON
           && effect.type() != EffectType.VULNERABLE
-          && effect.type() != EffectType.FEEBLE) {
+          && effect.type() != EffectType.FEEBLE
+          && effect.type() != EffectType.SUNDER) {
         throw unsupportedEnemyEffect(effect.type());
       }
     }
