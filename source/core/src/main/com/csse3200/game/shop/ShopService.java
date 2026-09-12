@@ -56,7 +56,7 @@ public class ShopService {
    */
   public PurchaseResult purchase(String itemId, InventoryComponent inventory) {
     ShopTransactionGateway transactions =
-            inventory == null ? null : new InventoryShopTransactionAdapter(inventory);
+        inventory == null ? null : new InventoryShopTransactionAdapter(inventory);
     return purchaseWithGateway(itemId, transactions);
   }
 
@@ -69,7 +69,7 @@ public class ShopService {
    */
   public PurchaseResult canPurchase(String itemId, InventoryComponent inventory) {
     ShopTransactionGateway transactions =
-            inventory == null ? null : new InventoryShopTransactionAdapter(inventory);
+        inventory == null ? null : new InventoryShopTransactionAdapter(inventory);
     return canPurchaseWithGateway(itemId, transactions);
   }
 
@@ -162,7 +162,7 @@ public class ShopService {
       return PurchaseResult.failure(PurchaseResult.Status.CARD_NOT_FOUND, item);
     }
     if (transaction == ShopTransactionStatus.INVALID_CARD
-            || transaction == ShopTransactionStatus.INVALID_PRICE) {
+        || transaction == ShopTransactionStatus.INVALID_PRICE) {
       return PurchaseResult.failure(PurchaseResult.Status.INVALID_ITEM, item);
     }
     return PurchaseResult.failure(PurchaseResult.Status.TRANSACTION_FAILED, item);

@@ -26,6 +26,7 @@ public interface ShopTransactionGateway {
    * @return detailed transaction status
    */
   ShopTransactionStatus purchaseCard(String cardId, int price);
+
   /**
    * Returns the player's current permanent shop discount, as a fraction (e.g. 0.1f = 10% off).
    *
@@ -33,4 +34,3 @@ public interface ShopTransactionGateway {
    */
   float getShopDiscount();
 }
-

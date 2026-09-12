@@ -2,7 +2,6 @@ package com.csse3200.game.rewards;
 
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.entities.Entity;
-import java.util.ArrayList;
 import java.util.List;
 
 public class RewardService {
@@ -22,10 +21,7 @@ public class RewardService {
    * @return a list containing exactly one GOLD RewardOption and one ITEM RewardOption
    */
   public List<RewardOption> generateRewardOptions() {
-    List<RewardOption> options = new ArrayList<>();
-    options.add(generator.generateGoldRewardOption());
-    options.add(generator.generateItemRewardOption());
-    return options;
+    return List.of(generator.generateGoldRewardOption(), generator.generateItemRewardOption());
   }
 
   /**

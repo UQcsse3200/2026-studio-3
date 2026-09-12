@@ -108,8 +108,8 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
   }
 
   /**
-   * Returns 0 for now — the Player/Card/Deck boundary does not yet expose a discount
-   * getter. TODO: wire this up once PlayerStateGateway supports shop discount.
+   * Returns 0 for now — the Player/Card/Deck boundary does not yet expose a discount getter. TODO:
+   * wire this up once PlayerStateGateway supports shop discount.
    */
   @Override
   public float getShopDiscount() {

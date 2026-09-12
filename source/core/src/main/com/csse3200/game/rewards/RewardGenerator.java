@@ -5,6 +5,7 @@ import java.util.Random;
 public class RewardGenerator {
   private static final int MIN_GOLD = 20;
   private static final int MAX_GOLD = 30;
+
   private final Random random;
 
   public RewardGenerator() {
@@ -20,7 +21,11 @@ public class RewardGenerator {
     return new GoldReward(base);
   }
 
-  /** Generates a GOLD-type RewardOption with a randomly rolled amount. */
+  /**
+   * Generates exactly one gold reward option.
+   *
+   * @return a randomly generated gold reward option
+   */
   public RewardOption generateGoldRewardOption() {
     GoldReward goldReward = generateGoldOption();
     RewardOption option = new RewardOption(RewardType.GOLD);
@@ -28,7 +33,11 @@ public class RewardGenerator {
     return option;
   }
 
-  /** Generates an ITEM-type RewardOption with a randomly picked item type. */
+  /**
+   * Generates exactly one item reward option, randomly chosen from the eligible item pool.
+   *
+   * @return a randomly generated item reward option
+   */
   public RewardOption generateItemRewardOption() {
     ItemType[] items = ItemType.values();
     ItemType picked = items[random.nextInt(items.length)];
@@ -37,7 +46,13 @@ public class RewardGenerator {
     return option;
   }
 
+  /**
+   * Generates a single reward option, randomly choosing between a gold reward and an item reward.
+   * Kept for compatibility with callers that just need one arbitrary option.
+   *
+   * @return a randomly generated reward option
+   */
   public RewardOption generateRewardOption() {
-    return generateGoldRewardOption();
+    return random.nextBoolean() ? generateGoldRewardOption() : generateItemRewardOption();
   }
 }

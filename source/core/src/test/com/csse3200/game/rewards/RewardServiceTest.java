@@ -25,6 +25,13 @@ class RewardServiceTest {
   }
 
   @Test
+  void shouldGenerateRequestedNumberOfOptions() {
+    RewardService service = new RewardService(new RewardGenerator(new Random(1)));
+    List<RewardOption> options = service.generateRewardOptions();
+    assertEquals(2, options.size());
+  }
+
+  @Test
   void claimingGoldRewardShouldAddGoldToPlayer() {
     Entity player = new Entity();
     player.addComponent(new InventoryComponent(0));
