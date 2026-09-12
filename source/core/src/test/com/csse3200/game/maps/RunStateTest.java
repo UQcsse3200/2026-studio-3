@@ -160,25 +160,25 @@ public class RunStateTest {
     assertEquals(graph.getCurrentNode().getHeight(), runState.getMapProgression());
   }
 
-    @Test
-    void returnsZeroWhenActiveNodeIsMissing() {
-        RunState runState = new RunState();
-        MapGraph graph = createGraph();
-        runState.startRun(graph, 0);
+  @Test
+  void returnsZeroWhenActiveNodeIsMissing() {
+    RunState runState = new RunState();
+    MapGraph graph = createGraph();
+    runState.startRun(graph, 0);
 
-        assertEquals(0, runState.getMapProgression());
-    }
+    assertEquals(0, runState.getMapProgression());
+  }
 
-    @Test
-    void returnsZeroWhenNodeIdDoesNotExist() {
-        RunState runState = new RunState();
-        MapGraph graph = createGraph();
-        runState.startRun(graph, 0);
+  @Test
+  void returnsZeroWhenNodeIdDoesNotExist() {
+    RunState runState = new RunState();
+    MapGraph graph = createGraph();
+    runState.startRun(graph, 0);
 
-        runState.enterEncounter(999);
+    runState.enterEncounter(999);
 
-        assertEquals(0, runState.getMapProgression());
-    }
+    assertEquals(0, runState.getMapProgression());
+  }
 
   @Test
   void endRunDiscardsTheMap() {

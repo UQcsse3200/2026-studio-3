@@ -70,7 +70,7 @@ public class BattleScreen extends ScreenAdapter {
   private final PhysicsEngine physicsEngine;
   private static final Map<String, Skin> textureSkinCache = new HashMap<>();
   private final BattleController controller;
-    private CardLibrary library;
+  private CardLibrary library;
   private BattleDeck battleDeck;
   private List<ClickableRecord> staticUiRecords;
 

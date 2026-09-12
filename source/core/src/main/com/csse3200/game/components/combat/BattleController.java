@@ -285,7 +285,6 @@ public class BattleController {
     return this.currentEnemyIndex;
   }
 
-
   /**
    * Adds a listener to the event handler, which ultimately informs external teams about a phase
    * change.
@@ -505,8 +504,8 @@ public class BattleController {
   }
 
   /**
-   * Prints a summary string for a game event that occurs. For use in printing
-   * actions within a battle sequence.
+   * Prints a summary string for a game event that occurs. For use in printing actions within a
+   * battle sequence.
    *
    * @param request The card that is being played.
    * @param result The result of the card being played.
@@ -553,7 +552,6 @@ public class BattleController {
     }
     return EnemyIntent.attack(attack);
   }
-
 
   private EnergyComponent playerEnergy() {
     return this.player.getComponent(EnergyComponent.class);
@@ -624,7 +622,6 @@ public class BattleController {
   }
 
   /*--------------------------- Possible Action Branches ----------------------------*/
-
 
   private void enterSetup() {
     // Coordinate battle setup.
