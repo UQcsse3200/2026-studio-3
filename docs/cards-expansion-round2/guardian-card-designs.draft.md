@@ -119,6 +119,28 @@ Descriptions state intended card rules. Part A's integration gaps remain unresol
 - Difference from Strike: combines a modest hit with a debuff, rather than concentrating on immediate damage. Difference from Defend: weakens enemy defense through increased damage taken, with no block. It does not remove or bypass armor.
 - Integration dependency: the Vulnerable multiplier and intended one-turn expiration are not functioning consistently in the inspected paths. This card satisfies the requested design role but is blocked from gameplay acceptance until those integrations are resolved. The primary set interaction below does not depend on it. Damage is listed before Vulnerable; no same-card amplification is assumed.
 
+### 4. Warden's Judgement — dedicated single-target payoff
+
+- `id`: `wardens_judgement`
+- `name`: Warden's Judgement
+- `description`: Deal 9 damage to an enemy.
+- `cost`: 2
+- `type`: ATTACK
+- `rarity`: UNCOMMON
+- `target`: SINGLE_ENEMY
+- `effects[]`, in order:
+  1. `type: DAMAGE`, `value: 9`, `duration: 0`.
+- `texturePath`: TBD — artwork pending the agreed art specification; no asset path assigned.
+- Archive technique: a single sanctioned strike delivered by the warden against one intruder. The blow carries the authority of the archive's protective inscriptions.
+- Intended role: the set's dedicated single-target damage card and the payoff for setup provided by the other Guardian cards. It fills the fourth slot left by the withdrawn Seal and Restore.
+- Balance rationale: Strike costs 1 energy for 6 damage. Two Strikes give 12 damage for 2 energy but use two cards; Warden's Judgement gives 9 for the same energy on one card, trading 3 damage for card economy. Against Warding Sweep at the same cost, it offers 9 to one target versus 4 per target (4/8/12 against one/two/three enemies). One enemy favours Warden's Judgement, three favour Warding Sweep, and two is a genuine decision point between concentrated damage and area coverage. This is a different role, not a numerical variant. The starting value of 9 is provisional and subject to Member 3's balance review, which owns the cost-versus-benefit baseline.
+- Intra-set interaction — DESIGN INTENT, NOT VERIFIED: Sentinel's Stance grants STRENGTH and Unseal the Breach applies VULNERABLE; neither supplies the set's dedicated damage payoff (Breach has a modest 2-damage setup hit). Warden's Judgement is where that setup pays off. Nominal pre-mitigation damage would be 10 with STRENGTH 1, 13 with VULNERABLE (9 × 1.5, rounded down), and 15 with both ((9 + 1) × 1.5). These are design figures, not verified behaviour.
+- Difference from Strike: higher single-target damage at twice the cost, trading energy flexibility for card economy. Difference from Defend: pure offence, no protection.
+- Integration note: the card uses DAMAGE only. DAMAGE is confirmed resolvable through the active BattleScreen → BattleController path, so its standalone damage does not depend on status-effect integration. This does not verify precise single-target behaviour: Part A's active consumer applies enemy-facing effects to all living enemies, so the intended SINGLE_ENEMY targeting still requires acceptance verification. The STRENGTH and VULNERABLE interaction figures above are design intent only, blocked from verified gameplay acceptance by the same integration gaps already recorded for Sentinel's Stance and Unseal the Breach; they must not be presented as verified behaviour.
+- Scope note: this card deliberately uses no armour-break or defence-reduction mechanic. Round 2 permits no assumption of a separate armour-break mechanic; Unseal the Breach already holds the set's defence-weakening role.
+
+The withdrawn section below retains its original slot number and text for audit; Warden's Judgement is the active fourth design.
+
 ### 4. Seal and Restore — protection-heavy recovery
 
 - status: Withdrawn
@@ -153,4 +175,4 @@ The previous Vulnerable → Sweep interaction is withdrawn: the inspected active
 
 ## Review boundary
 
-The fourth Guardian slot is pending redesign following the withdrawal of Seal and Restore; its original proposal is retained above for audit. Keep cards.json and combat source unchanged. Review the numbers, overlap with other themes, and Part A integration dependencies before authorizing implementation. The master list's older ALL_ENEMIES note for Breach predates this revision; this document is the current proposal. That separate draft has not been edited in this revision request.
+Warden's Judgement is the replacement fourth Guardian design following the withdrawal of Seal and Restore; the withdrawn proposal is retained above for audit. Keep cards.json and combat source unchanged. Review the numbers, overlap with other themes, and Part A integration dependencies before authorizing implementation. The master list's older ALL_ENEMIES note for Breach predates this revision; this document is the current proposal. That separate draft has not been edited in this revision request.
