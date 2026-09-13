@@ -79,6 +79,7 @@ public class ForestGameArea extends GameArea {
   public void create() {
     loadAssets();
     spawnTerrain();
+    // Comment this part of the code out to revert back to the original background
     spawnBackGround();
 
     enemy = spawnEnemy();
