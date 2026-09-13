@@ -49,4 +49,10 @@ class EnemyAIFactoryTest {
 
     assertInstanceOf(CycleAttackDefendAI.class, ai);
   }
+  @Test
+  void shouldCreateBossAI() {
+    EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.BOSS);
+
+    assertInstanceOf(BossAI.class, ai);
+  }
 }
