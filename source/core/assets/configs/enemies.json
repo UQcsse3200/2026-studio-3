@@ -25,7 +25,7 @@
       "baseAttack": 7,
       "armour": 1,
       "tier": "NORMAL",
-      "behaviour": "armour_sacrifice"
+      "behaviour": "armor_scaling"
     },
     {
       "id": "void_knight",

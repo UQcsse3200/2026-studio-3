@@ -96,10 +96,10 @@ class EnemyAIFactoryTest {
   }
 
   @Test
-  void shouldCreateArmourSacrificeAI() {
-    EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.ARMOUR_SACRIFICE);
+  void shouldCreateArmorScalingAI() {
+    EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.ARMOR_SCALING);
 
-    assertInstanceOf(ArmourSacrificeAI.class, ai);
+    assertInstanceOf(ArmorScalingAI.class, ai);
   }
 
   @Test
