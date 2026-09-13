@@ -2,6 +2,7 @@ package com.csse3200.game.components.combat;
 
 import com.csse3200.game.cards.CardPlayRequest;
 import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.effects.CardEffectResolution;
@@ -48,8 +49,10 @@ public class BattleController {
   private static final String ENEMY_EFFECTS_EVENT = "enemyEffects";
   private static final String PLAYER_EFFECTS_EVENT = "playerEffects";
   private static final String HAND_CHANGED_EVENT = "handChanged";
+  private static final String LISTENER_NOT_NULL = "Listener must not be null.";
   private boolean pendingEvent;
   private CardPlayRequest pendingCard;
+  private boolean lastCardPlaySucceeded;
 
   /** Team 5's card-effect resolver (Team 6 configs -> resolved effects); null without cards. */
   private final CardEffectResolver effectResolver;
@@ -228,6 +231,7 @@ public class BattleController {
   /** Player decides to end their turn */
   public void endPlayerTurn() {
     this.currentPlayerIntent = PlayerIntent.END_PLAYER_TURN;
+
     if (canHandle(BattleEvent.PLAYER_END_REQUESTED)) {
       handle(BattleEvent.PLAYER_END_REQUESTED);
     }
@@ -271,7 +275,7 @@ public class BattleController {
    * @param listener The instantiated external listener.
    */
   public void addPhaseChangeListener(EventListener2<BattlePhase, BattlePhase> listener) {
-    Objects.requireNonNull(listener, "Listener must not be null.");
+    Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(PHASE_CHANGED_EVENT, listener);
   }
 
@@ -282,7 +286,7 @@ public class BattleController {
    * @param listener receives the message text
    */
   public void addBattleLogListener(EventListener1<String> listener) {
-    Objects.requireNonNull(listener, "Listener must not be null.");
+    Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(BATTLE_LOG_EVENT, listener);
   }
 
@@ -294,7 +298,7 @@ public class BattleController {
    * @param listener receives the win/loss flag
    */
   public void addBattleEndListener(EventListener1<Boolean> listener) {
-    Objects.requireNonNull(listener, "Listener must not be null.");
+    Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(BATTLE_ENDED_EVENT, listener);
   }
 
@@ -305,7 +309,7 @@ public class BattleController {
    * @param listener receives the resolved effects
    */
   public void addEnemyEffectsListener(EventListener1<List<ResolvedCardEffect>> listener) {
-    Objects.requireNonNull(listener, "Listener must not be null.");
+    Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(ENEMY_EFFECTS_EVENT, listener);
   }
 
@@ -316,7 +320,7 @@ public class BattleController {
    * @param listener receives the resolved effects
    */
   public void addPlayerEffectsListener(EventListener1<List<ResolvedCardEffect>> listener) {
-    Objects.requireNonNull(listener, "Listener must not be null.");
+    Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(PLAYER_EFFECTS_EVENT, listener);
   }
 
@@ -327,7 +331,7 @@ public class BattleController {
    * @param listener receives the updated hand
    */
   public void addHandChangedListener(EventListener1<List<String>> listener) {
-    Objects.requireNonNull(listener, "Listener must not be null.");
+    Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(HAND_CHANGED_EVENT, listener);
   }
 
@@ -343,6 +347,20 @@ public class BattleController {
    */
   public int getCurrentEnemyIndex() {
     return this.currentEnemyIndex;
+  }
+
+  /**
+   * Reports whether the player currently has the given status effect.
+   *
+   * <p>Read-only: exposes a query about the player rather than the player entity itself, so callers
+   * cannot mutate player state through this controller.
+   *
+   * @param effectType identifier of the status effect, as stored by CombatStatsComponent
+   * @return true if the player carries an active effect with this identifier
+   */
+  public boolean playerHasStatusEffect(String effectType) {
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    return stats != null && stats.hasStatusEffect(effectType);
   }
 
   /**
@@ -486,10 +504,11 @@ public class BattleController {
     if (!canHandle(event)) {
       return false;
     }
+    lastCardPlaySucceeded = false;
     pendingCard = cardPlayRequest;
     currentPlayerIntent = playerIntent;
     handle(event);
-    return true;
+    return lastCardPlaySucceeded;
   }
 
   /*------------------------- Possible Action Branches ----------------------------*/
@@ -507,7 +526,11 @@ public class BattleController {
     // Rolls intent for alive each enemy.
     for (Entity enemy : this.enemies) {
       if (this.isEnemyAlive(enemy)) {
-        enemy.getComponent(EnemyBehaviourComponent.class).rollIntent();
+        EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+        // Enemies live on their own entity and cannot reach the player, so hand the player's stats
+        // over each round. Refreshing here keeps the AI reading the player's current condition.
+        behaviour.setPlayerStats(player.getComponent(CombatStatsComponent.class));
+        behaviour.rollIntent();
       }
     }
 
@@ -551,7 +574,29 @@ public class BattleController {
     if (energy != null) {
       energy.onTurnStart();
     }
+    applyHealingAtTurnStart();
     handle(BattleEvent.PLAYER_TURN_STARTED);
+  }
+
+  /** Applies and counts down timed HEAL once per player turn, starting on the next turn. */
+  private void applyHealingAtTurnStart() {
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    if (stats == null || stats.isDead()) {
+      return;
+    }
+    StatusEffect healing = stats.getStatusEffect(EffectType.HEAL.name());
+    if (healing == null) {
+      return;
+    }
+    if (healing.getDuration() <= 0) {
+      stats.removeStatusEffect(EffectType.HEAL.name());
+      return;
+    }
+    int missingHealth = Math.max(0, stats.getMaxHealth() - stats.getHealth());
+    stats.heal(Math.min(Math.max(0, healing.getValue()), missingHealth));
+    if (healing.tickAndCheckExpired()) {
+      stats.removeStatusEffect(EffectType.HEAL.name());
+    }
   }
 
   private EnergyComponent playerEnergy() {
@@ -600,6 +645,7 @@ public class BattleController {
     CardPlayResult result = playCardThroughCardSystem(request);
     if (result == null) {
       // Card system not wired in (e.g. unit tests without a resolution service).
+      lastCardPlaySucceeded = true;
       narrate("You played " + request.cardID() + ".");
       finishPlayerCardAction();
       return;
@@ -607,11 +653,13 @@ public class BattleController {
 
     if (!result.success()) {
       // No effects produced; the card stays in hand and the player keeps their turn.
+      lastCardPlaySucceeded = false;
       narrate("Couldn't play " + request.cardID() + ": " + result.failureReason());
       finishPlayerCardAction();
       return;
     }
 
+    lastCardPlaySucceeded = true;
     dispatchCardEffects(request, result);
     narrate(summarise(request, result));
     finishPlayerCardAction();
@@ -731,7 +779,13 @@ public class BattleController {
     for (ResolvedCardEffect effect : effects) {
       switch (effect.type()) {
         case BLOCK -> stats.addArmor(effect.value());
-        case HEAL -> stats.heal(effect.value());
+        case HEAL -> {
+          if (effect.duration() > 0) {
+            stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
+          } else {
+            stats.heal(effect.value());
+          }
+        }
         default -> {
           // STRENGTH is already folded into the resolver's running player state.
         }
@@ -851,13 +905,22 @@ public class BattleController {
 
   private void enterVictory() {
     this.cleanUp();
+    clearTimedHealing();
     narrate("Victory! Every enemy has been defeated.");
     eventHandler.trigger(BATTLE_ENDED_EVENT, Boolean.TRUE);
   }
 
   private void enterDefeat() {
     this.cleanUp();
+    clearTimedHealing();
     narrate("Defeat. The player has fallen.");
     eventHandler.trigger(BATTLE_ENDED_EVENT, Boolean.FALSE);
+  }
+
+  private void clearTimedHealing() {
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    if (stats != null) {
+      stats.removeStatusEffect(EffectType.HEAL.name());
+    }
   }
 }

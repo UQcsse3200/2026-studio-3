@@ -20,7 +20,7 @@ class EnemyAIContextTest {
     assertEquals(20, context.getEnemyHealth());
     assertEquals(30, context.getEnemyMaxHealth());
     assertEquals(7, context.getEnemyAttack());
-    assertEquals(3, context.getEnemyArmour());
+    assertEquals(3, context.getEnemyArmor());
     assertSame(previousIntent, context.getPreviousIntent());
     assertEquals(2, context.getTurnNumber());
   }
@@ -68,7 +68,7 @@ class EnemyAIContextTest {
     assertEquals(0, context.getEnemyHealth());
     assertEquals(0, context.getEnemyMaxHealth());
     assertEquals(0, context.getEnemyAttack());
-    assertEquals(0, context.getEnemyArmour());
+    assertEquals(0, context.getEnemyArmor());
   }
 
   @Test
@@ -88,14 +88,14 @@ class EnemyAIContextTest {
       int enemyHealth,
       int enemyMaxHealth,
       int enemyAttack,
-      int enemyArmour,
+      int enemyArmor,
       int turnNumber) {
     return new EnemyAIContext(
         playerHealth,
         enemyHealth,
         enemyMaxHealth,
         enemyAttack,
-        enemyArmour,
+        enemyArmor,
         EnemyIntent.unknown(),
         turnNumber);
   }

@@ -76,7 +76,6 @@ public class ClickableJsonLoaderTest {
     List<ClickableRecord> records =
         ClickableJsonLoader.loadRecordsFromJson(
             Path.of("spritedisplay/assestsForTest/clickable-multi.json"));
-    ;
 
     assertEquals(3, records.size());
     assertEquals("cardOne", records.get(0).trigger());

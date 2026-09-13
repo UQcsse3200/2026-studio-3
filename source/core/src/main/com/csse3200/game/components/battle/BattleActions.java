@@ -122,6 +122,9 @@ public class BattleActions extends Component {
     if (optionalCard.isEmpty()) {
       return;
     }
+    if (playerIsBlockedFromPlayingCards()) {
+      return;
+    }
     CardConfig cardConfig = optionalCard.get();
     CardPlayRequest request = new CardPlayRequest(cardID, targetID);
     PlayerIntent intent = classifyCard(cardConfig);
@@ -129,6 +132,20 @@ public class BattleActions extends Component {
     if (controller.submitCardPlayRequest(request, intent)) {
       entity.getEvents().trigger("cardPlayed", cardConfig.name, targetID);
     }
+  }
+
+  /**
+   * Whether a status effect currently prevents the player from playing cards.
+   *
+   * <p>Hook point for Team 1's boss mechanics. Rejecting here reuses the existing rejection path:
+   * "cardPlayed" is not fired, energy is not spent and the card stays in hand, exactly as when the
+   * controller declines the request.
+   *
+   * @return true if the play should be rejected before reaching the controller
+   */
+  private boolean playerIsBlockedFromPlayingCards() {
+    // Always false until #140 implements the silence check.
+    return false;
   }
 
   //  private void selectAttack() {
