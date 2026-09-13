@@ -74,6 +74,11 @@ public class BattleActions extends Component {
     controller.addPlayerEffectsListener(this::onPlayerEffects);
     controller.addBattleEndListener(this::onBattleEnd);
     controller.addHandChangedListener(hand -> entity.getEvents().trigger(HAND_CHANGED_EVENT, hand));
+    controller.addCardPlayedListener(
+        (cardId, targetId) -> {
+          String cardName = library.getCard(cardId).map(card -> card.name).orElse(cardId);
+          entity.getEvents().trigger("cardPlayed", cardName, targetId);
+        });
   }
 
   private void onEnemyEffects(List<ResolvedCardEffect> effects) {
@@ -129,9 +134,7 @@ public class BattleActions extends Component {
     CardPlayRequest request = new CardPlayRequest(cardID, targetID);
     PlayerIntent intent = classifyCard(cardConfig);
 
-    if (controller.submitCardPlayRequest(request, intent)) {
-      entity.getEvents().trigger("cardPlayed", cardConfig.name, targetID);
-    }
+    controller.submitCardPlayRequest(request, intent);
   }
 
   /**
@@ -144,8 +147,12 @@ public class BattleActions extends Component {
    * @return true if the play should be rejected before reaching the controller
    */
   private boolean playerIsBlockedFromPlayingCards() {
-    // Always false until #140 implements the silence check.
-    return false;
+    if (!controller.playerHasStatusEffect("SILENCE")) {
+      return false;
+    }
+
+    entity.getEvents().trigger(BATTLE_LOG_EVENT, "You are silenced and cannot play cards.");
+    return true;
   }
 
   //  private void selectAttack() {
