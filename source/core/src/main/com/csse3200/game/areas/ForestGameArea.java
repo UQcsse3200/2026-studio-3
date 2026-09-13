@@ -1,24 +1,24 @@
 package com.csse3200.game.areas;
 
-import com.badlogic.gdx.math.GridPoint2;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.GridPoint2;
+import com.badlogic.gdx.math.Vector2;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.areas.terrain.TerrainFactory.TerrainType;
+import com.csse3200.game.components.gamearea.CombatBackgroundComponent;
 import com.csse3200.game.components.gamearea.CombatBackgroundConfig;
 import com.csse3200.game.components.gamearea.CombatBackgroundConfigs;
-import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.components.gamearea.GameAreaDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.factories.EnemyFactory;
 import com.csse3200.game.entities.factories.NPCFactory;
 import com.csse3200.game.entities.factories.ObstacleFactory;
 import com.csse3200.game.entities.factories.PlayerFactory;
+import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
-import com.csse3200.game.components.gamearea.CombatBackgroundComponent;
 import com.csse3200.game.utils.math.GridPoint2Utils;
 import com.csse3200.game.utils.math.RandomUtils;
 import java.util.List;
@@ -58,8 +58,7 @@ public class ForestGameArea extends GameArea {
     "images/enemies/bone_crawler.atlas"
   };
 
-  private static final String BACKGROUND_CONFIG_PATH =
-          "configs/backgrounds.json";
+  private static final String BACKGROUND_CONFIG_PATH = "configs/backgrounds.json";
   private final String backgroundId;
   private static final String[] forestSounds = {"sounds/Impact4.ogg"};
 
@@ -71,9 +70,7 @@ public class ForestGameArea extends GameArea {
   private Entity player;
   private Entity enemy;
 
-  /**
-   * Creates the game area without a configured background.
-   */
+  /** Creates the game area without a configured background. */
   public ForestGameArea(TerrainFactory terrainFactory, Integer progression) {
     this(terrainFactory, progression, null);
   }
@@ -108,45 +105,29 @@ public class ForestGameArea extends GameArea {
     // playMusic();
   }
 
-  /**
-   * Reads the selected background configuration from the file path and ID.
-   */
+  /** Reads the selected background configuration from the file path and ID. */
   private void readBackgroundConfig() {
     backgroundConfig = null;
 
     if (backgroundId == null || backgroundId.isBlank()) return;
 
     CombatBackgroundConfigs configs =
-            FileLoader.readClass(
-                    CombatBackgroundConfigs.class,
-                    BACKGROUND_CONFIG_PATH
-            );
+        FileLoader.readClass(CombatBackgroundConfigs.class, BACKGROUND_CONFIG_PATH);
 
-    if (configs == null)  {
-      logger.warn(
-              "Couldn't read background configurations: {}",
-              BACKGROUND_CONFIG_PATH
-      );
+    if (configs == null) {
+      logger.warn("Couldn't read background configurations: {}", BACKGROUND_CONFIG_PATH);
       return;
     }
 
-    CombatBackgroundConfig selectedBackGround =
-            configs.get(backgroundId);
+    CombatBackgroundConfig selectedBackGround = configs.get(backgroundId);
 
     if (selectedBackGround == null) {
-      logger.warn(
-              "The selected background configuration doesn't exist: {}",
-              backgroundId
-      );
+      logger.warn("The selected background configuration doesn't exist: {}", backgroundId);
       return;
     }
 
     if (!Gdx.files.internal(selectedBackGround.texture).exists()) {
-      logger.warn(
-              "Missing texture! {}, {}",
-              backgroundId,
-              selectedBackGround.texture
-      );
+      logger.warn("Missing texture! {}, {}", backgroundId, selectedBackGround.texture);
     }
 
     backgroundConfig = selectedBackGround;
@@ -210,27 +191,18 @@ public class ForestGameArea extends GameArea {
 
     Texture texture;
     try {
-      texture = ServiceLocator
-              .getResourceService()
-              .getAsset(backgroundConfig.texture, Texture.class);
-    } catch (RuntimeException e){
-      logger.warn(
-              "Background texture missing: {}",
-              backgroundConfig.texture
-      );
+      texture =
+          ServiceLocator.getResourceService().getAsset(backgroundConfig.texture, Texture.class);
+    } catch (RuntimeException e) {
+      logger.warn("Background texture missing: {}", backgroundConfig.texture);
       return;
     }
 
-    texture.setFilter(
-            Texture.TextureFilter.Nearest,
-            Texture.TextureFilter.Nearest
-    );
+    texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
     OrthographicCamera camera = (OrthographicCamera) ServiceLocator.getCamera();
 
-    Entity background =  new Entity().addComponent(
-            new CombatBackgroundComponent(texture, camera)
-    );
+    Entity background = new Entity().addComponent(new CombatBackgroundComponent(texture, camera));
 
     spawnEntity(background);
   }
@@ -290,9 +262,7 @@ public class ForestGameArea extends GameArea {
     // resourceService.loadMusic(forestMusic);
 
     if (backgroundConfig != null) {
-      resourceService.loadTextures(
-              new String[] {backgroundConfig.texture}
-      );
+      resourceService.loadTextures(new String[] {backgroundConfig.texture});
     }
 
     while (!resourceService.loadForMillis(10)) {
@@ -305,8 +275,8 @@ public class ForestGameArea extends GameArea {
     logger.debug("Unloading assets");
     ResourceService resourceService = ServiceLocator.getResourceService();
 
-    if (backgroundConfig != null && resourceService.containsAsset(
-            backgroundConfig.texture, Texture.class)) {
+    if (backgroundConfig != null
+        && resourceService.containsAsset(backgroundConfig.texture, Texture.class)) {
       resourceService.unloadAssets(new String[] {backgroundConfig.texture});
     }
 

@@ -192,9 +192,11 @@ public class BattleScreen extends ScreenAdapter {
 
   @Override
   public void dispose() {
+    gameArea.dispose();
+    ServiceLocator.getEntityService().dispose();
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
-    ServiceLocator.getEntityService().dispose();
+    ServiceLocator.getResourceService().dispose();
     ServiceLocator.clear();
   }
 

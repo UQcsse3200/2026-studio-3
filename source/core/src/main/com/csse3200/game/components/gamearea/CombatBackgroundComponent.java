@@ -5,49 +5,44 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.csse3200.game.rendering.RenderComponent;
 
-/**
- *  A base class that represents different combat areas.
- */
+/** A base class that represents different combat areas. */
 public class CombatBackgroundComponent extends RenderComponent {
-    private static final int BACKGROUND_LAYER = 0;
-    private static final float BACKGROUND_Z = 1f;
+  private static final int BACKGROUND_LAYER = 0;
+  private static final float BACKGROUND_Z = 1f;
 
-    private final Texture texture;
-    private final OrthographicCamera camera;
+  private final Texture texture;
+  private final OrthographicCamera camera;
 
-    public CombatBackgroundComponent(Texture texture, OrthographicCamera camera) {
-        this.texture = texture;
-        this.camera  = camera;
-    }
+  public CombatBackgroundComponent(Texture texture, OrthographicCamera camera) {
+    this.texture = texture;
+    this.camera = camera;
+  }
 
-    @Override
-    protected void draw(SpriteBatch batch) {
-        float width  = camera.viewportWidth * camera.zoom;
-        float height = camera.viewportHeight * camera.zoom;
+  @Override
+  protected void draw(SpriteBatch batch) {
+    float width = camera.viewportWidth * camera.zoom;
+    float height = camera.viewportHeight * camera.zoom;
 
-        if (width <= 0f || height <= 0f) return;
+    if (width <= 0f || height <= 0f) return;
 
-        float scale = Math.max(
-                width / texture.getWidth(),
-                height / texture.getHeight()
-        );
+    float scale = Math.max(width / texture.getWidth(), height / texture.getHeight());
 
-        float drawWidth  = texture.getWidth() * scale;
-        float drawHeight = texture.getHeight() * scale;
+    float drawWidth = texture.getWidth() * scale;
+    float drawHeight = texture.getHeight() * scale;
 
-        float left   = camera.position.x - drawWidth / 2f;
-        float bottom = camera.position.y - drawHeight / 2f;
+    float left = camera.position.x - drawWidth / 2f;
+    float bottom = camera.position.y - drawHeight / 2f;
 
-        batch.draw(texture, left, bottom, drawWidth, drawHeight);
-    }
+    batch.draw(texture, left, bottom, drawWidth, drawHeight);
+  }
 
-    @Override
-    public int getLayer() {
-        return BACKGROUND_LAYER;
-    }
+  @Override
+  public int getLayer() {
+    return BACKGROUND_LAYER;
+  }
 
-    @Override
-    public float getZIndex() {
-        return BACKGROUND_Z;
-    }
+  @Override
+  public float getZIndex() {
+    return BACKGROUND_Z;
+  }
 }
