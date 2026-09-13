@@ -37,8 +37,8 @@ public class MapNodeActor extends Group {
     }
 
     nodeIcon.setSize(size, size);
-    checkNodeState();
     addActor(nodeIcon);
+    checkNodeState();
   }
 
   /**
@@ -55,8 +55,8 @@ public class MapNodeActor extends Group {
         new Image(ServiceLocator.getResourceService().getAsset(getNodeIcon(), Texture.class));
 
     nodeIcon.setSize(size, size);
-    checkNodeState();
     addActor(nodeIcon);
+    checkNodeState();
   }
 
   /**
@@ -81,8 +81,8 @@ public class MapNodeActor extends Group {
     completedCross = new Image(crossTexture);
 
     completedCross.setSize(size, size);
-    completedCross.setPosition(0, 0);
-
+    completedCross.setPosition(0,0);
+    completedCross.getColor().a = 1f;
     addActor(completedCross);
 }
 
@@ -165,14 +165,16 @@ public class MapNodeActor extends Group {
     float iconSize = size;
     switch (node.getState()) {
       case LOCKED:
-        nodeIcon.getColor().a = 0.5f;
+        nodeIcon.getColor().a = 0.75f;
         break;
       case AVAILABLE:
-        iconSize = size * 1.25f;
+        iconSize = size * 1.125f;
         break;
       case COMPLETED:
         nodeIcon.getColor().a = 0.5f;
-        addCompletedCross();
+        if (node.getRoomType() != RoomType.START) {
+          addCompletedCross();
+        }
         break;
       case CURRENT:
         break;

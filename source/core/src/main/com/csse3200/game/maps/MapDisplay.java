@@ -11,8 +11,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.components.CombatStatsComponent; 
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.entities.configs.PlayerConfig;
@@ -70,7 +68,7 @@ public class MapDisplay extends UIComponent {
         new Image(
             ServiceLocator.getResourceService()
                 .getAsset("images/map/background.png", Texture.class));
-    background.setSize(group.getWidth(), group.getHeight());
+    background.setSize(group.getWidth(), group.getHeight() - 100);
     background.setPosition(256, 0);
     group.addActor(background);
   }
@@ -89,12 +87,14 @@ public class MapDisplay extends UIComponent {
     addConnections();
     
 
-    // Ensure connections are behind Nodes by placing Nodes on top
-    for (Actor actor : group.getChildren()) {
+    // Ensure connections are behind nodes
+    for (int i = group.getChildren().size - 1; i >= 0; i--) {
+      Actor actor = group.getChildren().get(i);
+
       if (actor instanceof MapNodeActor) {
         actor.toFront();
       }
-    }
+   } 
 
     scrollPane = new ScrollPane(group);
     scrollPane.setActor(group);
@@ -144,8 +144,8 @@ public class MapDisplay extends UIComponent {
    * @return float x value to position the Node and Connection
    */
   private float getNodeX(int nodeId, float nodeWidth) {
-    float mapStart = 256f;
-    float mapEnd = mapWidth - 256f;
+    float mapStart = 352f;
+    float mapEnd = mapWidth - 352f;
 
     float spacing = (mapEnd - mapStart - nodeWidth) / 6f;
 
@@ -301,26 +301,6 @@ public class MapDisplay extends UIComponent {
     playerTable.add(table);
   }
 
-  private void addLegendRow(String imageUrl, String text, Table table) {
-    Label.LabelStyle textStyle = new Label.LabelStyle(skin.get("large", 
-    Label.LabelStyle.class));
-    textStyle.fontColor = new Color(1,1,1,1);
-    
-    Table row = new Table();
-    Image key =
-        new Image(
-            ServiceLocator.getResourceService()
-                .getAsset(imageUrl, Texture.class));
-
-    Label bossLabel = new Label(text, textStyle);
-    bossLabel.setFontScale(0.5f);
-    
-    row.add(key);
-    row.add(bossLabel);
-    table.add(row).left();
-    table.row();
-  }
-
   /**
    * Renders a basic legend on the right of the screen to clearly state what
    * each nodeIcon represents
@@ -329,19 +309,16 @@ public class MapDisplay extends UIComponent {
     Table playerTable = new Table();
 
     playerTable.setSize(192, (32 + 16) * 7);
+    Image legend =
+        new Image(
+            ServiceLocator.getResourceService()
+                .getAsset("images/map/legend.png", Texture.class));
+    playerTable.add(legend);
     playerTable.setPosition(Gdx.graphics.getWidth() - 224,
      Gdx.graphics.getHeight() / 2f - playerTable.getHeight() /2f);
-    playerTable.setBackground(
-        skin.newDrawable("color", new Color(0.105f, 0.070f, 0.065f, 0.98f)));
-    playerTable.setDebug(false); // for testing
+
     stage.addActor(playerTable);
 
-    addLegendRow("images/map/boss.png", "BOSS", playerTable);
-    addLegendRow("images/map/combat_elite.png", "ELITE COMBAT", playerTable);
-    addLegendRow("images/map/combat.png", "COMBAT", playerTable);
-    addLegendRow("images/map/shop.png", "SHOP", playerTable);
-    addLegendRow("images/map/event.png", "EVENT", playerTable);
-    addLegendRow("images/map/start.png", "START", playerTable);
   }
 
   /**
@@ -390,7 +367,9 @@ public class MapDisplay extends UIComponent {
       "images/energy.png",
       "images/piety.png",
       "images/money.png",
-      "images/map/cross.png"
+      "images/map/cross.png",
+      "images/map/legend.png",
+      "images/map/main_menu_btn.png"
   };
 
     ResourceService resourceService = ServiceLocator.getResourceService();

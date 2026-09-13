@@ -1,13 +1,17 @@
 package com.csse3200.game.screens;
 
 import com.csse3200.game.GdxGame;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -123,19 +127,32 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
    */
   private void createExitButton(GdxGame game) {
     Stage stage = ServiceLocator.getRenderService().getStage();
-    Skin skin = new Skin(Gdx.files.internal("flat-earth/skin/flat-earth-ui.json"));
-    TextButton exitButton = new TextButton("Main Menu", skin);
+    // not hover
+    Texture buttonTexture =
+    new Texture(Gdx.files.internal("images/map/main_menu_btn.png"));
+
+    // hover stuff
+    TextureRegionDrawable buttonDrawable =
+        new TextureRegionDrawable(new TextureRegion(buttonTexture));
+
+    Drawable buttonDrawableHover =
+        buttonDrawable.tint(new Color(0.8f, 0.8f, 0.8f, 1f));
+
+    ImageButton.ImageButtonStyle style = new ImageButton.ImageButtonStyle();
+    style.imageUp = buttonDrawable;
+    style.imageOver = buttonDrawableHover;
+
+    ImageButton exitButton = new ImageButton(style);
 
     float buttonWidth = 150f;
     float buttonHeight = 50f;
-    float offset = 25f;
+    float offset = 52f;
 
-    exitButton.setSize(150, 50);
+    exitButton.setSize(buttonWidth, buttonHeight);
 
     exitButton.setPosition(
         stage.getWidth() - buttonWidth - offset,
-        stage.getHeight() - buttonHeight - offset);
-    exitButton.setColor(new Color(0.65f, 0.12f, 0.10f, 1f));
+        stage.getHeight() -  offset * 1.5f);
 
     exitButton.addListener(
         new ChangeListener() {
@@ -150,6 +167,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
   @Override
   public void render(float delta) {
+    ScreenUtils.clear(0.105f, 0.070f, 0.120f, 1f); 
     ServiceLocator.getEntityService().update();
     renderer.render();
   }
@@ -166,6 +184,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getResourceService().dispose();
+    ScreenUtils.clear(new Color(248f / 255f, 249f / 255f, 178f / 255f, 1f));
     ServiceLocator.clear();
   }
 }
