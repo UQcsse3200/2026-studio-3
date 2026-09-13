@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.csse3200.game.components.enemy.EnemyAnimationController;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
+import com.csse3200.game.components.enemy.EnemyCombatEffectsComponent;
 import com.csse3200.game.components.enemy.EnemyStatsComponent;
 import com.csse3200.game.components.enemy.IntentIcons;
 import com.csse3200.game.entities.Entity;
@@ -35,6 +36,8 @@ public class EnemyFactory {
   private static final String DEFAULT_ATLAS = SPRITE_DIR + "default.atlas";
   private static final float IDLE_FRAME_DURATION = 0.5f;
   private static final float HURT_FRAME_DURATION = 0.15f;
+  private static final float ATTACK_FRAME_DURATION = 0.2f;
+  private static final float DEATH_FRAME_DURATION = 0.3f;
 
   private static EnemyConfigs loadRoster() {
     EnemyConfigs configs = FileLoader.readClass(EnemyConfigs.class, "configs/enemies.json");
@@ -83,12 +86,17 @@ public class EnemyFactory {
             ServiceLocator.getResourceService().getAsset(atlasPath(config), TextureAtlas.class));
     animator.addAnimation("idle", IDLE_FRAME_DURATION, Animation.PlayMode.LOOP);
     animator.addAnimation("hurt", HURT_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    // attack/death 是可选动画：旧的敌人图集里还没有这两个区域，
+    // addAnimation 在区域缺失时只会记警告日志、返回 false，不会报错。
+    animator.addAnimation("attack", ATTACK_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    animator.addAnimation("death", DEATH_FRAME_DURATION, Animation.PlayMode.NORMAL);
 
     return new Entity()
         .addComponent(new EnemyStatsComponent(config.health, config.baseAttack, config.armour))
         .addComponent(new EnemyBehaviourComponent(config.behaviour))
         .addComponent(animator)
-        .addComponent(new EnemyAnimationController());
+        .addComponent(new EnemyAnimationController())
+        .addComponent(new EnemyCombatEffectsComponent());
   }
 
   /**

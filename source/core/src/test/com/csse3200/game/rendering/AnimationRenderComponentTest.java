@@ -3,9 +3,11 @@ package com.csse3200.game.rendering;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
@@ -13,6 +15,7 @@ import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ServiceLocator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 
 @ExtendWith(GameExtension.class)
 class AnimationRenderComponentTest {
@@ -124,6 +127,86 @@ class AnimationRenderComponentTest {
     animator.startAnimation("test_name");
     assertTrue(animator.stopAnimation());
     assertNull(animator.getCurrentAnimation());
+  }
+
+  // flashTint 应该在指定时长后自动清除
+  @Test
+  void shouldExpireFlashTintAfterDuration() {
+    TextureAtlas atlas = createMockAtlas("test_name", 1);
+    SpriteBatch batch = mock(SpriteBatch.class);
+    when(batch.getPackedColor()).thenReturn(Color.WHITE.toFloatBits());
+
+    GameTime gameTime = mock(GameTime.class);
+    ServiceLocator.registerTimeSource(gameTime);
+    when(gameTime.getDeltaTime()).thenReturn(0.1f);
+
+    AnimationRenderComponent animator = new AnimationRenderComponent(atlas);
+    animator.setEntity(new Entity());
+    animator.addAnimation("test_name", 1f);
+    animator.startAnimation("test_name");
+
+    animator.flashTint(Color.RED, 0.2f);
+    assertEquals(Color.RED, animator.getActiveTint());
+
+    animator.draw(batch); // 0.1s 消耗掉，还剩 0.1s
+    assertEquals(Color.RED, animator.getActiveTint());
+
+    animator.draw(batch); // 再消耗 0.1s，闪烁结束
+    assertNull(animator.getActiveTint());
+  }
+
+  // 染色期间画图应该临时切颜色，画完立刻还原，不污染批次的全局颜色状态
+  @Test
+  void shouldRestoreBatchColorAfterFlash() {
+    TextureAtlas atlas = createMockAtlas("test_name", 1);
+    SpriteBatch batch = mock(SpriteBatch.class);
+    float originalPacked = Color.WHITE.toFloatBits();
+    when(batch.getPackedColor()).thenReturn(originalPacked);
+
+    GameTime gameTime = mock(GameTime.class);
+    ServiceLocator.registerTimeSource(gameTime);
+    when(gameTime.getDeltaTime()).thenReturn(0.05f);
+
+    AnimationRenderComponent animator = new AnimationRenderComponent(atlas);
+    animator.setEntity(new Entity());
+    animator.addAnimation("test_name", 1f);
+    animator.startAnimation("test_name");
+    animator.flashTint(Color.RED, 1f);
+
+    animator.draw(batch);
+
+    InOrder order = inOrder(batch);
+    order.verify(batch).setColor(Color.RED);
+    order.verify(batch).draw(any(TextureRegion.class), anyFloat(), anyFloat(), anyFloat(), anyFloat());
+    order.verify(batch).setPackedColor(originalPacked);
+  }
+
+  // 持续染色不会因为多次 draw 而自动消失，要手动 clearTint 才行
+  @Test
+  void shouldKeepPersistentTintUntilCleared() {
+    TextureAtlas atlas = createMockAtlas("test_name", 1);
+    SpriteBatch batch = mock(SpriteBatch.class);
+    when(batch.getPackedColor()).thenReturn(Color.WHITE.toFloatBits());
+
+    GameTime gameTime = mock(GameTime.class);
+    ServiceLocator.registerTimeSource(gameTime);
+    when(gameTime.getDeltaTime()).thenReturn(100f); // 故意给一个很大的 deltaTime
+
+    AnimationRenderComponent animator = new AnimationRenderComponent(atlas);
+    animator.setEntity(new Entity());
+    animator.addAnimation("test_name", 1f);
+    animator.startAnimation("test_name");
+
+    animator.setPersistentTint(Color.RED);
+    assertTrue(animator.isTintPersistent());
+
+    animator.draw(batch);
+    animator.draw(batch);
+    assertEquals(Color.RED, animator.getActiveTint());
+
+    animator.clearTint();
+    assertNull(animator.getActiveTint());
+    assertFalse(animator.isTintPersistent());
   }
 
   static TextureAtlas createMockAtlas(String animationName, int numRegions) {

@@ -6,15 +6,17 @@ import com.csse3200.game.entities.Entity;
 /**
  * Decides and telegraphs an enemy's action each round, then resolves it.
  *
- * <p>Placeholder implementation: always rolls a fixed attack. Behaviour patterns are added in #20.
+ * <p>实际的决策逻辑委托给 {@link EnemyAI}（由 {@link EnemyAIFactory} 根据 behaviourId 创建），
+ * 本类只负责在每回合调用它、保存结果并广播事件。
  */
 public class EnemyBehaviourComponent extends Component {
-  private static final int PLACEHOLDER_DAMAGE = 5;
   private final String behaviourId;
+  private final EnemyAI ai;
   private EnemyIntent currentIntent = EnemyIntent.unknown();
 
   public EnemyBehaviourComponent(String behaviourId) {
     this.behaviourId = behaviourId;
+    this.ai = EnemyAIFactory.create(behaviourId);
   }
 
   public String getBehaviourId() {
@@ -31,9 +33,16 @@ public class EnemyBehaviourComponent extends Component {
   /**
    * Decides the action for the coming round and telegraphs it.
    *
+   * <p>没有自身属性组件时安全跳过（保持 unknown 意图），不会抛异常。
+   *
    * @return the newly decided intent
    */
   public EnemyIntent rollIntent() {
+    EnemyStatsComponent stats = entity.getComponent(EnemyStatsComponent.class);
+    if (stats != null) {
+      currentIntent = ai.decideIntent(stats);
+    }
+
     entity.getEvents().trigger("intentChanged", currentIntent);
     return currentIntent;
   }
