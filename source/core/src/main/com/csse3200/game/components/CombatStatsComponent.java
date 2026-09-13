@@ -139,6 +139,7 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
+  /**
    * Applies a direct health change that bypasses armor and block, intended for non-combat sources
    * such as Chance Encounters. A positive amount heals (clamped to max health via {@link
    * #heal(int)}); a negative amount reduces health directly, clamped to 0, and triggers the same
@@ -157,6 +158,21 @@ public class CombatStatsComponent extends Component {
       setHealth(Math.max(this.health + amount, 0));
       if (entity != null && isDead()) {
         entity.getEvents().trigger("entityIsDead");
+      }
+    }
+  }
+
+  /**
+   * Damages the entity's health directly, ignoring block and armour. If health reaches 0, the
+   * entity dies.
+   *
+   * @param damage piercing damage
+   */
+  public void takePiercingDamage(int damage) {
+    if (damage >= 0 && !isDead()) {
+      setHealth(Math.max(this.health - damage, 0));
+      if (entity != null && isDead()) {
+        entity.getEvents().trigger(EVT_IS_DEAD);
       }
     }
   }
