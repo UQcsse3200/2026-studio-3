@@ -91,6 +91,20 @@ class BossAITest {
   }
 
   @Test
+  void shouldBecomeMoreAggressiveUnderHighPressure() {
+    BossAI lowPressureAI = new BossAI(new FixedRollRandom(40));
+    BossAI highPressureAI = new BossAI(new FixedRollRandom(40));
+
+    EnemyIntent lowPressureIntent = lowPressureAI.decide(createContext(100, 100, 0, 1));
+
+    EnemyIntent highPressureIntent = highPressureAI.decide(createContext(10, 70, 0, 5));
+
+    assertEquals(IntentType.DEFEND, lowPressureIntent.getType());
+
+    assertEquals(IntentType.ATTACK, highPressureIntent.getType());
+  }
+
+  @Test
   void shouldRecordPreviousMove() {
     BossAI ai = new BossAI(new FixedRollRandom(0));
 
@@ -129,8 +143,13 @@ class BossAITest {
   }
 
   private EnemyAIContext createContext(int bossHealth, int bossArmor, int turnNumber) {
+    return createContext(PLAYER_HEALTH, bossHealth, bossArmor, turnNumber);
+  }
+
+  private EnemyAIContext createContext(
+      int playerHealth, int bossHealth, int bossArmor, int turnNumber) {
     return new EnemyAIContext(
-        PLAYER_HEALTH,
+        playerHealth,
         bossHealth,
         BOSS_MAX_HEALTH,
         BOSS_ATTACK,
