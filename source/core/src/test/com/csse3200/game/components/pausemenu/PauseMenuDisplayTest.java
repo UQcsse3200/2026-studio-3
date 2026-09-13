@@ -9,7 +9,10 @@ import static org.mockito.Mockito.mock;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.csse3200.game.entities.Entity;
@@ -24,6 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 /** Tests for {@link PauseMenuDisplay}: button wiring, visibility, and exit confirmation. */
 @ExtendWith(GameExtension.class)
 class PauseMenuDisplayTest {
+  private Stage stage;
   private PauseMenuDisplay display;
   private AtomicInteger resumeCount;
   private AtomicInteger settingsCount;
@@ -32,7 +36,8 @@ class PauseMenuDisplayTest {
   @BeforeEach
   void setUp() {
     RenderService renderService = new RenderService();
-    renderService.setStage(new Stage(new ScreenViewport(), mock(SpriteBatch.class)));
+    stage = new Stage(new ScreenViewport(), mock(SpriteBatch.class));
+    renderService.setStage(stage);
     ServiceLocator.registerRenderService(renderService);
 
     resumeCount = new AtomicInteger();
@@ -93,6 +98,64 @@ class PauseMenuDisplayTest {
     assertEquals(1, settingsCount.get());
     assertEquals(0, resumeCount.get());
     assertEquals(0, exitCount.get());
+  }
+
+  @Test
+  void clickingSettingsShowsSettingsViewInsidePauseMenu() {
+    display.getEntity().getEvents().trigger(PauseMenuDisplay.PAUSE_EVENT);
+
+    click(display.getSettingsButton());
+
+    assertTrue(display.isMenuVisible());
+    assertTrue(display.isSettingsVisible());
+    assertEquals(1, settingsCount.get());
+  }
+
+  @Test
+  void settingsBackReturnsToPauseButtons() {
+    display.getEntity().getEvents().trigger(PauseMenuDisplay.PAUSE_EVENT);
+    click(display.getSettingsButton());
+
+    click(display.getSettingsBackButton());
+
+    assertTrue(display.isMenuVisible());
+    assertFalse(display.isSettingsVisible());
+  }
+
+  @Test
+  void resumeClosesSettingsViewAndPauseMenu() {
+    display.getEntity().getEvents().trigger(PauseMenuDisplay.PAUSE_EVENT);
+    click(display.getSettingsButton());
+
+    click(display.getResumeButton());
+
+    assertFalse(display.isMenuVisible());
+    assertFalse(display.isSettingsVisible());
+    assertEquals(1, resumeCount.get());
+  }
+
+  @Test
+  void pauseOverlayIsTouchableAndBlocksUnderlyingActors() {
+    AtomicInteger underlayTouches = new AtomicInteger();
+    Actor underlay = new Actor();
+    underlay.setBounds(0f, 0f, 500f, 500f);
+    underlay.addListener(
+        new InputListener() {
+          @Override
+          public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+            underlayTouches.incrementAndGet();
+            return true;
+          }
+        });
+    stage.addActor(underlay);
+    underlay.toBack();
+
+    display.getEntity().getEvents().trigger(PauseMenuDisplay.PAUSE_EVENT);
+    display.getRootTable().setBounds(0f, 0f, 500f, 500f);
+
+    assertEquals(Touchable.enabled, display.getRootTable().getTouchable());
+    stage.touchDown(10, 10, 0, 0);
+    assertEquals(0, underlayTouches.get());
   }
 
   @Test

@@ -2,17 +2,12 @@ package com.csse3200.game.components.pausemenu;
 
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.components.Component;
+import com.csse3200.game.services.GamePauseService;
+import com.csse3200.game.services.ServiceLocator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Listens to pause-menu events and performs the screen navigation for them.
- *
- * <p>Deliberately minimal: this owns only the navigation (sub-feature 5). The real pause behaviour
- * — freezing gameplay, blocking input, preserving the run — belongs to sub-feature 6, left
- * stubbed in {@link #onPause()} for Sahil to build on top of, using the same event names
- * defined on {@link PauseMenuDisplay}.
- */
+/** Listens to pause-menu events and performs pause state changes and screen navigation. */
 public class PauseMenuActions extends Component {
   private static final Logger logger = LoggerFactory.getLogger(PauseMenuActions.class);
   private final GdxGame game;
@@ -29,30 +24,34 @@ public class PauseMenuActions extends Component {
     entity.getEvents().addListener(PauseMenuDisplay.PAUSE_EVENT, this::onPause);
   }
 
-  /**
-   * Resumes play. The display hides itself on this event; this is where the unpause logic (the
-   * mirror of {@link #onPause()}) belongs.
-   */
+  /** Resumes play. The display hides itself on this event. */
   private void onResume() {
     logger.info("Resuming game from pause menu");
-    // TODO(Sahil, sub-feature 6): unfreeze gameplay (timeScale=1) and re-enable gameplay/map input
+    getPauseService().resume();
   }
 
-  /** Opens the settings screen. */
+  /** Opens settings inside the pause menu display. */
   private void onSettings() {
     logger.info("Opening settings from pause menu");
-    game.setScreen(GdxGame.ScreenType.SETTINGS);
   }
 
   /** Leaves the current run for the main menu. Only fired after the display's confirm dialog. */
   private void onExitToMenu() {
     logger.info("Returning to main menu from pause menu");
+    getPauseService().resume();
     game.setScreen(GdxGame.ScreenType.MAIN_MENU);
   }
 
-  /** Fired on Escape to open the menu. The display shows itself; real pause behaviour goes here. */
+  /** Fired on Escape to open the menu. The display shows itself. */
   private void onPause() {
-    // TODO(Sahil, sub-feature 6): freeze gameplay (timeScale=0), block gameplay/map input while
-    // paused, preserve the current run
+    getPauseService().pause();
+  }
+
+  private GamePauseService getPauseService() {
+    GamePauseService pauseService = ServiceLocator.getPauseService();
+    if (pauseService == null) {
+      throw new IllegalStateException("Pause service is not registered");
+    }
+    return pauseService;
   }
 }
