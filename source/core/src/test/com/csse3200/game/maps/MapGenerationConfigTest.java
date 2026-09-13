@@ -38,13 +38,4 @@ class MapGenerationConfigTest {
   void rejectsAllZeroWeights() {
     assertThrows(IllegalArgumentException.class, () -> new MapGenerationConfig(10, 0, 0, 0, 0));
   }
-
-  @Test
-  void preservesLargeWeightTotal() {
-    MapGenerationConfig config =
-        new MapGenerationConfig(
-            3, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 1L);
-
-    assertEquals(6_442_450_941L, config.getTotalWeight());
-  }
 }

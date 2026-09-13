@@ -1,15 +1,16 @@
 package com.csse3200.game.cards.deck;
 
+import com.csse3200.game.cards.CardService;
 import java.util.List;
 
 /** Creates standard player decks from the initial Team 6 card IDs. */
 public final class PlayerDeckFactory {
-  public static final String STRIKE = CardIdRegistry.STRIKE;
-  public static final String DEFEND = CardIdRegistry.DEFEND;
-  public static final String POISON_DAGGER = CardIdRegistry.POISON_DAGGER;
-  public static final String EXPOSE = CardIdRegistry.EXPOSE;
-  public static final String INNER_FOCUS = CardIdRegistry.INNER_FOCUS;
-  public static final String BANDAGE = CardIdRegistry.BANDAGE;
+  public static final String STRIKE = "strike";
+  public static final String DEFEND = "defend";
+  public static final String POISON_DAGGER = "poison_dagger";
+  public static final String EXPOSE = "expose";
+  public static final String INNER_FOCUS = "inner_focus";
+  public static final String BANDAGE = "bandage";
 
   private static final List<String> STARTER_DECK_CARD_IDS =
       List.of(
@@ -38,6 +39,16 @@ public final class PlayerDeckFactory {
    */
   public static PlayerDeck createStarterDeck() {
     return new PlayerDeck(STARTER_DECK_CARD_IDS);
+  }
+
+  /**
+   * Creates a default player deck validated by the supplied card service.
+   *
+   * @param cardService authoritative card lookup service
+   * @return starter player deck
+   */
+  public static PlayerDeck createStarterDeck(CardService cardService) {
+    return new PlayerDeck(cardService, STARTER_DECK_CARD_IDS);
   }
 
   /**
