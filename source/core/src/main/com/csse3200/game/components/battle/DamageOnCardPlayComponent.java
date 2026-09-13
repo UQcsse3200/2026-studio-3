@@ -3,12 +3,12 @@ package com.csse3200.game.components.battle;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.StatusEffect;
+import com.csse3200.game.components.enemy.IntentEffectType;
 import java.util.Objects;
 
 /** Applies the active damage-on-card-play effect after a successful play. */
 public class DamageOnCardPlayComponent extends Component {
-  private static final String EFFECT_TYPE = "DAMAGE_ON_CARD_PLAY";
-
+  private static final String EFFECT_TYPE = IntentEffectType.DAMAGE_ON_CARD_PLAY.name();
   private final CombatStatsComponent playerStats;
 
   public DamageOnCardPlayComponent(CombatStatsComponent playerStats) {

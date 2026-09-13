@@ -12,6 +12,7 @@ import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattleEvent;
+import com.csse3200.game.components.enemy.IntentEffectType;
 import com.csse3200.game.components.player.PlayerIntent;
 import java.util.List;
 
@@ -147,7 +148,7 @@ public class BattleActions extends Component {
    * @return true if the play should be rejected before reaching the controller
    */
   private boolean playerIsBlockedFromPlayingCards() {
-    if (!controller.playerHasStatusEffect("SILENCE")) {
+    if (!controller.playerHasStatusEffect(IntentEffectType.SILENCE.name())) {
       return false;
     }
 
