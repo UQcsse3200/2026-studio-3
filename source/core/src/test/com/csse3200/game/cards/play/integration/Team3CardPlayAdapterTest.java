@@ -28,7 +28,7 @@ class Team3CardPlayAdapterTest {
   void shouldResolveAndReturnOneResultWithoutApplyingEnemyEffects() {
     CardConfig strike = strike();
     CardLibrary cards = new CardLibrary(List.of(strike));
-    BattleDeck deck = new BattleDeck(new PlayerDeck(List.of("strike")));
+    BattleDeck deck = new BattleDeck(new PlayerDeck(cards, List.of("strike")));
     deck.drawOne();
 
     EnergyComponent energy = new EnergyComponent(3);

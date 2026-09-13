@@ -10,6 +10,10 @@ public final class EnemyAIFactory {
   public static final String CYCLE_FOUR_STANCE = "cycle_four_stance";
   public static final String ENRAGE_LOW_HEALTH = "enrage_low_health";
   public static final String VOID_KNIGHT_RETALIATION = "void_knight_retaliation";
+  public static final String BOSS = "BOSS";
+  public static final String DEFENSIVE_STANCE = "defensive_stance";
+  public static final String ARMOUR_SACRIFICE = "armour_sacrifice";
+  public static final String ERRATIC = "erratic";
 
   /** Behaviour used when a configuration names an unknown behaviour. */
   public static final String DEFAULT_BEHAVIOUR = CYCLE_ATTACK_DEFEND;
@@ -34,6 +38,10 @@ public final class EnemyAIFactory {
       case CYCLE_FOUR_STANCE -> new CycleFourStanceAI();
       case ENRAGE_LOW_HEALTH -> new EnrageLowHealthAI();
       case VOID_KNIGHT_RETALIATION -> new VoidKnightRetaliationAI();
+      case BOSS -> new BossAI();
+      case DEFENSIVE_STANCE -> new DefensiveStanceAI();
+      case ARMOUR_SACRIFICE -> new ArmourSacrificeAI();
+      case ERRATIC -> new RandomStanceAI();
       default -> {
         logger.warn(
             "Unknown enemy behaviour id '{}', falling back to {}", behaviourId, DEFAULT_BEHAVIOUR);
