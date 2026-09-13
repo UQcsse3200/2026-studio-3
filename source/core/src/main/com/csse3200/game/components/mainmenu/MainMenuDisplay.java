@@ -40,7 +40,9 @@ public class MainMenuDisplay extends UIComponent {
   }
 
   private void addActors() {
-    rootStack = new Stack();  // Using stack instead of table to allow for background and overlay to be added behind the content
+    rootStack =
+        new Stack(); // Using stack instead of table to allow for background and overlay to be added
+    // behind the content
     rootStack.setFillParent(true);
 
     Table background = new Table();
@@ -82,7 +84,7 @@ public class MainMenuDisplay extends UIComponent {
     menuTable.add(exitButton);
 
     Color panelColour = MenuTheme.deepPlum();
-    panelColour.a = 0.92f; 
+    panelColour.a = 0.92f;
     Table panel = new Table();
     panel.setBackground(skin.newDrawable("window", panelColour));
     panel.pad(MenuTheme.PANEL_PADDING);
@@ -107,7 +109,7 @@ public class MainMenuDisplay extends UIComponent {
   private TextButton createButton(String text, String eventName) {
     TextButton button = new TextButton(text, MenuTheme.createButtonStyle(skin));
     button.setName(eventName);
-     // Triggers an event when the button is pressed
+    // Triggers an event when the button is pressed
     button.addListener(
         new ChangeListener() {
           @Override
@@ -147,7 +149,6 @@ public class MainMenuDisplay extends UIComponent {
   }
 
   List<TextButton> getMenuButtons() {
-    return List.of(
-        newGameButton, loadGameButton, bestiaryButton, settingsButton, exitButton);
+    return List.of(newGameButton, loadGameButton, bestiaryButton, settingsButton, exitButton);
   }
 }
