@@ -7,7 +7,7 @@
       "baseAttack": 6,
       "armour": 0,
       "tier": "NORMAL",
-      "behaviour": "cycle_attack_defend"
+      "behaviour": "erratic"
     },
     {
       "id": "bone_crawler",
@@ -16,7 +16,7 @@
       "baseAttack": 5,
       "armour": 2,
       "tier": "NORMAL",
-      "behaviour": "cycle_attack_defend"
+      "behaviour": "defensive_stance"
     },
     {
       "id": "dark_acolyte",
@@ -25,7 +25,7 @@
       "baseAttack": 7,
       "armour": 1,
       "tier": "NORMAL",
-      "behaviour": "cycle_attack_defend"
+      "behaviour": "armour_sacrifice"
     },
     {
       "id": "void_knight",

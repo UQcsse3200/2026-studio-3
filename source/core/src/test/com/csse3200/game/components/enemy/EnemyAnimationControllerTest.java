@@ -41,10 +41,20 @@ class EnemyAnimationControllerTest {
   }
 
   @Test
-  void shouldPlayHurtWhenDefeated() {
+  void shouldPlayHurtWhenDefeatedAndNoDeathAnimationExists() {
     enemy.getEvents().trigger("enemyDefeated");
 
     verify(animator).startAnimation("hurt");
+  }
+
+  // 图集里有 death 帧的敌人，死亡时应该播 death，而不是退回 hurt
+  @Test
+  void shouldPlayDeathWhenDeathAnimationAvailable() {
+    when(animator.hasAnimation("death")).thenReturn(true);
+
+    enemy.getEvents().trigger("enemyDefeated");
+
+    verify(animator).startAnimation("death");
   }
 
   @Test

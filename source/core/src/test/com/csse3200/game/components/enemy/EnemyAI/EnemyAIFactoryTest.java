@@ -64,4 +64,25 @@ class EnemyAIFactoryTest {
 
     assertNotSame(first, second);
   }
+
+  @Test
+  void shouldCreateDefensiveStanceAI() {
+    EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.DEFENSIVE_STANCE);
+
+    assertInstanceOf(DefensiveStanceAI.class, ai);
+  }
+
+  @Test
+  void shouldCreateArmourSacrificeAI() {
+    EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.ARMOUR_SACRIFICE);
+
+    assertInstanceOf(ArmourSacrificeAI.class, ai);
+  }
+
+  @Test
+  void shouldCreateRandomStanceAI() {
+    EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.ERRATIC);
+
+    assertInstanceOf(RandomStanceAI.class, ai);
+  }
 }
