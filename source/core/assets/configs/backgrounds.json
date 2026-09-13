@@ -3,7 +3,7 @@
     {
       "id": "forest",
       "name": "Forest",
-      "texture": "images/backgrounds/forest.png"
+      "texture": "images/grass_1.png"
     },
     {
       "id": "mud_test",

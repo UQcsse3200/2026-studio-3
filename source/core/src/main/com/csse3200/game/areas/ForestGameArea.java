@@ -80,7 +80,7 @@ public class ForestGameArea extends GameArea {
    *
    * @param terrainFactory TerrainFactory used to create the terrain for the GameArea.
    * @param progression The current difficulty as given by map progression.
-   * @param backgroundId Backgroun ID from backgrounds.json, or null to use original terrain.
+   * @param backgroundId Background ID from backgrounds.json, or null to use original terrain.
    */
   public ForestGameArea(TerrainFactory terrainFactory, Integer progression, String backgroundId) {
     super();
@@ -126,8 +126,17 @@ public class ForestGameArea extends GameArea {
       return;
     }
 
+    if (selectedBackGround.name == null
+        || selectedBackGround.name.isBlank()
+        || selectedBackGround.texture == null
+        || selectedBackGround.texture.isBlank()) {
+      logger.warn("Background '{}' requires a name and texture path", backgroundId);
+      return;
+    }
+
     if (!Gdx.files.internal(selectedBackGround.texture).exists()) {
       logger.warn("Missing texture! {}, {}", backgroundId, selectedBackGround.texture);
+      return;
     }
 
     backgroundConfig = selectedBackGround;

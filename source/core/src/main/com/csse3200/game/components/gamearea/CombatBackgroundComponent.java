@@ -5,7 +5,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.csse3200.game.rendering.RenderComponent;
 
-/** A base class that represents different combat areas. */
+/**
+ * Draws a static background above terrain and behind combatants.
+ *
+ * <p>The image follows an unrotated orthographic camera and covers its view without stretching.
+ * Excess image content is cropped. The caller owns texture loading and disposal.
+ */
 public class CombatBackgroundComponent extends RenderComponent {
   private static final int BACKGROUND_LAYER = 0;
   private static final float BACKGROUND_Z = 1f;
@@ -13,6 +18,10 @@ public class CombatBackgroundComponent extends RenderComponent {
   private final Texture texture;
   private final OrthographicCamera camera;
 
+  /**
+   * @param texture already-loaded background texture
+   * @param camera world camera used for combat rendering
+   */
   public CombatBackgroundComponent(Texture texture, OrthographicCamera camera) {
     this.texture = texture;
     this.camera = camera;

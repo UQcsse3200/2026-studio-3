@@ -3,6 +3,7 @@ package com.csse3200.game.components.gamearea;
 import java.util.ArrayList;
 import java.util.List;
 
+/** Collection of combat background definitions loaded from JSON. */
 public class CombatBackgroundConfigs {
   public List<CombatBackgroundConfig> backgrounds = new ArrayList<>();
 
@@ -16,7 +17,7 @@ public class CombatBackgroundConfigs {
     if (id == null || backgrounds == null) return null;
 
     for (CombatBackgroundConfig background : backgrounds) {
-      if (id.equals(background.id)) {
+      if (background != null && id.equals(background.id)) {
         return background;
       }
     }
