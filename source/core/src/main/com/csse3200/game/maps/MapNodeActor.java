@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.utils.Align;
 import com.csse3200.game.services.ServiceLocator;
 
 /**
@@ -17,6 +16,7 @@ public class MapNodeActor extends Group {
   private final MapNode node;
   public float size;
   private Image nodeIcon;
+  private Image completedCross;
 
   /**
    * Constructer class to intialize a MapNodeActor. The size of the node is determined from the
@@ -72,6 +72,19 @@ public class MapNodeActor extends Group {
     nodeIcon = new Image();
     nodeIcon.setSize(size, size);
   }
+
+  private void addCompletedCross() {
+    Texture crossTexture =
+        ServiceLocator.getResourceService()
+            .getAsset("images/map/cross.png", Texture.class);
+
+    completedCross = new Image(crossTexture);
+
+    completedCross.setSize(size, size);
+    completedCross.setPosition(0, 0);
+
+    addActor(completedCross);
+}
 
   /**
    * Gets the Node
@@ -159,6 +172,7 @@ public class MapNodeActor extends Group {
         break;
       case COMPLETED:
         nodeIcon.getColor().a = 0.5f;
+        addCompletedCross();
         break;
       case CURRENT:
         break;

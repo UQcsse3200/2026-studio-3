@@ -1,6 +1,13 @@
 package com.csse3200.game.screens;
 
 import com.csse3200.game.GdxGame;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -85,6 +92,8 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         .addComponent(mapDisplay);
 
     ServiceLocator.getEntityService().register(ui);
+
+    createExitButton(game);
   }
 
   /**
@@ -107,6 +116,37 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
       game.setScreen(GdxGame.ScreenType.ENCOUNTER);
     }
   }
+
+  /**
+   * Creates the exit button on the mapscreen to allow the player to leave
+   * @param game the GdxGame required to change the game screen.
+   */
+  private void createExitButton(GdxGame game) {
+    Stage stage = ServiceLocator.getRenderService().getStage();
+    Skin skin = new Skin(Gdx.files.internal("flat-earth/skin/flat-earth-ui.json"));
+    TextButton exitButton = new TextButton("Main Menu", skin);
+
+    float buttonWidth = 150f;
+    float buttonHeight = 50f;
+    float offset = 25f;
+
+    exitButton.setSize(150, 50);
+
+    exitButton.setPosition(
+        stage.getWidth() - buttonWidth - offset,
+        stage.getHeight() - buttonHeight - offset);
+    exitButton.setColor(new Color(0.65f, 0.12f, 0.10f, 1f));
+
+    exitButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            game.setScreen(GdxGame.ScreenType.MAIN_MENU);
+          }
+        });
+
+    stage.addActor(exitButton);
+}
 
   @Override
   public void render(float delta) {

@@ -7,17 +7,13 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.Align;
-import com.csse3200.game.GdxGame;
-import com.csse3200.game.components.CombatStatsComponent;
-import com.csse3200.game.components.player.EnergyComponent;
+import com.csse3200.game.components.CombatStatsComponent; 
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.entities.configs.PlayerConfig;
 import com.csse3200.game.files.FileLoader;
@@ -190,18 +186,14 @@ public class MapDisplay extends UIComponent {
     }
   }
 
-  private void addExitButton(Table table) {
-    TextButton exitButton = new TextButton("EXIT", skin);
-    exitButton.setColor(new Color(0.75f, 0.18f, 0.16f, 1f));
-    exitButton.addListener(new ChangeListener() {
-      @Override
-      public void changed(ChangeEvent event, Actor actor) {
-        // exit to main menu
-      }
-    });
-    table.add(exitButton).right().expandX().padRight(25);
-  }
-  
+
+  /**
+   * Renders the player Stats at the top of the screen.
+   * 
+   * Player stats is assumed to be stored in "configs/player.json"
+   * 
+   * Piety is the height of the current node
+   */
   private void addPlayerStats() {
     Table playerTable = new Table();
 
@@ -282,15 +274,31 @@ public class MapDisplay extends UIComponent {
     Label moneyLabel = new Label(moneyText, moneyStyle);
     moneyLabel.setFontScale(0.75f);
 
+    // Piety image
+      Image pietyImage =
+          new Image(
+              ServiceLocator.getResourceService()
+                  .getAsset("images/piety.png", Texture.class));
+
+    // Piety text
+    Label.LabelStyle pietyStyle = new Label.LabelStyle(skin.get("large",
+      Label.LabelStyle.class));
+    pietyStyle.fontColor = new Color(0.95f, 0.73f, 0.28f, 1f);
+    String pietyText = String.format("Piety: %d", mapGraph.getCurrentNode().getHeight());
+    Label pietyLabel = new Label(pietyText, pietyStyle);
+    pietyLabel.setFontScale(0.75f);
+
     // Add stats to table
     table.add(heartImage).size(imageSideLength).padRight(5f).center();
     table.add(healthLabel).padRight(25f).center();
 
     table.add(moneyImage).size(imageSideLength).padRight(5f).center();
-    table.add(moneyLabel).center();
+    table.add(moneyLabel).padRight(25f).center();
+
+    table.add(pietyImage).size(imageSideLength).padRight(5f).center();
+    table.add(pietyLabel).padRight(25f).center();
 
     playerTable.add(table);
-    addExitButton(playerTable);
   }
 
   private void addLegendRow(String imageUrl, String text, Table table) {
@@ -313,6 +321,10 @@ public class MapDisplay extends UIComponent {
     table.row();
   }
 
+  /**
+   * Renders a basic legend on the right of the screen to clearly state what
+   * each nodeIcon represents
+   */
   private void addLegend() {
     Table playerTable = new Table();
 
@@ -372,12 +384,13 @@ public class MapDisplay extends UIComponent {
       "images/map/boss.png",
       "images/map/event.png",
       "images/map/shop.png",
-      "images/nodeLine.png",
+      "images/map/nodeLine.png",
       "images/map/background.png",
       "images/heart.png",
       "images/energy.png",
       "images/piety.png",
-      "images/money.png"
+      "images/money.png",
+      "images/map/cross.png"
   };
 
     ResourceService resourceService = ServiceLocator.getResourceService();
