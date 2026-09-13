@@ -729,6 +729,14 @@ public class BattleController {
   }
 
   private void enterEnemyTurn() {
+    Entity enemy = getActiveEnemy();
+
+    // Make sure that enemy hasn't died from poison damage etc.
+    if (isEnemyAlive(enemy)) {
+        handle(BattleEvent.ENEMY_TURN_SKIPPED);
+        return;
+    }
+
     // Begin the current enemy's action.
     BattleEvent event =
         switch (currentEnemyIntent.getType()) {
