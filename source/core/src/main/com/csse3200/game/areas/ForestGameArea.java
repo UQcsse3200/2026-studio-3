@@ -2,6 +2,7 @@ package com.csse3200.game.areas;
 
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.csse3200.game.areas.terrain.TerrainFactory;
@@ -74,8 +75,7 @@ public class ForestGameArea extends GameArea {
    * Creates the game area without a configured background.
    */
   public ForestGameArea(TerrainFactory terrainFactory, Integer progression) {
-    this.terrainFactory = terrainFactory;
-    this.progression = progression;
+    this(terrainFactory, progression, null);
   }
 
   /**
@@ -114,6 +114,8 @@ public class ForestGameArea extends GameArea {
   private void readBackgroundConfig() {
     backgroundConfig = null;
 
+    if (backgroundId == null || backgroundId.isBlank()) return;
+
     CombatBackgroundConfigs configs =
             FileLoader.readClass(
                     CombatBackgroundConfigs.class,
@@ -136,9 +138,16 @@ public class ForestGameArea extends GameArea {
               "The selected background configuration doesn't exist: {}",
               backgroundId
       );
+      return;
     }
 
-    // TODO: Check for missing texture.
+    if (!Gdx.files.internal(selectedBackGround.texture).exists()) {
+      logger.warn(
+              "Missing texture! {}, {}",
+              backgroundId,
+              selectedBackGround.texture
+      );
+    }
 
     backgroundConfig = selectedBackGround;
   }
@@ -296,7 +305,11 @@ public class ForestGameArea extends GameArea {
     logger.debug("Unloading assets");
     ResourceService resourceService = ServiceLocator.getResourceService();
 
-    resourceService.unloadAssets(new String[] {backgroundConfig.texture});
+    if (backgroundConfig != null && resourceService.containsAsset(
+            backgroundConfig.texture, Texture.class)) {
+      resourceService.unloadAssets(new String[] {backgroundConfig.texture});
+    }
+
     resourceService.unloadAssets(forestTextures);
     resourceService.unloadAssets(forestTextureAtlases);
     resourceService.unloadAssets(forestSounds);
