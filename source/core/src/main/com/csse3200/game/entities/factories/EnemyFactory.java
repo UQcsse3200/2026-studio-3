@@ -35,6 +35,9 @@ public class EnemyFactory {
   private static final String DEFAULT_ATLAS = SPRITE_DIR + "default.atlas";
   private static final float IDLE_FRAME_DURATION = 0.5f;
   private static final float HURT_FRAME_DURATION = 0.15f;
+  private static final float CAST_FRAME_DURATION = 0.1f;
+  private static final float DEFEND_FRAME_DURATION = 0.1f;
+  private static final float DEATH_FRAME_DURATION = 0.12f;
 
   private static EnemyConfigs loadRoster() {
     EnemyConfigs configs = FileLoader.readClass(EnemyConfigs.class, "configs/enemies.json");
@@ -83,6 +86,11 @@ public class EnemyFactory {
             ServiceLocator.getResourceService().getAsset(atlasPath(config), TextureAtlas.class));
     animator.addAnimation("idle", IDLE_FRAME_DURATION, Animation.PlayMode.LOOP);
     animator.addAnimation("hurt", HURT_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    if (config.tier == EnemyTier.BOSS) {
+      animator.addAnimation("cast", CAST_FRAME_DURATION, Animation.PlayMode.NORMAL);
+      animator.addAnimation("defend", DEFEND_FRAME_DURATION, Animation.PlayMode.NORMAL);
+      animator.addAnimation("death", DEATH_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    }
 
     CombatStatsComponent stats = new CombatStatsComponent(config.health, config.baseAttack);
     stats.setArmor(config.armour);
