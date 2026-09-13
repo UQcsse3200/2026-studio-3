@@ -7,5 +7,5 @@ public enum RoomType {
   EVENT,
   ELITE,
   START,
-  FINAL
+  FINAL,
 }
