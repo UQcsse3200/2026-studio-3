@@ -140,6 +140,7 @@ public class EnemyBehaviourComponent extends Component {
   private void defend() {
     CombatStatsComponent stats = entity.getComponent(CombatStatsComponent.class);
     if (stats != null) {
+      entity.getEvents().trigger("enemyDefend");
       stats.addArmor(currentIntent.getValue());
     }
   }
@@ -165,6 +166,7 @@ public class EnemyBehaviourComponent extends Component {
 
     CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
     if (targetStats != null) {
+      entity.getEvents().trigger("enemyCast");
       targetStats.applyStatusEffect(
           effectType.name(), currentIntent.getValue(), currentIntent.getDuration());
     }

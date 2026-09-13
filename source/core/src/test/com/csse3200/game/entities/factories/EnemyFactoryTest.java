@@ -143,15 +143,18 @@ class EnemyFactoryTest {
   void getIdsByTierReturnsOnlyMatchingTier() {
     List<String> normals = EnemyFactory.getIdsByTier(EnemyTier.NORMAL);
     List<String> elites = EnemyFactory.getIdsByTier(EnemyTier.ELITE);
+    List<String> bosses = EnemyFactory.getIdsByTier(EnemyTier.BOSS);
 
     assertTrue(normals.contains("lesser_shade"));
     assertFalse(normals.contains("void_knight"));
     assertTrue(elites.contains("void_knight"));
+    assertTrue(bosses.contains("boss_knight"));
+    assertFalse(bosses.contains("void_knight"));
   }
 
   @Test
   void getIdsByTierReturnsEmptyListWhenNoneMatch() {
-    assertTrue(EnemyFactory.getIdsByTier(EnemyTier.BOSS).isEmpty());
+    assertTrue(EnemyFactory.getIdsByTier(null).isEmpty());
   }
 
   @Test
@@ -166,6 +169,7 @@ class EnemyFactoryTest {
     assertTrue(paths.contains("images/enemies/default.atlas"));
     assertTrue(paths.contains("images/enemies/lesser_shade.atlas"));
     assertTrue(paths.contains("images/enemies/void_knight.atlas"));
+    assertTrue(paths.contains("images/enemies/boss_knight.atlas"));
   }
 
   @Test
