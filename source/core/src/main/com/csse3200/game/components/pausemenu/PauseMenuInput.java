@@ -7,8 +7,8 @@ import com.csse3200.game.services.ServiceLocator;
 
 /**
  * Listens for the Escape key and opens the pause menu by firing {@link
- * PauseMenuDisplay#PAUSE_EVENT} on its entity's events. The display (and the actions
- * component) decide what to do with that event.
+ * PauseMenuDisplay#PAUSE_EVENT} on its entity's events. The display (and the actions component)
+ * decide what to do with that event.
  */
 public class PauseMenuInput extends InputComponent {
   private static final int PAUSE_INPUT_PRIORITY = 100;

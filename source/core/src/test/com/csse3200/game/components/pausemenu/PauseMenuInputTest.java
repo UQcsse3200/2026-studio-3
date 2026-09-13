@@ -27,9 +27,7 @@ class PauseMenuInputTest {
     pauseCount = new AtomicInteger();
     input = new PauseMenuInput();
     Entity entity = new Entity().addComponent(input);
-    entity
-        .getEvents()
-        .addListener(PauseMenuDisplay.PAUSE_EVENT, pauseCount::incrementAndGet);
+    entity.getEvents().addListener(PauseMenuDisplay.PAUSE_EVENT, pauseCount::incrementAndGet);
   }
 
   @Test
