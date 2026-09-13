@@ -757,6 +757,7 @@ public class BattleController {
       for (ResolvedCardEffect effect : effects) {
         switch (effect.type()) {
           case DAMAGE -> stats.takeDamage(effect.value());
+          case PIERCE -> stats.takePiercingDamage(effect.value());
           case POISON ->
               stats.applyStatusEffect(
                   new StatusEffect("poison", effect.value(), effect.duration()));

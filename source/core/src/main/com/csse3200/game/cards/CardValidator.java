@@ -175,6 +175,8 @@ public final class CardValidator {
           || effectType == EffectType.HEAL
           || effectType == EffectType.STRENGTH;
     }
-    return effectType == EffectType.DAMAGE || effectType.usesDuration();
+    return effectType == EffectType.DAMAGE
+        || effectType == EffectType.PIERCE
+        || effectType.usesDuration();
   }
 }

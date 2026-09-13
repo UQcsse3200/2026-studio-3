@@ -139,6 +139,21 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
+   * Damages the entity's health directly, ignoring block and armour. If health reaches 0, the
+   * entity dies.
+   *
+   * @param damage piercing damage
+   */
+  public void takePiercingDamage(int damage) {
+    if (damage >= 0 && !isDead()) {
+      setHealth(Math.max(this.health - damage, 0));
+      if (entity != null && isDead()) {
+        entity.getEvents().trigger(EVT_IS_DEAD);
+      }
+    }
+  }
+
+  /**
    * A setter function for maxHealth, contains a safegaurd to avoid MaxHealth going lower than 1
    * send an update to every listener is changed to ensure real time changes updated.
    *
