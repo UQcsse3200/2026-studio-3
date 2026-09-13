@@ -78,7 +78,10 @@ public class EffectExecutor {
     if (effect.type.usesDuration() && effect.duration <= 0) {
       throw new IllegalArgumentException("Ongoing effect duration must be positive");
     }
-    if (!effect.type.usesDuration() && effect.duration != 0) {
+    if (effect.type == EffectType.HEAL && effect.duration < 0) {
+      throw new IllegalArgumentException("Healing duration must not be negative");
+    }
+    if (!effect.type.usesDuration() && effect.type != EffectType.HEAL && effect.duration != 0) {
       throw new IllegalArgumentException("Instant or combat-long effect duration must be zero");
     }
   }
@@ -117,7 +120,10 @@ public class EffectExecutor {
     if (effect.type.usesDuration() && effect.duration <= 0) {
       throw new IllegalArgumentException("Ongoing effect duration must be positive");
     }
-    if (!effect.type.usesDuration() && effect.duration != 0) {
+    if (effect.type == EffectType.HEAL && effect.duration < 0) {
+      throw new IllegalArgumentException("Healing duration must not be negative");
+    }
+    if (!effect.type.usesDuration() && effect.type != EffectType.HEAL && effect.duration != 0) {
       throw new IllegalArgumentException("Instant or combat-long effect duration must be zero");
     }
   }
