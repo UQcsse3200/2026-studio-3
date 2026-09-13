@@ -59,7 +59,7 @@ public class ForestGameArea extends GameArea {
 
   private static final String BACKGROUND_CONFIG_PATH =
           "configs/backgrounds.json";
-  private static final String BACKGROUND_ID = "forest";
+  private final String backgroundId;
   private static final String[] forestSounds = {"sounds/Impact4.ogg"};
 
   private final TerrainFactory terrainFactory;
@@ -71,15 +71,25 @@ public class ForestGameArea extends GameArea {
   private Entity enemy;
 
   /**
-   * Initialise this ForestGameArea to use the provided TerrainFactory.
-   *
-   * @param terrainFactory TerrainFactory used to create the terrain for the GameArea.
-   * @requires terrainFactory != null
+   * Creates the game area without a configured background.
    */
   public ForestGameArea(TerrainFactory terrainFactory, Integer progression) {
+    this.terrainFactory = terrainFactory;
+    this.progression = progression;
+  }
+
+  /**
+   * Creates the area with a selected background.
+   *
+   * @param terrainFactory TerrainFactory used to create the terrain for the GameArea.
+   * @param progression The current difficulty as given by map progression.
+   * @param backgroundId Backgroun ID from backgrounds.json, or null to use original terrain.
+   */
+  public ForestGameArea(TerrainFactory terrainFactory, Integer progression, String backgroundId) {
     super();
     this.terrainFactory = terrainFactory;
     this.progression = progression;
+    this.backgroundId = backgroundId;
   }
 
   /** Create the game area, including terrain, static entities (trees), dynamic entities (player) */
@@ -119,12 +129,12 @@ public class ForestGameArea extends GameArea {
     }
 
     CombatBackgroundConfig selectedBackGround =
-            configs.get(BACKGROUND_ID);
+            configs.get(backgroundId);
 
     if (selectedBackGround == null) {
       logger.warn(
               "The selected background configuration doesn't exist: {}",
-              BACKGROUND_ID
+              backgroundId
       );
     }
 
@@ -193,7 +203,7 @@ public class ForestGameArea extends GameArea {
     try {
       texture = ServiceLocator
               .getResourceService()
-              .getAsset("images/grass_1.png", Texture.class);
+              .getAsset(backgroundConfig.texture, Texture.class);
     } catch (RuntimeException e){
       logger.warn(
               "Background texture missing: {}",

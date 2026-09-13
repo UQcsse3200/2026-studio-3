@@ -4,6 +4,11 @@
       "id": "forest",
       "name": "Forest",
       "texture": "images/backgrounds/forest.png"
+    },
+    {
+      "id": "mud_test",
+      "name": "Mud Test",
+      "texture": "images/mud.png"
     }
   ]
 }
