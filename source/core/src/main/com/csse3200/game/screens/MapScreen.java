@@ -101,9 +101,8 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
   /**
    * Records the node being entered and switches to the screen that owns it: a battle for combat and
-   * boss nodes, the placeholder encounter screen for everything else (shop, event). Coming back is
-   * handled by whichever screen the run lands on ({@code BattleActions} for a battle, {@code
-   * EncounterScreen} otherwise), which reports the result to the run state and returns here.
+   * boss nodes, the Team 2 encounter screen for shop and event nodes. The destination screen owns
+   * completion: it reports the result to the run state and returns to this same map.
    */
   private void enterEncounter(GdxGame game, RunState runState, Integer nodeId) {
     runState.enterEncounter(nodeId);

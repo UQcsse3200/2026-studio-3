@@ -51,7 +51,7 @@ public class MainMenuActions extends Component {
     game.setScreen(GdxGame.ScreenType.SETTINGS);
   }
 
-  /** Opens the non-combat encounter screen (Chance encounter into the Shop). */
+  /** Opens the standalone Shop preview used from the main menu. */
   private void onShop() {
     logger.info("Opening shop encounter");
     game.setScreen(GdxGame.ScreenType.MAIN_GAME);
