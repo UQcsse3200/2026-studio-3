@@ -63,6 +63,7 @@ public final class Team7PlayerStateAdapter implements PlayerStateView, PlayerEff
         case HEAL -> combatStats.heal(effect.value());
         case STRENGTH ->
             combatStats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
+        case FORTIFY -> combatStats.addArmor(effect.value());
         default -> throw unsupportedPlayerEffect(effect.type());
       }
     }
@@ -81,7 +82,8 @@ public final class Team7PlayerStateAdapter implements PlayerStateView, PlayerEff
       }
       if (effect.type() != EffectType.BLOCK
           && effect.type() != EffectType.HEAL
-          && effect.type() != EffectType.STRENGTH) {
+          && effect.type() != EffectType.STRENGTH
+          && effect.type() != EffectType.FORTIFY) {
         throw unsupportedPlayerEffect(effect.type());
       }
     }

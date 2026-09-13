@@ -757,6 +757,7 @@ public class BattleController {
       switch (effect.type()) {
         case BLOCK -> stats.addArmor(effect.value());
         case HEAL -> stats.heal(effect.value());
+        case FORTIFY -> stats.addArmor(effect.value());
         default -> {
           // STRENGTH is already folded into the resolver's running player state.
         }

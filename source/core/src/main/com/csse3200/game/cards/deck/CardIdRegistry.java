@@ -16,9 +16,25 @@ public final class CardIdRegistry {
   public static final String EXPOSE = "expose";
   public static final String INNER_FOCUS = "inner_focus";
   public static final String BANDAGE = "bandage";
+  public static final String SEALED_PACT = "sealed_pact";
+  public static final String BLOOD_PRICE = "blood_price";
+  public static final String DOOM_SIGIL = "doom_sigil";
+  public static final String ECLIPSE_DECREE = "eclipse_decree";
+  public static final String IRON_OATH = "iron_oath";
 
   private static final Set<String> REGISTERED_CARD_IDS =
-      Set.of(STRIKE, DEFEND, POISON_DAGGER, EXPOSE, INNER_FOCUS, BANDAGE);
+      Set.of(
+          STRIKE,
+          DEFEND,
+          POISON_DAGGER,
+          EXPOSE,
+          INNER_FOCUS,
+          BANDAGE,
+          SEALED_PACT,
+          BLOOD_PRICE,
+          DOOM_SIGIL,
+          ECLIPSE_DECREE,
+          IRON_OATH);
 
   private CardIdRegistry() {
     throw new IllegalStateException("Instantiating utility class");

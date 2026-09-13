@@ -19,7 +19,12 @@ public enum EffectType {
   /** Decreases 25% the damage output to target while active. */
   FEEBLE(true),
   /** Increases damage the target deals for the rest of the combat. */
-  STRENGTH(false);
+  STRENGTH(false),
+  /**
+   * Immediately increases the target's armour pool. Armour is a lasting damage-reduction pool on
+   * {@code CombatStatsComponent}, distinct from per-turn Block.
+   */
+  FORTIFY(false);
 
   private final boolean usesDuration;
 

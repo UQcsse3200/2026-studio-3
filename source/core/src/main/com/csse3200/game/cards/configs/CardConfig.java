@@ -37,6 +37,12 @@ public class CardConfig {
   /** Path to the card artwork, relative to the assets directory. */
   public String texturePath = "";
 
+  /**
+   * Optional upgraded values for this card. The upgrade inherits this card's ID, type, target and
+   * artwork. Null means the card has no upgrade defined yet.
+   */
+  public CardUpgradeConfig upgrade = null;
+
   /** Required by the JSON deserialiser. */
   public CardConfig() {}
 }

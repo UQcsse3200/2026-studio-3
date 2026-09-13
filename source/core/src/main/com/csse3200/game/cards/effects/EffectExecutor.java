@@ -126,7 +126,9 @@ public class EffectExecutor {
       String cardId, EffectConfig effect, int sequence, PlayerEffectState playerState) {
     if (effect.type == EffectType.STRENGTH) {
       playerState.addStrength(effect.value);
-    } else if (effect.type != EffectType.BLOCK && effect.type != EffectType.HEAL) {
+    } else if (effect.type != EffectType.BLOCK
+        && effect.type != EffectType.HEAL
+        && effect.type != EffectType.FORTIFY) {
       throw new IllegalArgumentException("Unsupported self-targeting effect type: " + effect.type);
     }
 
@@ -137,7 +139,8 @@ public class EffectExecutor {
   private ResolvedCardEffect resolveSelfEffect(String cardId, EffectConfig effect, int sequence) {
     if (effect.type != EffectType.STRENGTH
         && effect.type != EffectType.BLOCK
-        && effect.type != EffectType.HEAL) {
+        && effect.type != EffectType.HEAL
+        && effect.type != EffectType.FORTIFY) {
       throw new IllegalArgumentException("Unsupported self-targeting effect type: " + effect.type);
     }
 

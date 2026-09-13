@@ -51,4 +51,33 @@ class PlayerDeckFactoryTest {
     assertEquals(10, second.size());
     assertEquals(3, second.count(PlayerDeckFactory.STRIKE));
   }
+
+  @Test
+  void shouldCreateForbiddenTestDeck() {
+    PlayerDeck deck = PlayerDeckFactory.createForbiddenTestDeck();
+
+    assertEquals(10, deck.size());
+    assertEquals(1, deck.count(PlayerDeckFactory.SEALED_PACT));
+    assertEquals(2, deck.count(PlayerDeckFactory.BLOOD_PRICE));
+    assertEquals(2, deck.count(PlayerDeckFactory.DOOM_SIGIL));
+    assertEquals(1, deck.count(PlayerDeckFactory.ECLIPSE_DECREE));
+  }
+
+  @Test
+  void shouldIncludeAllForbiddenCardIdsInTestDeck() {
+    List<String> cardIds = PlayerDeckFactory.getForbiddenTestDeckCardIds();
+
+    assertTrue(cardIds.contains(PlayerDeckFactory.SEALED_PACT));
+    assertTrue(cardIds.contains(PlayerDeckFactory.BLOOD_PRICE));
+    assertTrue(cardIds.contains(PlayerDeckFactory.DOOM_SIGIL));
+    assertTrue(cardIds.contains(PlayerDeckFactory.ECLIPSE_DECREE));
+  }
+
+  @Test
+  void shouldReturnImmutableForbiddenTestDeckIds() {
+    List<String> cardIds = PlayerDeckFactory.getForbiddenTestDeckCardIds();
+
+    assertThrows(
+        UnsupportedOperationException.class, () -> cardIds.add(PlayerDeckFactory.SEALED_PACT));
+  }
 }
