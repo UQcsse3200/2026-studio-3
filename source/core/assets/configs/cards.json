@@ -92,13 +92,13 @@
       {
         "id": "poison_blade",
         "name": "Poison Blade",
-        "description": "Deal 10 damage. Apply 4 Poison for 2 turns.",
+        "description": "Deal 10 piercing damage, ignoring Block and Armour. Apply 4 Poison for 2 turns.",
         "cost": 2,
         "type": "ATTACK",
         "rarity": "UNCOMMON",
         "target": "SINGLE_ENEMY",
         "effects": [
-          { "type": "DAMAGE", "value": 10, "duration": 0 },
+          { "type": "PIERCE", "value": 10, "duration": 0 },
           { "type": "POISON", "value": 4, "duration": 2 }
         ],
         "texturePath": "images/cards/poison_blade.png"
