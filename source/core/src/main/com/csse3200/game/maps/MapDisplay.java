@@ -48,9 +48,9 @@ public class MapDisplay extends UIComponent {
     this.mapSelectionController = new MapSelectionController(mapGraph);
     this.mapInputHandler = new MapInputHandler(mapSelectionController);
     this.mapHeight =
-        MapGraph.MAP_HEIGHT
+        MapGenerationConfig.MAP_HEIGHT
             * 1.5f
-            * borderPadding; // this to be changed for a constant in RoomDistributionConfig
+            * borderPadding; // this to be changed for a constant in MapGenerationConfig
   }
 
   /**
@@ -109,7 +109,7 @@ public class MapDisplay extends UIComponent {
       MapNodeActor nodeActor = new MapNodeActor(node);
       mapInputHandler.attach(nodeActor);
       float x =
-          (node.getRoomType() == RoomType.FINAL)
+          (node.getRoomType() == RoomType.FINAL || node.getRoomType() == RoomType.START)
               ? mapWidth / 2f - nodeWidth / 2f
               : getNodeX(node.getNodeId(), nodeWidth);
       float y = getNodeY(node);

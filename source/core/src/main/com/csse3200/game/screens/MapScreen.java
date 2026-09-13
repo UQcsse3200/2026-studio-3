@@ -6,13 +6,7 @@ import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
 import com.csse3200.game.input.InputDecorator;
 import com.csse3200.game.input.InputService;
-import com.csse3200.game.maps.MapDisplay;
-import com.csse3200.game.maps.MapGraph;
-import com.csse3200.game.maps.MapNode;
-import com.csse3200.game.maps.NodePoolGenerator;
-import com.csse3200.game.maps.RoomDistributionConfig;
-import com.csse3200.game.maps.RoomType;
-import com.csse3200.game.maps.RunState;
+import com.csse3200.game.maps.*;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.GameTime;
@@ -33,10 +27,6 @@ import org.slf4j.LoggerFactory;
 public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(MapScreen.class);
 
-  private static final int COMBAT_WEIGHT = 70;
-  private static final int EVENT_WEIGHT = 20;
-  private static final int SHOP_WEIGHT = 10;
-
   private final Renderer renderer;
 
   public MapScreen(GdxGame game) {
@@ -53,11 +43,9 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
     if (!runState.isRunActive()) {
       logger.info("No run in progress, generating a new map");
-      RoomDistributionConfig config =
-          new RoomDistributionConfig(
-              MapGraph.MAX_NODE_COUNT, COMBAT_WEIGHT, EVENT_WEIGHT, SHOP_WEIGHT);
-      MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
-      startNewRun(runState, graph);
+      MapGenerationController mapGen = new MapGenerationController();
+
+      startNewRun(runState, mapGen.getMap());
     }
 
     createUi(game, runState);
@@ -111,7 +99,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     MapNode node = runState.getMapGraph() == null ? null : runState.getMapGraph().getNode(nodeId);
     RoomType roomType = node == null ? null : node.getRoomType();
 
-    if (roomType == RoomType.COMBAT || roomType == RoomType.FINAL) {
+    if (roomType == RoomType.COMBAT || roomType == RoomType.FINAL || roomType == RoomType.ELITE) {
       logger.info("Node {} ({}) selected, entering battle", nodeId, roomType);
       game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
     } else {
