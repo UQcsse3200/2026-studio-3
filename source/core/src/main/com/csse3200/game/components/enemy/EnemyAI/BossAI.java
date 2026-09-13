@@ -1,6 +1,7 @@
 package com.csse3200.game.components.enemy.EnemyAI;
 
 import com.csse3200.game.components.enemy.EnemyIntent;
+import com.csse3200.game.components.enemy.IntentEffectType;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
@@ -13,11 +14,34 @@ import java.util.Random;
 public class BossAI implements EnemyAI {
   private static final int HIGH_ARMOR_THRESHOLD = 8;
 
+  /** Magnitude passed with a SILENCE effect; the effect itself is a simple on/off block. */
+  private static final int SILENCE_VALUE = 1;
+
+  /** Player turns a single SILENCE lasts for. */
+  private static final int SILENCE_DURATION = 2;
+
+  /** Health the player loses for each card played while the effect is active. */
+  private static final int CARD_PLAY_DAMAGE = 3;
+
+  /** Player turns a single damage-on-card-play effect lasts for. */
+  private static final int CARD_PLAY_DAMAGE_DURATION = 3;
+
+  /**
+   * Turns the Boss must wait between debuffs.
+   *
+   * <p>{@code CombatStatsComponent.applyStatusEffect} overwrites an effect of the same type, so
+   * re-applying every turn would refresh the duration indefinitely and lock the player out of
+   * playing cards for the rest of the fight. The Boss cannot read the player's active effects from
+   * {@link EnemyAIContext}, so the cooldown is tracked here instead.
+   */
+  private static final int DEBUFF_COOLDOWN_TURNS = 3;
+
   private final Random random;
 
   private BossPhase currentPhase = BossPhase.PHASE_ONE;
   private BossMove previousMove;
   private int consecutiveAttacks;
+  private int debuffCooldownRemaining;
 
   /** Creates a Boss AI using normal runtime randomness. */
   public BossAI() {
@@ -40,6 +64,7 @@ public class BossAI implements EnemyAI {
     Objects.requireNonNull(context, "context cannot be null");
 
     updatePhase(context);
+    tickDebuffCooldown();
 
     PressureLevel pressure = calculatePressure(context);
     EnumMap<BossMove, Integer> weights = getBaseWeights(currentPhase);
@@ -73,6 +98,13 @@ public class BossAI implements EnemyAI {
 
     if (desiredPhase.ordinal() > currentPhase.ordinal()) {
       currentPhase = desiredPhase;
+    }
+  }
+
+  /** Counts down the debuff cooldown once per decision. */
+  private void tickDebuffCooldown() {
+    if (debuffCooldownRemaining > 0) {
+      debuffCooldownRemaining--;
     }
   }
 
@@ -115,23 +147,35 @@ public class BossAI implements EnemyAI {
       case PHASE_ONE -> {
         weights.put(BossMove.ATTACK, 45);
         weights.put(BossMove.DEFEND, 55);
+        weights.put(BossMove.SILENCE, 0);
+        weights.put(BossMove.DAMAGE_ON_CARD_PLAY, 0);
       }
 
       case PHASE_TWO -> {
         weights.put(BossMove.ATTACK, 65);
         weights.put(BossMove.DEFEND, 35);
+        weights.put(BossMove.SILENCE, 20);
+        weights.put(BossMove.DAMAGE_ON_CARD_PLAY, 10);
       }
 
       case ENRAGED -> {
         weights.put(BossMove.ATTACK, 90);
         weights.put(BossMove.DEFEND, 10);
+        weights.put(BossMove.SILENCE, 15);
+        weights.put(BossMove.DAMAGE_ON_CARD_PLAY, 25);
       }
     }
 
     return weights;
   }
 
-  /** Modifies the current phase table according to the global pressure level. */
+  /**
+   * Modifies the current phase table according to the global pressure level.
+   *
+   * <p>Pressure moves weight between attacking and defending only. Debuff weights are set by the
+   * phase and by {@link #applyConstraints}, so that rising pressure cannot turn the Boss into a
+   * permanent debuff machine.
+   */
   private void applyPressure(EnumMap<BossMove, Integer> weights, PressureLevel pressure) {
     switch (pressure) {
       case LOW -> {
@@ -173,7 +217,14 @@ public class BossAI implements EnemyAI {
       adjustWeight(weights, BossMove.ATTACK, -20);
       adjustWeight(weights, BossMove.DEFEND, 20);
     }
-
+    // Hold off on a second debuff until the first has had time to expire.
+    if (debuffCooldownRemaining > 0) {
+      for (BossMove move : BossMove.values()) {
+        if (move.isDebuff()) {
+          weights.put(move, 0);
+        }
+      }
+    }
     ensureAvailableMove(weights);
   }
 
@@ -203,6 +254,10 @@ public class BossAI implements EnemyAI {
     return switch (move) {
       case ATTACK -> EnemyIntent.attack(context.getEnemyAttack());
       case DEFEND -> EnemyIntent.defend(getDefendAmount(currentPhase));
+      case SILENCE -> EnemyIntent.debuff(IntentEffectType.SILENCE, SILENCE_VALUE, SILENCE_DURATION);
+      case DAMAGE_ON_CARD_PLAY ->
+          EnemyIntent.debuff(
+              IntentEffectType.DAMAGE_ON_CARD_PLAY, CARD_PLAY_DAMAGE, CARD_PLAY_DAMAGE_DURATION);
     };
   }
 
@@ -223,6 +278,9 @@ public class BossAI implements EnemyAI {
       consecutiveAttacks++;
     } else {
       consecutiveAttacks = 0;
+    }
+    if (selectedMove.isDebuff()) {
+      debuffCooldownRemaining = DEBUFF_COOLDOWN_TURNS;
     }
   }
 
@@ -253,6 +311,13 @@ public class BossAI implements EnemyAI {
     return consecutiveAttacks;
   }
 
+  /**
+   * @return turns remaining before the Boss may apply another debuff
+   */
+  public int getDebuffCooldownRemaining() {
+    return debuffCooldownRemaining;
+  }
+
   /** High-level states of the Boss fight. */
   public enum BossPhase {
     PHASE_ONE,
@@ -263,7 +328,16 @@ public class BossAI implements EnemyAI {
   /** Actions currently supported by the battle execution system. */
   public enum BossMove {
     ATTACK,
-    DEFEND
+    DEFEND,
+    SILENCE,
+    DAMAGE_ON_CARD_PLAY;
+
+    /**
+     * @return true if this move inflicts a status effect on the player
+     */
+    boolean isDebuff() {
+      return this == SILENCE || this == DAMAGE_ON_CARD_PLAY;
+    }
   }
 
   /** Global aggression level applied on top of the current phase table. */
