@@ -8,5 +8,5 @@ public enum IntentType {
   /** Weakens the player. */
   DEBUFF,
   /** Intent is hidden or not yet decided. */
-  UNKNOWN
+  UNKNOWN,
 }

@@ -1,0 +1,130 @@
+{
+    "cards": [
+      {
+        "id": "strike",
+        "name": "Strike",
+        "description": "Deal 6 damage.",
+        "cost": 1,
+        "type": "ATTACK",
+        "rarity": "COMMON",
+        "target": "SINGLE_ENEMY",
+        "effects": [{ "type": "DAMAGE", "value": 6, "duration": 0 }],
+        "texturePath": "images/cards/strike.png",
+        "upgrade": {
+          "name": "Strike+",
+          "description": "Deal 12 damage.",
+          "cost": 1,
+          "rarity": "COMMON",
+          "effects": [{ "type": "DAMAGE", "value": 12, "duration": 0 }]
+        }
+      },
+      {
+        "id": "defend",
+        "name": "Defend",
+        "description": "Gain 5 block.",
+        "cost": 1,
+        "type": "SKILL",
+        "rarity": "COMMON",
+        "target": "SELF",
+        "effects": [{ "type": "BLOCK", "value": 5, "duration": 0 }],
+        "texturePath": "images/cards/defend.png"
+      },
+      {
+        "id": "poison_dagger",
+        "name": "Poison Dagger",
+        "description": "Deal 4 damage. Apply 3 Poison for 3 turns.",
+        "cost": 1,
+        "type": "ATTACK",
+        "rarity": "UNCOMMON",
+        "target": "SINGLE_ENEMY",
+        "effects": [
+          { "type": "DAMAGE", "value": 4, "duration": 0 },
+          { "type": "POISON", "value": 3, "duration": 3 }
+        ],
+        "texturePath": "images/cards/poison_dagger.png"
+      },
+      {
+        "id": "expose",
+        "name": "Expose",
+        "description": "Apply 2 Vulnerable to all enemies for 2 turns.",
+        "cost": 1,
+        "type": "SKILL",
+        "rarity": "UNCOMMON",
+        "target": "ALL_ENEMIES",
+        "effects": [{ "type": "VULNERABLE", "value": 2, "duration": 2 }],
+        "texturePath": "images/cards/expose.png"
+      },
+      {
+        "id": "inner_focus",
+        "name": "Inner Focus",
+        "description": "Gain 2 Strength for the rest of combat.",
+        "cost": 2,
+        "type": "POWER",
+        "rarity": "RARE",
+        "target": "SELF",
+        "effects": [{ "type": "STRENGTH", "value": 2, "duration": 0 }],
+        "texturePath": "images/cards/inner_focus.png"
+      },
+      {
+        "id": "bandage",
+        "name": "Bandage",
+        "description": "Heal 6 health.",
+        "cost": 1,
+        "type": "SKILL",
+        "rarity": "COMMON",
+        "target": "SELF",
+        "effects": [{ "type": "HEAL", "value": 6, "duration": 0 }],
+        "texturePath": "images/cards/bandage.png"
+      },
+      {
+        "id": "starfall",
+        "name": "Starfall",
+        "description": "Deal 6 damage to all enemies.",
+        "cost": 2,
+        "type": "ATTACK",
+        "rarity": "UNCOMMON",
+        "target": "ALL_ENEMIES",
+        "effects": [{ "type": "DAMAGE", "value": 6, "duration": 0 }],
+        "texturePath": "images/cards/starfall.png"
+      },
+      {
+        "id": "rift_lance",
+        "name": "Rift Lance",
+        "description": "Deal 4 damage. Apply 1 Vulnerable for 2 turns.",
+        "cost": 1,
+        "type": "ATTACK",
+        "rarity": "UNCOMMON",
+        "target": "SINGLE_ENEMY",
+        "effects": [
+          { "type": "DAMAGE", "value": 4, "duration": 0 },
+          { "type": "VULNERABLE", "value": 1, "duration": 2 }
+        ],
+        "texturePath": "images/cards/rift_lance.png"
+      },
+      {
+        "id": "astral_ward",
+        "name": "Astral Ward",
+        "description": "Gain 4 Block. Gain 1 Strength for the rest of combat.",
+        "cost": 2,
+        "type": "SKILL",
+        "rarity": "UNCOMMON",
+        "target": "SELF",
+        "effects": [
+          { "type": "BLOCK", "value": 4, "duration": 0 },
+          { "type": "STRENGTH", "value": 1, "duration": 0 }
+        ],
+        "texturePath": "images/cards/astral_ward.png"
+      },
+      {
+        "id": "resurrection",
+        "name": "Resurrection",
+        "description": "Heal 6 HP at the start of your next 3 turns.",
+        "cost": 5,
+        "type": "SKILL",
+        "rarity": "RARE",
+        "target": "SELF",
+        "effects": [{ "type": "HEAL", "value": 6, "duration": 3 }],
+        "texturePath": "images/cards/resurrection.png"
+      }
+    ]
+  }

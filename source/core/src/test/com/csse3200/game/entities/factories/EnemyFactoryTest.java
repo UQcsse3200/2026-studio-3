@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.enemy.EnemyAnimationController;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyStatsComponent;
@@ -61,6 +62,7 @@ class EnemyFactoryTest {
   void createAttachesStatsAndBehaviour() {
     Entity enemy = EnemyFactory.create("lesser_shade");
 
+    assertNotNull(enemy.getComponent(CombatStatsComponent.class));
     assertNotNull(enemy.getComponent(EnemyStatsComponent.class));
     assertNotNull(enemy.getComponent(EnemyBehaviourComponent.class));
   }
@@ -83,15 +85,23 @@ class EnemyFactoryTest {
   @Test
   void createUsesRosterStats() {
     Entity enemy = EnemyFactory.create("lesser_shade");
-    EnemyStatsComponent stats = enemy.getComponent(EnemyStatsComponent.class);
+    CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
 
     assertEquals(24, stats.getHealth());
   }
 
   @Test
+  void createUsesRosterDisplayName() {
+    Entity enemy = EnemyFactory.create("lesser_shade");
+    EnemyStatsComponent enemyStats = enemy.getComponent(EnemyStatsComponent.class);
+
+    assertNotNull(enemyStats.getDisplayName());
+  }
+
+  @Test
   void createFallsBackForUnknownId() {
     Entity enemy = EnemyFactory.create("does_not_exist");
-    EnemyStatsComponent stats = enemy.getComponent(EnemyStatsComponent.class);
+    CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
 
     assertNotNull(stats);
     assertEquals(1, stats.getHealth()); // BaseEntityConfig default health
@@ -105,25 +115,26 @@ class EnemyFactoryTest {
     config.armour = 3;
 
     Entity enemy = EnemyFactory.create(config);
-    EnemyStatsComponent stats = enemy.getComponent(EnemyStatsComponent.class);
+    CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
 
     assertEquals(50, stats.getHealth());
-    assertEquals(3, stats.getArmour());
+    assertEquals(9, stats.getBaseAttack());
+    assertEquals(3, stats.getArmor());
   }
 
   @Test
   void createWithFloorZeroKeepsBaseStats() {
     Entity enemy = EnemyFactory.create("void_knight", 0);
 
-    assertEquals(72, enemy.getComponent(EnemyStatsComponent.class).getHealth());
+    assertEquals(72, enemy.getComponent(CombatStatsComponent.class).getHealth());
   }
 
   @Test
   void createWithHigherFloorScalesStatsUp() {
     int baseHealth =
-        EnemyFactory.create("void_knight", 0).getComponent(EnemyStatsComponent.class).getHealth();
+        EnemyFactory.create("void_knight", 0).getComponent(CombatStatsComponent.class).getHealth();
     int scaledHealth =
-        EnemyFactory.create("void_knight", 5).getComponent(EnemyStatsComponent.class).getHealth();
+        EnemyFactory.create("void_knight", 5).getComponent(CombatStatsComponent.class).getHealth();
 
     assertTrue(scaledHealth > baseHealth);
   }

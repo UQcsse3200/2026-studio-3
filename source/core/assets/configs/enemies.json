@@ -16,7 +16,7 @@
       "baseAttack": 5,
       "armour": 2,
       "tier": "NORMAL",
-      "behaviour": "cycle_four_stance"
+      "behaviour": "defensive_stance"
     },
     {
       "id": "dark_acolyte",

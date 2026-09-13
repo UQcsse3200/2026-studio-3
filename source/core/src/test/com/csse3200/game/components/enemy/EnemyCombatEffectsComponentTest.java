@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.utils.Array;
+import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.rendering.AnimationRenderComponent;
@@ -44,7 +45,7 @@ class EnemyCombatEffectsComponentTest {
     animator.startAnimation("test_name");
 
     Entity entity = new Entity();
-    entity.addComponent(new EnemyStatsComponent(20, 6, 0));
+    entity.addComponent(new CombatStatsComponent(20, 6));
     entity.addComponent(animator);
     entity.addComponent(new EnemyCombatEffectsComponent());
     entity.create();
@@ -63,13 +64,27 @@ class EnemyCombatEffectsComponentTest {
   }
 
   @Test
-  void shouldFlashOnDefend() {
+  void shouldFlashWhenArmorIncreases() {
     Entity enemy = newEnemy();
     AnimationRenderComponent animator = enemy.getComponent(AnimationRenderComponent.class);
 
-    enemy.getEvents().trigger("enemyDefended", 4);
+    enemy.getEvents().trigger("updateArmor", 4);
 
     assertEquals(Color.CYAN, animator.getActiveTint());
+  }
+
+  // updateArmor 在护甲减少（比如被伤害吸收）时也会触发，这种情况不应该播放防御闪烁
+  @Test
+  void shouldNotFlashWhenArmorDecreases() {
+    Entity enemy = newEnemy();
+    AnimationRenderComponent animator = enemy.getComponent(AnimationRenderComponent.class);
+
+    enemy.getEvents().trigger("updateArmor", 4);
+    animator.clearTint();
+
+    enemy.getEvents().trigger("updateArmor", 1);
+
+    assertNull(animator.getActiveTint());
   }
 
   @Test

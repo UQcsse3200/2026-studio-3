@@ -36,6 +36,7 @@ public final class EnemyScaling {
     scaled.armour = base.armour;
     scaled.tier = base.tier;
     scaled.behaviour = base.behaviour;
+    scaled.sprite = base.sprite;
 
     return scaled;
   }

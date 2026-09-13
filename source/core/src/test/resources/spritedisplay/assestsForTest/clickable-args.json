@@ -1,0 +1,10 @@
+{
+  "Clickable": [
+    {
+      "trigger": "poisonCard",
+      "x": 0,
+      "y": 0,
+      "args": [5, 2.5, "poison", true, 4.0]
+    }
+  ]
+}
