@@ -33,14 +33,23 @@ public class MainMenuActions extends Component {
     game.setScreen(GdxGame.ScreenType.MAP);
   }
 
-  /** Intended for loading a saved game state. Load functionality is not actually implemented. */
+  /** Opens the Save/Load screen. */
   private void onLoad() {
-    logger.info("Load game"); // Hi Team 5, Please work on that ;)
+    logger.info("Opening save/load screen");
+    game.setScreen(GdxGame.ScreenType.SAVE_LOAD);
   }
 
   /** Intended for displaying the bestiary. Bestiary functionality is not actually implemented. */
   private void onBestiary() {
     logger.info("Bestiary");
+  }
+
+  /** Opens the library screen. Not currently reachable from the main menu — see TODO. */
+  // TODO: no menu button currently triggers this event; flagged to Team 4/William re: whether
+  // Library needs a menu entry point now that the old menu (which had one) is gone.
+  private void onLibrary() {
+    logger.info("Opening library screen");
+    game.setScreen(GdxGame.ScreenType.LIBRARY);
   }
 
   /** Exits the game. */

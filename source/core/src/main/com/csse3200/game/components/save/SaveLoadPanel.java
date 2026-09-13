@@ -6,7 +6,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.save.DeleteSaveResult;
 import com.csse3200.game.save.LoadResult;
+import com.csse3200.game.save.RestoreResult;
 import com.csse3200.game.save.SaveErrorMessages;
+import com.csse3200.game.save.SaveGameRestoreService;
 import com.csse3200.game.save.SaveGameService;
 import com.csse3200.game.save.SaveResult;
 import com.csse3200.game.save.SaveSlotListResult;
@@ -29,14 +31,26 @@ public class SaveLoadPanel extends UIComponent {
       DateTimeFormatter.ofPattern("dd MMM, HH:mm").withZone(ZoneId.systemDefault());
 
   private final SaveGameService saveGameService;
+  private final SaveGameRestoreService restoreService;
   private final List<Integer> slotIds;
+  private final Runnable backAction;
 
   private Table rootTable;
   private Label statusLabel;
 
   public SaveLoadPanel(SaveGameService saveGameService, List<Integer> slotIds) {
+    this(saveGameService, slotIds, null, null);
+  }
+
+  public SaveLoadPanel(
+      SaveGameService saveGameService,
+      List<Integer> slotIds,
+      SaveGameRestoreService restoreService,
+      Runnable backAction) {
     this.saveGameService = saveGameService;
+    this.restoreService = restoreService;
     this.slotIds = List.copyOf(slotIds);
+    this.backAction = backAction;
   }
 
   @Override
@@ -50,10 +64,29 @@ public class SaveLoadPanel extends UIComponent {
     rootTable = new Table();
     rootTable.setFillParent(true);
 
+    addHeader();
+
     statusLabel = new Label("", skin);
     rootTable.add(statusLabel).colspan(4).padBottom(10f).row();
 
     stage.addActor(rootTable);
+  }
+
+  private void addHeader() {
+    rootTable.add(new Label("Save / Load", skin, "title")).colspan(3).padBottom(20f);
+    if (backAction != null) {
+      TextButton backButton = new TextButton("Back", skin);
+      backButton.addListener(
+          new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+              backAction.run();
+            }
+          });
+      rootTable.add(backButton).padBottom(20f).row();
+    } else {
+      rootTable.add().padBottom(20f).row();
+    }
   }
 
   /** Rebuilds the slot list from the current save state. Call after any save/load/delete. */
@@ -67,6 +100,7 @@ public class SaveLoadPanel extends UIComponent {
     }
 
     rootTable.clearChildren();
+    addHeader();
     rootTable.add(statusLabel).colspan(4).padBottom(10f).row();
 
     for (int slotId : slotIds) {
@@ -129,10 +163,38 @@ public class SaveLoadPanel extends UIComponent {
 
   private void onLoad(int slotId) {
     LoadResult result = saveGameService.loadGame(slotId);
-    statusLabel.setText(SaveErrorMessages.forLoad(result));
-    // Note: this only reads and validates the save — actually applying it to the live game is
-    // William's restore logic, not this panel's job. Hook that in once it's ready.
+    if (!result.success() || restoreService == null) {
+      statusLabel.setText(SaveErrorMessages.forLoad(result));
+      refresh();
+      return;
+    }
+
+    RestoreResult restoreResult = restoreService.restore(result.data());
+    statusLabel.setText(formatRestoreMessage(restoreResult));
     refresh();
+  }
+
+  private String formatRestoreMessage(RestoreResult result) {
+    if (result.success()) {
+      String resumeScreen =
+          result.resumeScreen().isBlank()
+              ? "the saved run"
+              : readableResumeScreen(result.resumeScreen());
+      return "Save loaded successfully. Ready to resume from " + resumeScreen + ".";
+    }
+    return result.message().isBlank()
+        ? "Load failed: unable to restore save data"
+        : result.message();
+  }
+
+  private String readableResumeScreen(String resumeScreen) {
+    return switch (resumeScreen) {
+      case "MAP" -> "the Map";
+      case "BATTLE_SCREEN" -> "the Battle";
+      case "ENCOUNTER" -> "the Encounter";
+      case "MAIN_MENU" -> "the Main Menu";
+      default -> resumeScreen;
+    };
   }
 
   private void onDelete(int slotId) {

@@ -41,8 +41,41 @@ class JsonSaveGameRepositoryTest {
     assertEquals(List.of("strike", "defend", "strike"), loadResult.data().deck.cardIds);
     assertEquals(7, loadResult.data().map.currentNodeId);
     assertEquals(List.of(8, 9), loadResult.data().map.nodes.get(0).connectionIds);
-    assertEquals(List.of("shop-1"), loadResult.data().progress.completedEncounterIds);
+    assertEquals("CURRENT", loadResult.data().map.nodes.get(0).state);
+    assertEquals("reward-2", loadResult.data().progress.pendingRewardId);
+    assertEquals("MAP", loadResult.data().progress.resumeScreen);
     assertFalse(Files.exists(temporaryDirectory.resolve("slot-2.json.tmp")));
+  }
+
+  @Test
+  void shouldIgnoreLegacyCompletedEncounterIds() throws IOException {
+    Files.writeString(
+        temporaryDirectory.resolve("slot-1.json"),
+        """
+        {
+          "schemaVersion": 1,
+          "metadata": {"slotId": 1, "savedAtEpochMillis": 123456, "runLabel": "Legacy run"},
+          "player": {"currentHealth": 43, "maxHealth": 60, "gold": 120, "piety": 0},
+          "deck": {"cardIds": ["strike"]},
+          "map": {
+            "nodes": [
+              {"nodeId": 7, "roomType": "COMBAT", "state": "COMPLETED", "connectionIds": []}
+            ],
+            "currentNodeId": 7
+          },
+          "progress": {
+            "completedEncounterIds": ["7"],
+            "pendingRewardId": "",
+            "resumeScreen": "MAP"
+          }
+        }
+        """);
+
+    LoadResult result = repository.load(1);
+
+    assertTrue(result.success());
+    assertEquals("COMPLETED", result.data().map.nodes.get(0).state);
+    assertEquals("MAP", result.data().progress.resumeScreen);
   }
 
   @Test
@@ -163,7 +196,7 @@ class JsonSaveGameRepositoryTest {
                     new MapNodeSaveData(8, "SHOP", "AVAILABLE", List.of(7))),
                 7,
                 null),
-            new ProgressSaveData(List.of("shop-1"), "reward-2", "MAP"));
+            new ProgressSaveData("reward-2", "MAP"));
     data.metadata = new SaveSlotMetadata(slotId, 123456L, label, 321L, "MAP");
     assertNotNull(data.metadata);
     return data;
