@@ -47,6 +47,15 @@ public class BattleActions extends Component {
     this.library = library;
   }
 
+  /**
+   * Returns whether the battle is waiting for player input.
+   *
+   * @return true only during the player turn, excluding card resolution and all other phases
+   */
+  public boolean isPlayerTurn() {
+    return controller.isPlayerTurn();
+  }
+
   @Override
   public void create() {
     entity.getEvents().addListener("battle", this::onStart);
