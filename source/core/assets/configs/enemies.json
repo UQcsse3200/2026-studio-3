@@ -43,7 +43,7 @@
       "baseAttack": 14,
       "armour": 8,
       "tier": "BOSS",
-      "behaviour": "cycle_four_stance",
+      "behaviour": "BOSS",
       "sprite": "images/enemies/boss_knight.atlas"
     }
   ]
