@@ -32,48 +32,31 @@ class Team3CardPlayAdapterTest {
 
     CardLibrary cards = new CardLibrary(List.of(strike, defend));
 
-    BattleDeck deck =
-            new BattleDeck(
-                    new PlayerDeck(
-                            cards,
-                            List.of("strike", "defend")));
+    BattleDeck deck = new BattleDeck(new PlayerDeck(cards, List.of("strike", "defend")));
 
     // Only draw the first card. defend remains in the draw pile as the replacement.
     deck.drawOne();
 
     EnergyComponent energy = new EnergyComponent(3);
     CombatStatsComponent playerStats = new CombatStatsComponent(10, 1);
-    Team7PlayerStateAdapter player =
-            new Team7PlayerStateAdapter(energy, playerStats);
+    Team7PlayerStateAdapter player = new Team7PlayerStateAdapter(energy, playerStats);
 
     CombatStatsComponent enemyStats = new CombatStatsComponent(10, 1);
     Entity enemyEntity = new Entity().addComponent(enemyStats);
-    Team1EnemyStateAdapter enemies =
-            new Team1EnemyStateAdapter(Map.of("enemy-1", enemyEntity));
+    Team1EnemyStateAdapter enemies = new Team1EnemyStateAdapter(Map.of("enemy-1", enemyEntity));
 
-    CardPlayService playService =
-            new CardPlayService(cards, deck, energy, player, enemies);
+    CardPlayService playService = new CardPlayService(cards, deck, energy, player, enemies);
 
-    Team3CardPlayAdapter adapter =
-            new Team3CardPlayAdapter(cards, playService);
+    Team3CardPlayAdapter adapter = new Team3CardPlayAdapter(cards, playService);
 
     Entity battleFlow = new Entity().addComponent(adapter);
 
     AtomicReference<CardPlayResult> observed = new AtomicReference<>();
-    battleFlow
-            .getEvents()
-            .addListener(
-                    Team3CardPlayAdapter.CARD_PLAY_RESULT_EVENT,
-                    observed::set);
+    battleFlow.getEvents().addListener(Team3CardPlayAdapter.CARD_PLAY_RESULT_EVENT, observed::set);
 
     battleFlow.create();
 
-    battleFlow
-            .getEvents()
-            .trigger(
-                    Team3CardPlayAdapter.PLAY_CARD_EVENT,
-                    "strike",
-                    "enemy-1");
+    battleFlow.getEvents().trigger(Team3CardPlayAdapter.PLAY_CARD_EVENT, "strike", "enemy-1");
 
     assertNotNull(observed.get());
     assertTrue(observed.get().success());
@@ -88,7 +71,6 @@ class Team3CardPlayAdapterTest {
     assertEquals(List.of("defend"), deck.getHand());
     assertEquals(List.of("strike"), deck.getDiscardPile());
   }
-
 
   private static CardConfig strike() {
     CardConfig card = new CardConfig();

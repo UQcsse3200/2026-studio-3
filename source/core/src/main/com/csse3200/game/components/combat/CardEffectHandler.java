@@ -135,9 +135,17 @@ public class CardEffectHandler {
     for (ResolvedCardEffect effect : effects) {
       switch (effect.type()) {
         case BLOCK -> stats.addArmor(effect.value());
-        case HEAL -> stats.heal(effect.value());
+        case HEAL -> {
+          if (effect.duration() > 0) {
+            stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
+          } else {
+            stats.heal(effect.value());
+          }
+        }
+        case STRENGTH ->
+            stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
         default -> {
-          // STRENGTH is already folded into the resolver's running player state.
+          // Enemy-facing effects are handled separately.
         }
       }
     }
@@ -149,10 +157,10 @@ public class CardEffectHandler {
    * @param enemy The enemy to be checked.
    * @return True if the enemy is alive, False if not.
    */
-//  public boolean isEnemyAlive(Entity enemy) {
-//    CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
-//    return !stats.isDead();
-//  }
+  //  public boolean isEnemyAlive(Entity enemy) {
+  //    CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
+  //    return !stats.isDead();
+  //  }
 
   /**
    * Chooses which enemies a card's enemy effects hit. Self-targeting cards hit nothing; everything

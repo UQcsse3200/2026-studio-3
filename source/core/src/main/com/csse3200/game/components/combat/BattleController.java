@@ -1,17 +1,11 @@
 package com.csse3200.game.components.combat;
 
+import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.effects.*;
+import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.cards.play.CardPlayResult;
 import com.csse3200.game.cards.play.CardPlayService;
-import com.csse3200.game.cards.CardService;
-import com.csse3200.game.cards.EffectType;
-import com.csse3200.game.cards.configs.CardConfig;
-import com.csse3200.game.cards.deck.BattleDeck;
-import com.csse3200.game.cards.effects.CardEffectResolution;
-import com.csse3200.game.cards.effects.CardEffectResolver;
-import com.csse3200.game.cards.effects.PlayerEffectState;
-import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
@@ -27,7 +21,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
-
 
 /**
  * The central controller of the current state of the battle loop. Controls what phase the battle is
@@ -694,31 +687,12 @@ public class BattleController {
     }
     // Start-of-turn operations: refill energy for the new player turn.
     EnergyComponent energy = playerEnergy();
-    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
-
-    // NOTE: This part of the code relies on functionality that I suspect hasn't been committed to main yet
-    /**
     if (energy != null) {
       energy.onTurnStart();
-      for (ResolvedCardEffect effect : effects) {
-        switch (effect.type()) {
-          case BLOCK -> stats.addArmor(effect.value());
-          case HEAL -> {
-            if (effect.duration() > 0) {
-              stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
-            } else {
-              stats.heal(effect.value());
-            }
-          }
-          default -> {
-            // STRENGTH is already folded into the resolver's running player state.
-          }
-        }
-      }
-     **/
-      handle(BattleEvent.PLAYER_TURN_STARTED);
     }
-
+    applyHealingAtTurnStart();
+    handle(BattleEvent.PLAYER_TURN_STARTED);
+  }
 
   private void enterPlayerTurn() {
     // Enable or accept player actions.
