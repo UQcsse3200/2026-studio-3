@@ -38,6 +38,7 @@ import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.DragNDropService;
 import com.csse3200.game.services.GameTime;
+import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import java.nio.file.Path;
@@ -83,7 +84,9 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.registerDragNDropService(new DragNDropService());
 
     logger.debug("Initialising main game screen services");
-    ServiceLocator.registerTimeSource(new GameTime());
+    GameTime gameTime = new GameTime();
+    ServiceLocator.registerTimeSource(gameTime);
+    ServiceLocator.registerPauseService(new GamePauseService(gameTime));
 
     PhysicsService physicsService = new PhysicsService();
     ServiceLocator.registerPhysicsService(physicsService);
