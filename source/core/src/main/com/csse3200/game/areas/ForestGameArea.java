@@ -3,14 +3,12 @@ package com.csse3200.game.areas;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.areas.terrain.TerrainFactory.TerrainType;
 import com.csse3200.game.components.gamearea.CombatBackgroundConfig;
 import com.csse3200.game.components.gamearea.CombatBackgroundConfigs;
 import com.csse3200.game.files.FileLoader;
-import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.gamearea.GameAreaDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.factories.EnemyFactory;
@@ -87,10 +85,12 @@ public class ForestGameArea extends GameArea {
   /** Create the game area, including terrain, static entities (trees), dynamic entities (player) */
   @Override
   public void create() {
+    readBackgroundConfig();
     loadAssets();
     spawnTerrain();
+
     // Comment this part of the code out to revert back to the original background
-    spawnBackGround();
+    spawnBackground();
 
     enemy = spawnEnemy();
     player = spawnPlayer();
@@ -127,6 +127,8 @@ public class ForestGameArea extends GameArea {
               BACKGROUND_ID
       );
     }
+
+    // TODO: Check for missing texture.
 
     backgroundConfig = selectedBackGround;
   }
@@ -183,10 +185,27 @@ public class ForestGameArea extends GameArea {
     return newPlayer;
   }
 
-  private void spawnBackGround() {
-    Texture texture = ServiceLocator
-            .getResourceService()
-            .getAsset("images/grass_1.png", Texture.class);
+  private void spawnBackground() {
+
+    if (backgroundConfig == null) return;
+
+    Texture texture;
+    try {
+      texture = ServiceLocator
+              .getResourceService()
+              .getAsset("images/grass_1.png", Texture.class);
+    } catch (RuntimeException e){
+      logger.warn(
+              "Background texture missing: {}",
+              backgroundConfig.texture
+      );
+      return;
+    }
+
+    texture.setFilter(
+            Texture.TextureFilter.Nearest,
+            Texture.TextureFilter.Nearest
+    );
 
     OrthographicCamera camera = (OrthographicCamera) ServiceLocator.getCamera();
 
@@ -251,6 +270,12 @@ public class ForestGameArea extends GameArea {
     resourceService.loadSounds(forestSounds);
     // resourceService.loadMusic(forestMusic);
 
+    if (backgroundConfig != null) {
+      resourceService.loadTextures(
+              new String[] {backgroundConfig.texture}
+      );
+    }
+
     while (!resourceService.loadForMillis(10)) {
       // This could be upgraded to a loading screen
       logger.info("Loading... {}%", resourceService.getProgress());
@@ -260,6 +285,8 @@ public class ForestGameArea extends GameArea {
   private void unloadAssets() {
     logger.debug("Unloading assets");
     ResourceService resourceService = ServiceLocator.getResourceService();
+
+    resourceService.unloadAssets(new String[] {backgroundConfig.texture});
     resourceService.unloadAssets(forestTextures);
     resourceService.unloadAssets(forestTextureAtlases);
     resourceService.unloadAssets(forestSounds);
