@@ -1,7 +1,9 @@
 package com.csse3200.game.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.components.mainmenu.MainMenuActions;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
@@ -20,6 +22,14 @@ import org.slf4j.LoggerFactory;
 /** The game screen containing the main menu. */
 public class MainMenuScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(MainMenuScreen.class);
+  private static final float VIRTUAL_WIDTH = 1280f;
+  private static final float VIRTUAL_HEIGHT = 800f;
+  private static final String[] MAIN_MENU_TEXTURES = {
+    MainMenuDisplay.BACKGROUND_TEXTURE,
+    MainMenuDisplay.BUTTON_FRAME_TEXTURE,
+    MainMenuDisplay.TITLE_LOGO_TEXTURE
+  };
+
   private final GdxGame game;
   private final Renderer renderer;
 
@@ -33,8 +43,22 @@ public class MainMenuScreen extends ScreenAdapter {
     ServiceLocator.registerRenderService(new RenderService());
 
     renderer = RenderFactory.createRenderer();
+    configureViewport();
+    loadAssets();
 
     createUI();
+  }
+
+  private void configureViewport() {
+    FitViewport viewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+    renderer.getStage().setViewport(viewport);
+    viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+  }
+
+  private void loadAssets() {
+    ResourceService resourceService = ServiceLocator.getResourceService();
+    resourceService.loadTextures(MAIN_MENU_TEXTURES);
+    resourceService.loadAll();
   }
 
   @Override
@@ -66,6 +90,8 @@ public class MainMenuScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
+    ServiceLocator.getResourceService().unloadAssets(MAIN_MENU_TEXTURES);
+    ServiceLocator.getResourceService().dispose();
 
     ServiceLocator.clear();
   }

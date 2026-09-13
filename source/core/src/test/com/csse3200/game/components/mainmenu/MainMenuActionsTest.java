@@ -1,17 +1,15 @@
 package com.csse3200.game.components.mainmenu;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.csse3200.game.GdxGame;
-import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.maps.RunState;
-import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,34 +32,50 @@ class MainMenuActionsTest {
 
   @Test
   void startBeginsANewRunOnTheMap() {
-    menu.getEvents().trigger("start");
+    menu.getEvents().trigger(MainMenuDisplay.START_EVENT);
 
     verify(runState).endRun();
     verify(game).setScreen(GdxGame.ScreenType.MAP);
   }
 
   @Test
-  void loadReturnsToAnActiveRunOnTheMap() {
-    when(runState.isRunActive()).thenReturn(true);
+  void loadWaitsForBackendRoute() {
+    menu.getEvents().trigger(MainMenuDisplay.LOAD_EVENT);
 
-    menu.getEvents().trigger("load");
-
-    verify(game).setScreen(GdxGame.ScreenType.MAP);
+    verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
+    verify(runState, never()).endRun();
   }
 
   @Test
-  void loadDoesNothingWithoutAnActiveRun() {
-    when(runState.isRunActive()).thenReturn(false);
+  void bestiaryWaitsForBackendRoute() {
+    menu.getEvents().trigger(MainMenuDisplay.BESTIARY_EVENT);
 
-    menu.getEvents().trigger("load");
-
-    verify(game, never()).setScreen(GdxGame.ScreenType.MAP);
+    verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
+    verify(runState, never()).endRun();
   }
 
   @Test
-  void mainMenuConfigurationProvidesAStartButton() {
-    assertTrue(
-        ClickableFactory.loadRecordsFromJson(Path.of("sprites/MainMenuUi.json")).stream()
-            .anyMatch(record -> "start".equals(record.trigger())));
+  void settingsOpensSettingsScreen() {
+    menu.getEvents().trigger(MainMenuDisplay.SETTINGS_EVENT);
+
+    verify(game).setScreen(GdxGame.ScreenType.SETTINGS);
+  }
+
+  @Test
+  void exitClosesTheGame() {
+    menu.getEvents().trigger(MainMenuDisplay.EXIT_EVENT);
+
+    verify(game).exit();
+  }
+
+  @Test
+  void debugRoutesAreNotRegistered() {
+    menu.getEvents().trigger("map");
+    menu.getEvents().trigger("shop");
+    menu.getEvents().trigger("battle");
+
+    verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
+    verify(game, never()).exit();
+    verify(runState, never()).endRun();
   }
 }

@@ -1,13 +1,16 @@
 package com.csse3200.game.components.mainmenu;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Scaling;
+import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
 import java.util.List;
@@ -18,6 +21,12 @@ import org.slf4j.LoggerFactory;
 public class MainMenuDisplay extends UIComponent {
   private static final Logger logger = LoggerFactory.getLogger(MainMenuDisplay.class);
   private static final float Z_INDEX = 2f;
+  private static final float TITLE_WIDTH = 510f;
+  private static final float TITLE_HEIGHT = 170f;
+
+  public static final String BACKGROUND_TEXTURE = "images/main_menu_background.png";
+  public static final String BUTTON_FRAME_TEXTURE = "images/main_menu_button_frame.png";
+  public static final String TITLE_LOGO_TEXTURE = "images/main_menu_title_logo.png";
 
   public static final String START_EVENT = "start";
   public static final String LOAD_EVENT = "load";
@@ -40,17 +49,17 @@ public class MainMenuDisplay extends UIComponent {
   }
 
   private void addActors() {
-    rootStack =
-        new Stack(); // Using stack instead of table to allow for background and overlay to be added
-    // behind the content
+    rootStack = new Stack();
     rootStack.setFillParent(true);
 
-    Table background = new Table();
-    background.setBackground(skin.newDrawable("white", MenuTheme.deepPlum()));
+    Texture backgroundTexture = getTexture(BACKGROUND_TEXTURE);
+    backgroundTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    Image background = new Image(backgroundTexture);
+    background.setScaling(Scaling.fill);
     rootStack.add(background);
 
-    Color overlayColour = MenuTheme.earthBrown();
-    overlayColour.a = 0.18f;
+    Color overlayColour = MenuTheme.deepPlum();
+    overlayColour.a = 0.22f; // Set the alpha value to 0.22 for 22% opacity
     Table overlay = new Table();
     overlay.setBackground(skin.newDrawable("white", overlayColour));
     rootStack.add(overlay);
@@ -60,20 +69,23 @@ public class MainMenuDisplay extends UIComponent {
   }
 
   private Table buildContent() {
-    Label titleTop = new Label("THE FALL OF", skin, "title");
-    titleTop.setColor(MenuTheme.warmParchment());
-    titleTop.setFontScale(1.1f);
+    Texture titleTexture = getTexture(TITLE_LOGO_TEXTURE);
+    titleTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    // Set the filter to Nearest to avoid blurring the pixel art
+    Image titleLogo = new Image(titleTexture);
+    titleLogo.setScaling(Scaling.fit);
 
-    Label titleBottom = new Label("THE PANTHEON", skin, "title");
-    titleBottom.setColor(MenuTheme.warmParchment());
-    titleBottom.setFontScale(1.45f);
+    Texture buttonFrameTexture = getTexture(BUTTON_FRAME_TEXTURE);
+    buttonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
-    newGameButton = createButton("New Game", START_EVENT);
-    loadGameButton = createButton("Load Game", LOAD_EVENT);
-    bestiaryButton = createButton("Bestiary", BESTIARY_EVENT);
-    settingsButton = createButton("Settings", SETTINGS_EVENT);
-    exitButton = createButton("Exit", EXIT_EVENT);
+    // Build the buttons and add them to the menu table
+    newGameButton = createButton("New Game", START_EVENT, buttonFrameTexture);
+    loadGameButton = createButton("Load Game", LOAD_EVENT, buttonFrameTexture);
+    bestiaryButton = createButton("Bestiary", BESTIARY_EVENT, buttonFrameTexture);
+    settingsButton = createButton("Settings", SETTINGS_EVENT, buttonFrameTexture);
+    exitButton = createButton("Exit", EXIT_EVENT, buttonFrameTexture);
 
+    // Build the menu table and add the buttons to it
     menuTable = new Table();
     menuTable.setName("main-menu-buttons");
     menuTable.defaults().width(MenuTheme.BUTTON_WIDTH).height(MenuTheme.BUTTON_HEIGHT);
@@ -83,21 +95,16 @@ public class MainMenuDisplay extends UIComponent {
     addMenuButton(settingsButton);
     menuTable.add(exitButton);
 
-    Color panelColour = MenuTheme.deepPlum();
-    panelColour.a = 0.92f;
-    Table panel = new Table();
-    panel.setBackground(skin.newDrawable("window", panelColour));
-    panel.pad(MenuTheme.PANEL_PADDING);
-    panel.add(menuTable);
-
     Table content = new Table();
     content.setFillParent(true);
     content.center().pad(MenuTheme.SCREEN_PADDING);
-    content.add(titleTop).padBottom(4f);
+    content
+        .add(titleLogo)
+        .width(TITLE_WIDTH)
+        .height(TITLE_HEIGHT)
+        .padBottom(MenuTheme.TITLE_SPACING);
     content.row();
-    content.add(titleBottom).padBottom(MenuTheme.TITLE_SPACING);
-    content.row();
-    content.add(panel);
+    content.add(menuTable);
     return content;
   }
 
@@ -106,10 +113,9 @@ public class MainMenuDisplay extends UIComponent {
     menuTable.row().padTop(MenuTheme.BUTTON_SPACING);
   }
 
-  private TextButton createButton(String text, String eventName) {
-    TextButton button = new TextButton(text, MenuTheme.createButtonStyle(skin));
+  private TextButton createButton(String text, String eventName, Texture buttonFrameTexture) {
+    TextButton button = new TextButton(text, MenuTheme.createButtonStyle(skin, buttonFrameTexture));
     button.setName(eventName);
-    // Triggers an event when the button is pressed
     button.addListener(
         new ChangeListener() {
           @Override
@@ -119,6 +125,10 @@ public class MainMenuDisplay extends UIComponent {
           }
         });
     return button;
+  }
+
+  private Texture getTexture(String path) {
+    return ServiceLocator.getResourceService().getAsset(path, Texture.class);
   }
 
   @Override

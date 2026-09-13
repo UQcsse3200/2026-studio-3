@@ -35,7 +35,7 @@ public class MainMenuActions extends Component {
 
   /** Intended for loading a saved game state. Load functionality is not actually implemented. */
   private void onLoad() {
-    logger.info("Load game");
+    logger.info("Load game"); // Hi Team 5, Please work on that ;)
   }
 
   /** Intended for displaying the bestiary. Bestiary functionality is not actually implemented. */
