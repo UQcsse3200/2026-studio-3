@@ -49,10 +49,19 @@ class EnemyAIFactoryTest {
 
     assertInstanceOf(CycleAttackDefendAI.class, ai);
   }
+
   @Test
   void shouldCreateBossAI() {
     EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.BOSS);
 
     assertInstanceOf(BossAI.class, ai);
+  }
+
+  @Test
+  void shouldCreateSeparateBossAIInstances() {
+    EnemyAI first = EnemyAIFactory.create(EnemyAIFactory.BOSS);
+    EnemyAI second = EnemyAIFactory.create(EnemyAIFactory.BOSS);
+
+    assertNotSame(first, second);
   }
 }
