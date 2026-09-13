@@ -11,6 +11,7 @@ import com.csse3200.game.cards.CardType;
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.Rarity;
 import com.csse3200.game.cards.TargetType;
+import com.csse3200.game.cards.TestCardService;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
@@ -28,7 +29,7 @@ class CardPlayServiceTest {
     CardConfig strike =
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
     CardLibrary cardLibrary = new CardLibrary(List.of(strike));
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike")));
     battleDeck.drawOne();
     EnergyComponent energyComponent = new EnergyComponent(3);
     CardEffectResolutionService resolutionService = new CardEffectResolutionService(cardLibrary);
@@ -59,7 +60,10 @@ class CardPlayServiceTest {
     CardConfig strike =
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
     CardLibrary cardLibrary = new CardLibrary(List.of(strike));
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike", "defend")));
+    BattleDeck battleDeck =
+        new BattleDeck(
+            new PlayerDeck(
+                TestCardService.withCards("strike", "defend"), List.of("strike", "defend")));
     battleDeck.drawCards(2);
     EnergyComponent energyComponent = new EnergyComponent(3);
     CardPlayService playService = new CardPlayService(cardLibrary, battleDeck, energyComponent);
@@ -84,7 +88,8 @@ class CardPlayServiceTest {
     CardConfig strike =
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
     CardLibrary cardLibrary = new CardLibrary(List.of(strike));
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike")));
+    BattleDeck battleDeck =
+        new BattleDeck(new PlayerDeck(TestCardService.withCards("strike"), List.of("strike")));
     battleDeck.drawOne();
     EnergyComponent energyComponent = new EnergyComponent(3);
     PlayerStateView playerState = playerStateView(energyComponent, 2, 1);
@@ -108,7 +113,7 @@ class CardPlayServiceTest {
     CardConfig strike =
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
     CardLibrary cardLibrary = new CardLibrary(List.of(strike));
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike")));
     battleDeck.drawOne();
     EnergyComponent energyComponent = new EnergyComponent(3);
     PlayerStateView playerState = playerStateView(energyComponent, 0, 0);
@@ -130,7 +135,7 @@ class CardPlayServiceTest {
     CardConfig strike =
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
     CardLibrary cardLibrary = new CardLibrary(List.of(strike));
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike")));
     battleDeck.drawOne();
     EnergyComponent energyComponent = new EnergyComponent(3);
     CardEffectResolutionService resolutionService = new CardEffectResolutionService(cardLibrary);
@@ -151,7 +156,8 @@ class CardPlayServiceTest {
   @Test
   void shouldReturnUnknownCardFailureFromUnifiedEntryPoint() {
     CardLibrary cardLibrary = new CardLibrary();
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike")));
+    BattleDeck battleDeck =
+        new BattleDeck(new PlayerDeck(TestCardService.withCards("strike"), List.of("strike")));
     battleDeck.drawOne();
     EnergyComponent energyComponent = new EnergyComponent(3);
     CardPlayService playService = new CardPlayService(cardLibrary, battleDeck, energyComponent);
@@ -171,7 +177,7 @@ class CardPlayServiceTest {
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
     CardLibrary cardLibrary = new CardLibrary(List.of(strike));
     strike.effects = new EffectConfig[0];
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike")));
     battleDeck.drawOne();
     EnergyComponent energyComponent = new EnergyComponent(3);
     CardPlayService playService = new CardPlayService(cardLibrary, battleDeck, energyComponent);
@@ -191,7 +197,7 @@ class CardPlayServiceTest {
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
     CardLibrary cardLibrary = new CardLibrary(List.of(strike));
     BattleDeck failingDeck =
-        new BattleDeck(new PlayerDeck(List.of("strike"))) {
+        new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike"))) {
           @Override
           public List<String> getHand() {
             return List.of("strike");
@@ -216,7 +222,7 @@ class CardPlayServiceTest {
     CardConfig innerFocus =
         card("inner_focus", 2, TargetType.SELF, new EffectConfig(EffectType.STRENGTH, 2));
     CardLibrary cardLibrary = new CardLibrary(List.of(innerFocus));
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("inner_focus")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("inner_focus")));
     battleDeck.drawOne();
     EnergyComponent energyComponent = new EnergyComponent(3);
     energyComponent.spendEnergy(2);
@@ -241,7 +247,7 @@ class CardPlayServiceTest {
     CardConfig strike =
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
     CardLibrary cardLibrary = new CardLibrary(List.of(strike));
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike")));
     EnergyComponent energyComponent = new EnergyComponent(3);
     CardEffectResolutionService resolutionService = new CardEffectResolutionService(cardLibrary);
     CardPlayService playService =
@@ -263,7 +269,7 @@ class CardPlayServiceTest {
     CardConfig strike =
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
     CardLibrary cardLibrary = new CardLibrary(List.of(strike));
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike")));
     battleDeck.drawOne();
     EnergyComponent energyComponent = new EnergyComponent(3);
     CardPlayService playService = new CardPlayService(cardLibrary, battleDeck, energyComponent);
@@ -277,7 +283,7 @@ class CardPlayServiceTest {
     CardConfig strike =
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
     CardLibrary cardLibrary = new CardLibrary(List.of(strike));
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(List.of("strike")));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike")));
     EnergyComponent energyComponent = new EnergyComponent(3);
     CardEffectResolutionService resolutionService = new CardEffectResolutionService(cardLibrary);
 

@@ -38,7 +38,7 @@ public class EnemyStatsComponent extends Component {
     entity.getEvents().addListener("updateHealth", this::onHealthUpdated);
   }
 
-  private void onHealthUpdated(int health) {
+  private void onHealthUpdated(int health, int maxHealth) {
     if (health < lastHealth) {
       entity.getEvents().trigger("enemyDamaged", lastHealth - health);
     }

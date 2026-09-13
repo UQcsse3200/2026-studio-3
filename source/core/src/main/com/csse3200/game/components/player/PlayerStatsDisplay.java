@@ -20,6 +20,8 @@ public class PlayerStatsDisplay extends UIComponent {
   private Label pietyLabel;
   private Image moneyImage;
   private Label moneyLabel;
+  private static final float FONT_SCALE = 0.75f;
+  private static final String STYLE_NAME_LARGE = "large";
 
   /** Creates reusable ui styles and adds actors to the stage. */
   @Override
@@ -45,16 +47,18 @@ public class PlayerStatsDisplay extends UIComponent {
     table.padTop(45f).padLeft(5f);
 
     // Image size
-    float imageSideLength = 30f;
+    float imageSideLength = 20f;
 
     // Heart image
     heartImage =
         new Image(ServiceLocator.getResourceService().getAsset("images/heart.png", Texture.class));
 
     // Health text
-    int health = entity.getComponent(CombatStatsComponent.class).getHealth();
-    CharSequence healthText = String.format("Health: %d", health);
-    healthLabel = new Label(healthText, skin, "large");
+    int currentHealth = entity.getComponent(CombatStatsComponent.class).getHealth();
+    int maxHealth = entity.getComponent(CombatStatsComponent.class).getMaxHealth();
+    CharSequence healthText = String.format("Health: %d / %d", currentHealth, maxHealth);
+    healthLabel = new Label(healthText, skin, STYLE_NAME_LARGE);
+    healthLabel.setFontScale(FONT_SCALE);
 
     // Energy image
     energyImage =
@@ -62,16 +66,19 @@ public class PlayerStatsDisplay extends UIComponent {
 
     // Energy text
     EnergyComponent energyComponent = entity.getComponent(EnergyComponent.class);
-    int energy = energyComponent.getCurrentEnergy();
-    CharSequence energyText = String.format("Energy: %d", energy);
-    energyLabel = new Label(energyText, skin, "large");
+    int currentEnergy = energyComponent.getCurrentEnergy();
+    int maxEnergy = energyComponent.getMaxEnergy();
+    CharSequence energyText = String.format("Energy: %d / %d", currentEnergy, maxEnergy);
+    energyLabel = new Label(energyText, skin, STYLE_NAME_LARGE);
+    energyLabel.setFontScale(FONT_SCALE);
 
     // Piety image
     pietyImage =
         new Image(ServiceLocator.getResourceService().getAsset("images/piety.png", Texture.class));
 
     // Piety text
-    pietyLabel = new Label("Level: 1", skin, "large");
+    pietyLabel = new Label("Level: 1", skin, STYLE_NAME_LARGE);
+    pietyLabel.setFontScale(FONT_SCALE);
 
     // Money image
     moneyImage =
@@ -81,7 +88,8 @@ public class PlayerStatsDisplay extends UIComponent {
     InventoryComponent inventoryComponent = entity.getComponent(InventoryComponent.class);
     int money = inventoryComponent.getGold();
     CharSequence moneyText = String.format("Gold: $%d", money);
-    moneyLabel = new Label(moneyText, skin, "large");
+    moneyLabel = new Label(moneyText, skin, STYLE_NAME_LARGE);
+    moneyLabel.setFontScale(FONT_SCALE);
 
     table.add(heartImage).size(imageSideLength).pad(5);
     table.add(healthLabel);
@@ -108,20 +116,22 @@ public class PlayerStatsDisplay extends UIComponent {
   /**
    * Updates the player's health on the ui.
    *
-   * @param health player health
+   * @param currentHealth player's current health
+   * @param maxHealth player's max health
    */
-  public void updatePlayerHealthUI(int health) {
-    CharSequence text = String.format("Health: %d", health);
+  public void updatePlayerHealthUI(int currentHealth, int maxHealth) {
+    CharSequence text = String.format("Health: %d / %d", currentHealth, maxHealth);
     healthLabel.setText(text);
   }
 
   /**
    * Updates the player's energy on the ui.
    *
-   * @param energy player energy
+   * @param currentEnergy player's current energy
+   * @param maxEnergy player's max energy
    */
-  public void updatePlayerEnergyUI(int energy) {
-    CharSequence text = String.format("Energy: %d", energy);
+  public void updatePlayerEnergyUI(int currentEnergy, int maxEnergy) {
+    CharSequence text = String.format("Energy: %d / %d", currentEnergy, maxEnergy);
     energyLabel.setText(text);
   }
 

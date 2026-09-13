@@ -59,7 +59,7 @@ public class CombatStatsComponent extends Component {
 
   private void updateHealth() {
     if (entity != null) {
-      entity.getEvents().trigger("updateHealth", this.health);
+      entity.getEvents().trigger("updateHealth", this.health, this.maxHealth);
     }
   }
 

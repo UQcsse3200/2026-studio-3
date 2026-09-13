@@ -73,8 +73,8 @@ public class EncounterGameArea extends GameArea {
     "images/terrain_iso_grass.atlas", "images/ghost.atlas", "images/ghostKing.atlas"
   };
   private static final String[] forestSounds = {"sounds/Impact4.ogg"};
-  private static final String backgroundMusic = "sounds/BGM_03_mp3.mp3";
-  private static final String[] forestMusic = {backgroundMusic};
+  private static final String BACKGROUND_MUSIC = "sounds/BGM_03_mp3.mp3";
+  private static final String[] forestMusic = {BACKGROUND_MUSIC};
 
   private final TerrainFactory terrainFactory;
 
@@ -226,7 +226,7 @@ public class EncounterGameArea extends GameArea {
   }
 
   private void playMusic() {
-    Music music = ServiceLocator.getResourceService().getAsset(backgroundMusic, Music.class);
+    Music music = ServiceLocator.getResourceService().getAsset(BACKGROUND_MUSIC, Music.class);
     music.setLooping(true);
     music.setVolume(0.3f);
     music.play();
@@ -258,7 +258,7 @@ public class EncounterGameArea extends GameArea {
   @Override
   public void dispose() {
     super.dispose();
-    ServiceLocator.getResourceService().getAsset(backgroundMusic, Music.class).stop();
+    ServiceLocator.getResourceService().getAsset(BACKGROUND_MUSIC, Music.class).stop();
     this.unloadAssets();
   }
 }
