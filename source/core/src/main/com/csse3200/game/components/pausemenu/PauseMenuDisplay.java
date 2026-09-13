@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -45,6 +46,8 @@ public class PauseMenuDisplay extends UIComponent {
   private static final float BACKGROUND_OPACITY = 0.7f;
 
   private Table table;
+  private Table menuTable;
+  private Table settingsTable;
   private Texture backgroundTexture;
   private Dialog confirmDialog;
   private TextButton resumeButton;
@@ -52,6 +55,7 @@ public class PauseMenuDisplay extends UIComponent {
   private TextButton returnButton;
   private TextButton confirmButton;
   private TextButton cancelButton;
+  private TextButton settingsBackButton;
 
   @Override
   public void create() {
@@ -86,6 +90,7 @@ public class PauseMenuDisplay extends UIComponent {
           public void changed(ChangeEvent changeEvent, Actor actor) {
             logger.debug("Settings button clicked");
             entity.getEvents().trigger(SETTINGS_EVENT);
+            showSettings();
           }
         });
 
@@ -99,15 +104,40 @@ public class PauseMenuDisplay extends UIComponent {
         });
 
     buildConfirmDialog();
+    buildMenuTable();
 
-    table.add(resumeButton).padBottom(15f);
-    table.row();
-    table.add(settingsButton).padBottom(15f);
-    table.row();
-    table.add(returnButton);
+    table.add(menuTable);
 
     stage.addActor(table);
     table.setVisible(false);
+  }
+
+  private void buildMenuTable() {
+    menuTable = new Table();
+    menuTable.add(resumeButton).padBottom(15f);
+    menuTable.row();
+    menuTable.add(settingsButton).padBottom(15f);
+    menuTable.row();
+    menuTable.add(returnButton);
+  }
+
+  private Table buildSettingsTable() {
+    Table root = new Table();
+
+    Label title = new Label("Settings", skin, "title");
+    root.add(title).padBottom(25f);
+    root.row();
+    settingsBackButton = new TextButton("Back", skin);
+    settingsBackButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent changeEvent, Actor actor) {
+            logger.debug("Pause settings back button clicked");
+            showPauseButtons();
+          }
+        });
+    root.add(settingsBackButton);
+    return root;
   }
 
   /** Builds the "leave this run" confirmation dialog. It only fires the exit event on confirm. */
@@ -157,8 +187,21 @@ public class PauseMenuDisplay extends UIComponent {
    * already-visible menu is a no-op, which is what stops a second Escape press from closing it.
    */
   private void showMenu() {
+    showPauseButtons();
     table.setVisible(true);
     table.toFront();
+  }
+
+  private void showSettings() {
+    settingsTable = buildSettingsTable();
+    table.clearChildren();
+    table.add(settingsTable);
+  }
+
+  private void showPauseButtons() {
+    table.clearChildren();
+    table.add(menuTable);
+    settingsTable = null;
   }
 
   /** Hides the menu (and any open confirmation dialog). Triggered by Resume. */
@@ -166,6 +209,7 @@ public class PauseMenuDisplay extends UIComponent {
     if (confirmDialog != null) {
       confirmDialog.hide(null);
     }
+    showPauseButtons();
     table.setVisible(false);
   }
 
@@ -221,5 +265,13 @@ public class PauseMenuDisplay extends UIComponent {
 
   boolean isMenuVisible() {
     return table.isVisible();
+  }
+
+  boolean isSettingsVisible() {
+    return settingsTable != null;
+  }
+
+  TextButton getSettingsBackButton() {
+    return settingsBackButton;
   }
 }

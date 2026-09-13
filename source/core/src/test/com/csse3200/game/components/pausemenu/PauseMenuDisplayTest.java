@@ -96,6 +96,40 @@ class PauseMenuDisplayTest {
   }
 
   @Test
+  void clickingSettingsShowsSettingsViewInsidePauseMenu() {
+    display.getEntity().getEvents().trigger(PauseMenuDisplay.PAUSE_EVENT);
+
+    click(display.getSettingsButton());
+
+    assertTrue(display.isMenuVisible());
+    assertTrue(display.isSettingsVisible());
+    assertEquals(1, settingsCount.get());
+  }
+
+  @Test
+  void settingsBackReturnsToPauseButtons() {
+    display.getEntity().getEvents().trigger(PauseMenuDisplay.PAUSE_EVENT);
+    click(display.getSettingsButton());
+
+    click(display.getSettingsBackButton());
+
+    assertTrue(display.isMenuVisible());
+    assertFalse(display.isSettingsVisible());
+  }
+
+  @Test
+  void resumeClosesSettingsViewAndPauseMenu() {
+    display.getEntity().getEvents().trigger(PauseMenuDisplay.PAUSE_EVENT);
+    click(display.getSettingsButton());
+
+    click(display.getResumeButton());
+
+    assertFalse(display.isMenuVisible());
+    assertFalse(display.isSettingsVisible());
+    assertEquals(1, resumeCount.get());
+  }
+
+  @Test
   void returnToMainMenuShowsDialogAndDoesNotExitUntilConfirmed() {
     click(display.getReturnButton());
 
