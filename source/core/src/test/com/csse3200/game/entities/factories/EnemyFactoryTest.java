@@ -14,6 +14,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.bestiary.BestiaryTrackingComponent;
+import com.csse3200.game.bestiary.BestiaryUnlockState;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.enemy.EnemyAnimationController;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
@@ -21,6 +24,7 @@ import com.csse3200.game.components.enemy.EnemyStatsComponent;
 import com.csse3200.game.components.enemy.IntentIcons;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.configs.EnemyConfig;
+import com.csse3200.game.entities.configs.EnemyConfigs;
 import com.csse3200.game.entities.configs.EnemyTier;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.rendering.AnimationRenderComponent;
@@ -120,6 +124,26 @@ class EnemyFactoryTest {
     assertEquals(50, stats.getHealth());
     assertEquals(9, stats.getBaseAttack());
     assertEquals(3, stats.getArmor());
+  }
+
+  @Test
+  void createAttachesBestiaryTrackingWhenServiceContainsEnemy() {
+    EnemyConfig config = new EnemyConfig();
+    config.id = "tracked_enemy";
+    config.name = "Tracked Enemy";
+    config.health = 20;
+    EnemyConfigs configs = new EnemyConfigs();
+    configs.enemies = new EnemyConfig[] {config};
+    BestiaryService bestiary = new BestiaryService(configs);
+    ServiceLocator.registerBestiaryService(bestiary);
+
+    Entity enemy = EnemyFactory.create(config);
+
+    assertNotNull(enemy.getComponent(BestiaryTrackingComponent.class));
+    enemy.create();
+    assertEquals(
+        BestiaryUnlockState.ENCOUNTERED,
+        bestiary.getEntry("tracked_enemy").orElseThrow().unlockState());
   }
 
   @Test
