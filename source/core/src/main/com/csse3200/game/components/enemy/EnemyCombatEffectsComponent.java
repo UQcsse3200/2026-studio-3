@@ -7,8 +7,7 @@ import com.csse3200.game.rendering.AnimationRenderComponent;
 /**
  * Turns an enemy's own combat events into colour-flash visual feedback.
  *
- * <p>把敌人自身广播的战斗事件（受伤、防御、激怒、意图变化）转成染色闪烁反馈。目前项目里还没有
- * 战斗场景，所以这里只保证"事件 -&gt; 染色状态"的正确性；真正的染色渲染由 {@link
+ * <p>把敌人自身广播的战斗事件（受伤、防御、激怒、意图变化）转成染色闪烁反馈。目前项目里还没有 战斗场景，所以这里只保证"事件 -&gt; 染色状态"的正确性；真正的染色渲染由 {@link
  * AnimationRenderComponent} 完成，等战斗场景搭好后就能直接看到效果。
  */
 public class EnemyCombatEffectsComponent extends Component {

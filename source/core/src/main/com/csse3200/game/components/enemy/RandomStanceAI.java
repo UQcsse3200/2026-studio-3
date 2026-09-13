@@ -5,8 +5,7 @@ import java.util.Random;
 /**
  * Unpredictable behaviour for Lesser Shade: each round randomly attacks or defends.
  *
- * <p>暗影小怪（Lesser Shade）的打法：每回合像抛硬币一样随机决定攻击还是防御，
- * 让玩家猜不到下一步。{@link Random} 通过构造函数传入，方便单元测试用固定的随机源
+ * <p>暗影小怪（Lesser Shade）的打法：每回合像抛硬币一样随机决定攻击还是防御， 让玩家猜不到下一步。{@link Random} 通过构造函数传入，方便单元测试用固定的随机源
  * 来复现确定的结果。
  */
 public class RandomStanceAI implements EnemyAI {

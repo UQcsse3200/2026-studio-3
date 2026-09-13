@@ -7,8 +7,8 @@ import com.csse3200.game.rendering.AnimationRenderComponent;
  * Drives an enemy's {@link AnimationRenderComponent} from combat events.
  *
  * <p>The enemy loops {@code idle}, flashes {@code hurt} when it takes damage, plays {@code death}
- * when defeated (holding its final frame), and falls back to {@code idle} once a {@code hurt}
- * flash has finished playing.
+ * when defeated (holding its final frame), and falls back to {@code idle} once a {@code hurt} flash
+ * has finished playing.
  */
 public class EnemyAnimationController extends Component {
   private AnimationRenderComponent animator;

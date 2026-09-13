@@ -5,12 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Creates an {@link EnemyAI} instance from an {@link com.csse3200.game.entities.configs.EnemyConfig}
- * behaviour id.
+ * Creates an {@link EnemyAI} instance from an {@link
+ * com.csse3200.game.entities.configs.EnemyConfig} behaviour id.
  *
- * <p>打法工厂：根据 {@code enemies.json} 里配置的 {@code behaviour} 字符串，
- * 造出对应的"打法脑子"实例。未识别或缺失的 id 会记录警告并回退到基础的攻防交替打法，
- * 保证游戏不会因为配置错误而崩溃。
+ * <p>打法工厂：根据 {@code enemies.json} 里配置的 {@code behaviour} 字符串， 造出对应的"打法脑子"实例。未识别或缺失的 id
+ * 会记录警告并回退到基础的攻防交替打法， 保证游戏不会因为配置错误而崩溃。
  */
 public final class EnemyAIFactory {
   private static final Logger logger = LoggerFactory.getLogger(EnemyAIFactory.class);
@@ -38,7 +37,8 @@ public final class EnemyAIFactory {
       case ERRATIC -> new RandomStanceAI(new Random());
       case CYCLE_ATTACK_DEFEND -> new CycleAttackDefendAI();
       default -> {
-        logger.warn("Unknown enemy behaviour id: {}, falling back to {}", behaviourId, CYCLE_ATTACK_DEFEND);
+        logger.warn(
+            "Unknown enemy behaviour id: {}, falling back to {}", behaviourId, CYCLE_ATTACK_DEFEND);
         yield new CycleAttackDefendAI();
       }
     };

@@ -9,17 +9,20 @@ class EnemyAIFactoryTest {
   // 每个已注册的 behaviour id 都应该造出对应的实现类
   @Test
   void shouldCreateCycleAttackDefendAI() {
-    assertInstanceOf(CycleAttackDefendAI.class, EnemyAIFactory.create(EnemyAIFactory.CYCLE_ATTACK_DEFEND));
+    assertInstanceOf(
+        CycleAttackDefendAI.class, EnemyAIFactory.create(EnemyAIFactory.CYCLE_ATTACK_DEFEND));
   }
 
   @Test
   void shouldCreateCycleFourStanceAI() {
-    assertInstanceOf(CycleFourStanceAI.class, EnemyAIFactory.create(EnemyAIFactory.CYCLE_FOUR_STANCE));
+    assertInstanceOf(
+        CycleFourStanceAI.class, EnemyAIFactory.create(EnemyAIFactory.CYCLE_FOUR_STANCE));
   }
 
   @Test
   void shouldCreateArmourSacrificeAI() {
-    assertInstanceOf(ArmourSacrificeAI.class, EnemyAIFactory.create(EnemyAIFactory.ARMOUR_SACRIFICE));
+    assertInstanceOf(
+        ArmourSacrificeAI.class, EnemyAIFactory.create(EnemyAIFactory.ARMOUR_SACRIFICE));
   }
 
   @Test

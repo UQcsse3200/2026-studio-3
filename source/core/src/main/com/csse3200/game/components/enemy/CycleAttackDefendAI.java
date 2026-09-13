@@ -13,7 +13,9 @@ public class CycleAttackDefendAI implements EnemyAI {
   @Override
   public EnemyIntent decideIntent(EnemyStatsComponent self) {
     EnemyIntent intent =
-        (step % 2 == 0) ? EnemyIntent.attack(self.getBaseAttack()) : EnemyIntent.defend(DEFEND_ARMOUR);
+        (step % 2 == 0)
+            ? EnemyIntent.attack(self.getBaseAttack())
+            : EnemyIntent.defend(DEFEND_ARMOUR);
     step++;
     return intent;
   }

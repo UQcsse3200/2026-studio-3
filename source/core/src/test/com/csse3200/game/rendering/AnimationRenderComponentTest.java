@@ -177,7 +177,9 @@ class AnimationRenderComponentTest {
 
     InOrder order = inOrder(batch);
     order.verify(batch).setColor(Color.RED);
-    order.verify(batch).draw(any(TextureRegion.class), anyFloat(), anyFloat(), anyFloat(), anyFloat());
+    order
+        .verify(batch)
+        .draw(any(TextureRegion.class), anyFloat(), anyFloat(), anyFloat(), anyFloat());
     order.verify(batch).setPackedColor(originalPacked);
   }
 
