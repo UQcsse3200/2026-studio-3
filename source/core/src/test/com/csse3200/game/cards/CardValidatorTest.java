@@ -71,6 +71,15 @@ class CardValidatorTest {
   }
 
   @Test
+  void shouldAcceptCleanseOnSelf() {
+    CardConfig card = validCard();
+    card.type = CardType.SKILL;
+    card.target = TargetType.SELF;
+    card.effects = new EffectConfig[] {new EffectConfig(EffectType.CLEANSE, 1)};
+    assertTrue(CardValidator.isValid(card));
+  }
+
+  @Test
   void shouldAcceptStrengthWithoutDuration() {
     CardConfig card = validCard();
     card.type = CardType.POWER;

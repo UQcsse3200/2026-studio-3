@@ -19,7 +19,9 @@ public enum EffectType {
   /** Decreases 25% the damage output to target while active. */
   FEEBLE(true),
   /** Increases damage the target deals for the rest of the combat. */
-  STRENGTH(false);
+  STRENGTH(false),
+  /** Immediately removes poison, vulnerable and feeble from the target. */
+  CLEANSE(false);
 
   private final boolean usesDuration;
 

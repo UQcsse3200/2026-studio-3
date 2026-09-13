@@ -118,6 +118,24 @@ class CombatStatsComponentTest {
   }
 
   @Test
+  void shouldClearNegativeStatusesAndKeepBuffs() {
+    CombatStatsComponent combat = new CombatStatsComponent(100, 20);
+    combat.applyStatusEffect("POISON", 3, 2);
+    combat.applyStatusEffect("vulnerable", 1, 1);
+    combat.applyStatusEffect("FEEBLE", 1, 2);
+    combat.applyStatusEffect("STRENGTH", 2, 0);
+    combat.applyStatusEffect("HEAL", 4, 3);
+
+    combat.clearNegativeStatusEffects();
+
+    assertFalse(combat.hasStatusEffect("POISON"));
+    assertFalse(combat.hasStatusEffect("vulnerable"));
+    assertFalse(combat.hasStatusEffect("FEEBLE"));
+    assertTrue(combat.hasStatusEffect("STRENGTH"));
+    assertTrue(combat.hasStatusEffect("HEAL"));
+  }
+
+  @Test
   void shouldSetGetBaseAttack() {
     CombatStatsComponent combat = new CombatStatsComponent(100, 20);
     assertEquals(20, combat.getBaseAttack());

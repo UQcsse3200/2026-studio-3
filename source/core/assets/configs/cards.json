@@ -125,6 +125,53 @@
         "target": "SELF",
         "effects": [{ "type": "HEAL", "value": 6, "duration": 3 }],
         "texturePath": "images/cards/resurrection.png"
+      },
+      {
+        "id": "makeshift_shelter",
+        "name": "Makeshift Shelter",
+        "description": "Gain 7 Block. Heal 3.",
+        "cost": 2,
+        "type": "SKILL",
+        "rarity": "UNCOMMON",
+        "target": "SELF",
+        "effects": [
+          { "type": "BLOCK", "value": 7, "duration": 0 },
+          { "type": "HEAL", "value": 3, "duration": 0 }
+        ],
+        "texturePath": "images/cards/makeshift_shelter.png"
+      },
+      {
+        "id": "rubble_barricade",
+        "name": "Rubble Barricade",
+        "description": "Gain 12 Block.",
+        "cost": 2,
+        "type": "SKILL",
+        "rarity": "UNCOMMON",
+        "target": "SELF",
+        "effects": [{ "type": "BLOCK", "value": 12, "duration": 0 }],
+        "texturePath": "images/cards/rubble_barricade.png"
+      },
+      {
+        "id": "emergency_salve",
+        "name": "Emergency Salve",
+        "description": "Heal 10 health.",
+        "cost": 2,
+        "type": "SKILL",
+        "rarity": "UNCOMMON",
+        "target": "SELF",
+        "effects": [{ "type": "HEAL", "value": 10, "duration": 0 }],
+        "texturePath": "images/cards/emergency_salve.png"
+      },
+      {
+        "id": "purify",
+        "name": "Purify",
+        "description": "Remove all negative effects from yourself.",
+        "cost": 1,
+        "type": "SKILL",
+        "rarity": "UNCOMMON",
+        "target": "SELF",
+        "effects": [{ "type": "CLEANSE", "value": 1, "duration": 0 }],
+        "texturePath": "images/cards/purify.png"
       }
     ]
   }
