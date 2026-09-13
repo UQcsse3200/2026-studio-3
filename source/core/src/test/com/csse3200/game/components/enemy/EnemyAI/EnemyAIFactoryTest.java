@@ -51,6 +51,29 @@ class EnemyAIFactoryTest {
   }
 
   @Test
+  void shouldCreateEnrageLowHealthAI() {
+    EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.ENRAGE_LOW_HEALTH);
+
+    assertInstanceOf(EnrageLowHealthAI.class, ai);
+  }
+
+  @Test
+  void shouldCreateVoidKnightRetaliationAI() {
+    EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.VOID_KNIGHT_RETALIATION);
+
+    assertInstanceOf(VoidKnightRetaliationAI.class, ai);
+  }
+
+  @Test
+  void shouldCreateSeparateVoidKnightAIInstances() {
+    EnemyAI first = EnemyAIFactory.create(EnemyAIFactory.VOID_KNIGHT_RETALIATION);
+
+    EnemyAI second = EnemyAIFactory.create(EnemyAIFactory.VOID_KNIGHT_RETALIATION);
+
+    assertNotSame(first, second);
+  }
+
+  @Test
   void shouldCreateBossAI() {
     EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.BOSS);
 
