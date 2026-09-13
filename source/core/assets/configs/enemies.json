@@ -52,7 +52,7 @@
       "baseAttack": 14,
       "armour": 8,
       "tier": "BOSS",
-      "behaviour": "BOSS",
+      "behaviour": "boss",
       "sprite": "images/enemies/boss_knight.atlas"
     }
   ]
