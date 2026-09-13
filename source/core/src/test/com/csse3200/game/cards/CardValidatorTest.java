@@ -272,4 +272,21 @@ class CardValidatorTest {
         CardValidator.validate(card)
             .contains("upgrade.effects[0].duration must not be negative for HEAL"));
   }
+
+  @Test
+  void shouldAcceptPierceForEnemyUpgradeAndRejectSelfUpgrade() {
+    CardConfig card = validCard();
+    card.upgrade = validUpgrade();
+    card.upgrade.effects = new EffectConfig[] {new EffectConfig(EffectType.PIERCE, 10)};
+
+    assertTrue(CardValidator.isValid(card));
+
+    card.target = TargetType.SELF;
+    card.effects = new EffectConfig[] {new EffectConfig(EffectType.BLOCK, 5)};
+
+    assertTrue(
+        CardValidator.validate(card)
+            .contains(
+                "upgrade.effects[0].type PIERCE is not compatible with inherited target SELF"));
+  }
 }

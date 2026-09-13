@@ -128,4 +128,31 @@ class CombatStatsComponentTest {
     combat.setBaseAttack(-50);
     assertEquals(150, combat.getBaseAttack());
   }
+
+  @Test
+  void shouldTakePiercingDamageWithoutConsumingBlockOrArmor() {
+    CombatStatsComponent combat = new CombatStatsComponent(20, 5);
+    combat.addBlock(3);
+    combat.addArmor(4);
+
+    combat.takePiercingDamage(6);
+
+    assertEquals(14, combat.getHealth());
+    assertEquals(3, combat.getBlock());
+    assertEquals(4, combat.getArmor());
+  }
+
+  @Test
+  void shouldTriggerDeathEventFromPiercingDamage() {
+    Entity entity = new Entity();
+    CombatStatsComponent combat = new CombatStatsComponent(10, 5);
+    entity.addComponent(combat);
+    EventListener0 listener = mock(EventListener0.class);
+    entity.getEvents().addListener("entityIsDead", listener);
+
+    combat.takePiercingDamage(20);
+
+    assertEquals(0, combat.getHealth());
+    verify(listener).handle();
+  }
 }

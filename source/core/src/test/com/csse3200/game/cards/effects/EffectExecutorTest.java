@@ -236,4 +236,46 @@ class EffectExecutorTest {
                 0,
                 playerState));
   }
+
+  @Test
+  void shouldResolvePierceWithLiteralValueAndRejectSelfTarget() {
+    playerState.addStrength(5);
+
+    ResolvedCardEffect playerStateResult =
+        executor.resolve(
+            "poison_blade",
+            new EffectConfig(EffectType.PIERCE, 10),
+            TargetType.SINGLE_ENEMY,
+            0,
+            playerState);
+
+    assertEquals(
+        new ResolvedCardEffect(
+            "poison_blade", EffectType.PIERCE, TargetType.SINGLE_ENEMY, 10, 0, 0),
+        playerStateResult);
+
+    CardEffectResolutionContext context = new CardEffectResolutionContext(5, 1, 1);
+    ResolvedCardEffect contextResult =
+        executor.resolve(
+            "poison_blade",
+            new EffectConfig(EffectType.PIERCE, 10),
+            TargetType.SINGLE_ENEMY,
+            0,
+            context);
+
+    assertEquals(
+        new ResolvedCardEffect(
+            "poison_blade", EffectType.PIERCE, TargetType.SINGLE_ENEMY, 10, 0, 0),
+        contextResult);
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            executor.resolve(
+                "poison_blade",
+                new EffectConfig(EffectType.PIERCE, 10),
+                TargetType.SELF,
+                0,
+                playerState));
+  }
 }
