@@ -2,8 +2,11 @@ package com.csse3200.game.areas;
 
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.areas.terrain.TerrainFactory.TerrainType;
+import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.gamearea.GameAreaDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.factories.EnemyFactory;
@@ -12,6 +15,7 @@ import com.csse3200.game.entities.factories.ObstacleFactory;
 import com.csse3200.game.entities.factories.PlayerFactory;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.components.gamearea.CombatBackgroundComponent;
 import com.csse3200.game.utils.math.GridPoint2Utils;
 import com.csse3200.game.utils.math.RandomUtils;
 import java.util.List;
@@ -75,6 +79,7 @@ public class ForestGameArea extends GameArea {
   public void create() {
     loadAssets();
     spawnTerrain();
+    spawnBackGround();
 
     enemy = spawnEnemy();
     player = spawnPlayer();
@@ -132,6 +137,20 @@ public class ForestGameArea extends GameArea {
     Entity newPlayer = PlayerFactory.createPlayer();
     spawnEntityAt(newPlayer, PLAYER_SPAWN, true, true);
     return newPlayer;
+  }
+
+  private void spawnBackGround() {
+    Texture texture = ServiceLocator
+            .getResourceService()
+            .getAsset("images/grass_1.png", Texture.class);
+
+    OrthographicCamera camera = (OrthographicCamera) ServiceLocator.getCamera();
+
+    Entity background =  new Entity().addComponent(
+            new CombatBackgroundComponent(texture, camera)
+    );
+
+    spawnEntity(background);
   }
 
   /**

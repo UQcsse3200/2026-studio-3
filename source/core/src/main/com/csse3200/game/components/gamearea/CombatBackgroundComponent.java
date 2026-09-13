@@ -5,7 +5,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.csse3200.game.rendering.RenderComponent;
 
+/**
+ *  A base class that represents different combat areas.
+ */
 public class CombatBackgroundComponent extends RenderComponent {
+    private static final int BACKGROUND_LAYER = 0;
+    private static final float BACKGROUND_Z = 1f;
+
     private final Texture texture;
     private final OrthographicCamera camera;
 
@@ -18,6 +24,8 @@ public class CombatBackgroundComponent extends RenderComponent {
     protected void draw(SpriteBatch batch) {
         float width  = camera.viewportWidth * camera.zoom;
         float height = camera.viewportHeight * camera.zoom;
+
+        if (width <= 0f || height <= 0f) return;
 
         float scale = Math.max(
                 width / texture.getWidth(),
@@ -35,11 +43,11 @@ public class CombatBackgroundComponent extends RenderComponent {
 
     @Override
     public int getLayer() {
-        return 0;
+        return BACKGROUND_LAYER;
     }
 
     @Override
     public float getZIndex() {
-        return 1f;
+        return BACKGROUND_Z;
     }
 }
