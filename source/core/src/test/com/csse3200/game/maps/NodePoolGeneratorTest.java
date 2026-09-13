@@ -32,58 +32,6 @@ class NodePoolGeneratorTest {
             .allMatch(entry -> entry.getKey().equals(entry.getValue().getNodeId())));
   }
 
-  // TODO: because nodes wont be placed at heights less than 2 or 3, you need atleast >21 nodes or
-  // it gets stuck in a loop
-  //       im going to leave the tests as is, as its just gonna be adjusting numbers
-  //       once we know what constraints are suitable for the game, i will set a minimum node count
-  @Test
-  void followsConfiguredDistribution() {
-    MapGenerationConfig config = new MapGenerationConfig(10, 60, 20, 10, 10, 12345L);
-
-    MapGraph map = new MapGraph(NodePoolGenerator.generate(config));
-    Map<Integer, MapNode> nodes = map.getNodes();
-    Random rand = new Random();
-    // NodePoolGenerator.rebalanceRoomTypes(config, rand, map);
-
-    assertEquals(6, countRooms(nodes, RoomType.COMBAT));
-    assertEquals(2, countRooms(nodes, RoomType.EVENT));
-    assertEquals(1, countRooms(nodes, RoomType.ELITE));
-    assertEquals(1, countRooms(nodes, RoomType.SHOP));
-  }
-
-  @Test // TODO: nodes are no longer assigned types at creation, this happens via assignRoomTypes
-  // which has different params
-  void allocatesRemainderNodesToClosestWeightedDistribution() {
-    MapGenerationConfig config = new MapGenerationConfig(9, 60, 20, 10, 10, 12345L);
-
-    MapGraph map = new MapGraph(NodePoolGenerator.generate(config));
-    Map<Integer, MapNode> nodes = map.getNodes();
-    Random rand = new Random();
-    // NodePoolGenerator.rebalanceRoomTypes(config, rand, map);
-
-    assertEquals(5, countRooms(nodes, RoomType.COMBAT));
-    assertEquals(2, countRooms(nodes, RoomType.EVENT));
-    assertEquals(1, countRooms(nodes, RoomType.ELITE));
-    assertEquals(1, countRooms(nodes, RoomType.SHOP));
-  }
-
-  @Test // TODO: nodes are no longer assigned types at creation, this happens via assignRoomTypes
-  // which has different params
-  void usesLongArithmeticForLargeWeights() {
-    MapGenerationConfig config =
-        new MapGenerationConfig(
-            7, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 12345L);
-
-    MapGraph map = new MapGraph(NodePoolGenerator.generate(config));
-    Map<Integer, MapNode> nodes = map.getNodes();
-    Random rand = new Random();
-    // NodePoolGenerator.rebalanceRoomTypes(config, rand, map);
-
-    assertEquals(3, countRooms(nodes, RoomType.COMBAT));
-    assertEquals(2, countRooms(nodes, RoomType.EVENT));
-    assertEquals(2, countRooms(nodes, RoomType.SHOP));
-  }
-
   @Test
   void sameSeedProducesSameRoomAssignments() {
     MapGenerationConfig firstConfig = new MapGenerationConfig(20, 60, 20, 10, 10, 98765L);
@@ -93,21 +41,6 @@ class NodePoolGeneratorTest {
     List<RoomType> secondTypes = roomTypesById(NodePoolGenerator.generate(secondConfig));
 
     assertEquals(firstTypes, secondTypes);
-  }
-
-  @Test // TODO: nodes are no longer assigned types at creation, this happens via assignRoomTypes
-  // which has different params
-  void excludesZeroWeightRoomTypes() {
-    MapGenerationConfig config = new MapGenerationConfig(8, 1, 0, 0, 0, 1L);
-
-    MapGraph map = new MapGraph(NodePoolGenerator.generate(config));
-    Map<Integer, MapNode> nodes = map.getNodes();
-    Random rand = new Random();
-    // NodePoolGenerator.rebalanceRoomTypes(config, rand, map);
-
-    assertEquals(8, countRooms(nodes, RoomType.COMBAT));
-    assertEquals(0, countRooms(nodes, RoomType.EVENT));
-    assertEquals(0, countRooms(nodes, RoomType.SHOP));
   }
 
   @Test

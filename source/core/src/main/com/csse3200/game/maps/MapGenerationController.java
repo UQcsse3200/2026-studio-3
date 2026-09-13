@@ -108,8 +108,7 @@ public class MapGenerationController {
 
         for (MapNode connected : node.getConnections()) { // prevent crossover X-like connections
           if (connected.getNodeId() == 0
-              || connected.equals(parentNode)
-              || connected.getHeight() != parentNode.getHeight() + 1) {
+              || connected.equals(parentNode)) {
             continue;
           }
 
