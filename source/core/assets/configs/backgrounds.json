@@ -1,0 +1,9 @@
+{
+  "backgrounds": [
+    {
+      "id": "forest",
+      "name": "Forest",
+      "texture": "images/backgrounds/forest.png"
+    }
+  ]
+}
