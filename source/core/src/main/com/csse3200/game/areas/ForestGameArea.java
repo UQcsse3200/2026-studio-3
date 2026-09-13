@@ -3,9 +3,13 @@ package com.csse3200.game.areas;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.areas.terrain.TerrainFactory.TerrainType;
+import com.csse3200.game.components.gamearea.CombatBackgroundConfig;
+import com.csse3200.game.components.gamearea.CombatBackgroundConfigs;
+import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.gamearea.GameAreaDisplay;
 import com.csse3200.game.entities.Entity;
@@ -54,10 +58,16 @@ public class ForestGameArea extends GameArea {
     "images/ghostKing.atlas",
     "images/enemies/bone_crawler.atlas"
   };
+
+  private static final String BACKGROUND_CONFIG_PATH =
+          "configs/backgrounds.json";
+  private static final String BACKGROUND_ID = "forest";
   private static final String[] forestSounds = {"sounds/Impact4.ogg"};
 
   private final TerrainFactory terrainFactory;
   private final Integer progression;
+
+  private CombatBackgroundConfig backgroundConfig;
 
   private Entity player;
   private Entity enemy;
