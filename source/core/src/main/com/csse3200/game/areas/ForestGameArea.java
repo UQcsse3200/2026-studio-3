@@ -98,6 +98,39 @@ public class ForestGameArea extends GameArea {
     // playMusic();
   }
 
+  /**
+   * Reads the selected background configuration from the file path and ID.
+   */
+  private void readBackgroundConfig() {
+    backgroundConfig = null;
+
+    CombatBackgroundConfigs configs =
+            FileLoader.readClass(
+                    CombatBackgroundConfigs.class,
+                    BACKGROUND_CONFIG_PATH
+            );
+
+    if (configs == null)  {
+      logger.warn(
+              "Couldn't read background configurations: {}",
+              BACKGROUND_CONFIG_PATH
+      );
+      return;
+    }
+
+    CombatBackgroundConfig selectedBackGround =
+            configs.get(BACKGROUND_ID);
+
+    if (selectedBackGround == null) {
+      logger.warn(
+              "The selected background configuration doesn't exist: {}",
+              BACKGROUND_ID
+      );
+    }
+
+    backgroundConfig = selectedBackGround;
+  }
+
   public void displayUI(Entity ui) {
     ui.addComponent(new GameAreaDisplay("The Fall of Pantheons"));
     spawnEntity(ui);
