@@ -35,6 +35,16 @@
       "armour": 5,
       "tier": "ELITE",
       "behaviour": "cycle_attack_defend"
+    },
+    {
+      "id": "boss_knight",
+      "name": "Boss Knight",
+      "health": 150,
+      "baseAttack": 14,
+      "armour": 8,
+      "tier": "BOSS",
+      "behaviour": "BOSS",
+      "sprite": "images/enemies/boss_knight.atlas"
     }
   ]
 }

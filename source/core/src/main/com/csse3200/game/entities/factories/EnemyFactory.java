@@ -37,6 +37,9 @@ public class EnemyFactory {
   private static final float HURT_FRAME_DURATION = 0.15f;
   private static final float ATTACK_FRAME_DURATION = 0.2f;
   private static final float DEATH_FRAME_DURATION = 0.3f;
+  private static final float CAST_FRAME_DURATION = 0.1f;
+  private static final float DEFEND_FRAME_DURATION = 0.1f;
+  private static final float BOSS_DEATH_FRAME_DURATION = 0.12f;
 
   private static EnemyConfigs loadRoster() {
     EnemyConfigs configs = FileLoader.readClass(EnemyConfigs.class, "configs/enemies.json");
@@ -88,7 +91,14 @@ public class EnemyFactory {
     // attack/death 是可选动画：旧的敌人图集里还没有这两个区域，
     // addAnimation 在区域缺失时只会记警告日志、返回 false，不会报错。
     animator.addAnimation("attack", ATTACK_FRAME_DURATION, Animation.PlayMode.NORMAL);
-    animator.addAnimation("death", DEATH_FRAME_DURATION, Animation.PlayMode.NORMAL);
+
+    if (config.tier == EnemyTier.BOSS) {
+      animator.addAnimation("cast", CAST_FRAME_DURATION, Animation.PlayMode.NORMAL);
+      animator.addAnimation("defend", DEFEND_FRAME_DURATION, Animation.PlayMode.NORMAL);
+      animator.addAnimation("death", BOSS_DEATH_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    } else {
+      animator.addAnimation("death", DEATH_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    }
 
     CombatStatsComponent stats = new CombatStatsComponent(config.health, config.baseAttack);
     stats.setArmor(config.armour);

@@ -335,6 +335,12 @@ public class BattleController {
     eventHandler.addListener(HAND_CHANGED_EVENT, listener);
   }
 
+  /** Notifies listeners after a successful card play, before checking victory or defeat. */
+  public void addCardPlayedListener(EventListener2<String, String> listener) {
+    Objects.requireNonNull(listener, LISTENER_NOT_NULL);
+    eventHandler.addListener("cardPlayed", listener);
+  }
+
   /** Sends a one-line description of the latest battle action to any log listeners. */
   private void narrate(String message) {
     eventHandler.trigger(BATTLE_LOG_EVENT, message);
@@ -612,6 +618,10 @@ public class BattleController {
   }
 
   private void finishPlayerCardAction() {
+    if (lastCardPlaySucceeded && pendingCard != null) {
+      eventHandler.trigger("cardPlayed", pendingCard.cardID(), pendingCard.targetID());
+    }
+
     pendingCard = null;
     currentPlayerIntent = null;
     handle(BattleEvent.PLAYER_ACTION_RESOLVED);
@@ -815,10 +825,16 @@ public class BattleController {
   }
 
   public void enterPlayerEnd() {
-    // Coordinate end-of-turn operations.
     if (this.isBattleOver()) {
       return;
     }
+
+    CombatStatsComponent playerStats = this.player.getComponent(CombatStatsComponent.class);
+
+    if (playerStats != null) {
+      playerStats.updateStatusEffects();
+    }
+
     handle(BattleEvent.PLAYER_TURN_ENDED);
   }
 

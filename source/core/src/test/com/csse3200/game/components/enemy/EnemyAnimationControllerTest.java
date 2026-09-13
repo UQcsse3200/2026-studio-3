@@ -58,6 +58,33 @@ class EnemyAnimationControllerTest {
   }
 
   @Test
+  void shouldPlayDeathWhenAvailable() {
+    when(animator.hasAnimation("death")).thenReturn(true);
+
+    enemy.getEvents().trigger("enemyDefeated");
+
+    verify(animator).startAnimation("death");
+  }
+
+  @Test
+  void shouldPlayCastWhenAvailable() {
+    when(animator.hasAnimation("cast")).thenReturn(true);
+
+    enemy.getEvents().trigger("enemyCast");
+
+    verify(animator).startAnimation("cast");
+  }
+
+  @Test
+  void shouldPlayDefendWhenAvailable() {
+    when(animator.hasAnimation("defend")).thenReturn(true);
+
+    enemy.getEvents().trigger("enemyDefend");
+
+    verify(animator).startAnimation("defend");
+  }
+
+  @Test
   void shouldReturnToIdleAfterHurtFinishes() {
     when(animator.getCurrentAnimation()).thenReturn("hurt");
     when(animator.isFinished()).thenReturn(true);
@@ -65,6 +92,26 @@ class EnemyAnimationControllerTest {
     enemy.update();
 
     verify(animator, times(2)).startAnimation("idle");
+  }
+
+  @Test
+  void shouldReturnToIdleAfterCastFinishes() {
+    when(animator.getCurrentAnimation()).thenReturn("cast");
+    when(animator.isFinished()).thenReturn(true);
+
+    enemy.update();
+
+    verify(animator, times(2)).startAnimation("idle");
+  }
+
+  @Test
+  void shouldHoldTheFinalDeathFrame() {
+    when(animator.getCurrentAnimation()).thenReturn("death");
+    when(animator.isFinished()).thenReturn(true);
+
+    enemy.update();
+
+    verify(animator, times(1)).startAnimation("idle");
   }
 
   @Test
