@@ -75,16 +75,15 @@ public class MapNodeActor extends Group {
 
   private void addCompletedCross() {
     Texture crossTexture =
-        ServiceLocator.getResourceService()
-            .getAsset("images/map/cross.png", Texture.class);
+        ServiceLocator.getResourceService().getAsset("images/map/cross.png", Texture.class);
 
     completedCross = new Image(crossTexture);
 
     completedCross.setSize(size, size);
-    completedCross.setPosition(0,0);
+    completedCross.setPosition(0, 0);
     completedCross.getColor().a = 1f;
     addActor(completedCross);
-}
+  }
 
   /**
    * Gets the Node

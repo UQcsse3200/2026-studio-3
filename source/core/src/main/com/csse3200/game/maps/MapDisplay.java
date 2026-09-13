@@ -11,7 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.csse3200.game.components.CombatStatsComponent; 
+import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.entities.configs.PlayerConfig;
 import com.csse3200.game.files.FileLoader;
@@ -53,10 +53,7 @@ public class MapDisplay extends UIComponent {
     this.mapGraph = mapGraph;
     this.mapSelectionController = new MapSelectionController(mapGraph);
     this.mapInputHandler = new MapInputHandler(mapSelectionController);
-    this.mapHeight =
-        (MapGenerationConfig.MAP_HEIGHT + 1)
-            * 2f
-            * nodeWidth;
+    this.mapHeight = (MapGenerationConfig.MAP_HEIGHT + 1) * 2f * nodeWidth;
   }
 
   /**
@@ -73,8 +70,10 @@ public class MapDisplay extends UIComponent {
     group.addActor(background);
   }
 
-  /** Creates the three visual elements of the UI. Background, Nodes,
-   *  Connections, legend, and player stats */
+  /**
+   * Creates the three visual elements of the UI. Background, Nodes, Connections, legend, and player
+   * stats
+   */
   @Override
   public void create() {
     super.create();
@@ -85,7 +84,6 @@ public class MapDisplay extends UIComponent {
     addBackground();
     addNodes();
     addConnections();
-    
 
     // Ensure connections are behind nodes
     for (int i = group.getChildren().size - 1; i >= 0; i--) {
@@ -94,7 +92,7 @@ public class MapDisplay extends UIComponent {
       if (actor instanceof MapNodeActor) {
         actor.toFront();
       }
-   } 
+    }
 
     scrollPane = new ScrollPane(group);
     scrollPane.setActor(group);
@@ -127,13 +125,13 @@ public class MapDisplay extends UIComponent {
       float y = getNodeY(node);
 
       nodeActor.setPosition(x, y);
-      nodePositions.put( node.getNodeId(), new Vector2(
-              x + nodeActor.getNodeSize() / 2f,
-              y + nodeActor.getNodeSize() / 2f));
+      nodePositions.put(
+          node.getNodeId(),
+          new Vector2(x + nodeActor.getNodeSize() / 2f, y + nodeActor.getNodeSize() / 2f));
 
       group.addActor(nodeActor);
     }
-}
+  }
 
   /**
    * Calculates the x position a node needs to be to spread it evenly along each layer. nodeId % 7
@@ -150,7 +148,7 @@ public class MapDisplay extends UIComponent {
     float spacing = (mapEnd - mapStart - nodeWidth) / 6f;
 
     return mapStart + nodeWidth / 8f + (nodeId % 7) * spacing;
-}
+  }
 
   /**
    * Calculates the y position for a node
@@ -186,21 +184,19 @@ public class MapDisplay extends UIComponent {
     }
   }
 
-
   /**
    * Renders the player Stats at the top of the screen.
-   * 
-   * Player stats is assumed to be stored in "configs/player.json"
-   * 
-   * Piety is the height of the current node
+   *
+   * <p>Player stats is assumed to be stored in "configs/player.json"
+   *
+   * <p>Piety is the height of the current node
    */
   private void addPlayerStats() {
     Table playerTable = new Table();
 
     playerTable.setSize(mapWidth, 100);
     playerTable.setPosition(0, Gdx.graphics.getHeight() - 100);
-    playerTable.setBackground(
-        skin.newDrawable("color", new Color(0.105f, 0.070f, 0.065f, 0.98f)));
+    playerTable.setBackground(skin.newDrawable("color", new Color(0.105f, 0.070f, 0.065f, 0.98f)));
     playerTable.setDebug(false); // for testing
     playerTable.left();
     stage.addActor(playerTable);
@@ -211,36 +207,30 @@ public class MapDisplay extends UIComponent {
     table.padLeft(15f);
     table.padTop(25);
 
-    // Image size 
+    // Image size
     float imageSideLength = 48f;
 
     // Heart image
     Image heartImage =
-        new Image(
-            ServiceLocator.getResourceService()
-                .getAsset("images/heart.png", Texture.class));
+        new Image(ServiceLocator.getResourceService().getAsset("images/heart.png", Texture.class));
 
     // Health text
     int currentHealth;
     int maxHealth;
 
-    CombatStatsComponent combatStats =
-        entity.getComponent(CombatStatsComponent.class);
+    CombatStatsComponent combatStats = entity.getComponent(CombatStatsComponent.class);
 
     if (combatStats != null) {
       currentHealth = combatStats.getHealth();
       maxHealth = combatStats.getMaxHealth();
     } else {
-      PlayerConfig stats =
-          FileLoader.readClass(PlayerConfig.class, "configs/player.json");
+      PlayerConfig stats = FileLoader.readClass(PlayerConfig.class, "configs/player.json");
       currentHealth = stats.health;
       maxHealth = stats.maxHealth;
     }
 
-    String healthText =
-        String.format("Health: %d / %d", currentHealth, maxHealth);
-    Label.LabelStyle healthStyle = new Label.LabelStyle(skin.get("large",
-     Label.LabelStyle.class));
+    String healthText = String.format("Health: %d / %d", currentHealth, maxHealth);
+    Label.LabelStyle healthStyle = new Label.LabelStyle(skin.get("large", Label.LabelStyle.class));
     healthStyle.fontColor = new Color(0.75f, 0.18f, 0.16f, 1f);
 
     Label healthLabel = new Label(healthText, healthStyle);
@@ -248,41 +238,32 @@ public class MapDisplay extends UIComponent {
 
     // Money image
     Image moneyImage =
-        new Image(
-            ServiceLocator.getResourceService()
-                .getAsset("images/money.png", Texture.class));
+        new Image(ServiceLocator.getResourceService().getAsset("images/money.png", Texture.class));
 
     // Money text
     int money;
 
-    InventoryComponent inventoryComponent =
-        entity.getComponent(InventoryComponent.class);
+    InventoryComponent inventoryComponent = entity.getComponent(InventoryComponent.class);
 
     if (inventoryComponent != null) {
       money = inventoryComponent.getGold();
     } else {
-      PlayerConfig stats =
-          FileLoader.readClass(PlayerConfig.class,
-             "configs/player.json");
+      PlayerConfig stats = FileLoader.readClass(PlayerConfig.class, "configs/player.json");
       money = stats.gold;
     }
 
-    Label.LabelStyle moneyStyle = new Label.LabelStyle(skin.get("large",
-     Label.LabelStyle.class));
+    Label.LabelStyle moneyStyle = new Label.LabelStyle(skin.get("large", Label.LabelStyle.class));
     moneyStyle.fontColor = new Color(0.95f, 0.73f, 0.28f, 1f);
     String moneyText = String.format("Gold: $%d", money);
     Label moneyLabel = new Label(moneyText, moneyStyle);
     moneyLabel.setFontScale(0.75f);
 
     // Piety image
-      Image pietyImage =
-          new Image(
-              ServiceLocator.getResourceService()
-                  .getAsset("images/piety.png", Texture.class));
+    Image pietyImage =
+        new Image(ServiceLocator.getResourceService().getAsset("images/piety.png", Texture.class));
 
     // Piety text
-    Label.LabelStyle pietyStyle = new Label.LabelStyle(skin.get("large",
-      Label.LabelStyle.class));
+    Label.LabelStyle pietyStyle = new Label.LabelStyle(skin.get("large", Label.LabelStyle.class));
     pietyStyle.fontColor = new Color(0.95f, 0.73f, 0.28f, 1f);
     String pietyText = String.format("Piety: %d", mapGraph.getCurrentNode().getHeight());
     Label pietyLabel = new Label(pietyText, pietyStyle);
@@ -302,8 +283,8 @@ public class MapDisplay extends UIComponent {
   }
 
   /**
-   * Renders a basic legend on the right of the screen to clearly state what
-   * each nodeIcon represents
+   * Renders a basic legend on the right of the screen to clearly state what each nodeIcon
+   * represents
    */
   private void addLegend() {
     Table playerTable = new Table();
@@ -311,14 +292,13 @@ public class MapDisplay extends UIComponent {
     playerTable.setSize(192, (32 + 16) * 7);
     Image legend =
         new Image(
-            ServiceLocator.getResourceService()
-                .getAsset("images/map/legend.png", Texture.class));
+            ServiceLocator.getResourceService().getAsset("images/map/legend.png", Texture.class));
     playerTable.add(legend);
-    playerTable.setPosition(Gdx.graphics.getWidth() - 224,
-     Gdx.graphics.getHeight() / 2f - playerTable.getHeight() /2f);
+    playerTable.setPosition(
+        Gdx.graphics.getWidth() - 224,
+        Gdx.graphics.getHeight() / 2f - playerTable.getHeight() / 2f);
 
     stage.addActor(playerTable);
-
   }
 
   /**
@@ -370,7 +350,7 @@ public class MapDisplay extends UIComponent {
       "images/map/cross.png",
       "images/map/legend.png",
       "images/map/main_menu_btn.png"
-  };
+    };
 
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(mapAssets);
