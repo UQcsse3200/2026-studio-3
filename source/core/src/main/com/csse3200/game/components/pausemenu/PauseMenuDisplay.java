@@ -5,10 +5,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.csse3200.game.ui.UIComponent;
@@ -69,6 +72,19 @@ public class PauseMenuDisplay extends UIComponent {
     table = new Table();
     table.setFillParent(true);
     table.setBackground(new TextureRegionDrawable(new TextureRegion(createBackgroundTexture())));
+    table.setTouchable(Touchable.enabled);
+    table.addListener(
+        new InputListener() {
+          @Override
+          public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+            return table.isVisible();
+          }
+
+          @Override
+          public boolean scrolled(InputEvent event, float x, float y, float amountX, float amountY) {
+            return table.isVisible();
+          }
+        });
     table.center();
 
     resumeButton = new TextButton("Resume", skin);
@@ -273,5 +289,9 @@ public class PauseMenuDisplay extends UIComponent {
 
   TextButton getSettingsBackButton() {
     return settingsBackButton;
+  }
+
+  Table getRootTable() {
+    return table;
   }
 }
