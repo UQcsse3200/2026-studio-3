@@ -14,6 +14,7 @@ import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
+import com.csse3200.game.components.enemy.IntentEffectType;
 import com.csse3200.game.components.enemy.IntentType;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.PlayerIntent;
@@ -832,10 +833,19 @@ public class BattleController {
     CombatStatsComponent playerStats = this.player.getComponent(CombatStatsComponent.class);
 
     if (playerStats != null) {
-      playerStats.updateStatusEffects();
+      tickPlayerStatusEffect(playerStats, IntentEffectType.SILENCE.name());
+      tickPlayerStatusEffect(playerStats, IntentEffectType.DAMAGE_ON_CARD_PLAY.name());
     }
 
     handle(BattleEvent.PLAYER_TURN_ENDED);
+  }
+
+  /** Counts down one player status without changing effects owned by other turn hooks. */
+  private void tickPlayerStatusEffect(CombatStatsComponent playerStats, String effectType) {
+    StatusEffect effect = playerStats.getStatusEffect(effectType);
+    if (effect != null && effect.tickAndCheckExpired()) {
+      playerStats.removeStatusEffect(effectType);
+    }
   }
 
   private void enterPlayerResolved() {
