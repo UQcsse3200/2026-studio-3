@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton;
@@ -24,6 +25,8 @@ public abstract class Clickable extends Component {
   String trigger;
   float width;
   float height;
+  Object[] args;
+  String label;
 
   private static Skin getDefaultSkin() {
     if (defaultSkin == null) {
@@ -32,18 +35,20 @@ public abstract class Clickable extends Component {
     return defaultSkin;
   }
 
-  public Clickable(ClickableRecord record) {
-    this.x = record.x();
-    this.y = record.y();
-    this.width = record.width();
-    this.height = record.height();
-    this.btnSkin = (record.btnSkin() != null) ? record.btnSkin() : getDefaultSkin();
+  protected Clickable(ClickableRecord rec) {
+    this.x = rec.x();
+    this.y = rec.y();
+    this.width = rec.width();
+    this.height = rec.height();
+    this.btnSkin = (rec.btnSkin() != null) ? rec.btnSkin() : getDefaultSkin();
+    this.args = rec.args();
+    this.label = rec.label();
 
-    String text = record.text();
-    String styleName = record.styleName();
+    String text = rec.text();
+    String styleName = rec.styleName();
 
     this.btn =
-        switch (record.type()) {
+        switch (rec.type()) {
           case TEXT ->
               (styleName != null)
                   ? new TextButton(text, btnSkin, styleName)
@@ -56,10 +61,10 @@ public abstract class Clickable extends Component {
                   : new ImageTextButton(text, btnSkin);
         };
 
-    init(record.trigger());
+    init(rec.trigger());
   }
 
-  private void init(String trigger) {
+  protected void init(String trigger) {
     this.trigger = trigger;
     btn.addListener(
         new InputListener() {
@@ -90,8 +95,44 @@ public abstract class Clickable extends Component {
     btn.setColor(1f, 1f, 1f, 1f); // reset
   }
 
+  /**
+   * Default click behaviour: fire this clickable's configured trigger with its configured args on
+   * its entity's event handler. Mirrors EnemyDropTargetComponent.fireTrigger's arity handling (0-3
+   * args) so every Clickable variant gets working click dispatch for free, without each subclass
+   * (InOutOnTrigger, DragNDrop, etc.) needing to know or hardcode what the trigger/args mean.
+   * Subclasses may still override this if they need extra behaviour beyond firing the trigger.
+   */
   protected void onClick() {
-    entity.getEvents().trigger(trigger);
+    switch (args.length) {
+      case 0 -> entity.getEvents().trigger(trigger);
+      case 1 -> entity.getEvents().trigger(trigger, args[0]);
+      case 2 -> entity.getEvents().trigger(trigger, args[0], args[1]);
+      case 3 -> entity.getEvents().trigger(trigger, args[0], args[1], args[2]);
+      default ->
+          Gdx.app.error(
+              "Clickable",
+              "Trigger '" + trigger + "' has " + args.length + " args; only 0-3 are supported.");
+    }
+  }
+
+  /**
+   * Detach this clickable's widget from the stage and release anything it registered elsewhere.
+   * Called by {@link ClickableFactory} when a widget is removed at runtime (e.g. a played card
+   * leaving the hand) or the factory is disposed. Subclasses that register drag sources or
+   * listeners override this to also undo those.
+   */
+  public void remove() {
+    btn.remove();
+  }
+
+  /**
+   * Put this widget straight into its visible resting state, skipping any intro animation. Called
+   * by {@link ClickableFactory} when a widget is added to an already-live UI (e.g. a card drawn to
+   * replace one that was just played). Default: nothing, since the base widget is always drawn at
+   * its position anyway.
+   */
+  public void showNow() {
+    // no-op by default
   }
 
   public Button getBtn() {
@@ -104,6 +145,19 @@ public abstract class Clickable extends Component {
 
   public String getTrigger() {
     return trigger;
+  }
+
+  /**
+   * Arguments this clickable was configured with (e.g. a card's damage amount). May be empty, never
+   * null.
+   */
+  public Object[] getArgs() {
+    return args;
+  }
+
+  /** Human-readable label for UI feedback. Defaults to the trigger name if not set. */
+  public String getLabel() {
+    return label;
   }
 
   public float getY() {
@@ -123,11 +177,21 @@ public abstract class Clickable extends Component {
   }
 
   public void draw() {
-    int screenHeight = Gdx.graphics.getHeight();
-    btn.setPosition(this.getX(), screenHeight - this.getY());
+    // int screenHeight = Gdx.graphics.getHeight();
+    float stageHeight = btn.getStage().getViewport().getWorldHeight();
+    btn.setPosition(this.getX(), stageHeight - this.getY());
 
     if (this.getWidth() > 0 && this.getHeight() > 0) {
       btn.setSize(this.getWidth(), this.getHeight());
     }
+  }
+
+  /**
+   * Action to take after the specific component is added to the stage
+   *
+   * @param stage the stage that the component is added to
+   */
+  public void onAddedToStage(Stage stage) {
+    // default does nothing
   }
 }

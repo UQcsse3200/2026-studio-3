@@ -1,0 +1,38 @@
+{
+  "cards": [
+    {
+      "id": "duplicate",
+      "name": "First Card",
+      "description": "First card definition.",
+      "cost": 1,
+      "type": "ATTACK",
+      "rarity": "COMMON",
+      "target": "SINGLE_ENEMY",
+      "effects": [
+        {
+          "type": "DAMAGE",
+          "value": 5,
+          "duration": 0
+        }
+      ],
+      "texturePath": "images/cards/first.png"
+    },
+    {
+      "id": "duplicate",
+      "name": "Second Card",
+      "description": "Second card definition.",
+      "cost": 1,
+      "type": "ATTACK",
+      "rarity": "COMMON",
+      "target": "SINGLE_ENEMY",
+      "effects": [
+        {
+          "type": "DAMAGE",
+          "value": 7,
+          "duration": 0
+        }
+      ],
+      "texturePath": "images/cards/second.png"
+    }
+  ]
+}

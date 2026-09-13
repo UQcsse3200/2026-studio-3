@@ -1,0 +1,24 @@
+{
+  "Clickable": [
+    {
+      "text": "exit",
+      "x": 100,
+      "y": 100,
+      "trigger": "exit"
+    },
+    {
+      "text": "map",
+      "skinFile": "flat-earth/skin/flat-earth-ui.json",
+      "x": 100,
+      "y": 200,
+      "trigger": "map"
+    },
+    {
+      "text": "shop",
+      "skinFile": "flat-earth/skin/flat-earth-ui.json",
+      "x": 100,
+      "y": 300,
+      "trigger": "shop"
+    }
+  ]
+}

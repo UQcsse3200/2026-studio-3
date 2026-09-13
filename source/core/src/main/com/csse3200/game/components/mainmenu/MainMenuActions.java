@@ -20,15 +20,18 @@ public class MainMenuActions extends Component {
   @Override
   public void create() {
     entity.getEvents().addListener("start", this::onStart);
+    entity.getEvents().addListener("map", this::onStart);
     entity.getEvents().addListener("load", this::onLoad);
     entity.getEvents().addListener("exit", this::onExit);
     entity.getEvents().addListener("settings", this::onSettings);
+    entity.getEvents().addListener("shop", this::onShop);
   }
 
-  /** Swaps to the Main Game screen. */
+  /** Discards any run in progress and opens a fresh map. */
   private void onStart() {
-    logger.info("Start game");
-    game.setScreen(GdxGame.ScreenType.MAIN_GAME);
+    logger.info("Opening map");
+    game.getRunState().endRun();
+    game.setScreen(GdxGame.ScreenType.MAP);
   }
 
   /** Intended for loading a saved game state. Load functionality is not actually implemented. */
@@ -46,5 +49,11 @@ public class MainMenuActions extends Component {
   private void onSettings() {
     logger.info("Launching settings screen");
     game.setScreen(GdxGame.ScreenType.SETTINGS);
+  }
+
+  /** Opens the non-combat encounter screen (Chance encounter into the Shop). */
+  private void onShop() {
+    logger.info("Opening shop encounter");
+    game.setScreen(GdxGame.ScreenType.MAIN_GAME);
   }
 }

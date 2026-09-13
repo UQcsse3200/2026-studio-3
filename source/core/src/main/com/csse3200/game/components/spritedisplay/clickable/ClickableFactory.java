@@ -3,61 +3,49 @@ package com.csse3200.game.components.spritedisplay.clickable;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.utils.JsonReader;
-import com.badlogic.gdx.utils.JsonValue;
 import com.csse3200.game.ui.UIComponent;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Builds and manages the live {@link Clickable} widgets for a set of {@link ClickableRecord}s:
+ * resolves each record's variant, constructs and draws the widget, and disposes it. JSON parsing
+ * lives separately in {@link ClickableJsonLoader} — this class only cares about the runtime widget
+ * lifecycle, not where the records came from.
+ */
 public class ClickableFactory extends UIComponent {
 
   private static final String DEFAULT_VARIANT = "Clickable";
+  private static final String HAND_TRIGGER = "playCard";
   private static final Map<String, ClickableSupplier> STATIC_VARIANTS = new HashMap<>();
 
   static {
-    registerVariant(DEFAULT_VARIANT, record -> new Clickable(record) {});
+    registerVariant(DEFAULT_VARIANT, rec -> new Clickable(rec) {});
     registerVariant("inout", InOutOnTrigger::new);
-    // add future built-in variants here, e.g.:
-    // registerVariant("toggle", ToggleClickable::new);
+    registerVariant("drag", DragNDrop::new);
   }
 
   public static void registerVariant(String name, ClickableSupplier supplier) {
     STATIC_VARIANTS.put(name, supplier);
   }
 
+  /**
+   * @see ClickableJsonLoader#loadRecordsFromJson(Path)
+   */
+  public static List<ClickableRecord> loadRecordsFromJson(Path file) {
+    return ClickableJsonLoader.loadRecordsFromJson(file);
+  }
+
   private final List<ClickableRecord> records = new ArrayList<>();
   private final List<Clickable> clickables = new ArrayList<>();
-  private final Map<String, Skin> skinCache = new HashMap<>();
   private final Map<String, ClickableSupplier> instanceVariants = new HashMap<>();
 
   public ClickableFactory(Path file) {
-    JsonValue root = new JsonReader().parse(Gdx.files.internal(file.toString()));
-    JsonValue clickableArray = root.get("Clickable");
-
-    for (JsonValue entry : clickableArray) {
-      Skin skin =
-          getOrLoadSkin(entry.getString("skinFile", null), entry.getString("skinAtlas", null));
-
-      ClickableRecord.Builder b =
-          ClickableRecord.builder(entry.getString("trigger"))
-              .text(entry.getString("text", null))
-              .skin(skin)
-              .position(entry.getFloat("x"), entry.getFloat("y"))
-              .styleName(entry.getString("styleName", null))
-              .variant(entry.getString("variant", DEFAULT_VARIANT));
-
-      JsonValue sizeArray = entry.get("size");
-      if (sizeArray != null) {
-        b.size(sizeArray.getFloat(0), sizeArray.getFloat(1));
-      }
-
-      records.add(b.build());
-    }
+    this(loadRecordsFromJson(file));
   }
 
   public ClickableFactory(List<ClickableRecord> records) {
@@ -80,45 +68,55 @@ public class ClickableFactory extends UIComponent {
     return STATIC_VARIANTS.get(name);
   }
 
-  private Skin getOrLoadSkin(String skinFile, String skinAtlas) {
-    if (skinFile == null && skinAtlas == null) {
-      return null;
-    }
-
-    String cacheKey = skinFile + "|" + skinAtlas;
-    return skinCache.computeIfAbsent(
-        cacheKey,
-        key -> {
-          if (skinFile != null && skinAtlas != null) {
-            TextureAtlas atlas = new TextureAtlas(Gdx.files.internal(skinAtlas));
-            return new Skin(Gdx.files.internal(skinFile), atlas);
-          } else if (skinFile != null) {
-            return new Skin(Gdx.files.internal(skinFile));
-          } else {
-            return new Skin(new TextureAtlas(Gdx.files.internal(skinAtlas)));
-          }
-        });
-  }
-
   @Override
   public void create() {
     super.create();
-    for (ClickableRecord record : records) {
-      ClickableSupplier supplier = resolveVariant(record.variant());
-      if (supplier == null) {
-        Gdx.app.error(
-            "ClickableFactory",
-            "Unknown clickable variant \"" + record.variant() + "\", falling back to default");
-        supplier = STATIC_VARIANTS.get(DEFAULT_VARIANT);
+    for (ClickableRecord rec : records) {
+      clickables.add(buildClickable(rec));
+    }
+  }
+
+  private Clickable buildClickable(ClickableRecord rec) {
+    ClickableSupplier supplier = resolveVariant(rec.variant());
+    if (supplier == null) {
+      Gdx.app.error(
+          "ClickableFactory",
+          "Unknown clickable variant \"" + rec.variant() + "\", falling back to default");
+      supplier = STATIC_VARIANTS.get(DEFAULT_VARIANT);
+    }
+
+    Clickable clickable = supplier.create(rec);
+    clickable.setEntity(this.entity);
+    clickable.create();
+    stage.addActor(clickable.getBtn());
+    clickable.onAddedToStage(stage);
+
+    // Hand cards should be visible and playable straight away rather than waiting for an "up".
+    if (HAND_TRIGGER.equals(rec.trigger())) {
+      clickable.showNow();
+    }
+    return clickable;
+  }
+
+  /**
+   * Rebuilds the on-screen hand: drops every {@code "playCard"} widget and builds fresh ones from
+   * {@code handRecords}, leaving the static UI widgets untouched. Called when the hand changes (a
+   * card played and a replacement drawn), so the new hand — including the drawn card — shows
+   * immediately.
+   *
+   * @param handRecords one record per card currently in the player's hand
+   */
+  public void rebuildHand(List<ClickableRecord> handRecords) {
+    Iterator<Clickable> iterator = clickables.iterator();
+    while (iterator.hasNext()) {
+      Clickable clickable = iterator.next();
+      if (HAND_TRIGGER.equals(clickable.getTrigger())) {
+        clickable.remove();
+        iterator.remove();
       }
-
-      Clickable clickable = supplier.create(record);
-      clickable.setEntity(this.entity);
-
-      clickable.create();
-
-      clickables.add(clickable);
-      stage.addActor(clickable.getBtn());
+    }
+    for (ClickableRecord rec : handRecords) {
+      clickables.add(buildClickable(rec));
     }
   }
 
@@ -133,7 +131,8 @@ public class ClickableFactory extends UIComponent {
   public void dispose() {
     super.dispose();
     for (Clickable clickable : clickables) {
-      clickable.getBtn().remove();
+      clickable.remove();
     }
+    clickables.clear();
   }
 }

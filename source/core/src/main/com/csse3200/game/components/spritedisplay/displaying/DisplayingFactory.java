@@ -21,10 +21,11 @@ public class DisplayingFactory extends UIComponent {
   private static final Map<String, DisplayingSupplier> STATIC_VARIANTS = new HashMap<>();
 
   static {
-    registerVariant(DEFAULT_VARIANT, record -> new Displaying(record) {});
-    registerVariant("health", HealthDisplay::new);
+    registerVariant(DEFAULT_VARIANT, rec -> new Displaying(rec) {});
     registerVariant("cardDisplay", CardDisplay::new);
-    // Add more variants here as needed
+    registerVariant("battleLog", BattleLogDisplay::new);
+    registerVariant("endBattle", EndBattleDisplay::new);
+    // Add more variants here as needed.
   }
 
   public static void registerVariant(String name, DisplayingSupplier supplier) {
@@ -32,12 +33,13 @@ public class DisplayingFactory extends UIComponent {
   }
 
   private final List<DisplayingRecord> records = new ArrayList<>();
+  private final List<Displaying> displayings = new ArrayList<>();
   private final Map<String, Skin> skinCache = new HashMap<>();
   private final Map<String, DisplayingSupplier> instanceVariants = new HashMap<>();
 
   public DisplayingFactory(Path file) {
     JsonValue root = new JsonReader().parse(Gdx.files.internal(file.toString()));
-    JsonValue displayingArray = root.get("Displaying");
+    JsonValue displayingArray = root.get(DEFAULT_VARIANT);
 
     for (JsonValue entry : displayingArray) {
       Skin skin = getOrLoadSkin(entry.getString("skinFile", null));
@@ -89,29 +91,37 @@ public class DisplayingFactory extends UIComponent {
   public void create() {
     super.create();
 
-    for (DisplayingRecord record : records) {
-      DisplayingSupplier supplier = resolveVariant(record.variant());
+    for (DisplayingRecord rec : records) {
+      DisplayingSupplier supplier = resolveVariant(rec.variant());
       if (supplier == null) {
         Gdx.app.error(
             "DisplayingFactory",
-            "Unknown displaying variant \"" + record.variant() + "\", falling back to default");
+            "Unknown displaying variant \"" + rec.variant() + "\", falling back to default");
         supplier = STATIC_VARIANTS.get(DEFAULT_VARIANT);
       }
 
-      Displaying displaying = supplier.create(record);
-      this.entity.addComponent(displaying);
+      Displaying displaying = supplier.create(rec);
+      // Factory-managed, not registered as an entity component: it shares this factory's entity so
+      // its event listeners still work, and this factory owns its create/dispose lifecycle (the
+      // entity has already snapshotted its component list by the time this runs). Mirrors
+      // ClickableFactory.
+      displaying.setEntity(this.entity);
+      displaying.create();
+      displayings.add(displaying);
     }
   }
 
   @Override
   protected void draw(SpriteBatch batch) {
-    // All drawing is now handled by each individual Displaying component.
-    // Nothing to do here!
+    // Each Displaying is a UIComponent and draws itself via the render service.
   }
 
   @Override
   public void dispose() {
     super.dispose();
-    // Components are disposed by the entity system automatically.
+    for (Displaying displaying : displayings) {
+      displaying.dispose();
+    }
+    displayings.clear();
   }
 }

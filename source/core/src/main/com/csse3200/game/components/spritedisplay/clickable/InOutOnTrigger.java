@@ -1,7 +1,7 @@
 package com.csse3200.game.components.spritedisplay.clickable;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import java.util.Random;
 import org.slf4j.Logger;
@@ -12,8 +12,8 @@ public class InOutOnTrigger extends Clickable {
   private static final Logger logger = LoggerFactory.getLogger(InOutOnTrigger.class);
 
   // Store the target position (where the button should rest when visible)
-  private float targetX;
-  private float targetY;
+  protected float targetX;
+  protected float targetY;
 
   // Off-screen position (below the screen)
   private float offScreenY;
@@ -22,13 +22,12 @@ public class InOutOnTrigger extends Clickable {
   private static final float ANIMATION_DURATION = 0.5f;
 
   // Track whether the button is currently animating
-  private boolean isAnimating = false;
+  protected boolean isAnimating = false;
 
-  public InOutOnTrigger(ClickableRecord record) {
-    super(record);
-    int screenHeight = Gdx.graphics.getHeight();
-    this.targetX = record.x();
-    this.targetY = screenHeight - record.y();
+  public InOutOnTrigger(ClickableRecord rec) {
+    super(rec);
+    this.targetX = rec.x();
+    this.targetY = rec.y(); // temporarily store the y JSON value
   }
 
   @Override
@@ -36,21 +35,24 @@ public class InOutOnTrigger extends Clickable {
     super.create();
 
     // Calculate off-screen position (just below the bottom of the screen)
-    int screenHeight = Gdx.graphics.getHeight();
     offScreenY = -btn.getHeight() - 50; // 50px extra padding
-
-    // Start the button off-screen
-    btn.setPosition(targetX, offScreenY);
-
-    logger.info("InOutOnTrigger created! Listening for 'up' and 'down'");
 
     // Listen for events that trigger the animation
     entity.getEvents().addListener("up", this::slideUp);
     entity.getEvents().addListener("down", this::slideDown);
   }
 
+  /** Snap straight to the visible resting position, e.g. for a card drawn mid-turn. */
+  @Override
+  public void showNow() {
+    btn.clearActions();
+    isAnimating = false;
+    btn.setVisible(true);
+    btn.setPosition(targetX, targetY);
+  }
+
   private void slideUp() {
-    if (isAnimating) return;
+    if (isAnimating || btn.getStage() == null) return;
 
     if (Math.abs(btn.getY() - targetY) < 1f) {
       return;
@@ -81,12 +83,10 @@ public class InOutOnTrigger extends Clickable {
   /**
    * Slides the button out from its target position to off-screen. Triggered by the "down" event.
    */
-  private void slideDown() {
+  protected void slideDown() {
+    if (btn.getStage() == null) return;
     logger.info("down");
     btn.clearActions();
-    isAnimating = false; // reset flag
-
-    float startY = btn.getY();
     isAnimating = true;
     btn.addAction(
         Actions.sequence(
@@ -105,10 +105,9 @@ public class InOutOnTrigger extends Clickable {
   }
 
   @Override
-  public void draw() {
-    if (this.getWidth() > 0 && this.getHeight() > 0) {
-      btn.setSize(this.getWidth(), this.getHeight());
-    }
+  public void onAddedToStage(Stage stage) {
+    float stageHeight = btn.getStage().getViewport().getWorldHeight();
+    this.targetY = stageHeight - targetY;
   }
 
   @Override
@@ -119,6 +118,13 @@ public class InOutOnTrigger extends Clickable {
     // Move up by 10 pixels from current position
     // Using "moveBy" with a curved easing (slow in, fast out)
     btn.addAction(Actions.moveTo(targetX, targetY + 120, 0.3f, Interpolation.sineOut));
+  }
+
+  @Override
+  public void draw() {
+    if (this.getWidth() > 0 && this.getHeight() > 0) {
+      btn.setSize(this.getWidth(), this.getHeight());
+    }
   }
 
   @Override

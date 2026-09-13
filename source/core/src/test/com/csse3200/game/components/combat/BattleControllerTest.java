@@ -2,6 +2,7 @@ package com.csse3200.game.components.combat;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -10,17 +11,21 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.csse3200.game.cards.TargetType;
+import com.csse3200.game.cards.play.CardPlayRequest;
+import com.csse3200.game.cards.play.CardPlayTarget;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
-import com.csse3200.game.components.enemy.EnemyStatsComponent;
+import com.csse3200.game.components.player.PlayerActions;
+import com.csse3200.game.components.player.PlayerIntent;
 import com.csse3200.game.entities.Entity;
-import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class BattleControllerTest {
@@ -29,10 +34,12 @@ class BattleControllerTest {
   private List<Entity> enemies;
   private EnemyBehaviourComponent firstEnemyBehaviour;
   private EnemyBehaviourComponent secondEnemyBehaviour;
+  private final List<BattlePhase> phaseHistory = new ArrayList<>();
 
   @BeforeEach
   void setUp() {
     player = new Entity().addComponent(new CombatStatsComponent(20, 0));
+    player.addComponent(new PlayerActions());
     firstEnemyBehaviour = mock(EnemyBehaviourComponent.class);
     secondEnemyBehaviour = mock(EnemyBehaviourComponent.class);
     enemies =
@@ -40,6 +47,8 @@ class BattleControllerTest {
             createLivingDefendingEnemy(firstEnemyBehaviour),
             createLivingDefendingEnemy(secondEnemyBehaviour));
     controller = new BattleController(player, enemies);
+    phaseHistory.clear();
+    controller.addPhaseChangeListener((previous, next) -> phaseHistory.add(next));
   }
 
   @Test
@@ -72,12 +81,38 @@ class BattleControllerTest {
   }
 
   @Test
+  void shouldWaitForPlayerInputWhenPlayerTurnStarts() {
+    controller.start();
+
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+  }
+
+  @Test
+  void shouldResolveSubmittedAttackCardSynchronously() {
+    advanceToPlayerTurn();
+    CardPlayRequest request = new CardPlayRequest("strike",
+            new CardPlayTarget(TargetType.SINGLE_ENEMY, "enemy-1"));
+
+    boolean accepted = controller.submitCardPlayRequest(request, PlayerIntent.ATTACK);
+
+    assertTrue(accepted);
+    assertTrue(phaseHistory.contains(BattlePhase.PLAYER_ATTACK));
+    // No resolution service is wired in this unit test, so the card is consumed and the player
+    // keeps their turn.
+    assertNull(controller.getCardPlayRequest());
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+  }
+
+  @Test
   void shouldApplyValidTransitions() {
     controller.handle(BattleEvent.SETUP_COMPLETE);
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
 
     controller.handle(BattleEvent.PLAYER_ATTACK_SELECTED);
-    assertEquals(BattlePhase.PLAYER_ATTACK, controller.getCurrentPhase());
+
+    // A card action with no card attached resolves immediately and returns to the player.
+    assertTrue(phaseHistory.contains(BattlePhase.PLAYER_ATTACK));
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }
 
   @Test
@@ -95,16 +130,15 @@ class BattleControllerTest {
   }
 
   @Test
-  void shouldCompletePlayerActionCycle() {
+  void shouldCompletePlayerActionCycleSynchronously() {
     advanceToPlayerTurn();
 
     controller.handle(BattleEvent.PLAYER_ATTACK_SELECTED);
-    assertEquals(BattlePhase.PLAYER_ATTACK, controller.getCurrentPhase());
 
-    controller.handle(BattleEvent.PLAYER_ACTION_RESOLVED);
-    assertEquals(BattlePhase.PLAYER_RESOLVED, controller.getCurrentPhase());
-
-    controller.handle(BattleEvent.PLAYER_CONTINUES);
+    // The action steps through PLAYER_ATTACK and PLAYER_RESOLVED on its own, then hands control
+    // back to the player for their next card.
+    assertTrue(phaseHistory.contains(BattlePhase.PLAYER_ATTACK));
+    assertTrue(phaseHistory.contains(BattlePhase.PLAYER_RESOLVED));
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }
 
@@ -115,8 +149,8 @@ class BattleControllerTest {
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
     assertEquals(0, controller.getCurrentEnemyIndex());
     verify(firstEnemyBehaviour, times(2)).rollIntent();
-    verify(secondEnemyBehaviour, times(2)).rollIntent();
     verify(firstEnemyBehaviour).executeIntent(player);
+    verify(secondEnemyBehaviour, times(2)).rollIntent();
     verify(secondEnemyBehaviour).executeIntent(player);
   }
 
@@ -184,12 +218,11 @@ class BattleControllerTest {
   }
 
   @Test
-  @Disabled("Enemy attacks do not yet damage a player CombatStatsComponent")
-  void shouldDamagePlayer() throws ReflectiveOperationException {
+  void shouldDamagePlayer() {
+    // The AI opens with an attack; executeIntent hits the player for the enemy's base attack (5).
     EnemyBehaviourComponent attackingBehaviour = new EnemyBehaviourComponent("test");
-    setCurrentIntent(attackingBehaviour, EnemyIntent.attack(5));
     Entity enemy =
-        new Entity().addComponent(new EnemyStatsComponent(10, 1)).addComponent(attackingBehaviour);
+        new Entity().addComponent(new CombatStatsComponent(10, 5)).addComponent(attackingBehaviour);
     controller = new BattleController(player, List.of(enemy));
 
     controller.start();
@@ -206,27 +239,37 @@ class BattleControllerTest {
   }
 
   @Test
-  void shouldQueueListenerEvents() {
-    AtomicReference<BattlePhase> phaseAfterListenerHandle = new AtomicReference<>();
+  void shouldQueuePhaseChangeListenerEvents() {
+    AtomicReference<BattlePhase> phaseWhenListenerRan = new AtomicReference<>();
+    AtomicBoolean alreadyFired = new AtomicBoolean(false);
     controller.addPhaseChangeListener(
         (previousPhase, nextPhase) -> {
-          if (nextPhase == BattlePhase.PLAYER_TURN) {
+          if (nextPhase == BattlePhase.PLAYER_TURN && alreadyFired.compareAndSet(false, true)) {
+            // This event must be queued, not handled re-entrantly while a transition is running.
             controller.handle(BattleEvent.PLAYER_ATTACK_SELECTED);
-            phaseAfterListenerHandle.set(controller.getCurrentPhase());
+            phaseWhenListenerRan.set(controller.getCurrentPhase());
           }
         });
 
     controller.start();
 
-    assertEquals(BattlePhase.PLAYER_TURN, phaseAfterListenerHandle.get());
-    assertEquals(BattlePhase.PLAYER_ATTACK, controller.getCurrentPhase());
+    // The queued event had not been processed yet when the listener observed the phase.
+    assertEquals(BattlePhase.PLAYER_TURN, phaseWhenListenerRan.get());
+    // Once processed, the attack resolved synchronously and control returned to the player.
+    assertTrue(phaseHistory.contains(BattlePhase.PLAYER_ATTACK));
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }
 
   @Test
   void shouldRejectEventsAfterVictory() {
-    advanceToPlayerResolved();
+    controller =
+        new BattleController(
+            player,
+            List.of(
+                createDefendingEnemy(firstEnemyBehaviour, false),
+                createDefendingEnemy(secondEnemyBehaviour, false)));
 
-    controller.handle(BattleEvent.ENEMIES_DEFEATED);
+    controller.start();
 
     assertEquals(BattlePhase.VICTORY, controller.getCurrentPhase());
     assertFalse(controller.canHandle(BattleEvent.PLAYER_TURN_STARTED));
@@ -237,9 +280,10 @@ class BattleControllerTest {
 
   @Test
   void shouldRejectEventsAfterDefeat() {
-    advanceToPlayerResolved();
+    player = new Entity().addComponent(new CombatStatsComponent(0, 0));
+    controller = new BattleController(player, enemies);
 
-    controller.handle(BattleEvent.PLAYER_DEFEATED);
+    controller.start();
 
     assertEquals(BattlePhase.DEFEAT, controller.getCurrentPhase());
     assertFalse(controller.canHandle(BattleEvent.PLAYER_TURN_STARTED));
@@ -269,14 +313,72 @@ class BattleControllerTest {
     assertEquals(BattlePhase.SETUP, controller.getCurrentPhase());
   }
 
-  private void advanceToPlayerTurn() {
-    controller.handle(BattleEvent.SETUP_COMPLETE);
+  @Test
+  void shouldRejectCardSubmissionFromPhaseListener() {
+    AtomicBoolean attempted = new AtomicBoolean(false);
+
+    controller.addPhaseChangeListener(
+        (previous, next) -> {
+          if (next == BattlePhase.PLAYER_TURN && attempted.compareAndSet(false, true)) {
+            assertFalse(
+                controller.submitCardPlayRequest(
+                    new CardPlayRequest("strike",
+                            new CardPlayTarget(TargetType.SINGLE_ENEMY, "enemy-1")),
+                            PlayerIntent.ATTACK));
+            assertFalse(
+                controller.submitCardPlayRequest(
+                    new CardPlayRequest("defend",
+                            new CardPlayTarget(TargetType.SELF, null)),
+                            PlayerIntent.DEFEND));
+            assertNull(controller.getCardPlayRequest());
+          }
+        });
+
+    controller.start();
+
+    assertTrue(attempted.get());
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+    assertFalse(phaseHistory.contains(BattlePhase.PLAYER_ATTACK));
+    assertFalse(phaseHistory.contains(BattlePhase.PLAYER_DEFEND));
+
+    // Normal submissions still work once event processing finishes.
+    assertTrue(
+        controller.submitCardPlayRequest(
+            new CardPlayRequest("strike",
+                    new CardPlayTarget(TargetType.SINGLE_ENEMY, "enemy-1")),
+                    PlayerIntent.ATTACK));
   }
 
-  private void advanceToPlayerResolved() {
-    advanceToPlayerTurn();
-    controller.handle(BattleEvent.PLAYER_ATTACK_SELECTED);
-    controller.handle(BattleEvent.PLAYER_ACTION_RESOLVED);
+  @Test
+  void shouldPreserveSuccessfulResultWhenListenerSubmitsAnotherCard() {
+    controller.start();
+    AtomicBoolean attempted = new AtomicBoolean(false);
+
+    controller.addPhaseChangeListener(
+        (previous, next) -> {
+          if (next == BattlePhase.PLAYER_TURN && attempted.compareAndSet(false, true)) {
+            assertFalse(
+                controller.submitCardPlayRequest(
+                    new CardPlayRequest("defend",
+                            new CardPlayTarget(TargetType.SELF, null)),
+                            PlayerIntent.DEFEND));
+          }
+        });
+
+    assertTrue(
+        controller.submitCardPlayRequest(
+            new CardPlayRequest("strike",
+                    new CardPlayTarget(TargetType.SINGLE_ENEMY, "enemy-1")),
+                    PlayerIntent.ATTACK));
+
+    assertTrue(attempted.get());
+    assertNull(controller.getCardPlayRequest());
+    assertFalse(phaseHistory.contains(BattlePhase.PLAYER_DEFEND));
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+  }
+
+  private void advanceToPlayerTurn() {
+    controller.handle(BattleEvent.SETUP_COMPLETE);
   }
 
   private void advanceToEnemyTurn() {
@@ -285,8 +387,8 @@ class BattleControllerTest {
   }
 
   private void completePlayerTurn() {
+    // PLAYER_END_REQUESTED runs the whole end-of-turn and enemy phase on its own.
     controller.handle(BattleEvent.PLAYER_END_REQUESTED);
-    controller.handle(BattleEvent.PLAYER_TURN_ENDED);
   }
 
   private Entity createLivingDefendingEnemy(EnemyBehaviourComponent behaviour) {
@@ -295,21 +397,11 @@ class BattleControllerTest {
 
   private Entity createDefendingEnemy(EnemyBehaviourComponent behaviour, boolean alive) {
     Entity enemy = mock(Entity.class);
-    EnemyStatsComponent stats = mock(EnemyStatsComponent.class);
-    EnemyIntent intent = EnemyIntent.defend(1);
-
+    CombatStatsComponent stats = mock(CombatStatsComponent.class);
     when(enemy.getComponent(EnemyBehaviourComponent.class)).thenReturn(behaviour);
-    when(enemy.getComponent(EnemyStatsComponent.class)).thenReturn(stats);
-    when(behaviour.rollIntent()).thenReturn(intent);
-    when(behaviour.getCurrentIntent()).thenReturn(intent);
-    when(stats.isAlive()).thenReturn(alive);
+    when(enemy.getComponent(CombatStatsComponent.class)).thenReturn(stats);
+    when(behaviour.rollIntent()).thenReturn(EnemyIntent.defend(1));
+    when(stats.isDead()).thenReturn(!alive);
     return enemy;
-  }
-
-  private void setCurrentIntent(EnemyBehaviourComponent behaviour, EnemyIntent intent)
-      throws ReflectiveOperationException {
-    Field currentIntent = EnemyBehaviourComponent.class.getDeclaredField("currentIntent");
-    currentIntent.setAccessible(true);
-    currentIntent.set(behaviour, intent);
   }
 }

@@ -1,66 +1,50 @@
 package com.csse3200.game.components.enemy;
 
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.Component;
 
 /**
- * Health, attack and armour for an enemy, and the resolution of incoming damage.
+ * Enemy-specific state and lifecycle event translation.
  *
- * <p>Damage is currently untyped; typed damage can be added as an overload without breaking
- * callers.
+ * <p>Combat stats (health, base attack, armor) live on the entity's {@link CombatStatsComponent} so
+ * that other teams can read them uniformly with {@code getComponent(CombatStatsComponent.class)}.
+ * This component holds only enemy-specific data (currently the display name) and re-emits the enemy
+ * lifecycle events ({@code enemyDamaged}, {@code enemyDefeated}) from the shared {@code
+ * updateHealth} event fired by {@link CombatStatsComponent}.
  */
-public class EnemyStatsComponent extends CombatStatsComponent {
-  private final int maxHealth;
-  private int armour;
+public class EnemyStatsComponent extends Component {
+  private static final String DEFAULT_DISPLAY_NAME = "Unknown Enemy";
 
-  public EnemyStatsComponent(int health, int baseAttack) {
-    this(health, baseAttack, 0);
+  private final String displayName;
+  private int lastHealth;
+
+  public EnemyStatsComponent() {
+    this(DEFAULT_DISPLAY_NAME);
   }
 
-  public EnemyStatsComponent(int health, int baseAttack, int armour) {
-    super(health, baseAttack);
-    this.maxHealth = health;
-    this.armour = Math.max(armour, 0);
+  public EnemyStatsComponent(String displayName) {
+    this.displayName =
+        displayName == null || displayName.isBlank() ? DEFAULT_DISPLAY_NAME : displayName;
   }
 
-  public int getMaxHealth() {
-    return maxHealth;
+  public String getDisplayName() {
+    return displayName;
   }
 
-  public int getArmour() {
-    return armour;
+  @Override
+  public void create() {
+    CombatStatsComponent stats = entity.getComponent(CombatStatsComponent.class);
+    lastHealth = stats == null ? 0 : stats.getHealth();
+    entity.getEvents().addListener("updateHealth", this::onHealthUpdated);
   }
 
-  public void setArmour(int armour) {
-    this.armour = Math.max(armour, 0);
-  }
-
-  /** Adds armour, for example when a defend intent resolves. */
-  public void addArmour(int armour) {
-    setArmour(this.armour + armour);
-  }
-
-  public boolean isAlive() {
-    return getHealth() > 0;
-  }
-
-  /**
-   * Applies damage, depleting armour before health.
-   *
-   * @param damage incoming damage, ignored if not positive
-   */
-  public void takeDamage(int damage) {
-    if (damage <= 0) {
-      return;
+  private void onHealthUpdated(int health, int maxHealth) {
+    if (health < lastHealth) {
+      entity.getEvents().trigger("enemyDamaged", lastHealth - health);
     }
-    int absorbed = Math.min(armour, damage);
-    armour -= absorbed;
-    int remaining = damage - absorbed;
-    if (remaining > 0) {
-      setHealth(getHealth() - remaining);
-      entity.getEvents().trigger("enemyDamaged", remaining);
-    }
-    if (!isAlive()) {
+    if (lastHealth > 0 && health == 0) {
       entity.getEvents().trigger("enemyDefeated");
     }
+    lastHealth = health;
   }
 }

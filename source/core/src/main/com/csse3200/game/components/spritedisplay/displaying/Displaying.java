@@ -21,25 +21,25 @@ public abstract class Displaying extends UIComponent {
   private final String trigger;
   protected Label label;
 
-  public Displaying(DisplayingRecord record) {
-    this.x = record.x();
-    this.y = record.y();
-    this.width = record.width();
-    this.height = record.height();
-    this.trigger = record.trigger();
+  protected Displaying(DisplayingRecord rec) {
+    this.x = rec.x();
+    this.y = rec.y();
+    this.width = rec.width();
+    this.height = rec.height();
+    this.trigger = rec.trigger();
 
-    Skin labelSkin = (record.skin() != null) ? record.skin() : getDefaultSkin();
+    Skin labelSkin = (rec.skin() != null) ? rec.skin() : getDefaultSkin();
 
     this.label =
-        (record.fontName() != null)
-            ? new Label(record.text(), labelSkin, record.fontName())
-            : new Label(record.text(), labelSkin);
+        (rec.fontName() != null)
+            ? new Label(rec.text(), labelSkin, rec.fontName())
+            : new Label(rec.text(), labelSkin);
 
-    if (record.colour() != null) {
-      label.setColor(Color.valueOf(record.colour()));
+    if (rec.colour() != null) {
+      label.setColor(Color.valueOf(rec.colour()));
     }
 
-    label.setFontScale(record.scale());
+    label.setFontScale(rec.scale());
   }
 
   private static Skin getDefaultSkin() {
@@ -68,8 +68,9 @@ public abstract class Displaying extends UIComponent {
   @Override
   protected void draw(SpriteBatch batch) {
     // Position and size the label every frame
-    int screenHeight = Gdx.graphics.getHeight();
-    label.setPosition(x, screenHeight - y);
+    // int screenHeight = Gdx.graphics.getHeight();
+    float stageHeight = label.getStage().getViewport().getWorldHeight();
+    label.setPosition(x, stageHeight - y);
 
     if (width > 0 && height > 0) {
       label.setSize(width, height);

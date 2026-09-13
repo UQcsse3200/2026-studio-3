@@ -4,26 +4,31 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 
 public class CardDisplay extends Displaying {
 
-  private Label label;
+  private Label text;
 
-  public CardDisplay(DisplayingRecord record) {
-    super(record);
-    this.label = getLabel(); // Get the label from the superclass
+  public CardDisplay(DisplayingRecord rec) {
+    super(rec);
+    this.text = getLabel(); // Get the text from the superclass
   }
 
   @Override
   public void create() {
     super.create();
 
-    // Listen for each card trigger
-    entity.getEvents().addListener("card1", () -> updateLabel("Card 1 clicked!"));
-    entity.getEvents().addListener("card2", () -> updateLabel("Card 2 clicked!"));
-    entity.getEvents().addListener("card3", () -> updateLabel("Card 3 clicked!"));
-    entity.getEvents().addListener("card4", () -> updateLabel("Card 4 clicked!"));
+    // Cards are now dynamic (see CardService), so we can't hardcode listeners per card
+    // trigger. Instead, DragNDrop fires one generic "cardPlayed" event with the card's
+    // display text and a description of what it was dropped on, whenever ANY card is
+    // successfully dropped — that works for any card without this class needing to know
+    // what cards or targets exist.
+    entity.getEvents().addListener("cardPlayed", this::onCardPlayed);
+  }
+
+  private void onCardPlayed(String cardLabel, String targetLabel) {
+    updateLabel(cardLabel + " played (on " + targetLabel + ")!");
   }
 
   private void updateLabel(String text) {
-    label.setText(text);
-    label.setVisible(true);
+    this.text.setText(text);
+    this.text.setVisible(true);
   }
 }
