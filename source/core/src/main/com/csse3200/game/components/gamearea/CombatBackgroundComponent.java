@@ -18,6 +18,19 @@ public class CombatBackgroundComponent extends RenderComponent {
     protected void draw(SpriteBatch batch) {
         float width  = camera.viewportWidth * camera.zoom;
         float height = camera.viewportHeight * camera.zoom;
+
+        float scale = Math.max(
+                width / texture.getWidth(),
+                height / texture.getHeight()
+        );
+
+        float drawWidth  = texture.getWidth() * scale;
+        float drawHeight = texture.getHeight() * scale;
+
+        float left   = camera.position.x - drawWidth / 2f;
+        float bottom = camera.position.y - drawHeight / 2f;
+
+        batch.draw(texture, left, bottom, drawWidth, drawHeight);
     }
 
     @Override
