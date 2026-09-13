@@ -6,6 +6,7 @@ import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 public class SaveLoadScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(SaveLoadScreen.class);
   private static final List<Integer> SLOT_IDS = List.of(1, 2, 3);
+  private static final String[] SAVE_LOAD_TEXTURES = {MainMenuDisplay.BACKGROUND_TEXTURE};
 
   private final GdxGame game;
   private final Renderer renderer;
@@ -46,7 +48,14 @@ public class SaveLoadScreen extends ScreenAdapter {
     ServiceLocator.registerTimeSource(new GameTime());
 
     renderer = RenderFactory.createRenderer();
+    loadAssets();
     createUI();
+  }
+
+  private void loadAssets() {
+    ResourceService resourceService = ServiceLocator.getResourceService();
+    resourceService.loadTextures(SAVE_LOAD_TEXTURES);
+    resourceService.loadAll();
   }
 
   private void createUI() {
@@ -96,6 +105,8 @@ public class SaveLoadScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
+    ServiceLocator.getResourceService().unloadAssets(SAVE_LOAD_TEXTURES);
+    ServiceLocator.getResourceService().dispose();
     ServiceLocator.clear();
   }
 }
