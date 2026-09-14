@@ -49,6 +49,8 @@ public class SaveLoadPanel extends UIComponent {
   private static final int PILL_HEIGHT = 64;
   private static final int PILL_WIDTH = 160;
   private static final int PILL_RADIUS = PILL_HEIGHT / 2;
+  private static final float PANEL_WIDTH = 760f;
+  private static final float PANEL_HEIGHT = 430f;
 
   private Stack rootStack;
   private Table rootTable;
@@ -102,13 +104,20 @@ public class SaveLoadPanel extends UIComponent {
     overlay.setBackground(skin.newDrawable("white", overlayColour));
     rootStack.add(overlay);
 
+    Table wrapper = new Table();
+    wrapper.setFillParent(true);
+    wrapper.center().pad(MenuTheme.SCREEN_PADDING);
+
     rootTable = new Table();
+    rootTable.setBackground(skin.newDrawable("white", new Color(0.105f, 0.07f, 0.065f, 0.92f)));
+    rootTable.pad(28f, 34f, 30f, 34f);
     addHeader();
 
     statusLabel = new Label("", themedLabelStyle());
     rootTable.add(statusLabel).colspan(4).padBottom(10f).row();
 
-    rootStack.add(rootTable);
+    wrapper.add(rootTable).width(PANEL_WIDTH).height(PANEL_HEIGHT);
+    rootStack.add(wrapper);
     stage.addActor(rootStack);
   }
 
