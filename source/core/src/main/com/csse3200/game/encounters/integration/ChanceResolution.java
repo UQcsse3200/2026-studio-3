@@ -69,8 +69,25 @@ public final class ChanceResolution {
 
   static ChanceResolution failure(
       Status status, ChanceOutcome outcome, int health, int currency, String message) {
+    return failure(status, outcome, health, health, currency, currency, message);
+  }
+
+  static ChanceResolution failure(
+      Status status,
+      ChanceOutcome outcome,
+      int healthBefore,
+      int healthAfter,
+      int currencyBefore,
+      int currencyAfter,
+      String message) {
     return new ChanceResolution(
-        status, outcome, health, health, currency, currency, message == null ? "" : message);
+        status,
+        outcome,
+        healthBefore,
+        healthAfter,
+        currencyBefore,
+        currencyAfter,
+        message == null ? "" : message);
   }
 
   /**

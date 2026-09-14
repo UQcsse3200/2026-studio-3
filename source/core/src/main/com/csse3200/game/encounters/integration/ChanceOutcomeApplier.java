@@ -21,8 +21,9 @@ public final class ChanceOutcomeApplier {
   /**
    * Applies both health and currency changes as one logical operation.
    *
-   * <p>Currency is never allowed to become negative. If validation or an update fails, neither part
-   * of the outcome is retained.
+   * <p>Currency is never allowed to become negative. Currency is committed and verified before the
+   * direct health delta is applied. Health is the final mutation because lethal direct health loss
+   * can emit an irreversible death event.
    *
    * @param outcome Player-independent result returned by Chance logic
    * @return detailed resolution status and before/after values
@@ -38,9 +39,8 @@ public final class ChanceOutcomeApplier {
           "The selected choice did not provide an outcome.");
     }
 
-    long requestedHealth = (long) healthBefore + outcome.getHealthDelta();
     long requestedCurrency = (long) currencyBefore + outcome.getCurrencyDelta();
-    if (requestedHealth > Integer.MAX_VALUE || requestedCurrency > Integer.MAX_VALUE) {
+    if (requestedCurrency > Integer.MAX_VALUE) {
       return failure(
           ChanceResolution.Status.ARITHMETIC_OVERFLOW,
           outcome,
@@ -53,24 +53,56 @@ public final class ChanceOutcomeApplier {
           "The player cannot afford this choice.");
     }
 
-    int healthTarget = (int) Math.max(0L, requestedHealth);
+    long requestedHealth = (long) healthBefore + outcome.getHealthDelta();
+    int healthTarget = (int) Math.max(0L, Math.min((long) player.getMaxHealth(), requestedHealth));
+    int appliedHealthDelta = healthTarget - healthBefore;
     int currencyTarget = (int) requestedCurrency;
+
     try {
-      player.setHealth(healthTarget);
-      player.setCurrency(currencyTarget);
-      if (player.getHealth() != healthTarget || player.getCurrency() != currencyTarget) {
-        throw new IllegalStateException("Player state update was not accepted");
+      if (outcome.getCurrencyDelta() != 0) {
+        player.setCurrency(currencyTarget);
+      }
+      if (player.getCurrency() != currencyTarget) {
+        throw new IllegalStateException("Player currency update was not accepted");
       }
     } catch (RuntimeException exception) {
-      boolean rollbackSucceeded = rollback(healthBefore, currencyBefore);
+      boolean rollbackSucceeded = rollbackCurrency(currencyBefore);
       return failure(
           rollbackSucceeded
               ? ChanceResolution.Status.PLAYER_UPDATE_FAILED
               : ChanceResolution.Status.ROLLBACK_FAILED,
           outcome,
           rollbackSucceeded
-              ? "The player state could not be updated; no encounter changes were kept."
-              : "The player state update and rollback both failed; manual recovery is required.");
+              ? "The player currency could not be updated; no encounter changes were kept."
+              : "The player currency update and rollback both failed; manual recovery is"
+                  + " required.");
+    }
+
+    try {
+      if (appliedHealthDelta != 0) {
+        player.applyDirectHealthChange(appliedHealthDelta);
+      }
+      if (player.getHealth() != healthTarget) {
+        throw new IllegalStateException("Player health update was not accepted");
+      }
+    } catch (RuntimeException exception) {
+      int healthAfter = player.getHealth();
+      int currencyAfter = player.getCurrency();
+      boolean stateUnchanged = healthAfter == healthBefore && currencyAfter == currencyBefore;
+      return ChanceResolution.failure(
+          stateUnchanged
+              ? ChanceResolution.Status.PLAYER_UPDATE_FAILED
+              : ChanceResolution.Status.ROLLBACK_FAILED,
+          outcome,
+          healthBefore,
+          healthAfter,
+          currencyBefore,
+          currencyAfter,
+          stateUnchanged
+              ? "The direct health update was not accepted; player state was unchanged."
+              : "The direct health update failed after mutation began; automatic rollback was "
+                  + "skipped because the health change may have emitted an irreversible death "
+                  + "event.");
     }
 
     return ChanceResolution.applied(
@@ -82,22 +114,12 @@ public final class ChanceOutcomeApplier {
         status, outcome, player.getHealth(), player.getCurrency(), message);
   }
 
-  private boolean rollback(int health, int currency) {
-    boolean healthRestored;
-    try {
-      player.setHealth(health);
-      healthRestored = player.getHealth() == health;
-    } catch (RuntimeException ignored) {
-      healthRestored = false;
-    }
-
-    boolean currencyRestored;
+  private boolean rollbackCurrency(int currency) {
     try {
       player.setCurrency(currency);
-      currencyRestored = player.getCurrency() == currency;
+      return player.getCurrency() == currency;
     } catch (RuntimeException ignored) {
-      currencyRestored = false;
+      return false;
     }
-    return healthRestored && currencyRestored;
   }
 }
