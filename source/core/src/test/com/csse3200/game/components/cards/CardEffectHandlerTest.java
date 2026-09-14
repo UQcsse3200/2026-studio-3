@@ -33,28 +33,28 @@ class CardEffectHandlerTest {
     assertEquals(4, enemy.getComponent(CombatStatsComponent.class).getHealth());
   }
 
-  //    @Test
-  //    void shouldApplyPoisonToEnemy() {
-  //        Entity enemy =
-  //                new Entity()
-  //                        .addComponent(new CombatStatsComponent(10, 2));
-  //
-  //        ResolvedCardEffect poison =
-  //                new ResolvedCardEffect(
-  //                        "poison_dagger",
-  //                        EffectType.POISON,
-  //                        TargetType.SINGLE_ENEMY,
-  //                        3,
-  //                        2,
-  //                        2);
-  //
-  //        handler.applyEnemyEffects(List.of(enemy), List.of(poison));
-  //
-  //        CombatStatsComponent stats =
-  //                enemy.getComponent(CombatStatsComponent.class);
-  //
-  //        assertTrue(stats.hasStatusEffect(poison.cardId()));
-  //    }
+      @Test
+      void shouldApplyPoisonToEnemy() {
+          Entity enemy =
+                  new Entity()
+                          .addComponent(new CombatStatsComponent(10, 2));
+
+          ResolvedCardEffect poison =
+                  new ResolvedCardEffect(
+                          "poison_dagger",
+                          EffectType.POISON,
+                          TargetType.SINGLE_ENEMY,
+                          3,
+                          2,
+                          2);
+
+          handler.applyEnemyEffects(List.of(enemy), List.of(poison));
+
+          CombatStatsComponent stats =
+                  enemy.getComponent(CombatStatsComponent.class);
+
+          assertTrue(stats.hasStatusEffect("POISON"));
+      }
 
   @Test
   void shouldApplyVulnerableToEnemy() {
@@ -169,20 +169,20 @@ class CardEffectHandlerTest {
     assertEquals(List.of(livingEnemy), targets);
   }
 
-  //    @Test
-  //    void shouldReturnNoEnemiesForPlayerTargetingCard() {
-  //        Entity enemy =
-  //                new Entity()
-  //                        .addComponent(new CombatStatsComponent(10, 2));
-  //
-  //        CardPlayRequest request =
-  //                CardPlayRequest.self("defend");
-  //
-  //        List<Entity> targets =
-  //                handler.getLivingEnemyTargets(request, List.of(enemy));
-  //
-  //        assertTrue(targets.isEmpty());
-  //    }
+  @Test
+  void shouldReturnNoEnemiesForPlayerTargetingCard() {
+      Entity enemy =
+              new Entity()
+                      .addComponent(new CombatStatsComponent(10, 2));
+
+      CardPlayRequest request =
+              CardPlayRequest.self("defend");
+
+      List<Entity> targets =
+              handler.getLivingEnemyTargets(request, List.of(enemy));
+
+      assertTrue(targets.isEmpty());
+  }
 
   @Test
   void shouldReturnNoEnemiesWhenAllEnemiesAreDead() {
