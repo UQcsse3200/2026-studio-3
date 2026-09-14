@@ -30,6 +30,15 @@ public class PlayerFactory {
   public static int getDefaultHealth() {
     return stats.health;
   }
+
+  public static int getDefaultMaxHealth() {
+    return stats.maxHealth;
+  }
+
+  public static int getDefaultMaxEnergy() {
+    return stats.maxEnergy;
+  }
+
   private static final PlayerConfig stats =
       FileLoader.readClass(PlayerConfig.class, "configs/player.json");
 

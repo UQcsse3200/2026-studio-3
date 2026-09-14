@@ -22,6 +22,7 @@ import com.csse3200.game.cards.effects.CardEffectResolver;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
@@ -133,7 +134,12 @@ public class BattleScreen extends ScreenAdapter {
     controller.addBattleEndListener(won ->  {
       if (won) {
         int currentHealth = forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getHealth();
+        int maxHealth = forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getMaxHealth();
+        int maxEnergy = forestGameArea.getPlayer().getComponent(EnergyComponent.class).getMaxEnergy();
+
         game.getRunState().setPlayerHealth(currentHealth);
+        game.getRunState().setPlayerMaxHealth(maxHealth);
+        game.getRunState().setPlayerMaxEnergy(maxEnergy);
       }
     }) ;
     createUI();
