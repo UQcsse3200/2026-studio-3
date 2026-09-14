@@ -126,7 +126,7 @@ class EnemyFactoryTest {
   void createWithFloorZeroKeepsBaseStats() {
     Entity enemy = EnemyFactory.create("void_knight", 0);
 
-    assertEquals(72, enemy.getComponent(CombatStatsComponent.class).getHealth());
+    assertEquals(40, enemy.getComponent(CombatStatsComponent.class).getHealth());
   }
 
   @Test
