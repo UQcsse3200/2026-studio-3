@@ -19,6 +19,7 @@ import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.effects.CardEffectResolver;
+import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
@@ -105,7 +106,7 @@ public class BattleScreen extends ScreenAdapter {
 
     logger.debug("Initialising main game screen entities");
     TerrainFactory terrainFactory = new TerrainFactory(renderer.getCamera());
-    ForestGameArea forestGameArea = new ForestGameArea(terrainFactory, mapProgression);
+    ForestGameArea forestGameArea = new ForestGameArea(terrainFactory, mapProgression, game.getRunState());
     this.gameArea = forestGameArea;
     forestGameArea.create();
 
@@ -129,6 +130,12 @@ public class BattleScreen extends ScreenAdapter {
             library,
             battleDeck);
 
+    controller.addBattleEndListener(won ->  {
+      if (won) {
+        int currentHealth = forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getHealth();
+        game.getRunState().setPlayerHealth(currentHealth);
+      }
+    }) ;
     createUI();
     controller.start();
   }

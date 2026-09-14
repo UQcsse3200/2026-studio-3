@@ -20,6 +20,8 @@ public class RunState {
   private MapGraph mapGraph;
   private Integer activeNodeId;
   private PlayerDeck playerDeck;
+  private int playerHealth;
+  private boolean playerHealthInitialised;
 
   /**
    * Returns the run-scoped player deck, creating the starter deck on first access.
@@ -35,6 +37,35 @@ public class RunState {
       playerDeck = PlayerDeckFactory.createStarterDeck(cardService);
     }
     return playerDeck;
+  }
+
+  /**
+   * Initialises the player's health
+   *
+   * @param startingHealth the health the player starts with
+   */
+  public void initialisePlayerHealth(int startingHealth) {
+    if (!playerHealthInitialised) {
+      playerHealth = startingHealth;
+      playerHealthInitialised = true;
+    }
+  }
+
+  /**
+   *
+   * @return the player's health
+   */
+  public int getPlayerHealth() {
+    return playerHealth;
+  }
+
+  /**
+   * Sets the player's health
+   *
+   * @param health the player's new health
+   */
+  public void setPlayerHealth(int health) {
+    playerHealth = Math.max(0, health);
   }
 
   /**
@@ -124,5 +155,7 @@ public class RunState {
     mapGraph = null;
     activeNodeId = null;
     playerDeck = null;
+    playerHealth = 0;
+    playerHealthInitialised = false;
   }
 }
