@@ -23,7 +23,6 @@ import com.csse3200.game.components.combat.CardEffectHandler;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.player.EnergyComponent;
-import com.csse3200.game.components.player.PlayerIntent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
 import java.util.List;
@@ -116,8 +115,7 @@ class SprintTwoCardsIntegrationTest {
 
     assertTrue(
         controller.submitCardPlayRequest(
-            com.csse3200.game.cards.play.CardPlayRequest.self("resurrection"),
-            PlayerIntent.DEFEND));
+            com.csse3200.game.cards.play.CardPlayRequest.self("resurrection")));
 
     assertEquals(12, stats.getHealth());
     assertEquals(0, energy.getCurrentEnergy());

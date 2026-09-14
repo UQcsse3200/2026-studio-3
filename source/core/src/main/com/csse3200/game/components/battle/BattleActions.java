@@ -3,18 +3,13 @@ package com.csse3200.game.components.battle;
 import com.badlogic.gdx.Gdx;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardLibrary;
-import com.csse3200.game.cards.CardType;
-import com.csse3200.game.cards.EffectType;
-import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
-import com.csse3200.game.cards.configs.EffectConfig;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.cards.play.CardPlayTarget;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattleEvent;
-import com.csse3200.game.components.player.PlayerIntent;
 import java.util.List;
 
 /** Connects battle UI events to valid transitions in the battle controller. */
@@ -51,6 +46,15 @@ public class BattleActions extends Component {
     this.controller = controller;
     this.game = game;
     this.library = library;
+  }
+
+  /**
+   * Returns whether the battle is waiting for player input.
+   *
+   * @return true only during the player turn, excluding card resolution and all other phases
+   */
+  public boolean isPlayerTurn() {
+    return controller.isPlayerTurn();
   }
 
   @Override
@@ -127,19 +131,14 @@ public class BattleActions extends Component {
     }
 
     CardConfig cardConfig = optionalCard.get();
-    TargetType targetType = cardConfig.target;
-    CardPlayTarget target;
-
-    if (targetType == TargetType.SINGLE_ENEMY) {
-      target = new CardPlayTarget(TargetType.SINGLE_ENEMY, targetID);
-    } else {
-      target = new CardPlayTarget(targetType, null);
-    }
-
+    CardPlayTarget target =
+        switch (cardConfig.target) {
+          case SELF -> CardPlayTarget.self();
+          case SINGLE_ENEMY -> CardPlayTarget.singleEnemy(targetID);
+          case ALL_ENEMIES -> CardPlayTarget.allEnemies();
+        };
     CardPlayRequest request = new CardPlayRequest(cardID, target);
-    PlayerIntent intent = classifyCard(cardConfig);
-
-    if (controller.submitCardPlayRequest(request, intent)) {
+    if (controller.submitCardPlayRequest(request)) {
       entity.getEvents().trigger("cardPlayed", cardConfig.name, targetID);
     }
   }
@@ -164,20 +163,6 @@ public class BattleActions extends Component {
 
   private void selectEndTurn() {
     controller.canHandle(BattleEvent.PLAYER_END_REQUESTED);
-  }
-
-  private PlayerIntent classifyCard(CardConfig card) {
-    if (card.type == CardType.ATTACK) {
-      return PlayerIntent.ATTACK;
-    }
-
-    for (EffectConfig effect : card.effects) {
-      if (effect.type == EffectType.BLOCK) {
-        return PlayerIntent.DEFEND;
-      }
-    }
-
-    return PlayerIntent.OTHER;
   }
 
   private void onStart() {

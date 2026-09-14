@@ -26,7 +26,6 @@ import com.csse3200.game.components.combat.BattlePhase;
 import com.csse3200.game.components.combat.CardEffectHandler;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.player.EnergyComponent;
-import com.csse3200.game.components.player.PlayerIntent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
 import java.util.ArrayList;
@@ -94,18 +93,18 @@ class BattleActionsTest {
   }
 
   @Test
-  void shouldStepThroughPlayerAttackPhaseWhenCardPlayed() {
+  void shouldResolveCardBeforeReturningToPlayerTurn() {
     List<BattlePhase> phases = new ArrayList<>();
     entity.getEvents().addListener("phaseChange", (BattlePhase phase) -> phases.add(phase));
     advanceToPlayerTurn();
 
     entity.getEvents().trigger("playCard", "strike", "bone_crawler");
 
-    assertTrue(phases.contains(BattlePhase.PLAYER_ATTACK));
+    assertTrue(phases.contains(BattlePhase.CARD_RESOLVING));
   }
 
   @Test
-  void shouldSubmitAttackCardWithAttackIntent() {
+  void shouldSubmitAttackCardRequest() {
     BattleController mockController = mock(BattleController.class);
     GdxGame mockGame = mock(GdxGame.class);
     CardLibrary library = realLibrary();
@@ -115,13 +114,11 @@ class BattleActionsTest {
 
     battleUI.getEvents().trigger("playCard", "strike", "bone_crawler");
 
-    CardPlayTarget target = new CardPlayTarget(TargetType.SINGLE_ENEMY, "bone_crawler");
-    verify(mockController)
-        .submitCardPlayRequest(new CardPlayRequest("strike", target), PlayerIntent.ATTACK);
+    verify(mockController).submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "bone_crawler"));
   }
 
   @Test
-  void shouldSubmitBlockCardWithDefendIntent() {
+  void shouldSubmitBlockCardRequest() {
     BattleController mockController = mock(BattleController.class);
     Entity battleUI =
         new Entity()
@@ -130,13 +127,11 @@ class BattleActionsTest {
 
     battleUI.getEvents().trigger("playCard", "defend", "player");
 
-    CardPlayTarget target = new CardPlayTarget(TargetType.SELF, null);
-    verify(mockController)
-        .submitCardPlayRequest(new CardPlayRequest("defend", target), PlayerIntent.DEFEND);
+    verify(mockController).submitCardPlayRequest(CardPlayRequest.self("defend"));
   }
 
   @Test
-  void shouldSubmitNonAttackCardWithOtherIntent() {
+  void shouldSubmitHealingCardRequest() {
     BattleController mockController = mock(BattleController.class);
     Entity battleUI =
         new Entity()
@@ -145,9 +140,7 @@ class BattleActionsTest {
 
     battleUI.getEvents().trigger("playCard", "bandage", "player");
 
-    CardPlayTarget target = new CardPlayTarget(TargetType.SELF, null);
-    verify(mockController)
-        .submitCardPlayRequest(new CardPlayRequest("bandage", target), PlayerIntent.OTHER);
+    verify(mockController).submitCardPlayRequest(CardPlayRequest.self("bandage"));
   }
 
   @Test
@@ -160,13 +153,13 @@ class BattleActionsTest {
 
     battleUI.getEvents().trigger("playCard", "missing", "bone_crawler");
 
-    verify(mockController, never()).submitCardPlayRequest(any(), any());
+    verify(mockController, never()).submitCardPlayRequest(any());
   }
 
   @Test
   void shouldNotFireCardPlayedWhenControllerRejectsRequest() {
     BattleController mockController = mock(BattleController.class);
-    when(mockController.submitCardPlayRequest(any(), any())).thenReturn(false);
+    when(mockController.submitCardPlayRequest(any())).thenReturn(false);
     Entity battleUI =
         new Entity()
             .addComponent(new BattleActions(mockController, mock(GdxGame.class), realLibrary()));
