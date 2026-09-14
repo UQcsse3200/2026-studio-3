@@ -18,7 +18,6 @@ import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
-import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.cards.effects.CardEffectResolver;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.combat.BattleController;
@@ -113,7 +112,7 @@ public class BattleScreen extends ScreenAdapter {
     library = new CardLibrary(configs);
     ServiceLocator.registerCardLibrary(library);
 
-    PlayerDeck playerDeck = PlayerDeckFactory.createStarterDeck();
+    PlayerDeck playerDeck = game.getRunState().getOrCreatePlayerDeck(library);
     battleDeck = new BattleDeck(playerDeck);
     battleDeck.shuffleDrawPile();
     battleDeck.drawCards(5);

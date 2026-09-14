@@ -23,7 +23,7 @@ class CardPlayServiceIntegrationTest {
   @Test
   void shouldPlayEveryInitialTeamSixCardThroughTheUnifiedEntryPoint() {
     CardLibrary library = new CardLibrary(CardConfigLoader.loadCards());
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARD_IDS));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(library, CARD_IDS));
     battleDeck.drawCards(CARD_IDS.size());
     EnergyComponent energy = new EnergyComponent(10);
     CardPlayService service = new CardPlayService(library, battleDeck, energy);
