@@ -316,7 +316,8 @@ class BattleControllerTest {
     controller.addPhaseChangeListener(
         (previous, next) -> {
           if (next == BattlePhase.PLAYER_TURN && attempted.compareAndSet(false, true)) {
-            assertFalse(controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy-1")));
+            assertFalse(
+                controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy-1")));
             assertFalse(controller.submitCardPlayRequest(CardPlayRequest.self("defend")));
             assertNull(controller.getCardPlayRequest());
           }

@@ -18,8 +18,8 @@ import com.csse3200.game.cards.play.CardPlayTarget;
 import com.csse3200.game.cards.play.integration.Team1EnemyStateAdapter;
 import com.csse3200.game.cards.play.integration.Team7PlayerStateAdapter;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.combat.BattleController;
-import com.csse3200.game.components.combat.CardEffectHandler;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.player.EnergyComponent;
@@ -108,9 +108,7 @@ class SprintTwoCardsIntegrationTest {
     BattleDeck deck = deckWith("resurrection");
     Team7PlayerStateAdapter playerState = new Team7PlayerStateAdapter(energy, stats);
     CardPlayService cardPlayService = new CardPlayService(library, deck, energy, playerState, null);
-    CardEffectHandler effectHandler =
-        new CardEffectHandler(
-            new CardEffectResolver(library), library, deck, new PlayerEffectState());
+    CardEffectHandler effectHandler = new CardEffectHandler();
     BattleController controller =
         new BattleController(player, List.of(enemy), effectHandler, cardPlayService);
     controller.start();

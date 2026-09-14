@@ -13,12 +13,10 @@ import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
-import com.csse3200.game.cards.effects.CardEffectResolver;
-import com.csse3200.game.cards.effects.PlayerEffectState;
 import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.cards.play.CardPlayService;
-import com.csse3200.game.cards.play.CardPlayTarget;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
@@ -88,9 +86,7 @@ class BattleLoopTest {
     deck.drawCards(1);
 
     CardLibrary library = new CardLibrary(List.of(strikeCard()));
-    CardEffectHandler effectHandler =
-        new CardEffectHandler(
-            new CardEffectResolver(library), library, deck, new PlayerEffectState());
+    CardEffectHandler effectHandler = new CardEffectHandler();
     CardPlayService cardPlayService =
         new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
     BattleController controller =
@@ -178,9 +174,7 @@ class BattleLoopTest {
             .addComponent(new EnergyComponent(3));
     BattleDeck deck = deckWithFirstCardInHand("defend", "strike");
     CardLibrary library = new CardLibrary(List.of(defend));
-    CardEffectHandler effectHandler =
-        new CardEffectHandler(
-            new CardEffectResolver(library), library, deck, new PlayerEffectState());
+    CardEffectHandler effectHandler = new CardEffectHandler();
     CardPlayService cardPlayService =
         new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
     BattleController controller =
@@ -210,9 +204,7 @@ class BattleLoopTest {
             .addComponent(new EnergyComponent(3));
     BattleDeck deck = deckWithFirstCardInHand("bandage", "strike");
     CardLibrary library = new CardLibrary(List.of(bandage));
-    CardEffectHandler effectHandler =
-        new CardEffectHandler(
-            new CardEffectResolver(library), library, deck, new PlayerEffectState());
+    CardEffectHandler effectHandler = new CardEffectHandler();
     CardPlayService cardPlayService =
         new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
     BattleController controller =
@@ -241,15 +233,14 @@ class BattleLoopTest {
     Entity enemy = enemy("enemy", 20, 1);
     BattleDeck deck = deckWithFirstCardInHand("strike", "bandage");
     CardLibrary library = new CardLibrary(List.of(strikeCard()));
-    CardEffectHandler effectHandler =
-        new CardEffectHandler(
-            new CardEffectResolver(library), library, deck, new PlayerEffectState());
+    CardEffectHandler effectHandler = new CardEffectHandler();
     CardPlayService cardPlayService =
         new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
     BattleController controller =
         new BattleController(player, List.of(enemy), effectHandler, cardPlayService);
 
-    boolean accepted = controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy"));
+    boolean accepted =
+        controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy"));
 
     assertFalse(accepted);
     assertEquals(BattlePhase.SETUP, controller.getCurrentPhase());
@@ -275,16 +266,15 @@ class BattleLoopTest {
     Entity enemy = enemy("enemy", 20, 1);
     BattleDeck deck = deckWithFirstCardInHand("strike", "bandage");
     CardLibrary library = new CardLibrary(List.of(expensiveStrike));
-    CardEffectHandler effectHandler =
-        new CardEffectHandler(
-            new CardEffectResolver(library), library, deck, new PlayerEffectState());
+    CardEffectHandler effectHandler = new CardEffectHandler();
     CardPlayService cardPlayService =
         new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
     BattleController controller =
         new BattleController(player, List.of(enemy), effectHandler, cardPlayService);
 
     controller.start();
-    boolean accepted = controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy"));
+    boolean accepted =
+        controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy"));
 
     assertFalse(accepted);
     assertEquals(3, player.getComponent(EnergyComponent.class).getCurrentEnergy());
@@ -311,9 +301,7 @@ class BattleLoopTest {
     Entity secondEnemy = enemy("second_enemy", 20, 1);
     BattleDeck deck = deckWithFirstCardInHand("expose", "strike");
     CardLibrary library = new CardLibrary(List.of(expose));
-    CardEffectHandler effectHandler =
-        new CardEffectHandler(
-            new CardEffectResolver(library), library, deck, new PlayerEffectState());
+    CardEffectHandler effectHandler = new CardEffectHandler();
     CardPlayService cardPlayService =
         new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
     BattleController controller =
@@ -321,13 +309,12 @@ class BattleLoopTest {
             player, List.of(firstEnemy, secondEnemy), effectHandler, cardPlayService);
 
     controller.start();
-    boolean accepted =
-        controller.submitCardPlayRequest(CardPlayRequest.allEnemies("expose"));
+    boolean accepted = controller.submitCardPlayRequest(CardPlayRequest.allEnemies("expose"));
 
     assertTrue(accepted);
-    assertTrue(firstEnemy.getComponent(CombatStatsComponent.class).hasStatusEffect("vulnerable"));
+    assertTrue(firstEnemy.getComponent(CombatStatsComponent.class).hasStatusEffect("VULNERABLE"));
 
-    assertTrue(secondEnemy.getComponent(CombatStatsComponent.class).hasStatusEffect("vulnerable"));
+    assertTrue(secondEnemy.getComponent(CombatStatsComponent.class).hasStatusEffect("VULNERABLE"));
     assertEquals(2, player.getComponent(EnergyComponent.class).getCurrentEnergy());
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }

@@ -8,6 +8,7 @@ import com.csse3200.game.cards.play.CardPlayResult;
 import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
+import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.enemy.IntentType;
@@ -249,8 +250,8 @@ public class BattleController {
   /**
    * Returns whether the battle is in the player input phase.
    *
-   * @return true only during {@link BattlePhase#PLAYER_TURN}; false during card resolution,
-   *     setup, enemy turns, and all other phases
+   * @return true only during {@link BattlePhase#PLAYER_TURN}; false during card resolution, setup,
+   *     enemy turns, and all other phases
    */
   public boolean isPlayerTurn() {
     return this.currentPhase == BattlePhase.PLAYER_TURN;
@@ -542,7 +543,7 @@ public class BattleController {
       return;
     }
     int missingHealth = Math.max(0, stats.getMaxHealth() - stats.getHealth());
-    stats.heal(Math.min(Math.max(0, healing.getValue()), missingHealth));
+    stats.heal(Math.clamp(healing.getValue(), 0, missingHealth));
     if (healing.tickAndCheckExpired()) {
       stats.removeStatusEffect(EffectType.HEAL.name());
     }
