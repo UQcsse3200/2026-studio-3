@@ -5,22 +5,22 @@ Design only; all names, numbers and rarities await review. Implementation status
 
 ## Part A — source verification
 
-Inspected the source on task/guardian-cards, based on fbb0cfe. Line references below describe this snapshot. This is static source evidence, not a gameplay-test result.
+Inspected the source on task/guardian-cards, based on merge commit 7f26a88. Line references below describe this snapshot. This is static source evidence, not a gameplay-test result.
 
 ### Actual card-play path
 
-BattleScreen.java lines 121–128 constructs BattleController with CardEffectResolver. BattleController.java line 674 calls `effectResolver.resolve(card, playerEffectState)`. Its direct consumer loops over living enemies (lines 715–746), calls `stats.takeDamage(effect.value())`, and stores poison/vulnerable statuses. It does not use the context-based Vulnerable/Feeble calculation. CombatStatsComponent.takeDamage (lines 130–134) absorbs block, then armor, then subtracts health; it does not apply status multipliers.
+BattleScreen.java lines 121–128 constructs BattleController with CardEffectResolver. BattleController.java line 697 calls `effectResolver.resolve(card, playerEffectState)`. Its direct consumer loops over living enemies (lines 738–769), calls `stats.takeDamage(effect.value())`, and stores poison/vulnerable statuses. It does not use the context-based Vulnerable/Feeble calculation. CombatStatsComponent.takeDamage (lines 130–134) absorbs block, then armor, then subtracts health; it does not apply status multipliers.
 
 A separate CardPlayService context-based path exists. Lines 235–245 read Strength and outgoing Feeble, but read target Vulnerable only when `target.type() == TargetType.SINGLE_ENEMY`. ALL_ENEMIES therefore receives no target Vulnerable multiplier through this context builder. Do not claim Vulnerable boosts Sweep in either of these inspected card-play paths.
 
 ### STRENGTH
 
-- EffectExecutor.java line 159: `Math.max(0, effect.value + playerState.getStrength())`. This is a flat additive bonus per DAMAGE effect record. Context-based resolution agrees: CardEffectResolutionContext.java line 35 uses `Math.max(0, baseDamage + strength)` before multipliers, and line 45 rounds the final multiplied result down.
-- AoE: the resolved amount is computed once per effect, then applied in full to EACH enemy. BattleController.java lines 729–736: `for (Entity enemy : targets)` followed by `case DAMAGE -> stats.takeDamage(effect.value());`. Team1EnemyStateAdapter.java lines 77–81 likewise loops through selected enemies and applies that same amount. Strength is not divided across targets or cumulatively re-added during iteration. Each separate DAMAGE entry would receive the bonus separately.
-- Magnitude: EffectExecutor.java line 128 calls `playerState.addStrength(effect.value)`; PlayerEffectState.java line 32 performs `strength += amount`. Thus value controls the bonus gained in the BattleController path, with additive reapplications.
-- Duration: STRENGTH has usesDuration=false; EffectExecutor.java lines 120–121 reject nonzero duration. PlayerEffectState has no duration countdown. CardEffectResolutionService.java lines 95–99 explicitly preserves Strength when clearing turn results.
-- Alternate path discrepancy: Team7PlayerStateAdapter.java lines 64–65 calls `combatStats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration())`. CombatStatsComponent.java line 337 replaces an existing same-key status. Repeated Strength applications therefore overwrite instead of accumulate through this adapter.
-- Lifetime: BattleController.java line 90 creates a new PlayerEffectState per controller. Strength persists across its plays/turns. Its resetBattle method (lines 243–259) does not clear this state. In generic StatusEffect, duration 0 never expires from ticking. “Rest of combat” is the intended contract, but cleanup on every possible battle reset/reuse is not established by this code.
+- EffectExecutor.java line 165: `Math.max(0, effect.value + playerState.getStrength())`. This is a flat additive bonus per DAMAGE effect record. Context-based resolution agrees: CardEffectResolutionContext.java line 35 uses `Math.max(0, baseDamage + strength)` before multipliers, and line 45 rounds the final multiplied result down.
+- AoE: the resolved amount is computed once per effect, then applied in full to EACH enemy. BattleController.java lines 752–759: `for (Entity enemy : targets)` followed by `case DAMAGE -> stats.takeDamage(effect.value());`. Team1EnemyStateAdapter.java lines 77–81 likewise loops through selected enemies and applies that same amount. Strength is not divided across targets or cumulatively re-added during iteration. Each separate DAMAGE entry would receive the bonus separately.
+- Magnitude: EffectExecutor.java line 134 calls `playerState.addStrength(effect.value)`; PlayerEffectState.java line 32 performs `strength += amount`. Thus value controls the bonus gained in the BattleController path, with additive reapplications.
+- Duration: STRENGTH has usesDuration=false; EffectExecutor.java lines 126–127 require instant and combat-long effects to have zero duration, with HEAL exempted so it can run over multiple turns. PlayerEffectState has no duration countdown. CardEffectResolutionService.java lines 95–99 explicitly preserves Strength when clearing turn results.
+- Alternate path discrepancy: Team7PlayerStateAdapter.java lines 70–71 calls `combatStats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration())`. CombatStatsComponent.java line 337 replaces an existing same-key status. Repeated Strength applications therefore overwrite instead of accumulate through this adapter.
+- Lifetime: BattleController.java line 91 creates a new PlayerEffectState per controller. Strength persists across its plays/turns. Its resetBattle method (lines 244–260) does not clear this state. In generic StatusEffect, duration 0 never expires from ticking. “Rest of combat” is the intended contract, but cleanup on every possible battle reset/reuse is not established by this code.
 
 ### VULNERABLE
 
@@ -29,18 +29,18 @@ A separate CardPlayService context-based path exists. Lines 235–245 read Stren
 - Reapplication: CombatStatsComponent.java line 337 uses `statusEffects.put(effect.getType(), effect)`. For the exact same key, the new value AND duration replace the old ones. It neither sums values nor adds durations nor preserves the longest duration. A shorter new duration can shorten the remaining effect.
 - Duration: StatusEffect.java lines 101–106 return false for nonpositive duration; otherwise `duration--` and expire at zero. CombatStatsComponent.java lines 393–403 remove expired entries. This counts update calls, not independently scheduled turns.
 - Wiring gap: production-source search found no caller of updateStatusEffects outside its definition. Its lines 389–391 explicitly say turn timing is not yet wired. Therefore a configured duration of 2 expresses the intended two-turn debuff, but actual two-turn expiry is not confirmed.
-- BattleController.java lines 739–742 stores lowercase `poison`/`vulnerable`; helpers/adapters use uppercase names. CombatStatsComponent.java line 362 uses `statusEffects.get(type)` without normalization. These are different keys. This compounds the missing multiplier path described above.
+- BattleController.java lines 760–765 stores lowercase `poison`/`vulnerable`; helpers/adapters use uppercase names. CombatStatsComponent.java line 362 uses `statusEffects.get(type)` without normalization. These are different keys. This compounds the missing multiplier path described above.
 
 ### FEEBLE
 
 - CardEffectResolutionContext.java line 17: `FEEBLE_DAMAGE_MULTIPLIER = 0.75`; lines 38–39 apply it if `outgoingFeeble > 0`. This is fixed -25% outgoing damage; larger positive values do not increase the penalty. StatusEffectCalculator.java lines 18–20 instead tests status presence and returns the same fixed multiplier.
 - Value is stored/validated and supplies the context activation check; it does not scale the multiplier. Same-key applications replace value and duration via the same map operation described above.
 - Positive duration uses the same decrement/expiry helper as Vulnerable, with the same missing turn wiring. No confirmed number of real turns can be promised from that helper alone.
-- Team1EnemyStateAdapter.java lines 82–83 applies FEEBLE; BattleController.java lines 735–745 omits it. The presence of the enum/helper does not prove enemy attacks receive the penalty in the active battle path. Sentinel's Rebuke now uses FEEBLE under the confirmed unified-flow contract, but its live gameplay behaviour remains provisional until the integration and duration wiring land.
+- Team1EnemyStateAdapter.java lines 82–83 applies FEEBLE; BattleController.java lines 758–768 omits it. The presence of the enum/helper does not prove enemy attacks receive the penalty in the active battle path. Sentinel's Rebuke now uses FEEBLE under the confirmed unified-flow contract, but its live gameplay behaviour remains provisional until the integration and duration wiring land.
 
 ### POISON
 
-- EffectExecutor.java lines 164–166 pass value and duration through unchanged. Team1EnemyStateAdapter.java lines 82–83 passes them into the stored status.
+- EffectExecutor.java lines 175–177 and 199–201 pass value and duration through unchanged. Team1EnemyStateAdapter.java lines 82–83 passes them into the stored status.
 - StatusEffectCalculator.java line 45: `return Math.max(poison.getValue(), 0);`. The helper uses value directly as the poison damage amount. “Stacks” in EffectConfig/StatusEffect comments is terminology, not an implemented additive stacking rule.
 - Same-key reapplication overwrites value and duration; no additive poison stacking is implemented by these consumers.
 - Production-source search found no caller of getPoisonDamage outside its definition and no wired poison-damage tick. Consequently actual damage per tick, tick timing, and number of ticks are NOT confirmed. Duration counts expiry-helper calls if invoked, not verified poison ticks. The helper decrements duration only; it does not decrement poison value.
@@ -190,4 +190,4 @@ The previous Sentinel's Stance BLOCK + STRENGTH design is withdrawn because it d
 
 ## Review boundary
 
-Warden's Judgement is the replacement fourth Guardian design following the withdrawal of Seal and Restore; the withdrawn proposal is retained above for audit. Keep cards.json and combat source unchanged. Review the numbers, overlap with other themes, and Part A integration dependencies before authorizing implementation. The master list's older ALL_ENEMIES and VULNERABLE notes for Breach predate this revision; the current proposal is SINGLE_ENEMY with the new SUNDER dependency documented above. That separate draft has not been edited in this revision request.
+Warden's Judgement is the replacement fourth Guardian design following the withdrawal of Seal and Restore; the withdrawn proposal is retained above for audit. All four Guardian cards and the SUNDER effect are now implemented and merged; review should focus on numbers, cross-theme overlap and the Part A integration dependencies. The master list's older ALL_ENEMIES and VULNERABLE notes for Breach predate this revision; the current proposal is SINGLE_ENEMY with the new SUNDER dependency documented above. That separate draft has not been edited in this revision request.

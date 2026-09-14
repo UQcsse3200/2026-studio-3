@@ -2,7 +2,7 @@
 
 Maintainer: Hezhenyu (Member 1), Team 6. Round 2: Cards Expansion.
 
-Allocation source: the supplied “Team 6: Cards Expansion — ROUND 2 | TASK ALLOCATION | 5 MEMBERS” document (workspace copy: `output/pdf/Team6-Round2-Cards-Expansion-English.md`, outside the repository). It assigns Member 1 Guardian, Member 2 Astral, Member 3 Corruption, Member 4 Survival and Member 5 Forbidden. Hezhenyu's Member 1 identity is user-confirmed. The source does not name Members 2–5; role labels are retained without guessing identities.
+Allocation source: the supplied “Team 6: Cards Expansion — ROUND 2 | TASK ALLOCATION | 5 MEMBERS” document (workspace copy: `../output/pdf/Team6-Round2-Cards-Expansion-English.md`, outside the repository). It assigns Member 1 Guardian, Member 2 Astral, Member 3 Corruption, Member 4 Survival and Member 5 Forbidden. Hezhenyu's Member 1 identity is user-confirmed. The source does not name Members 2–5; role labels are retained without guessing identities.
 
 Exactly 20 Round 2 expansion slots: four per member. All four of Member 1's Guardian cards are implemented in the official config, leaving 16 expansion slots to implement. All other owners' statuses, card names and dependencies remain unconfirmed and require their input. This is a proposed coordination document, not a record of others' actual progress.
 
