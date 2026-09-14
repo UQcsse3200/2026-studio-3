@@ -2,6 +2,7 @@ package com.csse3200.game.cards.play;
 
 /** Immutable request sent by Team 3/battle flow when a player attempts to play one card. */
 public record CardPlayRequest(String cardId, CardPlayTarget target) {
+
   public CardPlayRequest {
     if (cardId == null || cardId.isBlank()) {
       throw new IllegalArgumentException("Card ID cannot be null or blank");

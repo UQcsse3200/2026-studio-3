@@ -6,6 +6,8 @@ import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardPlayRequest;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
+import com.csse3200.game.cards.play.CardPlayRequest;
+import com.csse3200.game.cards.play.CardPlayTarget;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattleEvent;
@@ -121,12 +123,14 @@ public class BattleActions extends Component {
    */
   private void onCardPlayed(String cardID, String targetID) {
     var optionalCard = library.getCard(cardID);
+
     if (optionalCard.isEmpty()) {
       return;
     }
     if (playerIsBlockedFromPlayingCards()) {
       return;
     }
+
     CardConfig cardConfig = optionalCard.get();
     CardPlayRequest request = new CardPlayRequest(cardID, targetID);
     if (controller.submitCardPlayRequest(request)) {

@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardLibrary;
-import com.csse3200.game.cards.CardPlayRequest;
 import com.csse3200.game.cards.CardType;
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.TargetType;
@@ -16,10 +15,15 @@ import com.csse3200.game.cards.configs.EffectConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.effects.CardEffectResolver;
+import com.csse3200.game.cards.effects.PlayerEffectState;
+import com.csse3200.game.cards.play.CardPlayRequest;
+import com.csse3200.game.cards.play.CardPlayService;
+import com.csse3200.game.cards.play.CardPlayTarget;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattleEvent;
 import com.csse3200.game.components.combat.BattlePhase;
+import com.csse3200.game.components.combat.CardEffectHandler;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
@@ -208,9 +212,13 @@ class BattleActionsTest {
         new Entity()
             .addComponent(new CombatStatsComponent(20, 1))
             .addComponent(new EnemyBehaviourComponent("test"));
+    CardEffectHandler effectHandler =
+        new CardEffectHandler(
+            new CardEffectResolver(library), library, deck, new PlayerEffectState());
+    CardPlayService cardPlayService =
+        new CardPlayService(library, deck, testPlayer.getComponent(EnergyComponent.class));
     BattleController realController =
-        new BattleController(
-            testPlayer, List.of(enemy), new CardEffectResolver(library), library, deck);
+        new BattleController(testPlayer, List.of(enemy), effectHandler, cardPlayService);
     Entity battleUI =
         new Entity().addComponent(new BattleActions(realController, mock(GdxGame.class), library));
     battleUI.create();
