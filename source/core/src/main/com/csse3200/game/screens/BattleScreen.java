@@ -61,7 +61,8 @@ public class BattleScreen extends ScreenAdapter {
     "images/energy.png",
     "images/money.png",
     "images/piety.png",
-    "images/enemy.png"
+    "images/enemy.png",
+    "images/armour.png"
   };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
 

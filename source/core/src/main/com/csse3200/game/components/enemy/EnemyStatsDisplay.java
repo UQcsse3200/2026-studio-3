@@ -17,6 +17,8 @@ public class EnemyStatsDisplay extends UIComponent {
   Table table;
   private Image heartImage;
   private Label healthLabel;
+  private Image armourImage;
+  private Label armourLabel;
   private static final float FONT_SCALE = 0.75f;
   private static final String STYLE_NAME_LARGE = "large";
 
@@ -52,9 +54,23 @@ public class EnemyStatsDisplay extends UIComponent {
     healthLabel = new Label(healthText, skin, STYLE_NAME_LARGE);
     healthLabel.setFontScale(FONT_SCALE);
 
+    // Armour image
+    armourImage =
+        new Image(ServiceLocator.getResourceService().getAsset("images/armour.png", Texture.class));
+
+    // Armour text
+    int armour = entity.getComponent(CombatStatsComponent.class).getArmor();
+    CharSequence armourText = String.format("Armour: %d", armour);
+    armourLabel = new Label(armourText, skin, STYLE_NAME_LARGE);
+    armourLabel.setFontScale(FONT_SCALE);
+
     table.add(heartImage).size(imageSideLength).pad(5);
     table.add(healthLabel);
+    table.row();
+    table.add(armourImage).size(imageSideLength).pad(5);
+    table.add(armourLabel).left();
     table.pack();
+
     stage.addActor(table);
     updatePosition();
   }
@@ -99,10 +115,22 @@ public class EnemyStatsDisplay extends UIComponent {
     healthLabel.setText(text);
   }
 
+  /**
+   * Updates the enemy's armour on the UI
+   *
+   * @param armour the enemy's armour
+   */
+  public void updateEnemyArmourUI(int armour) {
+    CharSequence text = String.format("Armour: %d", armour);
+    armourLabel.setText(text);
+  }
+
   @Override
   public void dispose() {
     super.dispose();
     heartImage.remove();
     healthLabel.remove();
+    armourImage.remove();
+    armourLabel.remove();
   }
 }
