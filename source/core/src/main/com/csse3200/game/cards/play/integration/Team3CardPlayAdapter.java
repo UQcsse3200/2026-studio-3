@@ -4,9 +4,8 @@ import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.play.CardPlayRequest;
-import com.csse3200.game.cards.play.CardPlayResult;
-import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.components.Component;
+import com.csse3200.game.components.combat.BattleController;
 
 /**
  * Connects Team 3's existing {@code playCard(cardId, targetId)} event to Team 5's unified API.
@@ -17,31 +16,42 @@ import com.csse3200.game.components.Component;
  */
 public final class Team3CardPlayAdapter extends Component {
   public static final String PLAY_CARD_EVENT = "playCard";
-  public static final String CARD_PLAY_RESULT_EVENT = "cardPlayResult";
+  public static final String CARD_PLAY_RESULT_EVENT = "cardPlayed";
 
   private final CardService cardService;
-  private final CardPlayService cardPlayService;
+  private final BattleController battleController;
 
   /** Creates an adapter that returns results to Team 3 without applying external state changes. */
-  public Team3CardPlayAdapter(CardService cardService, CardPlayService cardPlayService) {
+  public Team3CardPlayAdapter(CardService cardService, BattleController battleController) {
     if (cardService == null) {
       throw new IllegalArgumentException("Card service cannot be null");
     }
-    if (cardPlayService == null) {
+    if (battleController == null) {
       throw new IllegalArgumentException("Card play service cannot be null");
     }
     this.cardService = cardService;
-    this.cardPlayService = cardPlayService;
+    this.battleController = battleController;
   }
 
   @Override
   public void create() {
     entity.getEvents().addListener(PLAY_CARD_EVENT, this::onCardPlayed);
+    entity.getEvents().addListener(CARD_PLAY_RESULT_EVENT, this::logCardPlayed);
   }
 
   private void onCardPlayed(String cardId, String targetId) {
-    CardPlayResult result = cardPlayService.playCard(toRequest(cardId, targetId));
-    entity.getEvents().trigger(CARD_PLAY_RESULT_EVENT, result);
+    if (playerIsBlockedFromPlayingCards()) {
+      return;
+    }
+    CardPlayRequest request = toRequest(cardId, targetId);
+    if (battleController.submitCardPlayRequest(request)) {
+      entity.getEvents().trigger(CARD_PLAY_RESULT_EVENT, cardId, targetId);
+    }
+  }
+
+  // test that card is played
+  private void logCardPlayed(String cardName, String targetID) {
+    System.out.println("Card played: " + cardName + " on target: " + targetID);
   }
 
   private CardPlayRequest toRequest(String cardId, String targetId) {
@@ -56,5 +66,19 @@ public final class Team3CardPlayAdapter extends Component {
       return CardPlayRequest.allEnemies(cardId);
     }
     return CardPlayRequest.singleEnemy(cardId, targetId);
+  }
+
+  /**
+   * Whether a status effect currently prevents the player from playing cards.
+   *
+   * <p>Hook point for Team 1's boss mechanics. Rejecting here reuses the existing rejection path:
+   * "cardPlayed" is not fired, energy is not spent and the card stays in hand, exactly as when the
+   * controller declines the request.
+   *
+   * @return true if the play should be rejected before reaching the controller
+   */
+  private boolean playerIsBlockedFromPlayingCards() {
+    // Always false until #140 implements the silence check.
+    return false;
   }
 }
