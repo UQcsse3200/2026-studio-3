@@ -1,5 +1,7 @@
 package com.csse3200.game.save;
 
+import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.bestiary.BestiaryUnlockState;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.maps.MapGraph;
 import com.csse3200.game.maps.MapNode;
@@ -9,6 +11,7 @@ import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,9 +26,13 @@ public class SaveGameRestoreService {
   private final PlayerRunState playerState;
   private final PlayerDeck playerDeck;
   private final RunState runState;
+  private final BestiaryService bestiaryService;
 
   public SaveGameRestoreService(
-      PlayerRunState playerState, PlayerDeck playerDeck, RunState runState) {
+      PlayerRunState playerState,
+      PlayerDeck playerDeck,
+      RunState runState,
+      BestiaryService bestiaryService) {
     if (playerState == null) {
       throw new IllegalArgumentException("playerState must not be null");
     }
@@ -35,9 +42,13 @@ public class SaveGameRestoreService {
     if (runState == null) {
       throw new IllegalArgumentException("runState must not be null");
     }
+    if (bestiaryService == null) {
+      throw new IllegalArgumentException("bestiaryService must not be null");
+    }
     this.playerState = playerState;
     this.playerDeck = playerDeck;
     this.runState = runState;
+    this.bestiaryService = bestiaryService;
   }
 
   /**
@@ -60,6 +71,7 @@ public class SaveGameRestoreService {
       if (!runState.restoreRun(restoredMap, data.map.activeEncounterNodeId)) {
         return RestoreResult.failure(RestoreError.APPLY_FAILED, "Unable to restore run state");
       }
+      restoreBestiaryProgress(data.progress);
       return RestoreResult.success(resolveResumeScreen(data));
     } catch (RuntimeException exception) {
       return RestoreResult.failure(RestoreError.APPLY_FAILED, "Unable to apply loaded save data");
@@ -78,7 +90,42 @@ public class SaveGameRestoreService {
     if (!deckResult.success()) {
       return deckResult;
     }
-    return validateMap(data.map);
+    RestoreResult mapResult = validateMap(data.map);
+    if (!mapResult.success()) {
+      return mapResult;
+    }
+    return validateBestiaryProgress(data.progress);
+  }
+
+  private RestoreResult validateBestiaryProgress(ProgressSaveData progressData) {
+    if (progressData == null || progressData.bestiary == null) {
+      return RestoreResult.success("");
+    }
+
+    Set<String> enemyIds = new HashSet<>();
+    for (BestiaryProgressSaveData entry : progressData.bestiary) {
+      if (entry == null
+          || entry.enemyId == null
+          || entry.enemyId.isBlank()
+          || !entry.enemyId.equals(entry.enemyId.trim())) {
+        return RestoreResult.failure(
+            RestoreError.INVALID_PROGRESS_STATE,
+            "Saved Bestiary progress contains an invalid enemy ID");
+      }
+      if (!enemyIds.add(entry.enemyId)) {
+        return RestoreResult.failure(
+            RestoreError.INVALID_PROGRESS_STATE,
+            "Saved Bestiary progress contains a duplicate enemy ID: " + entry.enemyId);
+      }
+      try {
+        BestiaryUnlockState.valueOf(entry.unlockState);
+      } catch (RuntimeException exception) {
+        return RestoreResult.failure(
+            RestoreError.INVALID_PROGRESS_STATE,
+            "Saved Bestiary progress contains an invalid unlock state");
+      }
+    }
+    return RestoreResult.success("");
   }
 
   private RestoreResult validatePlayer(PlayerSaveData playerData) {
@@ -178,6 +225,18 @@ public class SaveGameRestoreService {
   private void restoreDeck(DeckSaveData deckData) {
     playerDeck.clear();
     playerDeck.addCards(deckData.cardIds);
+  }
+
+  private void restoreBestiaryProgress(ProgressSaveData progressData) {
+    Map<String, BestiaryUnlockState> restoredProgress = new LinkedHashMap<>();
+    if (progressData != null && progressData.bestiary != null) {
+      for (BestiaryProgressSaveData entry : progressData.bestiary) {
+        if (bestiaryService.contains(entry.enemyId)) {
+          restoredProgress.put(entry.enemyId, BestiaryUnlockState.valueOf(entry.unlockState));
+        }
+      }
+    }
+    bestiaryService.replaceProgress(restoredProgress);
   }
 
   private MapGraph buildMapGraph(MapSaveData mapData) {

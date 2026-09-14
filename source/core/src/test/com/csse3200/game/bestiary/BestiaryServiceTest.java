@@ -13,6 +13,7 @@ import com.csse3200.game.entities.configs.EnemyConfigs;
 import com.csse3200.game.entities.configs.EnemyTier;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.extensions.GameExtension;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,30 @@ class BestiaryServiceTest {
     assertEquals(
         "images/enemies/lesser_shade.atlas",
         service.getEntry("lesser_shade").orElseThrow().sprite().orElseThrow());
+  }
+
+  @Test
+  void shouldLoadTeamOneBossAsLockedBestiaryEntry() {
+    BestiaryService service = BestiaryService.loadDefault();
+
+    BestiaryEntryView lockedBoss = service.getEntry("boss_knight").orElseThrow();
+    assertEquals(EnemyTier.BOSS, lockedBoss.tier());
+    assertEquals(BestiaryUnlockState.LOCKED, lockedBoss.unlockState());
+    assertEquals("???", lockedBoss.displayName());
+    assertTrue(lockedBoss.sprite().isEmpty());
+
+    assertTrue(service.recordEncountered("boss_knight"));
+    BestiaryEntryView encounteredBoss = service.getEntry("boss_knight").orElseThrow();
+    assertEquals("Boss Knight", encounteredBoss.displayName());
+    assertEquals("images/enemies/boss_knight.atlas", encounteredBoss.sprite().orElseThrow());
+    assertTrue(encounteredBoss.health().isEmpty());
+
+    assertTrue(service.recordDefeated("boss_knight"));
+    BestiaryEntryView defeatedBoss = service.getEntry("boss_knight").orElseThrow();
+    assertEquals(150, defeatedBoss.health().orElseThrow());
+    assertEquals(14, defeatedBoss.baseAttack().orElseThrow());
+    assertEquals(8, defeatedBoss.armour().orElseThrow());
+    assertEquals("boss", defeatedBoss.behaviour().orElseThrow());
   }
 
   @Test
@@ -92,6 +117,49 @@ class BestiaryServiceTest {
     assertFalse(service.recordDefeated("shade"));
     assertEquals(
         BestiaryUnlockState.DEFEATED, service.getEntry("shade").orElseThrow().unlockState());
+  }
+
+  @Test
+  void shouldExposeStableImmutableProgressSnapshot() {
+    BestiaryService service = createService();
+    service.recordEncountered("shade");
+    service.recordDefeated("guardian");
+
+    Map<String, BestiaryUnlockState> snapshot = service.getProgressSnapshot();
+
+    assertEquals(List.of("alpha", "shade", "knight", "guardian"), List.copyOf(snapshot.keySet()));
+    assertEquals(BestiaryUnlockState.ENCOUNTERED, snapshot.get("shade"));
+    assertEquals(BestiaryUnlockState.DEFEATED, snapshot.get("guardian"));
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> snapshot.put("shade", BestiaryUnlockState.LOCKED));
+  }
+
+  @Test
+  void shouldAtomicallyReplaceProgressAndIgnoreUnknownIds() {
+    BestiaryService service = createService();
+    service.recordDefeated("shade");
+
+    service.replaceProgress(
+        Map.of(
+            "knight", BestiaryUnlockState.ENCOUNTERED,
+            "retired_enemy", BestiaryUnlockState.DEFEATED));
+
+    assertEquals(BestiaryUnlockState.LOCKED, service.getProgressSnapshot().get("shade"));
+    assertEquals(BestiaryUnlockState.ENCOUNTERED, service.getProgressSnapshot().get("knight"));
+    assertFalse(service.getProgressSnapshot().containsKey("retired_enemy"));
+  }
+
+  @Test
+  void shouldRejectInvalidReplacementWithoutMutatingProgress() {
+    BestiaryService service = createService();
+    service.recordDefeated("shade");
+    Map<String, BestiaryUnlockState> before = service.getProgressSnapshot();
+    Map<String, BestiaryUnlockState> invalidProgress = new LinkedHashMap<>();
+    invalidProgress.put("knight", null);
+
+    assertThrows(IllegalArgumentException.class, () -> service.replaceProgress(invalidProgress));
+    assertEquals(before, service.getProgressSnapshot());
   }
 
   @Test

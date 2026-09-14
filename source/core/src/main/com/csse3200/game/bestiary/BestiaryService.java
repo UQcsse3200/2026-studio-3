@@ -6,6 +6,7 @@ import com.csse3200.game.entities.configs.EnemyTier;
 import com.csse3200.game.events.EventHandler;
 import com.csse3200.game.files.FileLoader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -134,6 +135,59 @@ public class BestiaryService {
       return Optional.empty();
     }
     return Optional.of(viewFor(enemyId));
+  }
+
+  /**
+   * Returns a stable, immutable copy of every entry's current unlock state.
+   *
+   * @return unlock states keyed by stable enemy ID
+   */
+  public Map<String, BestiaryUnlockState> getProgressSnapshot() {
+    Map<String, BestiaryUnlockState> snapshot = new LinkedHashMap<>();
+    for (String enemyId : entries.keySet()) {
+      snapshot.put(enemyId, progress.get(enemyId));
+    }
+    return Collections.unmodifiableMap(snapshot);
+  }
+
+  /**
+   * Atomically replaces discovery progress using stable enemy IDs.
+   *
+   * <p>Entries omitted from the supplied map become locked. Unknown but well-formed enemy IDs are
+   * ignored so saves remain loadable when the configured roster changes between versions.
+   *
+   * @param restoredProgress progress loaded from a validated save
+   */
+  public void replaceProgress(Map<String, BestiaryUnlockState> restoredProgress) {
+    if (restoredProgress == null) {
+      throw new IllegalArgumentException("restoredProgress must not be null");
+    }
+
+    Map<String, BestiaryUnlockState> nextProgress = new LinkedHashMap<>();
+    for (String enemyId : entries.keySet()) {
+      nextProgress.put(enemyId, BestiaryUnlockState.LOCKED);
+    }
+
+    for (Map.Entry<String, BestiaryUnlockState> restored : restoredProgress.entrySet()) {
+      String enemyId = restored.getKey();
+      BestiaryUnlockState state = restored.getValue();
+      if (enemyId == null || enemyId.isBlank() || state == null) {
+        throw new IllegalArgumentException("restored progress contains an invalid entry");
+      }
+      if (entries.containsKey(enemyId)) {
+        nextProgress.put(enemyId, state);
+      }
+    }
+
+    Map<String, BestiaryUnlockState> previousProgress = new HashMap<>(progress);
+    progress.clear();
+    progress.putAll(nextProgress);
+
+    for (String enemyId : entries.keySet()) {
+      if (previousProgress.get(enemyId) != nextProgress.get(enemyId)) {
+        events.trigger(ENTRY_UPDATED_EVENT, viewFor(enemyId));
+      }
+    }
   }
 
   /**

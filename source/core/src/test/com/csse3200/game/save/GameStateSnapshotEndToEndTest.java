@@ -3,6 +3,8 @@ package com.csse3200.game.save;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.badlogic.gdx.files.FileHandle;
+import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.bestiary.BestiaryUnlockState;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.extensions.GameExtension;
@@ -31,14 +33,19 @@ class GameStateSnapshotEndToEndTest {
   @TempDir Path temporaryDirectory;
 
   private SaveGameService saveGameService;
+  private BestiaryService bestiary;
 
   @BeforeEach
   void setUp() {
     PlayerRunState playerState = new PlayerRunState(65, 100, 120);
     PlayerDeck deck = PlayerDeckFactory.createStarterDeck();
     RunState runState = buildRunStateWithConnectedNodes();
+    bestiary = BestiaryService.loadDefault();
+    bestiary.recordDefeated("lesser_shade");
+    bestiary.recordEncountered("boss_knight");
 
-    GameStateSnapshotProvider provider = new GameStateSnapshotProvider(playerState, deck, runState);
+    GameStateSnapshotProvider provider =
+        new GameStateSnapshotProvider(playerState, deck, runState, bestiary);
     JsonSaveGameRepository repository =
         new JsonSaveGameRepository(new FileHandle(temporaryDirectory.toFile()));
     saveGameService = new SaveGameService(repository, provider);
@@ -82,6 +89,18 @@ class GameStateSnapshotEndToEndTest {
   }
 
   @Test
+  void savesAndLoadsBestiaryUnlockProgress() {
+    saveGameService.saveGame(1);
+    LoadResult loadResult = saveGameService.loadGame(1);
+
+    assertEquals(2, loadResult.data().progress.bestiary.size());
+    assertEquals("lesser_shade", loadResult.data().progress.bestiary.get(0).enemyId);
+    assertEquals("DEFEATED", loadResult.data().progress.bestiary.get(0).unlockState);
+    assertEquals("boss_knight", loadResult.data().progress.bestiary.get(1).enemyId);
+    assertEquals("ENCOUNTERED", loadResult.data().progress.bestiary.get(1).unlockState);
+  }
+
+  @Test
   void saveCloseRelaunchAndRestoreRecoversTheWholeRun() {
     assertTrue(saveGameService.saveGame(1).success());
 
@@ -90,12 +109,14 @@ class GameStateSnapshotEndToEndTest {
     PlayerDeck restoredDeck = PlayerDeckFactory.createStarterDeck();
     restoredDeck.clear();
     RunState restoredRunState = new RunState();
+    BestiaryService restoredBestiary = BestiaryService.loadDefault();
 
     LoadResult loadResult = saveGameService.loadGame(1);
     assertTrue(loadResult.success());
 
     RestoreResult restoreResult =
-        new SaveGameRestoreService(restoredPlayerState, restoredDeck, restoredRunState)
+        new SaveGameRestoreService(
+                restoredPlayerState, restoredDeck, restoredRunState, restoredBestiary)
             .restore(loadResult.data());
 
     assertTrue(restoreResult.success());
@@ -106,6 +127,10 @@ class GameStateSnapshotEndToEndTest {
     assertEquals(PlayerDeckFactory.getStarterDeckCardIds(), restoredDeck.getCardIds());
     assertEquals(0, restoredRunState.getMapGraph().getCurrentNode().getNodeId());
     assertEquals(NodeState.AVAILABLE, restoredRunState.getMapGraph().getNode(1).getState());
+    assertEquals(
+        BestiaryUnlockState.DEFEATED, restoredBestiary.getProgressSnapshot().get("lesser_shade"));
+    assertEquals(
+        BestiaryUnlockState.ENCOUNTERED, restoredBestiary.getProgressSnapshot().get("boss_knight"));
   }
 
   private RunState buildRunStateWithConnectedNodes() {

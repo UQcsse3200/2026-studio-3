@@ -2,6 +2,8 @@ package com.csse3200.game.save;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.bestiary.BestiaryUnlockState;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.extensions.GameExtension;
@@ -24,7 +26,9 @@ class GameStateSnapshotProviderTest {
     PlayerDeck deck = PlayerDeckFactory.createStarterDeck();
     RunState runState = buildRunStateWithSingleNode();
 
-    SaveGameData data = new GameStateSnapshotProvider(playerState, deck, runState).capture();
+    SaveGameData data =
+        new GameStateSnapshotProvider(playerState, deck, runState, BestiaryService.loadDefault())
+            .capture();
 
     assertEquals(80, data.player.currentHealth);
     assertEquals(100, data.player.maxHealth);
@@ -37,10 +41,42 @@ class GameStateSnapshotProviderTest {
     PlayerDeck deck = PlayerDeckFactory.createStarterDeck();
     RunState runState = buildRunStateWithSingleNode();
 
-    SaveGameData data = new GameStateSnapshotProvider(playerState, deck, runState).capture();
+    SaveGameData data =
+        new GameStateSnapshotProvider(playerState, deck, runState, BestiaryService.loadDefault())
+            .capture();
 
     assertEquals(1, data.map.nodes.size());
     assertEquals(0, data.map.nodes.get(0).nodeId);
+  }
+
+  @Test
+  void capturesOnlyDiscoveredBestiaryProgress() {
+    PlayerRunState playerState = new PlayerRunState(100, 100, 50);
+    PlayerDeck deck = PlayerDeckFactory.createStarterDeck();
+    RunState runState = buildRunStateWithSingleNode();
+    BestiaryService bestiary = BestiaryService.loadDefault();
+    bestiary.recordEncountered("lesser_shade");
+    bestiary.recordDefeated("boss_knight");
+
+    SaveGameData data =
+        new GameStateSnapshotProvider(playerState, deck, runState, bestiary).capture();
+
+    assertEquals(2, data.progress.bestiary.size());
+    assertEquals("lesser_shade", data.progress.bestiary.get(0).enemyId);
+    assertEquals(BestiaryUnlockState.ENCOUNTERED.name(), data.progress.bestiary.get(0).unlockState);
+    assertEquals("boss_knight", data.progress.bestiary.get(1).enemyId);
+    assertEquals(BestiaryUnlockState.DEFEATED.name(), data.progress.bestiary.get(1).unlockState);
+  }
+
+  @Test
+  void rejectsMissingBestiaryService() {
+    PlayerRunState playerState = new PlayerRunState(100, 100, 50);
+    PlayerDeck deck = PlayerDeckFactory.createStarterDeck();
+    RunState runState = buildRunStateWithSingleNode();
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new GameStateSnapshotProvider(playerState, deck, runState, null));
   }
 
   private RunState buildRunStateWithSingleNode() {

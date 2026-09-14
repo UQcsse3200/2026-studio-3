@@ -1,6 +1,8 @@
 package com.csse3200.game.save;
 
 import com.csse3200.game.GdxGame;
+import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.bestiary.BestiaryUnlockState;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.maps.MapGraph;
 import com.csse3200.game.maps.MapNode;
@@ -8,6 +10,7 @@ import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Captures the live run as a {@link SaveGameData} snapshot.
@@ -19,9 +22,13 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
   private final PlayerRunState playerState;
   private final PlayerDeck playerDeck;
   private final RunState runState;
+  private final BestiaryService bestiaryService;
 
   public GameStateSnapshotProvider(
-      PlayerRunState playerState, PlayerDeck playerDeck, RunState runState) {
+      PlayerRunState playerState,
+      PlayerDeck playerDeck,
+      RunState runState,
+      BestiaryService bestiaryService) {
     if (playerState == null) {
       throw new IllegalArgumentException("playerState must not be null");
     }
@@ -31,9 +38,13 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
     if (runState == null) {
       throw new IllegalArgumentException("runState must not be null");
     }
+    if (bestiaryService == null) {
+      throw new IllegalArgumentException("bestiaryService must not be null");
+    }
     this.playerState = playerState;
     this.playerDeck = playerDeck;
     this.runState = runState;
+    this.bestiaryService = bestiaryService;
   }
 
   @Override
@@ -97,6 +108,14 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
     // in-progress to replay. Always MAP for now — revisit if that rule changes.
     String resumeScreen = GdxGame.ScreenType.MAP.name();
 
-    return new ProgressSaveData(pendingRewardId, resumeScreen);
+    List<BestiaryProgressSaveData> bestiaryProgress = new ArrayList<>();
+    for (Map.Entry<String, BestiaryUnlockState> entry :
+        bestiaryService.getProgressSnapshot().entrySet()) {
+      if (entry.getValue() != BestiaryUnlockState.LOCKED) {
+        bestiaryProgress.add(new BestiaryProgressSaveData(entry.getKey(), entry.getValue().name()));
+      }
+    }
+
+    return new ProgressSaveData(pendingRewardId, resumeScreen, bestiaryProgress);
   }
 }

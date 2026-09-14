@@ -174,8 +174,8 @@ class EnemyFactoryTest {
   }
 
   @Test
-  void getIdsByTierReturnsEmptyListWhenNoneMatch() {
-    assertTrue(EnemyFactory.getIdsByTier(EnemyTier.BOSS).isEmpty());
+  void getIdsByTierReturnsTeamOneBoss() {
+    assertEquals(List.of("boss_knight"), EnemyFactory.getIdsByTier(EnemyTier.BOSS));
   }
 
   @Test
@@ -190,6 +190,7 @@ class EnemyFactoryTest {
     assertTrue(paths.contains("images/enemies/default.atlas"));
     assertTrue(paths.contains("images/enemies/lesser_shade.atlas"));
     assertTrue(paths.contains("images/enemies/void_knight.atlas"));
+    assertTrue(paths.contains("images/enemies/boss_knight.atlas"));
   }
 
   @Test
