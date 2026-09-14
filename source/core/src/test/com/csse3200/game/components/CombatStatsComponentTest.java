@@ -166,4 +166,18 @@ class CombatStatsComponentTest {
         verify(listener).handle();
     }
 
+    @Test
+    void shouldNotTriggerDeathEventTwiceWhenAlreadyDead() {
+        Entity entity = new Entity();
+        CombatStatsComponent combat = new CombatStatsComponent(5, 0);
+        entity.addComponent(combat);
+        EventListener0 listener = mock(EventListener0.class);
+        entity.getEvents().addListener("entityIsDead", listener);
+
+        combat.applyDirectHealthChange(-100);
+        combat.applyDirectHealthChange(-5);
+
+        verify(listener, times(1)).handle();
+    }
+
 }

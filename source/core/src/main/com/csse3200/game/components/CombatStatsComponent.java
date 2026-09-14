@@ -153,7 +153,7 @@ public class CombatStatsComponent extends Component {
     public void applyDirectHealthChange(int amount) {
         if (amount > 0) {
             heal(amount);
-        } else if (amount < 0) {
+        } else if (amount < 0 && !isDead()) {
             setHealth(Math.max(this.health + amount, 0));
             if (entity != null && isDead()) {
                 entity.getEvents().trigger("entityIsDead");
