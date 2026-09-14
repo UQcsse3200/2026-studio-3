@@ -1,9 +1,17 @@
 package com.csse3200.game.components.save;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
+import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.save.DeleteSaveResult;
 import com.csse3200.game.save.LoadResult;
 import com.csse3200.game.save.RestoreResult;
@@ -13,6 +21,8 @@ import com.csse3200.game.save.SaveGameService;
 import com.csse3200.game.save.SaveResult;
 import com.csse3200.game.save.SaveSlotListResult;
 import com.csse3200.game.save.SaveSlotMetadata;
+import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -35,8 +45,23 @@ public class SaveLoadPanel extends UIComponent {
   private final List<Integer> slotIds;
   private final Runnable backAction;
 
+  private static final String BACKGROUND_TEXTURE = "images/main_menu_background.png";
+  private static final int PILL_HEIGHT = 64;
+  private static final int PILL_WIDTH = 160;
+  private static final int PILL_RADIUS = PILL_HEIGHT / 2;
+
+  private Stack rootStack;
   private Table rootTable;
   private Label statusLabel;
+  private final List<Texture> generatedPillTextures = new java.util.ArrayList<>();
+
+  // Cached once and reused across every button and every refresh() call — MenuTheme colors don't
+  // change at runtime, so regenerating these per-button (the original approach) created roughly
+  // 40 new 160x64 textures per save/load/delete refresh, an unbounded GPU memory leak flagged in
+  // review (PR #208, Anran).
+  private NinePatchDrawable upDrawable;
+  private NinePatchDrawable downDrawable;
+  private NinePatchDrawable overDrawable;
 
   public SaveLoadPanel(SaveGameService saveGameService, List<Integer> slotIds) {
     this(saveGameService, slotIds, null, null);
@@ -61,21 +86,85 @@ public class SaveLoadPanel extends UIComponent {
   }
 
   private void addActors() {
-    rootTable = new Table();
-    rootTable.setFillParent(true);
+    rootStack = new Stack();
+    rootStack.setFillParent(true);
 
+    Texture backgroundTexture =
+        ServiceLocator.getResourceService().getAsset(BACKGROUND_TEXTURE, Texture.class);
+    backgroundTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    Image background = new Image(backgroundTexture);
+    background.setScaling(Scaling.fill);
+    rootStack.add(background);
+
+    Color overlayColour = MenuTheme.deepPlum();
+    overlayColour.a = 0.6f; // Darker than the main menu overlay so slot text stays readable
+    Table overlay = new Table();
+    overlay.setBackground(skin.newDrawable("white", overlayColour));
+    rootStack.add(overlay);
+
+    rootTable = new Table();
     addHeader();
 
-    statusLabel = new Label("", skin);
+    statusLabel = new Label("", themedLabelStyle());
     rootTable.add(statusLabel).colspan(4).padBottom(10f).row();
 
-    stage.addActor(rootTable);
+    rootStack.add(rootTable);
+    stage.addActor(rootStack);
+  }
+
+  private Label.LabelStyle themedLabelStyle() {
+    Label.LabelStyle style = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+    style.fontColor = MenuTheme.warmParchment();
+    return style;
+  }
+
+  private TextButton.TextButtonStyle themedButtonStyle() {
+    if (upDrawable == null) {
+      upDrawable = pillDrawable(MenuTheme.burntRust());
+      downDrawable = pillDrawable(MenuTheme.dustyMauve());
+      overDrawable = pillDrawable(MenuTheme.softCoral());
+    }
+
+    TextButton.TextButtonStyle style =
+        new TextButton.TextButtonStyle(skin.get(TextButton.TextButtonStyle.class));
+    style.up = upDrawable;
+    style.down = downDrawable;
+    style.over = overDrawable;
+    style.disabled = upDrawable; // same color as enabled, by design (see disabledFontColor)
+    style.fontColor = MenuTheme.warmParchment();
+    style.overFontColor = Color.WHITE;
+    style.downFontColor = MenuTheme.warmParchment();
+    style.disabledFontColor = MenuTheme.warmParchment();
+    return style;
+  }
+
+  /**
+   * Builds a rounded-pill drawable in an exact {@link MenuTheme} color. The flat-earth skin only
+   * ships pre-colored green pill textures (tinting them would multiply, not replace, the color) and
+   * its only neutral region is a 1x1 white pixel (no rounding), so the shape is generated here
+   * instead: two filled circles at the ends plus a connecting rectangle, composited onto one
+   * texture via {@link Pixmap}. Wrapping it in a {@link NinePatch} keeps the rounded ends fixed
+   * size while the middle stretches to fit each button's actual width.
+   */
+  private NinePatchDrawable pillDrawable(Color color) {
+    Pixmap pixmap = new Pixmap(PILL_WIDTH, PILL_HEIGHT, Pixmap.Format.RGBA8888);
+    pixmap.setColor(color);
+    pixmap.fillCircle(PILL_RADIUS, PILL_RADIUS, PILL_RADIUS);
+    pixmap.fillCircle(PILL_WIDTH - PILL_RADIUS - 1, PILL_RADIUS, PILL_RADIUS);
+    pixmap.fillRectangle(PILL_RADIUS, 0, PILL_WIDTH - PILL_HEIGHT, PILL_HEIGHT);
+    Texture texture = new Texture(pixmap);
+    pixmap.dispose();
+    generatedPillTextures.add(texture);
+    NinePatch ninePatch = new NinePatch(texture, PILL_RADIUS, PILL_RADIUS, 0, 0);
+    return new NinePatchDrawable(ninePatch);
   }
 
   private void addHeader() {
-    rootTable.add(new Label("Save / Load", skin, "title")).colspan(3).padBottom(20f);
+    Label.LabelStyle titleStyle = new Label.LabelStyle(skin.get("title", Label.LabelStyle.class));
+    titleStyle.fontColor = MenuTheme.warmParchment();
+    rootTable.add(new Label("Save / Load", titleStyle)).colspan(3).padBottom(20f);
     if (backAction != null) {
-      TextButton backButton = new TextButton("Back", skin);
+      TextButton backButton = new TextButton("Back", themedButtonStyle());
       backButton.addListener(
           new ChangeListener() {
             @Override
@@ -120,9 +209,9 @@ public class SaveLoadPanel extends UIComponent {
         hasSave
             ? "Slot " + slotId + " — " + describeTimestamp(metadata.savedAtEpochMillis)
             : "Slot " + slotId + " — empty";
-    rootTable.add(new Label(label, skin)).left().padRight(20f);
+    rootTable.add(new Label(label, themedLabelStyle())).left().padRight(20f);
 
-    TextButton saveButton = new TextButton("Save", skin);
+    TextButton saveButton = new TextButton("Save", themedButtonStyle());
     saveButton.addListener(
         new ChangeListener() {
           @Override
@@ -132,7 +221,7 @@ public class SaveLoadPanel extends UIComponent {
         });
     rootTable.add(saveButton).padRight(10f);
 
-    TextButton loadButton = new TextButton("Load", skin);
+    TextButton loadButton = new TextButton("Load", themedButtonStyle());
     loadButton.setDisabled(!hasSave);
     loadButton.addListener(
         new ChangeListener() {
@@ -143,7 +232,7 @@ public class SaveLoadPanel extends UIComponent {
         });
     rootTable.add(loadButton).padRight(10f);
 
-    TextButton deleteButton = new TextButton("Delete", skin);
+    TextButton deleteButton = new TextButton("Delete", themedButtonStyle());
     deleteButton.setDisabled(!hasSave);
     deleteButton.addListener(
         new ChangeListener() {
@@ -152,7 +241,7 @@ public class SaveLoadPanel extends UIComponent {
             onDelete(slotId);
           }
         });
-    rootTable.add(deleteButton).row();
+    rootTable.add(deleteButton).padBottom(12f).row();
   }
 
   private void onSave(int slotId) {
@@ -214,7 +303,14 @@ public class SaveLoadPanel extends UIComponent {
 
   @Override
   public void dispose() {
-    rootTable.remove();
+    if (rootStack != null) {
+      rootStack.remove();
+      rootStack.clear();
+    }
+    for (Texture texture : generatedPillTextures) {
+      texture.dispose();
+    }
+    generatedPillTextures.clear();
     super.dispose();
   }
 }
