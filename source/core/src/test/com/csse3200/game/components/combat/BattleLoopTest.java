@@ -178,8 +178,7 @@ class BattleLoopTest {
     CardPlayService cardPlayService =
         new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
     BattleController controller =
-        new BattleController(
-            player, List.of(enemy(20, 1)), effectHandler, cardPlayService);
+        new BattleController(player, List.of(enemy(20, 1)), effectHandler, cardPlayService);
     List<BattlePhase> phases = new ArrayList<>();
     controller.addPhaseChangeListener((previous, next) -> phases.add(next));
 
@@ -208,8 +207,7 @@ class BattleLoopTest {
     CardPlayService cardPlayService =
         new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
     BattleController controller =
-        new BattleController(
-            player, List.of(enemy(20, 1)), effectHandler, cardPlayService);
+        new BattleController(player, List.of(enemy(20, 1)), effectHandler, cardPlayService);
     List<BattlePhase> phases = new ArrayList<>();
     controller.addPhaseChangeListener((previous, next) -> phases.add(next));
 
