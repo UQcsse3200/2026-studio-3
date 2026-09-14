@@ -1,6 +1,7 @@
 package com.csse3200.game.areas;
 
 import com.csse3200.game.areas.terrain.TerrainFactory;
+import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.chance.ChanceEncounterFactory;
 import com.csse3200.game.chance.ChanceEncounterSelector;
 import com.csse3200.game.components.CombatStatsComponent;
@@ -12,10 +13,12 @@ import com.csse3200.game.encounters.integration.EncounterFlowController;
 import com.csse3200.game.encounters.integration.FunctionalCardCatalogAdapter;
 import com.csse3200.game.encounters.integration.IntegratedShopTransactionGateway;
 import com.csse3200.game.encounters.integration.InventoryDeckAdapter;
+import com.csse3200.game.encounters.integration.PlayerDeckAdapter;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.factories.PlayerFactory;
 import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.maps.EncounterCallback;
+import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
@@ -41,6 +44,8 @@ public class EncounterGameArea extends GameArea {
   private final Integer nodeId;
   private final RoomType roomType;
   private final EncounterCallback completionCallback;
+  private final PlayerRunState sharedPlayerState;
+  private final PlayerDeck sharedPlayerDeck;
 
   private Entity player;
   private EncounterFlowController encounterFlow;
@@ -72,6 +77,16 @@ public class EncounterGameArea extends GameArea {
       Integer nodeId,
       RoomType roomType,
       EncounterCallback completionCallback) {
+    this(terrainFactory, nodeId, roomType, completionCallback, null, null);
+  }
+
+  public EncounterGameArea(
+      TerrainFactory terrainFactory,
+      Integer nodeId,
+      RoomType roomType,
+      EncounterCallback completionCallback,
+      PlayerRunState sharedPlayerState,
+      PlayerDeck sharedPlayerDeck) {
     super();
 
     Objects.requireNonNull(terrainFactory, "terrainFactory cannot be null");
@@ -79,6 +94,8 @@ public class EncounterGameArea extends GameArea {
     this.roomType = Objects.requireNonNull(roomType, "roomType cannot be null");
     this.completionCallback =
         Objects.requireNonNull(completionCallback, "completionCallback cannot be null");
+    this.sharedPlayerState = sharedPlayerState;
+    this.sharedPlayerDeck = sharedPlayerDeck;
   }
 
   /** Creates the logical player state and launches the selected encounter. */
@@ -87,6 +104,11 @@ public class EncounterGameArea extends GameArea {
     loadAssets();
 
     player = PlayerFactory.createPlayer();
+
+    if (sharedPlayerState != null) {
+      sharedPlayerState.applyTo(player);
+    }
+
     initialiseEncounterFlow();
     displayEncounter();
   }
@@ -147,7 +169,9 @@ public class EncounterGameArea extends GameArea {
         new IntegratedShopTransactionGateway(
             playerState,
             new FunctionalCardCatalogAdapter(cardId -> true),
-            new InventoryDeckAdapter(inventory));
+            sharedPlayerDeck != null
+                ? new PlayerDeckAdapter(sharedPlayerDeck)
+                : new InventoryDeckAdapter(inventory));
 
     encounterFlow = new EncounterFlowController(playerState, shopTransactions, completionCallback);
   }
@@ -170,6 +194,10 @@ public class EncounterGameArea extends GameArea {
 
   @Override
   public void dispose() {
+    if (sharedPlayerState != null && player != null) {
+      sharedPlayerState.captureFrom(player);
+    }
+
     super.dispose();
     unloadAssets();
   }
