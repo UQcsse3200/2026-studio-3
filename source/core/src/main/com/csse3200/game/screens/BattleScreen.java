@@ -22,8 +22,8 @@ import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.cards.play.integration.Team3CardPlayAdapter;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
+import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.combat.BattleController;
-import com.csse3200.game.components.combat.CardEffectHandler;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
@@ -76,8 +76,7 @@ public class BattleScreen extends ScreenAdapter {
   private final BattleController controller;
   private final CardLibrary library;
   private final BattleDeck battleDeck;
-  private final CardPlayService cardPlayService;
-  private List<ClickableRecord> staticUiRecords;
+    private List<ClickableRecord> staticUiRecords;
 
   public BattleScreen(GdxGame game) {
     this.game = game;
@@ -129,7 +128,7 @@ public class BattleScreen extends ScreenAdapter {
     Entity player = forestGameArea.getPlayer();
     EnergyComponent energy = player.getComponent(EnergyComponent.class);
 
-    cardPlayService = new CardPlayService(library, battleDeck, energy);
+    CardPlayService cardPlayService = new CardPlayService(library, battleDeck, energy);
     CardEffectHandler effectHandler = new CardEffectHandler();
     controller =
         new BattleController(player, forestGameArea.getEnemies(), effectHandler, cardPlayService);
@@ -166,7 +165,7 @@ public class BattleScreen extends ScreenAdapter {
 
     ClickableFactory uiFactory = new ClickableFactory(buildAllRecords());
 
-    Team3CardPlayAdapter cardPlayAdapter = new Team3CardPlayAdapter(library, cardPlayService);
+    Team3CardPlayAdapter cardPlayAdapter = new Team3CardPlayAdapter(library, controller);
 
     Stage stage = ServiceLocator.getRenderService().getStage();
     Entity battleUi =
@@ -174,8 +173,8 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new InputDecorator(stage, 10))
             .addComponent(uiFactory)
             .addComponent(displays)
-            .addComponent(new BattleActions(controller, game, library));
-    // .addComponent(cardPlayAdapter);
+            .addComponent(new BattleActions(controller, game, library))
+            .addComponent(cardPlayAdapter);
 
     // Keep the on-screen hand in sync with the deck: after a card is played (and a replacement
     // drawn) rebuild the hand widgets from the live deck, so the played card's button is gone and

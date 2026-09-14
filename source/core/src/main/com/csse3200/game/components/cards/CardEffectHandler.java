@@ -1,10 +1,11 @@
-package com.csse3200.game.components.combat;
+package com.csse3200.game.components.cards;
 
-import com.csse3200.game.cards.effects.*;
+import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.entities.Entity;
+
 import java.util.ArrayList;
 import java.util.List;
 
