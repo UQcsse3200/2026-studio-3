@@ -9,12 +9,14 @@ import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
 import com.csse3200.game.input.InputDecorator;
 import com.csse3200.game.input.InputService;
 import com.csse3200.game.maps.MapNode;
+import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.physics.PhysicsEngine;
@@ -84,6 +86,8 @@ public class EncounterScreen extends ScreenAdapter {
             .toArray(String[]::new);
 
     ServiceLocator.registerCardLibrary(cardLibrary);
+    PlayerRunState playerState = runState.getOrCreatePlayerState();
+    PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(cardLibrary);
 
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(cardTexturePaths);
@@ -102,8 +106,12 @@ public class EncounterScreen extends ScreenAdapter {
     TerrainFactory terrainFactory = new TerrainFactory(renderer.getCamera());
     encounterGameArea =
         new EncounterGameArea(
-            terrainFactory, activeNode.getNodeId(), roomType, this::onEncounterComplete);
-
+            terrainFactory,
+            activeNode.getNodeId(),
+            roomType,
+            this::onEncounterComplete,
+            playerState,
+            playerDeck);
     encounterGameArea.create();
   }
 

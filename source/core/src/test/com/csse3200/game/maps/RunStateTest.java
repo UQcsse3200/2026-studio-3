@@ -2,6 +2,10 @@ package com.csse3200.game.maps;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardLibrary;
+import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.extensions.GameExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -149,6 +153,32 @@ public class RunStateTest {
     runState.completeEncounter(true);
 
     assertEquals(NodeState.CURRENT, graph.getNode(0).getState());
+  }
+
+  @Test
+  void playerStatePersistsAcrossRunAccesses() {
+    RunState runState = new RunState();
+
+    PlayerRunState first = runState.getOrCreatePlayerState();
+    first.restore(50, 100, 25);
+
+    PlayerRunState second = runState.getOrCreatePlayerState();
+
+    assertSame(first, second);
+    assertEquals(50, second.getCurrentHealth());
+    assertEquals(100, second.getMaxHealth());
+    assertEquals(25, second.getGold());
+  }
+
+  @Test
+  void playerDeckPersistsAcrossRunAccesses() {
+    RunState runState = new RunState();
+    CardService cardService = new CardLibrary(CardConfigLoader.loadCards());
+
+    PlayerDeck first = runState.getOrCreatePlayerDeck(cardService);
+    PlayerDeck second = runState.getOrCreatePlayerDeck(cardService);
+
+    assertSame(first, second);
   }
 
   @Test
