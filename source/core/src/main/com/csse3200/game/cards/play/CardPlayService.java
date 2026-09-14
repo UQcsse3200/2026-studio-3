@@ -190,6 +190,7 @@ public final class CardPlayService {
         throw new IllegalStateException(
             "Card was no longer in hand after energy was spent: " + card.id);
       }
+      battleDeck.drawOne();
       return CardPlayResult.success(
           card.id, target, card.cost, resolution, DeckSnapshot.from(battleDeck));
     } catch (RuntimeException exception) {

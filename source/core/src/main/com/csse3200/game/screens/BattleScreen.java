@@ -18,10 +18,13 @@ import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
-import com.csse3200.game.cards.effects.CardEffectResolver;
+import com.csse3200.game.cards.play.CardPlayService;
+import com.csse3200.game.cards.play.integration.Team3CardPlayAdapter;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
+import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
@@ -71,8 +74,8 @@ public class BattleScreen extends ScreenAdapter {
   private final PhysicsEngine physicsEngine;
   private static final Map<String, Skin> textureSkinCache = new HashMap<>();
   private final BattleController controller;
-  private CardLibrary library;
-  private BattleDeck battleDeck;
+  private final CardLibrary library;
+  private final BattleDeck battleDeck;
   private List<ClickableRecord> staticUiRecords;
 
   public BattleScreen(GdxGame game) {
@@ -101,9 +104,13 @@ public class BattleScreen extends ScreenAdapter {
 
     ServiceLocator.registerCamera(renderer.getCamera().getCamera());
 
+    // Integer for scaling difficulty level
+    Integer mapProgression = game.getRunState().getMapProgression();
+
     logger.debug("Initialising main game screen entities");
     TerrainFactory terrainFactory = new TerrainFactory(renderer.getCamera());
-    ForestGameArea forestGameArea = new ForestGameArea(terrainFactory);
+    ForestGameArea forestGameArea =
+        new ForestGameArea(terrainFactory, mapProgression, game.getRunState());
     this.gameArea = forestGameArea;
     forestGameArea.create();
 
@@ -118,15 +125,29 @@ public class BattleScreen extends ScreenAdapter {
     battleDeck.shuffleDrawPile();
     battleDeck.drawCards(5);
 
-    CardEffectResolver effectResolver = new CardEffectResolver(library);
-    controller =
-        new BattleController(
-            forestGameArea.getPlayer(),
-            forestGameArea.getEnemies(),
-            effectResolver,
-            library,
-            battleDeck);
+    Entity player = forestGameArea.getPlayer();
+    EnergyComponent energy = player.getComponent(EnergyComponent.class);
 
+    CardPlayService cardPlayService = new CardPlayService(library, battleDeck, energy);
+    CardEffectHandler effectHandler = new CardEffectHandler();
+    controller =
+        new BattleController(player, forestGameArea.getEnemies(), effectHandler, cardPlayService);
+
+    controller.addBattleEndListener(
+        won -> {
+          if (won) {
+            int currentHealth =
+                forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getHealth();
+            int maxHealth =
+                forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getMaxHealth();
+            int maxEnergy =
+                forestGameArea.getPlayer().getComponent(EnergyComponent.class).getMaxEnergy();
+
+            game.getRunState().setPlayerHealth(currentHealth);
+            game.getRunState().setPlayerMaxHealth(maxHealth);
+            game.getRunState().setPlayerMaxEnergy(maxEnergy);
+          }
+        });
     createUI();
     controller.start();
   }
@@ -144,6 +165,8 @@ public class BattleScreen extends ScreenAdapter {
 
     ClickableFactory uiFactory = new ClickableFactory(buildAllRecords());
 
+    Team3CardPlayAdapter cardPlayAdapter = new Team3CardPlayAdapter(library, controller);
+
     Stage stage = ServiceLocator.getRenderService().getStage();
     Entity battleUi =
         new Entity()
@@ -151,9 +174,7 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(uiFactory)
             .addComponent(displays)
             .addComponent(new BattleActions(controller, game, library))
-            .addComponent(
-                new DamageOnCardPlayComponent(
-                    gameArea.getPlayer().getComponent(CombatStatsComponent.class)));
+            .addComponent(cardPlayAdapter);
 
     // Keep the on-screen hand in sync with the deck: after a card is played (and a replacement
     // drawn) rebuild the hand widgets from the live deck, so the played card's button is gone and
@@ -162,7 +183,7 @@ public class BattleScreen extends ScreenAdapter {
         .getEvents()
         .addListener(
             BattleActions.HAND_CHANGED_EVENT,
-            (java.util.List<String> hand) -> uiFactory.rebuildHand(buildHandRecords()));
+            (List<String> hand) -> uiFactory.rebuildHand(buildHandRecords()));
 
     gameArea.displayUI(battleUi);
   }

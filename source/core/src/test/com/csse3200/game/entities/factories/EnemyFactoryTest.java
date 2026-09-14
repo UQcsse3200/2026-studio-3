@@ -13,7 +13,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.enemy.EnemyAnimationController;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
@@ -49,9 +51,11 @@ class EnemyFactoryTest {
     resourceService = mock(ResourceService.class);
     when(resourceService.getAsset(anyString(), eq(TextureAtlas.class)))
         .thenReturn(mock(TextureAtlas.class));
+    when(resourceService.getAsset(anyString(), eq(Texture.class))).thenReturn(mock(Texture.class));
     ServiceLocator.registerResourceService(resourceService);
 
     RenderService renderService = new RenderService();
+    renderService.setStage(mock(Stage.class));
     renderService.setDebug(mock(DebugRenderer.class));
     ServiceLocator.registerRenderService(renderService);
 
