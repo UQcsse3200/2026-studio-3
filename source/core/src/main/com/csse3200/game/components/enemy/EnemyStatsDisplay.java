@@ -1,5 +1,6 @@
 package com.csse3200.game.components.enemy;
 
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -77,7 +78,12 @@ public class EnemyStatsDisplay extends UIComponent {
     float enemyY = position.y - 0.5f;
 
     Vector3 screenPosition = new Vector3(enemyX, enemyY, 0);
-    ServiceLocator.getCamera().project(screenPosition); // converts coordinates
+
+    Camera camera = ServiceLocator.getCamera();
+    if (camera == null) {
+      return;
+    }
+    camera.project(screenPosition); // converts coordinates
 
     table.setPosition(screenPosition.x - table.getWidth() / 2f, screenPosition.y);
   }
