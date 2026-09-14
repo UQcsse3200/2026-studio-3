@@ -1,97 +1,93 @@
 package com.csse3200.game.bestiary;
 
+import com.csse3200.game.entities.configs.EnemyConfig;
 import com.csse3200.game.entities.configs.EnemyTier;
-import java.util.Objects;
 
-/** Read-only enemy information presented by the bestiary. */
-public final class BestiaryEntry {
-  private final String enemyId;
-  private final String displayName;
-  private final EnemyTier tier;
-  private final String description;
-  private final String imagePath;
-  private final int maxHealth;
-  private final int baseAttack;
-  private final int armour;
-  private final BestiaryUnlockState unlockState;
+/**
+ * Immutable Bestiary definition derived from an enemy configuration.
+ *
+ * <p>Combat-owned values are copied when the Bestiary is initialised. Player-specific discovery
+ * progress is deliberately stored by {@link BestiaryService}, not in this definition.
+ *
+ * @param enemyId stable identifier shared with the enemy roster
+ * @param name enemy display name
+ * @param tier enemy difficulty tier
+ * @param health base health before run scaling
+ * @param baseAttack base attack before run scaling
+ * @param armour base armour before run scaling
+ * @param behaviour enemy behaviour identifier
+ * @param sprite optional explicit sprite atlas path
+ * @param description optional Bestiary-specific description
+ */
+public record BestiaryEntry(
+    String enemyId,
+    String name,
+    EnemyTier tier,
+    int health,
+    int baseAttack,
+    int armour,
+    String behaviour,
+    String sprite,
+    String description) {
+  private static final String ENEMY_SPRITE_DIR = "images/enemies/";
 
-  /**
-   * Creates a bestiary entry.
-   *
-   * @param enemyId stable enemy identifier
-   * @param displayName player-facing enemy name
-   * @param tier enemy difficulty tier
-   * @param description player-facing bestiary description
-   * @param imagePath internal path to the enemy portrait
-   * @param maxHealth enemy base maximum health
-   * @param baseAttack enemy base attack
-   * @param armour enemy base armour
-   * @param unlockState current bestiary progress state
-   */
-  public BestiaryEntry(
-      String enemyId,
-      String displayName,
-      EnemyTier tier,
-      String description,
-      String imagePath,
-      int maxHealth,
-      int baseAttack,
-      int armour,
-      BestiaryUnlockState unlockState) {
-    if (enemyId == null || enemyId.isBlank()) {
-      throw new IllegalArgumentException("enemyId cannot be blank");
+  /** Creates a validated and normalised Bestiary definition. */
+  public BestiaryEntry {
+    enemyId = enemyId == null ? null : enemyId.trim();
+    if (enemyId == null || enemyId.isBlank() || "unknown".equals(enemyId)) {
+      throw new IllegalArgumentException("enemyId must identify a registered enemy");
     }
-    this.enemyId = enemyId;
-    this.displayName = Objects.requireNonNull(displayName, "displayName cannot be null");
-    this.tier = Objects.requireNonNull(tier, "tier cannot be null");
-    this.description = Objects.requireNonNull(description, "description cannot be null");
-    this.imagePath = Objects.requireNonNull(imagePath, "imagePath cannot be null");
-    this.maxHealth = maxHealth;
-    this.baseAttack = baseAttack;
-    this.armour = armour;
-    this.unlockState = Objects.requireNonNull(unlockState, "unlockState cannot be null");
-  }
+    if (health <= 0) {
+      throw new IllegalArgumentException("health must be positive");
+    }
+    if (baseAttack < 0 || armour < 0) {
+      throw new IllegalArgumentException("combat values must not be negative");
+    }
 
-  public String getEnemyId() {
-    return enemyId;
-  }
-
-  public String getDisplayName() {
-    return displayName;
-  }
-
-  public EnemyTier getTier() {
-    return tier;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public String getImagePath() {
-    return imagePath;
-  }
-
-  public int getMaxHealth() {
-    return maxHealth;
-  }
-
-  public int getBaseAttack() {
-    return baseAttack;
-  }
-
-  public int getArmour() {
-    return armour;
-  }
-
-  public BestiaryUnlockState getUnlockState() {
-    return unlockState;
+    name = name == null || name.isBlank() ? "Unknown Enemy" : name.trim();
+    tier = tier == null ? EnemyTier.NORMAL : tier;
+    behaviour = normaliseOptionalText(behaviour);
+    sprite = normaliseOptionalText(sprite);
+    if (sprite.isEmpty()) {
+      sprite = ENEMY_SPRITE_DIR + enemyId + ".atlas";
+    }
+    description = normaliseOptionalText(description);
   }
 
   /**
-   * @return whether the enemy's information may be displayed
+   * Creates a Bestiary definition using an enemy's base configuration.
+   *
+   * @param config source enemy configuration
+   * @return immutable Bestiary definition
    */
-  public boolean isUnlocked() {
-    return unlockState != BestiaryUnlockState.LOCKED;
+  public static BestiaryEntry fromEnemyConfig(EnemyConfig config) {
+    return fromEnemyConfig(config, "");
+  }
+
+  /**
+   * Creates a Bestiary definition with additional Bestiary-specific descriptive text.
+   *
+   * @param config source enemy configuration
+   * @param description optional Bestiary description
+   * @return immutable Bestiary definition
+   */
+  public static BestiaryEntry fromEnemyConfig(EnemyConfig config, String description) {
+    if (config == null) {
+      throw new IllegalArgumentException("config must not be null");
+    }
+    return new BestiaryEntry(
+        config.id,
+        config.name,
+        config.tier,
+        config.health,
+        config.baseAttack,
+        config.armour,
+        config.behaviour,
+        config.sprite,
+        description);
+  }
+
+  private static String normaliseOptionalText(String value) {
+    return value == null ? "" : value.trim();
   }
 }

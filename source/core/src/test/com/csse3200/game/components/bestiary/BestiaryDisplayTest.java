@@ -2,50 +2,77 @@ package com.csse3200.game.components.bestiary;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.csse3200.game.bestiary.BestiaryEntry;
+import com.csse3200.game.bestiary.BestiaryEntryView;
 import com.csse3200.game.bestiary.BestiaryUnlockState;
 import com.csse3200.game.entities.configs.EnemyTier;
 import com.csse3200.game.extensions.GameExtension;
-import java.util.List;
+import java.util.Optional;
+import java.util.OptionalInt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(GameExtension.class)
 class BestiaryDisplayTest {
-  private final BestiaryEntry lockedNormal =
-      createEntry("locked", "Hidden Enemy", EnemyTier.NORMAL, BestiaryUnlockState.LOCKED);
-  private final BestiaryEntry unlockedElite =
-      createEntry("elite", "Elite Enemy", EnemyTier.ELITE, BestiaryUnlockState.DEFEATED);
-  private final BestiaryEntry lockedBoss =
-      createEntry("boss", "Boss Enemy", EnemyTier.BOSS, BestiaryUnlockState.LOCKED);
-
-  @Test
-  void shouldFilterEntriesByTier() {
-    List<BestiaryEntry> entries = List.of(lockedNormal, unlockedElite, lockedBoss);
-
-    assertEquals(List.of(lockedNormal), BestiaryDisplay.filterEntries(entries, EnemyTier.NORMAL));
-    assertEquals(List.of(unlockedElite), BestiaryDisplay.filterEntries(entries, EnemyTier.ELITE));
-    assertEquals(List.of(lockedBoss), BestiaryDisplay.filterEntries(entries, EnemyTier.BOSS));
-  }
+  private final BestiaryEntryView locked = createView(BestiaryUnlockState.LOCKED);
+  private final BestiaryEntryView encountered = createView(BestiaryUnlockState.ENCOUNTERED);
+  private final BestiaryEntryView defeated = createView(BestiaryUnlockState.DEFEATED);
 
   @Test
   void shouldHideLockedEnemyName() {
-    assertEquals("???", BestiaryDisplay.visibleName(lockedNormal));
+    assertEquals("???", BestiaryDisplay.visibleName(locked));
+    assertEquals(
+        "Encounter this enemy to reveal its record.", BestiaryDisplay.descriptionFor(locked));
+    assertEquals("HP  ???     ATTACK  ???     ARMOUR  ???", BestiaryDisplay.statsFor(locked));
   }
 
   @Test
-  void shouldShowUnlockedEnemyName() {
-    assertEquals("Elite Enemy", BestiaryDisplay.visibleName(unlockedElite));
+  void shouldKeepEncounteredCombatDetailsHidden() {
+    assertEquals("Enemy", BestiaryDisplay.visibleName(encountered));
+    assertEquals(
+        "Defeat this enemy to reveal its complete record.",
+        BestiaryDisplay.descriptionFor(encountered));
+    assertEquals("HP  ???     ATTACK  ???     ARMOUR  ???", BestiaryDisplay.statsFor(encountered));
   }
 
   @Test
-  void shouldHandleEmptyCategory() {
-    assertEquals(List.of(), BestiaryDisplay.filterEntries(List.of(unlockedElite), EnemyTier.BOSS));
+  void shouldShowDefeatedEnemyDetails() {
+    assertEquals("Enemy description", BestiaryDisplay.descriptionFor(defeated));
+    assertEquals(
+        "HP  24     ATTACK  6     ARMOUR  2\nBEHAVIOUR  CYCLE ATTACK DEFEND",
+        BestiaryDisplay.statsFor(defeated));
   }
 
-  private BestiaryEntry createEntry(
-      String id, String name, EnemyTier tier, BestiaryUnlockState state) {
-    return new BestiaryEntry(
-        id, name, tier, "Description", "images/enemies/default.png", 10, 2, 1, state);
+  @Test
+  void shouldUseFallbackWhenDefeatedDescriptionIsMissing() {
+    BestiaryEntryView noDescription =
+        new BestiaryEntryView(
+            "enemy",
+            EnemyTier.NORMAL,
+            BestiaryUnlockState.DEFEATED,
+            "Enemy",
+            Optional.of("images/enemies/default.atlas"),
+            Optional.empty(),
+            OptionalInt.of(24),
+            OptionalInt.of(6),
+            OptionalInt.of(2),
+            Optional.of("cycle_attack_defend"));
+
+    assertEquals("No description available.", BestiaryDisplay.descriptionFor(noDescription));
+  }
+
+  private BestiaryEntryView createView(BestiaryUnlockState state) {
+    boolean encountered = state.isAtLeast(BestiaryUnlockState.ENCOUNTERED);
+    boolean defeatedState = state == BestiaryUnlockState.DEFEATED;
+    return new BestiaryEntryView(
+        "enemy",
+        EnemyTier.NORMAL,
+        state,
+        encountered ? "Enemy" : "???",
+        encountered ? Optional.of("images/enemies/default.atlas") : Optional.empty(),
+        defeatedState ? Optional.of("Enemy description") : Optional.empty(),
+        defeatedState ? OptionalInt.of(24) : OptionalInt.empty(),
+        defeatedState ? OptionalInt.of(6) : OptionalInt.empty(),
+        defeatedState ? OptionalInt.of(2) : OptionalInt.empty(),
+        defeatedState ? Optional.of("cycle_attack_defend") : Optional.empty());
   }
 }

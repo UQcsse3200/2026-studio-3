@@ -1,9 +1,9 @@
 package com.csse3200.game.components.bestiary;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
@@ -18,13 +18,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
-import com.csse3200.game.bestiary.BestiaryDataSource;
-import com.csse3200.game.bestiary.BestiaryEntry;
+import com.csse3200.game.bestiary.BestiaryEntryView;
+import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.bestiary.BestiaryUnlockState;
 import com.csse3200.game.entities.configs.EnemyTier;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.UIComponent;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,6 +32,7 @@ import java.util.Objects;
 public class BestiaryDisplay extends UIComponent {
   private static final float Z_INDEX = 3f;
   private static final float PANEL_WIDTH = 1160f;
+  private static final String FALLBACK_ATLAS = "images/enemies/default.atlas";
   private static final Color BACKDROP_COLOUR = new Color(0.018f, 0.012f, 0.02f, 0.92f);
   private static final Color PANEL_COLOUR = new Color(0.105f, 0.07f, 0.065f, 0.98f);
   private static final Color LIST_COLOUR = new Color(0.13f, 0.09f, 0.085f, 1f);
@@ -40,7 +41,7 @@ public class BestiaryDisplay extends UIComponent {
   private static final Color BODY_COLOUR = new Color(0.9f, 0.84f, 0.73f, 1f);
   private static final Color MUTED_COLOUR = new Color(0.65f, 0.58f, 0.52f, 1f);
 
-  private final List<BestiaryEntry> entries;
+  private final BestiaryService bestiary;
   private final Runnable returnAction;
   private EnemyTier activeTier = EnemyTier.NORMAL;
 
@@ -57,12 +58,11 @@ public class BestiaryDisplay extends UIComponent {
   /**
    * Creates a bestiary display.
    *
-   * @param dataSource source of presentation-ready enemy entries
+   * @param bestiary source of progress-aware enemy entries
    * @param returnAction action invoked by the Back button
    */
-  public BestiaryDisplay(BestiaryDataSource dataSource, Runnable returnAction) {
-    Objects.requireNonNull(dataSource, "dataSource cannot be null");
-    this.entries = List.copyOf(dataSource.getEntries());
+  public BestiaryDisplay(BestiaryService bestiary, Runnable returnAction) {
+    this.bestiary = Objects.requireNonNull(bestiary, "bestiary cannot be null");
     this.returnAction = Objects.requireNonNull(returnAction, "returnAction cannot be null");
   }
 
@@ -246,7 +246,7 @@ public class BestiaryDisplay extends UIComponent {
 
   private void rebuildEnemyList() {
     enemyListTable.clearChildren();
-    List<BestiaryEntry> filtered = filterEntries(entries, activeTier);
+    List<BestiaryEntryView> filtered = bestiary.getEntriesByTier(activeTier);
     if (filtered.isEmpty()) {
       Label empty =
           new Label("No enemies in this category yet.", createLabelStyle("small", MUTED_COLOUR));
@@ -256,7 +256,7 @@ public class BestiaryDisplay extends UIComponent {
       return;
     }
 
-    for (BestiaryEntry entry : filtered) {
+    for (BestiaryEntryView entry : filtered) {
       TextButton entryButton = new TextButton(visibleName(entry), createButtonStyle());
       entryButton.getLabel().setFontScale(1.1f);
       entryButton.addListener(
@@ -283,47 +283,79 @@ public class BestiaryDisplay extends UIComponent {
     lockedArtLabel.setVisible(true);
   }
 
-  private void showDetails(BestiaryEntry entry) {
-    if (!entry.isUnlocked()) {
+  private void showDetails(BestiaryEntryView entry) {
+    detailNameLabel.setText(visibleName(entry));
+    detailTierLabel.setText(entry.tier().name());
+    detailDescriptionLabel.setText(descriptionFor(entry));
+    detailStatsLabel.setText(statsFor(entry));
+
+    if (entry.unlockState() == BestiaryUnlockState.LOCKED) {
       detailStateLabel.setText("UNDISCOVERED");
-      detailNameLabel.setText("???");
-      detailTierLabel.setText(entry.getTier().name());
-      detailDescriptionLabel.setText("Encounter this enemy to reveal its record.");
-      detailStatsLabel.setText("HP  ???     ATTACK  ???     ARMOUR  ???");
       detailImage.setDrawable(null);
       detailImage.setVisible(false);
       lockedArtLabel.setVisible(true);
       return;
     }
 
-    detailStateLabel.setText(entry.getUnlockState().name());
-    detailNameLabel.setText(entry.getDisplayName());
-    detailTierLabel.setText(entry.getTier().name());
-    detailDescriptionLabel.setText(entry.getDescription());
-    detailStatsLabel.setText(
-        String.format(
-            "HP  %d     ATTACK  %d     ARMOUR  %d",
-            entry.getMaxHealth(), entry.getBaseAttack(), entry.getArmour()));
+    detailStateLabel.setText(entry.unlockState().name());
     lockedArtLabel.setVisible(false);
-    setEnemyImage(entry.getImagePath());
+    setEnemyImage(entry.sprite().orElse(""));
   }
 
-  private void setEnemyImage(String imagePath) {
-    ResourceService resources = ServiceLocator.getResourceService();
-    String resolvedPath = imagePath;
-    if (!resources.containsAsset(resolvedPath, Texture.class)) {
-      resolvedPath = "images/enemies/default.png";
+  static String visibleName(BestiaryEntryView entry) {
+    return entry.displayName();
+  }
+
+  static String descriptionFor(BestiaryEntryView entry) {
+    return switch (entry.unlockState()) {
+      case LOCKED -> "Encounter this enemy to reveal its record.";
+      case ENCOUNTERED -> "Defeat this enemy to reveal its complete record.";
+      case DEFEATED -> entry.description().orElse("No description available.");
+    };
+  }
+
+  static String statsFor(BestiaryEntryView entry) {
+    if (!entry.hasFullDetails()) {
+      return "HP  ???     ATTACK  ???     ARMOUR  ???";
     }
-    if (!resources.containsAsset(resolvedPath, Texture.class)) {
+
+    String behaviour = entry.behaviour().orElse("Unknown").replace('_', ' ').toUpperCase();
+    return String.format(
+        "HP  %d     ATTACK  %d     ARMOUR  %d\nBEHAVIOUR  %s",
+        entry.health().orElse(0),
+        entry.baseAttack().orElse(0),
+        entry.armour().orElse(0),
+        behaviour);
+  }
+
+  private void setEnemyImage(String atlasPath) {
+    ResourceService resources = ServiceLocator.getResourceService();
+    String resolvedPath = atlasPath;
+    if (resolvedPath.isBlank() || !resources.containsAsset(resolvedPath, TextureAtlas.class)) {
+      resolvedPath = FALLBACK_ATLAS;
+    }
+    if (!resources.containsAsset(resolvedPath, TextureAtlas.class)) {
       detailImage.setDrawable(null);
       detailImage.setVisible(false);
       lockedArtLabel.setVisible(true);
       return;
     }
 
-    Texture texture = resources.getAsset(resolvedPath, Texture.class);
-    detailImage.setDrawable(new TextureRegionDrawable(new TextureRegion(texture)));
+    TextureAtlas atlas = resources.getAsset(resolvedPath, TextureAtlas.class);
+    AtlasRegion region = atlas.findRegion("default");
+    if (region == null) {
+      region = atlas.findRegion("idle", 0);
+    }
+    if (region == null) {
+      detailImage.setDrawable(null);
+      detailImage.setVisible(false);
+      lockedArtLabel.setVisible(true);
+      return;
+    }
+
+    detailImage.setDrawable(new TextureRegionDrawable(region));
     detailImage.setVisible(true);
+    lockedArtLabel.setVisible(false);
   }
 
   private LabelStyle createLabelStyle(String baseStyle, Color colour) {
@@ -341,20 +373,6 @@ public class BestiaryDisplay extends UIComponent {
     style.overFontColor = Color.WHITE;
     style.downFontColor = Color.WHITE;
     return style;
-  }
-
-  static List<BestiaryEntry> filterEntries(List<BestiaryEntry> source, EnemyTier tier) {
-    List<BestiaryEntry> matches = new ArrayList<>();
-    for (BestiaryEntry entry : source) {
-      if (entry.getTier() == tier) {
-        matches.add(entry);
-      }
-    }
-    return matches;
-  }
-
-  static String visibleName(BestiaryEntry entry) {
-    return entry.isUnlocked() ? entry.getDisplayName() : "???";
   }
 
   @Override

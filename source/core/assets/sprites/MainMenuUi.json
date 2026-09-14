@@ -21,11 +21,18 @@
       "trigger": "shop"
     },
     {
-      "text": "bestiary",
+      "text": "load",
       "skinFile": "flat-earth/skin/flat-earth-ui.json",
       "x": 100,
       "y": 400,
-      "trigger": "bestiary"
+      "trigger": "load"
+    },
+    {
+      "text": "library",
+      "skinFile": "flat-earth/skin/flat-earth-ui.json",
+      "x": 100,
+      "y": 500,
+      "trigger": "library"
     }
   ]
 }

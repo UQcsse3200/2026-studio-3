@@ -22,10 +22,10 @@ public class MainMenuActions extends Component {
     entity.getEvents().addListener("start", this::onStart);
     entity.getEvents().addListener("map", this::onStart);
     entity.getEvents().addListener("load", this::onLoad);
+    entity.getEvents().addListener("library", this::onLibrary);
     entity.getEvents().addListener("exit", this::onExit);
     entity.getEvents().addListener("settings", this::onSettings);
     entity.getEvents().addListener("shop", this::onShop);
-    entity.getEvents().addListener("bestiary", this::onBestiary);
   }
 
   /** Discards any run in progress and opens a fresh map. */
@@ -35,9 +35,16 @@ public class MainMenuActions extends Component {
     game.setScreen(GdxGame.ScreenType.MAP);
   }
 
-  /** Intended for loading a saved game state. Load functionality is not actually implemented. */
+  /** Opens the Save/Load screen. */
   private void onLoad() {
-    logger.info("Load game");
+    logger.info("Opening save/load screen");
+    game.setScreen(GdxGame.ScreenType.SAVE_LOAD);
+  }
+
+  /** Opens the library screen. */
+  private void onLibrary() {
+    logger.info("Opening library screen");
+    game.setScreen(GdxGame.ScreenType.LIBRARY);
   }
 
   /** Exits the game. */
@@ -56,11 +63,5 @@ public class MainMenuActions extends Component {
   private void onShop() {
     logger.info("Opening shop encounter");
     game.setScreen(GdxGame.ScreenType.MAIN_GAME);
-  }
-
-  /** Opens the enemy bestiary. */
-  private void onBestiary() {
-    logger.info("Opening bestiary");
-    game.setScreen(GdxGame.ScreenType.BESTIARY);
   }
 }

@@ -47,10 +47,7 @@ public class MapGraph implements EncounterCallback {
     }
   }
 
-  /**
-   * Clears the connections of nodes on the graph.
-   *
-   */
+  /** Clears the connections of nodes on the graph. */
   private void clearConnections() {
     for (MapNode node : nodes.values()) {
       node.getConnections().clear();
@@ -120,15 +117,12 @@ public class MapGraph implements EncounterCallback {
   }
 
   /**
-   * Heuristic helper function for map generation. Finds a random node in range
-   * that hasn't already been visited.
+   * Heuristic helper function for map generation. Finds a random node in range that hasn't already
+   * been visited.
    *
    * @param parentNode Chosen node where heuristic will be calculated from
-   *
    * @param row Chosen row the node must be connected to (can be above or below)
-   *
-   * @param visited The set of nodes that have already been visited by the
-   * branches
+   * @param visited The set of nodes that have already been visited by the branches
    */
   private MapNode chooseNextNode(MapNode parentNode, List<MapNode> row, Set<MapNode> visited) {
 
@@ -146,14 +140,11 @@ public class MapGraph implements EncounterCallback {
   }
 
   /**
-   * Returns a list of nodes that are within the given x coordinate range of a
-   * provided node on a neighboring row.
-   *
+   * Returns a list of nodes that are within the given x coordinate range of a provided node on a
+   * neighboring row.
    *
    * @param nodePos The x-coordinate of the node that is being ranged from.
-   *
    * @param row The row nodes should be trying to reach.
-   *
    * @param range The desired range of the nodes to be returned.
    */
   private List<MapNode> getNodesInRange(int nodePos, List<MapNode> row, int range) {
@@ -230,6 +221,26 @@ public class MapGraph implements EncounterCallback {
    */
   public MapNode getCurrentNode() {
     return currentNode;
+  }
+
+  /**
+   * Restores the current node from trusted save/load code without applying normal movement rules.
+   *
+   * @param nodeId saved current node id, or null when no node is current
+   * @return true when the node was restored, or false if the id is unknown
+   */
+  public boolean restoreCurrentNode(Integer nodeId) {
+    if (nodeId == null) {
+      currentNode = null;
+      return true;
+    }
+
+    MapNode restoredCurrentNode = nodes.get(nodeId);
+    if (restoredCurrentNode == null) {
+      return false;
+    }
+    currentNode = restoredCurrentNode;
+    return true;
   }
 
   /**
