@@ -1,7 +1,10 @@
 package com.csse3200.game.components.enemy;
 
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -30,10 +33,10 @@ public class EnemyStatsDisplay extends UIComponent {
    * @see Table for positioning options
    */
   private void addActors() {
-    table = new Table();
-    table.right();
-    table.setFillParent(true);
-    table.padTop(45f).padLeft(5f);
+    table = new Table(skin);
+    // table.setPosition(ENEMY_SPAWN.x, ENEMY_SPAWN.y);
+    // table.setFillParent(true);
+    // table.padTop(45f).padLeft(5f);
 
     // Image size
     float imageSideLength = 20f;
@@ -51,12 +54,38 @@ public class EnemyStatsDisplay extends UIComponent {
 
     table.add(heartImage).size(imageSideLength).pad(5);
     table.add(healthLabel);
+    table.pack();
     stage.addActor(table);
+    updatePosition();
   }
 
   @Override
   public void draw(SpriteBatch batch) {
     // draw is handled by the stage
+  }
+
+  @Override
+  public void update() {
+    updatePosition();
+  }
+
+  /** Updates the position of the enemy's stats, so they are displayed directly below the enemy */
+  public void updatePosition() {
+    Vector2 position = entity.getPosition();
+    Vector2 scale = entity.getScale();
+
+    float enemyX = position.x + scale.x / 2f;
+    float enemyY = position.y - 0.5f;
+
+    Vector3 screenPosition = new Vector3(enemyX, enemyY, 0);
+
+    Camera camera = ServiceLocator.getCamera();
+    if (camera == null) {
+      return;
+    }
+    camera.project(screenPosition); // converts coordinates
+
+    table.setPosition(screenPosition.x - table.getWidth() / 2f, screenPosition.y);
   }
 
   /**

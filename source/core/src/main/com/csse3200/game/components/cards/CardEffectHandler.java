@@ -1,5 +1,6 @@
 package com.csse3200.game.components.cards;
 
+import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.components.CombatStatsComponent;
@@ -73,7 +74,7 @@ public class CardEffectHandler {
    * cards. Precise single-target selection can be layered on when encounters have several enemies.
    */
   public List<Entity> getLivingEnemyTargets(CardPlayRequest request, List<Entity> enemies) {
-    if ("player".equalsIgnoreCase(request.target().targetId())) {
+    if (request.target().type() == TargetType.SELF) {
       return List.of();
     }
     List<Entity> targets = new ArrayList<>();

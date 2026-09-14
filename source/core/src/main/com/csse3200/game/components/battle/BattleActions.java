@@ -106,11 +106,6 @@ public class BattleActions extends Component {
     }
   }
 
-  // test that card is played
-  //  private void logCardPlayed(String cardName, String targetID) {
-  //    System.out.println("Card played: " + cardName + " on target: " + targetID);
-  //  }
-
   /**
    * A card was played (self-target on click, or dropped on a target) — see Clickable/DragNDrop and
    * EnemyDropTargetComponent for how "playCard" ends up firing with (cardId, targetId). Translates

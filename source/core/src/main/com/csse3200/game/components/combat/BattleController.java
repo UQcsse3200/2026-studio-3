@@ -605,6 +605,19 @@ public class BattleController {
   }
 
   /**
+   * Skips the enemy turn if the enemy is found to be dead.
+   * @param enemy The enemy to check.
+   * @return True if the turn is going to be skipped. False if not.
+   */
+  private boolean skipEnemyTurnIfDead(Entity enemy) {
+      if (!isEnemyAlive(enemy)) {
+          handle(BattleEvent.ENEMY_TURN_SKIPPED);
+          return true;
+      }
+      return false;
+  }
+
+  /**
    * Passes the resolved effects to the other systems ({@code enemyEffects} to Team 1, {@code
    * playerEffects} to Team 7) and also applies them directly so the encounter resolves even before
    * those systems subscribe.
@@ -689,6 +702,14 @@ public class BattleController {
   }
 
   private void enterEnemyTurn() {
+    Entity enemy = getActiveEnemy();
+
+    if (skipEnemyTurnIfDead(enemy)) return;
+
+    /* ADD POISON DAMAGE HERE */
+
+    if (skipEnemyTurnIfDead(enemy)) return;
+
     // Begin the current enemy's action.
     BattleEvent event =
         switch (currentEnemyIntent.getType()) {
