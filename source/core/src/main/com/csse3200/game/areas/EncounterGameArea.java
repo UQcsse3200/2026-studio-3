@@ -1,11 +1,17 @@
 package com.csse3200.game.areas;
 
+import java.util.Objects;
+import java.util.Random;
+
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.areas.terrain.TerrainFactory.TerrainType;
 import com.csse3200.game.chance.ChanceEncounterFactory;
+import com.csse3200.game.chance.ChanceEncounterSelector;
+import com.csse3200.game.maps.EncounterCallback;
+import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.chance.ChanceEncounterDisplay;
 import com.csse3200.game.components.gamearea.GameAreaDisplay;
@@ -70,7 +76,11 @@ public class EncounterGameArea extends GameArea {
     "images/hex_grass_3.png",
     "images/iso_grass_1.png",
     "images/iso_grass_2.png",
-    "images/iso_grass_3.png"
+    "images/iso_grass_3.png",
+    "images/heart.png",
+    "images/energy.png",
+    "images/piety.png",
+    "images/money.png"
   };
   private static final String[] forestTextureAtlases = {
     "images/terrain_iso_grass.atlas", "images/ghost.atlas", "images/ghostKing.atlas"
@@ -80,6 +90,9 @@ public class EncounterGameArea extends GameArea {
   private static final String[] forestMusic = {BACKGROUND_MUSIC};
 
   private final TerrainFactory terrainFactory;
+  private final Integer nodeId;
+  private final RoomType roomType;
+  private final EncounterCallback completionCallback;
 
   private Entity player;
   private EncounterFlowController encounterFlow;
@@ -91,8 +104,26 @@ public class EncounterGameArea extends GameArea {
    * @requires terrainFactory != null
    */
   public EncounterGameArea(TerrainFactory terrainFactory) {
+    this(
+        terrainFactory,
+        CHANCE_NODE_ID,
+        RoomType.EVENT,
+        (nodeId, success) ->
+            logger.debug(
+                "Demo encounter completed for node {} with success={}", nodeId, success));
+  }
+
+  public EncounterGameArea(
+      TerrainFactory terrainFactory,
+      Integer nodeId,
+      RoomType roomType,
+      EncounterCallback completionCallback) {
     super();
-    this.terrainFactory = terrainFactory;
+    this.terrainFactory = Objects.requireNonNull(terrainFactory, "terrainFactory cannot be null");
+    this.nodeId = Objects.requireNonNull(nodeId, "nodeId cannot be null");
+    this.roomType = Objects.requireNonNull(roomType, "roomType cannot be null");
+    this.completionCallback =
+        Objects.requireNonNull(completionCallback, "completionCallback cannot be null");
   }
 
   /** Create the game area, including terrain, static entities (trees), dynamic entities (player) */
@@ -106,11 +137,25 @@ public class EncounterGameArea extends GameArea {
     spawnTrees();
     player = spawnPlayer();
     initialiseEncounterFlow();
-    displayChanceEncounter();
+    displayEncounter();
     spawnGhosts();
     spawnGhostKing();
 
     playMusic();
+  }
+
+  private void displayEncounter() {
+    switch (roomType) {
+      case EVENT:
+        displayChanceEncounter();
+        break;
+      case SHOP:
+        displayShop();
+        break;
+      default:
+        throw new IllegalStateException(
+            "EncounterGameArea cannot handle room type " + roomType);
+    }
   }
 
   public Entity getPlayer() {
@@ -125,7 +170,7 @@ public class EncounterGameArea extends GameArea {
 
   private void displayShop() {
     ShopService shopService = new ShopService(FileLoader.readClass(ShopConfig.class, SHOP_CONFIG));
-    ShopEncounter shopEncounter = encounterFlow.startShop(SHOP_NODE_ID, shopService);
+    ShopEncounter shopEncounter = encounterFlow.startShop(nodeId, shopService);
     Entity shopUi = new Entity();
     shopUi.addComponent(new ShopDisplay(shopEncounter));
     spawnEntity(shopUi);
@@ -133,10 +178,12 @@ public class EncounterGameArea extends GameArea {
 
   private void displayChanceEncounter() {
     Entity chanceUi = new Entity();
-    chanceUi.addComponent(
-        new ChanceEncounterDisplay(
-            encounterFlow.startChance(
-                CHANCE_NODE_ID, ChanceEncounterFactory.createInitialEncounters().get(0))));
+    ChanceEncounterSelector selector =
+      new ChanceEncounterSelector(ChanceEncounterFactory.createInitialEncounters(), new Random());
+
+  chanceUi.addComponent(
+      new ChanceEncounterDisplay(
+          encounterFlow.startChance(nodeId, selector.select())));
     spawnEntity(chanceUi);
   }
 
@@ -151,14 +198,10 @@ public class EncounterGameArea extends GameArea {
             new InventoryDeckAdapter(inventory));
 
     encounterFlow =
-        new EncounterFlowController(
-            playerState,
-            shopTransactions,
-            (nodeId, success) ->
-                logger.debug(
-                    "Encounter completed for node {} with success={}; awaiting map flow integration",
-                    nodeId,
-                    success));
+      new EncounterFlowController(
+          playerState,
+          shopTransactions,
+          completionCallback);
   }
 
   private void spawnTerrain() {
