@@ -101,7 +101,7 @@ class BattleLoopTest {
     controller.addBattleLogListener(log::add);
 
     controller.start();
-    controller.submitCardPlayRequest(new CardPlayRequest("strike", "enemy"));
+    controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy"));
 
     assertEquals(BattlePhase.VICTORY, controller.getCurrentPhase());
     assertEquals(Boolean.TRUE, outcome.get());
@@ -190,7 +190,7 @@ class BattleLoopTest {
     controller.addPhaseChangeListener((previous, next) -> phases.add(next));
 
     controller.start();
-    boolean accepted = controller.submitCardPlayRequest(new CardPlayRequest("defend", "player"));
+    boolean accepted = controller.submitCardPlayRequest(CardPlayRequest.self("defend"));
 
     assertTrue(accepted);
     assertEquals(5, player.getComponent(CombatStatsComponent.class).getArmor());
@@ -222,7 +222,7 @@ class BattleLoopTest {
     controller.addPhaseChangeListener((previous, next) -> phases.add(next));
 
     controller.start();
-    boolean accepted = controller.submitCardPlayRequest(new CardPlayRequest("bandage", "player"));
+    boolean accepted = controller.submitCardPlayRequest(CardPlayRequest.self("bandage"));
 
     assertTrue(accepted);
     assertEquals(14, player.getComponent(CombatStatsComponent.class).getHealth());
@@ -249,7 +249,7 @@ class BattleLoopTest {
     BattleController controller =
         new BattleController(player, List.of(enemy), effectHandler, cardPlayService);
 
-    boolean accepted = controller.submitCardPlayRequest(new CardPlayRequest("strike", "enemy"));
+    boolean accepted = controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy"));
 
     assertFalse(accepted);
     assertEquals(BattlePhase.SETUP, controller.getCurrentPhase());
@@ -284,7 +284,7 @@ class BattleLoopTest {
         new BattleController(player, List.of(enemy), effectHandler, cardPlayService);
 
     controller.start();
-    boolean accepted = controller.submitCardPlayRequest(new CardPlayRequest("strike", "enemy"));
+    boolean accepted = controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy"));
 
     assertFalse(accepted);
     assertEquals(3, player.getComponent(EnergyComponent.class).getCurrentEnergy());
@@ -322,7 +322,7 @@ class BattleLoopTest {
 
     controller.start();
     boolean accepted =
-        controller.submitCardPlayRequest(new CardPlayRequest("expose", "first_enemy"));
+        controller.submitCardPlayRequest(CardPlayRequest.allEnemies("expose"));
 
     assertTrue(accepted);
     assertTrue(firstEnemy.getComponent(CombatStatsComponent.class).hasStatusEffect("vulnerable"));

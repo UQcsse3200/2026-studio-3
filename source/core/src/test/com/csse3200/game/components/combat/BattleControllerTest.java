@@ -316,8 +316,8 @@ class BattleControllerTest {
     controller.addPhaseChangeListener(
         (previous, next) -> {
           if (next == BattlePhase.PLAYER_TURN && attempted.compareAndSet(false, true)) {
-            assertFalse(controller.submitCardPlayRequest(new CardPlayRequest("strike", "enemy-1")));
-            assertFalse(controller.submitCardPlayRequest(new CardPlayRequest("defend", "player")));
+            assertFalse(controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy-1")));
+            assertFalse(controller.submitCardPlayRequest(CardPlayRequest.self("defend")));
             assertNull(controller.getCardPlayRequest());
           }
         });
@@ -329,7 +329,7 @@ class BattleControllerTest {
     assertFalse(phaseHistory.contains(BattlePhase.CARD_RESOLVING));
 
     // Normal submissions still work once event processing finishes.
-    assertTrue(controller.submitCardPlayRequest(new CardPlayRequest("strike", "enemy-1")));
+    assertTrue(controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy-1")));
   }
 
   @Test
@@ -340,11 +340,11 @@ class BattleControllerTest {
     controller.addPhaseChangeListener(
         (previous, next) -> {
           if (next == BattlePhase.PLAYER_TURN && attempted.compareAndSet(false, true)) {
-            assertFalse(controller.submitCardPlayRequest(new CardPlayRequest("defend", "player")));
+            assertFalse(controller.submitCardPlayRequest(CardPlayRequest.self("defend")));
           }
         });
 
-    assertTrue(controller.submitCardPlayRequest(new CardPlayRequest("strike", "enemy-1")));
+    assertTrue(controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy-1")));
 
     assertTrue(attempted.get());
     assertNull(controller.getCardPlayRequest());
@@ -355,13 +355,13 @@ class BattleControllerTest {
   @Test
   void shouldKeepOriginalCardWhenAnotherIsSubmittedDuringResolution() {
     controller.start();
-    CardPlayRequest original = new CardPlayRequest("strike", "enemy-1");
+    CardPlayRequest original = CardPlayRequest.singleEnemy("strike", "enemy-1");
     AtomicBoolean attempted = new AtomicBoolean(false);
     controller.addPhaseChangeListener(
         (previous, next) -> {
           if (next == BattlePhase.CARD_RESOLVING) {
             attempted.set(true);
-            assertFalse(controller.submitCardPlayRequest(new CardPlayRequest("defend", "player")));
+            assertFalse(controller.submitCardPlayRequest(CardPlayRequest.self("defend")));
             assertEquals(original, controller.getCardPlayRequest());
             controller.endPlayerTurn();
           }
@@ -378,17 +378,19 @@ class BattleControllerTest {
   @Test
   void shouldClearPendingCardIfResolutionListenerThrows() {
     controller.start();
-    controller.addBattleLogListener(
-        message -> {
-          throw new IllegalStateException("Listener failed");
+    controller.addPhaseChangeListener(
+        (previous, next) -> {
+          if (next == BattlePhase.CARD_RESOLVING) {
+            throw new IllegalStateException("Listener failed");
+          }
         });
 
     assertThrows(
         IllegalStateException.class,
-        () -> controller.submitCardPlayRequest(new CardPlayRequest("strike", "enemy-1")));
+        () -> controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy-1")));
 
     assertNull(controller.getCardPlayRequest());
-    assertFalse(controller.submitCardPlayRequest(new CardPlayRequest("defend", "player")));
+    assertFalse(controller.submitCardPlayRequest(CardPlayRequest.self("defend")));
   }
 
   private void advanceToPlayerTurn() {

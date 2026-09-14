@@ -114,7 +114,7 @@ class BattleActionsTest {
 
     battleUI.getEvents().trigger("playCard", "strike", "bone_crawler");
 
-    verify(mockController).submitCardPlayRequest(new CardPlayRequest("strike", "bone_crawler"));
+    verify(mockController).submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "bone_crawler"));
   }
 
   @Test
@@ -127,7 +127,7 @@ class BattleActionsTest {
 
     battleUI.getEvents().trigger("playCard", "defend", "player");
 
-    verify(mockController).submitCardPlayRequest(new CardPlayRequest("defend", "player"));
+    verify(mockController).submitCardPlayRequest(CardPlayRequest.self("defend"));
   }
 
   @Test
@@ -140,7 +140,7 @@ class BattleActionsTest {
 
     battleUI.getEvents().trigger("playCard", "bandage", "player");
 
-    verify(mockController).submitCardPlayRequest(new CardPlayRequest("bandage", "player"));
+    verify(mockController).submitCardPlayRequest(CardPlayRequest.self("bandage"));
   }
 
   @Test

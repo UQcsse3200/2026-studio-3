@@ -3,7 +3,6 @@ package com.csse3200.game.components.battle;
 import com.badlogic.gdx.Gdx;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardLibrary;
-import com.csse3200.game.cards.CardPlayRequest;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.cards.play.CardPlayRequest;
@@ -132,7 +131,13 @@ public class BattleActions extends Component {
     }
 
     CardConfig cardConfig = optionalCard.get();
-    CardPlayRequest request = new CardPlayRequest(cardID, targetID);
+    CardPlayTarget target =
+        switch (cardConfig.target) {
+          case SELF -> CardPlayTarget.self();
+          case SINGLE_ENEMY -> CardPlayTarget.singleEnemy(targetID);
+          case ALL_ENEMIES -> CardPlayTarget.allEnemies();
+        };
+    CardPlayRequest request = new CardPlayRequest(cardID, target);
     if (controller.submitCardPlayRequest(request)) {
       entity.getEvents().trigger("cardPlayed", cardConfig.name, targetID);
     }
