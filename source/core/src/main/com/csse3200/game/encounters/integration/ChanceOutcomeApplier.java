@@ -117,22 +117,6 @@ public final class ChanceOutcomeApplier {
                   + " required.");
     }
 
-    if (cardRewardId != null) {
-      try {
-        deck.commitCardAddition(cardRewardId);
-      } catch (RuntimeException exception) {
-        boolean rollbackSucceeded = rollbackBeforeHealth(cardRewardId, currencyBefore);
-        return failure(
-            rollbackSucceeded
-                ? ChanceResolution.Status.CARD_ADD_FAILED
-                : ChanceResolution.Status.ROLLBACK_FAILED,
-            outcome,
-            rollbackSucceeded
-                ? "The reward card could not be committed; no encounter changes were kept."
-                : "The reward card commit and rollback both failed; manual recovery is required.");
-      }
-    }
-
     try {
       if (appliedHealthDelta != 0) {
         player.applyDirectHealthChange(appliedHealthDelta);
@@ -142,22 +126,58 @@ public final class ChanceOutcomeApplier {
       }
     } catch (RuntimeException exception) {
       int healthAfter = player.getHealth();
-      int currencyAfter = player.getCurrency();
-      boolean stateUnchanged = healthAfter == healthBefore && currencyAfter == currencyBefore;
+      if (healthAfter == healthBefore) {
+        boolean rollbackSucceeded = rollbackBeforeHealth(cardRewardId, currencyBefore);
+        return failure(
+            rollbackSucceeded
+                ? ChanceResolution.Status.PLAYER_UPDATE_FAILED
+                : ChanceResolution.Status.ROLLBACK_FAILED,
+            outcome,
+            rollbackSucceeded
+                ? "The direct health update was not accepted; earlier outcome changes were rolled "
+                    + "back."
+                : "The direct health update was not accepted and earlier changes could not be "
+                    + "fully rolled back; manual recovery is required.");
+      }
+
+      commitCardAfterIrreversibleHealthFailure(cardRewardId);
       return ChanceResolution.failure(
-          stateUnchanged
-              ? ChanceResolution.Status.PLAYER_UPDATE_FAILED
-              : ChanceResolution.Status.ROLLBACK_FAILED,
+          ChanceResolution.Status.ROLLBACK_FAILED,
           outcome,
           healthBefore,
           healthAfter,
           currencyBefore,
-          currencyAfter,
-          stateUnchanged
-              ? "The direct health update was not accepted; player state was unchanged."
-              : "The direct health update failed after mutation began; automatic rollback was "
-                  + "skipped because the health change may have emitted an irreversible death "
-                  + "event.");
+          player.getCurrency(),
+          "The direct health update failed after health changed; earlier outcome changes were "
+              + "kept because rollback may be unsafe after health events began.");
+    }
+
+    if (cardRewardId != null) {
+      try {
+        deck.commitCardAddition(cardRewardId);
+      } catch (RuntimeException exception) {
+        if (player.getHealth() == healthBefore) {
+          boolean rollbackSucceeded = rollbackBeforeHealth(cardRewardId, currencyBefore);
+          return failure(
+              rollbackSucceeded
+                  ? ChanceResolution.Status.CARD_ADD_FAILED
+                  : ChanceResolution.Status.ROLLBACK_FAILED,
+              outcome,
+              rollbackSucceeded
+                  ? "The reward card could not be committed; no encounter changes were kept."
+                  : "The reward card commit and rollback both failed; manual recovery is"
+                      + " required.");
+        }
+        return ChanceResolution.failure(
+            ChanceResolution.Status.ROLLBACK_FAILED,
+            outcome,
+            healthBefore,
+            player.getHealth(),
+            currencyBefore,
+            player.getCurrency(),
+            "The reward card could not be committed after health changed; automatic rollback was "
+                + "skipped because health events may be irreversible.");
+      }
     }
 
     return ChanceResolution.applied(
@@ -226,6 +246,17 @@ public final class ChanceOutcomeApplier {
     }
     boolean currencyRestored = rollbackCurrency(currency);
     return cardRestored && currencyRestored;
+  }
+
+  private void commitCardAfterIrreversibleHealthFailure(String cardRewardId) {
+    if (cardRewardId == null) {
+      return;
+    }
+    try {
+      deck.commitCardAddition(cardRewardId);
+    } catch (RuntimeException ignored) {
+      // The outcome is already a partial failure and health-event rollback is unsafe.
+    }
   }
 
   private boolean rollbackCurrency(int currency) {

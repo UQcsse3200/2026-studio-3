@@ -326,6 +326,10 @@ public class ChanceEncounterDisplay extends UIComponent {
     } else if (outcome.getCurrencyDelta() < 0) {
       changes.add(String.format("You lose %d gold.", -outcome.getCurrencyDelta()));
     }
+    if (outcome.getCardRewardId() != null) {
+      changes.add(
+          String.format("You receive the %s card.", formatTitle(outcome.getCardRewardId())));
+    }
     return String.join("\n", changes);
   }
 

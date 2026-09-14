@@ -9,7 +9,10 @@ public final class ChanceEncounterFactory {
   /**
    * Creates the initial Chance Encounters in deterministic order.
    *
-   * @return read-only initial encounter definitions
+   * <p>This catalog-less entry point validates reward-ID syntax but does not verify that a reward
+   * card is registered.
+   *
+   * @return read-only structurally validated initial encounter definitions
    */
   public static List<ChanceEncounter> createInitialEncounters() {
     return ChanceEncounterConfigLoader.loadEncounters();

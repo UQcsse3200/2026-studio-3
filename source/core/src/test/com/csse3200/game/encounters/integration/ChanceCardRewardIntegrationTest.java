@@ -24,11 +24,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(GameExtension.class)
 class ChanceCardRewardIntegrationTest {
   @Test
-  void shouldRollbackExactRewardAdditionWithoutRemovingExistingDuplicate() {
+  void shouldRollbackExactRewardAfterRejectedHealthWithoutRemovingExistingDuplicate() {
     CardService cardService = TestCardService.withCards("bandage", "strike");
     PlayerDeck playerDeck = new PlayerDeck(cardService, List.of("bandage", "strike", "bandage"));
     MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
-    player.failNextCurrencyUpdate();
+    player.rejectNextHealthUpdate();
     ChanceOutcomeApplier applier =
         new ChanceOutcomeApplier(
             player, new CardServiceCatalogAdapter(cardService), new PlayerDeckAdapter(playerDeck));
@@ -39,6 +39,33 @@ class ChanceCardRewardIntegrationTest {
     assertEquals(List.of("bandage", "strike", "bandage"), playerDeck.getCardIds());
     assertEquals(100, player.getHealth());
     assertEquals(40, player.getCurrency());
+  }
+
+  @Test
+  void shouldKeepEarlierChangesWhenProductionHealthEventFailsAfterMutation() {
+    CardService cardService = TestCardService.withCards("bandage");
+    PlayerDeck playerDeck = new PlayerDeck(cardService);
+    CombatStatsComponent combatStats = new CombatStatsComponent(70, 10, 100);
+    InventoryComponent inventory = new InventoryComponent(40);
+    Entity playerEntity = new Entity().addComponent(combatStats).addComponent(inventory);
+    playerEntity
+        .getEvents()
+        .addListener(
+            "updateHealth",
+            (Integer currentHealth, Integer maxHealth) -> {
+              throw new IllegalStateException("Simulated health listener failure");
+            });
+    ComponentPlayerStateAdapter player = new ComponentPlayerStateAdapter(combatStats, inventory);
+    ChanceOutcomeApplier applier =
+        new ChanceOutcomeApplier(
+            player, new CardServiceCatalogAdapter(cardService), new PlayerDeckAdapter(playerDeck));
+
+    ChanceResolution result = applier.apply(new ChanceOutcome(-10, 15, "bandage"));
+
+    assertEquals(ChanceResolution.Status.ROLLBACK_FAILED, result.getStatus());
+    assertEquals(60, player.getHealth());
+    assertEquals(55, player.getCurrency());
+    assertEquals(List.of("bandage"), playerDeck.getCardIds());
   }
 
   @Test

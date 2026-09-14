@@ -90,15 +90,15 @@ class ChanceOutcomeApplierTest {
   }
 
   @Test
-  void shouldNotRollbackAfterDirectHealthUpdateIsRejected() {
+  void shouldRollbackCurrencyAfterDirectHealthUpdateIsRejected() {
     MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
     player.rejectNextHealthUpdate();
 
     ChanceResolution result = new ChanceOutcomeApplier(player).apply(new ChanceOutcome(-10, 5));
 
-    assertEquals(ChanceResolution.Status.ROLLBACK_FAILED, result.getStatus());
+    assertEquals(ChanceResolution.Status.PLAYER_UPDATE_FAILED, result.getStatus());
     assertEquals(100, player.getHealth());
-    assertEquals(45, player.getCurrency());
+    assertEquals(40, player.getCurrency());
   }
 
   @Test
@@ -220,6 +220,36 @@ class ChanceOutcomeApplierTest {
     assertEquals(List.of("bandage"), deck.getCardIds());
     assertEquals(60, player.getHealth());
     assertEquals(55, player.getCurrency());
+  }
+
+  @Test
+  void shouldRollbackCardWhenHealthIsRejectedBeforeMutation() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(70, 100, 40);
+    player.rejectNextHealthUpdate();
+    MockDeckGateway deck = new MockDeckGateway();
+
+    ChanceResolution result =
+        createCardApplier(player, deck).apply(new ChanceOutcome(20, 0, "bandage"));
+
+    assertEquals(ChanceResolution.Status.PLAYER_UPDATE_FAILED, result.getStatus());
+    assertTrue(deck.getCardIds().isEmpty());
+    assertEquals(70, player.getHealth());
+    assertEquals(40, player.getCurrency());
+  }
+
+  @Test
+  void shouldRollbackCardAndCurrencyWhenHealthIsRejectedBeforeMutation() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(70, 100, 40);
+    player.rejectNextHealthUpdate();
+    MockDeckGateway deck = new MockDeckGateway();
+
+    ChanceResolution result =
+        createCardApplier(player, deck).apply(new ChanceOutcome(20, 15, "bandage"));
+
+    assertEquals(ChanceResolution.Status.PLAYER_UPDATE_FAILED, result.getStatus());
+    assertTrue(deck.getCardIds().isEmpty());
+    assertEquals(70, player.getHealth());
+    assertEquals(40, player.getCurrency());
   }
 
   @Test

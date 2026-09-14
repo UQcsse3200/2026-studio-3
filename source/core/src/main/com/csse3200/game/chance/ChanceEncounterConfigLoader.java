@@ -15,7 +15,12 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Loads and validates Chance Encounter definitions from a JSON configuration file. */
+/**
+ * Loads and validates Chance Encounter definitions from a JSON configuration file.
+ *
+ * <p>Catalog-less entry points validate JSON structure and reward-ID syntax. Use a catalog-aware
+ * entry point when reward IDs must also be checked against registered card definitions.
+ */
 public final class ChanceEncounterConfigLoader {
   public static final String DEFAULT_ENCOUNTER_FILE = "configs/chanceEncounters.json";
 
@@ -28,7 +33,10 @@ public final class ChanceEncounterConfigLoader {
   /**
    * Loads Chance Encounters from the default configuration file.
    *
-   * @return immutable encounter definitions in configuration order
+   * <p>This catalog-less entry point validates reward-ID syntax but does not verify that a reward
+   * card is registered.
+   *
+   * @return immutable structurally validated encounter definitions in configuration order
    * @throws ChanceEncounterLoadingException if the configuration cannot be loaded
    */
   public static List<ChanceEncounter> loadEncounters() {
@@ -40,7 +48,8 @@ public final class ChanceEncounterConfigLoader {
    * catalog boundary.
    *
    * @param cardCatalog authoritative card lookup boundary
-   * @return immutable validated encounter definitions in configuration order
+   * @return immutable structurally and semantically validated encounter definitions in
+   *     configuration order
    */
   public static List<ChanceEncounter> loadEncountersWithCatalog(CardCatalogGateway cardCatalog) {
     if (cardCatalog == null) {
@@ -52,8 +61,11 @@ public final class ChanceEncounterConfigLoader {
   /**
    * Loads Chance Encounters from a JSON configuration file.
    *
+   * <p>This catalog-less entry point validates reward-ID syntax but does not verify that a reward
+   * card is registered.
+   *
    * @param filename internal asset path of the configuration file
-   * @return immutable validated encounter definitions in configuration order
+   * @return immutable structurally validated encounter definitions in configuration order
    * @throws ChanceEncounterLoadingException if the path, JSON, or encounter data is invalid
    */
   public static List<ChanceEncounter> loadEncounters(String filename) {
@@ -64,8 +76,9 @@ public final class ChanceEncounterConfigLoader {
    * Loads a Chance configuration and validates card rewards against the supplied catalog.
    *
    * @param filename internal asset path of the configuration file
-   * @param cardCatalog authoritative card lookup boundary
-   * @return immutable validated encounter definitions in configuration order
+   * @param cardCatalog authoritative card lookup boundary, or null for structural validation only
+   * @return immutable structurally validated definitions, including semantic card validation when a
+   *     catalog is supplied
    */
   public static List<ChanceEncounter> loadEncounters(
       String filename, CardCatalogGateway cardCatalog) {
