@@ -59,16 +59,16 @@ class EnemyAIFactoryTest {
 
   @Test
   void shouldCreateVoidKnightRetaliationAI() {
-    EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.VOID_KNIGHT_RETALIATION);
+    EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.SHIELD_BREAK_RETALIATION);
 
-    assertInstanceOf(VoidKnightRetaliationAI.class, ai);
+    assertInstanceOf(ShieldBreakRetaliationAI.class, ai);
   }
 
   @Test
   void shouldCreateSeparateVoidKnightAIInstances() {
-    EnemyAI first = EnemyAIFactory.create(EnemyAIFactory.VOID_KNIGHT_RETALIATION);
+    EnemyAI first = EnemyAIFactory.create(EnemyAIFactory.SHIELD_BREAK_RETALIATION);
 
-    EnemyAI second = EnemyAIFactory.create(EnemyAIFactory.VOID_KNIGHT_RETALIATION);
+    EnemyAI second = EnemyAIFactory.create(EnemyAIFactory.SHIELD_BREAK_RETALIATION);
 
     assertNotSame(first, second);
   }

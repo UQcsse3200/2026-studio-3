@@ -9,7 +9,7 @@ public final class EnemyAIFactory {
   public static final String CYCLE_ATTACK_DEFEND = "cycle_attack_defend";
   public static final String CYCLE_FOUR_STANCE = "cycle_four_stance";
   public static final String ENRAGE_LOW_HEALTH = "enrage_low_health";
-  public static final String VOID_KNIGHT_RETALIATION = "void_knight_retaliation";
+  public static final String SHIELD_BREAK_RETALIATION = "shield_break_retaliation";
   public static final String BOSS = "boss";
   public static final String DEFENSIVE_STANCE = "defensive_stance";
   public static final String ARMOR_SCALING = "armor_scaling";
@@ -37,7 +37,7 @@ public final class EnemyAIFactory {
       case CYCLE_ATTACK_DEFEND -> new CycleAttackDefendAI();
       case CYCLE_FOUR_STANCE -> new CycleFourStanceAI();
       case ENRAGE_LOW_HEALTH -> new EnrageLowHealthAI();
-      case VOID_KNIGHT_RETALIATION -> new VoidKnightRetaliationAI();
+      case SHIELD_BREAK_RETALIATION -> new ShieldBreakRetaliationAI();
       case BOSS -> new BossAI();
       case DEFENSIVE_STANCE -> new DefensiveStanceAI();
       case ARMOR_SCALING -> new ArmorScalingAI();
