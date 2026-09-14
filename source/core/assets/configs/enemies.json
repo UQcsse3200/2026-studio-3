@@ -14,7 +14,7 @@
       "name": "Bone Crawler",
       "health": 30,
       "baseAttack": 5,
-      "armour": 2,
+      "armour": 0,
       "tier": "NORMAL",
       "behaviour": "cycle_attack_defend"
     },
