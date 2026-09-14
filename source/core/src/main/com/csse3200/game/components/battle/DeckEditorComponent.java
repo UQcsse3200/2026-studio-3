@@ -53,16 +53,24 @@ public class DeckEditorComponent extends UIComponent {
   private static final Logger logger = LoggerFactory.getLogger(DeckEditorComponent.class);
 
   private static final String SELECT_TRIGGER = "toggleDeckCard";
+  private static final String PREV_PAGE_TRIGGER = "deckPagePrev";
+  private static final String NEXT_PAGE_TRIGGER = "deckPageNext";
   private static final int REQUIRED_HAND_SIZE = 5;
 
   private static final float CARD_WIDTH = 90f;
   private static final float CARD_HEIGHT = 130f;
   private static final float GRID_GAP = 14f;
   private static final int COLUMNS = 5;
+  private static final int ROWS_PER_PAGE = 2;
+  private static final int PAGE_SIZE = COLUMNS * ROWS_PER_PAGE;
+
+  private static final float PAGER_BUTTON_SIZE = 40f;
+  private static final float PAGER_GAP = 10f;
 
   // Fixed insets from the window's own top-left corner to the grid's top-left corner, chosen to
-  // clear the title bar/close button without needing to introspect Window's internal padding.
-  private static final float GRID_LEFT_INSET = 30f;
+  // clear the title bar/close button and leave room for the "<" pager button just left of the
+  // grid, without needing to introspect Window's internal padding.
+  private static final float GRID_LEFT_INSET = PAGER_BUTTON_SIZE + PAGER_GAP + 40f;
   private static final float GRID_TOP_INSET = 70f;
 
   private static final Color DISCARDED_TINT = new Color(0.35f, 0.35f, 0.35f, 1f);
@@ -82,6 +90,7 @@ public class DeckEditorComponent extends UIComponent {
   private final Map<String, CardInstance> poolByKey = new HashMap<>();
   private Set<CardInstance> discardedInstances = new HashSet<>();
   private List<CardInstance> pool = new ArrayList<>();
+  private int currentPage;
 
   private Label summaryLabel;
   private Label errorLabel;
@@ -115,6 +124,8 @@ public class DeckEditorComponent extends UIComponent {
   public void create() {
     super.create();
     entity.getEvents().addListener(SELECT_TRIGGER, this::toggleSelection);
+    entity.getEvents().addListener(PREV_PAGE_TRIGGER, this::previousPage);
+    entity.getEvents().addListener(NEXT_PAGE_TRIGGER, this::nextPage);
     popup.setOnShow(this::onOpened);
     popup.setOnHide(this::onClosed);
     popup.setOnWindowClicked(poolFactory::bringToFront);
@@ -166,11 +177,29 @@ public class DeckEditorComponent extends UIComponent {
     discardedInstances = new HashSet<>(cardPlayService.discardedInstances());
     selected.clear();
     selected.addAll(cardPlayService.handInstances());
+    currentPage = 0;
+  }
+
+  private int totalPages() {
+    return pool.isEmpty() ? 1 : ((pool.size() - 1) / PAGE_SIZE) + 1;
+  }
+
+  private void previousPage() {
+    if (currentPage > 0) {
+      currentPage--;
+      buildGridWidgets();
+    }
+  }
+
+  private void nextPage() {
+    if (currentPage < totalPages() - 1) {
+      currentPage++;
+      buildGridWidgets();
+    }
   }
 
   private void updateGridSpacer() {
-    int rows = pool.isEmpty() ? 0 : ((pool.size() - 1) / COLUMNS) + 1;
-    float height = rows * CARD_HEIGHT + Math.max(0, rows - 1) * GRID_GAP;
+    float height = ROWS_PER_PAGE * CARD_HEIGHT + Math.max(0, ROWS_PER_PAGE - 1) * GRID_GAP;
     gridSpacerCell.height(height);
   }
 
@@ -183,18 +212,33 @@ public class DeckEditorComponent extends UIComponent {
 
   private void onClosed() {
     poolFactory.rebuildByTrigger(SELECT_TRIGGER, List.of());
+    poolFactory.rebuildByTrigger(PREV_PAGE_TRIGGER, List.of());
+    poolFactory.rebuildByTrigger(NEXT_PAGE_TRIGGER, List.of());
   }
 
+  /**
+   * Rebuilds the card grid for {@link #currentPage} plus the "<"/">" pager buttons flanking it,
+   * anchored to the popup window's actual on-screen bounds. Called on open and on every page
+   * change — pages are cheap enough to rebuild wholesale rather than track incrementally.
+   */
   private void buildGridWidgets() {
+    int totalPages = totalPages();
+    currentPage = Math.max(0, Math.min(currentPage, totalPages - 1));
+
     float windowX = popup.getWindowX();
     float windowTopY = popup.getWindowY() + popup.getWindowHeight();
     float stageHeight = stage.getViewport().getWorldHeight();
 
     float gridOriginX = windowX + GRID_LEFT_INSET;
     float gridTopY = windowTopY - GRID_TOP_INSET;
+    float gridWidth = COLUMNS * CARD_WIDTH + (COLUMNS - 1) * GRID_GAP;
+    float gridHeight = ROWS_PER_PAGE * CARD_HEIGHT + (ROWS_PER_PAGE - 1) * GRID_GAP;
 
-    List<ClickableRecord> records = new ArrayList<>();
-    for (int i = 0; i < pool.size(); i++) {
+    int start = currentPage * PAGE_SIZE;
+    int end = Math.min(pool.size(), start + PAGE_SIZE);
+
+    List<ClickableRecord> cardRecords = new ArrayList<>();
+    for (int i = start; i < end; i++) {
       CardInstance instance = pool.get(i);
       Optional<CardConfig> maybeCard = library.getCard(instance.cardId());
       if (maybeCard.isEmpty()) {
@@ -203,8 +247,9 @@ public class DeckEditorComponent extends UIComponent {
       }
       CardConfig card = maybeCard.get();
 
-      int row = i / COLUMNS;
-      int col = i % COLUMNS;
+      int indexOnPage = i - start;
+      int row = indexOnPage / COLUMNS;
+      int col = indexOnPage % COLUMNS;
       float screenX = gridOriginX + col * (CARD_WIDTH + GRID_GAP);
       float screenTopY = gridTopY - row * (CARD_HEIGHT + GRID_GAP);
       float screenBottomY = screenTopY - CARD_HEIGHT;
@@ -223,10 +268,33 @@ public class DeckEditorComponent extends UIComponent {
               .skin(cardSkin)
               .args(instance.instanceId().toString())
               .build();
-      records.add(record);
+      cardRecords.add(record);
     }
 
-    poolFactory.rebuildByTrigger(SELECT_TRIGGER, records);
+    // Square "<"/">" buttons, vertically centred on the grid, just outside its left/right edges.
+    float pagerBottomY = (gridTopY - gridHeight / 2f) - PAGER_BUTTON_SIZE / 2f;
+    float pagerRecordY = stageHeight - pagerBottomY;
+    float prevX = gridOriginX - PAGER_BUTTON_SIZE - PAGER_GAP;
+    float nextX = gridOriginX + gridWidth + PAGER_GAP;
+
+    ClickableRecord prevRecord =
+        ClickableRecord.builder(PREV_PAGE_TRIGGER)
+            .text("<")
+            .position(prevX, pagerRecordY)
+            .size(PAGER_BUTTON_SIZE, PAGER_BUTTON_SIZE)
+            .disabled(currentPage <= 0)
+            .build();
+    ClickableRecord nextRecord =
+        ClickableRecord.builder(NEXT_PAGE_TRIGGER)
+            .text(">")
+            .position(nextX, pagerRecordY)
+            .size(PAGER_BUTTON_SIZE, PAGER_BUTTON_SIZE)
+            .disabled(currentPage >= totalPages - 1)
+            .build();
+
+    poolFactory.rebuildByTrigger(SELECT_TRIGGER, cardRecords);
+    poolFactory.rebuildByTrigger(PREV_PAGE_TRIGGER, List.of(prevRecord));
+    poolFactory.rebuildByTrigger(NEXT_PAGE_TRIGGER, List.of(nextRecord));
     applySelectionHighlights();
   }
 
