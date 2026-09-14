@@ -198,11 +198,45 @@ public class BattleController {
     handle(BattleEvent.SETUP_COMPLETE);
   }
 
+  /**
+   * Reports whether the player currently has the given status effect.
+   *
+   * <p>Read-only: exposes a query about the player rather than the player entity itself, so callers
+   * cannot mutate player state through this controller.
+   *
+   * @param effectType identifier of the status effect, as stored by CombatStatsComponent
+   * @return true if the player carries an active effect with this identifier
+   */
+  public boolean playerHasStatusEffect(String effectType) {
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    return stats != null && stats.hasStatusEffect(effectType);
+  }
+
   /** Player decides to end their turn */
   public void endPlayerTurn() {
     if (canHandle(BattleEvent.PLAYER_END_REQUESTED)) {
       handle(BattleEvent.PLAYER_END_REQUESTED);
     }
+  }
+
+  /**
+   * Resets the current battle to a completely new battle that has no previous player and enemy
+   * turns.
+   */
+  public void resetBattle() {
+    if (this.processingEvents) {
+      throw new IllegalStateException("There is an event in progress.");
+    }
+
+    // Saving the previous phase to inform the event listeners
+    BattlePhase previousPhase = this.currentPhase;
+
+    // Normal housekeeping for resetting the state machine.
+    this.eventQueue.clear();
+    this.resetEnemyCursor();
+    this.setEnemyIntent(null);
+    this.setCurrentPhase(BattlePhase.SETUP);
+    this.notifyPhaseChange(previousPhase, BattlePhase.SETUP);
   }
 
   /**
