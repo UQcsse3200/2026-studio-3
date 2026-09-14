@@ -31,12 +31,13 @@ public class MapConnectionGroup extends Group {
 
     mapConnection =
         new Image(
-            ServiceLocator.getResourceService().getAsset("images/nodeLine.png", Texture.class));
+            ServiceLocator.getResourceService().getAsset("images/map/nodeLine.png", Texture.class));
 
-    mapConnection.setSize(4, length);
+    float lineThickness = length * 0.0625f;
+    mapConnection.setSize(lineThickness, length);
     mapConnection.setOrigin(4, 0);
     mapConnection.setRotation(angle);
-    setPosition(start.x - 2, start.y);
+    setPosition(start.x - lineThickness / 2f, start.y);
     mapConnection.setPosition(0, 0);
     mapConnection.getColor().a = 0.5f;
 

@@ -25,7 +25,8 @@ import org.junit.jupiter.api.io.TempDir;
 /**
  * Proves the full save pipeline works against real game objects, not just isolated units: a live
  * player/deck/map is captured through {@link GameStateSnapshotProvider}, written to an actual JSON
- * file via {@link SaveGameService}, then restored into a fresh run as though the game relaunched.
+ * file via {@link SaveGameService}, then read back and verified to match — including a full restore
+ * into fresh objects, as though the game relaunched.
  */
 @ExtendWith(GameExtension.class)
 class GameStateSnapshotEndToEndTest {
