@@ -46,7 +46,6 @@ import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * The battle screen: the forest arena plus the card-hand UI, driven by {@link BattleController}.
  * Entered from a combat/boss map node (or the debug shortcut).
@@ -175,10 +174,10 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(uiFactory)
             .addComponent(displays)
             .addComponent(new BattleActions(controller, game, library))
-                .addComponent(cardPlayAdapter)
-                .addComponent(
-                        new DamageOnCardPlayComponent(
-                                gameArea.getPlayer().getComponent(CombatStatsComponent.class)));
+            .addComponent(cardPlayAdapter)
+            .addComponent(
+                new DamageOnCardPlayComponent(
+                    gameArea.getPlayer().getComponent(CombatStatsComponent.class)));
 
     // Keep the on-screen hand in sync with the deck: after a card is played (and a replacement
     // drawn) rebuild the hand widgets from the live deck, so the played card's button is gone and

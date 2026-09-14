@@ -5,7 +5,9 @@ import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.components.Component;
+import com.csse3200.game.components.battle.BattleActions;
 import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.enemy.IntentEffectType;
 
 /**
  * Connects Team 3's existing {@code playCard(cardId, targetId)} event to Team 5's unified API.
@@ -78,7 +80,12 @@ public final class Team3CardPlayAdapter extends Component {
    * @return true if the play should be rejected before reaching the controller
    */
   private boolean playerIsBlockedFromPlayingCards() {
-    // Always false until #140 implements the silence check.
-    return false;
+    if (!battleController.playerHasStatusEffect(IntentEffectType.SILENCE.name())) {
+      return false;
+    }
+    entity
+        .getEvents()
+        .trigger(BattleActions.BATTLE_LOG_EVENT, "You are silenced and cannot play cards.");
+    return true;
   }
 }

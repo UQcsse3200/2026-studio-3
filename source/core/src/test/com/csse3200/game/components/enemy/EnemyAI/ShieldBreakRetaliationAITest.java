@@ -7,83 +7,83 @@ import com.csse3200.game.components.enemy.IntentType;
 import org.junit.jupiter.api.Test;
 
 class ShieldBreakRetaliationAITest {
-    private static final int BASE_ATTACK = 10;
-    private static final int RESTORED_ARMOR = 5;
+  private static final int BASE_ATTACK = 10;
+  private static final int RESTORED_ARMOR = 5;
 
-    @Test
-    void shouldAttackNormallyWhileArmorRemains() {
-        ShieldBreakRetaliationAI ai = new ShieldBreakRetaliationAI();
+  @Test
+  void shouldAttackNormallyWhileArmorRemains() {
+    ShieldBreakRetaliationAI ai = new ShieldBreakRetaliationAI();
 
-        EnemyIntent intent = ai.decide(createContext(72, 72, 5, 1));
+    EnemyIntent intent = ai.decide(createContext(72, 72, 5, 1));
 
-        assertEquals(IntentType.ATTACK, intent.getType());
-        assertEquals(BASE_ATTACK, intent.getValue());
-    }
+    assertEquals(IntentType.ATTACK, intent.getType());
+    assertEquals(BASE_ATTACK, intent.getValue());
+  }
 
-    @Test
-    void shouldRetaliateWhenArmorIsBroken() {
-        ShieldBreakRetaliationAI ai = new ShieldBreakRetaliationAI();
+  @Test
+  void shouldRetaliateWhenArmorIsBroken() {
+    ShieldBreakRetaliationAI ai = new ShieldBreakRetaliationAI();
 
-        EnemyIntent intent = ai.decide(createContext(72, 72, 0, 2));
+    EnemyIntent intent = ai.decide(createContext(72, 72, 0, 2));
 
-        assertEquals(IntentType.ATTACK, intent.getType());
-        assertEquals(BASE_ATTACK * 2, intent.getValue());
-    }
+    assertEquals(IntentType.ATTACK, intent.getType());
+    assertEquals(BASE_ATTACK * 2, intent.getValue());
+  }
 
-    @Test
-    void shouldRestoreArmorAfterRetaliation() {
-        ShieldBreakRetaliationAI ai = new ShieldBreakRetaliationAI();
+  @Test
+  void shouldRestoreArmorAfterRetaliation() {
+    ShieldBreakRetaliationAI ai = new ShieldBreakRetaliationAI();
 
-        EnemyIntent retaliation = ai.decide(createContext(72, 72, 0, 2));
+    EnemyIntent retaliation = ai.decide(createContext(72, 72, 0, 2));
 
-        EnemyIntent restoration = ai.decide(createContext(72, 72, 0, 3));
+    EnemyIntent restoration = ai.decide(createContext(72, 72, 0, 3));
 
-        assertEquals(IntentType.ATTACK, retaliation.getType());
-        assertEquals(BASE_ATTACK * 2, retaliation.getValue());
+    assertEquals(IntentType.ATTACK, retaliation.getType());
+    assertEquals(BASE_ATTACK * 2, retaliation.getValue());
 
-        assertEquals(IntentType.DEFEND, restoration.getType());
-        assertEquals(RESTORED_ARMOR, restoration.getValue());
-    }
+    assertEquals(IntentType.DEFEND, restoration.getType());
+    assertEquals(RESTORED_ARMOR, restoration.getValue());
+  }
 
-    @Test
-    void shouldReturnToNormalAttackAfterRestoringArmor() {
-        ShieldBreakRetaliationAI ai = new ShieldBreakRetaliationAI();
+  @Test
+  void shouldReturnToNormalAttackAfterRestoringArmor() {
+    ShieldBreakRetaliationAI ai = new ShieldBreakRetaliationAI();
 
-        EnemyIntent retaliation = ai.decide(createContext(72, 72, 0, 2));
+    EnemyIntent retaliation = ai.decide(createContext(72, 72, 0, 2));
 
-        EnemyIntent restoration = ai.decide(createContext(72, 72, 0, 3));
+    EnemyIntent restoration = ai.decide(createContext(72, 72, 0, 3));
 
-        EnemyIntent normalAttack = ai.decide(createContext(72, 72, 5, 4));
+    EnemyIntent normalAttack = ai.decide(createContext(72, 72, 5, 4));
 
-        assertEquals(EnemyIntent.attack(BASE_ATTACK * 2), retaliation);
+    assertEquals(EnemyIntent.attack(BASE_ATTACK * 2), retaliation);
 
-        assertEquals(EnemyIntent.defend(RESTORED_ARMOR), restoration);
+    assertEquals(EnemyIntent.defend(RESTORED_ARMOR), restoration);
 
-        assertEquals(EnemyIntent.attack(BASE_ATTACK), normalAttack);
-    }
+    assertEquals(EnemyIntent.attack(BASE_ATTACK), normalAttack);
+  }
 
-    @Test
-    void shouldRepeatMechanicAfterArmorIsBrokenAgain() {
-        ShieldBreakRetaliationAI ai = new ShieldBreakRetaliationAI();
+  @Test
+  void shouldRepeatMechanicAfterArmorIsBrokenAgain() {
+    ShieldBreakRetaliationAI ai = new ShieldBreakRetaliationAI();
 
-        // First shield break.
-        assertEquals(EnemyIntent.attack(BASE_ATTACK * 2), ai.decide(createContext(72, 72, 0, 1)));
+    // First shield break.
+    assertEquals(EnemyIntent.attack(BASE_ATTACK * 2), ai.decide(createContext(72, 72, 0, 1)));
 
-        // Shield restored.
-        assertEquals(EnemyIntent.defend(RESTORED_ARMOR), ai.decide(createContext(72, 72, 0, 2)));
+    // Shield restored.
+    assertEquals(EnemyIntent.defend(RESTORED_ARMOR), ai.decide(createContext(72, 72, 0, 2)));
 
-        // Armor present, so it attacks normally.
-        assertEquals(EnemyIntent.attack(BASE_ATTACK), ai.decide(createContext(72, 72, 5, 3)));
+    // Armor present, so it attacks normally.
+    assertEquals(EnemyIntent.attack(BASE_ATTACK), ai.decide(createContext(72, 72, 5, 3)));
 
-        // Shield broken again.
-        assertEquals(EnemyIntent.attack(BASE_ATTACK * 2), ai.decide(createContext(72, 72, 0, 4)));
+    // Shield broken again.
+    assertEquals(EnemyIntent.attack(BASE_ATTACK * 2), ai.decide(createContext(72, 72, 0, 4)));
 
-        // Shield restored again.
-        assertEquals(EnemyIntent.defend(RESTORED_ARMOR), ai.decide(createContext(72, 72, 0, 5)));
-    }
+    // Shield restored again.
+    assertEquals(EnemyIntent.defend(RESTORED_ARMOR), ai.decide(createContext(72, 72, 0, 5)));
+  }
 
-    private EnemyAIContext createContext(int health, int maxHealth, int armor, int turnNumber) {
-        return new EnemyAIContext(
-                100, health, maxHealth, BASE_ATTACK, armor, EnemyIntent.unknown(), turnNumber);
-    }
+  private EnemyAIContext createContext(int health, int maxHealth, int armor, int turnNumber) {
+    return new EnemyAIContext(
+        100, health, maxHealth, BASE_ATTACK, armor, EnemyIntent.unknown(), turnNumber);
+  }
 }
