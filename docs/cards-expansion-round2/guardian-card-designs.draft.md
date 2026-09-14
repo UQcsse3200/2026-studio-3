@@ -1,7 +1,7 @@
-# Guardian card concepts — DRAFT revision 3
+# Guardian card concepts — DRAFT revision 4
 
 Owner: Hezhenyu (Member 1), Team 6. Theme: archive guardian techniques.
-Design only; all names, numbers and rarities await review. Implementation status: Not started. No card configuration or artwork is created by this document. Each texturePath below is proposed, not an existing-asset claim.
+Design only; all names, numbers and rarities await review. Implementation status: Warding Sweep, Sentinel's Rebuke, Warden's Judgement and Unseal the Breach are in source/core/assets/configs/cards.json with placeholder artwork. Artwork paths below point to placeholder assets pending the agreed art specification.
 
 ## Part A — source verification
 
@@ -36,7 +36,7 @@ A separate CardPlayService context-based path exists. Lines 235–245 read Stren
 - CardEffectResolutionContext.java line 17: `FEEBLE_DAMAGE_MULTIPLIER = 0.75`; lines 38–39 apply it if `outgoingFeeble > 0`. This is fixed -25% outgoing damage; larger positive values do not increase the penalty. StatusEffectCalculator.java lines 18–20 instead tests status presence and returns the same fixed multiplier.
 - Value is stored/validated and supplies the context activation check; it does not scale the multiplier. Same-key applications replace value and duration via the same map operation described above.
 - Positive duration uses the same decrement/expiry helper as Vulnerable, with the same missing turn wiring. No confirmed number of real turns can be promised from that helper alone.
-- Team1EnemyStateAdapter.java lines 82–83 applies FEEBLE; BattleController.java lines 735–745 omits it. The presence of the enum/helper does not prove enemy attacks receive the penalty in the active battle path. No Guardian concept below uses FEEBLE.
+- Team1EnemyStateAdapter.java lines 82–83 applies FEEBLE; BattleController.java lines 735–745 omits it. The presence of the enum/helper does not prove enemy attacks receive the penalty in the active battle path. Sentinel's Rebuke now uses FEEBLE under the confirmed unified-flow contract, but its live gameplay behaviour remains provisional until the integration and duration wiring land.
 
 ### POISON
 
@@ -94,23 +94,24 @@ Descriptions state intended card rules. Part A's integration gaps remain unresol
 - Balance rationale: raised from 1 to 2 energy. Against one/two/three enemies, unmodified total damage is 4/8/12 for 2 energy; two Strikes give 12 total for the same energy if available. Sweep trades concentrated damage and energy flexibility for encounter-wide coverage and one-card convenience. Its advantage at larger enemy counts is deliberate but still needs playtesting, especially with Strength; rarity alone is not the balancing lever.
 - Difference from Strike: area coverage at twice the cost with lower damage per enemy, rather than a numerical upgrade to a focused attack. Difference from Defend: immediate offensive pressure with no protection.
 
-### 2. Sentinel's Stance — defense with offensive preparation
+### 2. Sentinel's Rebuke — protection through suppression
 
-- `id`: `sentinels_stance`
-- `name`: Sentinel's Stance
-- `description`: Gain 5 block. Gain 1 Strength for the rest of combat.
-- `cost`: 2
-- `type`: SKILL
+- `id`: `sentinels_rebuke`
+- `name`: Sentinel's Rebuke
+- `description`: Deal 4 damage. Apply 1 Feeble for 2 turns.
+- `cost`: 1
+- `type`: ATTACK
 - `rarity`: UNCOMMON
-- `target`: SELF
+- `target`: SINGLE_ENEMY
 - `effects[]`, in order:
-  1. `type: BLOCK`, `value: 5`, `duration: 0`.
-  2. `type: STRENGTH`, `value: 1`, `duration: 0`.
-- `texturePath`: `images/cards/sentinels_stance.png`
-- Archive technique: brace behind an engraved shield and recover a disciplined attacking stance.
-- Balance rationale: lowered block from 6 to 5. Relative to Defend, the extra energy buys 1 Strength; relative to Inner Focus at the same cost, it trades 1 of the 2 Strength for 5 immediate block. It is a hybrid, not a better replacement for either baseline. Do not assume repeated plays accumulate Strength consistently across paths.
-- Difference from Strike: no immediate damage, with value realized through later attacks. Difference from Defend: adds a persistent offensive preparation effect at a higher cost.
-- Integration note: intended combat-long Strength matches the contract, but reset cleanup differs as documented in Part A. BLOCK also becomes armor in BattleController versus block in Team7PlayerStateAdapter; do not claim a verified expiry time for its protection.
+  1. `type: DAMAGE`, `value: 4`, `duration: 0`.
+  2. `type: FEEBLE`, `value: 1`, `duration: 2`.
+- `texturePath`: `images/cards/sentinels_rebuke.png`
+- Archive technique: answer an intruder's advance with a measured shield strike that disrupts the force of its next attacks.
+- Balance rationale: Strike deals 6 damage for the same 1 energy. Rebuke gives up 2 immediate damage for the intended two-turn 25% outgoing-damage reduction from FEEBLE. FEEBLE's positive value activates a fixed multiplier rather than scaling its percentage, so value 1 is sufficient. The duration and overall value remain subject to playtesting once status ticking is integrated.
+- Difference from Strike: trades one-third of Strike's base damage for temporary offensive suppression. Difference from Defend: reduces one selected enemy's future pressure rather than granting immediate protection, so target choice and enemy intent matter.
+- Difference from Astral cards: unlike Rift Lance's DAMAGE + VULNERABLE offensive setup and Astral Ward's BLOCK + STRENGTH self-buff, Rebuke combines damage with an enemy outgoing-damage penalty.
+- Integration note: DAMAGE resolves in the inspected paths. FEEBLE is an existing EffectType and is accepted by the unified resolver and Team1EnemyStateAdapter, so this design adds no new effect. The active legacy BattleController omits FEEBLE, enemy attacks do not yet consult the status multiplier, and effect durations do not tick in production; gameplay acceptance remains provisional on those existing integration dependencies.
 
 ### 3. Unseal the Breach — focused armour opening
 
@@ -148,9 +149,9 @@ Descriptions state intended card rules. Part A's integration gaps remain unresol
 - Archive technique: a single sanctioned strike delivered by the warden against one intruder. The blow carries the authority of the archive's protective inscriptions.
 - Intended role: the set's dedicated single-target damage card and the payoff for setup provided by the other Guardian cards. It fills the fourth slot left by the withdrawn Seal and Restore.
 - Balance rationale: Strike costs 1 energy for 6 damage. Two Strikes give 12 damage for 2 energy but use two cards; Warden's Judgement gives 9 for the same energy on one card, trading 3 damage for card economy. Against Warding Sweep at the same cost, it offers 9 to one target versus 4 per target (4/8/12 against one/two/three enemies). One enemy favours Warden's Judgement, three favour Warding Sweep, and two is a genuine decision point between concentrated damage and area coverage. This is a different role, not a numerical variant. The starting value of 9 is provisional and subject to Member 3's balance review, which owns the cost-versus-benefit baseline.
-- Intra-set interaction — DESIGN INTENT, NOT VERIFIED: Sentinel's Stance grants STRENGTH, raising Warden's Judgement from 9 to 10 pre-mitigation damage in the inspected resolver calculation. Unseal the Breach proposes SUNDER to remove armour before the payoff card is played, allowing more of Warden's Judgement's 9 damage to reach health instead of being absorbed by that persistent mitigation pool. The Strength figure follows existing calculation code; the SUNDER interaction remains unverified and blocked on the new-effect dependency above.
+- Intra-set interaction — DESIGN INTENT, NOT VERIFIED: Sentinel's Rebuke lowers a selected enemy's future damage while dealing 4 immediate damage, buying room to follow with Warden's Judgement's concentrated 9-damage hit. Unseal the Breach proposes SUNDER to remove armour before the payoff card is played, allowing more of Warden's Judgement's damage to reach health. The Rebuke protection depends on the existing FEEBLE integration gaps; the SUNDER interaction is implemented but not yet verified in live gameplay.
 - Difference from Strike: higher single-target damage at twice the cost, trading energy flexibility for card economy. Difference from Defend: pure offence, no protection.
-- Integration note: the card uses DAMAGE only. DAMAGE is confirmed resolvable through the active BattleScreen → BattleController path, so its standalone damage does not depend on status-effect integration. This does not verify precise single-target behaviour: Part A's active consumer applies enemy-facing effects to all living enemies, so the intended SINGLE_ENEMY targeting still requires acceptance verification. The STRENGTH interaction above remains subject to the state-path discrepancy documented for Sentinel's Stance, while the proposed SUNDER setup is blocked from verified gameplay acceptance until its new-effect dependency is agreed, implemented and tested.
+- Integration note: the card uses DAMAGE only. DAMAGE is confirmed resolvable through the active BattleScreen → BattleController path, so its standalone damage does not depend on status-effect integration. This does not verify precise single-target behaviour: Part A's active consumer applies enemy-facing effects to all living enemies, so the intended SINGLE_ENEMY targeting still requires acceptance verification. Sentinel's Rebuke's FEEBLE setup remains subject to the status integration gaps above, while the SUNDER setup is implemented and unit-tested but not yet verified in live gameplay, and Team 5 sign-off for the effect is still in progress.
 - Scope note: Warden's Judgement remains the Guardian set's dedicated single-target damage payoff. Unseal the Breach now proposes the set's separate armour-reduction role through SUNDER; Warden's Judgement itself does not reduce or bypass armour.
 
 The withdrawn section below retains its original slot number and text for audit; Warden's Judgement is the active fourth design.
@@ -179,13 +180,13 @@ Original design retained below for audit:
 - Balance rationale: raised from BLOCK 4 / HEAL 3 to BLOCK 7 / HEAL 4. Defend + Bandage provides BLOCK 5 / HEAL 6 for the same 2 energy. This card explicitly trades 2 healing for 2 additional block, so it is no longer lower in both values. One-card convenience is an advantage; paying both energy together and reduced recovery are disadvantages. Block and healing are not assumed to be interchangeable in every state. Compared with two Defends, it sacrifices 3 block for 4 healing. Healing may be wasted near full health; repeated sustain and overlap with Survival designs need review.
 - Difference from Defend: combines stronger immediate protection with recovery at a higher cost. Difference from Strike: affects both defensive resources without dealing damage. Unlike Bandage it allocates much of its benefit to protection.
 
-## Verified core interaction: Sentinel's Stance → Warding Sweep
+## Provisional core sequence: Sentinel's Rebuke → Warden's Judgement
 
-Starting from zero Strength, one Stance grants 1 Strength. A subsequent Sweep resolves to `4 + 1 = 5` damage per enemy before mitigation, instead of 4. With two living targets, the consumers receive two 5-damage hits rather than two 4-damage hits. This is confirmed by the calculation and target loops in Part A; it is not a claim of a completed gameplay test.
+Rebuke deals 4 damage to the selected enemy and is intended to reduce that enemy's outgoing damage by 25% for two turns. The protection creates room to spend 2 energy on Warden's Judgement's 9 focused damage on a later turn. This is role complementarity rather than a direct damage multiplier.
 
-The sequence combines protection/preparation with later area offense. Both cards cost 2; no same-turn affordability is assumed. Use one Stance application for this example so it does not depend on the additive-versus-overwrite discrepancy. Existing higher Strength, enemy count and repeated plays require balance testing. Block/armor can reduce actual HP loss.
+The resolver can emit Rebuke's DAMAGE and FEEBLE records without a new EffectType, and the unified enemy adapter accepts both. The sequence is not yet a verified live gameplay interaction because the legacy BattleController omits FEEBLE, enemy attack damage does not currently consume its modifier, and status durations are not wired to turn progression.
 
-The previous Vulnerable → Sweep interaction is withdrawn: the inspected active BattleController does not apply that multiplier, and the alternate CardPlayService only reads Vulnerable for SINGLE_ENEMY. No substitute damage bonus is invented.
+The previous Sentinel's Stance BLOCK + STRENGTH design is withdrawn because it duplicated Astral Ward's cost, type, rarity, target and effect combination, differing only by one point of Block.
 
 ## Review boundary
 
