@@ -3,6 +3,7 @@ package com.csse3200.game.chance;
 import com.csse3200.game.chance.configs.ChanceChoiceConfig;
 import com.csse3200.game.chance.configs.ChanceConfig;
 import com.csse3200.game.chance.configs.ChanceEncounterConfig;
+import com.csse3200.game.encounters.integration.CardCatalogGateway;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -15,6 +16,10 @@ final class ChanceEncounterConfigValidator {
   }
 
   static List<String> validate(ChanceConfig config) {
+    return validate(config, null);
+  }
+
+  static List<String> validate(ChanceConfig config, CardCatalogGateway cardCatalog) {
     if (config == null || config.encounters == null) {
       return List.of("configuration must contain an 'encounters' array");
     }
@@ -25,7 +30,7 @@ final class ChanceEncounterConfigValidator {
 
     for (int i = 0; i < config.encounters.length; i++) {
       ChanceEncounterConfig encounter = config.encounters[i];
-      validateEncounter(encounter, i, encounterIds, errors);
+      validateEncounter(encounter, i, encounterIds, cardCatalog, errors);
       if (encounter != null && encounter.weight != null && encounter.weight > 0) {
         totalWeight += encounter.weight;
       }
@@ -46,6 +51,7 @@ final class ChanceEncounterConfigValidator {
       ChanceEncounterConfig encounter,
       int encounterIndex,
       Set<String> encounterIds,
+      CardCatalogGateway cardCatalog,
       List<String> errors) {
     String label = "encounter[" + encounterIndex + "]";
     if (encounter == null) {
@@ -76,12 +82,17 @@ final class ChanceEncounterConfigValidator {
 
     Set<String> choiceIds = new HashSet<>();
     for (int i = 0; i < encounter.choices.length; i++) {
-      validateChoice(encounter.choices[i], label + ".choice[" + i + "]", choiceIds, errors);
+      validateChoice(
+          encounter.choices[i], label + ".choice[" + i + "]", choiceIds, cardCatalog, errors);
     }
   }
 
   private static void validateChoice(
-      ChanceChoiceConfig choice, String label, Set<String> choiceIds, List<String> errors) {
+      ChanceChoiceConfig choice,
+      String label,
+      Set<String> choiceIds,
+      CardCatalogGateway cardCatalog,
+      List<String> errors) {
     if (choice == null) {
       errors.add(label + " must not be null");
       return;
@@ -107,6 +118,21 @@ final class ChanceEncounterConfigValidator {
     }
     if (choice.outcome.currencyDelta == null) {
       errors.add(label + ".outcome: currencyDelta must be present");
+    }
+
+    String cardRewardId = choice.outcome.cardRewardId;
+    if (cardRewardId != null && cardRewardId.isBlank()) {
+      errors.add(label + ".outcome: cardRewardId must not be blank when present");
+    } else if (cardRewardId != null && cardCatalog != null) {
+      boolean knownCard;
+      try {
+        knownCard = cardCatalog.containsCard(cardRewardId);
+      } catch (RuntimeException exception) {
+        knownCard = false;
+      }
+      if (!knownCard) {
+        errors.add(label + ".outcome: unknown cardRewardId '" + cardRewardId + "'");
+      }
     }
   }
 }

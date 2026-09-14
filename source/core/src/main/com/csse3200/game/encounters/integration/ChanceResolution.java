@@ -20,6 +20,12 @@ public final class ChanceResolution {
     INSUFFICIENT_CURRENCY,
     /** Applying the outcome would overflow an integer player statistic. */
     ARITHMETIC_OVERFLOW,
+    /** The configured reward card identifier is blank or otherwise invalid. */
+    INVALID_CARD_REWARD,
+    /** The reward card identifier is not registered in the card catalog. */
+    CARD_NOT_FOUND,
+    /** The persistent deck rejected the reward card. */
+    CARD_ADD_FAILED,
     /** A Player update failed and all original values were restored. */
     PLAYER_UPDATE_FAILED,
     /** A Player update failed and at least one original value could not be restored. */

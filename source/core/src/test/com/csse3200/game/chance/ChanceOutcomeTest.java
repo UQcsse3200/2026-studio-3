@@ -2,6 +2,7 @@ package com.csse3200.game.chance;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -55,5 +56,20 @@ class ChanceOutcomeTest {
     assertEquals(0, outcome.getHealthDelta());
     assertEquals(0, outcome.getCurrencyDelta());
     assertTrue(outcome.isNoEffect());
+  }
+
+  @Test
+  void shouldRepresentOptionalCardReward() {
+    ChanceOutcome outcome = new ChanceOutcome(0, 0, "bandage");
+
+    assertEquals("bandage", outcome.getCardRewardId());
+    assertFalse(outcome.isNoEffect());
+  }
+
+  @Test
+  void shouldKeepExistingOutcomesWithoutCardReward() {
+    ChanceOutcome outcome = new ChanceOutcome(5, 10);
+
+    assertNull(outcome.getCardRewardId());
   }
 }

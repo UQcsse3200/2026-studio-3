@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.csse3200.game.chance.configs.ChanceChoiceConfig;
 import com.csse3200.game.chance.configs.ChanceConfig;
 import com.csse3200.game.chance.configs.ChanceEncounterConfig;
+import com.csse3200.game.encounters.integration.CardCatalogGateway;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,21 @@ public final class ChanceEncounterConfigLoader {
    * @throws ChanceEncounterLoadingException if the configuration cannot be loaded
    */
   public static List<ChanceEncounter> loadEncounters() {
-    return loadEncounters(DEFAULT_ENCOUNTER_FILE);
+    return loadEncounters(DEFAULT_ENCOUNTER_FILE, null);
+  }
+
+  /**
+   * Loads the default Chance configuration and validates rewards against the production card
+   * catalog boundary.
+   *
+   * @param cardCatalog authoritative card lookup boundary
+   * @return immutable validated encounter definitions in configuration order
+   */
+  public static List<ChanceEncounter> loadEncountersWithCatalog(CardCatalogGateway cardCatalog) {
+    if (cardCatalog == null) {
+      throw new IllegalArgumentException("cardCatalog cannot be null");
+    }
+    return loadEncounters(DEFAULT_ENCOUNTER_FILE, cardCatalog);
   }
 
   /**
@@ -42,6 +57,18 @@ public final class ChanceEncounterConfigLoader {
    * @throws ChanceEncounterLoadingException if the path, JSON, or encounter data is invalid
    */
   public static List<ChanceEncounter> loadEncounters(String filename) {
+    return loadEncounters(filename, null);
+  }
+
+  /**
+   * Loads a Chance configuration and validates card rewards against the supplied catalog.
+   *
+   * @param filename internal asset path of the configuration file
+   * @param cardCatalog authoritative card lookup boundary
+   * @return immutable validated encounter definitions in configuration order
+   */
+  public static List<ChanceEncounter> loadEncounters(
+      String filename, CardCatalogGateway cardCatalog) {
     if (filename == null || filename.isBlank()) {
       throw new ChanceEncounterLoadingException(
           "Chance Encounter configuration filename must not be null or blank");
@@ -86,7 +113,7 @@ public final class ChanceEncounterConfigLoader {
           "Chance Encounter configuration could not be parsed: " + filename, exception);
     }
 
-    errors.addAll(ChanceEncounterConfigValidator.validate(config));
+    errors.addAll(ChanceEncounterConfigValidator.validate(config, cardCatalog));
     if (!errors.isEmpty()) {
       throw invalidDefinitions(filename, errors);
     }
@@ -104,7 +131,10 @@ public final class ChanceEncounterConfigLoader {
     List<ChanceChoice> choices = new ArrayList<>();
     for (ChanceChoiceConfig choiceConfig : encounterConfig.choices) {
       ChanceOutcome outcome =
-          new ChanceOutcome(choiceConfig.outcome.healthDelta, choiceConfig.outcome.currencyDelta);
+          new ChanceOutcome(
+              choiceConfig.outcome.healthDelta,
+              choiceConfig.outcome.currencyDelta,
+              choiceConfig.outcome.cardRewardId);
       choices.add(new ChanceChoice(choiceConfig.id, choiceConfig.description, outcome));
     }
 
@@ -147,7 +177,21 @@ public final class ChanceEncounterConfigLoader {
         String label = choiceLabel + ".outcome";
         validateInteger(outcome.get("healthDelta"), label + ".healthDelta", errors);
         validateInteger(outcome.get("currencyDelta"), label + ".currencyDelta", errors);
+        validateOptionalString(outcome.get("cardRewardId"), label + ".cardRewardId", errors);
       }
+    }
+  }
+
+  private static void validateOptionalString(JsonValue value, String label, List<String> errors) {
+    if (value == null) {
+      return;
+    }
+    if (value.isNull()) {
+      errors.add(label + " must not be null when present");
+    } else if (!value.isString()) {
+      errors.add(label + " must be a string when present");
+    } else if (value.asString().isBlank()) {
+      errors.add(label + " must not be blank when present");
     }
   }
 

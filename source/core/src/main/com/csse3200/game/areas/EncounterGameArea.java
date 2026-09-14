@@ -8,9 +8,11 @@ import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.chance.ChanceEncounterDisplay;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.components.shop.ShopDisplay;
+import com.csse3200.game.encounters.integration.CardCatalogGateway;
+import com.csse3200.game.encounters.integration.CardServiceCatalogAdapter;
 import com.csse3200.game.encounters.integration.ComponentPlayerStateAdapter;
+import com.csse3200.game.encounters.integration.DeckGateway;
 import com.csse3200.game.encounters.integration.EncounterFlowController;
-import com.csse3200.game.encounters.integration.FunctionalCardCatalogAdapter;
 import com.csse3200.game.encounters.integration.IntegratedShopTransactionGateway;
 import com.csse3200.game.encounters.integration.InventoryDeckAdapter;
 import com.csse3200.game.encounters.integration.PlayerDeckAdapter;
@@ -49,6 +51,7 @@ public class EncounterGameArea extends GameArea {
 
   private Entity player;
   private EncounterFlowController encounterFlow;
+  private CardCatalogGateway cardCatalog;
 
   /**
    * Creates the standalone Shop preview used by the legacy MainGameScreen shortcut.
@@ -151,7 +154,8 @@ public class EncounterGameArea extends GameArea {
 
   private void displayChanceEncounter() {
     ChanceEncounterSelector selector =
-        new ChanceEncounterSelector(ChanceEncounterFactory.createInitialEncounters(), new Random());
+        new ChanceEncounterSelector(
+            ChanceEncounterFactory.createInitialEncounters(cardCatalog), new Random());
 
     Entity chanceUi = new Entity();
     chanceUi.addComponent(
@@ -165,15 +169,18 @@ public class EncounterGameArea extends GameArea {
     ComponentPlayerStateAdapter playerState =
         new ComponentPlayerStateAdapter(player.getComponent(CombatStatsComponent.class), inventory);
 
-    IntegratedShopTransactionGateway shopTransactions =
-        new IntegratedShopTransactionGateway(
-            playerState,
-            new FunctionalCardCatalogAdapter(cardId -> true),
-            sharedPlayerDeck != null
-                ? new PlayerDeckAdapter(sharedPlayerDeck)
-                : new InventoryDeckAdapter(inventory));
+    cardCatalog = new CardServiceCatalogAdapter(ServiceLocator.getCardLibrary());
+    DeckGateway deck =
+        sharedPlayerDeck != null
+            ? new PlayerDeckAdapter(sharedPlayerDeck)
+            : new InventoryDeckAdapter(inventory);
 
-    encounterFlow = new EncounterFlowController(playerState, shopTransactions, completionCallback);
+    IntegratedShopTransactionGateway shopTransactions =
+        new IntegratedShopTransactionGateway(playerState, cardCatalog, deck);
+
+    encounterFlow =
+        new EncounterFlowController(
+            playerState, cardCatalog, deck, shopTransactions, completionCallback);
   }
 
   private void loadAssets() {

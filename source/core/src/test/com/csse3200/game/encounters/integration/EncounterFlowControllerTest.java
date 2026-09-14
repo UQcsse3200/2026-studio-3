@@ -87,6 +87,28 @@ class EncounterFlowControllerTest {
   }
 
   @Test
+  void shouldApplyCardRewardThroughChanceFlowBoundaries() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 100);
+    MockCardCatalogGateway cardCatalog = new MockCardCatalogGateway("bandage");
+    MockDeckGateway deck = new MockDeckGateway();
+    IntegratedShopTransactionGateway transactions =
+        new IntegratedShopTransactionGateway(player, cardCatalog, deck);
+    EncounterFlowController flow =
+        new EncounterFlowController(
+            player, cardCatalog, deck, transactions, (nodeId, success) -> {});
+    ChanceEncounter encounter =
+        new ChanceEncounter(
+            "reward",
+            "Reward",
+            List.of(new ChanceChoice("accept", "Accept", new ChanceOutcome(0, 0, "bandage"))));
+
+    ChanceResolution result = flow.startChance(1, encounter).resolveChoice("accept");
+
+    assertTrue(result.isSuccess());
+    assertEquals(List.of("bandage"), deck.getCardIds());
+  }
+
+  @Test
   void shouldStartAndCompleteShopIndependently() {
     MockPlayerStateGateway player = new MockPlayerStateGateway(100, 100);
     IntegratedShopTransactionGateway transactions =

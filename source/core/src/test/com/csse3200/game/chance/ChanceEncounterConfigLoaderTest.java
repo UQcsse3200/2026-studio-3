@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardLibrary;
+import com.csse3200.game.encounters.integration.CardServiceCatalogAdapter;
 import com.csse3200.game.extensions.GameExtension;
 import java.util.List;
 import java.util.Random;
@@ -61,6 +64,8 @@ class ChanceEncounterConfigLoaderTest {
         "wandering-healer",
         "A wandering healer offers a restorative draught for a modest fee.",
         new ExpectedChoice("purchase-remedy", "Buy the healer's restorative draught.", 20, -10),
+        new ExpectedChoice(
+            "accept-bandage", "Accept a spare bandage for the road.", 0, 0, "bandage"),
         new ExpectedChoice("decline", "Politely decline the healer's offer.", 0, 0));
     assertEncounter(
         encounters.get(4),
@@ -163,6 +168,41 @@ class ChanceEncounterConfigLoaderTest {
     ChanceEncounterLoadingException exception = loadInvalid("invalid_outcome_structure.json");
 
     assertMessageContains(exception, "choice[0]: outcome must be a JSON object");
+  }
+
+  @Test
+  void shouldRejectBlankAndNonStringCardRewards() {
+    ChanceEncounterLoadingException exception = loadInvalid("invalid_card_rewards.json");
+
+    assertMessageContains(
+        exception,
+        "choice[0].outcome.cardRewardId must not be blank when present",
+        "choice[1].outcome.cardRewardId must be a string when present",
+        "choice[2].outcome.cardRewardId must not be null when present");
+  }
+
+  @Test
+  void shouldRejectUnknownCardRewardThroughCatalogBoundary() {
+    ChanceEncounterLoadingException exception =
+        assertThrows(
+            ChanceEncounterLoadingException.class,
+            () ->
+                ChanceEncounterConfigLoader.loadEncounters(
+                    TEST_DIRECTORY + "unknown_card_reward.json",
+                    new CardServiceCatalogAdapter(new CardLibrary(CardConfigLoader.loadCards()))));
+
+    assertMessageContains(exception, "unknown cardRewardId 'missing-card'");
+  }
+
+  @Test
+  void shouldLoadConfiguredRewardThroughProductionCardServiceAdapter() {
+    List<ChanceEncounter> encounters =
+        ChanceEncounterConfigLoader.loadEncountersWithCatalog(
+            new CardServiceCatalogAdapter(new CardLibrary(CardConfigLoader.loadCards())));
+
+    ChanceOutcome reward = encounters.get(3).resolveChoice("accept-bandage");
+
+    assertEquals("bandage", reward.getCardRewardId());
   }
 
   @Test
@@ -272,12 +312,17 @@ class ChanceEncounterConfigLoaderTest {
       assertEquals(expected.description(), choice.getDescription());
       assertEquals(expected.healthDelta(), outcome.getHealthDelta());
       assertEquals(expected.currencyDelta(), outcome.getCurrencyDelta());
+      assertEquals(expected.cardRewardId(), outcome.getCardRewardId());
       assertSame(outcome, encounter.resolveChoice(expected.id()));
     }
   }
 
   private record ExpectedChoice(
-      String id, String description, int healthDelta, int currencyDelta) {}
+      String id, String description, int healthDelta, int currencyDelta, String cardRewardId) {
+    private ExpectedChoice(String id, String description, int healthDelta, int currencyDelta) {
+      this(id, description, healthDelta, currencyDelta, null);
+    }
+  }
 
   private static final class SequenceRandom extends Random {
     private static final long serialVersionUID = 1L;

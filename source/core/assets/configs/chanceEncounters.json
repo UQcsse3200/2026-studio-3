@@ -83,6 +83,15 @@
           }
         },
         {
+          "id": "accept-bandage",
+          "description": "Accept a spare bandage for the road.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0,
+            "cardRewardId": "bandage"
+          }
+        },
+        {
           "id": "decline",
           "description": "Politely decline the healer's offer.",
           "outcome": {
