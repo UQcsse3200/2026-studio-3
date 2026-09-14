@@ -33,6 +33,30 @@ class BestiaryServiceTest {
   }
 
   @Test
+  void shouldLoadTeamOneBossAsLockedBestiaryEntry() {
+    BestiaryService service = BestiaryService.loadDefault();
+
+    BestiaryEntryView lockedBoss = service.getEntry("boss_knight").orElseThrow();
+    assertEquals(EnemyTier.BOSS, lockedBoss.tier());
+    assertEquals(BestiaryUnlockState.LOCKED, lockedBoss.unlockState());
+    assertEquals("???", lockedBoss.displayName());
+    assertTrue(lockedBoss.sprite().isEmpty());
+
+    assertTrue(service.recordEncountered("boss_knight"));
+    BestiaryEntryView encounteredBoss = service.getEntry("boss_knight").orElseThrow();
+    assertEquals("Boss Knight", encounteredBoss.displayName());
+    assertEquals("images/enemies/boss_knight.atlas", encounteredBoss.sprite().orElseThrow());
+    assertTrue(encounteredBoss.health().isEmpty());
+
+    assertTrue(service.recordDefeated("boss_knight"));
+    BestiaryEntryView defeatedBoss = service.getEntry("boss_knight").orElseThrow();
+    assertEquals(150, defeatedBoss.health().orElseThrow());
+    assertEquals(14, defeatedBoss.baseAttack().orElseThrow());
+    assertEquals(8, defeatedBoss.armour().orElseThrow());
+    assertEquals("boss", defeatedBoss.behaviour().orElseThrow());
+  }
+
+  @Test
   void shouldStartEntriesLockedInStableTierAndIdOrder() {
     BestiaryService service = createService();
 
