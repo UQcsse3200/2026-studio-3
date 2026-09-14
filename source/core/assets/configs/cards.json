@@ -81,18 +81,18 @@
         "texturePath": "images/cards/bandage.png"
       },
       {
-        "id": "sentinels_stance",
-        "name": "Sentinel's Stance",
-        "description": "Gain 5 block. Gain 1 Strength for the rest of combat.",
-        "cost": 2,
-        "type": "SKILL",
+        "id": "sentinels_rebuke",
+        "name": "Sentinel's Rebuke",
+        "description": "Deal 4 damage. Apply 1 Feeble for 2 turns.",
+        "cost": 1,
+        "type": "ATTACK",
         "rarity": "UNCOMMON",
-        "target": "SELF",
+        "target": "SINGLE_ENEMY",
         "effects": [
-          { "type": "BLOCK", "value": 5, "duration": 0 },
-          { "type": "STRENGTH", "value": 1, "duration": 0 }
+          { "type": "DAMAGE", "value": 4, "duration": 0 },
+          { "type": "FEEBLE", "value": 1, "duration": 2 }
         ],
-        "texturePath": "images/cards/sentinels_stance.png"
+        "texturePath": "images/cards/sentinels_rebuke.png"
       },
       {
         "id": "wardens_judgement",
