@@ -28,13 +28,10 @@ public class CardEffectHandler {
       for (ResolvedCardEffect effect : effects) {
         switch (effect.type()) {
           case DAMAGE -> stats.takeDamage(effect.value());
-          case POISON ->
+          case POISON, VULNERABLE ->
               stats.applyStatusEffect(
-                  new StatusEffect("poison", effect.value(), effect.duration()));
-          case VULNERABLE ->
-              stats.applyStatusEffect(
-                  new StatusEffect("vulnerable", effect.value(), effect.duration()));
-          default -> {
+                  new StatusEffect(effect.type().name(), effect.value(), effect.duration()));
+            default -> {
             // BLOCK / HEAL / STRENGTH are not enemy-facing.
           }
         }
