@@ -18,7 +18,6 @@ public class LibraryMenuDisplay extends UIComponent {
   private final GdxGame game;
 
   private Table rootTable;
-  private Label statusLabel;
 
   public LibraryMenuDisplay(GdxGame game) {
     this.game = game;
@@ -38,7 +37,6 @@ public class LibraryMenuDisplay extends UIComponent {
     TextButton cardLibraryButton = new TextButton("Card Library", skin);
     TextButton enemyLibraryButton = new TextButton("Enemy Library", skin);
     TextButton backButton = new TextButton("Back", skin);
-    statusLabel = new Label("", skin);
 
     cardLibraryButton.addListener(
         new ChangeListener() {
@@ -53,8 +51,8 @@ public class LibraryMenuDisplay extends UIComponent {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
-            logger.debug("Enemy Library button clicked before enemy library is ready");
-            statusLabel.setText("Enemy Library is waiting for bestiary data.");
+            logger.debug("Enemy Library button clicked");
+            game.setScreen(GdxGame.ScreenType.BESTIARY);
           }
         });
 
@@ -69,7 +67,6 @@ public class LibraryMenuDisplay extends UIComponent {
     rootTable.add(title).padBottom(25f).row();
     rootTable.add(cardLibraryButton).width(260f).padBottom(12f).row();
     rootTable.add(enemyLibraryButton).width(260f).padBottom(12f).row();
-    rootTable.add(statusLabel).padBottom(18f).row();
     rootTable.add(backButton).width(160f);
 
     stage.addActor(rootTable);
