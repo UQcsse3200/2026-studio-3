@@ -6,6 +6,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.areas.EncounterGameArea;
 import com.csse3200.game.areas.terrain.TerrainFactory;
+import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardLibrary;
+import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -21,6 +24,7 @@ import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +38,15 @@ import org.slf4j.LoggerFactory;
 public class EncounterScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(EncounterScreen.class);
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
-
+  private static final String[] SHOP_CARD_TEXTURES = {
+    "images/shop/cards/bandage.png",
+    "images/shop/cards/defend.png",
+    "images/shop/cards/expose.png",
+    "images/shop/cards/inner_focus.png",
+    "images/shop/cards/poison_dagger.png",
+    "images/shop/cards/strike.png"
+  };
+  private final String[] cardTexturePaths;
   private final GdxGame game;
   private final RunState runState;
   private final Renderer renderer;
@@ -53,14 +65,30 @@ public class EncounterScreen extends ScreenAdapter {
           "EncounterScreen only handles EVENT and SHOP nodes, but received " + roomType);
     }
 
-    logger.info(
-        "Opening {} encounter for map node {}", roomType, activeNode.getNodeId());
+    logger.info("Opening {} encounter for map node {}", roomType, activeNode.getNodeId());
 
     ServiceLocator.registerTimeSource(new GameTime());
     ServiceLocator.registerInputService(new InputService());
     ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
+
+    List<CardConfig> cards = CardConfigLoader.loadCards();
+    CardLibrary cardLibrary = new CardLibrary(cards);
+
+    cardTexturePaths =
+        cards.stream()
+            .map(card -> card.texturePath)
+            .filter(path -> path != null && !path.isBlank())
+            .distinct()
+            .toArray(String[]::new);
+
+    ServiceLocator.registerCardLibrary(cardLibrary);
+
+    ResourceService resourceService = ServiceLocator.getResourceService();
+    resourceService.loadTextures(cardTexturePaths);
+    resourceService.loadTextures(SHOP_CARD_TEXTURES);
+    resourceService.loadAll();
 
     PhysicsService physicsService = new PhysicsService();
     ServiceLocator.registerPhysicsService(physicsService);
@@ -74,10 +102,7 @@ public class EncounterScreen extends ScreenAdapter {
     TerrainFactory terrainFactory = new TerrainFactory(renderer.getCamera());
     encounterGameArea =
         new EncounterGameArea(
-            terrainFactory,
-            activeNode.getNodeId(),
-            roomType,
-            this::onEncounterComplete);
+            terrainFactory, activeNode.getNodeId(), roomType, this::onEncounterComplete);
 
     encounterGameArea.create();
   }
@@ -109,8 +134,7 @@ public class EncounterScreen extends ScreenAdapter {
   /** Makes the shared render stage receive input from Chance and Shop UI components. */
   private void createInput() {
     Entity inputEntity = new Entity();
-    inputEntity.addComponent(
-        new InputDecorator(ServiceLocator.getRenderService().getStage(), 10));
+    inputEntity.addComponent(new InputDecorator(ServiceLocator.getRenderService().getStage(), 10));
     ServiceLocator.getEntityService().register(inputEntity);
   }
 
@@ -158,6 +182,8 @@ public class EncounterScreen extends ScreenAdapter {
 
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getRenderService().dispose();
+    ServiceLocator.getResourceService().unloadAssets(cardTexturePaths);
+    ServiceLocator.getResourceService().unloadAssets(SHOP_CARD_TEXTURES);
     ServiceLocator.getResourceService().dispose();
 
     ServiceLocator.clear();

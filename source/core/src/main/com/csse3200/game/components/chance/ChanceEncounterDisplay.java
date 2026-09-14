@@ -37,7 +37,7 @@ public class ChanceEncounterDisplay extends UIComponent {
   private static final float PANEL_WIDTH = 1080f;
   private static final float CONTENT_WIDTH = 980f;
 
-  private static final Color BACKDROP_COLOUR = new Color(0.02f, 0.015f, 0.025f, 0.82f);
+  private static final Color BACKDROP_COLOUR = new Color(0.02f, 0.015f, 0.025f, 1f);
   private static final Color PANEL_COLOUR = new Color(0.11f, 0.075f, 0.08f, 0.98f);
   private static final Color RESULT_COLOUR = new Color(0.07f, 0.045f, 0.05f, 1f);
   private static final Color GOLD_COLOUR = new Color(0.94f, 0.72f, 0.3f, 1f);
