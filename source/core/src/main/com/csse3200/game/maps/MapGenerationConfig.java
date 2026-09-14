@@ -1,13 +1,27 @@
 package com.csse3200.game.maps;
 
 /** Immutable configuration for generating and assigning room types to a map node pool. */
-public final class RoomDistributionConfig {
+public final class MapGenerationConfig {
 
-  private final int normalNodeCount;
-  private final int combatWeight;
-  private final int eventWeight;
-  private final int shopWeight;
+  public static final int MAP_WIDTH = 7;
+  public static final int MAP_HEIGHT = 10;
+  public static final int MAX_NODE_COUNT = MAP_WIDTH * MAP_HEIGHT;
+  public static final int BRANCH_CHANCE = 8;
+
+  private int normalNodeCount = 70;
+
+  // Weights are used as a fixed point decimal with a scaling factor of 100
+  private int combatWeight = 60;
+  private int eventWeight = 20;
+  private int eliteWeight = 10;
+  private int shopWeight = 10;
   private final Long seed;
+
+  /** Creates and validates a room distribution configuration with default values and no seed. */
+  public MapGenerationConfig() {
+    checkValid(normalNodeCount, combatWeight, eventWeight, shopWeight, eliteWeight);
+    this.seed = System.nanoTime();
+  }
 
   /**
    * Creates and validates a room distribution configuration without seed.
@@ -17,9 +31,9 @@ public final class RoomDistributionConfig {
    * @param eventWeight relative event-room weight
    * @param shopWeight relative shop-room weight
    */
-  public RoomDistributionConfig(
-      int normalNodeCount, int combatWeight, int eventWeight, int shopWeight) {
-    this(normalNodeCount, combatWeight, eventWeight, shopWeight, null);
+  public MapGenerationConfig(
+      int normalNodeCount, int combatWeight, int eventWeight, int shopWeight, int eliteWeight) {
+    this(normalNodeCount, combatWeight, eliteWeight, eventWeight, shopWeight, System.nanoTime());
   }
 
   /**
@@ -31,28 +45,34 @@ public final class RoomDistributionConfig {
    * @param shopWeight relative shop-room weight
    * @param seed seed used for repeatable random generation
    */
-  public RoomDistributionConfig(
-      int normalNodeCount, int combatWeight, int eventWeight, int shopWeight, Long seed) {
+  public MapGenerationConfig(
+      int normalNodeCount,
+      int combatWeight,
+      int eventWeight,
+      int shopWeight,
+      int eliteWeight,
+      Long seed) {
 
-    checkValid(normalNodeCount, combatWeight, eventWeight, shopWeight);
+    checkValid(normalNodeCount, combatWeight, eventWeight, shopWeight, eliteWeight);
 
     this.normalNodeCount = normalNodeCount;
     this.combatWeight = combatWeight;
     this.eventWeight = eventWeight;
+    this.eliteWeight = eliteWeight;
     this.shopWeight = shopWeight;
     this.seed = seed;
   }
 
   /** Checks that the node count and weights are valid. */
   private static void checkValid(
-      int normalNodeCount, int combatWeight, int eventWeight, int shopWeight) {
+      int normalNodeCount, int combatWeight, int eventWeight, int shopWeight, int eliteWeight) {
     if (normalNodeCount < 1) {
       throw new IllegalArgumentException("Normal node count must be at least one!");
     }
-    if (combatWeight < 0 || eventWeight < 0 || shopWeight < 0) {
+    if (combatWeight < 0 || eventWeight < 0 || shopWeight < 0 || eliteWeight < 0) {
       throw new IllegalArgumentException("Room weights cannot be negative!");
     }
-    if ((long) combatWeight + eventWeight + shopWeight == 0) {
+    if (combatWeight + eventWeight + shopWeight + eliteWeight == 0) {
       throw new IllegalArgumentException("At least one room weight must be positive!");
     }
   }
@@ -72,6 +92,10 @@ public final class RoomDistributionConfig {
     return eventWeight;
   }
 
+  public int getEliteWeight() {
+    return eliteWeight;
+  }
+
   /** Returns the shop-room weight. */
   public int getShopWeight() {
     return shopWeight;
@@ -83,7 +107,7 @@ public final class RoomDistributionConfig {
   }
 
   /** Returns the combined room weight. */
-  public long getTotalWeight() {
-    return (long) combatWeight + eventWeight + shopWeight;
+  public int getTotalWeight() {
+    return combatWeight + eventWeight + shopWeight + eliteWeight;
   }
 }
