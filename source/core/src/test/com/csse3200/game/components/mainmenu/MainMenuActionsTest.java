@@ -47,10 +47,10 @@ class MainMenuActionsTest {
   }
 
   @Test
-  void bestiaryOpensBestiaryScreen() {
+  void bestiaryOpensLibraryScreen() {
     menu.getEvents().trigger(MainMenuDisplay.BESTIARY_EVENT);
 
-    verify(game).setScreen(GdxGame.ScreenType.BESTIARY);
+    verify(game).setScreen(GdxGame.ScreenType.LIBRARY);
     verify(runState, never()).endRun();
   }
 
