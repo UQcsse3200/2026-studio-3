@@ -89,11 +89,9 @@ class BattleLoopTest {
     deck.drawCards(1);
 
     CardLibrary library = new CardLibrary(List.of(strikeCard()));
-    CardEffectHandler effectHandler =
-        new CardEffectHandler(
-            new CardEffectResolver(library), library, deck, new PlayerEffectState());
-    CardPlayService cardPlayService =
-        new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
+    CardEffectHandler effectHandler = new CardEffectHandler();
+    CardPlayService cardPlayService = new CardPlayService(library, deck,
+            player.getComponent(EnergyComponent.class));
     BattleController controller =
         new BattleController(player, List.of(enemy), effectHandler, cardPlayService);
     AtomicReference<Boolean> outcome = new AtomicReference<>();
@@ -180,11 +178,9 @@ class BattleLoopTest {
             .addComponent(new EnergyComponent(3));
     BattleDeck deck = deckWithFirstCardInHand("defend", "strike");
     CardLibrary library = new CardLibrary(List.of(defend));
-    CardEffectHandler effectHandler =
-        new CardEffectHandler(
-            new CardEffectResolver(library), library, deck, new PlayerEffectState());
-    CardPlayService cardPlayService =
-        new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
+    CardEffectHandler effectHandler = new CardEffectHandler();
+    CardPlayService cardPlayService = new CardPlayService(library, deck,
+            player.getComponent(EnergyComponent.class));
     BattleController controller =
         new BattleController(
             player, List.of(enemy("enemy", 20, 1)), effectHandler, cardPlayService);
@@ -216,11 +212,9 @@ class BattleLoopTest {
             .addComponent(new EnergyComponent(3));
     BattleDeck deck = deckWithFirstCardInHand("bandage", "strike");
     CardLibrary library = new CardLibrary(List.of(bandage));
-    CardEffectHandler effectHandler =
-        new CardEffectHandler(
-            new CardEffectResolver(library), library, deck, new PlayerEffectState());
-    CardPlayService cardPlayService =
-        new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
+    CardEffectHandler effectHandler = new CardEffectHandler();
+    CardPlayService cardPlayService = new CardPlayService(library, deck,
+            player.getComponent(EnergyComponent.class));
     BattleController controller =
         new BattleController(
             player, List.of(enemy("enemy", 20, 1)), effectHandler, cardPlayService);
@@ -250,11 +244,9 @@ class BattleLoopTest {
     Entity enemy = enemy("enemy", 20, 1);
     BattleDeck deck = deckWithFirstCardInHand("strike", "bandage");
     CardLibrary library = new CardLibrary(List.of(strikeCard()));
-    CardEffectHandler effectHandler =
-        new CardEffectHandler(
-            new CardEffectResolver(library), library, deck, new PlayerEffectState());
-    CardPlayService cardPlayService =
-        new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
+    CardEffectHandler effectHandler = new CardEffectHandler();
+    CardPlayService cardPlayService = new CardPlayService(library, deck,
+            player.getComponent(EnergyComponent.class));
     BattleController controller =
         new BattleController(player, List.of(enemy), effectHandler, cardPlayService);
 
@@ -287,11 +279,9 @@ class BattleLoopTest {
     Entity enemy = enemy("enemy", 20, 1);
     BattleDeck deck = deckWithFirstCardInHand("strike", "bandage");
     CardLibrary library = new CardLibrary(List.of(expensiveStrike));
-    CardEffectHandler effectHandler =
-        new CardEffectHandler(
-            new CardEffectResolver(library), library, deck, new PlayerEffectState());
-    CardPlayService cardPlayService =
-        new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
+    CardEffectHandler effectHandler = new CardEffectHandler();
+    CardPlayService cardPlayService = new CardPlayService(library, deck,
+            player.getComponent(EnergyComponent.class));
     BattleController controller =
         new BattleController(player, List.of(enemy), effectHandler, cardPlayService);
 
@@ -326,11 +316,9 @@ class BattleLoopTest {
     Entity secondEnemy = enemy("second_enemy", 20, 1);
     BattleDeck deck = deckWithFirstCardInHand("expose", "strike");
     CardLibrary library = new CardLibrary(List.of(expose));
-    CardEffectHandler effectHandler =
-        new CardEffectHandler(
-            new CardEffectResolver(library), library, deck, new PlayerEffectState());
-    CardPlayService cardPlayService =
-        new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
+    CardEffectHandler effectHandler = new CardEffectHandler();
+    CardPlayService cardPlayService = new CardPlayService(library, deck,
+            player.getComponent(EnergyComponent.class));
     BattleController controller =
         new BattleController(
             player, List.of(firstEnemy, secondEnemy), effectHandler, cardPlayService);

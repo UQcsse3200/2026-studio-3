@@ -109,9 +109,7 @@ class SprintTwoCardsIntegrationTest {
     BattleDeck deck = deckWith("resurrection");
     Team7PlayerStateAdapter playerState = new Team7PlayerStateAdapter(energy, stats);
     CardPlayService cardPlayService = new CardPlayService(library, deck, energy, playerState, null);
-    CardEffectHandler effectHandler =
-        new CardEffectHandler(
-            new CardEffectResolver(library), library, deck, new PlayerEffectState());
+    CardEffectHandler effectHandler = new CardEffectHandler();
     BattleController controller =
         new BattleController(player, List.of(enemy), effectHandler, cardPlayService);
     controller.start();

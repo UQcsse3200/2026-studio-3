@@ -18,8 +18,6 @@ import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
-import com.csse3200.game.cards.effects.CardEffectResolver;
-import com.csse3200.game.cards.effects.PlayerEffectState;
 import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.cards.play.integration.Team3CardPlayAdapter;
 import com.csse3200.game.components.CombatStatsComponent;
@@ -132,10 +130,7 @@ public class BattleScreen extends ScreenAdapter {
     EnergyComponent energy = player.getComponent(EnergyComponent.class);
 
     cardPlayService = new CardPlayService(library, battleDeck, energy);
-    CardEffectResolver effectResolver = new CardEffectResolver(library);
-    CardEffectHandler effectHandler =
-        new CardEffectHandler(effectResolver, library, battleDeck, new PlayerEffectState());
-
+    CardEffectHandler effectHandler = new CardEffectHandler();
     controller =
         new BattleController(player, forestGameArea.getEnemies(), effectHandler, cardPlayService);
 

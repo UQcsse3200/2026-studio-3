@@ -219,11 +219,9 @@ class BattleActionsTest {
         new Entity()
             .addComponent(new CombatStatsComponent(20, 1))
             .addComponent(new EnemyBehaviourComponent("test"));
-    CardEffectHandler effectHandler =
-        new CardEffectHandler(
-            new CardEffectResolver(library), library, deck, new PlayerEffectState());
-    CardPlayService cardPlayService =
-        new CardPlayService(library, deck, testPlayer.getComponent(EnergyComponent.class));
+    CardEffectHandler effectHandler = new CardEffectHandler();
+    CardPlayService cardPlayService = new CardPlayService(library, deck,
+            testPlayer.getComponent(EnergyComponent.class));
     BattleController realController =
         new BattleController(testPlayer, List.of(enemy), effectHandler, cardPlayService);
     Entity battleUI =
