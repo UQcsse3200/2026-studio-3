@@ -51,7 +51,7 @@ class BattleLoopTest {
         new EffectConfig(EffectType.DAMAGE, 6));
   }
 
-  private static Entity enemy(String id, int health, int baseAttack) {
+  private static Entity enemy(int health, int baseAttack) {
     return new Entity()
         .addComponent(new CombatStatsComponent(health, baseAttack))
         .addComponent(new EnemyBehaviourComponent("test"));
@@ -179,7 +179,7 @@ class BattleLoopTest {
         new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
     BattleController controller =
         new BattleController(
-            player, List.of(enemy("enemy", 20, 1)), effectHandler, cardPlayService);
+            player, List.of(enemy(20, 1)), effectHandler, cardPlayService);
     List<BattlePhase> phases = new ArrayList<>();
     controller.addPhaseChangeListener((previous, next) -> phases.add(next));
 
@@ -209,7 +209,7 @@ class BattleLoopTest {
         new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
     BattleController controller =
         new BattleController(
-            player, List.of(enemy("enemy", 20, 1)), effectHandler, cardPlayService);
+            player, List.of(enemy(20, 1)), effectHandler, cardPlayService);
     List<BattlePhase> phases = new ArrayList<>();
     controller.addPhaseChangeListener((previous, next) -> phases.add(next));
 
@@ -230,7 +230,7 @@ class BattleLoopTest {
         new Entity()
             .addComponent(new CombatStatsComponent(20, 0))
             .addComponent(new EnergyComponent(3));
-    Entity enemy = enemy("enemy", 20, 1);
+    Entity enemy = enemy(20, 1);
     BattleDeck deck = deckWithFirstCardInHand("strike", "bandage");
     CardLibrary library = new CardLibrary(List.of(strikeCard()));
     CardEffectHandler effectHandler = new CardEffectHandler();
@@ -263,7 +263,7 @@ class BattleLoopTest {
         new Entity()
             .addComponent(new CombatStatsComponent(20, 0))
             .addComponent(new EnergyComponent(3));
-    Entity enemy = enemy("enemy", 20, 1);
+    Entity enemy = enemy(20, 1);
     BattleDeck deck = deckWithFirstCardInHand("strike", "bandage");
     CardLibrary library = new CardLibrary(List.of(expensiveStrike));
     CardEffectHandler effectHandler = new CardEffectHandler();
@@ -297,8 +297,8 @@ class BattleLoopTest {
         new Entity()
             .addComponent(new CombatStatsComponent(20, 0))
             .addComponent(new EnergyComponent(3));
-    Entity firstEnemy = enemy("first_enemy", 20, 1);
-    Entity secondEnemy = enemy("second_enemy", 20, 1);
+    Entity firstEnemy = enemy(20, 1);
+    Entity secondEnemy = enemy(20, 1);
     BattleDeck deck = deckWithFirstCardInHand("expose", "strike");
     CardLibrary library = new CardLibrary(List.of(expose));
     CardEffectHandler effectHandler = new CardEffectHandler();
