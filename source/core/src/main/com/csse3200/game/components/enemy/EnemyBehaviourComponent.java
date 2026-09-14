@@ -129,7 +129,6 @@ public class EnemyBehaviourComponent extends Component {
     }
 
     CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
-
     CombatStatsComponent attackerStats = entity.getComponent(CombatStatsComponent.class);
 
     if (targetStats != null && attackerStats != null) {

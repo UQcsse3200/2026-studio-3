@@ -2,9 +2,6 @@ package com.csse3200.game.entities.configs;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.csse3200.game.components.CombatStatsComponent;
-import com.csse3200.game.entities.Entity;
-import com.csse3200.game.entities.factories.EnemyFactory;
 import org.junit.jupiter.api.Test;
 
 class EnemyScalingTest {
@@ -113,5 +110,4 @@ class EnemyScalingTest {
     assertEquals(first.health, second.health);
     assertEquals(first.baseAttack, second.baseAttack);
   }
-
 }

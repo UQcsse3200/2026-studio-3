@@ -47,7 +47,7 @@ public class BattleDeck {
       return null;
     }
 
-    String cardId = drawPile.remove(0);
+    String cardId = drawPile.removeFirst();
     hand.add(cardId);
     return cardId;
   }

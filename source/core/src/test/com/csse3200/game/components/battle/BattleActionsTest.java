@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardLibrary;
-import com.csse3200.game.cards.CardPlayRequest;
 import com.csse3200.game.cards.CardType;
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.TargetType;
@@ -16,10 +15,15 @@ import com.csse3200.game.cards.configs.EffectConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.effects.CardEffectResolver;
+import com.csse3200.game.cards.effects.PlayerEffectState;
+import com.csse3200.game.cards.play.CardPlayRequest;
+import com.csse3200.game.cards.play.CardPlayService;
+import com.csse3200.game.cards.play.CardPlayTarget;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattleEvent;
 import com.csse3200.game.components.combat.BattlePhase;
+import com.csse3200.game.components.combat.CardEffectHandler;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.PlayerIntent;
@@ -111,8 +115,9 @@ class BattleActionsTest {
 
     battleUI.getEvents().trigger("playCard", "strike", "bone_crawler");
 
+    CardPlayTarget target = new CardPlayTarget(TargetType.SINGLE_ENEMY, "bone_crawler");
     verify(mockController)
-        .submitCardPlayRequest(new CardPlayRequest("strike", "bone_crawler"), PlayerIntent.ATTACK);
+        .submitCardPlayRequest(new CardPlayRequest("strike", target), PlayerIntent.ATTACK);
   }
 
   @Test
@@ -125,8 +130,9 @@ class BattleActionsTest {
 
     battleUI.getEvents().trigger("playCard", "defend", "player");
 
+    CardPlayTarget target = new CardPlayTarget(TargetType.SELF, null);
     verify(mockController)
-        .submitCardPlayRequest(new CardPlayRequest("defend", "player"), PlayerIntent.DEFEND);
+        .submitCardPlayRequest(new CardPlayRequest("defend", target), PlayerIntent.DEFEND);
   }
 
   @Test
@@ -139,8 +145,9 @@ class BattleActionsTest {
 
     battleUI.getEvents().trigger("playCard", "bandage", "player");
 
+    CardPlayTarget target = new CardPlayTarget(TargetType.SELF, null);
     verify(mockController)
-        .submitCardPlayRequest(new CardPlayRequest("bandage", "player"), PlayerIntent.OTHER);
+        .submitCardPlayRequest(new CardPlayRequest("bandage", target), PlayerIntent.OTHER);
   }
 
   @Test
@@ -212,9 +219,13 @@ class BattleActionsTest {
         new Entity()
             .addComponent(new CombatStatsComponent(20, 1))
             .addComponent(new EnemyBehaviourComponent("test"));
+    CardEffectHandler effectHandler =
+        new CardEffectHandler(
+            new CardEffectResolver(library), library, deck, new PlayerEffectState());
+    CardPlayService cardPlayService =
+        new CardPlayService(library, deck, testPlayer.getComponent(EnergyComponent.class));
     BattleController realController =
-        new BattleController(
-            testPlayer, List.of(enemy), new CardEffectResolver(library), library, deck);
+        new BattleController(testPlayer, List.of(enemy), effectHandler, cardPlayService);
     Entity battleUI =
         new Entity().addComponent(new BattleActions(realController, mock(GdxGame.class), library));
     battleUI.create();
