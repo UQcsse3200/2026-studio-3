@@ -10,6 +10,7 @@ public class MapGraph implements EncounterCallback {
 
   private Map<Integer, MapNode> nodes;
   private MapNode currentNode;
+  private MapNode previousNode; // tracks the node before the current one, for abandon
 
   /**
    * Creates a graph containing an existing node pool and runs procedural path generation over it.
@@ -233,9 +234,35 @@ public class MapGraph implements EncounterCallback {
     }
 
     // state of previous currentNode should be updated when its encounter completes.
+    previousNode = currentNode;
     currentNode = targetNode;
     targetNode.setState(NodeState.CURRENT);
 
+    return true;
+  }
+
+  /**
+   * Reverts an abandoned encounter: the current node goes back to AVAILABLE (or LOCKED if it was
+   * the very first move, with no prior position to return to), and the previous node becomes
+   * current again.
+   *
+   * @return true if an abandon was applied, false if there was no current node to abandon
+   */
+  public boolean abandonCurrentNode() {
+    if (currentNode == null) {
+      return false;
+    }
+
+    if (previousNode == null) {
+      currentNode.setState(NodeState.LOCKED);
+      currentNode = null;
+      return true;
+    }
+
+    currentNode.setState(NodeState.AVAILABLE);
+    currentNode = previousNode;
+    currentNode.setState(NodeState.CURRENT);
+    previousNode = null;
     return true;
   }
 
