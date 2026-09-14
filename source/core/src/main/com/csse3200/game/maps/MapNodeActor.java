@@ -16,6 +16,7 @@ public class MapNodeActor extends Group {
   private final MapNode node;
   public float size;
   private Image nodeIcon;
+  private Image completedCross;
 
   /**
    * Constructer class to intialize a MapNodeActor. The size of the node is determined from the
@@ -27,13 +28,17 @@ public class MapNodeActor extends Group {
   public MapNodeActor(MapNode node) {
     this.node = node;
     float mapWidth = Gdx.graphics.getWidth();
-    this.size = mapWidth / 13f;
+    this.size = (mapWidth - 512) / 13f;
     nodeIcon =
         new Image(ServiceLocator.getResourceService().getAsset(getNodeIcon(), Texture.class));
 
+    if (node.getRoomType() == RoomType.FINAL) {
+      this.size *= 2f;
+    }
+
     nodeIcon.setSize(size, size);
-    checkNodeState();
     addActor(nodeIcon);
+    checkNodeState();
   }
 
   /**
@@ -50,8 +55,8 @@ public class MapNodeActor extends Group {
         new Image(ServiceLocator.getResourceService().getAsset(getNodeIcon(), Texture.class));
 
     nodeIcon.setSize(size, size);
-    checkNodeState();
     addActor(nodeIcon);
+    checkNodeState();
   }
 
   /**
@@ -66,6 +71,18 @@ public class MapNodeActor extends Group {
     this.size = mapWidth / 13f;
     nodeIcon = new Image();
     nodeIcon.setSize(size, size);
+  }
+
+  private void addCompletedCross() {
+    Texture crossTexture =
+        ServiceLocator.getResourceService().getAsset("images/map/cross.png", Texture.class);
+
+    completedCross = new Image(crossTexture);
+
+    completedCross.setSize(size, size);
+    completedCross.setPosition(0, 0);
+    completedCross.getColor().a = 1f;
+    addActor(completedCross);
   }
 
   /**
@@ -126,54 +143,17 @@ public class MapNodeActor extends Group {
   private String getNodeIcon() {
     switch (node.getRoomType()) {
       case COMBAT:
-        if (node.getState() == NodeState.COMPLETED) {
-          return "images/combat_icon_completed.png";
-        }
-        if (node.getState() == NodeState.CURRENT) {
-          return "images/combat_icon_current.png";
-        } else {
-          return "images/combat_icon.png";
-        }
-      case ELITE:
-        if (node.getState() == NodeState.COMPLETED) {
-          return "images/combat_icon_completed.png";
-        }
-        if (node.getState() == NodeState.CURRENT) {
-          return "images/combat_icon_current.png";
-        } else {
-          return "images/final_icon.png";
-        }
+        return "images/map/combat.png";
       case SHOP:
-        if (node.getState() == NodeState.COMPLETED) {
-          return "images/shop_icon_completed.png";
-        }
-        if (node.getState() == NodeState.CURRENT) {
-          return "images/shop_icon_current.png";
-        } else {
-          return "images/shop_icon.png";
-        }
+        return "images/map/shop.png";
       case EVENT:
-        if (node.getState() == NodeState.COMPLETED) {
-          return "images/event_icon_completed.png";
-        }
-        if (node.getState() == NodeState.CURRENT) {
-          return "images/event_icon_current.png";
-        } else {
-          return "images/event_icon.png";
-        }
+        return "images/map/event.png";
       case FINAL:
-        if (node.getState() == NodeState.CURRENT) {
-          return "images/final_icon_current.png";
-        } else {
-          return "images/final_icon.png";
-        }
-      case START: // TODO: temporary placement of START case, needs UI
-        if (node.getState() == NodeState.CURRENT) {
-          return "images/final_icon_current.png";
-        } else {
-          return "images/final_icon.png";
-        }
-
+        return "images/map/boss.png";
+      case START:
+        return "images/map/start.png";
+      case ELITE:
+        return "images/map/combat_elite.png";
       default:
         return "images/event_icon.png";
     }
@@ -184,16 +164,18 @@ public class MapNodeActor extends Group {
     float iconSize = size;
     switch (node.getState()) {
       case LOCKED:
-        nodeIcon.getColor().a = 0.5f;
+        nodeIcon.getColor().a = 0.75f;
         break;
       case AVAILABLE:
-        iconSize = size * 1.25f;
+        iconSize = size * 1.125f;
         break;
       case COMPLETED:
         nodeIcon.getColor().a = 0.5f;
+        if (node.getRoomType() != RoomType.START) {
+          addCompletedCross();
+        }
         break;
       case CURRENT:
-        iconSize = size * 1.25f;
         break;
       default:
         break;
