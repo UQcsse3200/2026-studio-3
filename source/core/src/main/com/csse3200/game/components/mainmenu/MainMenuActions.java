@@ -19,13 +19,12 @@ public class MainMenuActions extends Component {
 
   @Override
   public void create() {
-    entity.getEvents().addListener("start", this::onStart);
-    entity.getEvents().addListener("map", this::onStart);
-    entity.getEvents().addListener("load", this::onLoad);
+    entity.getEvents().addListener(MainMenuDisplay.START_EVENT, this::onStart);
+    entity.getEvents().addListener(MainMenuDisplay.LOAD_EVENT, this::onLoad);
+    entity.getEvents().addListener(MainMenuDisplay.BESTIARY_EVENT, this::onBestiary);
+    entity.getEvents().addListener(MainMenuDisplay.SETTINGS_EVENT, this::onSettings);
+    entity.getEvents().addListener(MainMenuDisplay.EXIT_EVENT, this::onExit);
     entity.getEvents().addListener("library", this::onLibrary);
-    entity.getEvents().addListener("exit", this::onExit);
-    entity.getEvents().addListener("settings", this::onSettings);
-    entity.getEvents().addListener("shop", this::onShop);
   }
 
   /** Discards any run in progress and opens a fresh map. */
@@ -41,7 +40,15 @@ public class MainMenuActions extends Component {
     game.setScreen(GdxGame.ScreenType.SAVE_LOAD);
   }
 
-  /** Opens the library screen. */
+  /** Opens the bestiary screen. */
+  private void onBestiary() {
+    logger.info("Opening library screen from bestiary button");
+    game.setScreen(GdxGame.ScreenType.LIBRARY);
+  }
+
+  /** Opens the library screen. Not currently reachable from the main menu — see TODO. */
+  // TODO: no menu button currently triggers this event; flagged to Team 4/William re: whether
+  // Library needs a menu entry point now that the old menu (which had one) is gone.
   private void onLibrary() {
     logger.info("Opening library screen");
     game.setScreen(GdxGame.ScreenType.LIBRARY);
@@ -57,11 +64,5 @@ public class MainMenuActions extends Component {
   private void onSettings() {
     logger.info("Launching settings screen");
     game.setScreen(GdxGame.ScreenType.SETTINGS);
-  }
-
-  /** Opens the non-combat encounter screen (Chance encounter into the Shop). */
-  private void onShop() {
-    logger.info("Opening shop encounter");
-    game.setScreen(GdxGame.ScreenType.MAIN_GAME);
   }
 }

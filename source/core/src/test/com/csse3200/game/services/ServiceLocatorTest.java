@@ -22,18 +22,21 @@ class ServiceLocatorTest {
     PhysicsService physicsService = mock(PhysicsService.class);
     GameTime gameTime = new GameTime();
     BestiaryService bestiaryService = new BestiaryService(new EnemyConfigs());
+    GamePauseService pauseService = new GamePauseService(gameTime);
 
     ServiceLocator.registerEntityService(entityService);
     ServiceLocator.registerRenderService(renderService);
     ServiceLocator.registerPhysicsService(physicsService);
     ServiceLocator.registerTimeSource(gameTime);
     ServiceLocator.registerBestiaryService(bestiaryService);
+    ServiceLocator.registerPauseService(pauseService);
 
     assertEquals(ServiceLocator.getEntityService(), entityService);
     assertEquals(ServiceLocator.getRenderService(), renderService);
     assertEquals(ServiceLocator.getPhysicsService(), physicsService);
     assertEquals(ServiceLocator.getTimeSource(), gameTime);
     assertEquals(ServiceLocator.getBestiaryService(), bestiaryService);
+    assertEquals(ServiceLocator.getPauseService(), pauseService);
 
     ServiceLocator.clear();
     assertNull(ServiceLocator.getEntityService());
@@ -41,5 +44,6 @@ class ServiceLocatorTest {
     assertNull(ServiceLocator.getPhysicsService());
     assertNull(ServiceLocator.getTimeSource());
     assertNull(ServiceLocator.getBestiaryService());
+    assertNull(ServiceLocator.getPauseService());
   }
 }
