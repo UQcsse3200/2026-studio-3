@@ -1,14 +1,11 @@
 package com.csse3200.game.areas;
 
-import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.math.GridPoint2;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.Gdx;
+import com.csse3200.game.GdxGame;
 import com.csse3200.game.areas.terrain.TerrainFactory;
-import com.csse3200.game.areas.terrain.TerrainFactory.TerrainType;
 import com.csse3200.game.chance.ChanceEncounterFactory;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.chance.ChanceEncounterDisplay;
-import com.csse3200.game.components.gamearea.GameAreaDisplay;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.components.shop.ShopDisplay;
 import com.csse3200.game.encounters.integration.ComponentPlayerStateAdapter;
@@ -17,69 +14,41 @@ import com.csse3200.game.encounters.integration.FunctionalCardCatalogAdapter;
 import com.csse3200.game.encounters.integration.IntegratedShopTransactionGateway;
 import com.csse3200.game.encounters.integration.InventoryDeckAdapter;
 import com.csse3200.game.entities.Entity;
-import com.csse3200.game.entities.factories.NPCFactory;
-import com.csse3200.game.entities.factories.ObstacleFactory;
 import com.csse3200.game.entities.factories.PlayerFactory;
 import com.csse3200.game.files.FileLoader;
+import com.csse3200.game.maps.MapNode;
+import com.csse3200.game.maps.RoomType;
+import com.csse3200.game.maps.RunState;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.shop.ShopConfig;
 import com.csse3200.game.shop.ShopEncounter;
 import com.csse3200.game.shop.ShopService;
-import com.csse3200.game.utils.math.GridPoint2Utils;
-import com.csse3200.game.utils.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Non-combat encounter area used to host Team 2 encounter UI and lifecycle integration.
+ * Non-combat encounter area that displays the Team 2 Chance or Shop UI belonging to the active map
+ * node.
  *
- * <p>Chance and Shop encounters are intentionally not chained here. Each encounter is started
- * independently, and completion is reported through the shared encounter callback. Map screen
- * navigation and map refresh behaviour are left to the Map integration layer.
+ * <p>Chance and Shop encounters are intentionally not chained here. Each encounter is selected and
+ * started independently from its map node, then reports completion through the shared encounter
+ * callback.
  *
- * <p>This is Team 2's {@code ForestGameArea} from the {@code Feature-2} branch, restored as its own
- * area after the battle team's {@code ForestGameArea} replaced it on {@code main}. It still needs a
- * host screen that has registered the entity, render, resource and physics services (as {@code
- * MainGameScreen} does) before {@link #create()} is called.
+ * <p>The Sprint 1 forest demo is deliberately not created here. Encounter screens retain a logical
+ * player entity for the existing health, currency and deck adapters, while the full-screen Chance
+ * or Shop display owns everything the player sees.
  *
- * <p>The one deviation from the original: the throwaway demo {@code MapGraph} it built is gone (the
- * current {@code MapGraph} constructor forces full path generation and cannot hold three hand-made
- * nodes). Nothing read that graph's state; the Chance -> Shop hand-off it drove now lives directly
- * in the encounter-flow callback below.
+ * <p>Encounter completion is reported to the game's {@link RunState}. Returning therefore restores
+ * the same generated map and its progress instead of exposing this area's demo forest. If the area
+ * is opened from the main-menu debug shortcut with no active node, it displays a standalone Shop
+ * preview.
  */
 public class EncounterGameArea extends GameArea {
   private static final Logger logger = LoggerFactory.getLogger(EncounterGameArea.class);
-  private static final int NUM_TREES = 7;
-  private static final int NUM_GHOSTS = 2;
-  private static final Integer SHOP_NODE_ID = 1;
-  private static final Integer CHANCE_NODE_ID = 2;
   private static final String SHOP_CONFIG = "configs/shopItems.json";
-  private static final GridPoint2 PLAYER_SPAWN = new GridPoint2(10, 10);
-  private static final float WALL_WIDTH = 0.1f;
-  private static final String[] forestTextures = {
-    "images/star_player.png",
-    "images/tree.png",
-    "images/ghost_king.png",
-    "images/ghost_1.png",
-    "images/grass_1.png",
-    "images/grass_2.png",
-    "images/grass_3.png",
-    "images/hex_grass_1.png",
-    "images/hex_grass_2.png",
-    "images/hex_grass_3.png",
-    "images/iso_grass_1.png",
-    "images/iso_grass_2.png",
-    "images/iso_grass_3.png"
-  };
-  private static final String[] forestTextureAtlases = {
-    "images/terrain_iso_grass.atlas", "images/ghost.atlas", "images/ghostKing.atlas"
-  };
-  private static final String[] forestSounds = {"sounds/Impact4.ogg"};
-  private static final String BACKGROUND_MUSIC = "sounds/BGM_03_mp3.mp3";
-  private static final String[] forestMusic = {BACKGROUND_MUSIC};
-
-  private final TerrainFactory terrainFactory;
+  private static final String[] encounterTextures = {"images/star_player.png"};
+  private final GdxGame game;
 
   private Entity player;
   private EncounterFlowController encounterFlow;
@@ -87,57 +56,84 @@ public class EncounterGameArea extends GameArea {
   /**
    * Initialise this EncounterGameArea to use the provided TerrainFactory.
    *
-   * @param terrainFactory TerrainFactory used to create the terrain for the GameArea.
-   * @requires terrainFactory != null
+   * @param terrainFactory TerrainFactory used to create the terrain for the GameArea
+   * @param game game that owns the current run and screen navigation
+   * @requires terrainFactory != null && game != null
    */
-  public EncounterGameArea(TerrainFactory terrainFactory) {
+  public EncounterGameArea(TerrainFactory terrainFactory, GdxGame game) {
     super();
-    this.terrainFactory = terrainFactory;
+    this.game = game;
   }
 
-  /** Create the game area, including terrain, static entities (trees), dynamic entities (player) */
+  /** Creates the logical encounter state and the UI for the active map node. */
   @Override
   public void create() {
     loadAssets();
-
-    displayUI();
-
-    spawnTerrain();
-    spawnTrees();
-    player = spawnPlayer();
+    player = PlayerFactory.createPlayer();
     initialiseEncounterFlow();
-    displayChanceEncounter();
-    spawnGhosts();
-    spawnGhostKing();
-
-    playMusic();
+    displaySelectedEncounter();
   }
 
   public Entity getPlayer() {
     return player;
   }
 
-  private void displayUI() {
-    Entity ui = new Entity();
-    ui.addComponent(new GameAreaDisplay("Box Forest"));
-    spawnEntity(ui);
-  }
-
-  private void displayShop() {
+  private void displayShop(Integer nodeId) {
     ShopService shopService = new ShopService(FileLoader.readClass(ShopConfig.class, SHOP_CONFIG));
-    ShopEncounter shopEncounter = encounterFlow.startShop(SHOP_NODE_ID, shopService);
+    ShopEncounter shopEncounter = encounterFlow.startShop(nodeId, shopService);
     Entity shopUi = new Entity();
-    shopUi.addComponent(new ShopDisplay(shopEncounter));
+    shopUi.addComponent(new ShopDisplay(shopEncounter, ServiceLocator.getCardLibrary()));
     spawnEntity(shopUi);
   }
 
-  private void displayChanceEncounter() {
+  private void displayChanceEncounter(Integer nodeId) {
     Entity chanceUi = new Entity();
     chanceUi.addComponent(
         new ChanceEncounterDisplay(
             encounterFlow.startChance(
-                CHANCE_NODE_ID, ChanceEncounterFactory.createInitialEncounters().get(0))));
+                nodeId, ChanceEncounterFactory.createInitialEncounters().get(0))));
     spawnEntity(chanceUi);
+  }
+
+  private void displaySelectedEncounter() {
+    RunState runState = game.getRunState();
+    Integer nodeId = runState.getActiveNodeId();
+
+    if (nodeId == null) {
+      logger.info("No active map node; opening standalone Shop preview");
+      displayShop(ShopEncounter.DEFAULT_NODE_ID);
+      return;
+    }
+
+    MapNode node = runState.getMapGraph() == null ? null : runState.getMapGraph().getNode(nodeId);
+    RoomType roomType = node == null ? null : node.getRoomType();
+
+    try {
+      switch (encounterTypeFor(roomType)) {
+        case CHANCE:
+          displayChanceEncounter(nodeId);
+          break;
+        case SHOP:
+          displayShop(nodeId);
+          break;
+        default:
+          throw new IllegalStateException("Unhandled non-combat encounter type");
+      }
+    } catch (IllegalArgumentException exception) {
+      logger.error(
+          "Node {} has unsupported encounter room type {}; returning to map", nodeId, roomType);
+      completeRunEncounterAndReturnToMap(nodeId, false);
+    }
+  }
+
+  static EncounterFlowController.EncounterType encounterTypeFor(RoomType roomType) {
+    if (roomType == RoomType.EVENT) {
+      return EncounterFlowController.EncounterType.CHANCE;
+    }
+    if (roomType == RoomType.SHOP) {
+      return EncounterFlowController.EncounterType.SHOP;
+    }
+    throw new IllegalArgumentException("Room type is not a non-combat encounter: " + roomType);
   }
 
   private void initialiseEncounterFlow() {
@@ -152,96 +148,35 @@ public class EncounterGameArea extends GameArea {
 
     encounterFlow =
         new EncounterFlowController(
-            playerState,
-            shopTransactions,
-            (nodeId, success) ->
-                logger.debug(
-                    "Encounter completed for node {} with success={}; awaiting map flow integration",
-                    nodeId,
-                    success));
+            playerState, shopTransactions, this::completeRunEncounterAndReturnToMap);
   }
 
-  private void spawnTerrain() {
-    // Background terrain
-    terrain = terrainFactory.createTerrain(TerrainType.FOREST_DEMO);
-    spawnEntity(new Entity().addComponent(terrain));
+  private void completeRunEncounterAndReturnToMap(Integer nodeId, boolean success) {
+    RunState runState = game.getRunState();
+    Integer activeNodeId = runState.getActiveNodeId();
 
-    // Terrain walls
-    float tileSize = terrain.getTileSize();
-    GridPoint2 tileBounds = terrain.getMapBounds(0);
-    Vector2 worldBounds = new Vector2(tileBounds.x * tileSize, tileBounds.y * tileSize);
-
-    // Left
-    spawnEntityAt(
-        ObstacleFactory.createWall(WALL_WIDTH, worldBounds.y), GridPoint2Utils.ZERO, false, false);
-    // Right
-    spawnEntityAt(
-        ObstacleFactory.createWall(WALL_WIDTH, worldBounds.y),
-        new GridPoint2(tileBounds.x, 0),
-        false,
-        false);
-    // Top
-    spawnEntityAt(
-        ObstacleFactory.createWall(worldBounds.x, WALL_WIDTH),
-        new GridPoint2(0, tileBounds.y),
-        false,
-        false);
-    // Bottom
-    spawnEntityAt(
-        ObstacleFactory.createWall(worldBounds.x, WALL_WIDTH), GridPoint2Utils.ZERO, false, false);
-  }
-
-  private void spawnTrees() {
-    GridPoint2 minPos = new GridPoint2(0, 0);
-    GridPoint2 maxPos = terrain.getMapBounds(0).sub(2, 2);
-
-    for (int i = 0; i < NUM_TREES; i++) {
-      GridPoint2 randomPos = RandomUtils.random(minPos, maxPos);
-      Entity tree = ObstacleFactory.createTree();
-      spawnEntityAt(tree, randomPos, true, false);
+    if (activeNodeId != null && !activeNodeId.equals(nodeId)) {
+      logger.warn(
+          "Ignoring completion for node {} because active map node is {}", nodeId, activeNodeId);
+      return;
     }
-  }
 
-  private Entity spawnPlayer() {
-    Entity newPlayer = PlayerFactory.createPlayer();
-    spawnEntityAt(newPlayer, PLAYER_SPAWN, true, true);
-    return newPlayer;
-  }
-
-  private void spawnGhosts() {
-    GridPoint2 minPos = new GridPoint2(0, 0);
-    GridPoint2 maxPos = terrain.getMapBounds(0).sub(2, 2);
-
-    for (int i = 0; i < NUM_GHOSTS; i++) {
-      GridPoint2 randomPos = RandomUtils.random(minPos, maxPos);
-      Entity ghost = NPCFactory.createGhost(player);
-      spawnEntityAt(ghost, randomPos, true, true);
+    if (activeNodeId != null) {
+      runState.completeEncounter(success);
     }
-  }
 
-  private void spawnGhostKing() {
-    GridPoint2 minPos = new GridPoint2(0, 0);
-    GridPoint2 maxPos = terrain.getMapBounds(0).sub(2, 2);
-
-    GridPoint2 randomPos = RandomUtils.random(minPos, maxPos);
-    Entity ghostKing = NPCFactory.createGhostKing(player);
-    spawnEntityAt(ghostKing, randomPos, true, true);
-  }
-
-  private void playMusic() {
-    Music music = ServiceLocator.getResourceService().getAsset(BACKGROUND_MUSIC, Music.class);
-    music.setLooping(true);
-    music.setVolume(0.3f);
-    music.play();
+    Runnable returnToMap = () -> game.setScreen(GdxGame.ScreenType.MAP);
+    if (Gdx.app == null) {
+      returnToMap.run();
+    } else {
+      Gdx.app.postRunnable(returnToMap);
+    }
   }
 
   private void loadAssets() {
     logger.debug("Loading assets");
     ResourceService resourceService = ServiceLocator.getResourceService();
-    resourceService.loadTextures(forestTextures);
-    resourceService.loadTextureAtlases(forestTextureAtlases);
-    resourceService.loadSounds(forestSounds);
-    resourceService.loadMusic(forestMusic);
+    resourceService.loadTextures(encounterTextures);
 
     while (!resourceService.loadForMillis(10)) {
       // This could be upgraded to a loading screen
@@ -252,16 +187,12 @@ public class EncounterGameArea extends GameArea {
   private void unloadAssets() {
     logger.debug("Unloading assets");
     ResourceService resourceService = ServiceLocator.getResourceService();
-    resourceService.unloadAssets(forestTextures);
-    resourceService.unloadAssets(forestTextureAtlases);
-    resourceService.unloadAssets(forestSounds);
-    resourceService.unloadAssets(forestMusic);
+    resourceService.unloadAssets(encounterTextures);
   }
 
   @Override
   public void dispose() {
     super.dispose();
-    ServiceLocator.getResourceService().getAsset(BACKGROUND_MUSIC, Music.class).stop();
     this.unloadAssets();
   }
 }
