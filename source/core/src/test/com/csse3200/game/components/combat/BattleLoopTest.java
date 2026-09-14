@@ -313,9 +313,9 @@ class BattleLoopTest {
         controller.submitCardPlayRequest(CardPlayRequest.allEnemies("expose"));
 
     assertTrue(accepted);
-    assertTrue(firstEnemy.getComponent(CombatStatsComponent.class).hasStatusEffect("vulnerable"));
+    assertTrue(firstEnemy.getComponent(CombatStatsComponent.class).hasStatusEffect("VULNERABLE"));
 
-    assertTrue(secondEnemy.getComponent(CombatStatsComponent.class).hasStatusEffect("vulnerable"));
+    assertTrue(secondEnemy.getComponent(CombatStatsComponent.class).hasStatusEffect("VULNERABLE"));
     assertEquals(2, player.getComponent(EnergyComponent.class).getCurrentEnergy());
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }
