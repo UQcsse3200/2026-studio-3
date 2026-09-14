@@ -10,6 +10,7 @@ import com.csse3200.game.entities.factories.EnemyFactory;
 import com.csse3200.game.entities.factories.NPCFactory;
 import com.csse3200.game.entities.factories.ObstacleFactory;
 import com.csse3200.game.entities.factories.PlayerFactory;
+import com.csse3200.game.maps.RunState;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.utils.math.GridPoint2Utils;
@@ -26,6 +27,7 @@ public class ForestGameArea extends GameArea {
   private static final GridPoint2 PLAYER_SPAWN = new GridPoint2(5, 20);
   private static final GridPoint2 ENEMY_SPAWN = new GridPoint2(20, PLAYER_SPAWN.y);
   private static final float WALL_WIDTH = 3f;
+  private final RunState runState;
   private static final String[] forestTextures = {
     "images/star_player.png",
     "images/tree.png",
@@ -64,10 +66,11 @@ public class ForestGameArea extends GameArea {
    * @param terrainFactory TerrainFactory used to create the terrain for the GameArea.
    * @requires terrainFactory != null
    */
-  public ForestGameArea(TerrainFactory terrainFactory, Integer progression) {
+  public ForestGameArea(TerrainFactory terrainFactory, Integer progression, RunState runState) {
     super();
     this.terrainFactory = terrainFactory;
     this.progression = progression;
+    this.runState = runState;
   }
 
   /** Create the game area, including terrain, static entities (trees), dynamic entities (player) */
@@ -129,7 +132,13 @@ public class ForestGameArea extends GameArea {
   }
 
   private Entity spawnPlayer() {
-    Entity newPlayer = PlayerFactory.createPlayer();
+    runState.initialisePlayerStats(
+        PlayerFactory.getDefaultHealth(),
+        PlayerFactory.getDefaultMaxHealth(),
+        PlayerFactory.getDefaultMaxEnergy());
+
+    Entity newPlayer = PlayerFactory.createPlayer(runState.getPlayerHealth());
+
     spawnEntityAt(newPlayer, PLAYER_SPAWN, true, true);
     return newPlayer;
   }

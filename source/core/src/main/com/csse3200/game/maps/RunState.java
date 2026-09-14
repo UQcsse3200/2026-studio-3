@@ -20,6 +20,10 @@ public class RunState {
   private MapGraph mapGraph;
   private Integer activeNodeId;
   private PlayerDeck playerDeck;
+  private int playerHealth;
+  private int playerMaxHealth;
+  private int playerMaxEnergy;
+  private boolean playerStatsInitialised;
 
   /**
    * Returns the run-scoped player deck, creating the starter deck on first access.
@@ -35,6 +39,75 @@ public class RunState {
       playerDeck = PlayerDeckFactory.createStarterDeck(cardService);
     }
     return playerDeck;
+  }
+
+  /**
+   * Initialises the player's health
+   *
+   * @param startingHealth the health the player starts with
+   */
+  public void initialisePlayerStats(
+      int startingHealth, int startingMaxHealth, int startingMaxEnergy) {
+    if (!playerStatsInitialised) {
+      playerHealth = startingHealth;
+      playerMaxHealth = startingMaxHealth;
+      playerMaxEnergy = startingMaxEnergy;
+      playerStatsInitialised = true;
+    }
+  }
+
+  /**
+   * Returns the player's current health
+   *
+   * @return the player's health
+   */
+  public int getPlayerHealth() {
+    return playerHealth;
+  }
+
+  /**
+   * Returns the player's max health
+   *
+   * @return the player's max health
+   */
+  public int getPlayerMaxHealth() {
+    return playerMaxHealth;
+  }
+
+  /**
+   * Returns the player's max energy
+   *
+   * @return the player's max energy
+   */
+  public int getPlayerMaxEnergy() {
+    return playerMaxEnergy;
+  }
+
+  /**
+   * Sets the player's health
+   *
+   * @param health the player's new health
+   */
+  public void setPlayerHealth(int health) {
+    playerHealth = Math.max(0, health);
+  }
+
+  /**
+   * Sets the player's max health
+   *
+   * @param maxHealth the player's new max health
+   */
+  public void setPlayerMaxHealth(int maxHealth) {
+    playerMaxHealth = Math.max(1, maxHealth);
+  }
+
+  /**
+   * Sets the player's max energy
+   *
+   * @param maxEnergy the player's new max energy
+   */
+  public void setPlayerMaxEnergy(int maxEnergy) {
+    playerMaxEnergy = Math.max(1, maxEnergy);
   }
 
   /**
@@ -124,5 +197,9 @@ public class RunState {
     mapGraph = null;
     activeNodeId = null;
     playerDeck = null;
+    playerHealth = 0;
+    playerMaxHealth = 0;
+    playerMaxEnergy = 0;
+    playerStatsInitialised = false;
   }
 }
