@@ -5,8 +5,9 @@ import com.csse3200.game.cards.EffectType;
 /**
  * A single effect applied by a card, loaded as part of {@code configs/cards.json}. The meaning of
  * value depends on the effect type: it is a damage amount for DAMAGE, a block amount for BLOCK, an
- * amount of health for HEAL, and a number of stacks for POISON, VULNERABLE and STRENGTH. Duration
- * is only used by effects where {@link EffectType#usesDuration()} is true.
+ * amount of health for HEAL, an amount of restored energy for ENERGY_GAIN, and a number of stacks
+ * for POISON, VULNERABLE and STRENGTH. Duration is only used by effects where {@link
+ * EffectType#usesDuration()} is true.
  */
 public class EffectConfig {
   /** The kind of effect applied. */

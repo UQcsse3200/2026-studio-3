@@ -173,7 +173,8 @@ public final class CardValidator {
     if (target == TargetType.SELF) {
       return effectType == EffectType.BLOCK
           || effectType == EffectType.HEAL
-          || effectType == EffectType.STRENGTH;
+          || effectType == EffectType.STRENGTH
+          || effectType == EffectType.ENERGY_GAIN;
     }
     return effectType == EffectType.DAMAGE || effectType.usesDuration();
   }

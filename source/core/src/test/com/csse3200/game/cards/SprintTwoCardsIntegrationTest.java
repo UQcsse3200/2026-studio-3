@@ -175,12 +175,18 @@ class SprintTwoCardsIntegrationTest {
   @Test
   void shouldGrantBlockAndStrengthThenBoostStarfallAgainstAllEnemies() {
     CombatStatsComponent stats = new CombatStatsComponent(100, 1);
-    Team7PlayerStateAdapter player = new Team7PlayerStateAdapter(new EnergyComponent(5), stats);
+    EnergyComponent energy = new EnergyComponent(5);
+    energy.spendEnergy(2);
+    Team7PlayerStateAdapter player = new Team7PlayerStateAdapter(energy, stats);
     CardEffectResolver resolver = new CardEffectResolver(library);
     var ward = resolver.resolve("astral_ward", new CardEffectResolutionContext(0, 0, 0));
+    assertEquals(
+        List.of(EffectType.BLOCK, EffectType.STRENGTH, EffectType.ENERGY_GAIN),
+        ward.playerEffects().stream().map(effect -> effect.type()).toList());
     player.applyPlayerEffects(ward.playerEffects());
     assertEquals(4, stats.getBlock());
     assertEquals(1, player.statusValue(EffectType.STRENGTH));
+    assertEquals(4, energy.getCurrentEnergy());
 
     Entity first = new Entity().addComponent(new CombatStatsComponent(30, 0));
     Entity second = new Entity().addComponent(new CombatStatsComponent(20, 0));
@@ -211,6 +217,27 @@ class SprintTwoCardsIntegrationTest {
     assertEquals(1, enemies.statusValue("first", EffectType.VULNERABLE));
     assertEquals(30, second.getComponent(CombatStatsComponent.class).getHealth());
     assertEquals(0, enemies.statusValue("second", EffectType.VULNERABLE));
+  }
+
+  @Test
+  void shouldRestoreAstralWardEnergyInActiveBattleControllerPath() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 1);
+    EnergyComponent energy = new EnergyComponent(5);
+    Entity player = new Entity().addComponent(stats).addComponent(energy);
+    BattleController controller =
+        new BattleController(
+            player,
+            List.of(defendingEnemy()),
+            new CardEffectResolver(library),
+            library,
+            deckWith("astral_ward"));
+    controller.start();
+
+    assertTrue(
+        controller.submitCardPlayRequest(
+            new CardPlayRequest("astral_ward", "player"), PlayerIntent.DEFEND));
+
+    assertEquals(4, energy.getCurrentEnergy());
   }
 
   private BattleDeck deckWith(String id) {

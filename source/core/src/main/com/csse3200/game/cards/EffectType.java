@@ -19,7 +19,9 @@ public enum EffectType {
   /** Decreases 25% the damage output to target while active. */
   FEEBLE(true),
   /** Increases damage the target deals for the rest of the combat. */
-  STRENGTH(false);
+  STRENGTH(false),
+  /** Immediately restores player energy, capped by the player's maximum energy. */
+  ENERGY_GAIN(false);
 
   private final boolean usesDuration;
 
