@@ -123,16 +123,59 @@ public class ClickableFactory extends UIComponent {
    * @param handRecords one record per card currently in the player's hand
    */
   public void rebuildHand(List<ClickableRecord> handRecords) {
+    rebuildByTrigger(HAND_TRIGGER, handRecords);
+  }
+
+  /**
+   * Rebuilds every widget with the given trigger name: drops the old ones and builds fresh ones
+   * from {@code records}, leaving every other widget this factory owns untouched. Generalization of
+   * {@link #rebuildHand} for other dynamically-rebuilt widget groups (e.g. a popup's per-card toggle
+   * buttons).
+   *
+   * @param trigger trigger name identifying which widgets to replace
+   * @param records replacement records, built in order
+   */
+  public void rebuildByTrigger(String trigger, List<ClickableRecord> records) {
     Iterator<Clickable> iterator = clickables.iterator();
     while (iterator.hasNext()) {
       Clickable clickable = iterator.next();
-      if (HAND_TRIGGER.equals(clickable.getTrigger())) {
+      if (trigger.equals(clickable.getTrigger())) {
         clickable.remove();
         iterator.remove();
       }
     }
-    for (ClickableRecord rec : handRecords) {
+    for (ClickableRecord rec : records) {
       clickables.add(buildClickable(rec));
+    }
+  }
+
+  /**
+   * @param trigger trigger name to filter by
+   * @return the currently built widgets for that trigger, in build order — lets callers
+   *     post-process widgets they just (re)built (e.g. tinting a subset to reflect selection state)
+   *     without this factory needing to know about that concern itself
+   */
+  public List<Clickable> getByTrigger(String trigger) {
+    List<Clickable> result = new ArrayList<>();
+    for (Clickable clickable : clickables) {
+      if (trigger.equals(clickable.getTrigger())) {
+        result.add(clickable);
+      }
+    }
+    return List.copyOf(result);
+  }
+
+  /**
+   * Re-asserts front-to-back stacking order for every widget this factory currently owns. A libGDX
+   * {@link com.badlogic.gdx.scenes.scene2d.ui.Window} unconditionally calls {@code toFront()} on
+   * itself on every touch down inside it (baked into its constructor, unrelated to {@code
+   * setMovable}) — this undoes that for widgets that need to render on top of one, such as a popup's
+   * own per-card buttons, which sit outside the window's actor hierarchy as stage siblings rather
+   * than children.
+   */
+  public void bringToFront() {
+    for (Clickable clickable : clickables) {
+      clickable.getBtn().toFront();
     }
   }
 

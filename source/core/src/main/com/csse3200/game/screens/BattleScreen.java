@@ -1,14 +1,9 @@
 package com.csse3200.game.screens;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.areas.ForestGameArea;
 import com.csse3200.game.areas.terrain.TerrainFactory;
@@ -17,6 +12,7 @@ import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
+import com.csse3200.game.cards.deck.CardInstance;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.cards.play.integration.Team3CardPlayAdapter;
@@ -25,6 +21,7 @@ import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.player.EnergyComponent;
+import com.csse3200.game.components.spritedisplay.clickable.CardImageSkins;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
@@ -73,32 +70,19 @@ public class BattleScreen extends ScreenAdapter {
   private static final float CARD_HEIGHT = 456;
 
   private final PhysicsEngine physicsEngine;
-  private static final Map<String, Skin> textureSkinCache = new HashMap<>();
   private final BattleController controller;
   private final CardLibrary library;
   private final BattleDeck battleDeck;
+  private CardPlayService cardPlayService;
+  private ClickableFactory uiFactory;
   private List<ClickableRecord> staticUiRecords;
 
-  // Fixed left-to-right slot order for the on-screen row, captured once at deal time so a played
-  // card's slot just toggles disabled in place instead of the row reflowing and making it look
-  // like a new card was drawn. See buildHandRecords().
-  private final List<String> handRowOrder = new ArrayList<>();
-
-  // handRowOrder indices grouped by card ID, computed once — the initial contents of
-  // availableSlotsByCardId below.
-  private final Map<String, List<Integer>> slotIndicesByCardId = new HashMap<>();
-
-  // Per card ID, two FIFO queues that mirror BattleDeck's own hand/discardPile list order exactly:
-  // availableSlotsByCardId is "which slot gets played next" (BattleDeck.hand.remove(id) always
-  // removes the first/earliest match), disabledSlotsByCardId is "which slot gets retrieved next"
-  // (BattleDeck.discardPile.remove(id) likewise). Discarding pops the front of available and
-  // appends to the back of disabled; retrieving does the reverse. This is deliberately NOT just
-  // "the lowest still-available original index" — retrieveFromDiscard() appends a returned card to
-  // the END of the model's hand list, so once a slot has been retrieved once, the model no longer
-  // prefers it over an untouched original slot. Picking by fixed index instead of this FIFO order
-  // could dim/undim the wrong duplicate (e.g. among the starter deck's 3 Strikes).
-  private final Map<String, Deque<Integer>> availableSlotsByCardId = new HashMap<>();
-  private final Map<String, Deque<Integer>> disabledSlotsByCardId = new HashMap<>();
+  // Fixed left-to-right slot order for the on-screen row: each entry is the exact physical card
+  // (see CardInstance) occupying that slot. Captured at deal time, and reset wholesale whenever the
+  // player deliberately rearranges their hand via the deck editor — otherwise left untouched, so a
+  // played card's slot just toggles disabled in place (its instance shows up in the discard pile)
+  // instead of the row reflowing and making it look like a new card was drawn.
+  private List<CardInstance> handRowOrder = new ArrayList<>();
 
   public BattleScreen(GdxGame game) {
     this.game = game;
@@ -146,15 +130,12 @@ public class BattleScreen extends ScreenAdapter {
     battleDeck = new BattleDeck(playerDeck);
     battleDeck.shuffleDrawPile();
     battleDeck.drawCards(5);
-    handRowOrder.addAll(battleDeck.getHand());
-    for (int i = 0; i < handRowOrder.size(); i++) {
-      slotIndicesByCardId.computeIfAbsent(handRowOrder.get(i), id -> new ArrayList<>()).add(i);
-    }
+    handRowOrder = new ArrayList<>(battleDeck.getHandInstances());
 
     Entity player = forestGameArea.getPlayer();
     EnergyComponent energy = player.getComponent(EnergyComponent.class);
 
-    CardPlayService cardPlayService = new CardPlayService(library, battleDeck, energy);
+    cardPlayService = new CardPlayService(library, battleDeck, energy);
     CardEffectHandler effectHandler = new CardEffectHandler();
     controller =
         new BattleController(player, forestGameArea.getEnemies(), effectHandler, cardPlayService);
@@ -189,7 +170,7 @@ public class BattleScreen extends ScreenAdapter {
 
     staticUiRecords = ClickableFactory.loadRecordsFromJson(battleUiJson);
 
-    ClickableFactory uiFactory = new ClickableFactory(buildAllRecords());
+    uiFactory = new ClickableFactory(buildAllRecords());
 
     Team3CardPlayAdapter cardPlayAdapter = new Team3CardPlayAdapter(library, controller);
 
@@ -215,9 +196,35 @@ public class BattleScreen extends ScreenAdapter {
             BattleActions.HAND_CHANGED_EVENT,
             (List<String> hand) -> uiFactory.rebuildHand(buildHandRecords()));
 
-    battleUi.getEvents().addListener("open-menu", cardInventory::show);
-
+    // battleUi must be registered (and so cardInventory.create() must have run, giving it a
+    // content table) before the deck editor's create() tries to add widgets to that table below.
     gameArea.displayUI(battleUi);
+
+    // The deck editor's own per-card toggle buttons need a ClickableFactory of their own — an
+    // entity can only hold one component of a given class, and battleUi already has uiFactory.
+    ClickableFactory deckPoolFactory = new ClickableFactory(new ArrayList<>());
+    DeckEditorComponent deckEditor =
+        new DeckEditorComponent(
+            cardPlayService, library, cardInventory, deckPoolFactory, this::onDeckRearranged);
+    Entity deckEditorEntity =
+        new Entity().addComponent(deckPoolFactory).addComponent(deckEditor);
+    ServiceLocator.getEntityService().register(deckEditorEntity);
+
+    battleUi.getEvents().addListener("open-menu", deckEditor::open);
+  }
+
+  /**
+   * Called after the deck editor commits a hand rearrange, with the full confirmed selection —
+   * including any still-on-cooldown picks {@link CardPlayService#rearrangeHand} left in the discard
+   * pile untouched. Unlike a normal play/cooldown-retrieval hand change, the whole set of slots may
+   * now be different, so — unlike {@link #buildHandRecords()}'s usual in-place toggling — the row's
+   * slots themselves are reset to match. A slot holding a still-discarded pick simply renders
+   * disabled (same as any other discarded card) until its cooldown naturally elapses and it's
+   * retrieved into the real hand, at which point the normal HAND_CHANGED_EVENT listener un-dims it.
+   */
+  private void onDeckRearranged(List<CardInstance> newHandRow) {
+    handRowOrder = new ArrayList<>(newHandRow);
+    uiFactory.rebuildHand(buildHandRecords());
   }
 
   @Override
@@ -247,22 +254,6 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.getResourceService().loadAll();
   }
 
-  private Skin skinFromTexturePath(String texturePath) {
-    return textureSkinCache.computeIfAbsent(
-        texturePath,
-        path -> {
-          Texture texture = new Texture(Gdx.files.internal(path));
-          TextureRegionDrawable drawable = new TextureRegionDrawable(new TextureRegion(texture));
-
-          ImageButton.ImageButtonStyle style = new ImageButton.ImageButtonStyle();
-          style.imageUp = drawable;
-
-          Skin skin = new Skin();
-          skin.add("default", style, ImageButton.ImageButtonStyle.class);
-          return skin;
-        });
-  }
-
   private List<ClickableRecord> buildAllRecords() {
     List<ClickableRecord> records = new ArrayList<>(buildHandRecords());
     records.addAll(staticUiRecords);
@@ -270,21 +261,24 @@ public class BattleScreen extends ScreenAdapter {
   }
 
   /**
-   * Builds one widget per card slot in {@link #handRowOrder} — a fixed left-to-right layout
-   * captured once when the hand was dealt. A card still in hand renders normal and playable; one
-   * that has moved to the discard pile renders {@code disabled(true)} (shaded, inert to
+   * Builds one widget per card slot in {@link #handRowOrder} — a fixed left-to-right layout that
+   * only changes wholesale via {@link #onDeckRearranged()}. Each slot renders the exact {@link
+   * CardInstance} dealt to it: still in hand, it's normal and playable; currently sitting in the
+   * discard pile (played, or on cooldown), it renders {@code disabled(true)} (shaded, inert to
    * clicks/drags — see {@link com.csse3200.game.components.spritedisplay.clickable.Clickable}) in
-   * that SAME slot. Positions never reflow and the row never grows/shrinks, so playing a card
-   * reads as "this slot went dull", not as a new card being dealt.
+   * that SAME slot. Checking discard-pile membership by exact instance — not by card ID — is what
+   * lets duplicate copies of the same card (e.g. two "strike"s) be dimmed independently of each
+   * other. Positions never reflow and the row never grows/shrinks, so playing a card reads as "this
+   * slot went dull", not as a new card being dealt.
    */
   private List<ClickableRecord> buildHandRecords() {
-    syncDisabledSlots();
+    Set<CardInstance> discardedInstances = new HashSet<>(battleDeck.getDiscardPileInstances());
 
     List<ClickableRecord> records = new ArrayList<>();
     float x = HAND_START_X;
-    for (int i = 0; i < handRowOrder.size(); i++) {
-      String cardId = handRowOrder.get(i);
-      boolean disabled = disabledSlotsByCardId.getOrDefault(cardId, new ArrayDeque<>()).contains(i);
+    for (CardInstance instance : handRowOrder) {
+      String cardId = instance.cardId();
+      boolean disabled = discardedInstances.contains(instance);
 
       Optional<CardConfig> maybeCard = library.getCard(cardId);
       if (maybeCard.isEmpty()) {
@@ -295,7 +289,7 @@ public class BattleScreen extends ScreenAdapter {
       boolean selfTarget = card.target == TargetType.SELF;
       String variant = selfTarget ? "inout" : "drag";
 
-      Skin cardSkin = skinFromTexturePath(card.texturePath);
+      Skin cardSkin = CardImageSkins.forTexturePath(card.texturePath);
 
       ClickableRecord.Builder builder =
           ClickableRecord.builder("playCard")
@@ -318,41 +312,5 @@ public class BattleScreen extends ScreenAdapter {
       x += HAND_SPACING;
     }
     return records;
-  }
-
-  /**
-   * Keeps {@link #availableSlotsByCardId}/{@link #disabledSlotsByCardId} in sync with the deck's
-   * actual discard pile by diffing the target disabled-count per card ID against the current one,
-   * moving exactly one slot between the two queues per net discard/retrieval — see the field
-   * comment above for why this has to mirror BattleDeck's FIFO list order rather than just picking
-   * by fixed index.
-   */
-  private void syncDisabledSlots() {
-    Map<String, Integer> discardCounts = new HashMap<>();
-    for (String discardedId : battleDeck.getDiscardPile()) {
-      discardCounts.merge(discardedId, 1, Integer::sum);
-    }
-
-    for (Map.Entry<String, List<Integer>> slotEntry : slotIndicesByCardId.entrySet()) {
-      String cardId = slotEntry.getKey();
-      Deque<Integer> availableSlots =
-          availableSlotsByCardId.computeIfAbsent(
-              cardId, ignored -> new ArrayDeque<>(slotEntry.getValue()));
-      Deque<Integer> disabledSlots =
-          disabledSlotsByCardId.computeIfAbsent(cardId, ignored -> new ArrayDeque<>());
-      int targetDisabledCount = discardCounts.getOrDefault(cardId, 0);
-
-      // A new discard: the slot the model would actually remove next (front of available) goes
-      // dull, and joins the back of the discard queue (matches discardPile.add appending).
-      while (disabledSlots.size() < targetDisabledCount && !availableSlots.isEmpty()) {
-        disabledSlots.addLast(availableSlots.pollFirst());
-      }
-      // A retrieval: the oldest-discarded slot (front of disabled, matches discardPile.remove
-      // taking the first/oldest match) comes back, and joins the back of available (matches
-      // hand.add appending) — lowest priority for the next play, same as the real retrieved card.
-      while (disabledSlots.size() > targetDisabledCount && !disabledSlots.isEmpty()) {
-        availableSlots.addLast(disabledSlots.pollFirst());
-      }
-    }
   }
 }

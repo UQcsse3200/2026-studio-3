@@ -248,6 +248,87 @@ class BattleDeckTest {
   }
 
   @Test
+  void shouldPreserveInstanceIdentityThroughPlayAndRetrieve() {
+    PlayerDeck playerDeck = new PlayerDeck(CARDS, List.of("strike", "strike"));
+    List<CardInstance> originalCards = playerDeck.getCards();
+    BattleDeck battleDeck = new BattleDeck(playerDeck);
+    battleDeck.drawCards(2);
+
+    CardInstance discardedFirst = battleDeck.discardCardInstance("strike");
+
+    assertEquals(originalCards.get(0), discardedFirst);
+    assertEquals(1, battleDeck.getHandInstances().size());
+    assertEquals(1, battleDeck.getDiscardPileInstances().size());
+
+    // Discarding a second copy of the same card must not disturb the tracked identity of the
+    // first, even though both share the card ID "strike".
+    CardInstance discardedSecond = battleDeck.discardCardInstance("strike");
+    assertEquals(originalCards.get(1), discardedSecond);
+    assertEquals(2, battleDeck.getDiscardPileInstances().size());
+
+    // Retrieving one specific instance leaves the other exact copy behind in the discard pile.
+    boolean retrieved = battleDeck.retrieveInstanceFromDiscard(discardedFirst);
+
+    assertTrue(retrieved);
+    assertIterableEquals(List.of(discardedFirst), battleDeck.getHandInstances());
+    assertIterableEquals(List.of(discardedSecond), battleDeck.getDiscardPileInstances());
+  }
+
+  @Test
+  void shouldSetHandToExactChosenInstances() {
+    PlayerDeck playerDeck = new PlayerDeck(CARDS, List.of("strike", "strike", "defend", "bandage"));
+    List<CardInstance> owned = playerDeck.getCards();
+    BattleDeck battleDeck = new BattleDeck(playerDeck);
+
+    CardInstance firstStrike = owned.get(0);
+    CardInstance defend = owned.get(2);
+    battleDeck.setHandInstances(List.of(firstStrike, defend));
+
+    assertIterableEquals(List.of(firstStrike, defend), battleDeck.getHandInstances());
+    assertEquals(2, battleDeck.getDrawPileSize());
+    assertTrue(battleDeck.getDiscardPileInstances().isEmpty());
+  }
+
+  @Test
+  void shouldLeaveDiscardPileUntouchedWhenSettingHand() {
+    PlayerDeck playerDeck = new PlayerDeck(CARDS, List.of("strike", "strike", "defend"));
+    List<CardInstance> owned = playerDeck.getCards();
+    BattleDeck battleDeck = new BattleDeck(playerDeck);
+    battleDeck.drawCards(3);
+    CardInstance discardedStrike = battleDeck.discardCardInstance("strike");
+
+    battleDeck.setHandInstances(List.of(owned.get(1), owned.get(2)));
+
+    assertIterableEquals(List.of(discardedStrike), battleDeck.getDiscardPileInstances());
+  }
+
+  @Test
+  void shouldRejectSettingHandToAnInstanceOnCooldownInDiscard() {
+    PlayerDeck playerDeck = new PlayerDeck(CARDS, List.of("strike", "defend"));
+    List<CardInstance> owned = playerDeck.getCards();
+    BattleDeck battleDeck = new BattleDeck(playerDeck);
+    battleDeck.drawCards(2);
+    CardInstance discardedStrike = battleDeck.discardCardInstance("strike");
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> battleDeck.setHandInstances(List.of(discardedStrike, owned.get(1))));
+
+    // The failed request must not have mutated anything.
+    assertIterableEquals(List.of(owned.get(1)), battleDeck.getHandInstances());
+    assertIterableEquals(List.of(discardedStrike), battleDeck.getDiscardPileInstances());
+  }
+
+  @Test
+  void shouldRejectSettingHandToAnUnknownInstance() {
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike")));
+    CardInstance foreign = CardInstance.of("defend");
+
+    assertThrows(
+        IllegalArgumentException.class, () -> battleDeck.setHandInstances(List.of(foreign)));
+  }
+
+  @Test
   void shouldDrawFromReshuffledDiscardPile() {
     BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike")));
     assertEquals("strike", battleDeck.drawOne());

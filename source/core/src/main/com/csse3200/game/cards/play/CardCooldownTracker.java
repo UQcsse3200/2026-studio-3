@@ -1,6 +1,7 @@
 package com.csse3200.game.cards.play;
 
 import com.csse3200.game.cards.deck.BattleDeck;
+import com.csse3200.game.cards.deck.CardInstance;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -8,6 +9,11 @@ import java.util.List;
 /**
  * Tracks the player-round cooldown for cards sitting in the discard pile, automatically retrieving
  * a card straight back into the hand once its cooldown elapses. Owned by {@link CardPlayService}.
+ *
+ * <p>Cooldowns are keyed by {@link CardInstance} (card ID plus a unique instance ID), not by bare
+ * card ID. Two copies of the same card can be discarded independently — e.g. one on cooldown, one
+ * still playable — and only the exact instance that was actually discarded comes off cooldown and
+ * is retrieved, regardless of how many other copies of the same card are also in the discard pile.
  */
 final class CardCooldownTracker {
   private final BattleDeck battleDeck;
@@ -23,13 +29,29 @@ final class CardCooldownTracker {
   /**
    * Starts tracking a just-discarded card's cooldown.
    *
-   * @param cardId ID of the card that was just moved to the discard pile
+   * @param instance the exact card instance that was just moved to the discard pile
    * @param rounds player rounds until it is retrieved; entries at 0 or below are never tracked
    */
-  void trackDiscard(String cardId, int rounds) {
+  void trackDiscard(CardInstance instance, int rounds) {
     if (rounds > 0) {
-      entries.add(new Entry(cardId, rounds));
+      entries.add(new Entry(instance, rounds));
     }
+  }
+
+  /**
+   * Checks whether a specific card instance is currently on cooldown (discarded and waiting to be
+   * retrieved), as opposed to sitting in the discard pile for some other reason.
+   *
+   * @param instance the card instance to check
+   * @return true if that exact instance is currently tracked as on cooldown
+   */
+  boolean isOnCooldown(CardInstance instance) {
+    for (Entry entry : entries) {
+      if (entry.instance.equals(instance)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -45,8 +67,8 @@ final class CardCooldownTracker {
       Entry entry = iterator.next();
       entry.roundsRemaining--;
       if (entry.roundsRemaining <= 0) {
-        if (battleDeck.retrieveFromDiscard(entry.cardId)) {
-          retrieved.add(entry.cardId);
+        if (battleDeck.retrieveInstanceFromDiscard(entry.instance)) {
+          retrieved.add(entry.instance.cardId());
         }
         iterator.remove();
       }
@@ -55,11 +77,11 @@ final class CardCooldownTracker {
   }
 
   private static final class Entry {
-    private final String cardId;
+    private final CardInstance instance;
     private int roundsRemaining;
 
-    private Entry(String cardId, int roundsRemaining) {
-      this.cardId = cardId;
+    private Entry(CardInstance instance, int roundsRemaining) {
+      this.instance = instance;
       this.roundsRemaining = roundsRemaining;
     }
   }
