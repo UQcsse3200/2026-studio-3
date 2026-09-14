@@ -48,31 +48,31 @@ class SprintTwoCardsIntegrationTest {
   }
 
   @Test
-  void shouldLoadSentinelsStanceWithExpectedFields() {
-    CardConfig card = library.getCard("sentinels_stance").orElseThrow();
+  void shouldLoadSentinelsRebukeWithExpectedFields() {
+    CardConfig card = library.getCard("sentinels_rebuke").orElseThrow();
 
     assertAll(
-        () -> assertEquals("sentinels_stance", card.id),
-        () -> assertEquals("Sentinel's Stance", card.name),
-        () -> assertEquals("Gain 5 block. Gain 1 Strength for the rest of combat.", card.description),
-        () -> assertEquals(2, card.cost),
-        () -> assertEquals(CardType.SKILL, card.type),
+        () -> assertEquals("sentinels_rebuke", card.id),
+        () -> assertEquals("Sentinel's Rebuke", card.name),
+        () -> assertEquals("Deal 4 damage. Apply 1 Feeble for 2 turns.", card.description),
+        () -> assertEquals(1, card.cost),
+        () -> assertEquals(CardType.ATTACK, card.type),
         () -> assertEquals(Rarity.UNCOMMON, card.rarity),
-        () -> assertEquals(TargetType.SELF, card.target),
-        () -> assertEquals("images/cards/sentinels_stance.png", card.texturePath));
+        () -> assertEquals(TargetType.SINGLE_ENEMY, card.target),
+        () -> assertEquals("images/cards/sentinels_rebuke.png", card.texturePath));
     assertEquals(2, card.effects.length);
     assertAll(
-        () -> assertEquals(EffectType.BLOCK, card.effects[0].type),
-        () -> assertEquals(5, card.effects[0].value),
+        () -> assertEquals(EffectType.DAMAGE, card.effects[0].type),
+        () -> assertEquals(4, card.effects[0].value),
         () -> assertEquals(0, card.effects[0].duration),
-        () -> assertEquals(EffectType.STRENGTH, card.effects[1].type),
+        () -> assertEquals(EffectType.FEEBLE, card.effects[1].type),
         () -> assertEquals(1, card.effects[1].value),
-        () -> assertEquals(0, card.effects[1].duration));
+        () -> assertEquals(2, card.effects[1].duration));
   }
 
   @Test
-  void shouldValidateLoadedSentinelsStance() {
-    CardConfig card = library.getCard("sentinels_stance").orElseThrow();
+  void shouldValidateLoadedSentinelsRebuke() {
+    CardConfig card = library.getCard("sentinels_rebuke").orElseThrow();
 
     assertTrue(CardValidator.validate(card).isEmpty());
   }
