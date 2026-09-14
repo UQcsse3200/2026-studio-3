@@ -55,6 +55,14 @@ public class SaveLoadPanel extends UIComponent {
   private Label statusLabel;
   private final List<Texture> generatedPillTextures = new java.util.ArrayList<>();
 
+  // Cached once and reused across every button and every refresh() call — MenuTheme colors don't
+  // change at runtime, so regenerating these per-button (the original approach) created roughly
+  // 40 new 160x64 textures per save/load/delete refresh, an unbounded GPU memory leak flagged in
+  // review (PR #208, Anran).
+  private NinePatchDrawable upDrawable;
+  private NinePatchDrawable downDrawable;
+  private NinePatchDrawable overDrawable;
+
   public SaveLoadPanel(SaveGameService saveGameService, List<Integer> slotIds) {
     this(saveGameService, slotIds, null, null);
   }
@@ -111,12 +119,18 @@ public class SaveLoadPanel extends UIComponent {
   }
 
   private TextButton.TextButtonStyle themedButtonStyle() {
+    if (upDrawable == null) {
+      upDrawable = pillDrawable(MenuTheme.burntRust());
+      downDrawable = pillDrawable(MenuTheme.dustyMauve());
+      overDrawable = pillDrawable(MenuTheme.softCoral());
+    }
+
     TextButton.TextButtonStyle style =
         new TextButton.TextButtonStyle(skin.get(TextButton.TextButtonStyle.class));
-    style.up = pillDrawable(MenuTheme.burntRust());
-    style.down = pillDrawable(MenuTheme.dustyMauve());
-    style.over = pillDrawable(MenuTheme.softCoral());
-    style.disabled = pillDrawable(MenuTheme.burntRust());
+    style.up = upDrawable;
+    style.down = downDrawable;
+    style.over = overDrawable;
+    style.disabled = upDrawable; // same color as enabled, by design (see disabledFontColor)
     style.fontColor = MenuTheme.warmParchment();
     style.overFontColor = Color.WHITE;
     style.downFontColor = MenuTheme.warmParchment();
