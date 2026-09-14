@@ -47,10 +47,10 @@ class MainMenuActionsTest {
   }
 
   @Test
-  void bestiaryWaitsForBackendRoute() {
+  void bestiaryOpensBestiaryScreen() {
     menu.getEvents().trigger(MainMenuDisplay.BESTIARY_EVENT);
 
-    verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
+    verify(game).setScreen(GdxGame.ScreenType.BESTIARY);
     verify(runState, never()).endRun();
   }
 

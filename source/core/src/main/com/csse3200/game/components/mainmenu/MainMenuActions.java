@@ -40,9 +40,10 @@ public class MainMenuActions extends Component {
     game.setScreen(GdxGame.ScreenType.SAVE_LOAD);
   }
 
-  /** Intended for displaying the bestiary. Bestiary functionality is not actually implemented. */
+  /** Opens the bestiary screen. */
   private void onBestiary() {
-    logger.info("Bestiary");
+    logger.info("Opening bestiary screen");
+    game.setScreen(GdxGame.ScreenType.BESTIARY);
   }
 
   /** Opens the library screen. Not currently reachable from the main menu — see TODO. */
