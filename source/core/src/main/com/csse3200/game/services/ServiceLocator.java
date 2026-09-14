@@ -26,6 +26,7 @@ public class ServiceLocator {
   private static InputService inputService;
   private static ResourceService resourceService;
   private static DragNDropService dragNDropService;
+  private static GamePauseService pauseService;
   private static Camera camera;
   private static CardLibrary cardLibrary;
 
@@ -55,6 +56,10 @@ public class ServiceLocator {
 
   public static DragNDropService getDragAndDropService() {
     return dragNDropService;
+  }
+
+  public static GamePauseService getPauseService() {
+    return pauseService;
   }
 
   public static Camera getCamera() {
@@ -95,6 +100,11 @@ public class ServiceLocator {
     dragNDropService = service;
   }
 
+  public static void registerPauseService(GamePauseService service) {
+    logger.debug("Registering pause service {}", service);
+    pauseService = service;
+  }
+
   public static void registerCamera(Camera cam) {
     logger.debug("Registering camera {}", cam);
     camera = cam;
@@ -117,6 +127,7 @@ public class ServiceLocator {
     inputService = null;
     resourceService = null;
     dragNDropService = null;
+    pauseService = null;
     camera = null;
     cardLibrary = null;
   }
