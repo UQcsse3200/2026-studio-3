@@ -46,7 +46,8 @@ public class RunState {
    *
    * @param startingHealth the health the player starts with
    */
-  public void initialisePlayerStats(int startingHealth, int startingMaxHealth, int startingMaxEnergy) {
+  public void initialisePlayerStats(
+      int startingHealth, int startingMaxHealth, int startingMaxEnergy) {
     if (!playerStatsInitialised) {
       playerHealth = startingHealth;
       playerMaxHealth = startingMaxHealth;
@@ -57,6 +58,7 @@ public class RunState {
 
   /**
    * Returns the player's current health
+   *
    * @return the player's health
    */
   public int getPlayerHealth() {

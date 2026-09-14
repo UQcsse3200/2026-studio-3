@@ -71,23 +71,24 @@ public class PlayerFactory {
     return player;
   }
 
-  public static Entity createPlayer (int currentHealth) {
+  public static Entity createPlayer(int currentHealth) {
     InputComponent inputComponent =
-            ServiceLocator.getInputService().getInputFactory().createForPlayer();
+        ServiceLocator.getInputService().getInputFactory().createForPlayer();
 
     Entity player =
-            new Entity()
-                    .addComponent(new TextureRenderComponent("images/star_player.png"))
-                    .addComponent(new PhysicsComponent())
-                    .addComponent(new ColliderComponent())
-                    .addComponent(new HitboxComponent().setLayer(PhysicsLayer.PLAYER))
-                    .addComponent(new PlayerActions())
-                    .addComponent(new CombatStatsComponent(currentHealth, stats.baseAttack, stats.maxHealth))
-                    .addComponent(new InventoryComponent(stats.gold))
-                    .addComponent(new PlayerBehaviourComponent())
-                    .addComponent(inputComponent)
-                    .addComponent(new EnergyComponent(stats.maxEnergy))
-                    .addComponent(new PlayerStatsDisplay());
+        new Entity()
+            .addComponent(new TextureRenderComponent("images/star_player.png"))
+            .addComponent(new PhysicsComponent())
+            .addComponent(new ColliderComponent())
+            .addComponent(new HitboxComponent().setLayer(PhysicsLayer.PLAYER))
+            .addComponent(new PlayerActions())
+            .addComponent(
+                new CombatStatsComponent(currentHealth, stats.baseAttack, stats.maxHealth))
+            .addComponent(new InventoryComponent(stats.gold))
+            .addComponent(new PlayerBehaviourComponent())
+            .addComponent(inputComponent)
+            .addComponent(new EnergyComponent(stats.maxEnergy))
+            .addComponent(new PlayerStatsDisplay());
 
     PhysicsUtils.setScaledCollider(player, 0.6f, 0.3f);
     player.getComponent(ColliderComponent.class).setDensity(1.5f);

@@ -5,7 +5,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.areas.terrain.TerrainFactory.TerrainType;
 import com.csse3200.game.components.gamearea.GameAreaDisplay;
-import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.factories.EnemyFactory;
 import com.csse3200.game.entities.factories.NPCFactory;
@@ -133,8 +132,10 @@ public class ForestGameArea extends GameArea {
   }
 
   private Entity spawnPlayer() {
-    runState.initialisePlayerStats(PlayerFactory.getDefaultHealth(), PlayerFactory.getDefaultMaxHealth(),
-            PlayerFactory.getDefaultMaxEnergy());
+    runState.initialisePlayerStats(
+        PlayerFactory.getDefaultHealth(),
+        PlayerFactory.getDefaultMaxHealth(),
+        PlayerFactory.getDefaultMaxEnergy());
 
     Entity newPlayer = PlayerFactory.createPlayer(runState.getPlayerHealth());
 
