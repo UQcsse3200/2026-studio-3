@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 class CardPlayServiceTest {
 
   @Test
-  void shouldSpendEnergyResolveEffectsDiscardPlayedCardAndDrawReplacement() {
+  void shouldSpendEnergyResolveEffectsAndDiscardPlayedCard() {
     CardConfig strike =
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
     CardConfig defend = card("defend", 1, TargetType.SELF, new EffectConfig(EffectType.BLOCK, 3));
@@ -57,13 +57,13 @@ class CardPlayServiceTest {
     assertIterableEquals(List.of("strike"), battleDeck.getDiscardPile());
     assertIterableEquals(List.of("strike"), result.updatedDiscardPile());
 
-    // The replacement card was drawn into the hand.
-    assertIterableEquals(List.of("defend"), battleDeck.getHand());
-    assertIterableEquals(List.of("defend"), result.updatedHand());
+    // No replacement is drawn — the hand just shrinks by the played card.
+    assertTrue(battleDeck.getHand().isEmpty());
+    assertTrue(result.updatedHand().isEmpty());
 
-    // No cards remain in the draw pile.
-    assertTrue(battleDeck.getDrawPile().isEmpty());
-    assertTrue(result.updatedDrawPile().isEmpty());
+    // The draw pile is untouched.
+    assertIterableEquals(List.of("defend"), battleDeck.getDrawPile());
+    assertIterableEquals(List.of("defend"), result.updatedDrawPile());
 
     // The card's effects were resolved correctly.
     assertIterableEquals(
@@ -106,17 +106,16 @@ class CardPlayServiceTest {
     assertEquals(1, result.energyCost());
     assertEquals(2, energyComponent.getCurrentEnergy());
 
-    // strike was played and defend was drawn as its replacement.
-    assertIterableEquals(List.of("defend"), result.updatedHand());
+    // strike was played and not replaced — the hand is now empty.
+    assertTrue(result.updatedHand().isEmpty());
 
-    // No cards remain in the draw pile after drawing the replacement.
-    assertTrue(result.updatedDrawPile().isEmpty());
+    // The draw pile is untouched.
+    assertIterableEquals(List.of("defend"), result.updatedDrawPile());
 
     // strike was moved to the discard pile.
     assertIterableEquals(List.of("strike"), result.updatedDiscardPile());
 
-    // defend is no longer playable because it is in the hand but has no valid
-    // single-enemy target for this card.
+    // defend is not playable because it was never drawn into the hand.
     assertFalse(playService.canPlay(CardPlayRequest.singleEnemy("defend", "enemy-1")));
   }
 

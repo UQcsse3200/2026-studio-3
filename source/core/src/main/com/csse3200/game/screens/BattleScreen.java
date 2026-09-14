@@ -41,6 +41,7 @@ import com.csse3200.game.services.DragNDropService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.ui.PopupDisplay;
 import java.nio.file.Path;
 import java.util.*;
 import org.slf4j.Logger;
@@ -77,6 +78,27 @@ public class BattleScreen extends ScreenAdapter {
   private final CardLibrary library;
   private final BattleDeck battleDeck;
   private List<ClickableRecord> staticUiRecords;
+
+  // Fixed left-to-right slot order for the on-screen row, captured once at deal time so a played
+  // card's slot just toggles disabled in place instead of the row reflowing and making it look
+  // like a new card was drawn. See buildHandRecords().
+  private final List<String> handRowOrder = new ArrayList<>();
+
+  // handRowOrder indices grouped by card ID, computed once — the initial contents of
+  // availableSlotsByCardId below.
+  private final Map<String, List<Integer>> slotIndicesByCardId = new HashMap<>();
+
+  // Per card ID, two FIFO queues that mirror BattleDeck's own hand/discardPile list order exactly:
+  // availableSlotsByCardId is "which slot gets played next" (BattleDeck.hand.remove(id) always
+  // removes the first/earliest match), disabledSlotsByCardId is "which slot gets retrieved next"
+  // (BattleDeck.discardPile.remove(id) likewise). Discarding pops the front of available and
+  // appends to the back of disabled; retrieving does the reverse. This is deliberately NOT just
+  // "the lowest still-available original index" — retrieveFromDiscard() appends a returned card to
+  // the END of the model's hand list, so once a slot has been retrieved once, the model no longer
+  // prefers it over an untouched original slot. Picking by fixed index instead of this FIFO order
+  // could dim/undim the wrong duplicate (e.g. among the starter deck's 3 Strikes).
+  private final Map<String, Deque<Integer>> availableSlotsByCardId = new HashMap<>();
+  private final Map<String, Deque<Integer>> disabledSlotsByCardId = new HashMap<>();
 
   public BattleScreen(GdxGame game) {
     this.game = game;
@@ -124,6 +146,10 @@ public class BattleScreen extends ScreenAdapter {
     battleDeck = new BattleDeck(playerDeck);
     battleDeck.shuffleDrawPile();
     battleDeck.drawCards(5);
+    handRowOrder.addAll(battleDeck.getHand());
+    for (int i = 0; i < handRowOrder.size(); i++) {
+      slotIndicesByCardId.computeIfAbsent(handRowOrder.get(i), id -> new ArrayList<>()).add(i);
+    }
 
     Entity player = forestGameArea.getPlayer();
     EnergyComponent energy = player.getComponent(EnergyComponent.class);
@@ -167,6 +193,9 @@ public class BattleScreen extends ScreenAdapter {
 
     Team3CardPlayAdapter cardPlayAdapter = new Team3CardPlayAdapter(library, controller);
 
+    PopupDisplay cardInventory = new PopupDisplay("Card Inventory");
+    cardInventory.setMinSize(800f, 600f);
+
     Stage stage = ServiceLocator.getRenderService().getStage();
     Entity battleUi =
         new Entity()
@@ -174,16 +203,19 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(uiFactory)
             .addComponent(displays)
             .addComponent(new BattleActions(controller, game, library))
-            .addComponent(cardPlayAdapter);
+            .addComponent(cardPlayAdapter)
+            .addComponent(cardInventory);
 
-    // Keep the on-screen hand in sync with the deck: after a card is played (and a replacement
-    // drawn) rebuild the hand widgets from the live deck, so the played card's button is gone and
-    // the drawn card's button appears.
+    // Keep the on-screen row in sync with the deck: whenever the hand changes (a card played, or
+    // one retrieved from the discard pile after its cooldown elapses) rebuild from the live deck,
+    // so the affected slot's disabled/shaded state updates in place.
     battleUi
         .getEvents()
         .addListener(
             BattleActions.HAND_CHANGED_EVENT,
             (List<String> hand) -> uiFactory.rebuildHand(buildHandRecords()));
+
+    battleUi.getEvents().addListener("open-menu", cardInventory::show);
 
     gameArea.displayUI(battleUi);
   }
@@ -237,13 +269,26 @@ public class BattleScreen extends ScreenAdapter {
     return records;
   }
 
+  /**
+   * Builds one widget per card slot in {@link #handRowOrder} — a fixed left-to-right layout
+   * captured once when the hand was dealt. A card still in hand renders normal and playable; one
+   * that has moved to the discard pile renders {@code disabled(true)} (shaded, inert to
+   * clicks/drags — see {@link com.csse3200.game.components.spritedisplay.clickable.Clickable}) in
+   * that SAME slot. Positions never reflow and the row never grows/shrinks, so playing a card
+   * reads as "this slot went dull", not as a new card being dealt.
+   */
   private List<ClickableRecord> buildHandRecords() {
+    syncDisabledSlots();
+
     List<ClickableRecord> records = new ArrayList<>();
     float x = HAND_START_X;
-    for (String cardId : battleDeck.getHand()) {
+    for (int i = 0; i < handRowOrder.size(); i++) {
+      String cardId = handRowOrder.get(i);
+      boolean disabled = disabledSlotsByCardId.getOrDefault(cardId, new ArrayDeque<>()).contains(i);
+
       Optional<CardConfig> maybeCard = library.getCard(cardId);
       if (maybeCard.isEmpty()) {
-        logger.warn("Card ID {} in hand not found in library, skipping", cardId);
+        logger.warn("Card ID {} not found in library, skipping", cardId);
         continue;
       }
       CardConfig card = maybeCard.get();
@@ -258,7 +303,8 @@ public class BattleScreen extends ScreenAdapter {
               .variant(variant)
               .position(x, HAND_Y)
               .size(CARD_WIDTH, CARD_HEIGHT)
-              .skin(cardSkin);
+              .skin(cardSkin)
+              .disabled(disabled);
 
       if (selfTarget) {
         // No drop target involved — target is fixed at "player".
@@ -272,5 +318,41 @@ public class BattleScreen extends ScreenAdapter {
       x += HAND_SPACING;
     }
     return records;
+  }
+
+  /**
+   * Keeps {@link #availableSlotsByCardId}/{@link #disabledSlotsByCardId} in sync with the deck's
+   * actual discard pile by diffing the target disabled-count per card ID against the current one,
+   * moving exactly one slot between the two queues per net discard/retrieval — see the field
+   * comment above for why this has to mirror BattleDeck's FIFO list order rather than just picking
+   * by fixed index.
+   */
+  private void syncDisabledSlots() {
+    Map<String, Integer> discardCounts = new HashMap<>();
+    for (String discardedId : battleDeck.getDiscardPile()) {
+      discardCounts.merge(discardedId, 1, Integer::sum);
+    }
+
+    for (Map.Entry<String, List<Integer>> slotEntry : slotIndicesByCardId.entrySet()) {
+      String cardId = slotEntry.getKey();
+      Deque<Integer> availableSlots =
+          availableSlotsByCardId.computeIfAbsent(
+              cardId, ignored -> new ArrayDeque<>(slotEntry.getValue()));
+      Deque<Integer> disabledSlots =
+          disabledSlotsByCardId.computeIfAbsent(cardId, ignored -> new ArrayDeque<>());
+      int targetDisabledCount = discardCounts.getOrDefault(cardId, 0);
+
+      // A new discard: the slot the model would actually remove next (front of available) goes
+      // dull, and joins the back of the discard queue (matches discardPile.add appending).
+      while (disabledSlots.size() < targetDisabledCount && !availableSlots.isEmpty()) {
+        disabledSlots.addLast(availableSlots.pollFirst());
+      }
+      // A retrieval: the oldest-discarded slot (front of disabled, matches discardPile.remove
+      // taking the first/oldest match) comes back, and joins the back of available (matches
+      // hand.add appending) — lowest priority for the next play, same as the real retrieved card.
+      while (disabledSlots.size() > targetDisabledCount && !disabledSlots.isEmpty()) {
+        availableSlots.addLast(disabledSlots.pollFirst());
+      }
+    }
   }
 }

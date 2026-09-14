@@ -27,6 +27,7 @@ public class ClickableFactory extends UIComponent {
     registerVariant(DEFAULT_VARIANT, rec -> new Clickable(rec) {});
     registerVariant("inout", InOutOnTrigger::new);
     registerVariant("drag", DragNDrop::new);
+    registerVariant("gated", GatedClickable::new);
   }
 
   public static void registerVariant(String name, ClickableSupplier supplier) {
@@ -43,6 +44,13 @@ public class ClickableFactory extends UIComponent {
   private final List<ClickableRecord> records = new ArrayList<>();
   private final List<Clickable> clickables = new ArrayList<>();
   private final Map<String, ClickableSupplier> instanceVariants = new HashMap<>();
+
+  // Tracks whether the hand row is currently supposed to be up (visible/interactable) or down
+  // (hidden mid-enemy-turn), by listening to the same "up"/"down" events InOutOnTrigger widgets
+  // do. A freshly built/rebuilt hand widget (e.g. from a cooldown retrieval firing mid the enemy's
+  // "thinking" pause, before "up" has fired yet) must match this instead of always snapping
+  // visible, or the row pops into view early and the later real "up" animation looks broken.
+  private boolean handVisible = true;
 
   public ClickableFactory(Path file) {
     this(loadRecordsFromJson(file));
@@ -71,6 +79,8 @@ public class ClickableFactory extends UIComponent {
   @Override
   public void create() {
     super.create();
+    entity.getEvents().addListener("up", () -> handVisible = true);
+    entity.getEvents().addListener("down", () -> handVisible = false);
     for (ClickableRecord rec : records) {
       clickables.add(buildClickable(rec));
     }
@@ -91,9 +101,15 @@ public class ClickableFactory extends UIComponent {
     stage.addActor(clickable.getBtn());
     clickable.onAddedToStage(stage);
 
-    // Hand cards should be visible and playable straight away rather than waiting for an "up".
+    // Hand cards snap straight to whichever state ("up"/visible or "down"/hidden) the rest of the
+    // hand is currently in, rather than always popping up — matters when a rebuild happens while
+    // the row is meant to be down (e.g. a cooldown retrieval mid the enemy's "thinking" pause).
     if (HAND_TRIGGER.equals(rec.trigger())) {
-      clickable.showNow();
+      if (handVisible) {
+        clickable.showNow();
+      } else {
+        clickable.hideNow();
+      }
     }
     return clickable;
   }

@@ -1,5 +1,6 @@
 package com.csse3200.game.cards.play;
 
+import com.csse3200.game.cards.CardCooldown;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.CardValidator;
 import com.csse3200.game.cards.EffectType;
@@ -25,6 +26,7 @@ public final class CardPlayService {
   private final EnergyComponent energyComponent;
   private final PlayerStateView playerStateView;
   private final EnemyStateView enemyStateView;
+  private final CardCooldownTracker cooldownTracker;
 
   /**
    * Creates a play service using Team 6 card retrieval, Team 5 effect resolution and Team 7 energy.
@@ -92,6 +94,7 @@ public final class CardPlayService {
     this.energyComponent = energyComponent;
     this.playerStateView = playerStateView;
     this.enemyStateView = enemyStateView;
+    this.cooldownTracker = new CardCooldownTracker(battleDeck);
   }
 
   /**
@@ -106,6 +109,25 @@ public final class CardPlayService {
   public boolean canPlay(String cardId) {
     CardConfig card = getPlayableCardConfig(cardId);
     return battleDeck.getHand().contains(card.id) && energyComponent.canAfford(card.cost);
+  }
+
+  /**
+   * Ticks every discarded card's cooldown down by one player round, retrieving any that reach
+   * zero straight back into the hand. Intended to be called once at the start of each player
+   * round (see {@code BattleController.enterPlayerStart}).
+   *
+   * @return IDs of cards retrieved this round, in retrieval order (empty if none)
+   */
+  public List<String> onPlayerRoundStart() {
+    return cooldownTracker.tickRoundAndRetrieve();
+  }
+
+  /**
+   * @return a snapshot of the current hand, for callers (e.g. the battle controller) that need to
+   *     refresh the UI after {@link #onPlayerRoundStart()} changes it without a card being played
+   */
+  public List<String> currentHand() {
+    return battleDeck.getHand();
   }
 
   /**
@@ -190,7 +212,7 @@ public final class CardPlayService {
         throw new IllegalStateException(
             "Card was no longer in hand after energy was spent: " + card.id);
       }
-      battleDeck.drawOne();
+      cooldownTracker.trackDiscard(card.id, CardCooldown.roundsFor(card));
       return CardPlayResult.success(
           card.id, target, card.cost, resolution, DeckSnapshot.from(battleDeck));
     } catch (RuntimeException exception) {

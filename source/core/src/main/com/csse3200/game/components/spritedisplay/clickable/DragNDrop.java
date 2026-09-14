@@ -43,6 +43,11 @@ public class DragNDrop extends InOutOnTrigger {
   protected void init(String trigger) {
     super.init(trigger);
 
+    if (disabled) {
+      // Shaded, inert cards (e.g. the discard pile) must not be draggable.
+      return;
+    }
+
     DragAndDrop dragAndDrop = ServiceLocator.getDragAndDropService().getDragAndDrop();
 
     this.dragSource =

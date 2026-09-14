@@ -49,18 +49,36 @@ public class InOutOnTrigger extends Clickable {
     isAnimating = false;
     btn.setVisible(true);
     btn.setPosition(targetX, targetY);
+    setInteractable(true);
+  }
+
+  /**
+   * Snap straight to the hidden off-screen position — the rebuild-during-the-enemy's-turn
+   * counterpart to {@link #showNow()}, used so a widget built while the hand should still be down
+   * (e.g. a cooldown retrieval mid "enemy thinking" pause) doesn't pop into view ahead of the
+   * delayed "up" animation.
+   */
+  @Override
+  public void hideNow() {
+    btn.clearActions();
+    isAnimating = false;
+    btn.setVisible(false);
+    btn.setPosition(targetX, offScreenY);
+    setInteractable(false);
   }
 
   private void slideUp() {
-    if (isAnimating || btn.getStage() == null) return;
+    if (btn.getStage() == null) return;
 
-    if (Math.abs(btn.getY() - targetY) < 1f) {
+    setInteractable(true);
+    if (!isAnimating && Math.abs(btn.getY() - targetY) < 1f) {
       return;
     }
 
     float overshootAmount = 15f;
     float overshootY = targetY + overshootAmount;
 
+    btn.clearActions();
     isAnimating = true;
     btn.setVisible(true);
     btn.setPosition(targetX, offScreenY); // Make sure it's visible
@@ -82,8 +100,11 @@ public class InOutOnTrigger extends Clickable {
 
   /**
    * Slides the button out from its target position to off-screen. Triggered by the "down" event.
+   * Interactivity is blocked immediately, not just once the slide finishes, so a click mid-animation
+   * (or during the enemy's whole turn) can't sneak a card play through.
    */
   protected void slideDown() {
+    setInteractable(false);
     if (btn.getStage() == null) return;
     logger.info("down");
     btn.clearActions();

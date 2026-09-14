@@ -74,9 +74,9 @@ class SprintTwoCardsIntegrationTest {
       assertEquals(6, stats.getStatusEffect(EffectType.HEAL.name()).getValue());
       assertEquals(3, stats.getStatusEffect(EffectType.HEAL.name()).getDuration());
       assertEquals(0, energy.getCurrentEnergy());
-      // With a one-card deck, drawing a replacement reshuffles the played card back into hand.
-      assertEquals(List.of("resurrection"), result.updatedHand());
-      assertTrue(result.updatedDiscardPile().isEmpty());
+      // No replacement is drawn — the hand is now empty and the card sits in the discard pile.
+      assertTrue(result.updatedHand().isEmpty());
+      assertEquals(List.of("resurrection"), result.updatedDiscardPile());
     }
   }
 

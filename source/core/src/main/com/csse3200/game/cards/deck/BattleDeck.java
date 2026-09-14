@@ -102,6 +102,21 @@ public class BattleDeck {
   }
 
   /**
+   * Removes one matching card from the discard pile and moves it back into the hand.
+   *
+   * @param cardId ID of the card to retrieve
+   * @return true if the card was retrieved, otherwise false
+   */
+  public boolean retrieveFromDiscard(String cardId) {
+    if (cardId == null || !discardPile.remove(cardId)) {
+      return false;
+    }
+
+    hand.add(cardId);
+    return true;
+  }
+
+  /**
    * Moves every card currently in the hand to the discard pile.
    *
    * @return number of cards discarded
