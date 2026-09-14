@@ -8,6 +8,7 @@ import com.badlogic.gdx.Screen;
 import com.csse3200.game.files.UserSettings;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.screens.BattleScreen;
+import com.csse3200.game.screens.EncounterScreen;
 import com.csse3200.game.screens.EndBattleScreen;
 import com.csse3200.game.screens.MainGameScreen;
 import com.csse3200.game.screens.MainMenuScreen;
@@ -91,7 +92,7 @@ public class GdxGame extends Game {
       case MAP:
         return new MapScreen(this);
       case ENCOUNTER:
-        return new MainGameScreen(this);
+        return new EncounterScreen(this);
       case BATTLE_SCREEN:
         return new BattleScreen(this);
       case VICTORY:
