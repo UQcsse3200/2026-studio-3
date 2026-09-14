@@ -76,7 +76,7 @@ public class BattleScreen extends ScreenAdapter {
   private final BattleController controller;
   private final CardLibrary library;
   private final BattleDeck battleDeck;
-    private List<ClickableRecord> staticUiRecords;
+  private List<ClickableRecord> staticUiRecords;
 
   public BattleScreen(GdxGame game) {
     this.game = game;

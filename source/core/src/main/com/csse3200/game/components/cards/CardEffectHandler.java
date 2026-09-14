@@ -5,13 +5,10 @@ import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.entities.Entity;
-
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Handles card effects on the player and enemy
- */
+/** Handles card effects on the player and enemy */
 public class CardEffectHandler {
 
   /**
@@ -32,7 +29,7 @@ public class CardEffectHandler {
           case POISON, VULNERABLE ->
               stats.applyStatusEffect(
                   new StatusEffect(effect.type().name(), effect.value(), effect.duration()));
-            default -> {
+          default -> {
             // BLOCK / HEAL / STRENGTH are not enemy-facing.
           }
         }

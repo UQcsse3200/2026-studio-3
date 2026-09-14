@@ -75,69 +75,73 @@ class BattleActionsTest {
     return config;
   }
 
-//  @Test
-//  void shouldResolveAttackCardPlayDuringPlayerTurn() {
-//    advanceToPlayerTurn();
-//    List<String> played = new ArrayList<>();
-//    entity.getEvents().addListener("cardPlayed", (String name, String target) -> played.add(name));
-//
-//    entity.getEvents().trigger("playCard", "strike", "bone_crawler");
-//
-//    // Card was accepted and, with no resolution service wired, resolved straight away.
-//    assertEquals(List.of("strike"), played);
-//    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
-//  }
+  //  @Test
+  //  void shouldResolveAttackCardPlayDuringPlayerTurn() {
+  //    advanceToPlayerTurn();
+  //    List<String> played = new ArrayList<>();
+  //    entity.getEvents().addListener("cardPlayed", (String name, String target) ->
+  // played.add(name));
+  //
+  //    entity.getEvents().trigger("playCard", "strike", "bone_crawler");
+  //
+  //    // Card was accepted and, with no resolution service wired, resolved straight away.
+  //    assertEquals(List.of("strike"), played);
+  //    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+  //  }
 
-//  @Test
-//  void shouldResolveCardBeforeReturningToPlayerTurn() {
-//    List<BattlePhase> phases = new ArrayList<>();
-//    entity.getEvents().addListener("phaseChange", (BattlePhase phase) -> phases.add(phase));
-//    advanceToPlayerTurn();
-//
-//    entity.getEvents().trigger("playCard", "strike", "bone_crawler");
-//
-//    assertTrue(phases.contains(BattlePhase.CARD_RESOLVING));
-//  }
+  //  @Test
+  //  void shouldResolveCardBeforeReturningToPlayerTurn() {
+  //    List<BattlePhase> phases = new ArrayList<>();
+  //    entity.getEvents().addListener("phaseChange", (BattlePhase phase) -> phases.add(phase));
+  //    advanceToPlayerTurn();
+  //
+  //    entity.getEvents().trigger("playCard", "strike", "bone_crawler");
+  //
+  //    assertTrue(phases.contains(BattlePhase.CARD_RESOLVING));
+  //  }
 
-//  @Test
-//  void shouldSubmitAttackCardRequest() {
-//    BattleController mockController = mock(BattleController.class);
-//    GdxGame mockGame = mock(GdxGame.class);
-//    CardLibrary library = realLibrary();
-//    Entity battleUI =
-//        new Entity().addComponent(new BattleActions(mockController, mockGame, library));
-//    battleUI.create();
-//
-//    battleUI.getEvents().trigger("playCard", "strike", "bone_crawler");
-//
-//    verify(mockController).submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "bone_crawler"));
-//  }
-//
-//  @Test
-//  void shouldSubmitBlockCardRequest() {
-//    BattleController mockController = mock(BattleController.class);
-//    Entity battleUI =
-//        new Entity()
-//            .addComponent(new BattleActions(mockController, mock(GdxGame.class), realLibrary()));
-//    battleUI.create();
-//
-//    battleUI.getEvents().trigger("playCard", "defend", "player");
-//
-//    verify(mockController).submitCardPlayRequest(CardPlayRequest.self("defend"));
-//  }
+  //  @Test
+  //  void shouldSubmitAttackCardRequest() {
+  //    BattleController mockController = mock(BattleController.class);
+  //    GdxGame mockGame = mock(GdxGame.class);
+  //    CardLibrary library = realLibrary();
+  //    Entity battleUI =
+  //        new Entity().addComponent(new BattleActions(mockController, mockGame, library));
+  //    battleUI.create();
+  //
+  //    battleUI.getEvents().trigger("playCard", "strike", "bone_crawler");
+  //
+  //    verify(mockController).submitCardPlayRequest(CardPlayRequest.singleEnemy("strike",
+  // "bone_crawler"));
+  //  }
+  //
+  //  @Test
+  //  void shouldSubmitBlockCardRequest() {
+  //    BattleController mockController = mock(BattleController.class);
+  //    Entity battleUI =
+  //        new Entity()
+  //            .addComponent(new BattleActions(mockController, mock(GdxGame.class),
+  // realLibrary()));
+  //    battleUI.create();
+  //
+  //    battleUI.getEvents().trigger("playCard", "defend", "player");
+  //
+  //    verify(mockController).submitCardPlayRequest(CardPlayRequest.self("defend"));
+  //  }
 
-//  @Test
-//  void shouldSubmitHealingCardRequest() {
-//    BattleController mockController = mock(BattleController.class);
-//    Entity battleUI =
-//        new Entity()
-//            .addComponent(new BattleActions(mockController, mock(GdxGame.class), realLibrary()));
-//    battleUI.create();
-//
-//    battleUI.getEvents().trigger("playCard", "bandage", "player");
-//
-//    verify(mockController).submitCardPlayRequest(CardPlayRequest.self("bandage"));
-//  }
+  //  @Test
+  //  void shouldSubmitHealingCardRequest() {
+  //    BattleController mockController = mock(BattleController.class);
+  //    Entity battleUI =
+  //        new Entity()
+  //            .addComponent(new BattleActions(mockController, mock(GdxGame.class),
+  // realLibrary()));
+  //    battleUI.create();
+  //
+  //    battleUI.getEvents().trigger("playCard", "bandage", "player");
+  //
+  //    verify(mockController).submitCardPlayRequest(CardPlayRequest.self("bandage"));
+  //  }
 
   @Test
   void shouldNotSubmitUnknownCard() {
@@ -209,8 +213,8 @@ class BattleActionsTest {
             .addComponent(new CombatStatsComponent(20, 1))
             .addComponent(new EnemyBehaviourComponent("test"));
     CardEffectHandler effectHandler = new CardEffectHandler();
-    CardPlayService cardPlayService = new CardPlayService(library, deck,
-            testPlayer.getComponent(EnergyComponent.class));
+    CardPlayService cardPlayService =
+        new CardPlayService(library, deck, testPlayer.getComponent(EnergyComponent.class));
     BattleController realController =
         new BattleController(testPlayer, List.of(enemy), effectHandler, cardPlayService);
     Entity battleUI =

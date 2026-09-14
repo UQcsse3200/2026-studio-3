@@ -250,8 +250,8 @@ public class BattleController {
   /**
    * Returns whether the battle is in the player input phase.
    *
-   * @return true only during {@link BattlePhase#PLAYER_TURN}; false during card resolution,
-   *     setup, enemy turns, and all other phases
+   * @return true only during {@link BattlePhase#PLAYER_TURN}; false during card resolution, setup,
+   *     enemy turns, and all other phases
    */
   public boolean isPlayerTurn() {
     return this.currentPhase == BattlePhase.PLAYER_TURN;

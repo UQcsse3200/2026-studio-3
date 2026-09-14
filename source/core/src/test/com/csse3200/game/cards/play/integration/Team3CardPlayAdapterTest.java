@@ -38,18 +38,17 @@ class Team3CardPlayAdapterTest {
 
     EnergyComponent energy = new EnergyComponent(3);
 
-    Entity player = new Entity()
-                    .addComponent(new CombatStatsComponent(10, 1))
-                    .addComponent(energy);
+    Entity player = new Entity().addComponent(new CombatStatsComponent(10, 1)).addComponent(energy);
 
-    Entity enemy = new Entity()
-                    .addComponent(new CombatStatsComponent(10, 1))
-                    .addComponent(new EnemyBehaviourComponent("test"));
+    Entity enemy =
+        new Entity()
+            .addComponent(new CombatStatsComponent(10, 1))
+            .addComponent(new EnemyBehaviourComponent("test"));
 
     List<Entity> enemies = List.of(enemy);
 
-    Team7PlayerStateAdapter playerState = new Team7PlayerStateAdapter(energy,
-                    player.getComponent(CombatStatsComponent.class));
+    Team7PlayerStateAdapter playerState =
+        new Team7PlayerStateAdapter(energy, player.getComponent(CombatStatsComponent.class));
 
     Team1EnemyStateAdapter enemyState = new Team1EnemyStateAdapter(Map.of("enemy-1", enemy));
 
@@ -58,8 +57,7 @@ class Team3CardPlayAdapterTest {
     CardEffectHandler effectHandler = new CardEffectHandler();
     BattleController controller = new BattleController(player, enemies, effectHandler, playService);
 
-    Team3CardPlayAdapter adapter =
-            new Team3CardPlayAdapter(cards, controller);
+    Team3CardPlayAdapter adapter = new Team3CardPlayAdapter(cards, controller);
 
     Entity battleFlow = new Entity().addComponent(adapter);
 
@@ -72,8 +70,7 @@ class Team3CardPlayAdapterTest {
       controller.endPlayerTurn();
     }
 
-    battleFlow.getEvents().trigger(
-            Team3CardPlayAdapter.PLAY_CARD_EVENT, "strike", "enemy-1");
+    battleFlow.getEvents().trigger(Team3CardPlayAdapter.PLAY_CARD_EVENT, "strike", "enemy-1");
 
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
 
@@ -87,7 +84,6 @@ class Team3CardPlayAdapterTest {
     // The BattleController applies the resolved card effects.
     assertEquals(4, enemy.getComponent(CombatStatsComponent.class).getHealth());
   }
-
 
   private static CardConfig strike() {
     CardConfig card = new CardConfig();
@@ -117,4 +113,3 @@ class Team3CardPlayAdapterTest {
     return card;
   }
 }
-
