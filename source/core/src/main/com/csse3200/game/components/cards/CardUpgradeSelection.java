@@ -5,9 +5,7 @@ import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.cards.runtime.CardResolver;
 import com.csse3200.game.cards.runtime.ResolvedCard;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /** A class to gives information about the card upgrade selection when call */
 public class CardUpgradeSelection {
@@ -15,6 +13,8 @@ public class CardUpgradeSelection {
   private final CardService cardService;
   private final int maxSelections;
   private final List<UpgradeOption> options;
+  private final LinkedHashSet<Integer> selected = new LinkedHashSet<>();
+  private final Set<Integer> selectableIndices;
 
   /**
    * A constructor for Card upgrade selection
@@ -40,6 +40,12 @@ public class CardUpgradeSelection {
     this.cardService = cardService;
     this.maxSelections = maxSelections;
     this.options = buildUpgradeOptions();
+    Set<Integer> selectableIndicesCreate = new HashSet<>();
+
+    for (UpgradeOption card : this.options) {
+      selectableIndicesCreate.add(card.deckIndex());
+    }
+    this.selectableIndices = Set.copyOf(selectableIndicesCreate);
   }
 
   /**
@@ -74,11 +80,91 @@ public class CardUpgradeSelection {
   }
 
   /**
+   * Return true if the deck index is selected and false if not
+   *
+   * @param deckIndex The current deck Index of the chosen card
+   * @return boolean, true if the deck index is selected and false if not
+   */
+  public boolean isSelected(int deckIndex) {
+    return this.selected.contains(deckIndex);
+  }
+
+  /**
+   * Return the number of the remaining selectable card
+   *
+   * @return int Return the number of the remaining selectable card
+   */
+  public int remainingSelectable() {
+    return this.maxSelections - selected.size();
+  }
+
+  /**
    * Return the list of upgrade options
    *
-   * @return List<UpgradeOption> List of upgrade options
+   * @return the upgrade options, one per upgradable card in the deck.
    */
   public List<UpgradeOption> getCardUpgradeOption() {
-    return buildUpgradeOptions();
+    return this.options;
+  }
+
+  /**
+   * Return true if the selected card is at least one
+   *
+   * @return Return true if the selected card is at least one
+   */
+  public boolean canConfirm() {
+    return !selected.isEmpty();
+  }
+
+  /**
+   * Return true if the card can be selected
+   *
+   * @param deckIndex The current deck Index of the chosen card
+   * @return Return true if the card is in the selectable list and is selected or the remaining
+   *     selectable is more than 0
+   */
+  public boolean canSelect(int deckIndex) {
+    return selectableIndices.contains(deckIndex)
+        && (selected.contains(deckIndex) || (remainingSelectable() > 0));
+  }
+
+  /**
+   * Flips the selection state of one upgradable card. An already selected card is unselected, which
+   * is always allowed so the player can revise a choice after reaching the cap. An unselected card
+   * is selected only while the cap has room; at the cap the call changes nothing.
+   *
+   * @param deckIndex The current deck Index of the chosen card
+   * @return true if the card is selected after this call, false if it is not
+   * @throws IllegalArgumentException if the deck index is not an upgradable option
+   */
+  public boolean toggle(int deckIndex) {
+    if (!selectableIndices.contains(deckIndex)) {
+      throw new IllegalArgumentException(
+          "Deck index " + deckIndex + " is not an upgradable option");
+    } else if (isSelected(deckIndex)) {
+      selected.remove(deckIndex);
+      return false;
+    } else if (!canSelect(deckIndex)) {
+      return false;
+    } else {
+      selected.add(deckIndex);
+      return true;
+    }
+  }
+
+  /**
+   * Return the list of selected Deck Indices in sorted order
+   *
+   * @return Return the list of selected Deck Indices in sorted order
+   */
+  public List<Integer> getSelectedDeckIndices() {
+    List<Integer> sortedList = new ArrayList<>(selected);
+    sortedList.sort(Comparator.reverseOrder());
+    return List.copyOf(sortedList);
+  }
+
+  /** Clear selected list */
+  public void reset() {
+    selected.clear();
   }
 }
