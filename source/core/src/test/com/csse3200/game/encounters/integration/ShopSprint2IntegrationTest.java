@@ -2,6 +2,7 @@ package com.csse3200.game.encounters.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.cards.CardConfigLoader;
@@ -10,6 +11,7 @@ import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.encounters.integration.mocks.MockPlayerStateGateway;
 import com.csse3200.game.extensions.GameExtension;
+import com.csse3200.game.maps.RunState;
 import com.csse3200.game.shop.PurchaseResult;
 import com.csse3200.game.shop.ShopInventoryGenerator;
 import com.csse3200.game.shop.ShopItem;
@@ -39,6 +41,43 @@ class ShopSprint2IntegrationTest {
     assertEquals(3, playerDeck.size());
     assertTrue(playerDeck.contains(offer.cardId));
     assertEquals(0, offer.stock);
+  }
+
+  @Test
+  void shouldRetainPurchasedCardWhenShopIsReenteredWithSharedRunStateDeck() {
+    CardService cardService = new CardLibrary(CardConfigLoader.loadCards());
+    RunState runState = new RunState();
+    PlayerDeck firstShopDeck = runState.getOrCreatePlayerDeck(cardService);
+    int initialDeckSize = firstShopDeck.size();
+    int initialStrikeCount = firstShopDeck.count("strike");
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 1_000);
+    ShopItem offer = new ShopItem("strike-offer", "strike", "Strike", 20, 1);
+    ShopService firstShop = new ShopService(new ShopItem[] {offer});
+    IntegratedShopTransactionGateway firstTransactions =
+        new IntegratedShopTransactionGateway(
+            player,
+            new CardServiceCatalogAdapter(cardService),
+            new PlayerDeckAdapter(firstShopDeck));
+
+    PurchaseResult result = firstShop.purchaseWithGateway(offer.id, firstTransactions);
+
+    PlayerDeck reenteredShopDeck = runState.getOrCreatePlayerDeck(cardService);
+    ShopItem reenteredOffer = new ShopItem("defend-offer", "defend", "Defend", 20, 1);
+    ShopService reenteredShop = new ShopService(new ShopItem[] {reenteredOffer});
+    IntegratedShopTransactionGateway reenteredTransactions =
+        new IntegratedShopTransactionGateway(
+            player,
+            new CardServiceCatalogAdapter(cardService),
+            new PlayerDeckAdapter(reenteredShopDeck));
+
+    assertTrue(result.isSuccess());
+    assertSame(firstShopDeck, reenteredShopDeck);
+    assertEquals(initialDeckSize + 1, reenteredShopDeck.size());
+    assertEquals(initialStrikeCount + 1, reenteredShopDeck.count(offer.cardId));
+    assertTrue(reenteredShopDeck.contains(offer.cardId));
+    assertTrue(
+        reenteredShop.canPurchaseWithGateway(reenteredOffer.id, reenteredTransactions).isSuccess());
+    assertEquals(980, reenteredTransactions.getCurrency());
   }
 
   @Test
