@@ -28,8 +28,8 @@
       "behaviour": "armor_scaling"
     },
     {
-      "id": "void_knight",
-      "name": "Void Knight",
+      "id": "tomb_guardian",
+      "name": "Tomb Guardian",
       "health": 72,
       "baseAttack": 10,
       "armour": 5,
@@ -37,8 +37,8 @@
       "behaviour": "shield_break_retaliation"
     },
     {
-      "id": "giant_skeleton",
-      "name": "Giant Skeleton",
+      "id": "void_knight",
+      "name": "Void Knight",
       "health": 40,
       "baseAttack": 16,
       "armour": 0,
