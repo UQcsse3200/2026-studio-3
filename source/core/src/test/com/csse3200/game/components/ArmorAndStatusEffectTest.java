@@ -280,4 +280,88 @@ class ArmorAndStatusEffectTest {
     combat.updateStatusEffects();
     assertTrue(combat.hasStatusEffect("STRENGTH"));
   }
+
+  /** Verifies that reducing armor does not modify the entity's block or health. */
+  @Test
+  void reduceArmorShouldNotDamageBlockOrHealth() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 10);
+    stats.setArmor(5);
+    stats.setBlock(4);
+    assertEquals(3, stats.reduceArmor(3));
+    assertEquals(2, stats.getArmor());
+    assertEquals(4, stats.getBlock());
+    assertEquals(100, stats.getHealth());
+    assertFalse(stats.hasStatusEffect("SUNDER"));
+  }
+
+  /** Verifies that armor cannot fall below zero and non-positive reductions are ignored. */
+  @Test
+  void reduceArmorShouldClampAndIgnoreNonPositiveAmounts() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 10);
+    stats.setArmor(2);
+    assertEquals(0, stats.reduceArmor(-3));
+    assertEquals(0, stats.reduceArmor(0));
+    assertEquals(2, stats.getArmor());
+    assertEquals(2, stats.reduceArmor(Integer.MAX_VALUE));
+    assertEquals(0, stats.getArmor());
+    assertEquals(0, stats.reduceArmor(3));
+  }
+
+  /**
+   * Verifies that one poison tick applies damage and updates POISON without changing unrelated
+   * status effects.
+   */
+  @Test
+  void poisonShouldTickBeforeExpiryWithoutTickingOtherEffects() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 10);
+    stats.applyStatusEffect("POISON", 3, 2);
+    stats.applyStatusEffect("HEAL", 2, 3);
+    java.util.List<Integer> damage = new java.util.ArrayList<>();
+    stats.processPoisonTick(damage::add);
+    assertEquals(1, stats.getStatusEffect("POISON").getDuration());
+    stats.processPoisonTick(damage::add);
+    stats.processPoisonTick(damage::add);
+    assertEquals(java.util.List.of(3, 3), damage);
+    assertNull(stats.getStatusEffect("POISON"));
+    assertEquals(3, stats.getStatusEffect("HEAL").getDuration());
+    assertEquals(100, stats.getHealth());
+  }
+
+  /** Verifies that poison uses the supplied damage handler and does not tick a dead entity. */
+  @Test
+  void poisonShouldUseSuppliedDamageHandlerAndSkipDeadEntities() {
+    CombatStatsComponent stats = new CombatStatsComponent(3, 1);
+    stats.applyStatusEffect("POISON", 3, 1);
+    stats.processPoisonTick(stats::takeDamage);
+    assertTrue(stats.isDead());
+    assertNull(stats.getStatusEffect("POISON"));
+    stats.applyStatusEffect("POISON", 3, 2);
+    stats.processPoisonTick(
+        value -> {
+          throw new AssertionError("Dead entity ticked");
+        });
+    assertEquals(2, stats.getStatusEffect("POISON").getDuration());
+  }
+
+  /** Verifies that a POISON effect replaced during damage handling is not immediately ticked. */
+  @Test
+  void poisonShouldPreserveReplacementCreatedDuringDamageCallback() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 10);
+    stats.applyStatusEffect("POISON", 3, 1);
+    stats.processPoisonTick(value -> stats.applyStatusEffect("POISON", 7, 4));
+    assertEquals(7, stats.getStatusEffect("POISON").getValue());
+    assertEquals(4, stats.getStatusEffect("POISON").getDuration());
+  }
+
+  /** Verifies that non-positive poison applies no damage but still expires normally. */
+  @Test
+  void nonPositivePoisonShouldExpireWithoutApplyingDamage() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 10);
+    stats.applyStatusEffect("POISON", -2, 1);
+    stats.processPoisonTick(
+        value -> {
+          throw new AssertionError("Negative poison damage");
+        });
+    assertNull(stats.getStatusEffect("POISON"));
+  }
 }
