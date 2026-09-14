@@ -54,6 +54,7 @@ public class SaveLoadPanel extends UIComponent {
   private Table rootTable;
   private Label statusLabel;
   private final List<Texture> generatedPillTextures = new java.util.ArrayList<>();
+  private TextButton.TextButtonStyle buttonStyle;
 
   public SaveLoadPanel(SaveGameService saveGameService, List<Integer> slotIds) {
     this(saveGameService, slotIds, null, null);
@@ -111,17 +112,20 @@ public class SaveLoadPanel extends UIComponent {
   }
 
   private TextButton.TextButtonStyle themedButtonStyle() {
-    TextButton.TextButtonStyle style =
-        new TextButton.TextButtonStyle(skin.get(TextButton.TextButtonStyle.class));
-    style.up = pillDrawable(MenuTheme.burntRust());
-    style.down = pillDrawable(MenuTheme.dustyMauve());
-    style.over = pillDrawable(MenuTheme.softCoral());
-    style.disabled = pillDrawable(MenuTheme.burntRust());
-    style.fontColor = MenuTheme.warmParchment();
-    style.overFontColor = Color.WHITE;
-    style.downFontColor = MenuTheme.warmParchment();
-    style.disabledFontColor = MenuTheme.warmParchment();
-    return style;
+    if (buttonStyle != null) {
+      return buttonStyle;
+    }
+
+    buttonStyle = new TextButton.TextButtonStyle(skin.get(TextButton.TextButtonStyle.class));
+    buttonStyle.up = pillDrawable(MenuTheme.burntRust());
+    buttonStyle.down = pillDrawable(MenuTheme.dustyMauve());
+    buttonStyle.over = pillDrawable(MenuTheme.softCoral());
+    buttonStyle.disabled = buttonStyle.up;
+    buttonStyle.fontColor = MenuTheme.warmParchment();
+    buttonStyle.overFontColor = Color.WHITE;
+    buttonStyle.downFontColor = MenuTheme.warmParchment();
+    buttonStyle.disabledFontColor = MenuTheme.warmParchment();
+    return buttonStyle;
   }
 
   /**
@@ -297,6 +301,7 @@ public class SaveLoadPanel extends UIComponent {
       texture.dispose();
     }
     generatedPillTextures.clear();
+    buttonStyle = null;
     super.dispose();
   }
 }
