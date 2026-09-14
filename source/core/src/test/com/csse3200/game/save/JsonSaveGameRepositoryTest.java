@@ -44,6 +44,11 @@ class JsonSaveGameRepositoryTest {
     assertEquals("CURRENT", loadResult.data().map.nodes.get(0).state);
     assertEquals("reward-2", loadResult.data().progress.pendingRewardId);
     assertEquals("MAP", loadResult.data().progress.resumeScreen);
+    assertEquals(2, loadResult.data().progress.bestiary.size());
+    assertEquals("lesser_shade", loadResult.data().progress.bestiary.get(0).enemyId);
+    assertEquals("DEFEATED", loadResult.data().progress.bestiary.get(0).unlockState);
+    assertEquals("boss_knight", loadResult.data().progress.bestiary.get(1).enemyId);
+    assertEquals("ENCOUNTERED", loadResult.data().progress.bestiary.get(1).unlockState);
     assertFalse(Files.exists(temporaryDirectory.resolve("slot-2.json.tmp")));
   }
 
@@ -76,6 +81,7 @@ class JsonSaveGameRepositoryTest {
     assertTrue(result.success());
     assertEquals("COMPLETED", result.data().map.nodes.get(0).state);
     assertEquals("MAP", result.data().progress.resumeScreen);
+    assertTrue(result.data().progress.bestiary.isEmpty());
   }
 
   @Test
@@ -196,7 +202,12 @@ class JsonSaveGameRepositoryTest {
                     new MapNodeSaveData(8, "SHOP", "AVAILABLE", List.of(7))),
                 7,
                 null),
-            new ProgressSaveData("reward-2", "MAP"));
+            new ProgressSaveData(
+                "reward-2",
+                "MAP",
+                List.of(
+                    new BestiaryProgressSaveData("lesser_shade", "DEFEATED"),
+                    new BestiaryProgressSaveData("boss_knight", "ENCOUNTERED"))));
     data.metadata = new SaveSlotMetadata(slotId, 123456L, label, 321L, "MAP");
     assertNotNull(data.metadata);
     return data;

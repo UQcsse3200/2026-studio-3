@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.bestiary.BestiaryUnlockState;
 import com.csse3200.game.cards.TestCardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.extensions.GameExtension;
@@ -32,14 +34,20 @@ class SaveGameRestoreServiceTest {
     PlayerDeck deck = testDeck(List.of(STRIKE));
     RunState runState = new RunState();
     runState.startRun(existingMap(), 0);
+    BestiaryService bestiary = BestiaryService.loadDefault();
+    bestiary.recordDefeated("lesser_shade");
 
     SaveGameData saveData = validSaveData();
     saveData.player = new PlayerSaveData(80, 100, 42, 0);
     saveData.deck = new DeckSaveData(List.of(DEFEND, BANDAGE));
     saveData.progress.resumeScreen = "MAP";
+    saveData.progress.bestiary =
+        List.of(
+            new BestiaryProgressSaveData("boss_knight", "ENCOUNTERED"),
+            new BestiaryProgressSaveData("retired_enemy", "DEFEATED"));
 
     RestoreResult result =
-        new SaveGameRestoreService(playerState, deck, runState).restore(saveData);
+        new SaveGameRestoreService(playerState, deck, runState, bestiary).restore(saveData);
 
     assertTrue(result.success());
     assertEquals("MAP", result.resumeScreen());
@@ -52,6 +60,10 @@ class SaveGameRestoreServiceTest {
     assertEquals(2, runState.getActiveNodeId());
     assertEquals(NodeState.COMPLETED, runState.getMapGraph().getNode(0).getState());
     assertEquals(NodeState.CURRENT, runState.getMapGraph().getNode(1).getState());
+    assertEquals(BestiaryUnlockState.LOCKED, bestiary.getProgressSnapshot().get("lesser_shade"));
+    assertEquals(
+        BestiaryUnlockState.ENCOUNTERED, bestiary.getProgressSnapshot().get("boss_knight"));
+    assertFalse(bestiary.getProgressSnapshot().containsKey("retired_enemy"));
   }
 
   @Test
@@ -60,13 +72,14 @@ class SaveGameRestoreServiceTest {
     PlayerDeck deck = testDeck(List.of(STRIKE));
     RunState runState = new RunState();
     runState.startRun(existingMap(), 0);
+    BestiaryService bestiary = BestiaryService.loadDefault();
 
     SaveGameData saveData = validSaveData();
     saveData.player = new PlayerSaveData(80, 100, 42, 0);
     saveData.deck = new DeckSaveData(List.of("unknown_card"));
 
     RestoreResult result =
-        new SaveGameRestoreService(playerState, deck, runState).restore(saveData);
+        new SaveGameRestoreService(playerState, deck, runState, bestiary).restore(saveData);
 
     assertFalse(result.success());
     assertEquals(RestoreError.INVALID_DECK_STATE, result.error());
@@ -82,12 +95,13 @@ class SaveGameRestoreServiceTest {
     PlayerDeck deck = testDeck(List.of(STRIKE));
     RunState runState = new RunState();
     runState.startRun(existingMap(), 0);
+    BestiaryService bestiary = BestiaryService.loadDefault();
 
     SaveGameData saveData = validSaveData();
     saveData.map.nodes.get(0).connectionIds.add(99);
 
     RestoreResult result =
-        new SaveGameRestoreService(playerState, deck, runState).restore(saveData);
+        new SaveGameRestoreService(playerState, deck, runState, bestiary).restore(saveData);
 
     assertFalse(result.success());
     assertEquals(RestoreError.INVALID_MAP_STATE, result.error());
@@ -97,18 +111,52 @@ class SaveGameRestoreServiceTest {
   }
 
   @Test
+  void rejectsInvalidBestiaryProgressWithoutMutatingLiveState() {
+    PlayerRunState playerState = new PlayerRunState(12, 50, 3);
+    PlayerDeck deck = testDeck(List.of(STRIKE));
+    RunState runState = new RunState();
+    runState.startRun(existingMap(), 0);
+    BestiaryService bestiary = BestiaryService.loadDefault();
+    bestiary.recordDefeated("lesser_shade");
+
+    SaveGameData saveData = validSaveData();
+    saveData.player = new PlayerSaveData(80, 100, 42, 0);
+    saveData.deck = new DeckSaveData(List.of(DEFEND));
+    saveData.progress.bestiary =
+        List.of(new BestiaryProgressSaveData("boss_knight", "NOT_A_STATE"));
+
+    RestoreResult result =
+        new SaveGameRestoreService(playerState, deck, runState, bestiary).restore(saveData);
+
+    assertFalse(result.success());
+    assertEquals(RestoreError.INVALID_PROGRESS_STATE, result.error());
+    assertEquals(12, playerState.getCurrentHealth());
+    assertEquals(3, playerState.getGold());
+    assertEquals(List.of(STRIKE), deck.getCardIds());
+    assertEquals(0, runState.getMapGraph().getCurrentNode().getNodeId());
+    assertEquals(BestiaryUnlockState.DEFEATED, bestiary.getProgressSnapshot().get("lesser_shade"));
+    assertEquals(BestiaryUnlockState.LOCKED, bestiary.getProgressSnapshot().get("boss_knight"));
+  }
+
+  @Test
   void validatesConstructorArguments() {
     PlayerRunState playerState = new PlayerRunState(12, 50, 3);
     PlayerDeck deck = testDeck(List.of(STRIKE));
     RunState runState = new RunState();
+    BestiaryService bestiary = BestiaryService.loadDefault();
 
     assertThrows(
-        IllegalArgumentException.class, () -> new SaveGameRestoreService(null, deck, runState));
+        IllegalArgumentException.class,
+        () -> new SaveGameRestoreService(null, deck, runState, bestiary));
     assertThrows(
         IllegalArgumentException.class,
-        () -> new SaveGameRestoreService(playerState, null, runState));
+        () -> new SaveGameRestoreService(playerState, null, runState, bestiary));
     assertThrows(
-        IllegalArgumentException.class, () -> new SaveGameRestoreService(playerState, deck, null));
+        IllegalArgumentException.class,
+        () -> new SaveGameRestoreService(playerState, deck, null, bestiary));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new SaveGameRestoreService(playerState, deck, runState, null));
   }
 
   private SaveGameData validSaveData() {
