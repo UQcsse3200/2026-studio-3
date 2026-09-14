@@ -128,4 +128,42 @@ class CombatStatsComponentTest {
     combat.setBaseAttack(-50);
     assertEquals(150, combat.getBaseAttack());
   }
+
+    @Test
+    void shouldReduceHealthWithoutArmorOrBlock() {
+        CombatStatsComponent stats = new CombatStatsComponent(20, 0);
+        stats.setArmor(10);
+        stats.setBlock(5);
+        stats.applyDirectHealthChange(-8);
+        assertEquals(12, stats.getHealth());
+        assertEquals(10, stats.getArmor());
+        assertEquals(5, stats.getBlock());
+    }
+
+    @Test
+    void shouldClampHealthAtZeroAndTriggerDeath() {
+        CombatStatsComponent stats = new CombatStatsComponent(5, 0);
+        stats.applyDirectHealthChange(-100);
+        assertEquals(0, stats.getHealth());
+        assertTrue(stats.isDead());
+    }
+
+    @Test
+    void shouldHealAndClampAtMaxHealth() {
+        CombatStatsComponent stats = new CombatStatsComponent(10, 0, 20);
+        stats.applyDirectHealthChange(50);
+        assertEquals(20, stats.getHealth());
+    }
+
+    @Test
+    void shouldTriggerDeathEventOnDirectHealthChange() {
+        Entity entity = new Entity();
+        CombatStatsComponent combat = new CombatStatsComponent(5, 0);
+        entity.addComponent(combat);
+        EventListener0 listener = mock(EventListener0.class);
+        entity.getEvents().addListener("entityIsDead", listener);
+        combat.applyDirectHealthChange(-100);
+        verify(listener).handle();
+    }
+
 }
