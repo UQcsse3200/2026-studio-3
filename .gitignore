@@ -3,3 +3,7 @@
 ### Gradle ###
 .gradle/
 .gradle-local/
+stuff
+source/core/assets/images/silly_ghost.png
+source/core/assets/images/sillyGhost.atlas
+source/sprint2-test-run.log
