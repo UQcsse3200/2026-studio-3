@@ -38,6 +38,9 @@ public class PauseMenuActions extends Component {
   /** Leaves the current run for the main menu. Only fired after the display's confirm dialog. */
   private void onExitToMenu() {
     logger.info("Returning to main menu from pause menu");
+    if (game.getRunState() != null) {
+      game.getRunState().abandonEncounter();
+    }
     getPauseService().resume();
     game.setScreen(GdxGame.ScreenType.MAIN_MENU);
   }
