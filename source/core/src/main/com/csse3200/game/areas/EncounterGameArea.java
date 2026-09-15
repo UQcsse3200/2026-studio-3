@@ -21,6 +21,7 @@ import com.csse3200.game.entities.factories.NPCFactory;
 import com.csse3200.game.entities.factories.ObstacleFactory;
 import com.csse3200.game.entities.factories.PlayerFactory;
 import com.csse3200.game.files.FileLoader;
+import com.csse3200.game.maps.RunState;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.shop.ShopConfig;
@@ -80,6 +81,7 @@ public class EncounterGameArea extends GameArea {
 
   private Entity player;
   private EncounterFlowController encounterFlow;
+  private RunState runState;
 
   /**
    * Initialise this EncounterGameArea to use the provided TerrainFactory.
@@ -87,8 +89,9 @@ public class EncounterGameArea extends GameArea {
    * @param terrainFactory TerrainFactory used to create the terrain for the GameArea.
    * @requires terrainFactory != null
    */
-  public EncounterGameArea(TerrainFactory terrainFactory) {
+  public EncounterGameArea(TerrainFactory terrainFactory, RunState runState) {
     super();
+    this.runState = runState;
     this.terrainFactory = terrainFactory;
   }
 
@@ -200,7 +203,7 @@ public class EncounterGameArea extends GameArea {
   }
 
   private Entity spawnPlayer() {
-    Entity newPlayer = PlayerFactory.createPlayer();
+    Entity newPlayer = PlayerFactory.createPlayer(runState);
     spawnEntityAt(newPlayer, PLAYER_SPAWN, true, true);
     return newPlayer;
   }
