@@ -1,14 +1,9 @@
 package com.csse3200.game.screens;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.areas.ForestGameArea;
 import com.csse3200.game.areas.terrain.TerrainFactory;
@@ -17,6 +12,7 @@ import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
+import com.csse3200.game.cards.deck.CardInstance;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.cards.play.integration.Team3CardPlayAdapter;
@@ -25,6 +21,7 @@ import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.player.EnergyComponent;
+import com.csse3200.game.components.spritedisplay.clickable.CardImageSkins;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
@@ -41,6 +38,7 @@ import com.csse3200.game.services.DragNDropService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.ui.PopupDisplay;
 import java.nio.file.Path;
 import java.util.*;
 import org.slf4j.Logger;
@@ -73,11 +71,19 @@ public class BattleScreen extends ScreenAdapter {
   private static final float CARD_HEIGHT = 456;
 
   private final PhysicsEngine physicsEngine;
-  private static final Map<String, Skin> textureSkinCache = new HashMap<>();
   private final BattleController controller;
   private final CardLibrary library;
   private final BattleDeck battleDeck;
+  private CardPlayService cardPlayService;
+  private ClickableFactory uiFactory;
   private List<ClickableRecord> staticUiRecords;
+
+  // Fixed left-to-right slot order for the on-screen row: each entry is the exact physical card
+  // (see CardInstance) occupying that slot. Captured at deal time, and reset wholesale whenever the
+  // player deliberately rearranges their hand via the deck editor — otherwise left untouched, so a
+  // played card's slot just toggles disabled in place (its instance shows up in the discard pile)
+  // instead of the row reflowing and making it look like a new card was drawn.
+  private List<CardInstance> handRowOrder = new ArrayList<>();
 
   public BattleScreen(GdxGame game) {
     this.game = game;
@@ -125,11 +131,12 @@ public class BattleScreen extends ScreenAdapter {
     battleDeck = new BattleDeck(playerDeck);
     battleDeck.shuffleDrawPile();
     battleDeck.drawCards(5);
+    handRowOrder = new ArrayList<>(battleDeck.getHandInstances());
 
     Entity player = forestGameArea.getPlayer();
     EnergyComponent energy = player.getComponent(EnergyComponent.class);
 
-    CardPlayService cardPlayService = new CardPlayService(library, battleDeck, energy);
+    cardPlayService = new CardPlayService(library, battleDeck, energy);
     CardEffectHandler effectHandler = new CardEffectHandler();
     controller =
         new BattleController(player, forestGameArea.getEnemies(), effectHandler, cardPlayService);
@@ -164,9 +171,12 @@ public class BattleScreen extends ScreenAdapter {
 
     staticUiRecords = ClickableFactory.loadRecordsFromJson(battleUiJson);
 
-    ClickableFactory uiFactory = new ClickableFactory(buildAllRecords());
+    uiFactory = new ClickableFactory(buildAllRecords());
 
     Team3CardPlayAdapter cardPlayAdapter = new Team3CardPlayAdapter(library, controller);
+
+    PopupDisplay cardInventory = new PopupDisplay("Card Inventory");
+    cardInventory.setMinSize(800f, 600f);
 
     Stage stage = ServiceLocator.getRenderService().getStage();
     Entity battleUi =
@@ -175,18 +185,47 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(uiFactory)
             .addComponent(displays)
             .addComponent(new BattleActions(controller, game, library))
-            .addComponent(cardPlayAdapter);
+            .addComponent(cardPlayAdapter)
+            .addComponent(cardInventory);
 
-    // Keep the on-screen hand in sync with the deck: after a card is played (and a replacement
-    // drawn) rebuild the hand widgets from the live deck, so the played card's button is gone and
-    // the drawn card's button appears.
+    // Keep the on-screen row in sync with the deck: whenever the hand changes (a card played, or
+    // one retrieved from the discard pile after its cooldown elapses) rebuild from the live deck,
+    // so the affected slot's disabled/shaded state updates in place.
     battleUi
         .getEvents()
         .addListener(
             BattleActions.HAND_CHANGED_EVENT,
             (List<String> hand) -> uiFactory.rebuildHand(buildHandRecords()));
 
+    // battleUi must be registered (and so cardInventory.create() must have run, giving it a
+    // content table) before the deck editor's create() tries to add widgets to that table below.
     gameArea.displayUI(battleUi);
+
+    // The deck editor's own per-card toggle buttons need a ClickableFactory of their own — an
+    // entity can only hold one component of a given class, and battleUi already has uiFactory.
+    ClickableFactory deckPoolFactory = new ClickableFactory(new ArrayList<>());
+    DeckEditorComponent deckEditor =
+        new DeckEditorComponent(
+            cardPlayService, library, cardInventory, deckPoolFactory, this::onDeckRearranged);
+    Entity deckEditorEntity =
+        new Entity().addComponent(deckPoolFactory).addComponent(deckEditor);
+    ServiceLocator.getEntityService().register(deckEditorEntity);
+
+    battleUi.getEvents().addListener("open-menu", deckEditor::open);
+  }
+
+  /**
+   * Called after the deck editor commits a hand rearrange, with the full confirmed selection —
+   * including any still-on-cooldown picks {@link CardPlayService#rearrangeHand} left in the discard
+   * pile untouched. Unlike a normal play/cooldown-retrieval hand change, the whole set of slots may
+   * now be different, so — unlike {@link #buildHandRecords()}'s usual in-place toggling — the row's
+   * slots themselves are reset to match. A slot holding a still-discarded pick simply renders
+   * disabled (same as any other discarded card) until its cooldown naturally elapses and it's
+   * retrieved into the real hand, at which point the normal HAND_CHANGED_EVENT listener un-dims it.
+   */
+  private void onDeckRearranged(List<CardInstance> newHandRow) {
+    handRowOrder = new ArrayList<>(newHandRow);
+    uiFactory.rebuildHand(buildHandRecords());
   }
 
   @Override
@@ -216,42 +255,42 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.getResourceService().loadAll();
   }
 
-  private Skin skinFromTexturePath(String texturePath) {
-    return textureSkinCache.computeIfAbsent(
-        texturePath,
-        path -> {
-          Texture texture = new Texture(Gdx.files.internal(path));
-          TextureRegionDrawable drawable = new TextureRegionDrawable(new TextureRegion(texture));
-
-          ImageButton.ImageButtonStyle style = new ImageButton.ImageButtonStyle();
-          style.imageUp = drawable;
-
-          Skin skin = new Skin();
-          skin.add("default", style, ImageButton.ImageButtonStyle.class);
-          return skin;
-        });
-  }
-
   private List<ClickableRecord> buildAllRecords() {
     List<ClickableRecord> records = new ArrayList<>(buildHandRecords());
     records.addAll(staticUiRecords);
     return records;
   }
 
+  /**
+   * Builds one widget per card slot in {@link #handRowOrder} — a fixed left-to-right layout that
+   * only changes wholesale via {@link #onDeckRearranged()}. Each slot renders the exact {@link
+   * CardInstance} dealt to it: still in hand, it's normal and playable; currently sitting in the
+   * discard pile (played, or on cooldown), it renders {@code disabled(true)} (shaded, inert to
+   * clicks/drags — see {@link com.csse3200.game.components.spritedisplay.clickable.Clickable}) in
+   * that SAME slot. Checking discard-pile membership by exact instance — not by card ID — is what
+   * lets duplicate copies of the same card (e.g. two "strike"s) be dimmed independently of each
+   * other. Positions never reflow and the row never grows/shrinks, so playing a card reads as "this
+   * slot went dull", not as a new card being dealt.
+   */
   private List<ClickableRecord> buildHandRecords() {
+    Set<CardInstance> discardedInstances = new HashSet<>(battleDeck.getDiscardPileInstances());
+
     List<ClickableRecord> records = new ArrayList<>();
     float x = HAND_START_X;
-    for (String cardId : battleDeck.getHand()) {
+    for (CardInstance instance : handRowOrder) {
+      String cardId = instance.cardId();
+      boolean disabled = discardedInstances.contains(instance);
+
       Optional<CardConfig> maybeCard = library.getCard(cardId);
       if (maybeCard.isEmpty()) {
-        logger.warn("Card ID {} in hand not found in library, skipping", cardId);
+        logger.warn("Card ID {} not found in library, skipping", cardId);
         continue;
       }
       CardConfig card = maybeCard.get();
       boolean selfTarget = card.target == TargetType.SELF;
       String variant = selfTarget ? "inout" : "drag";
 
-      Skin cardSkin = skinFromTexturePath(card.texturePath);
+      Skin cardSkin = CardImageSkins.forTexturePath(card.texturePath);
 
       ClickableRecord.Builder builder =
           ClickableRecord.builder("playCard")
@@ -259,7 +298,8 @@ public class BattleScreen extends ScreenAdapter {
               .variant(variant)
               .position(x, HAND_Y)
               .size(CARD_WIDTH, CARD_HEIGHT)
-              .skin(cardSkin);
+              .skin(cardSkin)
+              .disabled(disabled);
 
       if (selfTarget) {
         // No drop target involved — target is fixed at "player".

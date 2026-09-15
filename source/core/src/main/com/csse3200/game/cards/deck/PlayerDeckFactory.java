@@ -17,6 +17,9 @@ public final class PlayerDeckFactory {
           STRIKE,
           STRIKE,
           STRIKE,
+          STRIKE, // TEMP: 11th card so the deck-rearrange popup's pagination has a second page to
+          // show. Remove this line (and the matching count bump in PlayerDeckFactoryTest) once
+          // pagination has been checked.
           DEFEND,
           DEFEND,
           DEFEND,

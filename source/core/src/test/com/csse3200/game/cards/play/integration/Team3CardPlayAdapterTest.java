@@ -77,8 +77,8 @@ class Team3CardPlayAdapterTest {
     // The card was resolved through the controller/service.
     assertEquals(2, energy.getCurrentEnergy());
 
-    // strike was discarded and defend was drawn as the replacement.
-    assertEquals(List.of("defend"), deck.getHand());
+    // strike was discarded and not replaced.
+    assertEquals(List.of(), deck.getHand());
     assertEquals(List.of("strike"), deck.getDiscardPile());
 
     // The BattleController applies the resolved card effects.

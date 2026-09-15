@@ -7,23 +7,17 @@
       "trigger": "exit"
     },
     {
-      "text": "Up",
+      "text": "Card Inventory",
       "x": 20,
       "y": 150,
-      "trigger": "up"
-    },
-    {
-      "text": "Down",
-      "x": 20,
-      "y": 200,
-      "trigger": "down"
+      "trigger": "open-menu"
     },
     {
       "text": "End Turn",
       "x": 20,
       "y": 250,
-      "trigger": "endturn"
-
+      "trigger": "endturn",
+      "variant": "gated"
     }
   ],
   "Displaying": [

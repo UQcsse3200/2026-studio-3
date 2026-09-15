@@ -15,6 +15,7 @@ import com.csse3200.game.cards.TestCardService;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
+import com.csse3200.game.cards.deck.CardInstance;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.effects.CardEffectResolution;
 import com.csse3200.game.cards.effects.CardEffectResolutionService;
@@ -26,7 +27,7 @@ import org.junit.jupiter.api.Test;
 class CardPlayServiceTest {
 
   @Test
-  void shouldSpendEnergyResolveEffectsDiscardPlayedCardAndDrawReplacement() {
+  void shouldSpendEnergyResolveEffectsAndDiscardPlayedCard() {
     CardConfig strike =
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
     CardConfig defend = card("defend", 1, TargetType.SELF, new EffectConfig(EffectType.BLOCK, 3));
@@ -57,13 +58,13 @@ class CardPlayServiceTest {
     assertIterableEquals(List.of("strike"), battleDeck.getDiscardPile());
     assertIterableEquals(List.of("strike"), result.updatedDiscardPile());
 
-    // The replacement card was drawn into the hand.
-    assertIterableEquals(List.of("defend"), battleDeck.getHand());
-    assertIterableEquals(List.of("defend"), result.updatedHand());
+    // No replacement is drawn — the hand just shrinks by the played card.
+    assertTrue(battleDeck.getHand().isEmpty());
+    assertTrue(result.updatedHand().isEmpty());
 
-    // No cards remain in the draw pile.
-    assertTrue(battleDeck.getDrawPile().isEmpty());
-    assertTrue(result.updatedDrawPile().isEmpty());
+    // The draw pile is untouched.
+    assertIterableEquals(List.of("defend"), battleDeck.getDrawPile());
+    assertIterableEquals(List.of("defend"), result.updatedDrawPile());
 
     // The card's effects were resolved correctly.
     assertIterableEquals(
@@ -106,17 +107,16 @@ class CardPlayServiceTest {
     assertEquals(1, result.energyCost());
     assertEquals(2, energyComponent.getCurrentEnergy());
 
-    // strike was played and defend was drawn as its replacement.
-    assertIterableEquals(List.of("defend"), result.updatedHand());
+    // strike was played and not replaced — the hand is now empty.
+    assertTrue(result.updatedHand().isEmpty());
 
-    // No cards remain in the draw pile after drawing the replacement.
-    assertTrue(result.updatedDrawPile().isEmpty());
+    // The draw pile is untouched.
+    assertIterableEquals(List.of("defend"), result.updatedDrawPile());
 
     // strike was moved to the discard pile.
     assertIterableEquals(List.of("strike"), result.updatedDiscardPile());
 
-    // defend is no longer playable because it is in the hand but has no valid
-    // single-enemy target for this card.
+    // defend is not playable because it was never drawn into the hand.
     assertFalse(playService.canPlay(CardPlayRequest.singleEnemy("defend", "enemy-1")));
   }
 
@@ -377,6 +377,149 @@ class CardPlayServiceTest {
     assertThrows(IllegalArgumentException.class, () -> CardPlayTarget.singleEnemy(" enemy-1 "));
     assertThrows(
         IllegalArgumentException.class, () -> new CardPlayTarget(TargetType.SELF, "enemy-1"));
+  }
+
+  @Test
+  void shouldTrackCooldownPerInstanceNotPerCardId() {
+    CardConfig strike =
+        card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 4));
+    CardLibrary cardLibrary = new CardLibrary(List.of(strike));
+
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike", "strike")));
+    battleDeck.drawCards(2);
+
+    EnergyComponent energyComponent = new EnergyComponent(3);
+    CardEffectResolutionService resolutionService = new CardEffectResolutionService(cardLibrary);
+    CardPlayService playService =
+        new CardPlayService(cardLibrary, resolutionService, battleDeck, energyComponent);
+
+    CardPlayResult result = playService.playCard("strike");
+    assertTrue(result.successful());
+
+    List<CardInstance> remainingHand = battleDeck.getHandInstances();
+    List<CardInstance> discarded = battleDeck.getDiscardPileInstances();
+
+    assertEquals(1, remainingHand.size());
+    assertEquals(1, discarded.size());
+
+    // Only the copy that was actually played is on cooldown; the other "strike" still sitting in
+    // hand must not be affected just because it shares the same card ID.
+    assertTrue(playService.isOnCooldown(discarded.get(0)));
+    assertFalse(playService.isOnCooldown(remainingHand.get(0)));
+  }
+
+  @Test
+  void shouldOnlyRetrieveTheSpecificInstanceOnCooldown() {
+    // Total effect value 6 -> 2 rounds of cooldown (see CardCooldown.roundsFor).
+    CardConfig strike =
+        card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
+    CardLibrary cardLibrary = new CardLibrary(List.of(strike));
+
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike", "strike")));
+    battleDeck.drawCards(2);
+
+    EnergyComponent energyComponent = new EnergyComponent(3);
+    CardEffectResolutionService resolutionService = new CardEffectResolutionService(cardLibrary);
+    CardPlayService playService =
+        new CardPlayService(cardLibrary, resolutionService, battleDeck, energyComponent);
+
+    playService.playCard("strike");
+    // Discard the remaining copy directly (not through play), so the discard pile ends up with
+    // two "strike" copies but only the played one is tracked for cooldown.
+    battleDeck.discardCard("strike");
+    assertEquals(2, battleDeck.getDiscardPileSize());
+
+    assertTrue(playService.onPlayerRoundStart().isEmpty());
+    List<String> secondTick = playService.onPlayerRoundStart();
+
+    // Only the tracked (played) instance comes back; the manually-discarded copy stays put.
+    assertEquals(List.of("strike"), secondTick);
+    assertEquals(1, battleDeck.getHandSize());
+    assertEquals(1, battleDeck.getDiscardPileSize());
+  }
+
+  @Test
+  void shouldRearrangeHandToExactSelectedInstancesAndChargeOneEnergy() {
+    CardConfig strike =
+        card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 4));
+    CardLibrary cardLibrary = new CardLibrary(List.of(strike));
+
+    PlayerDeck playerDeck =
+        new PlayerDeck(cardLibrary, List.of("strike", "strike", "strike", "strike", "strike"));
+    List<CardInstance> owned = playerDeck.getCards();
+    BattleDeck battleDeck = new BattleDeck(playerDeck);
+    battleDeck.drawCards(3);
+
+    EnergyComponent energyComponent = new EnergyComponent(3);
+    CardPlayService playService =
+        new CardPlayService(
+            cardLibrary,
+            new CardEffectResolutionService(cardLibrary),
+            battleDeck,
+            energyComponent);
+
+    // Pick two specific instances currently in the draw pile instead of the dealt hand.
+    List<CardInstance> chosenHand = List.of(owned.get(3), owned.get(4));
+    boolean changed = playService.rearrangeHand(chosenHand);
+
+    assertTrue(changed);
+    assertEquals(2, energyComponent.getCurrentEnergy());
+    assertIterableEquals(chosenHand, battleDeck.getHandInstances());
+  }
+
+  @Test
+  void shouldNotChargeEnergyWhenRearrangedHandMatchesCurrentHand() {
+    CardConfig strike =
+        card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 4));
+    CardLibrary cardLibrary = new CardLibrary(List.of(strike));
+
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike", "strike")));
+    battleDeck.drawCards(2);
+
+    EnergyComponent energyComponent = new EnergyComponent(3);
+    CardPlayService playService =
+        new CardPlayService(
+            cardLibrary,
+            new CardEffectResolutionService(cardLibrary),
+            battleDeck,
+            energyComponent);
+
+    boolean changed = playService.rearrangeHand(battleDeck.getHandInstances());
+
+    assertFalse(changed);
+    assertEquals(3, energyComponent.getCurrentEnergy());
+  }
+
+  @Test
+  void shouldAllowSelectingAnInstanceOnCooldownWithoutMovingItOrItsSiblingCard() {
+    CardConfig strike =
+        card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 4));
+    CardLibrary cardLibrary = new CardLibrary(List.of(strike));
+
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike", "strike")));
+    battleDeck.drawCards(2);
+
+    EnergyComponent energyComponent = new EnergyComponent(3);
+    CardPlayService playService =
+        new CardPlayService(
+            cardLibrary,
+            new CardEffectResolutionService(cardLibrary),
+            battleDeck,
+            energyComponent);
+
+    playService.playCard("strike");
+    List<CardInstance> discarded = playService.discardedInstances();
+    CardInstance remainingInHand = battleDeck.getHandInstances().get(0);
+
+    // Selecting the on-cooldown copy alongside the one still in hand must not move the cooldown
+    // copy (it stays exactly where it was, cooldown untouched) and must not disturb its sibling.
+    boolean changed = playService.rearrangeHand(List.of(discarded.get(0), remainingInHand));
+
+    assertFalse(changed);
+    assertIterableEquals(discarded, playService.discardedInstances());
+    assertIterableEquals(List.of(remainingInHand), battleDeck.getHandInstances());
+    // A no-op rearrange must not have spent energy.
+    assertEquals(2, energyComponent.getCurrentEnergy());
   }
 
   private static CardConfig card(String id, int cost, TargetType target, EffectConfig... effects) {

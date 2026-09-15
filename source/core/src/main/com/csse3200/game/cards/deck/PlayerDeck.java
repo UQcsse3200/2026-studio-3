@@ -14,10 +14,15 @@ import java.util.List;
  * and effects should be resolved through the card library when another system needs the full card
  * configuration. This keeps the player deck independent from combat-only state such as draw pile,
  * hand and discard pile.
+ *
+ * <p>Internally each card is tracked as a {@link CardInstance}: a card ID plus a unique instance
+ * ID generated the moment it is added, so duplicate copies of the same card (e.g. two "strike"
+ * cards) can be told apart by callers that need to. Most callers only care about card IDs and can
+ * keep using the {@code String}-based methods below; {@link #getCards()} exposes the instances.
  */
 public class PlayerDeck {
   private final CardService cardService;
-  private final List<String> cardIds = new ArrayList<>();
+  private final List<CardInstance> cards = new ArrayList<>();
 
   /** Creates an empty player deck backed by the configured card definitions. */
   public PlayerDeck() {
@@ -58,7 +63,7 @@ public class PlayerDeck {
   }
 
   /**
-   * Adds one card to the end of the deck.
+   * Adds one card to the end of the deck, generating a fresh unique instance ID for it.
    *
    * @param cardId Team 6 card ID
    * @throws IllegalArgumentException if the card ID is not registered
@@ -67,7 +72,7 @@ public class PlayerDeck {
     if (!canAddCard(cardId)) {
       throw new IllegalArgumentException("cardId must be registered");
     }
-    cardIds.add(cardId);
+    cards.add(CardInstance.of(cardId));
   }
 
   /**
@@ -104,7 +109,14 @@ public class PlayerDeck {
    * @return true if a card was removed, false if the deck did not contain that card
    */
   public boolean removeCard(String cardId) {
-    return cardIds.remove(validateCardId(cardId));
+    String validCardId = validateCardId(cardId);
+    for (int i = 0; i < cards.size(); i++) {
+      if (cards.get(i).cardId().equals(validCardId)) {
+        cards.remove(i);
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -114,7 +126,7 @@ public class PlayerDeck {
    * @return the removed card ID
    */
   public String removeCardAt(int index) {
-    return cardIds.remove(index);
+    return cards.remove(index).cardId();
   }
 
   /**
@@ -124,7 +136,13 @@ public class PlayerDeck {
    * @return true if the deck contains the card
    */
   public boolean contains(String cardId) {
-    return cardIds.contains(validateCardId(cardId));
+    String validCardId = validateCardId(cardId);
+    for (CardInstance card : cards) {
+      if (card.cardId().equals(validCardId)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -136,8 +154,8 @@ public class PlayerDeck {
   public int count(String cardId) {
     String validCardId = validateCardId(cardId);
     int count = 0;
-    for (String existingCardId : cardIds) {
-      if (existingCardId.equals(validCardId)) {
+    for (CardInstance card : cards) {
+      if (card.cardId().equals(validCardId)) {
         count++;
       }
     }
@@ -150,35 +168,53 @@ public class PlayerDeck {
    * @return immutable list of card IDs
    */
   public List<String> getCardIds() {
+    List<String> cardIds = new ArrayList<>(cards.size());
+    for (CardInstance card : cards) {
+      cardIds.add(card.cardId());
+    }
     return List.copyOf(cardIds);
+  }
+
+  /**
+   * Returns a snapshot of every card in the deck as a distinct {@link CardInstance}, in deck
+   * order. Unlike {@link #getCardIds()}, this lets callers tell duplicate copies of the same card
+   * apart.
+   *
+   * @return immutable list of card instances
+   */
+  public List<CardInstance> getCards() {
+    return List.copyOf(cards);
   }
 
   /**
    * Creates an independent copy of this player deck.
    *
+   * <p>The copy's cards get freshly generated instance IDs — it is a separate deck, not a shared
+   * view of the same physical cards.
+   *
    * @return copied player deck
    */
   public PlayerDeck copy() {
-    return new PlayerDeck(cardService, cardIds);
+    return new PlayerDeck(cardService, getCardIds());
   }
 
   /** Removes all cards from the deck. */
   public void clear() {
-    cardIds.clear();
+    cards.clear();
   }
 
   /**
    * @return number of cards in the deck, including duplicate copies
    */
   public int size() {
-    return cardIds.size();
+    return cards.size();
   }
 
   /**
    * @return true if the deck has no cards
    */
   public boolean isEmpty() {
-    return cardIds.isEmpty();
+    return cards.isEmpty();
   }
 
   private static String validateCardId(String cardId) {
