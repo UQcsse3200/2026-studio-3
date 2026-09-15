@@ -133,9 +133,7 @@ class CardEffectResolverTest {
         () -> resolver.resolve((ResolvedCard) null, new PlayerEffectState()));
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            resolver.resolve(
-                (ResolvedCard) null, new CardEffectResolutionContext(0, 0, 0)));
+        () -> resolver.resolve((ResolvedCard) null, new CardEffectResolutionContext(0, 0, 0)));
   }
 
   private static CardConfig card(String id, TargetType target, EffectConfig... effects) {
