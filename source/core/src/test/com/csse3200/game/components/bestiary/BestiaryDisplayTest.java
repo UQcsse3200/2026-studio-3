@@ -1,11 +1,20 @@
 package com.csse3200.game.components.bestiary;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.bestiary.BestiaryEntryView;
+import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryUnlockState;
+import com.csse3200.game.entities.configs.EnemyConfig;
+import com.csse3200.game.entities.configs.EnemyConfigs;
 import com.csse3200.game.entities.configs.EnemyTier;
 import com.csse3200.game.extensions.GameExtension;
+import com.csse3200.game.rendering.RenderService;
+import com.csse3200.game.services.ResourceService;
+import com.csse3200.game.services.ServiceLocator;
 import java.util.Optional;
 import java.util.OptionalInt;
 import org.junit.jupiter.api.Test;
@@ -58,6 +67,34 @@ class BestiaryDisplayTest {
             Optional.of("cycle_attack_defend"));
 
     assertEquals("No description available.", BestiaryDisplay.descriptionFor(noDescription));
+  }
+
+  @Test
+  void shouldRefreshVisibleEntryAndUnsubscribeOnDispose() {
+    EnemyConfig config = new EnemyConfig();
+    config.id = "enemy";
+    config.name = "Enemy";
+    config.tier = EnemyTier.NORMAL;
+    config.health = 24;
+    EnemyConfigs configs = new EnemyConfigs();
+    configs.enemies = new EnemyConfig[] {config};
+    BestiaryService service = new BestiaryService(configs);
+
+    RenderService renderService = mock(RenderService.class);
+    when(renderService.getStage()).thenReturn(mock(Stage.class));
+    ServiceLocator.registerRenderService(renderService);
+    ServiceLocator.registerResourceService(mock(ResourceService.class));
+
+    BestiaryDisplay display = new BestiaryDisplay(service, () -> {});
+    display.create();
+    assertEquals(BestiaryUnlockState.LOCKED, display.getDisplayedEntry().unlockState());
+
+    service.recordEncountered("enemy");
+    assertEquals(BestiaryUnlockState.ENCOUNTERED, display.getDisplayedEntry().unlockState());
+
+    display.dispose();
+    service.recordDefeated("enemy");
+    assertEquals(BestiaryUnlockState.ENCOUNTERED, display.getDisplayedEntry().unlockState());
   }
 
   private BestiaryEntryView createView(BestiaryUnlockState state) {

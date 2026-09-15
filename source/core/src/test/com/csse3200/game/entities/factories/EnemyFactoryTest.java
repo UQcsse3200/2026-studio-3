@@ -127,7 +127,7 @@ class EnemyFactoryTest {
   }
 
   @Test
-  void createAttachesBestiaryTrackingWhenServiceContainsEnemy() {
+  void createWiresBestiaryTrackingThroughEnemyDefeat() {
     EnemyConfig config = new EnemyConfig();
     config.id = "tracked_enemy";
     config.name = "Tracked Enemy";
@@ -144,13 +144,18 @@ class EnemyFactoryTest {
     assertEquals(
         BestiaryUnlockState.ENCOUNTERED,
         bestiary.getEntry("tracked_enemy").orElseThrow().unlockState());
+
+    enemy.getComponent(CombatStatsComponent.class).takeDamage(config.health);
+    assertEquals(
+        BestiaryUnlockState.DEFEATED,
+        bestiary.getEntry("tracked_enemy").orElseThrow().unlockState());
   }
 
   @Test
   void createWithFloorZeroKeepsBaseStats() {
     Entity enemy = EnemyFactory.create("void_knight", 0);
 
-    assertEquals(72, enemy.getComponent(CombatStatsComponent.class).getHealth());
+    assertEquals(40, enemy.getComponent(CombatStatsComponent.class).getHealth());
   }
 
   @Test
@@ -167,15 +172,23 @@ class EnemyFactoryTest {
   void getIdsByTierReturnsOnlyMatchingTier() {
     List<String> normals = EnemyFactory.getIdsByTier(EnemyTier.NORMAL);
     List<String> elites = EnemyFactory.getIdsByTier(EnemyTier.ELITE);
+    List<String> bosses = EnemyFactory.getIdsByTier(EnemyTier.BOSS);
 
     assertTrue(normals.contains("lesser_shade"));
     assertFalse(normals.contains("void_knight"));
     assertTrue(elites.contains("void_knight"));
+    assertTrue(bosses.contains("boss_knight"));
+    assertFalse(bosses.contains("void_knight"));
   }
 
   @Test
   void getIdsByTierReturnsTeamOneBoss() {
     assertEquals(List.of("boss_knight"), EnemyFactory.getIdsByTier(EnemyTier.BOSS));
+  }
+
+  @Test
+  void getIdsByTierReturnsEmptyListWhenNoneMatch() {
+    assertTrue(EnemyFactory.getIdsByTier(null).isEmpty());
   }
 
   @Test
@@ -189,6 +202,7 @@ class EnemyFactoryTest {
 
     assertTrue(paths.contains("images/enemies/default.atlas"));
     assertTrue(paths.contains("images/enemies/lesser_shade.atlas"));
+    assertTrue(paths.contains("images/enemies/tomb_guardian.atlas"));
     assertTrue(paths.contains("images/enemies/void_knight.atlas"));
     assertTrue(paths.contains("images/enemies/boss_knight.atlas"));
   }

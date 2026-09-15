@@ -139,6 +139,40 @@ class SaveGameRestoreServiceTest {
   }
 
   @Test
+  void rejectsBlankAndDuplicateBestiaryIdsWithoutMutatingLiveState() {
+    List<List<BestiaryProgressSaveData>> invalidProgressCases =
+        List.of(
+            List.of(new BestiaryProgressSaveData(" ", "ENCOUNTERED")),
+            List.of(
+                new BestiaryProgressSaveData("boss_knight", "ENCOUNTERED"),
+                new BestiaryProgressSaveData("boss_knight", "DEFEATED")));
+
+    for (List<BestiaryProgressSaveData> invalidProgress : invalidProgressCases) {
+      PlayerRunState playerState = new PlayerRunState(12, 50, 3);
+      PlayerDeck deck = testDeck(List.of(STRIKE));
+      RunState runState = new RunState();
+      runState.startRun(existingMap(), 0);
+      BestiaryService bestiary = BestiaryService.loadDefault();
+      bestiary.recordDefeated("lesser_shade");
+
+      SaveGameData saveData = validSaveData();
+      saveData.player = new PlayerSaveData(80, 100, 42, 0);
+      saveData.progress.bestiary = invalidProgress;
+
+      RestoreResult result =
+          new SaveGameRestoreService(playerState, deck, runState, bestiary).restore(saveData);
+
+      assertFalse(result.success());
+      assertEquals(RestoreError.INVALID_PROGRESS_STATE, result.error());
+      assertEquals(12, playerState.getCurrentHealth());
+      assertEquals(3, playerState.getGold());
+      assertEquals(
+          BestiaryUnlockState.DEFEATED, bestiary.getProgressSnapshot().get("lesser_shade"));
+      assertEquals(BestiaryUnlockState.LOCKED, bestiary.getProgressSnapshot().get("boss_knight"));
+    }
+  }
+
+  @Test
   void validatesConstructorArguments() {
     PlayerRunState playerState = new PlayerRunState(12, 50, 3);
     PlayerDeck deck = testDeck(List.of(STRIKE));

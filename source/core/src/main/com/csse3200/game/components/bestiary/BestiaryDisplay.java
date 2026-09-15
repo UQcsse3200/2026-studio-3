@@ -22,6 +22,7 @@ import com.csse3200.game.bestiary.BestiaryEntryView;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryUnlockState;
 import com.csse3200.game.entities.configs.EnemyTier;
+import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.UIComponent;
@@ -43,7 +44,9 @@ public class BestiaryDisplay extends UIComponent {
 
   private final BestiaryService bestiary;
   private final Runnable returnAction;
+  private final EventListener1<BestiaryEntryView> entryUpdatedListener = this::onEntryUpdated;
   private EnemyTier activeTier = EnemyTier.NORMAL;
+  private BestiaryEntryView displayedEntry;
 
   private Table rootTable;
   private Table enemyListTable;
@@ -70,6 +73,7 @@ public class BestiaryDisplay extends UIComponent {
   public void create() {
     super.create();
     addActors();
+    bestiary.getEvents().addListener(BestiaryService.ENTRY_UPDATED_EVENT, entryUpdatedListener);
   }
 
   private void addActors() {
@@ -245,6 +249,7 @@ public class BestiaryDisplay extends UIComponent {
   }
 
   private void rebuildEnemyList() {
+    String selectedEnemyId = displayedEntry == null ? null : displayedEntry.enemyId();
     enemyListTable.clearChildren();
     List<BestiaryEntryView> filtered = bestiary.getEntriesByTier(activeTier);
     if (filtered.isEmpty()) {
@@ -269,10 +274,16 @@ public class BestiaryDisplay extends UIComponent {
       enemyListTable.add(entryButton).width(285f).height(62f).padBottom(10f);
       enemyListTable.row();
     }
-    showDetails(filtered.get(0));
+    BestiaryEntryView selection =
+        filtered.stream()
+            .filter(entry -> entry.enemyId().equals(selectedEnemyId))
+            .findFirst()
+            .orElse(filtered.get(0));
+    showDetails(selection);
   }
 
   private void clearDetails() {
+    displayedEntry = null;
     detailStateLabel.setText("NO RECORDS");
     detailNameLabel.setText("No enemy selected");
     detailTierLabel.setText("");
@@ -284,6 +295,7 @@ public class BestiaryDisplay extends UIComponent {
   }
 
   private void showDetails(BestiaryEntryView entry) {
+    displayedEntry = entry;
     detailNameLabel.setText(visibleName(entry));
     detailTierLabel.setText(entry.tier().name());
     detailDescriptionLabel.setText(descriptionFor(entry));
@@ -300,6 +312,16 @@ public class BestiaryDisplay extends UIComponent {
     detailStateLabel.setText(entry.unlockState().name());
     lockedArtLabel.setVisible(false);
     setEnemyImage(entry.sprite().orElse(""));
+  }
+
+  private void onEntryUpdated(BestiaryEntryView entry) {
+    if (entry.tier() == activeTier && rootTable != null) {
+      rebuildEnemyList();
+    }
+  }
+
+  BestiaryEntryView getDisplayedEntry() {
+    return displayedEntry;
   }
 
   static String visibleName(BestiaryEntryView entry) {
@@ -387,6 +409,7 @@ public class BestiaryDisplay extends UIComponent {
 
   @Override
   public void dispose() {
+    bestiary.getEvents().removeListener(BestiaryService.ENTRY_UPDATED_EVENT, entryUpdatedListener);
     if (rootTable != null) {
       rootTable.remove();
     }

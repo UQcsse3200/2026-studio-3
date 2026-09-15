@@ -75,6 +75,24 @@ public class EventHandler {
   }
 
   /**
+   * Removes a previously registered listener from an event.
+   *
+   * @param eventName name of the event
+   * @param listener the same listener instance passed to {@code addListener}
+   */
+  public void removeListener(String eventName, EventListener listener) {
+    Array<EventListener> eventListeners = listeners.getOrDefault(eventName, null);
+    if (eventListeners == null) {
+      return;
+    }
+
+    eventListeners.removeValue(listener, true);
+    if (eventListeners.isEmpty()) {
+      listeners.remove(eventName);
+    }
+  }
+
+  /**
    * Trigger an event with no arguments
    *
    * @param eventName name of the event

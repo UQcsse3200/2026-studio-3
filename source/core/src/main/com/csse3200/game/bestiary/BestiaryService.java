@@ -23,6 +23,7 @@ public class BestiaryService {
 
   private static final Logger logger = LoggerFactory.getLogger(BestiaryService.class);
   private static final String DEFAULT_ENEMY_CONFIG = "configs/enemies.json";
+  private static final String DEFAULT_BESTIARY_CONFIG = "configs/bestiary.json";
 
   private final Map<String, BestiaryEntry> entries = new LinkedHashMap<>();
   private final Map<String, BestiaryUnlockState> progress = new HashMap<>();
@@ -39,7 +40,13 @@ public class BestiaryService {
       logger.warn("Failed to load Bestiary enemy definitions from {}", DEFAULT_ENEMY_CONFIG);
       configs = new EnemyConfigs();
     }
-    return new BestiaryService(configs);
+    BestiaryConfig bestiaryConfig =
+        FileLoader.readClass(BestiaryConfig.class, DEFAULT_BESTIARY_CONFIG);
+    if (bestiaryConfig == null) {
+      logger.warn("Failed to load Bestiary descriptions from {}", DEFAULT_BESTIARY_CONFIG);
+      bestiaryConfig = new BestiaryConfig();
+    }
+    return new BestiaryService(configs, bestiaryConfig.descriptionsByEnemyId());
   }
 
   /**
