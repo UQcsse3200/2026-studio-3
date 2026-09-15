@@ -119,11 +119,11 @@ class GuardianCardsIntegrationTest {
         () -> assertEquals("images/cards/unseal_the_breach.png", card.texturePath));
     assertEquals(2, card.effects.length);
     assertAll(
-        () -> assertEquals(EffectType.DAMAGE, card.effects[0].type),
-        () -> assertEquals(2, card.effects[0].value),
+        () -> assertEquals(EffectType.SUNDER, card.effects[0].type),
+        () -> assertEquals(3, card.effects[0].value),
         () -> assertEquals(0, card.effects[0].duration),
-        () -> assertEquals(EffectType.SUNDER, card.effects[1].type),
-        () -> assertEquals(3, card.effects[1].value),
+        () -> assertEquals(EffectType.DAMAGE, card.effects[1].type),
+        () -> assertEquals(2, card.effects[1].value),
         () -> assertEquals(0, card.effects[1].duration));
   }
 
