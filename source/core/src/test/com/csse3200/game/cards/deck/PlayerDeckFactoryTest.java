@@ -17,12 +17,7 @@ class PlayerDeckFactoryTest {
 
   private static final CardService FORBIDDEN_CARDS =
       TestCardService.withCards(
-          "strike",
-          "defend",
-          "sealed_pact",
-          "blood_price",
-          "doom_sigil",
-          "eclipse_decree");
+          "strike", "defend", "sealed_pact", "blood_price", "doom_sigil", "eclipse_decree");
 
   @Test
   void shouldCreateStarterDeckFromTeamSixCards() {
