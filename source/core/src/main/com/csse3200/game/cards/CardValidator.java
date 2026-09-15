@@ -209,6 +209,7 @@ public final class CardValidator {
     }
     return effectType == EffectType.DAMAGE
         || effectType == EffectType.PIERCE
+        || effectType == EffectType.SUNDER
         || effectType.usesDuration();
   }
 }
