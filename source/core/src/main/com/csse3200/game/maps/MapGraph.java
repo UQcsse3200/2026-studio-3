@@ -2,23 +2,15 @@ package com.csse3200.game.maps;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 
 /** Represents the map graph containing all map nodes. */
 public class MapGraph implements EncounterCallback {
 
   private Map<Integer, MapNode> nodes;
   private MapNode currentNode;
-
-  public static final int MAP_WIDTH = 7;
-  public static final int MAP_HEIGHT = 10;
-  public static final int MAX_NODE_COUNT = MAP_WIDTH * MAP_HEIGHT;
-  public static final int BRANCH_CHANCE = 10;
-  private final Random random = new Random();
+  private MapNode previousNode; // tracks the node before the current one, for abandon
 
   /**
    * Creates a graph containing an existing node pool and runs procedural path generation over it.
@@ -39,149 +31,6 @@ public class MapGraph implements EncounterCallback {
    */
   public MapGraph(Map<Integer, MapNode> nodes, boolean generate) {
     this.nodes = new HashMap<>(nodes);
-
-    if (generate) {
-      while (generatePathing() != 0) {
-        clearConnections();
-      }
-    }
-  }
-
-  /** Clears the connections of nodes on the graph. */
-  private void clearConnections() {
-    for (MapNode node : nodes.values()) {
-      node.getConnections().clear();
-    }
-  }
-
-  /**
-   * Primary map generation function. The player is able to start from any of the nodes at height =
-   * 1. Distinct paths are generated and can have a chance to create random branches if the option
-   * is available.
-   */
-  private int generatePathing() {
-
-    List<MapNode> row = getNodesByHeight(MAP_HEIGHT - 1);
-    MapNode finalNode = getNode(MAX_NODE_COUNT);
-
-    int pathCount = random.nextInt(3, row.size() - 1);
-    pruneRandomNodes(row, pathCount);
-
-    Set<MapNode> visited = new HashSet<>();
-    List<MapNode> pathNodes = new ArrayList<>();
-
-    // generates initial no. of paths from final node
-    for (MapNode child : row) {
-
-      if (child == null) {
-        return -1;
-      }
-
-      connectNodes(finalNode, child);
-      visited.add(child);
-      pathNodes.add(child);
-    }
-    // begin to loop the bulk of connections down the tree
-    for (int i = 2; i < MAP_HEIGHT; i++) {
-
-      row = getNodesByHeight(MAP_HEIGHT - i);
-      List<MapNode> newNodes = new ArrayList<>();
-
-      for (MapNode parentNode : pathNodes) {
-        MapNode child = chooseNextNode(parentNode, row, visited);
-        if (child == null) {
-          return -1;
-        }
-
-        connectNodes(parentNode, child);
-        visited.add(child);
-        newNodes.add(child);
-
-        // creates random additional branches off of the paths for variety
-        if (newNodes.size() < 6 && random.nextInt(100) < BRANCH_CHANCE) {
-
-          MapNode branch = chooseNextNode(parentNode, row, visited);
-
-          if (branch != null) {
-            connectNodes(parentNode, branch);
-
-            visited.add(branch);
-            newNodes.add(branch);
-          }
-        }
-      }
-      pathNodes = newNodes;
-    }
-    pruneUnconnectedMapGraphNodes();
-    return 0;
-  }
-
-  /**
-   * Heuristic helper function for map generation. Finds a random node in range that hasn't already
-   * been visited.
-   *
-   * @param parentNode Chosen node where heuristic will be calculated from
-   * @param row Chosen row the node must be connected to (can be above or below)
-   * @param visited The set of nodes that have already been visited by the branches
-   */
-  private MapNode chooseNextNode(MapNode parentNode, List<MapNode> row, Set<MapNode> visited) {
-
-    int currentPos = parentNode.getNodeId() % MAP_WIDTH;
-
-    List<MapNode> inRange = getNodesInRange(currentPos, row, 1);
-
-    inRange.removeIf(visited::contains);
-
-    if (inRange.isEmpty()) {
-      return null;
-    }
-
-    return inRange.get(random.nextInt(inRange.size()));
-  }
-
-  /**
-   * Returns a list of nodes that are within the given x coordinate range of a provided node on a
-   * neighboring row.
-   *
-   * @param nodePos The x-coordinate of the node that is being ranged from.
-   * @param row The row nodes should be trying to reach.
-   * @param range The desired range of the nodes to be returned.
-   */
-  private List<MapNode> getNodesInRange(int nodePos, List<MapNode> row, int range) {
-
-    List<MapNode> inRange = new ArrayList<>();
-
-    for (MapNode node : row) {
-
-      int childPos = node.getNodeId() % MAP_WIDTH;
-
-      if (Math.abs(nodePos - childPos) <= range) {
-        inRange.add(node);
-      }
-    }
-    return inRange;
-  }
-
-  /**
-   * Removes all unconnected nodes from the MapGraph. Only called as the final step of generation.
-   */
-  private void pruneUnconnectedMapGraphNodes() {
-    if (!this.nodes.isEmpty()) {
-      this.nodes.values().removeIf(node -> node.getConnections().isEmpty());
-    }
-  }
-
-  /**
-   * Removes random nodes from a list. Does not remove from MapGraph state.
-   *
-   * @param nodelist List of nodes to be pruned
-   * @param count Number of nodes to be pruned
-   */
-  private void pruneRandomNodes(List<MapNode> nodelist, int count) {
-
-    for (int i = 0; i < count; i++) {
-      nodelist.remove(random.nextInt(0, nodelist.size() - 1));
-    }
   }
 
   /**
@@ -229,7 +78,25 @@ public class MapGraph implements EncounterCallback {
    * @return all map nodes
    */
   public Map<Integer, MapNode> getNodes() {
-    return nodes;
+    return this.nodes;
+  }
+
+  /*
+   * Returns a signed integer of the difference in X positions of nodes.
+   * Only really relevant for nodes on neighbouring or same layer.
+   *
+   * @param node1
+   *
+   * @param node2
+   *
+   * @return difference in x positions
+   */
+  public int getRelativeNodePos(MapNode node1, MapNode node2) {
+
+    int node1Pos = node1.getNodeId() % MapGenerationConfig.MAP_WIDTH;
+    int node2Pos = node2.getNodeId() % MapGenerationConfig.MAP_WIDTH;
+
+    return node1Pos - node2Pos;
   }
 
   /**
@@ -249,12 +116,23 @@ public class MapGraph implements EncounterCallback {
     return result;
   }
 
-  /** Connects two nodes. */
-  public void connectNodes(MapNode first, MapNode second) {
+  public List<MapNode> getNodesByType(RoomType type) {
 
-    if (first != null && second != null) {
-      first.addConnection(second);
-      second.addConnection(first);
+    List<MapNode> result = new ArrayList<>();
+    for (MapNode node : nodes.values()) {
+      if (node.getRoomType() == type) {
+        result.add(node);
+      }
+    }
+    return result;
+  }
+
+  /** Connects two nodes. */
+  public void connectNodes(MapNode node1, MapNode node2) {
+
+    if (node1 != null && node2 != null) {
+      node1.addConnection(node2);
+      node2.addConnection(node1);
     }
   }
 
@@ -356,9 +234,38 @@ public class MapGraph implements EncounterCallback {
     }
 
     // state of previous currentNode should be updated when its encounter completes.
+    previousNode = currentNode;
     currentNode = targetNode;
     targetNode.setState(NodeState.CURRENT);
 
+    return true;
+  }
+
+  /**
+   * Reverts an abandoned encounter: the current node goes back to AVAILABLE (or LOCKED if it was
+   * the very first move, with no prior position to return to), and the previous node becomes
+   * current again.
+   *
+   * @return true if an abandon was applied, false if there was no current node to abandon
+   */
+  public boolean abandonCurrentNode() {
+    if (currentNode == null) {
+      return false;
+    }
+
+    if (previousNode == null) {
+      // No prior position to revert to — either this is the very first move, or previousNode
+      // was lost across a save/load reload since it isn't persisted (flagged by Zaidan, PR #220
+      // review). Leave the player exactly where they are rather than nulling currentNode, which
+      // would permanently fail every future moveToNode() call via its currentNode == null guard
+      // — worse than the original stuck-node bug this method exists to fix.
+      return false;
+    }
+
+    currentNode.setState(NodeState.AVAILABLE);
+    currentNode = previousNode;
+    currentNode.setState(NodeState.CURRENT);
+    previousNode = null;
     return true;
   }
 
