@@ -1,16 +1,22 @@
 package com.csse3200.game.areas;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
-import com.csse3200.game.areas.terrain.BackgroundDisplay;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.areas.terrain.TerrainFactory.TerrainType;
+import com.csse3200.game.components.gamearea.CombatBackgroundComponent;
+import com.csse3200.game.components.gamearea.CombatBackgroundConfig;
+import com.csse3200.game.components.gamearea.CombatBackgroundConfigs;
 import com.csse3200.game.components.gamearea.GameAreaDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.factories.EnemyFactory;
 import com.csse3200.game.entities.factories.NPCFactory;
 import com.csse3200.game.entities.factories.ObstacleFactory;
 import com.csse3200.game.entities.factories.PlayerFactory;
+import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
@@ -58,6 +64,9 @@ public class ForestGameArea extends GameArea {
 
   private final TerrainFactory terrainFactory;
   private final Integer progression;
+  private final String backgroundId;
+  private static final String BACKGROUND_CONFIG_PATH = "configs/backgrounds.json";
+  private CombatBackgroundConfig backgroundConfig;
 
   private Entity player;
   private Entity enemy;
@@ -68,16 +77,56 @@ public class ForestGameArea extends GameArea {
    * @param terrainFactory TerrainFactory used to create the terrain for the GameArea.
    * @requires terrainFactory != null
    */
-  public ForestGameArea(TerrainFactory terrainFactory, Integer progression, RunState runState) {
+  public ForestGameArea(TerrainFactory terrainFactory, Integer progression, RunState runState,
+                        String backgroundId) {
     super();
     this.terrainFactory = terrainFactory;
     this.progression = progression;
     this.runState = runState;
+    this.backgroundId = backgroundId;
+  }
+
+  /** Reads the selected background configuration from the file path and ID. */
+  private void readBackgroundConfig() {
+    backgroundConfig = null;
+
+    if (backgroundId == null || backgroundId.isBlank()) return;
+
+    CombatBackgroundConfigs configs =
+            FileLoader.readClass(CombatBackgroundConfigs.class, BACKGROUND_CONFIG_PATH);
+
+    if (configs == null) {
+      logger.warn("Couldn't read background configurations: {}", BACKGROUND_CONFIG_PATH);
+      return;
+    }
+
+    CombatBackgroundConfig selectedBackGround = configs.get(backgroundId);
+
+    if (selectedBackGround == null) {
+      logger.warn("The selected background configuration doesn't exist: {}", backgroundId);
+      return;
+    }
+
+    if (selectedBackGround.name == null
+            || selectedBackGround.name.isBlank()
+            || selectedBackGround.texture == null
+            || selectedBackGround.texture.isBlank()) {
+      logger.warn("Background '{}' requires a name and texture path", backgroundId);
+      return;
+    }
+
+    if (!Gdx.files.internal(selectedBackGround.texture).exists()) {
+      logger.warn("Missing texture! {}, {}", backgroundId, selectedBackGround.texture);
+      return;
+    }
+
+    backgroundConfig = selectedBackGround;
   }
 
   /** Create the game area, including terrain, static entities (trees), dynamic entities (player) */
   @Override
   public void create() {
+    readBackgroundConfig();
     loadAssets();
 
     spawnBackground();
@@ -95,8 +144,23 @@ public class ForestGameArea extends GameArea {
   }
 
   private void spawnBackground() {
-    Entity background = new Entity();
-    background.addComponent(new BackgroundDisplay());
+    if (backgroundConfig == null) return;
+
+    Texture texture;
+    try {
+      texture =
+              ServiceLocator.getResourceService().getAsset(backgroundConfig.texture, Texture.class);
+    } catch (RuntimeException e) {
+      logger.warn("Background texture missing: {}", backgroundConfig.texture);
+      return;
+    }
+
+    texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
+    OrthographicCamera camera = (OrthographicCamera) ServiceLocator.getCamera();
+
+    Entity background = new Entity().addComponent(new CombatBackgroundComponent(texture, camera));
+
     spawnEntity(background);
   }
 

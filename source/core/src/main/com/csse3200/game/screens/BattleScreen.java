@@ -126,7 +126,7 @@ public class BattleScreen extends ScreenAdapter {
     logger.debug("Initialising main game screen entities");
     TerrainFactory terrainFactory = new TerrainFactory(renderer.getCamera());
     ForestGameArea forestGameArea =
-        new ForestGameArea(terrainFactory, mapProgression, game.getRunState());
+        new ForestGameArea(terrainFactory, mapProgression, game.getRunState(), "dungeon");
     this.gameArea = forestGameArea;
     forestGameArea.create();
 

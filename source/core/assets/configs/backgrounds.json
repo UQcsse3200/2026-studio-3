@@ -9,6 +9,11 @@
       "id": "mud_test",
       "name": "Mud Test",
       "texture": "images/mud.png"
+    },
+    {
+      "id": "dungeon",
+      "name": "Dungeon",
+      "texture": "images/battle_background.png"
     }
   ]
 }
