@@ -385,7 +385,8 @@ class CardPlayServiceTest {
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 4));
     CardLibrary cardLibrary = new CardLibrary(List.of(strike));
 
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike", "strike")));
+    BattleDeck battleDeck =
+        new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike", "strike")));
     battleDeck.drawCards(2);
 
     EnergyComponent energyComponent = new EnergyComponent(3);
@@ -415,7 +416,8 @@ class CardPlayServiceTest {
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
     CardLibrary cardLibrary = new CardLibrary(List.of(strike));
 
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike", "strike")));
+    BattleDeck battleDeck =
+        new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike", "strike")));
     battleDeck.drawCards(2);
 
     EnergyComponent energyComponent = new EnergyComponent(3);
@@ -453,10 +455,7 @@ class CardPlayServiceTest {
     EnergyComponent energyComponent = new EnergyComponent(3);
     CardPlayService playService =
         new CardPlayService(
-            cardLibrary,
-            new CardEffectResolutionService(cardLibrary),
-            battleDeck,
-            energyComponent);
+            cardLibrary, new CardEffectResolutionService(cardLibrary), battleDeck, energyComponent);
 
     // Pick two specific instances currently in the draw pile instead of the dealt hand.
     List<CardInstance> chosenHand = List.of(owned.get(3), owned.get(4));
@@ -473,16 +472,14 @@ class CardPlayServiceTest {
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 4));
     CardLibrary cardLibrary = new CardLibrary(List.of(strike));
 
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike", "strike")));
+    BattleDeck battleDeck =
+        new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike", "strike")));
     battleDeck.drawCards(2);
 
     EnergyComponent energyComponent = new EnergyComponent(3);
     CardPlayService playService =
         new CardPlayService(
-            cardLibrary,
-            new CardEffectResolutionService(cardLibrary),
-            battleDeck,
-            energyComponent);
+            cardLibrary, new CardEffectResolutionService(cardLibrary), battleDeck, energyComponent);
 
     boolean changed = playService.rearrangeHand(battleDeck.getHandInstances());
 
@@ -496,16 +493,14 @@ class CardPlayServiceTest {
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 4));
     CardLibrary cardLibrary = new CardLibrary(List.of(strike));
 
-    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike", "strike")));
+    BattleDeck battleDeck =
+        new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike", "strike")));
     battleDeck.drawCards(2);
 
     EnergyComponent energyComponent = new EnergyComponent(3);
     CardPlayService playService =
         new CardPlayService(
-            cardLibrary,
-            new CardEffectResolutionService(cardLibrary),
-            battleDeck,
-            energyComponent);
+            cardLibrary, new CardEffectResolutionService(cardLibrary), battleDeck, energyComponent);
 
     playService.playCard("strike");
     List<CardInstance> discarded = playService.discardedInstances();

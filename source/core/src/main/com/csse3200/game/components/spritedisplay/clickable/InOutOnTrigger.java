@@ -100,8 +100,8 @@ public class InOutOnTrigger extends Clickable {
 
   /**
    * Slides the button out from its target position to off-screen. Triggered by the "down" event.
-   * Interactivity is blocked immediately, not just once the slide finishes, so a click mid-animation
-   * (or during the enemy's whole turn) can't sneak a card play through.
+   * Interactivity is blocked immediately, not just once the slide finishes, so a click
+   * mid-animation (or during the enemy's whole turn) can't sneak a card play through.
    */
   protected void slideDown() {
     setInteractable(false);

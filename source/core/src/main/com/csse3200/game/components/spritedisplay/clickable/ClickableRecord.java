@@ -189,8 +189,8 @@ public record ClickableRecord(
     }
 
     /**
-     * Marks the widget as visually shaded and unresponsive to clicks/drags (e.g. a card sitting
-     * in the discard pile). Defaults to false.
+     * Marks the widget as visually shaded and unresponsive to clicks/drags (e.g. a card sitting in
+     * the discard pile). Defaults to false.
      */
     public Builder disabled(boolean disabled) {
       this.disabled = disabled;
@@ -200,18 +200,7 @@ public record ClickableRecord(
     public ClickableRecord build() {
       ButtonType type = inferType(text, btnSkin);
       return new ClickableRecord(
-          text,
-          btnSkin,
-          x,
-          y,
-          styleName,
-          trigger,
-          type,
-          width,
-          height,
-          variant,
-          args,
-          label,
+          text, btnSkin, x, y, styleName, trigger, type, width, height, variant, args, label,
           disabled);
     }
 

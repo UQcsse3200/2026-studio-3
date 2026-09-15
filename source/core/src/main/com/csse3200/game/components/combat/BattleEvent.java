@@ -38,7 +38,7 @@ public enum BattleEvent {
   /** The current enemy's action has finished resolving. */
   ENEMY_ACTION_RESOLVED,
 
-  /** The current enemy's turn had been skipped*/
+  /** The current enemy's turn had been skipped */
   ENEMY_TURN_SKIPPED,
 
   /** Another eligible enemy is available to take a turn. */

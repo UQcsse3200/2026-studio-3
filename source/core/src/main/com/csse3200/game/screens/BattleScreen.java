@@ -207,8 +207,7 @@ public class BattleScreen extends ScreenAdapter {
     DeckEditorComponent deckEditor =
         new DeckEditorComponent(
             cardPlayService, library, cardInventory, deckPoolFactory, this::onDeckRearranged);
-    Entity deckEditorEntity =
-        new Entity().addComponent(deckPoolFactory).addComponent(deckEditor);
+    Entity deckEditorEntity = new Entity().addComponent(deckPoolFactory).addComponent(deckEditor);
     ServiceLocator.getEntityService().register(deckEditorEntity);
 
     battleUi.getEvents().addListener("open-menu", deckEditor::open);

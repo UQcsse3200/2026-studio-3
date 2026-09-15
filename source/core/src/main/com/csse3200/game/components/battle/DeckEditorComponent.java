@@ -218,8 +218,8 @@ public class DeckEditorComponent extends UIComponent {
 
   /**
    * Rebuilds the card grid for {@link #currentPage} plus the "<"/">" pager buttons flanking it,
-   * anchored to the popup window's actual on-screen bounds. Called on open and on every page
-   * change — pages are cheap enough to rebuild wholesale rather than track incrementally.
+   * anchored to the popup window's actual on-screen bounds. Called on open and on every page change
+   * — pages are cheap enough to rebuild wholesale rather than track incrementally.
    */
   private void buildGridWidgets() {
     int totalPages = totalPages();

@@ -106,8 +106,9 @@ public class PopupDisplay extends UIComponent {
 
   /**
    * Registers a callback run once at the end of every {@link #show()}, after the window has been
-   * packed and positioned — so its bounds ({@link #getWindowX()} etc.) are accurate. Used by callers
-   * with widgets outside the window's actor hierarchy that need to align themselves against it.
+   * packed and positioned — so its bounds ({@link #getWindowX()} etc.) are accurate. Used by
+   * callers with widgets outside the window's actor hierarchy that need to align themselves against
+   * it.
    */
   public void setOnShow(Runnable callback) {
     this.onShow = callback;
@@ -148,8 +149,7 @@ public class PopupDisplay extends UIComponent {
     window.pack();
     window.setSize(Math.max(window.getWidth(), minWidth), Math.max(window.getHeight(), minHeight));
     window.setPosition(
-        (stage.getWidth() - window.getWidth()) / 2f,
-        (stage.getHeight() - window.getHeight()) / 2f);
+        (stage.getWidth() - window.getWidth()) / 2f, (stage.getHeight() - window.getHeight()) / 2f);
     backdrop.setVisible(true);
     window.setVisible(true);
     backdrop.toFront();

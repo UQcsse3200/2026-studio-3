@@ -129,8 +129,8 @@ public class ClickableFactory extends UIComponent {
   /**
    * Rebuilds every widget with the given trigger name: drops the old ones and builds fresh ones
    * from {@code records}, leaving every other widget this factory owns untouched. Generalization of
-   * {@link #rebuildHand} for other dynamically-rebuilt widget groups (e.g. a popup's per-card toggle
-   * buttons).
+   * {@link #rebuildHand} for other dynamically-rebuilt widget groups (e.g. a popup's per-card
+   * toggle buttons).
    *
    * @param trigger trigger name identifying which widgets to replace
    * @param records replacement records, built in order
@@ -169,9 +169,9 @@ public class ClickableFactory extends UIComponent {
    * Re-asserts front-to-back stacking order for every widget this factory currently owns. A libGDX
    * {@link com.badlogic.gdx.scenes.scene2d.ui.Window} unconditionally calls {@code toFront()} on
    * itself on every touch down inside it (baked into its constructor, unrelated to {@code
-   * setMovable}) — this undoes that for widgets that need to render on top of one, such as a popup's
-   * own per-card buttons, which sit outside the window's actor hierarchy as stage siblings rather
-   * than children.
+   * setMovable}) — this undoes that for widgets that need to render on top of one, such as a
+   * popup's own per-card buttons, which sit outside the window's actor hierarchy as stage siblings
+   * rather than children.
    */
   public void bringToFront() {
     for (Clickable clickable : clickables) {

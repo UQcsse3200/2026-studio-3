@@ -15,10 +15,10 @@ import java.util.List;
  * configuration. This keeps the player deck independent from combat-only state such as draw pile,
  * hand and discard pile.
  *
- * <p>Internally each card is tracked as a {@link CardInstance}: a card ID plus a unique instance
- * ID generated the moment it is added, so duplicate copies of the same card (e.g. two "strike"
- * cards) can be told apart by callers that need to. Most callers only care about card IDs and can
- * keep using the {@code String}-based methods below; {@link #getCards()} exposes the instances.
+ * <p>Internally each card is tracked as a {@link CardInstance}: a card ID plus a unique instance ID
+ * generated the moment it is added, so duplicate copies of the same card (e.g. two "strike" cards)
+ * can be told apart by callers that need to. Most callers only care about card IDs and can keep
+ * using the {@code String}-based methods below; {@link #getCards()} exposes the instances.
  */
 public class PlayerDeck {
   private final CardService cardService;
@@ -176,9 +176,8 @@ public class PlayerDeck {
   }
 
   /**
-   * Returns a snapshot of every card in the deck as a distinct {@link CardInstance}, in deck
-   * order. Unlike {@link #getCardIds()}, this lets callers tell duplicate copies of the same card
-   * apart.
+   * Returns a snapshot of every card in the deck as a distinct {@link CardInstance}, in deck order.
+   * Unlike {@link #getCardIds()}, this lets callers tell duplicate copies of the same card apart.
    *
    * @return immutable list of card instances
    */

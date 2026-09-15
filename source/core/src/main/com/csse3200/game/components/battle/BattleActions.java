@@ -122,8 +122,10 @@ public class BattleActions extends Component {
     }
   }
 
-  /** The single point the "enemy thinks" pause lives: replays everything queued during the
-   * enemy's turn together, after one delay. */
+  /**
+   * The single point the "enemy thinks" pause lives: replays everything queued during the enemy's
+   * turn together, after one delay.
+   */
   private void flushDeferredReveals() {
     deferringEnemyTurn = false;
     List<Runnable> reveals = new ArrayList<>(queuedReveals);

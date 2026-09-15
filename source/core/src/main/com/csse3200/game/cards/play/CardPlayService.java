@@ -116,9 +116,9 @@ public final class CardPlayService {
   }
 
   /**
-   * Ticks every discarded card's cooldown down by one player round, retrieving any that reach
-   * zero straight back into the hand. Intended to be called once at the start of each player
-   * round (see {@code BattleController.enterPlayerStart}).
+   * Ticks every discarded card's cooldown down by one player round, retrieving any that reach zero
+   * straight back into the hand. Intended to be called once at the start of each player round (see
+   * {@code BattleController.enterPlayerStart}).
    *
    * @return IDs of cards retrieved this round, in retrieval order (empty if none)
    */
@@ -165,8 +165,8 @@ public final class CardPlayService {
   }
 
   /**
-   * @return a snapshot of every card instance the player owns for this battle — draw pile, hand
-   *     and discard pile combined — for callers (e.g. the deck-rearrange UI) that need to offer the
+   * @return a snapshot of every card instance the player owns for this battle — draw pile, hand and
+   *     discard pile combined — for callers (e.g. the deck-rearrange UI) that need to offer the
    *     whole pool regardless of which pile a given copy currently sits in
    */
   public List<CardInstance> allInstances() {
@@ -186,9 +186,8 @@ public final class CardPlayService {
    *
    * @param newHand exact card instances the player chose (any mix of currently-playable and
    *     currently-on-cooldown instances)
-   * @return true if the playable hand was actually changed (and energy spent), false if the
-   *     request was a no-op because the playable portion of the selection matched the current hand
-   *     already
+   * @return true if the playable hand was actually changed (and energy spent), false if the request
+   *     was a no-op because the playable portion of the selection matched the current hand already
    * @throws IllegalArgumentException if a requested instance isn't part of this battle deck at all
    * @throws IllegalStateException if energy could not be spent for a genuine change
    */

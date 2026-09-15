@@ -606,15 +606,16 @@ public class BattleController {
 
   /**
    * Skips the enemy turn if the enemy is found to be dead.
+   *
    * @param enemy The enemy to check.
    * @return True if the turn is going to be skipped. False if not.
    */
   private boolean skipEnemyTurnIfDead(Entity enemy) {
-      if (!isEnemyAlive(enemy)) {
-          handle(BattleEvent.ENEMY_TURN_SKIPPED);
-          return true;
-      }
-      return false;
+    if (!isEnemyAlive(enemy)) {
+      handle(BattleEvent.ENEMY_TURN_SKIPPED);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -689,8 +690,8 @@ public class BattleController {
   }
 
   /**
-   * Ticks card cooldowns for the new player round, retrieving any discarded card whose cooldown
-   * has elapsed straight back into the hand, and tells the UI to refresh if any were retrieved.
+   * Ticks card cooldowns for the new player round, retrieving any discarded card whose cooldown has
+   * elapsed straight back into the hand, and tells the UI to refresh if any were retrieved.
    */
   private void retrieveCooledDownCards() {
     if (cardPlayService == null) {
