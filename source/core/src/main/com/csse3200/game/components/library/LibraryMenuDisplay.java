@@ -1,13 +1,20 @@
 package com.csse3200.game.components.library;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
+import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +24,7 @@ public class LibraryMenuDisplay extends UIComponent {
   private static final Logger logger = LoggerFactory.getLogger(LibraryMenuDisplay.class);
   private final GdxGame game;
 
+  private Stack rootStack;
   private Table rootTable;
 
   public LibraryMenuDisplay(GdxGame game) {
@@ -30,13 +38,40 @@ public class LibraryMenuDisplay extends UIComponent {
   }
 
   private void addActors() {
+    rootStack = new Stack();
+    rootStack.setFillParent(true);
+
+    Texture backgroundTexture =
+        ServiceLocator.getResourceService()
+            .getAsset(MainMenuDisplay.BACKGROUND_TEXTURE, Texture.class);
+    backgroundTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    Image background = new Image(backgroundTexture);
+    background.setScaling(Scaling.fill);
+    rootStack.add(background);
+
+    Color overlayColour = MenuTheme.deepPlum();
+    overlayColour.a = 0.45f;
+    Table overlay = new Table();
+    overlay.setBackground(skin.newDrawable("white", overlayColour));
+    rootStack.add(overlay);
+
+    Texture buttonFrameTexture =
+        ServiceLocator.getResourceService()
+            .getAsset(MainMenuDisplay.BUTTON_FRAME_TEXTURE, Texture.class);
+    buttonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
     rootTable = new Table();
     rootTable.setFillParent(true);
+    rootTable.center().pad(MenuTheme.SCREEN_PADDING);
 
-    Label title = new Label("Library", skin, "title");
-    TextButton cardLibraryButton = new TextButton("Card Library", skin);
-    TextButton enemyLibraryButton = new TextButton("Enemy Library", skin);
-    TextButton backButton = new TextButton("Back", skin);
+    Label.LabelStyle titleStyle = new Label.LabelStyle(skin.get("title", Label.LabelStyle.class));
+    titleStyle.fontColor = MenuTheme.warmParchment();
+    Label title = new Label("Library", titleStyle);
+
+    TextButton.TextButtonStyle buttonStyle = MenuTheme.createButtonStyle(skin, buttonFrameTexture);
+    TextButton cardLibraryButton = new TextButton("Card Library", buttonStyle);
+    TextButton enemyLibraryButton = new TextButton("Enemy Library", buttonStyle);
+    TextButton backButton = new TextButton("Back", buttonStyle);
 
     cardLibraryButton.addListener(
         new ChangeListener() {
@@ -64,12 +99,14 @@ public class LibraryMenuDisplay extends UIComponent {
           }
         });
 
-    rootTable.add(title).padBottom(25f).row();
-    rootTable.add(cardLibraryButton).width(260f).padBottom(12f).row();
-    rootTable.add(enemyLibraryButton).width(260f).padBottom(12f).row();
-    rootTable.add(backButton).width(160f);
+    rootTable.add(title).padBottom(12f).row();
+    rootTable.defaults().width(MenuTheme.BUTTON_WIDTH).height(MenuTheme.BUTTON_HEIGHT);
+    rootTable.add(cardLibraryButton).row();
+    rootTable.add(enemyLibraryButton).row();
+    rootTable.add(backButton);
 
-    stage.addActor(rootTable);
+    rootStack.add(rootTable);
+    stage.addActor(rootStack);
   }
 
   @Override
@@ -84,7 +121,10 @@ public class LibraryMenuDisplay extends UIComponent {
 
   @Override
   public void dispose() {
-    rootTable.remove();
+    if (rootStack != null) {
+      rootStack.remove();
+      rootStack.clear();
+    }
     super.dispose();
   }
 }
