@@ -1,5 +1,38 @@
 {
-    "cards": [
+    "cards": [    {
+      "id": "debug_strike",
+      "name": "Debug Strike",
+      "description": "Deal 5 damage. Costs nothing.",
+      "cost": 0,
+      "type": "ATTACK",
+      "rarity": "COMMON",
+      "target": "SINGLE_ENEMY",
+      "effects": [
+        {
+          "type": "DAMAGE",
+          "value": 5,
+          "duration": 0
+        }
+      ],
+      "texturePath": "images/cards/strike.png"
+    },
+      {
+        "id": "debug_block",
+        "name": "Debug Block",
+        "description": "Gain 5 block. Costs nothing.",
+        "cost": 0,
+        "type": "SKILL",
+        "rarity": "COMMON",
+        "target": "SELF",
+        "effects": [
+          {
+            "type": "BLOCK",
+            "value": 5,
+            "duration": 0
+          }
+        ],
+        "texturePath": "images/cards/defend.png"
+      },
       {
         "id": "strike",
         "name": "Strike",

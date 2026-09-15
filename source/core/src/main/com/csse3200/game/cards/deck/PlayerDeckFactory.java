@@ -11,19 +11,20 @@ public final class PlayerDeckFactory {
   public static final String EXPOSE = "expose";
   public static final String INNER_FOCUS = "inner_focus";
   public static final String BANDAGE = "bandage";
-
+  public static final String DEBUG_STRIKE = "debug_strike";
+  public static final String DEBUG_BLOCK = "debug_block";
   private static final List<String> STARTER_DECK_CARD_IDS =
-      List.of(
-          STRIKE,
-          STRIKE,
-          STRIKE,
-          DEFEND,
-          DEFEND,
-          DEFEND,
-          POISON_DAGGER,
-          EXPOSE,
-          BANDAGE,
-          INNER_FOCUS);
+          List.of(
+                  DEBUG_STRIKE,
+                  DEBUG_STRIKE,
+                  DEBUG_STRIKE,
+                  DEBUG_STRIKE,
+                  DEBUG_STRIKE,
+                  DEBUG_BLOCK,
+                  DEBUG_BLOCK,
+                  DEBUG_BLOCK,
+                  DEBUG_BLOCK,
+                  DEBUG_BLOCK);
 
   private PlayerDeckFactory() {
     throw new IllegalStateException("Instantiating utility class");
