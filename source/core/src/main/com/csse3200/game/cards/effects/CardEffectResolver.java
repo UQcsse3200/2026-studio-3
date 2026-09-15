@@ -93,8 +93,12 @@ public class CardEffectResolver {
 
   /** Resolves selected instance values, preserving effect order and existing Strength behaviour. */
   public CardEffectResolution resolve(ResolvedCard card, PlayerEffectState playerState) {
-    if (playerState == null)
+    if (card == null) {
+      throw new IllegalArgumentException("Resolved card cannot be null");
+    }
+    if (playerState == null) {
       throw new IllegalArgumentException("Player effect state cannot be null");
+    }
     validateResolved(card);
     List<ResolvedCardEffect> results = new ArrayList<>();
     List<EffectConfig> effects = card.effects();
@@ -107,7 +111,12 @@ public class CardEffectResolver {
 
   /** Resolves selected instance values against read-only combat modifiers. */
   public CardEffectResolution resolve(ResolvedCard card, CardEffectResolutionContext context) {
-    if (context == null) throw new IllegalArgumentException("Resolution context cannot be null");
+    if (card == null) {
+      throw new IllegalArgumentException("Resolved card cannot be null");
+    }
+    if (context == null) {
+      throw new IllegalArgumentException("Resolution context cannot be null");
+    }
     validateResolved(card);
     List<ResolvedCardEffect> results = new ArrayList<>();
     List<EffectConfig> effects = card.effects();
