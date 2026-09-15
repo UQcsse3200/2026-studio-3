@@ -1,5 +1,6 @@
 package com.csse3200.game.cards;
 
+import static com.csse3200.game.cards.CardTestInstances.id;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,6 +14,7 @@ import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.effects.CardEffectResolutionContext;
 import com.csse3200.game.cards.effects.CardEffectResolver;
 import com.csse3200.game.cards.effects.PlayerEffectState;
+import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.cards.play.CardPlayTarget;
 import com.csse3200.game.cards.play.integration.Team1EnemyStateAdapter;
@@ -47,7 +49,9 @@ class SprintTwoCardsIntegrationTest {
   void shouldAdmitNewCardsToDeckAndFindTheirArtwork() {
     BattleDeck deck = new BattleDeck(new PlayerDeck(IDS));
     deck.drawCards(IDS.size());
-    assertEquals(IDS, deck.getHand());
+    assertEquals(
+        IDS,
+        deck.getHand().stream().map(com.csse3200.game.cards.runtime.CardInstance::cardId).toList());
     for (String id : IDS) {
       CardConfig card = library.getCard(id).orElseThrow();
       assertTrue(CardValidator.validate(card).isEmpty());
@@ -65,8 +69,7 @@ class SprintTwoCardsIntegrationTest {
       BattleDeck deck = deckWith("resurrection");
       CardPlayService service = new CardPlayService(library, deck, energy, player, null);
 
-      var result =
-          service.playCard(com.csse3200.game.cards.play.CardPlayRequest.self("resurrection"));
+      var result = service.playCard(CardPlayRequest.self(id(deck, "resurrection")));
       assertTrue(result.success());
       player.applyPlayerEffects(result.playerEffects());
 
@@ -75,7 +78,11 @@ class SprintTwoCardsIntegrationTest {
       assertEquals(3, stats.getStatusEffect(EffectType.HEAL.name()).getDuration());
       assertEquals(0, energy.getCurrentEnergy());
       assertTrue(result.updatedHand().isEmpty());
-      assertEquals(List.of("resurrection"), result.updatedDiscardPile());
+      assertEquals(
+          List.of("resurrection"),
+          result.updatedDiscardPile().stream()
+              .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+              .toList());
     }
   }
 
@@ -87,14 +94,15 @@ class SprintTwoCardsIntegrationTest {
     BattleDeck deck = deckWith("resurrection");
     CardPlayService service = new CardPlayService(library, deck, energy);
 
-    var result =
-        service.playCard(com.csse3200.game.cards.play.CardPlayRequest.self("resurrection"));
+    var result = service.playCard(CardPlayRequest.self(id(deck, "resurrection")));
 
     assertFalse(result.success());
     assertTrue(result.playerEffects().isEmpty());
     assertEquals(20, stats.getHealth());
     assertEquals(3, energy.getCurrentEnergy());
-    assertEquals(List.of("resurrection"), deck.getHand());
+    assertEquals(
+        List.of("resurrection"),
+        deck.getHand().stream().map(com.csse3200.game.cards.runtime.CardInstance::cardId).toList());
   }
 
   @Test
@@ -104,18 +112,15 @@ class SprintTwoCardsIntegrationTest {
     EnergyComponent energy = new EnergyComponent(5);
     Entity player = new Entity().addComponent(stats).addComponent(energy);
     Entity enemy = defendingEnemy();
+    BattleDeck deck = deckWith("resurrection");
     BattleController controller =
         new BattleController(
-            player,
-            List.of(enemy),
-            new CardEffectResolver(library),
-            library,
-            deckWith("resurrection"));
+            player, List.of(enemy), new CardEffectResolver(library), library, deck);
     controller.start();
 
     assertTrue(
         controller.submitCardPlayRequest(
-            new CardPlayRequest("resurrection", "player"), PlayerIntent.DEFEND));
+            CardPlayRequest.self(id(deck, "resurrection")), PlayerIntent.DEFEND));
 
     assertEquals(12, stats.getHealth());
     assertEquals(0, energy.getCurrentEnergy());
@@ -224,20 +229,59 @@ class SprintTwoCardsIntegrationTest {
     CombatStatsComponent stats = new CombatStatsComponent(100, 1);
     EnergyComponent energy = new EnergyComponent(5);
     Entity player = new Entity().addComponent(stats).addComponent(energy);
+    BattleDeck deck = deckWith("astral_ward");
     BattleController controller =
         new BattleController(
-            player,
-            List.of(defendingEnemy()),
-            new CardEffectResolver(library),
-            library,
-            deckWith("astral_ward"));
+            player, List.of(defendingEnemy()), new CardEffectResolver(library), library, deck);
     controller.start();
 
     assertTrue(
         controller.submitCardPlayRequest(
-            new CardPlayRequest("astral_ward", "player"), PlayerIntent.DEFEND));
+            CardPlayRequest.self(id(deck, "astral_ward")), PlayerIntent.DEFEND));
 
     assertEquals(4, energy.getCurrentEnergy());
+  }
+
+  @Test
+  void playServiceRejectsDefinitionIdWithoutSpendingEnergy() {
+    PlayerDeck owned = new PlayerDeck(library, List.of("strike"));
+    var upgraded = owned.upgradeCard(owned.getCards().get(0).instanceId());
+    BattleDeck deck = new BattleDeck(owned);
+    deck.drawOne();
+    EnergyComponent energy = new EnergyComponent(3);
+    CardPlayService service = new CardPlayService(library, deck, energy);
+
+    assertFalse(service.canPlay("strike"));
+    var request = com.csse3200.game.cards.play.CardPlayRequest.singleEnemy("strike", "enemy");
+    assertFalse(service.canPlay(request));
+    assertFalse(service.playCard(request).success());
+    assertEquals(3, energy.getCurrentEnergy());
+    assertEquals(List.of(upgraded), deck.getHand());
+    assertTrue(deck.getDiscardPile().isEmpty());
+  }
+
+  @Test
+  void battleControllerRejectsDefinitionIdWithoutApplyingBaseDamage() {
+    PlayerDeck owned = new PlayerDeck(library, List.of("strike"));
+    var upgraded = owned.upgradeCard(owned.getCards().get(0).instanceId());
+    BattleDeck deck = new BattleDeck(owned);
+    deck.drawOne();
+    EnergyComponent energy = new EnergyComponent(3);
+    Entity player =
+        new Entity().addComponent(new CombatStatsComponent(100, 1)).addComponent(energy);
+    Entity enemy = defendingEnemy();
+    BattleController controller =
+        new BattleController(
+            player, List.of(enemy), new CardEffectResolver(library), library, deck);
+    controller.start();
+    assertFalse(
+        controller.submitCardPlayRequest(
+            CardPlayRequest.singleEnemy("strike", Integer.toString(enemy.getId())),
+            PlayerIntent.ATTACK));
+    assertEquals(3, energy.getCurrentEnergy());
+    assertEquals(30, enemy.getComponent(CombatStatsComponent.class).getHealth());
+    assertEquals(List.of(upgraded), deck.getHand());
+    assertTrue(deck.getDiscardPile().isEmpty());
   }
 
   private BattleDeck deckWith(String id) {

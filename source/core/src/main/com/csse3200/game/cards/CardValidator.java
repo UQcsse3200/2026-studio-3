@@ -41,6 +41,23 @@ public final class CardValidator {
     return validate(card).isEmpty();
   }
 
+  /** Validates the selected runtime values before gameplay or effect calculation. */
+  public static List<String> validateResolved(com.csse3200.game.cards.runtime.ResolvedCard card) {
+    if (card == null) {
+      return List.of("resolved card must not be null");
+    }
+    List<String> errors = new ArrayList<>();
+    List<EffectConfig> effects = card.effects();
+    for (int i = 0; i < effects.size(); i++) {
+      validateEffect(effects.get(i), i, errors);
+      if (effects.get(i).type != null
+          && !isCompatibleWithTarget(effects.get(i).type, card.target())) {
+        errors.add("effects[" + i + "].type is not compatible with target " + card.target());
+      }
+    }
+    return List.copyOf(errors);
+  }
+
   private static void validateEffect(EffectConfig effect, int index, List<String> errors) {
     String prefix = "effect " + index + ": ";
     if (effect == null) {

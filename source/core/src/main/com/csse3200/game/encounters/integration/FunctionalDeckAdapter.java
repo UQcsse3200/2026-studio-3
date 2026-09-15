@@ -7,7 +7,7 @@ import java.util.function.Predicate;
  * Adapts add/remove functions to the Team 2 deck boundary.
  *
  * <p>After Team 5 is merged, the add function can call {@code PlayerDeck.addCard(cardId)} and the
- * remove function can call {@code PlayerDeck.removeCard(cardId)}.
+ * remove function must select an owned instance and call {@code PlayerDeck.removeCard(instanceId)}.
  */
 public final class FunctionalDeckAdapter implements DeckGateway {
   private final Predicate<String> addCard;

@@ -102,7 +102,9 @@ public class EnemyFactory {
     if (dragAndDrop != null && ServiceLocator.getCamera() != null) {
       enemy.addComponent(
           new EnemyDropTargetComponent(
-              dragAndDrop.getDragAndDrop(), ServiceLocator.getCamera(), config.id));
+              dragAndDrop.getDragAndDrop(),
+              ServiceLocator.getCamera(),
+              Integer.toString(enemy.getId())));
     }
     // The intent display draws into the world through the render service, which only exists while
     // the game is rendering, so it is skipped when absent (e.g. headless tests) rather than
