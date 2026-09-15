@@ -173,7 +173,7 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new InputDecorator(stage, 10))
             .addComponent(uiFactory)
             .addComponent(displays)
-            .addComponent(new BattleActions(controller, game, library))
+            .addComponent(new BattleActions(controller, game))
             .addComponent(cardPlayAdapter);
 
     // Keep the on-screen hand in sync with the deck: after a card is played (and a replacement
