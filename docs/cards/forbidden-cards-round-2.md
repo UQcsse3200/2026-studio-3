@@ -34,12 +34,13 @@ Armour is distinct from per-turn Block. This effect does not depend on `updateSt
 
 ## Artwork standard
 
-Card PNGs are **illustration-only** inside an ornate frame:
+Card PNGs follow the Team 6 shared Round 2 art spec:
 
-- Size: `691×1056`
-- Allowed UI baked into the image: cost orb digit only
-- Name, type, rarity and rules text come from `cards.json` / Team 3 UI overlay — **not** painted into
-  the PNG
+- Aspect: **4:3 landscape**, final size **1024×768** (nearest-neighbour upscale from 512×384)
+- Format: PNG, keep under **500 KB**
+- **Illustration only** — no card name, cost, description, rarity, borders, frames or icons
+- Filename equals card ID; `texturePath` is `images/cards/<id>.png`
+- UI overlays text and frame at runtime
 
 ## Card Designs
 
@@ -186,7 +187,7 @@ or launch option remains pending; production code should not silently replace th
 - [x] Effect values and durations satisfy `CardValidator` rules.
 - [x] Four artwork files exist at their configured paths.
 - [x] All four IDs are accepted by `CardIdRegistry`.
-- [x] Artwork is 691×1056 illustration-only (cost digit only; no baked name/rules text).
+- [x] Artwork is 1024×768 4:3 illustration-only (no baked text, cost, borders or icons).
 - [ ] Confirm no ID or design overlap with the Member 1 master inventory.
 
 ### Automated verification
@@ -225,7 +226,7 @@ or launch option remains pending; production code should not silently replace th
 | --- | --- | --- |
 | Reward/shop acquisition route | Reward/shop team + Member 5 | Pending agreement and end-to-end verification |
 | Debug selection of Forbidden test deck | Member 5 / battle UI owner | Factory entry exists; UI/launch selection not connected |
-| Art specification | Member 5 (this set) | 691×1056 illustration-only; cost orb digit only |
+| Art specification | Member 5 (this set) | 1024×768 4:3 illustration-only per Team 6 shared prompt |
 | Effect support | Member 2 + Team 5/7 | Existing effects selected; verify actual combat behaviour |
 | Upgrade runtime | Card upgrade owners | JSON `upgrade` filled; live upgrade application depends on shared systems |
 | Final 26-card inventory | Member 1 + all authors | Merge all member submissions and check unique IDs |
@@ -249,7 +250,7 @@ This is a test entry route, not evidence that production reward/shop acquisition
 
 ## AI-Assisted Artwork Disclosure
 
-The four card images were generated with Cursor's image-generation tool, using an illustration-only
-frame reference (cost digit only; no title or rules text). Zeyu Wang selected the card concepts,
-mechanics, text in `cards.json`, upgrade values and final assets. This use must also be included in
-the team's AI declaration and any required wiki attribution.
+The Forbidden and Iron Oath card images were regenerated with Cursor's image-generation tool using
+the Team 6 shared Round 2 prompt (4:3 landscape pixel art, illustration only). Zeyu Wang selected
+the subjects, mechanics and final assets. This use must also be included in the team's AI
+declaration and any required wiki attribution.
