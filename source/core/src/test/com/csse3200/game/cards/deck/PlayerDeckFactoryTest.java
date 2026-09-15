@@ -51,10 +51,24 @@ class PlayerDeckFactoryTest {
     PlayerDeck first = PlayerDeckFactory.createStarterDeck(CARDS);
     PlayerDeck second = PlayerDeckFactory.createStarterDeck(CARDS);
 
-    first.removeCard(PlayerDeckFactory.STRIKE);
+    first.removeCard(first.getCards().get(0).instanceId());
 
     assertEquals(9, first.size());
     assertEquals(10, second.size());
     assertEquals(3, second.count(PlayerDeckFactory.STRIKE));
+  }
+
+  @Test
+  void shouldCreateDistinctBaseInstancesInStarterOrder() {
+    PlayerDeck first = PlayerDeckFactory.createStarterDeck(CARDS);
+    PlayerDeck second = PlayerDeckFactory.createStarterDeck(CARDS);
+    assertEquals(
+        PlayerDeckFactory.getStarterDeckCardIds(),
+        first.getCards().stream().map(card -> card.cardId()).toList());
+    assertEquals(
+        first.size(), first.getCards().stream().map(card -> card.instanceId()).distinct().count());
+    assertTrue(first.getCards().stream().allMatch(card -> !card.isUpgraded()));
+    assertTrue(
+        first.getCards().stream().noneMatch(card -> second.containsInstance(card.instanceId())));
   }
 }

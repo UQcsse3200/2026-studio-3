@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.TestCardService;
+import com.csse3200.game.cards.runtime.CardInstance;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -95,10 +96,10 @@ class PlayerDeckTest {
   }
 
   @Test
-  void shouldRemoveFirstMatchingCardOnly() {
+  void shouldRemoveSelectedInstanceOnly() {
     PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike", "defend", "strike"));
 
-    assertTrue(deck.removeCard("strike"));
+    assertTrue(deck.removeCard(deck.getCards().get(0).instanceId()));
 
     assertIterableEquals(List.of("defend", "strike"), deck.getCardIds());
     assertEquals(1, deck.count("strike"));
@@ -117,9 +118,9 @@ class PlayerDeckTest {
   void shouldRemoveCardAtPosition() {
     PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike", "defend", "bandage"));
 
-    String removed = deck.removeCardAt(1);
+    CardInstance removed = deck.removeCardAt(1);
 
-    assertEquals("defend", removed);
+    assertEquals("defend", removed.cardId());
     assertIterableEquals(List.of("strike", "bandage"), deck.getCardIds());
   }
 
@@ -127,7 +128,7 @@ class PlayerDeckTest {
   void shouldRejectInvalidCardIds() {
     PlayerDeck deck = new PlayerDeck(CARDS);
 
-    assertThrows(IllegalArgumentException.class, () -> deck.addCard(null));
+    assertThrows(IllegalArgumentException.class, () -> deck.addCard((String) null));
     assertThrows(IllegalArgumentException.class, () -> deck.addCard(""));
     assertThrows(IllegalArgumentException.class, () -> deck.addCard("  "));
     assertThrows(IllegalArgumentException.class, () -> deck.addCard("unknown_card"));
@@ -152,7 +153,7 @@ class PlayerDeckTest {
     PlayerDeck copy = original.copy();
 
     copy.addCard("bandage");
-    original.removeCard("strike");
+    original.removeCard(original.getCards().get(0).instanceId());
 
     assertIterableEquals(List.of("defend"), original.getCardIds());
     assertIterableEquals(List.of("strike", "defend", "bandage"), copy.getCardIds());
