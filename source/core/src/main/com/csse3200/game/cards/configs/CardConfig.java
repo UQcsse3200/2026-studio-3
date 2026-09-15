@@ -39,7 +39,9 @@ public class CardConfig {
 
   /**
    * Optional upgraded values for this card. The upgrade inherits this card's ID, type, target and
-   * artwork. Null means the card has no upgrade defined yet.
+   * artwork. This remains optional while the official card library is migrated; after every card
+   * has an upgrade, validation may require it for release definitions. Null means the card has no
+   * upgrade defined yet.
    */
   public CardUpgradeConfig upgrade = null;
 

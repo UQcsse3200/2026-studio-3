@@ -1,6 +1,7 @@
 package com.csse3200.game.services;
 
 import com.badlogic.gdx.graphics.Camera;
+import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.input.InputService;
@@ -26,8 +27,10 @@ public class ServiceLocator {
   private static InputService inputService;
   private static ResourceService resourceService;
   private static DragNDropService dragNDropService;
+  private static GamePauseService pauseService;
   private static Camera camera;
   private static CardLibrary cardLibrary;
+  private static BestiaryService bestiaryService;
 
   public static EntityService getEntityService() {
     return entityService;
@@ -57,8 +60,16 @@ public class ServiceLocator {
     return dragNDropService;
   }
 
+  public static GamePauseService getPauseService() {
+    return pauseService;
+  }
+
   public static Camera getCamera() {
     return camera;
+  }
+
+  public static BestiaryService getBestiaryService() {
+    return bestiaryService;
   }
 
   public static void registerEntityService(EntityService service) {
@@ -95,6 +106,11 @@ public class ServiceLocator {
     dragNDropService = service;
   }
 
+  public static void registerPauseService(GamePauseService service) {
+    logger.debug("Registering pause service {}", service);
+    pauseService = service;
+  }
+
   public static void registerCamera(Camera cam) {
     logger.debug("Registering camera {}", cam);
     camera = cam;
@@ -109,6 +125,11 @@ public class ServiceLocator {
     cardLibrary = library;
   }
 
+  public static void registerBestiaryService(BestiaryService service) {
+    logger.debug("Registering Bestiary service {}", service);
+    bestiaryService = service;
+  }
+
   public static void clear() {
     entityService = null;
     renderService = null;
@@ -117,8 +138,10 @@ public class ServiceLocator {
     inputService = null;
     resourceService = null;
     dragNDropService = null;
+    pauseService = null;
     camera = null;
     cardLibrary = null;
+    bestiaryService = null;
   }
 
   private ServiceLocator() {

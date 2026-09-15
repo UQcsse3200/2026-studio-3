@@ -18,10 +18,13 @@ import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
-import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.cards.effects.CardEffectResolver;
+import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.pausemenu.PauseMenuActions;
+import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
+import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
@@ -30,11 +33,14 @@ import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
 import com.csse3200.game.input.InputDecorator;
 import com.csse3200.game.input.InputService;
+import com.csse3200.game.maps.PlayerRunState;
+import com.csse3200.game.maps.RunState;
 import com.csse3200.game.physics.PhysicsEngine;
 import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.DragNDropService;
+import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
@@ -71,6 +77,7 @@ public class BattleScreen extends ScreenAdapter {
   private final PhysicsEngine physicsEngine;
   private static final Map<String, Skin> textureSkinCache = new HashMap<>();
   private final BattleController controller;
+  private final PlayerRunState playerState;
   private CardLibrary library;
   private BattleDeck battleDeck;
   private List<ClickableRecord> staticUiRecords;
@@ -81,7 +88,9 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.registerDragNDropService(new DragNDropService());
 
     logger.debug("Initialising main game screen services");
-    ServiceLocator.registerTimeSource(new GameTime());
+    GameTime gameTime = new GameTime();
+    ServiceLocator.registerTimeSource(gameTime);
+    ServiceLocator.registerPauseService(new GamePauseService(gameTime));
 
     PhysicsService physicsService = new PhysicsService();
     ServiceLocator.registerPhysicsService(physicsService);
@@ -106,6 +115,9 @@ public class BattleScreen extends ScreenAdapter {
     ForestGameArea forestGameArea = new ForestGameArea(terrainFactory);
     this.gameArea = forestGameArea;
     forestGameArea.create();
+    RunState runState = game.getRunState();
+    playerState = runState.getOrCreatePlayerState();
+    playerState.applyTo(forestGameArea.getPlayer());
 
     // Card + deck state has to exist before the controller so it can be handed the single
     // card-play entry point and the deck it mutates.
@@ -113,7 +125,7 @@ public class BattleScreen extends ScreenAdapter {
     library = new CardLibrary(configs);
     ServiceLocator.registerCardLibrary(library);
 
-    PlayerDeck playerDeck = PlayerDeckFactory.createStarterDeck();
+    PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(library);
     battleDeck = new BattleDeck(playerDeck);
     battleDeck.shuffleDrawPile();
     battleDeck.drawCards(5);
@@ -150,7 +162,13 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new InputDecorator(stage, 10))
             .addComponent(uiFactory)
             .addComponent(displays)
-            .addComponent(new BattleActions(controller, game, library));
+            .addComponent(new BattleActions(controller, game))
+            .addComponent(new PauseMenuDisplay())
+            .addComponent(new PauseMenuInput())
+            .addComponent(new PauseMenuActions(game))
+            .addComponent(
+                new DamageOnCardPlayComponent(
+                    gameArea.getPlayer().getComponent(CombatStatsComponent.class)));
 
     // Keep the on-screen hand in sync with the deck: after a card is played (and a replacement
     // drawn) rebuild the hand widgets from the live deck, so the played card's button is gone and
@@ -159,7 +177,8 @@ public class BattleScreen extends ScreenAdapter {
         .getEvents()
         .addListener(
             BattleActions.HAND_CHANGED_EVENT,
-            (java.util.List<String> hand) -> uiFactory.rebuildHand(buildHandRecords()));
+            (java.util.List<com.csse3200.game.cards.runtime.CardInstance> hand) ->
+                uiFactory.rebuildHand(buildHandRecords()));
 
     gameArea.displayUI(battleUi);
   }
@@ -178,6 +197,7 @@ public class BattleScreen extends ScreenAdapter {
 
   @Override
   public void dispose() {
+    playerState.captureFrom(gameArea.getPlayer());
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
@@ -216,21 +236,22 @@ public class BattleScreen extends ScreenAdapter {
   private List<ClickableRecord> buildHandRecords() {
     List<ClickableRecord> records = new ArrayList<>();
     float x = HAND_START_X;
-    for (String cardId : battleDeck.getHand()) {
-      Optional<CardConfig> maybeCard = library.getCard(cardId);
-      if (maybeCard.isEmpty()) {
-        logger.warn("Card ID {} in hand not found in library, skipping", cardId);
+    for (var instance : battleDeck.getHand()) {
+      String cardId = instance.cardId();
+      var resolved = controller.resolveCardInHand(instance.instanceId());
+      if (resolved.isEmpty()) {
+        logger.warn("Card ID {} in hand could not be resolved, skipping", cardId);
         continue;
       }
-      CardConfig card = maybeCard.get();
-      boolean selfTarget = card.target == TargetType.SELF;
+      var card = resolved.get();
+      boolean selfTarget = card.target() == TargetType.SELF;
       String variant = selfTarget ? "inout" : "drag";
 
-      Skin cardSkin = skinFromTexturePath(card.texturePath);
+      Skin cardSkin = skinFromTexturePath(card.texturePath());
 
       ClickableRecord.Builder builder =
           ClickableRecord.builder("playCard")
-              .label(card.name)
+              .label(card.name())
               .variant(variant)
               .position(x, HAND_Y)
               .size(CARD_WIDTH, CARD_HEIGHT)
@@ -238,10 +259,10 @@ public class BattleScreen extends ScreenAdapter {
 
       if (selfTarget) {
         // No drop target involved — target is fixed at "player".
-        builder.args(card.id, "player");
+        builder.args(instance.instanceId(), "player");
       } else {
         // Enemy id isn't known yet; EnemyDropTargetComponent appends it at drop-time.
-        builder.args(card.id);
+        builder.args(instance.instanceId());
       }
 
       records.add(builder.build());

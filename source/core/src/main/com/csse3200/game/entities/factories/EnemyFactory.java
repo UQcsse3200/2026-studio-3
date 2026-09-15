@@ -2,6 +2,8 @@ package com.csse3200.game.entities.factories;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.bestiary.BestiaryTrackingComponent;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.enemy.*;
 import com.csse3200.game.components.spritedisplay.reactive.EnemyDropTargetComponent;
@@ -35,6 +37,11 @@ public class EnemyFactory {
   private static final String DEFAULT_ATLAS = SPRITE_DIR + "default.atlas";
   private static final float IDLE_FRAME_DURATION = 0.5f;
   private static final float HURT_FRAME_DURATION = 0.15f;
+  private static final float ATTACK_FRAME_DURATION = 0.2f;
+  private static final float DEATH_FRAME_DURATION = 0.3f;
+  private static final float CAST_FRAME_DURATION = 0.1f;
+  private static final float DEFEND_FRAME_DURATION = 0.1f;
+  private static final float BOSS_DEATH_FRAME_DURATION = 0.12f;
 
   private static EnemyConfigs loadRoster() {
     EnemyConfigs configs = FileLoader.readClass(EnemyConfigs.class, "configs/enemies.json");
@@ -83,6 +90,16 @@ public class EnemyFactory {
             ServiceLocator.getResourceService().getAsset(atlasPath(config), TextureAtlas.class));
     animator.addAnimation("idle", IDLE_FRAME_DURATION, Animation.PlayMode.LOOP);
     animator.addAnimation("hurt", HURT_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    // Attack and death are optional for legacy atlases. Missing regions are logged and skipped.
+    animator.addAnimation("attack", ATTACK_FRAME_DURATION, Animation.PlayMode.NORMAL);
+
+    if (config.tier == EnemyTier.BOSS) {
+      animator.addAnimation("cast", CAST_FRAME_DURATION, Animation.PlayMode.NORMAL);
+      animator.addAnimation("defend", DEFEND_FRAME_DURATION, Animation.PlayMode.NORMAL);
+      animator.addAnimation("death", BOSS_DEATH_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    } else {
+      animator.addAnimation("death", DEATH_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    }
 
     CombatStatsComponent stats = new CombatStatsComponent(config.health, config.baseAttack);
     stats.setArmor(config.armour);
@@ -93,7 +110,8 @@ public class EnemyFactory {
             .addComponent(new EnemyStatsComponent(config.name))
             .addComponent(new EnemyBehaviourComponent(config.behaviour))
             .addComponent(animator)
-            .addComponent(new EnemyAnimationController());
+            .addComponent(new EnemyAnimationController())
+            .addComponent(new EnemyCombatEffectsComponent());
 
     // The drop target lets the player drag a card onto the enemy. It needs the drag-and-drop UI
     // service and a camera, which are only registered when the battle screen is running, so it is
@@ -102,13 +120,20 @@ public class EnemyFactory {
     if (dragAndDrop != null && ServiceLocator.getCamera() != null) {
       enemy.addComponent(
           new EnemyDropTargetComponent(
-              dragAndDrop.getDragAndDrop(), ServiceLocator.getCamera(), config.id));
+              dragAndDrop.getDragAndDrop(),
+              ServiceLocator.getCamera(),
+              Integer.toString(enemy.getId())));
     }
     // The intent display draws into the world through the render service, which only exists while
     // the game is rendering, so it is skipped when absent (e.g. headless tests) rather than
     // failing enemy creation.
     if (ServiceLocator.getRenderService() != null) {
       enemy.addComponent(new EnemyIntentDisplay());
+    }
+
+    BestiaryService bestiary = ServiceLocator.getBestiaryService();
+    if (bestiary != null && bestiary.contains(config.id)) {
+      enemy.addComponent(new BestiaryTrackingComponent(config.id, bestiary));
     }
 
     return enemy;

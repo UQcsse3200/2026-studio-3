@@ -1,18 +1,26 @@
 package com.csse3200.game.components.combat;
 
-import com.csse3200.game.cards.CardPlayRequest;
 import com.csse3200.game.cards.CardService;
-import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.cards.EffectType;
+import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.deck.BattleDeck;
-import com.csse3200.game.cards.effects.CardEffectResolution;
+import com.csse3200.game.cards.effects.CardEffectResolutionService;
 import com.csse3200.game.cards.effects.CardEffectResolver;
-import com.csse3200.game.cards.effects.CardPlayResult;
 import com.csse3200.game.cards.effects.PlayerEffectState;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
+import com.csse3200.game.cards.effects.TurnEffectStore;
+import com.csse3200.game.cards.play.CardPlayFailureReason;
+import com.csse3200.game.cards.play.CardPlayRequest;
+import com.csse3200.game.cards.play.CardPlayResult;
+import com.csse3200.game.cards.play.CardPlayService;
+import com.csse3200.game.cards.play.DeckSnapshot;
+import com.csse3200.game.cards.runtime.CardInstance;
+import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
+import com.csse3200.game.components.enemy.IntentEffectType;
 import com.csse3200.game.components.enemy.IntentType;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.PlayerIntent;
@@ -21,7 +29,6 @@ import com.csse3200.game.events.EventHandler;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.events.listeners.EventListener2;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
@@ -52,6 +59,7 @@ public class BattleController {
   private boolean pendingEvent;
   private CardPlayRequest pendingCard;
   private boolean lastCardPlaySucceeded;
+  private CardPlayService cardPlayService;
 
   /** Team 5's card-effect resolver (Team 6 configs -> resolved effects); null without cards. */
   private final CardEffectResolver effectResolver;
@@ -102,6 +110,18 @@ public class BattleController {
       throw new IllegalArgumentException("One or more enemies are null.");
     }
 
+    if (effectResolver != null
+        && cardService != null
+        && battleDeck != null
+        && playerEnergy() != null) {
+      this.cardPlayService =
+          new CardPlayService(
+              cardService,
+              new CardEffectResolutionService(
+                  effectResolver, playerEffectState, new TurnEffectStore()),
+              battleDeck,
+              playerEnergy());
+    }
     this.battleTransitions = new BattleTransitions();
     this.currentPhase = BattlePhase.SETUP;
     this.currentEnemyIndex = -1;
@@ -329,9 +349,15 @@ public class BattleController {
    *
    * @param listener receives the updated hand
    */
-  public void addHandChangedListener(EventListener1<List<String>> listener) {
+  public void addHandChangedListener(EventListener1<List<CardInstance>> listener) {
     Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(HAND_CHANGED_EVENT, listener);
+  }
+
+  /** Notifies listeners after a successful card play, before checking victory or defeat. */
+  public void addCardPlayedListener(EventListener2<String, String> listener) {
+    Objects.requireNonNull(listener, LISTENER_NOT_NULL);
+    eventHandler.addListener("cardPlayed", listener);
   }
 
   /** Sends a one-line description of the latest battle action to any log listeners. */
@@ -489,7 +515,7 @@ public class BattleController {
     return this.pendingCard;
   }
 
-  public Boolean submitCardPlayRequest(CardPlayRequest cardPlayRequest, PlayerIntent playerIntent) {
+  public boolean submitCardPlayRequest(CardPlayRequest cardPlayRequest, PlayerIntent playerIntent) {
     Objects.requireNonNull(cardPlayRequest, "cardPlayRequest cannot be null.");
     Objects.requireNonNull(playerIntent, "playerIntent cannot be null.");
     BattleEvent event =
@@ -573,7 +599,29 @@ public class BattleController {
     if (energy != null) {
       energy.onTurnStart();
     }
+    applyHealingAtTurnStart();
     handle(BattleEvent.PLAYER_TURN_STARTED);
+  }
+
+  /** Applies and counts down timed HEAL once per player turn, starting on the next turn. */
+  private void applyHealingAtTurnStart() {
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    if (stats == null || stats.isDead()) {
+      return;
+    }
+    StatusEffect healing = stats.getStatusEffect(EffectType.HEAL.name());
+    if (healing == null) {
+      return;
+    }
+    if (healing.getDuration() <= 0) {
+      stats.removeStatusEffect(EffectType.HEAL.name());
+      return;
+    }
+    int missingHealth = Math.max(0, stats.getMaxHealth() - stats.getHealth());
+    stats.heal(Math.min(Math.max(0, healing.getValue()), missingHealth));
+    if (healing.tickAndCheckExpired()) {
+      stats.removeStatusEffect(EffectType.HEAL.name());
+    }
   }
 
   private EnergyComponent playerEnergy() {
@@ -589,6 +637,10 @@ public class BattleController {
   }
 
   private void finishPlayerCardAction() {
+    if (lastCardPlaySucceeded && pendingCard != null) {
+      eventHandler.trigger("cardPlayed", pendingCard.instanceId(), pendingCard.target().targetId());
+    }
+
     pendingCard = null;
     currentPlayerIntent = null;
     handle(BattleEvent.PLAYER_ACTION_RESOLVED);
@@ -623,7 +675,7 @@ public class BattleController {
     if (result == null) {
       // Card system not wired in (e.g. unit tests without a resolution service).
       lastCardPlaySucceeded = true;
-      narrate("You played " + request.cardID() + ".");
+      narrate("You played " + request.instanceId() + ".");
       finishPlayerCardAction();
       return;
     }
@@ -631,7 +683,7 @@ public class BattleController {
     if (!result.success()) {
       // No effects produced; the card stays in hand and the player keeps their turn.
       lastCardPlaySucceeded = false;
-      narrate("Couldn't play " + request.cardID() + ": " + result.failureReason());
+      narrate("Couldn't play " + request.instanceId() + ": " + result.failureReason());
       finishPlayerCardAction();
       return;
     }
@@ -643,10 +695,8 @@ public class BattleController {
   }
 
   /**
-   * Plays the submitted card: looks its config up in Team 6's library, checks it is in hand and
-   * affordable, resolves its effects through Team 5's {@link CardEffectResolver}, then commits the
-   * energy spend, moves the card to the discard pile and draws a replacement so the hand stays
-   * topped up.
+   * Validates the selected enemy, then delegates instance lookup, resolved cost/effects and discard
+   * to the shared CardPlayService. Draws a replacement only after successful play.
    *
    * @return the result, or {@code null} when no card system is wired in
    */
@@ -655,37 +705,44 @@ public class BattleController {
       return null;
     }
 
-    Optional<CardConfig> maybeCard = cardService.getCard(request.cardID());
-    if (maybeCard.isEmpty()) {
+    if (cardPlayService == null) {
       return CardPlayResult.failure(
-          "Unknown card: " + request.cardID(), request.cardID(), request.targetID(), battleDeck);
+          request.instanceId(),
+          null,
+          request.target(),
+          0,
+          CardPlayFailureReason.NOT_ENOUGH_ENERGY,
+          DeckSnapshot.from(battleDeck));
     }
-    CardConfig card = maybeCard.get();
-
-    if (!battleDeck.getHand().contains(card.id)) {
-      return CardPlayResult.failure("Card not in hand", card.id, request.targetID(), battleDeck);
+    Optional<ResolvedCard> selected = cardPlayService.resolveInHand(request.instanceId());
+    if (selected.isPresent()
+        && request.target().type() != TargetType.SELF
+        && livingEnemyTargets(request).isEmpty()) {
+      ResolvedCard card = selected.get();
+      return CardPlayResult.failure(
+          card.instanceId(),
+          card.cardId(),
+          request.target(),
+          card.cost(),
+          CardPlayFailureReason.INVALID_TARGET,
+          DeckSnapshot.from(battleDeck));
     }
-
-    EnergyComponent energy = playerEnergy();
-    if (energy != null && !energy.canAfford(card.cost)) {
-      return CardPlayResult.failure("Not enough energy", card.id, request.targetID(), battleDeck);
-    }
-
-    CardEffectResolution resolution = effectResolver.resolve(card, playerEffectState);
-
-    if (energy != null) {
-      energy.spendEnergy(card.cost);
-    }
-    battleDeck.playCard(card.id);
+    CardPlayResult result = cardPlayService.playCard(request);
+    if (!result.success()) return result;
+    // Preserve the existing draw-on-success battle rule, not on rejected attempts.
     battleDeck.drawOne();
-
     return CardPlayResult.success(
-        card.id,
-        request.targetID(),
-        resolution.enemyEffects(),
-        resolution.playerEffects(),
-        battleDeck,
-        card.cost);
+        result.instanceId(),
+        result.cardId(),
+        result.target(),
+        result.energyCost(),
+        result.effectResolution(),
+        DeckSnapshot.from(battleDeck));
+  }
+
+  /** Resolved values of an exact copy in hand, for UI event routing and previews. */
+  public Optional<ResolvedCard> resolveCardInHand(String instanceId) {
+    return cardPlayService == null ? Optional.empty() : cardPlayService.resolveInHand(instanceId);
   }
 
   /**
@@ -707,22 +764,16 @@ public class BattleController {
     eventHandler.trigger(HAND_CHANGED_EVENT, result.updatedHand());
   }
 
-  /**
-   * Chooses which enemies a card's enemy effects hit. Self-targeting cards hit nothing; everything
-   * else hits every living enemy, which covers both the single-enemy encounter and ALL_ENEMIES
-   * cards. Precise single-target selection can be layered on when encounters have several enemies.
-   */
+  /** Uses the entity ID emitted by the drop target, never the enemy's shared definition ID. */
   private List<Entity> livingEnemyTargets(CardPlayRequest request) {
-    if ("player".equalsIgnoreCase(request.targetID())) {
-      return List.of();
-    }
-    List<Entity> targets = new ArrayList<>();
-    for (Entity enemy : this.enemies) {
-      if (isEnemyAlive(enemy)) {
-        targets.add(enemy);
-      }
-    }
-    return targets;
+    if (request.target().type() == TargetType.SELF) return List.of();
+    return enemies.stream()
+        .filter(this::isEnemyAlive)
+        .filter(
+            enemy ->
+                request.target().type() == TargetType.ALL_ENEMIES
+                    || Integer.toString(enemy.getId()).equals(request.target().targetId()))
+        .toList();
   }
 
   private void applyEnemyEffects(List<Entity> targets, List<ResolvedCardEffect> effects) {
@@ -734,14 +785,16 @@ public class BattleController {
       for (ResolvedCardEffect effect : effects) {
         switch (effect.type()) {
           case DAMAGE -> stats.takeDamage(effect.value());
+          case PIERCE -> stats.takePiercingDamage(effect.value());
           case POISON ->
               stats.applyStatusEffect(
                   new StatusEffect("poison", effect.value(), effect.duration()));
           case VULNERABLE ->
               stats.applyStatusEffect(
                   new StatusEffect("vulnerable", effect.value(), effect.duration()));
+          case SUNDER -> stats.setArmor(stats.getArmor() - effect.value());
           default -> {
-            // BLOCK / HEAL / STRENGTH are not enemy-facing.
+            // Other effect types are not handled by this legacy battle path.
           }
         }
       }
@@ -756,7 +809,20 @@ public class BattleController {
     for (ResolvedCardEffect effect : effects) {
       switch (effect.type()) {
         case BLOCK -> stats.addArmor(effect.value());
-        case HEAL -> stats.heal(effect.value());
+        case HEAL -> {
+          if (effect.duration() > 0) {
+            stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
+          } else {
+            stats.heal(effect.value());
+          }
+        }
+        case ENERGY_GAIN -> {
+          EnergyComponent energy = playerEnergy();
+          if (energy != null) {
+            energy.restoreEnergy(effect.value());
+          }
+        }
+        case CLEANSE -> stats.clearNegativeStatusEffects();
         case FORTIFY -> stats.addArmor(effect.value());
         default -> {
           // STRENGTH is already folded into the resolver's running player state.
@@ -766,7 +832,12 @@ public class BattleController {
   }
 
   private String summarise(CardPlayRequest request, CardPlayResult result) {
-    StringBuilder summary = new StringBuilder("You played ").append(request.cardID());
+    StringBuilder summary =
+        new StringBuilder("You played ")
+            .append(result.cardId())
+            .append(" [")
+            .append(request.instanceId())
+            .append("]");
     for (ResolvedCardEffect effect : result.enemyEffects()) {
       summary
           .append(" - ")
@@ -787,11 +858,26 @@ public class BattleController {
   }
 
   public void enterPlayerEnd() {
-    // Coordinate end-of-turn operations.
     if (this.isBattleOver()) {
       return;
     }
+
+    CombatStatsComponent playerStats = this.player.getComponent(CombatStatsComponent.class);
+
+    if (playerStats != null) {
+      tickPlayerStatusEffect(playerStats, IntentEffectType.SILENCE.name());
+      tickPlayerStatusEffect(playerStats, IntentEffectType.DAMAGE_ON_CARD_PLAY.name());
+    }
+
     handle(BattleEvent.PLAYER_TURN_ENDED);
+  }
+
+  /** Counts down one player status without changing effects owned by other turn hooks. */
+  private void tickPlayerStatusEffect(CombatStatsComponent playerStats, String effectType) {
+    StatusEffect effect = playerStats.getStatusEffect(effectType);
+    if (effect != null && effect.tickAndCheckExpired()) {
+      playerStats.removeStatusEffect(effectType);
+    }
   }
 
   private void enterPlayerResolved() {
@@ -877,13 +963,22 @@ public class BattleController {
 
   private void enterVictory() {
     this.cleanUp();
+    clearTimedHealing();
     narrate("Victory! Every enemy has been defeated.");
     eventHandler.trigger(BATTLE_ENDED_EVENT, Boolean.TRUE);
   }
 
   private void enterDefeat() {
     this.cleanUp();
+    clearTimedHealing();
     narrate("Defeat. The player has fallen.");
     eventHandler.trigger(BATTLE_ENDED_EVENT, Boolean.FALSE);
+  }
+
+  private void clearTimedHealing() {
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    if (stats != null) {
+      stats.removeStatusEffect(EffectType.HEAL.name());
+    }
   }
 }

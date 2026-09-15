@@ -35,6 +35,8 @@ public class CardEffectDebugDisplay extends UIComponent {
     EFFECT_COLORS.put(EffectType.POISON, new Color(0.45f, 0.75f, 0.2f, 1f));
     EFFECT_COLORS.put(EffectType.VULNERABLE, new Color(0.9f, 0.4f, 0.1f, 1f));
     EFFECT_COLORS.put(EffectType.STRENGTH, new Color(1f, 0.92f, 0.15f, 1f));
+    EFFECT_COLORS.put(EffectType.ENERGY_GAIN, new Color(0.2f, 0.75f, 1f, 1f));
+    EFFECT_COLORS.put(EffectType.CLEANSE, new Color(0.85f, 0.9f, 1f, 1f));
     EFFECT_COLORS.put(EffectType.FORTIFY, new Color(0.72f, 0.58f, 0.35f, 1f));
   }
 

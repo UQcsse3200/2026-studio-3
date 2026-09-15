@@ -1,6 +1,9 @@
 package com.csse3200.game.components;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,6 +142,44 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
+   * Applies a direct health change that bypasses armor and block, intended for non-combat sources
+   * such as Chance Encounters. A positive amount heals (clamped to max health via {@link
+   * #heal(int)}); a negative amount reduces health directly, clamped to 0, and triggers the same
+   * death event used by combat damage.
+   *
+   * <p>Unlike {@link #takeDamage(int)}, this method does NOT consume block or armor. Use this when
+   * a game system needs a health change with a precise, predictable amount that should not be
+   * affected by the entity's current combat-only defences.
+   *
+   * @param amount positive to heal, negative to reduce health; zero is a no-op
+   */
+  public void applyDirectHealthChange(int amount) {
+    if (amount > 0) {
+      heal(amount);
+    } else if (amount < 0 && !isDead()) {
+      setHealth(Math.max(this.health + amount, 0));
+      if (entity != null && isDead()) {
+        entity.getEvents().trigger("entityIsDead");
+      }
+    }
+  }
+
+  /**
+   * Damages the entity's health directly, ignoring block and armour. If health reaches 0, the
+   * entity dies.
+   *
+   * @param damage piercing damage
+   */
+  public void takePiercingDamage(int damage) {
+    if (damage >= 0 && !isDead()) {
+      setHealth(Math.max(this.health - damage, 0));
+      if (entity != null && isDead()) {
+        entity.getEvents().trigger(EVT_IS_DEAD);
+      }
+    }
+  }
+
+  /**
    * A setter function for maxHealth, contains a safegaurd to avoid MaxHealth going lower than 1
    * send an update to every listener is changed to ensure real time changes updated.
    *
@@ -263,6 +304,7 @@ public class CombatStatsComponent extends Component {
   }
 
   // Block - per-turn damage reduction pool (Team 6's "Slay the Spire" style block)
+
   /**
    * Returns the entity's current block value.
    *
@@ -381,6 +423,33 @@ public class CombatStatsComponent extends Component {
     if (statusEffects.remove(type) != null && entity != null) {
       entity.getEvents().trigger("statusEffectRemoved", type);
     }
+  }
+
+  /**
+   * Removes poison, vulnerable and feeble. Strength, heal-over-time and other non-debuff statuses
+   * are left unchanged. Keys are matched case-insensitively because some combat paths store
+   * lowercase status names.
+   */
+  public void clearNegativeStatusEffects() {
+    List<String> toRemove = new ArrayList<>();
+    for (String type : statusEffects.keySet()) {
+      if (isNegativeStatusKey(type)) {
+        toRemove.add(type);
+      }
+    }
+    for (String type : toRemove) {
+      removeStatusEffect(type);
+    }
+  }
+
+  private static boolean isNegativeStatusKey(String type) {
+    if (type == null || type.isBlank()) {
+      return false;
+    }
+    return switch (type.toUpperCase(Locale.ROOT)) {
+      case "POISON", "VULNERABLE", "FEEBLE" -> true;
+      default -> false;
+    };
   }
 
   /**

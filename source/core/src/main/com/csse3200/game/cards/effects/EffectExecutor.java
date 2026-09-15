@@ -78,7 +78,10 @@ public class EffectExecutor {
     if (effect.type.usesDuration() && effect.duration <= 0) {
       throw new IllegalArgumentException("Ongoing effect duration must be positive");
     }
-    if (!effect.type.usesDuration() && effect.duration != 0) {
+    if (effect.type == EffectType.HEAL && effect.duration < 0) {
+      throw new IllegalArgumentException("Healing duration must not be negative");
+    }
+    if (!effect.type.usesDuration() && effect.type != EffectType.HEAL && effect.duration != 0) {
       throw new IllegalArgumentException("Instant or combat-long effect duration must be zero");
     }
   }
@@ -117,7 +120,10 @@ public class EffectExecutor {
     if (effect.type.usesDuration() && effect.duration <= 0) {
       throw new IllegalArgumentException("Ongoing effect duration must be positive");
     }
-    if (!effect.type.usesDuration() && effect.duration != 0) {
+    if (effect.type == EffectType.HEAL && effect.duration < 0) {
+      throw new IllegalArgumentException("Healing duration must not be negative");
+    }
+    if (!effect.type.usesDuration() && effect.type != EffectType.HEAL && effect.duration != 0) {
       throw new IllegalArgumentException("Instant or combat-long effect duration must be zero");
     }
   }
@@ -128,6 +134,8 @@ public class EffectExecutor {
       playerState.addStrength(effect.value);
     } else if (effect.type != EffectType.BLOCK
         && effect.type != EffectType.HEAL
+        && effect.type != EffectType.ENERGY_GAIN
+        && effect.type != EffectType.CLEANSE
         && effect.type != EffectType.FORTIFY) {
       throw new IllegalArgumentException("Unsupported self-targeting effect type: " + effect.type);
     }
@@ -140,6 +148,8 @@ public class EffectExecutor {
     if (effect.type != EffectType.STRENGTH
         && effect.type != EffectType.BLOCK
         && effect.type != EffectType.HEAL
+        && effect.type != EffectType.ENERGY_GAIN
+        && effect.type != EffectType.CLEANSE
         && effect.type != EffectType.FORTIFY) {
       throw new IllegalArgumentException("Unsupported self-targeting effect type: " + effect.type);
     }
@@ -164,6 +174,15 @@ public class EffectExecutor {
           sequence);
     }
 
+    if (effect.type == EffectType.SUNDER) {
+      return new ResolvedCardEffect(
+          cardId, EffectType.SUNDER, target, effect.value, 0, sequence);
+    }
+
+    if (effect.type == EffectType.PIERCE) {
+      return new ResolvedCardEffect(cardId, EffectType.PIERCE, target, effect.value, 0, sequence);
+    }
+
     if (effect.type.usesDuration()) {
       return new ResolvedCardEffect(
           cardId, effect.type, target, effect.value, effect.duration, sequence);
@@ -181,6 +200,15 @@ public class EffectExecutor {
     if (effect.type == EffectType.DAMAGE) {
       return new ResolvedCardEffect(
           cardId, EffectType.DAMAGE, target, context.resolveDamage(effect.value), 0, sequence);
+    }
+
+    if (effect.type == EffectType.SUNDER) {
+      return new ResolvedCardEffect(
+          cardId, EffectType.SUNDER, target, effect.value, 0, sequence);
+    }
+
+    if (effect.type == EffectType.PIERCE) {
+      return new ResolvedCardEffect(cardId, EffectType.PIERCE, target, effect.value, 0, sequence);
     }
 
     if (effect.type.usesDuration()) {

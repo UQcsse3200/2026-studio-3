@@ -1,19 +1,23 @@
 package com.csse3200.game.cards.deck;
 
+import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardLibrary;
+import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.runtime.CardInstanceFactory;
 import java.util.List;
 
 /** Creates standard player decks from the initial Team 6 card IDs. */
 public final class PlayerDeckFactory {
-  public static final String STRIKE = CardIdRegistry.STRIKE;
-  public static final String DEFEND = CardIdRegistry.DEFEND;
-  public static final String POISON_DAGGER = CardIdRegistry.POISON_DAGGER;
-  public static final String EXPOSE = CardIdRegistry.EXPOSE;
-  public static final String INNER_FOCUS = CardIdRegistry.INNER_FOCUS;
-  public static final String BANDAGE = CardIdRegistry.BANDAGE;
-  public static final String SEALED_PACT = CardIdRegistry.SEALED_PACT;
-  public static final String BLOOD_PRICE = CardIdRegistry.BLOOD_PRICE;
-  public static final String DOOM_SIGIL = CardIdRegistry.DOOM_SIGIL;
-  public static final String ECLIPSE_DECREE = CardIdRegistry.ECLIPSE_DECREE;
+  public static final String STRIKE = "strike";
+  public static final String DEFEND = "defend";
+  public static final String POISON_DAGGER = "poison_dagger";
+  public static final String EXPOSE = "expose";
+  public static final String INNER_FOCUS = "inner_focus";
+  public static final String BANDAGE = "bandage";
+  public static final String SEALED_PACT = "sealed_pact";
+  public static final String BLOOD_PRICE = "blood_price";
+  public static final String DOOM_SIGIL = "doom_sigil";
+  public static final String ECLIPSE_DECREE = "eclipse_decree";
 
   private static final List<String> STARTER_DECK_CARD_IDS =
       List.of(
@@ -54,7 +58,19 @@ public final class PlayerDeckFactory {
    * @return starter player deck
    */
   public static PlayerDeck createStarterDeck() {
-    return new PlayerDeck(STARTER_DECK_CARD_IDS);
+    return createStarterDeck(new CardLibrary(CardConfigLoader.loadCards()));
+  }
+
+  /**
+   * Creates a default player deck validated by the supplied card service.
+   *
+   * @param cardService authoritative card lookup service
+   * @return starter player deck
+   */
+  public static PlayerDeck createStarterDeck(CardService cardService) {
+    CardInstanceFactory factory = new CardInstanceFactory(cardService);
+    return PlayerDeck.fromInstances(
+        cardService, STARTER_DECK_CARD_IDS.stream().map(factory::create).toList());
   }
 
   /**
@@ -75,7 +91,19 @@ public final class PlayerDeckFactory {
    * @return player deck containing all four forbidden cards and supporting initial cards
    */
   public static PlayerDeck createForbiddenTestDeck() {
-    return new PlayerDeck(FORBIDDEN_TEST_DECK_CARD_IDS);
+    return createForbiddenTestDeck(new CardLibrary(CardConfigLoader.loadCards()));
+  }
+
+  /**
+   * Creates a deterministic forbidden-card test deck validated by the supplied card service.
+   *
+   * @param cardService authoritative card lookup service
+   * @return player deck containing all four forbidden cards and supporting initial cards
+   */
+  public static PlayerDeck createForbiddenTestDeck(CardService cardService) {
+    CardInstanceFactory factory = new CardInstanceFactory(cardService);
+    return PlayerDeck.fromInstances(
+        cardService, FORBIDDEN_TEST_DECK_CARD_IDS.stream().map(factory::create).toList());
   }
 
   /**
