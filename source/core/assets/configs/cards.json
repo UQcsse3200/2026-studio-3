@@ -345,24 +345,6 @@
         }
       },
       {
-        "id": "eclipse_decree",
-        "name": "Eclipse Decree",
-        "description": "Invoke the eclipse. Apply 1 Feeble to all enemies for 2 turns.",
-        "cost": 3,
-        "type": "SKILL",
-        "rarity": "RARE",
-        "target": "ALL_ENEMIES",
-        "effects": [{ "type": "FEEBLE", "value": 1, "duration": 2 }],
-        "texturePath": "images/cards/eclipse_decree.png",
-        "upgrade": {
-          "name": "Eclipse Decree+",
-          "description": "Invoke the eclipse. Apply 1 Feeble to all enemies for 3 turns.",
-          "cost": 3,
-          "rarity": "RARE",
-          "effects": [{ "type": "FEEBLE", "value": 1, "duration": 3 }]
-        }
-      },
-      {
         "id": "iron_oath",
         "name": "Iron Oath",
         "description": "Swear a forbidden oath. Gain 4 Armour.",

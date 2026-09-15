@@ -2,19 +2,20 @@
 
 ## Scope
 
-Member 5 owns four Forbidden Ritual cards and coordinates integration and demonstration for the
-Round 2 card expansion. This document records the card designs, balance rationale, test-deck entry
-point, verification checklist, known dependencies and repeatable demonstration steps.
+Member 5 owns four cards for the Round 2 expansion: three Forbidden Ritual cards plus Iron Oath
+(the FORTIFY demonstration card). This document records the card designs, balance rationale,
+test-deck entry point, verification checklist, known dependencies and repeatable demonstration
+steps.
 
-The four cards use effects already represented by the Team 6 card model and currently supported by
+The ritual cards use effects already represented by the Team 6 card model and currently supported by
 the combat integration:
 
-- `SELF`: `STRENGTH`, `BLOCK`, `HEAL`
-- Enemy targets: `DAMAGE`, `POISON`, `VULNERABLE`, `FEEBLE`
+- `SELF`: `STRENGTH`, `BLOCK`, `HEAL`, `FORTIFY`
+- Enemy targets: `DAMAGE`, `POISON`, `VULNERABLE`
 
 The data model can store other target/effect combinations, but that does not prove the combat
-executor can resolve them. In particular, these cards do not depend on self-targeted `POISON`,
-`VULNERABLE` or `FEEBLE`.
+executor can resolve them. In particular, these cards do not depend on self-targeted `POISON` or
+`VULNERABLE`.
 
 ## New Effect — FORTIFY (Member 5)
 
@@ -28,7 +29,8 @@ Round 2 also requires one new `EffectType` per member. Member 5 adds:
 | Behaviour | Immediately adds armour via `CombatStatsComponent.addArmor(value)` |
 | Strength | Does not modify FORTIFY |
 
-Companion card: `iron_oath` — cost 1, `SKILL`, `UNCOMMON`, `SELF`, `FORTIFY 4` (upgrade `FORTIFY 6`).
+Companion card (counts toward the four-card Member 5 set): `iron_oath` — cost 1, `SKILL`,
+`UNCOMMON`, `SELF`, `FORTIFY 4` (upgrade `FORTIFY 6`).
 
 Armour is distinct from per-turn Block. This effect does not depend on `updateStatusEffects()`.
 
@@ -106,26 +108,24 @@ attacks.
 **Balance rationale:** It applies two useful statuses but deals no immediate damage and costs two
 energy. The upgrade increases both status stacks while keeping cost and durations.
 
-### Eclipse Decree
+### Iron Oath
 
 | Field | Value |
 | --- | --- |
-| ID | `eclipse_decree` |
-| Cost | 3 |
-| Type / rarity | `SKILL` / `RARE` |
-| Target | `ALL_ENEMIES` |
-| Effects | `FEEBLE 1` for 2 turns |
-| Upgrade | `FEEBLE 1` for 3 turns |
-| Artwork | `images/cards/eclipse_decree.png` |
+| ID | `iron_oath` |
+| Cost | 1 |
+| Type / rarity | `SKILL` / `UNCOMMON` |
+| Target | `SELF` |
+| Effects | `FORTIFY 4` |
+| Upgrade | `FORTIFY 6` (same cost) |
+| Artwork | `images/cards/iron_oath.png` |
 
-**Theme:** The player invokes an eclipse that weakens every enemy in the archive.
+**Theme:** A forbidden oath binds lasting armour to the player.
 
-**Intended use:** A group-control option for encounters with several enemies.
+**Intended use:** Demonstrates `FORTIFY` and provides durable armour distinct from per-turn Block.
 
-**Balance rationale:** A fixed Feeble effect reduces affected enemies' outgoing damage by 25%.
-Applying it to all enemies is powerful, so the card costs three energy and causes no direct damage.
-The upgrade extends duration rather than stacking Feeble, because the live multiplier does not scale
-with stack count.
+**Balance rationale:** Low cost armour gain with no status duration. The upgrade raises the armour
+amount without changing cost.
 
 ## Upgrade schema
 
@@ -157,9 +157,13 @@ This line trades an expensive setup turn for stronger later attacks.
 
 1. Play `Doom Sigil` on a priority enemy.
 2. Use the Vulnerable window for follow-up attacks while Poison applies delayed damage.
-3. Use `Eclipse Decree` in a multi-enemy encounter to reduce incoming damage.
 
 This line gives up immediate damage and energy for status pressure and safer future turns.
+
+### Armour
+
+1. Play `Iron Oath` to gain lasting armour via `FORTIFY`.
+2. Confirm armour is distinct from per-turn Block.
 
 ## Test-Deck Entry Point
 
@@ -170,8 +174,9 @@ confirmed, Team 6 provides this clearly labelled test-only entry point:
 PlayerDeck testDeck = PlayerDeckFactory.createForbiddenTestDeck();
 ```
 
-The deterministic ten-card test deck contains all four Forbidden cards plus supporting copies of
-`strike` and `defend`. The normal `createStarterDeck()` method is unchanged.
+The deterministic ten-card test deck contains the four Member 5 cards (`sealed_pact`, `blood_price`,
+`doom_sigil`, `iron_oath`) plus supporting copies of `strike` and `defend`. The normal
+`createStarterDeck()` method is unchanged.
 
 The battle screen currently calls `createStarterDeck()`. Connecting the test deck to a debug menu
 or launch option remains pending; production code should not silently replace the starter deck.
@@ -182,7 +187,7 @@ or launch option remains pending; production code should not silently replace th
 
 - [x] Four unique IDs use lower snake case.
 - [x] Every required `CardConfig` field is present.
-- [x] Optional `upgrade` blocks defined for all four Forbidden cards.
+- [x] Optional `upgrade` blocks defined for all four Member 5 cards.
 - [x] JSON syntax is valid.
 - [x] Effect values and durations satisfy `CardValidator` rules.
 - [x] Four artwork files exist at their configured paths.
@@ -201,15 +206,16 @@ or launch option remains pending; production code should not silently replace th
 
 ### Display and combat
 
-- [ ] Display every Forbidden card in the actual hand UI.
+- [ ] Display every Member 5 card in the actual hand UI.
 - [ ] Check card art is not cropped and UI overlay text is readable.
-- [ ] Confirm three energy is spent for `Sealed Pact`, `Blood Price` and `Eclipse Decree`.
+- [ ] Confirm three energy is spent for `Sealed Pact` and `Blood Price`.
 - [ ] Confirm two energy is spent for `Doom Sigil`.
-- [ ] Confirm `SINGLE_ENEMY`, `SELF` and `ALL_ENEMIES` target selection.
+- [ ] Confirm one energy is spent for `Iron Oath`.
+- [ ] Confirm `SINGLE_ENEMY` and `SELF` target selection.
 - [ ] Confirm ordered resolution of both effects on `Sealed Pact` and `Doom Sigil`.
 - [ ] Confirm Strength modifies `Blood Price` damage.
 - [ ] Confirm Poison and Vulnerable durations update correctly.
-- [ ] Confirm Feeble applies to every enemy for two turns and uses the fixed 0.75 multiplier.
+- [ ] Confirm `FORTIFY` increases armour and does not change Block.
 - [ ] Confirm played cards move from hand to discard and replacement cards are drawn.
 - [ ] Confirm upgrade path applies when the combat/upgrade system is available.
 
@@ -237,12 +243,11 @@ or launch option remains pending; production code should not silently replace th
 1. Build and launch the project using JDK 21.
 2. Create the battle deck from `PlayerDeckFactory.createForbiddenTestDeck()` through the agreed
    debug/test selection.
-3. Enter combat and confirm all four Forbidden cards can appear in hand.
+3. Enter combat and confirm all four Member 5 cards can appear in hand.
 4. Demonstrate `Sealed Pact` followed by `Blood Price`, recording energy use, Strength and resolved
    damage.
 5. Demonstrate `Doom Sigil`, recording the target, Vulnerable duration and Poison duration.
-6. In a multi-enemy encounter, demonstrate `Eclipse Decree` and confirm every enemy receives
-   Feeble.
+6. Demonstrate `Iron Oath` and confirm armour increases via `FORTIFY`.
 7. Confirm played cards move to discard and hand replacement still works.
 8. Record screenshots or video and note any deviations in the issue table.
 
@@ -252,5 +257,6 @@ This is a test entry route, not evidence that production reward/shop acquisition
 
 The Forbidden and Iron Oath card images were regenerated with Cursor's image-generation tool using
 the Team 6 shared Round 2 prompt (4:3 landscape pixel art, illustration only). Zeyu Wang selected
-the subjects, mechanics and final assets. This use must also be included in the team's AI
-declaration and any required wiki attribution.
+the subjects, mechanics and final assets. Eclipse Decree was removed so the Member 5 set stays at
+four cards total. This use must also be included in the team's AI declaration and any required wiki
+attribution.

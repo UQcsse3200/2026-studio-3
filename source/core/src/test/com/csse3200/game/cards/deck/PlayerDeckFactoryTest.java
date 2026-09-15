@@ -22,7 +22,7 @@ class PlayerDeckFactoryTest {
           "sealed_pact",
           "blood_price",
           "doom_sigil",
-          "eclipse_decree");
+          "iron_oath");
 
   @Test
   void shouldCreateStarterDeckFromTeamSixCards() {
@@ -90,7 +90,7 @@ class PlayerDeckFactoryTest {
     assertEquals(1, deck.countByCardId(PlayerDeckFactory.SEALED_PACT));
     assertEquals(2, deck.countByCardId(PlayerDeckFactory.BLOOD_PRICE));
     assertEquals(2, deck.countByCardId(PlayerDeckFactory.DOOM_SIGIL));
-    assertEquals(1, deck.countByCardId(PlayerDeckFactory.ECLIPSE_DECREE));
+    assertEquals(1, deck.countByCardId(PlayerDeckFactory.IRON_OATH));
   }
 
   @Test
@@ -100,7 +100,7 @@ class PlayerDeckFactoryTest {
     assertTrue(cardIds.contains(PlayerDeckFactory.SEALED_PACT));
     assertTrue(cardIds.contains(PlayerDeckFactory.BLOOD_PRICE));
     assertTrue(cardIds.contains(PlayerDeckFactory.DOOM_SIGIL));
-    assertTrue(cardIds.contains(PlayerDeckFactory.ECLIPSE_DECREE));
+    assertTrue(cardIds.contains(PlayerDeckFactory.IRON_OATH));
   }
 
   @Test
