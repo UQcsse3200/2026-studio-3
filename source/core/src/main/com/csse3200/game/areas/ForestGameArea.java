@@ -196,7 +196,7 @@ public class ForestGameArea extends GameArea {
         PlayerFactory.getDefaultMaxHealth(),
         PlayerFactory.getDefaultMaxEnergy());
 
-    Entity newPlayer = PlayerFactory.createPlayer(runState.getPlayerHealth());
+    Entity newPlayer = PlayerFactory.createPlayer(runState.getPlayerHealth(), runState);
 
     spawnEntityAt(newPlayer, PLAYER_SPAWN, true, true);
     return newPlayer;

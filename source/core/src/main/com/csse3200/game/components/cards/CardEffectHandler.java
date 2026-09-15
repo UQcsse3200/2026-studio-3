@@ -8,9 +8,20 @@ import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.entities.Entity;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /** Handles card effects on the player and enemy */
 public class CardEffectHandler {
+  private final Map<String, Entity> enemyTargets;
+
+  public CardEffectHandler() {
+    this(Map.of());
+  }
+
+  /** Uses battle-owned target IDs without changing the shared enemy factory or drop widgets. */
+  public CardEffectHandler(Map<String, Entity> enemyTargets) {
+    this.enemyTargets = Map.copyOf(enemyTargets);
+  }
 
   /**
    * Applies the given card effects on the enemy targets
@@ -27,7 +38,7 @@ public class CardEffectHandler {
       for (ResolvedCardEffect effect : effects) {
         switch (effect.type()) {
           case DAMAGE -> stats.takeDamage(effect.value());
-          case POISON, VULNERABLE ->
+          case POISON, VULNERABLE, FEEBLE ->
               stats.applyStatusEffect(
                   new StatusEffect(effect.type().name(), effect.value(), effect.duration()));
           default -> {
@@ -69,9 +80,8 @@ public class CardEffectHandler {
   }
 
   /**
-   * Chooses which enemies a card's enemy effects hit. Self-targeting cards hit nothing; everything
-   * else hits every living enemy, which covers both the single-enemy encounter and ALL_ENEMIES
-   * cards. Precise single-target selection can be layered on when encounters have several enemies.
+   * Selects living targets using the battle's registered drop-target IDs. Encounters without a
+   * registry use entity IDs. Missing or defeated targets never redirect to another enemy.
    */
   public List<Entity> getLivingEnemyTargets(CardPlayRequest request, List<Entity> enemies) {
     if (request.target().type() == TargetType.SELF) {
@@ -79,7 +89,11 @@ public class CardEffectHandler {
     }
     List<Entity> targets = new ArrayList<>();
     for (Entity enemy : enemies) {
-      if (!enemy.getComponent(CombatStatsComponent.class).isDead()) {
+      if (!enemy.getComponent(CombatStatsComponent.class).isDead()
+          && (request.target().type() == TargetType.ALL_ENEMIES
+              || (enemyTargets.isEmpty()
+                  ? Integer.toString(enemy.getId()).equals(request.target().targetId())
+                  : enemy == enemyTargets.get(request.target().targetId())))) {
         targets.add(enemy);
       }
     }

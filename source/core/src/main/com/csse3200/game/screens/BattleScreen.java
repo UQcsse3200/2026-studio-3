@@ -14,7 +14,9 @@ import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.play.CardPlayService;
+import com.csse3200.game.cards.play.integration.Team1EnemyStateAdapter;
 import com.csse3200.game.cards.play.integration.Team3CardPlayAdapter;
+import com.csse3200.game.cards.play.integration.Team7PlayerStateAdapter;
 import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
@@ -128,8 +130,8 @@ public class BattleScreen extends ScreenAdapter {
 
     logger.debug("Initialising main game screen entities");
     TerrainFactory terrainFactory = new TerrainFactory(renderer.getCamera());
-    ForestGameArea forestGameArea =
-        new ForestGameArea(terrainFactory, mapProgression, game.getRunState(), "dungeon");
+    BattleGameArea forestGameArea =
+        new BattleGameArea(terrainFactory, mapProgression, game.getRunState(), "dungeon");
     this.gameArea = forestGameArea;
     forestGameArea.create();
     RunState runState = game.getRunState();
@@ -151,8 +153,16 @@ public class BattleScreen extends ScreenAdapter {
     Entity player = forestGameArea.getPlayer();
     EnergyComponent energy = player.getComponent(EnergyComponent.class);
 
-    cardPlayService = new CardPlayService(library, battleDeck, energy);
-    CardEffectHandler effectHandler = new CardEffectHandler();
+    Map<String, Entity> enemyTargets = forestGameArea.getEnemyTargets();
+    cardPlayService =
+        new CardPlayService(
+            library,
+            battleDeck,
+            energy,
+            new Team7PlayerStateAdapter(player),
+            new Team1EnemyStateAdapter(enemyTargets));
+    CardEffectHandler effectHandler = new CardEffectHandler(enemyTargets);
+
     controller =
         new BattleController(player, forestGameArea.getEnemies(), effectHandler, cardPlayService);
 

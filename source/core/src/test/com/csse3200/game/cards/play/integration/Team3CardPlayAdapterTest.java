@@ -57,7 +57,7 @@ class Team3CardPlayAdapterTest {
 
     CardPlayService playService = new CardPlayService(cards, deck, energy, playerState, enemyState);
 
-    CardEffectHandler effectHandler = new CardEffectHandler();
+    CardEffectHandler effectHandler = new CardEffectHandler(Map.of("enemy-1", enemy));
     BattleController controller = new BattleController(player, enemies, effectHandler, playService);
 
     Team3CardPlayAdapter adapter = new Team3CardPlayAdapter(cards, controller);

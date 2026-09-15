@@ -19,6 +19,7 @@ import com.csse3200.game.encounters.integration.PlayerDeckAdapter;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.factories.PlayerFactory;
 import com.csse3200.game.files.FileLoader;
+import com.csse3200.game.maps.RunState;
 import com.csse3200.game.maps.EncounterCallback;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
@@ -52,13 +53,14 @@ public class EncounterGameArea extends GameArea {
   private Entity player;
   private EncounterFlowController encounterFlow;
   private CardCatalogGateway cardCatalog;
+  private RunState runState;
 
   /**
    * Creates the standalone Shop preview used by the legacy MainGameScreen shortcut.
    *
    * @param terrainFactory retained for compatibility with existing screen construction
    */
-  public EncounterGameArea(TerrainFactory terrainFactory) {
+  public EncounterGameArea(TerrainFactory terrainFactory, RunState runState) {
     this(
         terrainFactory,
         ShopEncounter.DEFAULT_NODE_ID,

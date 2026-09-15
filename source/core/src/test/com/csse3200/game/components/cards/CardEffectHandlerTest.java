@@ -154,7 +154,7 @@ class CardEffectHandlerTest {
 
     List<Entity> enemies = List.of(livingEnemy, deadEnemy);
 
-    CardPlayRequest request = CardPlayRequest.singleEnemy("strike", "enemy-1");
+    CardPlayRequest request = CardPlayRequest.allEnemies("starfall");
 
     List<Entity> targets = handler.getLivingEnemyTargets(request, enemies);
 

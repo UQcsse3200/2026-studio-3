@@ -8,6 +8,7 @@ import com.csse3200.game.entities.configs.PlayerConfig;
 import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.input.InputComponent;
 import com.csse3200.game.maps.PlayerRunState;
+import com.csse3200.game.maps.RunState;
 import com.csse3200.game.physics.PhysicsLayer;
 import com.csse3200.game.physics.PhysicsUtils;
 import com.csse3200.game.physics.components.ColliderComponent;
@@ -44,7 +45,7 @@ public class PlayerFactory {
    *
    * @return entity
    */
-  public static Entity createPlayer() {
+  public static Entity createPlayer(RunState runState) {
     InputComponent inputComponent =
         ServiceLocator.getInputService().getInputFactory().createForPlayer();
 
@@ -61,7 +62,7 @@ public class PlayerFactory {
             .addComponent(inputComponent)
             .addComponent(new EnergyComponent(stats.maxEnergy))
             .addComponent(new PlayerStatsDisplay())
-            .addComponent(new PlayerStatsTopDisplay());
+            .addComponent(new PlayerStatsTopDisplay(runState));
 
     PhysicsUtils.setScaledCollider(player, 0.6f, 0.3f);
     player.getComponent(ColliderComponent.class).setDensity(1.5f);
@@ -69,7 +70,7 @@ public class PlayerFactory {
     return player;
   }
 
-  public static Entity createPlayer(int currentHealth) {
+  public static Entity createPlayer(int currentHealth, RunState runState) {
     InputComponent inputComponent =
         ServiceLocator.getInputService().getInputFactory().createForPlayer();
 
@@ -87,7 +88,7 @@ public class PlayerFactory {
             .addComponent(inputComponent)
             .addComponent(new EnergyComponent(stats.maxEnergy))
             .addComponent(new PlayerStatsDisplay())
-            .addComponent(new PlayerStatsTopDisplay());
+            .addComponent(new PlayerStatsTopDisplay(runState));
 
     PhysicsUtils.setScaledCollider(player, 0.6f, 0.3f);
     player.getComponent(ColliderComponent.class).setDensity(1.5f);
