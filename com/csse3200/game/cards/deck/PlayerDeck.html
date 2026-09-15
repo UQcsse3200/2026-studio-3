@@ -96,7 +96,12 @@ loadScripts(document, 'script');</script>
  <p>The deck stores Team 6 card IDs instead of full card definitions. Card data, costs, targets
  and effects should be resolved through the card library when another system needs the full card
  configuration. This keeps the player deck independent from combat-only state such as draw pile,
- hand and discard pile.</div>
+ hand and discard pile.
+
+ <p>Internally each card is tracked as a <a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime"><code>CardInstance</code></a>: a card ID plus a unique instance ID
+ generated the moment it is added, so duplicate copies of the same card (e.g. two "strike" cards)
+ can be told apart by callers that need to. Most callers only care about card IDs and can keep
+ using the <code>String</code>-based methods below; <a href="#getCards()"><code>getCards()</code></a> exposes the instances.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -134,7 +139,7 @@ loadScripts(document, 'script');</script>
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab1" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab1', 3)" class="table-tab">Static Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">Modifier and Type</div>
@@ -143,75 +148,70 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addCard(com.csse3200.game.cards.runtime.CardInstance)" class="member-name-link">addCard</a><wbr>(<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&nbsp;card)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Adds a registered copy; duplicate instance IDs are rejected across all definitions.</div>
+<div class="block">Adds an existing card instance to the end of the deck, preserving its instance ID and upgrade
+ level exactly rather than generating a fresh instance ID.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addCards(java.util.Collection)" class="member-name-link">addCards</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collection.html" title="class or interface in java.util" class="external-link">Collection</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;cardIds)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addCard(java.lang.String)" class="member-name-link">addCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Adds one card to the end of the deck, generating a fresh unique instance ID for it.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addCards(java.util.Collection)" class="member-name-link">addCards</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collection.html" title="class or interface in java.util" class="external-link">Collection</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;cardIds)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adds every provided card ID to the deck in iteration order.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#canAddCard(java.lang.String)" class="member-name-link">canAddCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#canAddCard(java.lang.String)" class="member-name-link">canAddCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Checks whether a card may be added to this player deck.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#clear()" class="member-name-link">clear</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#clear()" class="member-name-link">clear</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Removes all cards from the deck.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#containsInstance(java.lang.String)" class="member-name-link">containsInstance</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Checks ownership of an exact copy.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#copy()" class="member-name-link">copy</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#contains(java.lang.String)" class="member-name-link">contains</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Checks whether the deck contains at least one copy of a card.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#copy()" class="member-name-link">copy</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Creates an independent copy of this player deck.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#countByCardId(java.lang.String)" class="member-name-link">countByCardId</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Counts copies of a shared definition, irrespective of upgrade level.</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#countByCardId(java.lang.String)" class="member-name-link">countByCardId</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Counts how many copies of a card are in the deck.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#fromInstances(com.csse3200.game.cards.CardService,java.util.Collection)" class="member-name-link">fromInstances</a><wbr>(<a href="../CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;service,
- <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collection.html" title="class or interface in java.util" class="external-link">Collection</a>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;&nbsp;cards)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Restores existing instances without regenerating identity.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCard(java.lang.String)" class="member-name-link">getCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCardIds()" class="member-name-link">getCardIds</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the copy with this instanceId, or empty if it is not owned.</div>
+<div class="block">Returns a snapshot of card IDs in deck order.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCards()" class="member-name-link">getCards</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns an immutable snapshot preserving identity, order and upgrade level.</div>
+<div class="block">Returns a snapshot of every card in the deck as a distinct <a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime"><code>CardInstance</code></a>, in deck order.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isEmpty()" class="member-name-link">isEmpty</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeCard(java.lang.String)" class="member-name-link">removeCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeCard(java.lang.String)" class="member-name-link">removeCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Removes exactly the selected instance; never falls back to a definition ID.</div>
+<div class="block">Removes the first matching card ID from the deck.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a></code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeCardAt(int)" class="member-name-link">removeCardAt</a><wbr>(int&nbsp;index)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Removes and returns the copy at the given position.</div>
+<div class="block">Removes the card at a specific deck position.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#size()" class="member-name-link">size</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#upgradeCard(java.lang.String)" class="member-name-link">upgradeCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Replaces only the selected owned copy with its upgraded value, in the same slot.</div>
-</div>
 </div>
 </div>
 </div>
@@ -281,19 +281,32 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="fromInstances(com.csse3200.game.cards.CardService,java.util.Collection)">
-<h3>fromInstances</h3>
-<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></span>&nbsp;<span class="element-name">fromInstances</span><wbr><span class="parameters">(<a href="../CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;service,
- <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collection.html" title="class or interface in java.util" class="external-link">Collection</a>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;&nbsp;cards)</span></div>
-<div class="block">Restores existing instances without regenerating identity. A named factory avoids Java's
- generic erasure clash with the existing Collection&lt;String&gt; constructor.</div>
+<section class="detail" id="addCard(java.lang.String)">
+<h3>addCard</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</span></div>
+<div class="block">Adds one card to the end of the deck, generating a fresh unique instance ID for it.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>cardId</code> - Team 6 card ID</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the card ID is not registered</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="addCard(com.csse3200.game.cards.runtime.CardInstance)">
 <h3>addCard</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addCard</span><wbr><span class="parameters">(<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&nbsp;card)</span></div>
-<div class="block">Adds a registered copy; duplicate instance IDs are rejected across all definitions.</div>
+<div class="block">Adds an existing card instance to the end of the deck, preserving its instance ID and upgrade
+ level exactly rather than generating a fresh instance ID. Used when restoring a saved deck, so
+ each card comes back as the same physical copy the player owned before.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>card</code> - the exact card instance to add</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the card is null, its card ID is not registered, or it is
+     upgraded but the card has no upgrade definition</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -326,59 +339,86 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="removeCard(java.lang.String)">
 <h3>removeCard</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">removeCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</span></div>
-<div class="block">Removes exactly the selected instance; never falls back to a definition ID.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">removeCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</span></div>
+<div class="block">Removes the first matching card ID from the deck.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>cardId</code> - card ID to remove</dd>
+<dt>Returns:</dt>
+<dd>true if a card was removed, false if the deck did not contain that card</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="removeCardAt(int)">
 <h3>removeCardAt</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a></span>&nbsp;<span class="element-name">removeCardAt</span><wbr><span class="parameters">(int&nbsp;index)</span></div>
-<div class="block">Removes and returns the copy at the given position.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">removeCardAt</span><wbr><span class="parameters">(int&nbsp;index)</span></div>
+<div class="block">Removes the card at a specific deck position.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>index</code> - card position</dd>
+<dt>Returns:</dt>
+<dd>the removed card ID</dd>
+</dl>
 </section>
 </li>
 <li>
-<section class="detail" id="getCard(java.lang.String)">
-<h3>getCard</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</span>&nbsp;<span class="element-name">getCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</span></div>
-<div class="block">Returns the copy with this instanceId, or empty if it is not owned.</div>
-</section>
-</li>
-<li>
-<section class="detail" id="containsInstance(java.lang.String)">
-<h3>containsInstance</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">containsInstance</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</span></div>
-<div class="block">Checks ownership of an exact copy.</div>
+<section class="detail" id="contains(java.lang.String)">
+<h3>contains</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">contains</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</span></div>
+<div class="block">Checks whether the deck contains at least one copy of a card.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>cardId</code> - card ID to search for</dd>
+<dt>Returns:</dt>
+<dd>true if the deck contains the card</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="countByCardId(java.lang.String)">
 <h3>countByCardId</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">countByCardId</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</span></div>
-<div class="block">Counts copies of a shared definition, irrespective of upgrade level.</div>
+<div class="block">Counts how many copies of a card are in the deck.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>cardId</code> - card ID to count</dd>
+<dt>Returns:</dt>
+<dd>number of matching cards</dd>
+</dl>
 </section>
 </li>
 <li>
-<section class="detail" id="upgradeCard(java.lang.String)">
-<h3>upgradeCard</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a></span>&nbsp;<span class="element-name">upgradeCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</span></div>
-<div class="block">Replaces only the selected owned copy with its upgraded value, in the same slot.
- Eligibility/currency/UI belong to the upgrade feature; this operation only updates deck state.
- Unknown IDs, missing upgrade definitions and already-upgraded copies fail without mutation.</div>
+<section class="detail" id="getCardIds()">
+<h3>getCardIds</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">getCardIds</span>()</div>
+<div class="block">Returns a snapshot of card IDs in deck order.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>immutable list of card IDs</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="getCards()">
 <h3>getCards</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</span>&nbsp;<span class="element-name">getCards</span>()</div>
-<div class="block">Returns an immutable snapshot preserving identity, order and upgrade level.</div>
+<div class="block">Returns a snapshot of every card in the deck as a distinct <a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime"><code>CardInstance</code></a>, in deck order.
+ Unlike <a href="#getCardIds()"><code>getCardIds()</code></a>, this lets callers tell duplicate copies of the same card apart.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>immutable list of card instances</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="copy()">
 <h3>copy</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></span>&nbsp;<span class="element-name">copy</span>()</div>
-<div class="block">Creates an independent copy of this player deck.</div>
+<div class="block">Creates an independent copy of this player deck.
+
+ <p>The copy's cards get freshly generated instance IDs — it is a separate deck, not a shared
+ view of the same physical cards.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>copied player deck</dd>

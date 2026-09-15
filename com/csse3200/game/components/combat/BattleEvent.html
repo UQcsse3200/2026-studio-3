@@ -118,6 +118,14 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Enum Constant</div>
 <div class="table-header col-last">Description</div>
+<div class="col-first even-row-color"><code><a href="#CARD_PLAY_REQUESTED" class="member-name-link">CARD_PLAY_REQUESTED</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">The player submitted a card to resolve.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#CARD_RESOLVED" class="member-name-link">CARD_RESOLVED</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Card resolution is complete and the player may play another card.</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#ENEMIES_DEFEATED" class="member-name-link">ENEMIES_DEFEATED</a></code></div>
 <div class="col-last even-row-color">
 <div class="block">All enemies have been defeated, so the battle is won.</div>
@@ -142,41 +150,25 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color">
 <div class="block">Every eligible enemy has acted and the enemy phase is finished.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#INTENTS_REVEALED" class="member-name-link">INTENTS_REVEALED</a></code></div>
+<div class="col-first even-row-color"><code><a href="#ENEMY_TURN_SKIPPED" class="member-name-link">ENEMY_TURN_SKIPPED</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">The current enemy's turn had been skipped</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#INTENTS_REVEALED" class="member-name-link">INTENTS_REVEALED</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">All enemy intents have been revealed and the player phase can begin.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#MORE_ENEMIES" class="member-name-link">MORE_ENEMIES</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#MORE_ENEMIES" class="member-name-link">MORE_ENEMIES</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Another eligible enemy is available to take a turn.</div>
-</div>
-<div class="col-first even-row-color"><code><a href="#PLAYER_ACTION_RESOLVED" class="member-name-link">PLAYER_ACTION_RESOLVED</a></code></div>
-<div class="col-last even-row-color">
-<div class="block">The selected player action has finished resolving.</div>
-</div>
-<div class="col-first odd-row-color"><code><a href="#PLAYER_ATTACK_SELECTED" class="member-name-link">PLAYER_ATTACK_SELECTED</a></code></div>
-<div class="col-last odd-row-color">
-<div class="block">The player selected an attack action.</div>
-</div>
-<div class="col-first even-row-color"><code><a href="#PLAYER_CONTINUES" class="member-name-link">PLAYER_CONTINUES</a></code></div>
-<div class="col-last even-row-color">
-<div class="block">The player may select another action during the same turn.</div>
 </div>
 <div class="col-first odd-row-color"><code><a href="#PLAYER_DEFEATED" class="member-name-link">PLAYER_DEFEATED</a></code></div>
 <div class="col-last odd-row-color">
 <div class="block">The player has been defeated, so the battle is lost.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#PLAYER_DEFEND_SELECTED" class="member-name-link">PLAYER_DEFEND_SELECTED</a></code></div>
+<div class="col-first even-row-color"><code><a href="#PLAYER_END_REQUESTED" class="member-name-link">PLAYER_END_REQUESTED</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">The player selected a defensive action.</div>
-</div>
-<div class="col-first odd-row-color"><code><a href="#PLAYER_END_REQUESTED" class="member-name-link">PLAYER_END_REQUESTED</a></code></div>
-<div class="col-last odd-row-color">
 <div class="block">The player requested to finish their turn.</div>
-</div>
-<div class="col-first even-row-color"><code><a href="#PLAYER_OTHER_SELECTED" class="member-name-link">PLAYER_OTHER_SELECTED</a></code></div>
-<div class="col-last even-row-color">
-<div class="block">The player selected an action that is neither attack nor defence.</div>
 </div>
 <div class="col-first odd-row-color"><code><a href="#PLAYER_TURN_ENDED" class="member-name-link">PLAYER_TURN_ENDED</a></code></div>
 <div class="col-last odd-row-color">
@@ -257,24 +249,10 @@ the order they are declared.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="PLAYER_ATTACK_SELECTED">
-<h3>PLAYER_ATTACK_SELECTED</h3>
-<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BattleEvent.html" title="enum class in com.csse3200.game.components.combat">BattleEvent</a></span>&nbsp;<span class="element-name">PLAYER_ATTACK_SELECTED</span></div>
-<div class="block">The player selected an attack action.</div>
-</section>
-</li>
-<li>
-<section class="detail" id="PLAYER_DEFEND_SELECTED">
-<h3>PLAYER_DEFEND_SELECTED</h3>
-<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BattleEvent.html" title="enum class in com.csse3200.game.components.combat">BattleEvent</a></span>&nbsp;<span class="element-name">PLAYER_DEFEND_SELECTED</span></div>
-<div class="block">The player selected a defensive action.</div>
-</section>
-</li>
-<li>
-<section class="detail" id="PLAYER_OTHER_SELECTED">
-<h3>PLAYER_OTHER_SELECTED</h3>
-<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BattleEvent.html" title="enum class in com.csse3200.game.components.combat">BattleEvent</a></span>&nbsp;<span class="element-name">PLAYER_OTHER_SELECTED</span></div>
-<div class="block">The player selected an action that is neither attack nor defence.</div>
+<section class="detail" id="CARD_PLAY_REQUESTED">
+<h3>CARD_PLAY_REQUESTED</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BattleEvent.html" title="enum class in com.csse3200.game.components.combat">BattleEvent</a></span>&nbsp;<span class="element-name">CARD_PLAY_REQUESTED</span></div>
+<div class="block">The player submitted a card to resolve.</div>
 </section>
 </li>
 <li>
@@ -285,17 +263,10 @@ the order they are declared.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="PLAYER_ACTION_RESOLVED">
-<h3>PLAYER_ACTION_RESOLVED</h3>
-<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BattleEvent.html" title="enum class in com.csse3200.game.components.combat">BattleEvent</a></span>&nbsp;<span class="element-name">PLAYER_ACTION_RESOLVED</span></div>
-<div class="block">The selected player action has finished resolving.</div>
-</section>
-</li>
-<li>
-<section class="detail" id="PLAYER_CONTINUES">
-<h3>PLAYER_CONTINUES</h3>
-<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BattleEvent.html" title="enum class in com.csse3200.game.components.combat">BattleEvent</a></span>&nbsp;<span class="element-name">PLAYER_CONTINUES</span></div>
-<div class="block">The player may select another action during the same turn.</div>
+<section class="detail" id="CARD_RESOLVED">
+<h3>CARD_RESOLVED</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BattleEvent.html" title="enum class in com.csse3200.game.components.combat">BattleEvent</a></span>&nbsp;<span class="element-name">CARD_RESOLVED</span></div>
+<div class="block">Card resolution is complete and the player may play another card.</div>
 </section>
 </li>
 <li>
@@ -331,6 +302,13 @@ the order they are declared.</div>
 <h3>ENEMY_ACTION_RESOLVED</h3>
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BattleEvent.html" title="enum class in com.csse3200.game.components.combat">BattleEvent</a></span>&nbsp;<span class="element-name">ENEMY_ACTION_RESOLVED</span></div>
 <div class="block">The current enemy's action has finished resolving.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="ENEMY_TURN_SKIPPED">
+<h3>ENEMY_TURN_SKIPPED</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BattleEvent.html" title="enum class in com.csse3200.game.components.combat">BattleEvent</a></span>&nbsp;<span class="element-name">ENEMY_TURN_SKIPPED</span></div>
+<div class="block">The current enemy's turn had been skipped</div>
 </section>
 </li>
 <li>

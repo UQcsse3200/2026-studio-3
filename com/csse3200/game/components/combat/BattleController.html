@@ -108,11 +108,10 @@ loadScripts(document, 'script');</script>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.entities.Entity,java.util.List)" class="member-name-link">BattleController</a><wbr>(<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&gt;&nbsp;enemies)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.entities.Entity,java.util.List,com.csse3200.game.cards.effects.CardEffectResolver,com.csse3200.game.cards.CardService,com.csse3200.game.cards.deck.BattleDeck)" class="member-name-link">BattleController</a><wbr>(<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player,
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.entities.Entity,java.util.List,com.csse3200.game.components.cards.CardEffectHandler,com.csse3200.game.cards.play.CardPlayService)" class="member-name-link">BattleController</a><wbr>(<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&gt;&nbsp;enemies,
- <a href="../../cards/effects/CardEffectResolver.html" title="class in com.csse3200.game.cards.effects">CardEffectResolver</a>&nbsp;effectResolver,
- <a href="../../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
- <a href="../../cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a>&nbsp;battleDeck)</code></div>
+ <a href="../cards/CardEffectHandler.html" title="class in com.csse3200.game.components.cards">CardEffectHandler</a>&nbsp;effectHandler,
+ <a href="../../cards/play/CardPlayService.html" title="class in com.csse3200.game.cards.play">CardPlayService</a>&nbsp;cardPlayService)</code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 </div>
 </section>
@@ -150,7 +149,7 @@ loadScripts(document, 'script');</script>
  apply.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addHandChangedListener(com.csse3200.game.events.listeners.EventListener1)" class="member-name-link">addHandChangedListener</a><wbr>(<a href="../../events/listeners/EventListener1.html" title="interface in com.csse3200.game.events.listeners">EventListener1</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../cards/runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;&gt;&nbsp;listener)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addHandChangedListener(com.csse3200.game.events.listeners.EventListener1)" class="member-name-link">addHandChangedListener</a><wbr>(<a href="../../events/listeners/EventListener1.html" title="interface in com.csse3200.game.events.listeners">EventListener1</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&gt;&nbsp;listener)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adds a listener that receives the player's hand (card IDs) after it changes, e.g.</div>
 </div>
@@ -176,67 +175,55 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Player decides to end their turn</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#enterPlayerEnd()" class="member-name-link">enterPlayerEnd</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../cards/play/CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCardPlayRequest()" class="member-name-link">getCardPlayRequest</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../cards/play/CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCardPlayRequest()" class="member-name-link">getCardPlayRequest</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentEnemyIndex()" class="member-name-link">getCurrentEnemyIndex</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentEnemyIndex()" class="member-name-link">getCurrentEnemyIndex</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the current targeted enemy.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="BattlePhase.html" title="enum class in com.csse3200.game.components.combat">BattlePhase</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentPhase()" class="member-name-link">getCurrentPhase</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="BattlePhase.html" title="enum class in com.csse3200.game.components.combat">BattlePhase</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentPhase()" class="member-name-link">getCurrentPhase</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Retrieves the current phase of the battle (e.g.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#handle(com.csse3200.game.components.combat.BattleEvent)" class="member-name-link">handle</a><wbr>(<a href="BattleEvent.html" title="enum class in com.csse3200.game.components.combat">BattleEvent</a>&nbsp;event)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Handles a single event atomically.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#playerHasStatusEffect(java.lang.String)" class="member-name-link">playerHasStatusEffect</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;effectType)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Reports whether the player currently has the given status effect.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetBattle()" class="member-name-link">resetBattle</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Resets the current battle to a completely new battle that has no previous player and enemy
- turns</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../../cards/runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolveCardInHand(java.lang.String)" class="member-name-link">resolveCardInHand</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Resolved values of an exact copy in hand, for UI event routing and previews.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#selectAttack()" class="member-name-link">selectAttack</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Player intends to attack the enemy on their turn</div>
-</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#selectDefend()" class="member-name-link">selectDefend</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#handle(com.csse3200.game.components.combat.BattleEvent)" class="member-name-link">handle</a><wbr>(<a href="BattleEvent.html" title="enum class in com.csse3200.game.components.combat">BattleEvent</a>&nbsp;event)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Player intends to defend themselves on their turn</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#selectOther()" class="member-name-link">selectOther</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Player intends to do other actions on their turn</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#start()" class="member-name-link">start</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Starts the battle encounter</div>
+<div class="block">Queues an event and processes queued events in order.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#submitCardPlayRequest(com.csse3200.game.cards.play.CardPlayRequest,com.csse3200.game.components.player.PlayerIntent)" class="member-name-link">submitCardPlayRequest</a><wbr>(<a href="../../cards/play/CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a>&nbsp;cardPlayRequest,
- <a href="../player/PlayerIntent.html" title="enum class in com.csse3200.game.components.player">PlayerIntent</a>&nbsp;playerIntent)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isEnemyAlive(com.csse3200.game.entities.Entity)" class="member-name-link">isEnemyAlive</a><wbr>(<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;enemy)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns if the enemy is alive.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isPlayerTurn()" class="member-name-link">isPlayerTurn</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns whether the battle is in the player input phase.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#playerHasStatusEffect(java.lang.String)" class="member-name-link">playerHasStatusEffect</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;effectType)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Reports whether the player currently has the given status effect.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetBattle()" class="member-name-link">resetBattle</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resets the current battle to a completely new battle that has no previous player and enemy
+ turns.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#start()" class="member-name-link">start</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Starts the battle encounter</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#submitCardPlayRequest(com.csse3200.game.cards.play.CardPlayRequest)" class="member-name-link">submitCardPlayRequest</a><wbr>(<a href="../../cards/play/CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a>&nbsp;cardPlayRequest)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Submits a card during the player's turn, rejecting submissions while an action is running.</div>
+</div>
 </div>
 </div>
 </div>
@@ -267,22 +254,18 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="&lt;init&gt;(com.csse3200.game.entities.Entity,java.util.List,com.csse3200.game.cards.effects.CardEffectResolver,com.csse3200.game.cards.CardService,com.csse3200.game.cards.deck.BattleDeck)">
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.entities.Entity,java.util.List,com.csse3200.game.components.cards.CardEffectHandler,com.csse3200.game.cards.play.CardPlayService)">
 <h3>BattleController</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">BattleController</span><wbr><span class="parameters">(<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&gt;&nbsp;enemies,
- <a href="../../cards/effects/CardEffectResolver.html" title="class in com.csse3200.game.cards.effects">CardEffectResolver</a>&nbsp;effectResolver,
- <a href="../../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
- <a href="../../cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a>&nbsp;battleDeck)</span>
+ <a href="../cards/CardEffectHandler.html" title="class in com.csse3200.game.components.cards">CardEffectHandler</a>&nbsp;effectHandler,
+ <a href="../../cards/play/CardPlayService.html" title="class in com.csse3200.game.cards.play">CardPlayService</a>&nbsp;cardPlayService)</span>
                  throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></span></div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>player</code> - the player entity</dd>
 <dd><code>enemies</code> - the enemies in the encounter</dd>
-<dd><code>effectResolver</code> - Team 5's card-effect resolver, or <code>null</code> to run without cards</dd>
-<dd><code>cardService</code> - Team 6's card library for config lookup, or <code>null</code> to run without
-     cards</dd>
-<dd><code>battleDeck</code> - the battle deck state, or <code>null</code> to run without cards</dd>
+<dd><code>cardPlayService</code> - coordinator of the card play</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code></dd>
 </dl>
@@ -300,10 +283,13 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="handle(com.csse3200.game.components.combat.BattleEvent)">
 <h3>handle</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">handle</span><wbr><span class="parameters">(<a href="BattleEvent.html" title="enum class in com.csse3200.game.components.combat">BattleEvent</a>&nbsp;event)</span></div>
-<div class="block">Handles a single event atomically.</div>
+<div class="block">Queues an event and processes queued events in order.
+
+ <p>Events submitted during processing are queued until the current event finishes. If
+ processing throws, remaining events are discarded; changes already made are not rolled back.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>event</code> - The event within the Battle Loop to handle.</dd>
+<dd><code>event</code> - the battle event to handle</dd>
 </dl>
 </section>
 </li>
@@ -320,24 +306,19 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="selectAttack()">
-<h3>selectAttack</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">selectAttack</span>()</div>
-<div class="block">Player intends to attack the enemy on their turn</div>
-</section>
-</li>
-<li>
-<section class="detail" id="selectDefend()">
-<h3>selectDefend</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">selectDefend</span>()</div>
-<div class="block">Player intends to defend themselves on their turn</div>
-</section>
-</li>
-<li>
-<section class="detail" id="selectOther()">
-<h3>selectOther</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">selectOther</span>()</div>
-<div class="block">Player intends to do other actions on their turn</div>
+<section class="detail" id="playerHasStatusEffect(java.lang.String)">
+<h3>playerHasStatusEffect</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">playerHasStatusEffect</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;effectType)</span></div>
+<div class="block">Reports whether the player currently has the given status effect.
+
+ <p>Read-only: exposes a query about the player rather than the player entity itself, so callers
+ cannot mutate player state through this controller.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>effectType</code> - identifier of the status effect, as stored by CombatStatsComponent</dd>
+<dt>Returns:</dt>
+<dd>true if the player carries an active effect with this identifier</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -352,7 +333,7 @@ loadScripts(document, 'script');</script>
 <h3>resetBattle</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">resetBattle</span>()</div>
 <div class="block">Resets the current battle to a completely new battle that has no previous player and enemy
- turns</div>
+ turns.</div>
 </section>
 </li>
 <li>
@@ -363,6 +344,29 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>the current phase of the BattleController instance</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="isPlayerTurn()">
+<h3>isPlayerTurn</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isPlayerTurn</span>()</div>
+<div class="block">Returns whether the battle is in the player input phase.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>true only during <a href="BattlePhase.html#PLAYER_TURN"><code>BattlePhase.PLAYER_TURN</code></a>; false during card resolution, setup,
+     enemy turns, and all other phases</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getCurrentEnemyIndex()">
+<h3>getCurrentEnemyIndex</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getCurrentEnemyIndex</span>()</div>
+<div class="block">Returns the current targeted enemy.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>An int representing the targeted entity within the array.</dd>
 </dl>
 </section>
 </li>
@@ -430,7 +434,7 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="addHandChangedListener(com.csse3200.game.events.listeners.EventListener1)">
 <h3>addHandChangedListener</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addHandChangedListener</span><wbr><span class="parameters">(<a href="../../events/listeners/EventListener1.html" title="interface in com.csse3200.game.events.listeners">EventListener1</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../cards/runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;&gt;&nbsp;listener)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addHandChangedListener</span><wbr><span class="parameters">(<a href="../../events/listeners/EventListener1.html" title="interface in com.csse3200.game.events.listeners">EventListener1</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&gt;&nbsp;listener)</span></div>
 <div class="block">Adds a listener that receives the player's hand (card IDs) after it changes, e.g. once a played
  card has moved from hand to discard. The UI uses this to refresh the on-screen hand.</div>
 <dl class="notes">
@@ -444,33 +448,6 @@ loadScripts(document, 'script');</script>
 <h3>addCardPlayedListener</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addCardPlayedListener</span><wbr><span class="parameters">(<a href="../../events/listeners/EventListener2.html" title="interface in com.csse3200.game.events.listeners">EventListener2</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;listener)</span></div>
 <div class="block">Notifies listeners after a successful card play, before checking victory or defeat.</div>
-</section>
-</li>
-<li>
-<section class="detail" id="getCurrentEnemyIndex()">
-<h3>getCurrentEnemyIndex</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getCurrentEnemyIndex</span>()</div>
-<div class="block">Returns the current targeted enemy.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>An int representing the targeted entity within the array.</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="playerHasStatusEffect(java.lang.String)">
-<h3>playerHasStatusEffect</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">playerHasStatusEffect</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;effectType)</span></div>
-<div class="block">Reports whether the player currently has the given status effect.
-
- <p>Read-only: exposes a query about the player rather than the player entity itself, so callers
- cannot mutate player state through this controller.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>effectType</code> - identifier of the status effect, as stored by CombatStatsComponent</dd>
-<dt>Returns:</dt>
-<dd>true if the player carries an active effect with this identifier</dd>
-</dl>
 </section>
 </li>
 <li>
@@ -493,23 +470,23 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="submitCardPlayRequest(com.csse3200.game.cards.play.CardPlayRequest,com.csse3200.game.components.player.PlayerIntent)">
+<section class="detail" id="submitCardPlayRequest(com.csse3200.game.cards.play.CardPlayRequest)">
 <h3>submitCardPlayRequest</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">submitCardPlayRequest</span><wbr><span class="parameters">(<a href="../../cards/play/CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a>&nbsp;cardPlayRequest,
- <a href="../player/PlayerIntent.html" title="enum class in com.csse3200.game.components.player">PlayerIntent</a>&nbsp;playerIntent)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">submitCardPlayRequest</span><wbr><span class="parameters">(<a href="../../cards/play/CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a>&nbsp;cardPlayRequest)</span></div>
+<div class="block">Submits a card during the player's turn, rejecting submissions while an action is running.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="resolveCardInHand(java.lang.String)">
-<h3>resolveCardInHand</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../../cards/runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a>&gt;</span>&nbsp;<span class="element-name">resolveCardInHand</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</span></div>
-<div class="block">Resolved values of an exact copy in hand, for UI event routing and previews.</div>
-</section>
-</li>
-<li>
-<section class="detail" id="enterPlayerEnd()">
-<h3>enterPlayerEnd</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">enterPlayerEnd</span>()</div>
+<section class="detail" id="isEnemyAlive(com.csse3200.game.entities.Entity)">
+<h3>isEnemyAlive</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isEnemyAlive</span><wbr><span class="parameters">(<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;enemy)</span></div>
+<div class="block">Returns if the enemy is alive.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>enemy</code> - The enemy to be checked.</dd>
+<dt>Returns:</dt>
+<dd>True if the enemy is alive, False if not.</dd>
+</dl>
 </section>
 </li>
 </ul>

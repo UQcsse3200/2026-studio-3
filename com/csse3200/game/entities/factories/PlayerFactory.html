@@ -112,13 +112,26 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="../../maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#createInitialRunState()" class="member-name-link">createInitialRunState</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Creates the initial durable player state from the same config used by <a href="#createPlayer()"><code>createPlayer()</code></a>.</div>
+<div class="block">Creates the initial durable player state from the same config used by <a href="#createPlayer(com.csse3200.game.maps.RunState)"><code>createPlayer(RunState)</code></a>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="../Entity.html" title="class in com.csse3200.game.entities">Entity</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#createPlayer()" class="member-name-link">createPlayer</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#createPlayer(int,com.csse3200.game.maps.RunState)" class="member-name-link">createPlayer</a><wbr>(int&nbsp;currentHealth,
+ <a href="../../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="../Entity.html" title="class in com.csse3200.game.entities">Entity</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#createPlayer(com.csse3200.game.maps.RunState)" class="member-name-link">createPlayer</a><wbr>(<a href="../../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Create a player entity.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getDefaultHealth()" class="member-name-link">getDefaultHealth</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getDefaultMaxEnergy()" class="member-name-link">getDefaultMaxEnergy</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getDefaultMaxHealth()" class="member-name-link">getDefaultMaxHealth</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -137,9 +150,27 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="createPlayer()">
+<section class="detail" id="getDefaultHealth()">
+<h3>getDefaultHealth</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getDefaultHealth</span>()</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getDefaultMaxHealth()">
+<h3>getDefaultMaxHealth</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getDefaultMaxHealth</span>()</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getDefaultMaxEnergy()">
+<h3>getDefaultMaxEnergy</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getDefaultMaxEnergy</span>()</div>
+</section>
+</li>
+<li>
+<section class="detail" id="createPlayer(com.csse3200.game.maps.RunState)">
 <h3>createPlayer</h3>
-<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="../Entity.html" title="class in com.csse3200.game.entities">Entity</a></span>&nbsp;<span class="element-name">createPlayer</span>()</div>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="../Entity.html" title="class in com.csse3200.game.entities">Entity</a></span>&nbsp;<span class="element-name">createPlayer</span><wbr><span class="parameters">(<a href="../../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState)</span></div>
 <div class="block">Create a player entity.</div>
 <dl class="notes">
 <dt>Returns:</dt>
@@ -148,10 +179,17 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="createPlayer(int,com.csse3200.game.maps.RunState)">
+<h3>createPlayer</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="../Entity.html" title="class in com.csse3200.game.entities">Entity</a></span>&nbsp;<span class="element-name">createPlayer</span><wbr><span class="parameters">(int&nbsp;currentHealth,
+ <a href="../../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState)</span></div>
+</section>
+</li>
+<li>
 <section class="detail" id="createInitialRunState()">
 <h3>createInitialRunState</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="../../maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></span>&nbsp;<span class="element-name">createInitialRunState</span>()</div>
-<div class="block">Creates the initial durable player state from the same config used by <a href="#createPlayer()"><code>createPlayer()</code></a>.</div>
+<div class="block">Creates the initial durable player state from the same config used by <a href="#createPlayer(com.csse3200.game.maps.RunState)"><code>createPlayer(RunState)</code></a>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>default health and gold for a new run</dd>

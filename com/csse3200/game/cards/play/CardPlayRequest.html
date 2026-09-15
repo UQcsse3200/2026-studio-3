@@ -91,7 +91,7 @@ loadScripts(document, 'script');</script>
 </div>
 <section class="class-description" id="class-description">
 <hr>
-<div class="type-signature"><span class="modifiers">public record </span><span class="element-name type-name-label">CardPlayRequest</span>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId, <a href="CardPlayTarget.html" title="class in com.csse3200.game.cards.play">CardPlayTarget</a>&nbsp;target)
+<div class="type-signature"><span class="modifiers">public record </span><span class="element-name type-name-label">CardPlayRequest</span>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId, <a href="CardPlayTarget.html" title="class in com.csse3200.game.cards.play">CardPlayTarget</a>&nbsp;target)
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a></span></div>
 <div class="block">Immutable request sent by Team 3/battle flow when a player attempts to play one card.</div>
 </section>
@@ -105,7 +105,7 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.lang.String,com.csse3200.game.cards.play.CardPlayTarget)" class="member-name-link">CardPlayRequest</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.lang.String,com.csse3200.game.cards.play.CardPlayTarget)" class="member-name-link">CardPlayRequest</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId,
  <a href="CardPlayTarget.html" title="class in com.csse3200.game.cards.play">CardPlayTarget</a>&nbsp;target)</code></div>
 <div class="col-last even-row-color">
 <div class="block">Creates an instance of a <code>CardPlayRequest</code> record class.</div>
@@ -125,51 +125,44 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#allEnemies(java.lang.String)" class="member-name-link">allEnemies</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#allEnemies(java.lang.String)" class="member-name-link">allEnemies</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Creates a request for a card targeting every enemy.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#cardId()" class="member-name-link">cardId</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Indicates whether some other object is "equal to" this one.</div>
+<div class="block">Returns the value of the <code>cardId</code> record component.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#fromUi(java.lang.String,com.csse3200.game.cards.TargetType,java.lang.String)" class="member-name-link">fromUi</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId,
- <a href="../TargetType.html" title="enum class in com.csse3200.game.cards">TargetType</a>&nbsp;type,
- <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;targetId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Converts a UI event using the selected card's resolved target type.</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a hash code value for this object.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#instanceId()" class="member-name-link">instanceId</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>instanceId</code> record component.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#self(java.lang.String)" class="member-name-link">self</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#self(java.lang.String)" class="member-name-link">self</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Creates a request for a self-targeting card.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#singleEnemy(java.lang.String,java.lang.String)" class="member-name-link">singleEnemy</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#singleEnemy(java.lang.String,java.lang.String)" class="member-name-link">singleEnemy</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;targetId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Creates a request for a card targeting one selected enemy.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CardPlayTarget.html" title="class in com.csse3200.game.cards.play">CardPlayTarget</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#target()" class="member-name-link">target</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CardPlayTarget.html" title="class in com.csse3200.game.cards.play">CardPlayTarget</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#target()" class="member-name-link">target</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <code>target</code> record component.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a string representation of this record class.</div>
 </div>
 </div>
@@ -192,12 +185,12 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="&lt;init&gt;(java.lang.String,com.csse3200.game.cards.play.CardPlayTarget)">
 <h3>CardPlayRequest</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">CardPlayRequest</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId,
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">CardPlayRequest</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId,
  <a href="CardPlayTarget.html" title="class in com.csse3200.game.cards.play">CardPlayTarget</a>&nbsp;target)</span></div>
 <div class="block">Creates an instance of a <code>CardPlayRequest</code> record class.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>instanceId</code> - the value for the <code>instanceId</code> record component</dd>
+<dd><code>cardId</code> - the value for the <code>cardId</code> record component</dd>
 <dd><code>target</code> - the value for the <code>target</code> record component</dd>
 </dl>
 </section>
@@ -211,25 +204,16 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="fromUi(java.lang.String,com.csse3200.game.cards.TargetType,java.lang.String)">
-<h3>fromUi</h3>
-<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></span>&nbsp;<span class="element-name">fromUi</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId,
- <a href="../TargetType.html" title="enum class in com.csse3200.game.cards">TargetType</a>&nbsp;type,
- <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;targetId)</span></div>
-<div class="block">Converts a UI event using the selected card's resolved target type.</div>
-</section>
-</li>
-<li>
 <section class="detail" id="self(java.lang.String)">
 <h3>self</h3>
-<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></span>&nbsp;<span class="element-name">self</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</span></div>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></span>&nbsp;<span class="element-name">self</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</span></div>
 <div class="block">Creates a request for a self-targeting card.</div>
 </section>
 </li>
 <li>
 <section class="detail" id="singleEnemy(java.lang.String,java.lang.String)">
 <h3>singleEnemy</h3>
-<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></span>&nbsp;<span class="element-name">singleEnemy</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId,
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></span>&nbsp;<span class="element-name">singleEnemy</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;targetId)</span></div>
 <div class="block">Creates a request for a card targeting one selected enemy.</div>
 </section>
@@ -237,7 +221,7 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="allEnemies(java.lang.String)">
 <h3>allEnemies</h3>
-<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></span>&nbsp;<span class="element-name">allEnemies</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</span></div>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></span>&nbsp;<span class="element-name">allEnemies</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</span></div>
 <div class="block">Creates a request for a card targeting every enemy.</div>
 </section>
 </li>
@@ -283,13 +267,13 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="instanceId()">
-<h3>instanceId</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">instanceId</span>()</div>
-<div class="block">Returns the value of the <code>instanceId</code> record component.</div>
+<section class="detail" id="cardId()">
+<h3>cardId</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">cardId</span>()</div>
+<div class="block">Returns the value of the <code>cardId</code> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <code>instanceId</code> record component</dd>
+<dd>the value of the <code>cardId</code> record component</dd>
 </dl>
 </section>
 </li>
