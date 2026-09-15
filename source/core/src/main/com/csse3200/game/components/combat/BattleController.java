@@ -695,7 +695,27 @@ public class BattleController {
       energy.onTurnStart();
     }
     applyHealingAtTurnStart();
+    retrieveCooledDownCards();
     handle(BattleEvent.PLAYER_TURN_STARTED);
+  }
+
+  /**
+   * Ticks card cooldowns for the new player round, retrieving any discarded card whose cooldown has
+   * elapsed straight back into the hand, and tells the UI to refresh if any were retrieved.
+   */
+  private void retrieveCooledDownCards() {
+    if (cardPlayService == null) {
+      return;
+    }
+    List<String> retrieved = cardPlayService.onPlayerRoundStart();
+    if (retrieved.isEmpty()) {
+      return;
+    }
+    narrate(
+        retrieved.size() == 1
+            ? "A card cooled down and returned to your hand."
+            : retrieved.size() + " cards cooled down and returned to your hand.");
+    eventHandler.trigger(HAND_CHANGED_EVENT, cardPlayService.currentHand());
   }
 
   private void enterPlayerTurn() {

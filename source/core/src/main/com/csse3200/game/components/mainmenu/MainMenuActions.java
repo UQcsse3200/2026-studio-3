@@ -19,15 +19,14 @@ public class MainMenuActions extends Component {
 
   @Override
   public void create() {
-    entity.getEvents().addListener("start", this::onStart);
-    entity.getEvents().addListener("map", this::onStart);
-    entity.getEvents().addListener("load", this::onLoad);
-    entity.getEvents().addListener("exit", this::onExit);
-    entity.getEvents().addListener("settings", this::onSettings);
-    entity.getEvents().addListener("shop", this::onShop);
+    entity.getEvents().addListener(MainMenuDisplay.START_EVENT, this::onStart);
+    entity.getEvents().addListener(MainMenuDisplay.LOAD_EVENT, this::onLoad);
+    entity.getEvents().addListener(MainMenuDisplay.BESTIARY_EVENT, this::onBestiary);
+    entity.getEvents().addListener(MainMenuDisplay.SETTINGS_EVENT, this::onSettings);
+    entity.getEvents().addListener(MainMenuDisplay.EXIT_EVENT, this::onExit);
   }
 
-  /** Discards any run in progress and opens a fresh map. */
+  /** Starts a new run on the map. */
   private void onStart() {
     logger.info("Opening map");
     game.getRunState().endRun();
@@ -36,7 +35,12 @@ public class MainMenuActions extends Component {
 
   /** Intended for loading a saved game state. Load functionality is not actually implemented. */
   private void onLoad() {
-    logger.info("Load game");
+    logger.info("Load game"); // Hi Team 5, Please work on that ;)
+  }
+
+  /** Intended for displaying the bestiary. Bestiary functionality is not actually implemented. */
+  private void onBestiary() {
+    logger.info("Bestiary");
   }
 
   /** Exits the game. */
@@ -49,11 +53,5 @@ public class MainMenuActions extends Component {
   private void onSettings() {
     logger.info("Launching settings screen");
     game.setScreen(GdxGame.ScreenType.SETTINGS);
-  }
-
-  /** Opens the non-combat encounter screen (Chance encounter into the Shop). */
-  private void onShop() {
-    logger.info("Opening shop encounter");
-    game.setScreen(GdxGame.ScreenType.MAIN_GAME);
   }
 }

@@ -335,52 +335,48 @@ class BattleControllerTest {
 
   @Test
   void shouldSkipEnemyKilledDuringTurn() {
-      controller.start();
-      killEnemy(0);
+    controller.start();
+    killEnemy(0);
 
-      controller.endPlayerTurn();
+    controller.endPlayerTurn();
 
-      verify(firstEnemyBehaviour, never()).executeIntent(player);
-      verify(secondEnemyBehaviour).executeIntent(player);
-      assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
-
+    verify(firstEnemyBehaviour, never()).executeIntent(player);
+    verify(secondEnemyBehaviour).executeIntent(player);
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }
 
   @Test
   void shouldWinWhenEnemiesDeadBeforeActing() {
-     controller.addPhaseChangeListener(
-             (previous, next) -> {
-                 if (next == BattlePhase.ENEMY_TURN) {
-                     killEnemy(controller.getCurrentEnemyIndex());
-                 }
-             }
-     );
+    controller.addPhaseChangeListener(
+        (previous, next) -> {
+          if (next == BattlePhase.ENEMY_TURN) {
+            killEnemy(controller.getCurrentEnemyIndex());
+          }
+        });
 
-     controller.start();
-     controller.endPlayerTurn();
+    controller.start();
+    controller.endPlayerTurn();
 
-     verify(firstEnemyBehaviour, never()).executeIntent(player);
-     verify(secondEnemyBehaviour, never()).executeIntent(player);
-     assertEquals(BattlePhase.VICTORY, controller.getCurrentPhase());
+    verify(firstEnemyBehaviour, never()).executeIntent(player);
+    verify(secondEnemyBehaviour, never()).executeIntent(player);
+    assertEquals(BattlePhase.VICTORY, controller.getCurrentPhase());
   }
 
   @Test
   void shouldContinueIfEnemySurvives() {
-      controller.addPhaseChangeListener(
-              (previous, next) -> {
-                  if (next == BattlePhase.ENEMY_TURN &&
-                          controller.getCurrentEnemyIndex() == 1) {
-                      killEnemy(1);
-                  }
-              }
-      );
+    controller.addPhaseChangeListener(
+        (previous, next) -> {
+          if (next == BattlePhase.ENEMY_TURN && controller.getCurrentEnemyIndex() == 1) {
+            killEnemy(1);
+          }
+        });
 
-      controller.start();
-      controller.endPlayerTurn();
+    controller.start();
+    controller.endPlayerTurn();
 
-      verify(firstEnemyBehaviour).executeIntent(player);
-      verify(secondEnemyBehaviour, never()).executeIntent(player);
-      assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+    verify(firstEnemyBehaviour).executeIntent(player);
+    verify(secondEnemyBehaviour, never()).executeIntent(player);
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }
 
   @Test
@@ -463,9 +459,8 @@ class BattleControllerTest {
   }
 
   private void killEnemy(int index) {
-      CombatStatsComponent stats =
-              enemies.get(index).getComponent(CombatStatsComponent.class);
-      when(stats.isDead()).thenReturn(true);
+    CombatStatsComponent stats = enemies.get(index).getComponent(CombatStatsComponent.class);
+    when(stats.isDead()).thenReturn(true);
   }
 
   private Entity createDefendingEnemy(EnemyBehaviourComponent behaviour, boolean alive) {

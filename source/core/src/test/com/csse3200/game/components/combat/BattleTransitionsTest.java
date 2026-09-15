@@ -52,9 +52,7 @@ class BattleTransitionsTest {
     return List.of(
         transition(BattlePhase.SETUP, BattleEvent.SETUP_COMPLETE, BattlePhase.REVEAL_INTENTS),
         transition(
-                BattlePhase.ENEMY_TURN,
-                BattleEvent.ENEMY_TURN_SKIPPED,
-                BattlePhase.ENEMY_RESOLVED),
+            BattlePhase.ENEMY_TURN, BattleEvent.ENEMY_TURN_SKIPPED, BattlePhase.ENEMY_RESOLVED),
         transition(
             BattlePhase.REVEAL_INTENTS, BattleEvent.INTENTS_REVEALED, BattlePhase.PLAYER_START),
         transition(

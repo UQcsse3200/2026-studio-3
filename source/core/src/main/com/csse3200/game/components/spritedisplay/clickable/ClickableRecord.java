@@ -17,7 +17,8 @@ public record ClickableRecord(
     float height,
     String variant,
     Object[] args,
-    String label) {
+    String label,
+    boolean disabled) {
 
   public enum ButtonType {
     TEXT,
@@ -65,7 +66,8 @@ public record ClickableRecord(
         && Objects.equals(trigger, other.trigger)
         && Objects.equals(variant, other.variant)
         && Arrays.equals(args, other.args)
-        && Objects.equals(label, other.label);
+        && Objects.equals(label, other.label)
+        && disabled == other.disabled;
   }
 
   @Override
@@ -82,7 +84,8 @@ public record ClickableRecord(
         height,
         variant,
         Arrays.hashCode(args),
-        label);
+        label,
+        disabled);
   }
 
   @Override
@@ -111,6 +114,8 @@ public record ClickableRecord(
         + Arrays.toString(args)
         + ", label="
         + label
+        + ", disabled="
+        + disabled
         + "]";
   }
 
@@ -130,6 +135,7 @@ public record ClickableRecord(
     private String variant = DEFAULT_VARIANT;
     private Object[] args = NO_ARGS;
     private String label;
+    private boolean disabled = false;
 
     private Builder(String trigger) {
       this.trigger = trigger;
@@ -182,10 +188,20 @@ public record ClickableRecord(
       return this;
     }
 
+    /**
+     * Marks the widget as visually shaded and unresponsive to clicks/drags (e.g. a card sitting in
+     * the discard pile). Defaults to false.
+     */
+    public Builder disabled(boolean disabled) {
+      this.disabled = disabled;
+      return this;
+    }
+
     public ClickableRecord build() {
       ButtonType type = inferType(text, btnSkin);
       return new ClickableRecord(
-          text, btnSkin, x, y, styleName, trigger, type, width, height, variant, args, label);
+          text, btnSkin, x, y, styleName, trigger, type, width, height, variant, args, label,
+          disabled);
     }
 
     private static ButtonType inferType(String text, Skin btnSkin) {

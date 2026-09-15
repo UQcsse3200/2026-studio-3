@@ -3,11 +3,13 @@ package com.csse3200.game.cards.deck;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.TestCardService;
+import com.csse3200.game.cards.runtime.CardInstance;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -156,6 +158,18 @@ class PlayerDeckTest {
 
     assertIterableEquals(List.of("defend"), original.getCardIds());
     assertIterableEquals(List.of("strike", "defend", "bandage"), copy.getCardIds());
+  }
+
+  @Test
+  void shouldGiveEachAddedCardAUniqueInstanceId() {
+    PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike", "strike"));
+
+    List<CardInstance> cards = deck.getCards();
+
+    assertEquals(2, cards.size());
+    assertEquals("strike", cards.get(0).cardId());
+    assertEquals("strike", cards.get(1).cardId());
+    assertNotEquals(cards.get(0).instanceId(), cards.get(1).instanceId());
   }
 
   @Test
