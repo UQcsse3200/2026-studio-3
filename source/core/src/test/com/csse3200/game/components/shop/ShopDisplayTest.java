@@ -1,11 +1,17 @@
 package com.csse3200.game.components.shop;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.components.shop.ShopDisplay.ShopItemState;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.shop.PurchaseResult;
 import com.csse3200.game.shop.ShopItem;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -47,5 +53,18 @@ class ShopDisplayTest {
         ShopItemState.UNAVAILABLE,
         ShopDisplay.getItemState(
             PurchaseResult.failure(PurchaseResult.Status.INVALID_ITEM, item), false));
+  }
+
+  @Test
+  void shouldResolveArtworkFromTheSharedCardService() {
+    CardService cardService = mock(CardService.class);
+    CardConfig card = new CardConfig();
+    card.texturePath = "images/cards/card.png";
+    when(cardService.getCard("card")).thenReturn(Optional.of(card));
+
+    ShopDisplay display = new ShopDisplay(null, cardService);
+
+    assertEquals("images/shop/cards/card.png", display.resolveArtworkPath(item));
+    assertNull(display.resolveArtworkPath(null));
   }
 }
