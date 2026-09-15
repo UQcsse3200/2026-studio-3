@@ -21,22 +21,16 @@ public class MapGraphTest {
 
   @Test
   void testMapGeneration() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
-    MapGraph map = new MapGraph(NodePoolGenerator.generate(config));
+    MapGenerationController mapGen = new MapGenerationController();
+    MapGraph map = mapGen.getMap();
 
-    assertTrue(map.getNodes().size() < MapGraph.MAX_NODE_COUNT);
-    // for (int i = 0; i < MapGraph.MAP_HEIGHT; i++) {
-
-    // assertTrue(map.moveToNode());
-    // }
-
+    assertTrue(map.getNodes().size() < MapGenerationConfig.MAX_NODE_COUNT);
   }
 
   @Test
   void generatedMapCanStartWithReachableChoices() {
-    RoomDistributionConfig config =
-        new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10, 12345L);
-    MapGraph map = new MapGraph(NodePoolGenerator.generate(config));
+    MapGenerationController mapGen = new MapGenerationController();
+    MapGraph map = mapGen.getMap();
     MapNode startNode =
         map.getNodesByHeight(1).stream()
             .min((first, second) -> Integer.compare(first.getNodeId(), second.getNodeId()))
@@ -52,16 +46,15 @@ public class MapGraphTest {
 
   @Test
   void getCurrentNodeNull() {
-    RoomDistributionConfig config = new RoomDistributionConfig(70, 70, 20, 10);
-    MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
+    MapGenerationController mapGen = new MapGenerationController();
+    MapGraph map = mapGen.getMap();
 
-    assertNull(graph.getCurrentNode());
+    assertNull(map.getCurrentNode());
   }
 
   @Test
   void createsGraphFromGeneratedNodeMap() {
-    Map<Integer, MapNode> nodes =
-        NodePoolGenerator.generate(new RoomDistributionConfig(70, 3, 2, 1, 12345L));
+    Map<Integer, MapNode> nodes = NodePoolGenerator.generate(new MapGenerationConfig());
 
     MapGraph graph = new MapGraph(nodes);
     graph.addNodes(nodes);
@@ -74,7 +67,7 @@ public class MapGraphTest {
 
   @Test
   void getNodesByState() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph map = new MapGraph(NodePoolGenerator.generate(config));
 
     MapNode node1 = createNode(1, NodeState.AVAILABLE);
@@ -98,7 +91,7 @@ public class MapGraphTest {
 
   @Test
   void getNodesByStateEmpty() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph map = new MapGraph(NodePoolGenerator.generate(config));
 
     MapNode node1 = createNode(1, NodeState.AVAILABLE);
@@ -114,7 +107,7 @@ public class MapGraphTest {
 
   @Test
   void completeNodeSuccess() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
 
     MapNode node = createNode(1, NodeState.CURRENT);
@@ -127,7 +120,7 @@ public class MapGraphTest {
 
   @Test
   void completeNodeUnlocksConnected() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
 
     MapNode current = createNode(1, NodeState.CURRENT);
@@ -150,7 +143,7 @@ public class MapGraphTest {
 
   @Test
   void completeNodePreservesNonLocked() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
 
     MapNode current = createNode(1, NodeState.CURRENT);
@@ -172,7 +165,7 @@ public class MapGraphTest {
 
   @Test
   void completeNodeFailure() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
 
     MapNode current = createNode(1, NodeState.CURRENT);
@@ -190,7 +183,7 @@ public class MapGraphTest {
 
   @Test
   void completeNodeInvalidId() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
 
     MapNode node = createNode(1, NodeState.CURRENT);
@@ -202,4 +195,46 @@ public class MapGraphTest {
   }
 
   // TODO: Add tests for moveToNode
+
+  @Test
+  void abandonCurrentNodeRevertsToPreviousNode() {
+    MapGenerationConfig config = new MapGenerationConfig();
+    MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
+
+    MapNode start = createNode(1, NodeState.AVAILABLE);
+    MapNode next = createNode(2, NodeState.LOCKED);
+    graph.addNode(start);
+    graph.addNode(next);
+    graph.connectNodes(start, next);
+
+    assertTrue(graph.startRun(1));
+    assertTrue(graph.moveToNode(2));
+    assertEquals(NodeState.CURRENT, next.getState());
+
+    assertTrue(graph.abandonCurrentNode());
+
+    assertEquals(NodeState.AVAILABLE, next.getState());
+    assertEquals(NodeState.CURRENT, start.getState());
+    assertEquals(start, graph.getCurrentNode());
+  }
+
+  @Test
+  void abandonCurrentNodeWithNoPreviousNodeLeavesPlayerInPlace() {
+    // Regression test for a bug flagged in review (PR #220, Zaidan): abandoning with no
+    // previousNode used to null currentNode entirely, which permanently failed every future
+    // moveToNode() call — worse than the original stuck-node bug this method exists to fix.
+    MapGenerationConfig config = new MapGenerationConfig();
+    MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
+
+    MapNode start = createNode(1, NodeState.AVAILABLE);
+    graph.addNode(start);
+
+    assertTrue(graph.startRun(1));
+    assertEquals(NodeState.CURRENT, start.getState());
+
+    assertFalse(graph.abandonCurrentNode());
+
+    assertEquals(NodeState.CURRENT, start.getState());
+    assertEquals(start, graph.getCurrentNode());
+  }
 }

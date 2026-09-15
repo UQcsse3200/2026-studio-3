@@ -1,5 +1,8 @@
 package com.csse3200.game.maps;
 
+import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +18,23 @@ public class RunState {
 
   private MapGraph mapGraph;
   private Integer activeNodeId;
+  private PlayerDeck playerDeck;
+
+  /**
+   * Returns the run-scoped player deck, creating the starter deck on first access.
+   *
+   * @param cardService authoritative card lookup service used to validate starter card IDs
+   * @return the player's persistent deck for this run
+   */
+  public PlayerDeck getOrCreatePlayerDeck(CardService cardService) {
+    if (cardService == null) {
+      throw new IllegalArgumentException("cardService must not be null");
+    }
+    if (playerDeck == null) {
+      playerDeck = PlayerDeckFactory.createStarterDeck(cardService);
+    }
+    return playerDeck;
+  }
 
   /**
    * Starts a run on a generated map.
@@ -88,8 +108,26 @@ public class RunState {
     activeNodeId = null;
   }
 
+  /**
+   * Abandons the in-progress encounter without recording a result, reverting the map to the
+   * player's position before they entered it.
+   *
+   * @return true if an encounter was actually abandoned
+   */
+  public boolean abandonEncounter() {
+    if (mapGraph == null || activeNodeId == null) {
+      logger.warn("Abandon requested but no encounter was active");
+      return false;
+    }
+
+    boolean reverted = mapGraph.abandonCurrentNode();
+    activeNodeId = null;
+    return reverted;
+  }
+
   public void endRun() {
     mapGraph = null;
     activeNodeId = null;
+    playerDeck = null;
   }
 }
