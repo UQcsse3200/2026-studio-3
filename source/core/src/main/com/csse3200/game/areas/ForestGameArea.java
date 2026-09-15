@@ -2,6 +2,7 @@ package com.csse3200.game.areas;
 
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
+import com.csse3200.game.areas.terrain.BackgroundDisplay;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.areas.terrain.TerrainFactory.TerrainType;
 import com.csse3200.game.components.gamearea.GameAreaDisplay;
@@ -10,6 +11,7 @@ import com.csse3200.game.entities.factories.EnemyFactory;
 import com.csse3200.game.entities.factories.NPCFactory;
 import com.csse3200.game.entities.factories.ObstacleFactory;
 import com.csse3200.game.entities.factories.PlayerFactory;
+import com.csse3200.game.maps.RunState;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.utils.math.GridPoint2Utils;
@@ -26,6 +28,7 @@ public class ForestGameArea extends GameArea {
   private static final GridPoint2 PLAYER_SPAWN = new GridPoint2(5, 20);
   private static final GridPoint2 ENEMY_SPAWN = new GridPoint2(20, PLAYER_SPAWN.y);
   private static final float WALL_WIDTH = 3f;
+  private final RunState runState;
   private static final String[] forestTextures = {
     "images/star_player.png",
     "images/tree.png",
@@ -42,7 +45,8 @@ public class ForestGameArea extends GameArea {
     "images/iso_grass_2.png",
     "images/iso_grass_3.png",
     "images/enemies/intents/attack.png",
-    "images/enemies/intents/defend.png"
+    "images/enemies/intents/defend.png",
+    "images/battle_background.png"
   };
   private static final String[] forestTextureAtlases = {
     "images/terrain_iso_grass.atlas",
@@ -53,6 +57,7 @@ public class ForestGameArea extends GameArea {
   private static final String[] forestSounds = {"sounds/Impact4.ogg"};
 
   private final TerrainFactory terrainFactory;
+  private final Integer progression;
 
   private Entity player;
   private Entity enemy;
@@ -63,15 +68,19 @@ public class ForestGameArea extends GameArea {
    * @param terrainFactory TerrainFactory used to create the terrain for the GameArea.
    * @requires terrainFactory != null
    */
-  public ForestGameArea(TerrainFactory terrainFactory) {
+  public ForestGameArea(TerrainFactory terrainFactory, Integer progression, RunState runState) {
     super();
     this.terrainFactory = terrainFactory;
+    this.progression = progression;
+    this.runState = runState;
   }
 
   /** Create the game area, including terrain, static entities (trees), dynamic entities (player) */
   @Override
   public void create() {
     loadAssets();
+
+    spawnBackground();
     spawnTerrain();
 
     enemy = spawnEnemy();
@@ -83,6 +92,12 @@ public class ForestGameArea extends GameArea {
   public void displayUI(Entity ui) {
     ui.addComponent(new GameAreaDisplay("The Fall of Pantheons"));
     spawnEntity(ui);
+  }
+
+  private void spawnBackground() {
+    Entity background = new Entity();
+    background.addComponent(new BackgroundDisplay());
+    spawnEntity(background);
   }
 
   private void spawnTerrain() {
@@ -127,7 +142,13 @@ public class ForestGameArea extends GameArea {
   }
 
   private Entity spawnPlayer() {
-    Entity newPlayer = PlayerFactory.createPlayer();
+    runState.initialisePlayerStats(
+        PlayerFactory.getDefaultHealth(),
+        PlayerFactory.getDefaultMaxHealth(),
+        PlayerFactory.getDefaultMaxEnergy());
+
+    Entity newPlayer = PlayerFactory.createPlayer(runState.getPlayerHealth());
+
     spawnEntityAt(newPlayer, PLAYER_SPAWN, true, true);
     return newPlayer;
   }
@@ -138,7 +159,7 @@ public class ForestGameArea extends GameArea {
    * default config otherwise).
    */
   private Entity spawnEnemy() {
-    Entity newEnemy = EnemyFactory.create("bone_crawler");
+    Entity newEnemy = EnemyFactory.create("bone_crawler", this.progression);
     spawnEntityAt(newEnemy, ENEMY_SPAWN, true, true);
     return newEnemy;
   }

@@ -18,8 +18,10 @@ class PlayerDeckFactoryTest {
   void shouldCreateStarterDeckFromTeamSixCards() {
     PlayerDeck deck = PlayerDeckFactory.createStarterDeck(CARDS);
 
-    assertEquals(10, deck.size());
-    assertEquals(3, deck.count(PlayerDeckFactory.STRIKE));
+    // TEMP: starter deck has an extra STRIKE (11 cards, 4 of them) while pagination is being
+    // checked — see the TEMP comment in PlayerDeckFactory. Revert both together afterward.
+    assertEquals(11, deck.size());
+    assertEquals(4, deck.count(PlayerDeckFactory.STRIKE));
     assertEquals(3, deck.count(PlayerDeckFactory.DEFEND));
     assertEquals(1, deck.count(PlayerDeckFactory.POISON_DAGGER));
     assertEquals(1, deck.count(PlayerDeckFactory.EXPOSE));
@@ -53,8 +55,8 @@ class PlayerDeckFactoryTest {
 
     first.removeCard(PlayerDeckFactory.STRIKE);
 
-    assertEquals(9, first.size());
-    assertEquals(10, second.size());
-    assertEquals(3, second.count(PlayerDeckFactory.STRIKE));
+    assertEquals(10, first.size());
+    assertEquals(11, second.size());
+    assertEquals(4, second.count(PlayerDeckFactory.STRIKE));
   }
 }

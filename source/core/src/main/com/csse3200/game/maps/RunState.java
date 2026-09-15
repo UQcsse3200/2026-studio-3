@@ -3,6 +3,7 @@ package com.csse3200.game.maps;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +20,10 @@ public class RunState {
   private MapGraph mapGraph;
   private Integer activeNodeId;
   private PlayerDeck playerDeck;
+  private int playerHealth;
+  private int playerMaxHealth;
+  private int playerMaxEnergy;
+  private boolean playerStatsInitialised;
 
   /**
    * Returns the run-scoped player deck, creating the starter deck on first access.
@@ -34,6 +39,75 @@ public class RunState {
       playerDeck = PlayerDeckFactory.createStarterDeck(cardService);
     }
     return playerDeck;
+  }
+
+  /**
+   * Initialises the player's health
+   *
+   * @param startingHealth the health the player starts with
+   */
+  public void initialisePlayerStats(
+      int startingHealth, int startingMaxHealth, int startingMaxEnergy) {
+    if (!playerStatsInitialised) {
+      playerHealth = startingHealth;
+      playerMaxHealth = startingMaxHealth;
+      playerMaxEnergy = startingMaxEnergy;
+      playerStatsInitialised = true;
+    }
+  }
+
+  /**
+   * Returns the player's current health
+   *
+   * @return the player's health
+   */
+  public int getPlayerHealth() {
+    return playerHealth;
+  }
+
+  /**
+   * Returns the player's max health
+   *
+   * @return the player's max health
+   */
+  public int getPlayerMaxHealth() {
+    return playerMaxHealth;
+  }
+
+  /**
+   * Returns the player's max energy
+   *
+   * @return the player's max energy
+   */
+  public int getPlayerMaxEnergy() {
+    return playerMaxEnergy;
+  }
+
+  /**
+   * Sets the player's health
+   *
+   * @param health the player's new health
+   */
+  public void setPlayerHealth(int health) {
+    playerHealth = Math.max(0, health);
+  }
+
+  /**
+   * Sets the player's max health
+   *
+   * @param maxHealth the player's new max health
+   */
+  public void setPlayerMaxHealth(int maxHealth) {
+    playerMaxHealth = Math.max(1, maxHealth);
+  }
+
+  /**
+   * Sets the player's max energy
+   *
+   * @param maxEnergy the player's new max energy
+   */
+  public void setPlayerMaxEnergy(int maxEnergy) {
+    playerMaxEnergy = Math.max(1, maxEnergy);
   }
 
   /**
@@ -84,12 +158,23 @@ public class RunState {
         node.setState(NodeState.COMPLETED);
       }
     }
-
     activeNodeId = nodeId;
   }
 
   public Integer getActiveNodeId() {
     return activeNodeId;
+  }
+
+  /** Returns the height of the currently active node. */
+  public Integer getMapProgression() {
+    Integer mapNodeId = this.getActiveNodeId();
+    MapNode activeNode = mapGraph.getNode(mapNodeId);
+
+    if (mapNodeId == null || !Objects.nonNull(activeNode) || activeNode.getHeight() <= 0) {
+      return 0;
+    }
+
+    return mapGraph.getNode(this.getActiveNodeId()).getHeight();
   }
 
   /**
@@ -108,9 +193,30 @@ public class RunState {
     activeNodeId = null;
   }
 
+  /**
+   * Abandons the in-progress encounter without recording a result, reverting the map to the
+   * player's position before they entered it.
+   *
+   * @return true if an encounter was actually abandoned
+   */
+  public boolean abandonEncounter() {
+    if (mapGraph == null || activeNodeId == null) {
+      logger.warn("Abandon requested but no encounter was active");
+      return false;
+    }
+
+    boolean reverted = mapGraph.abandonCurrentNode();
+    activeNodeId = null;
+    return reverted;
+  }
+
   public void endRun() {
     mapGraph = null;
     activeNodeId = null;
     playerDeck = null;
+    playerHealth = 0;
+    playerMaxHealth = 0;
+    playerMaxEnergy = 0;
+    playerStatsInitialised = false;
   }
 }

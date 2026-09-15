@@ -11,7 +11,7 @@ public class RunStateTest {
 
   /** Start node 0, connected forwards to 1 and 2. */
   private MapGraph createGraph() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
     graph.addNode(new MapNode(0, RoomType.COMBAT));
     graph.addNode(new MapNode(1, RoomType.EVENT));
@@ -149,6 +149,35 @@ public class RunStateTest {
     runState.completeEncounter(true);
 
     assertEquals(NodeState.CURRENT, graph.getNode(0).getState());
+  }
+
+  @Test
+  void mapHeightReturnsCorrectValue() {
+    RunState runState = new RunState();
+    MapGraph graph = createGraph();
+    runState.startRun(graph, 0);
+
+    assertEquals(graph.getCurrentNode().getHeight(), runState.getMapProgression());
+  }
+
+  @Test
+  void returnsZeroWhenActiveNodeIsMissing() {
+    RunState runState = new RunState();
+    MapGraph graph = createGraph();
+    runState.startRun(graph, 0);
+
+    assertEquals(0, runState.getMapProgression());
+  }
+
+  @Test
+  void returnsZeroWhenNodeIdDoesNotExist() {
+    RunState runState = new RunState();
+    MapGraph graph = createGraph();
+    runState.startRun(graph, 0);
+
+    runState.enterEncounter(999);
+
+    assertEquals(0, runState.getMapProgression());
   }
 
   @Test

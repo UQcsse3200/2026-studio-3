@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 public class EncounterScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(EncounterScreen.class);
 
-  private static final Color BACKGROUND = new Color(248f / 255f, 249f / 255f, 178f / 255f, 1f);
+  private static final Color BACKGROUND = new Color(162f / 255f, 73f / 255f, 54f / 255f, 1f);
   private static final float BUTTON_WIDTH = 200f;
   private static final float BUTTON_HEIGHT = 60f;
 
