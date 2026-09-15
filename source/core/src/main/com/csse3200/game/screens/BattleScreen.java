@@ -16,8 +16,12 @@ import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.cards.debug.CardEffectDebugComponent;
+import com.csse3200.game.cards.debug.CardEffectDebugDisplay;
+import com.csse3200.game.cards.debug.KeyboardCardEffectDebugInputComponent;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.effects.CardEffectResolutionService;
 import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.cards.play.integration.Team3CardPlayAdapter;
 import com.csse3200.game.components.CombatStatsComponent;
@@ -76,6 +80,10 @@ public class BattleScreen extends ScreenAdapter {
   private final BattleController controller;
   private final CardLibrary library;
   private final BattleDeck battleDeck;
+  // PROPOSED: shared with the debug dialog so it reflects real, live resolutions instead of a
+  // separate copy — see cards/debug/CardEffectDebugComponent's own doc comment on this
+  // requirement.
+  private final CardEffectResolutionService cardEffects;
   private List<ClickableRecord> staticUiRecords;
 
   public BattleScreen(GdxGame game) {
@@ -128,7 +136,8 @@ public class BattleScreen extends ScreenAdapter {
     Entity player = forestGameArea.getPlayer();
     EnergyComponent energy = player.getComponent(EnergyComponent.class);
 
-    CardPlayService cardPlayService = new CardPlayService(library, battleDeck, energy);
+    cardEffects = new CardEffectResolutionService(library); // PROPOSED
+    CardPlayService cardPlayService = new CardPlayService(library, cardEffects, battleDeck, energy);
     CardEffectHandler effectHandler = new CardEffectHandler();
     controller =
         new BattleController(player, forestGameArea.getEnemies(), effectHandler, cardPlayService);
@@ -174,7 +183,12 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(uiFactory)
             .addComponent(displays)
             .addComponent(new BattleActions(controller, game))
-            .addComponent(cardPlayAdapter);
+            .addComponent(cardPlayAdapter)
+            // PROPOSED: same debug dialog MainGameScreen wires up, attached here so it shows
+            // real resolutions from actual combat instead of a separate debug-only copy.
+            .addComponent(new CardEffectDebugComponent(cardEffects))
+            .addComponent(new KeyboardCardEffectDebugInputComponent())
+            .addComponent(new CardEffectDebugDisplay());
 
     // Keep the on-screen hand in sync with the deck: after a card is played (and a replacement
     // drawn) rebuild the hand widgets from the live deck, so the played card's button is gone and
