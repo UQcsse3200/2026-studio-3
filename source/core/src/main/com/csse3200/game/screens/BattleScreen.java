@@ -17,8 +17,6 @@ import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.cards.play.integration.Team3CardPlayAdapter;
 import com.csse3200.game.components.CombatStatsComponent;
-import com.csse3200.game.cards.effects.CardEffectResolver;
-import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.combat.BattleController;
@@ -195,16 +193,15 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new InputDecorator(stage, 10))
             .addComponent(uiFactory)
             .addComponent(displays)
-            .addComponent(new BattleActions(controller, game, library))
-            .addComponent(
-                new DamageOnCardPlayComponent(
-                    gameArea.getPlayer().getComponent(CombatStatsComponent.class)));
             .addComponent(new BattleActions(controller, game))
             .addComponent(cardPlayAdapter)
             .addComponent(cardInventory)
             .addComponent(new PauseMenuDisplay())
             .addComponent(new PauseMenuInput())
-            .addComponent(new PauseMenuActions(game));
+            .addComponent(new PauseMenuActions(game))
+            .addComponent(
+                new DamageOnCardPlayComponent(
+                    gameArea.getPlayer().getComponent(CombatStatsComponent.class)));
 
     // Keep the on-screen row in sync with the deck: whenever the hand changes (a card played, or
     // one retrieved from the discard pile after its cooldown elapses) rebuild from the live deck,
