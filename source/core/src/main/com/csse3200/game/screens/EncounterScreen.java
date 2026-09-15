@@ -10,6 +10,7 @@ import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -162,11 +163,30 @@ public class EncounterScreen extends ScreenAdapter {
       return;
     }
 
-    logger.info("Encounter node {} completed with success={}", nodeId, success);
+    boolean playerDefeated = isPlayerDefeated(encounterGameArea.getPlayer());
+    boolean effectiveSuccess = success && !playerDefeated;
 
-    runState.completeEncounter(success);
+    logger.info(
+        "Encounter node {} completed with success={}, playerDefeated={}",
+        nodeId,
+        effectiveSuccess,
+        playerDefeated);
 
-    Gdx.app.postRunnable(() -> game.setScreen(GdxGame.ScreenType.MAP));
+    runState.completeEncounter(effectiveSuccess);
+
+    GdxGame.ScreenType targetScreen =
+        playerDefeated ? GdxGame.ScreenType.DEFEAT : GdxGame.ScreenType.MAP;
+
+    Gdx.app.postRunnable(() -> game.setScreen(targetScreen));
+  }
+
+  static boolean isPlayerDefeated(Entity player) {
+    if (player == null) {
+      return false;
+    }
+
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    return stats != null && stats.isDead();
   }
 
   @Override
