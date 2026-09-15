@@ -69,7 +69,12 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
   }
 
   private DeckSaveData captureDeck() {
-    return new DeckSaveData(playerDeck.getCards().stream().map(CardInstance::cardId).toList());
+    List<CardInstanceSaveData> cardSnapshots = new ArrayList<>();
+    for (CardInstance card : playerDeck.getCards()) {
+      cardSnapshots.add(
+          new CardInstanceSaveData(card.instanceId(), card.cardId(), card.upgradeLevel()));
+    }
+    return new DeckSaveData(cardSnapshots);
   }
 
   private MapSaveData captureMap() {
