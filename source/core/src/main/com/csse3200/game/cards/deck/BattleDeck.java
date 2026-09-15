@@ -77,33 +77,6 @@ public class BattleDeck {
   }
 
   /**
-   * Plays a card from the hand and moves it to the discard pile.
-   *
-   * <p>Card validation and effect resolution should be completed before this method is called.
-   *
-   * @param cardId ID of the card being played
-   * @return true if the card was moved, otherwise false
-   */
-  public boolean playCard(String cardId) {
-    return discardCard(cardId);
-  }
-
-  /**
-   * Removes one matching card from the hand and moves it to the discard pile.
-   *
-   * @param cardId ID of the card to discard
-   * @return true if the card was discarded, otherwise false
-   */
-  public boolean discardCard(String cardId) {
-    if (cardId == null || !hand.remove(cardId)) {
-      return false;
-    }
-
-    discardPile.add(cardId);
-    return true;
-  }
-
-  /**
    * Moves every card currently in the hand to the discard pile.
    *
    * @return number of cards discarded
@@ -171,5 +144,29 @@ public class BattleDeck {
    */
   public int getDiscardPileSize() {
     return discardPile.size();
+  }
+
+  /**
+   * Moves exactly the selected instance from hand to discard. Gameplay must validate and resolve
+   * the selected card before calling this operation.
+   */
+  public boolean playCard(String instanceId) {
+    return discardCard(instanceId);
+  }
+
+  /** Discards only the matching instanceId; unknown/null IDs do not change any pile. */
+  public boolean discardCard(String instanceId) {
+    for (int i = 0; i < hand.size(); i++) {
+      if (hand.get(i).instanceId().equals(instanceId)) {
+        discardPile.add(hand.remove(i));
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** Finds an exact owned copy in the current hand. */
+  public Optional<CardInstance> getCardInHand(String instanceId) {
+    return hand.stream().filter(card -> card.instanceId().equals(instanceId)).findFirst();
   }
 }
