@@ -80,6 +80,8 @@ class MultiEnemyBattleTest {
             EffectType.DAMAGE,
             6,
             Map.of("bone_crawler", first, "lesser_shade_1", second));
+    // Each attack needs its own dealt copy while the played card is on cooldown.
+    deck.drawCards(1);
     assertTrue(
         controller.submitCardPlayRequest(
             CardPlayRequest.singleEnemy("test_card", "lesser_shade_1")));
@@ -117,7 +119,7 @@ class MultiEnemyBattleTest {
     assertEquals(18, second.getComponent(CombatStatsComponent.class).getHealth());
     assertEquals(2, player.getComponent(EnergyComponent.class).getCurrentEnergy());
     assertEquals(1, deck.getDiscardPile().size());
-    assertEquals(1, deck.getHand().size());
+    assertTrue(deck.getHand().isEmpty());
   }
 
   @Test
@@ -146,6 +148,8 @@ class MultiEnemyBattleTest {
   @Test
   void killingFirstEnemySkipsItsTurnAndVictoryWaitsForSecondEnemy() {
     BattleController controller = battle(TargetType.SINGLE_ENEMY, EffectType.DAMAGE, 30);
+    // Keep a second copy in hand to attack the survivor before the first card's cooldown ends.
+    deck.drawCards(1);
     List<Boolean> outcomes = new ArrayList<>();
     controller.addBattleEndListener(outcomes::add);
     assertTrue(strike(controller, first));

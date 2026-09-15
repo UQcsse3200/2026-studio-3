@@ -23,8 +23,9 @@ public class BattleGameArea extends ForestGameArea {
   private final Map<String, Entity> enemyTargets = new LinkedHashMap<>();
   private String[] additionalAtlases = new String[0];
 
-  public BattleGameArea(TerrainFactory terrainFactory, int progression, RunState runState) {
-    super(terrainFactory, progression, runState);
+  public BattleGameArea(
+      TerrainFactory terrainFactory, int progression, RunState runState, String backgroundId) {
+    super(terrainFactory, progression, runState, backgroundId);
     this.progression = progression;
   }
 

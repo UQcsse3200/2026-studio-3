@@ -13,7 +13,6 @@ import com.csse3200.game.components.gamearea.CombatBackgroundConfigs;
 import com.csse3200.game.components.gamearea.GameAreaDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.factories.EnemyFactory;
-import com.csse3200.game.entities.factories.NPCFactory;
 import com.csse3200.game.entities.factories.ObstacleFactory;
 import com.csse3200.game.entities.factories.PlayerFactory;
 import com.csse3200.game.files.FileLoader;
@@ -21,7 +20,6 @@ import com.csse3200.game.maps.RunState;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.utils.math.GridPoint2Utils;
-import com.csse3200.game.utils.math.RandomUtils;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,8 +75,8 @@ public class ForestGameArea extends GameArea {
    * @param terrainFactory TerrainFactory used to create the terrain for the GameArea.
    * @requires terrainFactory != null
    */
-  public ForestGameArea(TerrainFactory terrainFactory, Integer progression, RunState runState,
-                        String backgroundId) {
+  public ForestGameArea(
+      TerrainFactory terrainFactory, Integer progression, RunState runState, String backgroundId) {
     super();
     this.terrainFactory = terrainFactory;
     this.progression = progression;
@@ -93,7 +91,7 @@ public class ForestGameArea extends GameArea {
     if (backgroundId == null || backgroundId.isBlank()) return;
 
     CombatBackgroundConfigs configs =
-            FileLoader.readClass(CombatBackgroundConfigs.class, BACKGROUND_CONFIG_PATH);
+        FileLoader.readClass(CombatBackgroundConfigs.class, BACKGROUND_CONFIG_PATH);
 
     if (configs == null) {
       logger.warn("Couldn't read background configurations: {}", BACKGROUND_CONFIG_PATH);
@@ -108,9 +106,9 @@ public class ForestGameArea extends GameArea {
     }
 
     if (selectedBackGround.name == null
-            || selectedBackGround.name.isBlank()
-            || selectedBackGround.texture == null
-            || selectedBackGround.texture.isBlank()) {
+        || selectedBackGround.name.isBlank()
+        || selectedBackGround.texture == null
+        || selectedBackGround.texture.isBlank()) {
       logger.warn("Background '{}' requires a name and texture path", backgroundId);
       return;
     }
@@ -149,7 +147,7 @@ public class ForestGameArea extends GameArea {
     Texture texture;
     try {
       texture =
-              ServiceLocator.getResourceService().getAsset(backgroundConfig.texture, Texture.class);
+          ServiceLocator.getResourceService().getAsset(backgroundConfig.texture, Texture.class);
     } catch (RuntimeException e) {
       logger.warn("Background texture missing: {}", backgroundConfig.texture);
       return;
