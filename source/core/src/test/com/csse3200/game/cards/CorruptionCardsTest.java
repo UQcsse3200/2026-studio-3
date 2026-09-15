@@ -41,13 +41,16 @@ class CorruptionCardsTest {
 
     assertAll(
         () -> assertEquals("Poison Blade", card.name),
-        () -> assertEquals("Deal 10 damage. Apply 4 Poison for 2 turns.", card.description),
+        () ->
+            assertEquals(
+                "Deal 10 piercing damage, ignoring Block and Armour. Apply 4 Poison for 2 turns.",
+                card.description),
         () -> assertEquals(2, card.cost),
         () -> assertEquals(CardType.ATTACK, card.type),
         () -> assertEquals(Rarity.UNCOMMON, card.rarity),
         () -> assertEquals(TargetType.SINGLE_ENEMY, card.target),
         () -> assertEquals(2, card.effects.length),
-        () -> assertEffect(card.effects[0], EffectType.DAMAGE, 10, 0),
+        () -> assertEffect(card.effects[0], EffectType.PIERCE, 10, 0),
         () -> assertEffect(card.effects[1], EffectType.POISON, 4, 2),
         () -> assertEquals("images/cards/poison_blade.png", card.texturePath));
   }
@@ -85,7 +88,6 @@ class CorruptionCardsTest {
         () -> assertEffect(card.effects[0], EffectType.VULNERABLE, 2, 2),
         () -> assertEffect(card.effects[1], EffectType.POISON, 2, 2),
         () -> assertEquals("images/cards/poison_mark.png", card.texturePath));
-
   }
 
   private static void assertEffect(EffectConfig effect, EffectType type, int value, int duration) {

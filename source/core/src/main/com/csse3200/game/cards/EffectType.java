@@ -23,7 +23,9 @@ public enum EffectType {
   /** Immediate reduction of the target's armour pool. */
   SUNDER(false),
   /** Immediately restores player energy, capped by the player's maximum energy. */
-  ENERGY_GAIN(false);
+  ENERGY_GAIN(false),
+  /** Immediate damage that ignores the target's block and armour. */
+  PIERCE(false);
 
   private final boolean usesDuration;
 
