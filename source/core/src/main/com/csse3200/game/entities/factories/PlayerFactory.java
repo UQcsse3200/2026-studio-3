@@ -97,7 +97,8 @@ public class PlayerFactory {
   }
 
   /**
-   * Creates the initial durable player state from the same config used by {@link #createPlayer()}.
+   * Creates the initial durable player state from the same config used by {@link
+   * #createPlayer(RunState)}.
    *
    * @return default health and gold for a new run
    */
