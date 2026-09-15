@@ -3,7 +3,6 @@ package com.csse3200.game.components.battle;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Timer;
 import com.csse3200.game.GdxGame;
-import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
@@ -16,8 +15,6 @@ import java.util.List;
 public class BattleActions extends Component {
   static final String END_TURN_SELECTED_EVENT = "endTurnSelected";
   static final String PHASE_CHANGED_EVENT = "phaseChange";
-
-  //  static final String PLAY_CARD_EVENT = "playCard";
 
   /** Fired on the battle UI entity with the latest one-line action description. */
   public static final String BATTLE_LOG_EVENT = "battleLog";
@@ -42,7 +39,6 @@ public class BattleActions extends Component {
 
   private final BattleController controller;
   private final GdxGame game;
-  private final CardLibrary library;
 
   // While true, reveals (log, effects, phase changes, the hand coming back up) are queued instead
   // of fired immediately, so the enemy's whole turn can be held back and replayed together after
@@ -51,10 +47,9 @@ public class BattleActions extends Component {
   private boolean deferringEnemyTurn = false;
   private final List<Runnable> queuedReveals = new ArrayList<>();
 
-  public BattleActions(BattleController controller, GdxGame game, CardLibrary library) {
+  public BattleActions(BattleController controller, GdxGame game) {
     this.controller = controller;
     this.game = game;
-    this.library = library;
   }
 
   /**
@@ -72,9 +67,7 @@ public class BattleActions extends Component {
     entity.getEvents().addListener("exit", this::onExit);
 
     entity.getEvents().addListener(END_TURN_SELECTED_EVENT, controller::endPlayerTurn);
-    //    entity.getEvents().addListener(PLAY_CARD_EVENT, this::onCardPlayed);
     controller.addPhaseChangeListener(this::onPhaseChange);
-    //    entity.getEvents().addListener("cardPlayed", this::logCardPlayed);
     entity.getEvents().addListener("endturn", this::triggerEndTurn);
 
     // Re-broadcast the controller's battle-loop signals as plain entity events so the battle-log
@@ -170,31 +163,6 @@ public class BattleActions extends Component {
       game.setScreen(target);
     }
   }
-
-  /**
-   * A card was played (self-target on click, or dropped on a target) — see Clickable/DragNDrop and
-   * EnemyDropTargetComponent for how "playCard" ends up firing with (cardId, targetId). Translates
-   * the raw cardId into its display name and re-fires as "cardPlayed" for UI feedback.
-   */
-  //  private void onCardPlayed(String cardID, String targetID) {
-  //    var optionalCard = library.getCard(cardID);
-  //
-  //    if (optionalCard.isEmpty()) {
-  //      return;
-  //    }
-  //
-  //    CardConfig cardConfig = optionalCard.get();
-  //    CardPlayTarget target =
-  //        switch (cardConfig.target) {
-  //          case SELF -> CardPlayTarget.self();
-  //          case SINGLE_ENEMY -> CardPlayTarget.singleEnemy(targetID);
-  //          case ALL_ENEMIES -> CardPlayTarget.allEnemies();
-  //        };
-  //    CardPlayRequest request = new CardPlayRequest(cardID, target);
-  //    if (controller.submitCardPlayRequest(request)) {
-  //      entity.getEvents().trigger("cardPlayed", cardConfig.name, targetID);
-  //    }
-  //  }
 
   private void triggerEndTurn() {
     controller.endPlayerTurn();

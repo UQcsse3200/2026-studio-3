@@ -78,7 +78,7 @@ public class BattleScreen extends ScreenAdapter {
   private final BattleController controller;
   private final CardLibrary library;
   private final BattleDeck battleDeck;
-  private CardPlayService cardPlayService;
+  private final CardPlayService cardPlayService;
   private ClickableFactory uiFactory;
   private List<ClickableRecord> staticUiRecords;
 
@@ -190,7 +190,7 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new InputDecorator(stage, 10))
             .addComponent(uiFactory)
             .addComponent(displays)
-            .addComponent(new BattleActions(controller, game, library))
+            .addComponent(new BattleActions(controller, game))
             .addComponent(cardPlayAdapter)
             .addComponent(cardInventory)
             .addComponent(new PauseMenuDisplay())
