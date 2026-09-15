@@ -11,7 +11,7 @@ public class RunStateTest {
 
   /** Start node 0, connected forwards to 1 and 2. */
   private MapGraph createGraph() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
     graph.addNode(new MapNode(0, RoomType.COMBAT));
     graph.addNode(new MapNode(1, RoomType.EVENT));

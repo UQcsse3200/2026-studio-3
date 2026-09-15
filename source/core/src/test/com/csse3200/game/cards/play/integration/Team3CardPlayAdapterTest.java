@@ -1,8 +1,6 @@
 package com.csse3200.game.cards.play.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardType;
@@ -13,20 +11,22 @@ import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
-import com.csse3200.game.cards.play.CardPlayResult;
 import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.cards.CardEffectHandler;
+import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.combat.BattlePhase;
+import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 
 class Team3CardPlayAdapterTest {
 
   @Test
-  void shouldResolveAndReturnOneResultWithoutApplyingEnemyEffects() {
+  void shouldSubmitCardPlayRequestToBattleController() {
     CardConfig strike = strike();
     CardConfig defend = defend();
 
@@ -34,42 +34,55 @@ class Team3CardPlayAdapterTest {
 
     BattleDeck deck = new BattleDeck(new PlayerDeck(cards, List.of("strike", "defend")));
 
-    // Only draw the first card. defend remains in the draw pile as the replacement.
     deck.drawOne();
 
     EnergyComponent energy = new EnergyComponent(3);
-    CombatStatsComponent playerStats = new CombatStatsComponent(10, 1);
-    Team7PlayerStateAdapter player = new Team7PlayerStateAdapter(energy, playerStats);
 
-    CombatStatsComponent enemyStats = new CombatStatsComponent(10, 1);
-    Entity enemyEntity = new Entity().addComponent(enemyStats);
-    Team1EnemyStateAdapter enemies = new Team1EnemyStateAdapter(Map.of("enemy-1", enemyEntity));
+    Entity player = new Entity().addComponent(new CombatStatsComponent(10, 1)).addComponent(energy);
 
-    CardPlayService playService = new CardPlayService(cards, deck, energy, player, enemies);
+    Entity enemy =
+        new Entity()
+            .addComponent(new CombatStatsComponent(10, 1))
+            .addComponent(new EnemyBehaviourComponent("test"));
 
-    Team3CardPlayAdapter adapter = new Team3CardPlayAdapter(cards, playService);
+    List<Entity> enemies = List.of(enemy);
+
+    Team7PlayerStateAdapter playerState =
+        new Team7PlayerStateAdapter(energy, player.getComponent(CombatStatsComponent.class));
+
+    Team1EnemyStateAdapter enemyState = new Team1EnemyStateAdapter(Map.of("enemy-1", enemy));
+
+    CardPlayService playService = new CardPlayService(cards, deck, energy, playerState, enemyState);
+
+    CardEffectHandler effectHandler = new CardEffectHandler();
+    BattleController controller = new BattleController(player, enemies, effectHandler, playService);
+
+    Team3CardPlayAdapter adapter = new Team3CardPlayAdapter(cards, controller);
 
     Entity battleFlow = new Entity().addComponent(adapter);
 
-    AtomicReference<CardPlayResult> observed = new AtomicReference<>();
-    battleFlow.getEvents().addListener(Team3CardPlayAdapter.CARD_PLAY_RESULT_EVENT, observed::set);
-
     battleFlow.create();
+
+    controller.start();
+
+    // Advance the controller into the player's turn.
+    while (controller.getCurrentPhase() != BattlePhase.PLAYER_TURN) {
+      controller.endPlayerTurn();
+    }
 
     battleFlow.getEvents().trigger(Team3CardPlayAdapter.PLAY_CARD_EVENT, "strike", "enemy-1");
 
-    assertNotNull(observed.get());
-    assertTrue(observed.get().success());
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+
+    // The card was resolved through the controller/service.
     assertEquals(2, energy.getCurrentEnergy());
-    assertEquals(6, observed.get().enemyEffects().get(0).value());
 
-    // The adapter/service only resolves the effect; it does not apply it
-    // directly to the enemy entity.
-    assertEquals(10, enemyStats.getHealth());
-
-    // strike was discarded and defend was drawn as its replacement.
-    assertEquals(List.of("defend"), deck.getHand());
+    // strike was discarded and not replaced.
+    assertEquals(List.of(), deck.getHand());
     assertEquals(List.of("strike"), deck.getDiscardPile());
+
+    // The BattleController applies the resolved card effects.
+    assertEquals(4, enemy.getComponent(CombatStatsComponent.class).getHealth());
   }
 
   private static CardConfig strike() {
