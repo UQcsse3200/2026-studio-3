@@ -50,19 +50,6 @@ class BattleActionsTest {
     entity.create();
   }
 
-  private static CardLibrary realLibrary() {
-    return new CardLibrary(
-        List.of(
-            card(
-                "strike",
-                CardType.ATTACK,
-                TargetType.SINGLE_ENEMY,
-                new EffectConfig(EffectType.DAMAGE, 6)),
-            card("defend", CardType.SKILL, TargetType.SELF, new EffectConfig(EffectType.BLOCK, 5)),
-            card(
-                "bandage", CardType.SKILL, TargetType.SELF, new EffectConfig(EffectType.HEAL, 4))));
-  }
-
   private static CardConfig card(String id, CardType type, TargetType target, EffectConfig effect) {
     CardConfig config = new CardConfig();
     config.id = id;

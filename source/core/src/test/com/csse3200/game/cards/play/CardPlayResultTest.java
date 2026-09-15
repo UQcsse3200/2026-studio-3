@@ -24,7 +24,6 @@ class CardPlayResultTest {
     assertEquals(CARD_ID, result.cardId());
     assertEquals(target, result.target());
     assertTrue(result.success());
-    assertTrue(result.successful());
     assertEquals(ENERGY_COST, result.energyCost());
     assertEquals(resolution, result.effectResolution());
     assertEquals(resolution, result.resolution());
@@ -44,10 +43,8 @@ class CardPlayResultTest {
     assertEquals(CARD_ID, result.cardId());
     assertEquals(target, result.target());
     assertFalse(result.success());
-    assertFalse(result.successful());
     assertEquals(ENERGY_COST, result.energyCost());
     assertNull(result.effectResolution());
-    assertNull(result.resolution());
     assertEquals(CardPlayFailureReason.NOT_ENOUGH_ENERGY, result.failureReason());
     assertEquals(snapshot, result.deckSnapshot());
   }
@@ -238,7 +235,6 @@ class CardPlayResultTest {
 
     assertEquals(CARD_ID, result.cardId());
     assertTrue(result.success());
-    assertTrue(result.successful());
     assertEquals(ENERGY_COST, result.energyCost());
     assertEquals(resolution, result.resolution());
     assertEquals(CardPlayFailureReason.NONE, result.failureReason());
