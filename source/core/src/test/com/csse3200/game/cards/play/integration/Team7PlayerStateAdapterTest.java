@@ -74,6 +74,17 @@ class Team7PlayerStateAdapterTest {
   }
 
   @Test
+  void shouldApplyFortifyAsArmourWithoutChangingBlock() {
+    CombatStatsComponent stats = new CombatStatsComponent(10, 1);
+    Team7PlayerStateAdapter adapter = new Team7PlayerStateAdapter(new EnergyComponent(3), stats);
+
+    adapter.applyPlayerEffects(List.of(effect(EffectType.FORTIFY, 4, 0, 0)));
+
+    assertEquals(4, stats.getArmor());
+    assertEquals(0, stats.getBlock());
+  }
+
+  @Test
   void shouldRejectUnsupportedEffectsBeforeChangingPlayerState() {
     CombatStatsComponent stats = new CombatStatsComponent(10, 1);
     Team7PlayerStateAdapter adapter = new Team7PlayerStateAdapter(new EnergyComponent(3), stats);

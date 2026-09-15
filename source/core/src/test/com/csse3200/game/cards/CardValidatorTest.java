@@ -190,6 +190,35 @@ class CardValidatorTest {
   }
 
   @Test
+  void shouldAcceptFortifyOnSelf() {
+    CardConfig card = validCard();
+    card.id = "iron_oath";
+    card.name = "Iron Oath";
+    card.type = CardType.SKILL;
+    card.rarity = Rarity.UNCOMMON;
+    card.target = TargetType.SELF;
+    card.effects = new EffectConfig[] {new EffectConfig(EffectType.FORTIFY, 4)};
+    card.texturePath = "images/cards/iron_oath.png";
+    assertTrue(CardValidator.isValid(card));
+    assertTrue(CardValidator.isCompatibleWithTarget(EffectType.FORTIFY, TargetType.SELF));
+  }
+
+  @Test
+  void shouldRejectFortifyInsideEnemyUpgradeBlock() {
+    CardConfig card = validCard();
+    com.csse3200.game.cards.configs.CardUpgradeConfig upgrade =
+        new com.csse3200.game.cards.configs.CardUpgradeConfig();
+    upgrade.name = "Bad+";
+    upgrade.description = "Invalid fortify on enemy.";
+    upgrade.cost = 1;
+    upgrade.rarity = Rarity.COMMON;
+    upgrade.effects = new EffectConfig[] {new EffectConfig(EffectType.FORTIFY, 4)};
+    card.upgrade = upgrade;
+
+    assertFalse(CardValidator.isValid(card));
+  }
+
+  @Test
   void shouldReportEveryProblemAtOnce() {
     CardConfig card = validCard();
     card.id = "";

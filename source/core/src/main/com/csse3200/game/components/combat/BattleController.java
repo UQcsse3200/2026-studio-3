@@ -823,6 +823,7 @@ public class BattleController {
           }
         }
         case CLEANSE -> stats.clearNegativeStatusEffects();
+        case FORTIFY -> stats.addArmor(effect.value());
         default -> {
           // STRENGTH is already folded into the resolver's running player state.
         }

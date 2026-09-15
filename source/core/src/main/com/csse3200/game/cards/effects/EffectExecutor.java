@@ -135,7 +135,8 @@ public class EffectExecutor {
     } else if (effect.type != EffectType.BLOCK
         && effect.type != EffectType.HEAL
         && effect.type != EffectType.ENERGY_GAIN
-        && effect.type != EffectType.CLEANSE) {
+        && effect.type != EffectType.CLEANSE
+        && effect.type != EffectType.FORTIFY) {
       throw new IllegalArgumentException("Unsupported self-targeting effect type: " + effect.type);
     }
 
@@ -148,7 +149,8 @@ public class EffectExecutor {
         && effect.type != EffectType.BLOCK
         && effect.type != EffectType.HEAL
         && effect.type != EffectType.ENERGY_GAIN
-        && effect.type != EffectType.CLEANSE) {
+        && effect.type != EffectType.CLEANSE
+        && effect.type != EffectType.FORTIFY) {
       throw new IllegalArgumentException("Unsupported self-targeting effect type: " + effect.type);
     }
 

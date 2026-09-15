@@ -199,13 +199,20 @@ public final class CardValidator {
     }
   }
 
-  private static boolean isCompatibleWithTarget(EffectType effectType, TargetType target) {
+  /**
+   * Target compatibility used for upgrade effects (and documented for future base-effect checks).
+   *
+   * <p>{@code FORTIFY} is SELF-only. Instant non-DAMAGE enemy effects must be listed here or they
+   * are rejected inside upgrade blocks.
+   */
+  static boolean isCompatibleWithTarget(EffectType effectType, TargetType target) {
     if (target == TargetType.SELF) {
       return effectType == EffectType.BLOCK
           || effectType == EffectType.HEAL
           || effectType == EffectType.STRENGTH
           || effectType == EffectType.ENERGY_GAIN
-          || effectType == EffectType.CLEANSE;
+          || effectType == EffectType.CLEANSE
+          || effectType == EffectType.FORTIFY;
     }
     return effectType == EffectType.DAMAGE
         || effectType == EffectType.PIERCE

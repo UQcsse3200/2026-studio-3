@@ -15,6 +15,15 @@ class PlayerDeckFactoryTest {
       TestCardService.withCards(
           "strike", "defend", "poison_dagger", "expose", "inner_focus", "bandage");
 
+  private static final CardService FORBIDDEN_CARDS =
+      TestCardService.withCards(
+          "strike",
+          "defend",
+          "sealed_pact",
+          "blood_price",
+          "doom_sigil",
+          "eclipse_decree");
+
   @Test
   void shouldCreateStarterDeckFromTeamSixCards() {
     PlayerDeck deck = PlayerDeckFactory.createStarterDeck(CARDS);
@@ -71,5 +80,34 @@ class PlayerDeckFactoryTest {
     assertTrue(first.getCards().stream().allMatch(card -> !card.isUpgraded()));
     assertTrue(
         first.getCards().stream().noneMatch(card -> second.containsInstance(card.instanceId())));
+  }
+
+  @Test
+  void shouldCreateForbiddenTestDeck() {
+    PlayerDeck deck = PlayerDeckFactory.createForbiddenTestDeck(FORBIDDEN_CARDS);
+
+    assertEquals(10, deck.size());
+    assertEquals(1, deck.countByCardId(PlayerDeckFactory.SEALED_PACT));
+    assertEquals(2, deck.countByCardId(PlayerDeckFactory.BLOOD_PRICE));
+    assertEquals(2, deck.countByCardId(PlayerDeckFactory.DOOM_SIGIL));
+    assertEquals(1, deck.countByCardId(PlayerDeckFactory.ECLIPSE_DECREE));
+  }
+
+  @Test
+  void shouldIncludeAllForbiddenCardIdsInTestDeck() {
+    List<String> cardIds = PlayerDeckFactory.getForbiddenTestDeckCardIds();
+
+    assertTrue(cardIds.contains(PlayerDeckFactory.SEALED_PACT));
+    assertTrue(cardIds.contains(PlayerDeckFactory.BLOOD_PRICE));
+    assertTrue(cardIds.contains(PlayerDeckFactory.DOOM_SIGIL));
+    assertTrue(cardIds.contains(PlayerDeckFactory.ECLIPSE_DECREE));
+  }
+
+  @Test
+  void shouldReturnImmutableForbiddenTestDeckIds() {
+    List<String> cardIds = PlayerDeckFactory.getForbiddenTestDeckCardIds();
+
+    assertThrows(
+        UnsupportedOperationException.class, () -> cardIds.add(PlayerDeckFactory.SEALED_PACT));
   }
 }

@@ -27,7 +27,12 @@ public enum EffectType {
   /** Immediate damage that ignores the target's block and armour. */
   PIERCE(false),
   /** Immediately removes poison, vulnerable and feeble from the target. */
-  CLEANSE(false);
+  CLEANSE(false),
+  /**
+   * Immediately increases the target's armour pool. Armour is a lasting damage-reduction pool on
+   * {@code CombatStatsComponent}, distinct from per-turn Block.
+   */
+  FORTIFY(false);
 
   private final boolean usesDuration;
 

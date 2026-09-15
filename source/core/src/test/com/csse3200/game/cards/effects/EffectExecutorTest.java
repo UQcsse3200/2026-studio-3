@@ -209,6 +209,27 @@ class EffectExecutorTest {
   }
 
   @Test
+  void shouldResolveFortifyOnSelfWithLiteralValue() {
+    assertEquals(
+        new ResolvedCardEffect("iron_oath", EffectType.FORTIFY, TargetType.SELF, 4, 0, 0),
+        executor.resolve(
+            "iron_oath", new EffectConfig(EffectType.FORTIFY, 4), TargetType.SELF, 0, playerState));
+  }
+
+  @Test
+  void shouldRejectFortifyOnEnemyTargets() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            executor.resolve(
+                "iron_oath",
+                new EffectConfig(EffectType.FORTIFY, 4),
+                TargetType.SINGLE_ENEMY,
+                0,
+                playerState));
+  }
+
+  @Test
   void shouldReturnPlayerEffectsWithoutApplyingExternalPlayerState() {
     assertEquals(
         new ResolvedCardEffect("defend", EffectType.BLOCK, TargetType.SELF, 5, 0, 0),
