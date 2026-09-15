@@ -82,9 +82,10 @@ class ShopSprint2IntegrationTest {
   }
 
   @Test
-  void shouldPreserveMoneyDeckOrderAndStockWhenCurrencyCommitFails() {
+  void shouldRollbackExactPurchasedInstanceWhenCurrencyCommitFails() {
     CardService cardService = new CardLibrary(CardConfigLoader.loadCards());
-    PlayerDeck playerDeck = new PlayerDeck(List.of("strike", "defend"));
+    PlayerDeck playerDeck = new PlayerDeck(cardService, List.of("strike", "defend", "strike"));
+    List<CardInstance> deckBefore = playerDeck.getCards();
     MockPlayerStateGateway player = new MockPlayerStateGateway(100, 50);
     player.failNextCurrencyUpdate();
     ShopItem offer = new ShopItem("strike-offer", "strike", "Strike", 20, 1);
@@ -98,7 +99,8 @@ class ShopSprint2IntegrationTest {
     assertFalse(result.isSuccess());
     assertEquals(PurchaseResult.Status.TRANSACTION_FAILED, result.getStatus());
     assertEquals(50, player.getCurrency());
-    assertEquals(List.of("strike", "defend"), cardIds(playerDeck));
+    assertEquals(deckBefore, playerDeck.getCards());
+    assertEquals(List.of("strike", "defend", "strike"), cardIds(playerDeck));
     assertEquals(1, offer.stock);
   }
 
