@@ -16,12 +16,22 @@ public record CardPlayResult(
     CardPlayFailureReason failureReason,
     DeckSnapshot deckSnapshot) {
   public CardPlayResult {
+    validateIdentity(instanceId, cardId, success);
+    validateCommonFields(energyCost, failureReason, deckSnapshot);
+    validateOutcome(success, effectResolution, failureReason);
+  }
+
+  private static void validateIdentity(String instanceId, String cardId, boolean success) {
     if (instanceId == null || instanceId.isBlank()) {
       throw new IllegalArgumentException("Instance ID cannot be null or blank");
     }
     if (success && (cardId == null || cardId.isBlank())) {
       throw new IllegalArgumentException("Successful play must identify its card definition");
     }
+  }
+
+  private static void validateCommonFields(
+      int energyCost, CardPlayFailureReason failureReason, DeckSnapshot deckSnapshot) {
     if (energyCost < 0) {
       throw new IllegalArgumentException("Energy cost cannot be negative");
     }
@@ -31,20 +41,29 @@ public record CardPlayResult(
     if (deckSnapshot == null) {
       throw new IllegalArgumentException("Card play deck snapshot cannot be null");
     }
+  }
+
+  private static void validateOutcome(
+      boolean success, CardEffectResolution effectResolution, CardPlayFailureReason failureReason) {
     if (success) {
-      if (failureReason != CardPlayFailureReason.NONE) {
-        throw new IllegalArgumentException("Successful card play cannot have a failure reason");
-      }
-      if (effectResolution == null) {
-        throw new IllegalArgumentException("Successful card play must include a resolution");
-      }
-    } else {
-      if (failureReason == CardPlayFailureReason.NONE) {
-        throw new IllegalArgumentException("Failed card play must include a failure reason");
-      }
-      if (effectResolution != null) {
-        throw new IllegalArgumentException("Failed card play cannot include a resolution");
-      }
+      validateSuccessfulOutcome(effectResolution, failureReason);
+      return;
+    }
+    if (failureReason == CardPlayFailureReason.NONE) {
+      throw new IllegalArgumentException("Failed card play must include a failure reason");
+    }
+    if (effectResolution != null) {
+      throw new IllegalArgumentException("Failed card play cannot include a resolution");
+    }
+  }
+
+  private static void validateSuccessfulOutcome(
+      CardEffectResolution effectResolution, CardPlayFailureReason failureReason) {
+    if (failureReason != CardPlayFailureReason.NONE) {
+      throw new IllegalArgumentException("Successful card play cannot have a failure reason");
+    }
+    if (effectResolution == null) {
+      throw new IllegalArgumentException("Successful card play must include a resolution");
     }
   }
 

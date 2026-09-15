@@ -508,7 +508,7 @@ public class BattleController {
     return this.pendingCard;
   }
 
-  public Boolean submitCardPlayRequest(CardPlayRequest cardPlayRequest, PlayerIntent playerIntent) {
+  public boolean submitCardPlayRequest(CardPlayRequest cardPlayRequest, PlayerIntent playerIntent) {
     Objects.requireNonNull(cardPlayRequest, "cardPlayRequest cannot be null.");
     Objects.requireNonNull(playerIntent, "playerIntent cannot be null.");
     BattleEvent event =
@@ -774,6 +774,7 @@ public class BattleController {
       for (ResolvedCardEffect effect : effects) {
         switch (effect.type()) {
           case DAMAGE -> stats.takeDamage(effect.value());
+          case PIERCE -> stats.takePiercingDamage(effect.value());
           case POISON ->
               stats.applyStatusEffect(
                   new StatusEffect("poison", effect.value(), effect.duration()));

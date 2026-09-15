@@ -96,14 +96,6 @@ public class PlayerDeck {
   }
 
   /**
-   * @deprecated Acquisition callers should explicitly create and add a CardInstance.
-   */
-  @Deprecated
-  public void addCard(String cardId) {
-    addCard(instanceFactory.create(cardId));
-  }
-
-  /**
    * Checks whether a card may be added to this player deck.
    *
    * <p>Sprint 1 allows duplicate cards and has no deck-size limit, so this check only verifies that
@@ -182,30 +174,6 @@ public class PlayerDeck {
   /** Returns an immutable snapshot preserving identity, order and upgrade level. */
   public List<CardInstance> getCards() {
     return List.copyOf(cards);
-  }
-
-  /**
-   * @deprecated Definition-only projection loses instance identity and upgrade state.
-   */
-  @Deprecated
-  public List<String> getCardIds() {
-    return cards.stream().map(CardInstance::cardId).toList();
-  }
-
-  /**
-   * @deprecated Use countByCardId to make definition-level intent explicit.
-   */
-  @Deprecated
-  public int count(String cardId) {
-    return countByCardId(cardId);
-  }
-
-  /**
-   * @deprecated Definition-level query; use containsInstance for an exact owned copy.
-   */
-  @Deprecated
-  public boolean contains(String cardId) {
-    return countByCardId(cardId) > 0;
   }
 
   /**

@@ -194,6 +194,8 @@ public final class CardValidator {
           || effectType == EffectType.ENERGY_GAIN
           || effectType == EffectType.CLEANSE;
     }
-    return effectType == EffectType.DAMAGE || effectType.usesDuration();
+    return effectType == EffectType.DAMAGE
+        || effectType == EffectType.PIERCE
+        || effectType.usesDuration();
   }
 }

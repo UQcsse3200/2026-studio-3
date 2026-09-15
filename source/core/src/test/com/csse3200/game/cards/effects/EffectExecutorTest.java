@@ -250,36 +250,65 @@ class EffectExecutorTest {
 
   @Test
   void shouldValidateEffectConfigValues() {
+    EffectConfig nullType = new EffectConfig(null, 1);
+    EffectConfig zeroDamage = new EffectConfig(EffectType.DAMAGE, 0);
+    EffectConfig lastingDamage = new EffectConfig(EffectType.DAMAGE, 1, 1);
+    EffectConfig poisonWithoutDuration = new EffectConfig(EffectType.POISON, 1);
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> executor.resolve("bad", nullType, TargetType.SINGLE_ENEMY, 0, playerState));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> executor.resolve("bad", zeroDamage, TargetType.SINGLE_ENEMY, 0, playerState));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> executor.resolve("bad", lastingDamage, TargetType.SINGLE_ENEMY, 0, playerState));
     assertThrows(
         IllegalArgumentException.class,
         () ->
             executor.resolve(
-                "bad", new EffectConfig(null, 1), TargetType.SINGLE_ENEMY, 0, playerState));
+                "bad", poisonWithoutDuration, TargetType.SINGLE_ENEMY, 0, playerState));
+  }
+
+  @Test
+  void shouldResolvePierceWithLiteralValueAndRejectSelfTarget() {
+    playerState.addStrength(5);
+
+    ResolvedCardEffect playerStateResult =
+        executor.resolve(
+            "poison_blade",
+            new EffectConfig(EffectType.PIERCE, 10),
+            TargetType.SINGLE_ENEMY,
+            0,
+            playerState);
+
+    assertEquals(
+        new ResolvedCardEffect(
+            "poison_blade", EffectType.PIERCE, TargetType.SINGLE_ENEMY, 10, 0, 0),
+        playerStateResult);
+
+    CardEffectResolutionContext context = new CardEffectResolutionContext(5, 1, 1);
+    ResolvedCardEffect contextResult =
+        executor.resolve(
+            "poison_blade",
+            new EffectConfig(EffectType.PIERCE, 10),
+            TargetType.SINGLE_ENEMY,
+            0,
+            context);
+
+    assertEquals(
+        new ResolvedCardEffect(
+            "poison_blade", EffectType.PIERCE, TargetType.SINGLE_ENEMY, 10, 0, 0),
+        contextResult);
+
     assertThrows(
         IllegalArgumentException.class,
         () ->
             executor.resolve(
-                "bad",
-                new EffectConfig(EffectType.DAMAGE, 0),
-                TargetType.SINGLE_ENEMY,
-                0,
-                playerState));
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            executor.resolve(
-                "bad",
-                new EffectConfig(EffectType.DAMAGE, 1, 1),
-                TargetType.SINGLE_ENEMY,
-                0,
-                playerState));
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            executor.resolve(
-                "bad",
-                new EffectConfig(EffectType.POISON, 1),
-                TargetType.SINGLE_ENEMY,
+                "poison_blade",
+                new EffectConfig(EffectType.PIERCE, 10),
+                TargetType.SELF,
                 0,
                 playerState));
   }

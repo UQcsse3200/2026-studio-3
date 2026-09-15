@@ -52,7 +52,9 @@ class BattleDeckTest {
 
     battleDeck.drawOne();
 
-    assertIterableEquals(List.of("strike", "defend"), playerDeck.getCardIds());
+    assertIterableEquals(
+        List.of("strike", "defend"),
+        playerDeck.getCards().stream().map(CardInstance::cardId).toList());
     assertIterableEquals(
         List.of("defend"),
         battleDeck.getDrawPile().stream()
@@ -173,28 +175,13 @@ class BattleDeckTest {
   @Test
   void shouldReturnImmutableSnapshots() {
     BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend")));
+    List<CardInstance> drawPile = battleDeck.getDrawPile();
+    List<CardInstance> hand = battleDeck.getHand();
+    List<CardInstance> discardPile = battleDeck.getDiscardPile();
 
-    assertThrows(
-        UnsupportedOperationException.class,
-        () ->
-            battleDeck.getDrawPile().stream()
-                .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-                .toList()
-                .add("bandage"));
-    assertThrows(
-        UnsupportedOperationException.class,
-        () ->
-            battleDeck.getHand().stream()
-                .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-                .toList()
-                .add("bandage"));
-    assertThrows(
-        UnsupportedOperationException.class,
-        () ->
-            battleDeck.getDiscardPile().stream()
-                .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-                .toList()
-                .add("bandage"));
+    assertThrows(UnsupportedOperationException.class, drawPile::clear);
+    assertThrows(UnsupportedOperationException.class, hand::clear);
+    assertThrows(UnsupportedOperationException.class, discardPile::clear);
 
     assertIterableEquals(
         List.of("strike", "defend"),

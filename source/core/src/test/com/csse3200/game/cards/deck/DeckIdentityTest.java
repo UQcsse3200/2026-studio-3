@@ -68,23 +68,20 @@ class DeckIdentityTest {
   void rejectsDuplicateIdentityEvenAcrossDifferentDefinitionsWithoutMutation() {
     List<CardInstance> before = player.getCards();
     CardInstance first = before.get(0);
+    CardInstance duplicateIdentity = new CardInstance(first.instanceId(), "defend", 0);
     assertThrows(IllegalArgumentException.class, () -> player.addCard(first));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> player.addCard(new CardInstance(first.instanceId(), "defend", 0)));
+    assertThrows(IllegalArgumentException.class, () -> player.addCard(duplicateIdentity));
     assertEquals(before, player.getCards());
   }
 
   @Test
   void rejectsInvalidInstancesAndMissingUpgradeDefinitionsWithoutMutation() {
     List<CardInstance> before = player.getCards();
+    CardInstance unknown = new CardInstance("unknown", "unknown", 0);
+    CardInstance missingUpgrade = new CardInstance("defend-plus", "defend", 1);
     assertThrows(IllegalArgumentException.class, () -> player.addCard((CardInstance) null));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> player.addCard(new CardInstance("unknown", "unknown", 0)));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> player.addCard(new CardInstance("defend-plus", "defend", 1)));
+    assertThrows(IllegalArgumentException.class, () -> player.addCard(unknown));
+    assertThrows(IllegalArgumentException.class, () -> player.addCard(missingUpgrade));
     assertThrows(IllegalArgumentException.class, () -> player.getCard(" "));
     assertThrows(IllegalArgumentException.class, () -> player.removeCard(null));
     assertEquals(before, player.getCards());
@@ -98,7 +95,8 @@ class DeckIdentityTest {
     assertThrows(IllegalArgumentException.class, () -> player.upgradeCard("strike"));
     assertThrows(IllegalArgumentException.class, () -> player.upgradeCard("missing"));
     assertThrows(IllegalArgumentException.class, () -> player.upgradeCard("defend-instance"));
-    assertThrows(IllegalStateException.class, () -> player.upgradeCard(before.get(1).instanceId()));
+    String alreadyUpgradedId = before.get(1).instanceId();
+    assertThrows(IllegalStateException.class, () -> player.upgradeCard(alreadyUpgradedId));
     assertEquals(before, player.getCards());
   }
 
@@ -115,7 +113,7 @@ class DeckIdentityTest {
     copy.upgradeCard(before.get(0).instanceId());
     copy.removeCard(before.get(2).instanceId());
     assertEquals(before, player.getCards());
-    assertThrows(UnsupportedOperationException.class, () -> before.clear());
+    assertThrows(UnsupportedOperationException.class, before::clear);
     player.clear();
     assertEquals(3, before.size());
     assertEquals(3, restored.size());
@@ -125,10 +123,10 @@ class DeckIdentityTest {
   @Test
   void restoreRejectsNullCollectionsAndDuplicateInstances() {
     CardInstance card = player.getCards().get(0);
+    List<CardInstance> duplicateCards = List.of(card, card);
     assertThrows(IllegalArgumentException.class, () -> PlayerDeck.fromInstances(service, null));
     assertThrows(
-        IllegalArgumentException.class,
-        () -> PlayerDeck.fromInstances(service, List.of(card, card)));
+        IllegalArgumentException.class, () -> PlayerDeck.fromInstances(service, duplicateCards));
   }
 
   @Test

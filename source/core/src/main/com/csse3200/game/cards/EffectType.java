@@ -22,6 +22,8 @@ public enum EffectType {
   STRENGTH(false),
   /** Immediately restores player energy, capped by the player's maximum energy. */
   ENERGY_GAIN(false),
+  /** Immediate damage that ignores the target's block and armour. */
+  PIERCE(false),
   /** Immediately removes poison, vulnerable and feeble from the target. */
   CLEANSE(false);
 

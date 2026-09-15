@@ -392,6 +392,8 @@ class CardPlayServiceTest {
             List.of(
                 new ResolvedCardEffect(
                     "strike", EffectType.DAMAGE, TargetType.SINGLE_ENEMY, 6, 0, 0)));
+    CardPlayTarget selfTarget = CardPlayTarget.self();
+    DeckSnapshot emptyDeck = DeckSnapshot.empty();
 
     assertThrows(
         IllegalArgumentException.class,
@@ -399,48 +401,48 @@ class CardPlayServiceTest {
             new CardPlayResult(
                 "strike-instance",
                 "strike",
-                CardPlayTarget.self(),
+                selfTarget,
                 true,
                 1,
                 null,
                 CardPlayFailureReason.NONE,
-                DeckSnapshot.empty()));
+                emptyDeck));
     assertThrows(
         IllegalArgumentException.class,
         () ->
             new CardPlayResult(
                 "strike-instance",
                 "strike",
-                CardPlayTarget.self(),
+                selfTarget,
                 true,
                 1,
                 resolution,
                 CardPlayFailureReason.NOT_ENOUGH_ENERGY,
-                DeckSnapshot.empty()));
+                emptyDeck));
     assertThrows(
         IllegalArgumentException.class,
         () ->
             new CardPlayResult(
                 "strike-instance",
                 "strike",
-                CardPlayTarget.self(),
+                selfTarget,
                 false,
                 1,
                 null,
                 CardPlayFailureReason.NONE,
-                DeckSnapshot.empty()));
+                emptyDeck));
     assertThrows(
         IllegalArgumentException.class,
         () ->
             new CardPlayResult(
                 "strike-instance",
                 "strike",
-                CardPlayTarget.self(),
+                selfTarget,
                 false,
                 1,
                 resolution,
                 CardPlayFailureReason.CARD_NOT_IN_HAND,
-                DeckSnapshot.empty()));
+                emptyDeck));
   }
 
   @Test

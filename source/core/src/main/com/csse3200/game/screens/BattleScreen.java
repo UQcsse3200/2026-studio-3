@@ -227,13 +227,11 @@ public class BattleScreen extends ScreenAdapter {
     float x = HAND_START_X;
     for (var instance : battleDeck.getHand()) {
       String cardId = instance.cardId();
-      Optional<CardConfig> maybeCard = library.getCard(cardId);
-      if (maybeCard.isEmpty()) {
-        logger.warn("Card ID {} in hand not found in library, skipping", cardId);
+      var resolved = controller.resolveCardInHand(instance.instanceId());
+      if (resolved.isEmpty()) {
+        logger.warn("Card ID {} in hand could not be resolved, skipping", cardId);
         continue;
       }
-      var resolved = controller.resolveCardInHand(instance.instanceId());
-      if (resolved.isEmpty()) continue;
       var card = resolved.get();
       boolean selfTarget = card.target() == TargetType.SELF;
       String variant = selfTarget ? "inout" : "drag";
