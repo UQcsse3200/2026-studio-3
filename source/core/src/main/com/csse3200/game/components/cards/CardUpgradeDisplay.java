@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -24,6 +25,8 @@ public class CardUpgradeDisplay extends UIComponent {
   private static final Color UPGRADE = new Color(0.18f, 0.48f, 0.29f, 1f);
   private static final Color SELECTED_FACE = new Color(0.86f, 0.95f, 0.82f, 1f);
   private static final Color DISABLED_FACE = new Color(0.62f, 0.60f, 0.55f, 1f);
+  private static final Color SCRIM = new Color(0.02f, 0.02f, 0.02f, 0.76f);
+  private static final Color PANEL = new Color(0.10f, 0.08f, 0.06f, 0.95f);
   private final Map<Integer, Table> tilesByDeckIndex = new LinkedHashMap<>();
   private final CardUpgradeCommitter committer;
   private Table buttonTable;
@@ -63,12 +66,26 @@ public class CardUpgradeDisplay extends UIComponent {
             toggleLibrary();
           }
         });
-
+    cardsButton.addListener(
+        new InputListener() {
+          @Override
+          public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+            event.stop();
+            return true;
+          }
+        });
     buttonTable.add(cardsButton).width(96f).height(40f).right();
 
     libraryOverlay = createLibraryOverlay();
     libraryOverlay.setVisible(false);
-
+    libraryOverlay.addListener(
+        new InputListener() {
+          @Override
+          public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+            event.stop();
+            return true;
+          }
+        });
     stage.addActor(buttonTable);
     stage.addActor(libraryOverlay);
     refresh();
@@ -78,13 +95,13 @@ public class CardUpgradeDisplay extends UIComponent {
     Table overlay = new Table();
     overlay.setFillParent(true);
     overlay.setTouchable(Touchable.enabled);
-    overlay.setBackground(skin.newDrawable("white", CARD_FACE));
+    overlay.setBackground(skin.newDrawable("white", SCRIM));
     overlay.pad(34f);
 
     Table libraryPanel = new Table();
     libraryPanel.top();
     libraryPanel.defaults().pad(6f);
-    libraryPanel.setBackground(skin.newDrawable("white", CARD_FACE));
+    libraryPanel.setBackground(skin.newDrawable("white", PANEL));
     libraryPanel.pad(18f);
 
     Table header = new Table();
@@ -147,6 +164,9 @@ public class CardUpgradeDisplay extends UIComponent {
   private void toggleLibrary() {
     libraryVisible = !libraryVisible;
     libraryOverlay.setVisible(libraryVisible);
+    if (libraryVisible) {
+      libraryOverlay.toFront();
+    }
   }
 
   private void hideLibrary() {
