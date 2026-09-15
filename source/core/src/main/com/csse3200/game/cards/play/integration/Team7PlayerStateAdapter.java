@@ -69,6 +69,7 @@ public final class Team7PlayerStateAdapter implements PlayerStateView, PlayerEff
         }
         case STRENGTH ->
             combatStats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
+        case ENERGY_GAIN -> energy.restoreEnergy(effect.value());
         default -> throw unsupportedPlayerEffect(effect.type());
       }
     }
@@ -87,7 +88,8 @@ public final class Team7PlayerStateAdapter implements PlayerStateView, PlayerEff
       }
       if (effect.type() != EffectType.BLOCK
           && effect.type() != EffectType.HEAL
-          && effect.type() != EffectType.STRENGTH) {
+          && effect.type() != EffectType.STRENGTH
+          && effect.type() != EffectType.ENERGY_GAIN) {
         throw unsupportedPlayerEffect(effect.type());
       }
     }

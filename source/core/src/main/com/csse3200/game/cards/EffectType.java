@@ -21,7 +21,9 @@ public enum EffectType {
   /** Increases damage the target deals for the rest of the combat. */
   STRENGTH(false),
   /** Immediate reduction of the target's armour pool. */
-  SUNDER(false);
+  SUNDER(false),
+  /** Immediately restores player energy, capped by the player's maximum energy. */
+  ENERGY_GAIN(false);
 
   private final boolean usesDuration;
 

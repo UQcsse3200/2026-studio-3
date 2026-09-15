@@ -787,6 +787,12 @@ public class BattleController {
             stats.heal(effect.value());
           }
         }
+        case ENERGY_GAIN -> {
+          EnergyComponent energy = playerEnergy();
+          if (energy != null) {
+            energy.restoreEnergy(effect.value());
+          }
+        }
         default -> {
           // STRENGTH is already folded into the resolver's running player state.
         }

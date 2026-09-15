@@ -154,14 +154,15 @@
       {
         "id": "astral_ward",
         "name": "Astral Ward",
-        "description": "Gain 4 Block. Gain 1 Strength for the rest of combat.",
+        "description": "Gain 4 Block and 1 Strength for the rest of combat. Restore 1 Energy.",
         "cost": 2,
         "type": "SKILL",
         "rarity": "UNCOMMON",
         "target": "SELF",
         "effects": [
           { "type": "BLOCK", "value": 4, "duration": 0 },
-          { "type": "STRENGTH", "value": 1, "duration": 0 }
+          { "type": "STRENGTH", "value": 1, "duration": 0 },
+          { "type": "ENERGY_GAIN", "value": 1, "duration": 0 }
         ],
         "texturePath": "images/cards/astral_ward.png"
       },

@@ -44,6 +44,18 @@ class Team7PlayerStateAdapterTest {
   }
 
   @Test
+  void shouldRestoreEnergyWithoutExceedingMaximumWhenApplyingEnergyGain() {
+    EnergyComponent energy = new EnergyComponent(3);
+    energy.spendEnergy(2);
+    Team7PlayerStateAdapter adapter =
+        new Team7PlayerStateAdapter(energy, new CombatStatsComponent(10, 1));
+
+    adapter.applyPlayerEffects(List.of(effect(EffectType.ENERGY_GAIN, 5, 0, 0)));
+
+    assertEquals(3, energy.getCurrentEnergy());
+  }
+
+  @Test
   void shouldRejectUnsupportedEffectsBeforeChangingPlayerState() {
     CombatStatsComponent stats = new CombatStatsComponent(10, 1);
     Team7PlayerStateAdapter adapter = new Team7PlayerStateAdapter(new EnergyComponent(3), stats);
