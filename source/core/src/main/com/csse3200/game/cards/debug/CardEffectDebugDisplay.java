@@ -82,6 +82,10 @@ public class CardEffectDebugDisplay extends UIComponent {
     boolean open = debug.isOpen();
     window.setVisible(open);
     if (open) {
+      // Bring the window back above anything added to the stage since it was created — e.g. the
+      // hand gets rebuilt (fresh actors added to the same stage) every time a card is played,
+      // which otherwise renders those cards in front of an already-open dialog.
+      window.toFront();
       refreshRows();
     }
   }
