@@ -88,7 +88,8 @@ class InstanceCardPlayTest {
     assertEquals(6, strike.effects[0].value);
     assertEquals(1, strike.cost);
     assertFalse(base.isUpgraded());
-    assertThrows(UnsupportedOperationException.class, () -> result.updatedHand().clear());
+    List<CardInstance> updatedHand = result.updatedHand();
+    assertThrows(UnsupportedOperationException.class, updatedHand::clear);
     service.playCard(CardPlayRequest.singleEnemy(other.instanceId(), "enemy"));
     assertEquals(List.of(base, other), result.updatedHand());
   }
@@ -176,9 +177,8 @@ class InstanceCardPlayTest {
         new CardEffectResolutionService(broken, new PlayerEffectState(), new TurnEffectStore());
     var play = new CardPlayService(library, resolutions, deck, energy);
     var before = DeckSnapshot.from(deck);
-    assertThrows(
-        IllegalStateException.class,
-        () -> play.playCard(CardPlayRequest.singleEnemy(plus.instanceId(), "enemy")));
+    var request = CardPlayRequest.singleEnemy(plus.instanceId(), "enemy");
+    assertThrows(IllegalStateException.class, () -> play.playCard(request));
     assertEquals(3, energy.getCurrentEnergy());
     assertEquals(before, DeckSnapshot.from(deck));
     assertTrue(resolutions.getResolutions().isEmpty());
@@ -206,9 +206,8 @@ class InstanceCardPlayTest {
     failingDeck.drawCards(2);
     var before = DeckSnapshot.from(failingDeck);
     var play = new CardPlayService(library, failingDeck, energy);
-    assertThrows(
-        IllegalStateException.class,
-        () -> play.playCard(CardPlayRequest.singleEnemy(plus.instanceId(), "enemy")));
+    var request = CardPlayRequest.singleEnemy(plus.instanceId(), "enemy");
+    assertThrows(IllegalStateException.class, () -> play.playCard(request));
     assertEquals(3, energy.getCurrentEnergy());
     assertEquals(before, DeckSnapshot.from(failingDeck));
   }

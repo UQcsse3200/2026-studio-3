@@ -112,27 +112,13 @@ public class BattleActions extends Component {
   /** Routes a playCard(instanceId, targetId) event using the selected copy's resolved values. */
   private void onCardPlayed(String instanceId, String targetId) {
     var selected = controller.resolveCardInHand(instanceId);
-    if (selected.isEmpty() || playerIsBlockedFromPlayingCards()) return;
+    if (selected.isEmpty()) return;
     ResolvedCard card = selected.get();
     if (targetId == null || targetId.isBlank()) return;
     CardPlayRequest request = CardPlayRequest.fromUi(instanceId, card.target(), targetId);
     if (controller.submitCardPlayRequest(request, classifyCard(card))) {
       entity.getEvents().trigger("cardPlayed", card.name(), targetId);
     }
-  }
-
-  /**
-   * Whether a status effect currently prevents the player from playing cards.
-   *
-   * <p>Hook point for Team 1's boss mechanics. Rejecting here reuses the existing rejection path:
-   * "cardPlayed" is not fired, energy is not spent and the card stays in hand, exactly as when the
-   * controller declines the request.
-   *
-   * @return true if the play should be rejected before reaching the controller
-   */
-  private boolean playerIsBlockedFromPlayingCards() {
-    // Always false until #140 implements the silence check.
-    return false;
   }
 
   //  private void selectAttack() {

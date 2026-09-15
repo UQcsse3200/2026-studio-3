@@ -136,7 +136,6 @@ class BattleActionsTest {
   void shouldSubmitAttackCardWithAttackIntent() {
     BattleController mockController = mockControllerWithCards();
     GdxGame mockGame = mock(GdxGame.class);
-    CardLibrary library = realLibrary();
     Entity battleUI = new Entity().addComponent(new BattleActions(mockController, mockGame));
     battleUI.create();
 

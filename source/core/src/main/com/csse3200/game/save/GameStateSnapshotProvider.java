@@ -1,6 +1,7 @@
 package com.csse3200.game.save;
 
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.entities.Entity;
@@ -55,7 +56,7 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
   }
 
   private DeckSaveData captureDeck() {
-    return new DeckSaveData(playerDeck.getCardIds());
+    return new DeckSaveData(playerDeck.getCards().stream().map(CardInstance::cardId).toList());
   }
 
   private MapSaveData captureMap() {

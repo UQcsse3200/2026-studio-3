@@ -508,7 +508,7 @@ public class BattleController {
     return this.pendingCard;
   }
 
-  public Boolean submitCardPlayRequest(CardPlayRequest cardPlayRequest, PlayerIntent playerIntent) {
+  public boolean submitCardPlayRequest(CardPlayRequest cardPlayRequest, PlayerIntent playerIntent) {
     Objects.requireNonNull(cardPlayRequest, "cardPlayRequest cannot be null.");
     Objects.requireNonNull(playerIntent, "playerIntent cannot be null.");
     BattleEvent event =
