@@ -3,6 +3,7 @@ package com.csse3200.game.cards.deck;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -29,7 +30,7 @@ class PlayerDeckTest {
 
     assertTrue(deck.isEmpty());
     assertEquals(0, deck.size());
-    assertTrue(deck.getCards().isEmpty());
+    assertTrue(deck.getCardIds().isEmpty());
   }
 
   @Test
@@ -37,20 +38,21 @@ class PlayerDeckTest {
     PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike", "defend", "bandage"));
 
     assertEquals(3, deck.size());
-    assertIterableEquals(List.of("strike", "defend", "bandage"), cardIds(deck));
+    assertIterableEquals(List.of("strike", "defend", "bandage"), deck.getCardIds());
   }
 
   @Test
   void shouldAddAndCountDuplicateCards() {
     PlayerDeck deck = new PlayerDeck(CARDS);
 
-    deck.addCard(new CardInstance("strike-1", "strike", 0));
-    deck.addCard(new CardInstance("strike-2", "strike", 0));
-    deck.addCard(new CardInstance("defend-1", "defend", 0));
+    deck.addCard("strike");
+    deck.addCard("strike");
+    deck.addCard("defend");
 
     assertEquals(3, deck.size());
     assertEquals(2, deck.countByCardId("strike"));
     assertEquals(1, deck.countByCardId("defend"));
+    assertTrue(deck.contains("strike"));
   }
 
   @Test
@@ -80,10 +82,9 @@ class PlayerDeckTest {
   void shouldRejectUnknownCardWithoutChangingDeck() {
     PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike"));
 
-    CardInstance unknown = new CardInstance("unknown-instance", "unknown_card", 0);
-    assertThrows(IllegalArgumentException.class, () -> deck.addCard(unknown));
+    assertThrows(IllegalArgumentException.class, () -> deck.addCard("unknown_card"));
 
-    assertIterableEquals(List.of("strike"), cardIds(deck));
+    assertIterableEquals(List.of("strike"), deck.getCardIds());
   }
 
   @Test
@@ -92,16 +93,16 @@ class PlayerDeckTest {
 
     deck.addCards(List.of("strike", "defend", "poison_dagger"));
 
-    assertIterableEquals(List.of("strike", "defend", "poison_dagger"), cardIds(deck));
+    assertIterableEquals(List.of("strike", "defend", "poison_dagger"), deck.getCardIds());
   }
 
   @Test
-  void shouldRemoveSelectedInstanceOnly() {
+  void shouldRemoveFirstMatchingCardOnly() {
     PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike", "defend", "strike"));
 
-    assertTrue(deck.removeCard(deck.getCards().get(0).instanceId()));
+    assertTrue(deck.removeCard("strike"));
 
-    assertIterableEquals(List.of("defend", "strike"), cardIds(deck));
+    assertIterableEquals(List.of("defend", "strike"), deck.getCardIds());
     assertEquals(1, deck.countByCardId("strike"));
   }
 
@@ -111,26 +112,27 @@ class PlayerDeckTest {
 
     assertFalse(deck.removeCard("bandage"));
 
-    assertIterableEquals(List.of("strike", "defend"), cardIds(deck));
+    assertIterableEquals(List.of("strike", "defend"), deck.getCardIds());
   }
 
   @Test
   void shouldRemoveCardAtPosition() {
     PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike", "defend", "bandage"));
 
-    CardInstance removed = deck.removeCardAt(1);
+    String removed = deck.removeCardAt(1);
 
-    assertEquals("defend", removed.cardId());
-    assertIterableEquals(List.of("strike", "bandage"), cardIds(deck));
+    assertEquals("defend", removed);
+    assertIterableEquals(List.of("strike", "bandage"), deck.getCardIds());
   }
 
   @Test
-  void shouldRejectInvalidCards() {
+  void shouldRejectInvalidCardIds() {
     PlayerDeck deck = new PlayerDeck(CARDS);
-    CardInstance unknown = new CardInstance("unknown-instance", "unknown_card", 0);
 
-    assertThrows(IllegalArgumentException.class, () -> deck.addCard((CardInstance) null));
-    assertThrows(IllegalArgumentException.class, () -> deck.addCard(unknown));
+    assertThrows(IllegalArgumentException.class, () -> deck.addCard((String) null));
+    assertThrows(IllegalArgumentException.class, () -> deck.addCard(""));
+    assertThrows(IllegalArgumentException.class, () -> deck.addCard("  "));
+    assertThrows(IllegalArgumentException.class, () -> deck.addCard("unknown_card"));
     assertThrows(IllegalArgumentException.class, () -> deck.addCards(null));
     assertThrows(
         IllegalArgumentException.class, () -> new PlayerDeck(CARDS, List.of("strike", "")));
@@ -139,11 +141,11 @@ class PlayerDeckTest {
   @Test
   void shouldReturnImmutableSnapshot() {
     PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike", "defend"));
-    List<CardInstance> snapshot = deck.getCards();
+    List<String> snapshot = deck.getCardIds();
 
-    assertThrows(UnsupportedOperationException.class, snapshot::clear);
+    assertThrows(UnsupportedOperationException.class, () -> snapshot.add("bandage"));
 
-    assertIterableEquals(List.of("strike", "defend"), cardIds(deck));
+    assertIterableEquals(List.of("strike", "defend"), deck.getCardIds());
   }
 
   @Test
@@ -151,11 +153,23 @@ class PlayerDeckTest {
     PlayerDeck original = new PlayerDeck(CARDS, List.of("strike", "defend"));
     PlayerDeck copy = original.copy();
 
-    copy.addCard(new CardInstance("bandage-copy", "bandage", 0));
-    original.removeCard(original.getCards().get(0).instanceId());
+    copy.addCard("bandage");
+    original.removeCard("strike");
 
-    assertIterableEquals(List.of("defend"), cardIds(original));
-    assertIterableEquals(List.of("strike", "defend", "bandage"), cardIds(copy));
+    assertIterableEquals(List.of("defend"), original.getCardIds());
+    assertIterableEquals(List.of("strike", "defend", "bandage"), copy.getCardIds());
+  }
+
+  @Test
+  void shouldGiveEachAddedCardAUniqueInstanceId() {
+    PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike", "strike"));
+
+    List<CardInstance> cards = deck.getCards();
+
+    assertEquals(2, cards.size());
+    assertEquals("strike", cards.get(0).cardId());
+    assertEquals("strike", cards.get(1).cardId());
+    assertNotEquals(cards.get(0).instanceId(), cards.get(1).instanceId());
   }
 
   @Test
@@ -166,9 +180,5 @@ class PlayerDeckTest {
 
     assertTrue(deck.isEmpty());
     assertEquals(0, deck.size());
-  }
-
-  private static List<String> cardIds(PlayerDeck deck) {
-    return deck.getCards().stream().map(CardInstance::cardId).toList();
   }
 }

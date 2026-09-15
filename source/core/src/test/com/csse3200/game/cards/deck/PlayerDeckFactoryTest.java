@@ -23,8 +23,10 @@ class PlayerDeckFactoryTest {
   void shouldCreateStarterDeckFromTeamSixCards() {
     PlayerDeck deck = PlayerDeckFactory.createStarterDeck(CARDS);
 
-    assertEquals(10, deck.size());
-    assertEquals(3, deck.countByCardId(PlayerDeckFactory.STRIKE));
+    // TEMP: starter deck has an extra STRIKE (11 cards, 4 of them) while pagination is being
+    // checked — see the TEMP comment in PlayerDeckFactory. Revert both together afterward.
+    assertEquals(11, deck.size());
+    assertEquals(4, deck.countByCardId(PlayerDeckFactory.STRIKE));
     assertEquals(3, deck.countByCardId(PlayerDeckFactory.DEFEND));
     assertEquals(1, deck.countByCardId(PlayerDeckFactory.POISON_DAGGER));
     assertEquals(1, deck.countByCardId(PlayerDeckFactory.EXPOSE));
@@ -56,11 +58,11 @@ class PlayerDeckFactoryTest {
     PlayerDeck first = PlayerDeckFactory.createStarterDeck(CARDS);
     PlayerDeck second = PlayerDeckFactory.createStarterDeck(CARDS);
 
-    first.removeCard(first.getCards().get(0).instanceId());
+    first.removeCard(PlayerDeckFactory.STRIKE);
 
-    assertEquals(9, first.size());
-    assertEquals(10, second.size());
-    assertEquals(3, second.countByCardId(PlayerDeckFactory.STRIKE));
+    assertEquals(10, first.size());
+    assertEquals(11, second.size());
+    assertEquals(4, second.countByCardId(PlayerDeckFactory.STRIKE));
   }
 
   @Test
@@ -73,8 +75,7 @@ class PlayerDeckFactoryTest {
     assertEquals(
         first.size(), first.getCards().stream().map(CardInstance::instanceId).distinct().count());
     assertTrue(first.getCards().stream().allMatch(card -> !card.isUpgraded()));
-    assertTrue(
-        first.getCards().stream().noneMatch(card -> second.containsInstance(card.instanceId())));
+    assertTrue(first.getCards().stream().noneMatch(card -> second.getCards().contains(card)));
   }
 
   @Test

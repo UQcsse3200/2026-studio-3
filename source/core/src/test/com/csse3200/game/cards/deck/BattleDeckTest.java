@@ -13,6 +13,7 @@ import com.csse3200.game.cards.runtime.CardInstance;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class BattleDeckTest {
@@ -25,21 +26,9 @@ class BattleDeckTest {
     PlayerDeck playerDeck = new PlayerDeck(CARDS, List.of("strike", "defend", "bandage"));
     BattleDeck battleDeck = new BattleDeck(playerDeck);
 
-    assertIterableEquals(
-        List.of("strike", "defend", "bandage"),
-        battleDeck.getDrawPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
-    assertTrue(
-        battleDeck.getHand().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
-    assertTrue(
-        battleDeck.getDiscardPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
+    assertIterableEquals(List.of("strike", "defend", "bandage"), battleDeck.getDrawPile());
+    assertTrue(battleDeck.getHand().isEmpty());
+    assertTrue(battleDeck.getDiscardPile().isEmpty());
     assertEquals(3, battleDeck.getDrawPileSize());
     assertEquals(0, battleDeck.getHandSize());
     assertEquals(0, battleDeck.getDiscardPileSize());
@@ -52,14 +41,8 @@ class BattleDeckTest {
 
     battleDeck.drawOne();
 
-    assertIterableEquals(
-        List.of("strike", "defend"),
-        playerDeck.getCards().stream().map(CardInstance::cardId).toList());
-    assertIterableEquals(
-        List.of("defend"),
-        battleDeck.getDrawPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
+    assertIterableEquals(List.of("strike", "defend"), playerDeck.getCardIds());
+    assertIterableEquals(List.of("defend"), battleDeck.getDrawPile());
   }
 
   @Test
@@ -71,19 +54,11 @@ class BattleDeckTest {
   void shouldDrawOneCardIntoHand() {
     BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend")));
 
-    CardInstance drawnCard = battleDeck.drawOne();
+    String drawnCard = battleDeck.drawOne();
 
-    assertEquals("strike", drawnCard.cardId());
-    assertIterableEquals(
-        List.of("defend"),
-        battleDeck.getDrawPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
-    assertIterableEquals(
-        List.of("strike"),
-        battleDeck.getHand().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
+    assertEquals("strike", drawnCard);
+    assertIterableEquals(List.of("defend"), battleDeck.getDrawPile());
+    assertIterableEquals(List.of("strike"), battleDeck.getHand());
     assertEquals(1, battleDeck.getDrawPileSize());
     assertEquals(1, battleDeck.getHandSize());
   }
@@ -93,16 +68,8 @@ class BattleDeckTest {
     BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS));
 
     assertNull(battleDeck.drawOne());
-    assertTrue(
-        battleDeck.getDrawPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
-    assertTrue(
-        battleDeck.getHand().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
+    assertTrue(battleDeck.getDrawPile().isEmpty());
+    assertTrue(battleDeck.getHand().isEmpty());
   }
 
   @Test
@@ -110,59 +77,33 @@ class BattleDeckTest {
     BattleDeck battleDeck =
         new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend", "bandage")));
 
-    List<CardInstance> drawnCards = battleDeck.drawCards(2);
+    List<String> drawnCards = battleDeck.drawCards(2);
 
-    assertIterableEquals(
-        List.of("strike", "defend"), drawnCards.stream().map(CardInstance::cardId).toList());
-    assertIterableEquals(
-        List.of("bandage"),
-        battleDeck.getDrawPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
-    assertIterableEquals(
-        List.of("strike", "defend"),
-        battleDeck.getHand().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
+    assertIterableEquals(List.of("strike", "defend"), drawnCards);
+    assertIterableEquals(List.of("bandage"), battleDeck.getDrawPile());
+    assertIterableEquals(List.of("strike", "defend"), battleDeck.getHand());
   }
 
   @Test
   void shouldDrawOnlyAvailableCards() {
     BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend")));
 
-    List<CardInstance> drawnCards = battleDeck.drawCards(5);
+    List<String> drawnCards = battleDeck.drawCards(5);
 
-    assertIterableEquals(
-        List.of("strike", "defend"), drawnCards.stream().map(CardInstance::cardId).toList());
-    assertTrue(
-        battleDeck.getDrawPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
-    assertIterableEquals(
-        List.of("strike", "defend"),
-        battleDeck.getHand().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
+    assertIterableEquals(List.of("strike", "defend"), drawnCards);
+    assertTrue(battleDeck.getDrawPile().isEmpty());
+    assertIterableEquals(List.of("strike", "defend"), battleDeck.getHand());
   }
 
   @Test
   void shouldDrawNoCardsWhenCountIsZero() {
     BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend")));
 
-    List<CardInstance> drawnCards = battleDeck.drawCards(0);
+    List<String> drawnCards = battleDeck.drawCards(0);
 
     assertTrue(drawnCards.isEmpty());
-    assertIterableEquals(
-        List.of("strike", "defend"),
-        battleDeck.getDrawPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
-    assertTrue(
-        battleDeck.getHand().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
+    assertIterableEquals(List.of("strike", "defend"), battleDeck.getDrawPile());
+    assertTrue(battleDeck.getHand().isEmpty());
   }
 
   @Test
@@ -175,29 +116,16 @@ class BattleDeckTest {
   @Test
   void shouldReturnImmutableSnapshots() {
     BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend")));
-    List<CardInstance> drawPile = battleDeck.getDrawPile();
-    List<CardInstance> hand = battleDeck.getHand();
-    List<CardInstance> discardPile = battleDeck.getDiscardPile();
 
-    assertThrows(UnsupportedOperationException.class, drawPile::clear);
-    assertThrows(UnsupportedOperationException.class, hand::clear);
-    assertThrows(UnsupportedOperationException.class, discardPile::clear);
+    assertThrows(
+        UnsupportedOperationException.class, () -> battleDeck.getDrawPile().add("bandage"));
+    assertThrows(UnsupportedOperationException.class, () -> battleDeck.getHand().add("bandage"));
+    assertThrows(
+        UnsupportedOperationException.class, () -> battleDeck.getDiscardPile().add("bandage"));
 
-    assertIterableEquals(
-        List.of("strike", "defend"),
-        battleDeck.getDrawPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
-    assertTrue(
-        battleDeck.getHand().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
-    assertTrue(
-        battleDeck.getDiscardPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
+    assertIterableEquals(List.of("strike", "defend"), battleDeck.getDrawPile());
+    assertTrue(battleDeck.getHand().isEmpty());
+    assertTrue(battleDeck.getDiscardPile().isEmpty());
   }
 
   @Test
@@ -209,20 +137,12 @@ class BattleDeckTest {
     battleDeck.shuffleDrawPile();
 
     List<String> expectedCards = new ArrayList<>(startingCards);
-    List<String> actualCards =
-        new ArrayList<>(
-            battleDeck.getDrawPile().stream()
-                .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-                .toList());
+    List<String> actualCards = new ArrayList<>(battleDeck.getDrawPile());
     Collections.sort(expectedCards);
     Collections.sort(actualCards);
     assertIterableEquals(expectedCards, actualCards);
     assertEquals(startingCards.size(), battleDeck.getDrawPileSize());
-    assertTrue(
-        battleDeck.getHand().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
+    assertTrue(battleDeck.getHand().isEmpty());
   }
 
   @Test
@@ -230,52 +150,24 @@ class BattleDeckTest {
     BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend")));
     battleDeck.drawOne();
 
-    boolean played =
-        battleDeck.playCard(
-            battleDeck.getHand().isEmpty() ? "missing" : battleDeck.getHand().get(0).instanceId());
+    boolean played = battleDeck.playCard("strike");
 
     assertTrue(played);
-    assertTrue(
-        battleDeck.getHand().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
-    assertIterableEquals(
-        List.of("strike"),
-        battleDeck.getDiscardPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
-    assertIterableEquals(
-        List.of("defend"),
-        battleDeck.getDrawPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
+    assertTrue(battleDeck.getHand().isEmpty());
+    assertIterableEquals(List.of("strike"), battleDeck.getDiscardPile());
+    assertIterableEquals(List.of("defend"), battleDeck.getDrawPile());
   }
 
   @Test
   void shouldNotPlayCardThatIsNotInHand() {
     BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike")));
 
-    boolean played =
-        battleDeck.playCard(
-            battleDeck.getHand().isEmpty() ? "missing" : battleDeck.getHand().get(0).instanceId());
+    boolean played = battleDeck.playCard("strike");
 
     assertFalse(played);
-    assertIterableEquals(
-        List.of("strike"),
-        battleDeck.getDrawPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
-    assertTrue(
-        battleDeck.getHand().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
-    assertTrue(
-        battleDeck.getDiscardPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
+    assertIterableEquals(List.of("strike"), battleDeck.getDrawPile());
+    assertTrue(battleDeck.getHand().isEmpty());
+    assertTrue(battleDeck.getDiscardPile().isEmpty());
   }
 
   @Test
@@ -284,24 +176,12 @@ class BattleDeckTest {
         new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend", "bandage")));
     battleDeck.drawCards(2);
 
-    boolean discarded = battleDeck.discardCard(battleDeck.getHand().get(1).instanceId());
+    boolean discarded = battleDeck.discardCard("defend");
 
     assertTrue(discarded);
-    assertIterableEquals(
-        List.of("strike"),
-        battleDeck.getHand().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
-    assertIterableEquals(
-        List.of("defend"),
-        battleDeck.getDiscardPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
-    assertIterableEquals(
-        List.of("bandage"),
-        battleDeck.getDrawPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
+    assertIterableEquals(List.of("strike"), battleDeck.getHand());
+    assertIterableEquals(List.of("defend"), battleDeck.getDiscardPile());
+    assertIterableEquals(List.of("bandage"), battleDeck.getDrawPile());
   }
 
   @Test
@@ -312,16 +192,8 @@ class BattleDeckTest {
     boolean discarded = battleDeck.discardCard(null);
 
     assertFalse(discarded);
-    assertIterableEquals(
-        List.of("strike"),
-        battleDeck.getHand().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
-    assertTrue(
-        battleDeck.getDiscardPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
+    assertIterableEquals(List.of("strike"), battleDeck.getHand());
+    assertTrue(battleDeck.getDiscardPile().isEmpty());
   }
 
   @Test
@@ -333,21 +205,9 @@ class BattleDeckTest {
     int discardedCount = battleDeck.discardHand();
 
     assertEquals(2, discardedCount);
-    assertTrue(
-        battleDeck.getHand().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
-    assertIterableEquals(
-        List.of("strike", "defend"),
-        battleDeck.getDiscardPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
-    assertIterableEquals(
-        List.of("bandage"),
-        battleDeck.getDrawPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
+    assertTrue(battleDeck.getHand().isEmpty());
+    assertIterableEquals(List.of("strike", "defend"), battleDeck.getDiscardPile());
+    assertIterableEquals(List.of("bandage"), battleDeck.getDrawPile());
   }
 
   @Test
@@ -357,93 +217,131 @@ class BattleDeckTest {
     int discardedCount = battleDeck.discardHand();
 
     assertEquals(0, discardedCount);
-    assertIterableEquals(
-        List.of("strike"),
-        battleDeck.getDrawPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
-    assertTrue(
-        battleDeck.getHand().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
-    assertTrue(
-        battleDeck.getDiscardPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
+    assertIterableEquals(List.of("strike"), battleDeck.getDrawPile());
+    assertTrue(battleDeck.getHand().isEmpty());
+    assertTrue(battleDeck.getDiscardPile().isEmpty());
   }
 
   @Test
   void shouldReshuffleDiscardPileIntoEmptyDrawPile() {
     BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike")));
     battleDeck.drawOne();
-    battleDeck.discardCard(battleDeck.getHand().get(0).instanceId());
+    battleDeck.discardCard("strike");
 
     boolean reshuffled = battleDeck.reshuffleDiscardIntoDrawPile();
 
     assertTrue(reshuffled);
-    assertIterableEquals(
-        List.of("strike"),
-        battleDeck.getDrawPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
-    assertTrue(
-        battleDeck.getHand().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
-    assertTrue(
-        battleDeck.getDiscardPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
+    assertIterableEquals(List.of("strike"), battleDeck.getDrawPile());
+    assertTrue(battleDeck.getHand().isEmpty());
+    assertTrue(battleDeck.getDiscardPile().isEmpty());
   }
 
   @Test
   void shouldNotReshuffleWhenDrawPileIsNotEmpty() {
     BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend")));
     battleDeck.drawOne();
-    battleDeck.discardCard(battleDeck.getHand().get(0).instanceId());
+    battleDeck.discardCard("strike");
 
     boolean reshuffled = battleDeck.reshuffleDiscardIntoDrawPile();
 
     assertFalse(reshuffled);
-    assertIterableEquals(
-        List.of("defend"),
-        battleDeck.getDrawPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
-    assertIterableEquals(
-        List.of("strike"),
-        battleDeck.getDiscardPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
+    assertIterableEquals(List.of("defend"), battleDeck.getDrawPile());
+    assertIterableEquals(List.of("strike"), battleDeck.getDiscardPile());
+  }
+
+  @Test
+  void shouldPreserveInstanceIdentityThroughPlayAndRetrieve() {
+    PlayerDeck playerDeck = new PlayerDeck(CARDS, List.of("strike", "strike"));
+    List<CardInstance> originalCards = playerDeck.getCards();
+    BattleDeck battleDeck = new BattleDeck(playerDeck);
+    battleDeck.drawCards(2);
+
+    CardInstance discardedFirst = battleDeck.discardCardInstance("strike");
+
+    assertEquals(originalCards.get(0), discardedFirst);
+    assertEquals(1, battleDeck.getHandInstances().size());
+    assertEquals(1, battleDeck.getDiscardPileInstances().size());
+
+    // Discarding a second copy of the same card must not disturb the tracked identity of the
+    // first, even though both share the card ID "strike".
+    CardInstance discardedSecond = battleDeck.discardCardInstance("strike");
+    assertEquals(originalCards.get(1), discardedSecond);
+    assertEquals(2, battleDeck.getDiscardPileInstances().size());
+
+    // Retrieving one specific instance leaves the other exact copy behind in the discard pile.
+    boolean retrieved = battleDeck.retrieveInstanceFromDiscard(discardedFirst);
+
+    assertTrue(retrieved);
+    assertIterableEquals(List.of(discardedFirst), battleDeck.getHandInstances());
+    assertIterableEquals(List.of(discardedSecond), battleDeck.getDiscardPileInstances());
+  }
+
+  @Test
+  void shouldSetHandToExactChosenInstances() {
+    PlayerDeck playerDeck = new PlayerDeck(CARDS, List.of("strike", "strike", "defend", "bandage"));
+    List<CardInstance> owned = playerDeck.getCards();
+    BattleDeck battleDeck = new BattleDeck(playerDeck);
+
+    CardInstance firstStrike = owned.get(0);
+    CardInstance defend = owned.get(2);
+    battleDeck.setHandInstances(List.of(firstStrike, defend));
+
+    assertIterableEquals(List.of(firstStrike, defend), battleDeck.getHandInstances());
+    assertEquals(2, battleDeck.getDrawPileSize());
+    assertTrue(battleDeck.getDiscardPileInstances().isEmpty());
+  }
+
+  @Test
+  void shouldLeaveDiscardPileUntouchedWhenSettingHand() {
+    PlayerDeck playerDeck = new PlayerDeck(CARDS, List.of("strike", "strike", "defend"));
+    List<CardInstance> owned = playerDeck.getCards();
+    BattleDeck battleDeck = new BattleDeck(playerDeck);
+    battleDeck.drawCards(3);
+    CardInstance discardedStrike = battleDeck.discardCardInstance("strike");
+
+    battleDeck.setHandInstances(List.of(owned.get(1), owned.get(2)));
+
+    assertIterableEquals(List.of(discardedStrike), battleDeck.getDiscardPileInstances());
+  }
+
+  @Test
+  void shouldRejectSettingHandToAnInstanceOnCooldownInDiscard() {
+    PlayerDeck playerDeck = new PlayerDeck(CARDS, List.of("strike", "defend"));
+    List<CardInstance> owned = playerDeck.getCards();
+    BattleDeck battleDeck = new BattleDeck(playerDeck);
+    battleDeck.drawCards(2);
+    CardInstance discardedStrike = battleDeck.discardCardInstance("strike");
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> battleDeck.setHandInstances(List.of(discardedStrike, owned.get(1))));
+
+    // The failed request must not have mutated anything.
+    assertIterableEquals(List.of(owned.get(1)), battleDeck.getHandInstances());
+    assertIterableEquals(List.of(discardedStrike), battleDeck.getDiscardPileInstances());
+  }
+
+  @Test
+  void shouldRejectSettingHandToAnUnknownInstance() {
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike")));
+    CardInstance foreign =
+        new CardInstance(UUID.randomUUID().toString(), "defend", CardInstance.BASE_LEVEL);
+
+    assertThrows(
+        IllegalArgumentException.class, () -> battleDeck.setHandInstances(List.of(foreign)));
   }
 
   @Test
   void shouldDrawFromReshuffledDiscardPile() {
     BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike")));
-    assertEquals("strike", battleDeck.drawOne().cardId());
-    assertTrue(battleDeck.discardCard(battleDeck.getHand().get(0).instanceId()));
+    assertEquals("strike", battleDeck.drawOne());
+    assertTrue(battleDeck.discardCard("strike"));
 
-    CardInstance redrawnCard = battleDeck.drawOne();
+    String redrawnCard = battleDeck.drawOne();
 
-    assertEquals("strike", redrawnCard.cardId());
-    assertIterableEquals(
-        List.of("strike"),
-        battleDeck.getHand().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList());
-    assertTrue(
-        battleDeck.getDrawPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
-    assertTrue(
-        battleDeck.getDiscardPile().stream()
-            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
-            .toList()
-            .isEmpty());
+    assertEquals("strike", redrawnCard);
+    assertIterableEquals(List.of("strike"), battleDeck.getHand());
+    assertTrue(battleDeck.getDrawPile().isEmpty());
+    assertTrue(battleDeck.getDiscardPile().isEmpty());
   }
 }

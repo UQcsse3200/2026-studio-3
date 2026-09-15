@@ -34,7 +34,7 @@ public final class PlayerDeckAdapter implements DeckGateway {
 
     int insertionIndex = playerDeck.size();
     try {
-      playerDeck.addCards(List.of(cardId));
+      playerDeck.addCard(cardId);
     } catch (IllegalArgumentException exception) {
       return false;
     }
@@ -47,12 +47,7 @@ public final class PlayerDeckAdapter implements DeckGateway {
   @Override
   public synchronized boolean removeCard(String cardId) {
     try {
-      return playerDeck.getCards().stream()
-          .filter(card -> card.cardId().equals(cardId))
-          .findFirst()
-          .map(CardInstance::instanceId)
-          .map(playerDeck::removeCard)
-          .orElse(false);
+      return playerDeck.removeCard(cardId);
     } catch (IllegalArgumentException exception) {
       return false;
     }
@@ -76,13 +71,16 @@ public final class PlayerDeckAdapter implements DeckGateway {
       return false;
     }
 
+    // Verify the exact instance is still at the expected position before removing it, so a
+    // duplicate card of the same ID that has shifted into this slot is never rolled back by
+    // mistake.
     CardInstance pendingCard = cards.get(pendingCardIndex);
     if (!Objects.equals(cardId, pendingCard.cardId())
         || !Objects.equals(pendingInstanceId, pendingCard.instanceId())) {
       return false;
     }
 
-    playerDeck.removeCard(pendingInstanceId);
+    playerDeck.removeCardAt(pendingCardIndex);
     clearPendingAddition();
     return true;
   }

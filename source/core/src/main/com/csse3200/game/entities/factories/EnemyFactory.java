@@ -111,6 +111,7 @@ public class EnemyFactory {
             .addComponent(new EnemyBehaviourComponent(config.behaviour))
             .addComponent(animator)
             .addComponent(new EnemyAnimationController())
+            .addComponent(new EnemyStatsDisplay())
             .addComponent(new EnemyCombatEffectsComponent());
 
     // The drop target lets the player drag a card onto the enemy. It needs the drag-and-drop UI

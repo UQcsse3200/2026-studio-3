@@ -1,9 +1,6 @@
 package com.csse3200.game.cards.deck;
 
-import com.csse3200.game.cards.CardConfigLoader;
-import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
-import com.csse3200.game.cards.runtime.CardInstanceFactory;
 import java.util.List;
 
 /** Creates standard player decks from the initial Team 6 card IDs. */
@@ -24,6 +21,9 @@ public final class PlayerDeckFactory {
           STRIKE,
           STRIKE,
           STRIKE,
+          STRIKE, // TEMP: 11th card so the deck-rearrange popup's pagination has a second page to
+          // show. Remove this line (and the matching count bump in PlayerDeckFactoryTest) once
+          // pagination has been checked.
           DEFEND,
           DEFEND,
           DEFEND,
@@ -58,7 +58,7 @@ public final class PlayerDeckFactory {
    * @return starter player deck
    */
   public static PlayerDeck createStarterDeck() {
-    return createStarterDeck(new CardLibrary(CardConfigLoader.loadCards()));
+    return new PlayerDeck(STARTER_DECK_CARD_IDS);
   }
 
   /**
@@ -68,9 +68,7 @@ public final class PlayerDeckFactory {
    * @return starter player deck
    */
   public static PlayerDeck createStarterDeck(CardService cardService) {
-    CardInstanceFactory factory = new CardInstanceFactory(cardService);
-    return PlayerDeck.fromInstances(
-        cardService, STARTER_DECK_CARD_IDS.stream().map(factory::create).toList());
+    return new PlayerDeck(cardService, STARTER_DECK_CARD_IDS);
   }
 
   /**
@@ -91,7 +89,7 @@ public final class PlayerDeckFactory {
    * @return player deck containing the four Member 5 cards and supporting initial cards
    */
   public static PlayerDeck createForbiddenTestDeck() {
-    return createForbiddenTestDeck(new CardLibrary(CardConfigLoader.loadCards()));
+    return new PlayerDeck(FORBIDDEN_TEST_DECK_CARD_IDS);
   }
 
   /**
@@ -101,9 +99,7 @@ public final class PlayerDeckFactory {
    * @return player deck containing the four Member 5 cards and supporting initial cards
    */
   public static PlayerDeck createForbiddenTestDeck(CardService cardService) {
-    CardInstanceFactory factory = new CardInstanceFactory(cardService);
-    return PlayerDeck.fromInstances(
-        cardService, FORBIDDEN_TEST_DECK_CARD_IDS.stream().map(factory::create).toList());
+    return new PlayerDeck(cardService, FORBIDDEN_TEST_DECK_CARD_IDS);
   }
 
   /**

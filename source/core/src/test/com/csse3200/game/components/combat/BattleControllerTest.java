@@ -1,6 +1,5 @@
 package com.csse3200.game.components.combat;
 
-import static com.csse3200.game.cards.CardTestInstances.id;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -16,19 +15,19 @@ import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardType;
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.TargetType;
-import com.csse3200.game.cards.TestCardService;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
-import com.csse3200.game.cards.effects.CardEffectResolver;
 import com.csse3200.game.cards.play.CardPlayRequest;
+import com.csse3200.game.cards.play.CardPlayService;
+import com.csse3200.game.cards.play.CardPlayTarget;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.PlayerActions;
-import com.csse3200.game.components.player.PlayerIntent;
 import com.csse3200.game.entities.Entity;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -100,12 +99,13 @@ class BattleControllerTest {
   @Test
   void shouldResolveSubmittedAttackCardSynchronously() {
     advanceToPlayerTurn();
-    CardPlayRequest request = CardPlayRequest.singleEnemy("strike-instance", "enemy-1");
+    CardPlayRequest request =
+        new CardPlayRequest("strike", new CardPlayTarget(TargetType.SINGLE_ENEMY, "enemy-1"));
 
-    boolean accepted = controller.submitCardPlayRequest(request, PlayerIntent.ATTACK);
+    boolean accepted = controller.submitCardPlayRequest(request);
 
     assertTrue(accepted);
-    assertTrue(phaseHistory.contains(BattlePhase.PLAYER_ATTACK));
+    assertTrue(phaseHistory.contains(BattlePhase.CARD_RESOLVING));
     // No resolution service is wired in this unit test, so the card is consumed and the player
     // keeps their turn.
     assertNull(controller.getCardPlayRequest());
@@ -117,22 +117,22 @@ class BattleControllerTest {
     controller.handle(BattleEvent.SETUP_COMPLETE);
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
 
-    controller.handle(BattleEvent.PLAYER_ATTACK_SELECTED);
+    controller.handle(BattleEvent.CARD_PLAY_REQUESTED);
 
     // A card action with no card attached resolves immediately and returns to the player.
-    assertTrue(phaseHistory.contains(BattlePhase.PLAYER_ATTACK));
+    assertTrue(phaseHistory.contains(BattlePhase.CARD_RESOLVING));
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }
 
   @Test
   void shouldReportHandledEvents() {
     assertTrue(controller.canHandle(BattleEvent.SETUP_COMPLETE));
-    assertFalse(controller.canHandle(BattleEvent.PLAYER_ATTACK_SELECTED));
+    assertFalse(controller.canHandle(BattleEvent.CARD_PLAY_REQUESTED));
 
     controller.handle(BattleEvent.SETUP_COMPLETE);
 
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
-    assertTrue(controller.canHandle(BattleEvent.PLAYER_ATTACK_SELECTED));
+    assertTrue(controller.canHandle(BattleEvent.CARD_PLAY_REQUESTED));
     assertTrue(controller.canHandle(BattleEvent.PLAYER_END_REQUESTED));
     assertFalse(controller.canHandle(BattleEvent.INTENTS_REVEALED));
     assertFalse(controller.canHandle(BattleEvent.SETUP_COMPLETE));
@@ -141,13 +141,12 @@ class BattleControllerTest {
   @Test
   void shouldCompletePlayerActionCycleSynchronously() {
     advanceToPlayerTurn();
+    phaseHistory.clear();
 
-    controller.handle(BattleEvent.PLAYER_ATTACK_SELECTED);
+    controller.handle(BattleEvent.CARD_PLAY_REQUESTED);
 
-    // The action steps through PLAYER_ATTACK and PLAYER_RESOLVED on its own, then hands control
-    // back to the player for their next card.
-    assertTrue(phaseHistory.contains(BattlePhase.PLAYER_ATTACK));
-    assertTrue(phaseHistory.contains(BattlePhase.PLAYER_RESOLVED));
+    // One busy phase covers every card, then input becomes available again.
+    assertEquals(List.of(BattlePhase.CARD_RESOLVING, BattlePhase.PLAYER_TURN), phaseHistory);
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }
 
@@ -255,7 +254,7 @@ class BattleControllerTest {
         (previousPhase, nextPhase) -> {
           if (nextPhase == BattlePhase.PLAYER_TURN && alreadyFired.compareAndSet(false, true)) {
             // This event must be queued, not handled re-entrantly while a transition is running.
-            controller.handle(BattleEvent.PLAYER_ATTACK_SELECTED);
+            controller.handle(BattleEvent.CARD_PLAY_REQUESTED);
             phaseWhenListenerRan.set(controller.getCurrentPhase());
           }
         });
@@ -265,7 +264,7 @@ class BattleControllerTest {
     // The queued event had not been processed yet when the listener observed the phase.
     assertEquals(BattlePhase.PLAYER_TURN, phaseWhenListenerRan.get());
     // Once processed, the attack resolved synchronously and control returned to the player.
-    assertTrue(phaseHistory.contains(BattlePhase.PLAYER_ATTACK));
+    assertTrue(phaseHistory.contains(BattlePhase.CARD_RESOLVING));
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }
 
@@ -303,16 +302,6 @@ class BattleControllerTest {
 
   @Test
   void shouldClearNegativeStatusesWhenCleanseCardIsPlayed() {
-    CardConfig purify = new CardConfig();
-    purify.id = "purify";
-    purify.name = "Purify";
-    purify.description = "Remove negative status effects.";
-    purify.cost = 1;
-    purify.type = CardType.SKILL;
-    purify.target = TargetType.SELF;
-    purify.effects = new EffectConfig[] {new EffectConfig(EffectType.CLEANSE, 1)};
-    purify.texturePath = "images/cards/purify.png";
-
     Entity cleansePlayer =
         new Entity()
             .addComponent(new CombatStatsComponent(20, 0))
@@ -324,19 +313,36 @@ class BattleControllerTest {
     stats.applyStatusEffect("STRENGTH", 2, 0);
     stats.applyStatusEffect("HEAL", 4, 3);
 
-    BattleDeck deck =
-        new BattleDeck(
-            new PlayerDeck(
-                TestCardService.withCards("purify", "strike"), List.of("purify", "strike")));
+    CardConfig purify = new CardConfig();
+    purify.id = "purify";
+    purify.name = "Purify";
+    purify.description = "Remove all negative effects from yourself.";
+    purify.cost = 1;
+    purify.type = CardType.SKILL;
+    purify.target = TargetType.SELF;
+    purify.effects = new EffectConfig[] {new EffectConfig(EffectType.CLEANSE, 1)};
+    purify.texturePath = "images/cards/purify.png";
+
+    CardConfig strike = new CardConfig();
+    strike.id = "strike";
+    strike.name = "Strike";
+    strike.cost = 1;
+    strike.type = CardType.ATTACK;
+    strike.target = TargetType.SINGLE_ENEMY;
+    strike.effects = new EffectConfig[] {new EffectConfig(EffectType.DAMAGE, 6)};
+    strike.texturePath = "images/cards/strike.png";
+
+    CardLibrary cardService = new CardLibrary(List.of(purify, strike));
+    BattleDeck deck = new BattleDeck(new PlayerDeck(cardService, List.of("purify", "strike")));
     deck.drawCards(1);
-    CardLibrary library = new CardLibrary(List.of(purify));
+    EnergyComponent energy = cleansePlayer.getComponent(EnergyComponent.class);
+    CardPlayService cardPlayService = new CardPlayService(cardService, deck, energy);
+    CardEffectHandler effectHandler = new CardEffectHandler();
     BattleController battle =
-        new BattleController(
-            cleansePlayer, enemies, new CardEffectResolver(library), library, deck);
+        new BattleController(cleansePlayer, enemies, effectHandler, cardPlayService);
 
     battle.start();
-    boolean accepted =
-        battle.submitCardPlayRequest(CardPlayRequest.self(id(deck, "purify")), PlayerIntent.OTHER);
+    boolean accepted = battle.submitCardPlayRequest(CardPlayRequest.self("purify"));
 
     assertTrue(accepted);
     assertFalse(stats.hasStatusEffect("POISON"));
@@ -359,12 +365,141 @@ class BattleControllerTest {
   void shouldRejectInvalidTransition() {
     IllegalStateException exception =
         assertThrows(
-            IllegalStateException.class,
-            () -> controller.handle(BattleEvent.PLAYER_ATTACK_SELECTED));
+            IllegalStateException.class, () -> controller.handle(BattleEvent.CARD_PLAY_REQUESTED));
 
-    assertEquals(
-        "Invalid battle transition: SETUP-->PLAYER_ATTACK_SELECTED", exception.getMessage());
+    assertEquals("Invalid battle transition: SETUP-->CARD_PLAY_REQUESTED", exception.getMessage());
     assertEquals(BattlePhase.SETUP, controller.getCurrentPhase());
+  }
+
+  @Test
+  void shouldRejectCardSubmissionFromPhaseListener() {
+    AtomicBoolean attempted = new AtomicBoolean(false);
+
+    controller.addPhaseChangeListener(
+        (previous, next) -> {
+          if (next == BattlePhase.PLAYER_TURN && attempted.compareAndSet(false, true)) {
+            assertFalse(
+                controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy-1")));
+            assertFalse(controller.submitCardPlayRequest(CardPlayRequest.self("defend")));
+            assertNull(controller.getCardPlayRequest());
+          }
+        });
+
+    controller.start();
+
+    assertTrue(attempted.get());
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+    assertFalse(phaseHistory.contains(BattlePhase.CARD_RESOLVING));
+
+    // Normal submissions still work once event processing finishes.
+    assertTrue(controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy-1")));
+  }
+
+  @Test
+  void shouldSkipEnemyKilledDuringTurn() {
+    controller.start();
+    killEnemy(0);
+
+    controller.endPlayerTurn();
+
+    verify(firstEnemyBehaviour, never()).executeIntent(player);
+    verify(secondEnemyBehaviour).executeIntent(player);
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+  }
+
+  @Test
+  void shouldWinWhenEnemiesDeadBeforeActing() {
+    controller.addPhaseChangeListener(
+        (previous, next) -> {
+          if (next == BattlePhase.ENEMY_TURN) {
+            killEnemy(controller.getCurrentEnemyIndex());
+          }
+        });
+
+    controller.start();
+    controller.endPlayerTurn();
+
+    verify(firstEnemyBehaviour, never()).executeIntent(player);
+    verify(secondEnemyBehaviour, never()).executeIntent(player);
+    assertEquals(BattlePhase.VICTORY, controller.getCurrentPhase());
+  }
+
+  @Test
+  void shouldContinueIfEnemySurvives() {
+    controller.addPhaseChangeListener(
+        (previous, next) -> {
+          if (next == BattlePhase.ENEMY_TURN && controller.getCurrentEnemyIndex() == 1) {
+            killEnemy(1);
+          }
+        });
+
+    controller.start();
+    controller.endPlayerTurn();
+
+    verify(firstEnemyBehaviour).executeIntent(player);
+    verify(secondEnemyBehaviour, never()).executeIntent(player);
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+  }
+
+  @Test
+  void shouldPreserveSuccessfulResultWhenListenerSubmitsAnotherCard() {
+    controller.start();
+    AtomicBoolean attempted = new AtomicBoolean(false);
+
+    controller.addPhaseChangeListener(
+        (previous, next) -> {
+          if (next == BattlePhase.PLAYER_TURN && attempted.compareAndSet(false, true)) {
+            assertFalse(controller.submitCardPlayRequest(CardPlayRequest.self("defend")));
+          }
+        });
+
+    assertTrue(controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy-1")));
+
+    assertTrue(attempted.get());
+    assertNull(controller.getCardPlayRequest());
+    assertEquals(1, phaseHistory.stream().filter(p -> p == BattlePhase.CARD_RESOLVING).count());
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+  }
+
+  @Test
+  void shouldKeepOriginalCardWhenAnotherIsSubmittedDuringResolution() {
+    controller.start();
+    CardPlayRequest original = CardPlayRequest.singleEnemy("strike", "enemy-1");
+    AtomicBoolean attempted = new AtomicBoolean(false);
+    controller.addPhaseChangeListener(
+        (previous, next) -> {
+          if (next == BattlePhase.CARD_RESOLVING) {
+            attempted.set(true);
+            assertFalse(controller.submitCardPlayRequest(CardPlayRequest.self("defend")));
+            assertEquals(original, controller.getCardPlayRequest());
+            controller.endPlayerTurn();
+          }
+        });
+
+    assertTrue(controller.submitCardPlayRequest(original));
+
+    assertTrue(attempted.get());
+    assertNull(controller.getCardPlayRequest());
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+    verify(firstEnemyBehaviour, never()).executeIntent(player);
+  }
+
+  @Test
+  void shouldClearPendingCardIfResolutionListenerThrows() {
+    controller.start();
+    controller.addPhaseChangeListener(
+        (previous, next) -> {
+          if (next == BattlePhase.CARD_RESOLVING) {
+            throw new IllegalStateException("Listener failed");
+          }
+        });
+
+    assertThrows(
+        IllegalStateException.class,
+        () -> controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy-1")));
+
+    assertNull(controller.getCardPlayRequest());
+    assertFalse(controller.submitCardPlayRequest(CardPlayRequest.self("defend")));
   }
 
   private void advanceToPlayerTurn() {
@@ -383,6 +518,11 @@ class BattleControllerTest {
 
   private Entity createLivingDefendingEnemy(EnemyBehaviourComponent behaviour) {
     return createDefendingEnemy(behaviour, true);
+  }
+
+  private void killEnemy(int index) {
+    CombatStatsComponent stats = enemies.get(index).getComponent(CombatStatsComponent.class);
+    when(stats.isDead()).thenReturn(true);
   }
 
   private Entity createDefendingEnemy(EnemyBehaviourComponent behaviour, boolean alive) {

@@ -1,14 +1,11 @@
 package com.csse3200.game.cards.play;
 
 import com.csse3200.game.cards.deck.BattleDeck;
-import com.csse3200.game.cards.runtime.CardInstance;
 import java.util.List;
 
 /** Immutable battle-deck state returned after a card play attempt. */
 public record DeckSnapshot(
-    List<CardInstance> updatedHand,
-    List<CardInstance> updatedDrawPile,
-    List<CardInstance> updatedDiscardPile) {
+    List<String> updatedHand, List<String> updatedDrawPile, List<String> updatedDiscardPile) {
   public DeckSnapshot {
     if (updatedHand == null || updatedDrawPile == null || updatedDiscardPile == null) {
       throw new IllegalArgumentException("Deck snapshot lists cannot be null");
