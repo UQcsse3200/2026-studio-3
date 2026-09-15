@@ -1,0 +1,20 @@
+{
+  "encounters": [
+    {
+      "id": "unknown-card-reward",
+      "description": "An encounter with an unknown reward.",
+      "weight": 1,
+      "choices": [
+        {
+          "id": "accept",
+          "description": "Accept the unknown card.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0,
+            "cardRewardId": "missing-card"
+          }
+        }
+      ]
+    }
+  ]
+}

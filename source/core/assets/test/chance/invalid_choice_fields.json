@@ -1,0 +1,29 @@
+{
+  "encounters": [
+    {
+      "id": "invalid-choices",
+      "description": "Contains invalid choice fields.",
+      "weight": 1,
+      "choices": [
+        {
+          "id": " ",
+          "description": "Blank ID.",
+          "outcome": { "healthDelta": 0, "currencyDelta": 0 }
+        },
+        {
+          "description": "Missing ID.",
+          "outcome": { "healthDelta": 0, "currencyDelta": 0 }
+        },
+        {
+          "id": "blank-description",
+          "description": " ",
+          "outcome": { "healthDelta": 0, "currencyDelta": 0 }
+        },
+        {
+          "id": "missing-description",
+          "outcome": { "healthDelta": 0, "currencyDelta": 0 }
+        }
+      ]
+    }
+  ]
+}

@@ -11,6 +11,7 @@ import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
+import com.csse3200.game.components.enemy.IntentEffectType;
 import com.csse3200.game.components.enemy.IntentType;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
@@ -333,6 +334,12 @@ public class BattleController {
     eventHandler.addListener(HAND_CHANGED_EVENT, listener);
   }
 
+  /** Notifies listeners after a successful card play, before checking victory or defeat. */
+  public void addCardPlayedListener(EventListener2<String, String> listener) {
+    Objects.requireNonNull(listener, LISTENER_NOT_NULL);
+    eventHandler.addListener("cardPlayed", listener);
+  }
+
   /** Sends a one-line description of the latest battle action to any log listeners. */
   private void narrate(String message) {
     eventHandler.trigger(BATTLE_LOG_EVENT, message);
@@ -554,6 +561,10 @@ public class BattleController {
   }
 
   private void finishPlayerCardAction() {
+    if (lastCardPlaySucceeded && pendingCard != null) {
+      eventHandler.trigger("cardPlayed", pendingCard.cardId(), pendingCard.target().targetId());
+    }
+
     pendingCard = null;
     if (!queueBattleOutcomeIfOver()) {
       handle(BattleEvent.CARD_RESOLVED);
@@ -719,7 +730,23 @@ public class BattleController {
     if (this.queueBattleOutcomeIfOver()) {
       return;
     }
+
+    CombatStatsComponent playerStats = this.player.getComponent(CombatStatsComponent.class);
+
+    if (playerStats != null) {
+      tickPlayerStatusEffect(playerStats, IntentEffectType.SILENCE.name());
+      tickPlayerStatusEffect(playerStats, IntentEffectType.DAMAGE_ON_CARD_PLAY.name());
+    }
+
     handle(BattleEvent.PLAYER_TURN_ENDED);
+  }
+
+  /** Counts down one player status without changing effects owned by other turn hooks. */
+  private void tickPlayerStatusEffect(CombatStatsComponent playerStats, String effectType) {
+    StatusEffect effect = playerStats.getStatusEffect(effectType);
+    if (effect != null && effect.tickAndCheckExpired()) {
+      playerStats.removeStatusEffect(effectType);
+    }
   }
 
   private void enterEnemyTurn() {

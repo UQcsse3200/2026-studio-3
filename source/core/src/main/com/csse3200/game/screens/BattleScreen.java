@@ -33,6 +33,8 @@ import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
 import com.csse3200.game.input.InputDecorator;
 import com.csse3200.game.input.InputService;
+import com.csse3200.game.maps.PlayerRunState;
+import com.csse3200.game.maps.RunState;
 import com.csse3200.game.physics.PhysicsEngine;
 import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.RenderService;
@@ -83,6 +85,7 @@ public class BattleScreen extends ScreenAdapter {
   private final BattleDeck battleDeck;
   private final CardPlayService cardPlayService;
   private ClickableFactory uiFactory;
+  private final PlayerRunState playerState;
   private List<ClickableRecord> staticUiRecords;
 
   // Fixed left-to-right slot order for the on-screen row: each entry is the exact physical card
@@ -129,6 +132,9 @@ public class BattleScreen extends ScreenAdapter {
         new ForestGameArea(terrainFactory, mapProgression, game.getRunState(), "dungeon");
     this.gameArea = forestGameArea;
     forestGameArea.create();
+    RunState runState = game.getRunState();
+    playerState = runState.getOrCreatePlayerState();
+    playerState.applyTo(forestGameArea.getPlayer());
 
     // Card + deck state has to exist before the controller so it can be handed the single
     // card-play entry point and the deck it mutates.
@@ -136,7 +142,7 @@ public class BattleScreen extends ScreenAdapter {
     library = new CardLibrary(configs);
     ServiceLocator.registerCardLibrary(library);
 
-    PlayerDeck playerDeck = game.getRunState().getOrCreatePlayerDeck(library);
+    PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(library);
     battleDeck = new BattleDeck(playerDeck);
     battleDeck.shuffleDrawPile();
     battleDeck.drawCards(AMOUNT_OF_CARDS_IN_DECK);
@@ -198,7 +204,10 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(cardInventory)
             .addComponent(new PauseMenuDisplay())
             .addComponent(new PauseMenuInput())
-            .addComponent(new PauseMenuActions(game));
+            .addComponent(new PauseMenuActions(game))
+            .addComponent(
+                new DamageOnCardPlayComponent(
+                    gameArea.getPlayer().getComponent(CombatStatsComponent.class)));
 
     // Keep the on-screen row in sync with the deck: whenever the hand changes (a card played, or
     // one retrieved from the discard pile after its cooldown elapses) rebuild from the live deck,
@@ -253,6 +262,7 @@ public class BattleScreen extends ScreenAdapter {
 
   @Override
   public void dispose() {
+    playerState.captureFrom(gameArea.getPlayer());
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();

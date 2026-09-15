@@ -9,6 +9,7 @@ import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattleEvent;
 import com.csse3200.game.components.combat.BattlePhase;
 import java.util.ArrayList;
+import com.csse3200.game.components.enemy.IntentEffectType;
 import java.util.List;
 
 /** Connects battle UI events to valid transitions in the battle controller. */
@@ -80,6 +81,11 @@ public class BattleActions extends Component {
     controller.addPlayerEffectsListener(this::onPlayerEffects);
     controller.addBattleEndListener(this::onBattleEnd);
     controller.addHandChangedListener(hand -> entity.getEvents().trigger(HAND_CHANGED_EVENT, hand));
+    controller.addCardPlayedListener(
+        (cardId, targetId) -> {
+          String cardName = library.getCard(cardId).map(card -> card.name).orElse(cardId);
+          entity.getEvents().trigger("cardPlayed", cardName, targetId);
+        });
   }
 
   private void onPhaseChange(BattlePhase previousPhase, BattlePhase nextPhase) {
