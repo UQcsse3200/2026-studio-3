@@ -2,19 +2,18 @@ package com.csse3200.game.areas;
 
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
+import com.csse3200.game.areas.terrain.BackgroundDisplay;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.areas.terrain.TerrainFactory.TerrainType;
 import com.csse3200.game.components.gamearea.GameAreaDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.factories.EnemyFactory;
-import com.csse3200.game.entities.factories.NPCFactory;
 import com.csse3200.game.entities.factories.ObstacleFactory;
 import com.csse3200.game.entities.factories.PlayerFactory;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.utils.math.GridPoint2Utils;
-import com.csse3200.game.utils.math.RandomUtils;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +43,8 @@ public class ForestGameArea extends GameArea {
     "images/iso_grass_2.png",
     "images/iso_grass_3.png",
     "images/enemies/intents/attack.png",
-    "images/enemies/intents/defend.png"
+    "images/enemies/intents/defend.png",
+    "images/battle_background.png"
   };
   private static final String[] forestTextureAtlases = {
     "images/terrain_iso_grass.atlas",
@@ -77,6 +77,8 @@ public class ForestGameArea extends GameArea {
   @Override
   public void create() {
     loadAssets();
+
+    spawnBackground();
     spawnTerrain();
 
     enemy = spawnEnemy();
@@ -88,6 +90,12 @@ public class ForestGameArea extends GameArea {
   public void displayUI(Entity ui) {
     ui.addComponent(new GameAreaDisplay("The Fall of Pantheons"));
     spawnEntity(ui);
+  }
+
+  private void spawnBackground() {
+    Entity background = new Entity();
+    background.addComponent(new BackgroundDisplay());
+    spawnEntity(background);
   }
 
   private void spawnTerrain() {
@@ -120,17 +128,14 @@ public class ForestGameArea extends GameArea {
         ObstacleFactory.createWall(worldBounds.x, WALL_WIDTH), GridPoint2Utils.ZERO, false, false);
   }
 
-  private void spawnTrees() {
-    GridPoint2 minPos = new GridPoint2(0, 0);
-    GridPoint2 maxPos = terrain.getMapBounds(0).sub(2, 2);
-
-    for (int i = 0; i < NUM_TREES; i++) {
-      GridPoint2 randomPos = RandomUtils.random(minPos, maxPos);
-      Entity tree = ObstacleFactory.createTree();
-      spawnEntityAt(tree, randomPos, true, false);
-    }
-  }
-
+  /**
+   * private void spawnTrees() { GridPoint2 minPos = new GridPoint2(0, 0); GridPoint2 maxPos =
+   * terrain.getMapBounds(0).sub(2, 2);
+   *
+   * <p>for (int i = 0; i < NUM_TREES; i++) { GridPoint2 randomPos = RandomUtils.random(minPos,
+   * maxPos); Entity tree = ObstacleFactory.createTree(); spawnEntityAt(tree, randomPos, true,
+   * false); } }
+   */
   private Entity spawnPlayer() {
     runState.initialisePlayerStats(
         PlayerFactory.getDefaultHealth(),
@@ -162,33 +167,26 @@ public class ForestGameArea extends GameArea {
     return List.of(enemy);
   }
 
-  private void spawnGhosts() {
-    GridPoint2 minPos = new GridPoint2(0, 0);
-    GridPoint2 maxPos = terrain.getMapBounds(0).sub(2, 2);
+  /**
+   * private void spawnGhosts() { GridPoint2 minPos = new GridPoint2(0, 0); GridPoint2 maxPos =
+   * terrain.getMapBounds(0).sub(2, 2);
+   *
+   * <p>for (int i = 0; i < NUM_GHOSTS; i++) { GridPoint2 randomPos = RandomUtils.random(minPos,
+   * maxPos); Entity ghost = NPCFactory.createGhost(player); spawnEntityAt(ghost, randomPos, true,
+   * true); } }
+   */
 
-    for (int i = 0; i < NUM_GHOSTS; i++) {
-      GridPoint2 randomPos = RandomUtils.random(minPos, maxPos);
-      Entity ghost = NPCFactory.createGhost(player);
-      spawnEntityAt(ghost, randomPos, true, true);
-    }
-  }
-
-  private void spawnGhostKing() {
-    GridPoint2 minPos = new GridPoint2(0, 0);
-    GridPoint2 maxPos = terrain.getMapBounds(0).sub(2, 2);
-
-    GridPoint2 randomPos = RandomUtils.random(minPos, maxPos);
-    Entity ghostKing = NPCFactory.createGhostKing(player);
-    spawnEntityAt(ghostKing, randomPos, true, true);
-  }
-
-  //  private void playMusic() {
-  //    Music music = ServiceLocator.getResourceService().getAsset(backgroundMusic, Music.class);
-  //    music.setLooping(true);
-  //    music.setVolume(0.3f);
-  //    music.play();
-  //  }
-
+  /**
+   * private void spawnGhostKing() { GridPoint2 minPos = new GridPoint2(0, 0); GridPoint2 maxPos =
+   * terrain.getMapBounds(0).sub(2, 2);
+   *
+   * <p>GridPoint2 randomPos = RandomUtils.random(minPos, maxPos); Entity ghostKing =
+   * NPCFactory.createGhostKing(player); spawnEntityAt(ghostKing, randomPos, true, true); }
+   *
+   * <p>// private void playMusic() { // Music music =
+   * ServiceLocator.getResourceService().getAsset(backgroundMusic, Music.class); //
+   * music.setLooping(true); // music.setVolume(0.3f); // music.play(); // }
+   */
   private void loadAssets() {
     logger.debug("Loading assets");
     ResourceService resourceService = ServiceLocator.getResourceService();

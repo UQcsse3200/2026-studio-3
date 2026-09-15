@@ -339,7 +339,7 @@ com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 	}
 	large: {
 		font: font_large,
-		fontColor: black
+		fontColor: color
 	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle: {
