@@ -254,9 +254,12 @@ public class MapGraph implements EncounterCallback {
     }
 
     if (previousNode == null) {
-      currentNode.setState(NodeState.LOCKED);
-      currentNode = null;
-      return true;
+      // No prior position to revert to — either this is the very first move, or previousNode
+      // was lost across a save/load reload since it isn't persisted (flagged by Zaidan, PR #220
+      // review). Leave the player exactly where they are rather than nulling currentNode, which
+      // would permanently fail every future moveToNode() call via its currentNode == null guard
+      // — worse than the original stuck-node bug this method exists to fix.
+      return false;
     }
 
     currentNode.setState(NodeState.AVAILABLE);
