@@ -39,7 +39,6 @@ public final class Team3CardPlayAdapter extends Component {
   @Override
   public void create() {
     entity.getEvents().addListener(PLAY_CARD_EVENT, this::onCardPlayed);
-    entity.getEvents().addListener(CARD_PLAY_RESULT_EVENT, this::logCardPlayed);
     battleController.addCardPlayedListener(
         (cardId, targetId) -> {
           entity.getEvents().trigger(CARD_PLAY_RESULT_EVENT, cardId, targetId);

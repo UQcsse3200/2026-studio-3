@@ -19,10 +19,10 @@ import com.csse3200.game.encounters.integration.PlayerDeckAdapter;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.factories.PlayerFactory;
 import com.csse3200.game.files.FileLoader;
-import com.csse3200.game.maps.RunState;
 import com.csse3200.game.maps.EncounterCallback;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
+import com.csse3200.game.maps.RunState;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.shop.ShopConfig;
@@ -108,7 +108,7 @@ public class EncounterGameArea extends GameArea {
   public void create() {
     loadAssets();
 
-    player = PlayerFactory.createPlayer();
+    player = PlayerFactory.createPlayer(runState);
 
     if (sharedPlayerState != null) {
       sharedPlayerState.applyTo(player);
