@@ -11,7 +11,6 @@ import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattleEvent;
-import com.csse3200.game.components.enemy.IntentEffectType;
 import com.csse3200.game.components.player.PlayerIntent;
 import java.util.List;
 
@@ -72,11 +71,6 @@ public class BattleActions extends Component {
     controller.addPlayerEffectsListener(this::onPlayerEffects);
     controller.addBattleEndListener(this::onBattleEnd);
     controller.addHandChangedListener(hand -> entity.getEvents().trigger(HAND_CHANGED_EVENT, hand));
-    controller.addCardPlayedListener(
-        (cardId, targetId) -> {
-          String cardName = library.getCard(cardId).map(card -> card.name).orElse(cardId);
-          entity.getEvents().trigger("cardPlayed", cardName, targetId);
-        });
   }
 
   private void onEnemyEffects(List<ResolvedCardEffect> effects) {

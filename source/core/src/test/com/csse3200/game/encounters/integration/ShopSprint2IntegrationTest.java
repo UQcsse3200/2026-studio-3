@@ -9,6 +9,7 @@ import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.encounters.integration.mocks.MockPlayerStateGateway;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.maps.RunState;
@@ -39,7 +40,7 @@ class ShopSprint2IntegrationTest {
     assertTrue(result.isSuccess());
     assertEquals(1_000 - offer.price, player.getCurrency());
     assertEquals(3, playerDeck.size());
-    assertTrue(playerDeck.contains(offer.cardId));
+    assertTrue(hasCardId(playerDeck, offer.cardId));
     assertEquals(0, offer.stock);
   }
 
@@ -49,7 +50,7 @@ class ShopSprint2IntegrationTest {
     RunState runState = new RunState();
     PlayerDeck firstShopDeck = runState.getOrCreatePlayerDeck(cardService);
     int initialDeckSize = firstShopDeck.size();
-    int initialStrikeCount = firstShopDeck.count("strike");
+    int initialStrikeCount = firstShopDeck.countByCardId("strike");
     MockPlayerStateGateway player = new MockPlayerStateGateway(100, 1_000);
     ShopItem offer = new ShopItem("strike-offer", "strike", "Strike", 20, 1);
     ShopService firstShop = new ShopService(new ShopItem[] {offer});
@@ -73,8 +74,8 @@ class ShopSprint2IntegrationTest {
     assertTrue(result.isSuccess());
     assertSame(firstShopDeck, reenteredShopDeck);
     assertEquals(initialDeckSize + 1, reenteredShopDeck.size());
-    assertEquals(initialStrikeCount + 1, reenteredShopDeck.count(offer.cardId));
-    assertTrue(reenteredShopDeck.contains(offer.cardId));
+    assertEquals(initialStrikeCount + 1, reenteredShopDeck.countByCardId(offer.cardId));
+    assertTrue(hasCardId(reenteredShopDeck, offer.cardId));
     assertTrue(
         reenteredShop.canPurchaseWithGateway(reenteredOffer.id, reenteredTransactions).isSuccess());
     assertEquals(980, reenteredTransactions.getCurrency());
@@ -97,7 +98,7 @@ class ShopSprint2IntegrationTest {
     assertFalse(result.isSuccess());
     assertEquals(PurchaseResult.Status.TRANSACTION_FAILED, result.getStatus());
     assertEquals(50, player.getCurrency());
-    assertEquals(List.of("strike", "defend"), playerDeck.getCardIds());
+    assertEquals(List.of("strike", "defend"), cardIds(playerDeck));
     assertEquals(1, offer.stock);
   }
 
@@ -119,5 +120,13 @@ class ShopSprint2IntegrationTest {
     assertEquals(50, player.getCurrency());
     assertTrue(playerDeck.isEmpty());
     assertEquals(1, offer.stock);
+  }
+
+  private static boolean hasCardId(PlayerDeck deck, String cardId) {
+    return deck.getCards().stream().anyMatch(card -> card.cardId().equals(cardId));
+  }
+
+  private static List<String> cardIds(PlayerDeck deck) {
+    return deck.getCards().stream().map(CardInstance::cardId).toList();
   }
 }
