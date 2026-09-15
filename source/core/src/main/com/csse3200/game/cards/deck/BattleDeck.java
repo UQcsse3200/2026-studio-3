@@ -1,8 +1,10 @@
 package com.csse3200.game.cards.deck;
 
+import com.csse3200.game.cards.runtime.CardInstance;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Runtime deck state for a single combat encounter.
@@ -12,9 +14,9 @@ import java.util.List;
  * PlayerDeck}.
  */
 public class BattleDeck {
-  private final List<String> drawPile = new ArrayList<>();
-  private final List<String> hand = new ArrayList<>();
-  private final List<String> discardPile = new ArrayList<>();
+  private final List<CardInstance> drawPile = new ArrayList<>();
+  private final List<CardInstance> hand = new ArrayList<>();
+  private final List<CardInstance> discardPile = new ArrayList<>();
 
   /**
    * Creates battle deck state from a player deck.
@@ -25,7 +27,7 @@ public class BattleDeck {
     if (playerDeck == null) {
       throw new IllegalArgumentException("playerDeck must not be null");
     }
-    drawPile.addAll(playerDeck.getCardIds());
+    drawPile.addAll(playerDeck.getCards());
   }
 
   /** Randomises the current draw pile order. */
@@ -36,9 +38,9 @@ public class BattleDeck {
   /**
    * Draws one card from the draw pile into the hand.
    *
-   * @return drawn card ID, or null if the draw pile is empty
+   * @return drawn instance, or null if the draw pile is empty
    */
-  public String drawOne() {
+  public CardInstance drawOne() {
     if (drawPile.isEmpty()) {
       reshuffleDiscardIntoDrawPile();
     }
@@ -47,29 +49,29 @@ public class BattleDeck {
       return null;
     }
 
-    String cardId = drawPile.remove(0);
-    hand.add(cardId);
-    return cardId;
+    CardInstance card = drawPile.remove(0);
+    hand.add(card);
+    return card;
   }
 
   /**
    * Draws up to the requested number of cards from the draw pile into the hand.
    *
    * @param count number of cards to draw
-   * @return card IDs that were drawn, in draw order
+   * @return card instances that were drawn, in draw order
    */
-  public List<String> drawCards(int count) {
+  public List<CardInstance> drawCards(int count) {
     if (count < 0) {
       throw new IllegalArgumentException("count must not be negative");
     }
 
-    List<String> drawnCards = new ArrayList<>();
+    List<CardInstance> drawnCards = new ArrayList<>();
     for (int i = 0; i < count; i++) {
-      String cardId = drawOne();
-      if (cardId == null) {
+      CardInstance card = drawOne();
+      if (card == null) {
         break;
       }
-      drawnCards.add(cardId);
+      drawnCards.add(card);
     }
     return List.copyOf(drawnCards);
   }
@@ -132,21 +134,21 @@ public class BattleDeck {
   /**
    * @return immutable snapshot of the draw pile
    */
-  public List<String> getDrawPile() {
+  public List<CardInstance> getDrawPile() {
     return List.copyOf(drawPile);
   }
 
   /**
    * @return immutable snapshot of the hand
    */
-  public List<String> getHand() {
+  public List<CardInstance> getHand() {
     return List.copyOf(hand);
   }
 
   /**
    * @return immutable snapshot of the discard pile
    */
-  public List<String> getDiscardPile() {
+  public List<CardInstance> getDiscardPile() {
     return List.copyOf(discardPile);
   }
 

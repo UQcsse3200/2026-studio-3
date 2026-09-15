@@ -224,7 +224,12 @@ public class BattleScreen extends ScreenAdapter {
   private List<ClickableRecord> buildHandRecords() {
     List<ClickableRecord> records = new ArrayList<>();
     float x = HAND_START_X;
-    for (String cardId : battleDeck.getHand()) {
+    for (var instance : battleDeck.getHand()) {
+      // Upgrade presentation and gameplay are connected in Checkpoints C/D.
+      if (instance.isUpgraded()) {
+        continue;
+      }
+      String cardId = instance.cardId();
       Optional<CardConfig> maybeCard = library.getCard(cardId);
       if (maybeCard.isEmpty()) {
         logger.warn("Card ID {} in hand not found in library, skipping", cardId);
