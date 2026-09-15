@@ -99,9 +99,8 @@ loadScripts(document, 'script');</script>
 implements <a href="SaveGameSnapshotProvider.html" title="interface in com.csse3200.game.save">SaveGameSnapshotProvider</a></span></div>
 <div class="block">Captures the live run as a <a href="SaveGameData.html" title="class in com.csse3200.game.save"><code>SaveGameData</code></a> snapshot.
 
- <p>Player/deck/map references are passed in explicitly, matching how the rest of the codebase
- holds them (no global "get the player" service exists) — construct this with whatever screen
- currently owns the player entity, deck, and run state.</div>
+ <p>The player, deck and map references are all run-scoped rather than screen-owned, so capturing
+ a save never depends on a rendered player entity still being alive.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -113,9 +112,10 @@ implements <a href="SaveGameSnapshotProvider.html" title="interface in com.csse3
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.entities.Entity,com.csse3200.game.cards.deck.PlayerDeck,com.csse3200.game.maps.RunState)" class="member-name-link">GameStateSnapshotProvider</a><wbr>(<a href="../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.maps.PlayerRunState,com.csse3200.game.cards.deck.PlayerDeck,com.csse3200.game.maps.RunState,com.csse3200.game.bestiary.BestiaryService)" class="member-name-link">GameStateSnapshotProvider</a><wbr>(<a href="../maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a>&nbsp;playerState,
  <a href="../cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a>&nbsp;playerDeck,
- <a href="../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState)</code></div>
+ <a href="../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState,
+ <a href="../bestiary/BestiaryService.html" title="class in com.csse3200.game.bestiary">BestiaryService</a>&nbsp;bestiaryService)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
@@ -152,11 +152,12 @@ implements <a href="SaveGameSnapshotProvider.html" title="interface in com.csse3
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(com.csse3200.game.entities.Entity,com.csse3200.game.cards.deck.PlayerDeck,com.csse3200.game.maps.RunState)">
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.maps.PlayerRunState,com.csse3200.game.cards.deck.PlayerDeck,com.csse3200.game.maps.RunState,com.csse3200.game.bestiary.BestiaryService)">
 <h3>GameStateSnapshotProvider</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">GameStateSnapshotProvider</span><wbr><span class="parameters">(<a href="../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player,
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">GameStateSnapshotProvider</span><wbr><span class="parameters">(<a href="../maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a>&nbsp;playerState,
  <a href="../cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a>&nbsp;playerDeck,
- <a href="../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState)</span></div>
+ <a href="../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState,
+ <a href="../bestiary/BestiaryService.html" title="class in com.csse3200.game.bestiary">BestiaryService</a>&nbsp;bestiaryService)</span></div>
 </section>
 </li>
 </ul>

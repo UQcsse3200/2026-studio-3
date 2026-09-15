@@ -3,6 +3,7 @@ com.csse3200.game.ai.movement
 com.csse3200.game.ai.tasks
 com.csse3200.game.areas
 com.csse3200.game.areas.terrain
+com.csse3200.game.bestiary
 com.csse3200.game.cards
 com.csse3200.game.cards.configs
 com.csse3200.game.cards.debug
@@ -15,12 +16,14 @@ com.csse3200.game.chance
 com.csse3200.game.chance.configs
 com.csse3200.game.components
 com.csse3200.game.components.battle
+com.csse3200.game.components.bestiary
 com.csse3200.game.components.cards
 com.csse3200.game.components.chance
 com.csse3200.game.components.combat
 com.csse3200.game.components.enemy
 com.csse3200.game.components.enemy.EnemyAI
 com.csse3200.game.components.gamearea
+com.csse3200.game.components.library
 com.csse3200.game.components.maingame
 com.csse3200.game.components.mainmenu
 com.csse3200.game.components.npc

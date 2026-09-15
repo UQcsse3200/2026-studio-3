@@ -84,18 +84,45 @@ loadScripts(document, 'script');</script>
 </li>
 <li>
 <div id="class-summary">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="class-summary-tab0" role="tab" aria-selected="true" aria-controls="class-summary.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary', 2)" class="active-table-tab">All Classes and Interfaces</button><button id="class-summary-tab1" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab1', 2)" class="table-tab">Interfaces</button><button id="class-summary-tab2" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab2', 2)" class="table-tab">Classes</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="class-summary-tab0" role="tab" aria-selected="true" aria-controls="class-summary.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary', 2)" class="active-table-tab">All Classes and Interfaces</button><button id="class-summary-tab1" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab1', 2)" class="table-tab">Interfaces</button><button id="class-summary-tab2" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab2', 2)" class="table-tab">Classes</button><button id="class-summary-tab3" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab3', 2)" class="table-tab">Enum Classes</button></div>
 <div id="class-summary.tabpanel" role="tabpanel" aria-labelledby="class-summary-tab0">
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Class</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color class-summary class-summary-tab2"><a href="CycleAttackDefendAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">CycleAttackDefendAI</a></div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="ArmorScalingAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">ArmorScalingAI</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Armor-scaling behaviour for Dark Acolyte: banks armor on odd turns and attacks on even turns for
+ base damage plus its currently-held armor.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="BossAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">BossAI</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Boss AI controlled by a phase state machine, per-phase action weights and a global pressure
+ level.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab3"><a href="BossAI.BossMove.html" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.BossMove</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab3">
+<div class="block">Actions currently supported by the battle execution system.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab3"><a href="BossAI.BossPhase.html" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.BossPhase</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab3">
+<div class="block">High-level states of the Boss fight.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab3"><a href="BossAI.PressureLevel.html" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.PressureLevel</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab3">
+<div class="block">Global aggression level applied on top of the current phase table.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="CycleAttackDefendAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">CycleAttackDefendAI</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Basic enemy AI that alternates between attacking and defending.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="CycleFourStanceAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">CycleFourStanceAI</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="CycleFourStanceAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">CycleFourStanceAI</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
 <div class="block">A stance-based behaviour that alternates between pressure and defence.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="DefensiveStanceAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">DefensiveStanceAI</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Defensive-leaning behaviour for Bone Crawler: a fixed 4-turn cycle of defend, attack, defend,
+ defend (3 defends per attack).</div>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab1"><a href="EnemyAI.html" title="interface in com.csse3200.game.components.enemy.EnemyAI">EnemyAI</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab1">
@@ -108,6 +135,18 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="EnemyAIFactory.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIFactory</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
 <div class="block">Creates enemy AI implementations from behaviour identifiers.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="EnrageLowHealthAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnrageLowHealthAI</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Elite behaviour that follows a four-stance combat pattern and becomes stronger at low health.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="RandomStanceAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">RandomStanceAI</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Unpredictable behaviour for Lesser Shade: each round randomly attacks or defends.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="ShieldBreakRetaliationAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">ShieldBreakRetaliationAI</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Elite behaviour built around shield breaking and retaliation.</div>
 </div>
 </div>
 </div>

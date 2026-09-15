@@ -96,8 +96,9 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="../Component.html" title="class in com.csse3200.game.components">Component</a></span></div>
 <div class="block">Drives an enemy's <a href="../../rendering/AnimationRenderComponent.html" title="class in com.csse3200.game.rendering"><code>AnimationRenderComponent</code></a> from combat events.
 
- <p>The enemy loops <code>idle</code>, flashes <code>hurt</code> when it takes damage or is defeated, and
- falls back to <code>idle</code> once a non-looping flash has finished playing.</div>
+ <p>The enemy loops <code>idle</code>, flashes <code>hurt</code> when it takes damage, and plays optional
+ boss animations for casting, defending, and dying. Non-looping action animations return to idle;
+ death holds on its final frame.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">

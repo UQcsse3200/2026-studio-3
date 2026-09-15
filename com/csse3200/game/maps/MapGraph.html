@@ -212,8 +212,13 @@ implements <a href="EncounterCallback.html" title="interface in com.csse3200.gam
 <div class="block">Called when an encounter finishes.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startRun(java.lang.Integer)" class="member-name-link">startRun</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#restoreCurrentNode(java.lang.Integer)" class="member-name-link">restoreCurrentNode</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Restores the current node from trusted save/load code without applying normal movement rules.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startRun(java.lang.Integer)" class="member-name-link">startRun</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Starts a run at the given node, unlocking its connections so there is somewhere to move.</div>
 </div>
 </div>
@@ -310,6 +315,19 @@ implements <a href="EncounterCallback.html" title="interface in com.csse3200.gam
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>current node or null if no current node is set</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="restoreCurrentNode(java.lang.Integer)">
+<h3>restoreCurrentNode</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">restoreCurrentNode</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId)</span></div>
+<div class="block">Restores the current node from trusted save/load code without applying normal movement rules.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>nodeId</code> - saved current node id, or null when no node is current</dd>
+<dt>Returns:</dt>
+<dd>true when the node was restored, or false if the id is unknown</dd>
 </dl>
 </section>
 </li>

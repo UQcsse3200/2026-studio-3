@@ -163,15 +163,21 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isRunActive()" class="member-name-link">isRunActive</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMapGraph(com.csse3200.game.maps.MapGraph)" class="member-name-link">setMapGraph</a><wbr>(<a href="MapGraph.html" title="class in com.csse3200.game.maps">MapGraph</a>&nbsp;mapGraph)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#restoreRun(com.csse3200.game.maps.MapGraph,java.lang.Integer)" class="member-name-link">restoreRun</a><wbr>(<a href="MapGraph.html" title="class in com.csse3200.game.maps">MapGraph</a>&nbsp;mapGraph,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;activeNodeId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Restores a saved run without replaying movement or encounter transitions.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMapGraph(com.csse3200.game.maps.MapGraph)" class="member-name-link">setMapGraph</a><wbr>(<a href="MapGraph.html" title="class in com.csse3200.game.maps">MapGraph</a>&nbsp;mapGraph)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the map for the current run without placing the player on it.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startRun(com.csse3200.game.maps.MapGraph,java.lang.Integer)" class="member-name-link">startRun</a><wbr>(<a href="MapGraph.html" title="class in com.csse3200.game.maps">MapGraph</a>&nbsp;mapGraph,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startRun(com.csse3200.game.maps.MapGraph,java.lang.Integer)" class="member-name-link">startRun</a><wbr>(<a href="MapGraph.html" title="class in com.csse3200.game.maps">MapGraph</a>&nbsp;mapGraph,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;startNodeId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Starts a run on a generated map.</div>
 </div>
 </div>
@@ -267,6 +273,21 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getMapGraph()">
 <h3>getMapGraph</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="MapGraph.html" title="class in com.csse3200.game.maps">MapGraph</a></span>&nbsp;<span class="element-name">getMapGraph</span>()</div>
+</section>
+</li>
+<li>
+<section class="detail" id="restoreRun(com.csse3200.game.maps.MapGraph,java.lang.Integer)">
+<h3>restoreRun</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">restoreRun</span><wbr><span class="parameters">(<a href="MapGraph.html" title="class in com.csse3200.game.maps">MapGraph</a>&nbsp;mapGraph,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;activeNodeId)</span></div>
+<div class="block">Restores a saved run without replaying movement or encounter transitions.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>mapGraph</code> - restored map graph</dd>
+<dd><code>activeNodeId</code> - saved in-progress encounter node, or null if the player is between rooms</dd>
+<dt>Returns:</dt>
+<dd>true if the run state was restored</dd>
+</dl>
 </section>
 </li>
 <li>
