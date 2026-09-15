@@ -17,7 +17,7 @@ public final class PlayerDeckFactory {
   public static final String SEALED_PACT = "sealed_pact";
   public static final String BLOOD_PRICE = "blood_price";
   public static final String DOOM_SIGIL = "doom_sigil";
-  public static final String ECLIPSE_DECREE = "eclipse_decree";
+  public static final String IRON_OATH = "iron_oath";
 
   private static final List<String> STARTER_DECK_CARD_IDS =
       List.of(
@@ -39,7 +39,7 @@ public final class PlayerDeckFactory {
           BLOOD_PRICE,
           DOOM_SIGIL,
           DOOM_SIGIL,
-          ECLIPSE_DECREE,
+          IRON_OATH,
           STRIKE,
           STRIKE,
           DEFEND,
@@ -88,7 +88,7 @@ public final class PlayerDeckFactory {
    * <p>This is a test/demo entry point only. The default starter deck is intentionally unchanged;
    * production acquisition remains owned by the reward and shop integrations.
    *
-   * @return player deck containing all four forbidden cards and supporting initial cards
+   * @return player deck containing the four Member 5 cards and supporting initial cards
    */
   public static PlayerDeck createForbiddenTestDeck() {
     return createForbiddenTestDeck(new CardLibrary(CardConfigLoader.loadCards()));
@@ -98,7 +98,7 @@ public final class PlayerDeckFactory {
    * Creates a deterministic forbidden-card test deck validated by the supplied card service.
    *
    * @param cardService authoritative card lookup service
-   * @return player deck containing all four forbidden cards and supporting initial cards
+   * @return player deck containing the four Member 5 cards and supporting initial cards
    */
   public static PlayerDeck createForbiddenTestDeck(CardService cardService) {
     CardInstanceFactory factory = new CardInstanceFactory(cardService);
