@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.csse3200.game.maps.RunState;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.UIComponent;
 
@@ -14,8 +15,13 @@ public class PlayerStatsTopDisplay extends UIComponent {
   private Label pietyLabel;
   private Image moneyImage;
   private Label moneyLabel;
+  private RunState runState;
   private static final float FONT_SCALE = 0.75f;
   private static final String STYLE_NAME_LARGE = "large";
+
+  public PlayerStatsTopDisplay(RunState runState) {
+    this.runState = runState;
+  }
 
   /** Creates reusable ui styles and adds actors to the stage. */
   @Override
@@ -46,7 +52,8 @@ public class PlayerStatsTopDisplay extends UIComponent {
         new Image(ServiceLocator.getResourceService().getAsset("images/piety.png", Texture.class));
 
     // Piety text
-    pietyLabel = new Label("Level: 1", skin, STYLE_NAME_LARGE);
+    String pietyText = String.format("Level: %d", runState.getMapProgression());
+    pietyLabel = new Label(pietyText, skin, STYLE_NAME_LARGE);
     pietyLabel.setFontScale(FONT_SCALE);
 
     // Money image
@@ -79,7 +86,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
    * @param piety player piety
    */
   public void updatePlayerPietyUI(int piety) {
-    CharSequence text = String.format("Piety: %d", piety);
+    CharSequence text = String.format("Level: %d", piety);
     pietyLabel.setText(text);
   }
 
