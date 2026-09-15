@@ -30,7 +30,6 @@ loadScripts(document, 'script');</script>
 <li><a href="package-summary.html">Package</a></li>
 <li class="nav-bar-cell1-rev">Class</li>
 <li><a href="package-tree.html">Tree</a></li>
-<li><a href="../../../../../deprecated-list.html">Deprecated</a></li>
 <li><a href="../../../../../index-all.html">Index</a></li>
 <li><a href="../../../../../help-doc.html#class">Help</a></li>
 </ul>
@@ -140,6 +139,18 @@ loadScripts(document, 'script');</script>
 <div class="block">Resolves a card that has already been retrieved from Team 6's card library.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CardEffectResolution.html" title="class in com.csse3200.game.cards.effects">CardEffectResolution</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolve(com.csse3200.game.cards.runtime.ResolvedCard,com.csse3200.game.cards.effects.CardEffectResolutionContext)" class="member-name-link">resolve</a><wbr>(<a href="../runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a>&nbsp;card,
+ <a href="CardEffectResolutionContext.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionContext</a>&nbsp;context)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resolves selected instance values against read-only combat modifiers.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CardEffectResolution.html" title="class in com.csse3200.game.cards.effects">CardEffectResolution</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolve(com.csse3200.game.cards.runtime.ResolvedCard,com.csse3200.game.cards.effects.PlayerEffectState)" class="member-name-link">resolve</a><wbr>(<a href="../runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a>&nbsp;card,
+ <a href="PlayerEffectState.html" title="class in com.csse3200.game.cards.effects">PlayerEffectState</a>&nbsp;playerState)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resolves selected instance values, preserving effect order and existing Strength behaviour.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CardEffectResolution.html" title="class in com.csse3200.game.cards.effects">CardEffectResolution</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolve(java.lang.String,com.csse3200.game.cards.effects.CardEffectResolutionContext)" class="member-name-link">resolve</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId,
  <a href="CardEffectResolutionContext.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionContext</a>&nbsp;context)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -235,6 +246,22 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="CardEffectResolution.html" title="class in com.csse3200.game.cards.effects">CardEffectResolution</a></span>&nbsp;<span class="element-name">resolve</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId,
  <a href="CardEffectResolutionContext.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionContext</a>&nbsp;context)</span></div>
 <div class="block">Resolves a card by ID using read-only combat state supplied by the caller.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="resolve(com.csse3200.game.cards.runtime.ResolvedCard,com.csse3200.game.cards.effects.PlayerEffectState)">
+<h3>resolve</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="CardEffectResolution.html" title="class in com.csse3200.game.cards.effects">CardEffectResolution</a></span>&nbsp;<span class="element-name">resolve</span><wbr><span class="parameters">(<a href="../runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a>&nbsp;card,
+ <a href="PlayerEffectState.html" title="class in com.csse3200.game.cards.effects">PlayerEffectState</a>&nbsp;playerState)</span></div>
+<div class="block">Resolves selected instance values, preserving effect order and existing Strength behaviour.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="resolve(com.csse3200.game.cards.runtime.ResolvedCard,com.csse3200.game.cards.effects.CardEffectResolutionContext)">
+<h3>resolve</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="CardEffectResolution.html" title="class in com.csse3200.game.cards.effects">CardEffectResolution</a></span>&nbsp;<span class="element-name">resolve</span><wbr><span class="parameters">(<a href="../runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a>&nbsp;card,
+ <a href="CardEffectResolutionContext.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionContext</a>&nbsp;context)</span></div>
+<div class="block">Resolves selected instance values against read-only combat modifiers.</div>
 </section>
 </li>
 </ul>

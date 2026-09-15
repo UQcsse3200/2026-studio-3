@@ -30,7 +30,6 @@ loadScripts(document, 'script');</script>
 <li><a href="package-summary.html">Package</a></li>
 <li class="nav-bar-cell1-rev">Class</li>
 <li><a href="package-tree.html">Tree</a></li>
-<li><a href="../../../../deprecated-list.html">Deprecated</a></li>
 <li><a href="../../../../index-all.html">Index</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
@@ -124,17 +123,33 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Immediate block granted to the target.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#DAMAGE" class="member-name-link">DAMAGE</a></code></div>
+<div class="col-first odd-row-color"><code><a href="#CLEANSE" class="member-name-link">CLEANSE</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">Immediately removes poison, vulnerable and feeble from the target.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#DAMAGE" class="member-name-link">DAMAGE</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Immediate damage dealt to the target.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#ENERGY_GAIN" class="member-name-link">ENERGY_GAIN</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Immediately restores player energy, capped by the player's maximum energy.</div>
 </div>
 <div class="col-first even-row-color"><code><a href="#FEEBLE" class="member-name-link">FEEBLE</a></code></div>
 <div class="col-last even-row-color">
 <div class="block">Decreases 25% the damage output to target while active.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#HEAL" class="member-name-link">HEAL</a></code></div>
+<div class="col-first odd-row-color"><code><a href="#FORTIFY" class="member-name-link">FORTIFY</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">Immediately increases the target's armour pool.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#HEAL" class="member-name-link">HEAL</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Immediate health restored to the target.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#PIERCE" class="member-name-link">PIERCE</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Immediate damage that ignores the target's block and armour.</div>
 </div>
 <div class="col-first even-row-color"><code><a href="#POISON" class="member-name-link">POISON</a></code></div>
 <div class="col-last even-row-color">
@@ -144,8 +159,12 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color">
 <div class="block">Increases damage the target deals for the rest of the combat.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#VULNERABLE" class="member-name-link">VULNERABLE</a></code></div>
+<div class="col-first even-row-color"><code><a href="#SUNDER" class="member-name-link">SUNDER</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Immediate reduction of the target's armour pool.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#VULNERABLE" class="member-name-link">VULNERABLE</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Increases damage the target receives while active.</div>
 </div>
 </div>
@@ -243,6 +262,42 @@ the order they are declared.</div>
 <h3>STRENGTH</h3>
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="EffectType.html" title="enum class in com.csse3200.game.cards">EffectType</a></span>&nbsp;<span class="element-name">STRENGTH</span></div>
 <div class="block">Increases damage the target deals for the rest of the combat.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="SUNDER">
+<h3>SUNDER</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="EffectType.html" title="enum class in com.csse3200.game.cards">EffectType</a></span>&nbsp;<span class="element-name">SUNDER</span></div>
+<div class="block">Immediate reduction of the target's armour pool.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="ENERGY_GAIN">
+<h3>ENERGY_GAIN</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="EffectType.html" title="enum class in com.csse3200.game.cards">EffectType</a></span>&nbsp;<span class="element-name">ENERGY_GAIN</span></div>
+<div class="block">Immediately restores player energy, capped by the player's maximum energy.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="PIERCE">
+<h3>PIERCE</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="EffectType.html" title="enum class in com.csse3200.game.cards">EffectType</a></span>&nbsp;<span class="element-name">PIERCE</span></div>
+<div class="block">Immediate damage that ignores the target's block and armour.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="CLEANSE">
+<h3>CLEANSE</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="EffectType.html" title="enum class in com.csse3200.game.cards">EffectType</a></span>&nbsp;<span class="element-name">CLEANSE</span></div>
+<div class="block">Immediately removes poison, vulnerable and feeble from the target.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="FORTIFY">
+<h3>FORTIFY</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="EffectType.html" title="enum class in com.csse3200.game.cards">EffectType</a></span>&nbsp;<span class="element-name">FORTIFY</span></div>
+<div class="block">Immediately increases the target's armour pool. Armour is a lasting damage-reduction pool on
+ <code>CombatStatsComponent</code>, distinct from per-turn Block.</div>
 </section>
 </li>
 </ul>
