@@ -18,7 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(GameExtension.class)
 class ForbiddenCardsTest {
   private static final Set<String> FORBIDDEN_CARD_IDS =
-      Set.of("sealed_pact", "blood_price", "doom_sigil", "eclipse_decree");
+      Set.of("sealed_pact", "blood_price", "doom_sigil", "iron_oath");
 
   private CardLibrary library;
 
@@ -93,25 +93,6 @@ class ForbiddenCardsTest {
         () -> assertEquals(2, upgrade.cost),
         () -> assertEquals(Rarity.RARE, upgrade.rarity),
         () -> assertEffects(upgrade.effects, EffectType.VULNERABLE, 2, 2, EffectType.POISON, 6, 3));
-  }
-
-  @Test
-  void shouldConfigureEclipseDecree() {
-    CardConfig card = library.getCard("eclipse_decree").orElseThrow();
-    CardUpgradeConfig upgrade = card.upgrade;
-
-    assertAll(
-        () -> assertEquals("Eclipse Decree", card.name),
-        () -> assertEquals(3, card.cost),
-        () -> assertEquals(CardType.SKILL, card.type),
-        () -> assertEquals(Rarity.RARE, card.rarity),
-        () -> assertEquals(TargetType.ALL_ENEMIES, card.target),
-        () -> assertEffect(card.effects, EffectType.FEEBLE, 1, 2),
-        () -> assertEquals("images/cards/eclipse_decree.png", card.texturePath),
-        () -> assertEquals("Eclipse Decree+", upgrade.name),
-        () -> assertEquals(3, upgrade.cost),
-        () -> assertEquals(Rarity.RARE, upgrade.rarity),
-        () -> assertEffect(upgrade.effects, EffectType.FEEBLE, 1, 3));
   }
 
   private static void assertEffect(
