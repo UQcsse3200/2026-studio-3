@@ -152,6 +152,14 @@ class EffectExecutorTest {
   }
 
   @Test
+  void shouldResolveCleanseOnSelf() {
+    assertEquals(
+        new ResolvedCardEffect("purify", EffectType.CLEANSE, TargetType.SELF, 1, 0, 0),
+        executor.resolve(
+            "purify", new EffectConfig(EffectType.CLEANSE, 1), TargetType.SELF, 0, playerState));
+  }
+
+  @Test
   void shouldReturnPlayerEffectsWithoutApplyingExternalPlayerState() {
     assertEquals(
         new ResolvedCardEffect("defend", EffectType.BLOCK, TargetType.SELF, 5, 0, 0),

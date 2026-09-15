@@ -134,7 +134,8 @@ public class EffectExecutor {
       playerState.addStrength(effect.value);
     } else if (effect.type != EffectType.BLOCK
         && effect.type != EffectType.HEAL
-        && effect.type != EffectType.ENERGY_GAIN) {
+        && effect.type != EffectType.ENERGY_GAIN
+        && effect.type != EffectType.CLEANSE) {
       throw new IllegalArgumentException("Unsupported self-targeting effect type: " + effect.type);
     }
 
@@ -146,7 +147,8 @@ public class EffectExecutor {
     if (effect.type != EffectType.STRENGTH
         && effect.type != EffectType.BLOCK
         && effect.type != EffectType.HEAL
-        && effect.type != EffectType.ENERGY_GAIN) {
+        && effect.type != EffectType.ENERGY_GAIN
+        && effect.type != EffectType.CLEANSE) {
       throw new IllegalArgumentException("Unsupported self-targeting effect type: " + effect.type);
     }
 
