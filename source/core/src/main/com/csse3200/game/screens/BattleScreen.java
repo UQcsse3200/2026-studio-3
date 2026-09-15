@@ -119,10 +119,6 @@ public class BattleScreen extends ScreenAdapter {
     playerState = runState.getOrCreatePlayerState();
     playerState.applyTo(forestGameArea.getPlayer());
 
-    RunState runState = game.getRunState();
-    playerState = runState.getOrCreatePlayerState();
-    playerState.applyTo(forestGameArea.getPlayer());
-
     // Card + deck state has to exist before the controller so it can be handed the single
     // card-play entry point and the deck it mutates.
     List<CardConfig> configs = CardConfigLoader.loadCards(); // reads configs/cards.json
