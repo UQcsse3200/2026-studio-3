@@ -27,7 +27,7 @@ public final class CardValidator {
     }
 
     validateBasicFields(card, errors);
-    validateEffects(card.effects, errors);
+    validateEffects(card.effects, card.target, errors);
     validateUpgrade(card.upgrade, card.target, errors);
 
     return List.copyOf(errors);
@@ -111,7 +111,8 @@ public final class CardValidator {
     }
   }
 
-  private static void validateEffects(EffectConfig[] effects, List<String> errors) {
+  private static void validateEffects(
+      EffectConfig[] effects, TargetType inheritedTarget, List<String> errors) {
     if (effects == null || effects.length == 0) {
       errors.add("a card must define at least one effect");
       return;
@@ -119,6 +120,18 @@ public final class CardValidator {
 
     for (int i = 0; i < effects.length; i++) {
       validateEffect(effects[i], i, errors);
+      if (effects[i] != null
+          && effects[i].type != null
+          && inheritedTarget != null
+          && !isCompatibleWithTarget(effects[i].type, inheritedTarget)) {
+        errors.add(
+            "effects["
+                + i
+                + "].type "
+                + effects[i].type
+                + " is not compatible with inherited target "
+                + inheritedTarget);
+      }
     }
   }
 
