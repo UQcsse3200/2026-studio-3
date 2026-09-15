@@ -73,6 +73,9 @@ public class BattleScreen extends ScreenAdapter {
   private static final float HAND_SPACING = 250f;
   private static final float CARD_WIDTH = 225;
   private static final float CARD_HEIGHT = 456;
+  private static final float CARD_INVENTORY_MIN_WIDTH = 800f;
+  private static final float CARD_INVENTORY_MIN_HEIGHT = 600f;
+  private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
 
   private final PhysicsEngine physicsEngine;
   private final BattleController controller;
@@ -136,7 +139,7 @@ public class BattleScreen extends ScreenAdapter {
     PlayerDeck playerDeck = game.getRunState().getOrCreatePlayerDeck(library);
     battleDeck = new BattleDeck(playerDeck);
     battleDeck.shuffleDrawPile();
-    battleDeck.drawCards(5);
+    battleDeck.drawCards(AMOUNT_OF_CARDS_IN_DECK);
     handRowOrder = new ArrayList<>(battleDeck.getHandInstances());
 
     Entity player = forestGameArea.getPlayer();
@@ -182,7 +185,7 @@ public class BattleScreen extends ScreenAdapter {
     Team3CardPlayAdapter cardPlayAdapter = new Team3CardPlayAdapter(library, controller);
 
     PopupDisplay cardInventory = new PopupDisplay("Card Inventory");
-    cardInventory.setMinSize(800f, 600f);
+    cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
     Stage stage = ServiceLocator.getRenderService().getStage();
     Entity battleUi =
