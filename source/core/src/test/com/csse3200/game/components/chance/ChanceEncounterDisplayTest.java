@@ -31,6 +31,13 @@ class ChanceEncounterDisplayTest {
   }
 
   @Test
+  void shouldDescribeCardRewardOutcome() {
+    assertEquals(
+        "You receive the Bandage card.",
+        ChanceEncounterDisplay.formatOutcome(new ChanceOutcome(0, 0, "bandage")));
+  }
+
+  @Test
   void shouldDescribeUnresolvedChoice() {
     assertEquals("This choice could not be resolved.", ChanceEncounterDisplay.formatOutcome(null));
   }

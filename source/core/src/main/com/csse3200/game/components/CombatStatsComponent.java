@@ -286,6 +286,7 @@ public class CombatStatsComponent extends Component {
   }
 
   // Block - per-turn damage reduction pool (Team 6's "Slay the Spire" style block)
+
   /**
    * Returns the entity's current block value.
    *

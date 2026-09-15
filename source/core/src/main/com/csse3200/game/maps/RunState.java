@@ -145,6 +145,23 @@ public class RunState {
     activeNodeId = null;
   }
 
+  /**
+   * Abandons the in-progress encounter without recording a result, reverting the map to the
+   * player's position before they entered it.
+   *
+   * @return true if an encounter was actually abandoned
+   */
+  public boolean abandonEncounter() {
+    if (mapGraph == null || activeNodeId == null) {
+      logger.warn("Abandon requested but no encounter was active");
+      return false;
+    }
+
+    boolean reverted = mapGraph.abandonCurrentNode();
+    activeNodeId = null;
+    return reverted;
+  }
+
   public void endRun() {
     mapGraph = null;
     activeNodeId = null;

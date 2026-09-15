@@ -115,6 +115,9 @@ public class BattleScreen extends ScreenAdapter {
     ForestGameArea forestGameArea = new ForestGameArea(terrainFactory);
     this.gameArea = forestGameArea;
     forestGameArea.create();
+    RunState runState = game.getRunState();
+    playerState = runState.getOrCreatePlayerState();
+    playerState.applyTo(forestGameArea.getPlayer());
 
     RunState runState = game.getRunState();
     playerState = runState.getOrCreatePlayerState();
