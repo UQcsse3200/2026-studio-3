@@ -40,21 +40,32 @@ class Team3CardPlayAdapterTest {
     Team1EnemyStateAdapter enemies = new Team1EnemyStateAdapter(Map.of("enemy-1", enemyEntity));
 
     CardPlayService playService = new CardPlayService(cards, deck, energy, player, enemies);
-    Team3CardPlayAdapter adapter = new Team3CardPlayAdapter(cards, playService);
+    Team3CardPlayAdapter adapter = new Team3CardPlayAdapter(playService);
     Entity battleFlow = new Entity().addComponent(adapter);
     AtomicReference<CardPlayResult> observed = new AtomicReference<>();
     battleFlow.getEvents().addListener(Team3CardPlayAdapter.CARD_PLAY_RESULT_EVENT, observed::set);
     battleFlow.create();
 
-    battleFlow.getEvents().trigger(Team3CardPlayAdapter.PLAY_CARD_EVENT, "strike", "enemy-1");
+    battleFlow
+        .getEvents()
+        .trigger(
+            Team3CardPlayAdapter.PLAY_CARD_EVENT, deck.getHand().get(0).instanceId(), "enemy-1");
 
     assertNotNull(observed.get());
     assertTrue(observed.get().success());
     assertEquals(2, energy.getCurrentEnergy());
     assertEquals(6, observed.get().enemyEffects().get(0).value());
     assertEquals(10, enemyStats.getHealth());
-    assertTrue(deck.getHand().isEmpty());
-    assertEquals(List.of("strike"), deck.getDiscardPile());
+    assertTrue(
+        deck.getHand().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList()
+            .isEmpty());
+    assertEquals(
+        List.of("strike"),
+        deck.getDiscardPile().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList());
   }
 
   private static CardConfig strike() {

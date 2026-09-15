@@ -11,7 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.csse3200.game.cards.CardPlayRequest;
+import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
@@ -88,7 +88,7 @@ class BattleControllerTest {
   @Test
   void shouldResolveSubmittedAttackCardSynchronously() {
     advanceToPlayerTurn();
-    CardPlayRequest request = new CardPlayRequest("strike", "enemy-1");
+    CardPlayRequest request = CardPlayRequest.singleEnemy("strike-instance", "enemy-1");
 
     boolean accepted = controller.submitCardPlayRequest(request, PlayerIntent.ATTACK);
 

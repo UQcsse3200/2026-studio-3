@@ -291,37 +291,24 @@ class EffectExecutorTest {
 
   @Test
   void shouldValidateEffectConfigValues() {
+    EffectConfig nullType = new EffectConfig(null, 1);
+    EffectConfig zeroDamage = new EffectConfig(EffectType.DAMAGE, 0);
+    EffectConfig lastingDamage = new EffectConfig(EffectType.DAMAGE, 1, 1);
+    EffectConfig poisonWithoutDuration = new EffectConfig(EffectType.POISON, 1);
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> executor.resolve("bad", nullType, TargetType.SINGLE_ENEMY, 0, playerState));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> executor.resolve("bad", zeroDamage, TargetType.SINGLE_ENEMY, 0, playerState));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> executor.resolve("bad", lastingDamage, TargetType.SINGLE_ENEMY, 0, playerState));
     assertThrows(
         IllegalArgumentException.class,
         () ->
             executor.resolve(
-                "bad", new EffectConfig(null, 1), TargetType.SINGLE_ENEMY, 0, playerState));
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            executor.resolve(
-                "bad",
-                new EffectConfig(EffectType.DAMAGE, 0),
-                TargetType.SINGLE_ENEMY,
-                0,
-                playerState));
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            executor.resolve(
-                "bad",
-                new EffectConfig(EffectType.DAMAGE, 1, 1),
-                TargetType.SINGLE_ENEMY,
-                0,
-                playerState));
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            executor.resolve(
-                "bad",
-                new EffectConfig(EffectType.POISON, 1),
-                TargetType.SINGLE_ENEMY,
-                0,
-                playerState));
+                "bad", poisonWithoutDuration, TargetType.SINGLE_ENEMY, 0, playerState));
   }
 }

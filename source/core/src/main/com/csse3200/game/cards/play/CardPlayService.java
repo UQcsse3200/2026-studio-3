@@ -9,8 +9,11 @@ import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.effects.CardEffectResolution;
 import com.csse3200.game.cards.effects.CardEffectResolutionContext;
 import com.csse3200.game.cards.effects.CardEffectResolutionService;
+import com.csse3200.game.cards.runtime.CardInstance;
+import com.csse3200.game.cards.runtime.CardResolver;
+import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.player.EnergyComponent;
-import java.util.List;
+import java.util.Optional;
 
 /**
  * Coordinates Team 5 card play with Team 7 energy state.
@@ -94,142 +97,99 @@ public final class CardPlayService {
     this.enemyStateView = enemyStateView;
   }
 
-  /**
-   * Read-only check for whether a card is currently playable.
-   *
-   * <p>This is intended for UI previews. The authoritative play path remains {@link #playCard},
-   * which calls Team 7's {@link EnergyComponent#spendEnergy(int)}.
-   *
-   * @param cardId card ID to check
-   * @return true if the card is in hand and Team 7 says the player can afford it
-   */
-  public boolean canPlay(String cardId) {
-    CardConfig card = getPlayableCardConfig(cardId);
-    return battleDeck.getHand().contains(card.id) && energyComponent.canAfford(card.cost);
-  }
-
-  /**
-   * Read-only preview for the unified Team 3 request flow.
-   *
-   * @param request card and selected target
-   * @return true only when the card, target, hand and energy checks currently pass
-   */
-  public boolean canPlay(CardPlayRequest request) {
-    if (request == null) {
-      return false;
+  /** Resolves an exact copy currently in hand; invalid/missing definitions are not playable. */
+  public Optional<ResolvedCard> resolveInHand(String instanceId) {
+    CardInstance instance = battleDeck.getCardInHand(instanceId).orElse(null);
+    if (instance == null) return Optional.empty();
+    CardConfig config = cardService.getCard(instance.cardId()).orElse(null);
+    if (config == null || !CardValidator.validate(config).isEmpty()) return Optional.empty();
+    try {
+      ResolvedCard card = new CardResolver().resolve(config, instance);
+      return CardValidator.validateResolved(card).isEmpty() ? Optional.of(card) : Optional.empty();
+    } catch (IllegalArgumentException | IllegalStateException exception) {
+      return Optional.empty();
     }
-    CardConfig card = cardService.getCard(request.cardId()).orElse(null);
-    return card != null
-        && CardValidator.validate(card).isEmpty()
-        && isValidTarget(card, request.target())
-        && isTargetAvailable(request.target())
-        && battleDeck.getHand().contains(card.id)
-        && energyComponent.canAfford(card.cost);
+  }
+
+  /** Checks affordability of an exact copy; use the request overload to check a selected target. */
+  public boolean canPlay(String instanceId) {
+    return resolveInHand(instanceId)
+        .filter(card -> energyComponent.canAfford(card.cost()))
+        .isPresent();
+  }
+
+  /** Read-only check of instance, resolved cost, target type and target availability. */
+  public boolean canPlay(CardPlayRequest request) {
+    return request != null
+        && resolveInHand(request.instanceId())
+            .filter(
+                card ->
+                    isValidTarget(card, request.target()) && isTargetAvailable(request.target()))
+            .filter(card -> energyComponent.canAfford(card.cost()))
+            .isPresent();
   }
 
   /**
-   * Attempts to play a card from the current hand.
-   *
-   * <p>When successful, Team 7 energy is spent first, then Team 5 resolves effects, then the battle
-   * deck moves the card from hand to discard. When energy is insufficient, no card effects are
-   * resolved and the hand remains unchanged.
-   *
-   * @param cardId card ID to play
-   * @return structured play result with either resolved effects or a failure reason
-   */
-  public CardPlayResult playCard(String cardId) {
-    CardConfig card = getPlayableCardConfig(cardId);
-    return playValidatedCard(card, null);
-  }
-
-  /**
-   * Unified Team 5 entry point for a card play attempt from Team 3/battle flow.
-   *
-   * <p>Expected validation failures are returned as data. A failed result never spends energy or
-   * moves the card. A successful result spends energy exactly once, records the resolved effects,
-   * moves the card to the discard pile and includes immutable deck snapshots.
-   *
-   * @param request card ID and already selected target
-   * @return complete result for UI coordination and Team 1/Team 7 effect consumers
+   * Validates an instance request, spends resolved cost once, resolves its effects and discards
+   * that exact copy. Expected failures leave energy and all piles unchanged. Unexpected failures
+   * restore energy and propagate; consumers apply returned effects separately.
    */
   public CardPlayResult playCard(CardPlayRequest request) {
-    if (request == null) {
-      throw new IllegalArgumentException("Card play request cannot be null");
+    if (request == null) throw new IllegalArgumentException("Card play request cannot be null");
+    CardInstance instance = battleDeck.getCardInHand(request.instanceId()).orElse(null);
+    if (instance == null) return failure(request, null, 0, CardPlayFailureReason.CARD_NOT_IN_HAND);
+    if (cardService.getCard(instance.cardId()).isEmpty()) {
+      return failure(request, instance.cardId(), 0, CardPlayFailureReason.UNKNOWN_CARD);
     }
-
-    CardConfig card = cardService.getCard(request.cardId()).orElse(null);
-    if (card == null) {
-      return failure(request, 0, CardPlayFailureReason.UNKNOWN_CARD);
+    ResolvedCard card = resolveInHand(request.instanceId()).orElse(null);
+    if (card == null)
+      return failure(request, instance.cardId(), 0, CardPlayFailureReason.INVALID_CARD_CONFIG);
+    if (!isValidTarget(card, request.target()) || !isTargetAvailable(request.target())) {
+      return failure(request, card.cardId(), card.cost(), CardPlayFailureReason.INVALID_TARGET);
     }
-    if (!CardValidator.validate(card).isEmpty()) {
-      return failure(request, Math.max(card.cost, 0), CardPlayFailureReason.INVALID_CARD_CONFIG);
+    if (!energyComponent.canAfford(card.cost()) || !energyComponent.spendEnergy(card.cost())) {
+      return failure(request, card.cardId(), card.cost(), CardPlayFailureReason.NOT_ENOUGH_ENERGY);
     }
-    if (!isValidTarget(card, request.target())) {
-      return failure(request, card.cost, CardPlayFailureReason.INVALID_TARGET);
-    }
-    if (!isTargetAvailable(request.target())) {
-      return failure(request, card.cost, CardPlayFailureReason.INVALID_TARGET);
-    }
-    return playValidatedCard(card, request.target());
-  }
-
-  private CardPlayResult playValidatedCard(CardConfig card, CardPlayTarget target) {
-    if (!battleDeck.getHand().contains(card.id)) {
-      return failure(card.id, target, card.cost, CardPlayFailureReason.CARD_NOT_IN_HAND);
-    }
-
-    // This read-only check gives the common failure a stable reason. spendEnergy() remains the
-    // authoritative atomic check-and-spend in case energy changes between the two calls.
-    if (!energyComponent.canAfford(card.cost) || !energyComponent.spendEnergy(card.cost)) {
-      return failure(card.id, target, card.cost, CardPlayFailureReason.NOT_ENOUGH_ENERGY);
-    }
-
     try {
-      CardEffectResolution resolution = resolveEffects(card, target);
-      if (!battleDeck.playCard(card.id)) {
-        throw new IllegalStateException(
-            "Card was no longer in hand after energy was spent: " + card.id);
+      CardEffectResolution resolution =
+          playerStateView == null && enemyStateView == null
+              ? resolutionService.resolve(card)
+              : resolutionService.resolve(card, buildResolutionContext(request.target()));
+      if (!battleDeck.playCard(card.instanceId())) {
+        throw new IllegalStateException("Card left hand during play: " + card.instanceId());
       }
       return CardPlayResult.success(
-          card.id, target, card.cost, resolution, DeckSnapshot.from(battleDeck));
+          card.instanceId(),
+          card.cardId(),
+          request.target(),
+          card.cost(),
+          resolution,
+          DeckSnapshot.from(battleDeck));
     } catch (RuntimeException exception) {
-      // Restore Team 7 energy when a later internal operation fails. The exception is rethrown so
-      // callers never mistake an incomplete play for a normal validation failure.
-      energyComponent.restoreEnergy(card.cost);
+      energyComponent.restoreEnergy(card.cost());
       throw exception;
     }
   }
 
   private CardPlayResult failure(
-      CardPlayRequest request, int energyCost, CardPlayFailureReason failureReason) {
-    return failure(request.cardId(), request.target(), energyCost, failureReason);
-  }
-
-  private CardPlayResult failure(
-      String cardId, CardPlayTarget target, int energyCost, CardPlayFailureReason failureReason) {
+      CardPlayRequest request, String cardId, int cost, CardPlayFailureReason reason) {
     return CardPlayResult.failure(
-        cardId, target, energyCost, failureReason, DeckSnapshot.from(battleDeck));
+        request.instanceId(),
+        cardId,
+        request.target(),
+        cost,
+        reason,
+        DeckSnapshot.from(battleDeck));
   }
 
-  private boolean isValidTarget(CardConfig card, CardPlayTarget target) {
-    if (target == null || card.target != target.type()) {
-      return false;
-    }
-    return card.target != TargetType.SINGLE_ENEMY || target.targetId() != null;
+  private boolean isValidTarget(ResolvedCard card, CardPlayTarget target) {
+    return target != null && card.target() == target.type();
   }
 
   private boolean isTargetAvailable(CardPlayTarget target) {
-    if (target == null || target.type() != TargetType.SINGLE_ENEMY || enemyStateView == null) {
-      return true;
-    }
-    return enemyStateView.isTargetAvailable(target.targetId());
-  }
-
-  private CardEffectResolution resolveEffects(CardConfig card, CardPlayTarget target) {
-    if (playerStateView == null && enemyStateView == null) {
-      return resolutionService.resolve(card);
-    }
-    return resolutionService.resolve(card, buildResolutionContext(target));
+    return target.type() != TargetType.SINGLE_ENEMY
+        || enemyStateView == null
+        || enemyStateView.isTargetAvailable(target.targetId());
   }
 
   private CardEffectResolutionContext buildResolutionContext(CardPlayTarget target) {
@@ -243,21 +203,6 @@ public final class CardPlayService {
     }
 
     return new CardEffectResolutionContext(strength, outgoingFeeble, targetVulnerable);
-  }
-
-  private CardConfig getPlayableCardConfig(String cardId) {
-    if (cardId == null || cardId.isBlank()) {
-      throw new IllegalArgumentException("Card ID cannot be null or blank");
-    }
-    CardConfig card =
-        cardService
-            .getCard(cardId)
-            .orElseThrow(() -> new IllegalArgumentException("Unknown card ID: " + cardId));
-    List<String> errors = CardValidator.validate(card);
-    if (!errors.isEmpty()) {
-      throw new IllegalArgumentException("Invalid card config: " + String.join("; ", errors));
-    }
-    return card;
   }
 
   private static CardService requireCardService(CardService cardService) {
