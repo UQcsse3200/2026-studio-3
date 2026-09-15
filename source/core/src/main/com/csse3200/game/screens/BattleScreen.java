@@ -21,6 +21,9 @@ import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.effects.CardEffectResolver;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.pausemenu.PauseMenuActions;
+import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
+import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
@@ -36,6 +39,7 @@ import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.rewards.RewardService;
 import com.csse3200.game.services.DragNDropService;
+import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
@@ -82,7 +86,9 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.registerDragNDropService(new DragNDropService());
 
     logger.debug("Initialising main game screen services");
-    ServiceLocator.registerTimeSource(new GameTime());
+    GameTime gameTime = new GameTime();
+    ServiceLocator.registerTimeSource(gameTime);
+    ServiceLocator.registerPauseService(new GamePauseService(gameTime));
 
     PhysicsService physicsService = new PhysicsService();
     ServiceLocator.registerPhysicsService(physicsService);
@@ -161,7 +167,10 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new InputDecorator(stage, 10))
             .addComponent(uiFactory)
             .addComponent(displays)
-            .addComponent(new BattleActions(controller, game, library));
+            .addComponent(new BattleActions(controller, game, library))
+            .addComponent(new PauseMenuDisplay())
+            .addComponent(new PauseMenuInput())
+            .addComponent(new PauseMenuActions(game));
 
     // Keep the on-screen hand in sync with the deck: after a card is played (and a replacement
     // drawn) rebuild the hand widgets from the live deck, so the played card's button is gone and

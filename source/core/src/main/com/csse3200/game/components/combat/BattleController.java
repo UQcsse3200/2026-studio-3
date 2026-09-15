@@ -2,6 +2,7 @@ package com.csse3200.game.components.combat;
 
 import com.csse3200.game.cards.CardPlayRequest;
 import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.effects.CardEffectResolution;
@@ -573,7 +574,29 @@ public class BattleController {
     if (energy != null) {
       energy.onTurnStart();
     }
+    applyHealingAtTurnStart();
     handle(BattleEvent.PLAYER_TURN_STARTED);
+  }
+
+  /** Applies and counts down timed HEAL once per player turn, starting on the next turn. */
+  private void applyHealingAtTurnStart() {
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    if (stats == null || stats.isDead()) {
+      return;
+    }
+    StatusEffect healing = stats.getStatusEffect(EffectType.HEAL.name());
+    if (healing == null) {
+      return;
+    }
+    if (healing.getDuration() <= 0) {
+      stats.removeStatusEffect(EffectType.HEAL.name());
+      return;
+    }
+    int missingHealth = Math.max(0, stats.getMaxHealth() - stats.getHealth());
+    stats.heal(Math.min(Math.max(0, healing.getValue()), missingHealth));
+    if (healing.tickAndCheckExpired()) {
+      stats.removeStatusEffect(EffectType.HEAL.name());
+    }
   }
 
   private EnergyComponent playerEnergy() {
@@ -756,7 +779,13 @@ public class BattleController {
     for (ResolvedCardEffect effect : effects) {
       switch (effect.type()) {
         case BLOCK -> stats.addArmor(effect.value());
-        case HEAL -> stats.heal(effect.value());
+        case HEAL -> {
+          if (effect.duration() > 0) {
+            stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
+          } else {
+            stats.heal(effect.value());
+          }
+        }
         default -> {
           // STRENGTH is already folded into the resolver's running player state.
         }
@@ -876,13 +905,22 @@ public class BattleController {
 
   private void enterVictory() {
     this.cleanUp();
+    clearTimedHealing();
     narrate("Victory! Every enemy has been defeated.");
     eventHandler.trigger(BATTLE_ENDED_EVENT, Boolean.TRUE);
   }
 
   private void enterDefeat() {
     this.cleanUp();
+    clearTimedHealing();
     narrate("Defeat. The player has fallen.");
     eventHandler.trigger(BATTLE_ENDED_EVENT, Boolean.FALSE);
+  }
+
+  private void clearTimedHealing() {
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    if (stats != null) {
+      stats.removeStatusEffect(EffectType.HEAL.name());
+    }
   }
 }
