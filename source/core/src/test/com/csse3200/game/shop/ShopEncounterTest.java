@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 class ShopEncounterTest {
   @Test
   void shouldCompleteMapNodeWhenShopEncounterEnds() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
     MapNode shopNode = new MapNode(1, RoomType.SHOP);
     MapNode nextNode = new MapNode(2, RoomType.EVENT);
@@ -77,7 +77,7 @@ class ShopEncounterTest {
 
   @Test
   void shouldNotUnlockMapNodeWhenShopEncounterFails() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
     MapNode shopNode = new MapNode(1, RoomType.SHOP);
     MapNode nextNode = new MapNode(2, RoomType.EVENT);
