@@ -75,7 +75,9 @@ class GameStateSnapshotEndToEndTest {
     saveGameService.saveGame(1);
     LoadResult loadResult = saveGameService.loadGame(1);
 
-    assertEquals(PlayerDeckFactory.getStarterDeckCardIds(), loadResult.data().deck.cardIds);
+    assertEquals(
+        PlayerDeckFactory.getStarterDeckCardIds(),
+        loadResult.data().deck.cards.stream().map(card -> card.cardId).toList());
   }
 
   @Test
