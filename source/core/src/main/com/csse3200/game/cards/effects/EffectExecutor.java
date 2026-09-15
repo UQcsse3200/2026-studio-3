@@ -175,8 +175,7 @@ public class EffectExecutor {
     }
 
     if (effect.type == EffectType.SUNDER) {
-      return new ResolvedCardEffect(
-          cardId, EffectType.SUNDER, target, effect.value, 0, sequence);
+      return new ResolvedCardEffect(cardId, EffectType.SUNDER, target, effect.value, 0, sequence);
     }
 
     if (effect.type == EffectType.PIERCE) {
@@ -203,8 +202,7 @@ public class EffectExecutor {
     }
 
     if (effect.type == EffectType.SUNDER) {
-      return new ResolvedCardEffect(
-          cardId, EffectType.SUNDER, target, effect.value, 0, sequence);
+      return new ResolvedCardEffect(cardId, EffectType.SUNDER, target, effect.value, 0, sequence);
     }
 
     if (effect.type == EffectType.PIERCE) {
