@@ -26,7 +26,7 @@ public class EnergyComponent extends Component {
 
   private void notifyEnergyChange() {
     if (entity != null) {
-      entity.getEvents().trigger(EVT_UPDATE_ENERGY, this.currentEnergy);
+      entity.getEvents().trigger(EVT_UPDATE_ENERGY, this.currentEnergy, this.maxEnergy);
     }
   }
 
@@ -45,9 +45,8 @@ public class EnergyComponent extends Component {
 
   public void setMaxEnergy(int maxEnergy) {
     this.maxEnergy = Math.max(maxEnergy, 1);
-    if (entity != null) {
-      entity.getEvents().trigger(EVT_UPDATE_MAX_ENERGY, this.maxEnergy);
-    }
+    this.currentEnergy = Math.min(this.currentEnergy, this.maxEnergy);
+    notifyEnergyChange();
   }
 
   // --- Team 5 (Card System) integration stubs ---
