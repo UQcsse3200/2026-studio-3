@@ -139,7 +139,6 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
-  /**
    * Applies a direct health change that bypasses armor and block, intended for non-combat sources
    * such as Chance Encounters. A positive amount heals (clamped to max health via {@link
    * #heal(int)}); a negative amount reduces health directly, clamped to 0, and triggers the same
