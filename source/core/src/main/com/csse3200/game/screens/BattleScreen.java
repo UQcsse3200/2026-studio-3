@@ -22,6 +22,9 @@ import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.spritedisplay.clickable.CardImageSkins;
+import com.csse3200.game.components.pausemenu.PauseMenuActions;
+import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
+import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
@@ -35,6 +38,7 @@ import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.DragNDropService;
+import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
@@ -91,7 +95,9 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.registerDragNDropService(new DragNDropService());
 
     logger.debug("Initialising main game screen services");
-    ServiceLocator.registerTimeSource(new GameTime());
+    GameTime gameTime = new GameTime();
+    ServiceLocator.registerTimeSource(gameTime);
+    ServiceLocator.registerPauseService(new GamePauseService(gameTime));
 
     PhysicsService physicsService = new PhysicsService();
     ServiceLocator.registerPhysicsService(physicsService);
@@ -186,7 +192,10 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(displays)
             .addComponent(new BattleActions(controller, game, library))
             .addComponent(cardPlayAdapter)
-            .addComponent(cardInventory);
+            .addComponent(cardInventory)
+            .addComponent(new PauseMenuDisplay())
+            .addComponent(new PauseMenuInput())
+            .addComponent(new PauseMenuActions(game));
 
     // Keep the on-screen row in sync with the deck: whenever the hand changes (a card played, or
     // one retrieved from the discard pile after its cooldown elapses) rebuild from the live deck,
@@ -263,7 +272,7 @@ public class BattleScreen extends ScreenAdapter {
 
   /**
    * Builds one widget per card slot in {@link #handRowOrder} — a fixed left-to-right layout that
-   * only changes wholesale via {@link #onDeckRearranged()}. Each slot renders the exact {@link
+   * only changes wholesale via {@link #onDeckRearranged}. Each slot renders the exact {@link
    * CardInstance} dealt to it: still in hand, it's normal and playable; currently sitting in the
    * discard pile (played, or on cooldown), it renders {@code disabled(true)} (shaded, inert to
    * clicks/drags — see {@link com.csse3200.game.components.spritedisplay.clickable.Clickable}) in

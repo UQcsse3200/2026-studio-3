@@ -182,12 +182,13 @@ public class ForestGameArea extends GameArea {
     spawnEntityAt(ghostKing, randomPos, true, true);
   }
 
-  //  private void playMusic() {
-  //    Music music = ServiceLocator.getResourceService().getAsset(backgroundMusic, Music.class);
-  //    music.setLooping(true);
-  //    music.setVolume(0.3f);
-  //    music.play();
-  //  }
+  // private void playMusic() {
+  // Music music = ServiceLocator.getResourceService().getAsset(backgroundMusic,
+  // Music.class);
+  // music.setLooping(true);
+  // music.setVolume(0.3f);
+  // music.play();
+  // }
 
   private void loadAssets() {
     logger.debug("Loading assets");
@@ -215,7 +216,8 @@ public class ForestGameArea extends GameArea {
   @Override
   public void dispose() {
     super.dispose();
-    // ServiceLocator.getResourceService().getAsset(backgroundMusic, Music.class).stop();
+    // ServiceLocator.getResourceService().getAsset(backgroundMusic,
+    // Music.class).stop();
     this.unloadAssets();
   }
 }
