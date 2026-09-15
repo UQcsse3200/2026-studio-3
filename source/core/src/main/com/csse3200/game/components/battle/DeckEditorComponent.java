@@ -12,8 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.configs.CardConfig;
-import com.csse3200.game.cards.deck.CardInstance;
 import com.csse3200.game.cards.play.CardPlayService;
+import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.components.spritedisplay.clickable.CardImageSkins;
 import com.csse3200.game.components.spritedisplay.clickable.Clickable;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
@@ -172,7 +172,7 @@ public class DeckEditorComponent extends UIComponent {
     pool = cardPlayService.allInstances();
     poolByKey.clear();
     for (CardInstance instance : pool) {
-      poolByKey.put(instance.instanceId().toString(), instance);
+      poolByKey.put(instance.instanceId(), instance);
     }
     discardedInstances = new HashSet<>(cardPlayService.discardedInstances());
     selected.clear();
@@ -266,7 +266,7 @@ public class DeckEditorComponent extends UIComponent {
               .position(screenX, recordY)
               .size(CARD_WIDTH, CARD_HEIGHT)
               .skin(cardSkin)
-              .args(instance.instanceId().toString())
+              .args(instance.instanceId())
               .build();
       cardRecords.add(record);
     }

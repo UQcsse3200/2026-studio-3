@@ -1,5 +1,6 @@
 package com.csse3200.game.cards.deck;
 
+import com.csse3200.game.cards.runtime.CardInstance;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;

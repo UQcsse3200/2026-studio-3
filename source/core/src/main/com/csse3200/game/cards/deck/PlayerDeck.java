@@ -3,6 +3,8 @@ package com.csse3200.game.cards.deck;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.runtime.CardInstance;
+import com.csse3200.game.cards.runtime.CardInstanceFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -22,6 +24,7 @@ import java.util.List;
  */
 public class PlayerDeck {
   private final CardService cardService;
+  private final CardInstanceFactory cardInstanceFactory;
   private final List<CardInstance> cards = new ArrayList<>();
 
   /** Creates an empty player deck backed by the configured card definitions. */
@@ -39,6 +42,7 @@ public class PlayerDeck {
       throw new IllegalArgumentException("cardService must not be null");
     }
     this.cardService = cardService;
+    this.cardInstanceFactory = new CardInstanceFactory(cardService);
   }
 
   /**
@@ -72,7 +76,7 @@ public class PlayerDeck {
     if (!canAddCard(cardId)) {
       throw new IllegalArgumentException("cardId must be registered");
     }
-    cards.add(CardInstance.of(cardId));
+    cards.add(cardInstanceFactory.create(cardId));
   }
 
   /**

@@ -9,9 +9,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.TestCardService;
+import com.csse3200.game.cards.runtime.CardInstance;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class BattleDeckTest {
@@ -322,7 +324,8 @@ class BattleDeckTest {
   @Test
   void shouldRejectSettingHandToAnUnknownInstance() {
     BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike")));
-    CardInstance foreign = CardInstance.of("defend");
+    CardInstance foreign =
+        new CardInstance(UUID.randomUUID().toString(), "defend", CardInstance.BASE_LEVEL);
 
     assertThrows(
         IllegalArgumentException.class, () -> battleDeck.setHandInstances(List.of(foreign)));

@@ -1,7 +1,7 @@
 package com.csse3200.game.cards.play;
 
 import com.csse3200.game.cards.deck.BattleDeck;
-import com.csse3200.game.cards.deck.CardInstance;
+import com.csse3200.game.cards.runtime.CardInstance;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
