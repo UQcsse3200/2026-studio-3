@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Runtime deck state for a single combat encounter.
@@ -324,5 +325,10 @@ public class BattleDeck {
       cardIds.add(instance.cardId());
     }
     return List.copyOf(cardIds);
+  }
+
+  /** Finds an exact owned copy in the current hand. */
+  public Optional<CardInstance> getCardInHand(String instanceId) {
+    return hand.stream().filter(card -> card.instanceId().equals(instanceId)).findFirst();
   }
 }

@@ -11,7 +11,7 @@ import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.enemy.IntentEffectType;
 
 /**
- * Connects Team 3's existing {@code playCard(cardId, targetId)} event to Team 5's unified API.
+ * Connects Team 3's existing {@code playCard(instanceId, targetId)} event to Team 5's unified API.
  *
  * <p>Attach this component to the same battle-flow entity that receives Team 3's card UI events.
  * The component emits one {@code cardPlayResult} event after every attempt. Team 3's battle flow

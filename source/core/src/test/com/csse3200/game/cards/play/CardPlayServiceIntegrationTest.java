@@ -51,6 +51,8 @@ class CardPlayServiceIntegrationTest {
     assertEquals(List.of(EffectType.HEAL), types(bandage.playerEffects()));
 
     assertEquals(3, energy.getCurrentEnergy());
+    assertTrue(bandage.updatedHand().isEmpty());
+    assertEquals(CARD_IDS, bandage.updatedDiscardPile());
   }
 
   private static List<EffectType> types(

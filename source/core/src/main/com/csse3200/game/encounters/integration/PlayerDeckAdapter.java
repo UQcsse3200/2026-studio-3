@@ -1,6 +1,7 @@
 package com.csse3200.game.encounters.integration;
 
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.runtime.CardInstance;
 import java.util.List;
 import java.util.Objects;
 
@@ -8,6 +9,7 @@ import java.util.Objects;
 public final class PlayerDeckAdapter implements DeckGateway {
   private final PlayerDeck playerDeck;
   private String pendingCardId;
+  private String pendingInstanceId;
   private int pendingCardIndex = -1;
 
   /**
@@ -38,6 +40,7 @@ public final class PlayerDeckAdapter implements DeckGateway {
     }
     pendingCardId = cardId;
     pendingCardIndex = insertionIndex;
+    pendingInstanceId = playerDeck.getCards().get(insertionIndex).instanceId();
     return true;
   }
 
@@ -63,8 +66,17 @@ public final class PlayerDeckAdapter implements DeckGateway {
       return false;
     }
 
-    List<String> cardIds = playerDeck.getCardIds();
-    if (pendingCardIndex >= cardIds.size() || !cardId.equals(cardIds.get(pendingCardIndex))) {
+    List<CardInstance> cards = playerDeck.getCards();
+    if (pendingCardIndex >= cards.size()) {
+      return false;
+    }
+
+    // Verify the exact instance is still at the expected position before removing it, so a
+    // duplicate card of the same ID that has shifted into this slot is never rolled back by
+    // mistake.
+    CardInstance pendingCard = cards.get(pendingCardIndex);
+    if (!Objects.equals(cardId, pendingCard.cardId())
+        || !Objects.equals(pendingInstanceId, pendingCard.instanceId())) {
       return false;
     }
 
@@ -75,6 +87,7 @@ public final class PlayerDeckAdapter implements DeckGateway {
 
   private void clearPendingAddition() {
     pendingCardId = null;
+    pendingInstanceId = null;
     pendingCardIndex = -1;
   }
 }

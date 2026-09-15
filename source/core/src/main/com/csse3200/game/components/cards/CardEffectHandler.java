@@ -5,6 +5,7 @@ import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
+import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +73,14 @@ public class CardEffectHandler {
         }
         case STRENGTH ->
             stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
+        case ENERGY_GAIN -> {
+          EnergyComponent energy = player.getComponent(EnergyComponent.class);
+          if (energy != null) {
+            energy.restoreEnergy(effect.value());
+          }
+        }
+        case CLEANSE -> stats.clearNegativeStatusEffects();
+        case FORTIFY -> stats.addArmor(effect.value());
         default -> {
           // Enemy-facing effects are handled separately.
         }

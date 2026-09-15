@@ -50,8 +50,8 @@ class PlayerDeckTest {
     deck.addCard("defend");
 
     assertEquals(3, deck.size());
-    assertEquals(2, deck.count("strike"));
-    assertEquals(1, deck.count("defend"));
+    assertEquals(2, deck.countByCardId("strike"));
+    assertEquals(1, deck.countByCardId("defend"));
     assertTrue(deck.contains("strike"));
   }
 
@@ -103,7 +103,7 @@ class PlayerDeckTest {
     assertTrue(deck.removeCard("strike"));
 
     assertIterableEquals(List.of("defend", "strike"), deck.getCardIds());
-    assertEquals(1, deck.count("strike"));
+    assertEquals(1, deck.countByCardId("strike"));
   }
 
   @Test
@@ -129,7 +129,7 @@ class PlayerDeckTest {
   void shouldRejectInvalidCardIds() {
     PlayerDeck deck = new PlayerDeck(CARDS);
 
-    assertThrows(IllegalArgumentException.class, () -> deck.addCard(null));
+    assertThrows(IllegalArgumentException.class, () -> deck.addCard((String) null));
     assertThrows(IllegalArgumentException.class, () -> deck.addCard(""));
     assertThrows(IllegalArgumentException.class, () -> deck.addCard("  "));
     assertThrows(IllegalArgumentException.class, () -> deck.addCard("unknown_card"));

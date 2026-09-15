@@ -74,6 +74,11 @@ class CardPlayRequestTest {
   }
 
   @Test
+  void shouldRejectBlankTargetIdForSingleEnemy() {
+    assertThrows(IllegalArgumentException.class, () -> CardPlayRequest.singleEnemy("strike", ""));
+  }
+
+  @Test
   void shouldCreateAllEnemiesTargetingRequest() {
     CardPlayRequest request = CardPlayRequest.allEnemies("whirlwind");
 

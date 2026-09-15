@@ -1,7 +1,9 @@
 package com.csse3200.game.cards.play.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.TargetType;
@@ -41,6 +43,45 @@ class Team7PlayerStateAdapterTest {
     assertEquals(5, stats.getBlock());
     assertEquals(8, stats.getHealth());
     assertEquals(3, stats.getStatusEffect(EffectType.STRENGTH.name()).getValue());
+  }
+
+  @Test
+  void shouldClearDebuffsAndKeepStrengthWhenCleansing() {
+    CombatStatsComponent stats = new CombatStatsComponent(10, 1);
+    stats.applyStatusEffect(EffectType.POISON.name(), 3, 2);
+    stats.applyStatusEffect("vulnerable", 1, 1);
+    stats.applyStatusEffect(EffectType.STRENGTH.name(), 2, 0);
+    Team7PlayerStateAdapter adapter = new Team7PlayerStateAdapter(new EnergyComponent(3), stats);
+
+    adapter.applyPlayerEffects(List.of(effect(EffectType.CLEANSE, 1, 0, 0)));
+
+    assertFalse(stats.hasStatusEffect(EffectType.POISON.name()));
+    assertFalse(stats.hasStatusEffect("vulnerable"));
+    assertTrue(stats.hasStatusEffect(EffectType.STRENGTH.name()));
+    assertEquals(2, stats.getStatusEffect(EffectType.STRENGTH.name()).getValue());
+  }
+
+  @Test
+  void shouldRestoreEnergyWithoutExceedingMaximumWhenApplyingEnergyGain() {
+    EnergyComponent energy = new EnergyComponent(3);
+    energy.spendEnergy(2);
+    Team7PlayerStateAdapter adapter =
+        new Team7PlayerStateAdapter(energy, new CombatStatsComponent(10, 1));
+
+    adapter.applyPlayerEffects(List.of(effect(EffectType.ENERGY_GAIN, 5, 0, 0)));
+
+    assertEquals(3, energy.getCurrentEnergy());
+  }
+
+  @Test
+  void shouldApplyFortifyAsArmourWithoutChangingBlock() {
+    CombatStatsComponent stats = new CombatStatsComponent(10, 1);
+    Team7PlayerStateAdapter adapter = new Team7PlayerStateAdapter(new EnergyComponent(3), stats);
+
+    adapter.applyPlayerEffects(List.of(effect(EffectType.FORTIFY, 4, 0, 0)));
+
+    assertEquals(4, stats.getArmor());
+    assertEquals(0, stats.getBlock());
   }
 
   @Test

@@ -80,6 +80,28 @@ public class PlayerDeck {
   }
 
   /**
+   * Adds an existing card instance to the end of the deck, preserving its instance ID and upgrade
+   * level exactly rather than generating a fresh instance ID. Used when restoring a saved deck, so
+   * each card comes back as the same physical copy the player owned before.
+   *
+   * @param card the exact card instance to add
+   * @throws IllegalArgumentException if the card is null, its card ID is not registered, or it is
+   *     upgraded but the card has no upgrade definition
+   */
+  public void addCard(CardInstance card) {
+    if (card == null) {
+      throw new IllegalArgumentException("card must not be null");
+    }
+    if (!canAddCard(card.cardId())) {
+      throw new IllegalArgumentException("cardId must be registered");
+    }
+    if (card.isUpgraded() && cardService.getCard(card.cardId()).orElseThrow().upgrade == null) {
+      throw new IllegalArgumentException("Card has no upgrade definition: " + card.cardId());
+    }
+    cards.add(card);
+  }
+
+  /**
    * Checks whether a card may be added to this player deck.
    *
    * <p>Sprint 1 allows duplicate cards and has no deck-size limit, so this check only verifies that
@@ -155,7 +177,7 @@ public class PlayerDeck {
    * @param cardId card ID to count
    * @return number of matching cards
    */
-  public int count(String cardId) {
+  public int countByCardId(String cardId) {
     String validCardId = validateCardId(cardId);
     int count = 0;
     for (CardInstance card : cards) {

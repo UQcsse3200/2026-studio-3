@@ -11,12 +11,22 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.csse3200.game.cards.CardLibrary;
+import com.csse3200.game.cards.CardType;
+import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.TargetType;
+import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.cards.configs.EffectConfig;
+import com.csse3200.game.cards.deck.BattleDeck;
+import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.play.CardPlayRequest;
+import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.cards.play.CardPlayTarget;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
+import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.PlayerActions;
 import com.csse3200.game.entities.Entity;
 import java.util.ArrayList;
@@ -288,6 +298,58 @@ class BattleControllerTest {
     assertThrows(
         IllegalStateException.class, () -> controller.handle(BattleEvent.PLAYER_TURN_STARTED));
     assertEquals(BattlePhase.DEFEAT, controller.getCurrentPhase());
+  }
+
+  @Test
+  void shouldClearNegativeStatusesWhenCleanseCardIsPlayed() {
+    Entity cleansePlayer =
+        new Entity()
+            .addComponent(new CombatStatsComponent(20, 0))
+            .addComponent(new EnergyComponent(3));
+    CombatStatsComponent stats = cleansePlayer.getComponent(CombatStatsComponent.class);
+    stats.applyStatusEffect("POISON", 3, 2);
+    stats.applyStatusEffect("vulnerable", 1, 1);
+    stats.applyStatusEffect("FEEBLE", 1, 2);
+    stats.applyStatusEffect("STRENGTH", 2, 0);
+    stats.applyStatusEffect("HEAL", 4, 3);
+
+    CardConfig purify = new CardConfig();
+    purify.id = "purify";
+    purify.name = "Purify";
+    purify.description = "Remove all negative effects from yourself.";
+    purify.cost = 1;
+    purify.type = CardType.SKILL;
+    purify.target = TargetType.SELF;
+    purify.effects = new EffectConfig[] {new EffectConfig(EffectType.CLEANSE, 1)};
+    purify.texturePath = "images/cards/purify.png";
+
+    CardConfig strike = new CardConfig();
+    strike.id = "strike";
+    strike.name = "Strike";
+    strike.cost = 1;
+    strike.type = CardType.ATTACK;
+    strike.target = TargetType.SINGLE_ENEMY;
+    strike.effects = new EffectConfig[] {new EffectConfig(EffectType.DAMAGE, 6)};
+    strike.texturePath = "images/cards/strike.png";
+
+    CardLibrary cardService = new CardLibrary(List.of(purify, strike));
+    BattleDeck deck = new BattleDeck(new PlayerDeck(cardService, List.of("purify", "strike")));
+    deck.drawCards(1);
+    EnergyComponent energy = cleansePlayer.getComponent(EnergyComponent.class);
+    CardPlayService cardPlayService = new CardPlayService(cardService, deck, energy);
+    CardEffectHandler effectHandler = new CardEffectHandler();
+    BattleController battle =
+        new BattleController(cleansePlayer, enemies, effectHandler, cardPlayService);
+
+    battle.start();
+    boolean accepted = battle.submitCardPlayRequest(CardPlayRequest.self("purify"));
+
+    assertTrue(accepted);
+    assertFalse(stats.hasStatusEffect("POISON"));
+    assertFalse(stats.hasStatusEffect("vulnerable"));
+    assertFalse(stats.hasStatusEffect("FEEBLE"));
+    assertTrue(stats.hasStatusEffect("STRENGTH"));
+    assertTrue(stats.hasStatusEffect("HEAL"));
   }
 
   @Test
