@@ -1,18 +1,23 @@
 package com.csse3200.game.screens;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
 import com.csse3200.game.input.InputDecorator;
 import com.csse3200.game.input.InputService;
-import com.csse3200.game.maps.MapDisplay;
-import com.csse3200.game.maps.MapGraph;
-import com.csse3200.game.maps.MapNode;
-import com.csse3200.game.maps.NodePoolGenerator;
-import com.csse3200.game.maps.RoomDistributionConfig;
-import com.csse3200.game.maps.RoomType;
-import com.csse3200.game.maps.RunState;
+import com.csse3200.game.maps.*;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.GameTime;
@@ -33,10 +38,6 @@ import org.slf4j.LoggerFactory;
 public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(MapScreen.class);
 
-  private static final int COMBAT_WEIGHT = 70;
-  private static final int EVENT_WEIGHT = 20;
-  private static final int SHOP_WEIGHT = 10;
-
   private final Renderer renderer;
 
   public MapScreen(GdxGame game) {
@@ -53,11 +54,9 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
     if (!runState.isRunActive()) {
       logger.info("No run in progress, generating a new map");
-      RoomDistributionConfig config =
-          new RoomDistributionConfig(
-              MapGraph.MAX_NODE_COUNT, COMBAT_WEIGHT, EVENT_WEIGHT, SHOP_WEIGHT);
-      MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
-      startNewRun(runState, graph);
+      MapGenerationController mapGen = new MapGenerationController();
+
+      startNewRun(runState, mapGen.getMap());
     }
 
     createUi(game, runState);
@@ -97,6 +96,8 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         .addComponent(mapDisplay);
 
     ServiceLocator.getEntityService().register(ui);
+
+    createExitButton(game);
   }
 
   /**
@@ -111,7 +112,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     MapNode node = runState.getMapGraph() == null ? null : runState.getMapGraph().getNode(nodeId);
     RoomType roomType = node == null ? null : node.getRoomType();
 
-    if (roomType == RoomType.COMBAT || roomType == RoomType.FINAL) {
+    if (roomType == RoomType.COMBAT || roomType == RoomType.FINAL || roomType == RoomType.ELITE) {
       logger.info("Node {} ({}) selected, entering battle", nodeId, roomType);
       game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
     } else {
@@ -120,8 +121,51 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     }
   }
 
+  /**
+   * Creates the exit button on the mapscreen to allow the player to leave
+   *
+   * @param game the GdxGame required to change the game screen.
+   */
+  private void createExitButton(GdxGame game) {
+    Stage stage = ServiceLocator.getRenderService().getStage();
+    // not hover
+    Texture buttonTexture = new Texture(Gdx.files.internal("images/map/main_menu_btn.png"));
+
+    // hover stuff
+    TextureRegionDrawable buttonDrawable =
+        new TextureRegionDrawable(new TextureRegion(buttonTexture));
+
+    Drawable buttonDrawableHover = buttonDrawable.tint(new Color(0.8f, 0.8f, 0.8f, 1f));
+
+    ImageButton.ImageButtonStyle style = new ImageButton.ImageButtonStyle();
+    style.imageUp = buttonDrawable;
+    style.imageOver = buttonDrawableHover;
+
+    ImageButton exitButton = new ImageButton(style);
+
+    float buttonWidth = 150f;
+    float buttonHeight = 50f;
+    float offset = 52f;
+
+    exitButton.setSize(buttonWidth, buttonHeight);
+
+    exitButton.setPosition(
+        stage.getWidth() - buttonWidth - offset, stage.getHeight() - offset * 1.5f);
+
+    exitButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            game.setScreen(GdxGame.ScreenType.MAIN_MENU);
+          }
+        });
+
+    stage.addActor(exitButton);
+  }
+
   @Override
   public void render(float delta) {
+    ScreenUtils.clear(0.105f, 0.070f, 0.120f, 1f);
     ServiceLocator.getEntityService().update();
     renderer.render();
   }
@@ -138,6 +182,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getResourceService().dispose();
+    ScreenUtils.clear(new Color(248f / 255f, 249f / 255f, 178f / 255f, 1f));
     ServiceLocator.clear();
   }
 }

@@ -139,6 +139,29 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
+   * Applies a direct health change that bypasses armor and block, intended for non-combat sources
+   * such as Chance Encounters. A positive amount heals (clamped to max health via {@link
+   * #heal(int)}); a negative amount reduces health directly, clamped to 0, and triggers the same
+   * death event used by combat damage.
+   *
+   * <p>Unlike {@link #takeDamage(int)}, this method does NOT consume block or armor. Use this when
+   * a game system needs a health change with a precise, predictable amount that should not be
+   * affected by the entity's current combat-only defences.
+   *
+   * @param amount positive to heal, negative to reduce health; zero is a no-op
+   */
+  public void applyDirectHealthChange(int amount) {
+    if (amount > 0) {
+      heal(amount);
+    } else if (amount < 0 && !isDead()) {
+      setHealth(Math.max(this.health + amount, 0));
+      if (entity != null && isDead()) {
+        entity.getEvents().trigger("entityIsDead");
+      }
+    }
+  }
+
+  /**
    * A setter function for maxHealth, contains a safegaurd to avoid MaxHealth going lower than 1
    * send an update to every listener is changed to ensure real time changes updated.
    *
@@ -263,6 +286,7 @@ public class CombatStatsComponent extends Component {
   }
 
   // Block - per-turn damage reduction pool (Team 6's "Slay the Spire" style block)
+
   /**
    * Returns the entity's current block value.
    *
