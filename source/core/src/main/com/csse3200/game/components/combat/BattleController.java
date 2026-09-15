@@ -706,7 +706,9 @@ public class BattleController {
 
     if (skipEnemyTurnIfDead(enemy)) return;
 
-    /* ADD POISON DAMAGE HERE */
+    // Resolve poison before the enemy acts. Poison uses normal damage, so block and armor absorb it.
+    CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
+    enemyStats.processPoisonTick(enemyStats::takeDamage);
 
     if (skipEnemyTurnIfDead(enemy)) return;
 

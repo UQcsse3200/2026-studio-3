@@ -27,6 +27,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.csse3200.game.components.StatusEffect;
+
 class BattleControllerTest {
   private BattleController controller;
   private Entity player;
@@ -476,5 +478,109 @@ class BattleControllerTest {
     when(behaviour.rollIntent()).thenReturn(EnemyIntent.defend(1));
     when(stats.isDead()).thenReturn(!alive);
     return enemy;
+  }
+
+  /** Verifies poison consumes defenses, ticks once per turn and expires. */
+  @Test
+  void poisonShouldUseDefensesAndExpireAfterTwoEnemyTurns() {
+    CombatStatsComponent stats = new CombatStatsComponent(20, 0);
+    stats.setBlock(3);
+    stats.setArmor(4);
+    stats.applyStatusEffect(new StatusEffect("POISON", 5, 2));
+
+    Entity enemy = createPoisonTestEnemy(stats, firstEnemyBehaviour);
+    BattleController battle = new BattleController(player, List.of(enemy));
+
+    List<Integer> healthAtAction = new ArrayList<>();
+    org.mockito.Mockito.doAnswer(
+                    invocation -> {
+                      healthAtAction.add(stats.getHealth());
+                      return null;
+                    })
+            .when(firstEnemyBehaviour)
+            .executeIntent(player);
+
+    battle.start();
+    battle.endPlayerTurn();
+
+    assertEquals(20, stats.getHealth());
+    assertEquals(0, stats.getBlock());
+    assertEquals(2, stats.getArmor());
+    assertEquals(1, stats.getStatusEffect("POISON").getDuration());
+    assertEquals(List.of(20), healthAtAction);
+    assertEquals(BattlePhase.PLAYER_TURN, battle.getCurrentPhase());
+
+    battle.endPlayerTurn();
+
+    assertEquals(17, stats.getHealth());
+    assertEquals(0, stats.getArmor());
+    assertNull(stats.getStatusEffect("POISON"));
+    assertEquals(List.of(20, 17), healthAtAction);
+
+    battle.endPlayerTurn();
+
+    assertEquals(17, stats.getHealth());
+    assertEquals(List.of(20, 17, 17), healthAtAction);
+    verify(firstEnemyBehaviour, times(3)).executeIntent(player);
+  }
+
+  /** Verifies a poisoned enemy dies before acting while the next enemy still acts. */
+  @Test
+  void poisonShouldSkipKilledEnemyAndContinueToNextEnemy() {
+    CombatStatsComponent poisonedStats = new CombatStatsComponent(3, 0);
+    poisonedStats.applyStatusEffect(new StatusEffect("POISON", 3, 1));
+
+    CombatStatsComponent healthyStats = new CombatStatsComponent(20, 0);
+
+    Entity poisonedEnemy = createPoisonTestEnemy(poisonedStats, firstEnemyBehaviour);
+    Entity healthyEnemy = createPoisonTestEnemy(healthyStats, secondEnemyBehaviour);
+
+    BattleController battle = new BattleController(player, List.of(poisonedEnemy, healthyEnemy));
+
+    battle.start();
+    battle.endPlayerTurn();
+
+    assertEquals(0, poisonedStats.getHealth());
+    assertNull(poisonedStats.getStatusEffect("POISON"));
+    assertEquals(20, healthyStats.getHealth());
+    verify(firstEnemyBehaviour, never()).executeIntent(player);
+    verify(secondEnemyBehaviour).executeIntent(player);
+    assertEquals(BattlePhase.PLAYER_TURN, battle.getCurrentPhase());
+  }
+
+  /** Verifies lethal poison on the final enemy ends the battle exactly once. */
+  @Test
+  void poisonShouldWinWhenLastEnemyDiesBeforeActing() {
+    CombatStatsComponent stats = new CombatStatsComponent(3, 0);
+    stats.applyStatusEffect(new StatusEffect("POISON", 3, 1));
+
+    Entity enemy = createPoisonTestEnemy(stats, firstEnemyBehaviour);
+    BattleController battle = new BattleController(player, List.of(enemy));
+
+    List<Boolean> outcomes = new ArrayList<>();
+    battle.addBattleEndListener(won -> outcomes.add(won));
+
+    battle.start();
+    battle.endPlayerTurn();
+
+    assertEquals(0, stats.getHealth());
+    verify(firstEnemyBehaviour, never()).executeIntent(player);
+    assertEquals(BattlePhase.VICTORY, battle.getCurrentPhase());
+    assertEquals(List.of(true), outcomes);
+  }
+
+  /**
+   * Creates an enemy with real combat stats and a controlled defending intent.
+   *
+   * @param stats the combat stats used for damage and status processing
+   * @param behaviour the mocked enemy behavior
+   * @return the enemy entity
+   */
+  private Entity createPoisonTestEnemy(
+          CombatStatsComponent stats, EnemyBehaviourComponent behaviour) {
+    when(behaviour.getCurrentIntent()).thenReturn(EnemyIntent.defend(1));
+    when(behaviour.rollIntent()).thenReturn(EnemyIntent.defend(1));
+
+    return new Entity().addComponent(stats).addComponent(behaviour);
   }
 }

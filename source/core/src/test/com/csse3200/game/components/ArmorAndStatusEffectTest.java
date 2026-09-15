@@ -9,6 +9,8 @@ import com.csse3200.game.extensions.GameExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import com.csse3200.game.entities.Entity;
+
 @ExtendWith(GameExtension.class)
 class ArmorAndStatusEffectTest {
 
@@ -363,5 +365,144 @@ class ArmorAndStatusEffectTest {
           throw new AssertionError("Negative poison damage");
         });
     assertNull(stats.getStatusEffect("POISON"));
+  }
+
+  /** Verifies that cleanse removes supported debuffs regardless of key case. */
+  @Test
+  void cleanseShouldRemoveSupportedDebuffsAndPreserveOtherState() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 10);
+    stats.setArmor(5);
+    stats.setBlock(4);
+    stats.applyStatusEffect("POISON", 3, 2);
+    stats.applyStatusEffect("poison", 2, 1);
+    stats.applyStatusEffect("Vulnerable", 1, 2);
+    stats.applyStatusEffect("feeble", 1, 3);
+
+    StatusEffect strength = new StatusEffect("STRENGTH", 2, 0);
+    StatusEffect healing = new StatusEffect("HEAL", 2, 3);
+    StatusEffect other = new StatusEffect("CUSTOM_EFFECT", 1, 2);
+    stats.applyStatusEffect(strength);
+    stats.applyStatusEffect(healing);
+    stats.applyStatusEffect(other);
+
+    stats.clearNegativeStatusEffects();
+
+    assertNull(stats.getStatusEffect("POISON"));
+    assertNull(stats.getStatusEffect("poison"));
+    assertNull(stats.getStatusEffect("Vulnerable"));
+    assertNull(stats.getStatusEffect("feeble"));
+    assertEquals(strength, stats.getStatusEffect("STRENGTH"));
+    assertEquals(healing, stats.getStatusEffect("HEAL"));
+    assertEquals(other, stats.getStatusEffect("CUSTOM_EFFECT"));
+    assertEquals(3, healing.getDuration());
+    assertEquals(2, other.getDuration());
+    assertEquals(100, stats.getHealth());
+    assertEquals(5, stats.getArmor());
+    assertEquals(4, stats.getBlock());
+  }
+
+  /** Verifies that cleansing an empty or already-cleansed component is harmless. */
+  @Test
+  void cleanseShouldBeSafeWhenRepeated() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 10);
+
+    stats.clearNegativeStatusEffects();
+
+    stats.applyStatusEffect("POISON", 3, 2);
+    stats.clearNegativeStatusEffects();
+    stats.clearNegativeStatusEffects();
+
+    assertNull(stats.getStatusEffect("POISON"));
+    assertEquals(100, stats.getHealth());
+  }
+
+  /** Verifies that piercing damage bypasses defenses and ignores status damage modifiers. */
+  @Test
+  void piercingDamageShouldBypassDefensesAndIgnoreModifiers() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 10);
+    stats.setBlock(6);
+    stats.setArmor(8);
+    stats.applyStatusEffect("STRENGTH", 5, 0);
+    stats.applyStatusEffect("VULNERABLE", 1, 2);
+    stats.applyStatusEffect("FEEBLE", 1, 2);
+
+    stats.takePiercingDamage(7);
+
+    assertEquals(93, stats.getHealth());
+    assertEquals(6, stats.getBlock());
+    assertEquals(8, stats.getArmor());
+    assertEquals(5, stats.getStatusEffect("STRENGTH").getValue());
+    assertEquals(2, stats.getStatusEffect("VULNERABLE").getDuration());
+    assertEquals(2, stats.getStatusEffect("FEEBLE").getDuration());
+    assertFalse(stats.hasStatusEffect("PIERCE"));
+  }
+
+  /** Verifies that each piercing hit applies independently and cannot reduce health below zero. */
+  @Test
+  void piercingDamageShouldApplyRepeatedlyAndClampHealth() {
+    CombatStatsComponent stats = new CombatStatsComponent(10, 0);
+
+    stats.takePiercingDamage(3);
+    stats.takePiercingDamage(3);
+
+    assertEquals(4, stats.getHealth());
+
+    stats.takePiercingDamage(Integer.MAX_VALUE);
+
+    assertEquals(0, stats.getHealth());
+    assertTrue(stats.isDead());
+  }
+
+  /** Verifies that non-positive piercing damage does not change health or defenses. */
+  @Test
+  void nonPositivePiercingDamageShouldNotChangeCombatValues() {
+    CombatStatsComponent stats = new CombatStatsComponent(20, 0);
+    stats.setArmor(5);
+    stats.setBlock(4);
+
+    stats.takePiercingDamage(-3);
+    stats.takePiercingDamage(0);
+
+    assertEquals(20, stats.getHealth());
+    assertEquals(5, stats.getArmor());
+    assertEquals(4, stats.getBlock());
+  }
+
+  /** Verifies that piercing damage reports health changes and reports death only once. */
+  @Test
+  void piercingDamageShouldNotifyHealthAndDeathOnce() {
+    CombatStatsComponent stats = new CombatStatsComponent(10, 0);
+    Entity entity = new Entity().addComponent(stats);
+    int[] healthUpdates = {0};
+    int[] reportedHealth = {-1};
+    int[] reportedMaxHealth = {-1};
+    int[] deathEvents = {0};
+
+    entity.getEvents().addListener(
+            "updateHealth",
+            (Integer health, Integer maxHealth) -> {
+              healthUpdates[0]++;
+              reportedHealth[0] = health;
+              reportedMaxHealth[0] = maxHealth;
+            });
+    entity.getEvents().addListener("entityIsDead", () -> deathEvents[0]++);
+
+    stats.takePiercingDamage(3);
+
+    assertEquals(1, healthUpdates[0]);
+    assertEquals(7, reportedHealth[0]);
+    assertEquals(10, reportedMaxHealth[0]);
+    assertEquals(0, deathEvents[0]);
+
+    stats.takePiercingDamage(7);
+
+    assertEquals(2, healthUpdates[0]);
+    assertEquals(0, reportedHealth[0]);
+    assertEquals(1, deathEvents[0]);
+
+    stats.takePiercingDamage(5);
+
+    assertEquals(2, healthUpdates[0]);
+    assertEquals(1, deathEvents[0]);
   }
 }

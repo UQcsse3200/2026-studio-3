@@ -6,6 +6,10 @@ import java.util.function.IntConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
 /**
  * Component used to store information related to combat such as health, attack, armor, block and
  * status effects. Any entities which engage it combat should have an instance of this class
@@ -135,6 +139,23 @@ public class CombatStatsComponent extends Component {
       setHealth(Math.max(this.health - remainingDamage, 0));
       if (entity != null && isDead()) {
         entity.getEvents().trigger("entityIsDead");
+      }
+    }
+  }
+
+  /**
+   * Damages health directly without consuming block or armor.
+   *
+   * <p>Negative damage and damage to an already-dead entity are ignored. Health updates use the
+   * existing notification mechanism. Lethal damage also fires the existing death event.
+   *
+   * @param damage flat damage applied directly to health
+   */
+  public void takePiercingDamage(int damage) {
+    if (damage >= 0 && !isDead()) {
+      setHealth(Math.max(this.health - damage, 0));
+      if (entity != null && isDead()) {
+        entity.getEvents().trigger(EVT_IS_DEAD);
       }
     }
   }
@@ -401,6 +422,33 @@ public class CombatStatsComponent extends Component {
     if (statusEffects.remove(type) != null && entity != null) {
       entity.getEvents().trigger("statusEffectRemoved", type);
     }
+  }
+
+  /**
+   * Removes poison, vulnerable and feeble. Strength, heal-over-time and other non-debuff statuses
+   * are left unchanged. Keys are matched case-insensitively because some combat paths store
+   * lowercase status names.
+   */
+  public void clearNegativeStatusEffects() {
+    List<String> toRemove = new ArrayList<>();
+    for (String type : statusEffects.keySet()) {
+      if (isNegativeStatusKey(type)) {
+        toRemove.add(type);
+      }
+    }
+    for (String type : toRemove) {
+      removeStatusEffect(type);
+    }
+  }
+
+  private static boolean isNegativeStatusKey(String type) {
+    if (type == null || type.isBlank()) {
+      return false;
+    }
+    return switch (type.toUpperCase(Locale.ROOT)) {
+      case "POISON", "VULNERABLE", "FEEBLE" -> true;
+      default -> false;
+    };
   }
 
   /**
