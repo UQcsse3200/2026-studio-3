@@ -3,8 +3,8 @@ package com.csse3200.game.maps;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
-import java.util.Objects;
 import com.csse3200.game.entities.factories.PlayerFactory;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

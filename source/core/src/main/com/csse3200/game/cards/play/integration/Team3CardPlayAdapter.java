@@ -1,5 +1,7 @@
 package com.csse3200.game.cards.play.integration;
 
+import static com.csse3200.game.components.battle.BattleActions.BATTLE_LOG_EVENT;
+
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
@@ -7,8 +9,6 @@ import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.enemy.IntentEffectType;
-
-import static com.csse3200.game.components.battle.BattleActions.BATTLE_LOG_EVENT;
 
 /**
  * Connects Team 3's existing {@code playCard(cardId, targetId)} event to Team 5's unified API.
@@ -41,9 +41,9 @@ public final class Team3CardPlayAdapter extends Component {
     entity.getEvents().addListener(PLAY_CARD_EVENT, this::onCardPlayed);
     entity.getEvents().addListener(CARD_PLAY_RESULT_EVENT, this::logCardPlayed);
     battleController.addCardPlayedListener(
-            (cardId, targetId) -> {
-              entity.getEvents().trigger(CARD_PLAY_RESULT_EVENT, cardId, targetId);
-            });
+        (cardId, targetId) -> {
+          entity.getEvents().trigger(CARD_PLAY_RESULT_EVENT, cardId, targetId);
+        });
   }
 
   private void onCardPlayed(String cardId, String targetId) {
