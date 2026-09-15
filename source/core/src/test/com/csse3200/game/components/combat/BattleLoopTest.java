@@ -97,7 +97,8 @@ class BattleLoopTest {
     controller.addBattleLogListener(log::add);
 
     controller.start();
-    controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy"));
+    controller.submitCardPlayRequest(
+        CardPlayRequest.singleEnemy("strike", Integer.toString(enemy.getId())));
 
     assertEquals(BattlePhase.VICTORY, controller.getCurrentPhase());
     assertEquals(Boolean.TRUE, outcome.get());
@@ -238,7 +239,8 @@ class BattleLoopTest {
         new BattleController(player, List.of(enemy), effectHandler, cardPlayService);
 
     boolean accepted =
-        controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy"));
+        controller.submitCardPlayRequest(
+            CardPlayRequest.singleEnemy("strike", Integer.toString(enemy.getId())));
 
     assertFalse(accepted);
     assertEquals(BattlePhase.SETUP, controller.getCurrentPhase());
@@ -272,7 +274,8 @@ class BattleLoopTest {
 
     controller.start();
     boolean accepted =
-        controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy"));
+        controller.submitCardPlayRequest(
+            CardPlayRequest.singleEnemy("strike", Integer.toString(enemy.getId())));
 
     assertFalse(accepted);
     assertEquals(3, player.getComponent(EnergyComponent.class).getCurrentEnergy());
