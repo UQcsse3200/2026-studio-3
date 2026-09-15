@@ -638,7 +638,8 @@ public class BattleController {
 
   private void finishPlayerCardAction() {
     if (lastCardPlaySucceeded && pendingCard != null) {
-      eventHandler.trigger("cardPlayed", pendingCard.cardID(), pendingCard.targetID());
+      eventHandler.trigger(
+          "cardPlayed", pendingCard.instanceId(), pendingCard.target().targetId());
     }
 
     pendingCard = null;

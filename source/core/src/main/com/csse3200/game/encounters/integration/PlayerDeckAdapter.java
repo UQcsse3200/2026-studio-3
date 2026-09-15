@@ -1,6 +1,7 @@
 package com.csse3200.game.encounters.integration;
 
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.runtime.CardInstance;
 import java.util.List;
 import java.util.Objects;
 
@@ -8,6 +9,7 @@ import java.util.Objects;
 public final class PlayerDeckAdapter implements DeckGateway {
   private final PlayerDeck playerDeck;
   private String pendingCardId;
+  private String pendingInstanceId;
   private int pendingCardIndex = -1;
 
   /**
@@ -32,19 +34,25 @@ public final class PlayerDeckAdapter implements DeckGateway {
 
     int insertionIndex = playerDeck.size();
     try {
-      playerDeck.addCard(cardId);
+      playerDeck.addCards(List.of(cardId));
     } catch (IllegalArgumentException exception) {
       return false;
     }
     pendingCardId = cardId;
     pendingCardIndex = insertionIndex;
+    pendingInstanceId = playerDeck.getCards().get(insertionIndex).instanceId();
     return true;
   }
 
   @Override
   public synchronized boolean removeCard(String cardId) {
     try {
-      return playerDeck.removeCard(cardId);
+      return playerDeck.getCards().stream()
+          .filter(card -> card.cardId().equals(cardId))
+          .findFirst()
+          .map(CardInstance::instanceId)
+          .map(playerDeck::removeCard)
+          .orElse(false);
     } catch (IllegalArgumentException exception) {
       return false;
     }
@@ -63,18 +71,25 @@ public final class PlayerDeckAdapter implements DeckGateway {
       return false;
     }
 
-    List<String> cardIds = playerDeck.getCardIds();
-    if (pendingCardIndex >= cardIds.size() || !cardId.equals(cardIds.get(pendingCardIndex))) {
+    List<CardInstance> cards = playerDeck.getCards();
+    if (pendingCardIndex >= cards.size()) {
       return false;
     }
 
-    playerDeck.removeCardAt(pendingCardIndex);
+    CardInstance pendingCard = cards.get(pendingCardIndex);
+    if (!cardId.equals(pendingCard.cardId())
+        || !Objects.equals(pendingInstanceId, pendingCard.instanceId())) {
+      return false;
+    }
+
+    playerDeck.removeCard(pendingInstanceId);
     clearPendingAddition();
     return true;
   }
 
   private void clearPendingAddition() {
     pendingCardId = null;
+    pendingInstanceId = null;
     pendingCardIndex = -1;
   }
 }
