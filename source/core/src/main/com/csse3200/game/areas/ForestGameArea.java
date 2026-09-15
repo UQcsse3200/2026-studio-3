@@ -2,6 +2,7 @@ package com.csse3200.game.areas;
 
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
+import com.csse3200.game.areas.terrain.BackgroundDisplay;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.areas.terrain.TerrainFactory.TerrainType;
 import com.csse3200.game.components.gamearea.GameAreaDisplay;
@@ -44,7 +45,8 @@ public class ForestGameArea extends GameArea {
     "images/iso_grass_2.png",
     "images/iso_grass_3.png",
     "images/enemies/intents/attack.png",
-    "images/enemies/intents/defend.png"
+    "images/enemies/intents/defend.png",
+    "images/battle_background.png"
   };
   private static final String[] forestTextureAtlases = {
     "images/terrain_iso_grass.atlas",
@@ -77,6 +79,8 @@ public class ForestGameArea extends GameArea {
   @Override
   public void create() {
     loadAssets();
+
+    spawnBackground();
     spawnTerrain();
 
     enemy = spawnEnemy();
@@ -88,6 +92,12 @@ public class ForestGameArea extends GameArea {
   public void displayUI(Entity ui) {
     ui.addComponent(new GameAreaDisplay("The Fall of Pantheons"));
     spawnEntity(ui);
+  }
+
+  private void spawnBackground() {
+    Entity background = new Entity();
+    background.addComponent(new BackgroundDisplay());
+    spawnEntity(background);
   }
 
   private void spawnTerrain() {
@@ -182,13 +192,12 @@ public class ForestGameArea extends GameArea {
     spawnEntityAt(ghostKing, randomPos, true, true);
   }
 
-  // private void playMusic() {
-  // Music music = ServiceLocator.getResourceService().getAsset(backgroundMusic,
-  // Music.class);
-  // music.setLooping(true);
-  // music.setVolume(0.3f);
-  // music.play();
-  // }
+  //  private void playMusic() {
+  //    Music music = ServiceLocator.getResourceService().getAsset(backgroundMusic, Music.class);
+  //    music.setLooping(true);
+  //    music.setVolume(0.3f);
+  //    music.play();
+  //  }
 
   private void loadAssets() {
     logger.debug("Loading assets");
@@ -216,8 +225,7 @@ public class ForestGameArea extends GameArea {
   @Override
   public void dispose() {
     super.dispose();
-    // ServiceLocator.getResourceService().getAsset(backgroundMusic,
-    // Music.class).stop();
+    // ServiceLocator.getResourceService().getAsset(backgroundMusic, Music.class).stop();
     this.unloadAssets();
   }
 }
