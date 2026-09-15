@@ -281,4 +281,28 @@ class CardValidatorTest {
         CardValidator.validate(card)
             .contains("upgrade.effects[0].duration must not be negative for HEAL"));
   }
+
+  @Test
+  void shouldAcceptEnergyGainForSelfTargetedUpgrade() {
+    CardConfig card = validCard();
+    card.target = TargetType.SELF;
+    card.effects = new EffectConfig[] {new EffectConfig(EffectType.ENERGY_GAIN, 1)};
+    card.upgrade = validUpgrade();
+    card.upgrade.effects = new EffectConfig[] {new EffectConfig(EffectType.ENERGY_GAIN, 2)};
+
+    assertTrue(CardValidator.isValid(card));
+  }
+
+  @Test
+  void shouldRejectEnergyGainForEnemyTargetedUpgrade() {
+    CardConfig card = validCard();
+    card.upgrade = validUpgrade();
+    card.upgrade.effects = new EffectConfig[] {new EffectConfig(EffectType.ENERGY_GAIN, 2)};
+
+    assertTrue(
+        CardValidator.validate(card)
+            .contains(
+                "upgrade.effects[0].type ENERGY_GAIN is not compatible with inherited target"
+                    + " SINGLE_ENEMY"));
+  }
 }

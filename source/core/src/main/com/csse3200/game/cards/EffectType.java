@@ -20,6 +20,8 @@ public enum EffectType {
   FEEBLE(true),
   /** Increases damage the target deals for the rest of the combat. */
   STRENGTH(false),
+  /** Immediately restores player energy, capped by the player's maximum energy. */
+  ENERGY_GAIN(false),
   /** Immediately removes poison, vulnerable and feeble from the target. */
   CLEANSE(false);
 

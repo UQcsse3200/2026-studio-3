@@ -92,6 +92,45 @@ class EffectExecutorTest {
   }
 
   @Test
+  void shouldResolveEnergyGainThroughBothSelfEffectPaths() {
+    playerState.addStrength(5);
+    ResolvedCardEffect expected =
+        new ResolvedCardEffect("astral_ward", EffectType.ENERGY_GAIN, TargetType.SELF, 1, 0, 2);
+    EffectConfig energyGain = new EffectConfig(EffectType.ENERGY_GAIN, 1);
+
+    assertEquals(
+        expected, executor.resolve("astral_ward", energyGain, TargetType.SELF, 2, playerState));
+    assertEquals(
+        expected,
+        executor.resolve(
+            "astral_ward",
+            energyGain,
+            TargetType.SELF,
+            2,
+            new CardEffectResolutionContext(5, 1, 1)));
+  }
+
+  @Test
+  void shouldRejectEnergyGainForEnemyTargets() {
+    EffectConfig energyGain = new EffectConfig(EffectType.ENERGY_GAIN, 1);
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            executor.resolve(
+                "invalid_energy_gain", energyGain, TargetType.SINGLE_ENEMY, 0, playerState));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            executor.resolve(
+                "invalid_energy_gain",
+                energyGain,
+                TargetType.ALL_ENEMIES,
+                0,
+                new CardEffectResolutionContext(0, 0, 0)));
+  }
+
+  @Test
   void shouldReturnEveryOngoingEnemyStatusForOtherSystemsToApply() {
     int sequence = 0;
     for (EffectType effectType : EffectType.values()) {
