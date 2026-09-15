@@ -1,5 +1,6 @@
 package com.csse3200.game.components.combat;
 
+import static com.csse3200.game.cards.CardTestInstances.id;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -11,10 +12,21 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.csse3200.game.cards.CardPlayRequest;
+import com.csse3200.game.cards.CardLibrary;
+import com.csse3200.game.cards.CardType;
+import com.csse3200.game.cards.EffectType;
+import com.csse3200.game.cards.TargetType;
+import com.csse3200.game.cards.TestCardService;
+import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.cards.configs.EffectConfig;
+import com.csse3200.game.cards.deck.BattleDeck;
+import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.effects.CardEffectResolver;
+import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
+import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.PlayerActions;
 import com.csse3200.game.components.player.PlayerIntent;
 import com.csse3200.game.entities.Entity;
@@ -88,7 +100,7 @@ class BattleControllerTest {
   @Test
   void shouldResolveSubmittedAttackCardSynchronously() {
     advanceToPlayerTurn();
-    CardPlayRequest request = new CardPlayRequest("strike", "enemy-1");
+    CardPlayRequest request = CardPlayRequest.singleEnemy("strike-instance", "enemy-1");
 
     boolean accepted = controller.submitCardPlayRequest(request, PlayerIntent.ATTACK);
 
@@ -287,6 +299,51 @@ class BattleControllerTest {
     assertThrows(
         IllegalStateException.class, () -> controller.handle(BattleEvent.PLAYER_TURN_STARTED));
     assertEquals(BattlePhase.DEFEAT, controller.getCurrentPhase());
+  }
+
+  @Test
+  void shouldClearNegativeStatusesWhenCleanseCardIsPlayed() {
+    CardConfig purify = new CardConfig();
+    purify.id = "purify";
+    purify.name = "Purify";
+    purify.description = "Remove negative status effects.";
+    purify.cost = 1;
+    purify.type = CardType.SKILL;
+    purify.target = TargetType.SELF;
+    purify.effects = new EffectConfig[] {new EffectConfig(EffectType.CLEANSE, 1)};
+    purify.texturePath = "images/cards/purify.png";
+
+    Entity cleansePlayer =
+        new Entity()
+            .addComponent(new CombatStatsComponent(20, 0))
+            .addComponent(new EnergyComponent(3));
+    CombatStatsComponent stats = cleansePlayer.getComponent(CombatStatsComponent.class);
+    stats.applyStatusEffect("POISON", 3, 2);
+    stats.applyStatusEffect("vulnerable", 1, 1);
+    stats.applyStatusEffect("FEEBLE", 1, 2);
+    stats.applyStatusEffect("STRENGTH", 2, 0);
+    stats.applyStatusEffect("HEAL", 4, 3);
+
+    BattleDeck deck =
+        new BattleDeck(
+            new PlayerDeck(
+                TestCardService.withCards("purify", "strike"), List.of("purify", "strike")));
+    deck.drawCards(1);
+    CardLibrary library = new CardLibrary(List.of(purify));
+    BattleController battle =
+        new BattleController(
+            cleansePlayer, enemies, new CardEffectResolver(library), library, deck);
+
+    battle.start();
+    boolean accepted =
+        battle.submitCardPlayRequest(CardPlayRequest.self(id(deck, "purify")), PlayerIntent.OTHER);
+
+    assertTrue(accepted);
+    assertFalse(stats.hasStatusEffect("POISON"));
+    assertFalse(stats.hasStatusEffect("vulnerable"));
+    assertFalse(stats.hasStatusEffect("FEEBLE"));
+    assertTrue(stats.hasStatusEffect("STRENGTH"));
+    assertTrue(stats.hasStatusEffect("HEAL"));
   }
 
   @Test

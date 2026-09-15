@@ -8,6 +8,7 @@ import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.chance.ChanceChoice;
 import com.csse3200.game.chance.ChanceEncounter;
 import com.csse3200.game.chance.ChanceOutcome;
@@ -70,7 +71,7 @@ class EncounterAcceptanceRegressionTest {
     flow.onEncounterComplete(2, true);
 
     assertEquals(105, inventory.getGold());
-    assertEquals(List.of("strike", "defend", "strike"), playerDeck.getCardIds());
+    assertEquals(List.of("strike", "defend", "strike"), cardIds(playerDeck));
     assertEquals(0, offer.stock);
     assertEquals(2, mapCallback.completionCount);
     assertEquals(NodeState.COMPLETED, map.getNode(2).getState());
@@ -92,7 +93,7 @@ class EncounterAcceptanceRegressionTest {
     ComponentPlayerStateAdapter player = new ComponentPlayerStateAdapter(combatStats, inventory);
     CardService cardService = new CardLibrary(CardConfigLoader.loadCards());
     PlayerDeck playerDeck = new PlayerDeck(cardService, List.of("strike", "defend"));
-    List<String> deckBefore = playerDeck.getCardIds();
+    List<String> deckBefore = cardIds(playerDeck);
     ShopItem offer = new ShopItem("strike-offer", "strike", "Strike", 20, 2);
     IntegratedShopTransactionGateway transactions =
         new IntegratedShopTransactionGateway(
@@ -105,7 +106,7 @@ class EncounterAcceptanceRegressionTest {
     assertFalse(result.isSuccess());
     assertEquals(PurchaseResult.Status.INSUFFICIENT_GOLD, result.getStatus());
     assertEquals(10, inventory.getGold());
-    assertEquals(deckBefore, playerDeck.getCardIds());
+    assertEquals(deckBefore, cardIds(playerDeck));
     assertEquals(2, offer.stock);
 
     shop.complete(false);
@@ -150,6 +151,10 @@ class EncounterAcceptanceRegressionTest {
         "shrine",
         "A shrine offers a risky bargain.",
         List.of(new ChanceChoice("risk", "Lose health for gold.", new ChanceOutcome(-10, 25))));
+  }
+
+  private static List<String> cardIds(PlayerDeck deck) {
+    return deck.getCards().stream().map(CardInstance::cardId).toList();
   }
 
   private static final class RecordingMapCallback implements EncounterCallback {

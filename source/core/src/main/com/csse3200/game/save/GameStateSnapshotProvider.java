@@ -4,6 +4,7 @@ import com.csse3200.game.GdxGame;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryUnlockState;
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.maps.MapGraph;
 import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.PlayerRunState;
@@ -68,7 +69,12 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
   }
 
   private DeckSaveData captureDeck() {
-    return new DeckSaveData(playerDeck.getCardIds());
+    List<CardInstanceSaveData> cardSnapshots = new ArrayList<>();
+    for (CardInstance card : playerDeck.getCards()) {
+      cardSnapshots.add(
+          new CardInstanceSaveData(card.instanceId(), card.cardId(), card.upgradeLevel()));
+    }
+    return new DeckSaveData(cardSnapshots);
   }
 
   private MapSaveData captureMap() {

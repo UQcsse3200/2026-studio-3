@@ -1,6 +1,9 @@
 package com.csse3200.game.cards.deck;
 
+import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.runtime.CardInstanceFactory;
 import java.util.List;
 
 /** Creates standard player decks from the initial Team 6 card IDs. */
@@ -11,6 +14,10 @@ public final class PlayerDeckFactory {
   public static final String EXPOSE = "expose";
   public static final String INNER_FOCUS = "inner_focus";
   public static final String BANDAGE = "bandage";
+  public static final String SEALED_PACT = "sealed_pact";
+  public static final String BLOOD_PRICE = "blood_price";
+  public static final String DOOM_SIGIL = "doom_sigil";
+  public static final String ECLIPSE_DECREE = "eclipse_decree";
 
   private static final List<String> STARTER_DECK_CARD_IDS =
       List.of(
@@ -25,6 +32,19 @@ public final class PlayerDeckFactory {
           BANDAGE,
           INNER_FOCUS);
 
+  private static final List<String> FORBIDDEN_TEST_DECK_CARD_IDS =
+      List.of(
+          SEALED_PACT,
+          BLOOD_PRICE,
+          BLOOD_PRICE,
+          DOOM_SIGIL,
+          DOOM_SIGIL,
+          ECLIPSE_DECREE,
+          STRIKE,
+          STRIKE,
+          DEFEND,
+          DEFEND);
+
   private PlayerDeckFactory() {
     throw new IllegalStateException("Instantiating utility class");
   }
@@ -38,7 +58,7 @@ public final class PlayerDeckFactory {
    * @return starter player deck
    */
   public static PlayerDeck createStarterDeck() {
-    return new PlayerDeck(STARTER_DECK_CARD_IDS);
+    return createStarterDeck(new CardLibrary(CardConfigLoader.loadCards()));
   }
 
   /**
@@ -48,7 +68,9 @@ public final class PlayerDeckFactory {
    * @return starter player deck
    */
   public static PlayerDeck createStarterDeck(CardService cardService) {
-    return new PlayerDeck(cardService, STARTER_DECK_CARD_IDS);
+    CardInstanceFactory factory = new CardInstanceFactory(cardService);
+    return PlayerDeck.fromInstances(
+        cardService, STARTER_DECK_CARD_IDS.stream().map(factory::create).toList());
   }
 
   /**
@@ -58,5 +80,38 @@ public final class PlayerDeckFactory {
    */
   public static List<String> getStarterDeckCardIds() {
     return STARTER_DECK_CARD_IDS;
+  }
+
+  /**
+   * Creates a deterministic deck for verifying the Round 2 forbidden cards.
+   *
+   * <p>This is a test/demo entry point only. The default starter deck is intentionally unchanged;
+   * production acquisition remains owned by the reward and shop integrations.
+   *
+   * @return player deck containing all four forbidden cards and supporting initial cards
+   */
+  public static PlayerDeck createForbiddenTestDeck() {
+    return createForbiddenTestDeck(new CardLibrary(CardConfigLoader.loadCards()));
+  }
+
+  /**
+   * Creates a deterministic forbidden-card test deck validated by the supplied card service.
+   *
+   * @param cardService authoritative card lookup service
+   * @return player deck containing all four forbidden cards and supporting initial cards
+   */
+  public static PlayerDeck createForbiddenTestDeck(CardService cardService) {
+    CardInstanceFactory factory = new CardInstanceFactory(cardService);
+    return PlayerDeck.fromInstances(
+        cardService, FORBIDDEN_TEST_DECK_CARD_IDS.stream().map(factory::create).toList());
+  }
+
+  /**
+   * Returns the card IDs used by the forbidden-card test deck.
+   *
+   * @return immutable test-deck card IDs
+   */
+  public static List<String> getForbiddenTestDeckCardIds() {
+    return FORBIDDEN_TEST_DECK_CARD_IDS;
   }
 }

@@ -3,9 +3,12 @@ package com.csse3200.game.cards.deck;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.runtime.CardInstance;
+import com.csse3200.game.cards.runtime.CardInstanceFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Stores the cards owned by the player outside a single combat encounter.
@@ -17,7 +20,8 @@ import java.util.List;
  */
 public class PlayerDeck {
   private final CardService cardService;
-  private final List<String> cardIds = new ArrayList<>();
+  private final CardInstanceFactory instanceFactory;
+  private final List<CardInstance> cards = new ArrayList<>();
 
   /** Creates an empty player deck backed by the configured card definitions. */
   public PlayerDeck() {
@@ -34,6 +38,7 @@ public class PlayerDeck {
       throw new IllegalArgumentException("cardService must not be null");
     }
     this.cardService = cardService;
+    this.instanceFactory = new CardInstanceFactory(cardService);
   }
 
   /**
@@ -58,16 +63,36 @@ public class PlayerDeck {
   }
 
   /**
-   * Adds one card to the end of the deck.
-   *
-   * @param cardId Team 6 card ID
-   * @throws IllegalArgumentException if the card ID is not registered
+   * Restores existing instances without regenerating identity. A named factory avoids Java's
+   * generic erasure clash with the existing Collection&lt;String&gt; constructor.
    */
-  public void addCard(String cardId) {
-    if (!canAddCard(cardId)) {
-      throw new IllegalArgumentException("cardId must be registered");
+  public static PlayerDeck fromInstances(CardService service, Collection<CardInstance> cards) {
+    if (cards == null) {
+      throw new IllegalArgumentException("cards must not be null");
     }
-    cardIds.add(cardId);
+    PlayerDeck deck = new PlayerDeck(service);
+    for (CardInstance card : cards) {
+      deck.addCard(card);
+    }
+    return deck;
+  }
+
+  /** Adds a registered copy; duplicate instance IDs are rejected across all definitions. */
+  public void addCard(CardInstance card) {
+    if (card == null) {
+      throw new IllegalArgumentException("card must not be null");
+    }
+    var config =
+        cardService
+            .getCard(card.cardId())
+            .orElseThrow(() -> new IllegalArgumentException("Unknown card ID: " + card.cardId()));
+    if (card.isUpgraded() && config.upgrade == null) {
+      throw new IllegalArgumentException("Card has no upgrade definition: " + card.cardId());
+    }
+    if (containsInstance(card.instanceId())) {
+      throw new IllegalArgumentException("Duplicate instance ID: " + card.instanceId());
+    }
+    cards.add(card);
   }
 
   /**
@@ -80,7 +105,7 @@ public class PlayerDeck {
    * @return true if the card can be added, otherwise false
    */
   public boolean canAddCard(String cardId) {
-    return cardService.getCard(cardId).isPresent();
+    return cardId != null && !cardId.isBlank() && cardService.getCard(cardId).isPresent();
   }
 
   /**
@@ -93,64 +118,62 @@ public class PlayerDeck {
       throw new IllegalArgumentException("cardIds must not be null");
     }
     for (String cardId : cardIds) {
-      addCard(cardId);
+      addCard(instanceFactory.create(cardId));
     }
   }
 
-  /**
-   * Removes the first matching card ID from the deck.
-   *
-   * @param cardId card ID to remove
-   * @return true if a card was removed, false if the deck did not contain that card
-   */
-  public boolean removeCard(String cardId) {
-    return cardIds.remove(validateCardId(cardId));
+  /** Removes exactly the selected instance; never falls back to a definition ID. */
+  public boolean removeCard(String instanceId) {
+    validateId(instanceId);
+    return cards.removeIf(card -> card.instanceId().equals(instanceId));
+  }
+
+  /** Removes and returns the copy at the given position. */
+  public CardInstance removeCardAt(int index) {
+    return cards.remove(index);
+  }
+
+  /** Returns the copy with this instanceId, or empty if it is not owned. */
+  public Optional<CardInstance> getCard(String instanceId) {
+    validateId(instanceId);
+    return cards.stream().filter(card -> card.instanceId().equals(instanceId)).findFirst();
+  }
+
+  /** Checks ownership of an exact copy. */
+  public boolean containsInstance(String instanceId) {
+    return getCard(instanceId).isPresent();
+  }
+
+  /** Counts copies of a shared definition, irrespective of upgrade level. */
+  public int countByCardId(String cardId) {
+    validateId(cardId);
+    return (int) cards.stream().filter(card -> card.cardId().equals(cardId)).count();
   }
 
   /**
-   * Removes the card at a specific deck position.
-   *
-   * @param index card position
-   * @return the removed card ID
+   * Replaces only the selected owned copy with its upgraded value, in the same slot.
+   * Eligibility/currency/UI belong to the upgrade feature; this operation only updates deck state.
+   * Unknown IDs, missing upgrade definitions and already-upgraded copies fail without mutation.
    */
-  public String removeCardAt(int index) {
-    return cardIds.remove(index);
-  }
-
-  /**
-   * Checks whether the deck contains at least one copy of a card.
-   *
-   * @param cardId card ID to search for
-   * @return true if the deck contains the card
-   */
-  public boolean contains(String cardId) {
-    return cardIds.contains(validateCardId(cardId));
-  }
-
-  /**
-   * Counts how many copies of a card are in the deck.
-   *
-   * @param cardId card ID to count
-   * @return number of matching cards
-   */
-  public int count(String cardId) {
-    String validCardId = validateCardId(cardId);
-    int count = 0;
-    for (String existingCardId : cardIds) {
-      if (existingCardId.equals(validCardId)) {
-        count++;
-      }
+  public CardInstance upgradeCard(String instanceId) {
+    CardInstance card =
+        getCard(instanceId)
+            .orElseThrow(() -> new IllegalArgumentException("Unknown instance ID: " + instanceId));
+    var config =
+        cardService
+            .getCard(card.cardId())
+            .orElseThrow(() -> new IllegalArgumentException("Unknown card ID: " + card.cardId()));
+    if (config.upgrade == null) {
+      throw new IllegalArgumentException("Card has no upgrade definition: " + card.cardId());
     }
-    return count;
+    CardInstance upgraded = card.upgrade();
+    cards.set(cards.indexOf(card), upgraded);
+    return upgraded;
   }
 
-  /**
-   * Returns a snapshot of card IDs in deck order.
-   *
-   * @return immutable list of card IDs
-   */
-  public List<String> getCardIds() {
-    return List.copyOf(cardIds);
+  /** Returns an immutable snapshot preserving identity, order and upgrade level. */
+  public List<CardInstance> getCards() {
+    return List.copyOf(cards);
   }
 
   /**
@@ -159,33 +182,32 @@ public class PlayerDeck {
    * @return copied player deck
    */
   public PlayerDeck copy() {
-    return new PlayerDeck(cardService, cardIds);
+    return fromInstances(cardService, cards);
   }
 
   /** Removes all cards from the deck. */
   public void clear() {
-    cardIds.clear();
+    cards.clear();
   }
 
   /**
    * @return number of cards in the deck, including duplicate copies
    */
   public int size() {
-    return cardIds.size();
+    return cards.size();
   }
 
   /**
    * @return true if the deck has no cards
    */
   public boolean isEmpty() {
-    return cardIds.isEmpty();
+    return cards.isEmpty();
   }
 
-  private static String validateCardId(String cardId) {
-    if (cardId == null || cardId.isBlank()) {
-      throw new IllegalArgumentException("cardId must not be null or blank");
+  private static void validateId(String id) {
+    if (id == null || id.isBlank()) {
+      throw new IllegalArgumentException("ID must not be null or blank");
     }
-    return cardId;
   }
 
   private static CardService loadDefaultCardService() {

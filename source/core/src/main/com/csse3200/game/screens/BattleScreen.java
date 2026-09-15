@@ -162,7 +162,7 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new InputDecorator(stage, 10))
             .addComponent(uiFactory)
             .addComponent(displays)
-            .addComponent(new BattleActions(controller, game, library))
+            .addComponent(new BattleActions(controller, game))
             .addComponent(new PauseMenuDisplay())
             .addComponent(new PauseMenuInput())
             .addComponent(new PauseMenuActions(game))
@@ -177,7 +177,8 @@ public class BattleScreen extends ScreenAdapter {
         .getEvents()
         .addListener(
             BattleActions.HAND_CHANGED_EVENT,
-            (java.util.List<String> hand) -> uiFactory.rebuildHand(buildHandRecords()));
+            (java.util.List<com.csse3200.game.cards.runtime.CardInstance> hand) ->
+                uiFactory.rebuildHand(buildHandRecords()));
 
     gameArea.displayUI(battleUi);
   }
@@ -235,21 +236,22 @@ public class BattleScreen extends ScreenAdapter {
   private List<ClickableRecord> buildHandRecords() {
     List<ClickableRecord> records = new ArrayList<>();
     float x = HAND_START_X;
-    for (String cardId : battleDeck.getHand()) {
-      Optional<CardConfig> maybeCard = library.getCard(cardId);
-      if (maybeCard.isEmpty()) {
-        logger.warn("Card ID {} in hand not found in library, skipping", cardId);
+    for (var instance : battleDeck.getHand()) {
+      String cardId = instance.cardId();
+      var resolved = controller.resolveCardInHand(instance.instanceId());
+      if (resolved.isEmpty()) {
+        logger.warn("Card ID {} in hand could not be resolved, skipping", cardId);
         continue;
       }
-      CardConfig card = maybeCard.get();
-      boolean selfTarget = card.target == TargetType.SELF;
+      var card = resolved.get();
+      boolean selfTarget = card.target() == TargetType.SELF;
       String variant = selfTarget ? "inout" : "drag";
 
-      Skin cardSkin = skinFromTexturePath(card.texturePath);
+      Skin cardSkin = skinFromTexturePath(card.texturePath());
 
       ClickableRecord.Builder builder =
           ClickableRecord.builder("playCard")
-              .label(card.name)
+              .label(card.name())
               .variant(variant)
               .position(x, HAND_Y)
               .size(CARD_WIDTH, CARD_HEIGHT)
@@ -257,10 +259,10 @@ public class BattleScreen extends ScreenAdapter {
 
       if (selfTarget) {
         // No drop target involved — target is fixed at "player".
-        builder.args(card.id, "player");
+        builder.args(instance.instanceId(), "player");
       } else {
         // Enemy id isn't known yet; EnemyDropTargetComponent appends it at drop-time.
-        builder.args(card.id);
+        builder.args(instance.instanceId());
       }
 
       records.add(builder.build());

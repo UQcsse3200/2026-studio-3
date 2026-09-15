@@ -1,5 +1,6 @@
 package com.csse3200.game.cards.play;
 
+import static com.csse3200.game.cards.CardTestInstances.id;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -28,13 +29,15 @@ class CardPlayServiceIntegrationTest {
     EnergyComponent energy = new EnergyComponent(10);
     CardPlayService service = new CardPlayService(library, battleDeck, energy);
 
-    CardPlayResult strike = service.playCard(CardPlayRequest.singleEnemy("strike", "enemy-1"));
-    CardPlayResult defend = service.playCard(CardPlayRequest.self("defend"));
+    CardPlayResult strike =
+        service.playCard(CardPlayRequest.singleEnemy(id(battleDeck, "strike"), "enemy-1"));
+    CardPlayResult defend = service.playCard(CardPlayRequest.self(id(battleDeck, "defend")));
     CardPlayResult poisonDagger =
-        service.playCard(CardPlayRequest.singleEnemy("poison_dagger", "enemy-1"));
-    CardPlayResult expose = service.playCard(CardPlayRequest.allEnemies("expose"));
-    CardPlayResult innerFocus = service.playCard(CardPlayRequest.self("inner_focus"));
-    CardPlayResult bandage = service.playCard(CardPlayRequest.self("bandage"));
+        service.playCard(CardPlayRequest.singleEnemy(id(battleDeck, "poison_dagger"), "enemy-1"));
+    CardPlayResult expose = service.playCard(CardPlayRequest.allEnemies(id(battleDeck, "expose")));
+    CardPlayResult innerFocus =
+        service.playCard(CardPlayRequest.self(id(battleDeck, "inner_focus")));
+    CardPlayResult bandage = service.playCard(CardPlayRequest.self(id(battleDeck, "bandage")));
 
     assertTrue(
         List.of(strike, defend, poisonDagger, expose, innerFocus, bandage).stream()
@@ -47,7 +50,11 @@ class CardPlayServiceIntegrationTest {
     assertEquals(List.of(EffectType.HEAL), types(bandage.playerEffects()));
     assertEquals(3, energy.getCurrentEnergy());
     assertTrue(bandage.updatedHand().isEmpty());
-    assertEquals(CARD_IDS, bandage.updatedDiscardPile());
+    assertEquals(
+        CARD_IDS,
+        battleDeck.getDiscardPile().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList());
   }
 
   private static List<EffectType> types(
