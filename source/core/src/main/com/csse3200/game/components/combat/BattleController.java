@@ -1,15 +1,21 @@
 package com.csse3200.game.components.combat;
 
-import com.csse3200.game.cards.CardPlayRequest;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.EffectType;
-import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.deck.BattleDeck;
-import com.csse3200.game.cards.effects.CardEffectResolution;
+import com.csse3200.game.cards.effects.CardEffectResolutionService;
 import com.csse3200.game.cards.effects.CardEffectResolver;
-import com.csse3200.game.cards.effects.CardPlayResult;
 import com.csse3200.game.cards.effects.PlayerEffectState;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
+import com.csse3200.game.cards.effects.TurnEffectStore;
+import com.csse3200.game.cards.play.CardPlayFailureReason;
+import com.csse3200.game.cards.play.CardPlayRequest;
+import com.csse3200.game.cards.play.CardPlayResult;
+import com.csse3200.game.cards.play.CardPlayService;
+import com.csse3200.game.cards.play.DeckSnapshot;
+import com.csse3200.game.cards.runtime.CardInstance;
+import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
@@ -22,7 +28,6 @@ import com.csse3200.game.events.EventHandler;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.events.listeners.EventListener2;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
@@ -53,6 +58,7 @@ public class BattleController {
   private boolean pendingEvent;
   private CardPlayRequest pendingCard;
   private boolean lastCardPlaySucceeded;
+  private CardPlayService cardPlayService;
 
   /** Team 5's card-effect resolver (Team 6 configs -> resolved effects); null without cards. */
   private final CardEffectResolver effectResolver;
@@ -103,6 +109,18 @@ public class BattleController {
       throw new IllegalArgumentException("One or more enemies are null.");
     }
 
+    if (effectResolver != null
+        && cardService != null
+        && battleDeck != null
+        && playerEnergy() != null) {
+      this.cardPlayService =
+          new CardPlayService(
+              cardService,
+              new CardEffectResolutionService(
+                  effectResolver, playerEffectState, new TurnEffectStore()),
+              battleDeck,
+              playerEnergy());
+    }
     this.battleTransitions = new BattleTransitions();
     this.currentPhase = BattlePhase.SETUP;
     this.currentEnemyIndex = -1;
@@ -330,7 +348,7 @@ public class BattleController {
    *
    * @param listener receives the updated hand
    */
-  public void addHandChangedListener(EventListener1<List<String>> listener) {
+  public void addHandChangedListener(EventListener1<List<CardInstance>> listener) {
     Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(HAND_CHANGED_EVENT, listener);
   }
@@ -646,7 +664,7 @@ public class BattleController {
     if (result == null) {
       // Card system not wired in (e.g. unit tests without a resolution service).
       lastCardPlaySucceeded = true;
-      narrate("You played " + request.cardID() + ".");
+      narrate("You played " + request.instanceId() + ".");
       finishPlayerCardAction();
       return;
     }
@@ -654,7 +672,7 @@ public class BattleController {
     if (!result.success()) {
       // No effects produced; the card stays in hand and the player keeps their turn.
       lastCardPlaySucceeded = false;
-      narrate("Couldn't play " + request.cardID() + ": " + result.failureReason());
+      narrate("Couldn't play " + request.instanceId() + ": " + result.failureReason());
       finishPlayerCardAction();
       return;
     }
@@ -666,10 +684,8 @@ public class BattleController {
   }
 
   /**
-   * Plays the submitted card: looks its config up in Team 6's library, checks it is in hand and
-   * affordable, resolves its effects through Team 5's {@link CardEffectResolver}, then commits the
-   * energy spend, moves the card to the discard pile and draws a replacement so the hand stays
-   * topped up.
+   * Validates the selected enemy, then delegates instance lookup, resolved cost/effects and discard
+   * to the shared CardPlayService. Draws a replacement only after successful play.
    *
    * @return the result, or {@code null} when no card system is wired in
    */
@@ -678,37 +694,44 @@ public class BattleController {
       return null;
     }
 
-    Optional<CardConfig> maybeCard = cardService.getCard(request.cardID());
-    if (maybeCard.isEmpty()) {
+    if (cardPlayService == null) {
       return CardPlayResult.failure(
-          "Unknown card: " + request.cardID(), request.cardID(), request.targetID(), battleDeck);
+          request.instanceId(),
+          null,
+          request.target(),
+          0,
+          CardPlayFailureReason.NOT_ENOUGH_ENERGY,
+          DeckSnapshot.from(battleDeck));
     }
-    CardConfig card = maybeCard.get();
-
-    if (!battleDeck.getHand().contains(card.id)) {
-      return CardPlayResult.failure("Card not in hand", card.id, request.targetID(), battleDeck);
+    Optional<ResolvedCard> selected = cardPlayService.resolveInHand(request.instanceId());
+    if (selected.isPresent()
+        && request.target().type() != TargetType.SELF
+        && livingEnemyTargets(request).isEmpty()) {
+      ResolvedCard card = selected.get();
+      return CardPlayResult.failure(
+          card.instanceId(),
+          card.cardId(),
+          request.target(),
+          card.cost(),
+          CardPlayFailureReason.INVALID_TARGET,
+          DeckSnapshot.from(battleDeck));
     }
-
-    EnergyComponent energy = playerEnergy();
-    if (energy != null && !energy.canAfford(card.cost)) {
-      return CardPlayResult.failure("Not enough energy", card.id, request.targetID(), battleDeck);
-    }
-
-    CardEffectResolution resolution = effectResolver.resolve(card, playerEffectState);
-
-    if (energy != null) {
-      energy.spendEnergy(card.cost);
-    }
-    battleDeck.playCard(card.id);
+    CardPlayResult result = cardPlayService.playCard(request);
+    if (!result.success()) return result;
+    // Preserve the existing draw-on-success battle rule, not on rejected attempts.
     battleDeck.drawOne();
-
     return CardPlayResult.success(
-        card.id,
-        request.targetID(),
-        resolution.enemyEffects(),
-        resolution.playerEffects(),
-        battleDeck,
-        card.cost);
+        result.instanceId(),
+        result.cardId(),
+        result.target(),
+        result.energyCost(),
+        result.effectResolution(),
+        DeckSnapshot.from(battleDeck));
+  }
+
+  /** Resolved values of an exact copy in hand, for UI event routing and previews. */
+  public Optional<ResolvedCard> resolveCardInHand(String instanceId) {
+    return cardPlayService == null ? Optional.empty() : cardPlayService.resolveInHand(instanceId);
   }
 
   /**
@@ -730,22 +753,16 @@ public class BattleController {
     eventHandler.trigger(HAND_CHANGED_EVENT, result.updatedHand());
   }
 
-  /**
-   * Chooses which enemies a card's enemy effects hit. Self-targeting cards hit nothing; everything
-   * else hits every living enemy, which covers both the single-enemy encounter and ALL_ENEMIES
-   * cards. Precise single-target selection can be layered on when encounters have several enemies.
-   */
+  /** Uses the entity ID emitted by the drop target, never the enemy's shared definition ID. */
   private List<Entity> livingEnemyTargets(CardPlayRequest request) {
-    if ("player".equalsIgnoreCase(request.targetID())) {
-      return List.of();
-    }
-    List<Entity> targets = new ArrayList<>();
-    for (Entity enemy : this.enemies) {
-      if (isEnemyAlive(enemy)) {
-        targets.add(enemy);
-      }
-    }
-    return targets;
+    if (request.target().type() == TargetType.SELF) return List.of();
+    return enemies.stream()
+        .filter(this::isEnemyAlive)
+        .filter(
+            enemy ->
+                request.target().type() == TargetType.ALL_ENEMIES
+                    || Integer.toString(enemy.getId()).equals(request.target().targetId()))
+        .toList();
   }
 
   private void applyEnemyEffects(List<Entity> targets, List<ResolvedCardEffect> effects) {
@@ -800,7 +817,12 @@ public class BattleController {
   }
 
   private String summarise(CardPlayRequest request, CardPlayResult result) {
-    StringBuilder summary = new StringBuilder("You played ").append(request.cardID());
+    StringBuilder summary =
+        new StringBuilder("You played ")
+            .append(result.cardId())
+            .append(" [")
+            .append(request.instanceId())
+            .append("]");
     for (ResolvedCardEffect effect : result.enemyEffects()) {
       summary
           .append(" - ")

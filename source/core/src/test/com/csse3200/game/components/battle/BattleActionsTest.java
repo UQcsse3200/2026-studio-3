@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardLibrary;
-import com.csse3200.game.cards.CardPlayRequest;
 import com.csse3200.game.cards.CardType;
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.TargetType;
@@ -16,6 +15,9 @@ import com.csse3200.game.cards.configs.EffectConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.effects.CardEffectResolver;
+import com.csse3200.game.cards.play.CardPlayRequest;
+import com.csse3200.game.cards.runtime.CardInstance;
+import com.csse3200.game.cards.runtime.CardResolver;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattleEvent;
@@ -27,6 +29,7 @@ import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +39,7 @@ class BattleActionsTest {
   private BattleController controller;
   private Entity player;
   private Entity entity;
+  private String enemyId;
 
   @BeforeEach
   void setUp() {
@@ -45,10 +49,38 @@ class BattleActionsTest {
         new Entity()
             .addComponent(new CombatStatsComponent(20, 1))
             .addComponent(new EnemyBehaviourComponent("test"));
-    controller = new BattleController(player, List.of(enemy));
+    player.addComponent(new EnergyComponent(3));
+    CardLibrary library = realLibrary();
+    BattleDeck deck =
+        new BattleDeck(
+            PlayerDeck.fromInstances(
+                library,
+                List.of(
+                    new CardInstance("strike-instance", "strike", 0),
+                    new CardInstance("defend-instance", "defend", 0),
+                    new CardInstance("bandage-instance", "bandage", 0))));
+    deck.drawCards(3);
+    controller =
+        new BattleController(
+            player, List.of(enemy), new CardEffectResolver(library), library, deck);
+    enemyId = Integer.toString(enemy.getId());
     GdxGame game = mock(GdxGame.class);
-    entity = new Entity().addComponent(new BattleActions(controller, game, realLibrary()));
+    entity = new Entity().addComponent(new BattleActions(controller, game));
     entity.create();
+  }
+
+  private static BattleController mockControllerWithCards() {
+    BattleController mockController = mock(BattleController.class);
+    for (String cardId : List.of("strike", "defend", "bandage")) {
+      when(mockController.resolveCardInHand(cardId + "-instance"))
+          .thenReturn(
+              Optional.of(
+                  new CardResolver()
+                      .resolve(
+                          realLibrary().getCard(cardId).orElseThrow(),
+                          new CardInstance(cardId + "-instance", cardId, 0))));
+    }
+    return mockController;
   }
 
   private static CardLibrary realLibrary() {
@@ -82,7 +114,7 @@ class BattleActionsTest {
     List<String> played = new ArrayList<>();
     entity.getEvents().addListener("cardPlayed", (String name, String target) -> played.add(name));
 
-    entity.getEvents().trigger("playCard", "strike", "bone_crawler");
+    entity.getEvents().trigger("playCard", "strike-instance", enemyId);
 
     // Card was accepted and, with no resolution service wired, resolved straight away.
     assertEquals(List.of("strike"), played);
@@ -95,60 +127,57 @@ class BattleActionsTest {
     entity.getEvents().addListener("phaseChange", (BattlePhase phase) -> phases.add(phase));
     advanceToPlayerTurn();
 
-    entity.getEvents().trigger("playCard", "strike", "bone_crawler");
+    entity.getEvents().trigger("playCard", "strike-instance", enemyId);
 
     assertTrue(phases.contains(BattlePhase.PLAYER_ATTACK));
   }
 
   @Test
   void shouldSubmitAttackCardWithAttackIntent() {
-    BattleController mockController = mock(BattleController.class);
+    BattleController mockController = mockControllerWithCards();
     GdxGame mockGame = mock(GdxGame.class);
     CardLibrary library = realLibrary();
-    Entity battleUI =
-        new Entity().addComponent(new BattleActions(mockController, mockGame, library));
+    Entity battleUI = new Entity().addComponent(new BattleActions(mockController, mockGame));
     battleUI.create();
 
-    battleUI.getEvents().trigger("playCard", "strike", "bone_crawler");
+    battleUI.getEvents().trigger("playCard", "strike-instance", enemyId);
 
     verify(mockController)
-        .submitCardPlayRequest(new CardPlayRequest("strike", "bone_crawler"), PlayerIntent.ATTACK);
+        .submitCardPlayRequest(
+            CardPlayRequest.singleEnemy("strike-instance", enemyId), PlayerIntent.ATTACK);
   }
 
   @Test
   void shouldSubmitBlockCardWithDefendIntent() {
-    BattleController mockController = mock(BattleController.class);
+    BattleController mockController = mockControllerWithCards();
     Entity battleUI =
-        new Entity()
-            .addComponent(new BattleActions(mockController, mock(GdxGame.class), realLibrary()));
+        new Entity().addComponent(new BattleActions(mockController, mock(GdxGame.class)));
     battleUI.create();
 
-    battleUI.getEvents().trigger("playCard", "defend", "player");
+    battleUI.getEvents().trigger("playCard", "defend-instance", "player");
 
     verify(mockController)
-        .submitCardPlayRequest(new CardPlayRequest("defend", "player"), PlayerIntent.DEFEND);
+        .submitCardPlayRequest(CardPlayRequest.self("defend-instance"), PlayerIntent.DEFEND);
   }
 
   @Test
   void shouldSubmitNonAttackCardWithOtherIntent() {
-    BattleController mockController = mock(BattleController.class);
+    BattleController mockController = mockControllerWithCards();
     Entity battleUI =
-        new Entity()
-            .addComponent(new BattleActions(mockController, mock(GdxGame.class), realLibrary()));
+        new Entity().addComponent(new BattleActions(mockController, mock(GdxGame.class)));
     battleUI.create();
 
-    battleUI.getEvents().trigger("playCard", "bandage", "player");
+    battleUI.getEvents().trigger("playCard", "bandage-instance", "player");
 
     verify(mockController)
-        .submitCardPlayRequest(new CardPlayRequest("bandage", "player"), PlayerIntent.OTHER);
+        .submitCardPlayRequest(CardPlayRequest.self("bandage-instance"), PlayerIntent.OTHER);
   }
 
   @Test
   void shouldNotSubmitUnknownCard() {
-    BattleController mockController = mock(BattleController.class);
+    BattleController mockController = mockControllerWithCards();
     Entity battleUI =
-        new Entity()
-            .addComponent(new BattleActions(mockController, mock(GdxGame.class), realLibrary()));
+        new Entity().addComponent(new BattleActions(mockController, mock(GdxGame.class)));
     battleUI.create();
 
     battleUI.getEvents().trigger("playCard", "missing", "bone_crawler");
@@ -158,11 +187,10 @@ class BattleActionsTest {
 
   @Test
   void shouldNotFireCardPlayedWhenControllerRejectsRequest() {
-    BattleController mockController = mock(BattleController.class);
+    BattleController mockController = mockControllerWithCards();
     when(mockController.submitCardPlayRequest(any(), any())).thenReturn(false);
     Entity battleUI =
-        new Entity()
-            .addComponent(new BattleActions(mockController, mock(GdxGame.class), realLibrary()));
+        new Entity().addComponent(new BattleActions(mockController, mock(GdxGame.class)));
     battleUI.create();
     List<String> playedEvents = new ArrayList<>();
     battleUI
@@ -171,17 +199,16 @@ class BattleActionsTest {
             "cardPlayed",
             (String cardName, String targetId) -> playedEvents.add(cardName + ":" + targetId));
 
-    battleUI.getEvents().trigger("playCard", "strike", "bone_crawler");
+    battleUI.getEvents().trigger("playCard", "strike-instance", enemyId);
 
     assertTrue(playedEvents.isEmpty());
   }
 
   @Test
   void shouldEndTurnWhenProductionEndTurnEventFires() {
-    BattleController mockController = mock(BattleController.class);
+    BattleController mockController = mockControllerWithCards();
     Entity battleUI =
-        new Entity()
-            .addComponent(new BattleActions(mockController, mock(GdxGame.class), realLibrary()));
+        new Entity().addComponent(new BattleActions(mockController, mock(GdxGame.class)));
     battleUI.create();
 
     battleUI.getEvents().trigger("endturn");
@@ -216,7 +243,7 @@ class BattleActionsTest {
         new BattleController(
             testPlayer, List.of(enemy), new CardEffectResolver(library), library, deck);
     Entity battleUI =
-        new Entity().addComponent(new BattleActions(realController, mock(GdxGame.class), library));
+        new Entity().addComponent(new BattleActions(realController, mock(GdxGame.class)));
     battleUI.create();
     List<String> playedEvents = new ArrayList<>();
     battleUI
@@ -226,11 +253,15 @@ class BattleActionsTest {
             (String cardName, String targetId) -> playedEvents.add(cardName + ":" + targetId));
     realController.start();
 
-    battleUI.getEvents().trigger("playCard", "strike", "enemy");
+    battleUI
+        .getEvents()
+        .trigger("playCard", deck.getHand().get(0).instanceId(), Integer.toString(enemy.getId()));
 
     assertTrue(playedEvents.isEmpty());
     assertEquals(3, testPlayer.getComponent(EnergyComponent.class).getCurrentEnergy());
-    assertEquals(List.of("strike"), deck.getHand());
+    assertEquals(
+        List.of("strike"),
+        deck.getHand().stream().map(com.csse3200.game.cards.runtime.CardInstance::cardId).toList());
   }
 
   @Test
@@ -247,7 +278,7 @@ class BattleActionsTest {
 
   @Test
   void shouldIgnoreSelectionWhenCurrentPhaseCannotHandleIt() {
-    entity.getEvents().trigger("playCard", "strike", "bone_crawler");
+    entity.getEvents().trigger("playCard", "strike-instance", enemyId);
 
     assertEquals(BattlePhase.SETUP, controller.getCurrentPhase());
   }

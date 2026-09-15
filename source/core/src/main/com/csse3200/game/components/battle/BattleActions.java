@@ -2,13 +2,12 @@ package com.csse3200.game.components.battle;
 
 import com.badlogic.gdx.Gdx;
 import com.csse3200.game.GdxGame;
-import com.csse3200.game.cards.CardLibrary;
-import com.csse3200.game.cards.CardPlayRequest;
 import com.csse3200.game.cards.CardType;
 import com.csse3200.game.cards.EffectType;
-import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
+import com.csse3200.game.cards.play.CardPlayRequest;
+import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattleEvent;
@@ -43,12 +42,10 @@ public class BattleActions extends Component {
 
   private final BattleController controller;
   private final GdxGame game;
-  private final CardLibrary library;
 
-  public BattleActions(BattleController controller, GdxGame game, CardLibrary library) {
+  public BattleActions(BattleController controller, GdxGame game) {
     this.controller = controller;
     this.game = game;
-    this.library = library;
   }
 
   @Override
@@ -112,25 +109,15 @@ public class BattleActions extends Component {
     System.out.println("Card played: " + cardName + " on target: " + targetID);
   }
 
-  /**
-   * A card was played (self-target on click, or dropped on a target) — see Clickable/DragNDrop and
-   * EnemyDropTargetComponent for how "playCard" ends up firing with (cardId, targetId). Translates
-   * the raw cardId into its display name and re-fires as "cardPlayed" for UI feedback.
-   */
-  private void onCardPlayed(String cardID, String targetID) {
-    var optionalCard = library.getCard(cardID);
-    if (optionalCard.isEmpty()) {
-      return;
-    }
-    if (playerIsBlockedFromPlayingCards()) {
-      return;
-    }
-    CardConfig cardConfig = optionalCard.get();
-    CardPlayRequest request = new CardPlayRequest(cardID, targetID);
-    PlayerIntent intent = classifyCard(cardConfig);
-
-    if (controller.submitCardPlayRequest(request, intent)) {
-      entity.getEvents().trigger("cardPlayed", cardConfig.name, targetID);
+  /** Routes a playCard(instanceId, targetId) event using the selected copy's resolved values. */
+  private void onCardPlayed(String instanceId, String targetId) {
+    var selected = controller.resolveCardInHand(instanceId);
+    if (selected.isEmpty() || playerIsBlockedFromPlayingCards()) return;
+    ResolvedCard card = selected.get();
+    if (targetId == null || targetId.isBlank()) return;
+    CardPlayRequest request = CardPlayRequest.fromUi(instanceId, card.target(), targetId);
+    if (controller.submitCardPlayRequest(request, classifyCard(card))) {
+      entity.getEvents().trigger("cardPlayed", card.name(), targetId);
     }
   }
 
@@ -164,12 +151,12 @@ public class BattleActions extends Component {
     if (controller.canHandle(BattleEvent.PLAYER_END_REQUESTED)) {}
   }
 
-  private PlayerIntent classifyCard(CardConfig card) {
-    if (card.type == CardType.ATTACK) {
+  private PlayerIntent classifyCard(ResolvedCard card) {
+    if (card.type() == CardType.ATTACK) {
       return PlayerIntent.ATTACK;
     }
 
-    for (EffectConfig effect : card.effects) {
+    for (EffectConfig effect : card.effects()) {
       if (effect.type == EffectType.BLOCK) {
         return PlayerIntent.DEFEND;
       }
