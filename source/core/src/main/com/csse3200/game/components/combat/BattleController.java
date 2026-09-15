@@ -821,6 +821,7 @@ public class BattleController {
             energy.restoreEnergy(effect.value());
           }
         }
+        case CLEANSE -> stats.clearNegativeStatusEffects();
         default -> {
           // STRENGTH is already folded into the resolver's running player state.
         }

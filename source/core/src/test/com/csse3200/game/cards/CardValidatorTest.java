@@ -71,6 +71,33 @@ class CardValidatorTest {
   }
 
   @Test
+  void shouldAcceptCleanseOnSelf() {
+    CardConfig card = validCard();
+    card.type = CardType.SKILL;
+    card.target = TargetType.SELF;
+    card.effects = new EffectConfig[] {new EffectConfig(EffectType.CLEANSE, 1)};
+    assertTrue(CardValidator.isValid(card));
+  }
+
+  @Test
+  void shouldRejectCleanseForEnemyTargets() {
+    CardConfig card = validCard();
+    card.type = CardType.SKILL;
+    card.effects = new EffectConfig[] {new EffectConfig(EffectType.CLEANSE, 1)};
+
+    assertTrue(
+        CardValidator.validate(card)
+            .contains(
+                "effects[0].type CLEANSE is not compatible with inherited target SINGLE_ENEMY"));
+
+    card.target = TargetType.ALL_ENEMIES;
+    assertTrue(
+        CardValidator.validate(card)
+            .contains(
+                "effects[0].type CLEANSE is not compatible with inherited target ALL_ENEMIES"));
+  }
+
+  @Test
   void shouldAcceptStrengthWithoutDuration() {
     CardConfig card = validCard();
     card.type = CardType.POWER;
