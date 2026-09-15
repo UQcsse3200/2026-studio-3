@@ -92,7 +92,7 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public final class </span><span class="element-name type-name-label">ChanceEncounterFactory</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Creates the initial Sprint 1 Chance Encounter definitions.</div>
+<div class="block">Provides the initial Chance Encounter definitions loaded from configuration.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -111,6 +111,11 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#createInitialEncounters()" class="member-name-link">createInitialEncounters</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Creates the initial Chance Encounters in deterministic order.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="ChanceEncounter.html" title="class in com.csse3200.game.chance">ChanceEncounter</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#createInitialEncounters(com.csse3200.game.encounters.integration.CardCatalogGateway)" class="member-name-link">createInitialEncounters</a><wbr>(<a href="../encounters/integration/CardCatalogGateway.html" title="interface in com.csse3200.game.encounters.integration">CardCatalogGateway</a>&nbsp;cardCatalog)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Creates the initial encounters while validating configured rewards against the card catalog.</div>
 </div>
 </div>
 </div>
@@ -133,8 +138,24 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="createInitialEncounters()">
 <h3>createInitialEncounters</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="ChanceEncounter.html" title="class in com.csse3200.game.chance">ChanceEncounter</a>&gt;</span>&nbsp;<span class="element-name">createInitialEncounters</span>()</div>
-<div class="block">Creates the initial Chance Encounters in deterministic order.</div>
+<div class="block">Creates the initial Chance Encounters in deterministic order.
+
+ <p>This catalog-less entry point validates reward-ID syntax but does not verify that a reward
+ card is registered.</div>
 <dl class="notes">
+<dt>Returns:</dt>
+<dd>read-only structurally validated initial encounter definitions</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="createInitialEncounters(com.csse3200.game.encounters.integration.CardCatalogGateway)">
+<h3>createInitialEncounters</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="ChanceEncounter.html" title="class in com.csse3200.game.chance">ChanceEncounter</a>&gt;</span>&nbsp;<span class="element-name">createInitialEncounters</span><wbr><span class="parameters">(<a href="../encounters/integration/CardCatalogGateway.html" title="interface in com.csse3200.game.encounters.integration">CardCatalogGateway</a>&nbsp;cardCatalog)</span></div>
+<div class="block">Creates the initial encounters while validating configured rewards against the card catalog.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>cardCatalog</code> - authoritative card lookup boundary</dd>
 <dt>Returns:</dt>
 <dd>read-only initial encounter definitions</dd>
 </dl>

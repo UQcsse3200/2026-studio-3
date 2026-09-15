@@ -135,6 +135,14 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Applying the outcome would overflow an integer player statistic.</div>
 </div>
+<div class="col-first odd-row-color"><code><a href="#CARD_ADD_FAILED" class="member-name-link">CARD_ADD_FAILED</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">The persistent deck rejected the reward card.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#CARD_NOT_FOUND" class="member-name-link">CARD_NOT_FOUND</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">The reward card identifier is not registered in the card catalog.</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#ENCOUNTER_CLOSED" class="member-name-link">ENCOUNTER_CLOSED</a></code></div>
 <div class="col-last odd-row-color">
 <div class="block">The session has already completed or been cancelled.</div>
@@ -143,20 +151,24 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Applying the outcome would make currency negative.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#INVALID_CHOICE" class="member-name-link">INVALID_CHOICE</a></code></div>
+<div class="col-first odd-row-color"><code><a href="#INVALID_CARD_REWARD" class="member-name-link">INVALID_CARD_REWARD</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">The configured reward card identifier is blank or otherwise invalid.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#INVALID_CHOICE" class="member-name-link">INVALID_CHOICE</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">No choice with the supplied identifier exists.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#INVALID_OUTCOME" class="member-name-link">INVALID_OUTCOME</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#INVALID_OUTCOME" class="member-name-link">INVALID_OUTCOME</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">The selected choice did not contain an outcome.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#PLAYER_UPDATE_FAILED" class="member-name-link">PLAYER_UPDATE_FAILED</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#PLAYER_UPDATE_FAILED" class="member-name-link">PLAYER_UPDATE_FAILED</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">A Player update failed and all original values were restored.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#ROLLBACK_FAILED" class="member-name-link">ROLLBACK_FAILED</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#ROLLBACK_FAILED" class="member-name-link">ROLLBACK_FAILED</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">A Player update failed and at least one original value could not be restored.</div>
 </div>
 </div>
@@ -251,6 +263,27 @@ the order they are declared.</div>
 <h3>ARITHMETIC_OVERFLOW</h3>
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></span>&nbsp;<span class="element-name">ARITHMETIC_OVERFLOW</span></div>
 <div class="block">Applying the outcome would overflow an integer player statistic.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="INVALID_CARD_REWARD">
+<h3>INVALID_CARD_REWARD</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></span>&nbsp;<span class="element-name">INVALID_CARD_REWARD</span></div>
+<div class="block">The configured reward card identifier is blank or otherwise invalid.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="CARD_NOT_FOUND">
+<h3>CARD_NOT_FOUND</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></span>&nbsp;<span class="element-name">CARD_NOT_FOUND</span></div>
+<div class="block">The reward card identifier is not registered in the card catalog.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="CARD_ADD_FAILED">
+<h3>CARD_ADD_FAILED</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></span>&nbsp;<span class="element-name">CARD_ADD_FAILED</span></div>
+<div class="block">The persistent deck rejected the reward card.</div>
 </section>
 </li>
 <li>

@@ -98,18 +98,10 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">EncounterGameArea</span>
 <span class="extends-implements">extends <a href="GameArea.html" title="class in com.csse3200.game.areas">GameArea</a></span></div>
-<div class="block">Non-combat encounter area (Team 2): a forest scene that runs a Chance encounter and then, on a
- successful outcome, opens the Shop.
+<div class="block">Non-combat encounter area used to host Team 2 Chance and Shop encounter content.
 
- <p>This is Team 2's <code>ForestGameArea</code> from the <code>Feature-2</code> branch, restored as its own
- area after the battle team's <code>ForestGameArea</code> replaced it on <code>main</code>. It still needs a
- host screen that has registered the entity, render, resource and physics services (as <code>
- MainGameScreen</code> does) before <a href="#create()"><code>create()</code></a> is called.
-
- <p>The one deviation from the original: the throwaway demo <code>MapGraph</code> it built is gone (the
- current <code>MapGraph</code> constructor forces full path generation and cannot hold three hand-made
- nodes). Nothing read that graph's state; the Chance -&gt; Shop hand-off it drove now lives directly
- in the encounter-flow callback below.</div>
+ <p>The owning screen supplies the active map node and completion callback. EVENT and SHOP
+ encounters are started independently and do not use the old Sprint 1 forest demo flow.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -132,8 +124,22 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory)" class="member-name-link">EncounterGameArea</a><wbr>(<a href="terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory)</code></div>
 <div class="col-last even-row-color">
-<div class="block">Initialise this EncounterGameArea to use the provided TerrainFactory.</div>
+<div class="block">Creates the standalone Shop preview used by the legacy MainGameScreen shortcut.</div>
 </div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback)" class="member-name-link">EncounterGameArea</a><wbr>(<a href="terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
+ <a href="../maps/RoomType.html" title="enum class in com.csse3200.game.maps">RoomType</a>&nbsp;roomType,
+ <a href="../maps/EncounterCallback.html" title="interface in com.csse3200.game.maps">EncounterCallback</a>&nbsp;completionCallback)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Creates an encounter area for a real map node.</div>
+</div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback,com.csse3200.game.maps.PlayerRunState,com.csse3200.game.cards.deck.PlayerDeck)" class="member-name-link">EncounterGameArea</a><wbr>(<a href="terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
+ <a href="../maps/RoomType.html" title="enum class in com.csse3200.game.maps">RoomType</a>&nbsp;roomType,
+ <a href="../maps/EncounterCallback.html" title="interface in com.csse3200.game.maps">EncounterCallback</a>&nbsp;completionCallback,
+ <a href="../maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a>&nbsp;sharedPlayerState,
+ <a href="../cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a>&nbsp;sharedPlayerDeck)</code></div>
+<div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -151,7 +157,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#create()" class="member-name-link">create</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Create the game area, including terrain, static entities (trees), dynamic entities (player)</div>
+<div class="block">Creates the logical player state and launches the selected encounter.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#dispose()" class="member-name-link">dispose</a>()</code></div>
@@ -185,13 +191,39 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="&lt;init&gt;(com.csse3200.game.areas.terrain.TerrainFactory)">
 <h3>EncounterGameArea</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">EncounterGameArea</span><wbr><span class="parameters">(<a href="terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory)</span></div>
-<div class="block">Initialise this EncounterGameArea to use the provided TerrainFactory.</div>
+<div class="block">Creates the standalone Shop preview used by the legacy MainGameScreen shortcut.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>terrainFactory</code> - TerrainFactory used to create the terrain for the GameArea.</dd>
-<dt>Requires:</dt>
-<dd>terrainFactory != null</dd>
+<dd><code>terrainFactory</code> - retained for compatibility with existing screen construction</dd>
 </dl>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback)">
+<h3>EncounterGameArea</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">EncounterGameArea</span><wbr><span class="parameters">(<a href="terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
+ <a href="../maps/RoomType.html" title="enum class in com.csse3200.game.maps">RoomType</a>&nbsp;roomType,
+ <a href="../maps/EncounterCallback.html" title="interface in com.csse3200.game.maps">EncounterCallback</a>&nbsp;completionCallback)</span></div>
+<div class="block">Creates an encounter area for a real map node.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>terrainFactory</code> - terrain factory supplied by the hosting screen</dd>
+<dd><code>nodeId</code> - active map node ID</dd>
+<dd><code>roomType</code> - active node room type</dd>
+<dd><code>completionCallback</code> - callback used to report encounter completion</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback,com.csse3200.game.maps.PlayerRunState,com.csse3200.game.cards.deck.PlayerDeck)">
+<h3>EncounterGameArea</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">EncounterGameArea</span><wbr><span class="parameters">(<a href="terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
+ <a href="../maps/RoomType.html" title="enum class in com.csse3200.game.maps">RoomType</a>&nbsp;roomType,
+ <a href="../maps/EncounterCallback.html" title="interface in com.csse3200.game.maps">EncounterCallback</a>&nbsp;completionCallback,
+ <a href="../maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a>&nbsp;sharedPlayerState,
+ <a href="../cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a>&nbsp;sharedPlayerDeck)</span></div>
 </section>
 </li>
 </ul>
@@ -206,7 +238,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="create()">
 <h3>create</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">create</span>()</div>
-<div class="block">Create the game area, including terrain, static entities (trees), dynamic entities (player)</div>
+<div class="block">Creates the logical player state and launches the selected encounter.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="GameArea.html#create()">create</a></code>&nbsp;in class&nbsp;<code><a href="GameArea.html" title="class in com.csse3200.game.areas">GameArea</a></code></dd>

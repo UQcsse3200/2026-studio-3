@@ -110,6 +110,13 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Creates a Chance Encounter definition.</div>
 </div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(java.lang.String,java.lang.String,java.util.List,int)" class="member-name-link">ChanceEncounter</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;id,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;description,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="ChanceChoice.html" title="class in com.csse3200.game.chance">ChanceChoice</a>&gt;&nbsp;choices,
+ int&nbsp;weight)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a weighted Chance Encounter definition.</div>
+</div>
 </div>
 </section>
 </li>
@@ -139,9 +146,14 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Gets the stable encounter definition identifier.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ChanceOutcome.html" title="class in com.csse3200.game.chance">ChanceOutcome</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolveChoice(java.lang.String)" class="member-name-link">resolveChoice</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;choiceId)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getWeight()" class="member-name-link">getWeight</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Gets the positive relative selection weight.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ChanceOutcome.html" title="class in com.csse3200.game.chance">ChanceOutcome</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolveChoice(java.lang.String)" class="member-name-link">resolveChoice</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;choiceId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Resolves the choice with the given stable identifier.</div>
 </div>
 </div>
@@ -176,6 +188,25 @@ loadScripts(document, 'script');</script>
 <dd><code>id</code> - stable encounter definition identifier</dd>
 <dd><code>description</code> - player-facing encounter description</dd>
 <dd><code>choices</code> - ordered choices available for this encounter</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(java.lang.String,java.lang.String,java.util.List,int)">
+<h3>ChanceEncounter</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ChanceEncounter</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;id,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;description,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="ChanceChoice.html" title="class in com.csse3200.game.chance">ChanceChoice</a>&gt;&nbsp;choices,
+ int&nbsp;weight)</span></div>
+<div class="block">Creates a weighted Chance Encounter definition.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>id</code> - stable encounter definition identifier</dd>
+<dd><code>description</code> - player-facing encounter description</dd>
+<dd><code>choices</code> - ordered choices available for this encounter</dd>
+<dd><code>weight</code> - positive relative selection weight</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if <code>weight</code> is not positive</dd>
 </dl>
 </section>
 </li>
@@ -217,6 +248,17 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>encounter choices</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getWeight()">
+<h3>getWeight</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getWeight</span>()</div>
+<div class="block">Gets the positive relative selection weight.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>encounter selection weight</dd>
 </dl>
 </section>
 </li>

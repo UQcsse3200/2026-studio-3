@@ -111,15 +111,25 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>int</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getCurrency()" class="member-name-link">getCurrency</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#applyDirectHealthChange(int)" class="member-name-link">applyDirectHealthChange</a><wbr>(int&nbsp;amount)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Returns the player's current spendable currency.</div>
+<div class="block">Applies a signed direct health delta using the Player system's non-combat health semantics.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>int</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getHealth()" class="member-name-link">getHealth</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getCurrency()" class="member-name-link">getCurrency</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Returns the player's current spendable currency.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getHealth()" class="member-name-link">getHealth</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns the player's current health.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMaxHealth()" class="member-name-link">getMaxHealth</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Returns the player's maximum health.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setCurrency(int)" class="member-name-link">setCurrency</a><wbr>(int&nbsp;currency)</code></div>
@@ -157,6 +167,17 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="getMaxHealth()">
+<h3>getMaxHealth</h3>
+<div class="member-signature"><span class="return-type">int</span>&nbsp;<span class="element-name">getMaxHealth</span>()</div>
+<div class="block">Returns the player's maximum health.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>the player's maximum health</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="setHealth(int)">
 <h3>setHealth</h3>
 <div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">setHealth</span><wbr><span class="parameters">(int&nbsp;health)</span></div>
@@ -164,6 +185,17 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>health</code> - requested health value</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="applyDirectHealthChange(int)">
+<h3>applyDirectHealthChange</h3>
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">applyDirectHealthChange</span><wbr><span class="parameters">(int&nbsp;amount)</span></div>
+<div class="block">Applies a signed direct health delta using the Player system's non-combat health semantics.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>amount</code> - positive to heal, negative to lose health, or zero for no change</dd>
 </dl>
 </section>
 </li>

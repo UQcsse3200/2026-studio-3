@@ -108,8 +108,8 @@ loadScripts(document, 'script');</script>
  states. Purchase validation and inventory changes are handled by the underlying Shop Encounter
  and Shop Service rather than this display component.
 
- <p>Placeholder card artwork is displayed until visual assets are provided by the Cards/Library
- system.</div>
+ <p>Card artwork is resolved through the Cards/Library system. A placeholder is retained when a
+ card or its texture is unavailable.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -156,6 +156,11 @@ loadScripts(document, 'script');</script>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.shop.ShopEncounter)" class="member-name-link">ShopDisplay</a><wbr>(<a href="../../shop/ShopEncounter.html" title="class in com.csse3200.game.shop">ShopEncounter</a>&nbsp;shopEncounter)</code></div>
 <div class="col-last even-row-color">
 <div class="block">Creates a display for an encounter already connected through the integration gateways.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.shop.ShopEncounter,com.csse3200.game.cards.CardService)" class="member-name-link">ShopDisplay</a><wbr>(<a href="../../shop/ShopEncounter.html" title="class in com.csse3200.game.shop">ShopEncounter</a>&nbsp;shopEncounter,
+ <a href="../../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Creates an integrated Shop display with artwork supplied by the shared Card Service.</div>
 </div>
 </div>
 </section>
@@ -283,6 +288,19 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>shopEncounter</code> - integrated shop session</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.shop.ShopEncounter,com.csse3200.game.cards.CardService)">
+<h3>ShopDisplay</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ShopDisplay</span><wbr><span class="parameters">(<a href="../../shop/ShopEncounter.html" title="class in com.csse3200.game.shop">ShopEncounter</a>&nbsp;shopEncounter,
+ <a href="../../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService)</span></div>
+<div class="block">Creates an integrated Shop display with artwork supplied by the shared Card Service.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>shopEncounter</code> - integrated shop session</dd>
+<dd><code>cardService</code> - read-only source of card definitions and texture paths</dd>
 </dl>
 </section>
 </li>

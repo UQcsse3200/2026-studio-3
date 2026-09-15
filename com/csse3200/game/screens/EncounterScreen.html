@@ -98,12 +98,11 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">EncounterScreen</span>
 <span class="extends-implements">extends com.badlogic.gdx.ScreenAdapter</span></div>
-<div class="block">Stand-in encounter that stands in for combat (Team 3) and event/shop (Team 2) until those can be
- entered from a map node. Lets the whole map to encounter to map loop be played and tested in the
- meantime.
+<div class="block">Hosts Team 2 non-battle encounters entered from the run map.
 
- <p>Screens aren't passed any arguments, so which node this belongs to is read from the run state.
- Finishing reports back through onEncounterComplete and returns to the same map.</div>
+ <p>The active map node is stored in <a href="../maps/RunState.html" title="class in com.csse3200.game.maps"><code>RunState</code></a>. EVENT nodes launch the Chance encounter
+ flow, while SHOP nodes launch the Shop encounter flow. Completion is reported back to the same
+ RunState before returning to the map.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">

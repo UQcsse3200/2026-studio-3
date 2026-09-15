@@ -128,6 +128,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/encounters/integration/InventoryDeckAdapter.html#addCard(java.lang.String)" class="member-name-link">addCard(String)</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/InventoryDeckAdapter.html" title="class in com.csse3200.game.encounters.integration">InventoryDeckAdapter</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/encounters/integration/PlayerDeckAdapter.html#addCard(java.lang.String)" class="member-name-link">addCard(String)</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/PlayerDeckAdapter.html" title="class in com.csse3200.game.encounters.integration">PlayerDeckAdapter</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/player/InventoryComponent.html#addCard(java.lang.String,int)" class="member-name-link">addCard(String, int)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/InventoryComponent.html" title="class in com.csse3200.game.components.player">InventoryComponent</a></dt>
 <dd>
 <div class="block">Adds a quantity of a card to the inventory.</div>
@@ -267,12 +269,18 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/encounters/integration/ChanceOutcomeApplier.html#apply(com.csse3200.game.chance.ChanceOutcome)" class="member-name-link">apply(ChanceOutcome)</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceOutcomeApplier.html" title="class in com.csse3200.game.encounters.integration">ChanceOutcomeApplier</a></dt>
 <dd>
-<div class="block">Applies both health and currency changes as one logical operation.</div>
+<div class="block">Applies card, currency, and health changes as one logical operation.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/CombatStatsComponent.html#applyDirectHealthChange(int)" class="member-name-link">applyDirectHealthChange(int)</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/CombatStatsComponent.html" title="class in com.csse3200.game.components">CombatStatsComponent</a></dt>
 <dd>
 <div class="block">Applies a direct health change that bypasses armor and block, intended for non-combat sources
  such as Chance Encounters.</div>
+</dd>
+<dt><a href="com/csse3200/game/encounters/integration/ComponentPlayerStateAdapter.html#applyDirectHealthChange(int)" class="member-name-link">applyDirectHealthChange(int)</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ComponentPlayerStateAdapter.html" title="class in com.csse3200.game.encounters.integration">ComponentPlayerStateAdapter</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/encounters/integration/PlayerStateGateway.html#applyDirectHealthChange(int)" class="member-name-link">applyDirectHealthChange(int)</a> - Method in interface com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/PlayerStateGateway.html" title="interface in com.csse3200.game.encounters.integration">PlayerStateGateway</a></dt>
+<dd>
+<div class="block">Applies a signed direct health delta using the Player system's non-combat health semantics.</div>
 </dd>
 <dt><a href="com/csse3200/game/cards/play/integration/EnemyEffectConsumer.html#applyEnemyEffects(com.csse3200.game.cards.play.CardPlayTarget,java.util.List)" class="member-name-link">applyEnemyEffects(CardPlayTarget, List&lt;ResolvedCardEffect&gt;)</a> - Method in interface com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/EnemyEffectConsumer.html" title="interface in com.csse3200.game.cards.play.integration">EnemyEffectConsumer</a></dt>
 <dd>
@@ -297,6 +305,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/CombatStatsComponent.html#applyStatusEffect(java.lang.String,int,int)" class="member-name-link">applyStatusEffect(String, int, int)</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/CombatStatsComponent.html" title="class in com.csse3200.game.components">CombatStatsComponent</a></dt>
 <dd>
 <div class="block">Convenience overload of applyStatusEffect that constructs the StatusEffect internally.</div>
+</dd>
+<dt><a href="com/csse3200/game/maps/PlayerRunState.html#applyTo(com.csse3200.game.entities.Entity)" class="member-name-link">applyTo(Entity)</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></dt>
+<dd>
+<div class="block">Applies the durable values to the player entity created for a gameplay screen.</div>
 </dd>
 <dt><a href="com/csse3200/game/areas/GameArea.html#areaEntities" class="member-name-link">areaEntities</a> - Variable in class com.csse3200.game.areas.<a href="com/csse3200/game/areas/GameArea.html" title="class in com.csse3200.game.areas">GameArea</a></dt>
 <dd>&nbsp;</dd>
@@ -508,6 +520,12 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Checks whether a card may be added to this player deck.</div>
 </dd>
+<dt><a href="com/csse3200/game/encounters/integration/DeckGateway.html#canAddCard(java.lang.String)" class="member-name-link">canAddCard(String)</a> - Method in interface com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/DeckGateway.html" title="interface in com.csse3200.game.encounters.integration">DeckGateway</a></dt>
+<dd>
+<div class="block">Checks whether the persistent deck currently accepts a card.</div>
+</dd>
+<dt><a href="com/csse3200/game/encounters/integration/PlayerDeckAdapter.html#canAddCard(java.lang.String)" class="member-name-link">canAddCard(String)</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/PlayerDeckAdapter.html" title="class in com.csse3200.game.encounters.integration">PlayerDeckAdapter</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/player/EnergyComponent.html#canAfford(int)" class="member-name-link">canAfford(int)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/EnergyComponent.html" title="class in com.csse3200.game.components.player">EnergyComponent</a></dt>
 <dd>
 <div class="block">Checks whether the player currently has enough energy to cover the given cost.</div>
@@ -548,6 +566,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/save/SaveError.html#CAPTURE_FAILED" class="member-name-link">CAPTURE_FAILED</a> - Enum constant in enum class com.csse3200.game.save.<a href="com/csse3200/game/save/SaveError.html" title="enum class in com.csse3200.game.save">SaveError</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/maps/PlayerRunState.html#captureFrom(com.csse3200.game.entities.Entity)" class="member-name-link">captureFrom(Entity)</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></dt>
+<dd>
+<div class="block">Captures the latest values before a gameplay screen disposes its player entity.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/Card.html" class="type-name-link" title="class in com.csse3200.game.cards">Card</a> - Record Class in <a href="com/csse3200/game/cards/package-summary.html">com.csse3200.game.cards</a></dt>
 <dd>
 <div class="block">Immutable definition of a single card: what it's called, what event it fires when played (and
@@ -557,9 +579,17 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Creates an instance of a <code>Card</code> record class.</div>
 </dd>
+<dt><a href="com/csse3200/game/encounters/integration/ChanceResolution.Status.html#CARD_ADD_FAILED" class="member-name-link">CARD_ADD_FAILED</a> - Enum constant in enum class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></dt>
+<dd>
+<div class="block">The persistent deck rejected the reward card.</div>
+</dd>
 <dt><a href="com/csse3200/game/encounters/integration/ShopTransactionStatus.html#CARD_ADD_FAILED" class="member-name-link">CARD_ADD_FAILED</a> - Enum constant in enum class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ShopTransactionStatus.html" title="enum class in com.csse3200.game.encounters.integration">ShopTransactionStatus</a></dt>
 <dd>
 <div class="block">Deck rejected the new card.</div>
+</dd>
+<dt><a href="com/csse3200/game/encounters/integration/ChanceResolution.Status.html#CARD_NOT_FOUND" class="member-name-link">CARD_NOT_FOUND</a> - Enum constant in enum class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></dt>
+<dd>
+<div class="block">The reward card identifier is not registered in the card catalog.</div>
 </dd>
 <dt><a href="com/csse3200/game/encounters/integration/ShopTransactionStatus.html#CARD_NOT_FOUND" class="member-name-link">CARD_NOT_FOUND</a> - Enum constant in enum class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ShopTransactionStatus.html" title="enum class in com.csse3200.game.encounters.integration">ShopTransactionStatus</a></dt>
 <dd>
@@ -799,9 +829,21 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/cards/runtime/CardResolver.html#%3Cinit%3E()" class="member-name-link">CardResolver()</a> - Constructor for class com.csse3200.game.cards.runtime.<a href="com/csse3200/game/cards/runtime/CardResolver.html" title="class in com.csse3200.game.cards.runtime">CardResolver</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceOutcomeConfig.html#cardRewardId" class="member-name-link">cardRewardId</a> - Variable in class com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceOutcomeConfig.html" title="class in com.csse3200.game.chance.configs">ChanceOutcomeConfig</a></dt>
+<dd>
+<div class="block">Optional stable Card Service identifier rewarded by this outcome.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/CardService.html" class="type-name-link" title="interface in com.csse3200.game.cards">CardService</a> - Interface in <a href="com/csse3200/game/cards/package-summary.html">com.csse3200.game.cards</a></dt>
 <dd>
 <div class="block">Public retrieval API for card definitions.</div>
+</dd>
+<dt><a href="com/csse3200/game/encounters/integration/CardServiceCatalogAdapter.html" class="type-name-link" title="class in com.csse3200.game.encounters.integration">CardServiceCatalogAdapter</a> - Class in <a href="com/csse3200/game/encounters/integration/package-summary.html">com.csse3200.game.encounters.integration</a></dt>
+<dd>
+<div class="block">Connects Team 2 shop validation to Team 6's production card service.</div>
+</dd>
+<dt><a href="com/csse3200/game/encounters/integration/CardServiceCatalogAdapter.html#%3Cinit%3E(com.csse3200.game.cards.CardService)" class="member-name-link">CardServiceCatalogAdapter(CardService)</a> - Constructor for class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/CardServiceCatalogAdapter.html" title="class in com.csse3200.game.encounters.integration">CardServiceCatalogAdapter</a></dt>
+<dd>
+<div class="block">Creates a card-catalog boundary backed by Team 6's shared service.</div>
 </dd>
 <dt><a href="com/csse3200/game/cards/CardType.html" class="type-name-link" title="enum class in com.csse3200.game.cards">CardType</a> - Enum Class in <a href="com/csse3200/game/cards/package-summary.html">com.csse3200.game.cards</a></dt>
 <dd>
@@ -835,6 +877,22 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Creates a Chance Encounter choice.</div>
 </dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceChoiceConfig.html" class="type-name-link" title="class in com.csse3200.game.chance.configs">ChanceChoiceConfig</a> - Class in <a href="com/csse3200/game/chance/configs/package-summary.html">com.csse3200.game.chance.configs</a></dt>
+<dd>
+<div class="block">Configuration data for one selectable Chance Encounter choice.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceChoiceConfig.html#%3Cinit%3E()" class="member-name-link">ChanceChoiceConfig()</a> - Constructor for class com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceChoiceConfig.html" title="class in com.csse3200.game.chance.configs">ChanceChoiceConfig</a></dt>
+<dd>
+<div class="block">Required by the JSON deserialiser.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceConfig.html" class="type-name-link" title="class in com.csse3200.game.chance.configs">ChanceConfig</a> - Class in <a href="com/csse3200/game/chance/configs/package-summary.html">com.csse3200.game.chance.configs</a></dt>
+<dd>
+<div class="block">Root configuration object for Chance Encounter definitions.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceConfig.html#%3Cinit%3E()" class="member-name-link">ChanceConfig()</a> - Constructor for class com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceConfig.html" title="class in com.csse3200.game.chance.configs">ChanceConfig</a></dt>
+<dd>
+<div class="block">Required by the JSON deserialiser.</div>
+</dd>
 <dt><a href="com/csse3200/game/chance/ChanceEncounter.html" class="type-name-link" title="class in com.csse3200.game.chance">ChanceEncounter</a> - Class in <a href="com/csse3200/game/chance/package-summary.html">com.csse3200.game.chance</a></dt>
 <dd>
 <div class="block">Represents one Player-independent Chance Encounter definition.</div>
@@ -842,6 +900,22 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/chance/ChanceEncounter.html#%3Cinit%3E(java.lang.String,java.lang.String,java.util.List)" class="member-name-link">ChanceEncounter(String, String, List&lt;ChanceChoice&gt;)</a> - Constructor for class com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceEncounter.html" title="class in com.csse3200.game.chance">ChanceEncounter</a></dt>
 <dd>
 <div class="block">Creates a Chance Encounter definition.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/ChanceEncounter.html#%3Cinit%3E(java.lang.String,java.lang.String,java.util.List,int)" class="member-name-link">ChanceEncounter(String, String, List&lt;ChanceChoice&gt;, int)</a> - Constructor for class com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceEncounter.html" title="class in com.csse3200.game.chance">ChanceEncounter</a></dt>
+<dd>
+<div class="block">Creates a weighted Chance Encounter definition.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceEncounterConfig.html" class="type-name-link" title="class in com.csse3200.game.chance.configs">ChanceEncounterConfig</a> - Class in <a href="com/csse3200/game/chance/configs/package-summary.html">com.csse3200.game.chance.configs</a></dt>
+<dd>
+<div class="block">Configuration data for one Chance Encounter definition.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceEncounterConfig.html#%3Cinit%3E()" class="member-name-link">ChanceEncounterConfig()</a> - Constructor for class com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceEncounterConfig.html" title="class in com.csse3200.game.chance.configs">ChanceEncounterConfig</a></dt>
+<dd>
+<div class="block">Required by the JSON deserialiser.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/ChanceEncounterConfigLoader.html" class="type-name-link" title="class in com.csse3200.game.chance">ChanceEncounterConfigLoader</a> - Class in <a href="com/csse3200/game/chance/package-summary.html">com.csse3200.game.chance</a></dt>
+<dd>
+<div class="block">Loads and validates Chance Encounter definitions from a JSON configuration file.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/chance/ChanceEncounterDisplay.html" class="type-name-link" title="class in com.csse3200.game.components.chance">ChanceEncounterDisplay</a> - Class in <a href="com/csse3200/game/components/chance/package-summary.html">com.csse3200.game.components.chance</a></dt>
 <dd>
@@ -861,7 +935,27 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/chance/ChanceEncounterFactory.html" class="type-name-link" title="class in com.csse3200.game.chance">ChanceEncounterFactory</a> - Class in <a href="com/csse3200/game/chance/package-summary.html">com.csse3200.game.chance</a></dt>
 <dd>
-<div class="block">Creates the initial Sprint 1 Chance Encounter definitions.</div>
+<div class="block">Provides the initial Chance Encounter definitions loaded from configuration.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/ChanceEncounterLoadingException.html" class="type-name-link" title="class in com.csse3200.game.chance">ChanceEncounterLoadingException</a> - Exception Class in <a href="com/csse3200/game/chance/package-summary.html">com.csse3200.game.chance</a></dt>
+<dd>
+<div class="block">Thrown when Chance Encounter definitions cannot be loaded from configuration.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/ChanceEncounterLoadingException.html#%3Cinit%3E(java.lang.String)" class="member-name-link">ChanceEncounterLoadingException(String)</a> - Constructor for exception class com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceEncounterLoadingException.html" title="class in com.csse3200.game.chance">ChanceEncounterLoadingException</a></dt>
+<dd>
+<div class="block">Creates a Chance Encounter loading exception.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/ChanceEncounterLoadingException.html#%3Cinit%3E(java.lang.String,java.lang.Throwable)" class="member-name-link">ChanceEncounterLoadingException(String, Throwable)</a> - Constructor for exception class com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceEncounterLoadingException.html" title="class in com.csse3200.game.chance">ChanceEncounterLoadingException</a></dt>
+<dd>
+<div class="block">Creates a Chance Encounter loading exception caused by another exception.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/ChanceEncounterSelector.html" class="type-name-link" title="class in com.csse3200.game.chance">ChanceEncounterSelector</a> - Class in <a href="com/csse3200/game/chance/package-summary.html">com.csse3200.game.chance</a></dt>
+<dd>
+<div class="block">Selects Chance Encounters using their configured relative weights.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/ChanceEncounterSelector.html#%3Cinit%3E(java.util.List,java.util.Random)" class="member-name-link">ChanceEncounterSelector(List&lt;ChanceEncounter&gt;, Random)</a> - Constructor for class com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceEncounterSelector.html" title="class in com.csse3200.game.chance">ChanceEncounterSelector</a></dt>
+<dd>
+<div class="block">Creates a deterministic-capable weighted selector.</div>
 </dd>
 <dt><a href="com/csse3200/game/encounters/integration/ChanceEncounterSession.html" class="type-name-link" title="class in com.csse3200.game.encounters.integration">ChanceEncounterSession</a> - Class in <a href="com/csse3200/game/encounters/integration/package-summary.html">com.csse3200.game.encounters.integration</a></dt>
 <dd>
@@ -879,6 +973,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Creates a Chance Encounter outcome.</div>
 </dd>
+<dt><a href="com/csse3200/game/chance/ChanceOutcome.html#%3Cinit%3E(int,int,java.lang.String)" class="member-name-link">ChanceOutcome(int, int, String)</a> - Constructor for class com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceOutcome.html" title="class in com.csse3200.game.chance">ChanceOutcome</a></dt>
+<dd>
+<div class="block">Creates a Chance Encounter outcome with an optional card reward.</div>
+</dd>
 <dt><a href="com/csse3200/game/encounters/integration/ChanceOutcomeApplier.html" class="type-name-link" title="class in com.csse3200.game.encounters.integration">ChanceOutcomeApplier</a> - Class in <a href="com/csse3200/game/encounters/integration/package-summary.html">com.csse3200.game.encounters.integration</a></dt>
 <dd>
 <div class="block">Applies Chance Encounter outcomes to a player without coupling Chance logic to Player classes.</div>
@@ -886,6 +984,18 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/encounters/integration/ChanceOutcomeApplier.html#%3Cinit%3E(com.csse3200.game.encounters.integration.PlayerStateGateway)" class="member-name-link">ChanceOutcomeApplier(PlayerStateGateway)</a> - Constructor for class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceOutcomeApplier.html" title="class in com.csse3200.game.encounters.integration">ChanceOutcomeApplier</a></dt>
 <dd>
 <div class="block">Creates an outcome applier for one player boundary.</div>
+</dd>
+<dt><a href="com/csse3200/game/encounters/integration/ChanceOutcomeApplier.html#%3Cinit%3E(com.csse3200.game.encounters.integration.PlayerStateGateway,com.csse3200.game.encounters.integration.CardCatalogGateway,com.csse3200.game.encounters.integration.DeckGateway)" class="member-name-link">ChanceOutcomeApplier(PlayerStateGateway, CardCatalogGateway, DeckGateway)</a> - Constructor for class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceOutcomeApplier.html" title="class in com.csse3200.game.encounters.integration">ChanceOutcomeApplier</a></dt>
+<dd>
+<div class="block">Creates an outcome applier with production card-catalog and persistent-deck boundaries.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceOutcomeConfig.html" class="type-name-link" title="class in com.csse3200.game.chance.configs">ChanceOutcomeConfig</a> - Class in <a href="com/csse3200/game/chance/configs/package-summary.html">com.csse3200.game.chance.configs</a></dt>
+<dd>
+<div class="block">Configuration data for the health, currency, and optional card effects of a Chance choice.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceOutcomeConfig.html#%3Cinit%3E()" class="member-name-link">ChanceOutcomeConfig()</a> - Constructor for class com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceOutcomeConfig.html" title="class in com.csse3200.game.chance.configs">ChanceOutcomeConfig</a></dt>
+<dd>
+<div class="block">Required by the JSON deserialiser.</div>
 </dd>
 <dt><a href="com/csse3200/game/encounters/integration/ChanceResolution.html" class="type-name-link" title="class in com.csse3200.game.encounters.integration">ChanceResolution</a> - Class in <a href="com/csse3200/game/encounters/integration/package-summary.html">com.csse3200.game.encounters.integration</a></dt>
 <dd>
@@ -901,6 +1011,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/components/tasks/ChaseTask.html#%3Cinit%3E(com.csse3200.game.entities.Entity,int,float,float)" class="member-name-link">ChaseTask(Entity, int, float, float)</a> - Constructor for class com.csse3200.game.components.tasks.<a href="com/csse3200/game/components/tasks/ChaseTask.html" title="class in com.csse3200.game.components.tasks">ChaseTask</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceEncounterConfig.html#choices" class="member-name-link">choices</a> - Variable in class com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceEncounterConfig.html" title="class in com.csse3200.game.chance.configs">ChanceEncounterConfig</a></dt>
+<dd>
+<div class="block">Ordered choices available for this encounter.</div>
+</dd>
 <dt><a href="com/csse3200/game/files/FileLoader.Location.html#CLASSPATH" class="member-name-link">CLASSPATH</a> - Enum constant in enum class com.csse3200.game.files.<a href="com/csse3200/game/files/FileLoader.Location.html" title="enum class in com.csse3200.game.files">FileLoader.Location</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/deck/PlayerDeck.html#clear()" class="member-name-link">clear()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></dt>
@@ -995,6 +1109,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/cards/runtime/package-summary.html">com.csse3200.game.cards.runtime</a> - package com.csse3200.game.cards.runtime</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/chance/package-summary.html">com.csse3200.game.chance</a> - package com.csse3200.game.chance</dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/chance/configs/package-summary.html">com.csse3200.game.chance.configs</a> - package com.csse3200.game.chance.configs</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/package-summary.html">com.csse3200.game.components</a> - package com.csse3200.game.components</dt>
 <dd>&nbsp;</dd>
@@ -1101,6 +1217,12 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">A generic command class.</div>
 </dd>
+<dt><a href="com/csse3200/game/encounters/integration/DeckGateway.html#commitCardAddition(java.lang.String)" class="member-name-link">commitCardAddition(String)</a> - Method in interface com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/DeckGateway.html" title="interface in com.csse3200.game.encounters.integration">DeckGateway</a></dt>
+<dd>
+<div class="block">Marks the most recent matching addition as committed.</div>
+</dd>
+<dt><a href="com/csse3200/game/encounters/integration/PlayerDeckAdapter.html#commitCardAddition(java.lang.String)" class="member-name-link">commitCardAddition(String)</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/PlayerDeckAdapter.html" title="class in com.csse3200.game.encounters.integration">PlayerDeckAdapter</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/Rarity.html#COMMON" class="member-name-link">COMMON</a> - Enum constant in enum class com.csse3200.game.cards.<a href="com/csse3200/game/cards/Rarity.html" title="enum class in com.csse3200.game.cards">Rarity</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/rendering/RenderComponent.html#compareTo(com.csse3200.game.rendering.Renderable)" class="member-name-link">compareTo(Renderable)</a> - Method in class com.csse3200.game.rendering.<a href="com/csse3200/game/rendering/RenderComponent.html" title="class in com.csse3200.game.rendering">RenderComponent</a></dt>
@@ -1175,6 +1297,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Checks whether a card definition exists.</div>
 </dd>
+<dt><a href="com/csse3200/game/encounters/integration/CardServiceCatalogAdapter.html#containsCard(java.lang.String)" class="member-name-link">containsCard(String)</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/CardServiceCatalogAdapter.html" title="class in com.csse3200.game.encounters.integration">CardServiceCatalogAdapter</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/encounters/integration/FunctionalCardCatalogAdapter.html#containsCard(java.lang.String)" class="member-name-link">containsCard(String)</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/FunctionalCardCatalogAdapter.html" title="class in com.csse3200.game.encounters.integration">FunctionalCardCatalogAdapter</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/shop/ShopService.html#containsItem(java.lang.String)" class="member-name-link">containsItem(String)</a> - Method in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopService.html" title="class in com.csse3200.game.shop">ShopService</a></dt>
@@ -1207,7 +1331,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/areas/EncounterGameArea.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.areas.<a href="com/csse3200/game/areas/EncounterGameArea.html" title="class in com.csse3200.game.areas">EncounterGameArea</a></dt>
 <dd>
-<div class="block">Create the game area, including terrain, static entities (trees), dynamic entities (player)</div>
+<div class="block">Creates the logical player state and launches the selected encounter.</div>
 </dd>
 <dt><a href="com/csse3200/game/areas/ForestGameArea.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.areas.<a href="com/csse3200/game/areas/ForestGameArea.html" title="class in com.csse3200.game.areas">ForestGameArea</a></dt>
 <dd>
@@ -1395,6 +1519,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Creates the initial Chance Encounters in deterministic order.</div>
 </dd>
+<dt><a href="com/csse3200/game/chance/ChanceEncounterFactory.html#createInitialEncounters(com.csse3200.game.encounters.integration.CardCatalogGateway)" class="member-name-link">createInitialEncounters(CardCatalogGateway)</a> - Static method in class com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceEncounterFactory.html" title="class in com.csse3200.game.chance">ChanceEncounterFactory</a></dt>
+<dd>
+<div class="block">Creates the initial encounters while validating configured rewards against the card catalog.</div>
+</dd>
+<dt><a href="com/csse3200/game/entities/factories/PlayerFactory.html#createInitialRunState()" class="member-name-link">createInitialRunState()</a> - Static method in class com.csse3200.game.entities.factories.<a href="com/csse3200/game/entities/factories/PlayerFactory.html" title="class in com.csse3200.game.entities.factories">PlayerFactory</a></dt>
+<dd>
+<div class="block">Creates the initial durable player state from the same config used by <a href="com/csse3200/game/entities/factories/PlayerFactory.html#createPlayer()"><code>PlayerFactory.createPlayer()</code></a>.</div>
+</dd>
 <dt><a href="com/csse3200/game/physics/PhysicsEngine.html#createJoint(com.badlogic.gdx.physics.box2d.JointDef)" class="member-name-link">createJoint(JointDef)</a> - Method in class com.csse3200.game.physics.<a href="com/csse3200/game/physics/PhysicsEngine.html" title="class in com.csse3200.game.physics">PhysicsEngine</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/entities/factories/PlayerFactory.html#createPlayer()" class="member-name-link">createPlayer()</a> - Static method in class com.csse3200.game.entities.factories.<a href="com/csse3200/game/entities/factories/PlayerFactory.html" title="class in com.csse3200.game.entities.factories">PlayerFactory</a></dt>
@@ -1403,6 +1535,14 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/entities/factories/RenderFactory.html#createRenderer()" class="member-name-link">createRenderer()</a> - Static method in class com.csse3200.game.entities.factories.<a href="com/csse3200/game/entities/factories/RenderFactory.html" title="class in com.csse3200.game.entities.factories">RenderFactory</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/shop/ShopInventoryGenerator.html#createShop()" class="member-name-link">createShop()</a> - Method in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopInventoryGenerator.html" title="class in com.csse3200.game.shop">ShopInventoryGenerator</a></dt>
+<dd>
+<div class="block">Generates a shop using the default offer count and stock range.</div>
+</dd>
+<dt><a href="com/csse3200/game/shop/ShopInventoryGenerator.html#createShop(int,int,int)" class="member-name-link">createShop(int, int, int)</a> - Method in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopInventoryGenerator.html" title="class in com.csse3200.game.shop">ShopInventoryGenerator</a></dt>
+<dd>
+<div class="block">Generates a shop from a random subset of currently registered cards.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html#createStarterDeck()" class="member-name-link">createStarterDeck()</a> - Static method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html" title="class in com.csse3200.game.cards.deck">PlayerDeckFactory</a></dt>
 <dd>
 <div class="block">Creates a default player deck using Team 6's six initial cards.</div>
@@ -1432,6 +1572,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/encounters/integration/ShopTransactionStatus.html#CURRENCY_UPDATE_FAILED" class="member-name-link">CURRENCY_UPDATE_FAILED</a> - Enum constant in enum class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ShopTransactionStatus.html" title="enum class in com.csse3200.game.encounters.integration">ShopTransactionStatus</a></dt>
 <dd>
 <div class="block">Currency update failed and the deck change was rolled back.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceOutcomeConfig.html#currencyDelta" class="member-name-link">currencyDelta</a> - Variable in class com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceOutcomeConfig.html" title="class in com.csse3200.game.chance.configs">ChanceOutcomeConfig</a></dt>
+<dd>
+<div class="block">Required signed currency change.</div>
 </dd>
 <dt><a href="com/csse3200/game/maps/NodeState.html#CURRENT" class="member-name-link">CURRENT</a> - Enum constant in enum class com.csse3200.game.maps.<a href="com/csse3200/game/maps/NodeState.html" title="enum class in com.csse3200.game.maps">NodeState</a></dt>
 <dd>&nbsp;</dd>
@@ -1558,7 +1702,15 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/cards/CardConfigLoader.html#DEFAULT_CARD_FILE" class="member-name-link">DEFAULT_CARD_FILE</a> - Static variable in class com.csse3200.game.cards.<a href="com/csse3200/game/cards/CardConfigLoader.html" title="class in com.csse3200.game.cards">CardConfigLoader</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/chance/ChanceEncounterConfigLoader.html#DEFAULT_ENCOUNTER_FILE" class="member-name-link">DEFAULT_ENCOUNTER_FILE</a> - Static variable in class com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceEncounterConfigLoader.html" title="class in com.csse3200.game.chance">ChanceEncounterConfigLoader</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/shop/ShopInventoryGenerator.html#DEFAULT_MAX_STOCK" class="member-name-link">DEFAULT_MAX_STOCK</a> - Static variable in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopInventoryGenerator.html" title="class in com.csse3200.game.shop">ShopInventoryGenerator</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/shop/ShopInventoryGenerator.html#DEFAULT_MIN_STOCK" class="member-name-link">DEFAULT_MIN_STOCK</a> - Static variable in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopInventoryGenerator.html" title="class in com.csse3200.game.shop">ShopInventoryGenerator</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/shop/ShopEncounter.html#DEFAULT_NODE_ID" class="member-name-link">DEFAULT_NODE_ID</a> - Static variable in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopEncounter.html" title="class in com.csse3200.game.shop">ShopEncounter</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/shop/ShopInventoryGenerator.html#DEFAULT_OFFER_COUNT" class="member-name-link">DEFAULT_OFFER_COUNT</a> - Static variable in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopInventoryGenerator.html" title="class in com.csse3200.game.shop">ShopInventoryGenerator</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/save/JsonSaveGameRepository.html#DEFAULT_SAVE_DIRECTORY" class="member-name-link">DEFAULT_SAVE_DIRECTORY</a> - Static variable in class com.csse3200.game.save.<a href="com/csse3200/game/save/JsonSaveGameRepository.html" title="class in com.csse3200.game.save">JsonSaveGameRepository</a></dt>
 <dd>&nbsp;</dd>
@@ -1612,6 +1764,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/cards/configs/CardUpgradeConfig.html#description" class="member-name-link">description</a> - Variable in class com.csse3200.game.cards.configs.<a href="com/csse3200/game/cards/configs/CardUpgradeConfig.html" title="class in com.csse3200.game.cards.configs">CardUpgradeConfig</a></dt>
 <dd>
 <div class="block">Rules text shown for the upgraded variant.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceChoiceConfig.html#description" class="member-name-link">description</a> - Variable in class com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceChoiceConfig.html" title="class in com.csse3200.game.chance.configs">ChanceChoiceConfig</a></dt>
+<dd>
+<div class="block">Player-facing choice description.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceEncounterConfig.html#description" class="member-name-link">description</a> - Variable in class com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceEncounterConfig.html" title="class in com.csse3200.game.chance.configs">ChanceEncounterConfig</a></dt>
+<dd>
+<div class="block">Player-facing encounter description.</div>
 </dd>
 <dt><a href="com/csse3200/game/shop/ShopItem.html#description" class="member-name-link">description</a> - Variable in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopItem.html" title="class in com.csse3200.game.shop">ShopItem</a></dt>
 <dd>&nbsp;</dd>
@@ -1952,6 +2112,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Entry point for the Map-to-Encounter-to-Map lifecycle.</div>
 </dd>
+<dt><a href="com/csse3200/game/encounters/integration/EncounterFlowController.html#%3Cinit%3E(com.csse3200.game.encounters.integration.PlayerStateGateway,com.csse3200.game.encounters.integration.CardCatalogGateway,com.csse3200.game.encounters.integration.DeckGateway,com.csse3200.game.encounters.integration.ShopTransactionGateway,com.csse3200.game.maps.EncounterCallback)" class="member-name-link">EncounterFlowController(PlayerStateGateway, CardCatalogGateway, DeckGateway, ShopTransactionGateway, EncounterCallback)</a> - Constructor for class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/EncounterFlowController.html" title="class in com.csse3200.game.encounters.integration">EncounterFlowController</a></dt>
+<dd>
+<div class="block">Creates a controller whose Chance flow can grant validated persistent card rewards.</div>
+</dd>
 <dt><a href="com/csse3200/game/encounters/integration/EncounterFlowController.html#%3Cinit%3E(com.csse3200.game.encounters.integration.PlayerStateGateway,com.csse3200.game.encounters.integration.ShopTransactionGateway,com.csse3200.game.maps.EncounterCallback)" class="member-name-link">EncounterFlowController(PlayerStateGateway, ShopTransactionGateway, EncounterCallback)</a> - Constructor for class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/EncounterFlowController.html" title="class in com.csse3200.game.encounters.integration">EncounterFlowController</a></dt>
 <dd>
 <div class="block">Creates a controller for the shared encounter lifecycle.</div>
@@ -1962,17 +2126,25 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/areas/EncounterGameArea.html" class="type-name-link" title="class in com.csse3200.game.areas">EncounterGameArea</a> - Class in <a href="com/csse3200/game/areas/package-summary.html">com.csse3200.game.areas</a></dt>
 <dd>
-<div class="block">Non-combat encounter area (Team 2): a forest scene that runs a Chance encounter and then, on a
- successful outcome, opens the Shop.</div>
+<div class="block">Non-combat encounter area used to host Team 2 Chance and Shop encounter content.</div>
 </dd>
 <dt><a href="com/csse3200/game/areas/EncounterGameArea.html#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory)" class="member-name-link">EncounterGameArea(TerrainFactory)</a> - Constructor for class com.csse3200.game.areas.<a href="com/csse3200/game/areas/EncounterGameArea.html" title="class in com.csse3200.game.areas">EncounterGameArea</a></dt>
 <dd>
-<div class="block">Initialise this EncounterGameArea to use the provided TerrainFactory.</div>
+<div class="block">Creates the standalone Shop preview used by the legacy MainGameScreen shortcut.</div>
+</dd>
+<dt><a href="com/csse3200/game/areas/EncounterGameArea.html#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback)" class="member-name-link">EncounterGameArea(TerrainFactory, Integer, RoomType, EncounterCallback)</a> - Constructor for class com.csse3200.game.areas.<a href="com/csse3200/game/areas/EncounterGameArea.html" title="class in com.csse3200.game.areas">EncounterGameArea</a></dt>
+<dd>
+<div class="block">Creates an encounter area for a real map node.</div>
+</dd>
+<dt><a href="com/csse3200/game/areas/EncounterGameArea.html#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback,com.csse3200.game.maps.PlayerRunState,com.csse3200.game.cards.deck.PlayerDeck)" class="member-name-link">EncounterGameArea(TerrainFactory, Integer, RoomType, EncounterCallback, PlayerRunState, PlayerDeck)</a> - Constructor for class com.csse3200.game.areas.<a href="com/csse3200/game/areas/EncounterGameArea.html" title="class in com.csse3200.game.areas">EncounterGameArea</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceConfig.html#encounters" class="member-name-link">encounters</a> - Variable in class com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceConfig.html" title="class in com.csse3200.game.chance.configs">ChanceConfig</a></dt>
+<dd>
+<div class="block">Chance Encounters available to the game, in configuration order.</div>
 </dd>
 <dt><a href="com/csse3200/game/screens/EncounterScreen.html" class="type-name-link" title="class in com.csse3200.game.screens">EncounterScreen</a> - Class in <a href="com/csse3200/game/screens/package-summary.html">com.csse3200.game.screens</a></dt>
 <dd>
-<div class="block">Stand-in encounter that stands in for combat (Team 3) and event/shop (Team 2) until those can be
- entered from a map node.</div>
+<div class="block">Hosts Team 2 non-battle encounters entered from the run map.</div>
 </dd>
 <dt><a href="com/csse3200/game/screens/EncounterScreen.html#%3Cinit%3E(com.csse3200.game.GdxGame)" class="member-name-link">EncounterScreen(GdxGame)</a> - Constructor for class com.csse3200.game.screens.<a href="com/csse3200/game/screens/EncounterScreen.html" title="class in com.csse3200.game.screens">EncounterScreen</a></dt>
 <dd>&nbsp;</dd>
@@ -2602,6 +2774,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/combat/BattleController.html#getCardPlayRequest()" class="member-name-link">getCardPlayRequest()</a> - Method in class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/chance/ChanceOutcome.html#getCardRewardId()" class="member-name-link">getCardRewardId()</a> - Method in class com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceOutcome.html" title="class in com.csse3200.game.chance">ChanceOutcome</a></dt>
+<dd>
+<div class="block">Gets the stable identifier of the rewarded card.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/player/InventoryComponent.html#getCards()" class="member-name-link">getCards()</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/InventoryComponent.html" title="class in com.csse3200.game.components.player">InventoryComponent</a></dt>
 <dd>
 <div class="block">Returns an immutable view of owned card quantities.</div>
@@ -2663,6 +2839,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Returns the current targeted enemy.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/player/EnergyComponent.html#getCurrentEnergy()" class="member-name-link">getCurrentEnergy()</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/EnergyComponent.html" title="class in com.csse3200.game.components.player">EnergyComponent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/maps/PlayerRunState.html#getCurrentHealth()" class="member-name-link">getCurrentHealth()</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html#getCurrentIntent()" class="member-name-link">getCurrentIntent()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html" title="class in com.csse3200.game.components.enemy">EnemyBehaviourComponent</a></dt>
 <dd>&nbsp;</dd>
@@ -2778,6 +2956,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the player's gold.</div>
 </dd>
+<dt><a href="com/csse3200/game/maps/PlayerRunState.html#getGold()" class="member-name-link">getGold()</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/maps/MapDisplay.html#getGroup()" class="member-name-link">getGroup()</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/MapDisplay.html" title="class in com.csse3200.game.maps">MapDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#getHand()" class="member-name-link">getHand()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
@@ -2889,6 +3069,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the entity's max health.</div>
 </dd>
+<dt><a href="com/csse3200/game/encounters/integration/ComponentPlayerStateAdapter.html#getMaxHealth()" class="member-name-link">getMaxHealth()</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ComponentPlayerStateAdapter.html" title="class in com.csse3200.game.encounters.integration">ComponentPlayerStateAdapter</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/encounters/integration/PlayerStateGateway.html#getMaxHealth()" class="member-name-link">getMaxHealth()</a> - Method in interface com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/PlayerStateGateway.html" title="interface in com.csse3200.game.encounters.integration">PlayerStateGateway</a></dt>
+<dd>
+<div class="block">Returns the player's maximum health.</div>
+</dd>
+<dt><a href="com/csse3200/game/maps/PlayerRunState.html#getMaxHealth()" class="member-name-link">getMaxHealth()</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/encounters/integration/ChanceResolution.html#getMessage()" class="member-name-link">getMessage()</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceResolution.html" title="class in com.csse3200.game.encounters.integration">ChanceResolution</a></dt>
 <dd>
 <div class="block">Returns a displayable explanation of the resolution status.</div>
@@ -2960,6 +3148,11 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/maps/RunState.html#getOrCreatePlayerDeck(com.csse3200.game.cards.CardService)" class="member-name-link">getOrCreatePlayerDeck(CardService)</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a></dt>
 <dd>
 <div class="block">Returns the run-scoped player deck, creating the starter deck on first access.</div>
+</dd>
+<dt><a href="com/csse3200/game/maps/RunState.html#getOrCreatePlayerState()" class="member-name-link">getOrCreatePlayerState()</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a></dt>
+<dd>
+<div class="block">Returns the durable player values for this run, initialising them from the player config on
+ first access.</div>
 </dd>
 <dt><a href="com/csse3200/game/encounters/integration/ChanceResolution.html#getOutcome()" class="member-name-link">getOutcome()</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceResolution.html" title="class in com.csse3200.game.encounters.integration">ChanceResolution</a></dt>
 <dd>
@@ -3116,6 +3309,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/StatusEffect.html#getValue()" class="member-name-link">getValue()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatusEffect.html" title="class in com.csse3200.game.components">StatusEffect</a></dt>
 <dd>
 <div class="block">Returns the magnitude/stack value of this effect.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/ChanceEncounter.html#getWeight()" class="member-name-link">getWeight()</a> - Method in class com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceEncounter.html" title="class in com.csse3200.game.chance">ChanceEncounter</a></dt>
+<dd>
+<div class="block">Gets the positive relative selection weight.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/clickable/Clickable.html#getWidth()" class="member-name-link">getWidth()</a> - Method in class com.csse3200.game.components.spritedisplay.clickable.<a href="com/csse3200/game/components/spritedisplay/clickable/Clickable.html" title="class in com.csse3200.game.components.spritedisplay.clickable">Clickable</a></dt>
 <dd>&nbsp;</dd>
@@ -3319,6 +3516,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/entities/configs/BaseEntityConfig.html#health" class="member-name-link">health</a> - Variable in class com.csse3200.game.entities.configs.<a href="com/csse3200/game/entities/configs/BaseEntityConfig.html" title="class in com.csse3200.game.entities.configs">BaseEntityConfig</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceOutcomeConfig.html#healthDelta" class="member-name-link">healthDelta</a> - Variable in class com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceOutcomeConfig.html" title="class in com.csse3200.game.chance.configs">ChanceOutcomeConfig</a></dt>
+<dd>
+<div class="block">Required signed health change.</div>
+</dd>
 <dt><a href="com/csse3200/game/files/UserSettings.DisplaySettings.html#height" class="member-name-link">height</a> - Variable in class com.csse3200.game.files.<a href="com/csse3200/game/files/UserSettings.DisplaySettings.html" title="class in com.csse3200.game.files">UserSettings.DisplaySettings</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/Card.html#height()" class="member-name-link">height()</a> - Method in record class com.csse3200.game.cards.<a href="com/csse3200/game/cards/Card.html" title="class in com.csse3200.game.cards">Card</a></dt>
@@ -3353,6 +3554,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/cards/configs/CardConfig.html#id" class="member-name-link">id</a> - Variable in class com.csse3200.game.cards.configs.<a href="com/csse3200/game/cards/configs/CardConfig.html" title="class in com.csse3200.game.cards.configs">CardConfig</a></dt>
 <dd>
 <div class="block">Unique key used to look this card up.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceChoiceConfig.html#id" class="member-name-link">id</a> - Variable in class com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceChoiceConfig.html" title="class in com.csse3200.game.chance.configs">ChanceChoiceConfig</a></dt>
+<dd>
+<div class="block">Stable choice identifier within its encounter.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceEncounterConfig.html#id" class="member-name-link">id</a> - Variable in class com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceEncounterConfig.html" title="class in com.csse3200.game.chance.configs">ChanceEncounterConfig</a></dt>
+<dd>
+<div class="block">Stable encounter identifier.</div>
 </dd>
 <dt><a href="com/csse3200/game/entities/configs/EnemyConfig.html#id" class="member-name-link">id</a> - Variable in class com.csse3200.game.entities.configs.<a href="com/csse3200/game/entities/configs/EnemyConfig.html" title="class in com.csse3200.game.entities.configs">EnemyConfig</a></dt>
 <dd>
@@ -3485,6 +3694,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/cards/play/CardPlayFailureReason.html#INVALID_CARD_CONFIG" class="member-name-link">INVALID_CARD_CONFIG</a> - Enum constant in enum class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayFailureReason.html" title="enum class in com.csse3200.game.cards.play">CardPlayFailureReason</a></dt>
 <dd>
 <div class="block">The retrieved Team 6 card config does not satisfy the card validation contract.</div>
+</dd>
+<dt><a href="com/csse3200/game/encounters/integration/ChanceResolution.Status.html#INVALID_CARD_REWARD" class="member-name-link">INVALID_CARD_REWARD</a> - Enum constant in enum class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></dt>
+<dd>
+<div class="block">The configured reward card identifier is blank or otherwise invalid.</div>
 </dd>
 <dt><a href="com/csse3200/game/encounters/integration/ChanceResolution.Status.html#INVALID_CHOICE" class="member-name-link">INVALID_CHOICE</a> - Enum constant in enum class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></dt>
 <dd>
@@ -3762,6 +3975,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/physics/raycast/SingleHitCallback.html#layerMask" class="member-name-link">layerMask</a> - Variable in class com.csse3200.game.physics.raycast.<a href="com/csse3200/game/physics/raycast/SingleHitCallback.html" title="class in com.csse3200.game.physics.raycast">SingleHitCallback</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/shop/ShopEncounter.html#leave()" class="member-name-link">leave()</a> - Method in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopEncounter.html" title="class in com.csse3200.game.shop">ShopEncounter</a></dt>
+<dd>
+<div class="block">Leaves the shop normally.</div>
+</dd>
 <dt><a href="com/csse3200/game/physics/components/PhysicsComponent.AlignX.html#LEFT" class="member-name-link">LEFT</a> - Enum constant in enum class com.csse3200.game.physics.components.<a href="com/csse3200/game/physics/components/PhysicsComponent.AlignX.html" title="enum class in com.csse3200.game.physics.components">PhysicsComponent.AlignX</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/utils/math/Vector2Utils.html#LEFT" class="member-name-link">LEFT</a> - Static variable in class com.csse3200.game.utils.math.<a href="com/csse3200/game/utils/math/Vector2Utils.html" title="class in com.csse3200.game.utils.math">Vector2Utils</a></dt>
@@ -3797,6 +4014,23 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/cards/CardConfigLoader.html#loadCards(java.lang.String)" class="member-name-link">loadCards(String)</a> - Static method in class com.csse3200.game.cards.<a href="com/csse3200/game/cards/CardConfigLoader.html" title="class in com.csse3200.game.cards">CardConfigLoader</a></dt>
 <dd>
 <div class="block">Loads and validates cards from a JSON configuration file.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/ChanceEncounterConfigLoader.html#loadEncounters()" class="member-name-link">loadEncounters()</a> - Static method in class com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceEncounterConfigLoader.html" title="class in com.csse3200.game.chance">ChanceEncounterConfigLoader</a></dt>
+<dd>
+<div class="block">Loads Chance Encounters from the default configuration file.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/ChanceEncounterConfigLoader.html#loadEncounters(java.lang.String)" class="member-name-link">loadEncounters(String)</a> - Static method in class com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceEncounterConfigLoader.html" title="class in com.csse3200.game.chance">ChanceEncounterConfigLoader</a></dt>
+<dd>
+<div class="block">Loads Chance Encounters from a JSON configuration file.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/ChanceEncounterConfigLoader.html#loadEncounters(java.lang.String,com.csse3200.game.encounters.integration.CardCatalogGateway)" class="member-name-link">loadEncounters(String, CardCatalogGateway)</a> - Static method in class com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceEncounterConfigLoader.html" title="class in com.csse3200.game.chance">ChanceEncounterConfigLoader</a></dt>
+<dd>
+<div class="block">Loads a Chance configuration and validates card rewards against the supplied catalog.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/ChanceEncounterConfigLoader.html#loadEncountersWithCatalog(com.csse3200.game.encounters.integration.CardCatalogGateway)" class="member-name-link">loadEncountersWithCatalog(CardCatalogGateway)</a> - Static method in class com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceEncounterConfigLoader.html" title="class in com.csse3200.game.chance">ChanceEncounterConfigLoader</a></dt>
+<dd>
+<div class="block">Loads the default Chance configuration and validates rewards against the production card
+ catalog boundary.</div>
 </dd>
 <dt><a href="com/csse3200/game/services/ResourceService.html#loadForMillis(int)" class="member-name-link">loadForMillis(int)</a> - Method in class com.csse3200.game.services.<a href="com/csse3200/game/services/ResourceService.html" title="class in com.csse3200.game.services">ResourceService</a></dt>
 <dd>
@@ -4243,6 +4477,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/shop/PurchaseResult.Status.html#OUT_OF_STOCK" class="member-name-link">OUT_OF_STOCK</a> - Enum constant in enum class com.csse3200.game.shop.<a href="com/csse3200/game/shop/PurchaseResult.Status.html" title="enum class in com.csse3200.game.shop">PurchaseResult.Status</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceChoiceConfig.html#outcome" class="member-name-link">outcome</a> - Variable in class com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceChoiceConfig.html" title="class in com.csse3200.game.chance.configs">ChanceChoiceConfig</a></dt>
+<dd>
+<div class="block">Required outcome produced by selecting this choice.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html#outgoingFeeble()" class="member-name-link">outgoingFeeble()</a> - Method in record class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResolutionContext.html" title="class in com.csse3200.game.cards.effects">CardEffectResolutionContext</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./com/csse3200/game/cards/effects/CardEffectResolutionContext.html#param-outgoingFeeble"><code>outgoingFeeble</code></a> record component.</div>
@@ -4505,6 +4743,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Creates a player deck containing the given card IDs in order.</div>
 </dd>
+<dt><a href="com/csse3200/game/encounters/integration/PlayerDeckAdapter.html" class="type-name-link" title="class in com.csse3200.game.encounters.integration">PlayerDeckAdapter</a> - Class in <a href="com/csse3200/game/encounters/integration/package-summary.html">com.csse3200.game.encounters.integration</a></dt>
+<dd>
+<div class="block">Connects Team 2 shop transactions to Team 5's persistent player deck.</div>
+</dd>
+<dt><a href="com/csse3200/game/encounters/integration/PlayerDeckAdapter.html#%3Cinit%3E(com.csse3200.game.cards.deck.PlayerDeck)" class="member-name-link">PlayerDeckAdapter(PlayerDeck)</a> - Constructor for class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/PlayerDeckAdapter.html" title="class in com.csse3200.game.encounters.integration">PlayerDeckAdapter</a></dt>
+<dd>
+<div class="block">Creates a deck boundary backed by Team 5's player deck.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html" class="type-name-link" title="class in com.csse3200.game.cards.deck">PlayerDeckFactory</a> - Class in <a href="com/csse3200/game/cards/deck/package-summary.html">com.csse3200.game.cards.deck</a></dt>
 <dd>
 <div class="block">Creates standard player decks from the initial Team 6 card IDs.</div>
@@ -4542,6 +4788,12 @@ loadScripts(document, 'script');</script>
 <div class="block">Reports whether the player currently has the given status effect.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/player/PlayerIntent.html" class="type-name-link" title="enum class in com.csse3200.game.components.player">PlayerIntent</a> - Enum Class in <a href="com/csse3200/game/components/player/package-summary.html">com.csse3200.game.components.player</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/maps/PlayerRunState.html" class="type-name-link" title="class in com.csse3200.game.maps">PlayerRunState</a> - Class in <a href="com/csse3200/game/maps/package-summary.html">com.csse3200.game.maps</a></dt>
+<dd>
+<div class="block">Run-scoped player values that must survive screen disposal.</div>
+</dd>
+<dt><a href="com/csse3200/game/maps/PlayerRunState.html#%3Cinit%3E(int,int,int)" class="member-name-link">PlayerRunState(int, int, int)</a> - Constructor for class com.csse3200.game.maps.<a href="com/csse3200/game/maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/save/PlayerSaveData.html" class="type-name-link" title="class in com.csse3200.game.save">PlayerSaveData</a> - Class in <a href="com/csse3200/game/save/package-summary.html">com.csse3200.game.save</a></dt>
 <dd>
@@ -4816,6 +5068,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/encounters/integration/InventoryDeckAdapter.html#removeCard(java.lang.String)" class="member-name-link">removeCard(String)</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/InventoryDeckAdapter.html" title="class in com.csse3200.game.encounters.integration">InventoryDeckAdapter</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/encounters/integration/PlayerDeckAdapter.html#removeCard(java.lang.String)" class="member-name-link">removeCard(String)</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/PlayerDeckAdapter.html" title="class in com.csse3200.game.encounters.integration">PlayerDeckAdapter</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/deck/PlayerDeck.html#removeCardAt(int)" class="member-name-link">removeCardAt(int)</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a></dt>
 <dd>
 <div class="block">Removes the card at a specific deck position.</div>
@@ -5019,6 +5273,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/shop/ShopService.html#restockItem(java.lang.String,int)" class="member-name-link">restockItem(String, int)</a> - Method in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopService.html" title="class in com.csse3200.game.shop">ShopService</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/maps/PlayerRunState.html#restore(int,int,int)" class="member-name-link">restore(int, int, int)</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></dt>
+<dd>
+<div class="block">Replaces all persisted player values after validating them as one atomic state.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/player/EnergyComponent.html#restoreEnergy(int)" class="member-name-link">restoreEnergy(int)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/EnergyComponent.html" title="class in com.csse3200.game.components.player">EnergyComponent</a></dt>
 <dd>
 <div class="block">Restores the given amount of energy, capped at maxEnergy.</div>
@@ -5063,6 +5321,12 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">At least one rollback operation failed.</div>
 </dd>
+<dt><a href="com/csse3200/game/encounters/integration/DeckGateway.html#rollbackCardAddition(java.lang.String)" class="member-name-link">rollbackCardAddition(String)</a> - Method in interface com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/DeckGateway.html" title="interface in com.csse3200.game.encounters.integration">DeckGateway</a></dt>
+<dd>
+<div class="block">Reverts the most recent matching addition after another transaction step fails.</div>
+</dd>
+<dt><a href="com/csse3200/game/encounters/integration/PlayerDeckAdapter.html#rollbackCardAddition(java.lang.String)" class="member-name-link">rollbackCardAddition(String)</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/PlayerDeckAdapter.html" title="class in com.csse3200.game.encounters.integration">PlayerDeckAdapter</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html#rollIntent()" class="member-name-link">rollIntent()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html" title="class in com.csse3200.game.components.enemy">EnemyBehaviourComponent</a></dt>
 <dd>
 <div class="block">Decides the action for the coming round and telegraphs it.</div>
@@ -5216,6 +5480,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/ui/terminal/TouchTerminalInputComponent.html#scrolled(float,float)" class="member-name-link">scrolled(float, float)</a> - Method in class com.csse3200.game.ui.terminal.<a href="com/csse3200/game/ui/terminal/TouchTerminalInputComponent.html" title="class in com.csse3200.game.ui.terminal">TouchTerminalInputComponent</a></dt>
 <dd>
 <div class="block">Scrolling up will open the terminal and scrolling down will close the terminal.</div>
+</dd>
+<dt><a href="com/csse3200/game/chance/ChanceEncounterSelector.html#select()" class="member-name-link">select()</a> - Method in class com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceEncounterSelector.html" title="class in com.csse3200.game.chance">ChanceEncounterSelector</a></dt>
+<dd>
+<div class="block">Selects one encounter according to the pool's relative weights.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/combat/BattleController.html#selectAttack()" class="member-name-link">selectAttack()</a> - Method in class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a></dt>
 <dd>
@@ -5515,6 +5783,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Creates a display for an encounter already connected through the integration gateways.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/shop/ShopDisplay.html#%3Cinit%3E(com.csse3200.game.shop.ShopEncounter,com.csse3200.game.cards.CardService)" class="member-name-link">ShopDisplay(ShopEncounter, CardService)</a> - Constructor for class com.csse3200.game.components.shop.<a href="com/csse3200/game/components/shop/ShopDisplay.html" title="class in com.csse3200.game.components.shop">ShopDisplay</a></dt>
+<dd>
+<div class="block">Creates an integrated Shop display with artwork supplied by the shared Card Service.</div>
+</dd>
 <dt><a href="com/csse3200/game/shop/ShopEncounter.html" class="type-name-link" title="class in com.csse3200.game.shop">ShopEncounter</a> - Class in <a href="com/csse3200/game/shop/package-summary.html">com.csse3200.game.shop</a></dt>
 <dd>
 <div class="block">Bridges shop purchase logic with the map encounter completion callback.</div>
@@ -5530,6 +5802,18 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/shop/ShopEncounter.html#%3Cinit%3E(java.lang.Integer,com.csse3200.game.shop.ShopService,com.csse3200.game.encounters.integration.ShopTransactionGateway,com.csse3200.game.maps.EncounterCallback)" class="member-name-link">ShopEncounter(Integer, ShopService, ShopTransactionGateway, EncounterCallback)</a> - Constructor for class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopEncounter.html" title="class in com.csse3200.game.shop">ShopEncounter</a></dt>
 <dd>
 <div class="block">Creates an encounter connected to the cross-team shop transaction boundary.</div>
+</dd>
+<dt><a href="com/csse3200/game/shop/ShopInventoryGenerator.html" class="type-name-link" title="class in com.csse3200.game.shop">ShopInventoryGenerator</a> - Class in <a href="com/csse3200/game/shop/package-summary.html">com.csse3200.game.shop</a></dt>
+<dd>
+<div class="block">Builds a varied shop inventory from Team 6's current card library.</div>
+</dd>
+<dt><a href="com/csse3200/game/shop/ShopInventoryGenerator.html#%3Cinit%3E(com.csse3200.game.cards.CardService)" class="member-name-link">ShopInventoryGenerator(CardService)</a> - Constructor for class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopInventoryGenerator.html" title="class in com.csse3200.game.shop">ShopInventoryGenerator</a></dt>
+<dd>
+<div class="block">Creates a generator with nondeterministic inventory selection.</div>
+</dd>
+<dt><a href="com/csse3200/game/shop/ShopInventoryGenerator.html#%3Cinit%3E(com.csse3200.game.cards.CardService,java.util.Random)" class="member-name-link">ShopInventoryGenerator(CardService, Random)</a> - Constructor for class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopInventoryGenerator.html" title="class in com.csse3200.game.shop">ShopInventoryGenerator</a></dt>
+<dd>
+<div class="block">Creates a generator with an injectable random source for deterministic tests and seeded runs.</div>
 </dd>
 <dt><a href="com/csse3200/game/shop/ShopItem.html" class="type-name-link" title="class in com.csse3200.game.shop">ShopItem</a> - Class in <a href="com/csse3200/game/shop/package-summary.html">com.csse3200.game.shop</a></dt>
 <dd>
@@ -6778,6 +7062,10 @@ the order they are declared.</div>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ui/MenuTheme.html#warmParchment()" class="member-name-link">warmParchment()</a> - Static method in class com.csse3200.game.ui.<a href="com/csse3200/game/ui/MenuTheme.html" title="class in com.csse3200.game.ui">MenuTheme</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/chance/configs/ChanceEncounterConfig.html#weight" class="member-name-link">weight</a> - Variable in class com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceEncounterConfig.html" title="class in com.csse3200.game.chance.configs">ChanceEncounterConfig</a></dt>
+<dd>
+<div class="block">Required positive selection weight.</div>
+</dd>
 <dt><a href="com/csse3200/game/files/UserSettings.DisplaySettings.html#width" class="member-name-link">width</a> - Variable in class com.csse3200.game.files.<a href="com/csse3200/game/files/UserSettings.DisplaySettings.html" title="class in com.csse3200.game.files">UserSettings.DisplaySettings</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/Card.html#width()" class="member-name-link">width()</a> - Method in record class com.csse3200.game.cards.<a href="com/csse3200/game/cards/Card.html" title="class in com.csse3200.game.cards">Card</a></dt>

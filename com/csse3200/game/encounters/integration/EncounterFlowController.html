@@ -129,10 +129,18 @@ implements <a href="../../maps/EncounterCallback.html" title="interface in com.c
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.encounters.integration.PlayerStateGateway,com.csse3200.game.encounters.integration.ShopTransactionGateway,com.csse3200.game.maps.EncounterCallback)" class="member-name-link">EncounterFlowController</a><wbr>(<a href="PlayerStateGateway.html" title="interface in com.csse3200.game.encounters.integration">PlayerStateGateway</a>&nbsp;player,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.encounters.integration.PlayerStateGateway,com.csse3200.game.encounters.integration.CardCatalogGateway,com.csse3200.game.encounters.integration.DeckGateway,com.csse3200.game.encounters.integration.ShopTransactionGateway,com.csse3200.game.maps.EncounterCallback)" class="member-name-link">EncounterFlowController</a><wbr>(<a href="PlayerStateGateway.html" title="interface in com.csse3200.game.encounters.integration">PlayerStateGateway</a>&nbsp;player,
+ <a href="CardCatalogGateway.html" title="interface in com.csse3200.game.encounters.integration">CardCatalogGateway</a>&nbsp;cardCatalog,
+ <a href="DeckGateway.html" title="interface in com.csse3200.game.encounters.integration">DeckGateway</a>&nbsp;deck,
  <a href="ShopTransactionGateway.html" title="interface in com.csse3200.game.encounters.integration">ShopTransactionGateway</a>&nbsp;shopTransactions,
  <a href="../../maps/EncounterCallback.html" title="interface in com.csse3200.game.maps">EncounterCallback</a>&nbsp;mapCallback)</code></div>
 <div class="col-last even-row-color">
+<div class="block">Creates a controller whose Chance flow can grant validated persistent card rewards.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.encounters.integration.PlayerStateGateway,com.csse3200.game.encounters.integration.ShopTransactionGateway,com.csse3200.game.maps.EncounterCallback)" class="member-name-link">EncounterFlowController</a><wbr>(<a href="PlayerStateGateway.html" title="interface in com.csse3200.game.encounters.integration">PlayerStateGateway</a>&nbsp;player,
+ <a href="ShopTransactionGateway.html" title="interface in com.csse3200.game.encounters.integration">ShopTransactionGateway</a>&nbsp;shopTransactions,
+ <a href="../../maps/EncounterCallback.html" title="interface in com.csse3200.game.maps">EncounterCallback</a>&nbsp;mapCallback)</code></div>
+<div class="col-last odd-row-color">
 <div class="block">Creates a controller for the shared encounter lifecycle.</div>
 </div>
 </div>
@@ -209,6 +217,25 @@ implements <a href="../../maps/EncounterCallback.html" title="interface in com.c
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>player</code> - player state used by Chance outcomes</dd>
+<dd><code>shopTransactions</code> - Player/Card/Deck boundary used by Shop purchases</dd>
+<dd><code>mapCallback</code> - Map callback receiving final encounter completion</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.encounters.integration.PlayerStateGateway,com.csse3200.game.encounters.integration.CardCatalogGateway,com.csse3200.game.encounters.integration.DeckGateway,com.csse3200.game.encounters.integration.ShopTransactionGateway,com.csse3200.game.maps.EncounterCallback)">
+<h3>EncounterFlowController</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">EncounterFlowController</span><wbr><span class="parameters">(<a href="PlayerStateGateway.html" title="interface in com.csse3200.game.encounters.integration">PlayerStateGateway</a>&nbsp;player,
+ <a href="CardCatalogGateway.html" title="interface in com.csse3200.game.encounters.integration">CardCatalogGateway</a>&nbsp;cardCatalog,
+ <a href="DeckGateway.html" title="interface in com.csse3200.game.encounters.integration">DeckGateway</a>&nbsp;deck,
+ <a href="ShopTransactionGateway.html" title="interface in com.csse3200.game.encounters.integration">ShopTransactionGateway</a>&nbsp;shopTransactions,
+ <a href="../../maps/EncounterCallback.html" title="interface in com.csse3200.game.maps">EncounterCallback</a>&nbsp;mapCallback)</span></div>
+<div class="block">Creates a controller whose Chance flow can grant validated persistent card rewards.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - player state used by Chance outcomes</dd>
+<dd><code>cardCatalog</code> - authoritative card lookup boundary used by Chance rewards</dd>
+<dd><code>deck</code> - persistent deck used by Chance rewards</dd>
 <dd><code>shopTransactions</code> - Player/Card/Deck boundary used by Shop purchases</dd>
 <dd><code>mapCallback</code> - Map callback receiving final encounter completion</dd>
 </dl>
