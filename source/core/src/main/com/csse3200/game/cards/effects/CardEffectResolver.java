@@ -4,6 +4,7 @@ import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.CardValidator;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
+import com.csse3200.game.cards.runtime.ResolvedCard;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,6 +89,37 @@ public class CardEffectResolver {
             .getCard(cardId)
             .orElseThrow(() -> new IllegalArgumentException("Unknown card ID: " + cardId));
     return resolve(card, context);
+  }
+
+  /** Resolves selected instance values, preserving effect order and existing Strength behaviour. */
+  public CardEffectResolution resolve(ResolvedCard card, PlayerEffectState playerState) {
+    if (playerState == null)
+      throw new IllegalArgumentException("Player effect state cannot be null");
+    validateResolved(card);
+    List<ResolvedCardEffect> results = new ArrayList<>();
+    List<EffectConfig> effects = card.effects();
+    for (int i = 0; i < effects.size(); i++) {
+      results.add(
+          effectExecutor.resolve(card.cardId(), effects.get(i), card.target(), i, playerState));
+    }
+    return new CardEffectResolution(card.cardId(), results);
+  }
+
+  /** Resolves selected instance values against read-only combat modifiers. */
+  public CardEffectResolution resolve(ResolvedCard card, CardEffectResolutionContext context) {
+    if (context == null) throw new IllegalArgumentException("Resolution context cannot be null");
+    validateResolved(card);
+    List<ResolvedCardEffect> results = new ArrayList<>();
+    List<EffectConfig> effects = card.effects();
+    for (int i = 0; i < effects.size(); i++) {
+      results.add(effectExecutor.resolve(card.cardId(), effects.get(i), card.target(), i, context));
+    }
+    return new CardEffectResolution(card.cardId(), results);
+  }
+
+  private void validateResolved(ResolvedCard card) {
+    List<String> errors = CardValidator.validateResolved(card);
+    if (!errors.isEmpty()) throw new IllegalArgumentException(String.join("; ", errors));
   }
 
   private void validate(CardConfig card, PlayerEffectState playerState) {

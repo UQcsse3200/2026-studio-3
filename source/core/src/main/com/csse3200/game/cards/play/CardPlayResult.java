@@ -2,10 +2,12 @@ package com.csse3200.game.cards.play;
 
 import com.csse3200.game.cards.effects.CardEffectResolution;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
+import com.csse3200.game.cards.runtime.CardInstance;
 import java.util.List;
 
 /** Immutable result of attempting to play one card from the player's current hand. */
 public record CardPlayResult(
+    String instanceId,
     String cardId,
     CardPlayTarget target,
     boolean success,
@@ -14,8 +16,11 @@ public record CardPlayResult(
     CardPlayFailureReason failureReason,
     DeckSnapshot deckSnapshot) {
   public CardPlayResult {
-    if (cardId == null || cardId.isBlank()) {
-      throw new IllegalArgumentException("Card ID cannot be null or blank");
+    if (instanceId == null || instanceId.isBlank()) {
+      throw new IllegalArgumentException("Instance ID cannot be null or blank");
+    }
+    if (success && (cardId == null || cardId.isBlank())) {
+      throw new IllegalArgumentException("Successful play must identify its card definition");
     }
     if (energyCost < 0) {
       throw new IllegalArgumentException("Energy cost cannot be negative");
@@ -43,61 +48,35 @@ public record CardPlayResult(
     }
   }
 
-  /** Backwards-compatible constructor for callers that do not yet send target/deck information. */
-  public CardPlayResult(
-      String cardId,
-      boolean successful,
-      int energyCost,
-      CardEffectResolution resolution,
-      CardPlayFailureReason failureReason) {
-    this(cardId, null, successful, energyCost, resolution, failureReason, DeckSnapshot.empty());
-  }
-
-  /**
-   * Creates a successful play result.
-   *
-   * @param cardId played card ID
-   * @param energyCost energy spent through Team 7
-   * @param resolution resolved card effects from Team 5
-   * @return successful card play result
-   */
-  public static CardPlayResult success(
-      String cardId, int energyCost, CardEffectResolution resolution) {
-    return success(cardId, null, energyCost, resolution, DeckSnapshot.empty());
-  }
-
   /** Creates a successful result for the unified card-play request flow. */
   public static CardPlayResult success(
+      String instanceId,
       String cardId,
       CardPlayTarget target,
       int energyCost,
       CardEffectResolution resolution,
       DeckSnapshot deckSnapshot) {
     return new CardPlayResult(
-        cardId, target, true, energyCost, resolution, CardPlayFailureReason.NONE, deckSnapshot);
-  }
-
-  /**
-   * Creates a failed play result.
-   *
-   * @param cardId requested card ID
-   * @param energyCost energy cost that would have been paid
-   * @param failureReason reason the card was not played
-   * @return failed card play result
-   */
-  public static CardPlayResult failure(
-      String cardId, int energyCost, CardPlayFailureReason failureReason) {
-    return failure(cardId, null, energyCost, failureReason, DeckSnapshot.empty());
+        instanceId,
+        cardId,
+        target,
+        true,
+        energyCost,
+        resolution,
+        CardPlayFailureReason.NONE,
+        deckSnapshot);
   }
 
   /** Creates a failed result for the unified card-play request flow. */
   public static CardPlayResult failure(
+      String instanceId,
       String cardId,
       CardPlayTarget target,
       int energyCost,
       CardPlayFailureReason failureReason,
       DeckSnapshot deckSnapshot) {
-    return new CardPlayResult(cardId, target, false, energyCost, null, failureReason, deckSnapshot);
+    return new CardPlayResult(
+        instanceId, cardId, target, false, energyCost, null, failureReason, deckSnapshot);
   }
 
   /** Backwards-compatible alias for the earlier result API. */
@@ -127,21 +106,21 @@ public record CardPlayResult(
   /**
    * @return immutable post-attempt hand snapshot for Team 3/UI
    */
-  public List<String> updatedHand() {
+  public List<CardInstance> updatedHand() {
     return deckSnapshot.updatedHand();
   }
 
   /**
    * @return immutable post-attempt draw-pile snapshot for Team 3/UI
    */
-  public List<String> updatedDrawPile() {
+  public List<CardInstance> updatedDrawPile() {
     return deckSnapshot.updatedDrawPile();
   }
 
   /**
    * @return immutable post-attempt discard-pile snapshot for Team 3/UI
    */
-  public List<String> updatedDiscardPile() {
+  public List<CardInstance> updatedDiscardPile() {
     return deckSnapshot.updatedDiscardPile();
   }
 }

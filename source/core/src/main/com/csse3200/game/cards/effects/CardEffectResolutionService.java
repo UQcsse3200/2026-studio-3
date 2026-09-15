@@ -3,6 +3,7 @@ package com.csse3200.game.cards.effects;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.cards.runtime.ResolvedCard;
 import java.util.List;
 
 /**
@@ -61,6 +62,18 @@ public final class CardEffectResolutionService {
 
   /** Resolves an already retrieved card config with read-only combat state. */
   public CardEffectResolution resolve(CardConfig card, CardEffectResolutionContext context) {
+    return record(resolver.resolve(card, context));
+  }
+
+  /**
+   * Resolves the exact base/upgraded instance values without looking up a base definition again.
+   */
+  public CardEffectResolution resolve(ResolvedCard card) {
+    return record(resolver.resolve(card, playerEffectState));
+  }
+
+  /** Resolves instance values with externally supplied modifiers. */
+  public CardEffectResolution resolve(ResolvedCard card, CardEffectResolutionContext context) {
     return record(resolver.resolve(card, context));
   }
 
