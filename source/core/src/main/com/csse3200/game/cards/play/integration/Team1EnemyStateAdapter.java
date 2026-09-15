@@ -82,6 +82,7 @@ public final class Team1EnemyStateAdapter implements EnemyStateView, EnemyEffect
           case PIERCE -> stats.takePiercingDamage(effect.value());
           case POISON, VULNERABLE, FEEBLE ->
               stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
+          case SUNDER -> stats.setArmor(stats.getArmor() - effect.value());
           default -> throw unsupportedEnemyEffect(effect.type());
         }
       }
@@ -134,7 +135,8 @@ public final class Team1EnemyStateAdapter implements EnemyStateView, EnemyEffect
           && effect.type() != EffectType.PIERCE
           && effect.type() != EffectType.POISON
           && effect.type() != EffectType.VULNERABLE
-          && effect.type() != EffectType.FEEBLE) {
+          && effect.type() != EffectType.FEEBLE
+          && effect.type() != EffectType.SUNDER) {
         throw unsupportedEnemyEffect(effect.type());
       }
     }

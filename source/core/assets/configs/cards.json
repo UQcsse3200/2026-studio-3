@@ -19,6 +19,17 @@
         }
       },
       {
+        "id": "warding_sweep",
+        "name": "Warding Sweep",
+        "description": "Deal 4 damage to all enemies.",
+        "cost": 2,
+        "type": "ATTACK",
+        "rarity": "COMMON",
+        "target": "ALL_ENEMIES",
+        "effects": [{ "type": "DAMAGE", "value": 4, "duration": 0 }],
+        "texturePath": "images/cards/warding_sweep.png"
+      },
+      {
         "id": "defend",
         "name": "Defend",
         "description": "Gain 5 block.",
@@ -75,6 +86,20 @@
         "target": "SELF",
         "effects": [{ "type": "HEAL", "value": 6, "duration": 0 }],
         "texturePath": "images/cards/bandage.png"
+      },
+      {
+        "id": "sentinels_rebuke",
+        "name": "Sentinel's Rebuke",
+        "description": "Deal 4 damage. Apply 1 Feeble for 2 turns.",
+        "cost": 1,
+        "type": "ATTACK",
+        "rarity": "UNCOMMON",
+        "target": "SINGLE_ENEMY",
+        "effects": [
+          { "type": "DAMAGE", "value": 4, "duration": 0 },
+          { "type": "FEEBLE", "value": 1, "duration": 2 }
+        ],
+        "texturePath": "images/cards/sentinels_rebuke.png"
       },
       {
         "id": "poison_flask",
@@ -154,6 +179,31 @@
           { "type": "VULNERABLE", "value": 1, "duration": 2 }
         ],
         "texturePath": "images/cards/rift_lance.png"
+      },
+      {
+        "id": "wardens_judgement",
+        "name": "Warden's Judgement",
+        "description": "Deal 9 damage.",
+        "cost": 2,
+        "type": "ATTACK",
+        "rarity": "UNCOMMON",
+        "target": "SINGLE_ENEMY",
+        "effects": [{ "type": "DAMAGE", "value": 9, "duration": 0 }],
+        "texturePath": "images/cards/wardens_judgement.png"
+      },
+      {
+        "id": "unseal_the_breach",
+        "name": "Unseal the Breach",
+        "description": "Deal 2 damage. Reduce the enemy's armour by 3.",
+        "cost": 1,
+        "type": "ATTACK",
+        "rarity": "UNCOMMON",
+        "target": "SINGLE_ENEMY",
+        "effects": [
+          { "type": "SUNDER", "value": 3, "duration": 0 },
+          { "type": "DAMAGE", "value": 2, "duration": 0 }
+        ],
+        "texturePath": "images/cards/unseal_the_breach.png"
       },
       {
         "id": "astral_ward",

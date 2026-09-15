@@ -792,8 +792,9 @@ public class BattleController {
           case VULNERABLE ->
               stats.applyStatusEffect(
                   new StatusEffect("vulnerable", effect.value(), effect.duration()));
+          case SUNDER -> stats.setArmor(stats.getArmor() - effect.value());
           default -> {
-            // BLOCK / HEAL / STRENGTH are not enemy-facing.
+            // Other effect types are not handled by this legacy battle path.
           }
         }
       }

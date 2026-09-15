@@ -54,6 +54,55 @@ class EffectExecutorTest {
   }
 
   @Test
+  void shouldResolveSunderTargetingEnemyWithLiteralValue() {
+    CardEffectResolutionContext context = new CardEffectResolutionContext(5, 1, 1);
+
+    ResolvedCardEffect result =
+        executor.resolve(
+            "unseal_the_breach",
+            new EffectConfig(EffectType.SUNDER, 3),
+            TargetType.SINGLE_ENEMY,
+            1,
+            context);
+
+    assertEquals(
+        new ResolvedCardEffect(
+            "unseal_the_breach", EffectType.SUNDER, TargetType.SINGLE_ENEMY, 3, 0, 1),
+        result);
+  }
+
+  @Test
+  void shouldNotIncreaseSunderWithPlayerStrength() {
+    playerState.addStrength(5);
+
+    ResolvedCardEffect result =
+        executor.resolve(
+            "unseal_the_breach",
+            new EffectConfig(EffectType.SUNDER, 3),
+            TargetType.SINGLE_ENEMY,
+            0,
+            playerState);
+
+    assertEquals(
+        new ResolvedCardEffect(
+            "unseal_the_breach", EffectType.SUNDER, TargetType.SINGLE_ENEMY, 3, 0, 0),
+        result);
+  }
+
+  @Test
+  void shouldRejectSunderTargetingSelf() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            executor.resolve(
+                "unseal_the_breach",
+                new EffectConfig(EffectType.SUNDER, 3),
+                TargetType.SELF,
+                0,
+                playerState));
+  }
+
+  @Test
   void shouldApplyExternalStrengthFeebleAndVulnerableOnce() {
     CardEffectResolutionContext context = new CardEffectResolutionContext(2, 1, 1);
 

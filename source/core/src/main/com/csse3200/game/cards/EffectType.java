@@ -20,6 +20,8 @@ public enum EffectType {
   FEEBLE(true),
   /** Increases damage the target deals for the rest of the combat. */
   STRENGTH(false),
+  /** Immediate reduction of the target's armour pool. */
+  SUNDER(false),
   /** Immediately restores player energy, capped by the player's maximum energy. */
   ENERGY_GAIN(false),
   /** Immediate damage that ignores the target's block and armour. */
