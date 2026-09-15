@@ -39,18 +39,18 @@ class MainMenuActionsTest {
   }
 
   @Test
-  void loadWaitsForBackendRoute() {
+  void loadOpensSaveLoadScreen() {
     menu.getEvents().trigger(MainMenuDisplay.LOAD_EVENT);
 
-    verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
+    verify(game).setScreen(GdxGame.ScreenType.SAVE_LOAD);
     verify(runState, never()).endRun();
   }
 
   @Test
-  void bestiaryWaitsForBackendRoute() {
+  void bestiaryOpensLibraryScreen() {
     menu.getEvents().trigger(MainMenuDisplay.BESTIARY_EVENT);
 
-    verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
+    verify(game).setScreen(GdxGame.ScreenType.LIBRARY);
     verify(runState, never()).endRun();
   }
 

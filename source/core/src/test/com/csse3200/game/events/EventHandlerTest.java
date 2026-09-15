@@ -62,6 +62,17 @@ class EventHandlerTest {
   }
 
   @Test
+  void shouldStopTriggeringRemovedListener() {
+    EventListener0 listener = mock(EventListener0.class);
+    handler.addListener("event", listener);
+
+    handler.removeListener("event", listener);
+    handler.trigger("event");
+
+    verifyNoInteractions(listener);
+  }
+
+  @Test
   void shouldTriggerOneArg() {
     EventListener1<String> listener = (EventListener1<String>) mock(EventListener1.class);
     handler.addListener("event", listener);

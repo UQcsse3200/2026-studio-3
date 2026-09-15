@@ -1,0 +1,38 @@
+{
+  "encounters": [
+    {
+      "id": "invalid-card-rewards",
+      "description": "Invalid card reward values.",
+      "weight": 1,
+      "choices": [
+        {
+          "id": "blank",
+          "description": "Blank reward.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0,
+            "cardRewardId": "  "
+          }
+        },
+        {
+          "id": "wrong-type",
+          "description": "Non-string reward.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0,
+            "cardRewardId": 42
+          }
+        },
+        {
+          "id": "null",
+          "description": "Null reward.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0,
+            "cardRewardId": null
+          }
+        }
+      ]
+    }
+  ]
+}

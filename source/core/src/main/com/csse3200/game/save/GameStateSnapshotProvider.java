@@ -1,5 +1,8 @@
 package com.csse3200.game.save;
 
+import com.csse3200.game.GdxGame;
+import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.bestiary.BestiaryUnlockState;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.components.CombatStatsComponent;
@@ -7,26 +10,45 @@ import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.maps.MapGraph;
 import com.csse3200.game.maps.MapNode;
+import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Captures the live run as a {@link SaveGameData} snapshot.
  *
- * <p>Player/deck/map references are passed in explicitly, matching how the rest of the codebase
- * holds them (no global "get the player" service exists) — construct this with whatever screen
- * currently owns the player entity, deck, and run state.
+ * <p>The player, deck and map references are all run-scoped rather than screen-owned, so capturing
+ * a save never depends on a rendered player entity still being alive.
  */
 public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
-  private final Entity player;
+  private final PlayerRunState playerState;
   private final PlayerDeck playerDeck;
   private final RunState runState;
+  private final BestiaryService bestiaryService;
 
-  public GameStateSnapshotProvider(Entity player, PlayerDeck playerDeck, RunState runState) {
-    this.player = player;
+  public GameStateSnapshotProvider(
+      PlayerRunState playerState,
+      PlayerDeck playerDeck,
+      RunState runState,
+      BestiaryService bestiaryService) {
+    if (playerState == null) {
+      throw new IllegalArgumentException("playerState must not be null");
+    }
+    if (playerDeck == null) {
+      throw new IllegalArgumentException("playerDeck must not be null");
+    }
+    if (runState == null) {
+      throw new IllegalArgumentException("runState must not be null");
+    }
+    if (bestiaryService == null) {
+      throw new IllegalArgumentException("bestiaryService must not be null");
+    }
+    this.playerState = playerState;
     this.playerDeck = playerDeck;
     this.runState = runState;
+    this.bestiaryService = bestiaryService;
   }
 
   @Override
@@ -40,19 +62,13 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
   }
 
   private PlayerSaveData capturePlayer() {
-    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
-    InventoryComponent inventory = player.getComponent(InventoryComponent.class);
-
-    int health = stats != null ? stats.getHealth() : 0;
-    int maxHealth = stats != null ? stats.getMaxHealth() : 0;
-    int gold = inventory != null ? inventory.getGold() : 0;
-
     // Piety is confirmed not implemented for this sprint (Amber_Teng, Team 7, 9/10) — dropped
     // from scope in favor of concrete Status Effects. PlayerSaveData.piety is a leftover field
     // from an earlier design; left at 0 intentionally, not a placeholder awaiting a real source.
     int piety = 0;
 
-    return new PlayerSaveData(health, maxHealth, gold, piety);
+    return new PlayerSaveData(
+        playerState.getCurrentHealth(), playerState.getMaxHealth(), playerState.getGold(), piety);
   }
 
   private DeckSaveData captureDeck() {
@@ -86,8 +102,24 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
   }
 
   private ProgressSaveData captureProgress() {
-    // TODO: no encounter-progress tracking exists yet anywhere in the codebase. Confirmed with
-    // Team 2 (message sent 9/9) — implement once they clarify ownership/source.
-    return new ProgressSaveData(List.of(), "", "");
+    // pendingRewardId: confirmed empty with Team 2 (Joel, 9/10) — Chance/Shop outcomes apply
+    // immediately, no pending-reward phase exists. Revisit only if a reward-claim screen is
+    // added later.
+    String pendingRewardId = "";
+
+    // resumeScreen: agreed with Team 2 (Joel, 9/10) that a load should always return to the Map,
+    // never resume mid-encounter, since outcomes apply immediately and nothing is ever left
+    // in-progress to replay. Always MAP for now — revisit if that rule changes.
+    String resumeScreen = GdxGame.ScreenType.MAP.name();
+
+    List<BestiaryProgressSaveData> bestiaryProgress = new ArrayList<>();
+    for (Map.Entry<String, BestiaryUnlockState> entry :
+        bestiaryService.getProgressSnapshot().entrySet()) {
+      if (entry.getValue() != BestiaryUnlockState.LOCKED) {
+        bestiaryProgress.add(new BestiaryProgressSaveData(entry.getKey(), entry.getValue().name()));
+      }
+    }
+
+    return new ProgressSaveData(pendingRewardId, resumeScreen, bestiaryProgress);
   }
 }
