@@ -26,11 +26,25 @@ class BestiaryServiceTest {
   void shouldLoadDefaultRosterWithResolvedSpritePaths() {
     BestiaryService service = BestiaryService.loadDefault();
 
+    assertEquals(6, service.getEntries().size());
     assertTrue(service.contains("lesser_shade"));
+    assertTrue(service.contains("tomb_guardian"));
+    assertTrue(service.contains("void_knight"));
     assertTrue(service.recordEncountered("lesser_shade"));
     assertEquals(
         "images/enemies/lesser_shade.atlas",
         service.getEntry("lesser_shade").orElseThrow().sprite().orElseThrow());
+  }
+
+  @Test
+  void shouldLoadDescriptionsForEveryDefaultEnemy() {
+    BestiaryService service = BestiaryService.loadDefault();
+
+    for (BestiaryEntryView entry : service.getEntries()) {
+      service.recordDefeated(entry.enemyId());
+    }
+
+    assertTrue(service.getEntries().stream().allMatch(entry -> entry.description().isPresent()));
   }
 
   @Test
