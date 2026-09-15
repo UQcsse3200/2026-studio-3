@@ -1,6 +1,7 @@
 package com.csse3200.game.components.combat;
 
 import com.csse3200.game.cards.EffectType;
+import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.effects.*;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.cards.play.CardPlayRequest;
@@ -580,6 +581,15 @@ public class BattleController {
       return;
     }
 
+    if (effectHandler != null
+        && request.target().type() != TargetType.SELF
+        && effectHandler.getLivingEnemyTargets(request, enemies).isEmpty()) {
+      lastCardPlaySucceeded = false;
+      narrate("Couldn't play " + request.cardId() + ": target is no longer available.");
+      finishPlayerCardAction();
+      return;
+    }
+
     CardPlayResult result = cardPlayService.playCard(request);
 
     if (result == null) {
@@ -718,6 +728,12 @@ public class BattleController {
     // Coordinate end-of-turn operations.
     if (this.queueBattleOutcomeIfOver()) {
       return;
+    }
+    // Cards may have defeated the enemy selected during intent reveal. Start the enemy phase
+    // from the first survivor rather than executing that stale selection.
+    resetEnemyCursor();
+    if (advanceToNextLivingEnemy()) {
+      setEnemyIntent(resolveEnemyIntent(getActiveEnemy()));
     }
     handle(BattleEvent.PLAYER_TURN_ENDED);
   }
