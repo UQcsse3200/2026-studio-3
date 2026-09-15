@@ -46,6 +46,27 @@ public final class EncounterFlowController implements EncounterCallback {
   }
 
   /**
+   * Creates a controller whose Chance flow can grant validated persistent card rewards.
+   *
+   * @param player player state used by Chance outcomes
+   * @param cardCatalog authoritative card lookup boundary used by Chance rewards
+   * @param deck persistent deck used by Chance rewards
+   * @param shopTransactions Player/Card/Deck boundary used by Shop purchases
+   * @param mapCallback Map callback receiving final encounter completion
+   */
+  public EncounterFlowController(
+      PlayerStateGateway player,
+      CardCatalogGateway cardCatalog,
+      DeckGateway deck,
+      ShopTransactionGateway shopTransactions,
+      EncounterCallback mapCallback) {
+    this.chanceOutcomeApplier = new ChanceOutcomeApplier(player, cardCatalog, deck);
+    this.shopTransactions =
+        Objects.requireNonNull(shopTransactions, "shopTransactions cannot be null");
+    this.mapCallback = Objects.requireNonNull(mapCallback, "mapCallback cannot be null");
+  }
+
+  /**
    * Starts a Chance Encounter for a map node.
    *
    * @param nodeId selected map node

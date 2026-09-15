@@ -81,7 +81,7 @@ public class MainMenuDisplay extends UIComponent {
     // Build the buttons and add them to the menu table
     newGameButton = createButton("New Game", START_EVENT, buttonFrameTexture);
     loadGameButton = createButton("Load Game", LOAD_EVENT, buttonFrameTexture);
-    bestiaryButton = createButton("Bestiary", BESTIARY_EVENT, buttonFrameTexture);
+    bestiaryButton = createButton("Library", BESTIARY_EVENT, buttonFrameTexture);
     settingsButton = createButton("Settings", SETTINGS_EVENT, buttonFrameTexture);
     exitButton = createButton("Exit", EXIT_EVENT, buttonFrameTexture);
 
