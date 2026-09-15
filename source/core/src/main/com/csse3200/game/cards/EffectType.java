@@ -21,7 +21,9 @@ public enum EffectType {
   /** Increases damage the target deals for the rest of the combat. */
   STRENGTH(false),
   /** Immediately restores player energy, capped by the player's maximum energy. */
-  ENERGY_GAIN(false);
+  ENERGY_GAIN(false),
+  /** Immediate damage that ignores the target's block and armour. */
+  PIERCE(false);
 
   private final boolean usesDuration;
 
