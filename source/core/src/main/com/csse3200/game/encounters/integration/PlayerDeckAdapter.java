@@ -77,7 +77,7 @@ public final class PlayerDeckAdapter implements DeckGateway {
     }
 
     CardInstance pendingCard = cards.get(pendingCardIndex);
-    if (!cardId.equals(pendingCard.cardId())
+    if (!Objects.equals(cardId, pendingCard.cardId())
         || !Objects.equals(pendingInstanceId, pendingCard.instanceId())) {
       return false;
     }
