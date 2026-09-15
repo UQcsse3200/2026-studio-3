@@ -9,6 +9,7 @@ import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.TestCardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.chance.ChanceOutcome;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.player.InventoryComponent;
@@ -36,7 +37,7 @@ class ChanceCardRewardIntegrationTest {
     ChanceResolution result = applier.apply(new ChanceOutcome(-10, 5, "bandage"));
 
     assertEquals(ChanceResolution.Status.PLAYER_UPDATE_FAILED, result.getStatus());
-    assertEquals(List.of("bandage", "strike", "bandage"), playerDeck.getCardIds());
+    assertEquals(List.of("bandage", "strike", "bandage"), cardIds(playerDeck));
     assertEquals(100, player.getHealth());
     assertEquals(40, player.getCurrency());
   }
@@ -65,7 +66,7 @@ class ChanceCardRewardIntegrationTest {
     assertEquals(ChanceResolution.Status.ROLLBACK_FAILED, result.getStatus());
     assertEquals(60, player.getHealth());
     assertEquals(55, player.getCurrency());
-    assertEquals(List.of("bandage"), playerDeck.getCardIds());
+    assertEquals(List.of("bandage"), cardIds(playerDeck));
   }
 
   @Test
@@ -73,7 +74,7 @@ class ChanceCardRewardIntegrationTest {
     CardService cardService = new CardLibrary(CardConfigLoader.loadCards());
     RunState runState = new RunState();
     PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(cardService);
-    int initialBandageCount = playerDeck.count("bandage");
+    int initialBandageCount = playerDeck.countByCardId("bandage");
     PlayerRunState playerState = new PlayerRunState(80, 100, 40);
     Entity playerEntity =
         new Entity()
@@ -94,8 +95,12 @@ class ChanceCardRewardIntegrationTest {
 
     assertTrue(result.isSuccess());
     assertSame(playerDeck, reenteredDeck);
-    assertEquals(initialBandageCount + 1, reenteredDeck.count("bandage"));
+    assertEquals(initialBandageCount + 1, reenteredDeck.countByCardId("bandage"));
     assertEquals(70, playerState.getCurrentHealth());
     assertEquals(55, playerState.getGold());
+  }
+
+  private static List<String> cardIds(PlayerDeck deck) {
+    return deck.getCards().stream().map(CardInstance::cardId).toList();
   }
 }

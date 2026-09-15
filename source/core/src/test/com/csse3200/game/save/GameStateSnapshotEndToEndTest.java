@@ -133,7 +133,11 @@ class GameStateSnapshotEndToEndTest {
     assertEquals(65, restoredPlayerState.getCurrentHealth());
     assertEquals(100, restoredPlayerState.getMaxHealth());
     assertEquals(120, restoredPlayerState.getGold());
-    assertEquals(PlayerDeckFactory.getStarterDeckCardIds(), restoredDeck.getCardIds());
+    assertEquals(
+        PlayerDeckFactory.getStarterDeckCardIds(),
+        restoredDeck.getCards().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList());
     assertEquals(0, restoredRunState.getMapGraph().getCurrentNode().getNodeId());
     assertEquals(NodeState.AVAILABLE, restoredRunState.getMapGraph().getNode(1).getState());
     assertEquals(
