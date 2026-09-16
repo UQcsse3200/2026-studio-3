@@ -218,21 +218,6 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="purchaseWithGateway(java.lang.String,com.csse3200.game.encounters.integration.ShopTransactionGateway)">
-<h3>purchaseWithGateway</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="PurchaseResult.html" title="class in com.csse3200.game.shop">PurchaseResult</a></span>&nbsp;<span class="element-name">purchaseWithGateway</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;itemId,
- <a href="../encounters/integration/ShopTransactionGateway.html" title="interface in com.csse3200.game.encounters.integration">ShopTransactionGateway</a>&nbsp;transactions)</span></div>
-<div class="block">Attempts to purchase an item through the cross-team transaction boundary.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>itemId</code> - shop item identifier</dd>
-<dd><code>transactions</code> - Player/Card/Deck transaction boundary</dd>
-<dt>Returns:</dt>
-<dd>purchase result with success or failure reason</dd>
-</dl>
-</section>
-</li>
-<li>
 <section class="detail" id="canPurchase(java.lang.String,com.csse3200.game.components.player.InventoryComponent)">
 <h3>canPurchase</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="PurchaseResult.html" title="class in com.csse3200.game.shop">PurchaseResult</a></span>&nbsp;<span class="element-name">canPurchase</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;itemId,
@@ -259,6 +244,21 @@ loadScripts(document, 'script');</script>
 <dd><code>transactions</code> - Player/Card/Deck transaction boundary</dd>
 <dt>Returns:</dt>
 <dd>success when the item and all dependent systems accept the purchase</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="purchaseWithGateway(java.lang.String,com.csse3200.game.encounters.integration.ShopTransactionGateway)">
+<h3>purchaseWithGateway</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="PurchaseResult.html" title="class in com.csse3200.game.shop">PurchaseResult</a></span>&nbsp;<span class="element-name">purchaseWithGateway</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;itemId,
+ <a href="../encounters/integration/ShopTransactionGateway.html" title="interface in com.csse3200.game.encounters.integration">ShopTransactionGateway</a>&nbsp;transactions)</span></div>
+<div class="block">Attempts to purchase an item through the cross-team transaction boundary.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>itemId</code> - shop item identifier</dd>
+<dd><code>transactions</code> - Player/Card/Deck transaction boundary</dd>
+<dt>Returns:</dt>
+<dd>purchase result with success or failure reason</dd>
 </dl>
 </section>
 </li>

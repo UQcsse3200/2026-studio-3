@@ -262,6 +262,16 @@ loadScripts(document, 'script');</script>
 <div class="block">Returns true if the entity's has 0 health, otherwise false.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#processPoisonTick(java.util.function.IntConsumer)" class="member-name-link">processPoisonTick</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/IntConsumer.html" title="class or interface in java.util.function" class="external-link">IntConsumer</a>&nbsp;applyDamage)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Processes one poison tick for this entity.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reduceArmor(int)" class="member-name-link">reduceArmor</a><wbr>(int&nbsp;amount)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Reduces this entity's armor without affecting block, health, or other combat statistics.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeStatusEffect(java.lang.String)" class="member-name-link">removeStatusEffect</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;type)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Explicitly removes a status effect from this entity, if present.</div>
@@ -571,6 +581,21 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="reduceArmor(int)">
+<h3>reduceArmor</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">reduceArmor</span><wbr><span class="parameters">(int&nbsp;amount)</span></div>
+<div class="block">Reduces this entity's armor without affecting block, health, or other combat statistics.
+
+ <p>The armor value cannot fall below zero. Non-positive amounts are ignored.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>amount</code> - requested amount of armor to remove</dd>
+<dt>Returns:</dt>
+<dd>actual amount of armor removed</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="clearArmor()">
 <h3>clearArmor</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">clearArmor</span>()</div>
@@ -731,6 +756,26 @@ loadScripts(document, 'script');</script>
  dependency: this method must be called exactly once per turn for durations to mean "number of
  turns". WHEN it gets called is not yet wired up - it depends on Team 3's turn/battle-sequence
  event, which is not confirmed yet.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="processPoisonTick(java.util.function.IntConsumer)">
+<h3>processPoisonTick</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">processPoisonTick</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/IntConsumer.html" title="class or interface in java.util.function" class="external-link">IntConsumer</a>&nbsp;applyDamage)</span></div>
+<div class="block">Processes one poison tick for this entity.
+
+ <p>If the entity is alive and has an active POISON effect, poison damage is calculated and
+ applied through the supplied damage handler. Only the POISON duration is reduced. The effect is
+ removed when its duration expires.
+
+ <p>If the damage handler replaces or removes the original POISON effect, this method does not
+ modify the replacement effect.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>applyDamage</code> - handler used to apply the calculated poison damage</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if <code>applyDamage</code> is null</dd>
+</dl>
 </section>
 </li>
 </ul>
