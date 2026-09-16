@@ -22,7 +22,6 @@ public class DisplayingFactory extends UIComponent {
 
   static {
     registerVariant(DEFAULT_VARIANT, rec -> new Displaying(rec) {});
-    registerVariant("cardDisplay", CardDisplay::new);
     registerVariant("battleLog", BattleLogDisplay::new);
     registerVariant("endBattle", EndBattleDisplay::new);
     // Add more variants here as needed.
