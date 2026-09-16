@@ -1,6 +1,7 @@
 package com.csse3200.game.rendering;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
@@ -99,6 +100,13 @@ public class Renderer implements Disposable {
     batch.setProjectionMatrix(projMatrix);
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+    // SpriteBatch's tint is sticky across begin()/end() pairs. The UI stage below shares this same
+    // batch, and a disabled/shaded card button (see Clickable#applyDisabledShade) can leave the
+    // batch tinted after stage.draw() — most visibly when it's the last actor drawn (the rightmost
+    // hand card), which then dims every world texture drawn raw via batch.draw(Texture, ...) (e.g.
+    // TextureRenderComponent) next frame until that card's color resets. Reset here so world
+    // rendering always starts from a clean white tint.
+    batch.setColor(Color.WHITE);
     batch.begin();
     renderService.render(batch);
     batch.end();
