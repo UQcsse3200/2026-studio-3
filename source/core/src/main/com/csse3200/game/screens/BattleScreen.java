@@ -11,8 +11,12 @@ import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.cards.debug.CardEffectDebugComponent;
+import com.csse3200.game.cards.debug.CardEffectDebugDisplay;
+import com.csse3200.game.cards.debug.KeyboardCardEffectDebugInputComponent;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.effects.CardEffectResolutionService;
 import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.cards.play.integration.Team1EnemyStateAdapter;
 import com.csse3200.game.cards.play.integration.Team3CardPlayAdapter;
@@ -85,6 +89,9 @@ public class BattleScreen extends ScreenAdapter {
   private final BattleController controller;
   private final CardLibrary library;
   private final BattleDeck battleDeck;
+  // Shared with the debug dialog so it reflects real, live resolutions instead of a
+  // separate copy.
+  private final CardEffectResolutionService cardEffects;
   private final CardPlayService cardPlayService;
   private ClickableFactory uiFactory;
   private final PlayerRunState playerState;
@@ -154,9 +161,11 @@ public class BattleScreen extends ScreenAdapter {
     EnergyComponent energy = player.getComponent(EnergyComponent.class);
 
     Map<String, Entity> enemyTargets = forestGameArea.getEnemyTargets();
+    cardEffects = new CardEffectResolutionService(library);
     cardPlayService =
         new CardPlayService(
             library,
+            cardEffects,
             battleDeck,
             energy,
             new Team7PlayerStateAdapter(player),
@@ -217,7 +226,10 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new PauseMenuActions(game))
             .addComponent(
                 new DamageOnCardPlayComponent(
-                    gameArea.getPlayer().getComponent(CombatStatsComponent.class)));
+                    gameArea.getPlayer().getComponent(CombatStatsComponent.class)))
+            .addComponent(new CardEffectDebugComponent(cardEffects))
+            .addComponent(new KeyboardCardEffectDebugInputComponent())
+            .addComponent(new CardEffectDebugDisplay());
 
     // Keep the on-screen row in sync with the deck: whenever the hand changes (a card played, or
     // one retrieved from the discard pile after its cooldown elapses) rebuild from the live deck,
