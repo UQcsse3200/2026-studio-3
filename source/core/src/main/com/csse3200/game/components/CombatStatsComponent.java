@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.IntConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -280,6 +281,26 @@ public class CombatStatsComponent extends Component {
     setArmor(this.armor + amount);
   }
 
+  /**
+   * Reduces this entity's armor without affecting block, health, or other combat statistics.
+   *
+   * <p>The armor value cannot fall below zero. Non-positive amounts are ignored.
+   *
+   * @param amount requested amount of armor to remove
+   * @return actual amount of armor removed
+   */
+  public int reduceArmor(int amount) {
+    if (amount <= 0) {
+      return 0;
+    }
+
+    int removed = Math.min(armor, amount);
+    if (removed > 0) {
+      setArmor(armor - removed);
+    }
+    return removed;
+  }
+
   /** Clears all armor from the entity, setting it to 0. */
   public void clearArmor() {
     setArmor(0);
@@ -304,7 +325,6 @@ public class CombatStatsComponent extends Component {
   }
 
   // Block - per-turn damage reduction pool (Team 6's "Slay the Spire" style block)
-
   /**
    * Returns the entity's current block value.
    *
@@ -470,5 +490,46 @@ public class CombatStatsComponent extends Component {
               }
               return expired;
             });
+  }
+
+  /**
+   * Processes one poison tick for this entity.
+   *
+   * <p>If the entity is alive and has an active POISON effect, poison damage is calculated and
+   * applied through the supplied damage handler. Only the POISON duration is reduced. The effect is
+   * removed when its duration expires.
+   *
+   * <p>If the damage handler replaces or removes the original POISON effect, this method does not
+   * modify the replacement effect.
+   *
+   * @param applyDamage handler used to apply the calculated poison damage
+   * @throws IllegalArgumentException if {@code applyDamage} is null
+   */
+  public void processPoisonTick(IntConsumer applyDamage) {
+    if (applyDamage == null) {
+      throw new IllegalArgumentException("Damage handler must not be null");
+    }
+    if (isDead()) {
+      return;
+    }
+
+    StatusEffect poison = getStatusEffect("POISON");
+    if (poison == null) {
+      return;
+    }
+
+    int damage = StatusEffectCalculator.getPoisonDamage(this);
+    if (damage > 0) {
+      applyDamage.accept(damage);
+    }
+
+    // Do not tick a replacement effect created by the damage callback.
+    if (getStatusEffect("POISON") != poison) {
+      return;
+    }
+
+    if (poison.tickAndCheckExpired()) {
+      removeStatusEffect("POISON");
+    }
   }
 }

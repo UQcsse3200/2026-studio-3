@@ -41,8 +41,6 @@ import com.csse3200.game.physics.PhysicsEngine;
 import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
-import com.csse3200.game.rewards.RewardOption;
-import com.csse3200.game.rewards.RewardService;
 import com.csse3200.game.services.DragNDropService;
 import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
