@@ -4,7 +4,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 
 public class CardDisplay extends Displaying {
 
-  private Label text;
+  private final Label text;
 
   @Deprecated
   public CardDisplay(DisplayingRecord rec) {
