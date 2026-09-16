@@ -24,7 +24,10 @@ class CardPlayServiceIntegrationTest {
   void shouldPlayEveryInitialTeamSixCardThroughTheUnifiedEntryPoint() {
     CardLibrary library = new CardLibrary(CardConfigLoader.loadCards());
     BattleDeck battleDeck = new BattleDeck(new PlayerDeck(library, CARD_IDS));
+
+    // Draw every card into hand up front — playing a card no longer draws a replacement.
     battleDeck.drawCards(CARD_IDS.size());
+
     EnergyComponent energy = new EnergyComponent(10);
     CardPlayService service = new CardPlayService(library, battleDeck, energy);
 
@@ -39,12 +42,14 @@ class CardPlayServiceIntegrationTest {
     assertTrue(
         List.of(strike, defend, poisonDagger, expose, innerFocus, bandage).stream()
             .allMatch(CardPlayResult::success));
+
     assertEquals(List.of(EffectType.DAMAGE), types(strike.enemyEffects()));
     assertEquals(List.of(EffectType.BLOCK), types(defend.playerEffects()));
     assertEquals(List.of(EffectType.DAMAGE, EffectType.POISON), types(poisonDagger.enemyEffects()));
     assertEquals(List.of(EffectType.VULNERABLE), types(expose.enemyEffects()));
     assertEquals(List.of(EffectType.STRENGTH), types(innerFocus.playerEffects()));
     assertEquals(List.of(EffectType.HEAL), types(bandage.playerEffects()));
+
     assertEquals(3, energy.getCurrentEnergy());
     assertTrue(bandage.updatedHand().isEmpty());
     assertEquals(CARD_IDS, bandage.updatedDiscardPile());

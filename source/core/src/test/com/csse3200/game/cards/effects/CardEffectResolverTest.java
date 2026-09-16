@@ -10,6 +10,7 @@ import com.csse3200.game.cards.Rarity;
 import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
+import com.csse3200.game.cards.runtime.ResolvedCard;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -127,6 +128,12 @@ class CardEffectResolverTest {
     assertThrows(
         IllegalArgumentException.class,
         () -> resolver.resolve(strike, (CardEffectResolutionContext) null));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> resolver.resolve((ResolvedCard) null, new PlayerEffectState()));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> resolver.resolve((ResolvedCard) null, new CardEffectResolutionContext(0, 0, 0)));
   }
 
   private static CardConfig card(String id, TargetType target, EffectConfig... effects) {

@@ -41,10 +41,47 @@ class EnemyAnimationControllerTest {
   }
 
   @Test
-  void shouldPlayHurtWhenDefeated() {
+  void shouldPlayHurtWhenDefeatedAndNoDeathAnimationExists() {
     enemy.getEvents().trigger("enemyDefeated");
 
     verify(animator).startAnimation("hurt");
+  }
+
+  // 图集里有 death 帧的敌人，死亡时应该播 death，而不是退回 hurt
+  @Test
+  void shouldPlayDeathWhenDeathAnimationAvailable() {
+    when(animator.hasAnimation("death")).thenReturn(true);
+
+    enemy.getEvents().trigger("enemyDefeated");
+
+    verify(animator).startAnimation("death");
+  }
+
+  @Test
+  void shouldPlayDeathWhenAvailable() {
+    when(animator.hasAnimation("death")).thenReturn(true);
+
+    enemy.getEvents().trigger("enemyDefeated");
+
+    verify(animator).startAnimation("death");
+  }
+
+  @Test
+  void shouldPlayCastWhenAvailable() {
+    when(animator.hasAnimation("cast")).thenReturn(true);
+
+    enemy.getEvents().trigger("enemyCast");
+
+    verify(animator).startAnimation("cast");
+  }
+
+  @Test
+  void shouldPlayDefendWhenAvailable() {
+    when(animator.hasAnimation("defend")).thenReturn(true);
+
+    enemy.getEvents().trigger("enemyDefend");
+
+    verify(animator).startAnimation("defend");
   }
 
   @Test
@@ -55,6 +92,26 @@ class EnemyAnimationControllerTest {
     enemy.update();
 
     verify(animator, times(2)).startAnimation("idle");
+  }
+
+  @Test
+  void shouldReturnToIdleAfterCastFinishes() {
+    when(animator.getCurrentAnimation()).thenReturn("cast");
+    when(animator.isFinished()).thenReturn(true);
+
+    enemy.update();
+
+    verify(animator, times(2)).startAnimation("idle");
+  }
+
+  @Test
+  void shouldHoldTheFinalDeathFrame() {
+    when(animator.getCurrentAnimation()).thenReturn("death");
+    when(animator.isFinished()).thenReturn(true);
+
+    enemy.update();
+
+    verify(animator, times(1)).startAnimation("idle");
   }
 
   @Test

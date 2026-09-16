@@ -8,7 +8,6 @@ import com.csse3200.game.areas.EncounterGameArea;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
-import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.debug.CardEffectDebugComponent;
 import com.csse3200.game.cards.debug.CardEffectDebugDisplay;
@@ -54,11 +53,21 @@ public class MainGameScreen extends ScreenAdapter {
   private static final String[] mainGameTextures = {
     "images/heart.png", "images/energy.png", "images/piety.png", "images/money.png"
   };
+  private static final String[] shopCardTextures = {
+    "images/shop/cards/bandage.png",
+    "images/shop/cards/defend.png",
+    "images/shop/cards/expose.png",
+    "images/shop/cards/inner_focus.png",
+    "images/shop/cards/poison_dagger.png",
+    "images/shop/cards/strike.png"
+  };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
 
   private final GdxGame game;
   private final Renderer renderer;
   private final PhysicsEngine physicsEngine;
+  private final CardLibrary cardLibrary;
+  private final String[] cardTexturePaths;
 
   public MainGameScreen(GdxGame game) {
     this.game = game;
@@ -78,6 +87,16 @@ public class MainGameScreen extends ScreenAdapter {
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
+    List<CardConfig> cards = CardConfigLoader.loadCards();
+    cardLibrary = new CardLibrary(cards);
+    cardTexturePaths =
+        cards.stream()
+            .map(card -> card.texturePath)
+            .filter(path -> path != null && !path.isBlank())
+            .distinct()
+            .toArray(String[]::new);
+    ServiceLocator.registerCardLibrary(cardLibrary);
+
     renderer = RenderFactory.createRenderer();
     renderer.getCamera().getEntity().setPosition(CAMERA_POSITION);
     renderer.getDebug().renderPhysicsWorld(physicsEngine.getWorld());
@@ -87,7 +106,7 @@ public class MainGameScreen extends ScreenAdapter {
 
     logger.debug("Initialising main game screen entities");
     TerrainFactory terrainFactory = new TerrainFactory(renderer.getCamera());
-    EncounterGameArea encounterGameArea = new EncounterGameArea(terrainFactory);
+    EncounterGameArea encounterGameArea = new EncounterGameArea(terrainFactory, game.getRunState());
     encounterGameArea.create();
   }
 
@@ -132,6 +151,8 @@ public class MainGameScreen extends ScreenAdapter {
     logger.debug("Loading assets");
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(mainGameTextures);
+    resourceService.loadTextures(cardTexturePaths);
+    resourceService.loadTextures(shopCardTextures);
     ServiceLocator.getResourceService().loadAll();
   }
 
@@ -139,6 +160,8 @@ public class MainGameScreen extends ScreenAdapter {
     logger.debug("Unloading assets");
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.unloadAssets(mainGameTextures);
+    resourceService.unloadAssets(cardTexturePaths);
+    resourceService.unloadAssets(shopCardTextures);
   }
 
   /**
@@ -151,9 +174,7 @@ public class MainGameScreen extends ScreenAdapter {
     InputComponent inputComponent =
         ServiceLocator.getInputService().getInputFactory().createForTerminal();
 
-    List<CardConfig> cards = CardConfigLoader.loadCards();
-    CardService cardService = new CardLibrary(cards);
-    CardEffectResolutionService cardEffects = new CardEffectResolutionService(cardService);
+    CardEffectResolutionService cardEffects = new CardEffectResolutionService(cardLibrary);
 
     Entity ui = new Entity();
     ui.addComponent(new InputDecorator(stage, 10))

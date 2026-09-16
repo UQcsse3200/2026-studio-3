@@ -18,7 +18,8 @@ class ClickableRecordTest {
   @Test
   void compactConstructor_defaultsVariantToClickableWhenNull() {
     ClickableRecord rec =
-        new ClickableRecord(null, null, 0, 0, null, "attackCard", null, -1, -1, null, null, null);
+        new ClickableRecord(
+            null, null, 0, 0, null, "attackCard", null, -1, -1, null, null, null, false);
 
     assertEquals("Clickable", rec.variant());
   }
@@ -26,7 +27,8 @@ class ClickableRecordTest {
   @Test
   void compactConstructor_defaultsArgsToEmptyArrayWhenNull() {
     ClickableRecord rec =
-        new ClickableRecord(null, null, 0, 0, null, "attackCard", null, -1, -1, "drag", null, null);
+        new ClickableRecord(
+            null, null, 0, 0, null, "attackCard", null, -1, -1, "drag", null, null, false);
 
     assertEquals(0, rec.args().length);
   }
@@ -34,7 +36,8 @@ class ClickableRecordTest {
   @Test
   void compactConstructor_defaultsLabelToTriggerWhenNull() {
     ClickableRecord rec =
-        new ClickableRecord(null, null, 0, 0, null, "attackCard", null, -1, -1, "drag", null, null);
+        new ClickableRecord(
+            null, null, 0, 0, null, "attackCard", null, -1, -1, "drag", null, null, false);
 
     assertEquals("attackCard", rec.label());
   }
@@ -55,7 +58,8 @@ class ClickableRecordTest {
             -1,
             "drag",
             args,
-            "custom label");
+            "custom label",
+            false);
 
     assertEquals("drag", rec.variant());
     assertEquals(args, rec.args());
@@ -82,7 +86,7 @@ class ClickableRecordTest {
   void hasSize_falseWhenOnlyWidthSet() {
     ClickableRecord rec =
         new ClickableRecord(
-            "Attack", null, 0, 0, null, "attackCard", null, 64, -1, "drag", null, null);
+            "Attack", null, 0, 0, null, "attackCard", null, 64, -1, "drag", null, null, false);
 
     assertFalse(rec.hasSize());
   }
@@ -91,7 +95,7 @@ class ClickableRecordTest {
   void hasSize_falseWhenOnlyHeightSet() {
     ClickableRecord rec =
         new ClickableRecord(
-            "Attack", null, 0, 0, null, "attackCard", null, -1, 32, "drag", null, null);
+            "Attack", null, 0, 0, null, "attackCard", null, -1, 32, "drag", null, null, false);
 
     assertFalse(rec.hasSize());
   }

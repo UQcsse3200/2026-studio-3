@@ -18,11 +18,11 @@ import com.csse3200.game.cards.play.CardPlayTarget;
 import com.csse3200.game.cards.play.integration.Team1EnemyStateAdapter;
 import com.csse3200.game.cards.play.integration.Team7PlayerStateAdapter;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.player.EnergyComponent;
-import com.csse3200.game.components.player.PlayerIntent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
 import java.util.List;
@@ -74,6 +74,7 @@ class SprintTwoCardsIntegrationTest {
       assertEquals(6, stats.getStatusEffect(EffectType.HEAL.name()).getValue());
       assertEquals(3, stats.getStatusEffect(EffectType.HEAL.name()).getDuration());
       assertEquals(0, energy.getCurrentEnergy());
+      // No replacement is drawn — the hand is now empty and the card sits in the discard pile.
       assertTrue(result.updatedHand().isEmpty());
       assertEquals(List.of("resurrection"), result.updatedDiscardPile());
     }
@@ -104,18 +105,17 @@ class SprintTwoCardsIntegrationTest {
     EnergyComponent energy = new EnergyComponent(5);
     Entity player = new Entity().addComponent(stats).addComponent(energy);
     Entity enemy = defendingEnemy();
+    BattleDeck deck = deckWith("resurrection");
+    Team7PlayerStateAdapter playerState = new Team7PlayerStateAdapter(energy, stats);
+    CardPlayService cardPlayService = new CardPlayService(library, deck, energy, playerState, null);
+    CardEffectHandler effectHandler = new CardEffectHandler();
     BattleController controller =
-        new BattleController(
-            player,
-            List.of(enemy),
-            new CardEffectResolver(library),
-            library,
-            deckWith("resurrection"));
+        new BattleController(player, List.of(enemy), effectHandler, cardPlayService);
     controller.start();
 
     assertTrue(
         controller.submitCardPlayRequest(
-            new CardPlayRequest("resurrection", "player"), PlayerIntent.DEFEND));
+            com.csse3200.game.cards.play.CardPlayRequest.self("resurrection")));
 
     assertEquals(12, stats.getHealth());
     assertEquals(0, energy.getCurrentEnergy());
@@ -211,6 +211,25 @@ class SprintTwoCardsIntegrationTest {
     assertEquals(1, enemies.statusValue("first", EffectType.VULNERABLE));
     assertEquals(30, second.getComponent(CombatStatsComponent.class).getHealth());
     assertEquals(0, enemies.statusValue("second", EffectType.VULNERABLE));
+  }
+
+  @Test
+  void shouldRestoreAstralWardEnergyInActiveBattleControllerPath() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 1);
+    EnergyComponent energy = new EnergyComponent(5);
+    Entity player = new Entity().addComponent(stats).addComponent(energy);
+    BattleDeck deck = deckWith("astral_ward");
+    CardPlayService cardPlayService = new CardPlayService(library, deck, energy);
+    CardEffectHandler effectHandler = new CardEffectHandler();
+    BattleController controller =
+        new BattleController(player, List.of(defendingEnemy()), effectHandler, cardPlayService);
+    controller.start();
+
+    assertTrue(
+        controller.submitCardPlayRequest(
+            com.csse3200.game.cards.play.CardPlayRequest.self("astral_ward")));
+
+    assertEquals(4, energy.getCurrentEnergy());
   }
 
   private BattleDeck deckWith(String id) {

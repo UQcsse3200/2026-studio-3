@@ -24,23 +24,34 @@ public class MainMenuActions extends Component {
     entity.getEvents().addListener(MainMenuDisplay.BESTIARY_EVENT, this::onBestiary);
     entity.getEvents().addListener(MainMenuDisplay.SETTINGS_EVENT, this::onSettings);
     entity.getEvents().addListener(MainMenuDisplay.EXIT_EVENT, this::onExit);
+    entity.getEvents().addListener("library", this::onLibrary);
   }
 
-  /** Starts a new run on the map. */
+  /** Discards any run in progress and opens a fresh map. */
   private void onStart() {
     logger.info("Opening map");
     game.getRunState().endRun();
     game.setScreen(GdxGame.ScreenType.MAP);
   }
 
-  /** Intended for loading a saved game state. Load functionality is not actually implemented. */
+  /** Opens the Save/Load screen. */
   private void onLoad() {
-    logger.info("Load game"); // Hi Team 5, Please work on that ;)
+    logger.info("Opening save/load screen");
+    game.setScreen(GdxGame.ScreenType.SAVE_LOAD);
   }
 
-  /** Intended for displaying the bestiary. Bestiary functionality is not actually implemented. */
+  /** Opens the bestiary screen. */
   private void onBestiary() {
-    logger.info("Bestiary");
+    logger.info("Opening library screen from bestiary button");
+    game.setScreen(GdxGame.ScreenType.LIBRARY);
+  }
+
+  /** Opens the library screen. Not currently reachable from the main menu — see TODO. */
+  // TODO: no menu button currently triggers this event; flagged to Team 4/William re: whether
+  // Library needs a menu entry point now that the old menu (which had one) is gone.
+  private void onLibrary() {
+    logger.info("Opening library screen");
+    game.setScreen(GdxGame.ScreenType.LIBRARY);
   }
 
   /** Exits the game. */

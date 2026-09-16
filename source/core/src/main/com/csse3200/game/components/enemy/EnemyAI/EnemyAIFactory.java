@@ -8,6 +8,12 @@ public final class EnemyAIFactory {
   private static final Logger logger = LoggerFactory.getLogger(EnemyAIFactory.class);
   public static final String CYCLE_ATTACK_DEFEND = "cycle_attack_defend";
   public static final String CYCLE_FOUR_STANCE = "cycle_four_stance";
+  public static final String ENRAGE_LOW_HEALTH = "enrage_low_health";
+  public static final String SHIELD_BREAK_RETALIATION = "shield_break_retaliation";
+  public static final String BOSS = "boss";
+  public static final String DEFENSIVE_STANCE = "defensive_stance";
+  public static final String ARMOR_SCALING = "armor_scaling";
+  public static final String ERRATIC = "erratic";
 
   /** Behaviour used when a configuration names an unknown behaviour. */
   public static final String DEFAULT_BEHAVIOUR = CYCLE_ATTACK_DEFEND;
@@ -30,6 +36,12 @@ public final class EnemyAIFactory {
     return switch (behaviourId) {
       case CYCLE_ATTACK_DEFEND -> new CycleAttackDefendAI();
       case CYCLE_FOUR_STANCE -> new CycleFourStanceAI();
+      case ENRAGE_LOW_HEALTH -> new EnrageLowHealthAI();
+      case SHIELD_BREAK_RETALIATION -> new ShieldBreakRetaliationAI();
+      case BOSS -> new BossAI();
+      case DEFENSIVE_STANCE -> new DefensiveStanceAI();
+      case ARMOR_SCALING -> new ArmorScalingAI();
+      case ERRATIC -> new RandomStanceAI();
       default -> {
         logger.warn(
             "Unknown enemy behaviour id '{}', falling back to {}", behaviourId, DEFAULT_BEHAVIOUR);
