@@ -11,12 +11,23 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.csse3200.game.cards.CardLibrary;
+import com.csse3200.game.cards.CardType;
+import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.TargetType;
+import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.cards.configs.EffectConfig;
+import com.csse3200.game.cards.deck.BattleDeck;
+import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.play.CardPlayRequest;
+import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.cards.play.CardPlayTarget;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.StatusEffect;
+import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
+import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.PlayerActions;
 import com.csse3200.game.entities.Entity;
 import java.util.ArrayList;
@@ -26,8 +37,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import com.csse3200.game.components.StatusEffect;
 
 class BattleControllerTest {
   private BattleController controller;
@@ -293,6 +302,58 @@ class BattleControllerTest {
   }
 
   @Test
+  void shouldClearNegativeStatusesWhenCleanseCardIsPlayed() {
+    Entity cleansePlayer =
+        new Entity()
+            .addComponent(new CombatStatsComponent(20, 0))
+            .addComponent(new EnergyComponent(3));
+    CombatStatsComponent stats = cleansePlayer.getComponent(CombatStatsComponent.class);
+    stats.applyStatusEffect("POISON", 3, 2);
+    stats.applyStatusEffect("vulnerable", 1, 1);
+    stats.applyStatusEffect("FEEBLE", 1, 2);
+    stats.applyStatusEffect("STRENGTH", 2, 0);
+    stats.applyStatusEffect("HEAL", 4, 3);
+
+    CardConfig purify = new CardConfig();
+    purify.id = "purify";
+    purify.name = "Purify";
+    purify.description = "Remove all negative effects from yourself.";
+    purify.cost = 1;
+    purify.type = CardType.SKILL;
+    purify.target = TargetType.SELF;
+    purify.effects = new EffectConfig[] {new EffectConfig(EffectType.CLEANSE, 1)};
+    purify.texturePath = "images/cards/purify.png";
+
+    CardConfig strike = new CardConfig();
+    strike.id = "strike";
+    strike.name = "Strike";
+    strike.cost = 1;
+    strike.type = CardType.ATTACK;
+    strike.target = TargetType.SINGLE_ENEMY;
+    strike.effects = new EffectConfig[] {new EffectConfig(EffectType.DAMAGE, 6)};
+    strike.texturePath = "images/cards/strike.png";
+
+    CardLibrary cardService = new CardLibrary(List.of(purify, strike));
+    BattleDeck deck = new BattleDeck(new PlayerDeck(cardService, List.of("purify", "strike")));
+    deck.drawCards(1);
+    EnergyComponent energy = cleansePlayer.getComponent(EnergyComponent.class);
+    CardPlayService cardPlayService = new CardPlayService(cardService, deck, energy);
+    CardEffectHandler effectHandler = new CardEffectHandler();
+    BattleController battle =
+        new BattleController(cleansePlayer, enemies, effectHandler, cardPlayService);
+
+    battle.start();
+    boolean accepted = battle.submitCardPlayRequest(CardPlayRequest.self("purify"));
+
+    assertTrue(accepted);
+    assertFalse(stats.hasStatusEffect("POISON"));
+    assertFalse(stats.hasStatusEffect("vulnerable"));
+    assertFalse(stats.hasStatusEffect("FEEBLE"));
+    assertTrue(stats.hasStatusEffect("STRENGTH"));
+    assertTrue(stats.hasStatusEffect("HEAL"));
+  }
+
+  @Test
   void shouldRejectNullEvent() {
     NullPointerException exception =
         assertThrows(NullPointerException.class, () -> controller.handle(null));
@@ -337,52 +398,48 @@ class BattleControllerTest {
 
   @Test
   void shouldSkipEnemyKilledDuringTurn() {
-      controller.start();
-      killEnemy(0);
+    controller.start();
+    killEnemy(0);
 
-      controller.endPlayerTurn();
+    controller.endPlayerTurn();
 
-      verify(firstEnemyBehaviour, never()).executeIntent(player);
-      verify(secondEnemyBehaviour).executeIntent(player);
-      assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
-
+    verify(firstEnemyBehaviour, never()).executeIntent(player);
+    verify(secondEnemyBehaviour).executeIntent(player);
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }
 
   @Test
   void shouldWinWhenEnemiesDeadBeforeActing() {
-     controller.addPhaseChangeListener(
-             (previous, next) -> {
-                 if (next == BattlePhase.ENEMY_TURN) {
-                     killEnemy(controller.getCurrentEnemyIndex());
-                 }
-             }
-     );
+    controller.addPhaseChangeListener(
+        (previous, next) -> {
+          if (next == BattlePhase.ENEMY_TURN) {
+            killEnemy(controller.getCurrentEnemyIndex());
+          }
+        });
 
-     controller.start();
-     controller.endPlayerTurn();
+    controller.start();
+    controller.endPlayerTurn();
 
-     verify(firstEnemyBehaviour, never()).executeIntent(player);
-     verify(secondEnemyBehaviour, never()).executeIntent(player);
-     assertEquals(BattlePhase.VICTORY, controller.getCurrentPhase());
+    verify(firstEnemyBehaviour, never()).executeIntent(player);
+    verify(secondEnemyBehaviour, never()).executeIntent(player);
+    assertEquals(BattlePhase.VICTORY, controller.getCurrentPhase());
   }
 
   @Test
   void shouldContinueIfEnemySurvives() {
-      controller.addPhaseChangeListener(
-              (previous, next) -> {
-                  if (next == BattlePhase.ENEMY_TURN &&
-                          controller.getCurrentEnemyIndex() == 1) {
-                      killEnemy(1);
-                  }
-              }
-      );
+    controller.addPhaseChangeListener(
+        (previous, next) -> {
+          if (next == BattlePhase.ENEMY_TURN && controller.getCurrentEnemyIndex() == 1) {
+            killEnemy(1);
+          }
+        });
 
-      controller.start();
-      controller.endPlayerTurn();
+    controller.start();
+    controller.endPlayerTurn();
 
-      verify(firstEnemyBehaviour).executeIntent(player);
-      verify(secondEnemyBehaviour, never()).executeIntent(player);
-      assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+    verify(firstEnemyBehaviour).executeIntent(player);
+    verify(secondEnemyBehaviour, never()).executeIntent(player);
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }
 
   @Test
@@ -465,9 +522,8 @@ class BattleControllerTest {
   }
 
   private void killEnemy(int index) {
-      CombatStatsComponent stats =
-              enemies.get(index).getComponent(CombatStatsComponent.class);
-      when(stats.isDead()).thenReturn(true);
+    CombatStatsComponent stats = enemies.get(index).getComponent(CombatStatsComponent.class);
+    when(stats.isDead()).thenReturn(true);
   }
 
   private Entity createDefendingEnemy(EnemyBehaviourComponent behaviour, boolean alive) {
@@ -493,12 +549,12 @@ class BattleControllerTest {
 
     List<Integer> healthAtAction = new ArrayList<>();
     org.mockito.Mockito.doAnswer(
-                    invocation -> {
-                      healthAtAction.add(stats.getHealth());
-                      return null;
-                    })
-            .when(firstEnemyBehaviour)
-            .executeIntent(player);
+            invocation -> {
+              healthAtAction.add(stats.getHealth());
+              return null;
+            })
+        .when(firstEnemyBehaviour)
+        .executeIntent(player);
 
     battle.start();
     battle.endPlayerTurn();
@@ -577,7 +633,7 @@ class BattleControllerTest {
    * @return the enemy entity
    */
   private Entity createPoisonTestEnemy(
-          CombatStatsComponent stats, EnemyBehaviourComponent behaviour) {
+      CombatStatsComponent stats, EnemyBehaviourComponent behaviour) {
     when(behaviour.getCurrentIntent()).thenReturn(EnemyIntent.defend(1));
     when(behaviour.rollIntent()).thenReturn(EnemyIntent.defend(1));
 

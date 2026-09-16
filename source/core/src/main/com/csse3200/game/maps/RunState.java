@@ -3,6 +3,8 @@ package com.csse3200.game.maps;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
+import com.csse3200.game.entities.factories.PlayerFactory;
+import com.csse3200.game.rewards.RewardOption;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,20 @@ public class RunState {
   private int playerMaxHealth;
   private int playerMaxEnergy;
   private boolean playerStatsInitialised;
+  private PlayerRunState playerState;
+
+  /**
+   * Returns the durable player values for this run, initialising them from the player config on
+   * first access.
+   *
+   * @return the player's persistent health and gold state
+   */
+  public PlayerRunState getOrCreatePlayerState() {
+    if (playerState == null) {
+      playerState = PlayerFactory.createInitialRunState();
+    }
+    return playerState;
+  }
 
   /**
    * Returns the run-scoped player deck, creating the starter deck on first access.
@@ -148,6 +164,28 @@ public class RunState {
   }
 
   /**
+   * Restores a saved run without replaying movement or encounter transitions.
+   *
+   * @param mapGraph restored map graph
+   * @param activeNodeId saved in-progress encounter node, or null if the player is between rooms
+   * @return true if the run state was restored
+   */
+  public boolean restoreRun(MapGraph mapGraph, Integer activeNodeId) {
+    if (mapGraph == null) {
+      logger.warn("Could not restore run without a map");
+      return false;
+    }
+    if (activeNodeId != null && mapGraph.getNode(activeNodeId) == null) {
+      logger.warn("Could not restore active encounter at unknown node {}", activeNodeId);
+      return false;
+    }
+
+    this.mapGraph = mapGraph;
+    this.activeNodeId = activeNodeId;
+    return true;
+  }
+
+  /**
    * Remembers the node the player entered so the encounter can report back against it. Any node
    * still marked current is one the player passed through without an encounter, i.e. the node they
    * started on, so it is closed off here.
@@ -193,6 +231,23 @@ public class RunState {
     activeNodeId = null;
   }
 
+  /**
+   * Abandons the in-progress encounter without recording a result, reverting the map to the
+   * player's position before they entered it.
+   *
+   * @return true if an encounter was actually abandoned
+   */
+  public boolean abandonEncounter() {
+    if (mapGraph == null || activeNodeId == null) {
+      logger.warn("Abandon requested but no encounter was active");
+      return false;
+    }
+
+    boolean reverted = mapGraph.abandonCurrentNode();
+    activeNodeId = null;
+    return reverted;
+  }
+
   public void endRun() {
     mapGraph = null;
     activeNodeId = null;
@@ -201,5 +256,20 @@ public class RunState {
     playerMaxHealth = 0;
     playerMaxEnergy = 0;
     playerStatsInitialised = false;
+    playerState = null;
+  }
+
+  private RewardOption pendingReward;
+
+  public void setPendingReward(RewardOption reward) {
+    this.pendingReward = reward;
+  }
+
+  public RewardOption getPendingReward() {
+    return pendingReward;
+  }
+
+  public void clearPendingReward() {
+    this.pendingReward = null;
   }
 }

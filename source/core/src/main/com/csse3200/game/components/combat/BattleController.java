@@ -1,6 +1,7 @@
 package com.csse3200.game.components.combat;
 
 import com.csse3200.game.cards.EffectType;
+import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.effects.*;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.cards.play.CardPlayRequest;
@@ -11,6 +12,7 @@ import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
+import com.csse3200.game.components.enemy.IntentEffectType;
 import com.csse3200.game.components.enemy.IntentType;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
@@ -333,6 +335,12 @@ public class BattleController {
     eventHandler.addListener(HAND_CHANGED_EVENT, listener);
   }
 
+  /** Notifies listeners after a successful card play, before checking victory or defeat. */
+  public void addCardPlayedListener(EventListener2<String, String> listener) {
+    Objects.requireNonNull(listener, LISTENER_NOT_NULL);
+    eventHandler.addListener("cardPlayed", listener);
+  }
+
   /** Sends a one-line description of the latest battle action to any log listeners. */
   private void narrate(String message) {
     eventHandler.trigger(BATTLE_LOG_EVENT, message);
@@ -554,6 +562,10 @@ public class BattleController {
   }
 
   private void finishPlayerCardAction() {
+    if (lastCardPlaySucceeded && pendingCard != null) {
+      eventHandler.trigger("cardPlayed", pendingCard.cardId(), pendingCard.target().targetId());
+    }
+
     pendingCard = null;
     if (!queueBattleOutcomeIfOver()) {
       handle(BattleEvent.CARD_RESOLVED);
@@ -576,6 +588,15 @@ public class BattleController {
     // Some controller unit tests intentionally run without the card system.
     if (cardPlayService == null) {
       lastCardPlaySucceeded = true;
+      finishPlayerCardAction();
+      return;
+    }
+
+    if (effectHandler != null
+        && request.target().type() != TargetType.SELF
+        && effectHandler.getLivingEnemyTargets(request, enemies).isEmpty()) {
+      lastCardPlaySucceeded = false;
+      narrate("Couldn't play " + request.cardId() + ": target is no longer available.");
       finishPlayerCardAction();
       return;
     }
@@ -606,15 +627,16 @@ public class BattleController {
 
   /**
    * Skips the enemy turn if the enemy is found to be dead.
+   *
    * @param enemy The enemy to check.
    * @return True if the turn is going to be skipped. False if not.
    */
   private boolean skipEnemyTurnIfDead(Entity enemy) {
-      if (!isEnemyAlive(enemy)) {
-          handle(BattleEvent.ENEMY_TURN_SKIPPED);
-          return true;
-      }
-      return false;
+    if (!isEnemyAlive(enemy)) {
+      handle(BattleEvent.ENEMY_TURN_SKIPPED);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -684,7 +706,27 @@ public class BattleController {
       energy.onTurnStart();
     }
     applyHealingAtTurnStart();
+    retrieveCooledDownCards();
     handle(BattleEvent.PLAYER_TURN_STARTED);
+  }
+
+  /**
+   * Ticks card cooldowns for the new player round, retrieving any discarded card whose cooldown has
+   * elapsed straight back into the hand, and tells the UI to refresh if any were retrieved.
+   */
+  private void retrieveCooledDownCards() {
+    if (cardPlayService == null) {
+      return;
+    }
+    List<String> retrieved = cardPlayService.onPlayerRoundStart();
+    if (retrieved.isEmpty()) {
+      return;
+    }
+    narrate(
+        retrieved.size() == 1
+            ? "A card cooled down and returned to your hand."
+            : retrieved.size() + " cards cooled down and returned to your hand.");
+    eventHandler.trigger(HAND_CHANGED_EVENT, cardPlayService.currentHand());
   }
 
   private void enterPlayerTurn() {
@@ -698,7 +740,29 @@ public class BattleController {
     if (this.queueBattleOutcomeIfOver()) {
       return;
     }
+    // Cards may have defeated the enemy selected during intent reveal. Start the enemy phase
+    // from the first survivor rather than executing that stale selection.
+    resetEnemyCursor();
+    if (advanceToNextLivingEnemy()) {
+      setEnemyIntent(resolveEnemyIntent(getActiveEnemy()));
+    }
+
+    CombatStatsComponent playerStats = this.player.getComponent(CombatStatsComponent.class);
+
+    if (playerStats != null) {
+      tickPlayerStatusEffect(playerStats, IntentEffectType.SILENCE.name());
+      tickPlayerStatusEffect(playerStats, IntentEffectType.DAMAGE_ON_CARD_PLAY.name());
+    }
+
     handle(BattleEvent.PLAYER_TURN_ENDED);
+  }
+
+  /** Counts down one player status without changing effects owned by other turn hooks. */
+  private void tickPlayerStatusEffect(CombatStatsComponent playerStats, String effectType) {
+    StatusEffect effect = playerStats.getStatusEffect(effectType);
+    if (effect != null && effect.tickAndCheckExpired()) {
+      playerStats.removeStatusEffect(effectType);
+    }
   }
 
   private void enterEnemyTurn() {
@@ -706,7 +770,8 @@ public class BattleController {
 
     if (skipEnemyTurnIfDead(enemy)) return;
 
-    // Resolve poison before the enemy acts. Poison uses normal damage, so block and armor absorb it.
+    // Resolve poison before the enemy acts. Poison uses normal damage, so block and armor absorb
+    // it.
     CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
     enemyStats.processPoisonTick(enemyStats::takeDamage);
 

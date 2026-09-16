@@ -1,14 +1,13 @@
 package com.csse3200.game.components;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.IntConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * Component used to store information related to combat such as health, attack, armor, block and
@@ -144,12 +143,33 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
-   * Damages health directly without consuming block or armor.
+   * Applies a direct health change that bypasses armor and block, intended for non-combat sources
+   * such as Chance Encounters. A positive amount heals (clamped to max health via {@link
+   * #heal(int)}); a negative amount reduces health directly, clamped to 0, and triggers the same
+   * death event used by combat damage.
    *
-   * <p>Negative damage and damage to an already-dead entity are ignored. Health updates use the
-   * existing notification mechanism. Lethal damage also fires the existing death event.
+   * <p>Unlike {@link #takeDamage(int)}, this method does NOT consume block or armor. Use this when
+   * a game system needs a health change with a precise, predictable amount that should not be
+   * affected by the entity's current combat-only defences.
    *
-   * @param damage flat damage applied directly to health
+   * @param amount positive to heal, negative to reduce health; zero is a no-op
+   */
+  public void applyDirectHealthChange(int amount) {
+    if (amount > 0) {
+      heal(amount);
+    } else if (amount < 0 && !isDead()) {
+      setHealth(Math.max(this.health + amount, 0));
+      if (entity != null && isDead()) {
+        entity.getEvents().trigger("entityIsDead");
+      }
+    }
+  }
+
+  /**
+   * Damages the entity's health directly, ignoring block and armour. If health reaches 0, the
+   * entity dies.
+   *
+   * @param damage piercing damage
    */
   public void takePiercingDamage(int damage) {
     if (damage >= 0 && !isDead()) {
@@ -273,6 +293,7 @@ public class CombatStatsComponent extends Component {
     if (amount <= 0) {
       return 0;
     }
+
     int removed = Math.min(armor, amount);
     if (removed > 0) {
       setArmor(armor - removed);
@@ -491,10 +512,12 @@ public class CombatStatsComponent extends Component {
     if (isDead()) {
       return;
     }
+
     StatusEffect poison = getStatusEffect("POISON");
     if (poison == null) {
       return;
     }
+
     int damage = StatusEffectCalculator.getPoisonDamage(this);
     if (damage > 0) {
       applyDamage.accept(damage);
@@ -504,6 +527,7 @@ public class CombatStatsComponent extends Component {
     if (getStatusEffect("POISON") != poison) {
       return;
     }
+
     if (poison.tickAndCheckExpired()) {
       removeStatusEffect("POISON");
     }

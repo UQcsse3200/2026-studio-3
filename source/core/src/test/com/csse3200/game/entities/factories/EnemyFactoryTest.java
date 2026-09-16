@@ -16,6 +16,9 @@ import static org.mockito.Mockito.when;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.bestiary.BestiaryTrackingComponent;
+import com.csse3200.game.bestiary.BestiaryUnlockState;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.enemy.EnemyAnimationController;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
@@ -23,6 +26,7 @@ import com.csse3200.game.components.enemy.EnemyStatsComponent;
 import com.csse3200.game.components.enemy.IntentIcons;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.configs.EnemyConfig;
+import com.csse3200.game.entities.configs.EnemyConfigs;
 import com.csse3200.game.entities.configs.EnemyTier;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.rendering.AnimationRenderComponent;
@@ -127,10 +131,35 @@ class EnemyFactoryTest {
   }
 
   @Test
+  void createWiresBestiaryTrackingThroughEnemyDefeat() {
+    EnemyConfig config = new EnemyConfig();
+    config.id = "tracked_enemy";
+    config.name = "Tracked Enemy";
+    config.health = 20;
+    EnemyConfigs configs = new EnemyConfigs();
+    configs.enemies = new EnemyConfig[] {config};
+    BestiaryService bestiary = new BestiaryService(configs);
+    ServiceLocator.registerBestiaryService(bestiary);
+
+    Entity enemy = EnemyFactory.create(config);
+
+    assertNotNull(enemy.getComponent(BestiaryTrackingComponent.class));
+    enemy.create();
+    assertEquals(
+        BestiaryUnlockState.ENCOUNTERED,
+        bestiary.getEntry("tracked_enemy").orElseThrow().unlockState());
+
+    enemy.getComponent(CombatStatsComponent.class).takeDamage(config.health);
+    assertEquals(
+        BestiaryUnlockState.DEFEATED,
+        bestiary.getEntry("tracked_enemy").orElseThrow().unlockState());
+  }
+
+  @Test
   void createWithFloorZeroKeepsBaseStats() {
     Entity enemy = EnemyFactory.create("void_knight", 0);
 
-    assertEquals(72, enemy.getComponent(CombatStatsComponent.class).getHealth());
+    assertEquals(40, enemy.getComponent(CombatStatsComponent.class).getHealth());
   }
 
   @Test
@@ -147,15 +176,23 @@ class EnemyFactoryTest {
   void getIdsByTierReturnsOnlyMatchingTier() {
     List<String> normals = EnemyFactory.getIdsByTier(EnemyTier.NORMAL);
     List<String> elites = EnemyFactory.getIdsByTier(EnemyTier.ELITE);
+    List<String> bosses = EnemyFactory.getIdsByTier(EnemyTier.BOSS);
 
     assertTrue(normals.contains("lesser_shade"));
     assertFalse(normals.contains("void_knight"));
     assertTrue(elites.contains("void_knight"));
+    assertTrue(bosses.contains("boss_knight"));
+    assertFalse(bosses.contains("void_knight"));
+  }
+
+  @Test
+  void getIdsByTierReturnsTeamOneBoss() {
+    assertEquals(List.of("boss_knight"), EnemyFactory.getIdsByTier(EnemyTier.BOSS));
   }
 
   @Test
   void getIdsByTierReturnsEmptyListWhenNoneMatch() {
-    assertTrue(EnemyFactory.getIdsByTier(EnemyTier.BOSS).isEmpty());
+    assertTrue(EnemyFactory.getIdsByTier(null).isEmpty());
   }
 
   @Test
@@ -169,7 +206,9 @@ class EnemyFactoryTest {
 
     assertTrue(paths.contains("images/enemies/default.atlas"));
     assertTrue(paths.contains("images/enemies/lesser_shade.atlas"));
+    assertTrue(paths.contains("images/enemies/tomb_guardian.atlas"));
     assertTrue(paths.contains("images/enemies/void_knight.atlas"));
+    assertTrue(paths.contains("images/enemies/boss_knight.atlas"));
   }
 
   @Test

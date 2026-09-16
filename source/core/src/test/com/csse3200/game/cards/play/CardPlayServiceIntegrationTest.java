@@ -25,9 +25,8 @@ class CardPlayServiceIntegrationTest {
     CardLibrary library = new CardLibrary(CardConfigLoader.loadCards());
     BattleDeck battleDeck = new BattleDeck(new PlayerDeck(library, CARD_IDS));
 
-    // Start with only the first card in hand. Each successful play draws
-    // the next card from the draw pile.
-    battleDeck.drawOne();
+    // Draw every card into hand up front — playing a card no longer draws a replacement.
+    battleDeck.drawCards(CARD_IDS.size());
 
     EnergyComponent energy = new EnergyComponent(10);
     CardPlayService service = new CardPlayService(library, battleDeck, energy);
@@ -52,6 +51,8 @@ class CardPlayServiceIntegrationTest {
     assertEquals(List.of(EffectType.HEAL), types(bandage.playerEffects()));
 
     assertEquals(3, energy.getCurrentEnergy());
+    assertTrue(bandage.updatedHand().isEmpty());
+    assertEquals(CARD_IDS, bandage.updatedDiscardPile());
   }
 
   private static List<EffectType> types(

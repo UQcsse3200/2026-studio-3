@@ -1,14 +1,17 @@
 package com.csse3200.game.cards.play.integration;
 
+import static com.csse3200.game.components.battle.BattleActions.BATTLE_LOG_EVENT;
+
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.enemy.IntentEffectType;
 
 /**
- * Connects Team 3's existing {@code playCard(cardId, targetId)} event to Team 5's unified API.
+ * Connects Team 3's existing {@code playCard(instanceId, targetId)} event to Team 5's unified API.
  *
  * <p>Attach this component to the same battle-flow entity that receives Team 3's card UI events.
  * The component emits one {@code cardPlayResult} event after every attempt. Team 3's battle flow
@@ -36,7 +39,10 @@ public final class Team3CardPlayAdapter extends Component {
   @Override
   public void create() {
     entity.getEvents().addListener(PLAY_CARD_EVENT, this::onCardPlayed);
-    entity.getEvents().addListener(CARD_PLAY_RESULT_EVENT, this::logCardPlayed);
+    battleController.addCardPlayedListener(
+        (cardId, targetId) -> {
+          entity.getEvents().trigger(CARD_PLAY_RESULT_EVENT, cardId, targetId);
+        });
   }
 
   private void onCardPlayed(String cardId, String targetId) {
@@ -44,9 +50,7 @@ public final class Team3CardPlayAdapter extends Component {
       return;
     }
     CardPlayRequest request = toRequest(cardId, targetId);
-    if (battleController.submitCardPlayRequest(request)) {
-      entity.getEvents().trigger(CARD_PLAY_RESULT_EVENT, cardId, targetId);
-    }
+    battleController.submitCardPlayRequest(request);
   }
 
   // test that card is played
@@ -78,7 +82,11 @@ public final class Team3CardPlayAdapter extends Component {
    * @return true if the play should be rejected before reaching the controller
    */
   private boolean playerIsBlockedFromPlayingCards() {
-    // Always false until #140 implements the silence check.
-    return false;
+    if (!battleController.playerHasStatusEffect(IntentEffectType.SILENCE.name())) {
+      return false;
+    }
+
+    entity.getEvents().trigger(BATTLE_LOG_EVENT, "You are silenced and cannot play cards.");
+    return true;
   }
 }

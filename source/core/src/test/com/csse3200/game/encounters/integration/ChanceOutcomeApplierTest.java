@@ -5,7 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.chance.ChanceOutcome;
+import com.csse3200.game.encounters.integration.mocks.MockCardCatalogGateway;
+import com.csse3200.game.encounters.integration.mocks.MockDeckGateway;
 import com.csse3200.game.encounters.integration.mocks.MockPlayerStateGateway;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ChanceOutcomeApplierTest {
@@ -30,6 +33,7 @@ class ChanceOutcomeApplierTest {
     assertEquals(ChanceResolution.Status.INSUFFICIENT_CURRENCY, result.getStatus());
     assertEquals(70, player.getHealth());
     assertEquals(5, player.getCurrency());
+    assertTrue(player.getMutations().isEmpty());
   }
 
   @Test
@@ -39,6 +43,27 @@ class ChanceOutcomeApplierTest {
 
     assertTrue(result.isSuccess());
     assertEquals(0, player.getHealth());
+  }
+
+  @Test
+  void shouldApplyDirectHealing() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(60, 100, 10);
+
+    ChanceResolution result = new ChanceOutcomeApplier(player).apply(new ChanceOutcome(20, 0));
+
+    assertTrue(result.isSuccess());
+    assertEquals(80, player.getHealth());
+  }
+
+  @Test
+  void shouldAcceptHealingClampedAtMaximumHealth() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(95, 100, 10);
+
+    ChanceResolution result = new ChanceOutcomeApplier(player).apply(new ChanceOutcome(20, 0));
+
+    assertTrue(result.isSuccess());
+    assertEquals(100, player.getHealth());
+    assertEquals(100, result.getHealthAfter());
   }
 
   @Test
@@ -52,7 +77,7 @@ class ChanceOutcomeApplierTest {
   }
 
   @Test
-  void shouldRollbackHealthWhenCurrencyUpdateFails() {
+  void shouldNotApplyHealthWhenCurrencyUpdateFails() {
     MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
     player.failNextCurrencyUpdate();
 
@@ -61,10 +86,11 @@ class ChanceOutcomeApplierTest {
     assertEquals(ChanceResolution.Status.PLAYER_UPDATE_FAILED, result.getStatus());
     assertEquals(100, player.getHealth());
     assertEquals(40, player.getCurrency());
+    assertFalse(player.getMutations().contains("health"));
   }
 
   @Test
-  void shouldRollbackWhenPlayerSilentlyRejectsHealthUpdate() {
+  void shouldRollbackCurrencyAfterDirectHealthUpdateIsRejected() {
     MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
     player.rejectNextHealthUpdate();
 
@@ -85,5 +111,197 @@ class ChanceOutcomeApplierTest {
     assertEquals(ChanceResolution.Status.ROLLBACK_FAILED, result.getStatus());
     assertEquals(100, player.getHealth());
     assertEquals(40, player.getCurrency());
+  }
+
+  @Test
+  void shouldCommitCurrencyBeforeApplyingDirectHealth() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
+
+    ChanceResolution result = new ChanceOutcomeApplier(player).apply(new ChanceOutcome(-10, 5));
+
+    assertTrue(result.isSuccess());
+    assertEquals(List.of("currency", "health"), player.getMutations());
+    assertEquals(90, player.getHealth());
+    assertEquals(45, player.getCurrency());
+  }
+
+  @Test
+  void shouldApplyCardOnlyReward() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
+    MockDeckGateway deck = new MockDeckGateway();
+
+    ChanceResolution result =
+        createCardApplier(player, deck).apply(new ChanceOutcome(0, 0, "bandage"));
+
+    assertTrue(result.isSuccess());
+    assertEquals(List.of("bandage"), deck.getCardIds());
+    assertEquals(100, player.getHealth());
+    assertEquals(40, player.getCurrency());
+  }
+
+  @Test
+  void shouldAllowDuplicateCardRewards() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
+    MockDeckGateway deck = new MockDeckGateway();
+    deck.addExistingCard("bandage");
+
+    ChanceResolution result =
+        createCardApplier(player, deck).apply(new ChanceOutcome(0, 0, "bandage"));
+
+    assertTrue(result.isSuccess());
+    assertEquals(List.of("bandage", "bandage"), deck.getCardIds());
+  }
+
+  @Test
+  void shouldRejectUnknownCardWithoutMutation() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
+    MockDeckGateway deck = new MockDeckGateway();
+    ChanceOutcomeApplier applier =
+        new ChanceOutcomeApplier(player, new MockCardCatalogGateway("bandage"), deck);
+
+    ChanceResolution result = applier.apply(new ChanceOutcome(-10, 5, "missing"));
+
+    assertEquals(ChanceResolution.Status.CARD_NOT_FOUND, result.getStatus());
+    assertTrue(deck.getCardIds().isEmpty());
+    assertEquals(100, player.getHealth());
+    assertEquals(40, player.getCurrency());
+  }
+
+  @Test
+  void shouldRejectFailedCardAddWithoutMutation() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
+    MockDeckGateway deck = new MockDeckGateway();
+    deck.setFailAdd(true);
+
+    ChanceResolution result =
+        createCardApplier(player, deck).apply(new ChanceOutcome(-10, 5, "bandage"));
+
+    assertEquals(ChanceResolution.Status.CARD_ADD_FAILED, result.getStatus());
+    assertTrue(deck.getCardIds().isEmpty());
+    assertEquals(100, player.getHealth());
+    assertEquals(40, player.getCurrency());
+  }
+
+  @Test
+  void shouldApplyCardAndCurrencyReward() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
+    MockDeckGateway deck = new MockDeckGateway();
+
+    ChanceResolution result =
+        createCardApplier(player, deck).apply(new ChanceOutcome(0, 15, "bandage"));
+
+    assertTrue(result.isSuccess());
+    assertEquals(List.of("bandage"), deck.getCardIds());
+    assertEquals(55, player.getCurrency());
+  }
+
+  @Test
+  void shouldApplyCardAndHealthReward() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(70, 100, 40);
+    MockDeckGateway deck = new MockDeckGateway();
+
+    ChanceResolution result =
+        createCardApplier(player, deck).apply(new ChanceOutcome(20, 0, "bandage"));
+
+    assertTrue(result.isSuccess());
+    assertEquals(List.of("bandage"), deck.getCardIds());
+    assertEquals(90, player.getHealth());
+  }
+
+  @Test
+  void shouldApplyCardCurrencyAndHealthReward() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(70, 100, 40);
+    MockDeckGateway deck = new MockDeckGateway();
+
+    ChanceResolution result =
+        createCardApplier(player, deck).apply(new ChanceOutcome(-10, 15, "bandage"));
+
+    assertTrue(result.isSuccess());
+    assertEquals(List.of("bandage"), deck.getCardIds());
+    assertEquals(60, player.getHealth());
+    assertEquals(55, player.getCurrency());
+  }
+
+  @Test
+  void shouldRollbackCardWhenHealthIsRejectedBeforeMutation() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(70, 100, 40);
+    player.rejectNextHealthUpdate();
+    MockDeckGateway deck = new MockDeckGateway();
+
+    ChanceResolution result =
+        createCardApplier(player, deck).apply(new ChanceOutcome(20, 0, "bandage"));
+
+    assertEquals(ChanceResolution.Status.PLAYER_UPDATE_FAILED, result.getStatus());
+    assertTrue(deck.getCardIds().isEmpty());
+    assertEquals(70, player.getHealth());
+    assertEquals(40, player.getCurrency());
+  }
+
+  @Test
+  void shouldRollbackCardAndCurrencyWhenHealthIsRejectedBeforeMutation() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(70, 100, 40);
+    player.rejectNextHealthUpdate();
+    MockDeckGateway deck = new MockDeckGateway();
+
+    ChanceResolution result =
+        createCardApplier(player, deck).apply(new ChanceOutcome(20, 15, "bandage"));
+
+    assertEquals(ChanceResolution.Status.PLAYER_UPDATE_FAILED, result.getStatus());
+    assertTrue(deck.getCardIds().isEmpty());
+    assertEquals(70, player.getHealth());
+    assertEquals(40, player.getCurrency());
+  }
+
+  @Test
+  void shouldRejectUnaffordableCardOutcomeBeforeAddingCard() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(70, 100, 5);
+    MockDeckGateway deck = new MockDeckGateway();
+    deck.addExistingCard("bandage");
+
+    ChanceResolution result =
+        createCardApplier(player, deck).apply(new ChanceOutcome(20, -10, "bandage"));
+
+    assertEquals(ChanceResolution.Status.INSUFFICIENT_CURRENCY, result.getStatus());
+    assertEquals(List.of("bandage"), deck.getCardIds());
+    assertEquals(70, player.getHealth());
+    assertEquals(5, player.getCurrency());
+  }
+
+  @Test
+  void shouldRollbackOnlyCardAddedByOutcomeWhenCurrencyFails() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
+    player.failNextCurrencyUpdate();
+    MockDeckGateway deck = new MockDeckGateway();
+    deck.addExistingCard("bandage");
+    deck.addExistingCard("strike");
+
+    ChanceResolution result =
+        createCardApplier(player, deck).apply(new ChanceOutcome(-10, 5, "bandage"));
+
+    assertEquals(ChanceResolution.Status.PLAYER_UPDATE_FAILED, result.getStatus());
+    assertEquals(List.of("bandage", "strike"), deck.getCardIds());
+    assertEquals(100, player.getHealth());
+    assertEquals(40, player.getCurrency());
+  }
+
+  @Test
+  void shouldReportCardRollbackFailureWithoutApplyingHealth() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
+    player.failNextCurrencyUpdate();
+    MockDeckGateway deck = new MockDeckGateway();
+    deck.setFailRemove(true);
+
+    ChanceResolution result =
+        createCardApplier(player, deck).apply(new ChanceOutcome(-10, 5, "bandage"));
+
+    assertEquals(ChanceResolution.Status.ROLLBACK_FAILED, result.getStatus());
+    assertEquals(List.of("bandage"), deck.getCardIds());
+    assertEquals(100, player.getHealth());
+    assertEquals(40, player.getCurrency());
+  }
+
+  private ChanceOutcomeApplier createCardApplier(
+      MockPlayerStateGateway player, MockDeckGateway deck) {
+    return new ChanceOutcomeApplier(player, new MockCardCatalogGateway("bandage", "strike"), deck);
   }
 }

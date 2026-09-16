@@ -50,6 +50,13 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
     if (!cardExists) {
       return ShopTransactionStatus.CARD_NOT_FOUND;
     }
+    try {
+      if (!deck.canAddCard(cardId)) {
+        return ShopTransactionStatus.CARD_ADD_FAILED;
+      }
+    } catch (RuntimeException exception) {
+      return ShopTransactionStatus.CARD_ADD_FAILED;
+    }
     if (player.getCurrency() < price) {
       return ShopTransactionStatus.INSUFFICIENT_CURRENCY;
     }
@@ -79,6 +86,7 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
       if (player.getCurrency() != currencyBefore - price) {
         throw new IllegalStateException("Player currency update was not accepted");
       }
+      deck.commitCardAddition(cardId);
     } catch (RuntimeException exception) {
       return rollback(cardId, currencyBefore);
     }
@@ -89,7 +97,7 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
   private ShopTransactionStatus rollback(String cardId, int currencyBefore) {
     boolean cardRemoved;
     try {
-      cardRemoved = deck.removeCard(cardId);
+      cardRemoved = deck.rollbackCardAddition(cardId);
     } catch (RuntimeException exception) {
       cardRemoved = false;
     }
@@ -105,5 +113,14 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
     return cardRemoved && currencyRestored
         ? ShopTransactionStatus.CURRENCY_UPDATE_FAILED
         : ShopTransactionStatus.ROLLBACK_FAILED;
+  }
+
+  /**
+   * Returns 0 for now — the Player/Card/Deck boundary does not yet expose a discount getter. TODO:
+   * wire this up once PlayerStateGateway supports shop discount.
+   */
+  @Override
+  public float getShopDiscount() {
+    return 0f;
   }
 }

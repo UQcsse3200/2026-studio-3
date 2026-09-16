@@ -78,7 +78,7 @@ class BattleLoopTest {
             .addComponent(new CombatStatsComponent(6, 4))
             .addComponent(new EnemyBehaviourComponent("test"));
 
-    // Hand of 1 (strike) with a spare in the draw pile so the played card is replaced by a draw.
+    // Hand of 1 (strike), with a spare left untouched in the draw pile.
     BattleDeck deck =
         new BattleDeck(
             new PlayerDeck(
@@ -97,14 +97,15 @@ class BattleLoopTest {
     controller.addBattleLogListener(log::add);
 
     controller.start();
-    controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy"));
+    controller.submitCardPlayRequest(
+        CardPlayRequest.singleEnemy("strike", Integer.toString(enemy.getId())));
 
     assertEquals(BattlePhase.VICTORY, controller.getCurrentPhase());
     assertEquals(Boolean.TRUE, outcome.get());
     assertEquals(0, enemy.getComponent(CombatStatsComponent.class).getHealth());
     assertFalse(deck.getHand().contains("strike"));
     assertTrue(deck.getDiscardPile().contains("strike"));
-    assertEquals(List.of("bandage"), deck.getHand()); // played strike replaced by a draw
+    assertTrue(deck.getHand().isEmpty()); // no replacement is drawn
     assertTrue(log.stream().anyMatch(line -> line.contains("Victory")));
   }
 
@@ -238,7 +239,8 @@ class BattleLoopTest {
         new BattleController(player, List.of(enemy), effectHandler, cardPlayService);
 
     boolean accepted =
-        controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy"));
+        controller.submitCardPlayRequest(
+            CardPlayRequest.singleEnemy("strike", Integer.toString(enemy.getId())));
 
     assertFalse(accepted);
     assertEquals(BattlePhase.SETUP, controller.getCurrentPhase());
@@ -272,7 +274,8 @@ class BattleLoopTest {
 
     controller.start();
     boolean accepted =
-        controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("strike", "enemy"));
+        controller.submitCardPlayRequest(
+            CardPlayRequest.singleEnemy("strike", Integer.toString(enemy.getId())));
 
     assertFalse(accepted);
     assertEquals(3, player.getComponent(EnergyComponent.class).getCurrentEnergy());

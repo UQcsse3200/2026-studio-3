@@ -1,20 +1,20 @@
 package com.csse3200.game.components.battle;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.Timer;
 import com.csse3200.game.GdxGame;
-import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattleEvent;
+import com.csse3200.game.components.combat.BattlePhase;
+import java.util.ArrayList;
 import java.util.List;
 
 /** Connects battle UI events to valid transitions in the battle controller. */
 public class BattleActions extends Component {
   static final String END_TURN_SELECTED_EVENT = "endTurnSelected";
   static final String PHASE_CHANGED_EVENT = "phaseChange";
-
-  //  static final String PLAY_CARD_EVENT = "playCard";
 
   /** Fired on the battle UI entity with the latest one-line action description. */
   public static final String BATTLE_LOG_EVENT = "battleLog";
@@ -34,14 +34,22 @@ public class BattleActions extends Component {
   /** Fired on the battle UI entity with the player's hand after it changes (e.g. a card played). */
   public static final String HAND_CHANGED_EVENT = "handChanged";
 
+  /** How long the enemy "thinks" before its action, log line and effects are revealed. */
+  private static final float ENEMY_TURN_DELAY = 1.2f;
+
   private final BattleController controller;
   private final GdxGame game;
-  private final CardLibrary library;
 
-  public BattleActions(BattleController controller, GdxGame game, CardLibrary library) {
+  // While true, reveals (log, effects, phase changes, the hand coming back up) are queued instead
+  // of fired immediately, so the enemy's whole turn can be held back and replayed together after
+  // ENEMY_TURN_DELAY. This is the one point the "enemy thinks" pause lives — see dispatch() and
+  // flushDeferredReveals().
+  private boolean deferringEnemyTurn = false;
+  private final List<Runnable> queuedReveals = new ArrayList<>();
+
+  public BattleActions(BattleController controller, GdxGame game) {
     this.controller = controller;
     this.game = game;
-    this.library = library;
   }
 
   /**
@@ -59,20 +67,70 @@ public class BattleActions extends Component {
     entity.getEvents().addListener("exit", this::onExit);
 
     entity.getEvents().addListener(END_TURN_SELECTED_EVENT, controller::endPlayerTurn);
-    //    entity.getEvents().addListener(PLAY_CARD_EVENT, this::onCardPlayed);
-    controller.addPhaseChangeListener(
-        (previousPhase, nextPhase) -> entity.getEvents().trigger(PHASE_CHANGED_EVENT, nextPhase));
-    //    entity.getEvents().addListener("cardPlayed", this::logCardPlayed);
+    controller.addPhaseChangeListener(this::onPhaseChange);
     entity.getEvents().addListener("endturn", this::triggerEndTurn);
 
     // Re-broadcast the controller's battle-loop signals as plain entity events so the battle-log
     // UI, Team 1 (enemy effects) and Team 7 (player effects) can all subscribe in one place.
+    // Log and enemy-effects reveals go through dispatch() so they hold back during the enemy's
+    // "thinking" pause instead of appearing the instant the controller computes them.
     controller.addBattleLogListener(
-        message -> entity.getEvents().trigger(BATTLE_LOG_EVENT, message));
-    controller.addEnemyEffectsListener(this::onEnemyEffects);
+        message -> dispatch(() -> entity.getEvents().trigger(BATTLE_LOG_EVENT, message)));
+    controller.addEnemyEffectsListener(effects -> dispatch(() -> onEnemyEffects(effects)));
     controller.addPlayerEffectsListener(this::onPlayerEffects);
     controller.addBattleEndListener(this::onBattleEnd);
     controller.addHandChangedListener(hand -> entity.getEvents().trigger(HAND_CHANGED_EVENT, hand));
+  }
+
+  private void onPhaseChange(BattlePhase previousPhase, BattlePhase nextPhase) {
+    // Entering the enemy's turn fires immediately — no delay on ending your own turn — and starts
+    // holding back every reveal that follows until the whole enemy turn is done.
+    if (nextPhase == BattlePhase.ENEMY_TURN && previousPhase == BattlePhase.PLAYER_END) {
+      deferringEnemyTurn = true;
+      entity.getEvents().trigger(PHASE_CHANGED_EVENT, nextPhase);
+      entity.getEvents().trigger("down");
+      return;
+    }
+
+    dispatch(() -> entity.getEvents().trigger(PHASE_CHANGED_EVENT, nextPhase));
+    if (nextPhase == BattlePhase.PLAYER_TURN) {
+      dispatch(() -> entity.getEvents().trigger("up"));
+    }
+
+    boolean enemyTurnOver =
+        (nextPhase == BattlePhase.PLAYER_TURN && previousPhase == BattlePhase.PLAYER_START)
+            || nextPhase == BattlePhase.VICTORY
+            || nextPhase == BattlePhase.DEFEAT;
+    if (deferringEnemyTurn && enemyTurnOver) {
+      flushDeferredReveals();
+    }
+  }
+
+  /** Fires now if the enemy isn't mid-turn, otherwise queues for flushDeferredReveals(). */
+  private void dispatch(Runnable reveal) {
+    if (deferringEnemyTurn) {
+      queuedReveals.add(reveal);
+    } else {
+      reveal.run();
+    }
+  }
+
+  /**
+   * The single point the "enemy thinks" pause lives: replays everything queued during the enemy's
+   * turn together, after one delay.
+   */
+  private void flushDeferredReveals() {
+    deferringEnemyTurn = false;
+    List<Runnable> reveals = new ArrayList<>(queuedReveals);
+    queuedReveals.clear();
+    Timer.schedule(
+        new Timer.Task() {
+          @Override
+          public void run() {
+            reveals.forEach(Runnable::run);
+          }
+        },
+        ENEMY_TURN_DELAY);
   }
 
   private void onEnemyEffects(List<ResolvedCardEffect> effects) {
@@ -105,31 +163,6 @@ public class BattleActions extends Component {
       game.setScreen(target);
     }
   }
-
-  /**
-   * A card was played (self-target on click, or dropped on a target) — see Clickable/DragNDrop and
-   * EnemyDropTargetComponent for how "playCard" ends up firing with (cardId, targetId). Translates
-   * the raw cardId into its display name and re-fires as "cardPlayed" for UI feedback.
-   */
-  //  private void onCardPlayed(String cardID, String targetID) {
-  //    var optionalCard = library.getCard(cardID);
-  //
-  //    if (optionalCard.isEmpty()) {
-  //      return;
-  //    }
-  //
-  //    CardConfig cardConfig = optionalCard.get();
-  //    CardPlayTarget target =
-  //        switch (cardConfig.target) {
-  //          case SELF -> CardPlayTarget.self();
-  //          case SINGLE_ENEMY -> CardPlayTarget.singleEnemy(targetID);
-  //          case ALL_ENEMIES -> CardPlayTarget.allEnemies();
-  //        };
-  //    CardPlayRequest request = new CardPlayRequest(cardID, target);
-  //    if (controller.submitCardPlayRequest(request)) {
-  //      entity.getEvents().trigger("cardPlayed", cardConfig.name, targetID);
-  //    }
-  //  }
 
   private void triggerEndTurn() {
     controller.endPlayerTurn();

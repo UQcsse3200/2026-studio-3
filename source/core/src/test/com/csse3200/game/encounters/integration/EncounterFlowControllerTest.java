@@ -59,6 +59,83 @@ class EncounterFlowControllerTest {
   }
 
   @Test
+  void shouldStartAndCompleteChanceIndependently() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 100);
+    IntegratedShopTransactionGateway transactions =
+        new IntegratedShopTransactionGateway(
+            player, new MockCardCatalogGateway("card_heal"), new MockDeckGateway());
+    RecordingCallback callback = new RecordingCallback();
+
+    EncounterFlowController flow = new EncounterFlowController(player, transactions, callback);
+
+    ChanceEncounterSession chance = flow.startChance(41, createChanceEncounter());
+
+    assertTrue(flow.isEncounterActive());
+    assertEquals(41, flow.getActiveNodeId());
+    assertEquals(EncounterFlowController.EncounterType.CHANCE, flow.getActiveType());
+
+    assertTrue(chance.resolveChoice("risk").isSuccess());
+    assertTrue(chance.complete());
+
+    assertFalse(flow.isEncounterActive());
+    assertNull(flow.getActiveNodeId());
+    assertNull(flow.getActiveType());
+
+    assertEquals(1, callback.count);
+    assertEquals(41, callback.nodeId);
+    assertTrue(callback.success);
+  }
+
+  @Test
+  void shouldApplyCardRewardThroughChanceFlowBoundaries() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 100);
+    MockCardCatalogGateway cardCatalog = new MockCardCatalogGateway("bandage");
+    MockDeckGateway deck = new MockDeckGateway();
+    IntegratedShopTransactionGateway transactions =
+        new IntegratedShopTransactionGateway(player, cardCatalog, deck);
+    EncounterFlowController flow =
+        new EncounterFlowController(
+            player, cardCatalog, deck, transactions, (nodeId, success) -> {});
+    ChanceEncounter encounter =
+        new ChanceEncounter(
+            "reward",
+            "Reward",
+            List.of(new ChanceChoice("accept", "Accept", new ChanceOutcome(0, 0, "bandage"))));
+
+    ChanceResolution result = flow.startChance(1, encounter).resolveChoice("accept");
+
+    assertTrue(result.isSuccess());
+    assertEquals(List.of("bandage"), deck.getCardIds());
+  }
+
+  @Test
+  void shouldStartAndCompleteShopIndependently() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 100);
+    IntegratedShopTransactionGateway transactions =
+        new IntegratedShopTransactionGateway(
+            player, new MockCardCatalogGateway("card_heal"), new MockDeckGateway());
+    RecordingCallback callback = new RecordingCallback();
+
+    EncounterFlowController flow = new EncounterFlowController(player, transactions, callback);
+
+    ShopEncounter shop = flow.startShop(42, new ShopService(new ShopItem[0]));
+
+    assertTrue(flow.isEncounterActive());
+    assertEquals(42, flow.getActiveNodeId());
+    assertEquals(EncounterFlowController.EncounterType.SHOP, flow.getActiveType());
+
+    shop.leave();
+
+    assertFalse(flow.isEncounterActive());
+    assertNull(flow.getActiveNodeId());
+    assertNull(flow.getActiveType());
+
+    assertEquals(1, callback.count);
+    assertEquals(42, callback.nodeId);
+    assertTrue(callback.success);
+  }
+
+  @Test
   void shouldPreventTwoConcurrentEncounters() {
     MockPlayerStateGateway player = new MockPlayerStateGateway(100, 100);
     IntegratedShopTransactionGateway transactions =
@@ -175,7 +252,7 @@ class EncounterFlowControllerTest {
   }
 
   private MapGraph createMap() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph map = new MapGraph(NodePoolGenerator.generate(config));
     MapNode chance = new MapNode(1, RoomType.EVENT);
     MapNode shop = new MapNode(2, RoomType.SHOP);

@@ -5,11 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import com.csse3200.game.entities.Entity;
 
 @ExtendWith(GameExtension.class)
 class ArmorAndStatusEffectTest {
@@ -478,7 +477,9 @@ class ArmorAndStatusEffectTest {
     int[] reportedMaxHealth = {-1};
     int[] deathEvents = {0};
 
-    entity.getEvents().addListener(
+    entity
+        .getEvents()
+        .addListener(
             "updateHealth",
             (Integer health, Integer maxHealth) -> {
               healthUpdates[0]++;
