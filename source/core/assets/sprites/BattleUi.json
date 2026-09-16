@@ -22,9 +22,9 @@
   ],
   "Displaying": [
     {
-      "text": "Click a card",
-      "x": 500,
-      "y": 500,
+      "text": "Click or drag a card to your opponent",
+      "x": 300,
+      "y": 650,
       "fontName": "large",
       "scale": 1,
       "variant": "cardDisplay"

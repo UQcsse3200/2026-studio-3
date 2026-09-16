@@ -6,6 +6,7 @@ public class CardDisplay extends Displaying {
 
   private Label text;
 
+  @Deprecated
   public CardDisplay(DisplayingRecord rec) {
     super(rec);
     this.text = getLabel(); // Get the text from the superclass
