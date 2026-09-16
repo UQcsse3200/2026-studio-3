@@ -149,6 +149,40 @@ class CardPlayServiceTest {
   }
 
   @Test
+  void shouldResolveOnTheExplicitlySharedResolutionServiceInstance() {
+    // Proves the exact constructor combination BattleScreen relies on to share one
+    // CardEffectResolutionService between real card play and the debug dialog: passing an
+    // explicit resolutionService alongside playerStateView/enemyStateView (not the adapter-only
+    // overload, which builds its own internal service the caller can never observe).
+    CardConfig strike =
+        card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
+    CardLibrary cardLibrary = new CardLibrary(List.of(strike));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike")));
+    battleDeck.drawOne();
+    EnergyComponent energyComponent = new EnergyComponent(3);
+    PlayerStateView playerState = playerStateView(energyComponent, 0, 0);
+    EnemyStateView enemyState = enemyStateView("enemy-1", 0);
+    CardEffectResolutionService sharedResolutionService =
+        new CardEffectResolutionService(cardLibrary);
+    CardPlayService playService =
+        new CardPlayService(
+            cardLibrary,
+            sharedResolutionService,
+            battleDeck,
+            energyComponent,
+            playerState,
+            enemyState);
+
+    CardPlayResult result = playService.playCard(CardPlayRequest.singleEnemy("strike", "enemy-1"));
+
+    assertTrue(result.success());
+    // The externally-held service the caller kept a reference to (e.g. to hand to a debug
+    // dialog) must show the same resolution playCard() just produced internally.
+    assertEquals(1, sharedResolutionService.getResolutions().size());
+    assertEquals("strike", sharedResolutionService.getResolutions().get(0).cardId());
+  }
+
+  @Test
   void shouldRejectUnavailableEnemyBeforeSpendingEnergy() {
     CardConfig strike =
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
