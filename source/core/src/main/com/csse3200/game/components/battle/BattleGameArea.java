@@ -32,8 +32,10 @@ public class BattleGameArea extends ForestGameArea {
   @Override
   public void create() {
     super.create();
-    // The shared forest area owns its original Bone Crawler and its existing drop-target ID.
-    enemyTargets.put("bone_crawler", super.getEnemies().getFirst());
+    // The shared forest area's Bone Crawler gets its drop-target ID from EnemyFactory, which
+    // keys it by the entity's numeric ID rather than its name, so the target map must match.
+    Entity boneCrawler = super.getEnemies().getFirst();
+    enemyTargets.put(Integer.toString(boneCrawler.getId()), boneCrawler);
 
     EnemyConfigs roster = FileLoader.readClass(EnemyConfigs.class, "configs/enemies.json");
     List<EnemyConfig> configs =
@@ -58,7 +60,8 @@ public class BattleGameArea extends ForestGameArea {
       EnemyConfig config = configs.get(index);
       Entity enemy = EnemyFactory.create(config);
       spawnEntityAt(enemy, new GridPoint2(27 + index * 7, 20), true, true);
-      enemyTargets.put(config.id, enemy);
+      // Keyed by the entity's numeric ID to match the drop-target ID EnemyFactory assigns it.
+      enemyTargets.put(Integer.toString(enemy.getId()), enemy);
     }
   }
 
