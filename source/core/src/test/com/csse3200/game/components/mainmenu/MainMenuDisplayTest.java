@@ -72,7 +72,7 @@ class MainMenuDisplayTest {
   @Test
   void buildsPlayerFacingMenuInOrder() {
     assertEquals(
-        List.of("New Game", "Load Game", "Bestiary", "Settings", "Exit"),
+        List.of("New Game", "Load Game", "Library", "Settings", "Exit"),
         display.getMenuButtons().stream().map(button -> button.getText().toString()).toList());
     assertEquals(
         List.of("start", "load", "bestiary", "settings", "exit"),

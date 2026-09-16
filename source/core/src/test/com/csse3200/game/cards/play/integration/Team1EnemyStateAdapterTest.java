@@ -64,6 +64,34 @@ class Team1EnemyStateAdapterTest {
   }
 
   @Test
+  void shouldReduceEnemyArmorWithSunder() {
+    CombatStatsComponent stats = new CombatStatsComponent(10, 1);
+    stats.addArmor(5);
+    Team1EnemyStateAdapter adapter =
+        new Team1EnemyStateAdapter(Map.of("enemy-1", enemyWith(stats)));
+
+    adapter.applyEnemyEffects(
+        CardPlayTarget.singleEnemy("enemy-1"),
+        List.of(enemyEffect(EffectType.SUNDER, TargetType.SINGLE_ENEMY, 3, 0, 0)));
+
+    assertEquals(2, stats.getArmor());
+  }
+
+  @Test
+  void shouldNotReduceEnemyArmorBelowZeroWithSunder() {
+    CombatStatsComponent stats = new CombatStatsComponent(10, 1);
+    stats.addArmor(2);
+    Team1EnemyStateAdapter adapter =
+        new Team1EnemyStateAdapter(Map.of("enemy-1", enemyWith(stats)));
+
+    adapter.applyEnemyEffects(
+        CardPlayTarget.singleEnemy("enemy-1"),
+        List.of(enemyEffect(EffectType.SUNDER, TargetType.SINGLE_ENEMY, 3, 0, 0)));
+
+    assertEquals(0, stats.getArmor());
+  }
+
+  @Test
   void shouldRejectUnavailableSingleEnemyWithoutMutatingAnotherEnemy() {
     CombatStatsComponent available = new CombatStatsComponent(10, 1);
     Team1EnemyStateAdapter adapter =
@@ -85,5 +113,42 @@ class Team1EnemyStateAdapterTest {
   private static ResolvedCardEffect enemyEffect(
       EffectType type, TargetType target, int value, int duration, int sequence) {
     return new ResolvedCardEffect("enemy_card", type, target, value, duration, sequence);
+  }
+
+  @Test
+  void shouldApplyPiercingDamageWithoutConsumingBlockOrArmor() {
+    CombatStatsComponent stats = new CombatStatsComponent(20, 1);
+    stats.addBlock(3);
+    stats.addArmor(4);
+    Team1EnemyStateAdapter adapter =
+        new Team1EnemyStateAdapter(Map.of("enemy-1", enemyWith(stats)));
+
+    adapter.applyEnemyEffects(
+        CardPlayTarget.singleEnemy("enemy-1"),
+        List.of(enemyEffect(EffectType.PIERCE, TargetType.SINGLE_ENEMY, 6, 0, 0)));
+
+    assertEquals(14, stats.getHealth());
+    assertEquals(3, stats.getBlock());
+    assertEquals(4, stats.getArmor());
+  }
+
+  @Test
+  void shouldApplyPiercingDamageToAllAvailableEnemies() {
+    CombatStatsComponent first = new CombatStatsComponent(20, 1);
+    CombatStatsComponent second = new CombatStatsComponent(20, 1);
+    first.addArmor(4);
+    second.addBlock(3);
+    Team1EnemyStateAdapter adapter =
+        new Team1EnemyStateAdapter(
+            Map.of("enemy-1", enemyWith(first), "enemy-2", enemyWith(second)));
+
+    adapter.applyEnemyEffects(
+        CardPlayTarget.allEnemies(),
+        List.of(enemyEffect(EffectType.PIERCE, TargetType.ALL_ENEMIES, 6, 0, 0)));
+
+    assertEquals(14, first.getHealth());
+    assertEquals(14, second.getHealth());
+    assertEquals(4, first.getArmor());
+    assertEquals(3, second.getBlock());
   }
 }

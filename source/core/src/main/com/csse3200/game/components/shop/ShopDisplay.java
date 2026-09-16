@@ -1,10 +1,12 @@
 package com.csse3200.game.components.shop;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -12,9 +14,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Scaling;
+import com.csse3200.game.cards.CardService;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.maps.EncounterCallback;
+import com.csse3200.game.services.ResourceService;
+import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.shop.PurchaseResult;
 import com.csse3200.game.shop.ShopConfig;
 import com.csse3200.game.shop.ShopEncounter;
@@ -35,19 +41,20 @@ import org.slf4j.LoggerFactory;
  * states. Purchase validation and inventory changes are handled by the underlying Shop Encounter
  * and Shop Service rather than this display component.
  *
- * <p>Placeholder card artwork is displayed until visual assets are provided by the Cards/Library
- * system.
+ * <p>Card artwork is resolved through the Cards/Library system. A placeholder is retained when a
+ * card or its texture is unavailable.
  */
 public class ShopDisplay extends UIComponent {
   private static final Logger logger = LoggerFactory.getLogger(ShopDisplay.class);
   private static final String SHOP_CONFIG = "configs/shopItems.json";
+  private static final String SHOP_ART_DIRECTORY = "images/shop/cards/";
   private static final float Z_INDEX = 2f;
   private static final float PANEL_WIDTH = 1080f;
   private static final float CARD_WIDTH = 300f;
-  private static final float CARD_PADDING = 30f;
+  private static final float CARD_PADDING = 14f;
   private static final float CARD_CONTENT_WIDTH = CARD_WIDTH - (CARD_PADDING * 2f);
 
-  private static final Color BACKDROP_COLOUR = new Color(0.018f, 0.012f, 0.02f, 0.84f);
+  private static final Color BACKDROP_COLOUR = new Color(0.018f, 0.012f, 0.02f, 1f);
   private static final Color PANEL_COLOUR = new Color(0.105f, 0.07f, 0.065f, 0.98f);
   private static final Color CARD_COLOUR = new Color(0.16f, 0.11f, 0.1f, 1f);
   private static final Color ART_COLOUR = new Color(0.075f, 0.055f, 0.065f, 1f);
@@ -80,6 +87,7 @@ public class ShopDisplay extends UIComponent {
   }
 
   private final ShopEncounter shopEncounter;
+  private final CardService cardService;
   private final Map<String, ItemWidgets> itemWidgets = new HashMap<>();
   private final Set<String> purchasedItemIds = new HashSet<>();
 
@@ -133,10 +141,16 @@ public class ShopDisplay extends UIComponent {
    * @param shopEncounter encounter session receiving purchase and completion actions
    */
   public ShopDisplay(InventoryComponent inventory, ShopEncounter shopEncounter) {
+    this(inventory, shopEncounter, null);
+  }
+
+  private ShopDisplay(
+      InventoryComponent inventory, ShopEncounter shopEncounter, CardService cardService) {
     this.shopEncounter =
         shopEncounter == null
             ? new ShopEncounter(inventory, new ShopService((ShopConfig) null))
             : shopEncounter;
+    this.cardService = cardService;
   }
 
   /**
@@ -146,6 +160,16 @@ public class ShopDisplay extends UIComponent {
    */
   public ShopDisplay(ShopEncounter shopEncounter) {
     this(null, shopEncounter);
+  }
+
+  /**
+   * Creates an integrated Shop display with artwork supplied by the shared Card Service.
+   *
+   * @param shopEncounter integrated shop session
+   * @param cardService read-only source of card definitions and texture paths
+   */
+  public ShopDisplay(ShopEncounter shopEncounter, CardService cardService) {
+    this(null, shopEncounter, cardService);
   }
 
   @Override
@@ -264,33 +288,24 @@ public class ShopDisplay extends UIComponent {
     card.setBackground(skin.newDrawable("white", CARD_COLOUR));
     card.pad(CARD_PADDING);
 
-    Label categoryLabel = new Label("CARD OFFER", createLabelStyle("small", MUTED_COLOUR));
-    Label nameLabel = new Label(item.getDisplayName(), createLabelStyle("default", BODY_COLOUR));
-    categoryLabel.setFontScale(1.3f);
-    nameLabel.setFontScale(1.45f);
-    nameLabel.setWrap(true);
+    Actor artwork = createArtwork(item);
 
-    Table artPlaceholder = new Table();
-    artPlaceholder.setBackground(skin.newDrawable("white", ART_COLOUR));
-    Label artLabel = new Label("CARD ART\nCOMING SOON", createLabelStyle("small", MUTED_COLOUR));
-    artLabel.setFontScale(1.3f);
-    artLabel.setAlignment(Align.center);
-    artPlaceholder.add(artLabel).center();
-
-    Label descriptionLabel =
-        new Label(item.getDescription(), createLabelStyle("small", BODY_COLOUR));
-    descriptionLabel.setWrap(true);
     Label priceLabel =
         new Label(String.format("%d GOLD", item.price), createLabelStyle("default", GOLD_COLOUR));
     Label stockLabel = new Label("", createLabelStyle("small", MUTED_COLOUR));
     Label stateLabel = new Label("", createLabelStyle("small", AVAILABLE_COLOUR));
-    descriptionLabel.setFontScale(1.35f);
-    priceLabel.setFontScale(1.45f);
-    stockLabel.setFontScale(1.3f);
-    stateLabel.setFontScale(1.3f);
+    priceLabel.setFontScale(1.12f);
+    stockLabel.setFontScale(0.98f);
+    stateLabel.setFontScale(1f);
+
+    Table detailsRow = new Table();
+    detailsRow.add(priceLabel).left().expandX();
+    detailsRow.add(stockLabel).right();
 
     TextButton buyButton = new TextButton("Purchase", availableButtonStyle);
-    buyButton.getLabel().setFontScale(1.42f);
+    buyButton.getLabel().setFontScale(1f);
+    buyButton.getLabel().setWrap(true);
+    buyButton.getLabel().setAlignment(Align.center);
     buyButton.addListener(
         new ChangeListener() {
           @Override
@@ -299,24 +314,64 @@ public class ShopDisplay extends UIComponent {
           }
         });
 
-    card.add(categoryLabel).left().width(CARD_CONTENT_WIDTH);
+    card.add(artwork).width(CARD_CONTENT_WIDTH).height(355f).top();
     card.row();
-    card.add(nameLabel).left().width(CARD_CONTENT_WIDTH).padTop(8f);
+    card.add(detailsRow).width(CARD_CONTENT_WIDTH).fillX().padTop(8f);
     card.row();
-    card.add(artPlaceholder).width(CARD_CONTENT_WIDTH).height(147f).padTop(18f);
+    card.add(stateLabel).left().padTop(4f);
     card.row();
-    card.add(descriptionLabel).left().top().width(CARD_CONTENT_WIDTH).height(84f).padTop(18f);
-    card.row();
-    card.add(priceLabel).left().padTop(16f);
-    card.row();
-    card.add(stockLabel).left().padTop(4f);
-    card.row();
-    card.add(stateLabel).left().padTop(8f);
-    card.row();
-    card.add(buyButton).bottom().width(CARD_CONTENT_WIDTH).height(78f).padTop(18f);
+    card.add(buyButton).bottom().width(CARD_CONTENT_WIDTH).height(52f).padTop(8f);
 
     itemWidgets.put(item.id, new ItemWidgets(card, stateLabel, stockLabel, buyButton));
     return card;
+  }
+
+  private Actor createArtwork(ShopItem item) {
+    String texturePath = resolveArtworkPath(item);
+    ResourceService resources = ServiceLocator.getResourceService();
+    if (resources != null && !isLoadedTexture(resources, texturePath)) {
+      texturePath = resolveConfiguredArtworkPath(item);
+    }
+    if (resources != null && isLoadedTexture(resources, texturePath)) {
+      Texture texture = resources.getAsset(texturePath, Texture.class);
+      texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+      Image artwork = new Image(texture);
+      artwork.setScaling(Scaling.fit);
+      return artwork;
+    }
+
+    Table placeholder = new Table();
+    placeholder.setBackground(skin.newDrawable("white", ART_COLOUR));
+    Label label = new Label("CARD ART\nUNAVAILABLE", createLabelStyle("small", MUTED_COLOUR));
+    label.setFontScale(1.3f);
+    label.setAlignment(Align.center);
+    placeholder.add(label).center();
+    return placeholder;
+  }
+
+  String resolveArtworkPath(ShopItem item) {
+    String configuredPath = resolveConfiguredArtworkPath(item);
+    if (configuredPath == null) {
+      return null;
+    }
+    int separator = configuredPath.lastIndexOf('/');
+    String fileName = separator < 0 ? configuredPath : configuredPath.substring(separator + 1);
+    return SHOP_ART_DIRECTORY + fileName;
+  }
+
+  private String resolveConfiguredArtworkPath(ShopItem item) {
+    if (cardService == null || item == null || item.cardId == null || item.cardId.isBlank()) {
+      return null;
+    }
+    return cardService
+        .getCard(item.cardId)
+        .map(card -> card.texturePath)
+        .filter(path -> path != null && !path.isBlank())
+        .orElse(null);
+  }
+
+  private static boolean isLoadedTexture(ResourceService resources, String texturePath) {
+    return texturePath != null && resources.containsAsset(texturePath, Texture.class);
   }
 
   private void addFooter(Table shopPanel) {
@@ -366,7 +421,7 @@ public class ShopDisplay extends UIComponent {
 
   private void leaveShop() {
     logger.debug("Shop encounter completed for node {}", shopEncounter.getNodeId());
-    shopEncounter.complete(true);
+    shopEncounter.leave();
     rootTable.addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
   }
 

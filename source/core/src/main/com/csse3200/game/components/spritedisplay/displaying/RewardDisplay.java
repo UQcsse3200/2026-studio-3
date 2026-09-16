@@ -29,7 +29,6 @@ public class RewardDisplay extends Displaying {
   @Override
   public void create() {
     super.create();
-    Thread.dumpStack();
     options = rewardService.generateRewardOptions();
     buildOptionButtons();
   }

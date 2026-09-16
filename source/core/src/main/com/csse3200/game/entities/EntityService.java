@@ -48,7 +48,9 @@ public class EntityService {
 
   /** Dispose all entities. */
   public void dispose() {
-    for (Entity entity : entities) {
+    Array<Entity> entitiesToDispose = new Array<>(entities);
+
+    for (Entity entity : entitiesToDispose) {
       entity.dispose();
     }
   }

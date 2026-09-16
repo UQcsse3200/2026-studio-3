@@ -1,0 +1,21 @@
+{
+  "encounters": [
+    {
+      "id": "valid-outcomes",
+      "description": "Contains valid no-effect and boundary outcomes.",
+      "weight": 1,
+      "choices": [
+        {
+          "id": "no-effect",
+          "description": "Do nothing.",
+          "outcome": { "healthDelta": 0, "currencyDelta": 0 }
+        },
+        {
+          "id": "integer-boundaries",
+          "description": "Use the supported integer boundaries.",
+          "outcome": { "healthDelta": -2147483648, "currencyDelta": 2147483647 }
+        }
+      ]
+    }
+  ]
+}

@@ -34,19 +34,14 @@ public class CardConfig {
   /** Effects applied in order when the card is played. */
   public EffectConfig[] effects = new EffectConfig[0];
 
-    /**
-     * Effects applied when the upgraded version of this card is played. Null means the card has
-     * no defined upgrade path and cannot be upgraded. Structured identically to {@link #effects}.
-     */
-    public EffectConfig[] upgradedEffects = null;
-
   /** Path to the card artwork, relative to the assets directory. */
   public String texturePath = "";
 
   /**
    * Optional upgraded values for this card. The upgrade inherits this card's ID, type, target and
    * artwork. This remains optional while the official card library is migrated; after every card
-   * has an upgrade, validation may require it for release definitions.
+   * has an upgrade, validation may require it for release definitions. Null means the card has no
+   * upgrade defined yet.
    */
   public CardUpgradeConfig upgrade = null;
 

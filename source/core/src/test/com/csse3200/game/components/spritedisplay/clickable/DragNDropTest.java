@@ -7,7 +7,9 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.csse3200.game.cards.CardPlayRequest;
+import com.csse3200.game.cards.TargetType;
+import com.csse3200.game.cards.play.CardPlayRequest;
+import com.csse3200.game.cards.play.CardPlayTarget;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.services.DragNDropService;
@@ -38,7 +40,9 @@ class DragNDropTest {
         .addListener(
             "playCard",
             (String cardId, String targetId) ->
-                received.set(new CardPlayRequest(cardId, targetId)));
+                received.set(
+                    new CardPlayRequest(
+                        cardId, new CardPlayTarget(TargetType.SINGLE_ENEMY, targetId))));
 
     DragAndDrop.Source source = getOnlySource(dragService.getDragAndDrop());
     DragAndDrop.Payload payload = source.dragStart(new InputEvent(), 0f, 0f, 0);
@@ -48,7 +52,9 @@ class DragNDropTest {
 
     source.dragStop(new InputEvent(), 0f, 0f, 0, payload, target);
 
-    assertEquals(new CardPlayRequest("strike", "bone_crawler"), received.get());
+    assertEquals(
+        new CardPlayRequest("strike", new CardPlayTarget(TargetType.SINGLE_ENEMY, "bone_crawler")),
+        received.get());
   }
 
   private DragAndDrop.Target targetFor(Actor actor) {

@@ -76,6 +76,25 @@ class ShopEncounterTest {
   }
 
   @Test
+  void shouldTreatNormalLeaveAsSuccessfulCompletion() {
+    CountingCallback callback = new CountingCallback();
+
+    ShopEncounter encounter =
+        new ShopEncounter(
+            7, new InventoryComponent(50), new ShopService(new ShopItem[0]), callback);
+
+    encounter.leave();
+    encounter.leave();
+
+    assertTrue(encounter.isCompleted());
+    assertTrue(encounter.completedSuccessfully());
+
+    assertEquals(1, callback.count);
+    assertEquals(7, callback.nodeId);
+    assertTrue(callback.success);
+  }
+
+  @Test
   void shouldNotUnlockMapNodeWhenShopEncounterFails() {
     MapGenerationConfig config = new MapGenerationConfig();
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
