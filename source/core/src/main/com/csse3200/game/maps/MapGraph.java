@@ -185,6 +185,12 @@ public class MapGraph implements EncounterCallback {
 
       node.setState(NodeState.COMPLETED);
 
+      for (MapNode nodes : getNodesByHeight(node.getHeight())) {
+        if (nodes.getNodeId() != node.getNodeId()) {
+          nodes.setState(NodeState.LOCKED);
+        }
+      }
+
       for (MapNode connected : node.getConnections()) {
         if (connected.getState() == NodeState.LOCKED) {
           connected.setState(NodeState.AVAILABLE);

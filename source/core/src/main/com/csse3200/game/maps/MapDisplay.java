@@ -43,14 +43,16 @@ public class MapDisplay extends UIComponent {
   private final float nodeWidth = mapWidth / 13f; // default size
   // to store positions
   private final Map<Integer, Vector2> nodePositions = new HashMap<>();
+  private final RunState runState;
 
   /**
    * Constructer method to initialize mapGraph
    *
    * @param mapGraph
    */
-  public MapDisplay(MapGraph mapGraph) {
+  public MapDisplay(MapGraph mapGraph, RunState runState) {
     this.mapGraph = mapGraph;
+    this.runState = runState;
     this.mapSelectionController = new MapSelectionController(mapGraph);
     this.mapInputHandler = new MapInputHandler(mapSelectionController);
     this.mapHeight = (MapGenerationConfig.MAP_HEIGHT + 1) * 2f * nodeWidth;
@@ -207,6 +209,8 @@ public class MapDisplay extends UIComponent {
     table.padLeft(15f);
     table.padTop(25);
 
+    PlayerRunState playerRunState = runState.getOrCreatePlayerState();
+
     // Image size
     float imageSideLength = 48f;
 
@@ -215,19 +219,8 @@ public class MapDisplay extends UIComponent {
         new Image(ServiceLocator.getResourceService().getAsset("images/heart.png", Texture.class));
 
     // Health text
-    int currentHealth;
-    int maxHealth;
-
-    CombatStatsComponent combatStats = entity.getComponent(CombatStatsComponent.class);
-
-    if (combatStats != null) {
-      currentHealth = combatStats.getHealth();
-      maxHealth = combatStats.getMaxHealth();
-    } else {
-      PlayerConfig stats = FileLoader.readClass(PlayerConfig.class, "configs/player.json");
-      currentHealth = stats.health;
-      maxHealth = stats.maxHealth;
-    }
+    int currentHealth = playerRunState.getCurrentHealth();
+    int maxHealth = playerRunState.getMaxHealth();
 
     String healthText = String.format("Health: %d / %d", currentHealth, maxHealth);
     Label.LabelStyle healthStyle = new Label.LabelStyle(skin.get("large", Label.LabelStyle.class));
@@ -240,17 +233,7 @@ public class MapDisplay extends UIComponent {
     Image moneyImage =
         new Image(ServiceLocator.getResourceService().getAsset("images/money.png", Texture.class));
 
-    // Money text
-    int money;
-
-    InventoryComponent inventoryComponent = entity.getComponent(InventoryComponent.class);
-
-    if (inventoryComponent != null) {
-      money = inventoryComponent.getGold();
-    } else {
-      PlayerConfig stats = FileLoader.readClass(PlayerConfig.class, "configs/player.json");
-      money = stats.gold;
-    }
+    int money = playerRunState.getGold();
 
     Label.LabelStyle moneyStyle = new Label.LabelStyle(skin.get("large", Label.LabelStyle.class));
     moneyStyle.fontColor = new Color(0.95f, 0.73f, 0.28f, 1f);
