@@ -34,6 +34,7 @@ public class CardConfig {
   /** Effects applied in order when the card is played. */
   public EffectConfig[] effects = new EffectConfig[0];
 
+
   /** Path to the card artwork, relative to the assets directory. */
   public String texturePath = "";
 

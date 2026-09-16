@@ -3,6 +3,7 @@ package com.csse3200.game.maps;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
+import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.entities.factories.PlayerFactory;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -256,5 +257,19 @@ public class RunState {
     playerMaxEnergy = 0;
     playerStatsInitialised = false;
     playerState = null;
+  }
+
+  private RewardOption pendingReward;
+
+  public void setPendingReward(RewardOption reward) {
+    this.pendingReward = reward;
+  }
+
+  public RewardOption getPendingReward() {
+    return pendingReward;
+  }
+
+  public void clearPendingReward() {
+    this.pendingReward = null;
   }
 }

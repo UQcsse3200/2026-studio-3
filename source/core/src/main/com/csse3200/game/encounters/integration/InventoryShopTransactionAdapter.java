@@ -45,4 +45,9 @@ public final class InventoryShopTransactionAdapter implements ShopTransactionGat
         ? ShopTransactionStatus.SUCCESS
         : ShopTransactionStatus.TRANSACTION_FAILED;
   }
+
+  @Override
+  public float getShopDiscount() {
+    return inventory.getShopDiscount();
+  }
 }
