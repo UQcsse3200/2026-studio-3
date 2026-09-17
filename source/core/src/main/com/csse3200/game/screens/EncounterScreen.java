@@ -173,6 +173,9 @@ public class EncounterScreen extends ScreenAdapter {
         playerDefeated);
 
     runState.completeEncounter(effectiveSuccess);
+    if (effectiveSuccess) {
+      game.requestAutosaveAfterEncounter();
+    }
 
     GdxGame.ScreenType targetScreen =
         playerDefeated ? GdxGame.ScreenType.DEFEAT : GdxGame.ScreenType.MAP;

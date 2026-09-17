@@ -7,6 +7,7 @@ import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattlePhase;
+import com.csse3200.game.maps.RunState;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -150,8 +151,13 @@ public class BattleActions extends Component {
 
     // Report the result to the run so the map node is marked done (win) or the run stays put
     // (loss). The end screen reads this to decide whether to go back to the map or the menu.
-    if (game.getRunState() != null) {
-      game.getRunState().completeEncounter(win);
+    RunState runState = game.getRunState();
+    if (runState != null) {
+      boolean hadActiveEncounter = runState.getActiveNodeId() != null;
+      runState.completeEncounter(win);
+      if (win && hadActiveEncounter) {
+        game.requestAutosaveAfterEncounter();
+      }
     }
 
     GdxGame.ScreenType target = win ? GdxGame.ScreenType.VICTORY : GdxGame.ScreenType.DEFEAT;
