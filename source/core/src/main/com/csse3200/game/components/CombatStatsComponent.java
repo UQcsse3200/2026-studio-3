@@ -10,16 +10,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Component used to store information related to combat such as health, attack, armor, block and
+ * Component used to store information related to combat such as health, attack, armour, block and
  * status effects. Any entities which engage it combat should have an instance of this class
  * registered. This class can be extended for more specific combat needs. SCOPE NOTE: this class
- * owns the generic mechanics of armor, block and status effects - how they are stored, applied,
+ * owns the generic mechanics of armour, block and status effects - how they are stored, applied,
  * queried, removed and expired. It deliberately does NOT own the specific calculation rules for any
  * individual effect (e.g. exactly how "Vulnerable" or "Strength" changes a number). Those
- * calculations are owned by whichever system/teammate needs them. ARMOR vs BLOCK: these are two
- * distinct mechanics, not two names for the same thing. Armor is a permanent damage-reduction pool.
- * It persists until consumed by incoming damage or explicitly cleared via clearArmor() - it does
- * not reset automatically at any point in the turn cycle. Block is a per-turn damage-reduction
+ * calculations are owned by whichever system/teammate needs them. ARMOUR vs BLOCK: these are two
+ * distinct mechanics, not two names for the same thing. Armour is a permanent damage-reduction
+ * pool. It persists until consumed by incoming damage or explicitly cleared via clearArmour() - it
+ * does not reset automatically at any point in the turn cycle. Block is a per-turn damage-reduction
  * pool, matching the "Slay the Spire" style block mechanic (Team 6). It is intended to reset to 0
  * once per turn via resetBlock(), regardless of whether it was consumed. TODO: exact reset timing
  * (start vs end of turn) is not yet wired up - depends on Team 3's turn/battle-sequence event.
@@ -32,7 +32,7 @@ public class CombatStatsComponent extends Component {
   private int health;
   private int baseAttack;
   private int maxHealth;
-  private int armor = 0;
+  private int armour = 0;
   private int block = 0;
   private final Map<String, StatusEffect> statusEffects = new HashMap<>();
 
@@ -120,13 +120,13 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
-   * Damage the entity's health. Incoming damage is first absorbed by armor, and the remainder is
+   * Damage the entity's health. Incoming damage is first absorbed by armour, and the remainder is
    * applied to health. If health reaches 0 the entity dies.
    *
    * <p>NOTE: this method does NOT apply any status-effect-based damage modifiers (e.g. Vulnerable).
    * Callers that need a status effect to change the amount of incoming damage should calculate the
    * final damage value themselves (e.g. by reading the relevant StatusEffect via getStatusEffect())
-   * before calling this method. This keeps this class limited to armor/status-effect storage and
+   * before calling this method. This keeps this class limited to armour/status-effect storage and
    * lifecycle management, not the specific calculation rules for any individual effect type.
    *
    * @param damage damage
@@ -134,7 +134,7 @@ public class CombatStatsComponent extends Component {
   public void takeDamage(int damage) {
     if (damage >= 0 && !isDead()) {
       int afterBlock = absorbDamageWithBlock(damage);
-      int remainingDamage = absorbDamageWithArmor(afterBlock);
+      int remainingDamage = absorbDamageWithArmour(afterBlock);
       setHealth(Math.max(this.health - remainingDamage, 0));
       if (entity != null && isDead()) {
         entity.getEvents().trigger("entityIsDead");
@@ -143,12 +143,12 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
-   * Applies a direct health change that bypasses armor and block, intended for non-combat sources
+   * Applies a direct health change that bypasses armour and block, intended for non-combat sources
    * such as Chance Encounters. A positive amount heals (clamped to max health via {@link
    * #heal(int)}); a negative amount reduces health directly, clamped to 0, and triggers the same
    * death event used by combat damage.
    *
-   * <p>Unlike {@link #takeDamage(int)}, this method does NOT consume block or armor. Use this when
+   * <p>Unlike {@link #takeDamage(int)}, this method does NOT consume block or armour. Use this when
    * a game system needs a health change with a precise, predictable amount that should not be
    * affected by the entity's current combat-only defences.
    *
@@ -249,77 +249,77 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
-   * Returns the entity's current armor value.
+   * Returns the entity's current armour value.
    *
-   * @return armor
+   * @return armour
    */
-  public int getArmor() {
-    return armor;
+  public int getArmour() {
+    return armour;
   }
 
   /**
-   * Sets the entity's armor. Armor is clamped to a minimum of 0.
+   * Sets the entity's armour. Armour is clamped to a minimum of 0.
    *
-   * @param armor armor value
+   * @param armour armour value
    */
-  public void setArmor(int armor) {
-    this.armor = Math.max(armor, 0);
+  public void setArmour(int armour) {
+    this.armour = Math.max(armour, 0);
     if (entity != null) {
-      entity.getEvents().trigger("updateArmor", this.armor);
+      entity.getEvents().trigger("updateArmour", this.armour);
     }
   }
 
   /**
-   * Adds armor to the entity. Non-positive amounts are ignored.
+   * Adds armour to the entity. Non-positive amounts are ignored.
    *
-   * @param amount amount of armor to add
+   * @param amount amount of armour to add
    */
-  public void addArmor(int amount) {
+  public void addArmour(int amount) {
     if (amount <= 0) {
       return;
     }
-    setArmor(this.armor + amount);
+    setArmour(this.armour + amount);
   }
 
   /**
-   * Reduces this entity's armor without affecting block, health, or other combat statistics.
+   * Reduces this entity's armour without affecting block, health, or other combat statistics.
    *
-   * <p>The armor value cannot fall below zero. Non-positive amounts are ignored.
+   * <p>The armour value cannot fall below zero. Non-positive amounts are ignored.
    *
-   * @param amount requested amount of armor to remove
-   * @return actual amount of armor removed
+   * @param amount requested amount of armour to remove
+   * @return actual amount of armour removed
    */
-  public int reduceArmor(int amount) {
+  public int reduceArmour(int amount) {
     if (amount <= 0) {
       return 0;
     }
 
-    int removed = Math.min(armor, amount);
+    int removed = Math.min(armour, amount);
     if (removed > 0) {
-      setArmor(armor - removed);
+      setArmour(armour - removed);
     }
     return removed;
   }
 
-  /** Clears all armor from the entity, setting it to 0. */
-  public void clearArmor() {
-    setArmor(0);
+  /** Clears all armour from the entity, setting it to 0. */
+  public void clearArmour() {
+    setArmour(0);
   }
 
   /**
-   * Uses current armor to absorb as much of the incoming damage as possible, reducing armor
+   * Uses current armour to absorb as much of the incoming damage as possible, reducing armour
    * accordingly, and returns whatever damage remains to be applied to health.
    *
    * @param incomingDamage damage to be absorbed (after status-effect modifiers)
-   * @return damage remaining after armor absorption
+   * @return damage remaining after armour absorption
    */
-  public int absorbDamageWithArmor(int incomingDamage) {
+  public int absorbDamageWithArmour(int incomingDamage) {
     if (incomingDamage <= 0) {
       return 0;
     }
-    int absorbed = Math.min(armor, incomingDamage);
+    int absorbed = Math.min(armour, incomingDamage);
     if (absorbed > 0) {
-      setArmor(armor - absorbed);
+      setArmour(armour - absorbed);
     }
     return incomingDamage - absorbed;
   }

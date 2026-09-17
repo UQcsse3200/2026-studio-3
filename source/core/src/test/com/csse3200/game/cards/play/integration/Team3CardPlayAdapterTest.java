@@ -105,7 +105,7 @@ class Team3CardPlayAdapterTest {
     CardConfig card = new CardConfig();
     card.id = "defend";
     card.name = "Defend";
-    card.description = "Add armor";
+    card.description = "Add armour";
     card.cost = 1;
     card.type = CardType.SKILL;
     card.rarity = Rarity.COMMON;

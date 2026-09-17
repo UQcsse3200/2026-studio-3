@@ -14,7 +14,7 @@
       "name": "Bone Crawler",
       "health": 30,
       "baseAttack": 5,
-      "armour": 0,
+      "armour": 2,
       "tier": "NORMAL",
       "behaviour": "defensive_stance"
     },
@@ -25,7 +25,7 @@
       "baseAttack": 7,
       "armour": 1,
       "tier": "NORMAL",
-      "behaviour": "armor_scaling"
+      "behaviour": "armour_scaling"
     },
     {
       "id": "tomb_guardian",

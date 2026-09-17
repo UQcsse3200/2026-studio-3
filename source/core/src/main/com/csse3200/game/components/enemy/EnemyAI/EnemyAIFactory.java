@@ -12,7 +12,7 @@ public final class EnemyAIFactory {
   public static final String SHIELD_BREAK_RETALIATION = "shield_break_retaliation";
   public static final String BOSS = "boss";
   public static final String DEFENSIVE_STANCE = "defensive_stance";
-  public static final String ARMOR_SCALING = "armor_scaling";
+  public static final String ARMOUR_SCALING = "armour_scaling";
   public static final String ERRATIC = "erratic";
 
   /** Behaviour used when a configuration names an unknown behaviour. */
@@ -40,7 +40,7 @@ public final class EnemyAIFactory {
       case SHIELD_BREAK_RETALIATION -> new ShieldBreakRetaliationAI();
       case BOSS -> new BossAI();
       case DEFENSIVE_STANCE -> new DefensiveStanceAI();
-      case ARMOR_SCALING -> new ArmorScalingAI();
+      case ARMOUR_SCALING -> new ArmourScalingAI();
       case ERRATIC -> new RandomStanceAI();
       default -> {
         logger.warn(

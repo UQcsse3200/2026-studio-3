@@ -13,7 +13,7 @@ public class EnemyIntent {
    * Creates an intent that inflicts no status effect.
    *
    * @param type category of the telegraphed action
-   * @param value magnitude of the action, such as damage dealt or armor gained
+   * @param value magnitude of the action, such as damage dealt or armour gained
    */
   public EnemyIntent(IntentType type, int value) {
     this(type, value, null, 0);
@@ -38,8 +38,8 @@ public class EnemyIntent {
     return new EnemyIntent(IntentType.ATTACK, damage);
   }
 
-  public static EnemyIntent defend(int armor) {
-    return new EnemyIntent(IntentType.DEFEND, armor);
+  public static EnemyIntent defend(int armour) {
+    return new EnemyIntent(IntentType.DEFEND, armour);
   }
 
   /**
