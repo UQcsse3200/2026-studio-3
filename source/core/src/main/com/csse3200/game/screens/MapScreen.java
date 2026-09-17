@@ -38,9 +38,11 @@ import org.slf4j.LoggerFactory;
 public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(MapScreen.class);
 
+  private final GdxGame game;
   private final Renderer renderer;
 
   public MapScreen(GdxGame game) {
+    this.game = game;
     logger.debug("Initialising map screen services");
     ServiceLocator.registerTimeSource(new GameTime());
     ServiceLocator.registerInputService(new InputService());
@@ -160,6 +162,11 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         });
 
     stage.addActor(exitButton);
+  }
+
+  @Override
+  public void show() {
+    game.autosaveOnMapReady();
   }
 
   @Override
