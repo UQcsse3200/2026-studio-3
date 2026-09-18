@@ -29,6 +29,7 @@ public class CombatStatsComponent extends Component {
   private static final Logger logger = LoggerFactory.getLogger(CombatStatsComponent.class);
   private static final String EVT_IS_DEAD = "entityIsDead";
   private static final String EVT_MAX_HEALTH = "updateMaxHealth";
+  private static final String POISON = "POISON";
   private int health;
   private int baseAttack;
   private int maxHealth;
@@ -467,7 +468,7 @@ public class CombatStatsComponent extends Component {
       return false;
     }
     return switch (type.toUpperCase(Locale.ROOT)) {
-      case "POISON", "VULNERABLE", "FEEBLE" -> true;
+      case POISON, "VULNERABLE", "FEEBLE" -> true;
       default -> false;
     };
   }
@@ -513,7 +514,7 @@ public class CombatStatsComponent extends Component {
       return;
     }
 
-    StatusEffect poison = getStatusEffect("POISON");
+    StatusEffect poison = getStatusEffect(POISON);
     if (poison == null) {
       return;
     }
@@ -524,12 +525,12 @@ public class CombatStatsComponent extends Component {
     }
 
     // Do not tick a replacement effect created by the damage callback.
-    if (getStatusEffect("POISON") != poison) {
+    if (getStatusEffect(POISON) != poison) {
       return;
     }
 
     if (poison.tickAndCheckExpired()) {
-      removeStatusEffect("POISON");
+      removeStatusEffect(POISON);
     }
   }
 }

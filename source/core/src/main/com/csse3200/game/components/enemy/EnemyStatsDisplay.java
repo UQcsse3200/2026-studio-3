@@ -22,6 +22,7 @@ public class EnemyStatsDisplay extends UIComponent {
   private static final float FONT_SCALE = 0.75f;
   private static final String STYLE_NAME_LARGE = "large";
 
+  @Override
   public void create() {
     super.create();
     addActors();
