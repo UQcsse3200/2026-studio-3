@@ -63,7 +63,6 @@ public class EnemyStatsDisplay extends UIComponent {
     armourLabel = new Label(armourText, skin, STYLE_NAME_LARGE);
     armourLabel.setFontScale(FONT_SCALE);
 
-    // table
     table.add(heartImage).size(imageSideLength).pad(5);
     table.add(healthLabel);
     table.row();
