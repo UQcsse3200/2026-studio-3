@@ -102,7 +102,7 @@ public class EnemyFactory {
     }
 
     CombatStatsComponent stats = new CombatStatsComponent(config.health, config.baseAttack);
-    stats.setArmor(config.armour);
+    stats.setArmour(config.armour);
 
     Entity enemy =
         new Entity()

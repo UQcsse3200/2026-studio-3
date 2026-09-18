@@ -541,7 +541,7 @@ class BattleControllerTest {
   void poisonShouldUseDefensesAndExpireAfterTwoEnemyTurns() {
     CombatStatsComponent stats = new CombatStatsComponent(20, 0);
     stats.setBlock(3);
-    stats.setArmor(4);
+    stats.setArmour(4);
     stats.applyStatusEffect(new StatusEffect("POISON", 5, 2));
 
     Entity enemy = createPoisonTestEnemy(stats, firstEnemyBehaviour);
@@ -561,7 +561,7 @@ class BattleControllerTest {
 
     assertEquals(20, stats.getHealth());
     assertEquals(0, stats.getBlock());
-    assertEquals(2, stats.getArmor());
+    assertEquals(2, stats.getArmour());
     assertEquals(1, stats.getStatusEffect("POISON").getDuration());
     assertEquals(List.of(20), healthAtAction);
     assertEquals(BattlePhase.PLAYER_TURN, battle.getCurrentPhase());
@@ -569,7 +569,7 @@ class BattleControllerTest {
     battle.endPlayerTurn();
 
     assertEquals(17, stats.getHealth());
-    assertEquals(0, stats.getArmor());
+    assertEquals(0, stats.getArmour());
     assertNull(stats.getStatusEffect("POISON"));
     assertEquals(List.of(20, 17), healthAtAction);
 

@@ -35,6 +35,7 @@ public class MapDisplay extends UIComponent {
   private final MapGraph mapGraph;
   private final MapInputHandler mapInputHandler;
   private final MapSelectionController mapSelectionController;
+  private static final String LARGE = "large";
 
   private Group group;
   private ScrollPane scrollPane;
@@ -230,7 +231,7 @@ public class MapDisplay extends UIComponent {
     }
 
     String healthText = String.format("Health: %d / %d", currentHealth, maxHealth);
-    Label.LabelStyle healthStyle = new Label.LabelStyle(skin.get("large", Label.LabelStyle.class));
+    Label.LabelStyle healthStyle = new Label.LabelStyle(skin.get(LARGE, Label.LabelStyle.class));
     healthStyle.fontColor = new Color(0.75f, 0.18f, 0.16f, 1f);
 
     Label healthLabel = new Label(healthText, healthStyle);
@@ -252,7 +253,7 @@ public class MapDisplay extends UIComponent {
       money = stats.gold;
     }
 
-    Label.LabelStyle moneyStyle = new Label.LabelStyle(skin.get("large", Label.LabelStyle.class));
+    Label.LabelStyle moneyStyle = new Label.LabelStyle(skin.get(LARGE, Label.LabelStyle.class));
     moneyStyle.fontColor = new Color(0.95f, 0.73f, 0.28f, 1f);
     String moneyText = String.format("Gold: $%d", money);
     Label moneyLabel = new Label(moneyText, moneyStyle);
@@ -263,7 +264,7 @@ public class MapDisplay extends UIComponent {
         new Image(ServiceLocator.getResourceService().getAsset("images/piety.png", Texture.class));
 
     // Piety text
-    Label.LabelStyle pietyStyle = new Label.LabelStyle(skin.get("large", Label.LabelStyle.class));
+    Label.LabelStyle pietyStyle = new Label.LabelStyle(skin.get(LARGE, Label.LabelStyle.class));
     pietyStyle.fontColor = new Color(0.95f, 0.73f, 0.28f, 1f);
     String pietyText = String.format("Piety: %d", mapGraph.getCurrentNode().getHeight());
     Label pietyLabel = new Label(pietyText, pietyStyle);
