@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.maps.EncounterCallback;
@@ -30,6 +31,7 @@ import com.csse3200.game.ui.UIComponent;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +49,6 @@ import org.slf4j.LoggerFactory;
 public class ShopDisplay extends UIComponent {
   private static final Logger logger = LoggerFactory.getLogger(ShopDisplay.class);
   private static final String SHOP_CONFIG = "configs/shopItems.json";
-  private static final String SHOP_ART_DIRECTORY = "images/shop/cards/";
   private static final float Z_INDEX = 2f;
   private static final float PANEL_WIDTH = 1080f;
   private static final float CARD_WIDTH = 300f;
@@ -290,6 +291,20 @@ public class ShopDisplay extends UIComponent {
 
     Actor artwork = createArtwork(item);
 
+    Label nameLabel = new Label(resolveCardName(item), createLabelStyle("default", BODY_COLOUR));
+    Label energyLabel = new Label(resolveEnergyText(item), createLabelStyle("small", GOLD_COLOUR));
+    Label descriptionLabel =
+        new Label(resolveCardDescription(item), createLabelStyle("small", MUTED_COLOUR));
+    nameLabel.setFontScale(1.1f);
+    energyLabel.setFontScale(0.95f);
+    descriptionLabel.setFontScale(0.95f);
+    descriptionLabel.setWrap(true);
+    descriptionLabel.setAlignment(Align.left, Align.top);
+
+    Table cardIdentity = new Table();
+    cardIdentity.add(nameLabel).left().expandX();
+    cardIdentity.add(energyLabel).right();
+
     Label priceLabel =
         new Label(String.format("%d GOLD", item.price), createLabelStyle("default", GOLD_COLOUR));
     Label stockLabel = new Label("", createLabelStyle("small", MUTED_COLOUR));
@@ -314,7 +329,11 @@ public class ShopDisplay extends UIComponent {
           }
         });
 
-    card.add(artwork).width(CARD_CONTENT_WIDTH).height(355f).top();
+    card.add(artwork).width(CARD_CONTENT_WIDTH).height(205f).top();
+    card.row();
+    card.add(cardIdentity).width(CARD_CONTENT_WIDTH).fillX().padTop(10f);
+    card.row();
+    card.add(descriptionLabel).width(CARD_CONTENT_WIDTH).height(52f).left().top().padTop(5f);
     card.row();
     card.add(detailsRow).width(CARD_CONTENT_WIDTH).fillX().padTop(8f);
     card.row();
@@ -329,9 +348,6 @@ public class ShopDisplay extends UIComponent {
   private Actor createArtwork(ShopItem item) {
     String texturePath = resolveArtworkPath(item);
     ResourceService resources = ServiceLocator.getResourceService();
-    if (resources != null && !isLoadedTexture(resources, texturePath)) {
-      texturePath = resolveConfiguredArtworkPath(item);
-    }
     if (resources != null && isLoadedTexture(resources, texturePath)) {
       Texture texture = resources.getAsset(texturePath, Texture.class);
       texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
@@ -350,24 +366,39 @@ public class ShopDisplay extends UIComponent {
   }
 
   String resolveArtworkPath(ShopItem item) {
-    String configuredPath = resolveConfiguredArtworkPath(item);
-    if (configuredPath == null) {
-      return null;
-    }
-    int separator = configuredPath.lastIndexOf('/');
-    String fileName = separator < 0 ? configuredPath : configuredPath.substring(separator + 1);
-    return SHOP_ART_DIRECTORY + fileName;
-  }
-
-  private String resolveConfiguredArtworkPath(ShopItem item) {
-    if (cardService == null || item == null || item.cardId == null || item.cardId.isBlank()) {
-      return null;
-    }
-    return cardService
-        .getCard(item.cardId)
+    return resolveCard(item)
         .map(card -> card.texturePath)
         .filter(path -> path != null && !path.isBlank())
         .orElse(null);
+  }
+
+  String resolveCardName(ShopItem item) {
+    return resolveCard(item)
+        .map(card -> card.name)
+        .filter(name -> name != null && !name.isBlank())
+        .orElseGet(() -> item == null ? "Unknown card" : item.getDisplayName());
+  }
+
+  String resolveCardDescription(ShopItem item) {
+    return resolveCard(item)
+        .map(card -> card.description)
+        .filter(description -> description != null && !description.isBlank())
+        .orElseGet(
+            () -> {
+              String description = item == null ? "" : item.getDescription();
+              return description.isBlank() ? "No description available." : description;
+            });
+  }
+
+  String resolveEnergyText(ShopItem item) {
+    return resolveCard(item).map(card -> card.cost + " ENERGY").orElse("-- ENERGY");
+  }
+
+  private Optional<CardConfig> resolveCard(ShopItem item) {
+    if (cardService == null || item == null || item.cardId == null || item.cardId.isBlank()) {
+      return Optional.empty();
+    }
+    return cardService.getCard(item.cardId);
   }
 
   private static boolean isLoadedTexture(ResourceService resources, String texturePath) {

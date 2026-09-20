@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
+import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -76,6 +77,22 @@ class MainMenuActionsTest {
 
     verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
     verify(game, never()).exit();
+    verify(runState, never()).endRun();
+  }
+
+  @Test
+  void demoShopOpensEncounterScreen() {
+    menu.getEvents().trigger(MainMenuDisplay.DEMO_SHOP_EVENT);
+
+    verify(game).openDemoEncounter(RoomType.SHOP);
+    verify(runState, never()).endRun();
+  }
+
+  @Test
+  void demoEventOpensEncounterScreen() {
+    menu.getEvents().trigger(MainMenuDisplay.DEMO_EVENT_EVENT);
+
+    verify(game).openDemoEncounter(RoomType.EVENT);
     verify(runState, never()).endRun();
   }
 }

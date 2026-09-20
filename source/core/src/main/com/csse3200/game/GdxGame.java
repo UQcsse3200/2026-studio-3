@@ -7,10 +7,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.files.UserSettings;
+import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.screens.BattleScreen;
 import com.csse3200.game.screens.BestiaryScreen;
 import com.csse3200.game.screens.CardLibraryScreen;
+import com.csse3200.game.screens.DemoEncounterScreen;
 import com.csse3200.game.screens.EncounterScreen;
 import com.csse3200.game.screens.EndBattleScreen;
 import com.csse3200.game.screens.LibraryScreen;
@@ -85,6 +87,16 @@ public class GdxGame extends Game {
   /** Opens the battle screen. Used by encounter navigation and the temporary debug shortcut. */
   public void startBattle() {
     setScreen(ScreenType.BATTLE_SCREEN);
+  }
+
+  /** Opens a temporary standalone Shop or Event preview without touching the run map. */
+  public void openDemoEncounter(RoomType roomType) {
+    logger.info("Opening standalone {} demo", roomType);
+    Screen currentScreen = getScreen();
+    if (currentScreen != null) {
+      currentScreen.dispose();
+    }
+    setScreen(new DemoEncounterScreen(this, roomType));
   }
 
   @Override

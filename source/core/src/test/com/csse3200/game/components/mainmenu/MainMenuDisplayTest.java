@@ -102,6 +102,29 @@ class MainMenuDisplayTest {
   }
 
   @Test
+  void buildsTemporaryDemoShortcuts() {
+    assertEquals(
+        List.of("Demo Shop", "Demo Event"),
+        display.getDemoButtons().stream().map(button -> button.getText().toString()).toList());
+    assertEquals(
+        List.of(MainMenuDisplay.DEMO_SHOP_EVENT, MainMenuDisplay.DEMO_EVENT_EVENT),
+        display.getDemoButtons().stream().map(TextButton::getName).toList());
+  }
+
+  @Test
+  void demoButtonsEmitTheirNamedEvents() {
+    List<String> events =
+        List.of(MainMenuDisplay.DEMO_SHOP_EVENT, MainMenuDisplay.DEMO_EVENT_EVENT);
+
+    for (int i = 0; i < events.size(); i++) {
+      AtomicInteger eventCount = new AtomicInteger();
+      menu.getEvents().addListener(events.get(i), eventCount::incrementAndGet);
+      display.getDemoButtons().get(i).fire(new ChangeEvent());
+      assertEquals(1, eventCount.get());
+    }
+  }
+
+  @Test
   void layoutKeepsVirtualSizeAcrossWindowShapes() {
     stage.getViewport().update(1920, 1080, true);
     display.getRootStack().validate();

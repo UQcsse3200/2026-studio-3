@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Scaling;
+import com.csse3200.game.debug.DemoEncounterAccess;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
@@ -33,6 +34,8 @@ public class MainMenuDisplay extends UIComponent {
   public static final String BESTIARY_EVENT = "bestiary";
   public static final String SETTINGS_EVENT = "settings";
   public static final String EXIT_EVENT = "exit";
+  public static final String DEMO_SHOP_EVENT = "demoShop";
+  public static final String DEMO_EVENT_EVENT = "demoEvent";
 
   private Stack rootStack;
   private Table menuTable;
@@ -41,6 +44,8 @@ public class MainMenuDisplay extends UIComponent {
   private TextButton bestiaryButton;
   private TextButton settingsButton;
   private TextButton exitButton;
+  private TextButton demoShopButton;
+  private TextButton demoEventButton;
 
   @Override
   public void create() {
@@ -64,19 +69,20 @@ public class MainMenuDisplay extends UIComponent {
     overlay.setBackground(skin.newDrawable("white", overlayColour));
     rootStack.add(overlay);
 
-    rootStack.add(buildContent());
+    Texture buttonFrameTexture = buttonFrameTexture();
+    rootStack.add(buildContent(buttonFrameTexture));
+    if (DemoEncounterAccess.ENABLED) {
+      rootStack.add(buildDemoPanel(buttonFrameTexture));
+    }
     stage.addActor(rootStack);
   }
 
-  private Table buildContent() {
+  private Table buildContent(Texture buttonFrameTexture) {
     Texture titleTexture = getTexture(TITLE_LOGO_TEXTURE);
     titleTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     // Set the filter to Nearest to avoid blurring the pixel art
     Image titleLogo = new Image(titleTexture);
     titleLogo.setScaling(Scaling.fit);
-
-    Texture buttonFrameTexture = getTexture(BUTTON_FRAME_TEXTURE);
-    buttonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
     // Build the buttons and add them to the menu table
     newGameButton = createButton("New Game", START_EVENT, buttonFrameTexture);
@@ -106,6 +112,32 @@ public class MainMenuDisplay extends UIComponent {
     content.row();
     content.add(menuTable);
     return content;
+  }
+
+  /** Adds temporary review shortcuts without changing the layout of the real main menu. */
+  private Table buildDemoPanel(Texture buttonFrameTexture) {
+    demoShopButton = createButton("Demo Shop", DEMO_SHOP_EVENT, buttonFrameTexture);
+    demoEventButton = createButton("Demo Event", DEMO_EVENT_EVENT, buttonFrameTexture);
+    demoShopButton.getLabel().setFontScale(0.62f);
+    demoEventButton.getLabel().setFontScale(0.62f);
+
+    Table buttons = new Table();
+    buttons.defaults().width(220f).height(68f);
+    buttons.add(demoShopButton);
+    buttons.row();
+    buttons.add(demoEventButton).padTop(8f);
+
+    Table panel = new Table();
+    panel.setFillParent(true);
+    panel.top().right().pad(18f);
+    panel.add(buttons);
+    return panel;
+  }
+
+  private Texture buttonFrameTexture() {
+    Texture texture = getTexture(BUTTON_FRAME_TEXTURE);
+    texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    return texture;
   }
 
   private void addMenuButton(TextButton button) {
@@ -160,5 +192,12 @@ public class MainMenuDisplay extends UIComponent {
 
   List<TextButton> getMenuButtons() {
     return List.of(newGameButton, loadGameButton, bestiaryButton, settingsButton, exitButton);
+  }
+
+  List<TextButton> getDemoButtons() {
+    if (!DemoEncounterAccess.ENABLED) {
+      return List.of();
+    }
+    return List.of(demoShopButton, demoEventButton);
   }
 }
