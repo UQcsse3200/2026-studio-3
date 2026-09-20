@@ -42,7 +42,14 @@ import org.slf4j.LoggerFactory;
 public class EncounterGameArea extends GameArea {
   private static final Logger logger = LoggerFactory.getLogger(EncounterGameArea.class);
   private static final String SHOP_CONFIG = "configs/shopItems.json";
-  private static final String[] encounterTextures = {"images/star_player.png"};
+  private static final String[] encounterTextures = {
+    "images/star_player.png",
+    ShopDisplay.BACKGROUND_TEXTURE,
+    ShopDisplay.MERCHANT_TEXTURE,
+    ShopDisplay.PANEL_FRAME_TEXTURE,
+    ShopDisplay.CARD_FRAME_TEXTURE,
+    ShopDisplay.PLAQUE_FRAME_TEXTURE
+  };
 
   private final Integer nodeId;
   private final RoomType roomType;
