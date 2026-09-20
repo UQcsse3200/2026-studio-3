@@ -30,7 +30,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
     addActors();
 
     entity.getEvents().addListener("updatePiety", this::updatePlayerPietyUI);
-    entity.getEvents().addListener("updateMoney", this::updatePlayerMoneyUI);
+    entity.getEvents().addListener("updateGold", this::updatePlayerMoneyUI);
   }
 
   /**
@@ -96,7 +96,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
    * @param money player money
    */
   public void updatePlayerMoneyUI(int money) {
-    CharSequence text = String.format("Money: %d", money);
+    CharSequence text = String.format("Gold: $%d", money);
     moneyLabel.setText(text);
   }
 
