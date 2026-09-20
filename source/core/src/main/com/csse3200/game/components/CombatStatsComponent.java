@@ -434,6 +434,18 @@ public class CombatStatsComponent extends Component {
 
         statusEffects.put(type, targetPoison);
       }
+    } else if ("FEEBLE".equals(type)) {
+      StatusEffect existing = statusEffects.get(type);
+      int duration = effect.getDuration();
+      if (existing != null) {
+        if (existing.getDuration() <= 0 || duration <= 0) {
+          duration = 0; // Permanent effects outlast any finite duration.
+        } else {
+          duration = Math.max(existing.getDuration(), duration);
+        }
+      }
+      // Feeble is a fixed reduction, not an accumulating stack count.
+      statusEffects.put(type, new StatusEffect(type, 1, duration));
     } else {
       statusEffects.put(type, effect);
     }
@@ -462,7 +474,7 @@ public class CombatStatsComponent extends Component {
    * @return active StatusEffect, or null
    */
   public StatusEffect getStatusEffect(String type) {
-    return statusEffects.get(type);
+    return statusEffects.get(statusKey(type));
   }
 
   /**
@@ -472,7 +484,7 @@ public class CombatStatsComponent extends Component {
    * @return whether the effect is active
    */
   public boolean hasStatusEffect(String type) {
-    return statusEffects.containsKey(type);
+    return statusEffects.containsKey(statusKey(type));
   }
 
   /**
@@ -481,14 +493,18 @@ public class CombatStatsComponent extends Component {
    * @param type status effect type identifier
    */
   public void removeStatusEffect(String type) {
-    if (statusEffects.remove(type) != null && entity != null) {
-      entity.getEvents().trigger("statusEffectRemoved", type);
+    String key = statusKey(type);
+    if (statusEffects.remove(key) != null && entity != null) {
+      entity.getEvents().trigger("statusEffectRemoved", key);
     }
   }
 
   private static String statusKey(String type) {
     if ("POISON".equalsIgnoreCase(type)) {
       return "POISON";
+    }
+    if ("FEEBLE".equalsIgnoreCase(type)) {
+      return "FEEBLE";
     }
     return type;
   }
@@ -532,11 +548,12 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
-   * Ticks down the duration of all active status effects by one and removes any that have expired.
-   * This method's internal logic (tick/expire/cleanup) is self-contained. IMPORTANT - external
-   * dependency: this method must be called exactly once per turn for durations to mean "number of
-   * turns". WHEN it gets called is not yet wired up - it depends on Team 3's turn/battle-sequence
-   * event, which is not confirmed yet.
+   * Updates statuses without a dedicated lifecycle hook. Poison is owned by processPoisonTick;
+   * Feeble is owned by the affected actor's end-of-turn hook in BattleController.
+   */
+  /**
+   * Decrements active status durations and removes expired effects. The battle lifecycle owner must
+   * coordinate calls to avoid duplicate ticking.
    */
   public void updateStatusEffects() {
     statusEffects

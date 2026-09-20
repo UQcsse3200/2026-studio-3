@@ -506,4 +506,36 @@ class ArmorAndStatusEffectTest {
     assertEquals(2, healthUpdates[0]);
     assertEquals(1, deathEvents[0]);
   }
+
+  @Test
+  void feebleReapplicationUsesLongerDurationWithoutStackingStrength() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 0);
+    stats.applyStatusEffect("FEEBLE", 1, 3);
+    stats.applyStatusEffect("feeble", 4, 1);
+    assertEquals(3, stats.getStatusEffect("FEEBLE").getDuration());
+    assertEquals(1, stats.getStatusEffect("FEEBLE").getValue());
+    assertEquals(0.75f, StatusEffectCalculator.getOutgoingDamageModifier(stats));
+    stats.applyStatusEffect("FEEBLE", 2, 5);
+    assertEquals(5, stats.getStatusEffect("FEEBLE").getDuration());
+    assertEquals(1, stats.getStatusEffect("FEEBLE").getValue());
+  }
+
+  @Test
+  void permanentFeebleOutlastsFiniteReapplicationInEitherOrder() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 0);
+    stats.applyStatusEffect("FEEBLE", 1, 2);
+    stats.applyStatusEffect("FEEBLE", 1, 0);
+    stats.applyStatusEffect("FEEBLE", 1, 3);
+    assertEquals(0, stats.getStatusEffect("FEEBLE").getDuration());
+  }
+
+  @Test
+  void poisonQueriesAndRemovalAcceptMixedCase() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 0);
+    stats.applyStatusEffect("poison", 3, 2);
+    assertTrue(stats.hasStatusEffect("Poison"));
+    assertEquals(3, stats.getStatusEffect("poison").getValue());
+    stats.removeStatusEffect("pOiSoN");
+    assertFalse(stats.hasStatusEffect("POISON"));
+  }
 }
