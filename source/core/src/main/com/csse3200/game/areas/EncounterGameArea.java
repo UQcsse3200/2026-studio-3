@@ -1,7 +1,11 @@
 package com.csse3200.game.areas;
 
 import com.csse3200.game.areas.terrain.TerrainFactory;
+import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.chance.ChanceEncounter;
+import com.csse3200.game.chance.ChanceEncounterBehaviour;
+import com.csse3200.game.chance.ChanceEncounterBehaviourFactory;
 import com.csse3200.game.chance.ChanceEncounterFactory;
 import com.csse3200.game.chance.ChanceEncounterSelector;
 import com.csse3200.game.components.CombatStatsComponent;
@@ -155,13 +159,17 @@ public class EncounterGameArea extends GameArea {
   }
 
   private void displayChanceEncounter() {
+    CardService cardService = ServiceLocator.getCardLibrary();
     ChanceEncounterSelector selector =
         new ChanceEncounterSelector(
             ChanceEncounterFactory.createInitialEncounters(cardCatalog), new Random());
+    ChanceEncounter encounter = selector.select();
+    ChanceEncounterBehaviour behaviour =
+        ChanceEncounterBehaviourFactory.create(encounter, new Random(), cardService);
 
     Entity chanceUi = new Entity();
     chanceUi.addComponent(
-        new ChanceEncounterDisplay(encounterFlow.startChance(nodeId, selector.select())));
+        new ChanceEncounterDisplay(encounterFlow.startChance(nodeId, encounter, behaviour)));
     spawnEntity(chanceUi);
   }
 
