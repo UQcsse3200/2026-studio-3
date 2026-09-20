@@ -27,6 +27,7 @@ class ChanceEncounterConfigLoaderTest {
         List.of(
             "mysterious-shrine",
             "healing-spring",
+            "dice-game",
             "forgotten-cache",
             "wandering-healer",
             "flooded-crossing",
@@ -34,7 +35,8 @@ class ChanceEncounterConfigLoaderTest {
             "roadside-riddle"),
         encounters.stream().map(ChanceEncounter::getId).toList());
     assertEquals(
-        List.of(3, 2, 3, 2, 3, 2, 2), encounters.stream().map(ChanceEncounter::getWeight).toList());
+        List.of(3, 2, 2, 3, 2, 3, 2, 2),
+        encounters.stream().map(ChanceEncounter::getWeight).toList());
   }
 
   @Test
@@ -55,12 +57,22 @@ class ChanceEncounterConfigLoaderTest {
         new ExpectedChoice("leave", "Continue without drinking.", 0, 0));
     assertEncounter(
         encounters.get(2),
+        "dice-game",
+        "A masked dice keeper invites you to test your luck with two dice.",
+        new ExpectedChoice("low", "Predict Low (2-6).", 0, 0),
+        new ExpectedChoice("high", "Predict High (8-12).", 0, 0),
+        new ExpectedChoice("take", "Take the Lucky Seven offer.", 0, 0),
+        new ExpectedChoice("double-down", "Double down on another prediction.", 0, 0),
+        new ExpectedChoice("cash-out", "Cash out the current Gold stake.", 0, 0),
+        new ExpectedChoice("continue", "Risk the current Gold stake in round two.", 0, 0));
+    assertEncounter(
+        encounters.get(3),
         "forgotten-cache",
         "You discover an abandoned cache hidden beneath loose stones.",
         new ExpectedChoice("take-coins", "Take the coins from the cache.", 0, 15),
         new ExpectedChoice("leave", "Leave the cache untouched.", 0, 0));
     assertEncounter(
-        encounters.get(3),
+        encounters.get(4),
         "wandering-healer",
         "A wandering healer offers a restorative draught for a modest fee.",
         new ExpectedChoice("purchase-remedy", "Buy the healer's restorative draught.", 20, -10),
@@ -68,20 +80,20 @@ class ChanceEncounterConfigLoaderTest {
             "accept-bandage", "Accept a spare bandage for the road.", 0, 0, "bandage"),
         new ExpectedChoice("decline", "Politely decline the healer's offer.", 0, 0));
     assertEncounter(
-        encounters.get(4),
+        encounters.get(5),
         "flooded-crossing",
         "A flooded crossing blocks the road ahead.",
         new ExpectedChoice("hire-ferryman", "Pay a ferryman for safe passage.", 0, -8),
         new ExpectedChoice("ford-river", "Attempt to ford the river alone.", -8, 0),
         new ExpectedChoice("wait", "Wait for the water to recede.", 0, 0));
     assertEncounter(
-        encounters.get(5),
+        encounters.get(6),
         "abandoned-mine",
         "The mouth of an abandoned mine promises danger and forgotten riches.",
         new ExpectedChoice("search-tunnels", "Search the unstable tunnels for valuables.", -12, 30),
         new ExpectedChoice("leave", "Leave the mine undisturbed.", 0, 0));
     assertEncounter(
-        encounters.get(6),
+        encounters.get(7),
         "roadside-riddle",
         "A hooded traveller offers a coin reward for solving a riddle.",
         new ExpectedChoice("answer-riddle", "Attempt to solve the traveller's riddle.", 0, 12),
@@ -200,7 +212,7 @@ class ChanceEncounterConfigLoaderTest {
         ChanceEncounterConfigLoader.loadEncountersWithCatalog(
             new CardServiceCatalogAdapter(new CardLibrary(CardConfigLoader.loadCards())));
 
-    ChanceOutcome reward = encounters.get(3).resolveChoice("accept-bandage");
+    ChanceOutcome reward = encounters.get(4).resolveChoice("accept-bandage");
 
     assertEquals("bandage", reward.getCardRewardId());
   }
@@ -265,10 +277,11 @@ class ChanceEncounterConfigLoaderTest {
   void shouldSelectEveryEncounterFromExpandedConfiguration() {
     List<ChanceEncounter> encounters = ChanceEncounterConfigLoader.loadEncounters();
     ChanceEncounterSelector selector =
-        new ChanceEncounterSelector(encounters, new SequenceRandom(0, 3, 5, 8, 10, 13, 15));
+        new ChanceEncounterSelector(encounters, new SequenceRandom(0, 3, 5, 7, 10, 12, 15, 17));
 
     List<String> selectedIds =
         List.of(
+            selector.select().getId(),
             selector.select().getId(),
             selector.select().getId(),
             selector.select().getId(),

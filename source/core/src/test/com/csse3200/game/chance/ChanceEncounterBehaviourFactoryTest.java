@@ -20,6 +20,20 @@ class ChanceEncounterBehaviourFactoryTest {
   }
 
   @Test
+  void shouldCreateDiceBehaviourForDiceDefinition() {
+    ChanceEncounterBehaviour behaviour =
+        ChanceEncounterBehaviourFactory.create(
+            new ChanceEncounter(
+                DiceEncounterBehaviour.ENCOUNTER_ID,
+                "A dice keeper offers a wager.",
+                List.of(new ChanceChoice("low", "Predict low.", new ChanceOutcome(0, 0)))),
+            new Random(266L),
+            TestCardService.withCards("bandage"));
+
+    assertInstanceOf(DiceEncounterBehaviour.class, behaviour);
+  }
+
+  @Test
   void shouldPreserveFixedBehaviourForEveryOtherEncounter() {
     ChanceOutcome configuredOutcome = new ChanceOutcome(-10, 25);
     ChanceEncounter encounter =

@@ -47,6 +47,61 @@
       ]
     },
     {
+      "id": "dice-game",
+      "description": "A masked dice keeper invites you to test your luck with two dice.",
+      "weight": 2,
+      "choices": [
+        {
+          "id": "low",
+          "description": "Predict Low (2-6).",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        },
+        {
+          "id": "high",
+          "description": "Predict High (8-12).",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        },
+        {
+          "id": "take",
+          "description": "Take the Lucky Seven offer.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        },
+        {
+          "id": "double-down",
+          "description": "Double down on another prediction.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        },
+        {
+          "id": "cash-out",
+          "description": "Cash out the current Gold stake.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        },
+        {
+          "id": "continue",
+          "description": "Risk the current Gold stake in round two.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        }
+      ]
+    },
+    {
       "id": "forgotten-cache",
       "description": "You discover an abandoned cache hidden beneath loose stones.",
       "weight": 3,

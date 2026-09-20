@@ -105,6 +105,12 @@ public final class ChanceEncounterSession {
       return outcomeApplier.failure(
           ChanceResolution.Status.INVALID_CHOICE, null, "The selected choice does not exist.");
     }
+    if (behaviourResult.getType() == ChanceBehaviourResult.Type.AWAITING_CHOICE) {
+      return outcomeApplier.failure(
+          ChanceResolution.Status.AWAITING_CHOICE,
+          null,
+          "The encounter advanced and is awaiting another choice.");
+    }
     if (behaviourResult.getType() == ChanceBehaviourResult.Type.DELEGATED) {
       awaitingDelegatedCompletion = true;
       return outcomeApplier.failure(

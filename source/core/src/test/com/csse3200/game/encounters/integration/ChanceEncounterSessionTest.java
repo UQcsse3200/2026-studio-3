@@ -154,6 +154,38 @@ class ChanceEncounterSessionTest {
     assertEquals(50, player.getCurrency());
   }
 
+  @Test
+  void shouldKeepSessionOpenWithoutApplyingStateWhileStagedChoiceIsPending() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 50);
+    AtomicInteger resolutionCount = new AtomicInteger();
+    ChanceEncounter encounter =
+        new ChanceEncounter(
+            "staged-event",
+            "Staged event",
+            List.of(new ChanceChoice("continue", "Continue", new ChanceOutcome(0, 0))));
+    ChanceEncounterSession session =
+        new ChanceEncounterSession(
+            1,
+            encounter,
+            choiceId -> {
+              resolutionCount.incrementAndGet();
+              return ChanceBehaviourResult.awaitingChoice();
+            },
+            new ChanceOutcomeApplier(player),
+            (nodeId, success) -> {});
+
+    ChanceResolution first = session.resolveChoice("continue");
+    ChanceResolution second = session.resolveChoice("continue");
+
+    assertEquals(ChanceResolution.Status.AWAITING_CHOICE, first.getStatus());
+    assertEquals(ChanceResolution.Status.AWAITING_CHOICE, second.getStatus());
+    assertEquals(2, resolutionCount.get());
+    assertFalse(session.isResolved());
+    assertFalse(session.complete());
+    assertEquals(100, player.getHealth());
+    assertEquals(50, player.getCurrency());
+  }
+
   private ChanceEncounterSession createSession(
       MockPlayerStateGateway player, RecordingCallback callback) {
     ChanceEncounter encounter =

@@ -3,8 +3,10 @@ package com.csse3200.game.chance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ChanceOutcomeTest {
@@ -71,5 +73,15 @@ class ChanceOutcomeTest {
     ChanceOutcome outcome = new ChanceOutcome(5, 10);
 
     assertNull(outcome.getCardRewardId());
+  }
+
+  @Test
+  void shouldRepresentMultipleCardRewardsAndRetainDuplicates() {
+    ChanceOutcome outcome = ChanceOutcome.withCardRewards(0, 15, List.of("bandage", "bandage"));
+
+    assertEquals("bandage", outcome.getCardRewardId());
+    assertEquals(List.of("bandage", "bandage"), outcome.getCardRewardIds());
+    assertThrows(UnsupportedOperationException.class, () -> outcome.getCardRewardIds().clear());
+    assertFalse(outcome.isNoEffect());
   }
 }

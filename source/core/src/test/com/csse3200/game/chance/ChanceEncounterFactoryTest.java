@@ -21,6 +21,7 @@ class ChanceEncounterFactoryTest {
         List.of(
             "mysterious-shrine",
             "healing-spring",
+            "dice-game",
             "forgotten-cache",
             "wandering-healer",
             "flooded-crossing",
@@ -70,7 +71,7 @@ class ChanceEncounterFactoryTest {
 
   @Test
   void shouldCreateForgottenCache() {
-    ChanceEncounter encounter = ChanceEncounterFactory.createInitialEncounters().get(2);
+    ChanceEncounter encounter = ChanceEncounterFactory.createInitialEncounters().get(3);
 
     assertEquals(
         "You discover an abandoned cache hidden beneath loose stones.", encounter.getDescription());

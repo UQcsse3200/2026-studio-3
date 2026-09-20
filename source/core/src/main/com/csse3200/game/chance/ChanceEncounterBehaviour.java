@@ -13,7 +13,8 @@ public interface ChanceEncounterBehaviour {
    * Resolves a selected choice into an encounter result.
    *
    * @param choiceId selected choice identifier
-   * @return non-null result describing the resolved outcome, invalid choice, or delegated flow
+   * @return non-null result describing an outcome, staged continuation, invalid choice, or
+   *     delegated flow
    */
   ChanceBehaviourResult resolveChoice(String choiceId);
 }

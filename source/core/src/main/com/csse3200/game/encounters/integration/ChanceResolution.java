@@ -14,6 +14,8 @@ public final class ChanceResolution {
     ALREADY_RESOLVED,
     /** The session has already completed or been cancelled. */
     ENCOUNTER_CLOSED,
+    /** The staged encounter accepted the choice and requires another choice. */
+    AWAITING_CHOICE,
     /** The selected choice is continuing in another flow and has not completed yet. */
     DELEGATED,
     /** The selected choice did not contain an outcome. */

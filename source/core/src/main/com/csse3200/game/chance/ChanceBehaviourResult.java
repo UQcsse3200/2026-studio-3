@@ -10,12 +10,16 @@ public final class ChanceBehaviourResult {
     OUTCOME,
     /** The selected choice does not exist for this behaviour. */
     INVALID_CHOICE,
+    /** The choice advanced a staged encounter and another player choice is required. */
+    AWAITING_CHOICE,
     /** Another flow has accepted the choice and will finish the encounter later. */
     DELEGATED
   }
 
   private static final ChanceBehaviourResult INVALID_CHOICE_RESULT =
       new ChanceBehaviourResult(Type.INVALID_CHOICE, null);
+  private static final ChanceBehaviourResult AWAITING_CHOICE_RESULT =
+      new ChanceBehaviourResult(Type.AWAITING_CHOICE, null);
   private static final ChanceBehaviourResult DELEGATED_RESULT =
       new ChanceBehaviourResult(Type.DELEGATED, null);
 
@@ -45,6 +49,15 @@ public final class ChanceBehaviourResult {
    */
   public static ChanceBehaviourResult invalidChoice() {
     return INVALID_CHOICE_RESULT;
+  }
+
+  /**
+   * Creates a result indicating that a staged encounter accepted the choice and needs another one.
+   *
+   * @return shared awaiting-choice result
+   */
+  public static ChanceBehaviourResult awaitingChoice() {
+    return AWAITING_CHOICE_RESULT;
   }
 
   /**

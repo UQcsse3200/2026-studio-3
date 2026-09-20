@@ -23,6 +23,9 @@ public final class ChanceEncounterBehaviourFactory {
     if (SpringEncounterBehaviour.ENCOUNTER_ID.equals(encounter.getId())) {
       return new SpringEncounterBehaviour(random, cardService);
     }
+    if (DiceEncounterBehaviour.ENCOUNTER_ID.equals(encounter.getId())) {
+      return new DiceEncounterBehaviour(random, cardService);
+    }
     return new FixedChanceEncounterBehaviour(encounter);
   }
 
