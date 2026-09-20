@@ -175,7 +175,7 @@ public class CombatStatsComponent extends Component {
     if (damage >= 0 && !isDead()) {
       setHealth(Math.max(this.health - damage, 0));
       if (entity != null && isDead()) {
-        entity.getEvents().trigger(EVT_IS_DEAD);
+        entity.getEvents().trigger("entityIsDead");
       }
     }
   }
@@ -396,9 +396,50 @@ public class CombatStatsComponent extends Component {
     if (effect == null) {
       return;
     }
-    statusEffects.put(effect.getType(), effect);
+
+    String type = statusKey(effect.getType());
+
+    if ("POISON".equals(type)) {
+      StatusEffect existingEffect = statusEffects.get(type);
+
+      // Do not add an existing live object's stacks to itself.
+      if (existingEffect != effect) {
+        PoisonStatusEffect targetPoison;
+
+        if (existingEffect instanceof PoisonStatusEffect) {
+          targetPoison = (PoisonStatusEffect) existingEffect;
+        } else {
+          targetPoison = new PoisonStatusEffect();
+        }
+
+        if (effect instanceof PoisonStatusEffect) {
+          // Incoming poison may already contain several duration groups.
+          PoisonStatusEffect incomingPoison = (PoisonStatusEffect) effect;
+
+          Map<Integer, Integer> incomingGroups = incomingPoison.getStacksByDuration();
+
+          for (Map.Entry<Integer, Integer> group : incomingGroups.entrySet()) {
+            int duration = group.getKey();
+            int stacks = group.getValue();
+
+            targetPoison.addApplication(stacks, duration);
+          }
+        } else {
+          // An ordinary StatusEffect represents one incoming duration group.
+          int stacks = effect.getValue();
+          int duration = effect.getDuration();
+
+          targetPoison.addApplication(stacks, duration);
+        }
+
+        statusEffects.put(type, targetPoison);
+      }
+    } else {
+      statusEffects.put(type, effect);
+    }
+
     if (entity != null) {
-      entity.getEvents().trigger("statusEffectApplied", effect.getType());
+      entity.getEvents().trigger("statusEffectApplied", type);
     }
   }
 
@@ -443,6 +484,24 @@ public class CombatStatsComponent extends Component {
     if (statusEffects.remove(type) != null && entity != null) {
       entity.getEvents().trigger("statusEffectRemoved", type);
     }
+  }
+
+  private static String statusKey(String type) {
+    if ("POISON".equalsIgnoreCase(type)) {
+      return "POISON";
+    }
+    return type;
+  }
+
+  public Map<Integer, Integer> getPoisonStacksByDuration() {
+    StatusEffect effect = getStatusEffect("POISON");
+
+    if (effect instanceof PoisonStatusEffect) {
+      PoisonStatusEffect poison = (PoisonStatusEffect) effect;
+      return poison.getStacksByDuration();
+    }
+
+    return Map.of();
   }
 
   /**
@@ -512,23 +571,13 @@ public class CombatStatsComponent extends Component {
     if (isDead()) {
       return;
     }
-
-    StatusEffect poison = getStatusEffect("POISON");
-    if (poison == null) {
+    StatusEffect effect = getStatusEffect("POISON");
+    if (!(effect instanceof PoisonStatusEffect)) {
       return;
     }
-
-    int damage = StatusEffectCalculator.getPoisonDamage(this);
-    if (damage > 0) {
-      applyDamage.accept(damage);
-    }
-
-    // Do not tick a replacement effect created by the damage callback.
-    if (getStatusEffect("POISON") != poison) {
-      return;
-    }
-
-    if (poison.tickAndCheckExpired()) {
+    PoisonStatusEffect poison = (PoisonStatusEffect) effect;
+    boolean expired = poison.processTick(applyDamage, () -> getStatusEffect("POISON") == poison);
+    if (expired && getStatusEffect("POISON") == poison) {
       removeStatusEffect("POISON");
     }
   }
