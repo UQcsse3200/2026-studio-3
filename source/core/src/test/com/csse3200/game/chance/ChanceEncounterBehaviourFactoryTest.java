@@ -34,21 +34,25 @@ class ChanceEncounterBehaviourFactoryTest {
   }
 
   @Test
-  void shouldPreserveFixedBehaviourForEveryOtherEncounter() {
-    ChanceOutcome configuredOutcome = new ChanceOutcome(-10, 25);
-    ChanceEncounter encounter =
-        new ChanceEncounter(
-            "mysterious-shrine",
-            "An ancient shrine.",
-            List.of(new ChanceChoice("offer", "Make an offering.", configuredOutcome)));
-    ChanceEncounterBehaviour behaviour =
-        ChanceEncounterBehaviourFactory.create(
-            encounter, new Random(266L), TestCardService.withCards());
+  void shouldPreserveFixedBehaviourForEveryRetainedOrdinaryEncounter() {
+    for (String encounterId :
+        List.of("mysterious-shrine", "wandering-healer", "flooded-crossing", "abandoned-mine")) {
+      ChanceOutcome configuredOutcome = new ChanceOutcome(-10, 25);
+      ChanceEncounter encounter =
+          new ChanceEncounter(
+              encounterId,
+              "Ordinary event.",
+              List.of(new ChanceChoice("offer", "Make an offering.", configuredOutcome)));
+      ChanceEncounterBehaviour behaviour =
+          ChanceEncounterBehaviourFactory.create(
+              encounter, new Random(266L), TestCardService.withCards());
 
-    ChanceBehaviourResult result = behaviour.resolveChoice("offer");
+      ChanceBehaviourResult result = behaviour.resolveChoice("offer");
 
-    assertEquals(ChanceBehaviourResult.Type.OUTCOME, result.getType());
-    assertSame(configuredOutcome, result.getOutcome());
+      assertInstanceOf(FixedChanceEncounterBehaviour.class, behaviour);
+      assertEquals(ChanceBehaviourResult.Type.OUTCOME, result.getType());
+      assertSame(configuredOutcome, result.getOutcome());
+    }
   }
 
   private static ChanceEncounter springEncounter() {
@@ -57,7 +61,7 @@ class ChanceEncounterBehaviourFactoryTest {
         "A clear spring.",
         List.of(
             new ChanceChoice(
-                SpringEncounterBehaviour.DRINK_CHOICE_ID, "Drink.", new ChanceOutcome(15, 0)),
+                SpringEncounterBehaviour.DRINK_CHOICE_ID, "Drink.", new ChanceOutcome(0, 0)),
             new ChanceChoice(
                 SpringEncounterBehaviour.LEAVE_CHOICE_ID, "Leave.", new ChanceOutcome(0, 0))));
   }

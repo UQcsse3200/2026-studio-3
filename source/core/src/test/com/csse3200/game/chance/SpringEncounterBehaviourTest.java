@@ -138,7 +138,7 @@ class SpringEncounterBehaviourTest {
             new ChanceChoice(
                 SpringEncounterBehaviour.DRINK_CHOICE_ID,
                 "Drink from the spring.",
-                new ChanceOutcome(15, 0)),
+                new ChanceOutcome(0, 0)),
             new ChanceChoice(
                 SpringEncounterBehaviour.LEAVE_CHOICE_ID,
                 "Continue without drinking.",
