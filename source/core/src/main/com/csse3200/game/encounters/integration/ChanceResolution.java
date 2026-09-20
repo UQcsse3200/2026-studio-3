@@ -14,6 +14,8 @@ public final class ChanceResolution {
     ALREADY_RESOLVED,
     /** The session has already completed or been cancelled. */
     ENCOUNTER_CLOSED,
+    /** The selected choice is continuing in another flow and has not completed yet. */
+    DELEGATED,
     /** The selected choice did not contain an outcome. */
     INVALID_OUTCOME,
     /** Applying the outcome would make currency negative. */

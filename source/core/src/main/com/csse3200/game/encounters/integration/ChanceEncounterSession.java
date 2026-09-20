@@ -1,7 +1,10 @@
 package com.csse3200.game.encounters.integration;
 
+import com.csse3200.game.chance.ChanceBehaviourResult;
 import com.csse3200.game.chance.ChanceEncounter;
+import com.csse3200.game.chance.ChanceEncounterBehaviour;
 import com.csse3200.game.chance.ChanceOutcome;
+import com.csse3200.game.chance.FixedChanceEncounterBehaviour;
 import com.csse3200.game.maps.EncounterCallback;
 import java.util.Objects;
 
@@ -9,10 +12,12 @@ import java.util.Objects;
 public final class ChanceEncounterSession {
   private final Integer nodeId;
   private final ChanceEncounter encounter;
+  private final ChanceEncounterBehaviour behaviour;
   private final ChanceOutcomeApplier outcomeApplier;
   private final EncounterCallback completionCallback;
 
   private ChanceResolution resolution;
+  private boolean awaitingDelegatedCompletion;
   private boolean completed;
 
   /**
@@ -28,11 +33,39 @@ public final class ChanceEncounterSession {
       ChanceEncounter encounter,
       ChanceOutcomeApplier outcomeApplier,
       EncounterCallback completionCallback) {
+    this(
+        nodeId,
+        encounter,
+        new FixedChanceEncounterBehaviour(encounter),
+        outcomeApplier,
+        completionCallback);
+  }
+
+  /**
+   * Creates one Chance Encounter lifecycle session with an injected choice behaviour.
+   *
+   * <p>The encounter remains the immutable display definition. The behaviour independently resolves
+   * choices, allowing later encounter types to compute runtime outcomes or delegate to a separate
+   * flow without changing ordinary outcome application.
+   *
+   * @param nodeId map node that launched the encounter
+   * @param encounter Chance Encounter definition displayed by the UI
+   * @param behaviour player-independent choice resolver
+   * @param outcomeApplier service applying normal outcomes to the player
+   * @param completionCallback callback returning control to the map
+   */
+  public ChanceEncounterSession(
+      Integer nodeId,
+      ChanceEncounter encounter,
+      ChanceEncounterBehaviour behaviour,
+      ChanceOutcomeApplier outcomeApplier,
+      EncounterCallback completionCallback) {
     if (nodeId == null) {
       throw new IllegalArgumentException("nodeId cannot be null");
     }
     this.nodeId = nodeId;
     this.encounter = Objects.requireNonNull(encounter, "encounter cannot be null");
+    this.behaviour = Objects.requireNonNull(behaviour, "behaviour cannot be null");
     this.outcomeApplier = Objects.requireNonNull(outcomeApplier, "outcomeApplier cannot be null");
     this.completionCallback = completionCallback;
   }
@@ -54,13 +87,33 @@ public final class ChanceEncounterSession {
           resolution.getOutcome(),
           "A choice has already been resolved.");
     }
+    if (awaitingDelegatedCompletion) {
+      return outcomeApplier.failure(
+          ChanceResolution.Status.DELEGATED,
+          null,
+          "This encounter is awaiting completion from a delegated flow.");
+    }
 
-    ChanceOutcome outcome = encounter.resolveChoice(choiceId);
-    if (outcome == null) {
+    ChanceBehaviourResult behaviourResult = behaviour.resolveChoice(choiceId);
+    if (behaviourResult == null) {
+      return outcomeApplier.failure(
+          ChanceResolution.Status.INVALID_OUTCOME,
+          null,
+          "The encounter behaviour did not provide a resolution result.");
+    }
+    if (behaviourResult.getType() == ChanceBehaviourResult.Type.INVALID_CHOICE) {
       return outcomeApplier.failure(
           ChanceResolution.Status.INVALID_CHOICE, null, "The selected choice does not exist.");
     }
+    if (behaviourResult.getType() == ChanceBehaviourResult.Type.DELEGATED) {
+      awaitingDelegatedCompletion = true;
+      return outcomeApplier.failure(
+          ChanceResolution.Status.DELEGATED,
+          null,
+          "The selected choice is continuing in a delegated flow.");
+    }
 
+    ChanceOutcome outcome = behaviourResult.getOutcome();
     ChanceResolution attempt = outcomeApplier.apply(outcome);
     if (attempt.isSuccess()) {
       resolution = attempt;
@@ -134,6 +187,15 @@ public final class ChanceEncounterSession {
    */
   public boolean isResolved() {
     return resolution != null && resolution.isSuccess();
+  }
+
+  /**
+   * Reports whether this session is waiting for a delegated flow.
+   *
+   * @return true after behaviour delegates resolution and before the session is cancelled
+   */
+  public boolean isAwaitingDelegatedCompletion() {
+    return awaitingDelegatedCompletion && !completed;
   }
 
   /**
