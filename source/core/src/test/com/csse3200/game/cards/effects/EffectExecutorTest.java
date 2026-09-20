@@ -54,6 +54,55 @@ class EffectExecutorTest {
   }
 
   @Test
+  void shouldResolveSunderTargetingEnemyWithLiteralValue() {
+    CardEffectResolutionContext context = new CardEffectResolutionContext(5, 1, 1);
+
+    ResolvedCardEffect result =
+        executor.resolve(
+            "unseal_the_breach",
+            new EffectConfig(EffectType.SUNDER, 3),
+            TargetType.SINGLE_ENEMY,
+            1,
+            context);
+
+    assertEquals(
+        new ResolvedCardEffect(
+            "unseal_the_breach", EffectType.SUNDER, TargetType.SINGLE_ENEMY, 3, 0, 1),
+        result);
+  }
+
+  @Test
+  void shouldNotIncreaseSunderWithPlayerStrength() {
+    playerState.addStrength(5);
+
+    ResolvedCardEffect result =
+        executor.resolve(
+            "unseal_the_breach",
+            new EffectConfig(EffectType.SUNDER, 3),
+            TargetType.SINGLE_ENEMY,
+            0,
+            playerState);
+
+    assertEquals(
+        new ResolvedCardEffect(
+            "unseal_the_breach", EffectType.SUNDER, TargetType.SINGLE_ENEMY, 3, 0, 0),
+        result);
+  }
+
+  @Test
+  void shouldRejectSunderTargetingSelf() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            executor.resolve(
+                "unseal_the_breach",
+                new EffectConfig(EffectType.SUNDER, 3),
+                TargetType.SELF,
+                0,
+                playerState));
+  }
+
+  @Test
   void shouldApplyExternalStrengthFeebleAndVulnerableOnce() {
     CardEffectResolutionContext context = new CardEffectResolutionContext(2, 1, 1);
 
@@ -92,6 +141,45 @@ class EffectExecutorTest {
   }
 
   @Test
+  void shouldResolveEnergyGainThroughBothSelfEffectPaths() {
+    playerState.addStrength(5);
+    ResolvedCardEffect expected =
+        new ResolvedCardEffect("astral_ward", EffectType.ENERGY_GAIN, TargetType.SELF, 1, 0, 2);
+    EffectConfig energyGain = new EffectConfig(EffectType.ENERGY_GAIN, 1);
+
+    assertEquals(
+        expected, executor.resolve("astral_ward", energyGain, TargetType.SELF, 2, playerState));
+    assertEquals(
+        expected,
+        executor.resolve(
+            "astral_ward",
+            energyGain,
+            TargetType.SELF,
+            2,
+            new CardEffectResolutionContext(5, 1, 1)));
+  }
+
+  @Test
+  void shouldRejectEnergyGainForEnemyTargets() {
+    EffectConfig energyGain = new EffectConfig(EffectType.ENERGY_GAIN, 1);
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            executor.resolve(
+                "invalid_energy_gain", energyGain, TargetType.SINGLE_ENEMY, 0, playerState));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            executor.resolve(
+                "invalid_energy_gain",
+                energyGain,
+                TargetType.ALL_ENEMIES,
+                0,
+                new CardEffectResolutionContext(0, 0, 0)));
+  }
+
+  @Test
   void shouldReturnEveryOngoingEnemyStatusForOtherSystemsToApply() {
     int sequence = 0;
     for (EffectType effectType : EffectType.values()) {
@@ -110,6 +198,35 @@ class EffectExecutorTest {
               playerState));
       sequence++;
     }
+  }
+
+  @Test
+  void shouldResolveCleanseOnSelf() {
+    assertEquals(
+        new ResolvedCardEffect("purify", EffectType.CLEANSE, TargetType.SELF, 1, 0, 0),
+        executor.resolve(
+            "purify", new EffectConfig(EffectType.CLEANSE, 1), TargetType.SELF, 0, playerState));
+  }
+
+  @Test
+  void shouldResolveFortifyOnSelfWithLiteralValue() {
+    assertEquals(
+        new ResolvedCardEffect("iron_oath", EffectType.FORTIFY, TargetType.SELF, 4, 0, 0),
+        executor.resolve(
+            "iron_oath", new EffectConfig(EffectType.FORTIFY, 4), TargetType.SELF, 0, playerState));
+  }
+
+  @Test
+  void shouldRejectFortifyOnEnemyTargets() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            executor.resolve(
+                "iron_oath",
+                new EffectConfig(EffectType.FORTIFY, 4),
+                TargetType.SINGLE_ENEMY,
+                0,
+                playerState));
   }
 
   @Test
@@ -203,36 +320,65 @@ class EffectExecutorTest {
 
   @Test
   void shouldValidateEffectConfigValues() {
+    EffectConfig nullType = new EffectConfig(null, 1);
+    EffectConfig zeroDamage = new EffectConfig(EffectType.DAMAGE, 0);
+    EffectConfig lastingDamage = new EffectConfig(EffectType.DAMAGE, 1, 1);
+    EffectConfig poisonWithoutDuration = new EffectConfig(EffectType.POISON, 1);
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> executor.resolve("bad", nullType, TargetType.SINGLE_ENEMY, 0, playerState));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> executor.resolve("bad", zeroDamage, TargetType.SINGLE_ENEMY, 0, playerState));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> executor.resolve("bad", lastingDamage, TargetType.SINGLE_ENEMY, 0, playerState));
     assertThrows(
         IllegalArgumentException.class,
         () ->
             executor.resolve(
-                "bad", new EffectConfig(null, 1), TargetType.SINGLE_ENEMY, 0, playerState));
+                "bad", poisonWithoutDuration, TargetType.SINGLE_ENEMY, 0, playerState));
+  }
+
+  @Test
+  void shouldResolvePierceWithLiteralValueAndRejectSelfTarget() {
+    playerState.addStrength(5);
+
+    ResolvedCardEffect playerStateResult =
+        executor.resolve(
+            "poison_blade",
+            new EffectConfig(EffectType.PIERCE, 10),
+            TargetType.SINGLE_ENEMY,
+            0,
+            playerState);
+
+    assertEquals(
+        new ResolvedCardEffect(
+            "poison_blade", EffectType.PIERCE, TargetType.SINGLE_ENEMY, 10, 0, 0),
+        playerStateResult);
+
+    CardEffectResolutionContext context = new CardEffectResolutionContext(5, 1, 1);
+    ResolvedCardEffect contextResult =
+        executor.resolve(
+            "poison_blade",
+            new EffectConfig(EffectType.PIERCE, 10),
+            TargetType.SINGLE_ENEMY,
+            0,
+            context);
+
+    assertEquals(
+        new ResolvedCardEffect(
+            "poison_blade", EffectType.PIERCE, TargetType.SINGLE_ENEMY, 10, 0, 0),
+        contextResult);
+
     assertThrows(
         IllegalArgumentException.class,
         () ->
             executor.resolve(
-                "bad",
-                new EffectConfig(EffectType.DAMAGE, 0),
-                TargetType.SINGLE_ENEMY,
-                0,
-                playerState));
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            executor.resolve(
-                "bad",
-                new EffectConfig(EffectType.DAMAGE, 1, 1),
-                TargetType.SINGLE_ENEMY,
-                0,
-                playerState));
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            executor.resolve(
-                "bad",
-                new EffectConfig(EffectType.POISON, 1),
-                TargetType.SINGLE_ENEMY,
+                "poison_blade",
+                new EffectConfig(EffectType.PIERCE, 10),
+                TargetType.SELF,
                 0,
                 playerState));
   }

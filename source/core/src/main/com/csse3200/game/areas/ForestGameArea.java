@@ -1,19 +1,25 @@
 package com.csse3200.game.areas;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.areas.terrain.TerrainFactory.TerrainType;
+import com.csse3200.game.components.gamearea.CombatBackgroundComponent;
+import com.csse3200.game.components.gamearea.CombatBackgroundConfig;
+import com.csse3200.game.components.gamearea.CombatBackgroundConfigs;
 import com.csse3200.game.components.gamearea.GameAreaDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.factories.EnemyFactory;
-import com.csse3200.game.entities.factories.NPCFactory;
 import com.csse3200.game.entities.factories.ObstacleFactory;
 import com.csse3200.game.entities.factories.PlayerFactory;
+import com.csse3200.game.files.FileLoader;
+import com.csse3200.game.maps.RunState;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.utils.math.GridPoint2Utils;
-import com.csse3200.game.utils.math.RandomUtils;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,11 +27,10 @@ import org.slf4j.LoggerFactory;
 /** Forest area for the demo game with trees, a player, and some enemies. */
 public class ForestGameArea extends GameArea {
   private static final Logger logger = LoggerFactory.getLogger(ForestGameArea.class);
-  private static final int NUM_TREES = 7;
-  private static final int NUM_GHOSTS = 2;
   private static final GridPoint2 PLAYER_SPAWN = new GridPoint2(5, 20);
   private static final GridPoint2 ENEMY_SPAWN = new GridPoint2(20, PLAYER_SPAWN.y);
   private static final float WALL_WIDTH = 3f;
+  private final RunState runState;
   private static final String[] forestTextures = {
     "images/star_player.png",
     "images/tree.png",
@@ -42,7 +47,8 @@ public class ForestGameArea extends GameArea {
     "images/iso_grass_2.png",
     "images/iso_grass_3.png",
     "images/enemies/intents/attack.png",
-    "images/enemies/intents/defend.png"
+    "images/enemies/intents/defend.png",
+    "images/battle_background.png"
   };
   private static final String[] forestTextureAtlases = {
     "images/terrain_iso_grass.atlas",
@@ -53,6 +59,10 @@ public class ForestGameArea extends GameArea {
   private static final String[] forestSounds = {"sounds/Impact4.ogg"};
 
   private final TerrainFactory terrainFactory;
+  private final Integer progression;
+  private final String backgroundId;
+  private static final String BACKGROUND_CONFIG_PATH = "configs/backgrounds.json";
+  private CombatBackgroundConfig backgroundConfig;
 
   private Entity player;
   private Entity enemy;
@@ -63,15 +73,59 @@ public class ForestGameArea extends GameArea {
    * @param terrainFactory TerrainFactory used to create the terrain for the GameArea.
    * @requires terrainFactory != null
    */
-  public ForestGameArea(TerrainFactory terrainFactory) {
+  public ForestGameArea(
+      TerrainFactory terrainFactory, Integer progression, RunState runState, String backgroundId) {
     super();
     this.terrainFactory = terrainFactory;
+    this.progression = progression;
+    this.runState = runState;
+    this.backgroundId = backgroundId;
+  }
+
+  /** Reads the selected background configuration from the file path and ID. */
+  private void readBackgroundConfig() {
+    backgroundConfig = null;
+
+    if (backgroundId == null || backgroundId.isBlank()) return;
+
+    CombatBackgroundConfigs configs =
+        FileLoader.readClass(CombatBackgroundConfigs.class, BACKGROUND_CONFIG_PATH);
+
+    if (configs == null) {
+      logger.warn("Couldn't read background configurations: {}", BACKGROUND_CONFIG_PATH);
+      return;
+    }
+
+    CombatBackgroundConfig selectedBackGround = configs.get(backgroundId);
+
+    if (selectedBackGround == null) {
+      logger.warn("The selected background configuration doesn't exist: {}", backgroundId);
+      return;
+    }
+
+    if (selectedBackGround.name == null
+        || selectedBackGround.name.isBlank()
+        || selectedBackGround.texture == null
+        || selectedBackGround.texture.isBlank()) {
+      logger.warn("Background '{}' requires a name and texture path", backgroundId);
+      return;
+    }
+
+    if (!Gdx.files.internal(selectedBackGround.texture).exists()) {
+      logger.warn("Missing texture! {}, {}", backgroundId, selectedBackGround.texture);
+      return;
+    }
+
+    backgroundConfig = selectedBackGround;
   }
 
   /** Create the game area, including terrain, static entities (trees), dynamic entities (player) */
   @Override
   public void create() {
+    readBackgroundConfig();
     loadAssets();
+
+    spawnBackground();
     spawnTerrain();
 
     enemy = spawnEnemy();
@@ -83,6 +137,27 @@ public class ForestGameArea extends GameArea {
   public void displayUI(Entity ui) {
     ui.addComponent(new GameAreaDisplay("The Fall of Pantheons"));
     spawnEntity(ui);
+  }
+
+  private void spawnBackground() {
+    if (backgroundConfig == null) return;
+
+    Texture texture;
+    try {
+      texture =
+          ServiceLocator.getResourceService().getAsset(backgroundConfig.texture, Texture.class);
+    } catch (RuntimeException e) {
+      logger.warn("Background texture missing: {}", backgroundConfig.texture);
+      return;
+    }
+
+    texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
+    OrthographicCamera camera = (OrthographicCamera) ServiceLocator.getCamera();
+
+    Entity background = new Entity().addComponent(new CombatBackgroundComponent(texture, camera));
+
+    spawnEntity(background);
   }
 
   private void spawnTerrain() {
@@ -115,19 +190,14 @@ public class ForestGameArea extends GameArea {
         ObstacleFactory.createWall(worldBounds.x, WALL_WIDTH), GridPoint2Utils.ZERO, false, false);
   }
 
-  private void spawnTrees() {
-    GridPoint2 minPos = new GridPoint2(0, 0);
-    GridPoint2 maxPos = terrain.getMapBounds(0).sub(2, 2);
-
-    for (int i = 0; i < NUM_TREES; i++) {
-      GridPoint2 randomPos = RandomUtils.random(minPos, maxPos);
-      Entity tree = ObstacleFactory.createTree();
-      spawnEntityAt(tree, randomPos, true, false);
-    }
-  }
-
   private Entity spawnPlayer() {
-    Entity newPlayer = PlayerFactory.createPlayer();
+    runState.initialisePlayerStats(
+        PlayerFactory.getDefaultHealth(),
+        PlayerFactory.getDefaultMaxHealth(),
+        PlayerFactory.getDefaultMaxEnergy());
+
+    Entity newPlayer = PlayerFactory.createPlayer(runState.getPlayerHealth(), runState);
+
     spawnEntityAt(newPlayer, PLAYER_SPAWN, true, true);
     return newPlayer;
   }
@@ -138,7 +208,7 @@ public class ForestGameArea extends GameArea {
    * default config otherwise).
    */
   private Entity spawnEnemy() {
-    Entity newEnemy = EnemyFactory.create("bone_crawler");
+    Entity newEnemy = EnemyFactory.create("bone_crawler", this.progression);
     spawnEntityAt(newEnemy, ENEMY_SPAWN, true, true);
     return newEnemy;
   }
@@ -149,26 +219,6 @@ public class ForestGameArea extends GameArea {
 
   public List<Entity> getEnemies() {
     return List.of(enemy);
-  }
-
-  private void spawnGhosts() {
-    GridPoint2 minPos = new GridPoint2(0, 0);
-    GridPoint2 maxPos = terrain.getMapBounds(0).sub(2, 2);
-
-    for (int i = 0; i < NUM_GHOSTS; i++) {
-      GridPoint2 randomPos = RandomUtils.random(minPos, maxPos);
-      Entity ghost = NPCFactory.createGhost(player);
-      spawnEntityAt(ghost, randomPos, true, true);
-    }
-  }
-
-  private void spawnGhostKing() {
-    GridPoint2 minPos = new GridPoint2(0, 0);
-    GridPoint2 maxPos = terrain.getMapBounds(0).sub(2, 2);
-
-    GridPoint2 randomPos = RandomUtils.random(minPos, maxPos);
-    Entity ghostKing = NPCFactory.createGhostKing(player);
-    spawnEntityAt(ghostKing, randomPos, true, true);
   }
 
   //  private void playMusic() {

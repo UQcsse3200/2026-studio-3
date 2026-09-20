@@ -1,7 +1,11 @@
 package com.csse3200.game.components;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.function.IntConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,6 +143,44 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
+   * Applies a direct health change that bypasses armor and block, intended for non-combat sources
+   * such as Chance Encounters. A positive amount heals (clamped to max health via {@link
+   * #heal(int)}); a negative amount reduces health directly, clamped to 0, and triggers the same
+   * death event used by combat damage.
+   *
+   * <p>Unlike {@link #takeDamage(int)}, this method does NOT consume block or armor. Use this when
+   * a game system needs a health change with a precise, predictable amount that should not be
+   * affected by the entity's current combat-only defences.
+   *
+   * @param amount positive to heal, negative to reduce health; zero is a no-op
+   */
+  public void applyDirectHealthChange(int amount) {
+    if (amount > 0) {
+      heal(amount);
+    } else if (amount < 0 && !isDead()) {
+      setHealth(Math.max(this.health + amount, 0));
+      if (entity != null && isDead()) {
+        entity.getEvents().trigger("entityIsDead");
+      }
+    }
+  }
+
+  /**
+   * Damages the entity's health directly, ignoring block and armour. If health reaches 0, the
+   * entity dies.
+   *
+   * @param damage piercing damage
+   */
+  public void takePiercingDamage(int damage) {
+    if (damage >= 0 && !isDead()) {
+      setHealth(Math.max(this.health - damage, 0));
+      if (entity != null && isDead()) {
+        entity.getEvents().trigger(EVT_IS_DEAD);
+      }
+    }
+  }
+
+  /**
    * A setter function for maxHealth, contains a safegaurd to avoid MaxHealth going lower than 1
    * send an update to every listener is changed to ensure real time changes updated.
    *
@@ -237,6 +279,26 @@ public class CombatStatsComponent extends Component {
       return;
     }
     setArmor(this.armor + amount);
+  }
+
+  /**
+   * Reduces this entity's armor without affecting block, health, or other combat statistics.
+   *
+   * <p>The armor value cannot fall below zero. Non-positive amounts are ignored.
+   *
+   * @param amount requested amount of armor to remove
+   * @return actual amount of armor removed
+   */
+  public int reduceArmor(int amount) {
+    if (amount <= 0) {
+      return 0;
+    }
+
+    int removed = Math.min(armor, amount);
+    if (removed > 0) {
+      setArmor(armor - removed);
+    }
+    return removed;
   }
 
   /** Clears all armor from the entity, setting it to 0. */
@@ -384,6 +446,33 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
+   * Removes poison, vulnerable and feeble. Strength, heal-over-time and other non-debuff statuses
+   * are left unchanged. Keys are matched case-insensitively because some combat paths store
+   * lowercase status names.
+   */
+  public void clearNegativeStatusEffects() {
+    List<String> toRemove = new ArrayList<>();
+    for (String type : statusEffects.keySet()) {
+      if (isNegativeStatusKey(type)) {
+        toRemove.add(type);
+      }
+    }
+    for (String type : toRemove) {
+      removeStatusEffect(type);
+    }
+  }
+
+  private static boolean isNegativeStatusKey(String type) {
+    if (type == null || type.isBlank()) {
+      return false;
+    }
+    return switch (type.toUpperCase(Locale.ROOT)) {
+      case "POISON", "VULNERABLE", "FEEBLE" -> true;
+      default -> false;
+    };
+  }
+
+  /**
    * Ticks down the duration of all active status effects by one and removes any that have expired.
    * This method's internal logic (tick/expire/cleanup) is self-contained. IMPORTANT - external
    * dependency: this method must be called exactly once per turn for durations to mean "number of
@@ -401,5 +490,46 @@ public class CombatStatsComponent extends Component {
               }
               return expired;
             });
+  }
+
+  /**
+   * Processes one poison tick for this entity.
+   *
+   * <p>If the entity is alive and has an active POISON effect, poison damage is calculated and
+   * applied through the supplied damage handler. Only the POISON duration is reduced. The effect is
+   * removed when its duration expires.
+   *
+   * <p>If the damage handler replaces or removes the original POISON effect, this method does not
+   * modify the replacement effect.
+   *
+   * @param applyDamage handler used to apply the calculated poison damage
+   * @throws IllegalArgumentException if {@code applyDamage} is null
+   */
+  public void processPoisonTick(IntConsumer applyDamage) {
+    if (applyDamage == null) {
+      throw new IllegalArgumentException("Damage handler must not be null");
+    }
+    if (isDead()) {
+      return;
+    }
+
+    StatusEffect poison = getStatusEffect("POISON");
+    if (poison == null) {
+      return;
+    }
+
+    int damage = StatusEffectCalculator.getPoisonDamage(this);
+    if (damage > 0) {
+      applyDamage.accept(damage);
+    }
+
+    // Do not tick a replacement effect created by the damage callback.
+    if (getStatusEffect("POISON") != poison) {
+      return;
+    }
+
+    if (poison.tickAndCheckExpired()) {
+      removeStatusEffect("POISON");
+    }
   }
 }

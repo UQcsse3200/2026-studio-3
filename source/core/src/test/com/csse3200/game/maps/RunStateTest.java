@@ -2,6 +2,10 @@ package com.csse3200.game.maps;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardLibrary;
+import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.extensions.GameExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,7 +15,7 @@ public class RunStateTest {
 
   /** Start node 0, connected forwards to 1 and 2. */
   private MapGraph createGraph() {
-    RoomDistributionConfig config = new RoomDistributionConfig(MapGraph.MAX_NODE_COUNT, 60, 30, 10);
+    MapGenerationConfig config = new MapGenerationConfig();
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
     graph.addNode(new MapNode(0, RoomType.COMBAT));
     graph.addNode(new MapNode(1, RoomType.EVENT));
@@ -149,6 +153,61 @@ public class RunStateTest {
     runState.completeEncounter(true);
 
     assertEquals(NodeState.CURRENT, graph.getNode(0).getState());
+  }
+
+  @Test
+  void playerStatePersistsAcrossRunAccesses() {
+    RunState runState = new RunState();
+
+    PlayerRunState first = runState.getOrCreatePlayerState();
+    first.restore(50, 100, 25);
+
+    PlayerRunState second = runState.getOrCreatePlayerState();
+
+    assertSame(first, second);
+    assertEquals(50, second.getCurrentHealth());
+    assertEquals(100, second.getMaxHealth());
+    assertEquals(25, second.getGold());
+  }
+
+  @Test
+  void playerDeckPersistsAcrossRunAccesses() {
+    RunState runState = new RunState();
+    CardService cardService = new CardLibrary(CardConfigLoader.loadCards());
+
+    PlayerDeck first = runState.getOrCreatePlayerDeck(cardService);
+    PlayerDeck second = runState.getOrCreatePlayerDeck(cardService);
+
+    assertSame(first, second);
+  }
+
+  @Test
+  void mapHeightReturnsCorrectValue() {
+    RunState runState = new RunState();
+    MapGraph graph = createGraph();
+    runState.startRun(graph, 0);
+
+    assertEquals(graph.getCurrentNode().getHeight(), runState.getMapProgression());
+  }
+
+  @Test
+  void returnsZeroWhenActiveNodeIsMissing() {
+    RunState runState = new RunState();
+    MapGraph graph = createGraph();
+    runState.startRun(graph, 0);
+
+    assertEquals(0, runState.getMapProgression());
+  }
+
+  @Test
+  void returnsZeroWhenNodeIdDoesNotExist() {
+    RunState runState = new RunState();
+    MapGraph graph = createGraph();
+    runState.startRun(graph, 0);
+
+    runState.enterEncounter(999);
+
+    assertEquals(0, runState.getMapProgression());
   }
 
   @Test

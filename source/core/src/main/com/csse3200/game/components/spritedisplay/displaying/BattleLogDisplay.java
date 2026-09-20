@@ -1,6 +1,7 @@
 package com.csse3200.game.components.spritedisplay.displaying;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 
@@ -24,6 +25,9 @@ public class BattleLogDisplay extends Displaying {
   @Override
   public void create() {
     super.create();
+    Color battleLogController = Color.valueOf("DBBEA1");
+    label.getStyle().fontColor = battleLogController;
+    label.setColor(battleLogController);
     label.getColor().a = 0f;
     entity.getEvents().addListener("battleWon", () -> onTrigger("VICTORY!"));
     entity.getEvents().addListener("battleLost", () -> onTrigger("DEFEAT..."));

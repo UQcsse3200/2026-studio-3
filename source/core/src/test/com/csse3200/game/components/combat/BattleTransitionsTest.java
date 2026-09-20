@@ -52,35 +52,20 @@ class BattleTransitionsTest {
     return List.of(
         transition(BattlePhase.SETUP, BattleEvent.SETUP_COMPLETE, BattlePhase.REVEAL_INTENTS),
         transition(
+            BattlePhase.ENEMY_TURN, BattleEvent.ENEMY_TURN_SKIPPED, BattlePhase.ENEMY_RESOLVED),
+        transition(
             BattlePhase.REVEAL_INTENTS, BattleEvent.INTENTS_REVEALED, BattlePhase.PLAYER_START),
         transition(
             BattlePhase.PLAYER_START, BattleEvent.PLAYER_TURN_STARTED, BattlePhase.PLAYER_TURN),
         transition(BattlePhase.PLAYER_START, BattleEvent.ENEMIES_DEFEATED, BattlePhase.VICTORY),
         transition(BattlePhase.PLAYER_START, BattleEvent.PLAYER_DEFEATED, BattlePhase.DEFEAT),
         transition(
-            BattlePhase.PLAYER_TURN, BattleEvent.PLAYER_ATTACK_SELECTED, BattlePhase.PLAYER_ATTACK),
-        transition(
-            BattlePhase.PLAYER_TURN, BattleEvent.PLAYER_DEFEND_SELECTED, BattlePhase.PLAYER_DEFEND),
-        transition(
-            BattlePhase.PLAYER_TURN, BattleEvent.PLAYER_OTHER_SELECTED, BattlePhase.PLAYER_OTHER),
+            BattlePhase.PLAYER_TURN, BattleEvent.CARD_PLAY_REQUESTED, BattlePhase.CARD_RESOLVING),
         transition(
             BattlePhase.PLAYER_TURN, BattleEvent.PLAYER_END_REQUESTED, BattlePhase.PLAYER_END),
-        transition(
-            BattlePhase.PLAYER_ATTACK,
-            BattleEvent.PLAYER_ACTION_RESOLVED,
-            BattlePhase.PLAYER_RESOLVED),
-        transition(
-            BattlePhase.PLAYER_DEFEND,
-            BattleEvent.PLAYER_ACTION_RESOLVED,
-            BattlePhase.PLAYER_RESOLVED),
-        transition(
-            BattlePhase.PLAYER_OTHER,
-            BattleEvent.PLAYER_ACTION_RESOLVED,
-            BattlePhase.PLAYER_RESOLVED),
-        transition(
-            BattlePhase.PLAYER_RESOLVED, BattleEvent.PLAYER_CONTINUES, BattlePhase.PLAYER_TURN),
-        transition(BattlePhase.PLAYER_RESOLVED, BattleEvent.ENEMIES_DEFEATED, BattlePhase.VICTORY),
-        transition(BattlePhase.PLAYER_RESOLVED, BattleEvent.PLAYER_DEFEATED, BattlePhase.DEFEAT),
+        transition(BattlePhase.CARD_RESOLVING, BattleEvent.CARD_RESOLVED, BattlePhase.PLAYER_TURN),
+        transition(BattlePhase.CARD_RESOLVING, BattleEvent.ENEMIES_DEFEATED, BattlePhase.VICTORY),
+        transition(BattlePhase.CARD_RESOLVING, BattleEvent.PLAYER_DEFEATED, BattlePhase.DEFEAT),
         transition(BattlePhase.PLAYER_END, BattleEvent.PLAYER_DEFEATED, BattlePhase.DEFEAT),
         transition(BattlePhase.PLAYER_END, BattleEvent.ENEMIES_DEFEATED, BattlePhase.VICTORY),
         transition(BattlePhase.PLAYER_END, BattleEvent.PLAYER_TURN_ENDED, BattlePhase.ENEMY_TURN),
