@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.csse3200.game.components.battle.EncounterComposer;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.maps.MapGenerationConfig;
@@ -77,6 +78,14 @@ class EncounterTableContentTest {
             roster.get(enemyId).tier == EnemyTier.BOSS,
             "Boss enemy '" + enemyId + "' appears in non-final encounter '" + encounter.id + "'");
       }
+    }
+  }
+
+  @Test
+  void shouldOnlyUseKnownEnemiesInDefaultLineUp() {
+    for (String enemyId : EncounterComposer.DEFAULT_ENEMIES) {
+      assertTrue(
+          roster.contains(enemyId), "Default line-up references unknown enemy '" + enemyId + "'");
     }
   }
 }
