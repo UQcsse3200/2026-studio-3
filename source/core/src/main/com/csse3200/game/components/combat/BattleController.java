@@ -536,6 +536,21 @@ public class BattleController {
     return !stats.isDead();
   }
 
+  /**
+   * Debug/cheat entry point: kills every enemy via piercing damage (bypassing block/armor, same as
+   * a real killing blow) and lets the normal outcome check pick it up, so this reuses the real win
+   * path instead of faking a VICTORY transition directly.
+   */
+  public void forceEnemiesDefeated() {
+    for (Entity enemy : this.enemies) {
+      CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
+      if (stats != null && !stats.isDead()) {
+        stats.takePiercingDamage(stats.getHealth());
+      }
+    }
+    queueBattleOutcomeIfOver();
+  }
+
   /** Applies and counts down timed HEAL once per player turn, starting on the next turn. */
   private void applyHealingAtTurnStart() {
     CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
