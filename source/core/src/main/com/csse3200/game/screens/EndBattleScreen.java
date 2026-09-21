@@ -6,9 +6,10 @@ import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.components.cards.CardUpgradeDisplay;
 import com.csse3200.game.components.cards.CardUpgradeSelection;
-import com.csse3200.game.components.cards.LoggingCardUpgradeCommitter;
+import com.csse3200.game.components.cards.PlayerDeckCardUpgradeCommitter;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord;
 import com.csse3200.game.components.spritedisplay.displaying.EndBattleDisplay;
@@ -68,12 +69,13 @@ public class EndBattleScreen extends ScreenAdapter {
       CardService cardLibrary = new CardLibrary(CardConfigLoader.loadCards());
       RunState runState = game.getRunState();
       if (runState != null) {
+        PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(cardLibrary);
         CardUpgradeSelection upgradeSelection =
-            new CardUpgradeSelection(
-                runState.getOrCreatePlayerDeck(cardLibrary).getCardIds(), cardLibrary, 2);
+            new CardUpgradeSelection(playerDeck.getCards(), cardLibrary, 2);
         if (!upgradeSelection.getCardUpgradeOption().isEmpty()) {
           ui.addComponent(
-              new CardUpgradeDisplay(upgradeSelection, new LoggingCardUpgradeCommitter()));
+              new CardUpgradeDisplay(
+                  upgradeSelection, new PlayerDeckCardUpgradeCommitter(playerDeck)));
         }
       }
     }

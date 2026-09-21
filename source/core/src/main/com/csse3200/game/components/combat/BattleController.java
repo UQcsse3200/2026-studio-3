@@ -7,6 +7,7 @@ import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.cards.play.CardPlayResult;
 import com.csse3200.game.cards.play.CardPlayService;
+import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.cards.CardEffectHandler;
@@ -325,12 +326,11 @@ public class BattleController {
   }
 
   /**
-   * Adds a listener that receives the player's hand (card IDs) after it changes, e.g. once a played
-   * card has moved from hand to discard. The UI uses this to refresh the on-screen hand.
+   * Adds a listener that receives the exact hand instances after it changes.
    *
    * @param listener receives the updated hand
    */
-  public void addHandChangedListener(EventListener1<List<String>> listener) {
+  public void addHandChangedListener(EventListener1<List<CardInstance>> listener) {
     Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(HAND_CHANGED_EVENT, listener);
   }
@@ -485,11 +485,11 @@ public class BattleController {
    */
   private String summarise(CardPlayRequest request, CardPlayResult result) {
     StringBuilder summary =
-            new StringBuilder("You played ")
-                    .append(result.cardId())
-                    .append(" [")
-                    .append(request.instanceId())
-                    .append("]");
+        new StringBuilder("You played ")
+            .append(result.cardId())
+            .append(" [")
+            .append(request.instanceId())
+            .append("]");
     for (ResolvedCardEffect effect : result.enemyEffects()) {
       summary
           .append(" - ")
@@ -723,7 +723,7 @@ public class BattleController {
     if (cardPlayService == null) {
       return;
     }
-    List<String> retrieved = cardPlayService.onPlayerRoundStart();
+    List<CardInstance> retrieved = cardPlayService.onPlayerRoundStart();
     if (retrieved.isEmpty()) {
       return;
     }

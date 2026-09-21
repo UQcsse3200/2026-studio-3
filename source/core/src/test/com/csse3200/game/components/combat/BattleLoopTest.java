@@ -15,6 +15,7 @@ import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.cards.play.CardPlayService;
+import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
@@ -67,6 +68,18 @@ class BattleLoopTest {
     return deck;
   }
 
+  private static String instanceIdInHand(BattleDeck deck, String cardId) {
+    return deck.getHand().stream()
+        .filter(card -> card.cardId().equals(cardId))
+        .findFirst()
+        .orElseThrow()
+        .instanceId();
+  }
+
+  private static boolean containsCardId(List<CardInstance> cards, String cardId) {
+    return cards.stream().anyMatch(card -> card.cardId().equals(cardId));
+  }
+
   @Test
   void playerWinsWhenCardKillsTheLastEnemy() {
     Entity player =
@@ -98,13 +111,14 @@ class BattleLoopTest {
 
     controller.start();
     controller.submitCardPlayRequest(
-        CardPlayRequest.singleEnemy("strike", Integer.toString(enemy.getId())));
+        CardPlayRequest.singleEnemy(
+            instanceIdInHand(deck, "strike"), Integer.toString(enemy.getId())));
 
     assertEquals(BattlePhase.VICTORY, controller.getCurrentPhase());
     assertEquals(Boolean.TRUE, outcome.get());
     assertEquals(0, enemy.getComponent(CombatStatsComponent.class).getHealth());
-    assertFalse(deck.getHand().contains("strike"));
-    assertTrue(deck.getDiscardPile().contains("strike"));
+    assertFalse(containsCardId(deck.getHand(), "strike"));
+    assertTrue(containsCardId(deck.getDiscardPile(), "strike"));
     assertTrue(deck.getHand().isEmpty()); // no replacement is drawn
     assertTrue(log.stream().anyMatch(line -> line.contains("Victory")));
   }
@@ -184,12 +198,13 @@ class BattleLoopTest {
     controller.addPhaseChangeListener((previous, next) -> phases.add(next));
 
     controller.start();
-    boolean accepted = controller.submitCardPlayRequest(CardPlayRequest.self("defend"));
+    boolean accepted =
+        controller.submitCardPlayRequest(CardPlayRequest.self(instanceIdInHand(deck, "defend")));
 
     assertTrue(accepted);
     assertEquals(5, player.getComponent(CombatStatsComponent.class).getArmor());
     assertEquals(2, player.getComponent(EnergyComponent.class).getCurrentEnergy());
-    assertTrue(deck.getDiscardPile().contains("defend"));
+    assertTrue(containsCardId(deck.getDiscardPile(), "defend"));
     assertTrue(phases.contains(BattlePhase.CARD_RESOLVING));
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }
@@ -213,12 +228,13 @@ class BattleLoopTest {
     controller.addPhaseChangeListener((previous, next) -> phases.add(next));
 
     controller.start();
-    boolean accepted = controller.submitCardPlayRequest(CardPlayRequest.self("bandage"));
+    boolean accepted =
+        controller.submitCardPlayRequest(CardPlayRequest.self(instanceIdInHand(deck, "bandage")));
 
     assertTrue(accepted);
     assertEquals(14, player.getComponent(CombatStatsComponent.class).getHealth());
     assertEquals(2, player.getComponent(EnergyComponent.class).getCurrentEnergy());
-    assertTrue(deck.getDiscardPile().contains("bandage"));
+    assertTrue(containsCardId(deck.getDiscardPile(), "bandage"));
     assertTrue(phases.contains(BattlePhase.CARD_RESOLVING));
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }
@@ -240,13 +256,14 @@ class BattleLoopTest {
 
     boolean accepted =
         controller.submitCardPlayRequest(
-            CardPlayRequest.singleEnemy("strike", Integer.toString(enemy.getId())));
+            CardPlayRequest.singleEnemy(
+                instanceIdInHand(deck, "strike"), Integer.toString(enemy.getId())));
 
     assertFalse(accepted);
     assertEquals(BattlePhase.SETUP, controller.getCurrentPhase());
     assertEquals(20, enemy.getComponent(CombatStatsComponent.class).getHealth());
     assertEquals(3, player.getComponent(EnergyComponent.class).getCurrentEnergy());
-    assertEquals(List.of("strike"), deck.getHand());
+    assertEquals("strike", deck.getHand().get(0).cardId());
     assertTrue(deck.getDiscardPile().isEmpty());
   }
 
@@ -275,12 +292,13 @@ class BattleLoopTest {
     controller.start();
     boolean accepted =
         controller.submitCardPlayRequest(
-            CardPlayRequest.singleEnemy("strike", Integer.toString(enemy.getId())));
+            CardPlayRequest.singleEnemy(
+                instanceIdInHand(deck, "strike"), Integer.toString(enemy.getId())));
 
     assertFalse(accepted);
     assertEquals(3, player.getComponent(EnergyComponent.class).getCurrentEnergy());
     assertEquals(20, enemy.getComponent(CombatStatsComponent.class).getHealth());
-    assertEquals(List.of("strike"), deck.getHand());
+    assertEquals("strike", deck.getHand().get(0).cardId());
     assertTrue(deck.getDiscardPile().isEmpty());
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }
@@ -310,7 +328,9 @@ class BattleLoopTest {
             player, List.of(firstEnemy, secondEnemy), effectHandler, cardPlayService);
 
     controller.start();
-    boolean accepted = controller.submitCardPlayRequest(CardPlayRequest.allEnemies("expose"));
+    boolean accepted =
+        controller.submitCardPlayRequest(
+            CardPlayRequest.allEnemies(instanceIdInHand(deck, "expose")));
 
     assertTrue(accepted);
     assertTrue(firstEnemy.getComponent(CombatStatsComponent.class).hasStatusEffect("VULNERABLE"));
