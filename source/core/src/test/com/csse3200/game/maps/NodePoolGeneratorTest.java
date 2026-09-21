@@ -32,6 +32,28 @@ class NodePoolGeneratorTest {
   }
 
   @Test
+  void assignsOneCampfireToHighLayerAfterRebalance() {
+    MapGenerationConfig config = new MapGenerationConfig(70, 60, 20, 10, 10, 1234L);
+
+    MapGraph map = new MapGenerationController(70, 60, 20, 10, 10).getMap();
+
+    long campfireCount =
+        map.getNodes().values().stream()
+            .filter(node -> node.getRoomType() == RoomType.CAMPFIRE)
+            .count();
+
+    assertEquals(1, campfireCount);
+
+    MapNode campfire =
+        map.getNodes().values().stream()
+            .filter(node -> node.getRoomType() == RoomType.CAMPFIRE)
+            .findFirst()
+            .orElseThrow();
+
+    assertEquals(MapGenerationConfig.MAP_HEIGHT - 1, campfire.getHeight());
+  }
+
+  @Test
   void sameSeedProducesSameRoomAssignments() {
     MapGenerationConfig firstConfig = new MapGenerationConfig(20, 60, 20, 10, 10, 98765L);
     MapGenerationConfig secondConfig = new MapGenerationConfig(20, 60, 20, 10, 10, 98765L);

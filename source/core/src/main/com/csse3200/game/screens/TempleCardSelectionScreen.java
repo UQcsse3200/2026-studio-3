@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -54,6 +55,7 @@ public class TempleCardSelectionScreen extends ScreenAdapter {
   private Label rarityLabel;
   private Image cardImage;
   private TextButton claimButton;
+  private Texture backgroundTexture;
 
   private CardConfig selectedCard;
   private boolean claimed;
@@ -100,6 +102,12 @@ public class TempleCardSelectionScreen extends ScreenAdapter {
     inputEntity.addComponent(new InputDecorator(stage, 10));
     ServiceLocator.getEntityService().register(inputEntity);
 
+    backgroundTexture = new Texture(Gdx.files.internal("images/blessing_of_war_bg.png"));
+    backgroundTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
+    Image background = new Image(backgroundTexture);
+    background.setScaling(Scaling.stretch);
+
     Table root = new Table();
     root.setFillParent(true);
     root.pad(35f);
@@ -113,19 +121,27 @@ public class TempleCardSelectionScreen extends ScreenAdapter {
         new Label(
             "The ancient warrior grants you knowledge of any technique you desire.", bodyStyle);
 
+    Table cardList = createCardList();
+    Table detailPanel = createDetailPanel(bodyStyle);
+
+    cardList.setBackground(skin.newDrawable("white", new Color(0.05f, 0.03f, 0.10f, 0.72f)));
+    detailPanel.setBackground(skin.newDrawable("white", new Color(0.05f, 0.03f, 0.10f, 0.72f)));
+
     root.add(title).colspan(2).padBottom(15f);
     root.row();
 
     root.add(subtitle).colspan(2).padBottom(30f);
     root.row();
 
-    Table cardList = createCardList();
-    Table detailPanel = createDetailPanel(bodyStyle);
-
     root.add(cardList).width(360f).expandY().fillY().padRight(25f);
     root.add(detailPanel).width(700f).expandY().fillY();
 
-    stage.addActor(root);
+    Stack sceneRoot = new Stack();
+    sceneRoot.setFillParent(true);
+    sceneRoot.add(background);
+    sceneRoot.add(root);
+
+    stage.addActor(sceneRoot);
 
     if (!cards.isEmpty()) {
       showCard(cards.get(0));
@@ -288,6 +304,10 @@ public class TempleCardSelectionScreen extends ScreenAdapter {
 
   @Override
   public void dispose() {
+    if (backgroundTexture != null) {
+      backgroundTexture.dispose();
+    }
+
     skin.dispose();
     renderer.dispose();
 

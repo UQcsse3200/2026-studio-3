@@ -2,13 +2,19 @@ package com.csse3200.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
@@ -37,6 +43,7 @@ public class ElitePortalScreen extends ScreenAdapter {
 
   private Texture backgroundTexture;
   private Texture portalTexture;
+  private Skin skin;
 
   public ElitePortalScreen(GdxGame game) {
     this.game = game;
@@ -52,6 +59,8 @@ public class ElitePortalScreen extends ScreenAdapter {
     ServiceLocator.registerRenderService(new RenderService());
 
     renderer = RenderFactory.createRenderer();
+
+    skin = new Skin(Gdx.files.internal("flat-earth/skin/flat-earth-ui.json"));
 
     createUI();
   }
@@ -83,10 +92,34 @@ public class ElitePortalScreen extends ScreenAdapter {
 
     portal.setSize(portalWidth, portalHeight);
     portal.setOrigin(Align.center);
+    portal.setPosition(0f, 0f);
 
-    portal.setPosition(
+    /*
+     * The group owns the permanent idle animation.
+     * The portal image itself owns the mouse-hover animation.
+     *
+     * Keeping them separate means hover effects do not cancel the
+     * continuous portal animation.
+     */
+    Group portalGroup = new Group();
+    portalGroup.setSize(portalWidth, portalHeight);
+    portalGroup.setOrigin(Align.center);
+
+    portalGroup.setPosition(
         (stage.getWidth() - portalWidth) / 2f, (stage.getHeight() - portalHeight) / 2f);
 
+    portalGroup.addActor(portal);
+
+    /* Continuous portal idle animation. */
+    portalGroup.addAction(
+        Actions.forever(
+            Actions.sequence(
+                Actions.parallel(
+                    Actions.scaleTo(1.03f, 1.03f, 0.9f, Interpolation.sineOut),
+                    Actions.moveBy(0f, 6f, 0.9f, Interpolation.sineOut)),
+                Actions.parallel(
+                    Actions.scaleTo(1f, 1f, 0.9f, Interpolation.sineIn),
+                    Actions.moveBy(0f, -6f, 0.9f, Interpolation.sineIn)))));
     portal.addListener(
         new ClickListener() {
           @Override
@@ -108,7 +141,40 @@ public class ElitePortalScreen extends ScreenAdapter {
         });
 
     stage.addActor(background);
-    stage.addActor(portal);
+    stage.addActor(portalGroup);
+
+    showPortalOpenedNotification(stage);
+  }
+
+  private void showPortalOpenedNotification(Stage stage) {
+    Table notification = new Table();
+
+    notification.setTouchable(Touchable.disabled);
+
+    notification.setBackground(skin.newDrawable("white", new Color(0.08f, 0.03f, 0.12f, 0.90f)));
+
+    Label message = new Label("A mysterious portal has opened!", skin, "large");
+
+    message.setColor(new Color(0.90f, 0.75f, 1f, 1f));
+
+    notification.add(message).pad(14f, 26f, 14f, 26f);
+
+    notification.pack();
+
+    notification.setPosition(
+        (stage.getWidth() - notification.getWidth()) / 2f,
+        stage.getHeight() - notification.getHeight() - 35f);
+
+    notification.getColor().a = 0f;
+
+    notification.addAction(
+        Actions.sequence(
+            Actions.fadeIn(0.25f),
+            Actions.delay(2.2f),
+            Actions.fadeOut(0.5f),
+            Actions.removeActor()));
+
+    stage.addActor(notification);
   }
 
   private void enterPortal() {
@@ -135,6 +201,10 @@ public class ElitePortalScreen extends ScreenAdapter {
 
     if (portalTexture != null) {
       portalTexture.dispose();
+    }
+
+    if (skin != null) {
+      skin.dispose();
     }
 
     renderer.dispose();

@@ -11,6 +11,7 @@ import com.csse3200.game.maps.RunState;
 import com.csse3200.game.screens.AncientTempleScreen;
 import com.csse3200.game.screens.BattleScreen;
 import com.csse3200.game.screens.BestiaryScreen;
+import com.csse3200.game.screens.CampfireScreen;
 import com.csse3200.game.screens.CardLibraryScreen;
 import com.csse3200.game.screens.ElitePortalScreen;
 import com.csse3200.game.screens.EncounterScreen;
@@ -126,6 +127,8 @@ public class GdxGame extends Game {
         return new MapScreen(this);
       case ENCOUNTER:
         return new EncounterScreen(this);
+      case CAMPFIRE:
+        return new CampfireScreen(this);
       case BATTLE_SCREEN:
         return new BattleScreen(this);
       case VICTORY:
@@ -154,6 +157,7 @@ public class GdxGame extends Game {
     CARD_LIBRARY,
     MAP,
     ENCOUNTER,
+    CAMPFIRE,
     BATTLE_SCREEN,
     VICTORY,
     DEFEAT,
