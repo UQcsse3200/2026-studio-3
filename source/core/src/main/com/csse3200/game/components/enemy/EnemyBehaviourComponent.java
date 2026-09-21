@@ -2,6 +2,7 @@ package com.csse3200.game.components.enemy;
 
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.Component;
+import com.csse3200.game.components.StatusEffectCalculator;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAI;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIFactory;
@@ -140,7 +141,13 @@ public class EnemyBehaviourComponent extends Component {
 
     CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
     if (targetStats != null) {
-      targetStats.takeDamage(currentIntent.getValue());
+      CombatStatsComponent attackerStats = entity.getComponent(CombatStatsComponent.class);
+      float outgoingModifier =
+          attackerStats == null
+              ? 1.0f
+              : StatusEffectCalculator.getOutgoingDamageModifier(attackerStats);
+      int damage = Math.round(currentIntent.getValue() * outgoingModifier);
+      targetStats.takeDamage(damage);
     }
   }
 

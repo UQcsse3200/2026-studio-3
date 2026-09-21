@@ -93,7 +93,59 @@ class CardEffectHandlerTest {
 
     handler.applyPlayerEffects(List.of(block), player);
 
-    assertEquals(5, player.getComponent(CombatStatsComponent.class).getArmour());
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    assertEquals(5, stats.getBlock());
+    assertEquals(0, stats.getArmour());
+  }
+
+  @Test
+  void shouldApplyFortifyAsPersistentArmour() {
+    Entity player = new Entity().addComponent(new CombatStatsComponent(10, 2));
+
+    ResolvedCardEffect fortify =
+        new ResolvedCardEffect("iron_oath", EffectType.FORTIFY, TargetType.SELF, 4, 0, 0);
+
+    handler.applyPlayerEffects(List.of(fortify), player);
+
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    assertEquals(4, stats.getArmour());
+    assertEquals(0, stats.getBlock());
+  }
+
+  @Test
+  void shouldApplyPiercingDamageWithoutConsumingDefences() {
+    CombatStatsComponent stats = new CombatStatsComponent(20, 2);
+    stats.addBlock(3);
+    stats.addArmour(4);
+    Entity enemy = new Entity().addComponent(stats);
+
+    ResolvedCardEffect pierce =
+        new ResolvedCardEffect("poison_blade", EffectType.PIERCE, TargetType.SINGLE_ENEMY, 6, 0, 0);
+
+    handler.applyEnemyEffects(List.of(enemy), List.of(pierce));
+
+    assertEquals(14, stats.getHealth());
+    assertEquals(3, stats.getBlock());
+    assertEquals(4, stats.getArmour());
+  }
+
+  @Test
+  void shouldApplySunderBeforeFollowingDamage() {
+    CombatStatsComponent stats = new CombatStatsComponent(20, 2);
+    stats.addArmour(5);
+    Entity enemy = new Entity().addComponent(stats);
+
+    ResolvedCardEffect sunder =
+        new ResolvedCardEffect(
+            "unseal_the_breach", EffectType.SUNDER, TargetType.SINGLE_ENEMY, 3, 0, 0);
+    ResolvedCardEffect damage =
+        new ResolvedCardEffect(
+            "unseal_the_breach", EffectType.DAMAGE, TargetType.SINGLE_ENEMY, 4, 0, 1);
+
+    handler.applyEnemyEffects(List.of(enemy), List.of(sunder, damage));
+
+    assertEquals(18, stats.getHealth());
+    assertEquals(0, stats.getArmour());
   }
 
   @Test

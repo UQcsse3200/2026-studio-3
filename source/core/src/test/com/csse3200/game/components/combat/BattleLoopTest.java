@@ -184,7 +184,7 @@ class BattleLoopTest {
   }
 
   @Test
-  void shouldAddArmourWhenDefendCardIsPlayed() {
+  void shouldAddBlockWhenDefendCardIsPlayed() {
     CardConfig defend =
         card("defend", CardType.SKILL, TargetType.SELF, 1, new EffectConfig(EffectType.BLOCK, 5));
     Entity player =
@@ -206,11 +206,18 @@ class BattleLoopTest {
         controller.submitCardPlayRequest(CardPlayRequest.self(instanceIdInHand(deck, "defend")));
 
     assertTrue(accepted);
-    assertEquals(5, player.getComponent(CombatStatsComponent.class).getArmour());
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    assertEquals(5, stats.getBlock());
+    assertEquals(0, stats.getArmour());
     assertEquals(2, player.getComponent(EnergyComponent.class).getCurrentEnergy());
     assertTrue(containsCardId(deck.getDiscardPile(), "defend"));
     assertTrue(phases.contains(BattlePhase.CARD_RESOLVING));
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+
+    controller.endPlayerTurn();
+
+    assertEquals(0, stats.getBlock());
+    assertEquals(20, stats.getHealth());
   }
 
   @Test
