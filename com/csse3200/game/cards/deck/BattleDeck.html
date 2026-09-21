@@ -97,13 +97,9 @@ loadScripts(document, 'script');</script>
  <p>A battle deck is created from the player's long-term deck at battle start, then owns its own
  draw pile, hand and discard pile. Mutating this class should not change the original <a href="PlayerDeck.html" title="class in com.csse3200.game.cards.deck"><code>PlayerDeck</code></a>.
 
- <p>Internally every pile stores <a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime"><code>CardInstance</code></a>s rather than bare card IDs, carrying over
- the unique instance ID each card was given when it entered the <a href="PlayerDeck.html" title="class in com.csse3200.game.cards.deck"><code>PlayerDeck</code></a>. Most callers
- only care about card IDs and can keep using the <code>String</code>-based methods below, which match
- the first card with that ID (the same "first match" semantics <code>List.remove(Object)</code> has
- always had here). Callers that need to tell duplicate copies of the same card apart — e.g.
- cooldown tracking, so disabling one "strike" doesn't disable every "strike" — should use the
- instance-aware methods instead.</div>
+ <p>Every pile stores <a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime"><code>CardInstance</code></a>s and preserves the identity assigned when a card
+ entered the <a href="PlayerDeck.html" title="class in com.csse3200.game.cards.deck"><code>PlayerDeck</code></a>. All string parameters in this class are exact instance IDs;
+ definition IDs are never used to choose one copy from a pile.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -134,28 +130,26 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#discardCard(java.lang.String)" class="member-name-link">discardCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#discardCard(java.lang.String)" class="member-name-link">discardCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Removes one matching card from the hand and moves it to the discard pile.</div>
+<div class="block">Removes the exact card from the hand and moves it to the discard pile.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#discardCardInstance(java.lang.String)" class="member-name-link">discardCardInstance</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#discardCardInstance(java.lang.String)" class="member-name-link">discardCardInstance</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Removes the first hand card matching <code>cardId</code> and moves it to the discard pile, same as
- <a href="#discardCard(java.lang.String)"><code>discardCard(String)</code></a>, but returns the exact <a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime"><code>CardInstance</code></a> that moved so callers
- needing per-copy identity (e.g.</div>
+<div class="block">Removes the hand card with <code>instanceId</code> and moves it to the discard pile, same as <a href="#discardCard(java.lang.String)"><code>discardCard(String)</code></a>, but returns the exact <a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime"><code>CardInstance</code></a> that moved.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#discardHand()" class="member-name-link">discardHand</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Moves every card currently in the hand to the discard pile.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#drawCards(int)" class="member-name-link">drawCards</a><wbr>(int&nbsp;count)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Draws up to the requested number of cards from the draw pile into the hand.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#drawOne()" class="member-name-link">drawOne</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Draws one card from the draw pile into the hand.</div>
@@ -168,7 +162,7 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Finds an exact owned copy in the current hand.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDiscardPile()" class="member-name-link">getDiscardPile</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</code></div>
@@ -177,7 +171,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDiscardPileSize()" class="member-name-link">getDiscardPileSize</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDrawPile()" class="member-name-link">getDrawPile</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</code></div>
@@ -186,7 +180,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDrawPileSize()" class="member-name-link">getDrawPileSize</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getHand()" class="member-name-link">getHand</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</code></div>
@@ -196,7 +190,7 @@ loadScripts(document, 'script');</script>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getHandSize()" class="member-name-link">getHandSize</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#playCard(java.lang.String)" class="member-name-link">playCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#playCard(java.lang.String)" class="member-name-link">playCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Plays a card from the hand and moves it to the discard pile.</div>
 </div>
@@ -206,15 +200,14 @@ loadScripts(document, 'script');</script>
 <div class="block">Moves the discard pile into an empty draw pile and shuffles it.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#retrieveFromDiscard(java.lang.String)" class="member-name-link">retrieveFromDiscard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#retrieveFromDiscard(java.lang.String)" class="member-name-link">retrieveFromDiscard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Removes one matching card from the discard pile and moves it back into the hand.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#retrieveInstanceFromDiscard(com.csse3200.game.cards.runtime.CardInstance)" class="member-name-link">retrieveInstanceFromDiscard</a><wbr>(<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&nbsp;instance)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Moves a specific card instance from the discard pile back into the hand, by exact identity
- rather than by matching the first card with a given ID.</div>
+<div class="block">Moves a specific card instance from the discard pile back into the hand.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setHandInstances(java.util.List)" class="member-name-link">setHandInstances</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;&nbsp;newHand)</code></div>
@@ -272,37 +265,37 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="drawOne()">
 <h3>drawOne</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">drawOne</span>()</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a></span>&nbsp;<span class="element-name">drawOne</span>()</div>
 <div class="block">Draws one card from the draw pile into the hand.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>drawn card ID, or null if the draw pile is empty</dd>
+<dd>drawn card instance, or null if the draw pile is empty</dd>
 </dl>
 </section>
 </li>
 <li>
 <section class="detail" id="drawCards(int)">
 <h3>drawCards</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">drawCards</span><wbr><span class="parameters">(int&nbsp;count)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</span>&nbsp;<span class="element-name">drawCards</span><wbr><span class="parameters">(int&nbsp;count)</span></div>
 <div class="block">Draws up to the requested number of cards from the draw pile into the hand.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>count</code> - number of cards to draw</dd>
 <dt>Returns:</dt>
-<dd>card IDs that were drawn, in draw order</dd>
+<dd>card instances that were drawn, in draw order</dd>
 </dl>
 </section>
 </li>
 <li>
 <section class="detail" id="playCard(java.lang.String)">
 <h3>playCard</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">playCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">playCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</span></div>
 <div class="block">Plays a card from the hand and moves it to the discard pile.
 
  <p>Card validation and effect resolution should be completed before this method is called.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>cardId</code> - ID of the card being played</dd>
+<dd><code>instanceId</code> - ID of the card being played</dd>
 <dt>Returns:</dt>
 <dd>true if the card was moved, otherwise false</dd>
 </dl>
@@ -311,11 +304,11 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="discardCard(java.lang.String)">
 <h3>discardCard</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">discardCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</span></div>
-<div class="block">Removes one matching card from the hand and moves it to the discard pile.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">discardCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</span></div>
+<div class="block">Removes the exact card from the hand and moves it to the discard pile.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>cardId</code> - ID of the card to discard</dd>
+<dd><code>instanceId</code> - ID of the card to discard</dd>
 <dt>Returns:</dt>
 <dd>true if the card was discarded, otherwise false</dd>
 </dl>
@@ -324,14 +317,11 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="discardCardInstance(java.lang.String)">
 <h3>discardCardInstance</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a></span>&nbsp;<span class="element-name">discardCardInstance</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</span></div>
-<div class="block">Removes the first hand card matching <code>cardId</code> and moves it to the discard pile, same as
- <a href="#discardCard(java.lang.String)"><code>discardCard(String)</code></a>, but returns the exact <a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime"><code>CardInstance</code></a> that moved so callers
- needing per-copy identity (e.g. cooldown tracking) can key off it instead of the shared card
- ID.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a></span>&nbsp;<span class="element-name">discardCardInstance</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</span></div>
+<div class="block">Removes the hand card with <code>instanceId</code> and moves it to the discard pile, same as <a href="#discardCard(java.lang.String)"><code>discardCard(String)</code></a>, but returns the exact <a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime"><code>CardInstance</code></a> that moved.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>cardId</code> - ID of the card to discard</dd>
+<dd><code>instanceId</code> - ID of the card to discard</dd>
 <dt>Returns:</dt>
 <dd>the discarded instance, or null if no matching card was in hand</dd>
 </dl>
@@ -340,11 +330,11 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="retrieveFromDiscard(java.lang.String)">
 <h3>retrieveFromDiscard</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">retrieveFromDiscard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">retrieveFromDiscard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</span></div>
 <div class="block">Removes one matching card from the discard pile and moves it back into the hand.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>cardId</code> - ID of the card to retrieve</dd>
+<dd><code>instanceId</code> - ID of the card to retrieve</dd>
 <dt>Returns:</dt>
 <dd>true if the card was retrieved, otherwise false</dd>
 </dl>
@@ -354,10 +344,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="retrieveInstanceFromDiscard(com.csse3200.game.cards.runtime.CardInstance)">
 <h3>retrieveInstanceFromDiscard</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">retrieveInstanceFromDiscard</span><wbr><span class="parameters">(<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&nbsp;instance)</span></div>
-<div class="block">Moves a specific card instance from the discard pile back into the hand, by exact identity
- rather than by matching the first card with a given ID. Used by cooldown tracking so the
- physical card that was actually discarded is the one retrieved, even when other copies of the
- same card are also sitting in the discard pile.</div>
+<div class="block">Moves a specific card instance from the discard pile back into the hand. Used by cooldown
+ tracking so the physical card that was discarded is the one retrieved.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>instance</code> - the exact instance to retrieve</dd>
@@ -391,7 +379,7 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="getDrawPile()">
 <h3>getDrawPile</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">getDrawPile</span>()</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</span>&nbsp;<span class="element-name">getDrawPile</span>()</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>immutable snapshot of the draw pile</dd>
@@ -401,17 +389,18 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="getHand()">
 <h3>getHand</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">getHand</span>()</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</span>&nbsp;<span class="element-name">getHand</span>()</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>immutable snapshot of the hand</dd>
+<dd>immutable snapshot of the hand as distinct card instances, letting callers tell
+     duplicate copies of the same card apart</dd>
 </dl>
 </section>
 </li>
 <li>
 <section class="detail" id="getDiscardPile()">
 <h3>getDiscardPile</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">getDiscardPile</span>()</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</span>&nbsp;<span class="element-name">getDiscardPile</span>()</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>immutable snapshot of the discard pile</dd>

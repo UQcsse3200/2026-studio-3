@@ -157,43 +157,36 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#canPlay(com.csse3200.game.cards.play.CardPlayRequest)" class="member-name-link">canPlay</a><wbr>(<a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a>&nbsp;request)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Read-only preview for the unified Team 3 request flow.</div>
+<div class="block">Read-only check of instance, resolved cost, target type and target availability.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#canPlay(java.lang.String)" class="member-name-link">canPlay</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#canPlay(java.lang.String)" class="member-name-link">canPlay</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Read-only check for whether a card is currently playable.</div>
+<div class="block">Checks affordability of an exact copy; use the request overload to check a selected target.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#currentHand()" class="member-name-link">currentHand</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#discardedInstances()" class="member-name-link">discardedInstances</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#handInstances()" class="member-name-link">handInstances</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isOnCooldown(com.csse3200.game.cards.runtime.CardInstance)" class="member-name-link">isOnCooldown</a><wbr>(<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&nbsp;instance)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isOnCooldown(com.csse3200.game.cards.runtime.CardInstance)" class="member-name-link">isOnCooldown</a><wbr>(<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&nbsp;instance)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Checks whether a specific card instance is currently tracked as on cooldown (discarded and
  waiting to be automatically retrieved), as distinct from any other copy of the same card.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onPlayerRoundStart()" class="member-name-link">onPlayerRoundStart</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onPlayerRoundStart()" class="member-name-link">onPlayerRoundStart</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Ticks every discarded card's cooldown down by one player round, retrieving any that reach zero
  straight back into the hand.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#playCard(com.csse3200.game.cards.play.CardPlayRequest)" class="member-name-link">playCard</a><wbr>(<a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a>&nbsp;request)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Unified Team 5 entry point for a card play attempt from Team 3/battle flow.</div>
-</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#playCard(java.lang.String)" class="member-name-link">playCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#playCard(com.csse3200.game.cards.play.CardPlayRequest)" class="member-name-link">playCard</a><wbr>(<a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a>&nbsp;request)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Attempts to play a card from the current hand.</div>
+<div class="block">Validates an instance request, spends resolved cost once, resolves its effects and discards
+ that exact copy.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#rearrangeHand(java.util.List)" class="member-name-link">rearrangeHand</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;&nbsp;newHand)</code></div>
@@ -201,6 +194,11 @@ loadScripts(document, 'script');</script>
 <div class="block">Replaces the current hand with an exact set of card instances chosen from the player's full
  pool, at a cost of 1 energy — but only when the player's actually-playable hand changes as a
  result, so re-confirming the same cards is free and never touches energy.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolveInHand(java.lang.String)" class="member-name-link">resolveInHand</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resolves an exact copy currently in hand; invalid/missing definitions are not playable.</div>
 </div>
 </div>
 </div>
@@ -276,53 +274,47 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
+<section class="detail" id="resolveInHand(java.lang.String)">
+<h3>resolveInHand</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a>&gt;</span>&nbsp;<span class="element-name">resolveInHand</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</span></div>
+<div class="block">Resolves an exact copy currently in hand; invalid/missing definitions are not playable.</div>
+</section>
+</li>
+<li>
 <section class="detail" id="canPlay(java.lang.String)">
 <h3>canPlay</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">canPlay</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</span></div>
-<div class="block">Read-only check for whether a card is currently playable.
-
- <p>This is intended for UI previews. The authoritative play path remains <a href="#playCard(java.lang.String)"><code>playCard(java.lang.String)</code></a>,
- which calls Team 7's <a href="../../components/player/EnergyComponent.html#spendEnergy(int)"><code>EnergyComponent.spendEnergy(int)</code></a>.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>cardId</code> - card ID to check</dd>
-<dt>Returns:</dt>
-<dd>true if the card is in hand and Team 7 says the player can afford it</dd>
-</dl>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">canPlay</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</span></div>
+<div class="block">Checks affordability of an exact copy; use the request overload to check a selected target.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="canPlay(com.csse3200.game.cards.play.CardPlayRequest)">
+<h3>canPlay</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">canPlay</span><wbr><span class="parameters">(<a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a>&nbsp;request)</span></div>
+<div class="block">Read-only check of instance, resolved cost, target type and target availability.</div>
 </section>
 </li>
 <li>
 <section class="detail" id="onPlayerRoundStart()">
 <h3>onPlayerRoundStart</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">onPlayerRoundStart</span>()</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</span>&nbsp;<span class="element-name">onPlayerRoundStart</span>()</div>
 <div class="block">Ticks every discarded card's cooldown down by one player round, retrieving any that reach zero
  straight back into the hand. Intended to be called once at the start of each player round (see
  <code>BattleController.enterPlayerStart</code>).</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>IDs of cards retrieved this round, in retrieval order (empty if none)</dd>
+<dd>exact card instances retrieved this round, in retrieval order</dd>
 </dl>
 </section>
 </li>
 <li>
 <section class="detail" id="currentHand()">
 <h3>currentHand</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">currentHand</span>()</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</span>&nbsp;<span class="element-name">currentHand</span>()</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>a snapshot of the current hand, for callers (e.g. the battle controller) that need to
      refresh the UI after <a href="#onPlayerRoundStart()"><code>onPlayerRoundStart()</code></a> changes it without a card being played</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="handInstances()">
-<h3>handInstances</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;</span>&nbsp;<span class="element-name">handInstances</span>()</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>a snapshot of the current hand as distinct card instances, for callers (e.g. UI
-     dimming) that need to tell duplicate copies of the same card apart</dd>
 </dl>
 </section>
 </li>
@@ -393,50 +385,12 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="canPlay(com.csse3200.game.cards.play.CardPlayRequest)">
-<h3>canPlay</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">canPlay</span><wbr><span class="parameters">(<a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a>&nbsp;request)</span></div>
-<div class="block">Read-only preview for the unified Team 3 request flow.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>request</code> - card and selected target</dd>
-<dt>Returns:</dt>
-<dd>true only when the card, target, hand and energy checks currently pass</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="playCard(java.lang.String)">
-<h3>playCard</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></span>&nbsp;<span class="element-name">playCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</span></div>
-<div class="block">Attempts to play a card from the current hand.
-
- <p>When successful, Team 7 energy is spent first, then Team 5 resolves effects, then the battle
- deck moves the card from hand to discard. When energy is insufficient, no card effects are
- resolved and the hand remains unchanged.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>cardId</code> - card ID to play</dd>
-<dt>Returns:</dt>
-<dd>structured play result with either resolved effects or a failure reason</dd>
-</dl>
-</section>
-</li>
-<li>
 <section class="detail" id="playCard(com.csse3200.game.cards.play.CardPlayRequest)">
 <h3>playCard</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></span>&nbsp;<span class="element-name">playCard</span><wbr><span class="parameters">(<a href="CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a>&nbsp;request)</span></div>
-<div class="block">Unified Team 5 entry point for a card play attempt from Team 3/battle flow.
-
- <p>Expected validation failures are returned as data. A failed result never spends energy or
- moves the card. A successful result spends energy exactly once, records the resolved effects,
- moves the card to the discard pile and includes immutable deck snapshots.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>request</code> - card ID and already selected target</dd>
-<dt>Returns:</dt>
-<dd>complete result for UI coordination and Team 1/Team 7 effect consumers</dd>
-</dl>
+<div class="block">Validates an instance request, spends resolved cost once, resolves its effects and discards
+ that exact copy. Expected failures leave energy and all piles unchanged. Unexpected failures
+ restore energy and propagate; consumers apply returned effects separately.</div>
 </section>
 </li>
 </ul>

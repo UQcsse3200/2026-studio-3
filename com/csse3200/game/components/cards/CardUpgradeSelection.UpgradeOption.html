@@ -92,19 +92,13 @@ loadScripts(document, 'script');</script>
 </div>
 <section class="class-description" id="class-description">
 <dl class="notes">
-<dt>Record Components:</dt>
-<dd><code><span id="param-deckIndex">deckIndex</span></code> - for keeping the index of the cards</dd>
-<dd><code><span id="param-current">current</span></code> - look at the current card</dd>
-<dd><code><span id="param-preview">preview</span></code> - look at the card's upgraded</dd>
-</dl>
-<dl class="notes">
 <dt>Enclosing class:</dt>
 <dd><code><a href="CardUpgradeSelection.html" title="class in com.csse3200.game.components.cards">CardUpgradeSelection</a></code></dd>
 </dl>
 <hr>
-<div class="type-signature"><span class="modifiers">public static record </span><span class="element-name type-name-label">CardUpgradeSelection.UpgradeOption</span>(int&nbsp;deckIndex, <a href="../../cards/runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a>&nbsp;current, <a href="../../cards/runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a>&nbsp;preview)
+<div class="type-signature"><span class="modifiers">public static record </span><span class="element-name type-name-label">CardUpgradeSelection.UpgradeOption</span>(<a href="../../cards/runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&nbsp;instance, <a href="../../cards/runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a>&nbsp;current, <a href="../../cards/runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a>&nbsp;preview)
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a></span></div>
-<div class="block">Blueprint for the upgrade option</div>
+<div class="block">One upgrade choice tied to the exact persistent card copy it will replace.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -116,7 +110,7 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(int,com.csse3200.game.cards.runtime.ResolvedCard,com.csse3200.game.cards.runtime.ResolvedCard)" class="member-name-link">UpgradeOption</a><wbr>(int&nbsp;deckIndex,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.cards.runtime.CardInstance,com.csse3200.game.cards.runtime.ResolvedCard,com.csse3200.game.cards.runtime.ResolvedCard)" class="member-name-link">UpgradeOption</a><wbr>(<a href="../../cards/runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&nbsp;instance,
  <a href="../../cards/runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a>&nbsp;current,
  <a href="../../cards/runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a>&nbsp;preview)</code></div>
 <div class="col-last even-row-color">
@@ -139,27 +133,27 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../cards/runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#current()" class="member-name-link">current</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <a href="#param-current"><code>current</code></a> record component.</div>
+<div class="block">Returns the value of the <code>current</code> record component.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#deckIndex()" class="member-name-link">deckIndex</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <a href="#param-deckIndex"><code>deckIndex</code></a> record component.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a hash code value for this object.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../cards/runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#instance()" class="member-name-link">instance</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the value of the <code>instance</code> record component.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../cards/runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#preview()" class="member-name-link">preview</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <a href="#param-preview"><code>preview</code></a> record component.</div>
+<div class="block">Returns the value of the <code>preview</code> record component.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
@@ -184,17 +178,17 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(int,com.csse3200.game.cards.runtime.ResolvedCard,com.csse3200.game.cards.runtime.ResolvedCard)">
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.cards.runtime.CardInstance,com.csse3200.game.cards.runtime.ResolvedCard,com.csse3200.game.cards.runtime.ResolvedCard)">
 <h3>UpgradeOption</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">UpgradeOption</span><wbr><span class="parameters">(int&nbsp;deckIndex,
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">UpgradeOption</span><wbr><span class="parameters">(<a href="../../cards/runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&nbsp;instance,
  <a href="../../cards/runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a>&nbsp;current,
  <a href="../../cards/runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a>&nbsp;preview)</span></div>
 <div class="block">Creates an instance of a <code>UpgradeOption</code> record class.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>deckIndex</code> - the value for the <a href="#param-deckIndex"><code>deckIndex</code></a> record component</dd>
-<dd><code>current</code> - the value for the <a href="#param-current"><code>current</code></a> record component</dd>
-<dd><code>preview</code> - the value for the <a href="#param-preview"><code>preview</code></a> record component</dd>
+<dd><code>instance</code> - the value for the <code>instance</code> record component</dd>
+<dd><code>current</code> - the value for the <code>current</code> record component</dd>
+<dd><code>preview</code> - the value for the <code>preview</code> record component</dd>
 </dl>
 </section>
 </li>
@@ -236,7 +230,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="equals(java.lang.Object)">
 <h3>equals</h3>
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">equals</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</span></div>
-<div class="block">Indicates whether some other object is "equal to" this one. The objects are equal if the other object is of the same class and if all the record components are equal. Reference components are compared with <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Objects.html#equals(java.lang.Object,java.lang.Object)" title="class or interface in java.util" class="external-link"><code>Objects::equals(Object,Object)</code></a>; primitive components are compared with '=='.</div>
+<div class="block">Indicates whether some other object is "equal to" this one. The objects are equal if the other object is of the same class and if all the record components are equal. All components in this record class are compared with <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Objects.html#equals(java.lang.Object,java.lang.Object)" title="class or interface in java.util" class="external-link"><code>Objects::equals(Object,Object)</code></a>.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Record.html#equals(java.lang.Object)" title="class or interface in java.lang" class="external-link">equals</a></code>&nbsp;in class&nbsp;<code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a></code></dd>
@@ -248,13 +242,13 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="deckIndex()">
-<h3>deckIndex</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">deckIndex</span>()</div>
-<div class="block">Returns the value of the <a href="#param-deckIndex"><code>deckIndex</code></a> record component.</div>
+<section class="detail" id="instance()">
+<h3>instance</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../cards/runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a></span>&nbsp;<span class="element-name">instance</span>()</div>
+<div class="block">Returns the value of the <code>instance</code> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <a href="#param-deckIndex"><code>deckIndex</code></a> record component</dd>
+<dd>the value of the <code>instance</code> record component</dd>
 </dl>
 </section>
 </li>
@@ -262,10 +256,10 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="current()">
 <h3>current</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../cards/runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a></span>&nbsp;<span class="element-name">current</span>()</div>
-<div class="block">Returns the value of the <a href="#param-current"><code>current</code></a> record component.</div>
+<div class="block">Returns the value of the <code>current</code> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <a href="#param-current"><code>current</code></a> record component</dd>
+<dd>the value of the <code>current</code> record component</dd>
 </dl>
 </section>
 </li>
@@ -273,10 +267,10 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="preview()">
 <h3>preview</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../cards/runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a></span>&nbsp;<span class="element-name">preview</span>()</div>
-<div class="block">Returns the value of the <a href="#param-preview"><code>preview</code></a> record component.</div>
+<div class="block">Returns the value of the <code>preview</code> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <a href="#param-preview"><code>preview</code></a> record component</dd>
+<dd>the value of the <code>preview</code> record component</dd>
 </dl>
 </section>
 </li>

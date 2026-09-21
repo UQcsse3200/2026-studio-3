@@ -150,9 +150,9 @@ loadScripts(document, 'script');</script>
  apply.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addHandChangedListener(com.csse3200.game.events.listeners.EventListener1)" class="member-name-link">addHandChangedListener</a><wbr>(<a href="../../events/listeners/EventListener1.html" title="interface in com.csse3200.game.events.listeners">EventListener1</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&gt;&nbsp;listener)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addHandChangedListener(com.csse3200.game.events.listeners.EventListener1)" class="member-name-link">addHandChangedListener</a><wbr>(<a href="../../events/listeners/EventListener1.html" title="interface in com.csse3200.game.events.listeners">EventListener1</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../cards/runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;&gt;&nbsp;listener)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Adds a listener that receives the player's hand (card IDs) after it changes, e.g.</div>
+<div class="block">Adds a listener that receives the exact hand instances after it changes.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addPhaseChangeListener(com.csse3200.game.events.listeners.EventListener2)" class="member-name-link">addPhaseChangeListener</a><wbr>(<a href="../../events/listeners/EventListener2.html" title="interface in com.csse3200.game.events.listeners">EventListener2</a>&lt;<a href="BattlePhase.html" title="enum class in com.csse3200.game.components.combat">BattlePhase</a>,<wbr><a href="BattlePhase.html" title="enum class in com.csse3200.game.components.combat">BattlePhase</a>&gt;&nbsp;listener)</code></div>
@@ -435,9 +435,8 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="addHandChangedListener(com.csse3200.game.events.listeners.EventListener1)">
 <h3>addHandChangedListener</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addHandChangedListener</span><wbr><span class="parameters">(<a href="../../events/listeners/EventListener1.html" title="interface in com.csse3200.game.events.listeners">EventListener1</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&gt;&nbsp;listener)</span></div>
-<div class="block">Adds a listener that receives the player's hand (card IDs) after it changes, e.g. once a played
- card has moved from hand to discard. The UI uses this to refresh the on-screen hand.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addHandChangedListener</span><wbr><span class="parameters">(<a href="../../events/listeners/EventListener1.html" title="interface in com.csse3200.game.events.listeners">EventListener1</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../cards/runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;&gt;&nbsp;listener)</span></div>
+<div class="block">Adds a listener that receives the exact hand instances after it changes.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>listener</code> - receives the updated hand</dd>

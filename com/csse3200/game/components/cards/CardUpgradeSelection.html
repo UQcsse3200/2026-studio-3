@@ -92,7 +92,7 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">CardUpgradeSelection</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">A class to gives information about the card upgrade selection when call</div>
+<div class="block">Selects exact owned card copies for upgrade and builds resolved before/after previews.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -108,7 +108,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="CardUpgradeSelection.UpgradeOption.html" class="type-name-link" title="class in com.csse3200.game.components.cards">CardUpgradeSelection.UpgradeOption</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">Blueprint for the upgrade option</div>
+<div class="block">One upgrade choice tied to the exact persistent card copy it will replace.</div>
 </div>
 </div>
 </section>
@@ -121,12 +121,10 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.util.List,com.csse3200.game.cards.CardService,int)" class="member-name-link">CardUpgradeSelection</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;deck,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.util.List,com.csse3200.game.cards.CardService,int)" class="member-name-link">CardUpgradeSelection</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../cards/runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;&nbsp;deck,
  <a href="../../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
  int&nbsp;maxSelections)</code></div>
-<div class="col-last even-row-color">
-<div class="block">A constructor for Card upgrade selection</div>
-</div>
+<div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -135,7 +133,7 @@ loadScripts(document, 'script');</script>
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab1" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab1', 3)" class="table-tab">Static Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">Modifier and Type</div>
@@ -143,43 +141,43 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#canConfirm()" class="member-name-link">canConfirm</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#canSelect(java.lang.String)" class="member-name-link">canSelect</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="CardUpgradeSelection.html" title="class in com.csse3200.game.components.cards">CardUpgradeSelection</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#forPlayerDeck(com.csse3200.game.cards.deck.PlayerDeck,com.csse3200.game.cards.CardService,int)" class="member-name-link">forPlayerDeck</a><wbr>(<a href="../../cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a>&nbsp;playerDeck,
+ <a href="../../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ int&nbsp;maxSelections)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Creates a selection model that can refresh from the current persistent deck after commits.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="CardUpgradeSelection.UpgradeOption.html" title="class in com.csse3200.game.components.cards">CardUpgradeSelection.UpgradeOption</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCardUpgradeOption()" class="member-name-link">getCardUpgradeOption</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSelectedInstanceIds()" class="member-name-link">getSelectedInstanceIds</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Return true if the selected card is at least one</div>
+<div class="block">Returns selected instance IDs in selection order.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#canSelect(int)" class="member-name-link">canSelect</a><wbr>(int&nbsp;deckIndex)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Return true if the card can be selected</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="CardUpgradeSelection.UpgradeOption.html" title="class in com.csse3200.game.components.cards">CardUpgradeSelection.UpgradeOption</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCardUpgradeOption()" class="member-name-link">getCardUpgradeOption</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isSelected(java.lang.String)" class="member-name-link">isSelected</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#refresh()" class="member-name-link">refresh</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Return the list of upgrade options</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSelectedDeckIndices()" class="member-name-link">getSelectedDeckIndices</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Return the list of selected Deck Indices in sorted order</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isSelected(int)" class="member-name-link">isSelected</a><wbr>(int&nbsp;deckIndex)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Return true if the deck index is selected and false if not</div>
+<div class="block">Rebuilds eligible options from the latest deck state and clears the previous selection.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#remainingSelectable()" class="member-name-link">remainingSelectable</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Return the number of the remaining selectable card</div>
-</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reset()" class="member-name-link">reset</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Clear selected list</div>
-</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toggle(int)" class="member-name-link">toggle</a><wbr>(int&nbsp;deckIndex)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toggle(java.lang.String)" class="member-name-link">toggle</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Flips the selection state of one upgradable card.</div>
+<div class="block">Toggles one exact upgradable copy without selecting its same-definition siblings.</div>
 </div>
 </div>
 </div>
@@ -201,20 +199,9 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="&lt;init&gt;(java.util.List,com.csse3200.game.cards.CardService,int)">
 <h3>CardUpgradeSelection</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">CardUpgradeSelection</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;deck,
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">CardUpgradeSelection</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../cards/runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;&nbsp;deck,
  <a href="../../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
  int&nbsp;maxSelections)</span></div>
-<div class="block">A constructor for Card upgrade selection</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>deck</code> - receive the list of the player's deck</dd>
-<dd><code>cardService</code> - call card service to receive card deck</dd>
-<dd><code>maxSelections</code> - the max selections for the upgrade</dd>
-<dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - Deck being null</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - CardService being null</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - Max Selections being less than 1</dd>
-</dl>
 </section>
 </li>
 </ul>
@@ -226,98 +213,69 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="isSelected(int)">
+<section class="detail" id="forPlayerDeck(com.csse3200.game.cards.deck.PlayerDeck,com.csse3200.game.cards.CardService,int)">
+<h3>forPlayerDeck</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="CardUpgradeSelection.html" title="class in com.csse3200.game.components.cards">CardUpgradeSelection</a></span>&nbsp;<span class="element-name">forPlayerDeck</span><wbr><span class="parameters">(<a href="../../cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a>&nbsp;playerDeck,
+ <a href="../../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ int&nbsp;maxSelections)</span></div>
+<div class="block">Creates a selection model that can refresh from the current persistent deck after commits.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="refresh()">
+<h3>refresh</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">refresh</span>()</div>
+<div class="block">Rebuilds eligible options from the latest deck state and clears the previous selection.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isSelected(java.lang.String)">
 <h3>isSelected</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isSelected</span><wbr><span class="parameters">(int&nbsp;deckIndex)</span></div>
-<div class="block">Return true if the deck index is selected and false if not</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>deckIndex</code> - The current deck Index of the chosen card</dd>
-<dt>Returns:</dt>
-<dd>boolean, true if the deck index is selected and false if not</dd>
-</dl>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isSelected</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</span></div>
 </section>
 </li>
 <li>
 <section class="detail" id="remainingSelectable()">
 <h3>remainingSelectable</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">remainingSelectable</span>()</div>
-<div class="block">Return the number of the remaining selectable card</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>int Return the number of the remaining selectable card</dd>
-</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="getCardUpgradeOption()">
 <h3>getCardUpgradeOption</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="CardUpgradeSelection.UpgradeOption.html" title="class in com.csse3200.game.components.cards">CardUpgradeSelection.UpgradeOption</a>&gt;</span>&nbsp;<span class="element-name">getCardUpgradeOption</span>()</div>
-<div class="block">Return the list of upgrade options</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>the upgrade options, one per upgradable card in the deck.</dd>
-</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="canConfirm()">
 <h3>canConfirm</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">canConfirm</span>()</div>
-<div class="block">Return true if the selected card is at least one</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>Return true if the selected card is at least one</dd>
-</dl>
 </section>
 </li>
 <li>
-<section class="detail" id="canSelect(int)">
+<section class="detail" id="canSelect(java.lang.String)">
 <h3>canSelect</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">canSelect</span><wbr><span class="parameters">(int&nbsp;deckIndex)</span></div>
-<div class="block">Return true if the card can be selected</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>deckIndex</code> - The current deck Index of the chosen card</dd>
-<dt>Returns:</dt>
-<dd>Return true if the card is in the selectable list and is selected or the remaining
-     selectable is more than 0</dd>
-</dl>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">canSelect</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</span></div>
 </section>
 </li>
 <li>
-<section class="detail" id="toggle(int)">
+<section class="detail" id="toggle(java.lang.String)">
 <h3>toggle</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">toggle</span><wbr><span class="parameters">(int&nbsp;deckIndex)</span></div>
-<div class="block">Flips the selection state of one upgradable card. An already selected card is unselected, which
- is always allowed so the player can revise a choice after reaching the cap. An unselected card
- is selected only while the cap has room; at the cap the call changes nothing.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>deckIndex</code> - The current deck Index of the chosen card</dd>
-<dt>Returns:</dt>
-<dd>true if the card is selected after this call, false if it is not</dd>
-<dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the deck index is not an upgradable option</dd>
-</dl>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">toggle</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</span></div>
+<div class="block">Toggles one exact upgradable copy without selecting its same-definition siblings.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="getSelectedDeckIndices()">
-<h3>getSelectedDeckIndices</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&gt;</span>&nbsp;<span class="element-name">getSelectedDeckIndices</span>()</div>
-<div class="block">Return the list of selected Deck Indices in sorted order</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>Return the list of selected Deck Indices in sorted order</dd>
-</dl>
+<section class="detail" id="getSelectedInstanceIds()">
+<h3>getSelectedInstanceIds</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">getSelectedInstanceIds</span>()</div>
+<div class="block">Returns selected instance IDs in selection order.</div>
 </section>
 </li>
 <li>
 <section class="detail" id="reset()">
 <h3>reset</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">reset</span>()</div>
-<div class="block">Clear selected list</div>
 </section>
 </li>
 </ul>
