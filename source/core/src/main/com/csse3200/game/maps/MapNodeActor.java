@@ -34,6 +34,8 @@ public class MapNodeActor extends Group {
 
     if (node.getRoomType() == RoomType.FINAL) {
       this.size *= 2f;
+    } else if (node.getRoomType() == RoomType.CAMPFIRE) {
+      this.size *= 1.5f;
     }
 
     nodeIcon.setSize(size, size);
@@ -148,6 +150,8 @@ public class MapNodeActor extends Group {
         return "images/map/shop.png";
       case EVENT:
         return "images/map/event.png";
+      case CAMPFIRE:
+        return "images/map/campfire.png";
       case FINAL:
         return "images/map/boss.png";
       case START:

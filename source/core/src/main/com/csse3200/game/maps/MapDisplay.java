@@ -343,6 +343,7 @@ public class MapDisplay extends UIComponent {
       "images/map/boss.png",
       "images/map/event.png",
       "images/map/shop.png",
+      "images/map/campfire.png",
       "images/map/nodeLine.png",
       "images/map/background.png",
       "images/heart.png",

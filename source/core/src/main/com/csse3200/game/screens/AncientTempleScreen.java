@@ -3,13 +3,18 @@ package com.csse3200.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.entities.Entity;
@@ -41,6 +46,8 @@ public class AncientTempleScreen extends ScreenAdapter {
   private final RunState runState;
   private final Renderer renderer;
   private final Skin skin;
+  private Texture backgroundTexture;
+  private Stack sceneRoot;
 
   private final Random random = new Random();
 
@@ -80,27 +87,38 @@ public class AncientTempleScreen extends ScreenAdapter {
     inputEntity.addComponent(new InputDecorator(stage, 10));
     ServiceLocator.getEntityService().register(inputEntity);
 
+    backgroundTexture = new Texture(Gdx.files.internal("images/ancient_temple.png"));
+
+    backgroundTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
+    Image background = new Image(backgroundTexture);
+    background.setScaling(Scaling.stretch);
+
     root = new Table();
-    root.setFillParent(true);
+
+    sceneRoot = new Stack();
+    sceneRoot.setFillParent(true);
+
+    sceneRoot.add(background);
+    sceneRoot.add(root);
 
     showTempleEntrance();
 
-    stage.addActor(root);
+    stage.addActor(sceneRoot);
   }
 
   private void showTempleEntrance() {
     root.clearChildren();
+
+    root.bottom();
+    root.padBottom(45f);
 
     Label.LabelStyle bodyStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
     bodyStyle.fontColor = new Color(0.9f, 0.8f, 0.65f, 1f);
 
     Label title = new Label("Ancient Temple", skin, "title");
 
-    Label statue = new Label("[ ANCIENT STONE STATUE ]", bodyStyle);
-    statue.setFontScale(1.4f);
-
-    Label description =
-        new Label("The silent statue watches over the forgotten temple.", bodyStyle);
+    Label description = new Label("An ancient presence watches in silence.", bodyStyle);
 
     TextButton prayButton = new TextButton("Pray", skin);
 
@@ -108,24 +126,49 @@ public class AncientTempleScreen extends ScreenAdapter {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
-            showBlessings();
+            if (prayButton.isDisabled()) {
+              return;
+            }
+
+            prayButton.setDisabled(true);
+            playPrayerShake();
           }
         });
 
-    root.add(title).padBottom(60f);
+    root.add(title).padBottom(8f);
     root.row();
 
-    root.add(statue).padBottom(40f);
+    root.add(description).padBottom(18f);
     root.row();
 
-    root.add(description).padBottom(50f);
-    root.row();
+    root.add(prayButton).width(280f).height(70f);
+  }
 
-    root.add(prayButton).width(300f).height(80f);
+  private void playPrayerShake() {
+    if (sceneRoot == null) {
+      showBlessings();
+      return;
+    }
+
+    sceneRoot.clearActions();
+
+    sceneRoot.addAction(
+        Actions.sequence(
+            Actions.moveBy(8f, 0f, 0.05f),
+            Actions.moveBy(-16f, 0f, 0.05f),
+            Actions.moveBy(14f, 4f, 0.05f),
+            Actions.moveBy(-12f, -8f, 0.05f),
+            Actions.moveBy(10f, 6f, 0.05f),
+            Actions.moveBy(-4f, -2f, 0.05f),
+            Actions.delay(0.10f),
+            Actions.run(this::showBlessings)));
   }
 
   private void showBlessings() {
     root.clearChildren();
+
+    root.bottom();
+    root.padBottom(35f);
 
     // Decide the offered Eternity effect before the player chooses a blessing.
     // Once selected for this temple visit, it does not change.
@@ -138,8 +181,7 @@ public class AncientTempleScreen extends ScreenAdapter {
     Label.LabelStyle bodyStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
     bodyStyle.fontColor = new Color(0.9f, 0.8f, 0.65f, 1f);
 
-    Label response = new Label("The stone statue stirs. Choose one blessing.", bodyStyle);
-
+    Label response = new Label("The ancient guardian answers. Choose one blessing.", bodyStyle);
     TextButton warButton =
         new TextButton("Blessing of War\n" + "(Choose Any Card from the Divine Archive)", skin);
 
@@ -176,10 +218,10 @@ public class AncientTempleScreen extends ScreenAdapter {
     root.add(response).padBottom(50f);
     root.row();
 
-    root.add(warButton).width(620f).height(100f).padBottom(20f);
+    root.add(warButton).width(580f).height(90f).padBottom(12f);
     root.row();
 
-    root.add(eternityButton).width(620f).height(100f);
+    root.add(eternityButton).width(580f).height(90f);
   }
 
   private void openWarBlessing() {
@@ -259,6 +301,10 @@ public class AncientTempleScreen extends ScreenAdapter {
 
   @Override
   public void dispose() {
+    if (backgroundTexture != null) {
+      backgroundTexture.dispose();
+    }
+
     skin.dispose();
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
