@@ -47,7 +47,7 @@ class SprintTwoCardsIntegrationTest {
   void shouldAdmitNewCardsToDeckAndFindTheirArtwork() {
     BattleDeck deck = new BattleDeck(new PlayerDeck(IDS));
     deck.drawCards(IDS.size());
-    assertEquals(IDS, deck.getHand());
+    assertEquals(IDS, deck.getHand().stream().map(card -> card.cardId()).toList());
     for (String id : IDS) {
       CardConfig card = library.getCard(id).orElseThrow();
       assertTrue(CardValidator.validate(card).isEmpty());
@@ -66,7 +66,8 @@ class SprintTwoCardsIntegrationTest {
       CardPlayService service = new CardPlayService(library, deck, energy, player, null);
 
       var result =
-          service.playCard(com.csse3200.game.cards.play.CardPlayRequest.self("resurrection"));
+          service.playCard(
+              com.csse3200.game.cards.play.CardPlayRequest.self(instanceId(deck, "resurrection")));
       assertTrue(result.success());
       player.applyPlayerEffects(result.playerEffects());
 
@@ -76,7 +77,9 @@ class SprintTwoCardsIntegrationTest {
       assertEquals(0, energy.getCurrentEnergy());
       // No replacement is drawn — the hand is now empty and the card sits in the discard pile.
       assertTrue(result.updatedHand().isEmpty());
-      assertEquals(List.of("resurrection"), result.updatedDiscardPile());
+      assertEquals(
+          List.of("resurrection"),
+          result.updatedDiscardPile().stream().map(card -> card.cardId()).toList());
     }
   }
 
@@ -89,13 +92,15 @@ class SprintTwoCardsIntegrationTest {
     CardPlayService service = new CardPlayService(library, deck, energy);
 
     var result =
-        service.playCard(com.csse3200.game.cards.play.CardPlayRequest.self("resurrection"));
+        service.playCard(
+            com.csse3200.game.cards.play.CardPlayRequest.self(instanceId(deck, "resurrection")));
 
     assertFalse(result.success());
     assertTrue(result.playerEffects().isEmpty());
     assertEquals(20, stats.getHealth());
     assertEquals(3, energy.getCurrentEnergy());
-    assertEquals(List.of("resurrection"), deck.getHand());
+    assertEquals(
+        List.of("resurrection"), deck.getHand().stream().map(card -> card.cardId()).toList());
   }
 
   @Test
@@ -115,7 +120,7 @@ class SprintTwoCardsIntegrationTest {
 
     assertTrue(
         controller.submitCardPlayRequest(
-            com.csse3200.game.cards.play.CardPlayRequest.self("resurrection")));
+            com.csse3200.game.cards.play.CardPlayRequest.self(instanceId(deck, "resurrection"))));
 
     assertEquals(12, stats.getHealth());
     assertEquals(0, energy.getCurrentEnergy());
@@ -227,7 +232,7 @@ class SprintTwoCardsIntegrationTest {
 
     assertTrue(
         controller.submitCardPlayRequest(
-            com.csse3200.game.cards.play.CardPlayRequest.self("astral_ward")));
+            com.csse3200.game.cards.play.CardPlayRequest.self(instanceId(deck, "astral_ward"))));
 
     assertEquals(4, energy.getCurrentEnergy());
   }
@@ -236,6 +241,14 @@ class SprintTwoCardsIntegrationTest {
     BattleDeck deck = new BattleDeck(new PlayerDeck(List.of(id)));
     deck.drawCards(1);
     return deck;
+  }
+
+  private static String instanceId(BattleDeck deck, String cardId) {
+    return deck.getHand().stream()
+        .filter(card -> card.cardId().equals(cardId))
+        .findFirst()
+        .orElseThrow()
+        .instanceId();
   }
 
   private Entity defendingEnemy() {

@@ -2,11 +2,10 @@ package com.csse3200.game.cards.play;
 
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.runtime.CardInstance;
-
 import java.util.List;
 
-///** Immutable battle-deck state returned after a card play attempt. */
-//public record DeckSnapshot(
+/// ** Immutable battle-deck state returned after a card play attempt. */
+// public record DeckSnapshot(
 //    List<String> updatedHand, List<String> updatedDrawPile, List<String> updatedDiscardPile) {
 //  public DeckSnapshot {
 //    if (updatedHand == null || updatedDrawPile == null || updatedDiscardPile == null) {
@@ -32,13 +31,13 @@ import java.util.List;
 //  public static DeckSnapshot empty() {
 //    return new DeckSnapshot(List.of(), List.of(), List.of());
 //  }
-//}
+// }
 
 /** Immutable battle-deck state returned after a card play attempt. */
 public record DeckSnapshot(
-        List<CardInstance> updatedHand,
-        List<CardInstance> updatedDrawPile,
-        List<CardInstance> updatedDiscardPile) {
+    List<CardInstance> updatedHand,
+    List<CardInstance> updatedDrawPile,
+    List<CardInstance> updatedDiscardPile) {
   public DeckSnapshot {
     if (updatedHand == null || updatedDrawPile == null || updatedDiscardPile == null) {
       throw new IllegalArgumentException("Deck snapshot lists cannot be null");
@@ -54,7 +53,7 @@ public record DeckSnapshot(
       throw new IllegalArgumentException("Battle deck cannot be null");
     }
     return new DeckSnapshot(
-            battleDeck.getHand(), battleDeck.getDrawPile(), battleDeck.getDiscardPile());
+        battleDeck.getHand(), battleDeck.getDrawPile(), battleDeck.getDiscardPile());
   }
 
   /**

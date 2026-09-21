@@ -10,6 +10,8 @@ import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.TestCardService;
+import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.components.cards.CardUpgradeSelection.UpgradeOption;
 import com.csse3200.game.extensions.GameExtension;
 import java.util.List;
@@ -19,117 +21,139 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(GameExtension.class)
 class CardUpgradeSelectionTest {
-  private CardUpgradeSelection selection;
   private static final int MAX_SELECTIONS = 2;
+  private CardUpgradeSelection selection;
   private CardService cardService;
-  private List<String> deck;
+  private List<CardInstance> deck;
 
   @BeforeEach
   void setUp() {
     cardService = new CardLibrary(CardConfigLoader.loadCards());
-    deck = List.of("strike", "strike", "strike", "defend", "defend", "defend", "bandage");
+    deck =
+        List.of(
+            instance("strike-1", "strike"),
+            instance("strike-2", "strike"),
+            instance("strike-3", "strike"),
+            instance("defend-1", "defend"),
+            instance("defend-2", "defend"),
+            instance("defend-3", "defend"),
+            instance("bandage-1", "bandage"));
     selection = new CardUpgradeSelection(deck, cardService, MAX_SELECTIONS);
   }
 
   @Test
-  void shouldBuildOptionsForEachUpgradableCardWithItsDeckIndex() {
+  void shouldBuildOptionsForEachUpgradableCardWithItsExactInstance() {
     List<UpgradeOption> options = selection.getCardUpgradeOption();
-    List<Integer> deckIndices = options.stream().map(UpgradeOption::deckIndex).toList();
+    List<String> instanceIds =
+        options.stream().map(option -> option.instance().instanceId()).toList();
 
     assertAll(
-        () -> assertEquals(3, options.size()), () -> assertEquals(List.of(0, 1, 2), deckIndices));
+        () -> assertEquals(3, options.size()),
+        () -> assertEquals(List.of("strike-1", "strike-2", "strike-3"), instanceIds));
   }
 
   @Test
   void shouldReturnNoOptionsWhenNoCardDefinesAnUpgrade() {
     CardService withoutUpgrades = TestCardService.withCards("strike", "defend", "bandage");
-
     CardUpgradeSelection noUpgrades =
         new CardUpgradeSelection(deck, withoutUpgrades, MAX_SELECTIONS);
-
     assertTrue(noUpgrades.getCardUpgradeOption().isEmpty());
   }
 
   @Test
-  void shouldSkipUnknownCardIdsWithoutFailing() {
-    CardUpgradeSelection withUnknownCard =
-        new CardUpgradeSelection(List.of("banana", "strike"), cardService, MAX_SELECTIONS);
+  void shouldSkipUnknownAndAlreadyUpgradedCards() {
+    CardUpgradeSelection filtered =
+        new CardUpgradeSelection(
+            List.of(
+                instance("banana-1", "banana"),
+                instance("strike-base", "strike"),
+                new CardInstance("strike-plus", "strike", CardInstance.UPGRADED_LEVEL)),
+            cardService,
+            MAX_SELECTIONS);
 
-    List<Integer> deckIndices =
-        withUnknownCard.getCardUpgradeOption().stream().map(UpgradeOption::deckIndex).toList();
-
-    assertEquals(List.of(1), deckIndices);
+    assertEquals(
+        List.of("strike-base"),
+        filtered.getCardUpgradeOption().stream()
+            .map(option -> option.instance().instanceId())
+            .toList());
   }
 
   @Test
-  void shouldReturnSelectedIndicesInDescendingOrder() {
-    selection.toggle(0);
-    selection.toggle(2);
-
-    List<Integer> result = selection.getSelectedDeckIndices();
-
-    assertEquals(List.of(2, 0), result);
+  void shouldReturnSelectedInstanceIdsInSelectionOrder() {
+    selection.toggle(id(0));
+    selection.toggle(id(2));
+    assertEquals(List.of(id(0), id(2)), selection.getSelectedInstanceIds());
   }
 
   @Test
-  void shouldRejectDeckIndexThatIsNotAnUpgradableOption() {
-    assertThrows(IllegalArgumentException.class, () -> selection.toggle(3));
+  void shouldRejectInstanceThatIsNotAnUpgradableOption() {
+    assertThrows(IllegalArgumentException.class, () -> selection.toggle(id(3)));
   }
 
   @Test
   void shouldRestoreStateWhenTogglingTheSameCardTwice() {
-    selection.toggle(1);
-
-    boolean selectedAfterSecondToggle = selection.toggle(1);
+    selection.toggle(id(1));
+    boolean selectedAfterSecondToggle = selection.toggle(id(1));
 
     assertAll(
         () -> assertFalse(selectedAfterSecondToggle),
-        () -> assertFalse(selection.isSelected(1)),
+        () -> assertFalse(selection.isSelected(id(1))),
         () -> assertEquals(MAX_SELECTIONS, selection.remainingSelectable()));
   }
 
   @Test
   void shouldIgnoreNewSelectionsOnceCapIsReached() {
-    selection.toggle(0);
-    selection.toggle(1);
-
-    boolean selectedAtCap = selection.toggle(2);
+    selection.toggle(id(0));
+    selection.toggle(id(1));
+    boolean selectedAtCap = selection.toggle(id(2));
 
     assertAll(
         () -> assertFalse(selectedAtCap),
-        () -> assertFalse(selection.isSelected(2)),
+        () -> assertFalse(selection.isSelected(id(2))),
         () -> assertEquals(0, selection.remainingSelectable()),
-        () -> assertEquals(List.of(1, 0), selection.getSelectedDeckIndices()));
+        () -> assertEquals(List.of(id(0), id(1)), selection.getSelectedInstanceIds()));
   }
 
   @Test
   void shouldKeepAlreadySelectedCardsToggleableAtCap() {
-    selection.toggle(0);
-    selection.toggle(1);
+    selection.toggle(id(0));
+    selection.toggle(id(1));
 
     assertAll(
-        () -> assertTrue(selection.canSelect(0)),
-        () -> assertFalse(selection.canSelect(2)),
-        () -> assertFalse(selection.toggle(0)),
+        () -> assertTrue(selection.canSelect(id(0))),
+        () -> assertFalse(selection.canSelect(id(2))),
+        () -> assertFalse(selection.toggle(id(0))),
         () -> assertEquals(1, selection.remainingSelectable()));
   }
 
   @Test
   void shouldOnlyAllowConfirmWhenAtLeastOneCardIsSelected() {
-    boolean confirmableWhenEmpty = selection.canConfirm();
-
-    selection.toggle(0);
-
-    assertAll(() -> assertFalse(confirmableWhenEmpty), () -> assertTrue(selection.canConfirm()));
+    assertFalse(selection.canConfirm());
+    selection.toggle(id(0));
+    assertTrue(selection.canConfirm());
   }
 
   @Test
   void shouldReturnAnImmutableSelectionList() {
-    selection.toggle(0);
+    selection.toggle(id(0));
+    List<String> result = selection.getSelectedInstanceIds();
+    assertThrows(UnsupportedOperationException.class, () -> result.add("other"));
+  }
 
-    List<Integer> result = selection.getSelectedDeckIndices();
+  @Test
+  void shouldCommitUpgradeToOnlyTheSelectedInstance() {
+    CardInstance first = instance("strike-base", "strike");
+    CardInstance second = instance("strike-selected", "strike");
+    PlayerDeck playerDeck = PlayerDeck.fromInstances(cardService, List.of(first, second));
 
-    assertThrows(UnsupportedOperationException.class, () -> result.add(9));
+    new PlayerDeckCardUpgradeCommitter(playerDeck).commitUpgrades(List.of(second.instanceId()));
+
+    assertAll(
+        () -> assertEquals(CardInstance.BASE_LEVEL, playerDeck.getCards().get(0).upgradeLevel()),
+        () ->
+            assertEquals(CardInstance.UPGRADED_LEVEL, playerDeck.getCards().get(1).upgradeLevel()),
+        () -> assertEquals(first.instanceId(), playerDeck.getCards().get(0).instanceId()),
+        () -> assertEquals(second.instanceId(), playerDeck.getCards().get(1).instanceId()));
   }
 
   @Test
@@ -147,5 +171,13 @@ class CardUpgradeSelectionTest {
             assertThrows(
                 IllegalArgumentException.class,
                 () -> new CardUpgradeSelection(deck, cardService, 0)));
+  }
+
+  private String id(int index) {
+    return deck.get(index).instanceId();
+  }
+
+  private static CardInstance instance(String instanceId, String cardId) {
+    return new CardInstance(instanceId, cardId, CardInstance.BASE_LEVEL);
   }
 }
