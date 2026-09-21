@@ -71,7 +71,7 @@ class BattleDeckTest {
   void shouldDrawOneCardIntoHand() {
     BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike", "defend")));
 
-    CardInstance drawnCard = battleDeck.drawOneInstance();
+    CardInstance drawnCard = battleDeck.drawOne();
 
     assertEquals("strike", drawnCard.cardId());
     assertIterableEquals(
@@ -424,10 +424,10 @@ class BattleDeckTest {
   @Test
   void shouldDrawFromReshuffledDiscardPile() {
     BattleDeck battleDeck = new BattleDeck(new PlayerDeck(CARDS, List.of("strike")));
-    assertEquals("strike", battleDeck.drawOneInstance().cardId());
+    assertEquals("strike", battleDeck.drawOne().cardId());
     assertTrue(battleDeck.discardCard(battleDeck.getHand().getFirst().instanceId()));
 
-    CardInstance redrawnCard = battleDeck.drawOneInstance();
+    CardInstance redrawnCard = battleDeck.drawOne();
 
     assertEquals("strike", redrawnCard.cardId());
     assertIterableEquals(

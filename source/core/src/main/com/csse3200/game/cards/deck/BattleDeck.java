@@ -47,19 +47,9 @@ public class BattleDeck {
   /**
    * Draws one card from the draw pile into the hand.
    *
-   * @return drawn card ID, or null if the draw pile is empty
-   */
-  public String drawOne() {
-    CardInstance instance = drawOneInstance();
-    return instance == null ? null : instance.cardId();
-  }
-
-  /**
-   * Draws one card from the draw pile into the hand.
-   *
    * @return drawn card instance, or null if the draw pile is empty
    */
-  public CardInstance drawOneInstance() {
+  public CardInstance drawOne() {
     if (drawPile.isEmpty()) {
       reshuffleDiscardIntoDrawPile();
     }
@@ -108,7 +98,7 @@ public class BattleDeck {
 
     List<CardInstance> drawnCards = new ArrayList<>();
     for (int i = 0; i < count; i++) {
-      CardInstance card = drawOneInstance();
+      CardInstance card = drawOne();
       if (card == null) {
         break;
       }
