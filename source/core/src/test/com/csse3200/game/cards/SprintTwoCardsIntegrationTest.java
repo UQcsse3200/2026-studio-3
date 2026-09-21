@@ -13,10 +13,12 @@ import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.effects.CardEffectResolutionContext;
 import com.csse3200.game.cards.effects.CardEffectResolver;
 import com.csse3200.game.cards.effects.PlayerEffectState;
+import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.cards.play.CardPlayTarget;
 import com.csse3200.game.cards.play.integration.Team1EnemyStateAdapter;
 import com.csse3200.game.cards.play.integration.Team7PlayerStateAdapter;
+import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.combat.BattleController;
@@ -47,7 +49,7 @@ class SprintTwoCardsIntegrationTest {
   void shouldAdmitNewCardsToDeckAndFindTheirArtwork() {
     BattleDeck deck = new BattleDeck(new PlayerDeck(IDS));
     deck.drawCards(IDS.size());
-    assertEquals(IDS, deck.getHand().stream().map(card -> card.cardId()).toList());
+    assertEquals(IDS, deck.getHand().stream().map(CardInstance::cardId).toList());
     for (String id : IDS) {
       CardConfig card = library.getCard(id).orElseThrow();
       assertTrue(CardValidator.validate(card).isEmpty());
@@ -79,7 +81,7 @@ class SprintTwoCardsIntegrationTest {
       assertTrue(result.updatedHand().isEmpty());
       assertEquals(
           List.of("resurrection"),
-          result.updatedDiscardPile().stream().map(card -> card.cardId()).toList());
+          result.updatedDiscardPile().stream().map(CardInstance::cardId).toList());
     }
   }
 
@@ -100,7 +102,7 @@ class SprintTwoCardsIntegrationTest {
     assertEquals(20, stats.getHealth());
     assertEquals(3, energy.getCurrentEnergy());
     assertEquals(
-        List.of("resurrection"), deck.getHand().stream().map(card -> card.cardId()).toList());
+        List.of("resurrection"), deck.getHand().stream().map(CardInstance::cardId).toList());
   }
 
   @Test
@@ -207,7 +209,7 @@ class SprintTwoCardsIntegrationTest {
     var result = new CardEffectResolver(library).resolve("rift_lance", new PlayerEffectState());
     assertEquals(
         List.of(EffectType.DAMAGE, EffectType.VULNERABLE),
-        result.enemyEffects().stream().map(effect -> effect.type()).toList());
+        result.enemyEffects().stream().map(ResolvedCardEffect::type).toList());
 
     enemies.applyEnemyEffects(
         new CardPlayTarget(TargetType.SINGLE_ENEMY, "first"), result.enemyEffects());

@@ -87,7 +87,9 @@ class CardUpgradeSelectionTest {
 
   @Test
   void shouldRejectInstanceThatIsNotAnUpgradableOption() {
-    assertThrows(IllegalArgumentException.class, () -> selection.toggle(id(3)));
+    String nonUpgradableInstanceId = id(3);
+
+    assertThrows(IllegalArgumentException.class, () -> selection.toggle(nonUpgradableInstanceId));
   }
 
   @Test

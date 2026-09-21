@@ -8,9 +8,12 @@ import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.extensions.GameExtension;
 import java.util.List;
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -46,7 +49,7 @@ class CardPlayServiceIntegrationTest {
         service.playCard(CardPlayRequest.self(instanceId(battleDeck, "bandage")));
 
     assertTrue(
-        List.of(strike, defend, poisonDagger, expose, innerFocus, bandage).stream()
+        Stream.of(strike, defend, poisonDagger, expose, innerFocus, bandage)
             .allMatch(CardPlayResult::success));
 
     assertEquals(List.of(EffectType.DAMAGE), types(strike.enemyEffects()));
@@ -59,7 +62,7 @@ class CardPlayServiceIntegrationTest {
     assertEquals(3, energy.getCurrentEnergy());
     assertTrue(bandage.updatedHand().isEmpty());
     assertEquals(
-        CARD_IDS, bandage.updatedDiscardPile().stream().map(card -> card.cardId()).toList());
+        CARD_IDS, bandage.updatedDiscardPile().stream().map(CardInstance::cardId).toList());
   }
 
   private static String instanceId(BattleDeck deck, String cardId) {

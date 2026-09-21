@@ -8,6 +8,7 @@ import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.cards.play.CardPlayResult;
 import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.cards.runtime.CardInstance;
+import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.cards.CardEffectHandler;
@@ -593,7 +594,7 @@ public class BattleController {
     }
 
     String cardName =
-        cardPlayService.resolveInHand(request.instanceId()).map(card -> card.name()).orElse("card");
+        cardPlayService.resolveInHand(request.instanceId()).map(ResolvedCard::name).orElse("card");
 
     if (effectHandler != null
         && request.target().type() != TargetType.SELF
