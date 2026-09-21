@@ -5,6 +5,7 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.csse3200.game.GdxGame;
+import com.csse3200.game.components.maingame.DebugShortcutInputComponent;
 import com.csse3200.game.components.mainmenu.MainMenuActions;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.entities.Entity;
@@ -106,7 +107,8 @@ public class MainMenuScreen extends ScreenAdapter {
     Entity ui = new Entity();
     ui.addComponent(new InputDecorator(stage, 10))
         .addComponent(new MainMenuActions(game))
-        .addComponent(new MainMenuDisplay());
+        .addComponent(new MainMenuDisplay())
+        .addComponent(new DebugShortcutInputComponent(game));
     ServiceLocator.getEntityService().register(ui);
   }
 }
