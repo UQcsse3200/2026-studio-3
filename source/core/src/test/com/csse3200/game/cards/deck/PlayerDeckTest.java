@@ -126,6 +126,18 @@ class PlayerDeckTest {
   }
 
   @Test
+  void shouldRemoveTheExactCardInstanceSelectedFromDuplicateCards() {
+    PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike", "strike", "defend"));
+    String secondStrikeInstanceId = deck.getCards().get(1).instanceId();
+
+    assertTrue(deck.removeCardInstance(secondStrikeInstanceId));
+
+    assertEquals(2, deck.size());
+    assertEquals(1, deck.countByCardId("strike"));
+    assertFalse(deck.getCards().stream().anyMatch(card -> card.instanceId().equals(secondStrikeInstanceId)));
+  }
+
+  @Test
   void shouldRejectInvalidCardIds() {
     PlayerDeck deck = new PlayerDeck(CARDS);
 

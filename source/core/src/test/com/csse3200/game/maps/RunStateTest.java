@@ -221,4 +221,14 @@ public class RunStateTest {
     assertNull(runState.getMapGraph());
     assertNull(runState.getActiveNodeId());
   }
+
+  @Test
+  void endRunRestoresTheCardFusionAllowanceForTheNextRun() {
+    RunState runState = new RunState();
+    runState.markCardFusionUsed();
+
+    runState.endRun();
+
+    assertFalse(runState.hasUsedCardFusion());
+  }
 }
