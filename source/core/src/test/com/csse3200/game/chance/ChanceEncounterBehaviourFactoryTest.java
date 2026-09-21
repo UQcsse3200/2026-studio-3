@@ -34,6 +34,27 @@ class ChanceEncounterBehaviourFactoryTest {
   }
 
   @Test
+  void shouldCreateCardFusionBehaviourForCardFusionDefinition() {
+    ChanceEncounterBehaviour behaviour =
+        ChanceEncounterBehaviourFactory.create(
+            new ChanceEncounter(
+                CardFusionEncounterBehaviour.ENCOUNTER_ID,
+                "A forge offers to fuse cards.",
+                List.of(
+                    new ChanceChoice(
+                        CardFusionEncounterBehaviour.FUSE_CHOICE_ID,
+                        "Fuse.",
+                        new ChanceOutcome(0, 0)))),
+            new Random(266L),
+            TestCardService.withCards());
+
+    assertInstanceOf(CardFusionEncounterBehaviour.class, behaviour);
+    assertEquals(
+        ChanceBehaviourResult.Type.DELEGATED,
+        behaviour.resolveChoice(CardFusionEncounterBehaviour.FUSE_CHOICE_ID).getType());
+  }
+
+  @Test
   void shouldPreserveFixedBehaviourForEveryRetainedOrdinaryEncounter() {
     for (String encounterId :
         List.of("mysterious-shrine", "wandering-healer", "flooded-crossing", "abandoned-mine")) {

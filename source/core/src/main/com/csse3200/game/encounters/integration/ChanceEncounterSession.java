@@ -144,6 +144,27 @@ public final class ChanceEncounterSession {
   }
 
   /**
+   * Completes an encounter that handed control to a delegated flow.
+   *
+   * <p>A delegated flow owns its own result. For example, Card Fusion may either fuse cards or
+   * leave without fusing, but either choice consumes the Event node and returns the player to the
+   * map.
+   *
+   * @return true only when a pending delegated flow is completed for the first time
+   */
+  public boolean completeDelegated() {
+    if (completed || !awaitingDelegatedCompletion) {
+      return false;
+    }
+    awaitingDelegatedCompletion = false;
+    completed = true;
+    if (completionCallback != null) {
+      completionCallback.onEncounterComplete(nodeId, true);
+    }
+    return true;
+  }
+
+  /**
    * Leaves the encounter without advancing map progression.
    *
    * @return true only for the first cancellation call
