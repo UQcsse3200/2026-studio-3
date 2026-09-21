@@ -98,7 +98,9 @@ class BattleLoopTest {
                 TestCardService.withCards("strike", "bandage"), List.of("strike", "bandage")));
     deck.drawCards(1);
 
-    CardLibrary library = new CardLibrary(List.of(strikeCard()));
+    CardConfig strike = strikeCard();
+    strike.name = "Heavy Strike";
+    CardLibrary library = new CardLibrary(List.of(strike));
     CardEffectHandler effectHandler = new CardEffectHandler();
     CardPlayService cardPlayService =
         new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
@@ -110,9 +112,9 @@ class BattleLoopTest {
     controller.addBattleLogListener(log::add);
 
     controller.start();
+    String strikeInstanceId = instanceIdInHand(deck, "strike");
     controller.submitCardPlayRequest(
-        CardPlayRequest.singleEnemy(
-            instanceIdInHand(deck, "strike"), Integer.toString(enemy.getId())));
+        CardPlayRequest.singleEnemy(strikeInstanceId, Integer.toString(enemy.getId())));
 
     assertEquals(BattlePhase.VICTORY, controller.getCurrentPhase());
     assertEquals(Boolean.TRUE, outcome.get());
@@ -120,6 +122,8 @@ class BattleLoopTest {
     assertFalse(containsCardId(deck.getHand(), "strike"));
     assertTrue(containsCardId(deck.getDiscardPile(), "strike"));
     assertTrue(deck.getHand().isEmpty()); // no replacement is drawn
+    assertTrue(log.stream().anyMatch(line -> line.startsWith("You played Heavy Strike")));
+    assertFalse(log.stream().anyMatch(line -> line.contains(strikeInstanceId)));
     assertTrue(log.stream().anyMatch(line -> line.contains("Victory")));
   }
 

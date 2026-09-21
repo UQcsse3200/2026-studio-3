@@ -479,17 +479,12 @@ public class BattleController {
    * Prints a summary string for a game event that occurs. For use in printing actions within a
    * battle sequence.
    *
-   * @param request The card that is being played.
+   * @param cardName player-facing name of the card being played
    * @param result The result of the card being played.
    * @return A string summarising the card being played and the resulting actions.
    */
-  private String summarise(CardPlayRequest request, CardPlayResult result) {
-    StringBuilder summary =
-        new StringBuilder("You played ")
-            .append(result.cardId())
-            .append(" [")
-            .append(request.instanceId())
-            .append("]");
+  private String summarise(String cardName, CardPlayResult result) {
+    StringBuilder summary = new StringBuilder("You played ").append(cardName);
     for (ResolvedCardEffect effect : result.enemyEffects()) {
       summary
           .append(" - ")
@@ -597,11 +592,14 @@ public class BattleController {
       return;
     }
 
+    String cardName =
+        cardPlayService.resolveInHand(request.instanceId()).map(card -> card.name()).orElse("card");
+
     if (effectHandler != null
         && request.target().type() != TargetType.SELF
         && effectHandler.getLivingEnemyTargets(request, enemies).isEmpty()) {
       lastCardPlaySucceeded = false;
-      narrate("Couldn't play " + request.instanceId() + ": target is no longer available.");
+      narrate("Couldn't play " + cardName + ": target is no longer available.");
       finishPlayerCardAction();
       return;
     }
@@ -611,7 +609,7 @@ public class BattleController {
     if (result == null) {
       // Card system not wired in (e.g. unit tests without a resolution service).
       lastCardPlaySucceeded = true;
-      narrate("You played " + request.instanceId() + ".");
+      narrate("You played " + cardName + ".");
       finishPlayerCardAction();
       return;
     }
@@ -619,14 +617,14 @@ public class BattleController {
     if (!result.success()) {
       // No effects produced; the card stays in hand and the player keeps their turn.
       lastCardPlaySucceeded = false;
-      narrate("Couldn't play " + request.instanceId() + ": " + result.failureReason());
+      narrate("Couldn't play " + cardName + ": " + result.failureReason());
       finishPlayerCardAction();
       return;
     }
 
     lastCardPlaySucceeded = true;
     dispatchCardEffects(request, result);
-    narrate(summarise(request, result));
+    narrate(summarise(cardName, result));
     finishPlayerCardAction();
   }
 
