@@ -1,7 +1,11 @@
 package com.csse3200.game.areas;
 
 import com.csse3200.game.areas.terrain.TerrainFactory;
+import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.chance.ChanceEncounter;
+import com.csse3200.game.chance.ChanceEncounterBehaviour;
+import com.csse3200.game.chance.ChanceEncounterBehaviourFactory;
 import com.csse3200.game.chance.ChanceEncounterFactory;
 import com.csse3200.game.chance.ChanceEncounterSelector;
 import com.csse3200.game.components.CombatStatsComponent;
@@ -18,15 +22,14 @@ import com.csse3200.game.encounters.integration.InventoryDeckAdapter;
 import com.csse3200.game.encounters.integration.PlayerDeckAdapter;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.factories.PlayerFactory;
-import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.maps.EncounterCallback;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
-import com.csse3200.game.shop.ShopConfig;
 import com.csse3200.game.shop.ShopEncounter;
+import com.csse3200.game.shop.ShopInventoryGenerator;
 import com.csse3200.game.shop.ShopService;
 import java.util.Objects;
 import java.util.Random;
@@ -41,7 +44,6 @@ import org.slf4j.LoggerFactory;
  */
 public class EncounterGameArea extends GameArea {
   private static final Logger logger = LoggerFactory.getLogger(EncounterGameArea.class);
-  private static final String SHOP_CONFIG = "configs/shopItems.json";
   private static final String[] encounterTextures = {
     "images/star_player.png",
     ShopDisplay.BACKGROUND_TEXTURE,
@@ -153,7 +155,7 @@ public class EncounterGameArea extends GameArea {
   }
 
   private void displayShop() {
-    ShopService shopService = new ShopService(FileLoader.readClass(ShopConfig.class, SHOP_CONFIG));
+    ShopService shopService = createMapShop(ServiceLocator.getCardLibrary());
     ShopEncounter shopEncounter = encounterFlow.startShop(nodeId, shopService);
 
     Entity shopUi = new Entity();
@@ -161,14 +163,23 @@ public class EncounterGameArea extends GameArea {
     spawnEntity(shopUi);
   }
 
+  /** Builds the three generated offers shown when the player enters a map Shop node. */
+  static ShopService createMapShop(CardService cardService) {
+    return new ShopInventoryGenerator(cardService).createShop();
+  }
+
   private void displayChanceEncounter() {
+    CardService cardService = ServiceLocator.getCardLibrary();
     ChanceEncounterSelector selector =
         new ChanceEncounterSelector(
             ChanceEncounterFactory.createInitialEncounters(cardCatalog), new Random());
+    ChanceEncounter encounter = selector.select();
+    ChanceEncounterBehaviour behaviour =
+        ChanceEncounterBehaviourFactory.create(encounter, new Random(), cardService);
 
     Entity chanceUi = new Entity();
     chanceUi.addComponent(
-        new ChanceEncounterDisplay(encounterFlow.startChance(nodeId, selector.select())));
+        new ChanceEncounterDisplay(encounterFlow.startChance(nodeId, encounter, behaviour)));
     spawnEntity(chanceUi);
   }
 

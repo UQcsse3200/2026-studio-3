@@ -9,18 +9,16 @@ import java.util.Objects;
 /** Controllable persistent-deck mock used by Shop integration tests. */
 public final class MockDeckGateway implements DeckGateway {
   private final List<String> cardIds = new ArrayList<>();
+  private final List<PendingAddition> pendingAdditions = new ArrayList<>();
   private boolean failAdd;
   private boolean failRemove;
-  private String pendingCardId;
-  private int pendingCardIndex = -1;
 
   @Override
   public boolean addCard(String cardId) {
     if (failAdd) {
       return false;
     }
-    pendingCardIndex = cardIds.size();
-    pendingCardId = cardId;
+    pendingAdditions.add(new PendingAddition(cardId, cardIds.size()));
     cardIds.add(cardId);
     return true;
   }
@@ -32,22 +30,29 @@ public final class MockDeckGateway implements DeckGateway {
 
   @Override
   public void commitCardAddition(String cardId) {
-    if (Objects.equals(pendingCardId, cardId)) {
-      clearPendingAddition();
+    int pendingIndex = findLatestPendingAddition(cardId);
+    if (pendingIndex >= 0) {
+      pendingAdditions.remove(pendingIndex);
     }
   }
 
   @Override
   public boolean rollbackCardAddition(String cardId) {
+    int pendingIndex = findLatestPendingAddition(cardId);
     if (failRemove
-        || !Objects.equals(pendingCardId, cardId)
-        || pendingCardIndex < 0
-        || pendingCardIndex >= cardIds.size()
-        || !cardId.equals(cardIds.get(pendingCardIndex))) {
+        || pendingIndex < 0
+        || pendingAdditions.get(pendingIndex).cardIndex >= cardIds.size()
+        || !cardId.equals(cardIds.get(pendingAdditions.get(pendingIndex).cardIndex))) {
       return false;
     }
-    cardIds.remove(pendingCardIndex);
-    clearPendingAddition();
+    int cardIndex = pendingAdditions.get(pendingIndex).cardIndex;
+    cardIds.remove(cardIndex);
+    pendingAdditions.remove(pendingIndex);
+    for (PendingAddition remaining : pendingAdditions) {
+      if (remaining.cardIndex > cardIndex) {
+        remaining.cardIndex--;
+      }
+    }
     return true;
   }
 
@@ -71,8 +76,22 @@ public final class MockDeckGateway implements DeckGateway {
     cardIds.add(cardId);
   }
 
-  private void clearPendingAddition() {
-    pendingCardId = null;
-    pendingCardIndex = -1;
+  private int findLatestPendingAddition(String cardId) {
+    for (int index = pendingAdditions.size() - 1; index >= 0; index--) {
+      if (Objects.equals(pendingAdditions.get(index).cardId, cardId)) {
+        return index;
+      }
+    }
+    return -1;
+  }
+
+  private static final class PendingAddition {
+    private final String cardId;
+    private int cardIndex;
+
+    private PendingAddition(String cardId, int cardIndex) {
+      this.cardId = cardId;
+      this.cardIndex = cardIndex;
+    }
   }
 }

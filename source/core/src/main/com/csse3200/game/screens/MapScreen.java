@@ -84,7 +84,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
   /** Puts the map display on a UI entity so it is rendered and receives input. */
   private void createUi(GdxGame game, RunState runState) {
-    MapDisplay mapDisplay = new MapDisplay(runState.getMapGraph());
+    MapDisplay mapDisplay = new MapDisplay(runState.getMapGraph(), runState);
 
     mapDisplay
         .getMapSelectionController()
