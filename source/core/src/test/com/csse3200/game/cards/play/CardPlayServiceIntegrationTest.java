@@ -13,7 +13,6 @@ import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.extensions.GameExtension;
 import java.util.List;
 import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
