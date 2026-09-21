@@ -2,6 +2,7 @@ package com.csse3200.game.components.shop;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -64,6 +65,7 @@ public class ShopDisplay extends UIComponent {
   private static final float CARD_WIDTH = 282f;
   private static final float CARD_PADDING = 10f;
   private static final float CARD_CONTENT_WIDTH = CARD_WIDTH - (CARD_PADDING * 2f);
+  private static final float CARD_NAME_WIDTH = 174f;
 
   private static final Color BACKDROP_COLOUR = new Color(0.025f, 0.012f, 0.018f, 0.34f);
   private static final Color CARD_COLOUR = new Color(0.86f, 0.78f, 0.72f, 1f);
@@ -413,19 +415,21 @@ public class ShopDisplay extends UIComponent {
 
     Actor artwork = createArtwork(item);
 
-    Label nameLabel = new Label(resolveCardName(item), createLabelStyle("default", BODY_COLOUR));
+    String cardName = resolveCardName(item);
+    Label nameLabel = new Label(cardName, createLabelStyle("default", BODY_COLOUR));
     Label energyLabel = new Label(resolveEnergyText(item), createLabelStyle("small", GOLD_COLOUR));
-    Label descriptionLabel =
-        new Label(resolveCardDescription(item), createLabelStyle("small", MUTED_COLOUR));
-    nameLabel.setFontScale(0.95f);
+    String cardDescription = resolveCardDescription(item);
+    Label descriptionLabel = new Label(cardDescription, createLabelStyle("small", MUTED_COLOUR));
+    float nameWidth = new GlyphLayout(nameLabel.getStyle().font, cardName).width;
+    nameLabel.setFontScale(Math.min(0.95f, CARD_NAME_WIDTH / Math.max(nameWidth, 1f)));
     energyLabel.setFontScale(0.76f);
-    descriptionLabel.setFontScale(0.78f);
+    descriptionLabel.setFontScale(cardDescription.length() > 65 ? 0.68f : 0.78f);
     descriptionLabel.setWrap(true);
-    descriptionLabel.setAlignment(Align.left, Align.top);
+    descriptionLabel.setAlignment(Align.topLeft, Align.left);
 
     Table cardIdentity = new Table();
-    cardIdentity.add(nameLabel).left().expandX();
-    cardIdentity.add(energyLabel).right();
+    cardIdentity.add(nameLabel).width(CARD_NAME_WIDTH).left();
+    cardIdentity.add(energyLabel).width(CARD_CONTENT_WIDTH - CARD_NAME_WIDTH).right();
 
     Label priceLabel =
         new Label(String.format("%d GOLD", item.price), createLabelStyle("default", GOLD_COLOUR));
@@ -455,7 +459,7 @@ public class ShopDisplay extends UIComponent {
     card.row();
     card.add(cardIdentity).width(CARD_CONTENT_WIDTH).height(25f).fillX().padTop(6f);
     card.row();
-    card.add(descriptionLabel).width(CARD_CONTENT_WIDTH).height(22f).left().top();
+    card.add(descriptionLabel).width(CARD_CONTENT_WIDTH).height(36f).left().top();
     card.row();
     card.add(detailsRow).width(CARD_CONTENT_WIDTH).fillX().padTop(6f);
     card.row();
