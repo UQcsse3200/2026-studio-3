@@ -336,6 +336,7 @@ class BattleControllerTest {
     CardLibrary cardService = new CardLibrary(List.of(purify, strike));
     BattleDeck deck = new BattleDeck(new PlayerDeck(cardService, List.of("purify", "strike")));
     deck.drawCards(1);
+    String purifyInstanceId = deck.getHand().get(0).instanceId();
     EnergyComponent energy = cleansePlayer.getComponent(EnergyComponent.class);
     CardPlayService cardPlayService = new CardPlayService(cardService, deck, energy);
     CardEffectHandler effectHandler = new CardEffectHandler();
@@ -343,7 +344,7 @@ class BattleControllerTest {
         new BattleController(cleansePlayer, enemies, effectHandler, cardPlayService);
 
     battle.start();
-    boolean accepted = battle.submitCardPlayRequest(CardPlayRequest.self("purify"));
+    boolean accepted = battle.submitCardPlayRequest(CardPlayRequest.self(purifyInstanceId));
 
     assertTrue(accepted);
     assertFalse(stats.hasStatusEffect("POISON"));
@@ -614,7 +615,7 @@ class BattleControllerTest {
     BattleController battle = new BattleController(player, List.of(enemy));
 
     List<Boolean> outcomes = new ArrayList<>();
-    battle.addBattleEndListener(won -> outcomes.add(won));
+    battle.addBattleEndListener(outcomes::add);
 
     battle.start();
     battle.endPlayerTurn();

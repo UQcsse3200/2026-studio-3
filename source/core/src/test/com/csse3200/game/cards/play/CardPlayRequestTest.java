@@ -7,23 +7,23 @@ import org.junit.jupiter.api.Test;
 class CardPlayRequestTest {
 
   @Test
-  void shouldCreateRequestWithValidCardIdAndTarget() {
+  void shouldCreateRequestWithValidInstanceIdAndTarget() {
     CardPlayTarget target = CardPlayTarget.self();
 
     CardPlayRequest request = new CardPlayRequest("strike", target);
 
-    assertEquals("strike", request.cardId());
+    assertEquals("strike", request.instanceId());
     assertEquals(target, request.target());
   }
 
   @Test
-  void shouldRejectNullCardId() {
+  void shouldRejectNullInstanceId() {
     assertThrows(
         IllegalArgumentException.class, () -> new CardPlayRequest(null, CardPlayTarget.self()));
   }
 
   @Test
-  void shouldRejectBlankCardId() {
+  void shouldRejectBlankInstanceId() {
     assertThrows(
         IllegalArgumentException.class, () -> new CardPlayRequest("", CardPlayTarget.self()));
 
@@ -32,21 +32,21 @@ class CardPlayRequestTest {
   }
 
   @Test
-  void shouldRejectCardIdWithLeadingWhitespace() {
+  void shouldRejectInstanceIdWithLeadingWhitespace() {
     assertThrows(
         IllegalArgumentException.class,
         () -> new CardPlayRequest(" strike", CardPlayTarget.self()));
   }
 
   @Test
-  void shouldRejectCardIdWithTrailingWhitespace() {
+  void shouldRejectInstanceIdWithTrailingWhitespace() {
     assertThrows(
         IllegalArgumentException.class,
         () -> new CardPlayRequest("strike ", CardPlayTarget.self()));
   }
 
   @Test
-  void shouldRejectCardIdWithLeadingAndTrailingWhitespace() {
+  void shouldRejectInstanceIdWithLeadingAndTrailingWhitespace() {
     assertThrows(
         IllegalArgumentException.class,
         () -> new CardPlayRequest(" strike ", CardPlayTarget.self()));
@@ -61,7 +61,7 @@ class CardPlayRequestTest {
   void shouldCreateSelfTargetingRequest() {
     CardPlayRequest request = CardPlayRequest.self("defend");
 
-    assertEquals("defend", request.cardId());
+    assertEquals("defend", request.instanceId());
     assertEquals(CardPlayTarget.self(), request.target());
   }
 
@@ -69,7 +69,7 @@ class CardPlayRequestTest {
   void shouldCreateSingleEnemyTargetingRequest() {
     CardPlayRequest request = CardPlayRequest.singleEnemy("strike", "enemy-1");
 
-    assertEquals("strike", request.cardId());
+    assertEquals("strike", request.instanceId());
     assertEquals(CardPlayTarget.singleEnemy("enemy-1"), request.target());
   }
 
@@ -82,15 +82,15 @@ class CardPlayRequestTest {
   void shouldCreateAllEnemiesTargetingRequest() {
     CardPlayRequest request = CardPlayRequest.allEnemies("whirlwind");
 
-    assertEquals("whirlwind", request.cardId());
+    assertEquals("whirlwind", request.instanceId());
     assertEquals(CardPlayTarget.allEnemies(), request.target());
   }
 
   @Test
-  void shouldPreserveCardIdExactlyWhenValid() {
+  void shouldPreserveInstanceIdExactlyWhenValid() {
     CardPlayRequest request = new CardPlayRequest("Strike_01", CardPlayTarget.self());
 
-    assertEquals("Strike_01", request.cardId());
+    assertEquals("Strike_01", request.instanceId());
   }
 
   @Test
@@ -104,7 +104,7 @@ class CardPlayRequestTest {
   }
 
   @Test
-  void shouldNotCreateEqualRequestsWithDifferentCardIds() {
+  void shouldNotCreateEqualRequestsWithDifferentInstanceIds() {
     CardPlayRequest first = CardPlayRequest.self("strike");
 
     CardPlayRequest second = CardPlayRequest.self("defend");
