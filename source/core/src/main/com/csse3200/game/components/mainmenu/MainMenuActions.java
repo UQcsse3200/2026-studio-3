@@ -2,8 +2,6 @@ package com.csse3200.game.components.mainmenu;
 
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.components.Component;
-import com.csse3200.game.debug.DemoEncounterAccess;
-import com.csse3200.game.maps.RoomType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,10 +25,6 @@ public class MainMenuActions extends Component {
     entity.getEvents().addListener(MainMenuDisplay.SETTINGS_EVENT, this::onSettings);
     entity.getEvents().addListener(MainMenuDisplay.EXIT_EVENT, this::onExit);
     entity.getEvents().addListener("library", this::onLibrary);
-    if (DemoEncounterAccess.ENABLED) {
-      entity.getEvents().addListener(MainMenuDisplay.DEMO_SHOP_EVENT, this::onDemoShop);
-      entity.getEvents().addListener(MainMenuDisplay.DEMO_EVENT_EVENT, this::onDemoEvent);
-    }
   }
 
   /** Discards any run in progress and opens a fresh map. */
@@ -70,15 +64,5 @@ public class MainMenuActions extends Component {
   private void onSettings() {
     logger.info("Launching settings screen");
     game.setScreen(GdxGame.ScreenType.SETTINGS);
-  }
-
-  private void onDemoShop() {
-    logger.info("Opening temporary Shop demo");
-    DemoEncounterAccess.open(game, RoomType.SHOP);
-  }
-
-  private void onDemoEvent() {
-    logger.info("Opening temporary Event demo");
-    DemoEncounterAccess.open(game, RoomType.EVENT);
   }
 }

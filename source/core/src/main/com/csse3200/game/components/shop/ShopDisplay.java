@@ -65,7 +65,8 @@ public class ShopDisplay extends UIComponent {
   private static final float CARD_WIDTH = 282f;
   private static final float CARD_PADDING = 10f;
   private static final float CARD_CONTENT_WIDTH = CARD_WIDTH - (CARD_PADDING * 2f);
-  private static final float CARD_NAME_WIDTH = 174f;
+  private static final float CARD_NAME_WIDTH = 166f;
+  private static final float CARD_IDENTITY_GAP = 12f;
 
   private static final Color BACKDROP_COLOUR = new Color(0.025f, 0.012f, 0.018f, 0.34f);
   private static final Color CARD_COLOUR = new Color(0.86f, 0.78f, 0.72f, 1f);
@@ -423,13 +424,18 @@ public class ShopDisplay extends UIComponent {
     float nameWidth = new GlyphLayout(nameLabel.getStyle().font, cardName).width;
     nameLabel.setFontScale(Math.min(0.95f, CARD_NAME_WIDTH / Math.max(nameWidth, 1f)));
     energyLabel.setFontScale(0.76f);
+    energyLabel.setAlignment(Align.right);
     descriptionLabel.setFontScale(cardDescription.length() > 65 ? 0.68f : 0.78f);
     descriptionLabel.setWrap(true);
     descriptionLabel.setAlignment(Align.topLeft, Align.left);
 
     Table cardIdentity = new Table();
     cardIdentity.add(nameLabel).width(CARD_NAME_WIDTH).left();
-    cardIdentity.add(energyLabel).width(CARD_CONTENT_WIDTH - CARD_NAME_WIDTH).right();
+    cardIdentity
+        .add(energyLabel)
+        .width(CARD_CONTENT_WIDTH - CARD_NAME_WIDTH - CARD_IDENTITY_GAP)
+        .padLeft(CARD_IDENTITY_GAP)
+        .right();
 
     Label priceLabel =
         new Label(String.format("%d GOLD", item.price), createLabelStyle("default", GOLD_COLOUR));

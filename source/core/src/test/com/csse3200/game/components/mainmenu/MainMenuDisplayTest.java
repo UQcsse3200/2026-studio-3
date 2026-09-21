@@ -78,6 +78,7 @@ class MainMenuDisplayTest {
         List.of("start", "load", "bestiary", "settings", "exit"),
         display.getMenuButtons().stream().map(TextButton::getName).toList());
     assertInstanceOf(Image.class, display.getRootStack().getChild(0));
+    assertEquals(3, display.getRootStack().getChildren().size);
     verify(resourceService).getAsset(MainMenuDisplay.BACKGROUND_TEXTURE, Texture.class);
     verify(resourceService).getAsset(MainMenuDisplay.TITLE_LOGO_TEXTURE, Texture.class);
     verify(resourceService).getAsset(MainMenuDisplay.BUTTON_FRAME_TEXTURE, Texture.class);
@@ -97,29 +98,6 @@ class MainMenuDisplayTest {
       AtomicInteger eventCount = new AtomicInteger();
       menu.getEvents().addListener(events.get(i), eventCount::incrementAndGet);
       display.getMenuButtons().get(i).fire(new ChangeEvent());
-      assertEquals(1, eventCount.get());
-    }
-  }
-
-  @Test
-  void buildsTemporaryDemoShortcuts() {
-    assertEquals(
-        List.of("Demo Shop", "Demo Event"),
-        display.getDemoButtons().stream().map(button -> button.getText().toString()).toList());
-    assertEquals(
-        List.of(MainMenuDisplay.DEMO_SHOP_EVENT, MainMenuDisplay.DEMO_EVENT_EVENT),
-        display.getDemoButtons().stream().map(TextButton::getName).toList());
-  }
-
-  @Test
-  void demoButtonsEmitTheirNamedEvents() {
-    List<String> events =
-        List.of(MainMenuDisplay.DEMO_SHOP_EVENT, MainMenuDisplay.DEMO_EVENT_EVENT);
-
-    for (int i = 0; i < events.size(); i++) {
-      AtomicInteger eventCount = new AtomicInteger();
-      menu.getEvents().addListener(events.get(i), eventCount::incrementAndGet);
-      display.getDemoButtons().get(i).fire(new ChangeEvent());
       assertEquals(1, eventCount.get());
     }
   }
