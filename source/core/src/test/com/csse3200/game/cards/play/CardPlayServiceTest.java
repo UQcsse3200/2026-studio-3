@@ -273,7 +273,7 @@ class CardPlayServiceTest {
     BattleDeck failingDeck =
         new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike"))) {
           @Override
-          public List<String> getHand() {
+          public List<CardInstance> getHand() {
             return List.of("strike");
           }
 

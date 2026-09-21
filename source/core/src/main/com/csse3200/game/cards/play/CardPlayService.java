@@ -130,17 +130,17 @@ public final class CardPlayService {
    * @return a snapshot of the current hand, for callers (e.g. the battle controller) that need to
    *     refresh the UI after {@link #onPlayerRoundStart()} changes it without a card being played
    */
-  public List<String> currentHand() {
+  public List<CardInstance> currentHand() {
     return battleDeck.getHand();
   }
 
-  /**
-   * @return a snapshot of the current hand as distinct card instances, for callers (e.g. UI
-   *     dimming) that need to tell duplicate copies of the same card apart
-   */
-  public List<CardInstance> handInstances() {
-    return battleDeck.getHandInstances();
-  }
+//  /**
+//   * @return a snapshot of the current hand as distinct card instances, for callers (e.g. UI
+//   *     dimming) that need to tell duplicate copies of the same card apart
+//   */
+//  public List<CardInstance> handInstances() {
+//    return battleDeck.getHand();
+//  }
 
   /**
    * Checks whether a specific card instance is currently tracked as on cooldown (discarded and

@@ -54,7 +54,12 @@ public class BattleDeck {
     return instance == null ? null : instance.cardId();
   }
 
-  private CardInstance drawOneInstance() {
+  /**
+   * Draws one card from the draw pile into the hand.
+   *
+   * @return drawn card instance, or null if the draw pile is empty
+   */
+  public CardInstance drawOneInstance() {
     if (drawPile.isEmpty()) {
       reshuffleDiscardIntoDrawPile();
     }
@@ -68,24 +73,46 @@ public class BattleDeck {
     return instance;
   }
 
+//  /**
+//   * Draws up to the requested number of cards from the draw pile into the hand.
+//   *
+//   * @param count number of cards to draw
+//   * @return card IDs that were drawn, in draw order
+//   */
+//  public List<String> drawCards(int count) {
+//    if (count < 0) {
+//      throw new IllegalArgumentException("count must not be negative");
+//    }
+//
+//    List<String> drawnCards = new ArrayList<>();
+//    for (int i = 0; i < count; i++) {
+//      String cardId = drawOne();
+//      if (cardId == null) {
+//        break;
+//      }
+//      drawnCards.add(cardId);
+//    }
+//    return List.copyOf(drawnCards);
+//  }
+
   /**
    * Draws up to the requested number of cards from the draw pile into the hand.
    *
    * @param count number of cards to draw
-   * @return card IDs that were drawn, in draw order
+   * @return card instances that were drawn, in draw order
    */
-  public List<String> drawCards(int count) {
+  public List<CardInstance> drawCards(int count) {
     if (count < 0) {
       throw new IllegalArgumentException("count must not be negative");
     }
 
-    List<String> drawnCards = new ArrayList<>();
+    List<CardInstance> drawnCards = new ArrayList<>();
     for (int i = 0; i < count; i++) {
-      String cardId = drawOne();
-      if (cardId == null) {
+      CardInstance card = drawOneInstance();
+      if (card == null) {
         break;
       }
-      drawnCards.add(cardId);
+      drawnCards.add(card);
     }
     return List.copyOf(drawnCards);
   }
@@ -190,25 +217,40 @@ public class BattleDeck {
     return true;
   }
 
+//  /**
+//   * @return immutable snapshot of the draw pile
+//   */
+//  public List<String> getDrawPile() {
+//    return cardIdsOf(drawPile);
+//  }
+
   /**
    * @return immutable snapshot of the draw pile
    */
-  public List<String> getDrawPile() {
-    return cardIdsOf(drawPile);
+  public List<CardInstance> getDrawPile() {
+    return List.copyOf(drawPile);
   }
 
+//  /**
+//   * @return immutable snapshot of the hand
+//   */
+//  public List<String> getHand() {
+//    return cardIdsOf(hand);
+//  }
+
   /**
-   * @return immutable snapshot of the hand
+   * @return immutable snapshot of the hand as distinct card instances, letting callers tell
+   *     duplicate copies of the same card apart
    */
-  public List<String> getHand() {
-    return cardIdsOf(hand);
+  public List<CardInstance> getHand() {
+    return List.copyOf(hand);
   }
 
   /**
    * @return immutable snapshot of the discard pile
    */
-  public List<String> getDiscardPile() {
-    return cardIdsOf(discardPile);
+  public List<CardInstance> getDiscardPile() {
+    return List.copyOf(discardPile);
   }
 
   /**
@@ -319,13 +361,13 @@ public class BattleDeck {
     return null;
   }
 
-  private static List<String> cardIdsOf(List<CardInstance> instances) {
-    List<String> cardIds = new ArrayList<>(instances.size());
-    for (CardInstance instance : instances) {
-      cardIds.add(instance.cardId());
-    }
-    return List.copyOf(cardIds);
-  }
+//  private static List<String> cardIdsOf(List<CardInstance> instances) {
+//    List<String> cardIds = new ArrayList<>(instances.size());
+//    for (CardInstance instance : instances) {
+//      cardIds.add(instance.cardId());
+//    }
+//    return List.copyOf(cardIds);
+//  }
 
   /** Finds an exact owned copy in the current hand. */
   public Optional<CardInstance> getCardInHand(String instanceId) {
