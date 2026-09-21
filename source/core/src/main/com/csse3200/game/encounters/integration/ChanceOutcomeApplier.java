@@ -1,6 +1,8 @@
 package com.csse3200.game.encounters.integration;
 
 import com.csse3200.game.chance.ChanceOutcome;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -75,14 +77,15 @@ public final class ChanceOutcomeApplier {
     int healthTarget = (int) Math.max(0L, Math.min((long) player.getMaxHealth(), requestedHealth));
     int appliedHealthDelta = healthTarget - healthBefore;
     int currencyTarget = (int) requestedCurrency;
-    String cardRewardId = outcome.getCardRewardId();
+    List<String> cardRewardIds = outcome.getCardRewardIds();
 
-    ChanceResolution cardValidation = validateCardReward(outcome, cardRewardId);
+    ChanceResolution cardValidation = validateCardRewards(outcome, cardRewardIds);
     if (cardValidation != null) {
       return cardValidation;
     }
 
-    if (cardRewardId != null) {
+    List<String> addedCardIds = new ArrayList<>();
+    for (String cardRewardId : cardRewardIds) {
       boolean cardAdded;
       try {
         cardAdded = deck.addCard(cardRewardId);
@@ -90,11 +93,18 @@ public final class ChanceOutcomeApplier {
         cardAdded = false;
       }
       if (!cardAdded) {
+        boolean rollbackSucceeded = rollbackCardAdditions(addedCardIds);
         return failure(
-            ChanceResolution.Status.CARD_ADD_FAILED,
+            rollbackSucceeded
+                ? ChanceResolution.Status.CARD_ADD_FAILED
+                : ChanceResolution.Status.ROLLBACK_FAILED,
             outcome,
-            "The reward card could not be added to the player's deck.");
+            rollbackSucceeded
+                ? "A reward card could not be added to the player's deck; no cards were kept."
+                : "A reward card could not be added and earlier card additions could not be fully"
+                    + " rolled back; manual recovery is required.");
       }
+      addedCardIds.add(cardRewardId);
     }
 
     try {
@@ -105,7 +115,7 @@ public final class ChanceOutcomeApplier {
         throw new IllegalStateException("Player currency update was not accepted");
       }
     } catch (RuntimeException exception) {
-      boolean rollbackSucceeded = rollbackBeforeHealth(cardRewardId, currencyBefore);
+      boolean rollbackSucceeded = rollbackBeforeHealth(addedCardIds, currencyBefore);
       return failure(
           rollbackSucceeded
               ? ChanceResolution.Status.PLAYER_UPDATE_FAILED
@@ -127,7 +137,7 @@ public final class ChanceOutcomeApplier {
     } catch (RuntimeException exception) {
       int healthAfter = player.getHealth();
       if (healthAfter == healthBefore) {
-        boolean rollbackSucceeded = rollbackBeforeHealth(cardRewardId, currencyBefore);
+        boolean rollbackSucceeded = rollbackBeforeHealth(addedCardIds, currencyBefore);
         return failure(
             rollbackSucceeded
                 ? ChanceResolution.Status.PLAYER_UPDATE_FAILED
@@ -140,7 +150,7 @@ public final class ChanceOutcomeApplier {
                     + "fully rolled back; manual recovery is required.");
       }
 
-      commitCardAfterIrreversibleHealthFailure(cardRewardId);
+      commitCardsAfterIrreversibleHealthFailure(addedCardIds);
       return ChanceResolution.failure(
           ChanceResolution.Status.ROLLBACK_FAILED,
           outcome,
@@ -152,12 +162,12 @@ public final class ChanceOutcomeApplier {
               + "kept because rollback may be unsafe after health events began.");
     }
 
-    if (cardRewardId != null) {
+    if (!addedCardIds.isEmpty()) {
       try {
-        deck.commitCardAddition(cardRewardId);
+        commitCardAdditions(addedCardIds);
       } catch (RuntimeException exception) {
         if (player.getHealth() == healthBefore) {
-          boolean rollbackSucceeded = rollbackBeforeHealth(cardRewardId, currencyBefore);
+          boolean rollbackSucceeded = rollbackBeforeHealth(addedCardIds, currencyBefore);
           return failure(
               rollbackSucceeded
                   ? ChanceResolution.Status.CARD_ADD_FAILED
@@ -189,15 +199,9 @@ public final class ChanceOutcomeApplier {
         status, outcome, player.getHealth(), player.getCurrency(), message);
   }
 
-  private ChanceResolution validateCardReward(ChanceOutcome outcome, String cardRewardId) {
-    if (cardRewardId == null) {
+  private ChanceResolution validateCardRewards(ChanceOutcome outcome, List<String> cardRewardIds) {
+    if (cardRewardIds.isEmpty()) {
       return null;
-    }
-    if (cardRewardId.isBlank()) {
-      return failure(
-          ChanceResolution.Status.INVALID_CARD_REWARD,
-          outcome,
-          "The reward card identifier must not be blank.");
     }
     if (cardCatalog == null || deck == null) {
       return failure(
@@ -206,56 +210,73 @@ public final class ChanceOutcomeApplier {
           "Card reward services are not available for this encounter.");
     }
 
-    boolean cardExists;
-    try {
-      cardExists = cardCatalog.containsCard(cardRewardId);
-    } catch (RuntimeException exception) {
-      cardExists = false;
-    }
-    if (!cardExists) {
-      return failure(
-          ChanceResolution.Status.CARD_NOT_FOUND,
-          outcome,
-          "The reward card is not registered: " + cardRewardId);
-    }
+    for (String cardRewardId : cardRewardIds) {
+      if (cardRewardId == null || cardRewardId.isBlank()) {
+        return failure(
+            ChanceResolution.Status.INVALID_CARD_REWARD,
+            outcome,
+            "The reward card identifier must not be blank.");
+      }
 
-    try {
-      if (!deck.canAddCard(cardRewardId)) {
+      boolean cardExists;
+      try {
+        cardExists = cardCatalog.containsCard(cardRewardId);
+      } catch (RuntimeException exception) {
+        cardExists = false;
+      }
+      if (!cardExists) {
+        return failure(
+            ChanceResolution.Status.CARD_NOT_FOUND,
+            outcome,
+            "The reward card is not registered: " + cardRewardId);
+      }
+
+      try {
+        if (!deck.canAddCard(cardRewardId)) {
+          return failure(
+              ChanceResolution.Status.CARD_ADD_FAILED,
+              outcome,
+              "The player's deck cannot accept the reward card.");
+        }
+      } catch (RuntimeException exception) {
         return failure(
             ChanceResolution.Status.CARD_ADD_FAILED,
             outcome,
-            "The player's deck cannot accept the reward card.");
+            "The player's deck could not validate the reward card.");
       }
-    } catch (RuntimeException exception) {
-      return failure(
-          ChanceResolution.Status.CARD_ADD_FAILED,
-          outcome,
-          "The player's deck could not validate the reward card.");
     }
     return null;
   }
 
-  private boolean rollbackBeforeHealth(String cardRewardId, int currency) {
-    boolean cardRestored = true;
-    if (cardRewardId != null) {
-      try {
-        cardRestored = deck.rollbackCardAddition(cardRewardId);
-      } catch (RuntimeException exception) {
-        cardRestored = false;
-      }
-    }
+  private boolean rollbackBeforeHealth(List<String> cardRewardIds, int currency) {
+    boolean cardRestored = rollbackCardAdditions(cardRewardIds);
     boolean currencyRestored = rollbackCurrency(currency);
     return cardRestored && currencyRestored;
   }
 
-  private void commitCardAfterIrreversibleHealthFailure(String cardRewardId) {
-    if (cardRewardId == null) {
-      return;
+  private boolean rollbackCardAdditions(List<String> cardRewardIds) {
+    boolean cardRestored = true;
+    for (int index = cardRewardIds.size() - 1; index >= 0; index--) {
+      try {
+        cardRestored = deck.rollbackCardAddition(cardRewardIds.get(index)) && cardRestored;
+      } catch (RuntimeException exception) {
+        cardRestored = false;
+      }
     }
+    return cardRestored;
+  }
+
+  private void commitCardsAfterIrreversibleHealthFailure(List<String> cardRewardIds) {
     try {
-      deck.commitCardAddition(cardRewardId);
+      commitCardAdditions(cardRewardIds);
     } catch (RuntimeException ignored) {
       // The outcome is already a partial failure and health-event rollback is unsafe.
+    }
+  }
+
+  private void commitCardAdditions(List<String> cardRewardIds) {
+    for (int index = cardRewardIds.size() - 1; index >= 0; index--) {
+      deck.commitCardAddition(cardRewardIds.get(index));
     }
   }
 

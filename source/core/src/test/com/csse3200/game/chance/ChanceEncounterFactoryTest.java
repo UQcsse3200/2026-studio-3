@@ -1,6 +1,8 @@
 package com.csse3200.game.chance;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -16,17 +18,19 @@ class ChanceEncounterFactoryTest {
   @Test
   void shouldCreateInitialEncountersInDeterministicOrder() {
     List<ChanceEncounter> encounters = ChanceEncounterFactory.createInitialEncounters();
+    List<String> encounterIds = encounters.stream().map(ChanceEncounter::getId).toList();
 
     assertEquals(
         List.of(
             "mysterious-shrine",
-            "healing-spring",
-            "forgotten-cache",
             "wandering-healer",
             "flooded-crossing",
             "abandoned-mine",
-            "roadside-riddle"),
-        encounters.stream().map(ChanceEncounter::getId).toList());
+            "healing-spring",
+            "dice-game"),
+        encounterIds);
+    assertFalse(encounterIds.contains("forgotten-cache"));
+    assertFalse(encounterIds.contains("roadside-riddle"));
   }
 
   @Test
@@ -60,23 +64,23 @@ class ChanceEncounterFactoryTest {
 
   @Test
   void shouldCreateHealingSpring() {
-    ChanceEncounter encounter = ChanceEncounterFactory.createInitialEncounters().get(1);
+    ChanceEncounter encounter = ChanceEncounterFactory.createInitialEncounters().get(4);
 
     assertEquals("A clear spring glows softly beside the path.", encounter.getDescription());
     assertEquals(2, encounter.getChoices().size());
-    assertChoice(encounter, 0, "drink", "Drink from the spring.", 15, 0);
+    assertChoice(encounter, 0, "drink", "Drink from the spring.", 0, 0);
     assertChoice(encounter, 1, "leave", "Continue without drinking.", 0, 0);
   }
 
   @Test
-  void shouldCreateForgottenCache() {
+  void shouldCreateForcedCostFloodedCrossing() {
     ChanceEncounter encounter = ChanceEncounterFactory.createInitialEncounters().get(2);
 
-    assertEquals(
-        "You discover an abandoned cache hidden beneath loose stones.", encounter.getDescription());
+    assertEquals("A flooded crossing blocks the road ahead.", encounter.getDescription());
     assertEquals(2, encounter.getChoices().size());
-    assertChoice(encounter, 0, "take-coins", "Take the coins from the cache.", 0, 15);
-    assertChoice(encounter, 1, "leave", "Leave the cache untouched.", 0, 0);
+    assertChoice(encounter, 0, "hire-ferryman", "Pay a ferryman for safe passage.", 0, -8);
+    assertChoice(encounter, 1, "ford-river", "Attempt to ford the river alone.", -8, 0);
+    assertNull(encounter.resolveChoice("wait"));
   }
 
   private static void assertChoice(

@@ -53,7 +53,7 @@ public class InventoryComponent extends Component {
     logger.debug("Setting gold to {}", this.gold);
 
     if (entity != null) {
-      entity.getEvents().trigger("updateGold", this.gold);
+      entity.getEvents().trigger("updateMoney", this.gold);
     }
   }
 

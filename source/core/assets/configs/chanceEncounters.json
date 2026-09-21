@@ -24,52 +24,6 @@
       ]
     },
     {
-      "id": "healing-spring",
-      "description": "A clear spring glows softly beside the path.",
-      "weight": 2,
-      "choices": [
-        {
-          "id": "drink",
-          "description": "Drink from the spring.",
-          "outcome": {
-            "healthDelta": 15,
-            "currencyDelta": 0
-          }
-        },
-        {
-          "id": "leave",
-          "description": "Continue without drinking.",
-          "outcome": {
-            "healthDelta": 0,
-            "currencyDelta": 0
-          }
-        }
-      ]
-    },
-    {
-      "id": "forgotten-cache",
-      "description": "You discover an abandoned cache hidden beneath loose stones.",
-      "weight": 3,
-      "choices": [
-        {
-          "id": "take-coins",
-          "description": "Take the coins from the cache.",
-          "outcome": {
-            "healthDelta": 0,
-            "currencyDelta": 15
-          }
-        },
-        {
-          "id": "leave",
-          "description": "Leave the cache untouched.",
-          "outcome": {
-            "healthDelta": 0,
-            "currencyDelta": 0
-          }
-        }
-      ]
-    },
-    {
       "id": "wandering-healer",
       "description": "A wandering healer offers a restorative draught for a modest fee.",
       "weight": 2,
@@ -121,14 +75,6 @@
             "healthDelta": -8,
             "currencyDelta": 0
           }
-        },
-        {
-          "id": "wait",
-          "description": "Wait for the water to recede.",
-          "outcome": {
-            "healthDelta": 0,
-            "currencyDelta": 0
-          }
         }
       ]
     },
@@ -156,21 +102,76 @@
       ]
     },
     {
-      "id": "roadside-riddle",
-      "description": "A hooded traveller offers a coin reward for solving a riddle.",
+      "id": "healing-spring",
+      "description": "A clear spring glows softly beside the path.",
       "weight": 2,
       "choices": [
         {
-          "id": "answer-riddle",
-          "description": "Attempt to solve the traveller's riddle.",
+          "id": "drink",
+          "description": "Drink from the spring.",
           "outcome": {
             "healthDelta": 0,
-            "currencyDelta": 12
+            "currencyDelta": 0
           }
         },
         {
-          "id": "walk-on",
-          "description": "Continue along the road.",
+          "id": "leave",
+          "description": "Continue without drinking.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "dice-game",
+      "description": "A masked dice keeper invites you to test your luck with two dice.",
+      "weight": 2,
+      "choices": [
+        {
+          "id": "low",
+          "description": "Predict Low (2-6).",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        },
+        {
+          "id": "high",
+          "description": "Predict High (8-12).",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        },
+        {
+          "id": "take",
+          "description": "Take the Lucky Seven offer.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        },
+        {
+          "id": "double-down",
+          "description": "Double down on another prediction.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        },
+        {
+          "id": "cash-out",
+          "description": "Cash out the current Gold stake.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        },
+        {
+          "id": "continue",
+          "description": "Risk the current Gold stake in round two.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0

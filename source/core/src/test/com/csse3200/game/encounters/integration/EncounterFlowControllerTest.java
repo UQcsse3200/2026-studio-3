@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.csse3200.game.chance.ChanceBehaviourResult;
 import com.csse3200.game.chance.ChanceChoice;
 import com.csse3200.game.chance.ChanceEncounter;
 import com.csse3200.game.chance.ChanceOutcome;
@@ -83,6 +84,29 @@ class EncounterFlowControllerTest {
 
     assertEquals(1, callback.count);
     assertEquals(41, callback.nodeId);
+    assertTrue(callback.success);
+  }
+
+  @Test
+  void shouldStartChanceWithInjectedRuntimeBehaviour() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(60, 100, 40);
+    IntegratedShopTransactionGateway transactions =
+        new IntegratedShopTransactionGateway(
+            player, new MockCardCatalogGateway("card_heal"), new MockDeckGateway());
+    RecordingCallback callback = new RecordingCallback();
+    EncounterFlowController flow = new EncounterFlowController(player, transactions, callback);
+
+    ChanceEncounterSession chance =
+        flow.startChance(
+            41,
+            createChanceEncounter(),
+            choiceId -> ChanceBehaviourResult.outcome(new ChanceOutcome(20, 0)));
+
+    assertTrue(chance.resolveChoice("risk").isSuccess());
+    assertEquals(80, player.getHealth());
+    assertTrue(chance.complete());
+    assertFalse(flow.isEncounterActive());
+    assertEquals(1, callback.count);
     assertTrue(callback.success);
   }
 
