@@ -85,7 +85,7 @@ public class GdxGame extends Game {
     setScreen(newScreen(screenType));
   }
 
-  /** Opens the battle screen. Used by encounter navigation and the temporary debug shortcut. */
+  /** Opens the battle screen. */
   public void startBattle() {
     setScreen(ScreenType.BATTLE_SCREEN);
   }

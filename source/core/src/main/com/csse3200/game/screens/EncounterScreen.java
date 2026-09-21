@@ -41,14 +41,6 @@ import org.slf4j.LoggerFactory;
 public class EncounterScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(EncounterScreen.class);
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
-  private static final String[] SHOP_CARD_TEXTURES = {
-    "images/shop/cards/bandage.png",
-    "images/shop/cards/defend.png",
-    "images/shop/cards/expose.png",
-    "images/shop/cards/inner_focus.png",
-    "images/shop/cards/poison_dagger.png",
-    "images/shop/cards/strike.png"
-  };
   private final String[] cardTexturePaths;
   private final GdxGame game;
   private final RunState runState;
@@ -92,7 +84,6 @@ public class EncounterScreen extends ScreenAdapter {
 
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(cardTexturePaths);
-    resourceService.loadTextures(SHOP_CARD_TEXTURES);
     resourceService.loadAll();
 
     PhysicsService physicsService = new PhysicsService();
@@ -211,7 +202,6 @@ public class EncounterScreen extends ScreenAdapter {
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getResourceService().unloadAssets(cardTexturePaths);
-    ServiceLocator.getResourceService().unloadAssets(SHOP_CARD_TEXTURES);
     ServiceLocator.getResourceService().dispose();
 
     ServiceLocator.clear();

@@ -53,14 +53,6 @@ public class MainGameScreen extends ScreenAdapter {
   private static final String[] mainGameTextures = {
     "images/heart.png", "images/energy.png", "images/piety.png", "images/money.png"
   };
-  private static final String[] shopCardTextures = {
-    "images/shop/cards/bandage.png",
-    "images/shop/cards/defend.png",
-    "images/shop/cards/expose.png",
-    "images/shop/cards/inner_focus.png",
-    "images/shop/cards/poison_dagger.png",
-    "images/shop/cards/strike.png"
-  };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
 
   private final GdxGame game;
@@ -152,7 +144,6 @@ public class MainGameScreen extends ScreenAdapter {
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(mainGameTextures);
     resourceService.loadTextures(cardTexturePaths);
-    resourceService.loadTextures(shopCardTextures);
     ServiceLocator.getResourceService().loadAll();
   }
 
@@ -161,7 +152,6 @@ public class MainGameScreen extends ScreenAdapter {
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.unloadAssets(mainGameTextures);
     resourceService.unloadAssets(cardTexturePaths);
-    resourceService.unloadAssets(shopCardTextures);
   }
 
   /**
