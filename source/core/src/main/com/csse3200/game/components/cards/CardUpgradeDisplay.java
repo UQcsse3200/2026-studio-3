@@ -31,6 +31,7 @@ public class CardUpgradeDisplay extends UIComponent {
   private final CardUpgradeCommitter committer;
   private Table buttonTable;
   private Table libraryOverlay;
+  private TextButton upgradeButton;
   private TextButton confirmButton;
   private boolean libraryVisible;
   private final CardUpgradeSelection selection;
@@ -58,15 +59,15 @@ public class CardUpgradeDisplay extends UIComponent {
     buttonTable.top().right();
     buttonTable.padTop(56f).padRight(10f);
 
-    TextButton cardsButton = new TextButton("Upgrade", skin);
-    cardsButton.addListener(
+    upgradeButton = new TextButton("Upgrade", skin);
+    upgradeButton.addListener(
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
             toggleLibrary();
           }
         });
-    cardsButton.addListener(
+    upgradeButton.addListener(
         new InputListener() {
           @Override
           public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -74,21 +75,10 @@ public class CardUpgradeDisplay extends UIComponent {
             return true;
           }
         });
-    buttonTable.add(cardsButton).width(96f).height(40f).right();
+    buttonTable.add(upgradeButton).width(96f).height(40f).right();
 
-    libraryOverlay = createLibraryOverlay();
-    libraryOverlay.setVisible(false);
-    libraryOverlay.addListener(
-        new InputListener() {
-          @Override
-          public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-            event.stop();
-            return true;
-          }
-        });
     stage.addActor(buttonTable);
-    stage.addActor(libraryOverlay);
-    refresh();
+    rebuildLibraryOverlay();
   }
 
   private Table createLibraryOverlay() {
@@ -150,8 +140,8 @@ public class CardUpgradeDisplay extends UIComponent {
               return;
             }
             committer.commitUpgrades(selection.getSelectedInstanceIds());
-            selection.reset();
-            hideLibrary();
+            selection.refresh();
+            rebuildLibraryOverlay();
           }
         });
     libraryPanel.add(cardGrid).center().padTop(10f);
@@ -162,6 +152,9 @@ public class CardUpgradeDisplay extends UIComponent {
   }
 
   private void toggleLibrary() {
+    if (selection.getCardUpgradeOption().isEmpty()) {
+      return;
+    }
     libraryVisible = !libraryVisible;
     libraryOverlay.setVisible(libraryVisible);
     if (libraryVisible) {
@@ -259,5 +252,35 @@ public class CardUpgradeDisplay extends UIComponent {
     }
     confirmButton.setText("Upgrade (" + selection.getSelectedInstanceIds().size() + ")");
     confirmButton.setDisabled(!selection.canConfirm());
+    upgradeButton.setDisabled(selection.getCardUpgradeOption().isEmpty());
+  }
+
+  /** Replaces the stale card grid after the backing player deck has changed. */
+  private void rebuildLibraryOverlay() {
+    if (libraryOverlay != null) {
+      libraryOverlay.remove();
+    }
+    tilesByInstanceId.clear();
+    libraryVisible = false;
+    libraryOverlay = createLibraryOverlay();
+    libraryOverlay.setVisible(false);
+    libraryOverlay.addListener(
+        new InputListener() {
+          @Override
+          public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+            event.stop();
+            return true;
+          }
+        });
+    stage.addActor(libraryOverlay);
+    refresh();
+  }
+
+  TextButton getConfirmButton() {
+    return confirmButton;
+  }
+
+  int getDisplayedOptionCount() {
+    return tilesByInstanceId.size();
   }
 }

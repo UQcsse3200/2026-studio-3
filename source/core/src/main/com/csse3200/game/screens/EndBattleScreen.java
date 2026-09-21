@@ -71,7 +71,7 @@ public class EndBattleScreen extends ScreenAdapter {
       if (runState != null) {
         PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(cardLibrary);
         CardUpgradeSelection upgradeSelection =
-            new CardUpgradeSelection(playerDeck.getCards(), cardLibrary, 2);
+            CardUpgradeSelection.forPlayerDeck(playerDeck, cardLibrary, 2);
         if (!upgradeSelection.getCardUpgradeOption().isEmpty()) {
           ui.addComponent(
               new CardUpgradeDisplay(
