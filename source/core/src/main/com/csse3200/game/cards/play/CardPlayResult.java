@@ -7,14 +7,14 @@ import java.util.List;
 
 /** Immutable result of attempting to play one card from the player's current hand. */
 public record CardPlayResult(
-        String instanceId,
-        String cardId,
-        CardPlayTarget target,
-        boolean success,
-        int energyCost,
-        CardEffectResolution effectResolution,
-        CardPlayFailureReason failureReason,
-        DeckSnapshot deckSnapshot) {
+    String instanceId,
+    String cardId,
+    CardPlayTarget target,
+    boolean success,
+    int energyCost,
+    CardEffectResolution effectResolution,
+    CardPlayFailureReason failureReason,
+    DeckSnapshot deckSnapshot) {
 
   public CardPlayResult {
     validateIdentity(instanceId, cardId, success);
@@ -32,7 +32,7 @@ public record CardPlayResult(
   }
 
   private static void validateCommonFields(
-          int energyCost, CardPlayFailureReason failureReason, DeckSnapshot deckSnapshot) {
+      int energyCost, CardPlayFailureReason failureReason, DeckSnapshot deckSnapshot) {
     if (energyCost < 0) {
       throw new IllegalArgumentException("Energy cost cannot be negative");
     }
@@ -45,7 +45,7 @@ public record CardPlayResult(
   }
 
   private static void validateOutcome(
-          boolean success, CardEffectResolution effectResolution, CardPlayFailureReason failureReason) {
+      boolean success, CardEffectResolution effectResolution, CardPlayFailureReason failureReason) {
     if (success) {
       validateSuccessfulOutcome(effectResolution, failureReason);
       return;
@@ -59,7 +59,7 @@ public record CardPlayResult(
   }
 
   private static void validateSuccessfulOutcome(
-          CardEffectResolution effectResolution, CardPlayFailureReason failureReason) {
+      CardEffectResolution effectResolution, CardPlayFailureReason failureReason) {
     if (failureReason != CardPlayFailureReason.NONE) {
       throw new IllegalArgumentException("Successful card play cannot have a failure reason");
     }
@@ -70,33 +70,33 @@ public record CardPlayResult(
 
   /** Creates a successful result for the unified card-play request flow. */
   public static CardPlayResult success(
-          String instanceId,
-          String cardId,
-          CardPlayTarget target,
-          int energyCost,
-          CardEffectResolution resolution,
-          DeckSnapshot deckSnapshot) {
+      String instanceId,
+      String cardId,
+      CardPlayTarget target,
+      int energyCost,
+      CardEffectResolution resolution,
+      DeckSnapshot deckSnapshot) {
     return new CardPlayResult(
-            instanceId,
-            cardId,
-            target,
-            true,
-            energyCost,
-            resolution,
-            CardPlayFailureReason.NONE,
-            deckSnapshot);
+        instanceId,
+        cardId,
+        target,
+        true,
+        energyCost,
+        resolution,
+        CardPlayFailureReason.NONE,
+        deckSnapshot);
   }
 
   /** Creates a failed result for the unified card-play request flow. */
   public static CardPlayResult failure(
-          String instanceId,
-          String cardId,
-          CardPlayTarget target,
-          int energyCost,
-          CardPlayFailureReason failureReason,
-          DeckSnapshot deckSnapshot) {
+      String instanceId,
+      String cardId,
+      CardPlayTarget target,
+      int energyCost,
+      CardPlayFailureReason failureReason,
+      DeckSnapshot deckSnapshot) {
     return new CardPlayResult(
-            instanceId, cardId, target, false, energyCost, null, failureReason, deckSnapshot);
+        instanceId, cardId, target, false, energyCost, null, failureReason, deckSnapshot);
   }
 
   /** Backwards-compatible alias for the earlier result API. */

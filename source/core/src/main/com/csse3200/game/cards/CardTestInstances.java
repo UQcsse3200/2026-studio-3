@@ -9,14 +9,14 @@ import java.util.stream.Stream;
  * IDs.
  */
 public final class CardTestInstances {
-    private CardTestInstances() {}
+  private CardTestInstances() {}
 
-    public static String id(BattleDeck deck, String cardId) {
-        return Stream.of(deck.getHand(), deck.getDrawPile(), deck.getDiscardPile())
-                .flatMap(java.util.List::stream)
-                .filter(card -> card.cardId().equals(cardId))
-                .map(CardInstance::instanceId)
-                .findFirst()
-                .orElseThrow();
-    }
+  public static String id(BattleDeck deck, String cardId) {
+    return Stream.of(deck.getHand(), deck.getDrawPile(), deck.getDiscardPile())
+        .flatMap(java.util.List::stream)
+        .filter(card -> card.cardId().equals(cardId))
+        .map(CardInstance::instanceId)
+        .findFirst()
+        .orElseThrow();
+  }
 }

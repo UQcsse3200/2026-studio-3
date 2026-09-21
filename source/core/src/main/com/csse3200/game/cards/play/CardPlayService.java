@@ -1,5 +1,6 @@
 package com.csse3200.game.cards.play;
 
+import com.csse3200.game.cards.CardCooldown;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.CardValidator;
 import com.csse3200.game.cards.EffectType;
@@ -13,7 +14,6 @@ import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.cards.runtime.CardResolver;
 import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.player.EnergyComponent;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -43,49 +43,49 @@ public final class CardPlayService {
    * @param energyComponent Team 7 player energy component
    */
   public CardPlayService(
-          CardService cardService, BattleDeck battleDeck, EnergyComponent energyComponent) {
+      CardService cardService, BattleDeck battleDeck, EnergyComponent energyComponent) {
     this(
-            cardService,
-            new CardEffectResolutionService(requireCardService(cardService)),
-            battleDeck,
-            energyComponent,
-            null,
-            null);
+        cardService,
+        new CardEffectResolutionService(requireCardService(cardService)),
+        battleDeck,
+        energyComponent,
+        null,
+        null);
   }
 
   /** Creates a play service that can resolve damage from Team 7/Team 1 read-only state views. */
   public CardPlayService(
-          CardService cardService,
-          BattleDeck battleDeck,
-          EnergyComponent energyComponent,
-          PlayerStateView playerStateView,
-          EnemyStateView enemyStateView) {
+      CardService cardService,
+      BattleDeck battleDeck,
+      EnergyComponent energyComponent,
+      PlayerStateView playerStateView,
+      EnemyStateView enemyStateView) {
     this(
-            cardService,
-            new CardEffectResolutionService(requireCardService(cardService)),
-            battleDeck,
-            energyComponent,
-            playerStateView,
-            enemyStateView);
+        cardService,
+        new CardEffectResolutionService(requireCardService(cardService)),
+        battleDeck,
+        energyComponent,
+        playerStateView,
+        enemyStateView);
   }
 
   /** Creates a play service with explicit dependencies for integration and testing. */
   public CardPlayService(
-          CardService cardService,
-          CardEffectResolutionService resolutionService,
-          BattleDeck battleDeck,
-          EnergyComponent energyComponent) {
+      CardService cardService,
+      CardEffectResolutionService resolutionService,
+      BattleDeck battleDeck,
+      EnergyComponent energyComponent) {
     this(cardService, resolutionService, battleDeck, energyComponent, null, null);
   }
 
   /** Creates a play service with explicit dependencies and optional read-only state views. */
   public CardPlayService(
-          CardService cardService,
-          CardEffectResolutionService resolutionService,
-          BattleDeck battleDeck,
-          EnergyComponent energyComponent,
-          PlayerStateView playerStateView,
-          EnemyStateView enemyStateView) {
+      CardService cardService,
+      CardEffectResolutionService resolutionService,
+      BattleDeck battleDeck,
+      EnergyComponent energyComponent,
+      PlayerStateView playerStateView,
+      EnemyStateView enemyStateView) {
 
     this.cardService = requireCardService(cardService);
     if (resolutionService == null) {
@@ -126,17 +126,17 @@ public final class CardPlayService {
   /** Checks affordability of an exact copy; use the request overload to check a selected target. */
   public boolean canPlay(String instanceId) {
     return resolveInHand(instanceId)
-            .filter(card -> energyComponent.canAfford(card.cost()))
-            .isPresent();
+        .filter(card -> energyComponent.canAfford(card.cost()))
+        .isPresent();
   }
 
   /** Read-only check of instance, resolved cost, target type and target availability. */
   public boolean canPlay(CardPlayRequest request) {
     return request != null
-            && resolveInHand(request.instanceId())
+        && resolveInHand(request.instanceId())
             .filter(
-                    card ->
-                            isValidTarget(card, request.target()) && isTargetAvailable(request.target()))
+                card ->
+                    isValidTarget(card, request.target()) && isTargetAvailable(request.target()))
             .filter(card -> energyComponent.canAfford(card.cost()))
             .isPresent();
   }
@@ -146,9 +146,9 @@ public final class CardPlayService {
    * straight back into the hand. Intended to be called once at the start of each player round (see
    * {@code BattleController.enterPlayerStart}).
    *
-   * @return IDs of cards retrieved this round, in retrieval order (empty if none)
+   * @return exact card instances retrieved this round, in retrieval order
    */
-  public List<String> onPlayerRoundStart() {
+  public List<CardInstance> onPlayerRoundStart() {
     return cooldownTracker.tickRoundAndRetrieve();
   }
 
@@ -215,13 +215,13 @@ public final class CardPlayService {
     }
     Set<CardInstance> onCooldown = Set.copyOf(battleDeck.getDiscardPileInstances());
     List<CardInstance> playableSelection =
-            newHand.stream().filter(instance -> !onCooldown.contains(instance)).toList();
+        newHand.stream().filter(instance -> !onCooldown.contains(instance)).toList();
 
     if (Set.copyOf(playableSelection).equals(Set.copyOf(battleDeck.getHandInstances()))) {
       return false;
     }
     if (!energyComponent.canAfford(REARRANGE_ENERGY_COST)
-            || !energyComponent.spendEnergy(REARRANGE_ENERGY_COST)) {
+        || !energyComponent.spendEnergy(REARRANGE_ENERGY_COST)) {
       throw new IllegalStateException("Not enough energy to rearrange the hand");
     }
     try {
@@ -255,20 +255,19 @@ public final class CardPlayService {
       return failure(request, card.cardId(), card.cost(), CardPlayFailureReason.NOT_ENOUGH_ENERGY);
     }
     try {
-      CardEffectResolution resolution =
-              playerStateView == null && enemyStateView == null
-                      ? resolutionService.resolve(card)
-                      : resolutionService.resolve(card, buildResolutionContext(request.target()));
-      if (!battleDeck.playCard(card.instanceId())) {
+      CardEffectResolution resolution = resolveEffects(card, request.target());
+      CardInstance discarded = battleDeck.discardCardInstance(card.instanceId());
+      if (discarded == null) {
         throw new IllegalStateException("Card left hand during play: " + card.instanceId());
       }
+      cooldownTracker.trackDiscard(discarded, CardCooldown.roundsFor(card));
       return CardPlayResult.success(
-              card.instanceId(),
-              card.cardId(),
-              request.target(),
-              card.cost(),
-              resolution,
-              DeckSnapshot.from(battleDeck));
+          card.instanceId(),
+          card.cardId(),
+          request.target(),
+          card.cost(),
+          resolution,
+          DeckSnapshot.from(battleDeck));
     } catch (RuntimeException exception) {
       energyComponent.restoreEnergy(card.cost());
       throw exception;
@@ -276,14 +275,14 @@ public final class CardPlayService {
   }
 
   private CardPlayResult failure(
-          CardPlayRequest request, String cardId, int cost, CardPlayFailureReason reason) {
+      CardPlayRequest request, String cardId, int cost, CardPlayFailureReason reason) {
     return CardPlayResult.failure(
-            request.instanceId(),
-            cardId,
-            request.target(),
-            cost,
-            reason,
-            DeckSnapshot.from(battleDeck));
+        request.instanceId(),
+        cardId,
+        request.target(),
+        cost,
+        reason,
+        DeckSnapshot.from(battleDeck));
   }
 
   private boolean isValidTarget(ResolvedCard card, CardPlayTarget target) {
@@ -297,23 +296,19 @@ public final class CardPlayService {
     return enemyStateView.isTargetAvailable(target.targetId());
   }
 
-  private CardEffectResolution resolveEffects(
-          ResolvedCard card,
-          CardPlayTarget target) {
+  private CardEffectResolution resolveEffects(ResolvedCard card, CardPlayTarget target) {
 
     if (playerStateView == null && enemyStateView == null) {
       return resolutionService.resolve(card);
     }
 
-    return resolutionService.resolve(
-            card,
-            buildResolutionContext(target));
+    return resolutionService.resolve(card, buildResolutionContext(target));
   }
 
   private CardEffectResolutionContext buildResolutionContext(CardPlayTarget target) {
     int strength = playerStateView == null ? 0 : playerStateView.statusValue(EffectType.STRENGTH);
     int outgoingFeeble =
-            playerStateView == null ? 0 : playerStateView.statusValue(EffectType.FEEBLE);
+        playerStateView == null ? 0 : playerStateView.statusValue(EffectType.FEEBLE);
     int targetVulnerable = 0;
 
     if (target != null && target.type() == TargetType.SINGLE_ENEMY && enemyStateView != null) {

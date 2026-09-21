@@ -16,7 +16,7 @@ public record CardPlayRequest(String instanceId, CardPlayTarget target) {
 
   /** Converts a UI event using the selected card's resolved target type. */
   public static CardPlayRequest fromUi(
-          String instanceId, com.csse3200.game.cards.TargetType type, String targetId) {
+      String instanceId, com.csse3200.game.cards.TargetType type, String targetId) {
     return switch (type) {
       case SELF -> "player".equals(targetId) ? self(instanceId) : singleEnemy(instanceId, targetId);
       case SINGLE_ENEMY -> singleEnemy(instanceId, targetId);
