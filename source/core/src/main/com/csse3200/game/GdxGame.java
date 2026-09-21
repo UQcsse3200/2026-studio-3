@@ -21,6 +21,7 @@ import com.csse3200.game.screens.MainMenuScreen;
 import com.csse3200.game.screens.MapScreen;
 import com.csse3200.game.screens.SaveLoadScreen;
 import com.csse3200.game.screens.SettingsScreen;
+import com.csse3200.game.screens.TempleCardSelectionScreen;
 import com.csse3200.game.services.ServiceLocator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,6 +134,8 @@ public class GdxGame extends Game {
         return new ElitePortalScreen(this);
       case ANCIENT_TEMPLE:
         return new AncientTempleScreen(this);
+      case TEMPLE_CARD_SELECTION:
+        return new TempleCardSelectionScreen(this);
       case DEFEAT:
         return new EndBattleScreen(this, false);
       case BESTIARY:
@@ -156,6 +159,7 @@ public class GdxGame extends Game {
     DEFEAT,
     ELITE_PORTAL,
     ANCIENT_TEMPLE,
+    TEMPLE_CARD_SELECTION,
     BESTIARY
   }
 

@@ -68,7 +68,13 @@ public class RunState {
     if (!playerStatsInitialised) {
       playerHealth = startingHealth;
       playerMaxHealth = startingMaxHealth;
-      playerMaxEnergy = startingMaxEnergy;
+
+      // Preserve a max-energy value that was already granted before the
+      // player's first battle, such as Blessing of Eternity.
+      if (playerMaxEnergy <= 0) {
+        playerMaxEnergy = startingMaxEnergy;
+      }
+
       playerStatsInitialised = true;
     }
   }
