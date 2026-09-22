@@ -7,6 +7,7 @@ public class SaveGameService {
   private final SaveGameRepository repository;
   private final SaveGameSnapshotProvider snapshotProvider;
   private final Clock clock;
+  private static final String SLOT_ID_POSITIVE = "Save slot ID must be positive: ";
 
   /** Creates a service whose callers provide {@link SaveGameData} when saving. */
   public SaveGameService(SaveGameRepository repository) {
@@ -35,7 +36,7 @@ public class SaveGameService {
   /** Captures the live run and writes it to the selected slot. */
   public SaveResult saveGame(int slotId) {
     if (slotId <= 0) {
-      return SaveResult.failure(SaveError.INVALID_SLOT, "Save slot ID must be positive: " + slotId);
+      return SaveResult.failure(SaveError.INVALID_SLOT, SLOT_ID_POSITIVE + slotId);
     }
     if (snapshotProvider == null) {
       return SaveResult.failure(
@@ -52,7 +53,7 @@ public class SaveGameService {
   /** Writes already-captured state to the selected slot. */
   public SaveResult saveGame(int slotId, SaveGameData data) {
     if (slotId <= 0) {
-      return SaveResult.failure(SaveError.INVALID_SLOT, "Save slot ID must be positive: " + slotId);
+      return SaveResult.failure(SaveError.INVALID_SLOT, SLOT_ID_POSITIVE + slotId);
     }
     if (data == null) {
       return SaveResult.failure(SaveError.NO_SAVE_DATA, "Save data must not be null");
@@ -77,7 +78,7 @@ public class SaveGameService {
   /** Reads and parses a slot without mutating live game state. */
   public LoadResult loadGame(int slotId) {
     if (slotId <= 0) {
-      return LoadResult.failure(SaveError.INVALID_SLOT, "Save slot ID must be positive: " + slotId);
+      return LoadResult.failure(SaveError.INVALID_SLOT, SLOT_ID_POSITIVE + slotId);
     }
 
     LoadResult result = repository.load(slotId);
@@ -105,8 +106,7 @@ public class SaveGameService {
   /** Deletes the selected save slot. */
   public DeleteSaveResult deleteSave(int slotId) {
     if (slotId <= 0) {
-      return DeleteSaveResult.failure(
-          SaveError.INVALID_SLOT, "Save slot ID must be positive: " + slotId);
+      return DeleteSaveResult.failure(SaveError.INVALID_SLOT, SLOT_ID_POSITIVE + slotId);
     }
     return repository.delete(slotId);
   }

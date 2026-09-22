@@ -21,17 +21,5 @@ public enum CardPlayFailureReason {
   NOT_ENOUGH_ENERGY,
 
   /** Effect resolution or the local deck commit failed after validation. */
-  RESOLUTION_FAILED,
-
-  /**
-   * @deprecated use {@link #INVALID_CARD_CONFIG}.
-   */
-  @Deprecated
-  INVALID_CARD,
-
-  /**
-   * @deprecated use {@link #NOT_ENOUGH_ENERGY}.
-   */
-  @Deprecated
-  INSUFFICIENT_ENERGY
+  RESOLUTION_FAILED
 }

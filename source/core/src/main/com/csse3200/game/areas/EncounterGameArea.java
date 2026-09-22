@@ -1,6 +1,7 @@
 package com.csse3200.game.areas;
 
 import com.csse3200.game.areas.terrain.TerrainFactory;
+import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.chance.ChanceEncounterFactory;
 import com.csse3200.game.chance.ChanceEncounterSelector;
@@ -18,14 +19,14 @@ import com.csse3200.game.encounters.integration.InventoryDeckAdapter;
 import com.csse3200.game.encounters.integration.PlayerDeckAdapter;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.factories.PlayerFactory;
-import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.maps.EncounterCallback;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
+import com.csse3200.game.maps.RunState;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
-import com.csse3200.game.shop.ShopConfig;
 import com.csse3200.game.shop.ShopEncounter;
+import com.csse3200.game.shop.ShopInventoryGenerator;
 import com.csse3200.game.shop.ShopService;
 import java.util.Objects;
 import java.util.Random;
@@ -40,7 +41,6 @@ import org.slf4j.LoggerFactory;
  */
 public class EncounterGameArea extends GameArea {
   private static final Logger logger = LoggerFactory.getLogger(EncounterGameArea.class);
-  private static final String SHOP_CONFIG = "configs/shopItems.json";
   private static final String[] encounterTextures = {"images/star_player.png"};
 
   private final Integer nodeId;
@@ -52,13 +52,14 @@ public class EncounterGameArea extends GameArea {
   private Entity player;
   private EncounterFlowController encounterFlow;
   private CardCatalogGateway cardCatalog;
+  private RunState runState;
 
   /**
    * Creates the standalone Shop preview used by the legacy MainGameScreen shortcut.
    *
    * @param terrainFactory retained for compatibility with existing screen construction
    */
-  public EncounterGameArea(TerrainFactory terrainFactory) {
+  public EncounterGameArea(TerrainFactory terrainFactory, RunState runState) {
     this(
         terrainFactory,
         ShopEncounter.DEFAULT_NODE_ID,
@@ -106,7 +107,7 @@ public class EncounterGameArea extends GameArea {
   public void create() {
     loadAssets();
 
-    player = PlayerFactory.createPlayer();
+    player = PlayerFactory.createPlayer(runState);
 
     if (sharedPlayerState != null) {
       sharedPlayerState.applyTo(player);
@@ -144,12 +145,17 @@ public class EncounterGameArea extends GameArea {
   }
 
   private void displayShop() {
-    ShopService shopService = new ShopService(FileLoader.readClass(ShopConfig.class, SHOP_CONFIG));
+    ShopService shopService = createMapShop(ServiceLocator.getCardLibrary());
     ShopEncounter shopEncounter = encounterFlow.startShop(nodeId, shopService);
 
     Entity shopUi = new Entity();
     shopUi.addComponent(new ShopDisplay(shopEncounter, ServiceLocator.getCardLibrary()));
     spawnEntity(shopUi);
+  }
+
+  /** Builds the three generated offers shown when the player enters a map Shop node. */
+  static ShopService createMapShop(CardService cardService) {
+    return new ShopInventoryGenerator(cardService).createShop();
   }
 
   private void displayChanceEncounter() {

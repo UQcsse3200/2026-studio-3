@@ -13,7 +13,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryTrackingComponent;
 import com.csse3200.game.bestiary.BestiaryUnlockState;
@@ -53,9 +55,11 @@ class EnemyFactoryTest {
     resourceService = mock(ResourceService.class);
     when(resourceService.getAsset(anyString(), eq(TextureAtlas.class)))
         .thenReturn(mock(TextureAtlas.class));
+    when(resourceService.getAsset(anyString(), eq(Texture.class))).thenReturn(mock(Texture.class));
     ServiceLocator.registerResourceService(resourceService);
 
     RenderService renderService = new RenderService();
+    renderService.setStage(mock(Stage.class));
     renderService.setDebug(mock(DebugRenderer.class));
     ServiceLocator.registerRenderService(renderService);
 
@@ -123,7 +127,7 @@ class EnemyFactoryTest {
 
     assertEquals(50, stats.getHealth());
     assertEquals(9, stats.getBaseAttack());
-    assertEquals(3, stats.getArmor());
+    assertEquals(3, stats.getArmour());
   }
 
   @Test

@@ -63,9 +63,9 @@ class EnemyStatsComponentTest {
   }
 
   @Test
-  void shouldReportOnlyHealthLostAfterArmorAbsorbs() {
+  void shouldReportOnlyHealthLostAfterArmourAbsorbs() {
     CombatStatsComponent stats = new CombatStatsComponent(20, 6);
-    stats.setArmor(5);
+    stats.setArmour(5);
     Entity enemy = enemyWith(stats, new EnemyStatsComponent("Lesser Shade"));
 
     @SuppressWarnings("unchecked")

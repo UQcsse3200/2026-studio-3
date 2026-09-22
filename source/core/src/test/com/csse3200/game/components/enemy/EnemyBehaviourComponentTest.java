@@ -133,7 +133,7 @@ class EnemyBehaviourComponentTest {
   }
 
   @Test
-  void shouldGainArmorWhenResolvingDefend() {
+  void shouldGainArmourWhenResolvingDefend() {
     EnemyBehaviourComponent behaviour =
         new EnemyBehaviourComponent(EnemyAIFactory.CYCLE_ATTACK_DEFEND);
     CombatStatsComponent stats = enemyStats();
@@ -143,7 +143,7 @@ class EnemyBehaviourComponentTest {
     behaviour.rollIntent();
     behaviour.executeIntent(null);
 
-    assertEquals(2, stats.getArmor());
+    assertEquals(2, stats.getArmour());
   }
 
   @Test
@@ -151,6 +151,25 @@ class EnemyBehaviourComponentTest {
     EnemyBehaviourComponent behaviour =
         new EnemyBehaviourComponent(EnemyAIFactory.CYCLE_ATTACK_DEFEND);
     enemyWith(behaviour, enemyStats());
+
+    Entity player = new Entity();
+    CombatStatsComponent playerStats = new CombatStatsComponent(30, 4);
+    player.addComponent(playerStats);
+    player.create();
+
+    behaviour.rollIntent();
+    behaviour.executeIntent(player);
+
+    assertEquals(24, playerStats.getHealth());
+  }
+
+  @Test
+  void shouldApplyFeebleReductionOnceWhenResolvingAttack() {
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent("test_attack", fixedAi(EnemyIntent.attack(8)));
+    CombatStatsComponent attackerStats = enemyStats();
+    attackerStats.applyStatusEffect("FEEBLE", 1, 2);
+    enemyWith(behaviour, attackerStats);
 
     Entity player = new Entity();
     CombatStatsComponent playerStats = new CombatStatsComponent(30, 4);

@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 public class InventoryComponent extends Component {
   private static final Logger logger = LoggerFactory.getLogger(InventoryComponent.class);
   private int gold;
+  private float goldBonusMultiplier = 0f;
+  private float shopDiscount = 0f;
   private final Map<String, Integer> cards = new HashMap<>();
 
   public InventoryComponent(int gold) {
@@ -51,7 +53,7 @@ public class InventoryComponent extends Component {
     logger.debug("Setting gold to {}", this.gold);
 
     if (entity != null) {
-      entity.getEvents().trigger("updateGold", this.gold);
+      entity.getEvents().trigger("updateMoney", this.gold);
     }
   }
 
@@ -195,5 +197,21 @@ public class InventoryComponent extends Component {
 
     setGold(this.gold - amount);
     return true;
+  }
+
+  public void addShopDiscount(float amount) {
+    this.shopDiscount = Math.min(this.shopDiscount + amount, 0.5f);
+  }
+
+  public float getShopDiscount() {
+    return shopDiscount;
+  }
+
+  public float getGoldBonusMultiplier() {
+    return goldBonusMultiplier;
+  }
+
+  public void addGoldBonusMultiplier(float bonus) {
+    this.goldBonusMultiplier += bonus;
   }
 }

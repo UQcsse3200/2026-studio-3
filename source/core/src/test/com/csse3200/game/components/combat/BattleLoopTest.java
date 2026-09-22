@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.cards.CardLibrary;
-import com.csse3200.game.cards.CardPlayRequest;
 import com.csse3200.game.cards.CardType;
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.TargetType;
@@ -14,11 +13,13 @@ import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
-import com.csse3200.game.cards.effects.CardEffectResolver;
+import com.csse3200.game.cards.play.CardPlayRequest;
+import com.csse3200.game.cards.play.CardPlayService;
+import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.player.EnergyComponent;
-import com.csse3200.game.components.player.PlayerIntent;
 import com.csse3200.game.entities.Entity;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +52,7 @@ class BattleLoopTest {
         new EffectConfig(EffectType.DAMAGE, 6));
   }
 
-  private static Entity enemy(String id, int health, int baseAttack) {
+  private static Entity enemy(int health, int baseAttack) {
     return new Entity()
         .addComponent(new CombatStatsComponent(health, baseAttack))
         .addComponent(new EnemyBehaviourComponent("test"));
@@ -67,6 +68,18 @@ class BattleLoopTest {
     return deck;
   }
 
+  private static String instanceIdInHand(BattleDeck deck, String cardId) {
+    return deck.getHand().stream()
+        .filter(card -> card.cardId().equals(cardId))
+        .findFirst()
+        .orElseThrow()
+        .instanceId();
+  }
+
+  private static boolean containsCardId(List<CardInstance> cards, String cardId) {
+    return cards.stream().anyMatch(card -> card.cardId().equals(cardId));
+  }
+
   @Test
   void playerWinsWhenCardKillsTheLastEnemy() {
     Entity player =
@@ -78,31 +91,39 @@ class BattleLoopTest {
             .addComponent(new CombatStatsComponent(6, 4))
             .addComponent(new EnemyBehaviourComponent("test"));
 
-    // Hand of 1 (strike) with a spare in the draw pile so the played card is replaced by a draw.
+    // Hand of 1 (strike), with a spare left untouched in the draw pile.
     BattleDeck deck =
         new BattleDeck(
             new PlayerDeck(
                 TestCardService.withCards("strike", "bandage"), List.of("strike", "bandage")));
     deck.drawCards(1);
 
-    CardLibrary library = new CardLibrary(List.of(strikeCard()));
+    CardConfig strike = strikeCard();
+    strike.name = "Heavy Strike";
+    CardLibrary library = new CardLibrary(List.of(strike));
+    CardEffectHandler effectHandler = new CardEffectHandler();
+    CardPlayService cardPlayService =
+        new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
     BattleController controller =
-        new BattleController(
-            player, List.of(enemy), new CardEffectResolver(library), library, deck);
+        new BattleController(player, List.of(enemy), effectHandler, cardPlayService);
     AtomicReference<Boolean> outcome = new AtomicReference<>();
     List<String> log = new ArrayList<>();
     controller.addBattleEndListener(outcome::set);
     controller.addBattleLogListener(log::add);
 
     controller.start();
-    controller.submitCardPlayRequest(new CardPlayRequest("strike", "enemy"), PlayerIntent.ATTACK);
+    String strikeInstanceId = instanceIdInHand(deck, "strike");
+    controller.submitCardPlayRequest(
+        CardPlayRequest.singleEnemy(strikeInstanceId, Integer.toString(enemy.getId())));
 
     assertEquals(BattlePhase.VICTORY, controller.getCurrentPhase());
     assertEquals(Boolean.TRUE, outcome.get());
     assertEquals(0, enemy.getComponent(CombatStatsComponent.class).getHealth());
-    assertFalse(deck.getHand().contains("strike"));
-    assertTrue(deck.getDiscardPile().contains("strike"));
-    assertEquals(List.of("bandage"), deck.getHand()); // played strike replaced by a draw
+    assertFalse(containsCardId(deck.getHand(), "strike"));
+    assertTrue(containsCardId(deck.getDiscardPile(), "strike"));
+    assertTrue(deck.getHand().isEmpty()); // no replacement is drawn
+    assertTrue(log.stream().anyMatch(line -> line.startsWith("You played Heavy Strike")));
+    assertFalse(log.stream().anyMatch(line -> line.contains(strikeInstanceId)));
     assertTrue(log.stream().anyMatch(line -> line.contains("Victory")));
   }
 
@@ -163,7 +184,7 @@ class BattleLoopTest {
   }
 
   @Test
-  void shouldAddArmourWhenDefendCardIsPlayed() {
+  void shouldAddBlockWhenDefendCardIsPlayed() {
     CardConfig defend =
         card("defend", CardType.SKILL, TargetType.SELF, 1, new EffectConfig(EffectType.BLOCK, 5));
     Entity player =
@@ -172,23 +193,31 @@ class BattleLoopTest {
             .addComponent(new EnergyComponent(3));
     BattleDeck deck = deckWithFirstCardInHand("defend", "strike");
     CardLibrary library = new CardLibrary(List.of(defend));
+    CardEffectHandler effectHandler = new CardEffectHandler();
+    CardPlayService cardPlayService =
+        new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
     BattleController controller =
-        new BattleController(
-            player, List.of(enemy("enemy", 20, 1)), new CardEffectResolver(library), library, deck);
+        new BattleController(player, List.of(enemy(20, 1)), effectHandler, cardPlayService);
     List<BattlePhase> phases = new ArrayList<>();
     controller.addPhaseChangeListener((previous, next) -> phases.add(next));
 
     controller.start();
     boolean accepted =
-        controller.submitCardPlayRequest(
-            new CardPlayRequest("defend", "player"), PlayerIntent.DEFEND);
+        controller.submitCardPlayRequest(CardPlayRequest.self(instanceIdInHand(deck, "defend")));
 
     assertTrue(accepted);
-    assertEquals(5, player.getComponent(CombatStatsComponent.class).getArmor());
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    assertEquals(5, stats.getBlock());
+    assertEquals(0, stats.getArmour());
     assertEquals(2, player.getComponent(EnergyComponent.class).getCurrentEnergy());
-    assertTrue(deck.getDiscardPile().contains("defend"));
-    assertTrue(phases.contains(BattlePhase.PLAYER_DEFEND));
+    assertTrue(containsCardId(deck.getDiscardPile(), "defend"));
+    assertTrue(phases.contains(BattlePhase.CARD_RESOLVING));
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+
+    controller.endPlayerTurn();
+
+    assertEquals(0, stats.getBlock());
+    assertEquals(20, stats.getHealth());
   }
 
   @Test
@@ -201,22 +230,23 @@ class BattleLoopTest {
             .addComponent(new EnergyComponent(3));
     BattleDeck deck = deckWithFirstCardInHand("bandage", "strike");
     CardLibrary library = new CardLibrary(List.of(bandage));
+    CardEffectHandler effectHandler = new CardEffectHandler();
+    CardPlayService cardPlayService =
+        new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
     BattleController controller =
-        new BattleController(
-            player, List.of(enemy("enemy", 20, 1)), new CardEffectResolver(library), library, deck);
+        new BattleController(player, List.of(enemy(20, 1)), effectHandler, cardPlayService);
     List<BattlePhase> phases = new ArrayList<>();
     controller.addPhaseChangeListener((previous, next) -> phases.add(next));
 
     controller.start();
     boolean accepted =
-        controller.submitCardPlayRequest(
-            new CardPlayRequest("bandage", "player"), PlayerIntent.OTHER);
+        controller.submitCardPlayRequest(CardPlayRequest.self(instanceIdInHand(deck, "bandage")));
 
     assertTrue(accepted);
     assertEquals(14, player.getComponent(CombatStatsComponent.class).getHealth());
     assertEquals(2, player.getComponent(EnergyComponent.class).getCurrentEnergy());
-    assertTrue(deck.getDiscardPile().contains("bandage"));
-    assertTrue(phases.contains(BattlePhase.PLAYER_OTHER));
+    assertTrue(containsCardId(deck.getDiscardPile(), "bandage"));
+    assertTrue(phases.contains(BattlePhase.CARD_RESOLVING));
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }
 
@@ -226,22 +256,25 @@ class BattleLoopTest {
         new Entity()
             .addComponent(new CombatStatsComponent(20, 0))
             .addComponent(new EnergyComponent(3));
-    Entity enemy = enemy("enemy", 20, 1);
+    Entity enemy = enemy(20, 1);
     BattleDeck deck = deckWithFirstCardInHand("strike", "bandage");
     CardLibrary library = new CardLibrary(List.of(strikeCard()));
+    CardEffectHandler effectHandler = new CardEffectHandler();
+    CardPlayService cardPlayService =
+        new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
     BattleController controller =
-        new BattleController(
-            player, List.of(enemy), new CardEffectResolver(library), library, deck);
+        new BattleController(player, List.of(enemy), effectHandler, cardPlayService);
 
     boolean accepted =
         controller.submitCardPlayRequest(
-            new CardPlayRequest("strike", "enemy"), PlayerIntent.ATTACK);
+            CardPlayRequest.singleEnemy(
+                instanceIdInHand(deck, "strike"), Integer.toString(enemy.getId())));
 
     assertFalse(accepted);
     assertEquals(BattlePhase.SETUP, controller.getCurrentPhase());
     assertEquals(20, enemy.getComponent(CombatStatsComponent.class).getHealth());
     assertEquals(3, player.getComponent(EnergyComponent.class).getCurrentEnergy());
-    assertEquals(List.of("strike"), deck.getHand());
+    assertEquals("strike", deck.getHand().get(0).cardId());
     assertTrue(deck.getDiscardPile().isEmpty());
   }
 
@@ -258,22 +291,25 @@ class BattleLoopTest {
         new Entity()
             .addComponent(new CombatStatsComponent(20, 0))
             .addComponent(new EnergyComponent(3));
-    Entity enemy = enemy("enemy", 20, 1);
+    Entity enemy = enemy(20, 1);
     BattleDeck deck = deckWithFirstCardInHand("strike", "bandage");
     CardLibrary library = new CardLibrary(List.of(expensiveStrike));
+    CardEffectHandler effectHandler = new CardEffectHandler();
+    CardPlayService cardPlayService =
+        new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
     BattleController controller =
-        new BattleController(
-            player, List.of(enemy), new CardEffectResolver(library), library, deck);
+        new BattleController(player, List.of(enemy), effectHandler, cardPlayService);
 
     controller.start();
     boolean accepted =
         controller.submitCardPlayRequest(
-            new CardPlayRequest("strike", "enemy"), PlayerIntent.ATTACK);
+            CardPlayRequest.singleEnemy(
+                instanceIdInHand(deck, "strike"), Integer.toString(enemy.getId())));
 
     assertFalse(accepted);
     assertEquals(3, player.getComponent(EnergyComponent.class).getCurrentEnergy());
     assertEquals(20, enemy.getComponent(CombatStatsComponent.class).getHealth());
-    assertEquals(List.of("strike"), deck.getHand());
+    assertEquals("strike", deck.getHand().get(0).cardId());
     assertTrue(deck.getDiscardPile().isEmpty());
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }
@@ -291,26 +327,26 @@ class BattleLoopTest {
         new Entity()
             .addComponent(new CombatStatsComponent(20, 0))
             .addComponent(new EnergyComponent(3));
-    Entity firstEnemy = enemy("first_enemy", 20, 1);
-    Entity secondEnemy = enemy("second_enemy", 20, 1);
+    Entity firstEnemy = enemy(20, 1);
+    Entity secondEnemy = enemy(20, 1);
     BattleDeck deck = deckWithFirstCardInHand("expose", "strike");
     CardLibrary library = new CardLibrary(List.of(expose));
+    CardEffectHandler effectHandler = new CardEffectHandler();
+    CardPlayService cardPlayService =
+        new CardPlayService(library, deck, player.getComponent(EnergyComponent.class));
     BattleController controller =
         new BattleController(
-            player,
-            List.of(firstEnemy, secondEnemy),
-            new CardEffectResolver(library),
-            library,
-            deck);
+            player, List.of(firstEnemy, secondEnemy), effectHandler, cardPlayService);
 
     controller.start();
     boolean accepted =
         controller.submitCardPlayRequest(
-            new CardPlayRequest("expose", "first_enemy"), PlayerIntent.OTHER);
+            CardPlayRequest.allEnemies(instanceIdInHand(deck, "expose")));
 
     assertTrue(accepted);
-    assertTrue(firstEnemy.getComponent(CombatStatsComponent.class).hasStatusEffect("vulnerable"));
-    assertTrue(secondEnemy.getComponent(CombatStatsComponent.class).hasStatusEffect("vulnerable"));
+    assertTrue(firstEnemy.getComponent(CombatStatsComponent.class).hasStatusEffect("VULNERABLE"));
+
+    assertTrue(secondEnemy.getComponent(CombatStatsComponent.class).hasStatusEffect("VULNERABLE"));
     assertEquals(2, player.getComponent(EnergyComponent.class).getCurrentEnergy());
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }

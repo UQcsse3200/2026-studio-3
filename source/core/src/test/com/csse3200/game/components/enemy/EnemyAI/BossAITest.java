@@ -93,7 +93,7 @@ class BossAITest {
   }
 
   @Test
-  void shouldAttackWhenArmorIsAlreadyHigh() {
+  void shouldAttackWhenArmourIsAlreadyHigh() {
     BossAI ai = new BossAI(new FixedRollRandom(99));
 
     EnemyIntent intent = ai.decide(createContext(100, 8, 1));
@@ -223,18 +223,18 @@ class BossAITest {
     assertEquals(0, ai.getConsecutiveAttacks());
   }
 
-  private EnemyAIContext createContext(int bossHealth, int bossArmor, int turnNumber) {
-    return createContext(PLAYER_HEALTH, bossHealth, bossArmor, turnNumber);
+  private EnemyAIContext createContext(int bossHealth, int bossArmour, int turnNumber) {
+    return createContext(PLAYER_HEALTH, bossHealth, bossArmour, turnNumber);
   }
 
   private EnemyAIContext createContext(
-      int playerHealth, int bossHealth, int bossArmor, int turnNumber) {
+      int playerHealth, int bossHealth, int bossArmour, int turnNumber) {
     return new EnemyAIContext(
         playerHealth,
         bossHealth,
         BOSS_MAX_HEALTH,
         BOSS_ATTACK,
-        bossArmor,
+        bossArmour,
         EnemyIntent.unknown(),
         turnNumber);
   }

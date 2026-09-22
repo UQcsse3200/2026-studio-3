@@ -75,7 +75,9 @@ class GameStateSnapshotEndToEndTest {
     saveGameService.saveGame(1);
     LoadResult loadResult = saveGameService.loadGame(1);
 
-    assertEquals(PlayerDeckFactory.getStarterDeckCardIds(), loadResult.data().deck.cardIds);
+    assertEquals(
+        PlayerDeckFactory.getStarterDeckCardIds(),
+        loadResult.data().deck.cards.stream().map(card -> card.cardId).toList());
   }
 
   @Test
@@ -133,7 +135,11 @@ class GameStateSnapshotEndToEndTest {
     assertEquals(65, restoredPlayerState.getCurrentHealth());
     assertEquals(100, restoredPlayerState.getMaxHealth());
     assertEquals(120, restoredPlayerState.getGold());
-    assertEquals(PlayerDeckFactory.getStarterDeckCardIds(), restoredDeck.getCardIds());
+    assertEquals(
+        PlayerDeckFactory.getStarterDeckCardIds(),
+        restoredDeck.getCards().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList());
     assertEquals(0, restoredRunState.getMapGraph().getCurrentNode().getNodeId());
     assertEquals(NodeState.AVAILABLE, restoredRunState.getMapGraph().getNode(1).getState());
     assertEquals(

@@ -12,7 +12,7 @@ import java.util.Objects;
  *   <li>Attack
  *   <li>Defend
  *   <li>Attack
- *   <li>Attack if armor remains, otherwise defend
+ *   <li>Attack if armour remains, otherwise defend
  * </ol>
  */
 public class CycleFourStanceAI implements EnemyAI {
@@ -35,7 +35,7 @@ public class CycleFourStanceAI implements EnemyAI {
   }
 
   private EnemyIntent decideFinalStance(EnemyAIContext context) {
-    if (context.getEnemyArmor() > 0) {
+    if (context.getEnemyArmour() > 0) {
       return attack(context);
     }
 

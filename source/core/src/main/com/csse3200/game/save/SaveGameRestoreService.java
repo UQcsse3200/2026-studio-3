@@ -3,6 +3,7 @@ package com.csse3200.game.save;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryUnlockState;
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.maps.MapGraph;
 import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.NodeState;
@@ -148,13 +149,40 @@ public class SaveGameRestoreService {
   }
 
   private RestoreResult validateDeck(DeckSaveData deckData) {
-    if (deckData == null || deckData.cardIds == null) {
+    if (deckData == null || deckData.cards == null) {
       return RestoreResult.failure(RestoreError.MISSING_DECK_DATA, "Save is missing deck data");
     }
-    for (String cardId : deckData.cardIds) {
-      if (!playerDeck.canAddCard(cardId)) {
+    // Validates against a throwaway copy of the live deck (same CardService, via
+    // PlayerDeck.copy()) using the real addCard() path, rather than re-implementing its checks
+    // here — avoids drifting out of sync with PlayerDeck's actual acceptance rules (e.g. an
+    // upgradeLevel that's in-range but has no upgrade definition for that card). Caught in
+    // review (Ray, PR #243): the previous version only checked upgradeLevel's numeric range and
+    // whether cardId was registered, so an in-range-but-incompatible upgrade would pass here and
+    // then throw partway through restoreDeck() — after restorePlayer() and playerDeck.clear()
+    // had already mutated live state, breaking the documented no-partial-mutation guarantee.
+    Set<String> seenInstanceIds = new HashSet<>();
+    PlayerDeck candidate = playerDeck.copy();
+    candidate.clear();
+    for (CardInstanceSaveData card : deckData.cards) {
+      if (card == null) {
         return RestoreResult.failure(
-            RestoreError.INVALID_DECK_STATE, "Saved deck contains an unknown card ID: " + cardId);
+            RestoreError.INVALID_DECK_STATE, "Saved deck contains a null card entry");
+      }
+      if (card.instanceId == null || card.instanceId.isBlank()) {
+        return RestoreResult.failure(
+            RestoreError.INVALID_DECK_STATE, "Saved deck contains a card with no instance ID");
+      }
+      if (!seenInstanceIds.add(card.instanceId)) {
+        return RestoreResult.failure(
+            RestoreError.INVALID_DECK_STATE,
+            "Saved deck contains a duplicate instance ID: " + card.instanceId);
+      }
+      try {
+        candidate.addCard(new CardInstance(card.instanceId, card.cardId, card.upgradeLevel));
+      } catch (IllegalArgumentException exception) {
+        return RestoreResult.failure(
+            RestoreError.INVALID_DECK_STATE,
+            "Saved deck contains an invalid card (" + card.cardId + "): " + exception.getMessage());
       }
     }
     return RestoreResult.success("");
@@ -223,8 +251,14 @@ public class SaveGameRestoreService {
   }
 
   private void restoreDeck(DeckSaveData deckData) {
+    // validateDeck() has already confirmed every entry is well-formed, so this should never
+    // throw — a plain clear()+addCard() loop against the same injected playerDeck instance,
+    // rather than PlayerDeck.fromInstances(...)'s static factory, since restore mutates an
+    // existing run-scoped deck rather than constructing a fresh one.
     playerDeck.clear();
-    playerDeck.addCards(deckData.cardIds);
+    for (CardInstanceSaveData card : deckData.cards) {
+      playerDeck.addCard(new CardInstance(card.instanceId, card.cardId, card.upgradeLevel));
+    }
   }
 
   private void restoreBestiaryProgress(ProgressSaveData progressData) {

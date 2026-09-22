@@ -2,10 +2,12 @@
 package com.csse3200.game.components.spritedisplay.clickable;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton;
@@ -17,6 +19,11 @@ import com.csse3200.game.components.Component;
 public abstract class Clickable extends Component {
   // Shared default skin, only loaded if the record doesn't provide one.
   private static Skin defaultSkin;
+
+  // Applied to disabled widgets (e.g. discard-pile cards) so they read as inert at a glance.
+  private static final float DISABLED_SHADE = 0.35f;
+
+  protected boolean disabled;
 
   float x;
   float y;
@@ -43,6 +50,7 @@ public abstract class Clickable extends Component {
     this.btnSkin = (rec.btnSkin() != null) ? rec.btnSkin() : getDefaultSkin();
     this.args = rec.args();
     this.label = rec.label();
+    this.disabled = rec.disabled();
 
     String text = rec.text();
     String styleName = rec.styleName();
@@ -61,7 +69,28 @@ public abstract class Clickable extends Component {
                   : new ImageTextButton(text, btnSkin);
         };
 
+    if (this.disabled) {
+      // Blocks clicks/drags and hover hit-testing (so onEnter/onExit never fire) in one go.
+      btn.setTouchable(Touchable.disabled);
+      applyDisabledShade();
+    }
+
     init(rec.trigger());
+  }
+
+  /**
+   * Tints the button and every direct child (its {@code Image}/{@code Label}, depending on button
+   * type) so the shade is actually visible. {@code Button.setColor} alone only tints the button's
+   * own background drawable and propagates ALPHA (not RGB) to children per {@code Group.draw} — an
+   * {@link ImageButton} with only {@code imageUp} set has no background, so the nested {@code
+   * Image} would otherwise stay full-color white.
+   */
+  private void applyDisabledShade() {
+    Color shade = new Color(DISABLED_SHADE, DISABLED_SHADE, DISABLED_SHADE, 1f);
+    btn.setColor(shade);
+    for (Actor child : btn.getChildren()) {
+      child.setColor(shade);
+    }
   }
 
   protected void init(String trigger) {
@@ -85,6 +114,18 @@ public abstract class Clickable extends Component {
             onClick();
           }
         });
+  }
+
+  /**
+   * Toggles whether this widget currently responds to clicks/drags — separate from {@link
+   * #disabled}, which permanently marks a specific card (e.g. one sitting in the discard pile) as
+   * inert regardless of whose turn it is. A permanently-disabled widget stays non-interactive no
+   * matter what this is called with.
+   *
+   * @param interactable whether the widget should currently accept clicks/drags
+   */
+  protected void setInteractable(boolean interactable) {
+    btn.setTouchable(interactable && !disabled ? Touchable.enabled : Touchable.disabled);
   }
 
   protected void onEnter() {
@@ -132,6 +173,17 @@ public abstract class Clickable extends Component {
    * its position anyway.
    */
   public void showNow() {
+    // no-op by default
+  }
+
+  /**
+   * Put this widget straight into its hidden resting state (off-screen/invisible, not
+   * interactable), skipping any outro animation. Called by {@link ClickableFactory} when a widget
+   * is (re)built while the hand is currently supposed to be hidden — e.g. a cooldown retrieval
+   * rebuilding the row mid-enemy-turn, before the delayed "up" animation has fired — so it doesn't
+   * pop into view early. Default: nothing, mirroring {@link #showNow()}.
+   */
+  public void hideNow() {
     // no-op by default
   }
 

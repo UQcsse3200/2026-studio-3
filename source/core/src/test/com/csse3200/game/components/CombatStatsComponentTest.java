@@ -118,6 +118,36 @@ class CombatStatsComponentTest {
   }
 
   @Test
+  void shouldClearNegativeStatusesAndKeepBuffs() {
+    CombatStatsComponent combat = new CombatStatsComponent(100, 20);
+    combat.applyStatusEffect("POISON", 3, 2);
+    combat.applyStatusEffect("vulnerable", 1, 1);
+    combat.applyStatusEffect("FEEBLE", 1, 2);
+    combat.applyStatusEffect("STRENGTH", 2, 0);
+    combat.applyStatusEffect("HEAL", 4, 3);
+
+    combat.clearNegativeStatusEffects();
+
+    assertFalse(combat.hasStatusEffect("POISON"));
+    assertFalse(combat.hasStatusEffect("vulnerable"));
+    assertFalse(combat.hasStatusEffect("FEEBLE"));
+    assertTrue(combat.hasStatusEffect("STRENGTH"));
+    assertTrue(combat.hasStatusEffect("HEAL"));
+  }
+
+  @Test
+  void shouldKeepLongerDurationWhenFeebleIsReapplied() {
+    CombatStatsComponent combat = new CombatStatsComponent(100, 20);
+
+    combat.applyStatusEffect("FEEBLE", 1, 4);
+    combat.applyStatusEffect("FEEBLE", 1, 2);
+    assertEquals(4, combat.getStatusEffect("FEEBLE").getDuration());
+
+    combat.applyStatusEffect("FEEBLE", 1, 6);
+    assertEquals(6, combat.getStatusEffect("FEEBLE").getDuration());
+  }
+
+  @Test
   void shouldSetGetBaseAttack() {
     CombatStatsComponent combat = new CombatStatsComponent(100, 20);
     assertEquals(20, combat.getBaseAttack());
@@ -130,13 +160,13 @@ class CombatStatsComponentTest {
   }
 
   @Test
-  void shouldReduceHealthWithoutArmorOrBlock() {
+  void shouldReduceHealthWithoutArmourOrBlock() {
     CombatStatsComponent stats = new CombatStatsComponent(20, 0);
-    stats.setArmor(10);
+    stats.setArmour(10);
     stats.setBlock(5);
     stats.applyDirectHealthChange(-8);
     assertEquals(12, stats.getHealth());
-    assertEquals(10, stats.getArmor());
+    assertEquals(10, stats.getArmour());
     assertEquals(5, stats.getBlock());
   }
 
@@ -178,5 +208,32 @@ class CombatStatsComponentTest {
     combat.applyDirectHealthChange(-5);
 
     verify(listener, times(1)).handle();
+  }
+
+  @Test
+  void shouldTakePiercingDamageWithoutConsumingBlockOrArmour() {
+    CombatStatsComponent combat = new CombatStatsComponent(20, 5);
+    combat.addBlock(3);
+    combat.addArmour(4);
+
+    combat.takePiercingDamage(6);
+
+    assertEquals(14, combat.getHealth());
+    assertEquals(3, combat.getBlock());
+    assertEquals(4, combat.getArmour());
+  }
+
+  @Test
+  void shouldTriggerDeathEventFromPiercingDamage() {
+    Entity entity = new Entity();
+    CombatStatsComponent combat = new CombatStatsComponent(10, 5);
+    entity.addComponent(combat);
+    EventListener0 listener = mock(EventListener0.class);
+    entity.getEvents().addListener("entityIsDead", listener);
+
+    combat.takePiercingDamage(20);
+
+    assertEquals(0, combat.getHealth());
+    verify(listener).handle();
   }
 }

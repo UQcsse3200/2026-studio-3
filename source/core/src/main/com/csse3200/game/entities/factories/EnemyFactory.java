@@ -102,7 +102,7 @@ public class EnemyFactory {
     }
 
     CombatStatsComponent stats = new CombatStatsComponent(config.health, config.baseAttack);
-    stats.setArmor(config.armour);
+    stats.setArmour(config.armour);
 
     Entity enemy =
         new Entity()
@@ -111,6 +111,7 @@ public class EnemyFactory {
             .addComponent(new EnemyBehaviourComponent(config.behaviour))
             .addComponent(animator)
             .addComponent(new EnemyAnimationController())
+            .addComponent(new EnemyStatsDisplay())
             .addComponent(new EnemyCombatEffectsComponent());
 
     // The drop target lets the player drag a card onto the enemy. It needs the drag-and-drop UI
@@ -120,7 +121,9 @@ public class EnemyFactory {
     if (dragAndDrop != null && ServiceLocator.getCamera() != null) {
       enemy.addComponent(
           new EnemyDropTargetComponent(
-              dragAndDrop.getDragAndDrop(), ServiceLocator.getCamera(), config.id));
+              dragAndDrop.getDragAndDrop(),
+              ServiceLocator.getCamera(),
+              Integer.toString(enemy.getId())));
     }
     // The intent display draws into the world through the render service, which only exists while
     // the game is rendering, so it is skipped when absent (e.g. headless tests) rather than

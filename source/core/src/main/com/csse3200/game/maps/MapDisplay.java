@@ -11,8 +11,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.csse3200.game.components.CombatStatsComponent;
-import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.entities.configs.PlayerConfig;
 import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.services.ResourceService;
@@ -33,8 +31,10 @@ import java.util.Map;
 public class MapDisplay extends UIComponent {
 
   private final MapGraph mapGraph;
+  private final RunState runState;
   private final MapInputHandler mapInputHandler;
   private final MapSelectionController mapSelectionController;
+  private static final String LARGE = "large";
 
   private Group group;
   private ScrollPane scrollPane;
@@ -43,6 +43,9 @@ public class MapDisplay extends UIComponent {
   private final float nodeWidth = mapWidth / 13f; // default size
   // to store positions
   private final Map<Integer, Vector2> nodePositions = new HashMap<>();
+  // Node-id labels, shown only while debug rendering is active — same toggle 'debug on'
+  // already controls elsewhere, so this reuses it instead of adding a new one.
+  private final java.util.List<Label> nodeIdLabels = new java.util.ArrayList<>();
 
   /**
    * Constructer method to initialize mapGraph
@@ -50,7 +53,12 @@ public class MapDisplay extends UIComponent {
    * @param mapGraph
    */
   public MapDisplay(MapGraph mapGraph) {
+    this(mapGraph, null);
+  }
+
+  public MapDisplay(MapGraph mapGraph, RunState runState) {
     this.mapGraph = mapGraph;
+    this.runState = runState;
     this.mapSelectionController = new MapSelectionController(mapGraph);
     this.mapInputHandler = new MapInputHandler(mapSelectionController);
     this.mapHeight = (MapGenerationConfig.MAP_HEIGHT + 1) * 2f * nodeWidth;
@@ -130,6 +138,13 @@ public class MapDisplay extends UIComponent {
           new Vector2(x + nodeActor.getNodeSize() / 2f, y + nodeActor.getNodeSize() / 2f));
 
       group.addActor(nodeActor);
+
+      Label idLabel = new Label(String.valueOf(node.getNodeId()), skin);
+      idLabel.setFontScale(0.6f);
+      idLabel.setPosition(x, y + nodeActor.getNodeSize());
+      idLabel.setVisible(false);
+      nodeIdLabels.add(idLabel);
+      group.addActor(idLabel);
     }
   }
 
@@ -210,6 +225,8 @@ public class MapDisplay extends UIComponent {
     // Image size
     float imageSideLength = 48f;
 
+    PlayerRunState playerState = runState == null ? null : runState.getOrCreatePlayerState();
+
     // Heart image
     Image heartImage =
         new Image(ServiceLocator.getResourceService().getAsset("images/heart.png", Texture.class));
@@ -218,11 +235,9 @@ public class MapDisplay extends UIComponent {
     int currentHealth;
     int maxHealth;
 
-    CombatStatsComponent combatStats = entity.getComponent(CombatStatsComponent.class);
-
-    if (combatStats != null) {
-      currentHealth = combatStats.getHealth();
-      maxHealth = combatStats.getMaxHealth();
+    if (playerState != null) {
+      currentHealth = playerState.getCurrentHealth();
+      maxHealth = playerState.getMaxHealth();
     } else {
       PlayerConfig stats = FileLoader.readClass(PlayerConfig.class, "configs/player.json");
       currentHealth = stats.health;
@@ -230,7 +245,7 @@ public class MapDisplay extends UIComponent {
     }
 
     String healthText = String.format("Health: %d / %d", currentHealth, maxHealth);
-    Label.LabelStyle healthStyle = new Label.LabelStyle(skin.get("large", Label.LabelStyle.class));
+    Label.LabelStyle healthStyle = new Label.LabelStyle(skin.get(LARGE, Label.LabelStyle.class));
     healthStyle.fontColor = new Color(0.75f, 0.18f, 0.16f, 1f);
 
     Label healthLabel = new Label(healthText, healthStyle);
@@ -243,16 +258,14 @@ public class MapDisplay extends UIComponent {
     // Money text
     int money;
 
-    InventoryComponent inventoryComponent = entity.getComponent(InventoryComponent.class);
-
-    if (inventoryComponent != null) {
-      money = inventoryComponent.getGold();
+    if (playerState != null) {
+      money = playerState.getGold();
     } else {
       PlayerConfig stats = FileLoader.readClass(PlayerConfig.class, "configs/player.json");
       money = stats.gold;
     }
 
-    Label.LabelStyle moneyStyle = new Label.LabelStyle(skin.get("large", Label.LabelStyle.class));
+    Label.LabelStyle moneyStyle = new Label.LabelStyle(skin.get(LARGE, Label.LabelStyle.class));
     moneyStyle.fontColor = new Color(0.95f, 0.73f, 0.28f, 1f);
     String moneyText = String.format("Gold: $%d", money);
     Label moneyLabel = new Label(moneyText, moneyStyle);
@@ -263,7 +276,7 @@ public class MapDisplay extends UIComponent {
         new Image(ServiceLocator.getResourceService().getAsset("images/piety.png", Texture.class));
 
     // Piety text
-    Label.LabelStyle pietyStyle = new Label.LabelStyle(skin.get("large", Label.LabelStyle.class));
+    Label.LabelStyle pietyStyle = new Label.LabelStyle(skin.get(LARGE, Label.LabelStyle.class));
     pietyStyle.fontColor = new Color(0.95f, 0.73f, 0.28f, 1f);
     String pietyText = String.format("Piety: %d", mapGraph.getCurrentNode().getHeight());
     Label pietyLabel = new Label(pietyText, pietyStyle);
@@ -322,7 +335,12 @@ public class MapDisplay extends UIComponent {
 
   @Override
   public void draw(SpriteBatch batch) {
-    // draw is handled by the stage
+    // draw is handled by the stage; only the node-id label visibility needs a live per-frame
+    // check, since it follows the 'debug on' terminal toggle.
+    boolean showIds = ServiceLocator.getRenderService().getDebug().getActive();
+    for (Label label : nodeIdLabels) {
+      label.setVisible(showIds);
+    }
   }
 
   /** Closes the MapUI */

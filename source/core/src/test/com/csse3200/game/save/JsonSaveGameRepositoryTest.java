@@ -38,7 +38,9 @@ class JsonSaveGameRepositoryTest {
     assertEquals(2, loadResult.data().metadata.slotId);
     assertEquals("Second run", loadResult.data().metadata.runLabel);
     assertEquals(43, loadResult.data().player.currentHealth);
-    assertEquals(List.of("strike", "defend", "strike"), loadResult.data().deck.cardIds);
+    assertEquals(
+        List.of("strike", "defend", "strike"),
+        loadResult.data().deck.cards.stream().map(card -> card.cardId).toList());
     assertEquals(7, loadResult.data().map.currentNodeId);
     assertEquals(List.of(8, 9), loadResult.data().map.nodes.get(0).connectionIds);
     assertEquals("CURRENT", loadResult.data().map.nodes.get(0).state);
@@ -195,7 +197,7 @@ class JsonSaveGameRepositoryTest {
     SaveGameData data =
         new SaveGameData(
             new PlayerSaveData(43, 60, 120, 8),
-            new DeckSaveData(List.of("strike", "defend", "strike")),
+            DeckSaveData.ofCardIds(List.of("strike", "defend", "strike")),
             new MapSaveData(
                 List.of(
                     new MapNodeSaveData(7, "COMBAT", "CURRENT", List.of(8, 9)),
