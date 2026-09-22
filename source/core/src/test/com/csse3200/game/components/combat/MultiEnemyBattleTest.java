@@ -9,6 +9,7 @@ import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.cards.play.CardPlayService;
+import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
@@ -69,7 +70,15 @@ class MultiEnemyBattleTest {
 
   private boolean strike(BattleController controller, Entity target) {
     return controller.submitCardPlayRequest(
-        CardPlayRequest.singleEnemy("test_card", Integer.toString(target.getId())));
+        CardPlayRequest.singleEnemy(currentInstanceId(), Integer.toString(target.getId())));
+  }
+
+  private String currentInstanceId() {
+    return deck.getHand().get(0).instanceId();
+  }
+
+  private List<String> handCardIds() {
+    return deck.getHand().stream().map(CardInstance::cardId).toList();
   }
 
   @Test
@@ -84,11 +93,12 @@ class MultiEnemyBattleTest {
     deck.drawCards(1);
     assertTrue(
         controller.submitCardPlayRequest(
-            CardPlayRequest.singleEnemy("test_card", "lesser_shade_1")));
+            CardPlayRequest.singleEnemy(currentInstanceId(), "lesser_shade_1")));
     assertEquals(30, first.getComponent(CombatStatsComponent.class).getHealth());
     assertEquals(18, second.getComponent(CombatStatsComponent.class).getHealth());
     assertTrue(
-        controller.submitCardPlayRequest(CardPlayRequest.singleEnemy("test_card", "bone_crawler")));
+        controller.submitCardPlayRequest(
+            CardPlayRequest.singleEnemy(currentInstanceId(), "bone_crawler")));
     assertEquals(24, first.getComponent(CombatStatsComponent.class).getHealth());
     assertEquals(18, second.getComponent(CombatStatsComponent.class).getHealth());
   }
@@ -105,9 +115,9 @@ class MultiEnemyBattleTest {
     second.getComponent(CombatStatsComponent.class).setHealth(0);
     assertFalse(
         controller.submitCardPlayRequest(
-            CardPlayRequest.singleEnemy("test_card", "lesser_shade_1")));
+            CardPlayRequest.singleEnemy(currentInstanceId(), "lesser_shade_1")));
     assertEquals(3, player.getComponent(EnergyComponent.class).getCurrentEnergy());
-    assertEquals(List.of("test_card"), deck.getHand());
+    assertEquals(List.of("test_card"), handCardIds());
     assertTrue(deck.getDiscardPile().isEmpty());
   }
 
@@ -127,9 +137,9 @@ class MultiEnemyBattleTest {
     BattleController controller = battle(TargetType.SINGLE_ENEMY, EffectType.DAMAGE, 6);
     assertFalse(
         controller.submitCardPlayRequest(
-            CardPlayRequest.singleEnemy("test_card", "missing-enemy")));
+            CardPlayRequest.singleEnemy(currentInstanceId(), "missing-enemy")));
     assertEquals(3, player.getComponent(EnergyComponent.class).getCurrentEnergy());
-    assertEquals(List.of("test_card"), deck.getHand());
+    assertEquals(List.of("test_card"), handCardIds());
     assertTrue(deck.getDiscardPile().isEmpty());
     assertEquals(30, first.getComponent(CombatStatsComponent.class).getHealth());
     assertEquals(24, second.getComponent(CombatStatsComponent.class).getHealth());
@@ -177,7 +187,7 @@ class MultiEnemyBattleTest {
   @Test
   void allEnemyDamageHitsBothEnemiesAndCanWinTheBattle() {
     BattleController controller = battle(TargetType.ALL_ENEMIES, EffectType.DAMAGE, 30);
-    assertTrue(controller.submitCardPlayRequest(CardPlayRequest.allEnemies("test_card")));
+    assertTrue(controller.submitCardPlayRequest(CardPlayRequest.allEnemies(currentInstanceId())));
     assertTrue(first.getComponent(CombatStatsComponent.class).isDead());
     assertTrue(second.getComponent(CombatStatsComponent.class).isDead());
     assertEquals(BattlePhase.VICTORY, controller.getCurrentPhase());
@@ -187,7 +197,7 @@ class MultiEnemyBattleTest {
   @Test
   void selfCardProtectsPlayerFromTheCombinedEnemyAttacks() {
     BattleController controller = battle(TargetType.SELF, EffectType.BLOCK, 8);
-    assertTrue(controller.submitCardPlayRequest(CardPlayRequest.self("test_card")));
+    assertTrue(controller.submitCardPlayRequest(CardPlayRequest.self(currentInstanceId())));
     assertEquals(30, first.getComponent(CombatStatsComponent.class).getHealth());
     assertEquals(24, second.getComponent(CombatStatsComponent.class).getHealth());
     controller.endPlayerTurn();

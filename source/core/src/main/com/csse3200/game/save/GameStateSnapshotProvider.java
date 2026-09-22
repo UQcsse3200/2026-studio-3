@@ -122,6 +122,9 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
       }
     }
 
-    return new ProgressSaveData(pendingRewardId, resumeScreen, bestiaryProgress);
+    ProgressSaveData progress =
+        new ProgressSaveData(pendingRewardId, resumeScreen, bestiaryProgress);
+    progress.encounterSeed = runState.getEncounterSeed();
+    return progress;
   }
 }

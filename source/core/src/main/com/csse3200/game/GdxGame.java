@@ -6,8 +6,14 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.files.UserSettings;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.save.AutosaveCoordinator;
+import com.csse3200.game.save.GameStateSnapshotProvider;
+import com.csse3200.game.save.JsonSaveGameRepository;
+import com.csse3200.game.save.SaveGameService;
 import com.csse3200.game.screens.BattleScreen;
 import com.csse3200.game.screens.BestiaryScreen;
 import com.csse3200.game.screens.CardLibraryScreen;
@@ -43,9 +49,32 @@ public class GdxGame extends Game {
 
   // Lives here rather than on a screen, since setScreen() disposes the outgoing screen.
   private final RunState runState = new RunState();
+  private final AutosaveCoordinator autosaveCoordinator =
+      new AutosaveCoordinator(runState, this::newAutosaveService);
 
   public RunState getRunState() {
     return runState;
+  }
+
+  /** Schedules one autosave for the current run after a completed encounter. */
+  public void requestAutosaveAfterEncounter() {
+    autosaveCoordinator.requestAfterSuccessfulEncounter();
+  }
+
+  /** Flushes a scheduled autosave once the completed encounter's screen has been disposed. */
+  public void autosaveOnMapReady() {
+    autosaveCoordinator.saveIfPending();
+  }
+
+  private SaveGameService newAutosaveService() {
+    CardLibrary cardLibrary = new CardLibrary(CardConfigLoader.loadCards());
+    return new SaveGameService(
+        new JsonSaveGameRepository(),
+        new GameStateSnapshotProvider(
+            runState.getOrCreatePlayerState(),
+            runState.getOrCreatePlayerDeck(cardLibrary),
+            runState,
+            bestiaryService));
   }
 
   @Override

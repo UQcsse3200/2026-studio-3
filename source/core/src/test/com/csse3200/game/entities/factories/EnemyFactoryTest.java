@@ -127,7 +127,7 @@ class EnemyFactoryTest {
 
     assertEquals(50, stats.getHealth());
     assertEquals(9, stats.getBaseAttack());
-    assertEquals(3, stats.getArmor());
+    assertEquals(3, stats.getArmour());
   }
 
   @Test
