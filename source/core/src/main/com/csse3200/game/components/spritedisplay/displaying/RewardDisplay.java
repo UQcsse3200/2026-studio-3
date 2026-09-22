@@ -9,6 +9,7 @@ import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.rewards.RewardService;
 import com.csse3200.game.rewards.RewardType;
+import com.csse3200.game.rewards.ItemFormatting;
 import java.util.List;
 
 public class RewardDisplay extends Displaying {
@@ -72,20 +73,8 @@ public class RewardDisplay extends Displaying {
   private String describeOption(RewardOption option) {
     return switch (option.type) {
       case GOLD -> option.goldAmount + " Gold";
-      case ITEM -> "Item: " + formatItemName(option.itemId);
+      case ITEM -> "Item: " + ItemFormatting.formatItemName(option.itemId);
     };
-  }
-
-  private String formatItemName(ItemType itemId) {
-    String[] words = itemId.name().split("_");
-    StringBuilder result = new StringBuilder();
-    for (String word : words) {
-      if (!result.isEmpty()) {
-        result.append(' ');
-      }
-      result.append(word.charAt(0)).append(word.substring(1).toLowerCase());
-    }
-    return result.toString();
   }
 
   private void claimOption(RewardOption option) {
