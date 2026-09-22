@@ -43,6 +43,9 @@ public class MapDisplay extends UIComponent {
   private final float nodeWidth = mapWidth / 13f; // default size
   // to store positions
   private final Map<Integer, Vector2> nodePositions = new HashMap<>();
+  // Node-id labels, shown only while debug rendering is active — same toggle 'debug on'
+  // already controls elsewhere, so this reuses it instead of adding a new one.
+  private final java.util.List<Label> nodeIdLabels = new java.util.ArrayList<>();
 
   /**
    * Constructer method to initialize mapGraph
@@ -135,6 +138,13 @@ public class MapDisplay extends UIComponent {
           new Vector2(x + nodeActor.getNodeSize() / 2f, y + nodeActor.getNodeSize() / 2f));
 
       group.addActor(nodeActor);
+
+      Label idLabel = new Label(String.valueOf(node.getNodeId()), skin);
+      idLabel.setFontScale(0.6f);
+      idLabel.setPosition(x, y + nodeActor.getNodeSize());
+      idLabel.setVisible(false);
+      nodeIdLabels.add(idLabel);
+      group.addActor(idLabel);
     }
   }
 
@@ -325,7 +335,12 @@ public class MapDisplay extends UIComponent {
 
   @Override
   public void draw(SpriteBatch batch) {
-    // draw is handled by the stage
+    // draw is handled by the stage; only the node-id label visibility needs a live per-frame
+    // check, since it follows the 'debug on' terminal toggle.
+    boolean showIds = ServiceLocator.getRenderService().getDebug().getActive();
+    for (Label label : nodeIdLabels) {
+      label.setVisible(showIds);
+    }
   }
 
   /** Closes the MapUI */

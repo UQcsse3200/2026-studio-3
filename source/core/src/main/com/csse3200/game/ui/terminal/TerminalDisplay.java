@@ -22,7 +22,9 @@ public class TerminalDisplay extends UIComponent {
 
   private void addActors() {
     String message = "";
-    label = new Label("> " + message, skin);
+    Label.LabelStyle style = new Label.LabelStyle(skin.get("default", Label.LabelStyle.class));
+    style.fontColor = com.badlogic.gdx.graphics.Color.WHITE;
+    label = new Label("> " + message, style);
     label.setPosition(5f, 0);
     stage.addActor(label);
   }

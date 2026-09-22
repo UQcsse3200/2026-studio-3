@@ -23,6 +23,11 @@ import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
+import com.csse3200.game.ui.terminal.Terminal;
+import com.csse3200.game.ui.terminal.TerminalDisplay;
+import com.csse3200.game.ui.terminal.commands.ListNodesCommand;
+import com.csse3200.game.ui.terminal.commands.UnlockNodeCommand;
 import java.util.Comparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,9 +96,18 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         .getEvents()
         .addListener("nodeSelected", (Integer nodeId) -> enterEncounter(game, runState, nodeId));
 
+    // PROPOSED: debug terminal for cheats/commands on the map (unlock nodes, etc.). Same
+    // Terminal/KeyboardTerminalInputComponent/TerminalDisplay trio used elsewhere; F1 toggles it.
+    Terminal terminal = new Terminal();
+    terminal.addCommand("unlocknode", new UnlockNodeCommand(runState));
+    terminal.addCommand("listnodes", new ListNodesCommand(runState));
+
     Entity ui = new Entity();
     ui.addComponent(new InputDecorator(ServiceLocator.getRenderService().getStage(), 10))
-        .addComponent(mapDisplay);
+        .addComponent(mapDisplay)
+        .addComponent(terminal)
+        .addComponent(new KeyboardTerminalInputComponent())
+        .addComponent(new TerminalDisplay());
 
     ServiceLocator.getEntityService().register(ui);
 
