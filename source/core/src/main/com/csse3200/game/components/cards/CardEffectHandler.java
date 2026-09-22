@@ -63,7 +63,7 @@ public class CardEffectHandler {
     }
     for (ResolvedCardEffect effect : effects) {
       switch (effect.type()) {
-        case BLOCK -> stats.addArmor(effect.value());
+        case BLOCK -> stats.addArmour(effect.value());
         case HEAL -> {
           if (effect.duration() > 0) {
             stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
@@ -80,7 +80,7 @@ public class CardEffectHandler {
           }
         }
         case CLEANSE -> stats.clearNegativeStatusEffects();
-        case FORTIFY -> stats.addArmor(effect.value());
+        case FORTIFY -> stats.addArmour(effect.value());
         default -> {
           // Enemy-facing effects are handled separately.
         }

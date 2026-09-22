@@ -8,9 +8,11 @@ import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.extensions.GameExtension;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -31,16 +33,22 @@ class CardPlayServiceIntegrationTest {
     EnergyComponent energy = new EnergyComponent(10);
     CardPlayService service = new CardPlayService(library, battleDeck, energy);
 
-    CardPlayResult strike = service.playCard(CardPlayRequest.singleEnemy("strike", "enemy-1"));
-    CardPlayResult defend = service.playCard(CardPlayRequest.self("defend"));
+    CardPlayResult strike =
+        service.playCard(CardPlayRequest.singleEnemy(instanceId(battleDeck, "strike"), "enemy-1"));
+    CardPlayResult defend =
+        service.playCard(CardPlayRequest.self(instanceId(battleDeck, "defend")));
     CardPlayResult poisonDagger =
-        service.playCard(CardPlayRequest.singleEnemy("poison_dagger", "enemy-1"));
-    CardPlayResult expose = service.playCard(CardPlayRequest.allEnemies("expose"));
-    CardPlayResult innerFocus = service.playCard(CardPlayRequest.self("inner_focus"));
-    CardPlayResult bandage = service.playCard(CardPlayRequest.self("bandage"));
+        service.playCard(
+            CardPlayRequest.singleEnemy(instanceId(battleDeck, "poison_dagger"), "enemy-1"));
+    CardPlayResult expose =
+        service.playCard(CardPlayRequest.allEnemies(instanceId(battleDeck, "expose")));
+    CardPlayResult innerFocus =
+        service.playCard(CardPlayRequest.self(instanceId(battleDeck, "inner_focus")));
+    CardPlayResult bandage =
+        service.playCard(CardPlayRequest.self(instanceId(battleDeck, "bandage")));
 
     assertTrue(
-        List.of(strike, defend, poisonDagger, expose, innerFocus, bandage).stream()
+        Stream.of(strike, defend, poisonDagger, expose, innerFocus, bandage)
             .allMatch(CardPlayResult::success));
 
     assertEquals(List.of(EffectType.DAMAGE), types(strike.enemyEffects()));
@@ -52,7 +60,16 @@ class CardPlayServiceIntegrationTest {
 
     assertEquals(3, energy.getCurrentEnergy());
     assertTrue(bandage.updatedHand().isEmpty());
-    assertEquals(CARD_IDS, bandage.updatedDiscardPile());
+    assertEquals(
+        CARD_IDS, bandage.updatedDiscardPile().stream().map(CardInstance::cardId).toList());
+  }
+
+  private static String instanceId(BattleDeck deck, String cardId) {
+    return deck.getHand().stream()
+        .filter(card -> card.cardId().equals(cardId))
+        .findFirst()
+        .orElseThrow()
+        .instanceId();
   }
 
   private static List<EffectType> types(

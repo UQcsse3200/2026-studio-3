@@ -31,9 +31,9 @@ class ComponentPlayerStateAdapterTest {
   }
 
   @Test
-  void shouldDelegateDirectHealthWithoutConsumingArmorOrBlock() {
+  void shouldDelegateDirectHealthWithoutConsumingArmourOrBlock() {
     CombatStatsComponent combatStats = new CombatStatsComponent(50, 10, 100);
-    combatStats.setArmor(12);
+    combatStats.setArmour(12);
     combatStats.setBlock(8);
     ComponentPlayerStateAdapter player =
         new ComponentPlayerStateAdapter(combatStats, new InventoryComponent(50));
@@ -42,7 +42,7 @@ class ComponentPlayerStateAdapterTest {
 
     assertEquals(30, player.getHealth());
     assertEquals(100, player.getMaxHealth());
-    assertEquals(12, combatStats.getArmor());
+    assertEquals(12, combatStats.getArmour());
     assertEquals(8, combatStats.getBlock());
   }
 

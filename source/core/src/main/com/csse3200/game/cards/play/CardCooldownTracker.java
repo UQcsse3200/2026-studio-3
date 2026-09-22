@@ -58,17 +58,17 @@ final class CardCooldownTracker {
    * Ticks every tracked cooldown down by one player round, retrieving any card that reaches zero
    * straight back into the hand.
    *
-   * @return IDs of cards retrieved this tick, in the order they were retrieved (empty if none)
+   * @return exact instances retrieved this tick, in retrieval order
    */
-  List<String> tickRoundAndRetrieve() {
-    List<String> retrieved = new ArrayList<>();
+  List<CardInstance> tickRoundAndRetrieve() {
+    List<CardInstance> retrieved = new ArrayList<>();
     Iterator<Entry> iterator = entries.iterator();
     while (iterator.hasNext()) {
       Entry entry = iterator.next();
       entry.roundsRemaining--;
       if (entry.roundsRemaining <= 0) {
         if (battleDeck.retrieveInstanceFromDiscard(entry.instance)) {
-          retrieved.add(entry.instance.cardId());
+          retrieved.add(entry.instance);
         }
         iterator.remove();
       }

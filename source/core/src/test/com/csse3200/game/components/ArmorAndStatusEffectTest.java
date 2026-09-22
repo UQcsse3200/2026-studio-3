@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(GameExtension.class)
-class ArmorAndStatusEffectTest {
+class ArmourAndStatusEffectTest {
 
   // -----------------------------------------------------------------
   // StatusEffect class itself
@@ -65,59 +65,59 @@ class ArmorAndStatusEffectTest {
   }
 
   // -----------------------------------------------------------------
-  // Armor on CombatStatsComponent (permanent pool)
+  // Armour on CombatStatsComponent (permanent pool)
   // -----------------------------------------------------------------
 
   @Test
-  void shouldSetGetArmor() {
+  void shouldSetGetArmour() {
     CombatStatsComponent combat = new CombatStatsComponent(100, 20);
-    assertEquals(0, combat.getArmor());
-    combat.setArmor(10);
-    assertEquals(10, combat.getArmor());
-    combat.setArmor(-5);
-    assertEquals(0, combat.getArmor());
+    assertEquals(0, combat.getArmour());
+    combat.setArmour(10);
+    assertEquals(10, combat.getArmour());
+    combat.setArmour(-5);
+    assertEquals(0, combat.getArmour());
   }
 
   @Test
-  void shouldAddArmor() {
+  void shouldAddArmour() {
     CombatStatsComponent combat = new CombatStatsComponent(100, 20);
-    combat.addArmor(5);
-    assertEquals(5, combat.getArmor());
-    combat.addArmor(-100);
-    assertEquals(5, combat.getArmor());
+    combat.addArmour(5);
+    assertEquals(5, combat.getArmour());
+    combat.addArmour(-100);
+    assertEquals(5, combat.getArmour());
   }
 
   @Test
-  void shouldClearArmor() {
+  void shouldClearArmour() {
     CombatStatsComponent combat = new CombatStatsComponent(100, 20);
-    combat.addArmor(15);
-    combat.clearArmor();
-    assertEquals(0, combat.getArmor());
+    combat.addArmour(15);
+    combat.clearArmour();
+    assertEquals(0, combat.getArmour());
   }
 
   @Test
-  void armorShouldAbsorbDamageBeforeHealth() {
+  void armourShouldAbsorbDamageBeforeHealth() {
     CombatStatsComponent combat = new CombatStatsComponent(100, 20);
-    combat.addArmor(5);
+    combat.addArmour(5);
     combat.takeDamage(8);
-    assertEquals(0, combat.getArmor());
+    assertEquals(0, combat.getArmour());
     assertEquals(97, combat.getHealth());
   }
 
   @Test
-  void armorShouldFullyAbsorbDamageWhenSufficient() {
+  void armourShouldFullyAbsorbDamageWhenSufficient() {
     CombatStatsComponent combat = new CombatStatsComponent(100, 20);
-    combat.addArmor(10);
+    combat.addArmour(10);
     combat.takeDamage(6);
-    assertEquals(4, combat.getArmor());
+    assertEquals(4, combat.getArmour());
     assertEquals(100, combat.getHealth());
   }
 
   @Test
-  void damageShouldHitHealthDirectlyWhenNoArmorOrBlock() {
+  void damageShouldHitHealthDirectlyWhenNoArmourOrBlock() {
     CombatStatsComponent combat = new CombatStatsComponent(100, 20);
     combat.takeDamage(30);
-    assertEquals(0, combat.getArmor());
+    assertEquals(0, combat.getArmour());
     assertEquals(70, combat.getHealth());
   }
 
@@ -153,7 +153,7 @@ class ArmorAndStatusEffectTest {
   }
 
   @Test
-  void blockShouldAbsorbDamageBeforeHealthWhenNoArmor() {
+  void blockShouldAbsorbDamageBeforeHealthWhenNoArmour() {
     CombatStatsComponent combat = new CombatStatsComponent(100, 20);
     combat.addBlock(5);
     combat.takeDamage(8);
@@ -171,28 +171,28 @@ class ArmorAndStatusEffectTest {
   }
 
   // -----------------------------------------------------------------
-  // Block + Armor combined in takeDamage()
+  // Block + Armour combined in takeDamage()
   // -----------------------------------------------------------------
 
   @Test
-  void blockShouldAbsorbBeforeArmor() {
+  void blockShouldAbsorbBeforeArmour() {
     CombatStatsComponent combat = new CombatStatsComponent(100, 20);
     combat.addBlock(3);
-    combat.addArmor(4);
+    combat.addArmour(4);
     combat.takeDamage(10);
     assertEquals(0, combat.getBlock());
-    assertEquals(0, combat.getArmor());
+    assertEquals(0, combat.getArmour());
     assertEquals(97, combat.getHealth());
   }
 
   @Test
-  void blockAndArmorTogetherShouldFullyAbsorbDamageWhenSufficient() {
+  void blockAndArmourTogetherShouldFullyAbsorbDamageWhenSufficient() {
     CombatStatsComponent combat = new CombatStatsComponent(100, 20);
     combat.addBlock(5);
-    combat.addArmor(10);
+    combat.addArmour(10);
     combat.takeDamage(8);
     assertEquals(0, combat.getBlock());
-    assertEquals(7, combat.getArmor());
+    assertEquals(7, combat.getArmour());
     assertEquals(100, combat.getHealth());
   }
 
@@ -282,30 +282,30 @@ class ArmorAndStatusEffectTest {
     assertTrue(combat.hasStatusEffect("STRENGTH"));
   }
 
-  /** Verifies that reducing armor does not modify the entity's block or health. */
+  /** Verifies that reducing armour does not modify the entity's block or health. */
   @Test
-  void reduceArmorShouldNotDamageBlockOrHealth() {
+  void reduceArmourShouldNotDamageBlockOrHealth() {
     CombatStatsComponent stats = new CombatStatsComponent(100, 10);
-    stats.setArmor(5);
+    stats.setArmour(5);
     stats.setBlock(4);
-    assertEquals(3, stats.reduceArmor(3));
-    assertEquals(2, stats.getArmor());
+    assertEquals(3, stats.reduceArmour(3));
+    assertEquals(2, stats.getArmour());
     assertEquals(4, stats.getBlock());
     assertEquals(100, stats.getHealth());
     assertFalse(stats.hasStatusEffect("SUNDER"));
   }
 
-  /** Verifies that armor cannot fall below zero and non-positive reductions are ignored. */
+  /** Verifies that armour cannot fall below zero and non-positive reductions are ignored. */
   @Test
-  void reduceArmorShouldClampAndIgnoreNonPositiveAmounts() {
+  void reduceArmourShouldClampAndIgnoreNonPositiveAmounts() {
     CombatStatsComponent stats = new CombatStatsComponent(100, 10);
-    stats.setArmor(2);
-    assertEquals(0, stats.reduceArmor(-3));
-    assertEquals(0, stats.reduceArmor(0));
-    assertEquals(2, stats.getArmor());
-    assertEquals(2, stats.reduceArmor(Integer.MAX_VALUE));
-    assertEquals(0, stats.getArmor());
-    assertEquals(0, stats.reduceArmor(3));
+    stats.setArmour(2);
+    assertEquals(0, stats.reduceArmour(-3));
+    assertEquals(0, stats.reduceArmour(0));
+    assertEquals(2, stats.getArmour());
+    assertEquals(2, stats.reduceArmour(Integer.MAX_VALUE));
+    assertEquals(0, stats.getArmour());
+    assertEquals(0, stats.reduceArmour(3));
   }
 
   /**
@@ -370,7 +370,7 @@ class ArmorAndStatusEffectTest {
   @Test
   void cleanseShouldRemoveSupportedDebuffsAndPreserveOtherState() {
     CombatStatsComponent stats = new CombatStatsComponent(100, 10);
-    stats.setArmor(5);
+    stats.setArmour(5);
     stats.setBlock(4);
     stats.applyStatusEffect("POISON", 3, 2);
     stats.applyStatusEffect("poison", 2, 1);
@@ -396,7 +396,7 @@ class ArmorAndStatusEffectTest {
     assertEquals(3, healing.getDuration());
     assertEquals(2, other.getDuration());
     assertEquals(100, stats.getHealth());
-    assertEquals(5, stats.getArmor());
+    assertEquals(5, stats.getArmour());
     assertEquals(4, stats.getBlock());
   }
 
@@ -420,7 +420,7 @@ class ArmorAndStatusEffectTest {
   void piercingDamageShouldBypassDefensesAndIgnoreModifiers() {
     CombatStatsComponent stats = new CombatStatsComponent(100, 10);
     stats.setBlock(6);
-    stats.setArmor(8);
+    stats.setArmour(8);
     stats.applyStatusEffect("STRENGTH", 5, 0);
     stats.applyStatusEffect("VULNERABLE", 1, 2);
     stats.applyStatusEffect("FEEBLE", 1, 2);
@@ -429,7 +429,7 @@ class ArmorAndStatusEffectTest {
 
     assertEquals(93, stats.getHealth());
     assertEquals(6, stats.getBlock());
-    assertEquals(8, stats.getArmor());
+    assertEquals(8, stats.getArmour());
     assertEquals(5, stats.getStatusEffect("STRENGTH").getValue());
     assertEquals(2, stats.getStatusEffect("VULNERABLE").getDuration());
     assertEquals(2, stats.getStatusEffect("FEEBLE").getDuration());
@@ -456,14 +456,14 @@ class ArmorAndStatusEffectTest {
   @Test
   void nonPositivePiercingDamageShouldNotChangeCombatValues() {
     CombatStatsComponent stats = new CombatStatsComponent(20, 0);
-    stats.setArmor(5);
+    stats.setArmour(5);
     stats.setBlock(4);
 
     stats.takePiercingDamage(-3);
     stats.takePiercingDamage(0);
 
     assertEquals(20, stats.getHealth());
-    assertEquals(5, stats.getArmor());
+    assertEquals(5, stats.getArmour());
     assertEquals(4, stats.getBlock());
   }
 

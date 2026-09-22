@@ -37,6 +37,10 @@ public class CardLibraryDisplay extends UIComponent {
   private static final Color PANEL_COLOUR = new Color(0.105f, 0.07f, 0.065f, 0.96f);
   private static final Color LIST_COLOUR = new Color(0.13f, 0.09f, 0.085f, 1f);
   private static final Color DETAIL_COLOUR = new Color(0.075f, 0.055f, 0.065f, 1f);
+  private static final String WHITE = "white";
+  private static final String LARGE = "large";
+  private static final String SMALL = "small";
+  private static final String DEFAULT = "default";
 
   private final GdxGame game;
 
@@ -73,7 +77,7 @@ public class CardLibraryDisplay extends UIComponent {
     buttonStyle = MenuTheme.createButtonStyle(skin, buttonFrameTexture);
 
     Table panel = new Table();
-    panel.setBackground(skin.newDrawable("white", PANEL_COLOUR));
+    panel.setBackground(skin.newDrawable(WHITE, PANEL_COLOUR));
     panel.pad(24f, 32f, 28f, 32f);
 
     addHeader(panel);
@@ -100,18 +104,18 @@ public class CardLibraryDisplay extends UIComponent {
     Color overlayColour = MenuTheme.deepPlum();
     overlayColour.a = 0.62f;
     Table overlay = new Table();
-    overlay.setBackground(skin.newDrawable("white", overlayColour));
+    overlay.setBackground(skin.newDrawable(WHITE, overlayColour));
     stack.add(overlay);
   }
 
   private void addHeader(Table panel) {
     Table titleBlock = new Table();
-    Label eyebrow = new Label("CARD ARCHIVE", labelStyle("small", MenuTheme.softCoral()));
-    Label title = new Label("Card Library", labelStyle("large", MenuTheme.warmParchment()));
+    Label eyebrow = new Label("CARD ARCHIVE", labelStyle(SMALL, MenuTheme.softCoral()));
+    Label title = new Label("Card Library", labelStyle(LARGE, MenuTheme.warmParchment()));
     Label subtitle =
         new Label(
             "Browse the current card definitions and effect order.",
-            labelStyle("small", MenuTheme.warmParchment()));
+            labelStyle(SMALL, MenuTheme.warmParchment()));
     eyebrow.setFontScale(1.15f);
     title.setFontScale(1.35f);
     subtitle.setFontScale(1.05f);
@@ -138,7 +142,7 @@ public class CardLibraryDisplay extends UIComponent {
 
   private void addDivider(Table panel) {
     Table divider = new Table();
-    divider.setBackground(skin.newDrawable("white", MenuTheme.softCoral()));
+    divider.setBackground(skin.newDrawable(WHITE, MenuTheme.softCoral()));
     panel.add(divider).colspan(2).expandX().fillX().height(2f).padTop(16f).padBottom(16f);
   }
 
@@ -188,9 +192,9 @@ public class CardLibraryDisplay extends UIComponent {
     scrollPane.setScrollingDisabled(true, false);
 
     Table listPanel = new Table();
-    listPanel.setBackground(skin.newDrawable("white", LIST_COLOUR));
+    listPanel.setBackground(skin.newDrawable(WHITE, LIST_COLOUR));
     listPanel.pad(18f);
-    listPanel.add(new Label("CARDS", labelStyle("small", MenuTheme.softCoral()))).left().expandX();
+    listPanel.add(new Label("CARDS", labelStyle(SMALL, MenuTheme.softCoral()))).left().expandX();
     listPanel.row();
     listPanel.add(scrollPane).expand().fill().padTop(12f);
 
@@ -200,18 +204,18 @@ public class CardLibraryDisplay extends UIComponent {
 
   private Table createDetailPanel() {
     Table detailPanel = new Table();
-    detailPanel.setBackground(skin.newDrawable("white", DETAIL_COLOUR));
+    detailPanel.setBackground(skin.newDrawable(WHITE, DETAIL_COLOUR));
     detailPanel.pad(24f);
     detailPanel.top();
 
-    nameLabel = new Label("", labelStyle("large", MenuTheme.warmParchment()));
+    nameLabel = new Label("", labelStyle(LARGE, MenuTheme.warmParchment()));
     descriptionLabel = new Label("", bodyLabelStyle());
-    costLabel = new Label("", labelStyle("default", MenuTheme.softCoral()));
+    costLabel = new Label("", labelStyle(DEFAULT, MenuTheme.softCoral()));
     typeLabel = new Label("", bodyLabelStyle());
     targetLabel = new Label("", bodyLabelStyle());
     rarityLabel = new Label("", bodyLabelStyle());
-    effectsLabel = new Label("", labelStyle("default", MenuTheme.warmParchment()));
-    artworkLabel = new Label("", labelStyle("small", MenuTheme.warmParchment()));
+    effectsLabel = new Label("", labelStyle(DEFAULT, MenuTheme.warmParchment()));
+    artworkLabel = new Label("", labelStyle(SMALL, MenuTheme.warmParchment()));
     cardImage = new Image();
 
     nameLabel.setFontScale(1.25f);
@@ -222,7 +226,7 @@ public class CardLibraryDisplay extends UIComponent {
     cardImage.setScaling(Scaling.fit);
 
     Table artworkBackground = new Table();
-    artworkBackground.setBackground(skin.newDrawable("white", new Color(0.035f, 0.03f, 0.04f, 1f)));
+    artworkBackground.setBackground(skin.newDrawable(WHITE, new Color(0.035f, 0.03f, 0.04f, 1f)));
     Stack artwork = new Stack();
     artwork.add(artworkBackground);
     artwork.add(cardImage);
@@ -297,7 +301,7 @@ public class CardLibraryDisplay extends UIComponent {
   }
 
   private Label.LabelStyle bodyLabelStyle() {
-    return labelStyle("default", MenuTheme.warmParchment());
+    return labelStyle(DEFAULT, MenuTheme.warmParchment());
   }
 
   private Label.LabelStyle labelStyle(String baseStyle, Color colour) {

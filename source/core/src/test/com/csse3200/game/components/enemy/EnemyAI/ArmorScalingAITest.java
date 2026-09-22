@@ -7,10 +7,10 @@ import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.enemy.IntentType;
 import org.junit.jupiter.api.Test;
 
-class ArmorScalingAITest {
+class ArmourScalingAITest {
   private static final int BASE_ATTACK = 7;
 
-  private final ArmorScalingAI ai = new ArmorScalingAI();
+  private final ArmourScalingAI ai = new ArmourScalingAI();
 
   @Test
   void shouldDefendOnOddTurns() {
@@ -20,7 +20,7 @@ class ArmorScalingAITest {
   }
 
   @Test
-  void shouldAttackForBaseDamagePlusHeldArmorOnEvenTurns() {
+  void shouldAttackForBaseDamagePlusHeldArmourOnEvenTurns() {
     EnemyIntent intent = ai.decide(createContext(2, 4));
 
     assertEquals(IntentType.ATTACK, intent.getType());
@@ -28,7 +28,7 @@ class ArmorScalingAITest {
   }
 
   @Test
-  void shouldAttackForBaseDamageWhenNoArmorIsBanked() {
+  void shouldAttackForBaseDamageWhenNoArmourIsBanked() {
     EnemyIntent intent = ai.decide(createContext(2, 0));
 
     assertEquals(IntentType.ATTACK, intent.getType());
@@ -42,7 +42,7 @@ class ArmorScalingAITest {
   }
 
   @Test
-  void shouldHitHarderAsArmorAccumulates() {
+  void shouldHitHarderAsArmourAccumulates() {
     int earlyDamage = ai.decide(createContext(2, 4)).getValue();
     int laterDamage = ai.decide(createContext(4, 8)).getValue();
 
@@ -55,7 +55,7 @@ class ArmorScalingAITest {
     assertThrows(NullPointerException.class, () -> ai.decide(null));
   }
 
-  private EnemyAIContext createContext(int turnNumber, int armor) {
-    return new EnemyAIContext(30, 34, 34, BASE_ATTACK, armor, EnemyIntent.unknown(), turnNumber);
+  private EnemyAIContext createContext(int turnNumber, int armour) {
+    return new EnemyAIContext(30, 34, 34, BASE_ATTACK, armour, EnemyIntent.unknown(), turnNumber);
   }
 }

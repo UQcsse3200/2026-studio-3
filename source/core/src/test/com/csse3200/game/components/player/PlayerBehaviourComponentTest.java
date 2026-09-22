@@ -71,6 +71,6 @@ class PlayerBehaviourComponentTest {
     playerEntity.addComponent(behaviour);
     playerEntity.create();
     behaviour.defend(5);
-    assertEquals(5, playerStats.getArmor());
+    assertEquals(5, playerStats.getArmour());
   }
 }

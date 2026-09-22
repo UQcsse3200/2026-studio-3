@@ -33,15 +33,15 @@ public class PlayerBehaviourComponent extends Component {
   }
 
   /**
-   * Add the armor amount to the player stats.
+   * Add the armour amount to the player stats.
    *
-   * @param amount armor amount
+   * @param amount armour amount
    */
   public void defend(int amount) {
     CombatStatsComponent playerStats = entity.getComponent(CombatStatsComponent.class);
     if (playerStats == null) {
       return;
     }
-    playerStats.addArmor(amount);
+    playerStats.addArmour(amount);
   }
 }

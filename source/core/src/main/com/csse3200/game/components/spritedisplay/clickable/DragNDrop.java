@@ -30,7 +30,7 @@ public class DragNDrop extends InOutOnTrigger {
   /**
    * Drag cards fire their configured trigger on the source entity once the drop target is known.
    * The base Clickable.onClick() fires on the button's ChangeEvent, which libGDX raises on click
-   * AND on drag release — for a drag card that trigger only has the cardId baked in (no target
+   * AND on drag release — for a drag card that trigger only has the instanceId baked in (no target
    * yet), so firing it here duplicates the drop-time trigger with the wrong arity and crashes.
    * Suppress it entirely for this variant.
    */

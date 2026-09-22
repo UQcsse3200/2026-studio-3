@@ -17,6 +17,7 @@ import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
+import com.csse3200.game.save.AutosaveCoordinator;
 import com.csse3200.game.save.GameStateSnapshotProvider;
 import com.csse3200.game.save.JsonSaveGameRepository;
 import com.csse3200.game.save.SaveGameRestoreService;
@@ -31,7 +32,8 @@ import org.slf4j.LoggerFactory;
 /** Save/load screen backed by the current run's real player, deck and map state. */
 public class SaveLoadScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(SaveLoadScreen.class);
-  private static final List<Integer> SLOT_IDS = List.of(1, 2, 3);
+  private static final List<Integer> SLOT_IDS =
+      List.of(1, 2, 3, AutosaveCoordinator.AUTOSAVE_SLOT_ID);
   private static final String[] SAVE_LOAD_TEXTURES = {MainMenuDisplay.BACKGROUND_TEXTURE};
 
   private final GdxGame game;

@@ -5,7 +5,7 @@ package com.csse3200.game.cards.effects;
  *
  * <p>The values are read from other teams' state through adapters before Team 5 calculates card
  * effects. Team 5 uses them to return final pre-mitigation damage, while Team 1/Team 7 still own
- * block, armor, HP, statuses and death checks.
+ * block, armour, HP, statuses and death checks.
  *
  * @param strength flat outgoing damage bonus
  * @param outgoingFeeble active Feeble value on the attacker; any positive value applies the fixed

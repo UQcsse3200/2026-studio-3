@@ -31,10 +31,10 @@ class Team1EnemyStateAdapterTest {
   }
 
   @Test
-  void shouldApplyResolvedDamageBeforeTeamOneBlockArmorAndHealthHandling() {
+  void shouldApplyResolvedDamageBeforeTeamOneBlockArmourAndHealthHandling() {
     CombatStatsComponent stats = new CombatStatsComponent(10, 1);
     stats.addBlock(3);
-    stats.addArmor(2);
+    stats.addArmour(2);
     Team1EnemyStateAdapter adapter =
         new Team1EnemyStateAdapter(Map.of("enemy-1", enemyWith(stats)));
 
@@ -44,7 +44,7 @@ class Team1EnemyStateAdapterTest {
 
     assertEquals(5, stats.getHealth());
     assertEquals(0, stats.getBlock());
-    assertEquals(0, stats.getArmor());
+    assertEquals(0, stats.getArmour());
   }
 
   @Test
@@ -64,9 +64,9 @@ class Team1EnemyStateAdapterTest {
   }
 
   @Test
-  void shouldReduceEnemyArmorWithSunder() {
+  void shouldReduceEnemyArmourWithSunder() {
     CombatStatsComponent stats = new CombatStatsComponent(10, 1);
-    stats.addArmor(5);
+    stats.addArmour(5);
     Team1EnemyStateAdapter adapter =
         new Team1EnemyStateAdapter(Map.of("enemy-1", enemyWith(stats)));
 
@@ -74,13 +74,13 @@ class Team1EnemyStateAdapterTest {
         CardPlayTarget.singleEnemy("enemy-1"),
         List.of(enemyEffect(EffectType.SUNDER, TargetType.SINGLE_ENEMY, 3, 0, 0)));
 
-    assertEquals(2, stats.getArmor());
+    assertEquals(2, stats.getArmour());
   }
 
   @Test
-  void shouldNotReduceEnemyArmorBelowZeroWithSunder() {
+  void shouldNotReduceEnemyArmourBelowZeroWithSunder() {
     CombatStatsComponent stats = new CombatStatsComponent(10, 1);
-    stats.addArmor(2);
+    stats.addArmour(2);
     Team1EnemyStateAdapter adapter =
         new Team1EnemyStateAdapter(Map.of("enemy-1", enemyWith(stats)));
 
@@ -88,7 +88,7 @@ class Team1EnemyStateAdapterTest {
         CardPlayTarget.singleEnemy("enemy-1"),
         List.of(enemyEffect(EffectType.SUNDER, TargetType.SINGLE_ENEMY, 3, 0, 0)));
 
-    assertEquals(0, stats.getArmor());
+    assertEquals(0, stats.getArmour());
   }
 
   @Test
@@ -116,10 +116,10 @@ class Team1EnemyStateAdapterTest {
   }
 
   @Test
-  void shouldApplyPiercingDamageWithoutConsumingBlockOrArmor() {
+  void shouldApplyPiercingDamageWithoutConsumingBlockOrArmour() {
     CombatStatsComponent stats = new CombatStatsComponent(20, 1);
     stats.addBlock(3);
-    stats.addArmor(4);
+    stats.addArmour(4);
     Team1EnemyStateAdapter adapter =
         new Team1EnemyStateAdapter(Map.of("enemy-1", enemyWith(stats)));
 
@@ -129,14 +129,14 @@ class Team1EnemyStateAdapterTest {
 
     assertEquals(14, stats.getHealth());
     assertEquals(3, stats.getBlock());
-    assertEquals(4, stats.getArmor());
+    assertEquals(4, stats.getArmour());
   }
 
   @Test
   void shouldApplyPiercingDamageToAllAvailableEnemies() {
     CombatStatsComponent first = new CombatStatsComponent(20, 1);
     CombatStatsComponent second = new CombatStatsComponent(20, 1);
-    first.addArmor(4);
+    first.addArmour(4);
     second.addBlock(3);
     Team1EnemyStateAdapter adapter =
         new Team1EnemyStateAdapter(
@@ -148,7 +148,7 @@ class Team1EnemyStateAdapterTest {
 
     assertEquals(14, first.getHealth());
     assertEquals(14, second.getHealth());
-    assertEquals(4, first.getArmor());
+    assertEquals(4, first.getArmour());
     assertEquals(3, second.getBlock());
   }
 }

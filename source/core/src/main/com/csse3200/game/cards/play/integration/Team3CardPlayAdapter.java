@@ -2,10 +2,8 @@ package com.csse3200.game.cards.play.integration;
 
 import static com.csse3200.game.components.battle.BattleActions.BATTLE_LOG_EVENT;
 
-import com.csse3200.game.cards.CardService;
-import com.csse3200.game.cards.TargetType;
-import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.play.CardPlayRequest;
+import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.enemy.IntentEffectType;
@@ -21,18 +19,18 @@ public final class Team3CardPlayAdapter extends Component {
   public static final String PLAY_CARD_EVENT = "playCard";
   public static final String CARD_PLAY_RESULT_EVENT = "cardPlayed";
 
-  private final CardService cardService;
+  private final CardPlayService cardPlayService;
   private final BattleController battleController;
 
   /** Creates an adapter that returns results to Team 3 without applying external state changes. */
-  public Team3CardPlayAdapter(CardService cardService, BattleController battleController) {
-    if (cardService == null) {
-      throw new IllegalArgumentException("Card service cannot be null");
-    }
-    if (battleController == null) {
+  public Team3CardPlayAdapter(CardPlayService cardPlayService, BattleController battleController) {
+    if (cardPlayService == null) {
       throw new IllegalArgumentException("Card play service cannot be null");
     }
-    this.cardService = cardService;
+    if (battleController == null) {
+      throw new IllegalArgumentException("Battle controller cannot be null");
+    }
+    this.cardPlayService = cardPlayService;
     this.battleController = battleController;
   }
 
@@ -40,36 +38,24 @@ public final class Team3CardPlayAdapter extends Component {
   public void create() {
     entity.getEvents().addListener(PLAY_CARD_EVENT, this::onCardPlayed);
     battleController.addCardPlayedListener(
-        (cardId, targetId) -> {
-          entity.getEvents().trigger(CARD_PLAY_RESULT_EVENT, cardId, targetId);
+        (instanceId, targetId) -> {
+          entity.getEvents().trigger(CARD_PLAY_RESULT_EVENT, instanceId, targetId);
         });
   }
 
-  private void onCardPlayed(String cardId, String targetId) {
+  private void onCardPlayed(String instanceId, String targetId) {
     if (playerIsBlockedFromPlayingCards()) {
       return;
     }
-    CardPlayRequest request = toRequest(cardId, targetId);
+    CardPlayRequest request = toRequest(instanceId, targetId);
     battleController.submitCardPlayRequest(request);
   }
 
-  // test that card is played
-  private void logCardPlayed(String cardName, String targetID) {
-    System.out.println("Card played: " + cardName + " on target: " + targetID);
-  }
-
-  private CardPlayRequest toRequest(String cardId, String targetId) {
-    CardConfig card = cardService.getCard(cardId).orElse(null);
-    if (card == null) {
-      return CardPlayRequest.self(cardId);
-    }
-    if (card.target == TargetType.SELF) {
-      return CardPlayRequest.self(cardId);
-    }
-    if (card.target == TargetType.ALL_ENEMIES) {
-      return CardPlayRequest.allEnemies(cardId);
-    }
-    return CardPlayRequest.singleEnemy(cardId, targetId);
+  private CardPlayRequest toRequest(String instanceId, String targetId) {
+    return cardPlayService
+        .resolveInHand(instanceId)
+        .map(card -> CardPlayRequest.fromUi(instanceId, card.target(), targetId))
+        .orElseGet(() -> CardPlayRequest.self(instanceId));
   }
 
   /**
