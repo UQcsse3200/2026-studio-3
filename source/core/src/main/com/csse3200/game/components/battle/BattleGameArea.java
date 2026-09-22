@@ -33,19 +33,6 @@ public class BattleGameArea extends ForestGameArea {
   private String[] enemyAtlases = new String[0];
 
   /**
-   * Creates a battle area with the default line-up.
-   *
-   * @param terrainFactory factory used to build the terrain
-   * @param progression map progression of the node, used to scale enemy stats
-   * @param runState state of the current run
-   * @param backgroundId id of the background to show
-   */
-  public BattleGameArea(
-      TerrainFactory terrainFactory, int progression, RunState runState, String backgroundId) {
-    this(terrainFactory, progression, runState, backgroundId, EncounterComposer.DEFAULT_ENEMIES);
-  }
-
-  /**
    * Creates a battle area for the given line-up.
    *
    * @param terrainFactory factory used to build the terrain
