@@ -4,10 +4,10 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.ui.PopupDisplay;
 import com.csse3200.game.ui.UIComponent;
-import com.csse3200.game.rewards.ItemFormatting;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +62,11 @@ public class InventoryPopupComponent extends UIComponent {
     }
 
     for (ItemType itemId : ownedItems) {
-      content.add(new Label(ItemFormatting.formatItemName(itemId), skin)).left().padRight(20f).padTop(6f);
+      content
+          .add(new Label(ItemFormatting.formatItemName(itemId), skin))
+          .left()
+          .padRight(20f)
+          .padTop(6f);
       content.add(new Label(ITEM_DESCRIPTIONS.getOrDefault(itemId, ""), skin)).left().padTop(6f);
       content.row();
     }

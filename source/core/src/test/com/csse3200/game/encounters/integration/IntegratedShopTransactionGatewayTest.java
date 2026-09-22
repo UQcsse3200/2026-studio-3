@@ -87,6 +87,7 @@ class IntegratedShopTransactionGatewayTest {
     assertEquals(ShopTransactionStatus.ROLLBACK_FAILED, result);
     assertEquals(1, deck.getCardCount("card_heal"));
   }
+
   @Test
   void shouldChargeDiscountedPriceWhenPlayerHasShopDiscount() {
     MockPlayerStateGateway player = new MockPlayerStateGateway(100, 50);
@@ -177,4 +178,3 @@ class IntegratedShopTransactionGatewayTest {
         player, new MockCardCatalogGateway("card_heal"), deck);
   }
 }
-

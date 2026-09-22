@@ -303,3 +303,90 @@ public class BattleScreen extends ScreenAdapter {
     }
 
     @Override
+    public void render(float delta) {
+        ServiceLocator.getEntityService().update();
+        renderer.render();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        renderer.resize(width, height);
+        logger.trace("Resized renderer: ({} x {})", width, height);
+    }
+
+    @Override
+    public void dispose() {
+        playerState.captureFrom(gameArea.getPlayer());
+        renderer.dispose();
+        ServiceLocator.getRenderService().dispose();
+        ServiceLocator.getEntityService().dispose();
+        ServiceLocator.clear();
+    }
+
+    private void loadAssets() {
+        logger.debug("Loading assets");
+        ResourceService resourceService = ServiceLocator.getResourceService();
+        resourceService.loadTextures(mainGameTextures);
+        ServiceLocator.getResourceService().loadAll();
+    }
+
+    private List<ClickableRecord> buildAllRecords() {
+        List<ClickableRecord> records = new ArrayList<>(buildHandRecords());
+        records.addAll(staticUiRecords);
+        return records;
+    }
+
+    /**
+     * Builds one widget per card slot in {@link #handRowOrder} — a fixed left-to-right layout that
+     * only changes wholesale via {@link #onDeckRearranged}. Each slot renders the exact {@link
+     * CardInstance} dealt to it: still in hand, it's normal and playable; currently sitting in the
+     * discard pile (played, or on cooldown), it renders {@code disabled(true)} (shaded, inert to
+     * clicks/drags — see {@link com.csse3200.game.components.spritedisplay.clickable.Clickable}) in
+     * that SAME slot. Checking discard-pile membership by exact instance — not by card ID — is what
+     * lets duplicate copies of the same card (e.g. two "strike"s) be dimmed independently of each
+     * other. Positions never reflow and the row never grows/shrinks, so playing a card reads as "this
+     * slot went dull", not as a new card being dealt.
+     */
+    private List<ClickableRecord> buildHandRecords() {
+        Set<CardInstance> discardedInstances = new HashSet<>(battleDeck.getDiscardPileInstances());
+
+        List<ClickableRecord> records = new ArrayList<>();
+        float x = HAND_START_X;
+        for (CardInstance instance : handRowOrder) {
+            String cardId = instance.cardId();
+            boolean disabled = discardedInstances.contains(instance);
+
+            Optional<CardConfig> maybeCard = library.getCard(cardId);
+            if (maybeCard.isEmpty()) {
+                logger.warn("Card ID {} not found in library, skipping", cardId);
+                continue;
+            }
+            CardConfig card = maybeCard.get();
+            boolean selfTarget = card.target == TargetType.SELF;
+            String variant = selfTarget ? "inout" : "drag";
+
+            Skin cardSkin = CardImageSkins.forTexturePath(card.texturePath);
+
+            ClickableRecord.Builder builder =
+                    ClickableRecord.builder("playCard")
+                            .label(card.name)
+                            .variant(variant)
+                            .position(x, HAND_Y)
+                            .size(CARD_WIDTH, CARD_HEIGHT)
+                            .skin(cardSkin)
+                            .disabled(disabled);
+
+            if (selfTarget) {
+                // No drop target involved — target is fixed at "player".
+                builder.args(instance.instanceId(), "player");
+            } else {
+                // Enemy id isn't known yet; EnemyDropTargetComponent appends it at drop-time.
+                builder.args(instance.instanceId());
+            }
+
+            records.add(builder.build());
+            x += HAND_SPACING;
+        }
+        return records;
+    }
+}
