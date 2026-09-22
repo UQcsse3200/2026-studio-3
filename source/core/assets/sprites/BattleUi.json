@@ -7,6 +7,12 @@
       "trigger": "openMenu"
     },
     {
+      "text": "Item Inventory",
+      "x": 180,
+      "y": 100,
+      "trigger": "openInventory"
+    },
+    {
       "text": "End Turn",
       "x": 20,
       "y": 150,

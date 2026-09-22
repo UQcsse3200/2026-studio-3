@@ -240,6 +240,11 @@ public class BattleScreen extends ScreenAdapter {
     PopupDisplay cardInventory = new PopupDisplay("Card Inventory");
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
+    PopupDisplay itemInventory = new PopupDisplay("Item Inventory");
+    itemInventory.setMinSize(400f, 400f);
+    InventoryPopupComponent inventoryPopup =
+            new InventoryPopupComponent(game.getRunState(), itemInventory);
+
     Stage stage = ServiceLocator.getRenderService().getStage();
     Entity battleUi =
         new Entity()
@@ -249,6 +254,8 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new BattleActions(controller, game))
             .addComponent(cardPlayAdapter)
             .addComponent(cardInventory)
+                .addComponent(itemInventory)
+                .addComponent(inventoryPopup)
             .addComponent(new PauseMenuDisplay())
             .addComponent(new PauseMenuInput())
             .addComponent(new PauseMenuActions(game))
@@ -257,7 +264,8 @@ public class BattleScreen extends ScreenAdapter {
                     gameArea.getPlayer().getComponent(CombatStatsComponent.class)))
             .addComponent(new CardEffectDebugComponent(cardEffects))
             .addComponent(new KeyboardCardEffectDebugInputComponent())
-            .addComponent(new CardEffectDebugDisplay());
+            .addComponent(new CardEffectDebugDisplay())
+            ;
 
     // Keep the on-screen row in sync with the deck: whenever the hand changes (a card played, or
     // one retrieved from the discard pile after its cooldown elapses) rebuild from the live deck,
@@ -282,6 +290,7 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.getEntityService().register(deckEditorEntity);
 
     battleUi.getEvents().addListener("openMenu", deckEditor::open);
+    battleUi.getEvents().addListener("openInventory", inventoryPopup::open);
   }
 
   /**
