@@ -179,6 +179,18 @@ public class BattleScreen extends ScreenAdapter {
 
     controller =
         new BattleController(player, forestGameArea.getEnemies(), effectHandler, cardPlayService);
+    EffectVisualRegistry effectVisualRegistry = new EffectVisualRegistry();
+    OffensiveEffectVisuals.registerAll(effectVisualRegistry);
+    Entity animationCoordinatorEntity =
+            new Entity()
+                    .addComponent(
+                            new BattleAnimationCoordinator(
+                                    controller,
+                                    effectHandler,
+                                    forestGameArea.getEnemies(),
+                                    player,
+                                    effectVisualRegistry));
+    ServiceLocator.getEntityService().register(animationCoordinatorEntity);
 
     controller.addBattleEndListener(
         won -> {
