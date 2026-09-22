@@ -12,6 +12,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.csse3200.game.GdxGame;
+import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardLibrary;
+import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.components.cards.CardUpgradeDisplay;
+import com.csse3200.game.components.cards.CardUpgradeSelection;
+import com.csse3200.game.components.cards.PlayerDeckCardUpgradeCommitter;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -27,7 +34,7 @@ import com.csse3200.game.services.ServiceLocator;
 /**
  * Campfire encounter where the player can rest or forge a card.
  *
- * <p>Rest is functional. Forge will be wired to the card-upgrade integration separately.
+ * <p>Rest restores health, while Forge upgrades one eligible card in the persistent player deck.
  */
 public class CampfireScreen extends ScreenAdapter {
   private static final float REST_HEAL_PERCENT = 0.30f;
@@ -65,6 +72,22 @@ public class CampfireScreen extends ScreenAdapter {
 
     PlayerRunState playerState = runState.getOrCreatePlayerState();
 
+    CardService cardLibrary = new CardLibrary(CardConfigLoader.loadCards());
+    PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(cardLibrary);
+
+    CardUpgradeSelection upgradeSelection =
+        CardUpgradeSelection.forPlayerDeck(playerDeck, cardLibrary, 1);
+
+    CardUpgradeDisplay upgradeDisplay =
+        new CardUpgradeDisplay(
+            upgradeSelection,
+            new PlayerDeckCardUpgradeCommitter(playerDeck),
+            false,
+            this::finishCampfire);
+
+    Entity upgradeEntity = new Entity().addComponent(upgradeDisplay);
+    ServiceLocator.getEntityService().register(upgradeEntity);
+
     Table root = new Table();
     root.setFillParent(true);
 
@@ -92,10 +115,24 @@ public class CampfireScreen extends ScreenAdapter {
 
     TextButton forgeButton = new TextButton("Forge\n(Upgrade a Card)", skin);
 
-    // Temporary until the real card-upgrade integration is connected.
-    forgeButton.setDisabled(true);
+    boolean hasUpgradableCards = !upgradeSelection.getCardUpgradeOption().isEmpty();
 
-    Label forgeStatus = new Label("Forge integration pending.", bodyStyle);
+    forgeButton.setDisabled(!hasUpgradableCards);
+
+    if (hasUpgradableCards) {
+      forgeButton.addListener(
+          new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+              upgradeDisplay.showLibrary();
+            }
+          });
+    }
+
+    Label forgeStatus =
+        new Label(
+            hasUpgradableCards ? "Choose a card to upgrade." : "No cards available to upgrade.",
+            bodyStyle);
 
     root.add(title).padBottom(30f);
     root.row();
