@@ -52,7 +52,7 @@ class PlayerDeckTest {
     assertEquals(3, deck.size());
     assertEquals(2, deck.countByCardId("strike"));
     assertEquals(1, deck.countByCardId("defend"));
-    assertTrue(deck.contains("strike"));
+    assertTrue(deck.containsInstance(deck.getCards().getFirst().instanceId()));
   }
 
   @Test
@@ -97,10 +97,11 @@ class PlayerDeckTest {
   }
 
   @Test
-  void shouldRemoveFirstMatchingCardOnly() {
+  void shouldRemoveOnlyTheSelectedInstance() {
     PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike", "defend", "strike"));
+    CardInstance selected = deck.getCards().getFirst();
 
-    assertTrue(deck.removeCard("strike"));
+    assertTrue(deck.removeCard(selected.instanceId()));
 
     assertIterableEquals(List.of("defend", "strike"), deck.getCardIds());
     assertEquals(1, deck.countByCardId("strike"));
@@ -110,7 +111,7 @@ class PlayerDeckTest {
   void shouldReturnFalseWhenRemovingMissingCard() {
     PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike", "defend"));
 
-    assertFalse(deck.removeCard("bandage"));
+    assertFalse(deck.removeCard("missing-instance"));
 
     assertIterableEquals(List.of("strike", "defend"), deck.getCardIds());
   }
@@ -119,9 +120,9 @@ class PlayerDeckTest {
   void shouldRemoveCardAtPosition() {
     PlayerDeck deck = new PlayerDeck(CARDS, List.of("strike", "defend", "bandage"));
 
-    String removed = deck.removeCardAt(1);
+    CardInstance removed = deck.removeCardAt(1);
 
-    assertEquals("defend", removed);
+    assertEquals("defend", removed.cardId());
     assertIterableEquals(List.of("strike", "bandage"), deck.getCardIds());
   }
 
@@ -152,12 +153,14 @@ class PlayerDeckTest {
   void shouldCopyIndependently() {
     PlayerDeck original = new PlayerDeck(CARDS, List.of("strike", "defend"));
     PlayerDeck copy = original.copy();
+    List<CardInstance> copiedInstances = copy.getCards();
 
     copy.addCard("bandage");
-    original.removeCard("strike");
+    original.removeCard(original.getCards().getFirst().instanceId());
 
     assertIterableEquals(List.of("defend"), original.getCardIds());
     assertIterableEquals(List.of("strike", "defend", "bandage"), copy.getCardIds());
+    assertIterableEquals(copiedInstances, copy.getCards().subList(0, 2));
   }
 
   @Test

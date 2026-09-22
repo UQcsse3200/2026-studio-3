@@ -148,13 +148,13 @@ class CombatStatsComponentTest {
   }
 
   @Test
-  void shouldReduceHealthWithoutArmorOrBlock() {
+  void shouldReduceHealthWithoutArmourOrBlock() {
     CombatStatsComponent stats = new CombatStatsComponent(20, 0);
-    stats.setArmor(10);
+    stats.setArmour(10);
     stats.setBlock(5);
     stats.applyDirectHealthChange(-8);
     assertEquals(12, stats.getHealth());
-    assertEquals(10, stats.getArmor());
+    assertEquals(10, stats.getArmour());
     assertEquals(5, stats.getBlock());
   }
 
@@ -199,16 +199,16 @@ class CombatStatsComponentTest {
   }
 
   @Test
-  void shouldTakePiercingDamageWithoutConsumingBlockOrArmor() {
+  void shouldTakePiercingDamageWithoutConsumingBlockOrArmour() {
     CombatStatsComponent combat = new CombatStatsComponent(20, 5);
     combat.addBlock(3);
-    combat.addArmor(4);
+    combat.addArmour(4);
 
     combat.takePiercingDamage(6);
 
     assertEquals(14, combat.getHealth());
     assertEquals(3, combat.getBlock());
-    assertEquals(4, combat.getArmor());
+    assertEquals(4, combat.getArmour());
   }
 
   @Test

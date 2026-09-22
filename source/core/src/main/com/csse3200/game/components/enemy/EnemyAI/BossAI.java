@@ -12,7 +12,7 @@ import java.util.Random;
  * level.
  */
 public class BossAI implements EnemyAI {
-  private static final int HIGH_ARMOR_THRESHOLD = 8;
+  private static final int HIGH_ARMOUR_THRESHOLD = 8;
 
   /** Magnitude passed with a SILENCE effect; the effect itself is a simple on/off block. */
   private static final int SILENCE_VALUE = 1;
@@ -201,8 +201,8 @@ public class BossAI implements EnemyAI {
 
   /** Applies restrictions that override undesirable random behaviour. */
   private void applyConstraints(EnumMap<BossMove, Integer> weights, EnemyAIContext context) {
-    // Do not keep defending when the Boss already has substantial armor.
-    if (context.getEnemyArmor() >= HIGH_ARMOR_THRESHOLD) {
+    // Do not keep defending when the Boss already has substantial armour.
+    if (context.getEnemyArmour() >= HIGH_ARMOUR_THRESHOLD) {
       weights.put(BossMove.DEFEND, 0);
     }
 

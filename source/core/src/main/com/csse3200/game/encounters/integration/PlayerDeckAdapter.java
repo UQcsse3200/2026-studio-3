@@ -45,7 +45,12 @@ public final class PlayerDeckAdapter implements DeckGateway {
   @Override
   public synchronized boolean removeCard(String cardId) {
     try {
-      return playerDeck.removeCard(cardId);
+      return playerDeck.getCards().stream()
+          .filter(card -> card.cardId().equals(cardId))
+          .findFirst()
+          .map(CardInstance::instanceId)
+          .map(playerDeck::removeCard)
+          .orElse(false);
     } catch (IllegalArgumentException exception) {
       return false;
     }

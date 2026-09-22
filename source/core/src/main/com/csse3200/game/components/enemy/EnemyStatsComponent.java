@@ -6,11 +6,12 @@ import com.csse3200.game.components.Component;
 /**
  * Enemy-specific state and lifecycle event translation.
  *
- * <p>Combat stats (health, base attack, armor) live on the entity's {@link CombatStatsComponent} so
- * that other teams can read them uniformly with {@code getComponent(CombatStatsComponent.class)}.
- * This component holds only enemy-specific data (currently the display name) and re-emits the enemy
- * lifecycle events ({@code enemyDamaged}, {@code enemyDefeated}, {@code enemyEnraged}) from the
- * shared {@code updateHealth} event fired by {@link CombatStatsComponent}.
+ * <p>Combat stats (health, base attack, armour) live on the entity's {@link CombatStatsComponent}
+ * so that other teams can read them uniformly with {@code
+ * getComponent(CombatStatsComponent.class)}. This component holds only enemy-specific data
+ * (currently the display name) and re-emits the enemy lifecycle events ({@code enemyDamaged},
+ * {@code enemyDefeated}, {@code enemyEnraged}) from the shared {@code updateHealth} event fired by
+ * {@link CombatStatsComponent}.
  */
 public class EnemyStatsComponent extends Component {
   private static final String DEFAULT_DISPLAY_NAME = "Unknown Enemy";

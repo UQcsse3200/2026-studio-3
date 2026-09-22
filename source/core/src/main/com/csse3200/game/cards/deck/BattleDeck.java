@@ -3,7 +3,6 @@ package com.csse3200.game.cards.deck;
 import com.csse3200.game.cards.runtime.CardInstance;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,13 +13,9 @@ import java.util.Optional;
  * draw pile, hand and discard pile. Mutating this class should not change the original {@link
  * PlayerDeck}.
  *
- * <p>Internally every pile stores {@link CardInstance}s rather than bare card IDs, carrying over
- * the unique instance ID each card was given when it entered the {@link PlayerDeck}. Most callers
- * only care about card IDs and can keep using the {@code String}-based methods below, which match
- * the first card with that ID (the same "first match" semantics {@code List.remove(Object)} has
- * always had here). Callers that need to tell duplicate copies of the same card apart — e.g.
- * cooldown tracking, so disabling one "strike" doesn't disable every "strike" — should use the
- * instance-aware methods instead.
+ * <p>Every pile stores {@link CardInstance}s and preserves the identity assigned when a card
+ * entered the {@link PlayerDeck}. All string parameters in this class are exact instance IDs;
+ * definition IDs are never used to choose one copy from a pile.
  */
 public class BattleDeck {
   private final List<CardInstance> drawPile = new ArrayList<>();
@@ -47,14 +42,9 @@ public class BattleDeck {
   /**
    * Draws one card from the draw pile into the hand.
    *
-   * @return drawn card ID, or null if the draw pile is empty
+   * @return drawn card instance, or null if the draw pile is empty
    */
-  public String drawOne() {
-    CardInstance instance = drawOneInstance();
-    return instance == null ? null : instance.cardId();
-  }
-
-  private CardInstance drawOneInstance() {
+  public CardInstance drawOne() {
     if (drawPile.isEmpty()) {
       reshuffleDiscardIntoDrawPile();
     }
@@ -72,20 +62,20 @@ public class BattleDeck {
    * Draws up to the requested number of cards from the draw pile into the hand.
    *
    * @param count number of cards to draw
-   * @return card IDs that were drawn, in draw order
+   * @return card instances that were drawn, in draw order
    */
-  public List<String> drawCards(int count) {
+  public List<CardInstance> drawCards(int count) {
     if (count < 0) {
       throw new IllegalArgumentException("count must not be negative");
     }
 
-    List<String> drawnCards = new ArrayList<>();
+    List<CardInstance> drawnCards = new ArrayList<>();
     for (int i = 0; i < count; i++) {
-      String cardId = drawOne();
-      if (cardId == null) {
+      CardInstance card = drawOne();
+      if (card == null) {
         break;
       }
-      drawnCards.add(cardId);
+      drawnCards.add(card);
     }
     return List.copyOf(drawnCards);
   }
@@ -95,34 +85,32 @@ public class BattleDeck {
    *
    * <p>Card validation and effect resolution should be completed before this method is called.
    *
-   * @param cardId ID of the card being played
+   * @param instanceId ID of the card being played
    * @return true if the card was moved, otherwise false
    */
-  public boolean playCard(String cardId) {
-    return discardCard(cardId);
+  public boolean playCard(String instanceId) {
+    return discardCard(instanceId);
   }
 
   /**
-   * Removes one matching card from the hand and moves it to the discard pile.
+   * Removes the exact card from the hand and moves it to the discard pile.
    *
-   * @param cardId ID of the card to discard
+   * @param instanceId ID of the card to discard
    * @return true if the card was discarded, otherwise false
    */
-  public boolean discardCard(String cardId) {
-    return discardCardInstance(cardId) != null;
+  public boolean discardCard(String instanceId) {
+    return discardCardInstance(instanceId) != null;
   }
 
   /**
-   * Removes the first hand card matching {@code cardId} and moves it to the discard pile, same as
-   * {@link #discardCard(String)}, but returns the exact {@link CardInstance} that moved so callers
-   * needing per-copy identity (e.g. cooldown tracking) can key off it instead of the shared card
-   * ID.
+   * Removes the hand card with {@code instanceId} and moves it to the discard pile, same as {@link
+   * #discardCard(String)}, but returns the exact {@link CardInstance} that moved.
    *
-   * @param cardId ID of the card to discard
+   * @param instanceId ID of the card to discard
    * @return the discarded instance, or null if no matching card was in hand
    */
-  public CardInstance discardCardInstance(String cardId) {
-    CardInstance instance = removeFirstMatching(hand, cardId);
+  public CardInstance discardCardInstance(String instanceId) {
+    CardInstance instance = removeByInstanceId(hand, instanceId);
     if (instance == null) {
       return null;
     }
@@ -133,11 +121,11 @@ public class BattleDeck {
   /**
    * Removes one matching card from the discard pile and moves it back into the hand.
    *
-   * @param cardId ID of the card to retrieve
+   * @param instanceId ID of the card to retrieve
    * @return true if the card was retrieved, otherwise false
    */
-  public boolean retrieveFromDiscard(String cardId) {
-    CardInstance instance = removeFirstMatching(discardPile, cardId);
+  public boolean retrieveFromDiscard(String instanceId) {
+    CardInstance instance = removeByInstanceId(discardPile, instanceId);
     if (instance == null) {
       return false;
     }
@@ -146,10 +134,8 @@ public class BattleDeck {
   }
 
   /**
-   * Moves a specific card instance from the discard pile back into the hand, by exact identity
-   * rather than by matching the first card with a given ID. Used by cooldown tracking so the
-   * physical card that was actually discarded is the one retrieved, even when other copies of the
-   * same card are also sitting in the discard pile.
+   * Moves a specific card instance from the discard pile back into the hand. Used by cooldown
+   * tracking so the physical card that was discarded is the one retrieved.
    *
    * @param instance the exact instance to retrieve
    * @return true if that instance was in the discard pile and was moved, otherwise false
@@ -193,22 +179,23 @@ public class BattleDeck {
   /**
    * @return immutable snapshot of the draw pile
    */
-  public List<String> getDrawPile() {
-    return cardIdsOf(drawPile);
+  public List<CardInstance> getDrawPile() {
+    return List.copyOf(drawPile);
   }
 
   /**
-   * @return immutable snapshot of the hand
+   * @return immutable snapshot of the hand as distinct card instances, letting callers tell
+   *     duplicate copies of the same card apart
    */
-  public List<String> getHand() {
-    return cardIdsOf(hand);
+  public List<CardInstance> getHand() {
+    return List.copyOf(hand);
   }
 
   /**
    * @return immutable snapshot of the discard pile
    */
-  public List<String> getDiscardPile() {
-    return cardIdsOf(discardPile);
+  public List<CardInstance> getDiscardPile() {
+    return List.copyOf(discardPile);
   }
 
   /**
@@ -304,27 +291,18 @@ public class BattleDeck {
     return discardPile.size();
   }
 
-  private static CardInstance removeFirstMatching(List<CardInstance> instances, String cardId) {
-    if (cardId == null) {
+  private static CardInstance removeByInstanceId(List<CardInstance> instances, String instanceId) {
+    if (instanceId == null) {
       return null;
     }
-    Iterator<CardInstance> iterator = instances.iterator();
-    while (iterator.hasNext()) {
-      CardInstance instance = iterator.next();
-      if (instance.cardId().equals(cardId)) {
-        iterator.remove();
+    for (int i = 0; i < instances.size(); i++) {
+      CardInstance instance = instances.get(i);
+      if (instance.instanceId().equals(instanceId)) {
+        instances.remove(i);
         return instance;
       }
     }
     return null;
-  }
-
-  private static List<String> cardIdsOf(List<CardInstance> instances) {
-    List<String> cardIds = new ArrayList<>(instances.size());
-    for (CardInstance instance : instances) {
-      cardIds.add(instance.cardId());
-    }
-    return List.copyOf(cardIds);
   }
 
   /** Finds an exact owned copy in the current hand. */

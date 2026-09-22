@@ -1,26 +1,38 @@
 package com.csse3200.game.cards.play;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.cards.effects.CardEffectResolution;
+import com.csse3200.game.cards.runtime.CardInstance;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class CardPlayResultTest {
 
+  private static final String INSTANCE_ID = "instance-1";
   private static final String CARD_ID = "strike";
   private static final int ENERGY_COST = 1;
+  private static final DeckSnapshot EMPTY_SNAPSHOT = DeckSnapshot.empty();
 
   @Test
   void shouldCreateSuccessfulResult() {
     CardEffectResolution resolution = createResolution();
     CardPlayTarget target = CardPlayTarget.singleEnemy(CARD_ID);
+
     DeckSnapshot snapshot =
-        new DeckSnapshot(List.of("defend"), List.of("block"), List.of("strike"));
+        new DeckSnapshot(
+            List.of(new CardInstance("instance-2", "defend", CardInstance.BASE_LEVEL)),
+            List.of(new CardInstance("instance-3", "block", CardInstance.BASE_LEVEL)),
+            List.of(new CardInstance(INSTANCE_ID, CARD_ID, CardInstance.BASE_LEVEL)));
 
     CardPlayResult result =
-        CardPlayResult.success(CARD_ID, target, ENERGY_COST, resolution, snapshot);
+        CardPlayResult.success(INSTANCE_ID, CARD_ID, target, ENERGY_COST, resolution, snapshot);
 
+    assertEquals(INSTANCE_ID, result.instanceId());
     assertEquals(CARD_ID, result.cardId());
     assertEquals(target, result.target());
     assertTrue(result.success());
@@ -34,12 +46,23 @@ class CardPlayResultTest {
   @Test
   void shouldCreateFailedResult() {
     CardPlayTarget target = CardPlayTarget.singleEnemy(CARD_ID);
-    DeckSnapshot snapshot = new DeckSnapshot(List.of("strike"), List.of("defend"), List.of());
+
+    DeckSnapshot snapshot =
+        new DeckSnapshot(
+            List.of(new CardInstance(INSTANCE_ID, CARD_ID, CardInstance.BASE_LEVEL)),
+            List.of(new CardInstance("instance-2", "defend", CardInstance.BASE_LEVEL)),
+            List.of());
 
     CardPlayResult result =
         CardPlayResult.failure(
-            CARD_ID, target, ENERGY_COST, CardPlayFailureReason.NOT_ENOUGH_ENERGY, snapshot);
+            INSTANCE_ID,
+            CARD_ID,
+            target,
+            ENERGY_COST,
+            CardPlayFailureReason.NOT_ENOUGH_ENERGY,
+            snapshot);
 
+    assertEquals(INSTANCE_ID, result.instanceId());
     assertEquals(CARD_ID, result.cardId());
     assertEquals(target, result.target());
     assertFalse(result.success());
@@ -50,7 +73,7 @@ class CardPlayResultTest {
   }
 
   @Test
-  void shouldRejectNullCardId() {
+  void shouldRejectNullInstanceId() {
     CardEffectResolution resolution = createResolution();
 
     assertThrows(
@@ -58,16 +81,17 @@ class CardPlayResultTest {
         () ->
             new CardPlayResult(
                 null,
+                CARD_ID,
                 null,
                 true,
                 ENERGY_COST,
                 resolution,
                 CardPlayFailureReason.NONE,
-                DeckSnapshot.empty()));
+                EMPTY_SNAPSHOT));
   }
 
   @Test
-  void shouldRejectBlankCardId() {
+  void shouldRejectBlankInstanceId() {
     CardEffectResolution resolution = createResolution();
 
     assertThrows(
@@ -75,12 +99,67 @@ class CardPlayResultTest {
         () ->
             new CardPlayResult(
                 " ",
+                CARD_ID,
                 null,
                 true,
                 ENERGY_COST,
                 resolution,
                 CardPlayFailureReason.NONE,
-                DeckSnapshot.empty()));
+                EMPTY_SNAPSHOT));
+  }
+
+  @Test
+  void shouldRejectSuccessfulResultWithNullCardId() {
+    CardEffectResolution resolution = createResolution();
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            new CardPlayResult(
+                INSTANCE_ID,
+                null,
+                null,
+                true,
+                ENERGY_COST,
+                resolution,
+                CardPlayFailureReason.NONE,
+                EMPTY_SNAPSHOT));
+  }
+
+  @Test
+  void shouldRejectSuccessfulResultWithBlankCardId() {
+    CardEffectResolution resolution = createResolution();
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            new CardPlayResult(
+                INSTANCE_ID,
+                " ",
+                null,
+                true,
+                ENERGY_COST,
+                resolution,
+                CardPlayFailureReason.NONE,
+                EMPTY_SNAPSHOT));
+  }
+
+  @Test
+  void shouldAllowFailedResultWithNullCardId() {
+    CardPlayResult result =
+        new CardPlayResult(
+            INSTANCE_ID,
+            null,
+            null,
+            false,
+            ENERGY_COST,
+            null,
+            CardPlayFailureReason.NOT_ENOUGH_ENERGY,
+            EMPTY_SNAPSHOT);
+
+    assertEquals(INSTANCE_ID, result.instanceId());
+    assertNull(result.cardId());
+    assertFalse(result.success());
   }
 
   @Test
@@ -91,13 +170,14 @@ class CardPlayResultTest {
         IllegalArgumentException.class,
         () ->
             new CardPlayResult(
+                INSTANCE_ID,
                 CARD_ID,
                 null,
                 true,
                 -1,
                 resolution,
                 CardPlayFailureReason.NONE,
-                DeckSnapshot.empty()));
+                EMPTY_SNAPSHOT));
   }
 
   @Test
@@ -108,7 +188,7 @@ class CardPlayResultTest {
         IllegalArgumentException.class,
         () ->
             new CardPlayResult(
-                CARD_ID, null, true, ENERGY_COST, resolution, null, DeckSnapshot.empty()));
+                INSTANCE_ID, CARD_ID, null, true, ENERGY_COST, resolution, null, EMPTY_SNAPSHOT));
   }
 
   @Test
@@ -119,7 +199,14 @@ class CardPlayResultTest {
         IllegalArgumentException.class,
         () ->
             new CardPlayResult(
-                CARD_ID, null, true, ENERGY_COST, resolution, CardPlayFailureReason.NONE, null));
+                INSTANCE_ID,
+                CARD_ID,
+                null,
+                true,
+                ENERGY_COST,
+                resolution,
+                CardPlayFailureReason.NONE,
+                null));
   }
 
   @Test
@@ -130,13 +217,14 @@ class CardPlayResultTest {
         IllegalArgumentException.class,
         () ->
             new CardPlayResult(
+                INSTANCE_ID,
                 CARD_ID,
                 null,
                 true,
                 ENERGY_COST,
                 resolution,
                 CardPlayFailureReason.NOT_ENOUGH_ENERGY,
-                DeckSnapshot.empty()));
+                EMPTY_SNAPSHOT));
   }
 
   @Test
@@ -145,13 +233,14 @@ class CardPlayResultTest {
         IllegalArgumentException.class,
         () ->
             new CardPlayResult(
+                INSTANCE_ID,
                 CARD_ID,
                 null,
                 true,
                 ENERGY_COST,
                 null,
                 CardPlayFailureReason.NONE,
-                DeckSnapshot.empty()));
+                EMPTY_SNAPSHOT));
   }
 
   @Test
@@ -160,13 +249,14 @@ class CardPlayResultTest {
         IllegalArgumentException.class,
         () ->
             new CardPlayResult(
+                INSTANCE_ID,
                 CARD_ID,
                 null,
                 false,
                 ENERGY_COST,
                 null,
                 CardPlayFailureReason.NONE,
-                DeckSnapshot.empty()));
+                EMPTY_SNAPSHOT));
   }
 
   @Test
@@ -177,19 +267,26 @@ class CardPlayResultTest {
         IllegalArgumentException.class,
         () ->
             new CardPlayResult(
+                INSTANCE_ID,
                 CARD_ID,
                 null,
                 false,
                 ENERGY_COST,
                 resolution,
                 CardPlayFailureReason.NOT_ENOUGH_ENERGY,
-                DeckSnapshot.empty()));
+                EMPTY_SNAPSHOT));
   }
 
   @Test
   void shouldReturnEmptyEffectListsWhenResultHasNoResolution() {
     CardPlayResult result =
-        CardPlayResult.failure(CARD_ID, ENERGY_COST, CardPlayFailureReason.NOT_ENOUGH_ENERGY);
+        CardPlayResult.failure(
+            INSTANCE_ID,
+            CARD_ID,
+            null,
+            ENERGY_COST,
+            CardPlayFailureReason.NOT_ENOUGH_ENERGY,
+            EMPTY_SNAPSHOT);
 
     assertTrue(result.enemyEffects().isEmpty());
     assertTrue(result.playerEffects().isEmpty());
@@ -199,7 +296,8 @@ class CardPlayResultTest {
   void shouldReturnEnemyEffectsFromResolution() {
     CardEffectResolution resolution = createResolution();
 
-    CardPlayResult result = CardPlayResult.success(CARD_ID, ENERGY_COST, resolution);
+    CardPlayResult result =
+        CardPlayResult.success(INSTANCE_ID, CARD_ID, null, ENERGY_COST, resolution, EMPTY_SNAPSHOT);
 
     assertEquals(resolution.enemyEffects(), result.enemyEffects());
   }
@@ -208,22 +306,28 @@ class CardPlayResultTest {
   void shouldReturnPlayerEffectsFromResolution() {
     CardEffectResolution resolution = createResolution();
 
-    CardPlayResult result = CardPlayResult.success(CARD_ID, ENERGY_COST, resolution);
+    CardPlayResult result =
+        CardPlayResult.success(INSTANCE_ID, CARD_ID, null, ENERGY_COST, resolution, EMPTY_SNAPSHOT);
 
     assertEquals(resolution.playerEffects(), result.playerEffects());
   }
 
   @Test
   void shouldReturnDeckSnapshots() {
+    CardInstance handCard = new CardInstance("instance-2", "defend", CardInstance.BASE_LEVEL);
+    CardInstance drawCard = new CardInstance("instance-3", "strike", CardInstance.BASE_LEVEL);
+    CardInstance discardCard = new CardInstance("instance-4", "block", CardInstance.BASE_LEVEL);
+
     DeckSnapshot snapshot =
-        new DeckSnapshot(List.of("defend"), List.of("strike"), List.of("block"));
+        new DeckSnapshot(List.of(handCard), List.of(drawCard), List.of(discardCard));
 
     CardPlayResult result =
-        CardPlayResult.success(CARD_ID, null, ENERGY_COST, createResolution(), snapshot);
+        CardPlayResult.success(
+            INSTANCE_ID, CARD_ID, null, ENERGY_COST, createResolution(), snapshot);
 
-    assertEquals(List.of("defend"), result.updatedHand());
-    assertEquals(List.of("strike"), result.updatedDrawPile());
-    assertEquals(List.of("block"), result.updatedDiscardPile());
+    assertEquals(List.of(handCard), result.updatedHand());
+    assertEquals(List.of(drawCard), result.updatedDrawPile());
+    assertEquals(List.of(discardCard), result.updatedDiscardPile());
   }
 
   @Test
@@ -231,27 +335,44 @@ class CardPlayResultTest {
     CardEffectResolution resolution = createResolution();
 
     CardPlayResult result =
-        new CardPlayResult(CARD_ID, true, ENERGY_COST, resolution, CardPlayFailureReason.NONE);
+        new CardPlayResult(
+            INSTANCE_ID,
+            CARD_ID,
+            null,
+            true,
+            ENERGY_COST,
+            resolution,
+            CardPlayFailureReason.NONE,
+            EMPTY_SNAPSHOT);
 
+    assertEquals(INSTANCE_ID, result.instanceId());
     assertEquals(CARD_ID, result.cardId());
     assertTrue(result.success());
     assertEquals(ENERGY_COST, result.energyCost());
     assertEquals(resolution, result.resolution());
     assertEquals(CardPlayFailureReason.NONE, result.failureReason());
-    assertEquals(DeckSnapshot.empty(), result.deckSnapshot());
+    assertEquals(EMPTY_SNAPSHOT, result.deckSnapshot());
   }
 
   @Test
   void shouldCreateBackwardsCompatibleFailedResult() {
     CardPlayResult result =
         new CardPlayResult(
-            CARD_ID, false, ENERGY_COST, null, CardPlayFailureReason.CARD_NOT_IN_HAND);
+            INSTANCE_ID,
+            CARD_ID,
+            null,
+            false,
+            ENERGY_COST,
+            null,
+            CardPlayFailureReason.CARD_NOT_IN_HAND,
+            EMPTY_SNAPSHOT);
 
+    assertEquals(INSTANCE_ID, result.instanceId());
     assertEquals(CARD_ID, result.cardId());
     assertFalse(result.success());
     assertNull(result.resolution());
     assertEquals(CardPlayFailureReason.CARD_NOT_IN_HAND, result.failureReason());
-    assertEquals(DeckSnapshot.empty(), result.deckSnapshot());
+    assertEquals(EMPTY_SNAPSHOT, result.deckSnapshot());
   }
 
   private CardEffectResolution createResolution() {
