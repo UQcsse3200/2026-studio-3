@@ -31,118 +31,118 @@ import org.slf4j.LoggerFactory;
  * an entity must not dispose itself while its components are being iterated.
  */
 public class BattleAnimationCoordinator extends Component {
-    private static final Logger logger = LoggerFactory.getLogger(BattleAnimationCoordinator.class);
-    private static final float SIZE_FACTOR = 0.8f;
-    private static final float MIN_SIZE = 0.6f;
+  private static final Logger logger = LoggerFactory.getLogger(BattleAnimationCoordinator.class);
+  private static final float SIZE_FACTOR = 0.8f;
+  private static final float MIN_SIZE = 0.6f;
 
-    private final BattleController controller;
-    private final CardEffectHandler effectHandler;
-    private final List<Entity> enemies;
-    private final Entity player;
-    private final EffectVisualRegistry registry;
-    private final List<Entity> activeVisuals = new ArrayList<>();
+  private final BattleController controller;
+  private final CardEffectHandler effectHandler;
+  private final List<Entity> enemies;
+  private final Entity player;
+  private final EffectVisualRegistry registry;
+  private final List<Entity> activeVisuals = new ArrayList<>();
 
-    /**
-     * @param controller the battle controller to listen to
-     * @param effectHandler used to find which enemies a played card targets
-     * @param enemies the same enemy list the controller was built with
-     * @param player the player entity
-     * @param registry effect-type-to-visual lookup, shared with teammates' registrations
-     */
-    public BattleAnimationCoordinator(
-            BattleController controller,
-            CardEffectHandler effectHandler,
-            List<Entity> enemies,
-            Entity player,
-            EffectVisualRegistry registry) {
-        this.controller = Objects.requireNonNull(controller, "controller cannot be null");
-        this.effectHandler = Objects.requireNonNull(effectHandler, "effectHandler cannot be null");
-        this.enemies = List.copyOf(Objects.requireNonNull(enemies, "enemies cannot be null"));
-        this.player = Objects.requireNonNull(player, "player cannot be null");
-        this.registry = Objects.requireNonNull(registry, "registry cannot be null");
+  /**
+   * @param controller the battle controller to listen to
+   * @param effectHandler used to find which enemies a played card targets
+   * @param enemies the same enemy list the controller was built with
+   * @param player the player entity
+   * @param registry effect-type-to-visual lookup, shared with teammates' registrations
+   */
+  public BattleAnimationCoordinator(
+      BattleController controller,
+      CardEffectHandler effectHandler,
+      List<Entity> enemies,
+      Entity player,
+      EffectVisualRegistry registry) {
+    this.controller = Objects.requireNonNull(controller, "controller cannot be null");
+    this.effectHandler = Objects.requireNonNull(effectHandler, "effectHandler cannot be null");
+    this.enemies = List.copyOf(Objects.requireNonNull(enemies, "enemies cannot be null"));
+    this.player = Objects.requireNonNull(player, "player cannot be null");
+    this.registry = Objects.requireNonNull(registry, "registry cannot be null");
+  }
+
+  @Override
+  public void create() {
+    super.create();
+    controller.addEnemyEffectsListener(
+        effects -> safely("enemy effects", () -> onEnemyEffects(effects)));
+    controller.addPlayerEffectsListener(
+        effects -> safely("player effects", () -> onPlayerEffects(effects)));
+  }
+
+  @Override
+  public void update() {
+    Iterator<Entity> iterator = activeVisuals.iterator();
+    while (iterator.hasNext()) {
+      Entity visual = iterator.next();
+      EffectVisualComponent component = visual.getComponent(EffectVisualComponent.class);
+      if (component == null || component.isExpired()) {
+        iterator.remove();
+        visual.dispose();
+      }
     }
+  }
 
-    @Override
-    public void create() {
-        super.create();
-        controller.addEnemyEffectsListener(
-                effects -> safely("enemy effects", () -> onEnemyEffects(effects)));
-        controller.addPlayerEffectsListener(
-                effects -> safely("player effects", () -> onPlayerEffects(effects)));
+  /** Fires before the controller applies the effects, so the targets are still alive to read. */
+  private void onEnemyEffects(List<ResolvedCardEffect> effects) {
+    CardPlayRequest request = controller.getCardPlayRequest();
+    if (request == null || effects == null || effects.isEmpty()) {
+      return;
     }
-
-    @Override
-    public void update() {
-        Iterator<Entity> iterator = activeVisuals.iterator();
-        while (iterator.hasNext()) {
-            Entity visual = iterator.next();
-            EffectVisualComponent component = visual.getComponent(EffectVisualComponent.class);
-            if (component == null || component.isExpired()) {
-                iterator.remove();
-                visual.dispose();
-            }
-        }
+    for (Entity target : effectHandler.getLivingEnemyTargets(request, enemies)) {
+      for (EffectType type : distinctTypesInOrder(effects)) {
+        spawnVisual(type, target);
+      }
     }
+  }
 
-    /** Fires before the controller applies the effects, so the targets are still alive to read. */
-    private void onEnemyEffects(List<ResolvedCardEffect> effects) {
-        CardPlayRequest request = controller.getCardPlayRequest();
-        if (request == null || effects == null || effects.isEmpty()) {
-            return;
-        }
-        for (Entity target : effectHandler.getLivingEnemyTargets(request, enemies)) {
-            for (EffectType type : distinctTypesInOrder(effects)) {
-                spawnVisual(type, target);
-            }
-        }
+  private void onPlayerEffects(List<ResolvedCardEffect> effects) {
+    for (EffectType type : distinctTypesInOrder(effects)) {
+      spawnVisual(type, player);
     }
+  }
 
-    private void onPlayerEffects(List<ResolvedCardEffect> effects) {
-        for (EffectType type : distinctTypesInOrder(effects)) {
-            spawnVisual(type, player);
-        }
+  private void spawnVisual(EffectType type, Entity target) {
+    EffectVisualStyle style = registry.lookup(type);
+    Vector2 scale = target.getScale();
+    float baseSize = Math.max(MIN_SIZE, Math.max(scale.x, scale.y) * SIZE_FACTOR);
+
+    Entity visual =
+        new Entity().addComponent(new EffectVisualComponent(textureFor(style), style, baseSize));
+    visual.setPosition(target.getCenterPosition());
+    ServiceLocator.getEntityService().register(visual);
+    activeVisuals.add(visual);
+  }
+
+  private Texture textureFor(EffectVisualStyle style) {
+    if (style.iconPath() == null) {
+      return null;
     }
-
-    private void spawnVisual(EffectType type, Entity target) {
-        EffectVisualStyle style = registry.lookup(type);
-        Vector2 scale = target.getScale();
-        float baseSize = Math.max(MIN_SIZE, Math.max(scale.x, scale.y) * SIZE_FACTOR);
-
-        Entity visual =
-                new Entity().addComponent(new EffectVisualComponent(textureFor(style), style, baseSize));
-        visual.setPosition(target.getCenterPosition());
-        ServiceLocator.getEntityService().register(visual);
-        activeVisuals.add(visual);
+    try {
+      return ServiceLocator.getResourceService().getAsset(style.iconPath(), Texture.class);
+    } catch (RuntimeException e) {
+      logger.warn("Effect icon {} is not loaded, skipping the texture", style.iconPath());
+      return null;
     }
+  }
 
-    private Texture textureFor(EffectVisualStyle style) {
-        if (style.iconPath() == null) {
-            return null;
-        }
-        try {
-            return ServiceLocator.getResourceService().getAsset(style.iconPath(), Texture.class);
-        } catch (RuntimeException e) {
-            logger.warn("Effect icon {} is not loaded, skipping the texture", style.iconPath());
-            return null;
-        }
+  /** Preserves each effect's first appearance order, dropping later duplicates of the same type. */
+  private static Set<EffectType> distinctTypesInOrder(List<ResolvedCardEffect> effects) {
+    Set<EffectType> types = new LinkedHashSet<>();
+    if (effects != null) {
+      for (ResolvedCardEffect effect : effects) {
+        types.add(effect.type());
+      }
     }
+    return types;
+  }
 
-    /** Preserves each effect's first appearance order, dropping later duplicates of the same type. */
-    private static Set<EffectType> distinctTypesInOrder(List<ResolvedCardEffect> effects) {
-        Set<EffectType> types = new LinkedHashSet<>();
-        if (effects != null) {
-            for (ResolvedCardEffect effect : effects) {
-                types.add(effect.type());
-            }
-        }
-        return types;
+  private static void safely(String what, Runnable action) {
+    try {
+      action.run();
+    } catch (RuntimeException e) {
+      logger.warn("Battle visual '{}' failed and was skipped", what, e);
     }
-
-    private static void safely(String what, Runnable action) {
-        try {
-            action.run();
-        } catch (RuntimeException e) {
-            logger.warn("Battle visual '{}' failed and was skipped", what, e);
-        }
-    }
+  }
 }

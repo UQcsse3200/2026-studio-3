@@ -13,37 +13,37 @@ import java.util.Map;
  * failing, so a newly added effect type never breaks the battle.
  */
 public class EffectVisualRegistry {
-    private static final EffectVisualStyle DEFAULT_STYLE =
-            new EffectVisualStyle(null, Color.WHITE, 0.4f, 0.4f, 1.2f, 0f);
+  private static final EffectVisualStyle DEFAULT_STYLE =
+      new EffectVisualStyle(null, Color.WHITE, 0.4f, 0.4f, 1.2f, 0f);
 
-    private final Map<EffectType, EffectVisualStyle> styles = new HashMap<>();
+  private final Map<EffectType, EffectVisualStyle> styles = new HashMap<>();
 
-    /**
-     * Registers (or replaces) the visual style for an effect type.
-     *
-     * @param type the effect type this style represents
-     * @param style the visual style to use for it
-     */
-    public void register(EffectType type, EffectVisualStyle style) {
-        if (type == null) {
-            throw new IllegalArgumentException("Effect type cannot be null");
-        }
-        if (style == null) {
-            throw new IllegalArgumentException("Visual style cannot be null");
-        }
-        styles.put(type, style);
+  /**
+   * Registers (or replaces) the visual style for an effect type.
+   *
+   * @param type the effect type this style represents
+   * @param style the visual style to use for it
+   */
+  public void register(EffectType type, EffectVisualStyle style) {
+    if (type == null) {
+      throw new IllegalArgumentException("Effect type cannot be null");
     }
-
-    /**
-     * Looks up the visual style for an effect type.
-     *
-     * @param type the effect type, may be null
-     * @return the registered style, or a plain default glow if none is registered (or type is null)
-     */
-    public EffectVisualStyle lookup(EffectType type) {
-        if (type == null) {
-            return DEFAULT_STYLE;
-        }
-        return styles.getOrDefault(type, DEFAULT_STYLE);
+    if (style == null) {
+      throw new IllegalArgumentException("Visual style cannot be null");
     }
+    styles.put(type, style);
+  }
+
+  /**
+   * Looks up the visual style for an effect type.
+   *
+   * @param type the effect type, may be null
+   * @return the registered style, or a plain default glow if none is registered (or type is null)
+   */
+  public EffectVisualStyle lookup(EffectType type) {
+    if (type == null) {
+      return DEFAULT_STYLE;
+    }
+    return styles.getOrDefault(type, DEFAULT_STYLE);
+  }
 }

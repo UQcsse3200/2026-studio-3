@@ -17,17 +17,17 @@ import com.badlogic.gdx.graphics.Color;
  * @param rise upward drift over the lifetime, relative to the target's own size (0 = no drift)
  */
 public record EffectVisualStyle(
-        String iconPath, Color color, float duration, float startScale, float endScale, float rise) {
+    String iconPath, Color color, float duration, float startScale, float endScale, float rise) {
 
-    public EffectVisualStyle {
-        if (color == null) {
-            throw new IllegalArgumentException("Visual color cannot be null");
-        }
-        if (duration <= 0f) {
-            throw new IllegalArgumentException("Visual duration must be positive");
-        }
-        if (startScale <= 0f || endScale <= 0f) {
-            throw new IllegalArgumentException("Visual scales must be positive");
-        }
+  public EffectVisualStyle {
+    if (color == null) {
+      throw new IllegalArgumentException("Visual color cannot be null");
     }
+    if (duration <= 0f) {
+      throw new IllegalArgumentException("Visual duration must be positive");
+    }
+    if (startScale <= 0f || endScale <= 0f) {
+      throw new IllegalArgumentException("Visual scales must be positive");
+    }
+  }
 }
