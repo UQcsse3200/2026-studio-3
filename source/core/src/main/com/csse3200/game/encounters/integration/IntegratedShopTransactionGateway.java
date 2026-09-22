@@ -122,9 +122,9 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
   public float getShopDiscount() {
     return player.getShopDiscount();
   }
+
   private int applyDiscount(int price) {
     float discount = getShopDiscount();
     return Math.round(price * (1f - discount));
   }
-
 }

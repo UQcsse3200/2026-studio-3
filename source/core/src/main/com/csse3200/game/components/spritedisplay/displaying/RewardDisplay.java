@@ -93,7 +93,9 @@ public class RewardDisplay extends Displaying {
       return;
     }
     claimed = true;
-    System.out.println(">>> claimOption called: type=" + option.type
+    System.out.println(
+        ">>> claimOption called: type="
+            + option.type
             + (option.type == RewardType.ITEM ? " item=" + option.itemId : ""));
     runState.setPendingReward(option);
     entity.getEvents().trigger(REWARD_CLAIMED_EVENT);

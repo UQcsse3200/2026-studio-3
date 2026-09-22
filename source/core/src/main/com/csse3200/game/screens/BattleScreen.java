@@ -45,14 +45,14 @@ import com.csse3200.game.physics.PhysicsEngine;
 import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
+import com.csse3200.game.rewards.RewardOption;
+import com.csse3200.game.rewards.RewardService;
 import com.csse3200.game.rewards.RewardType;
 import com.csse3200.game.services.DragNDropService;
 import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
-import com.csse3200.game.rewards.RewardOption;
-import com.csse3200.game.rewards.RewardService;
 import com.csse3200.game.ui.PopupDisplay;
 import java.nio.file.Path;
 import java.util.*;
@@ -150,17 +150,17 @@ public class BattleScreen extends ScreenAdapter {
 
     RewardOption pendingReward = runState.getPendingReward();
 
-// If the pending reward is an item, record it so applyTo() below replays
-// its effect now and in every future battle.
+    // If the pending reward is an item, record it so applyTo() below replays
+    // its effect now and in every future battle.
     if (pendingReward != null && pendingReward.type == RewardType.ITEM) {
       playerState.addOwnedItem(pendingReward.itemId);
     }
 
-// Applies persisted stats/gold, then replays all owned item effects
-// (including the one just recorded above).
+    // Applies persisted stats/gold, then replays all owned item effects
+    // (including the one just recorded above).
     playerState.applyTo(player);
 
-// Gold rewards are still claimed one-off here, same as before.
+    // Gold rewards are still claimed one-off here, same as before.
     if (pendingReward != null && pendingReward.type == RewardType.GOLD) {
       RewardService rewardService = new RewardService();
       try {
@@ -243,7 +243,7 @@ public class BattleScreen extends ScreenAdapter {
     PopupDisplay itemInventory = new PopupDisplay("Item Inventory");
     itemInventory.setMinSize(400f, 400f);
     InventoryPopupComponent inventoryPopup =
-            new InventoryPopupComponent(game.getRunState(), itemInventory);
+        new InventoryPopupComponent(game.getRunState(), itemInventory);
 
     Stage stage = ServiceLocator.getRenderService().getStage();
     Entity battleUi =
@@ -254,8 +254,8 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new BattleActions(controller, game))
             .addComponent(cardPlayAdapter)
             .addComponent(cardInventory)
-                .addComponent(itemInventory)
-                .addComponent(inventoryPopup)
+            .addComponent(itemInventory)
+            .addComponent(inventoryPopup)
             .addComponent(new PauseMenuDisplay())
             .addComponent(new PauseMenuInput())
             .addComponent(new PauseMenuActions(game))
@@ -264,8 +264,7 @@ public class BattleScreen extends ScreenAdapter {
                     gameArea.getPlayer().getComponent(CombatStatsComponent.class)))
             .addComponent(new CardEffectDebugComponent(cardEffects))
             .addComponent(new KeyboardCardEffectDebugInputComponent())
-            .addComponent(new CardEffectDebugDisplay())
-            ;
+            .addComponent(new CardEffectDebugDisplay());
 
     // Keep the on-screen row in sync with the deck: whenever the hand changes (a card played, or
     // one retrieved from the discard pile after its cooldown elapses) rebuild from the live deck,

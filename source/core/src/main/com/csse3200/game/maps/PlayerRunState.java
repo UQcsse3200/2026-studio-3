@@ -1,12 +1,12 @@
 package com.csse3200.game.maps;
 
-import java.util.ArrayList;
-import java.util.List;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.entities.Entity;
-import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.rewards.ItemEffectApplier;
+import com.csse3200.game.rewards.ItemType;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Run-scoped player values that must survive screen disposal.
@@ -97,8 +97,8 @@ public class PlayerRunState {
   }
 
   /**
-   * Records that the player now owns this item, so its effect will be
-   * reapplied every time a new player entity is created (see applyTo()).
+   * Records that the player now owns this item, so its effect will be reapplied every time a new
+   * player entity is created (see applyTo()).
    */
   public void addOwnedItem(ItemType itemId) {
     ownedItems.add(itemId);
@@ -107,5 +107,4 @@ public class PlayerRunState {
   public List<ItemType> getOwnedItems() {
     return List.copyOf(ownedItems);
   }
-
 }
