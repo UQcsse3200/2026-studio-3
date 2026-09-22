@@ -1,22 +1,16 @@
 {
   "Clickable": [
     {
-      "text": "Exit",
-      "x": 20,
-      "y": 100,
-      "trigger": "exit"
-    },
-    {
       "text": "Card Inventory",
       "x": 20,
-      "y": 150,
-      "trigger": "open-menu"
+      "y": 100,
+      "trigger": "openMenu"
     },
     {
       "text": "End Turn",
       "x": 20,
-      "y": 250,
-      "trigger": "endturn",
+      "y": 150,
+      "trigger": "endTurn",
       "variant": "gated"
     }
   ],

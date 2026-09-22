@@ -253,7 +253,7 @@ public class BattleScreen extends ScreenAdapter {
     Entity deckEditorEntity = new Entity().addComponent(deckPoolFactory).addComponent(deckEditor);
     ServiceLocator.getEntityService().register(deckEditorEntity);
 
-    battleUi.getEvents().addListener("open-menu", deckEditor::open);
+    battleUi.getEvents().addListener("openMenu", deckEditor::open);
   }
 
   /**

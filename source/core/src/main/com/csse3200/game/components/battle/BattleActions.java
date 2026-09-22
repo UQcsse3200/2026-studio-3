@@ -64,11 +64,10 @@ public class BattleActions extends Component {
   @Override
   public void create() {
     entity.getEvents().addListener("battle", this::onStart);
-    entity.getEvents().addListener("exit", this::onExit);
 
     entity.getEvents().addListener(END_TURN_SELECTED_EVENT, controller::endPlayerTurn);
     controller.addPhaseChangeListener(this::onPhaseChange);
-    entity.getEvents().addListener("endturn", this::triggerEndTurn);
+    entity.getEvents().addListener("endTurn", this::triggerEndTurn);
 
     // Re-broadcast the controller's battle-loop signals as plain entity events so the battle-log
     // UI, Team 1 (enemy effects) and Team 7 (player effects) can all subscribe in one place.
@@ -174,9 +173,5 @@ public class BattleActions extends Component {
 
   private void onStart() {
     game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
-  }
-
-  private void onExit() {
-    game.setScreen(GdxGame.ScreenType.MAIN_MENU);
   }
 }
