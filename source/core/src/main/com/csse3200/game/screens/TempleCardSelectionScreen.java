@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
@@ -55,7 +57,11 @@ public class TempleCardSelectionScreen extends ScreenAdapter {
   private Label rarityLabel;
   private Image cardImage;
   private TextButton claimButton;
+  private TextButton selectedCardButton;
+
   private Texture backgroundTexture;
+  private Texture cardChoiceButtonTexture;
+  private Texture templeButtonTexture;
 
   private CardConfig selectedCard;
   private boolean claimed;
@@ -105,6 +111,14 @@ public class TempleCardSelectionScreen extends ScreenAdapter {
     backgroundTexture = new Texture(Gdx.files.internal("images/blessing_of_war_bg.png"));
     backgroundTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
+    cardChoiceButtonTexture =
+        new Texture(Gdx.files.internal("images/temple_card_choice_button.png"));
+    cardChoiceButtonTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
+    templeButtonTexture =
+        new Texture(Gdx.files.internal("images/ancient_temple_choice_button.png"));
+    templeButtonTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
     Image background = new Image(backgroundTexture);
     background.setScaling(Scaling.stretch);
 
@@ -112,10 +126,12 @@ public class TempleCardSelectionScreen extends ScreenAdapter {
     root.setFillParent(true);
     root.pad(35f);
 
-    Label title = new Label("Blessing of War", skin, "title");
+    Label.LabelStyle titleStyle = new Label.LabelStyle(skin.get("title", Label.LabelStyle.class));
+    titleStyle.fontColor = Color.valueOf("F1B45A");
 
+    Label title = new Label("Blessing of War", titleStyle);
     Label.LabelStyle bodyStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
-    bodyStyle.fontColor = new Color(0.9f, 0.8f, 0.65f, 1f);
+    bodyStyle.fontColor = Color.valueOf("E8DCC5");
 
     Label subtitle =
         new Label(
@@ -124,8 +140,9 @@ public class TempleCardSelectionScreen extends ScreenAdapter {
     Table cardList = createCardList();
     Table detailPanel = createDetailPanel(bodyStyle);
 
-    cardList.setBackground(skin.newDrawable("white", new Color(0.05f, 0.03f, 0.10f, 0.72f)));
-    detailPanel.setBackground(skin.newDrawable("white", new Color(0.05f, 0.03f, 0.10f, 0.72f)));
+    cardList.setBackground(skin.newDrawable("white", new Color(0.02f, 0.035f, 0.11f, 0.48f)));
+
+    detailPanel.setBackground(skin.newDrawable("white", new Color(0.015f, 0.025f, 0.08f, 0.60f)));
 
     root.add(title).colspan(2).padBottom(15f);
     root.row();
@@ -148,24 +165,116 @@ public class TempleCardSelectionScreen extends ScreenAdapter {
     }
   }
 
+  /**
+   * Creates the normal blue-and-gold card selection button style.
+   *
+   * @return button style for unselected card choices
+   */
+  private TextButtonStyle createCardChoiceButtonStyle() {
+    TextureRegionDrawable normal =
+        new TextureRegionDrawable(new TextureRegion(cardChoiceButtonTexture));
+
+    TextButtonStyle style = new TextButtonStyle(skin.get(TextButtonStyle.class));
+
+    style.up = normal;
+
+    // Warm highlight while hovering.
+    style.over = normal.tint(Color.valueOf("FFF0C8"));
+
+    // Darker blue when pressed.
+    style.down = normal.tint(Color.valueOf("7F86A8"));
+
+    style.fontColor = Color.valueOf("F4E7C5");
+    style.overFontColor = Color.WHITE;
+    style.downFontColor = Color.valueOf("F1C879");
+
+    return style;
+  }
+
+  /**
+   * Creates a highlighted style for the currently selected card.
+   *
+   * @return selected card button style
+   */
+  private TextButtonStyle createSelectedCardButtonStyle() {
+    TextureRegionDrawable selected =
+        new TextureRegionDrawable(new TextureRegion(cardChoiceButtonTexture));
+
+    TextButtonStyle style = new TextButtonStyle(createCardChoiceButtonStyle());
+
+    // Selected: brighter golden-violet highlight.
+    style.up = selected.tint(Color.valueOf("FFD98A"));
+    style.over = selected.tint(Color.valueOf("FFF0B8"));
+    style.down = selected.tint(Color.valueOf("B894D6"));
+
+    style.fontColor = Color.valueOf("FFF4D6");
+    style.overFontColor = Color.WHITE;
+    style.downFontColor = Color.WHITE;
+
+    return style;
+  }
+
+  private TextButtonStyle createTempleButtonStyle() {
+    TextureRegionDrawable normal =
+        new TextureRegionDrawable(new TextureRegion(templeButtonTexture));
+
+    TextButtonStyle style = new TextButtonStyle(skin.get(TextButtonStyle.class));
+
+    style.up = normal;
+
+    // Hover: brighter warm-gold/red tone.
+    style.over = normal.tint(Color.valueOf("E6A85C"));
+
+    // Pressed: darker red tone.
+    style.down = normal.tint(Color.valueOf("8C493D"));
+
+    style.disabled = normal.tint(Color.valueOf("5E5550"));
+
+    style.fontColor = Color.valueOf("F6E8C8");
+    style.overFontColor = Color.WHITE;
+    style.downFontColor = Color.valueOf("F1C879");
+    style.disabledFontColor = Color.valueOf("94877A");
+
+    return style;
+  }
+
   private Table createCardList() {
     Table buttons = new Table();
     buttons.top();
-    buttons.defaults().width(310f).height(55f).padBottom(8f);
+    buttons.defaults().width(320f).height(55f).padBottom(8f);
+
+    TextButton firstButton = null;
 
     for (CardConfig card : cards) {
-      TextButton button = new TextButton(card.name, skin);
+      TextButton button = new TextButton(card.name, createCardChoiceButtonStyle());
+      button.getLabel().setFontScale(0.9f);
+
+      if (firstButton == null) {
+        firstButton = button;
+      }
 
       button.addListener(
           new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+              if (selectedCardButton != null) {
+                selectedCardButton.setStyle(createCardChoiceButtonStyle());
+              }
+
+              selectedCardButton = button;
+              selectedCardButton.setStyle(createSelectedCardButtonStyle());
+
               showCard(card);
             }
           });
 
       buttons.add(button);
       buttons.row();
+    }
+
+    if (firstButton != null) {
+      selectedCardButton = firstButton;
+      selectedCardButton.setStyle(createSelectedCardButtonStyle());
     }
 
     ScrollPane scrollPane = new ScrollPane(buttons, skin);
@@ -193,14 +302,25 @@ public class TempleCardSelectionScreen extends ScreenAdapter {
     descriptionLabel = new Label("", bodyStyle);
     descriptionLabel.setWrap(true);
 
-    costLabel = new Label("", bodyStyle);
-    typeLabel = new Label("", bodyStyle);
-    rarityLabel = new Label("", bodyStyle);
+    Label.LabelStyle costStyle = new Label.LabelStyle(bodyStyle);
+    costStyle.fontColor = Color.valueOf("F1B45A");
+
+    Label.LabelStyle typeStyle = new Label.LabelStyle(bodyStyle);
+    typeStyle.fontColor = Color.valueOf("BFD8FF");
+
+    Label.LabelStyle rarityStyle = new Label.LabelStyle(bodyStyle);
+    rarityStyle.fontColor = Color.valueOf("D7B7FF");
+
+    costLabel = new Label("", costStyle);
+    typeLabel = new Label("", typeStyle);
+    rarityLabel = new Label("", rarityStyle);
 
     cardImage = new Image();
     cardImage.setScaling(Scaling.fit);
 
-    claimButton = new TextButton("Claim This Card", skin);
+    // Keep the original project button style here.
+    claimButton = new TextButton("Claim This Card", createTempleButtonStyle());
+    claimButton.getLabel().setFontScale(1.05f);
     claimButton.setDisabled(true);
 
     claimButton.addListener(
@@ -229,7 +349,7 @@ public class TempleCardSelectionScreen extends ScreenAdapter {
     panel.add(rarityLabel).padBottom(25f);
     panel.row();
 
-    panel.add(claimButton).width(300f).height(75f);
+    panel.add(claimButton).width(360f).height(82f);
 
     return panel;
   }
@@ -306,6 +426,14 @@ public class TempleCardSelectionScreen extends ScreenAdapter {
   public void dispose() {
     if (backgroundTexture != null) {
       backgroundTexture.dispose();
+    }
+
+    if (cardChoiceButtonTexture != null) {
+      cardChoiceButtonTexture.dispose();
+    }
+
+    if (templeButtonTexture != null) {
+      templeButtonTexture.dispose();
     }
 
     skin.dispose();

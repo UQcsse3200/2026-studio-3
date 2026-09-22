@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -13,7 +14,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.csse3200.game.GdxGame;
@@ -42,11 +45,16 @@ public class AncientTempleScreen extends ScreenAdapter {
   private static final int ETERNITY_MAX_ENERGY_BONUS = 1;
   private static final int ETERNITY_FOCUS_HEAL = 20;
 
+  private static final float MESSAGE_FADE_IN_SECONDS = 0.4f;
+  private static final float MESSAGE_HOLD_SECONDS = 1.8f;
+  private static final float MESSAGE_FADE_OUT_SECONDS = 0.4f;
+
   private final GdxGame game;
   private final RunState runState;
   private final Renderer renderer;
   private final Skin skin;
   private Texture backgroundTexture;
+  private Texture templeButtonTexture;
   private Stack sceneRoot;
 
   private final Random random = new Random();
@@ -90,6 +98,9 @@ public class AncientTempleScreen extends ScreenAdapter {
     backgroundTexture = new Texture(Gdx.files.internal("images/ancient_temple.png"));
 
     backgroundTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    templeButtonTexture =
+        new Texture(Gdx.files.internal("images/ancient_temple_choice_button.png"));
+    templeButtonTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
     Image background = new Image(backgroundTexture);
     background.setScaling(Scaling.stretch);
@@ -113,14 +124,20 @@ public class AncientTempleScreen extends ScreenAdapter {
     root.bottom();
     root.padBottom(45f);
 
-    Label.LabelStyle bodyStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
-    bodyStyle.fontColor = new Color(0.9f, 0.8f, 0.65f, 1f);
+    Label.LabelStyle titleStyle = new Label.LabelStyle(skin.get("title", Label.LabelStyle.class));
+    titleStyle.fontColor = Color.valueOf("F1C879");
 
-    Label title = new Label("Ancient Temple", skin, "title");
+    Label.LabelStyle bodyStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+    bodyStyle.fontColor = Color.valueOf("E3D3B8");
+
+    Label title = new Label("Ancient Temple", titleStyle);
 
     Label description = new Label("An ancient presence watches in silence.", bodyStyle);
+    showTransientMessage(title);
+    showTransientMessage(description);
 
-    TextButton prayButton = new TextButton("Pray", skin);
+    TextButton prayButton = new TextButton("Pray", createTempleButtonStyle());
+    prayButton.getLabel().setFontScale(1.15f);
 
     prayButton.addListener(
         new ChangeListener() {
@@ -141,7 +158,55 @@ public class AncientTempleScreen extends ScreenAdapter {
     root.add(description).padBottom(18f);
     root.row();
 
-    root.add(prayButton).width(280f).height(70f);
+    root.add(prayButton).width(460f).height(100f);
+  }
+
+  private TextButtonStyle createTempleButtonStyle() {
+    TextureRegionDrawable normal =
+        new TextureRegionDrawable(new TextureRegion(templeButtonTexture));
+
+    TextButtonStyle style = new TextButtonStyle(skin.get(TextButtonStyle.class));
+
+    // Normal
+    style.up = normal;
+
+    // Hover: warmer golden-red tone
+    style.over = normal.tint(Color.valueOf("E6A85C"));
+
+    // Pressed: dark red-brown
+    style.down = normal.tint(Color.valueOf("8C493D"));
+
+    style.fontColor = Color.valueOf("F6E8C8");
+    style.overFontColor = Color.WHITE;
+    style.downFontColor = Color.valueOf("F1C879");
+
+    return style;
+  }
+
+  private TextButtonStyle createWarBlessingButtonStyle() {
+    TextButtonStyle style = new TextButtonStyle(createTempleButtonStyle());
+    style.fontColor = Color.valueOf("F1B45A");
+    style.overFontColor = Color.valueOf("FFF1D6");
+    style.downFontColor = Color.valueOf("D88A2D");
+    return style;
+  }
+
+  private TextButtonStyle createEternityBlessingButtonStyle() {
+    TextButtonStyle style = new TextButtonStyle(createTempleButtonStyle());
+    style.fontColor = Color.valueOf("C9D8FF");
+    style.overFontColor = Color.valueOf("F3F7FF");
+    style.downFontColor = Color.valueOf("9FB6F2");
+    return style;
+  }
+
+  private void showTransientMessage(Actor actor) {
+    actor.getColor().a = 0f;
+
+    actor.addAction(
+        Actions.sequence(
+            Actions.fadeIn(MESSAGE_FADE_IN_SECONDS),
+            Actions.delay(MESSAGE_HOLD_SECONDS),
+            Actions.fadeOut(MESSAGE_FADE_OUT_SECONDS)));
   }
 
   private void playPrayerShake() {
@@ -176,15 +241,24 @@ public class AncientTempleScreen extends ScreenAdapter {
       offeredEternityEffect = random.nextBoolean() ? EternityEffect.VITALITY : EternityEffect.FOCUS;
     }
 
-    Label title = new Label("Your Prayer Has Been Answered", skin, "title");
+    Label.LabelStyle titleStyle = new Label.LabelStyle(skin.get("title", Label.LabelStyle.class));
+    titleStyle.fontColor = Color.valueOf("F1C879");
 
     Label.LabelStyle bodyStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
-    bodyStyle.fontColor = new Color(0.9f, 0.8f, 0.65f, 1f);
+    bodyStyle.fontColor = Color.valueOf("E3D3B8");
+
+    Label title = new Label("Your Prayer Has Been Answered", titleStyle);
 
     Label response = new Label("The ancient guardian answers. Choose one blessing.", bodyStyle);
+    showTransientMessage(title);
+    showTransientMessage(response);
     TextButton warButton =
-        new TextButton("Blessing of War\n" + "(Choose Any Card from the Divine Archive)", skin);
+        new TextButton(
+            "Blessing of War\nChoose Any Card from the Divine Archive",
+            createWarBlessingButtonStyle());
 
+    warButton.getLabel().setFontScale(1.05f);
+    warButton.getLabel().setWrap(true);
     warButton.addListener(
         new ChangeListener() {
           @Override
@@ -196,14 +270,15 @@ public class AncientTempleScreen extends ScreenAdapter {
     String eternityText;
 
     if (offeredEternityEffect == EternityEffect.VITALITY) {
-      eternityText =
-          "Blessing of Eternity\n" + "(Eternal Vitality: +20 Max HP and Fully Restore HP)";
+      eternityText = "Blessing of Eternity\nEternal Vitality: +20 Max HP and Fully Restore HP";
     } else {
-      eternityText = "Blessing of Eternity\n" + "(Eternal Focus: +1 Max Energy and Restore 20 HP)";
+      eternityText = "Blessing of Eternity\nEternal Focus: +1 Max Energy and Restore 20 HP";
     }
 
-    TextButton eternityButton = new TextButton(eternityText, skin);
+    TextButton eternityButton = new TextButton(eternityText, createEternityBlessingButtonStyle());
 
+    eternityButton.getLabel().setFontScale(1.05f);
+    eternityButton.getLabel().setWrap(true);
     eternityButton.addListener(
         new ChangeListener() {
           @Override
@@ -218,10 +293,10 @@ public class AncientTempleScreen extends ScreenAdapter {
     root.add(response).padBottom(50f);
     root.row();
 
-    root.add(warButton).width(580f).height(90f).padBottom(12f);
+    root.add(warButton).width(680f).height(110f).padBottom(16f);
     root.row();
 
-    root.add(eternityButton).width(580f).height(90f);
+    root.add(eternityButton).width(680f).height(110f);
   }
 
   private void openWarBlessing() {
@@ -304,7 +379,9 @@ public class AncientTempleScreen extends ScreenAdapter {
     if (backgroundTexture != null) {
       backgroundTexture.dispose();
     }
-
+    if (templeButtonTexture != null) {
+      templeButtonTexture.dispose();
+    }
     skin.dispose();
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
