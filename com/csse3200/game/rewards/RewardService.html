@@ -125,12 +125,17 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#claimReward(com.csse3200.game.entities.Entity,com.csse3200.game.rewards.RewardOption)" class="member-name-link">claimReward</a><wbr>(<a href="../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player,
  <a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a>&nbsp;selected)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Applies the selected reward option to the player's actual state.</div>
+<div class="block">Applies a generated reward to a live player entity.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generateRewardOptions()" class="member-name-link">generateRewardOptions</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Generates a fixed set of reward options: one GOLD option and one ITEM option.</div>
+<div class="block">Generates rewards for a player without a gold bonus.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generateRewardOptions(float)" class="member-name-link">generateRewardOptions</a><wbr>(float&nbsp;goldBonusMultiplier)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Generates one final gold option and one item option.</div>
 </div>
 </div>
 </div>
@@ -173,10 +178,19 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="generateRewardOptions()">
 <h3>generateRewardOptions</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a>&gt;</span>&nbsp;<span class="element-name">generateRewardOptions</span>()</div>
-<div class="block">Generates a fixed set of reward options: one GOLD option and one ITEM option.</div>
+<div class="block">Generates rewards for a player without a gold bonus.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="generateRewardOptions(float)">
+<h3>generateRewardOptions</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a>&gt;</span>&nbsp;<span class="element-name">generateRewardOptions</span><wbr><span class="parameters">(float&nbsp;goldBonusMultiplier)</span></div>
+<div class="block">Generates one final gold option and one item option.</div>
 <dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>goldBonusMultiplier</code> - current Lucky Coin multiplier</dd>
 <dt>Returns:</dt>
-<dd>a list containing exactly one GOLD RewardOption and one ITEM RewardOption</dd>
+<dd>one gold option and one item option</dd>
 </dl>
 </section>
 </li>
@@ -185,12 +199,10 @@ loadScripts(document, 'script');</script>
 <h3>claimReward</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">claimReward</span><wbr><span class="parameters">(<a href="../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player,
  <a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a>&nbsp;selected)</span></div>
-<div class="block">Applies the selected reward option to the player's actual state.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>player</code> - the player entity to apply the reward to</dd>
-<dd><code>selected</code> - the reward option the player chose/claimed</dd>
-</dl>
+<div class="block">Applies a generated reward to a live player entity.
+
+ <p>The gold amount has already been finalised by RewardGenerator and must not be multiplied
+ again here.</div>
 </section>
 </li>
 </ul>

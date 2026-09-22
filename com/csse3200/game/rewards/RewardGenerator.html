@@ -127,18 +127,19 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generateGoldRewardOption()" class="member-name-link">generateGoldRewardOption</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Generates exactly one gold reward option.</div>
+<div class="block">Generates gold without an item multiplier.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generateItemRewardOption()" class="member-name-link">generateItemRewardOption</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generateGoldRewardOption(float)" class="member-name-link">generateGoldRewardOption</a><wbr>(float&nbsp;goldBonusMultiplier)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Generates exactly one item reward option, randomly chosen from the eligible item pool.</div>
+<div class="block">Generates the final gold amount, including the player's current Lucky Coin multiplier.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generateRewardOption()" class="member-name-link">generateRewardOption</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Generates a single reward option, randomly choosing between a gold reward and an item reward.</div>
-</div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generateItemRewardOption()" class="member-name-link">generateItemRewardOption</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generateRewardOption()" class="member-name-link">generateRewardOption</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -186,10 +187,19 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="generateGoldRewardOption()">
 <h3>generateGoldRewardOption</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a></span>&nbsp;<span class="element-name">generateGoldRewardOption</span>()</div>
-<div class="block">Generates exactly one gold reward option.</div>
+<div class="block">Generates gold without an item multiplier.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="generateGoldRewardOption(float)">
+<h3>generateGoldRewardOption</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a></span>&nbsp;<span class="element-name">generateGoldRewardOption</span><wbr><span class="parameters">(float&nbsp;goldBonusMultiplier)</span></div>
+<div class="block">Generates the final gold amount, including the player's current Lucky Coin multiplier.</div>
 <dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>goldBonusMultiplier</code> - accumulated gold bonus</dd>
 <dt>Returns:</dt>
-<dd>a randomly generated gold reward option</dd>
+<dd>final gold reward option</dd>
 </dl>
 </section>
 </li>
@@ -197,23 +207,12 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="generateItemRewardOption()">
 <h3>generateItemRewardOption</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a></span>&nbsp;<span class="element-name">generateItemRewardOption</span>()</div>
-<div class="block">Generates exactly one item reward option, randomly chosen from the eligible item pool.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>a randomly generated item reward option</dd>
-</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="generateRewardOption()">
 <h3>generateRewardOption</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a></span>&nbsp;<span class="element-name">generateRewardOption</span>()</div>
-<div class="block">Generates a single reward option, randomly choosing between a gold reward and an item reward.
- Kept for compatibility with callers that just need one arbitrary option.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>a randomly generated reward option</dd>
-</dl>
 </section>
 </li>
 </ul>

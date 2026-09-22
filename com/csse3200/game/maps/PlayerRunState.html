@@ -92,12 +92,7 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">PlayerRunState</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Run-scoped player values that must survive screen disposal.
-
- <p>Gameplay screens create and dispose their own player entities. Keeping the durable values in
- this small model prevents health and gold from silently resetting whenever the player leaves a
- battle, and gives Save/Load a real source and destination that is independent of a rendered
- entity.</div>
+<div class="block">Run-scoped player values that must survive screen disposal.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -128,14 +123,20 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addGold(int)" class="member-name-link">addGold</a><wbr>(int&nbsp;amount)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addOwnedItem(com.csse3200.game.rewards.ItemType)" class="member-name-link">addOwnedItem</a><wbr>(<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&nbsp;itemId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyTo(com.csse3200.game.entities.Entity)" class="member-name-link">applyTo</a><wbr>(<a href="../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Applies the durable values to the player entity created for a gameplay screen.</div>
+<div class="block">Applies durable state to a newly-created player entity.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#captureFrom(com.csse3200.game.entities.Entity)" class="member-name-link">captureFrom</a><wbr>(<a href="../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Captures the latest values before a gameplay screen disposes its player entity.</div>
+<div class="block">Captures mutable base values before a gameplay entity is disposed.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentHealth()" class="member-name-link">getCurrentHealth</a>()</code></div>
@@ -143,15 +144,28 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getGold()" class="member-name-link">getGold</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaxHealth()" class="member-name-link">getMaxHealth</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>float</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getGoldBonusMultiplier()" class="member-name-link">getGoldBonusMultiplier</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Calculates the bonus from the durable owned-item list.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaxHealth()" class="member-name-link">getMaxHealth</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getOwnedItems()" class="member-name-link">getOwnedItems</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#restore(int,int,int)" class="member-name-link">restore</a><wbr>(int&nbsp;currentHealth,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>float</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getShopDiscount()" class="member-name-link">getShopDiscount</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Calculates the discount from the durable owned-item list.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#restore(int,int,int)" class="member-name-link">restore</a><wbr>(int&nbsp;currentHealth,
  int&nbsp;maxHealth,
  int&nbsp;gold)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Replaces all persisted player values after validating them as one atomic state.</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Replaces health and gold while retaining the current owned-item list.</div>
 </div>
 </div>
 </div>
@@ -205,17 +219,59 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="getGoldBonusMultiplier()">
+<h3>getGoldBonusMultiplier</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">float</span>&nbsp;<span class="element-name">getGoldBonusMultiplier</span>()</div>
+<div class="block">Calculates the bonus from the durable owned-item list.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>accumulated Lucky Coin multiplier</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getShopDiscount()">
+<h3>getShopDiscount</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">float</span>&nbsp;<span class="element-name">getShopDiscount</span>()</div>
+<div class="block">Calculates the discount from the durable owned-item list.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>accumulated shop discount, capped at 50%</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="addGold(int)">
+<h3>addGold</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addGold</span><wbr><span class="parameters">(int&nbsp;amount)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="addOwnedItem(com.csse3200.game.rewards.ItemType)">
+<h3>addOwnedItem</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addOwnedItem</span><wbr><span class="parameters">(<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&nbsp;itemId)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="getOwnedItems()">
+<h3>getOwnedItems</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&gt;</span>&nbsp;<span class="element-name">getOwnedItems</span>()</div>
+</section>
+</li>
+<li>
 <section class="detail" id="applyTo(com.csse3200.game.entities.Entity)">
 <h3>applyTo</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">applyTo</span><wbr><span class="parameters">(<a href="../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player)</span></div>
-<div class="block">Applies the durable values to the player entity created for a gameplay screen.</div>
+<div class="block">Applies durable state to a newly-created player entity.
+
+ <p>This method must be called exactly once for each newly-created player entity.</div>
 </section>
 </li>
 <li>
 <section class="detail" id="captureFrom(com.csse3200.game.entities.Entity)">
 <h3>captureFrom</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">captureFrom</span><wbr><span class="parameters">(<a href="../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player)</span></div>
-<div class="block">Captures the latest values before a gameplay screen disposes its player entity.</div>
+<div class="block">Captures mutable base values before a gameplay entity is disposed.</div>
 </section>
 </li>
 <li>
@@ -224,7 +280,13 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">restore</span><wbr><span class="parameters">(int&nbsp;currentHealth,
  int&nbsp;maxHealth,
  int&nbsp;gold)</span></div>
-<div class="block">Replaces all persisted player values after validating them as one atomic state.</div>
+<div class="block">Replaces health and gold while retaining the current owned-item list.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>currentHealth</code> - current player health</dd>
+<dd><code>maxHealth</code> - maximum player health</dd>
+<dd><code>gold</code> - current player gold</dd>
+</dl>
 </section>
 </li>
 </ul>

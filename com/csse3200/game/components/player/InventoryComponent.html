@@ -152,10 +152,14 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addGoldBonusMultiplier(float)" class="member-name-link">addGoldBonusMultiplier</a><wbr>(float&nbsp;bonus)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Increases the gold bonus multiplier by a given amount (e.g.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addShopDiscount(float)" class="member-name-link">addShopDiscount</a><wbr>(float&nbsp;amount)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Increases the shop discount by a given amount, capped at 50%.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCardCount(java.lang.String)" class="member-name-link">getCardCount</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -202,6 +206,16 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setGold(int)" class="member-name-link">setGold</a><wbr>(int&nbsp;gold)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the player's gold.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setGoldBonusMultiplier(float)" class="member-name-link">setGoldBonusMultiplier</a><wbr>(float&nbsp;multiplier)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the gold bonus multiplier directly.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setShopDiscount(float)" class="member-name-link">setShopDiscount</a><wbr>(float&nbsp;discount)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the shop discount directly, clamped between 0 and 50%.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#spendGold(int)" class="member-name-link">spendGold</a><wbr>(int&nbsp;gold)</code></div>
@@ -412,6 +426,24 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="addShopDiscount(float)">
 <h3>addShopDiscount</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addShopDiscount</span><wbr><span class="parameters">(float&nbsp;amount)</span></div>
+<div class="block">Increases the shop discount by a given amount, capped at 50%.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>amount</code> - discount to add, as a fraction (e.g. 0.05f for 5%)</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="setShopDiscount(float)">
+<h3>setShopDiscount</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setShopDiscount</span><wbr><span class="parameters">(float&nbsp;discount)</span></div>
+<div class="block">Sets the shop discount directly, clamped between 0 and 50%. Used to restore a persisted
+ discount value (e.g. from <a href="../../maps/PlayerRunState.html" title="class in com.csse3200.game.maps"><code>PlayerRunState</code></a>) without re-adding on
+ top of whatever the discount currently is.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>discount</code> - discount value to set, as a fraction</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -430,6 +462,24 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="addGoldBonusMultiplier(float)">
 <h3>addGoldBonusMultiplier</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addGoldBonusMultiplier</span><wbr><span class="parameters">(float&nbsp;bonus)</span></div>
+<div class="block">Increases the gold bonus multiplier by a given amount (e.g. from a Lucky Coin item).</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>bonus</code> - multiplier to add, as a fraction (e.g. 0.1f for +10%)</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="setGoldBonusMultiplier(float)">
+<h3>setGoldBonusMultiplier</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setGoldBonusMultiplier</span><wbr><span class="parameters">(float&nbsp;multiplier)</span></div>
+<div class="block">Sets the gold bonus multiplier directly. Used to restore a persisted multiplier value (e.g.
+ from <a href="../../maps/PlayerRunState.html" title="class in com.csse3200.game.maps"><code>PlayerRunState</code></a>) without re-adding on top of whatever the
+ multiplier currently is.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>multiplier</code> - multiplier value to set, as a fraction</dd>
+</dl>
 </section>
 </li>
 </ul>

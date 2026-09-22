@@ -178,8 +178,12 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Adds to the player's gold.</div>
 </dd>
-<dt><a href="com/csse3200/game/components/player/InventoryComponent.html#addGoldBonusMultiplier(float)" class="member-name-link">addGoldBonusMultiplier(float)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/InventoryComponent.html" title="class in com.csse3200.game.components.player">InventoryComponent</a></dt>
+<dt><a href="com/csse3200/game/maps/PlayerRunState.html#addGold(int)" class="member-name-link">addGold(int)</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/player/InventoryComponent.html#addGoldBonusMultiplier(float)" class="member-name-link">addGoldBonusMultiplier(float)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/InventoryComponent.html" title="class in com.csse3200.game.components.player">InventoryComponent</a></dt>
+<dd>
+<div class="block">Increases the gold bonus multiplier by a given amount (e.g.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/combat/BattleController.html#addHandChangedListener(com.csse3200.game.events.listeners.EventListener1)" class="member-name-link">addHandChangedListener(EventListener1&lt;List&lt;CardInstance&gt;&gt;)</a> - Method in class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a></dt>
 <dd>
 <div class="block">Adds a listener that receives the exact hand instances after it changes.</div>
@@ -216,6 +220,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Adds a list of nodes to the graph.</div>
 </dd>
+<dt><a href="com/csse3200/game/maps/PlayerRunState.html#addOwnedItem(com.csse3200.game.rewards.ItemType)" class="member-name-link">addOwnedItem(ItemType)</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/combat/BattleController.html#addPhaseChangeListener(com.csse3200.game.events.listeners.EventListener2)" class="member-name-link">addPhaseChangeListener(EventListener2&lt;BattlePhase, BattlePhase&gt;)</a> - Method in class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a></dt>
 <dd>
 <div class="block">Adds a listener to the event handler, which ultimately informs external teams about a phase
@@ -227,7 +233,9 @@ loadScripts(document, 'script');</script>
  to apply.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/player/InventoryComponent.html#addShopDiscount(float)" class="member-name-link">addShopDiscount(float)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/InventoryComponent.html" title="class in com.csse3200.game.components.player">InventoryComponent</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Increases the shop discount by a given amount, capped at 50%.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/effects/PlayerEffectState.html#addStrength(int)" class="member-name-link">addStrength(int)</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/PlayerEffectState.html" title="class in com.csse3200.game.cards.effects">PlayerEffectState</a></dt>
 <dd>
 <div class="block">Adds strength to the Team 5 calculation state.</div>
@@ -359,7 +367,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/maps/PlayerRunState.html#applyTo(com.csse3200.game.entities.Entity)" class="member-name-link">applyTo(Entity)</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></dt>
 <dd>
-<div class="block">Applies the durable values to the player entity created for a gameplay screen.</div>
+<div class="block">Applies durable state to a newly-created player entity.</div>
 </dd>
 <dt><a href="com/csse3200/game/areas/GameArea.html#areaEntities" class="member-name-link">areaEntities</a> - Variable in class com.csse3200.game.areas.<a href="com/csse3200/game/areas/GameArea.html" title="class in com.csse3200.game.areas">GameArea</a></dt>
 <dd>&nbsp;</dd>
@@ -787,7 +795,7 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/maps/PlayerRunState.html#captureFrom(com.csse3200.game.entities.Entity)" class="member-name-link">captureFrom(Entity)</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></dt>
 <dd>
-<div class="block">Captures the latest values before a gameplay screen disposes its player entity.</div>
+<div class="block">Captures mutable base values before a gameplay entity is disposed.</div>
 </dd>
 <dt><a href="com/csse3200/game/cards/Card.html" class="type-name-link" title="class in com.csse3200.game.cards">Card</a> - Record Class in <a href="com/csse3200/game/cards/package-summary.html">com.csse3200.game.cards</a></dt>
 <dd>
@@ -1283,7 +1291,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/rewards/RewardService.html#claimReward(com.csse3200.game.entities.Entity,com.csse3200.game.rewards.RewardOption)" class="member-name-link">claimReward(Entity, RewardOption)</a> - Method in class com.csse3200.game.rewards.<a href="com/csse3200/game/rewards/RewardService.html" title="class in com.csse3200.game.rewards">RewardService</a></dt>
 <dd>
-<div class="block">Applies the selected reward option to the player's actual state.</div>
+<div class="block">Applies a generated reward to a live player entity.</div>
 </dd>
 <dt><a href="com/csse3200/game/files/FileLoader.Location.html#CLASSPATH" class="member-name-link">CLASSPATH</a> - Enum constant in enum class com.csse3200.game.files.<a href="com/csse3200/game/files/FileLoader.Location.html" title="enum class in com.csse3200.game.files">FileLoader.Location</a></dt>
 <dd>&nbsp;</dd>
@@ -2273,7 +2281,9 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/ai/tasks/AITaskComponent.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.ai.tasks.<a href="com/csse3200/game/ai/tasks/AITaskComponent.html" title="class in com.csse3200.game.ai.tasks">AITaskComponent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/areas/EncounterGameArea.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.areas.<a href="com/csse3200/game/areas/EncounterGameArea.html" title="class in com.csse3200.game.areas">EncounterGameArea</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Captures gold and health changes made by Shop or Chance encounters before disposing the player.</div>
+</dd>
 <dt><a href="com/csse3200/game/areas/ForestGameArea.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.areas.<a href="com/csse3200/game/areas/ForestGameArea.html" title="class in com.csse3200.game.areas">ForestGameArea</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/areas/GameArea.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.areas.<a href="com/csse3200/game/areas/GameArea.html" title="class in com.csse3200.game.areas">GameArea</a></dt>
@@ -2627,10 +2637,12 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/areas/EncounterGameArea.html#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback)" class="member-name-link">EncounterGameArea(TerrainFactory, Integer, RoomType, EncounterCallback)</a> - Constructor for class com.csse3200.game.areas.<a href="com/csse3200/game/areas/EncounterGameArea.html" title="class in com.csse3200.game.areas">EncounterGameArea</a></dt>
 <dd>
-<div class="block">Creates an encounter area for a real map node.</div>
+<div class="block">Creates an isolated encounter area.</div>
 </dd>
-<dt><a href="com/csse3200/game/areas/EncounterGameArea.html#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback,com.csse3200.game.maps.PlayerRunState,com.csse3200.game.cards.deck.PlayerDeck)" class="member-name-link">EncounterGameArea(TerrainFactory, Integer, RoomType, EncounterCallback, PlayerRunState, PlayerDeck)</a> - Constructor for class com.csse3200.game.areas.<a href="com/csse3200/game/areas/EncounterGameArea.html" title="class in com.csse3200.game.areas">EncounterGameArea</a></dt>
-<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/areas/EncounterGameArea.html#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback,com.csse3200.game.maps.RunState,com.csse3200.game.cards.deck.PlayerDeck)" class="member-name-link">EncounterGameArea(TerrainFactory, Integer, RoomType, EncounterCallback, RunState, PlayerDeck)</a> - Constructor for class com.csse3200.game.areas.<a href="com/csse3200/game/areas/EncounterGameArea.html" title="class in com.csse3200.game.areas">EncounterGameArea</a></dt>
+<dd>
+<div class="block">Creates an encounter backed by the supplied run and deck state.</div>
+</dd>
 <dt><a href="com/csse3200/game/chance/configs/ChanceConfig.html#encounters" class="member-name-link">encounters</a> - Variable in class com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceConfig.html" title="class in com.csse3200.game.chance.configs">ChanceConfig</a></dt>
 <dd>
 <div class="block">Chance Encounters available to the game, in configuration order.</div>
@@ -3265,19 +3277,23 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/rewards/RewardGenerator.html#generateGoldRewardOption()" class="member-name-link">generateGoldRewardOption()</a> - Method in class com.csse3200.game.rewards.<a href="com/csse3200/game/rewards/RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a></dt>
 <dd>
-<div class="block">Generates exactly one gold reward option.</div>
+<div class="block">Generates gold without an item multiplier.</div>
+</dd>
+<dt><a href="com/csse3200/game/rewards/RewardGenerator.html#generateGoldRewardOption(float)" class="member-name-link">generateGoldRewardOption(float)</a> - Method in class com.csse3200.game.rewards.<a href="com/csse3200/game/rewards/RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a></dt>
+<dd>
+<div class="block">Generates the final gold amount, including the player's current Lucky Coin multiplier.</div>
 </dd>
 <dt><a href="com/csse3200/game/rewards/RewardGenerator.html#generateItemRewardOption()" class="member-name-link">generateItemRewardOption()</a> - Method in class com.csse3200.game.rewards.<a href="com/csse3200/game/rewards/RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a></dt>
-<dd>
-<div class="block">Generates exactly one item reward option, randomly chosen from the eligible item pool.</div>
-</dd>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/rewards/RewardGenerator.html#generateRewardOption()" class="member-name-link">generateRewardOption()</a> - Method in class com.csse3200.game.rewards.<a href="com/csse3200/game/rewards/RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a></dt>
-<dd>
-<div class="block">Generates a single reward option, randomly choosing between a gold reward and an item reward.</div>
-</dd>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/rewards/RewardService.html#generateRewardOptions()" class="member-name-link">generateRewardOptions()</a> - Method in class com.csse3200.game.rewards.<a href="com/csse3200/game/rewards/RewardService.html" title="class in com.csse3200.game.rewards">RewardService</a></dt>
 <dd>
-<div class="block">Generates a fixed set of reward options: one GOLD option and one ITEM option.</div>
+<div class="block">Generates rewards for a player without a gold bonus.</div>
+</dd>
+<dt><a href="com/csse3200/game/rewards/RewardService.html#generateRewardOptions(float)" class="member-name-link">generateRewardOptions(float)</a> - Method in class com.csse3200.game.rewards.<a href="com/csse3200/game/rewards/RewardService.html" title="class in com.csse3200.game.rewards">RewardService</a></dt>
+<dd>
+<div class="block">Generates one final gold option and one item option.</div>
 </dd>
 <dt><a href="com/csse3200/game/files/UserSettings.html#get()" class="member-name-link">get()</a> - Static method in class com.csse3200.game.files.<a href="com/csse3200/game/files/UserSettings.html" title="class in com.csse3200.game.files">UserSettings</a></dt>
 <dd>
@@ -3640,6 +3656,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/player/InventoryComponent.html#getGoldBonusMultiplier()" class="member-name-link">getGoldBonusMultiplier()</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/InventoryComponent.html" title="class in com.csse3200.game.components.player">InventoryComponent</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/maps/PlayerRunState.html#getGoldBonusMultiplier()" class="member-name-link">getGoldBonusMultiplier()</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></dt>
+<dd>
+<div class="block">Calculates the bonus from the durable owned-item list.</div>
+</dd>
 <dt><a href="com/csse3200/game/maps/MapDisplay.html#getGroup()" class="member-name-link">getGroup()</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/MapDisplay.html" title="class in com.csse3200.game.maps">MapDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#getHand()" class="member-name-link">getHand()</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
@@ -3856,6 +3876,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/components/StatusEffectCalculator.html#getOutgoingDamageModifier(com.csse3200.game.components.CombatStatsComponent)" class="member-name-link">getOutgoingDamageModifier(CombatStatsComponent)</a> - Static method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatusEffectCalculator.html" title="class in com.csse3200.game.components">StatusEffectCalculator</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/maps/PlayerRunState.html#getOwnedItems()" class="member-name-link">getOwnedItems()</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/services/ServiceLocator.html#getPauseService()" class="member-name-link">getPauseService()</a> - Static method in class com.csse3200.game.services.<a href="com/csse3200/game/services/ServiceLocator.html" title="class in com.csse3200.game.services">ServiceLocator</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/maps/RunState.html#getPendingReward()" class="member-name-link">getPendingReward()</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a></dt>
@@ -3971,6 +3993,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/encounters/integration/ShopTransactionGateway.html#getShopDiscount()" class="member-name-link">getShopDiscount()</a> - Method in interface com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ShopTransactionGateway.html" title="interface in com.csse3200.game.encounters.integration">ShopTransactionGateway</a></dt>
 <dd>
 <div class="block">Returns the player's current permanent shop discount, as a fraction (e.g.</div>
+</dd>
+<dt><a href="com/csse3200/game/maps/PlayerRunState.html#getShopDiscount()" class="member-name-link">getShopDiscount()</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></dt>
+<dd>
+<div class="block">Calculates the discount from the durable owned-item list.</div>
 </dd>
 <dt><a href="com/csse3200/game/maps/MapGenerationConfig.html#getShopWeight()" class="member-name-link">getShopWeight()</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/MapGenerationConfig.html" title="class in com.csse3200.game.maps">MapGenerationConfig</a></dt>
 <dd>
@@ -6304,7 +6330,7 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/maps/PlayerRunState.html#restore(int,int,int)" class="member-name-link">restore(int, int, int)</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></dt>
 <dd>
-<div class="block">Replaces all persisted player values after validating them as one atomic state.</div>
+<div class="block">Replaces health and gold while retaining the current owned-item list.</div>
 </dd>
 <dt><a href="com/csse3200/game/save/SaveGameRestoreService.html#restore(com.csse3200.game.save.SaveGameData)" class="member-name-link">restore(SaveGameData)</a> - Method in class com.csse3200.game.save.<a href="com/csse3200/game/save/SaveGameRestoreService.html" title="class in com.csse3200.game.save">SaveGameRestoreService</a></dt>
 <dd>
@@ -6703,6 +6729,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Sets the player's gold.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/player/InventoryComponent.html#setGoldBonusMultiplier(float)" class="member-name-link">setGoldBonusMultiplier(float)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/InventoryComponent.html" title="class in com.csse3200.game.components.player">InventoryComponent</a></dt>
+<dd>
+<div class="block">Sets the gold bonus multiplier directly.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/deck/BattleDeck.html#setHandInstances(java.util.List)" class="member-name-link">setHandInstances(List&lt;CardInstance&gt;)</a> - Method in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/BattleDeck.html" title="class in com.csse3200.game.cards.deck">BattleDeck</a></dt>
 <dd>
 <div class="block">Replaces the current hand with an exact set of card instances, by identity rather than card ID.</div>
@@ -6847,6 +6877,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/physics/components/ColliderComponent.html#setShape(com.badlogic.gdx.physics.box2d.Shape)" class="member-name-link">setShape(Shape)</a> - Method in class com.csse3200.game.physics.components.<a href="com/csse3200/game/physics/components/ColliderComponent.html" title="class in com.csse3200.game.physics.components">ColliderComponent</a></dt>
 <dd>
 <div class="block">Set shape</div>
+</dd>
+<dt><a href="com/csse3200/game/components/player/InventoryComponent.html#setShopDiscount(float)" class="member-name-link">setShopDiscount(float)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/InventoryComponent.html" title="class in com.csse3200.game.components.player">InventoryComponent</a></dt>
+<dd>
+<div class="block">Sets the shop discount directly, clamped between 0 and 50%.</div>
 </dd>
 <dt><a href="com/csse3200/game/rendering/RenderService.html#setStage(com.badlogic.gdx.scenes.scene2d.Stage)" class="member-name-link">setStage(Stage)</a> - Method in class com.csse3200.game.rendering.<a href="com/csse3200/game/rendering/RenderService.html" title="class in com.csse3200.game.rendering">RenderService</a></dt>
 <dd>&nbsp;</dd>
