@@ -22,6 +22,7 @@ public class BattleGameArea extends ForestGameArea {
   private final List<String> enemyIds;
   private final Map<String, Entity> enemyTargets = new LinkedHashMap<>();
   private String[] additionalAtlases = new String[0];
+
   /**
    * Creates a battle area with the default line-up.
    *
@@ -31,7 +32,7 @@ public class BattleGameArea extends ForestGameArea {
    * @param backgroundId id of the background to show
    */
   public BattleGameArea(
-          TerrainFactory terrainFactory, int progression, RunState runState, String backgroundId) {
+      TerrainFactory terrainFactory, int progression, RunState runState, String backgroundId) {
     this(terrainFactory, progression, runState, backgroundId, EncounterComposer.DEFAULT_ENEMIES);
   }
 
@@ -45,29 +46,29 @@ public class BattleGameArea extends ForestGameArea {
    * @param enemyIds enemy ids to spawn, from left to right
    */
   public BattleGameArea(
-          TerrainFactory terrainFactory,
-          int progression,
-          RunState runState,
-          String backgroundId,
-          List<String> enemyIds) {
+      TerrainFactory terrainFactory,
+      int progression,
+      RunState runState,
+      String backgroundId,
+      List<String> enemyIds) {
     super(terrainFactory, progression, runState, backgroundId);
     this.progression = progression;
     this.enemyIds = List.copyOf(enemyIds);
   }
+
   /** This area spawns every enemy itself, so the shared area's default enemy is not wanted. */
   @Override
   protected boolean spawnsDefaultEnemy() {
     return false;
   }
+
   @Override
   public void create() {
     super.create();
 
     EnemyConfigs roster = FileLoader.readClass(EnemyConfigs.class, "configs/enemies.json");
     List<EnemyConfig> configs =
-            enemyIds.stream()
-            .map(id -> EnemyScaling.scale(roster.get(id), progression))
-            .toList();
+        enemyIds.stream().map(id -> EnemyScaling.scale(roster.get(id), progression)).toList();
     for (int index = 0; index < configs.size(); index++) {
       EnemyConfig config = configs.get(index);
       if (config.sprite == null || config.sprite.isBlank()) {
