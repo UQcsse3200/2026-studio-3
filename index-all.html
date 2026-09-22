@@ -84,6 +84,16 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Toggles debug mode on or off if the corresponding argument is received.</div>
 </dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/GiveGoldCommand.html#action(java.util.ArrayList)" class="member-name-link">action(ArrayList&lt;String&gt;)</a> - Method in class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/GiveGoldCommand.html" title="class in com.csse3200.game.ui.terminal.commands">GiveGoldCommand</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/ListNodesCommand.html#action(java.util.ArrayList)" class="member-name-link">action(ArrayList&lt;String&gt;)</a> - Method in class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/ListNodesCommand.html" title="class in com.csse3200.game.ui.terminal.commands">ListNodesCommand</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/SetHealthCommand.html#action(java.util.ArrayList)" class="member-name-link">action(ArrayList&lt;String&gt;)</a> - Method in class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/SetHealthCommand.html" title="class in com.csse3200.game.ui.terminal.commands">SetHealthCommand</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/SkipBattleCommand.html#action(java.util.ArrayList)" class="member-name-link">action(ArrayList&lt;String&gt;)</a> - Method in class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/SkipBattleCommand.html" title="class in com.csse3200.game.ui.terminal.commands">SkipBattleCommand</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/UnlockNodeCommand.html#action(java.util.ArrayList)" class="member-name-link">action(ArrayList&lt;String&gt;)</a> - Method in class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/UnlockNodeCommand.html" title="class in com.csse3200.game.ui.terminal.commands">UnlockNodeCommand</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ai/tasks/Task.Status.html#ACTIVE" class="member-name-link">ACTIVE</a> - Enum constant in enum class com.csse3200.game.ai.tasks.<a href="com/csse3200/game/ai/tasks/Task.Status.html" title="enum class in com.csse3200.game.ai.tasks">Task.Status</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/save/MapSaveData.html#activeEncounterNodeId" class="member-name-link">activeEncounterNodeId</a> - Variable in class com.csse3200.game.save.<a href="com/csse3200/game/save/MapSaveData.html" title="class in com.csse3200.game.save">MapSaveData</a></dt>
@@ -3095,6 +3105,12 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/DisplayingRecord.Builder.html#fontName(java.lang.String)" class="member-name-link">fontName(String)</a> - Method in class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/DisplayingRecord.Builder.html" title="class in com.csse3200.game.components.spritedisplay.displaying">DisplayingRecord.Builder</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/combat/BattleController.html#forceEnemiesDefeated()" class="member-name-link">forceEnemiesDefeated()</a> - Method in class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a></dt>
+<dd>
+<div class="block">Debug/cheat entry point: kills every enemy via piercing damage (bypassing block/armor, same as
+ a real killing blow) and lets the normal outcome check pick it up, so this reuses the real win
+ path instead of faking a VICTORY transition directly.</div>
+</dd>
 <dt><a href="com/csse3200/game/save/SaveErrorMessages.html#forDelete(com.csse3200.game.save.DeleteSaveResult)" class="member-name-link">forDelete(DeleteSaveResult)</a> - Static method in class com.csse3200.game.save.<a href="com/csse3200/game/save/SaveErrorMessages.html" title="class in com.csse3200.game.save">SaveErrorMessages</a></dt>
 <dd>
 <div class="block">Returns a user-facing message for a delete attempt result.</div>
@@ -4091,6 +4107,12 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/entities/configs/GhostKingConfig.html#%3Cinit%3E()" class="member-name-link">GhostKingConfig()</a> - Constructor for class com.csse3200.game.entities.configs.<a href="com/csse3200/game/entities/configs/GhostKingConfig.html" title="class in com.csse3200.game.entities.configs">GhostKingConfig</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/GiveGoldCommand.html" class="type-name-link" title="class in com.csse3200.game.ui.terminal.commands">GiveGoldCommand</a> - Class in <a href="com/csse3200/game/ui/terminal/commands/package-summary.html">com.csse3200.game.ui.terminal.commands</a></dt>
+<dd>
+<div class="block">Debug/cheat command: gives the player a specified amount of gold.</div>
+</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/GiveGoldCommand.html#%3Cinit%3E(com.csse3200.game.entities.Entity)" class="member-name-link">GiveGoldCommand(Entity)</a> - Constructor for class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/GiveGoldCommand.html" title="class in com.csse3200.game.ui.terminal.commands">GiveGoldCommand</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/entities/configs/PlayerConfig.html#gold" class="member-name-link">gold</a> - Variable in class com.csse3200.game.entities.configs.<a href="com/csse3200/game/entities/configs/PlayerConfig.html" title="class in com.csse3200.game.entities.configs">PlayerConfig</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/save/PlayerSaveData.html#gold" class="member-name-link">gold</a> - Variable in class com.csse3200.game.save.<a href="com/csse3200/game/save/PlayerSaveData.html" title="class in com.csse3200.game.save">PlayerSaveData</a></dt>
@@ -4816,6 +4838,12 @@ loadScripts(document, 'script');</script>
 <div class="block">Menu screen for choosing between card and enemy library views.</div>
 </dd>
 <dt><a href="com/csse3200/game/screens/LibraryScreen.html#%3Cinit%3E(com.csse3200.game.GdxGame)" class="member-name-link">LibraryScreen(GdxGame)</a> - Constructor for class com.csse3200.game.screens.<a href="com/csse3200/game/screens/LibraryScreen.html" title="class in com.csse3200.game.screens">LibraryScreen</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/ListNodesCommand.html" class="type-name-link" title="class in com.csse3200.game.ui.terminal.commands">ListNodesCommand</a> - Class in <a href="com/csse3200/game/ui/terminal/commands/package-summary.html">com.csse3200.game.ui.terminal.commands</a></dt>
+<dd>
+<div class="block">Debug/cheat command: logs every map node's id, room type and state.</div>
+</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/ListNodesCommand.html#%3Cinit%3E(com.csse3200.game.maps.RunState)" class="member-name-link">ListNodesCommand(RunState)</a> - Constructor for class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/ListNodesCommand.html" title="class in com.csse3200.game.ui.terminal.commands">ListNodesCommand</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/save/JsonSaveGameRepository.html#listSaveSlots()" class="member-name-link">listSaveSlots()</a> - Method in class com.csse3200.game.save.<a href="com/csse3200/game/save/JsonSaveGameRepository.html" title="class in com.csse3200.game.save">JsonSaveGameRepository</a></dt>
 <dd>&nbsp;</dd>
@@ -6656,6 +6684,12 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Updates the player's health.</div>
 </dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/SetHealthCommand.html" class="type-name-link" title="class in com.csse3200.game.ui.terminal.commands">SetHealthCommand</a> - Class in <a href="com/csse3200/game/ui/terminal/commands/package-summary.html">com.csse3200.game.ui.terminal.commands</a></dt>
+<dd>
+<div class="block">Debug/cheat command: sets the player's current health to a specified amount.</div>
+</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/SetHealthCommand.html#%3Cinit%3E(com.csse3200.game.entities.Entity)" class="member-name-link">SetHealthCommand(Entity)</a> - Constructor for class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/SetHealthCommand.html" title="class in com.csse3200.game.ui.terminal.commands">SetHealthCommand</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/maps/MapNodeActor.html#setHovered(boolean)" class="member-name-link">setHovered(boolean)</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/MapNodeActor.html" title="class in com.csse3200.game.maps">MapNodeActor</a></dt>
 <dd>
 <div class="block">Defines what happens when a node is hovered</div>
@@ -7003,6 +7037,12 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the value of the <a href="./com/csse3200/game/cards/Card.html#param-skinFile"><code>skinFile</code></a> record component.</div>
 </dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/SkipBattleCommand.html" class="type-name-link" title="class in com.csse3200.game.ui.terminal.commands">SkipBattleCommand</a> - Class in <a href="com/csse3200/game/ui/terminal/commands/package-summary.html">com.csse3200.game.ui.terminal.commands</a></dt>
+<dd>
+<div class="block">Debug/cheat command: instantly wins the current battle by defeating every enemy.</div>
+</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/SkipBattleCommand.html#%3Cinit%3E(com.csse3200.game.components.combat.BattleController)" class="member-name-link">SkipBattleCommand(BattleController)</a> - Constructor for class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/SkipBattleCommand.html" title="class in com.csse3200.game.ui.terminal.commands">SkipBattleCommand</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/clickable/InOutOnTrigger.html#slideDown()" class="member-name-link">slideDown()</a> - Method in class com.csse3200.game.components.spritedisplay.clickable.<a href="com/csse3200/game/components/spritedisplay/clickable/InOutOnTrigger.html" title="class in com.csse3200.game.components.spritedisplay.clickable">InOutOnTrigger</a></dt>
 <dd>
 <div class="block">Slides the button out from its target position to off-screen.</div>
@@ -7730,6 +7770,12 @@ loadScripts(document, 'script');</script>
 <div class="block">Releases every enemy atlas and intent icon previously queued by <a href="com/csse3200/game/entities/factories/EnemyFactory.html#loadAssets()"><code>EnemyFactory.loadAssets()</code></a>.</div>
 </dd>
 <dt><a href="com/csse3200/game/services/ResourceService.html#unloadAssets(java.lang.String%5B%5D)" class="member-name-link">unloadAssets(String[])</a> - Method in class com.csse3200.game.services.<a href="com/csse3200/game/services/ResourceService.html" title="class in com.csse3200.game.services">ResourceService</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/UnlockNodeCommand.html" class="type-name-link" title="class in com.csse3200.game.ui.terminal.commands">UnlockNodeCommand</a> - Class in <a href="com/csse3200/game/ui/terminal/commands/package-summary.html">com.csse3200.game.ui.terminal.commands</a></dt>
+<dd>
+<div class="block">Debug/cheat command: unlocks a specific map node by id (LOCKED -&gt; AVAILABLE).</div>
+</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/UnlockNodeCommand.html#%3Cinit%3E(com.csse3200.game.maps.RunState)" class="member-name-link">UnlockNodeCommand(RunState)</a> - Constructor for class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/UnlockNodeCommand.html" title="class in com.csse3200.game.ui.terminal.commands">UnlockNodeCommand</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/save/BestiaryProgressSaveData.html#unlockState" class="member-name-link">unlockState</a> - Variable in class com.csse3200.game.save.<a href="com/csse3200/game/save/BestiaryProgressSaveData.html" title="class in com.csse3200.game.save">BestiaryProgressSaveData</a></dt>
 <dd>&nbsp;</dd>
