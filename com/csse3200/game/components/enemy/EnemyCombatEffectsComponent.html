@@ -98,7 +98,7 @@ loadScripts(document, 'script');</script>
 
  <p>把敌人自身广播的战斗事件（受伤、护甲变化、激怒、意图变化）转成染色闪烁反馈。目前项目里还没有 战斗场景，所以这里只保证"事件 -&gt; 染色状态"的正确性；真正的染色渲染由 <a href="../../rendering/AnimationRenderComponent.html" title="class in com.csse3200.game.rendering"><code>AnimationRenderComponent</code></a> 完成，等战斗场景搭好后就能直接看到效果。
 
- <p><a href="../CombatStatsComponent.html" title="class in com.csse3200.game.components"><code>CombatStatsComponent</code></a> 的 <code>updateArmor</code> 事件在护甲增加或减少时都会触发，
+ <p><a href="../CombatStatsComponent.html" title="class in com.csse3200.game.components"><code>CombatStatsComponent</code></a> 的 <code>updateArmour</code> 事件在护甲增加或减少时都会触发，
  所以这里自己记录上一次的护甲值，只有在护甲真的增加时才播放"防御"闪烁。</div>
 </section>
 <section class="summary">

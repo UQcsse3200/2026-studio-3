@@ -96,11 +96,12 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="../Component.html" title="class in com.csse3200.game.components">Component</a></span></div>
 <div class="block">Enemy-specific state and lifecycle event translation.
 
- <p>Combat stats (health, base attack, armor) live on the entity's <a href="../CombatStatsComponent.html" title="class in com.csse3200.game.components"><code>CombatStatsComponent</code></a> so
- that other teams can read them uniformly with <code>getComponent(CombatStatsComponent.class)</code>.
- This component holds only enemy-specific data (currently the display name) and re-emits the enemy
- lifecycle events (<code>enemyDamaged</code>, <code>enemyDefeated</code>, <code>enemyEnraged</code>) from the
- shared <code>updateHealth</code> event fired by <a href="../CombatStatsComponent.html" title="class in com.csse3200.game.components"><code>CombatStatsComponent</code></a>.</div>
+ <p>Combat stats (health, base attack, armour) live on the entity's <a href="../CombatStatsComponent.html" title="class in com.csse3200.game.components"><code>CombatStatsComponent</code></a>
+ so that other teams can read them uniformly with <code>
+ getComponent(CombatStatsComponent.class)</code>. This component holds only enemy-specific data
+ (currently the display name) and re-emits the enemy lifecycle events (<code>enemyDamaged</code>,
+ <code>enemyDefeated</code>, <code>enemyEnraged</code>) from the shared <code>updateHealth</code> event fired by
+ <a href="../CombatStatsComponent.html" title="class in com.csse3200.game.components"><code>CombatStatsComponent</code></a>.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
