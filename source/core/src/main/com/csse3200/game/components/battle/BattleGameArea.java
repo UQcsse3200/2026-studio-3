@@ -47,9 +47,12 @@ public class BattleGameArea extends ForestGameArea {
       if (config.sprite == null || config.sprite.isBlank()) {
         config.sprite = "images/enemies/" + config.id + ".atlas";
       }
+      // TODO: remove once Team 3 confirms nothing else relied on the suffix.
       // The factory accepts an explicit sprite and target ID. Keep instances distinct even when
       // the encounter contains several copies of the same enemy type, without changing the roster.
-      config.id = config.id + "_" + (index + 1);
+      // config.id = config.id + "_" + (index + 1);
+      // Leave config.id as the roster id: the bestiary looks it up in enemies.json. Instances are
+      // already distinct, since each config is a fresh copy and drop targets use the entity's ID.
     }
     additionalAtlases =
         configs.stream().map(config -> config.sprite).distinct().toArray(String[]::new);
