@@ -75,7 +75,7 @@ public final class DiceEncounterBehaviour implements ChanceEncounterBehaviour {
   private int rollSequence;
 
   /**
-   * Creates Dice behaviour using the same eligible-card rule as the Spring Event.
+   * Creates Dice behaviour using the same eligible-card rule as the Wishing Fountain Event.
    *
    * <p>Eligible IDs come from all registered card definitions, with null definitions and blank IDs
    * ignored. IDs are deduplicated and sorted before deterministic random selection.

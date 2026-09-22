@@ -32,7 +32,7 @@ class ChanceEncounterConfigLoaderTest {
             "wandering-healer",
             "flooded-crossing",
             "abandoned-mine",
-            "healing-spring",
+            "wishing-fountain",
             "dice-game"),
         encounterIds);
     assertFalse(encounterIds.contains("forgotten-cache"));
@@ -74,10 +74,10 @@ class ChanceEncounterConfigLoaderTest {
         new ExpectedChoice("leave", "Leave the mine undisturbed.", 0, 0));
     assertEncounter(
         encounters.get(4),
-        "healing-spring",
-        "A clear spring glows softly beside the path.",
-        new ExpectedChoice("drink", "Drink from the spring.", 0, 0),
-        new ExpectedChoice("leave", "Continue without drinking.", 0, 0));
+        "wishing-fountain",
+        "An old wishing fountain shimmers beside the path.",
+        new ExpectedChoice("make-wish", "Make a wish at the fountain.", 0, 0),
+        new ExpectedChoice("leave", "Leave the fountain without making a wish.", 0, 0));
     assertEncounter(
         encounters.get(5),
         "dice-game",

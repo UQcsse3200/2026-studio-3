@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-/** Resolves the runtime-random outcomes of the Spring Event. */
-public final class SpringEncounterBehaviour implements ChanceEncounterBehaviour {
-  /** Stable identifier of the Spring Event's existing catalogue definition. */
-  public static final String ENCOUNTER_ID = "healing-spring";
+/** Resolves the runtime-random outcomes of the Wishing Fountain Event. */
+public final class WishingFountainEncounterBehaviour implements ChanceEncounterBehaviour {
+  /** Stable identifier of the Wishing Fountain Event's catalogue definition. */
+  public static final String ENCOUNTER_ID = "wishing-fountain";
 
-  /** Stable identifier of the choice that rolls a Spring outcome. */
-  public static final String DRINK_CHOICE_ID = "drink";
+  /** Stable identifier of the choice that rolls a Wishing Fountain outcome. */
+  public static final String MAKE_WISH_CHOICE_ID = "make-wish";
 
   /** Stable identifier of the choice that leaves without an effect. */
   public static final String LEAVE_CHOICE_ID = "leave";
@@ -25,7 +25,8 @@ public final class SpringEncounterBehaviour implements ChanceEncounterBehaviour 
   private final List<String> eligibleCardIds;
 
   /**
-   * Creates Spring behaviour using all registered base-card definitions as eligible rewards.
+   * Creates Wishing Fountain behaviour using all registered base-card definitions as eligible
+   * rewards.
    *
    * <p>Card IDs are deduplicated and sorted before selection so an injected random source produces
    * deterministic results independently of the Card Service's collection order.
@@ -34,7 +35,7 @@ public final class SpringEncounterBehaviour implements ChanceEncounterBehaviour 
    * @param cardService authoritative source of registered card definitions
    * @throws IllegalArgumentException when the Card Service has no eligible card definitions
    */
-  public SpringEncounterBehaviour(Random random, CardService cardService) {
+  public WishingFountainEncounterBehaviour(Random random, CardService cardService) {
     this.random = Objects.requireNonNull(random, "random cannot be null");
     Objects.requireNonNull(cardService, "cardService cannot be null");
 
@@ -47,7 +48,8 @@ public final class SpringEncounterBehaviour implements ChanceEncounterBehaviour 
             .sorted()
             .toList();
     if (eligibleCardIds.isEmpty()) {
-      throw new IllegalArgumentException("Spring Event requires at least one registered card");
+      throw new IllegalArgumentException(
+          "Wishing Fountain Event requires at least one registered card");
     }
   }
 
@@ -56,7 +58,7 @@ public final class SpringEncounterBehaviour implements ChanceEncounterBehaviour 
     if (LEAVE_CHOICE_ID.equals(choiceId)) {
       return ChanceBehaviourResult.outcome(new ChanceOutcome(0, 0));
     }
-    if (!DRINK_CHOICE_ID.equals(choiceId)) {
+    if (!MAKE_WISH_CHOICE_ID.equals(choiceId)) {
       return ChanceBehaviourResult.invalidChoice();
     }
 

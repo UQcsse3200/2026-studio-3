@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Random;
 import org.junit.jupiter.api.Test;
 
-class SpringEncounterBehaviourTest {
+class WishingFountainEncounterBehaviourTest {
   @Test
   void shouldLeaveWithoutRandomnessOrStateChangesAndCompleteNormally() {
     MockPlayerStateGateway player = new MockPlayerStateGateway(70, 100, 40);
@@ -24,12 +24,13 @@ class SpringEncounterBehaviourTest {
     ChanceEncounterSession session =
         new ChanceEncounterSession(
             1,
-            springEncounter(),
-            new SpringEncounterBehaviour(new FailingRandom(), cards("bandage")),
+            wishingFountainEncounter(),
+            new WishingFountainEncounterBehaviour(new FailingRandom(), cards("bandage")),
             new ChanceOutcomeApplier(player),
             (nodeId, success) -> completionCount[0]++);
 
-    ChanceResolution result = session.resolveChoice(SpringEncounterBehaviour.LEAVE_CHOICE_ID);
+    ChanceResolution result =
+        session.resolveChoice(WishingFountainEncounterBehaviour.LEAVE_CHOICE_ID);
 
     assertTrue(result.isSuccess());
     assertTrue(result.getOutcome().isNoEffect());
@@ -45,7 +46,8 @@ class SpringEncounterBehaviourTest {
     ChanceEncounterSession session =
         session(player, new SequenceRandom(0), cards("bandage"), new MockDeckGateway());
 
-    ChanceResolution result = session.resolveChoice(SpringEncounterBehaviour.DRINK_CHOICE_ID);
+    ChanceResolution result =
+        session.resolveChoice(WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID);
 
     assertTrue(result.isSuccess());
     assertEquals(20, result.getOutcome().getHealthDelta());
@@ -55,14 +57,14 @@ class SpringEncounterBehaviourTest {
 
   @Test
   void shouldUseExactProbabilityBoundaries() {
-    assertEquals(20, drinkOutcome(0).getHealthDelta());
-    assertEquals(20, drinkOutcome(49).getHealthDelta());
+    assertEquals(20, wishOutcome(0).getHealthDelta());
+    assertEquals(20, wishOutcome(49).getHealthDelta());
 
-    assertEquals("bandage", drinkOutcome(50, 0).getCardRewardId());
-    assertEquals("bandage", drinkOutcome(79, 0).getCardRewardId());
+    assertEquals("bandage", wishOutcome(50, 0).getCardRewardId());
+    assertEquals("bandage", wishOutcome(79, 0).getCardRewardId());
 
-    assertTrue(drinkOutcome(80).isNoEffect());
-    assertTrue(drinkOutcome(99).isNoEffect());
+    assertTrue(wishOutcome(80).isNoEffect());
+    assertTrue(wishOutcome(99).isNoEffect());
   }
 
   @Test
@@ -72,7 +74,8 @@ class SpringEncounterBehaviourTest {
     MockDeckGateway deck = new MockDeckGateway();
     ChanceEncounterSession session = session(player, new SequenceRandom(50, 1), cardService, deck);
 
-    ChanceResolution result = session.resolveChoice(SpringEncounterBehaviour.DRINK_CHOICE_ID);
+    ChanceResolution result =
+        session.resolveChoice(WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID);
 
     assertTrue(result.isSuccess());
     assertEquals("strike", result.getOutcome().getCardRewardId());
@@ -88,7 +91,8 @@ class SpringEncounterBehaviourTest {
     ChanceEncounterSession session =
         session(player, new SequenceRandom(80), cards("bandage"), new MockDeckGateway());
 
-    ChanceResolution result = session.resolveChoice(SpringEncounterBehaviour.DRINK_CHOICE_ID);
+    ChanceResolution result =
+        session.resolveChoice(WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID);
 
     assertTrue(result.isSuccess());
     assertTrue(result.getOutcome().isNoEffect());
@@ -98,8 +102,8 @@ class SpringEncounterBehaviourTest {
 
   @Test
   void shouldRejectUnknownChoice() {
-    SpringEncounterBehaviour behaviour =
-        new SpringEncounterBehaviour(new FailingRandom(), cards("bandage"));
+    WishingFountainEncounterBehaviour behaviour =
+        new WishingFountainEncounterBehaviour(new FailingRandom(), cards("bandage"));
 
     ChanceBehaviourResult result = behaviour.resolveChoice("missing");
 
@@ -110,38 +114,38 @@ class SpringEncounterBehaviourTest {
   void shouldRequireAtLeastOneEligibleCard() {
     assertThrows(
         IllegalArgumentException.class,
-        () -> new SpringEncounterBehaviour(new Random(266L), cards()));
+        () -> new WishingFountainEncounterBehaviour(new Random(266L), cards()));
   }
 
   private static ChanceEncounterSession session(
       MockPlayerStateGateway player, Random random, CardService cardService, MockDeckGateway deck) {
     return new ChanceEncounterSession(
         1,
-        springEncounter(),
-        new SpringEncounterBehaviour(random, cardService),
+        wishingFountainEncounter(),
+        new WishingFountainEncounterBehaviour(random, cardService),
         new ChanceOutcomeApplier(player, new CardServiceCatalogAdapter(cardService), deck),
         (nodeId, success) -> {});
   }
 
-  private static ChanceOutcome drinkOutcome(int... randomValues) {
+  private static ChanceOutcome wishOutcome(int... randomValues) {
     ChanceBehaviourResult result =
-        new SpringEncounterBehaviour(new SequenceRandom(randomValues), cards("bandage"))
-            .resolveChoice(SpringEncounterBehaviour.DRINK_CHOICE_ID);
+        new WishingFountainEncounterBehaviour(new SequenceRandom(randomValues), cards("bandage"))
+            .resolveChoice(WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID);
     return result.getOutcome();
   }
 
-  private static ChanceEncounter springEncounter() {
+  private static ChanceEncounter wishingFountainEncounter() {
     return new ChanceEncounter(
-        SpringEncounterBehaviour.ENCOUNTER_ID,
-        "A clear spring glows softly beside the path.",
+        WishingFountainEncounterBehaviour.ENCOUNTER_ID,
+        "An old wishing fountain shimmers beside the path.",
         List.of(
             new ChanceChoice(
-                SpringEncounterBehaviour.DRINK_CHOICE_ID,
-                "Drink from the spring.",
+                WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID,
+                "Make a wish at the fountain.",
                 new ChanceOutcome(0, 0)),
             new ChanceChoice(
-                SpringEncounterBehaviour.LEAVE_CHOICE_ID,
-                "Continue without drinking.",
+                WishingFountainEncounterBehaviour.LEAVE_CHOICE_ID,
+                "Leave the fountain without making a wish.",
                 new ChanceOutcome(0, 0))),
         2);
   }

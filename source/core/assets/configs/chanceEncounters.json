@@ -102,13 +102,13 @@
       ]
     },
     {
-      "id": "healing-spring",
-      "description": "A clear spring glows softly beside the path.",
+      "id": "wishing-fountain",
+      "description": "An old wishing fountain shimmers beside the path.",
       "weight": 2,
       "choices": [
         {
-          "id": "drink",
-          "description": "Drink from the spring.",
+          "id": "make-wish",
+          "description": "Make a wish at the fountain.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0
@@ -116,7 +116,7 @@
         },
         {
           "id": "leave",
-          "description": "Continue without drinking.",
+          "description": "Leave the fountain without making a wish.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0

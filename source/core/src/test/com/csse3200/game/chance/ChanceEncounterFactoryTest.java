@@ -26,7 +26,7 @@ class ChanceEncounterFactoryTest {
             "wandering-healer",
             "flooded-crossing",
             "abandoned-mine",
-            "healing-spring",
+            "wishing-fountain",
             "dice-game"),
         encounterIds);
     assertFalse(encounterIds.contains("forgotten-cache"));
@@ -63,13 +63,13 @@ class ChanceEncounterFactoryTest {
   }
 
   @Test
-  void shouldCreateHealingSpring() {
+  void shouldCreateWishingFountain() {
     ChanceEncounter encounter = ChanceEncounterFactory.createInitialEncounters().get(4);
 
-    assertEquals("A clear spring glows softly beside the path.", encounter.getDescription());
+    assertEquals("An old wishing fountain shimmers beside the path.", encounter.getDescription());
     assertEquals(2, encounter.getChoices().size());
-    assertChoice(encounter, 0, "drink", "Drink from the spring.", 0, 0);
-    assertChoice(encounter, 1, "leave", "Continue without drinking.", 0, 0);
+    assertChoice(encounter, 0, "make-wish", "Make a wish at the fountain.", 0, 0);
+    assertChoice(encounter, 1, "leave", "Leave the fountain without making a wish.", 0, 0);
   }
 
   @Test

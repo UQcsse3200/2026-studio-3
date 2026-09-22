@@ -20,8 +20,8 @@ public final class ChanceEncounterBehaviourFactory {
     Objects.requireNonNull(random, "random cannot be null");
     Objects.requireNonNull(cardService, "cardService cannot be null");
 
-    if (SpringEncounterBehaviour.ENCOUNTER_ID.equals(encounter.getId())) {
-      return new SpringEncounterBehaviour(random, cardService);
+    if (WishingFountainEncounterBehaviour.ENCOUNTER_ID.equals(encounter.getId())) {
+      return new WishingFountainEncounterBehaviour(random, cardService);
     }
     if (DiceEncounterBehaviour.ENCOUNTER_ID.equals(encounter.getId())) {
       return new DiceEncounterBehaviour(random, cardService);

@@ -11,12 +11,12 @@ import org.junit.jupiter.api.Test;
 
 class ChanceEncounterBehaviourFactoryTest {
   @Test
-  void shouldCreateSpringBehaviourForExistingHealingSpringDefinition() {
+  void shouldCreateWishingFountainBehaviourForItsDefinition() {
     ChanceEncounterBehaviour behaviour =
         ChanceEncounterBehaviourFactory.create(
-            springEncounter(), new Random(266L), TestCardService.withCards("bandage"));
+            wishingFountainEncounter(), new Random(266L), TestCardService.withCards("bandage"));
 
-    assertInstanceOf(SpringEncounterBehaviour.class, behaviour);
+    assertInstanceOf(WishingFountainEncounterBehaviour.class, behaviour);
   }
 
   @Test
@@ -76,14 +76,18 @@ class ChanceEncounterBehaviourFactoryTest {
     }
   }
 
-  private static ChanceEncounter springEncounter() {
+  private static ChanceEncounter wishingFountainEncounter() {
     return new ChanceEncounter(
-        SpringEncounterBehaviour.ENCOUNTER_ID,
-        "A clear spring.",
+        WishingFountainEncounterBehaviour.ENCOUNTER_ID,
+        "An old wishing fountain.",
         List.of(
             new ChanceChoice(
-                SpringEncounterBehaviour.DRINK_CHOICE_ID, "Drink.", new ChanceOutcome(0, 0)),
+                WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID,
+                "Make a wish.",
+                new ChanceOutcome(0, 0)),
             new ChanceChoice(
-                SpringEncounterBehaviour.LEAVE_CHOICE_ID, "Leave.", new ChanceOutcome(0, 0))));
+                WishingFountainEncounterBehaviour.LEAVE_CHOICE_ID,
+                "Leave.",
+                new ChanceOutcome(0, 0))));
   }
 }
