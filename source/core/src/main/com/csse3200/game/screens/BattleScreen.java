@@ -52,6 +52,13 @@ import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.PopupDisplay;
+import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
+import com.csse3200.game.ui.terminal.Terminal;
+import com.csse3200.game.ui.terminal.TerminalDisplay;
+import com.csse3200.game.ui.terminal.commands.GiveGoldCommand;
+import com.csse3200.game.ui.terminal.commands.GiveItemCommand;
+import com.csse3200.game.ui.terminal.commands.SetHealthCommand;
+import com.csse3200.game.ui.terminal.commands.SkipBattleCommand;
 import java.nio.file.Path;
 import java.util.*;
 import org.slf4j.Logger;
@@ -86,7 +93,6 @@ public class BattleScreen extends ScreenAdapter {
   private static final float CARD_INVENTORY_MIN_HEIGHT = 600f;
   private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
 
-  private final PhysicsEngine physicsEngine;
   private final BattleController controller;
   private final CardLibrary library;
   private final BattleDeck battleDeck;
@@ -117,7 +123,7 @@ public class BattleScreen extends ScreenAdapter {
 
     PhysicsService physicsService = new PhysicsService();
     ServiceLocator.registerPhysicsService(physicsService);
-    physicsEngine = physicsService.getPhysics();
+    PhysicsEngine physicsEngine = physicsService.getPhysics();
 
     ServiceLocator.registerInputService(new InputService());
     ServiceLocator.registerResourceService(new ResourceService());
@@ -215,6 +221,15 @@ public class BattleScreen extends ScreenAdapter {
 
     Team3CardPlayAdapter cardPlayAdapter = new Team3CardPlayAdapter(cardPlayService, controller);
 
+    // PROPOSED: debug terminal for cheats/commands during battle (skip battle, give gold, etc.
+    // — commands added separately). Same Terminal/KeyboardTerminalInputComponent/TerminalDisplay
+    // trio MainGameScreen already wires up; F1 toggles it open/closed.
+    Terminal terminal = new Terminal();
+    terminal.addCommand("skipbattle", new SkipBattleCommand(controller));
+    terminal.addCommand("givegold", new GiveGoldCommand(gameArea.getPlayer()));
+    terminal.addCommand("sethealth", new SetHealthCommand(gameArea.getPlayer()));
+    terminal.addCommand("giveitem", new GiveItemCommand(gameArea.getPlayer()));
+
     PopupDisplay cardInventory = new PopupDisplay("Card Inventory");
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
@@ -235,7 +250,10 @@ public class BattleScreen extends ScreenAdapter {
                     gameArea.getPlayer().getComponent(CombatStatsComponent.class)))
             .addComponent(new CardEffectDebugComponent(cardEffects))
             .addComponent(new KeyboardCardEffectDebugInputComponent())
-            .addComponent(new CardEffectDebugDisplay());
+            .addComponent(new CardEffectDebugDisplay())
+            .addComponent(terminal)
+            .addComponent(new KeyboardTerminalInputComponent())
+            .addComponent(new TerminalDisplay());
 
     // Keep the on-screen row in sync with the deck: whenever the hand changes (a card played, or
     // one retrieved from the discard pile after its cooldown elapses) rebuild from the live deck,
@@ -259,7 +277,7 @@ public class BattleScreen extends ScreenAdapter {
     Entity deckEditorEntity = new Entity().addComponent(deckPoolFactory).addComponent(deckEditor);
     ServiceLocator.getEntityService().register(deckEditorEntity);
 
-    battleUi.getEvents().addListener("open-menu", deckEditor::open);
+    battleUi.getEvents().addListener("openMenu", deckEditor::open);
   }
 
   /**

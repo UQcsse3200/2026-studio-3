@@ -206,7 +206,7 @@ class BattleLoopTest {
         controller.submitCardPlayRequest(CardPlayRequest.self(instanceIdInHand(deck, "defend")));
 
     assertTrue(accepted);
-    assertEquals(5, player.getComponent(CombatStatsComponent.class).getArmor());
+    assertEquals(5, player.getComponent(CombatStatsComponent.class).getArmour());
     assertEquals(2, player.getComponent(EnergyComponent.class).getCurrentEnergy());
     assertTrue(containsCardId(deck.getDiscardPile(), "defend"));
     assertTrue(phases.contains(BattlePhase.CARD_RESOLVING));
