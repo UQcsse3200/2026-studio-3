@@ -3,6 +3,7 @@ package com.csse3200.game.chance;
 import com.csse3200.game.cards.CardService;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 
 /** Resolves the staged, two-round push-your-luck Dice Event. */
@@ -70,6 +71,8 @@ public final class DiceEncounterBehaviour implements ChanceEncounterBehaviour {
   private int currentStake;
   private ChanceOutcome terminalOutcome;
   private String terminalChoiceId;
+  private DiceRoll lastDiceRoll;
+  private int rollSequence;
 
   /**
    * Creates Dice behaviour using the same eligible-card rule as the Spring Event.
@@ -117,6 +120,64 @@ public final class DiceEncounterBehaviour implements ChanceEncounterBehaviour {
               ? ChanceBehaviourResult.outcome(terminalOutcome)
               : ChanceBehaviourResult.invalidChoice();
     };
+  }
+
+  @Override
+  public List<String> getAvailableChoiceIds(ChanceEncounter encounter) {
+    return switch (stage) {
+      case ROUND_ONE_PREDICTION,
+              ROUND_ONE_DOUBLE_DOWN_PREDICTION,
+              ROUND_ONE_FINAL_PREDICTION,
+              ROUND_TWO_PREDICTION,
+              ROUND_TWO_DOUBLE_DOWN_PREDICTION,
+              ROUND_TWO_FINAL_PREDICTION ->
+          List.of(LOW_CHOICE_ID, HIGH_CHOICE_ID);
+      case ROUND_ONE_LUCKY_SEVEN,
+              ROUND_ONE_FINAL_LUCKY_SEVEN,
+              ROUND_TWO_LUCKY_SEVEN,
+              ROUND_TWO_FINAL_LUCKY_SEVEN ->
+          List.of(TAKE_CHOICE_ID, DOUBLE_DOWN_CHOICE_ID);
+      case STAKE_DECISION -> List.of(CASH_OUT_CHOICE_ID, CONTINUE_CHOICE_ID);
+      case RESOLVED -> List.of();
+    };
+  }
+
+  @Override
+  public String getChoicePrompt() {
+    return switch (stage) {
+      case ROUND_ONE_PREDICTION -> "ROUND 1 - PREDICT LOW OR HIGH";
+      case ROUND_ONE_LUCKY_SEVEN, ROUND_ONE_FINAL_LUCKY_SEVEN ->
+          "LUCKY SEVEN - TAKE THE OFFER OR DOUBLE DOWN";
+      case ROUND_ONE_DOUBLE_DOWN_PREDICTION, ROUND_ONE_FINAL_PREDICTION ->
+          "ROUND 1 DOUBLE DOWN - PREDICT AGAIN";
+      case STAKE_DECISION -> "STAKE: " + currentStake + " GOLD - CASH OUT OR CONTINUE";
+      case ROUND_TWO_PREDICTION -> "ROUND 2 - PREDICT LOW OR HIGH";
+      case ROUND_TWO_LUCKY_SEVEN, ROUND_TWO_FINAL_LUCKY_SEVEN ->
+          "ROUND 2 LUCKY SEVEN - TAKE OR DOUBLE DOWN";
+      case ROUND_TWO_DOUBLE_DOWN_PREDICTION, ROUND_TWO_FINAL_PREDICTION ->
+          "ROUND 2 DOUBLE DOWN - PREDICT AGAIN";
+      case RESOLVED -> "WAGER COMPLETE";
+    };
+  }
+
+  @Override
+  public String getStageResultText() {
+    return switch (stage) {
+      case ROUND_ONE_LUCKY_SEVEN,
+              ROUND_ONE_FINAL_LUCKY_SEVEN,
+              ROUND_TWO_LUCKY_SEVEN,
+              ROUND_TWO_FINAL_LUCKY_SEVEN ->
+          "LUCKY SEVEN!\nThe dice total is 7. Take the offer or double down.";
+      case STAKE_DECISION -> "Prediction won. Your current stake is " + currentStake + " gold.";
+      case ROUND_TWO_PREDICTION ->
+          "Round one is complete. Your " + currentStake + " gold stake is still at risk.";
+      default -> ChanceEncounterBehaviour.super.getStageResultText();
+    };
+  }
+
+  @Override
+  public Optional<DiceRoll> getLastDiceRoll() {
+    return Optional.ofNullable(lastDiceRoll);
   }
 
   /**
@@ -334,6 +395,9 @@ public final class DiceEncounterBehaviour implements ChanceEncounterBehaviour {
   }
 
   private int rollDice() {
-    return random.nextInt(DIE_SIDES) + 1 + random.nextInt(DIE_SIDES) + 1;
+    int firstDie = random.nextInt(DIE_SIDES) + 1;
+    int secondDie = random.nextInt(DIE_SIDES) + 1;
+    lastDiceRoll = new DiceRoll(firstDie, secondDie, ++rollSequence);
+    return lastDiceRoll.total();
   }
 }

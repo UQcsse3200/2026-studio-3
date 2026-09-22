@@ -184,7 +184,6 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getResourceService().dispose();
-    ScreenUtils.clear(new Color(248f / 255f, 249f / 255f, 178f / 255f, 1f));
     ServiceLocator.clear();
   }
 }
