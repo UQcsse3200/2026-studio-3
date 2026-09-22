@@ -1,4 +1,3 @@
-// PlayerFactory.java
 package com.csse3200.game.entities.factories;
 
 import com.csse3200.game.components.CombatStatsComponent;
@@ -17,12 +16,6 @@ import com.csse3200.game.physics.components.PhysicsComponent;
 import com.csse3200.game.rendering.TextureRenderComponent;
 import com.csse3200.game.services.ServiceLocator;
 
-/**
- * Factory to create a player entity.
- *
- * <p>Predefined player properties are loaded from a config stored as a json file and should have
- * the properties stores in 'PlayerConfig'.
- */
 public class PlayerFactory {
 
   public static int getDefaultHealth() {
@@ -40,11 +33,6 @@ public class PlayerFactory {
   private static final PlayerConfig stats =
       FileLoader.readClass(PlayerConfig.class, "configs/player.json");
 
-  /**
-   * Create a player entity.
-   *
-   * @return entity
-   */
   public static Entity createPlayer(RunState runState) {
     InputComponent inputComponent =
         ServiceLocator.getInputService().getInputFactory().createForPlayer();
@@ -63,6 +51,8 @@ public class PlayerFactory {
             .addComponent(new EnergyComponent(stats.maxEnergy))
             .addComponent(new PlayerStatsDisplay())
             .addComponent(new PlayerStatsTopDisplay(runState));
+
+    runState.getOrCreatePlayerState().applyTo(player);
 
     PhysicsUtils.setScaledCollider(player, 0.6f, 0.3f);
     player.getComponent(ColliderComponent.class).setDensity(1.5f);
@@ -90,18 +80,14 @@ public class PlayerFactory {
             .addComponent(new PlayerStatsDisplay())
             .addComponent(new PlayerStatsTopDisplay(runState));
 
+    runState.getOrCreatePlayerState().applyTo(player);
+
     PhysicsUtils.setScaledCollider(player, 0.6f, 0.3f);
     player.getComponent(ColliderComponent.class).setDensity(1.5f);
     player.getComponent(TextureRenderComponent.class).scaleEntity();
     return player;
   }
 
-  /**
-   * Creates the initial durable player state from the same config used by {@link
-   * #createPlayer(RunState)}.
-   *
-   * @return default health and gold for a new run
-   */
   public static PlayerRunState createInitialRunState() {
     return new PlayerRunState(stats.health, stats.maxHealth, stats.gold);
   }
