@@ -64,25 +64,25 @@ class EnemyCombatEffectsComponentTest {
   }
 
   @Test
-  void shouldFlashWhenArmorIncreases() {
+  void shouldFlashWhenArmourIncreases() {
     Entity enemy = newEnemy();
     AnimationRenderComponent animator = enemy.getComponent(AnimationRenderComponent.class);
 
-    enemy.getEvents().trigger("updateArmor", 4);
+    enemy.getEvents().trigger("updateArmour", 4);
 
     assertEquals(Color.CYAN, animator.getActiveTint());
   }
 
-  // updateArmor 在护甲减少（比如被伤害吸收）时也会触发，这种情况不应该播放防御闪烁
+  // updateArmour 在护甲减少（比如被伤害吸收）时也会触发，这种情况不应该播放防御闪烁
   @Test
-  void shouldNotFlashWhenArmorDecreases() {
+  void shouldNotFlashWhenArmourDecreases() {
     Entity enemy = newEnemy();
     AnimationRenderComponent animator = enemy.getComponent(AnimationRenderComponent.class);
 
-    enemy.getEvents().trigger("updateArmor", 4);
+    enemy.getEvents().trigger("updateArmour", 4);
     animator.clearTint();
 
-    enemy.getEvents().trigger("updateArmor", 1);
+    enemy.getEvents().trigger("updateArmour", 1);
 
     assertNull(animator.getActiveTint());
   }
