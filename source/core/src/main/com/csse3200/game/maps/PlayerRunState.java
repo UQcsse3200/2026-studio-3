@@ -11,14 +11,26 @@ import com.csse3200.game.entities.Entity;
  * this small model prevents health and gold from silently resetting whenever the player leaves a
  * battle, and gives Save/Load a real source and destination that is independent of a rendered
  * entity.
+ *
+ * <p>Note: goldBonusMultiplier and shopDiscount are persisted across screen transitions within a
+ * run, but are NOT currently included in {@link com.csse3200.game.save.PlayerSaveData} — loading a
+ * save resets them to 0. Extending save/load to cover these is tracked separately with the
+ * save/load team.
  */
 public class PlayerRunState {
   private int currentHealth;
   private int maxHealth;
   private int gold;
+  private float goldBonusMultiplier;
+  private float shopDiscount;
 
   public PlayerRunState(int currentHealth, int maxHealth, int gold) {
-    restore(currentHealth, maxHealth, gold);
+    this(currentHealth, maxHealth, gold, 0f, 0f);
+  }
+
+  public PlayerRunState(
+      int currentHealth, int maxHealth, int gold, float goldBonusMultiplier, float shopDiscount) {
+    restore(currentHealth, maxHealth, gold, goldBonusMultiplier, shopDiscount);
   }
 
   public int getCurrentHealth() {
@@ -33,6 +45,14 @@ public class PlayerRunState {
     return gold;
   }
 
+  public float getGoldBonusMultiplier() {
+    return goldBonusMultiplier;
+  }
+
+  public float getShopDiscount() {
+    return shopDiscount;
+  }
+
   /** Applies the durable values to the player entity created for a gameplay screen. */
   public void applyTo(Entity player) {
     CombatStatsComponent stats = requireStats(player);
@@ -41,17 +61,33 @@ public class PlayerRunState {
     stats.setMaxHealth(maxHealth);
     stats.setHealth(currentHealth);
     inventory.setGold(gold);
+    inventory.setGoldBonusMultiplier(goldBonusMultiplier);
+    inventory.setShopDiscount(shopDiscount);
   }
 
   /** Captures the latest values before a gameplay screen disposes its player entity. */
   public void captureFrom(Entity player) {
     CombatStatsComponent stats = requireStats(player);
     InventoryComponent inventory = requireInventory(player);
-    restore(stats.getHealth(), stats.getMaxHealth(), inventory.getGold());
+    restore(
+        stats.getHealth(),
+        stats.getMaxHealth(),
+        inventory.getGold(),
+        inventory.getGoldBonusMultiplier(),
+        inventory.getShopDiscount());
+  }
+
+  /**
+   * Replaces health and gold, resetting goldBonusMultiplier and shopDiscount to 0. Used by
+   * Save/Load, which does not currently persist item bonuses — see class Javadoc.
+   */
+  public void restore(int currentHealth, int maxHealth, int gold) {
+    restore(currentHealth, maxHealth, gold, 0f, 0f);
   }
 
   /** Replaces all persisted player values after validating them as one atomic state. */
-  public void restore(int currentHealth, int maxHealth, int gold) {
+  public void restore(
+      int currentHealth, int maxHealth, int gold, float goldBonusMultiplier, float shopDiscount) {
     if (maxHealth <= 0) {
       throw new IllegalArgumentException("maxHealth must be positive");
     }
@@ -65,6 +101,8 @@ public class PlayerRunState {
     this.currentHealth = currentHealth;
     this.maxHealth = maxHealth;
     this.gold = gold;
+    this.goldBonusMultiplier = goldBonusMultiplier;
+    this.shopDiscount = shopDiscount;
   }
 
   private CombatStatsComponent requireStats(Entity player) {
