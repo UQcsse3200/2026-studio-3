@@ -50,7 +50,8 @@ public class EncounterGameArea extends GameArea {
     ShopDisplay.MERCHANT_TEXTURE,
     ShopDisplay.PANEL_FRAME_TEXTURE,
     ShopDisplay.CARD_FRAME_TEXTURE,
-    ShopDisplay.PLAQUE_FRAME_TEXTURE
+    ShopDisplay.PLAQUE_FRAME_TEXTURE,
+    ChanceEncounterDisplay.DICE_GAME_BACKGROUND_TEXTURE
   };
 
   private final Integer nodeId;
