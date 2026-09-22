@@ -8,6 +8,7 @@ import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.rewards.RewardService;
+import com.csse3200.game.rewards.RewardType;
 import java.util.List;
 
 public class RewardDisplay extends Displaying {
@@ -92,6 +93,8 @@ public class RewardDisplay extends Displaying {
       return;
     }
     claimed = true;
+    System.out.println(">>> claimOption called: type=" + option.type
+            + (option.type == RewardType.ITEM ? " item=" + option.itemId : ""));
     runState.setPendingReward(option);
     entity.getEvents().trigger(REWARD_CLAIMED_EVENT);
     entity.getEvents().trigger(EndBattleDisplay.RETURN_TO_MENU_EVENT);

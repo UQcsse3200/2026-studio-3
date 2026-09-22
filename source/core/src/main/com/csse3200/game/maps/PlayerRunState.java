@@ -1,8 +1,12 @@
 package com.csse3200.game.maps;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.entities.Entity;
+import com.csse3200.game.rewards.ItemType;
+import com.csse3200.game.rewards.ItemEffectApplier;
 
 /**
  * Run-scoped player values that must survive screen disposal.
@@ -16,6 +20,8 @@ public class PlayerRunState {
   private int currentHealth;
   private int maxHealth;
   private int gold;
+
+  private final List<ItemType> ownedItems = new ArrayList<>();
 
   public PlayerRunState(int currentHealth, int maxHealth, int gold) {
     restore(currentHealth, maxHealth, gold);
@@ -41,6 +47,10 @@ public class PlayerRunState {
     stats.setMaxHealth(maxHealth);
     stats.setHealth(currentHealth);
     inventory.setGold(gold);
+
+    for (ItemType itemId : ownedItems) {
+      ItemEffectApplier.applyItemEffect(itemId, player);
+    }
   }
 
   /** Captures the latest values before a gameplay screen disposes its player entity. */
@@ -85,4 +95,17 @@ public class PlayerRunState {
     }
     return inventory;
   }
+
+  /**
+   * Records that the player now owns this item, so its effect will be
+   * reapplied every time a new player entity is created (see applyTo()).
+   */
+  public void addOwnedItem(ItemType itemId) {
+    ownedItems.add(itemId);
+  }
+
+  public List<ItemType> getOwnedItems() {
+    return List.copyOf(ownedItems);
+  }
+
 }

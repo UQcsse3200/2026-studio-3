@@ -10,7 +10,6 @@ import com.csse3200.game.cards.configs.CardUpgradeConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import java.util.List;
 
 class CardValidatorTest {
   private CardConfig validCard() {
@@ -69,6 +68,33 @@ class CardValidatorTest {
           new EffectConfig(EffectType.DAMAGE, 4), new EffectConfig(EffectType.POISON, 3, 3)
         };
     assertTrue(CardValidator.isValid(card));
+  }
+
+  @Test
+  void shouldAcceptCleanseOnSelf() {
+    CardConfig card = validCard();
+    card.type = CardType.SKILL;
+    card.target = TargetType.SELF;
+    card.effects = new EffectConfig[] {new EffectConfig(EffectType.CLEANSE, 1)};
+    assertTrue(CardValidator.isValid(card));
+  }
+
+  @Test
+  void shouldRejectCleanseForEnemyTargets() {
+    CardConfig card = validCard();
+    card.type = CardType.SKILL;
+    card.effects = new EffectConfig[] {new EffectConfig(EffectType.CLEANSE, 1)};
+
+    assertTrue(
+        CardValidator.validate(card)
+            .contains(
+                "effects[0].type CLEANSE is not compatible with inherited target SINGLE_ENEMY"));
+
+    card.target = TargetType.ALL_ENEMIES;
+    assertTrue(
+        CardValidator.validate(card)
+            .contains(
+                "effects[0].type CLEANSE is not compatible with inherited target ALL_ENEMIES"));
   }
 
   @Test
@@ -164,6 +190,35 @@ class CardValidatorTest {
   }
 
   @Test
+  void shouldAcceptFortifyOnSelf() {
+    CardConfig card = validCard();
+    card.id = "iron_oath";
+    card.name = "Iron Oath";
+    card.type = CardType.SKILL;
+    card.rarity = Rarity.UNCOMMON;
+    card.target = TargetType.SELF;
+    card.effects = new EffectConfig[] {new EffectConfig(EffectType.FORTIFY, 4)};
+    card.texturePath = "images/cards/iron_oath.png";
+    assertTrue(CardValidator.isValid(card));
+    assertTrue(CardValidator.isCompatibleWithTarget(EffectType.FORTIFY, TargetType.SELF));
+  }
+
+  @Test
+  void shouldRejectFortifyInsideEnemyUpgradeBlock() {
+    CardConfig card = validCard();
+    com.csse3200.game.cards.configs.CardUpgradeConfig upgrade =
+        new com.csse3200.game.cards.configs.CardUpgradeConfig();
+    upgrade.name = "Bad+";
+    upgrade.description = "Invalid fortify on enemy.";
+    upgrade.cost = 1;
+    upgrade.rarity = Rarity.COMMON;
+    upgrade.effects = new EffectConfig[] {new EffectConfig(EffectType.FORTIFY, 4)};
+    card.upgrade = upgrade;
+
+    assertFalse(CardValidator.isValid(card));
+  }
+
+  @Test
   void shouldReportEveryProblemAtOnce() {
     CardConfig card = validCard();
     card.id = "";
@@ -171,66 +226,6 @@ class CardValidatorTest {
     card.cost = -5;
     assertEquals(3, CardValidator.validate(card).size());
   }
-    @Test
-    void shouldAcceptNullUpgradedEffects() {
-        CardConfig card = new CardConfig();
-        card.id = "test_card";
-        card.name = "Test Card";
-        card.description = "desc";
-        card.texturePath = "path.png";
-        card.effects = new EffectConfig[] { new EffectConfig(EffectType.DAMAGE, 5) };
-        card.upgradedEffects = null; // 不升级的卡
-
-        List<String> errors = CardValidator.validate(card);
-        assertTrue(errors.isEmpty(), "null upgradedEffects should be valid");
-    }
-
-    @Test
-    void shouldRejectEmptyUpgradedEffectsArray() {
-        CardConfig card = new CardConfig();
-        card.id = "test_card";
-        card.name = "Test Card";
-        card.description = "desc";
-        card.texturePath = "path.png";
-        card.effects = new EffectConfig[] { new EffectConfig(EffectType.DAMAGE, 5) };
-        card.upgradedEffects = new EffectConfig[0]; // 空数组,应该被拒绝
-
-        List<String> errors = CardValidator.validate(card);
-        assertFalse(errors.isEmpty());
-        assertTrue(errors.stream().anyMatch(e -> e.contains("upgradedEffects")));
-    }
-
-    @Test
-    void shouldValidateUpgradedEffectsContents() {
-        CardConfig card = new CardConfig();
-        card.id = "test_card";
-        card.name = "Test Card";
-        card.description = "desc";
-        card.texturePath = "path.png";
-        card.effects = new EffectConfig[] { new EffectConfig(EffectType.DAMAGE, 5) };
-        card.upgradedEffects = new EffectConfig[] {
-                new EffectConfig(EffectType.DAMAGE, -1) // 非法值,value必须为正
-        };
-
-        List<String> errors = CardValidator.validate(card);
-        assertFalse(errors.isEmpty(), "invalid upgradedEffects entries should be rejected");
-    }
-
-    @Test
-    void shouldAcceptValidUpgradedEffects() {
-        CardConfig card = new CardConfig();
-        card.id = "test_card";
-        card.name = "Test Card";
-        card.description = "desc";
-        card.texturePath = "path.png";
-        card.effects = new EffectConfig[] { new EffectConfig(EffectType.DAMAGE, 4) };
-        card.upgradedEffects = new EffectConfig[] {
-                new EffectConfig(EffectType.DAMAGE, 6) // 合法的升级版数值
-        };
-
-        List<String> errors = CardValidator.validate(card);
-        assertTrue(errors.isEmpty(), "valid upgradedEffects should pass");
-    }
 
   @Test
   void shouldAcceptValidUpgradeWithoutMutatingConfiguration() {
@@ -332,5 +327,46 @@ class CardValidatorTest {
     assertTrue(
         CardValidator.validate(card)
             .contains("upgrade.effects[0].duration must not be negative for HEAL"));
+  }
+
+  @Test
+  void shouldAcceptEnergyGainForSelfTargetedUpgrade() {
+    CardConfig card = validCard();
+    card.target = TargetType.SELF;
+    card.effects = new EffectConfig[] {new EffectConfig(EffectType.ENERGY_GAIN, 1)};
+    card.upgrade = validUpgrade();
+    card.upgrade.effects = new EffectConfig[] {new EffectConfig(EffectType.ENERGY_GAIN, 2)};
+
+    assertTrue(CardValidator.isValid(card));
+  }
+
+  @Test
+  void shouldRejectEnergyGainForEnemyTargetedUpgrade() {
+    CardConfig card = validCard();
+    card.upgrade = validUpgrade();
+    card.upgrade.effects = new EffectConfig[] {new EffectConfig(EffectType.ENERGY_GAIN, 2)};
+
+    assertTrue(
+        CardValidator.validate(card)
+            .contains(
+                "upgrade.effects[0].type ENERGY_GAIN is not compatible with inherited target"
+                    + " SINGLE_ENEMY"));
+  }
+
+  @Test
+  void shouldAcceptPierceForEnemyUpgradeAndRejectSelfUpgrade() {
+    CardConfig card = validCard();
+    card.upgrade = validUpgrade();
+    card.upgrade.effects = new EffectConfig[] {new EffectConfig(EffectType.PIERCE, 10)};
+
+    assertTrue(CardValidator.isValid(card));
+
+    card.target = TargetType.SELF;
+    card.effects = new EffectConfig[] {new EffectConfig(EffectType.BLOCK, 5)};
+
+    assertTrue(
+        CardValidator.validate(card)
+            .contains(
+                "upgrade.effects[0].type PIERCE is not compatible with inherited target SELF"));
   }
 }

@@ -45,11 +45,14 @@ import com.csse3200.game.physics.PhysicsEngine;
 import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
+import com.csse3200.game.rewards.RewardType;
 import com.csse3200.game.services.DragNDropService;
 import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.rewards.RewardOption;
+import com.csse3200.game.rewards.RewardService;
 import com.csse3200.game.ui.PopupDisplay;
 import java.nio.file.Path;
 import java.util.*;
@@ -140,9 +143,36 @@ public class BattleScreen extends ScreenAdapter {
         new BattleGameArea(terrainFactory, mapProgression, game.getRunState(), "dungeon");
     this.gameArea = forestGameArea;
     forestGameArea.create();
+
     RunState runState = game.getRunState();
     playerState = runState.getOrCreatePlayerState();
-    playerState.applyTo(forestGameArea.getPlayer());
+    Entity player = forestGameArea.getPlayer();
+
+    RewardOption pendingReward = runState.getPendingReward();
+
+// If the pending reward is an item, record it so applyTo() below replays
+// its effect now and in every future battle.
+    if (pendingReward != null && pendingReward.type == RewardType.ITEM) {
+      playerState.addOwnedItem(pendingReward.itemId);
+    }
+
+// Applies persisted stats/gold, then replays all owned item effects
+// (including the one just recorded above).
+    playerState.applyTo(player);
+
+// Gold rewards are still claimed one-off here, same as before.
+    if (pendingReward != null && pendingReward.type == RewardType.GOLD) {
+      RewardService rewardService = new RewardService();
+      try {
+        rewardService.claimReward(player, pendingReward);
+      } catch (UnsupportedOperationException e) {
+        logger.warn("Could not apply pending reward: {}", e.getMessage());
+      }
+    }
+
+    if (pendingReward != null) {
+      runState.clearPendingReward();
+    }
 
     // Card + deck state has to exist before the controller so it can be handed the single
     // card-play entry point and the deck it mutates.
@@ -156,7 +186,6 @@ public class BattleScreen extends ScreenAdapter {
     battleDeck.drawCards(AMOUNT_OF_CARDS_IN_DECK);
     handRowOrder = new ArrayList<>(battleDeck.getHandInstances());
 
-    Entity player = forestGameArea.getPlayer();
     EnergyComponent energy = player.getComponent(EnergyComponent.class);
 
     Map<String, Entity> enemyTargets = forestGameArea.getEnemyTargets();

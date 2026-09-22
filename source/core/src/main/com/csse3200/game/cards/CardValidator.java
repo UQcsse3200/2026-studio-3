@@ -27,10 +27,9 @@ public final class CardValidator {
     }
 
     validateBasicFields(card, errors);
-    validateEffects(card.effects, errors);
+    validateEffects(card.effects, card.target, errors);
     validateUpgrade(card.upgrade, card.target, errors);
 
-    validateUpgradedEffects(card.upgradedEffects, errors);
     return List.copyOf(errors);
   }
 
@@ -40,6 +39,23 @@ public final class CardValidator {
    */
   public static boolean isValid(CardConfig card) {
     return validate(card).isEmpty();
+  }
+
+  /** Validates the selected runtime values before gameplay or effect calculation. */
+  public static List<String> validateResolved(com.csse3200.game.cards.runtime.ResolvedCard card) {
+    if (card == null) {
+      return List.of("resolved card must not be null");
+    }
+    List<String> errors = new ArrayList<>();
+    List<EffectConfig> effects = card.effects();
+    for (int i = 0; i < effects.size(); i++) {
+      validateEffect(effects.get(i), i, errors);
+      if (effects.get(i).type != null
+          && !isCompatibleWithTarget(effects.get(i).type, card.target())) {
+        errors.add("effects[" + i + "].type is not compatible with target " + card.target());
+      }
+    }
+    return List.copyOf(errors);
   }
 
   private static void validateEffect(EffectConfig effect, int index, List<String> errors) {
@@ -95,7 +111,8 @@ public final class CardValidator {
     }
   }
 
-  private static void validateEffects(EffectConfig[] effects, List<String> errors) {
+  private static void validateEffects(
+      EffectConfig[] effects, TargetType inheritedTarget, List<String> errors) {
     if (effects == null || effects.length == 0) {
       errors.add("a card must define at least one effect");
       return;
@@ -103,24 +120,19 @@ public final class CardValidator {
 
     for (int i = 0; i < effects.length; i++) {
       validateEffect(effects[i], i, errors);
+      if (effects[i] != null
+          && effects[i].type != null
+          && inheritedTarget != null
+          && !isCompatibleWithTarget(effects[i].type, inheritedTarget)) {
+        errors.add(
+            "effects["
+                + i
+                + "].type "
+                + effects[i].type
+                + " is not compatible with inherited target "
+                + inheritedTarget);
+      }
     }
-  }
-  /**
-   * Validates the optional upgraded-effects array. Null is valid and means the card cannot be
-   * upgraded. If present, it must not be empty, and every entry follows the same rules as a
-   * normal effect.
-   */
-  private static void validateUpgradedEffects(EffectConfig[] upgradedEffects, List<String> errors) {
-      if (upgradedEffects == null) {
-          return;
-      }
-      if (upgradedEffects.length == 0) {
-          errors.add("upgradedEffects must not be an empty array; use null if the card cannot be upgraded");
-          return;
-      }
-      for (int i = 0; i < upgradedEffects.length; i++) {
-          validateEffect(upgradedEffects[i], i, errors);
-      }
   }
 
   private static void validateUpgrade(
@@ -187,12 +199,24 @@ public final class CardValidator {
     }
   }
 
-  private static boolean isCompatibleWithTarget(EffectType effectType, TargetType target) {
+  /**
+   * Target compatibility used for upgrade effects (and documented for future base-effect checks).
+   *
+   * <p>{@code FORTIFY} is SELF-only. Instant non-DAMAGE enemy effects must be listed here or they
+   * are rejected inside upgrade blocks.
+   */
+  static boolean isCompatibleWithTarget(EffectType effectType, TargetType target) {
     if (target == TargetType.SELF) {
       return effectType == EffectType.BLOCK
           || effectType == EffectType.HEAL
-          || effectType == EffectType.STRENGTH;
+          || effectType == EffectType.STRENGTH
+          || effectType == EffectType.ENERGY_GAIN
+          || effectType == EffectType.CLEANSE
+          || effectType == EffectType.FORTIFY;
     }
-    return effectType == EffectType.DAMAGE || effectType.usesDuration();
+    return effectType == EffectType.DAMAGE
+        || effectType == EffectType.PIERCE
+        || effectType == EffectType.SUNDER
+        || effectType.usesDuration();
   }
 }
