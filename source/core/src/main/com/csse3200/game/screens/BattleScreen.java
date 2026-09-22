@@ -85,7 +85,6 @@ public class BattleScreen extends ScreenAdapter {
   private static final float CARD_INVENTORY_MIN_HEIGHT = 600f;
   private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
 
-  private final PhysicsEngine physicsEngine;
   private final BattleController controller;
   private final CardLibrary library;
   private final BattleDeck battleDeck;
@@ -116,7 +115,7 @@ public class BattleScreen extends ScreenAdapter {
 
     PhysicsService physicsService = new PhysicsService();
     ServiceLocator.registerPhysicsService(physicsService);
-    physicsEngine = physicsService.getPhysics();
+    PhysicsEngine physicsEngine = physicsService.getPhysics();
 
     ServiceLocator.registerInputService(new InputService());
     ServiceLocator.registerResourceService(new ResourceService());
@@ -253,7 +252,7 @@ public class BattleScreen extends ScreenAdapter {
     Entity deckEditorEntity = new Entity().addComponent(deckPoolFactory).addComponent(deckEditor);
     ServiceLocator.getEntityService().register(deckEditorEntity);
 
-    battleUi.getEvents().addListener("open-menu", deckEditor::open);
+    battleUi.getEvents().addListener("openMenu", deckEditor::open);
   }
 
   /**

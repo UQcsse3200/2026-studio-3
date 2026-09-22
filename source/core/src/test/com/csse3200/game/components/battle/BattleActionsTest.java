@@ -100,7 +100,7 @@ class BattleActionsTest {
         new Entity().addComponent(new BattleActions(mockController, mock(GdxGame.class)));
     battleUI.create();
 
-    battleUI.getEvents().trigger("endturn");
+    battleUI.getEvents().trigger("endTurn");
 
     verify(mockController).endPlayerTurn();
   }
