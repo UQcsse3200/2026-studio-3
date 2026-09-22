@@ -74,7 +74,7 @@ class PlayerRunStateTest {
     Entity battleOnePlayer = player(65, 100, 42);
     state.applyTo(battleOnePlayer);
     assertEquals(
-        0.05f, battleOnePlayer.getComponent(InventoryComponent.class).getShopDiscount(), 1e-6f);
+        0.10f, battleOnePlayer.getComponent(InventoryComponent.class).getShopDiscount(), 1e-6f);
 
     // Battle 2: a completely new player entity/components, same as after disposing
     // battle 1's screen. The discount must still be there — recomputed fresh from
@@ -82,7 +82,7 @@ class PlayerRunStateTest {
     Entity battleTwoPlayer = player(65, 100, 42);
     state.applyTo(battleTwoPlayer);
     assertEquals(
-        0.05f, battleTwoPlayer.getComponent(InventoryComponent.class).getShopDiscount(), 1e-6f);
+        0.10f, battleTwoPlayer.getComponent(InventoryComponent.class).getShopDiscount(), 1e-6f);
   }
 
   @Test
@@ -95,7 +95,7 @@ class PlayerRunStateTest {
     Entity player = playerWithEnergy(65, 100, 42, 3);
     state.applyTo(player);
 
-    assertEquals(0.10f, player.getComponent(InventoryComponent.class).getShopDiscount(), 1e-6f);
+    assertEquals(0.20f, player.getComponent(InventoryComponent.class).getShopDiscount(), 1e-6f);
     assertEquals(4, player.getComponent(EnergyComponent.class).getMaxEnergy());
   }
 
