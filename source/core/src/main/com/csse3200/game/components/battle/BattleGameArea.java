@@ -18,10 +18,19 @@ import java.util.Map;
 
 /** Adds the battle encounter roster using the shared area's and enemy factory's existing APIs. */
 public class BattleGameArea extends ForestGameArea {
+  /** Grid x of the leftmost enemy; matches where the shared area used to spawn its enemy. */
+  private static final int FIRST_ENEMY_X = 20;
+
+  /** Grid columns between neighbouring enemies. */
+  private static final int ENEMY_SPACING = 7;
+
+  /** Grid y shared by every enemy. */
+  private static final int ENEMY_Y = 20;
+
   private final int progression;
   private final List<String> enemyIds;
   private final Map<String, Entity> enemyTargets = new LinkedHashMap<>();
-  private String[] additionalAtlases = new String[0];
+  private String[] enemyAtlases = new String[0];
 
   /**
    * Creates a battle area with the default line-up.
@@ -69,21 +78,23 @@ public class BattleGameArea extends ForestGameArea {
     EnemyConfigs roster = FileLoader.readClass(EnemyConfigs.class, "configs/enemies.json");
     List<EnemyConfig> configs =
         enemyIds.stream().map(id -> EnemyScaling.scale(roster.get(id), progression)).toList();
+    // Leave config.id as the roster id: the bestiary looks it up in enemies.json. Instances are
+    // already distinct, since each config is a fresh copy and drop targets use the entity's ID.
     for (int index = 0; index < configs.size(); index++) {
       EnemyConfig config = configs.get(index);
       if (config.sprite == null || config.sprite.isBlank()) {
         config.sprite = "images/enemies/" + config.id + ".atlas";
       }
     }
-    additionalAtlases =
-        configs.stream().map(config -> config.sprite).distinct().toArray(String[]::new);
+    enemyAtlases = configs.stream().map(config -> config.sprite).distinct().toArray(String[]::new);
     ResourceService resources = ServiceLocator.getResourceService();
-    resources.loadTextureAtlases(additionalAtlases);
+    resources.loadTextureAtlases(enemyAtlases);
     resources.loadAll();
     for (int index = 0; index < configs.size(); index++) {
       EnemyConfig config = configs.get(index);
       Entity enemy = EnemyFactory.create(config);
-      spawnEntityAt(enemy, new GridPoint2(20 + index * 7, 20), true, true);
+      spawnEntityAt(
+          enemy, new GridPoint2(FIRST_ENEMY_X + index * ENEMY_SPACING, ENEMY_Y), true, true);
       // Keyed by the entity's numeric ID to match the drop-target ID EnemyFactory assigns it.
       enemyTargets.put(Integer.toString(enemy.getId()), enemy);
     }
@@ -102,6 +113,6 @@ public class BattleGameArea extends ForestGameArea {
   @Override
   public void dispose() {
     super.dispose();
-    ServiceLocator.getResourceService().unloadAssets(additionalAtlases);
+    ServiceLocator.getResourceService().unloadAssets(enemyAtlases);
   }
 }
