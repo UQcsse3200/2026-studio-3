@@ -38,7 +38,11 @@ public class ListNodesCommand implements Command {
         .forEach(
             node ->
                 logger.info(
-                    "Node {} ({}) - {}", node.getNodeId(), node.getRoomType(), node.getState()));
+                    "Node {} (height {}, {}) - {}",
+                    node.getNodeId(),
+                    node.getHeight(),
+                    node.getRoomType(),
+                    node.getState()));
     return true;
   }
 }
