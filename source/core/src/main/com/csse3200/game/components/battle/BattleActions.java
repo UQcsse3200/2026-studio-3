@@ -6,7 +6,6 @@ import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
-import com.csse3200.game.components.combat.BattleEvent;
 import com.csse3200.game.components.combat.BattlePhase;
 import java.util.ArrayList;
 import java.util.List;
@@ -165,10 +164,6 @@ public class BattleActions extends Component {
 
   private void triggerEndTurn() {
     controller.endPlayerTurn();
-  }
-
-  private void selectEndTurn() {
-    controller.canHandle(BattleEvent.PLAYER_END_REQUESTED);
   }
 
   private void onStart() {
