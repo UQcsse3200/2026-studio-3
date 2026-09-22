@@ -33,12 +33,15 @@ class ChanceEncounterConfigLoaderTest {
             "flooded-crossing",
             "abandoned-mine",
             "wishing-fountain",
-            "dice-game"),
+            "dice-game",
+            "card-fusion"),
         encounterIds);
     assertFalse(encounterIds.contains("forgotten-cache"));
     assertFalse(encounterIds.contains("roadside-riddle"));
     assertEquals(
-        List.of(3, 2, 3, 2, 2, 2), encounters.stream().map(ChanceEncounter::getWeight).toList());
+        List.of(1, 1, 1, 1, 2, 2, 2),
+        encounters.stream().map(ChanceEncounter::getWeight).toList());
+    assertEquals(10, encounters.stream().mapToInt(ChanceEncounter::getWeight).sum());
   }
 
   @Test
@@ -88,6 +91,12 @@ class ChanceEncounterConfigLoaderTest {
         new ExpectedChoice("double-down", "Double down on another prediction.", 0, 0),
         new ExpectedChoice("cash-out", "Cash out the current Gold stake.", 0, 0),
         new ExpectedChoice("continue", "Risk the current Gold stake in round two.", 0, 0));
+    assertEncounter(
+        encounters.get(6),
+        "card-fusion",
+        "An ancient forge offers to fuse three of your Common cards into one Rare card.",
+        new ExpectedChoice("fuse", "Choose three Common cards to fuse.", 0, 0),
+        new ExpectedChoice("leave", "Leave the forge without fusing cards.", 0, 0));
   }
 
   @Test
@@ -267,10 +276,11 @@ class ChanceEncounterConfigLoaderTest {
   void shouldSelectEveryEncounterFromExpandedConfiguration() {
     List<ChanceEncounter> encounters = ChanceEncounterConfigLoader.loadEncounters();
     ChanceEncounterSelector selector =
-        new ChanceEncounterSelector(encounters, new SequenceRandom(0, 3, 5, 8, 10, 12));
+        new ChanceEncounterSelector(encounters, new SequenceRandom(0, 1, 2, 3, 4, 6, 8));
 
     List<String> selectedIds =
         List.of(
+            selector.select().getId(),
             selector.select().getId(),
             selector.select().getId(),
             selector.select().getId(),

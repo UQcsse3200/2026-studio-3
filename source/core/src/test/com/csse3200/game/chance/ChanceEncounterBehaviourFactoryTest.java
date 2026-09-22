@@ -3,6 +3,7 @@ package com.csse3200.game.chance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.cards.TestCardService;
 import java.util.List;
@@ -44,6 +45,10 @@ class ChanceEncounterBehaviourFactoryTest {
                     new ChanceChoice(
                         CardFusionEncounterBehaviour.FUSE_CHOICE_ID,
                         "Fuse.",
+                        new ChanceOutcome(0, 0)),
+                    new ChanceChoice(
+                        CardFusionEncounterBehaviour.LEAVE_CHOICE_ID,
+                        "Leave.",
                         new ChanceOutcome(0, 0)))),
             new Random(266L),
             TestCardService.withCards());
@@ -52,6 +57,12 @@ class ChanceEncounterBehaviourFactoryTest {
     assertEquals(
         ChanceBehaviourResult.Type.DELEGATED,
         behaviour.resolveChoice(CardFusionEncounterBehaviour.FUSE_CHOICE_ID).getType());
+    ChanceBehaviourResult leave =
+        behaviour.resolveChoice(CardFusionEncounterBehaviour.LEAVE_CHOICE_ID);
+    assertEquals(ChanceBehaviourResult.Type.OUTCOME, leave.getType());
+    assertTrue(leave.getOutcome().isNoEffect());
+    assertEquals(
+        ChanceBehaviourResult.Type.INVALID_CHOICE, behaviour.resolveChoice("other").getType());
   }
 
   @Test

@@ -103,7 +103,8 @@ public class EncounterScreen extends ScreenAdapter {
             roomType,
             this::onEncounterComplete,
             playerState,
-            playerDeck);
+            playerDeck,
+            runState);
     encounterGameArea.create();
   }
 

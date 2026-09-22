@@ -3,7 +3,7 @@
     {
       "id": "mysterious-shrine",
       "description": "An ancient shrine hums with an unsettling energy.",
-      "weight": 3,
+      "weight": 1,
       "choices": [
         {
           "id": "make-offering",
@@ -26,7 +26,7 @@
     {
       "id": "wandering-healer",
       "description": "A wandering healer offers a restorative draught for a modest fee.",
-      "weight": 2,
+      "weight": 1,
       "choices": [
         {
           "id": "purchase-remedy",
@@ -58,7 +58,7 @@
     {
       "id": "flooded-crossing",
       "description": "A flooded crossing blocks the road ahead.",
-      "weight": 3,
+      "weight": 1,
       "choices": [
         {
           "id": "hire-ferryman",
@@ -81,7 +81,7 @@
     {
       "id": "abandoned-mine",
       "description": "The mouth of an abandoned mine promises danger and forgotten riches.",
-      "weight": 2,
+      "weight": 1,
       "choices": [
         {
           "id": "search-tunnels",
@@ -172,6 +172,29 @@
         {
           "id": "continue",
           "description": "Risk the current Gold stake in round two.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "card-fusion",
+      "description": "An ancient forge offers to fuse three of your Common cards into one Rare card.",
+      "weight": 2,
+      "choices": [
+        {
+          "id": "fuse",
+          "description": "Choose three Common cards to fuse.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        },
+        {
+          "id": "leave",
+          "description": "Leave the forge without fusing cards.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0

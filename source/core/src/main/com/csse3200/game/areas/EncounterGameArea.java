@@ -3,6 +3,8 @@ package com.csse3200.game.areas;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.fusion.CardFusionService;
+import com.csse3200.game.chance.CardFusionEncounterBehaviour;
 import com.csse3200.game.chance.ChanceEncounter;
 import com.csse3200.game.chance.ChanceEncounterBehaviour;
 import com.csse3200.game.chance.ChanceEncounterBehaviourFactory;
@@ -14,6 +16,8 @@ import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.components.shop.ShopDisplay;
 import com.csse3200.game.encounters.integration.CardCatalogGateway;
 import com.csse3200.game.encounters.integration.CardServiceCatalogAdapter;
+import com.csse3200.game.encounters.integration.CardFusionEncounterFlow;
+import com.csse3200.game.encounters.integration.ChanceEncounterSession;
 import com.csse3200.game.encounters.integration.ComponentPlayerStateAdapter;
 import com.csse3200.game.encounters.integration.DeckGateway;
 import com.csse3200.game.encounters.integration.EncounterFlowController;
@@ -32,6 +36,7 @@ import com.csse3200.game.shop.ShopEncounter;
 import com.csse3200.game.shop.ShopInventoryGenerator;
 import com.csse3200.game.shop.ShopService;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +68,8 @@ public class EncounterGameArea extends GameArea {
   private Entity player;
   private EncounterFlowController encounterFlow;
   private CardCatalogGateway cardCatalog;
-  private RunState runState;
+  private final RunState runState;
+  private CardFusionEncounterFlow cardFusionEncounterFlow;
 
   /**
    * Creates the standalone Shop preview used by the legacy MainGameScreen shortcut.
@@ -76,7 +82,10 @@ public class EncounterGameArea extends GameArea {
         ShopEncounter.DEFAULT_NODE_ID,
         RoomType.SHOP,
         (nodeId, success) ->
-            logger.debug("Standalone shop completed for node {} with success={}", nodeId, success));
+            logger.debug("Standalone shop completed for node {} with success={}", nodeId, success),
+        null,
+        null,
+        runState);
   }
 
   /**
@@ -102,6 +111,35 @@ public class EncounterGameArea extends GameArea {
       EncounterCallback completionCallback,
       PlayerRunState sharedPlayerState,
       PlayerDeck sharedPlayerDeck) {
+    this(
+        terrainFactory,
+        nodeId,
+        roomType,
+        completionCallback,
+        sharedPlayerState,
+        sharedPlayerDeck,
+        null);
+  }
+
+  /**
+   * Creates a map encounter area using the run that owns the shared deck and Fusion allowance.
+   *
+   * @param terrainFactory terrain factory supplied by the hosting screen
+   * @param nodeId active map node ID
+   * @param roomType active node room type
+   * @param completionCallback reports final encounter completion
+   * @param sharedPlayerState persistent player health and currency state
+   * @param sharedPlayerDeck persistent deck used by ordinary Event rewards and Shop
+   * @param runState active run that owns the same deck and Fusion allowance
+   */
+  public EncounterGameArea(
+      TerrainFactory terrainFactory,
+      Integer nodeId,
+      RoomType roomType,
+      EncounterCallback completionCallback,
+      PlayerRunState sharedPlayerState,
+      PlayerDeck sharedPlayerDeck,
+      RunState runState) {
     super();
 
     Objects.requireNonNull(terrainFactory, "terrainFactory cannot be null");
@@ -111,6 +149,7 @@ public class EncounterGameArea extends GameArea {
         Objects.requireNonNull(completionCallback, "completionCallback cannot be null");
     this.sharedPlayerState = sharedPlayerState;
     this.sharedPlayerDeck = sharedPlayerDeck;
+    this.runState = runState;
   }
 
   /** Creates the logical player state and launches the selected encounter. */
@@ -130,6 +169,17 @@ public class EncounterGameArea extends GameArea {
 
   public Entity getPlayer() {
     return player;
+  }
+
+  /**
+   * Returns the selected Fusion flow for the player-facing UI, if Fusion was selected.
+   *
+   * <p>The UI must resolve the introductory {@code fuse} choice before calling the flow.
+   *
+   * @return the existing delegated flow, or empty for other encounters
+   */
+  public Optional<CardFusionEncounterFlow> getCardFusionEncounterFlow() {
+    return Optional.ofNullable(cardFusionEncounterFlow);
   }
 
   private void displayEncounter() {
@@ -177,11 +227,27 @@ public class EncounterGameArea extends GameArea {
     ChanceEncounter encounter = selector.select();
     ChanceEncounterBehaviour behaviour =
         ChanceEncounterBehaviourFactory.create(encounter, new Random(), cardService);
+    ChanceEncounterSession session = encounterFlow.startChance(nodeId, encounter, behaviour);
+    cardFusionEncounterFlow =
+        createCardFusionEncounterFlow(encounter, session, runState, cardService);
 
     Entity chanceUi = new Entity();
-    chanceUi.addComponent(
-        new ChanceEncounterDisplay(encounterFlow.startChance(nodeId, encounter, behaviour)));
+    chanceUi.addComponent(new ChanceEncounterDisplay(session));
     spawnEntity(chanceUi);
+  }
+
+  static CardFusionEncounterFlow createCardFusionEncounterFlow(
+      ChanceEncounter encounter,
+      ChanceEncounterSession session,
+      RunState runState,
+      CardService cardService) {
+    if (!CardFusionEncounterBehaviour.ENCOUNTER_ID.equals(encounter.getId())) {
+      return null;
+    }
+    if (runState == null) {
+      throw new IllegalStateException("Card Fusion requires the active shared RunState");
+    }
+    return new CardFusionEncounterFlow(session, runState, new CardFusionService(cardService));
   }
 
   private void initialiseEncounterFlow() {

@@ -5,11 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.csse3200.game.extensions.GameExtension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(GameExtension.class)
 class ChanceEncounterSelectorTest {
   @Test
   void shouldSelectUsingConfiguredWeights() {
@@ -26,6 +29,16 @@ class ChanceEncounterSelectorTest {
     assertSame(third, selector.select());
     assertSame(third, selector.select());
     assertSame(third, selector.select());
+  }
+
+  @Test
+  void shouldSelectCardFusionAtItsConfiguredBoundary() {
+    List<ChanceEncounter> encounters = ChanceEncounterFactory.createInitialEncounters();
+    ChanceEncounterSelector selector =
+        new ChanceEncounterSelector(encounters, new SequenceRandom(8, 9));
+
+    assertEquals("card-fusion", selector.select().getId());
+    assertEquals("card-fusion", selector.select().getId());
   }
 
   @Test

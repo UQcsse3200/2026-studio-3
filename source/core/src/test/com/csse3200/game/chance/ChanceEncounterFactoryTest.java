@@ -27,7 +27,8 @@ class ChanceEncounterFactoryTest {
             "flooded-crossing",
             "abandoned-mine",
             "wishing-fountain",
-            "dice-game"),
+            "dice-game",
+            "card-fusion"),
         encounterIds);
     assertFalse(encounterIds.contains("forgotten-cache"));
     assertFalse(encounterIds.contains("roadside-riddle"));
@@ -70,6 +71,16 @@ class ChanceEncounterFactoryTest {
     assertEquals(2, encounter.getChoices().size());
     assertChoice(encounter, 0, "make-wish", "Make a wish at the fountain.", 0, 0);
     assertChoice(encounter, 1, "leave", "Leave the fountain without making a wish.", 0, 0);
+  }
+
+  @Test
+  void shouldCreateCardFusionWithInitialLeave() {
+    ChanceEncounter encounter = ChanceEncounterFactory.createInitialEncounters().get(6);
+
+    assertEquals("card-fusion", encounter.getId());
+    assertEquals(2, encounter.getWeight());
+    assertChoice(encounter, 0, "fuse", "Choose three Common cards to fuse.", 0, 0);
+    assertChoice(encounter, 1, "leave", "Leave the forge without fusing cards.", 0, 0);
   }
 
   @Test
