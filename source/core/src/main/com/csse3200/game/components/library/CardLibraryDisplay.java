@@ -11,19 +11,20 @@ import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLoadingException;
 import com.csse3200.game.cards.configs.CardConfig;
-import com.csse3200.game.cards.configs.EffectConfig;
+import com.csse3200.game.cards.runtime.CardInstance;
+import com.csse3200.game.cards.runtime.CardResolver;
+import com.csse3200.game.cards.runtime.ResolvedCard;
+import com.csse3200.game.components.cards.CardWidget;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
-import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import org.slf4j.Logger;
@@ -43,18 +44,11 @@ public class CardLibraryDisplay extends UIComponent {
   private static final String DEFAULT = "default";
 
   private final GdxGame game;
+  private final CardResolver cardResolver = new CardResolver();
 
   private Stack rootStack;
   private Table cardList;
-  private Image cardImage;
-  private Label nameLabel;
-  private Label descriptionLabel;
-  private Label costLabel;
-  private Label typeLabel;
-  private Label targetLabel;
-  private Label rarityLabel;
-  private Label effectsLabel;
-  private Label artworkLabel;
+  private CardWidget cardWidget;
   private TextButton.TextButtonStyle buttonStyle;
 
   public CardLibraryDisplay(GdxGame game) {
@@ -198,6 +192,12 @@ public class CardLibraryDisplay extends UIComponent {
     listPanel.row();
     listPanel.add(scrollPane).expand().fill().padTop(12f);
 
+    if (!cards.isEmpty()) {
+      CardWidgetAssets widgetAssets =
+          CardWidgetAssets.fromManagedResources(skin, ServiceLocator.getResourceService());
+      cardWidget = new CardWidget(resolveForDisplay(cards.getFirst()), widgetAssets);
+    }
+
     panel.add(listPanel).width(350f).expandY().fillY().padRight(22f);
     panel.add(createDetailPanel()).expand().fill();
   }
@@ -206,49 +206,11 @@ public class CardLibraryDisplay extends UIComponent {
     Table detailPanel = new Table();
     detailPanel.setBackground(skin.newDrawable(WHITE, DETAIL_COLOUR));
     detailPanel.pad(24f);
-    detailPanel.top();
-
-    nameLabel = new Label("", labelStyle(LARGE, MenuTheme.warmParchment()));
-    descriptionLabel = new Label("", bodyLabelStyle());
-    costLabel = new Label("", labelStyle(DEFAULT, MenuTheme.softCoral()));
-    typeLabel = new Label("", bodyLabelStyle());
-    targetLabel = new Label("", bodyLabelStyle());
-    rarityLabel = new Label("", bodyLabelStyle());
-    effectsLabel = new Label("", labelStyle(DEFAULT, MenuTheme.warmParchment()));
-    artworkLabel = new Label("", labelStyle(SMALL, MenuTheme.warmParchment()));
-    cardImage = new Image();
-
-    nameLabel.setFontScale(1.25f);
-    descriptionLabel.setFontScale(1.1f);
-    descriptionLabel.setWrap(true);
-    effectsLabel.setWrap(true);
-    artworkLabel.setWrap(true);
-    cardImage.setScaling(Scaling.fit);
-
-    Table artworkBackground = new Table();
-    artworkBackground.setBackground(skin.newDrawable(WHITE, new Color(0.035f, 0.03f, 0.04f, 1f)));
-    Stack artwork = new Stack();
-    artwork.add(artworkBackground);
-    artwork.add(cardImage);
-
-    Table meta = new Table();
-    meta.defaults().left().padBottom(8f);
-    meta.add(costLabel).row();
-    meta.add(typeLabel).row();
-    meta.add(targetLabel).row();
-    meta.add(rarityLabel).row();
-
-    detailPanel.add(nameLabel).left().expandX();
-    detailPanel.row();
-    detailPanel.add(descriptionLabel).width(650f).left().padTop(8f).padBottom(16f);
-    detailPanel.row();
-    detailPanel.add(artwork).width(650f).height(230f).padBottom(16f);
-    detailPanel.row();
-    detailPanel.add(meta).left().expandX();
-    detailPanel.row();
-    detailPanel.add(effectsLabel).width(650f).left().top().padTop(8f);
-    detailPanel.row();
-    detailPanel.add(artworkLabel).width(650f).left().top().padTop(10f);
+    if (cardWidget == null) {
+      detailPanel.add(new Label("No cards are available.", bodyLabelStyle()));
+    } else {
+      detailPanel.add(cardWidget).size(CardWidget.CARD_WIDTH, CardWidget.CARD_HEIGHT).center();
+    }
     return detailPanel;
   }
 
@@ -257,47 +219,15 @@ public class CardLibraryDisplay extends UIComponent {
   }
 
   private void showCard(CardConfig card) {
-    nameLabel.setText(card.name);
-    descriptionLabel.setText(card.description);
-    costLabel.setText("Cost: " + card.cost);
-    typeLabel.setText("Type: " + card.type);
-    targetLabel.setText("Target: " + card.target);
-    rarityLabel.setText("Rarity: " + card.rarity);
-    effectsLabel.setText("Effects resolve in this order:\n" + formatEffects(card.effects));
-    artworkLabel.setText("Artwork: " + card.texturePath);
-    setCardImage(card.texturePath);
+    if (cardWidget != null) {
+      cardWidget.setCard(resolveForDisplay(card));
+    }
   }
 
-  private void setCardImage(String texturePath) {
-    ResourceService resources = ServiceLocator.getResourceService();
-    if (texturePath == null
-        || texturePath.isBlank()
-        || !resources.containsAsset(texturePath, Texture.class)) {
-      cardImage.setDrawable(null);
-      cardImage.setVisible(false);
-      return;
-    }
-
-    Texture texture = resources.getAsset(texturePath, Texture.class);
-    texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-    cardImage.setDrawable(new TextureRegionDrawable(texture));
-    cardImage.setVisible(true);
-  }
-
-  private String formatEffects(EffectConfig[] effects) {
-    if (effects == null || effects.length == 0) {
-      return "None";
-    }
-
-    return Arrays.stream(effects).map(this::formatEffect).reduce((a, b) -> a + "\n" + b).orElse("");
-  }
-
-  private String formatEffect(EffectConfig effect) {
-    String text = "- " + effect.type + " value " + effect.value;
-    if (effect.duration > 0) {
-      text += " for " + effect.duration + " turns";
-    }
-    return text;
+  private ResolvedCard resolveForDisplay(CardConfig card) {
+    CardInstance instance =
+        new CardInstance("library-preview-" + card.id, card.id, CardInstance.BASE_LEVEL);
+    return cardResolver.resolve(card, instance);
   }
 
   private Label.LabelStyle bodyLabelStyle() {
