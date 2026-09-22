@@ -11,7 +11,7 @@ import java.util.List;
 /** Run-scoped player values that must survive screen disposal. */
 public class PlayerRunState {
   private static final float LUCKY_COIN_BONUS = 0.1f;
-  private static final float MERCHANTS_FAVOR_DISCOUNT = 0.05f;
+  private static final float MERCHANTS_FAVOR_DISCOUNT = 0.10f;
   private static final float MAX_SHOP_DISCOUNT = 0.5f;
 
   private int currentHealth;
