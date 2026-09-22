@@ -58,7 +58,7 @@ class PlayerDeckFactoryTest {
     PlayerDeck first = PlayerDeckFactory.createStarterDeck(CARDS);
     PlayerDeck second = PlayerDeckFactory.createStarterDeck(CARDS);
 
-    first.removeCard(PlayerDeckFactory.STRIKE);
+    first.removeCard(first.getCards().getFirst().instanceId());
 
     assertEquals(10, first.size());
     assertEquals(11, second.size());
