@@ -118,6 +118,24 @@ class CombatStatsComponentTest {
   }
 
   @Test
+  void shouldClearNegativeStatusesAndKeepBuffs() {
+    CombatStatsComponent combat = new CombatStatsComponent(100, 20);
+    combat.applyStatusEffect("POISON", 3, 2);
+    combat.applyStatusEffect("vulnerable", 1, 1);
+    combat.applyStatusEffect("FEEBLE", 1, 2);
+    combat.applyStatusEffect("STRENGTH", 2, 0);
+    combat.applyStatusEffect("HEAL", 4, 3);
+
+    combat.clearNegativeStatusEffects();
+
+    assertFalse(combat.hasStatusEffect("POISON"));
+    assertFalse(combat.hasStatusEffect("vulnerable"));
+    assertFalse(combat.hasStatusEffect("FEEBLE"));
+    assertTrue(combat.hasStatusEffect("STRENGTH"));
+    assertTrue(combat.hasStatusEffect("HEAL"));
+  }
+
+  @Test
   void shouldSetGetBaseAttack() {
     CombatStatsComponent combat = new CombatStatsComponent(100, 20);
     assertEquals(20, combat.getBaseAttack());
@@ -129,93 +147,81 @@ class CombatStatsComponentTest {
     assertEquals(150, combat.getBaseAttack());
   }
 
-    @Test
-    void shouldReduceHealthWithoutArmorOrBlock() {
-        CombatStatsComponent stats = new CombatStatsComponent(20, 0);
-        stats.setArmor(10);
-        stats.setBlock(5);
-        stats.applyDirectHealthChange(-8);
-        assertEquals(12, stats.getHealth());
-        assertEquals(10, stats.getArmor());
-        assertEquals(5, stats.getBlock());
-    }
+  @Test
+  void shouldReduceHealthWithoutArmourOrBlock() {
+    CombatStatsComponent stats = new CombatStatsComponent(20, 0);
+    stats.setArmour(10);
+    stats.setBlock(5);
+    stats.applyDirectHealthChange(-8);
+    assertEquals(12, stats.getHealth());
+    assertEquals(10, stats.getArmour());
+    assertEquals(5, stats.getBlock());
+  }
 
-    @Test
-    void shouldClampHealthAtZeroAndTriggerDeath() {
-        CombatStatsComponent stats = new CombatStatsComponent(5, 0);
-        stats.applyDirectHealthChange(-100);
-        assertEquals(0, stats.getHealth());
-        assertTrue(stats.isDead());
-    }
+  @Test
+  void shouldClampHealthAtZeroAndTriggerDeath() {
+    CombatStatsComponent stats = new CombatStatsComponent(5, 0);
+    stats.applyDirectHealthChange(-100);
+    assertEquals(0, stats.getHealth());
+    assertTrue(stats.isDead());
+  }
 
-    @Test
-    void shouldHealAndClampAtMaxHealth() {
-        CombatStatsComponent stats = new CombatStatsComponent(10, 0, 20);
-        stats.applyDirectHealthChange(50);
-        assertEquals(20, stats.getHealth());
-    }
+  @Test
+  void shouldHealAndClampAtMaxHealth() {
+    CombatStatsComponent stats = new CombatStatsComponent(10, 0, 20);
+    stats.applyDirectHealthChange(50);
+    assertEquals(20, stats.getHealth());
+  }
 
-    @Test
-    void shouldTriggerDeathEventOnDirectHealthChange() {
-        Entity entity = new Entity();
-        CombatStatsComponent combat = new CombatStatsComponent(5, 0);
-        entity.addComponent(combat);
-        EventListener0 listener = mock(EventListener0.class);
-        entity.getEvents().addListener("entityIsDead", listener);
-        combat.applyDirectHealthChange(-100);
-        verify(listener).handle();
-    }
+  @Test
+  void shouldTriggerDeathEventOnDirectHealthChange() {
+    Entity entity = new Entity();
+    CombatStatsComponent combat = new CombatStatsComponent(5, 0);
+    entity.addComponent(combat);
+    EventListener0 listener = mock(EventListener0.class);
+    entity.getEvents().addListener("entityIsDead", listener);
+    combat.applyDirectHealthChange(-100);
+    verify(listener).handle();
+  }
 
+  @Test
+  void shouldNotTriggerDeathEventTwiceWhenAlreadyDead() {
+    Entity entity = new Entity();
+    CombatStatsComponent combat = new CombatStatsComponent(5, 0);
+    entity.addComponent(combat);
+    EventListener0 listener = mock(EventListener0.class);
+    entity.getEvents().addListener("entityIsDead", listener);
 
-    @Test
-    void shouldReduceHealthWithoutArmorOrBlock() {
-        CombatStatsComponent stats = new CombatStatsComponent(20, 0);
-        stats.setArmor(10);
-        stats.setBlock(5);
-        stats.applyDirectHealthChange(-8);
-        assertEquals(12, stats.getHealth());
-        assertEquals(10, stats.getArmor());
-        assertEquals(5, stats.getBlock());
-    }
+    combat.applyDirectHealthChange(-100);
+    combat.applyDirectHealthChange(-5);
 
-    @Test
-    void shouldClampHealthAtZeroAndTriggerDeath() {
-        CombatStatsComponent stats = new CombatStatsComponent(5, 0);
-        stats.applyDirectHealthChange(-100);
-        assertEquals(0, stats.getHealth());
-        assertTrue(stats.isDead());
-    }
+    verify(listener, times(1)).handle();
+  }
 
-    @Test
-    void shouldHealAndClampAtMaxHealth() {
-        CombatStatsComponent stats = new CombatStatsComponent(10, 0, 20);
-        stats.applyDirectHealthChange(50);
-        assertEquals(20, stats.getHealth());
-    }
+  @Test
+  void shouldTakePiercingDamageWithoutConsumingBlockOrArmour() {
+    CombatStatsComponent combat = new CombatStatsComponent(20, 5);
+    combat.addBlock(3);
+    combat.addArmour(4);
 
-    @Test
-    void shouldTriggerDeathEventOnDirectHealthChange() {
-        Entity entity = new Entity();
-        CombatStatsComponent combat = new CombatStatsComponent(5, 0);
-        entity.addComponent(combat);
-        EventListener0 listener = mock(EventListener0.class);
-        entity.getEvents().addListener("entityIsDead", listener);
-        combat.applyDirectHealthChange(-100);
-        verify(listener).handle();
-    }
+    combat.takePiercingDamage(6);
 
-    @Test
-    void shouldNotTriggerDeathEventTwiceWhenAlreadyDead() {
-        Entity entity = new Entity();
-        CombatStatsComponent combat = new CombatStatsComponent(5, 0);
-        entity.addComponent(combat);
-        EventListener0 listener = mock(EventListener0.class);
-        entity.getEvents().addListener("entityIsDead", listener);
+    assertEquals(14, combat.getHealth());
+    assertEquals(3, combat.getBlock());
+    assertEquals(4, combat.getArmour());
+  }
 
-        combat.applyDirectHealthChange(-100);
-        combat.applyDirectHealthChange(-5);
+  @Test
+  void shouldTriggerDeathEventFromPiercingDamage() {
+    Entity entity = new Entity();
+    CombatStatsComponent combat = new CombatStatsComponent(10, 5);
+    entity.addComponent(combat);
+    EventListener0 listener = mock(EventListener0.class);
+    entity.getEvents().addListener("entityIsDead", listener);
 
-        verify(listener, times(1)).handle();
-    }
+    combat.takePiercingDamage(20);
 
+    assertEquals(0, combat.getHealth());
+    verify(listener).handle();
+  }
 }

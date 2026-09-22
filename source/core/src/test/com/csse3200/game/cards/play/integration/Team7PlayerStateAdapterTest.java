@@ -80,7 +80,7 @@ class Team7PlayerStateAdapterTest {
 
     adapter.applyPlayerEffects(List.of(effect(EffectType.FORTIFY, 4, 0, 0)));
 
-    assertEquals(4, stats.getArmor());
+    assertEquals(4, stats.getArmour());
     assertEquals(0, stats.getBlock());
   }
 

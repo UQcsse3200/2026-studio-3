@@ -6,7 +6,6 @@ import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
-import com.csse3200.game.components.combat.BattleEvent;
 import com.csse3200.game.components.combat.BattlePhase;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,11 +63,10 @@ public class BattleActions extends Component {
   @Override
   public void create() {
     entity.getEvents().addListener("battle", this::onStart);
-    entity.getEvents().addListener("exit", this::onExit);
 
     entity.getEvents().addListener(END_TURN_SELECTED_EVENT, controller::endPlayerTurn);
     controller.addPhaseChangeListener(this::onPhaseChange);
-    entity.getEvents().addListener("endturn", this::triggerEndTurn);
+    entity.getEvents().addListener("endTurn", this::triggerEndTurn);
 
     // Re-broadcast the controller's battle-loop signals as plain entity events so the battle-log
     // UI, Team 1 (enemy effects) and Team 7 (player effects) can all subscribe in one place.
@@ -168,15 +166,7 @@ public class BattleActions extends Component {
     controller.endPlayerTurn();
   }
 
-  private void selectEndTurn() {
-    controller.canHandle(BattleEvent.PLAYER_END_REQUESTED);
-  }
-
   private void onStart() {
     game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
-  }
-
-  private void onExit() {
-    game.setScreen(GdxGame.ScreenType.MAIN_MENU);
   }
 }
