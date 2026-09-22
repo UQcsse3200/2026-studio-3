@@ -17,7 +17,6 @@ import com.csse3200.game.entities.factories.RenderFactory;
 import com.csse3200.game.input.InputDecorator;
 import com.csse3200.game.input.InputService;
 import com.csse3200.game.maps.MapNode;
-import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.physics.PhysicsEngine;
@@ -87,7 +86,6 @@ public class EncounterScreen extends ScreenAdapter {
             .toArray(String[]::new);
 
     ServiceLocator.registerCardLibrary(cardLibrary);
-    PlayerRunState playerState = runState.getOrCreatePlayerState();
     PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(cardLibrary);
 
     ResourceService resourceService = ServiceLocator.getResourceService();
@@ -111,7 +109,7 @@ public class EncounterScreen extends ScreenAdapter {
             activeNode.getNodeId(),
             roomType,
             this::onEncounterComplete,
-            playerState,
+            runState,
             playerDeck);
     encounterGameArea.create();
   }
