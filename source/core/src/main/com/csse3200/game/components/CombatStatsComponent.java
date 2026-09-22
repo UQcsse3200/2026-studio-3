@@ -278,7 +278,7 @@ public class CombatStatsComponent extends Component {
     if (amount <= 0) {
       return;
     }
-    setArmor(this.armor + amount);
+    setArmor((int) Math.min(Integer.MAX_VALUE, (long) this.armor + amount));
   }
 
   /**
@@ -386,9 +386,11 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
-   * Applies a status effect to this entity. If an effect with the same id is already active, it is
-   * overwritten by the new one (design choice: overwrite, not stack. To be confirmed with Team 5/6
-   * if card design expects stacking behaviour instead).
+   * Applies a status effect.
+   *
+   * <p>Poison stacks are grouped by remaining duration. Feeble does not stack its damage reduction
+   * and keeps the longer duration on reapplication; permanent duration takes precedence. Other
+   * statuses retain their overwrite behaviour.
    *
    * @param effect status effect to apply
    */
@@ -437,19 +439,21 @@ public class CombatStatsComponent extends Component {
     } else if ("FEEBLE".equals(type)) {
       StatusEffect existing = statusEffects.get(type);
       int duration = effect.getDuration();
+
       if (existing != null) {
         if (existing.getDuration() <= 0 || duration <= 0) {
-          duration = 0; // Permanent effects outlast any finite duration.
+          duration = 0;
         } else {
           duration = Math.max(existing.getDuration(), duration);
         }
       }
-      // Feeble is a fixed reduction, not an accumulating stack count.
+
+      // Feeble does not stack its damage reduction.
       statusEffects.put(type, new StatusEffect(type, 1, duration));
     } else {
+      // Preserve the existing behaviour for other statuses.
       statusEffects.put(type, effect);
     }
-
     if (entity != null) {
       entity.getEvents().trigger("statusEffectApplied", type);
     }
@@ -548,12 +552,38 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
-   * Updates statuses without a dedicated lifecycle hook. Poison is owned by processPoisonTick;
-   * Feeble is owned by the affected actor's end-of-turn hook in BattleController.
+   * Decrements only the named status and removes it when expired. Missing and permanent statuses
+   * are left unchanged.
+   *
+   * <p>Poison must use processPoisonTick instead. Do not also tick the same status through
+   * updateStatusEffects.
+   *
+   * @param type status identifier
+   * @return true if the status expired and was removed
+   * @throws IllegalArgumentException if type identifies poison
    */
+  public boolean tickStatusEffect(String type) {
+    String key = statusKey(type);
+
+    if ("POISON".equals(key)) {
+      throw new IllegalArgumentException(
+          "Use processPoisonTick to process poison damage and expiry");
+    }
+
+    StatusEffect effect = statusEffects.get(key);
+    if (effect == null || !effect.tickAndCheckExpired()) {
+      return false;
+    }
+
+    removeStatusEffect(key);
+    return true;
+  }
+
   /**
-   * Decrements active status durations and removes expired effects. The battle lifecycle owner must
-   * coordinate calls to avoid duplicate ticking.
+   * Decrements every active status and removes expired effects.
+   *
+   * <p>This includes Poison and Feeble. The caller must avoid ticking the same status twice through
+   * this method and processPoisonTick or tickStatusEffect.
    */
   public void updateStatusEffects() {
     statusEffects
