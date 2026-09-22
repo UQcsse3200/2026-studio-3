@@ -12,143 +12,143 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class PlayerRunStateTest {
-    @Test
-    void appliesPersistedValuesToAScreenPlayer() {
-        PlayerRunState state = new PlayerRunState(65, 100, 42);
-        Entity player = player(10, 20, 1);
+  @Test
+  void appliesPersistedValuesToAScreenPlayer() {
+    PlayerRunState state = new PlayerRunState(65, 100, 42);
+    Entity player = player(10, 20, 1);
 
-        state.applyTo(player);
+    state.applyTo(player);
 
-        assertEquals(65, player.getComponent(CombatStatsComponent.class).getHealth());
-        assertEquals(100, player.getComponent(CombatStatsComponent.class).getMaxHealth());
-        assertEquals(42, player.getComponent(InventoryComponent.class).getGold());
+    assertEquals(65, player.getComponent(CombatStatsComponent.class).getHealth());
+    assertEquals(100, player.getComponent(CombatStatsComponent.class).getMaxHealth());
+    assertEquals(42, player.getComponent(InventoryComponent.class).getGold());
+  }
+
+  @Test
+  void capturesValuesBeforeTheScreenPlayerIsDisposed() {
+    PlayerRunState state = new PlayerRunState(65, 100, 42);
+    Entity player = player(30, 120, 77);
+
+    state.captureFrom(player);
+
+    assertEquals(30, state.getCurrentHealth());
+    assertEquals(120, state.getMaxHealth());
+    assertEquals(77, state.getGold());
+  }
+
+  @Test
+  void rejectsInvalidStateWithoutPartiallyChangingExistingValues() {
+    PlayerRunState state = new PlayerRunState(65, 100, 42);
+
+    assertThrows(IllegalArgumentException.class, () -> state.restore(101, 100, 10));
+
+    assertEquals(65, state.getCurrentHealth());
+    assertEquals(100, state.getMaxHealth());
+    assertEquals(42, state.getGold());
+  }
+
+  private Entity player(int health, int maxHealth, int gold) {
+    return new Entity()
+        .addComponent(new CombatStatsComponent(health, 5, maxHealth))
+        .addComponent(new InventoryComponent(gold));
+  }
+
+  private Entity playerWithEnergy(int health, int maxHealth, int gold, int maxEnergy) {
+    return new Entity()
+        .addComponent(new CombatStatsComponent(health, 5, maxHealth))
+        .addComponent(new InventoryComponent(gold))
+        .addComponent(new EnergyComponent(maxEnergy));
+  }
+
+  @Test
+  void ownedItemEffectPersistsAcrossMultipleBattles() {
+    // Regression test: previously RunState.pendingReward only reapplied the single
+    // most-recently-claimed reward, so an item's effect (e.g. shop discount) was lost
+    // as soon as the next battle after that one began. Owned items must now be
+    // replayed on every new player entity, not just the one immediately following
+    // the claim.
+    PlayerRunState state = new PlayerRunState(65, 100, 42);
+    state.addOwnedItem(ItemType.MERCHANTS_FAVOR);
+
+    // Battle 1: new player entity, as BattleScreen creates on each screen transition.
+    Entity battleOnePlayer = player(65, 100, 42);
+    state.applyTo(battleOnePlayer);
+    assertEquals(
+        0.05f, battleOnePlayer.getComponent(InventoryComponent.class).getShopDiscount(), 1e-6f);
+
+    // Battle 2: a completely new player entity/components, same as after disposing
+    // battle 1's screen. The discount must still be there — recomputed fresh from
+    // ownedItems, not carried over as a stale snapshot.
+    Entity battleTwoPlayer = player(65, 100, 42);
+    state.applyTo(battleTwoPlayer);
+    assertEquals(
+        0.05f, battleTwoPlayer.getComponent(InventoryComponent.class).getShopDiscount(), 1e-6f);
+  }
+
+  @Test
+  void multipleOwnedItemsStackOnEachNewPlayer() {
+    PlayerRunState state = new PlayerRunState(65, 100, 42);
+    state.addOwnedItem(ItemType.MERCHANTS_FAVOR);
+    state.addOwnedItem(ItemType.MERCHANTS_FAVOR);
+    state.addOwnedItem(ItemType.ENERGY_CRYSTAL);
+
+    Entity player = playerWithEnergy(65, 100, 42, 3);
+    state.applyTo(player);
+
+    assertEquals(0.10f, player.getComponent(InventoryComponent.class).getShopDiscount(), 1e-6f);
+    assertEquals(4, player.getComponent(EnergyComponent.class).getMaxEnergy());
+  }
+
+  @Test
+  void shopDiscountStillRespectsCapAcrossManyOwnedItems() {
+    PlayerRunState state = new PlayerRunState(65, 100, 42);
+    for (int i = 0; i < 20; i++) {
+      state.addOwnedItem(ItemType.MERCHANTS_FAVOR);
     }
 
-    @Test
-    void capturesValuesBeforeTheScreenPlayerIsDisposed() {
-        PlayerRunState state = new PlayerRunState(65, 100, 42);
-        Entity player = player(30, 120, 77);
+    Entity player = player(65, 100, 42);
+    state.applyTo(player);
 
-        state.captureFrom(player);
+    assertEquals(0.5f, player.getComponent(InventoryComponent.class).getShopDiscount(), 1e-6f);
+  }
 
-        assertEquals(30, state.getCurrentHealth());
-        assertEquals(120, state.getMaxHealth());
-        assertEquals(77, state.getGold());
-    }
+  @Test
+  void getOwnedItemsReturnsImmutableView() {
+    PlayerRunState state = new PlayerRunState(65, 100, 42);
+    state.addOwnedItem(ItemType.LUCKY_COIN);
 
-    @Test
-    void rejectsInvalidStateWithoutPartiallyChangingExistingValues() {
-        PlayerRunState state = new PlayerRunState(65, 100, 42);
+    var ownedItems = state.getOwnedItems();
 
-        assertThrows(IllegalArgumentException.class, () -> state.restore(101, 100, 10));
+    assertThrows(
+        UnsupportedOperationException.class, () -> ownedItems.add(ItemType.ENERGY_CRYSTAL));
+  }
 
-        assertEquals(65, state.getCurrentHealth());
-        assertEquals(100, state.getMaxHealth());
-        assertEquals(42, state.getGold());
-    }
+  @Test
+  void ownedItemsSurviveCaptureAndApply() {
+    // Regression test: captureFrom() must not wipe out ownedItems — it only snapshots
+    // health/gold, so the item list (and therefore derived bonuses like gold multiplier)
+    // must still be intact and correctly reapplied to the next player entity.
+    PlayerRunState state = new PlayerRunState(100, 100, 50);
+    state.addOwnedItem(ItemType.LUCKY_COIN);
 
-    private Entity player(int health, int maxHealth, int gold) {
-        return new Entity()
-                .addComponent(new CombatStatsComponent(health, 5, maxHealth))
-                .addComponent(new InventoryComponent(gold));
-    }
+    Entity firstPlayer = playerWithEnergy(100, 100, 50, 3);
+    state.applyTo(firstPlayer);
+    state.captureFrom(firstPlayer);
 
-    private Entity playerWithEnergy(int health, int maxHealth, int gold, int maxEnergy) {
-        return new Entity()
-                .addComponent(new CombatStatsComponent(health, 5, maxHealth))
-                .addComponent(new InventoryComponent(gold))
-                .addComponent(new EnergyComponent(maxEnergy));
-    }
+    Entity secondPlayer = playerWithEnergy(100, 0, 0, 3);
+    state.applyTo(secondPlayer);
 
-    @Test
-    void ownedItemEffectPersistsAcrossMultipleBattles() {
-        // Regression test: previously RunState.pendingReward only reapplied the single
-        // most-recently-claimed reward, so an item's effect (e.g. shop discount) was lost
-        // as soon as the next battle after that one began. Owned items must now be
-        // replayed on every new player entity, not just the one immediately following
-        // the claim.
-        PlayerRunState state = new PlayerRunState(65, 100, 42);
-        state.addOwnedItem(ItemType.MERCHANTS_FAVOR);
+    assertEquals(List.of(ItemType.LUCKY_COIN), state.getOwnedItems());
+    assertEquals(
+        0.1f, secondPlayer.getComponent(InventoryComponent.class).getGoldBonusMultiplier(), 1e-6f);
+  }
 
-        // Battle 1: new player entity, as BattleScreen creates on each screen transition.
-        Entity battleOnePlayer = player(65, 100, 42);
-        state.applyTo(battleOnePlayer);
-        assertEquals(
-                0.05f, battleOnePlayer.getComponent(InventoryComponent.class).getShopDiscount(), 1e-6f);
+  @Test
+  void multipleLuckyCoinsStack() {
+    PlayerRunState state = new PlayerRunState(100, 100, 50);
+    state.addOwnedItem(ItemType.LUCKY_COIN);
+    state.addOwnedItem(ItemType.LUCKY_COIN);
 
-        // Battle 2: a completely new player entity/components, same as after disposing
-        // battle 1's screen. The discount must still be there — recomputed fresh from
-        // ownedItems, not carried over as a stale snapshot.
-        Entity battleTwoPlayer = player(65, 100, 42);
-        state.applyTo(battleTwoPlayer);
-        assertEquals(
-                0.05f, battleTwoPlayer.getComponent(InventoryComponent.class).getShopDiscount(), 1e-6f);
-    }
-
-    @Test
-    void multipleOwnedItemsStackOnEachNewPlayer() {
-        PlayerRunState state = new PlayerRunState(65, 100, 42);
-        state.addOwnedItem(ItemType.MERCHANTS_FAVOR);
-        state.addOwnedItem(ItemType.MERCHANTS_FAVOR);
-        state.addOwnedItem(ItemType.ENERGY_CRYSTAL);
-
-        Entity player = playerWithEnergy(65, 100, 42, 3);
-        state.applyTo(player);
-
-        assertEquals(0.10f, player.getComponent(InventoryComponent.class).getShopDiscount(), 1e-6f);
-        assertEquals(4, player.getComponent(EnergyComponent.class).getMaxEnergy());
-    }
-
-    @Test
-    void shopDiscountStillRespectsCapAcrossManyOwnedItems() {
-        PlayerRunState state = new PlayerRunState(65, 100, 42);
-        for (int i = 0; i < 20; i++) {
-            state.addOwnedItem(ItemType.MERCHANTS_FAVOR);
-        }
-
-        Entity player = player(65, 100, 42);
-        state.applyTo(player);
-
-        assertEquals(0.5f, player.getComponent(InventoryComponent.class).getShopDiscount(), 1e-6f);
-    }
-
-    @Test
-    void getOwnedItemsReturnsImmutableView() {
-        PlayerRunState state = new PlayerRunState(65, 100, 42);
-        state.addOwnedItem(ItemType.LUCKY_COIN);
-
-        var ownedItems = state.getOwnedItems();
-
-        assertThrows(
-                UnsupportedOperationException.class, () -> ownedItems.add(ItemType.ENERGY_CRYSTAL));
-    }
-
-    @Test
-    void ownedItemsSurviveCaptureAndApply() {
-        // Regression test: captureFrom() must not wipe out ownedItems — it only snapshots
-        // health/gold, so the item list (and therefore derived bonuses like gold multiplier)
-        // must still be intact and correctly reapplied to the next player entity.
-        PlayerRunState state = new PlayerRunState(100, 100, 50);
-        state.addOwnedItem(ItemType.LUCKY_COIN);
-
-        Entity firstPlayer = playerWithEnergy(100, 100, 50, 3);
-        state.applyTo(firstPlayer);
-        state.captureFrom(firstPlayer);
-
-        Entity secondPlayer = playerWithEnergy(100, 0, 0, 3);
-        state.applyTo(secondPlayer);
-
-        assertEquals(List.of(ItemType.LUCKY_COIN), state.getOwnedItems());
-        assertEquals(
-                0.1f, secondPlayer.getComponent(InventoryComponent.class).getGoldBonusMultiplier(), 1e-6f);
-    }
-
-    @Test
-    void multipleLuckyCoinsStack() {
-        PlayerRunState state = new PlayerRunState(100, 100, 50);
-        state.addOwnedItem(ItemType.LUCKY_COIN);
-        state.addOwnedItem(ItemType.LUCKY_COIN);
-
-        assertEquals(0.2f, state.getGoldBonusMultiplier(), 1e-6f);
-    }
+    assertEquals(0.2f, state.getGoldBonusMultiplier(), 1e-6f);
+  }
 }

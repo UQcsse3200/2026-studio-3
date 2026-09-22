@@ -68,325 +68,325 @@ import org.slf4j.LoggerFactory;
  * Entered from a combat/boss map node (or the debug shortcut).
  */
 public class BattleScreen extends ScreenAdapter {
-    private final GdxGame game;
-    private static final Logger logger = LoggerFactory.getLogger(BattleScreen.class);
-    private final Renderer renderer;
-    private final ForestGameArea gameArea;
+  private final GdxGame game;
+  private static final Logger logger = LoggerFactory.getLogger(BattleScreen.class);
+  private final Renderer renderer;
+  private final ForestGameArea gameArea;
 
-    private static final String[] mainGameTextures = {
-            "images/heart.png",
-            "images/energy.png",
-            "images/money.png",
-            "images/piety.png",
-            "images/enemy.png",
-            "images/armour.png"
-    };
-    private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
+  private static final String[] mainGameTextures = {
+    "images/heart.png",
+    "images/energy.png",
+    "images/money.png",
+    "images/piety.png",
+    "images/enemy.png",
+    "images/armour.png"
+  };
+  private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
 
-    private static final float HAND_START_X = 25f;
-    private static final float HAND_Y = 1000f;
-    private static final float HAND_SPACING = 250f;
-    private static final float CARD_WIDTH = 225;
-    private static final float CARD_HEIGHT = 456;
-    private static final float CARD_INVENTORY_MIN_WIDTH = 800f;
-    private static final float CARD_INVENTORY_MIN_HEIGHT = 600f;
-    private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
+  private static final float HAND_START_X = 25f;
+  private static final float HAND_Y = 1000f;
+  private static final float HAND_SPACING = 250f;
+  private static final float CARD_WIDTH = 225;
+  private static final float CARD_HEIGHT = 456;
+  private static final float CARD_INVENTORY_MIN_WIDTH = 800f;
+  private static final float CARD_INVENTORY_MIN_HEIGHT = 600f;
+  private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
 
-    private final BattleController controller;
-    private final CardLibrary library;
-    private final BattleDeck battleDeck;
-    // Shared with the debug dialog so it reflects real, live resolutions instead of a
-    // separate copy.
-    private final CardEffectResolutionService cardEffects;
-    private final CardPlayService cardPlayService;
-    private ClickableFactory uiFactory;
-    private final PlayerRunState playerState;
-    private List<ClickableRecord> staticUiRecords;
+  private final BattleController controller;
+  private final CardLibrary library;
+  private final BattleDeck battleDeck;
+  // Shared with the debug dialog so it reflects real, live resolutions instead of a
+  // separate copy.
+  private final CardEffectResolutionService cardEffects;
+  private final CardPlayService cardPlayService;
+  private ClickableFactory uiFactory;
+  private final PlayerRunState playerState;
+  private List<ClickableRecord> staticUiRecords;
 
-    // Fixed left-to-right slot order for the on-screen row: each entry is the exact physical card
-    // (see CardInstance) occupying that slot. Captured at deal time, and reset wholesale whenever the
-    // player deliberately rearranges their hand via the deck editor — otherwise left untouched, so a
-    // played card's slot just toggles disabled in place (its instance shows up in the discard pile)
-    // instead of the row reflowing and making it look like a new card was drawn.
-    private List<CardInstance> handRowOrder = new ArrayList<>();
+  // Fixed left-to-right slot order for the on-screen row: each entry is the exact physical card
+  // (see CardInstance) occupying that slot. Captured at deal time, and reset wholesale whenever the
+  // player deliberately rearranges their hand via the deck editor — otherwise left untouched, so a
+  // played card's slot just toggles disabled in place (its instance shows up in the discard pile)
+  // instead of the row reflowing and making it look like a new card was drawn.
+  private List<CardInstance> handRowOrder = new ArrayList<>();
 
-    public BattleScreen(GdxGame game) {
-        this.game = game;
+  public BattleScreen(GdxGame game) {
+    this.game = game;
 
-        ServiceLocator.registerDragNDropService(new DragNDropService());
+    ServiceLocator.registerDragNDropService(new DragNDropService());
 
-        logger.debug("Initialising main game screen services");
-        GameTime gameTime = new GameTime();
-        ServiceLocator.registerTimeSource(gameTime);
-        ServiceLocator.registerPauseService(new GamePauseService(gameTime));
+    logger.debug("Initialising main game screen services");
+    GameTime gameTime = new GameTime();
+    ServiceLocator.registerTimeSource(gameTime);
+    ServiceLocator.registerPauseService(new GamePauseService(gameTime));
 
-        PhysicsService physicsService = new PhysicsService();
-        ServiceLocator.registerPhysicsService(physicsService);
-        PhysicsEngine physicsEngine = physicsService.getPhysics();
+    PhysicsService physicsService = new PhysicsService();
+    ServiceLocator.registerPhysicsService(physicsService);
+    PhysicsEngine physicsEngine = physicsService.getPhysics();
 
-        ServiceLocator.registerInputService(new InputService());
-        ServiceLocator.registerResourceService(new ResourceService());
+    ServiceLocator.registerInputService(new InputService());
+    ServiceLocator.registerResourceService(new ResourceService());
 
-        ServiceLocator.registerEntityService(new EntityService());
-        ServiceLocator.registerRenderService(new RenderService());
+    ServiceLocator.registerEntityService(new EntityService());
+    ServiceLocator.registerRenderService(new RenderService());
 
-        loadAssets(); // <-- MOVED UP: load "images/heart.png" before anything uses it
+    loadAssets(); // <-- MOVED UP: load "images/heart.png" before anything uses it
 
-        renderer = RenderFactory.createRenderer();
-        renderer.getCamera().getEntity().setPosition(CAMERA_POSITION);
-        renderer.getDebug().renderPhysicsWorld(physicsEngine.getWorld());
+    renderer = RenderFactory.createRenderer();
+    renderer.getCamera().getEntity().setPosition(CAMERA_POSITION);
+    renderer.getDebug().renderPhysicsWorld(physicsEngine.getWorld());
 
-        ServiceLocator.registerCamera(renderer.getCamera().getCamera());
+    ServiceLocator.registerCamera(renderer.getCamera().getCamera());
 
-        // Integer for scaling difficulty level
-        Integer mapProgression = game.getRunState().getMapProgression();
+    // Integer for scaling difficulty level
+    Integer mapProgression = game.getRunState().getMapProgression();
 
-        logger.debug("Initialising main game screen entities");
-        TerrainFactory terrainFactory = new TerrainFactory(renderer.getCamera());
-        BattleGameArea forestGameArea =
-                new BattleGameArea(terrainFactory, mapProgression, game.getRunState(), "dungeon");
-        this.gameArea = forestGameArea;
-        forestGameArea.create();
+    logger.debug("Initialising main game screen entities");
+    TerrainFactory terrainFactory = new TerrainFactory(renderer.getCamera());
+    BattleGameArea forestGameArea =
+        new BattleGameArea(terrainFactory, mapProgression, game.getRunState(), "dungeon");
+    this.gameArea = forestGameArea;
+    forestGameArea.create();
 
-        RunState runState = game.getRunState();
-        playerState = runState.getOrCreatePlayerState();
-        Entity player = forestGameArea.getPlayer();
+    RunState runState = game.getRunState();
+    playerState = runState.getOrCreatePlayerState();
+    Entity player = forestGameArea.getPlayer();
 
-        // Reward claiming now happens directly in RewardDisplay (addOwnedItem/addGold on
-        // PlayerRunState), so nothing pending needs to be read or replayed here — applyTo() below
-        // already reconstructs everything (stats, gold, and every owned item's effect) from durable
-        // state on its own.
-        playerState.applyTo(player);
+    // Reward claiming now happens directly in RewardDisplay (addOwnedItem/addGold on
+    // PlayerRunState), so nothing pending needs to be read or replayed here — applyTo() below
+    // already reconstructs everything (stats, gold, and every owned item's effect) from durable
+    // state on its own.
+    playerState.applyTo(player);
 
-        // Card + deck state has to exist before the controller so it can be handed the single
-        // card-play entry point and the deck it mutates.
-        List<CardConfig> configs = CardConfigLoader.loadCards(); // reads configs/cards.json
-        library = new CardLibrary(configs);
-        ServiceLocator.registerCardLibrary(library);
+    // Card + deck state has to exist before the controller so it can be handed the single
+    // card-play entry point and the deck it mutates.
+    List<CardConfig> configs = CardConfigLoader.loadCards(); // reads configs/cards.json
+    library = new CardLibrary(configs);
+    ServiceLocator.registerCardLibrary(library);
 
-        PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(library);
-        battleDeck = new BattleDeck(playerDeck);
-        battleDeck.shuffleDrawPile();
-        battleDeck.drawCards(AMOUNT_OF_CARDS_IN_DECK);
-        handRowOrder = new ArrayList<>(battleDeck.getHandInstances());
+    PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(library);
+    battleDeck = new BattleDeck(playerDeck);
+    battleDeck.shuffleDrawPile();
+    battleDeck.drawCards(AMOUNT_OF_CARDS_IN_DECK);
+    handRowOrder = new ArrayList<>(battleDeck.getHandInstances());
 
-        EnergyComponent energy = player.getComponent(EnergyComponent.class);
+    EnergyComponent energy = player.getComponent(EnergyComponent.class);
 
-        Map<String, Entity> enemyTargets = forestGameArea.getEnemyTargets();
-        cardEffects = new CardEffectResolutionService(library);
-        cardPlayService =
-                new CardPlayService(
-                        library,
-                        cardEffects,
-                        battleDeck,
-                        energy,
-                        new Team7PlayerStateAdapter(player),
-                        new Team1EnemyStateAdapter(enemyTargets));
-        CardEffectHandler effectHandler = new CardEffectHandler(enemyTargets);
+    Map<String, Entity> enemyTargets = forestGameArea.getEnemyTargets();
+    cardEffects = new CardEffectResolutionService(library);
+    cardPlayService =
+        new CardPlayService(
+            library,
+            cardEffects,
+            battleDeck,
+            energy,
+            new Team7PlayerStateAdapter(player),
+            new Team1EnemyStateAdapter(enemyTargets));
+    CardEffectHandler effectHandler = new CardEffectHandler(enemyTargets);
 
-        controller =
-                new BattleController(player, forestGameArea.getEnemies(), effectHandler, cardPlayService);
+    controller =
+        new BattleController(player, forestGameArea.getEnemies(), effectHandler, cardPlayService);
 
-        controller.addBattleEndListener(
-                won -> {
-                    if (won) {
-                        int currentHealth =
-                                forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getHealth();
-                        int maxHealth =
-                                forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getMaxHealth();
-                        int maxEnergy =
-                                forestGameArea.getPlayer().getComponent(EnergyComponent.class).getMaxEnergy();
+    controller.addBattleEndListener(
+        won -> {
+          if (won) {
+            int currentHealth =
+                forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getHealth();
+            int maxHealth =
+                forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getMaxHealth();
+            int maxEnergy =
+                forestGameArea.getPlayer().getComponent(EnergyComponent.class).getMaxEnergy();
 
-                        game.getRunState().setPlayerHealth(currentHealth);
-                        game.getRunState().setPlayerMaxHealth(maxHealth);
-                        game.getRunState().setPlayerMaxEnergy(maxEnergy);
-                    }
-                });
-        createUI();
-        controller.start();
+            game.getRunState().setPlayerHealth(currentHealth);
+            game.getRunState().setPlayerMaxHealth(maxHealth);
+            game.getRunState().setPlayerMaxEnergy(maxEnergy);
+          }
+        });
+    createUI();
+    controller.start();
+  }
+
+  public void createUI() {
+    // sprites/BattleUi.json holds both the static "Clickable" UI (exit/up/down/end turn) and the
+    // "Displaying" text overlays (the card-label prompt and the between-turns battle log). The card
+    // hand itself is dealt dynamically from the battle deck, so it is merged in below rather than
+    // living in JSON.
+    Path battleUiJson = Path.of("sprites/BattleUi.json");
+
+    DisplayingFactory displays = new DisplayingFactory(battleUiJson);
+
+    staticUiRecords = ClickableFactory.loadRecordsFromJson(battleUiJson);
+
+    uiFactory = new ClickableFactory(buildAllRecords());
+
+    Team3CardPlayAdapter cardPlayAdapter = new Team3CardPlayAdapter(cardPlayService, controller);
+
+    // PROPOSED: debug terminal for cheats/commands during battle (skip battle, give gold, etc.
+    // — commands added separately). Same Terminal/KeyboardTerminalInputComponent/TerminalDisplay
+    // trio MainGameScreen already wires up; F1 toggles it open/closed.
+    Terminal terminal = new Terminal();
+    terminal.addCommand("skipbattle", new SkipBattleCommand(controller));
+    terminal.addCommand("givegold", new GiveGoldCommand(gameArea.getPlayer()));
+    terminal.addCommand("sethealth", new SetHealthCommand(gameArea.getPlayer()));
+    terminal.addCommand("giveitem", new GiveItemCommand(gameArea.getPlayer()));
+
+    PopupDisplay cardInventory = new PopupDisplay("Card Inventory");
+    cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
+
+    PopupDisplay itemInventory = new PopupDisplay("Item Inventory");
+    itemInventory.setMinSize(400f, 400f);
+    InventoryPopupComponent inventoryPopup =
+        new InventoryPopupComponent(game.getRunState(), itemInventory);
+
+    Stage stage = ServiceLocator.getRenderService().getStage();
+    Entity battleUi =
+        new Entity()
+            .addComponent(new InputDecorator(stage, 10))
+            .addComponent(uiFactory)
+            .addComponent(displays)
+            .addComponent(new BattleActions(controller, game))
+            .addComponent(cardPlayAdapter)
+            .addComponent(cardInventory)
+            .addComponent(itemInventory)
+            .addComponent(inventoryPopup)
+            .addComponent(new PauseMenuDisplay())
+            .addComponent(new PauseMenuInput())
+            .addComponent(new PauseMenuActions(game))
+            .addComponent(
+                new DamageOnCardPlayComponent(
+                    gameArea.getPlayer().getComponent(CombatStatsComponent.class)))
+            .addComponent(new CardEffectDebugComponent(cardEffects))
+            .addComponent(new KeyboardCardEffectDebugInputComponent())
+            .addComponent(new CardEffectDebugDisplay())
+            .addComponent(terminal)
+            .addComponent(new KeyboardTerminalInputComponent())
+            .addComponent(new TerminalDisplay());
+
+    // Keep the on-screen row in sync with the deck: whenever the hand changes (a card played, or
+    // one retrieved from the discard pile after its cooldown elapses) rebuild from the live deck,
+    // so the affected slot's disabled/shaded state updates in place.
+    battleUi
+        .getEvents()
+        .addListener(
+            BattleActions.HAND_CHANGED_EVENT,
+            (List<CardInstance> hand) -> uiFactory.rebuildHand(buildHandRecords()));
+
+    // battleUi must be registered (and so cardInventory.create() must have run, giving it a
+    // content table) before the deck editor's create() tries to add widgets to that table below.
+    gameArea.displayUI(battleUi);
+
+    // The deck editor's own per-card toggle buttons need a ClickableFactory of their own — an
+    // entity can only hold one component of a given class, and battleUi already has uiFactory.
+    ClickableFactory deckPoolFactory = new ClickableFactory(new ArrayList<>());
+    DeckEditorComponent deckEditor =
+        new DeckEditorComponent(
+            cardPlayService, library, cardInventory, deckPoolFactory, this::onDeckRearranged);
+    Entity deckEditorEntity = new Entity().addComponent(deckPoolFactory).addComponent(deckEditor);
+    ServiceLocator.getEntityService().register(deckEditorEntity);
+
+    battleUi.getEvents().addListener("openMenu", deckEditor::open);
+    battleUi.getEvents().addListener("openInventory", inventoryPopup::open);
+  }
+
+  /**
+   * Called after the deck editor commits a hand rearrange, with the full confirmed selection —
+   * including any still-on-cooldown picks {@link CardPlayService#rearrangeHand} left in the discard
+   * pile untouched. Unlike a normal play/cooldown-retrieval hand change, the whole set of slots may
+   * now be different, so — unlike {@link #buildHandRecords()}'s usual in-place toggling — the row's
+   * slots themselves are reset to match. A slot holding a still-discarded pick simply renders
+   * disabled (same as any other discarded card) until its cooldown naturally elapses and it's
+   * retrieved into the real hand, at which point the normal HAND_CHANGED_EVENT listener un-dims it.
+   */
+  private void onDeckRearranged(List<CardInstance> newHandRow) {
+    handRowOrder = new ArrayList<>(newHandRow);
+    uiFactory.rebuildHand(buildHandRecords());
+  }
+
+  @Override
+  public void render(float delta) {
+    ServiceLocator.getEntityService().update();
+    renderer.render();
+  }
+
+  @Override
+  public void resize(int width, int height) {
+    renderer.resize(width, height);
+    logger.trace("Resized renderer: ({} x {})", width, height);
+  }
+
+  @Override
+  public void dispose() {
+    playerState.captureFrom(gameArea.getPlayer());
+    renderer.dispose();
+    ServiceLocator.getRenderService().dispose();
+    ServiceLocator.getEntityService().dispose();
+    ServiceLocator.clear();
+  }
+
+  private void loadAssets() {
+    logger.debug("Loading assets");
+    ResourceService resourceService = ServiceLocator.getResourceService();
+    resourceService.loadTextures(mainGameTextures);
+    ServiceLocator.getResourceService().loadAll();
+  }
+
+  private List<ClickableRecord> buildAllRecords() {
+    List<ClickableRecord> records = new ArrayList<>(buildHandRecords());
+    records.addAll(staticUiRecords);
+    return records;
+  }
+
+  /**
+   * Builds one widget per card slot in {@link #handRowOrder} — a fixed left-to-right layout that
+   * only changes wholesale via {@link #onDeckRearranged}. Each slot renders the exact {@link
+   * CardInstance} dealt to it: still in hand, it's normal and playable; currently sitting in the
+   * discard pile (played, or on cooldown), it renders {@code disabled(true)} (shaded, inert to
+   * clicks/drags — see {@link com.csse3200.game.components.spritedisplay.clickable.Clickable}) in
+   * that SAME slot. Checking discard-pile membership by exact instance — not by card ID — is what
+   * lets duplicate copies of the same card (e.g. two "strike"s) be dimmed independently of each
+   * other. Positions never reflow and the row never grows/shrinks, so playing a card reads as "this
+   * slot went dull", not as a new card being dealt.
+   */
+  private List<ClickableRecord> buildHandRecords() {
+    Set<CardInstance> discardedInstances = new HashSet<>(battleDeck.getDiscardPileInstances());
+
+    List<ClickableRecord> records = new ArrayList<>();
+    float x = HAND_START_X;
+    for (CardInstance instance : handRowOrder) {
+      String cardId = instance.cardId();
+      boolean disabled = discardedInstances.contains(instance);
+
+      Optional<CardConfig> maybeCard = library.getCard(cardId);
+      if (maybeCard.isEmpty()) {
+        logger.warn("Card ID {} not found in library, skipping", cardId);
+        continue;
+      }
+      CardConfig card = maybeCard.get();
+      boolean selfTarget = card.target == TargetType.SELF;
+      String variant = selfTarget ? "inout" : "drag";
+
+      Skin cardSkin = CardImageSkins.forTexturePath(card.texturePath);
+
+      ClickableRecord.Builder builder =
+          ClickableRecord.builder("playCard")
+              .label(card.name)
+              .variant(variant)
+              .position(x, HAND_Y)
+              .size(CARD_WIDTH, CARD_HEIGHT)
+              .skin(cardSkin)
+              .disabled(disabled);
+
+      if (selfTarget) {
+        // No drop target involved — target is fixed at "player".
+        builder.args(instance.instanceId(), "player");
+      } else {
+        // Enemy id isn't known yet; EnemyDropTargetComponent appends it at drop-time.
+        builder.args(instance.instanceId());
+      }
+
+      records.add(builder.build());
+      x += HAND_SPACING;
     }
-
-    public void createUI() {
-        // sprites/BattleUi.json holds both the static "Clickable" UI (exit/up/down/end turn) and the
-        // "Displaying" text overlays (the card-label prompt and the between-turns battle log). The card
-        // hand itself is dealt dynamically from the battle deck, so it is merged in below rather than
-        // living in JSON.
-        Path battleUiJson = Path.of("sprites/BattleUi.json");
-
-        DisplayingFactory displays = new DisplayingFactory(battleUiJson);
-
-        staticUiRecords = ClickableFactory.loadRecordsFromJson(battleUiJson);
-
-        uiFactory = new ClickableFactory(buildAllRecords());
-
-        Team3CardPlayAdapter cardPlayAdapter = new Team3CardPlayAdapter(cardPlayService, controller);
-
-        // PROPOSED: debug terminal for cheats/commands during battle (skip battle, give gold, etc.
-        // — commands added separately). Same Terminal/KeyboardTerminalInputComponent/TerminalDisplay
-        // trio MainGameScreen already wires up; F1 toggles it open/closed.
-        Terminal terminal = new Terminal();
-        terminal.addCommand("skipbattle", new SkipBattleCommand(controller));
-        terminal.addCommand("givegold", new GiveGoldCommand(gameArea.getPlayer()));
-        terminal.addCommand("sethealth", new SetHealthCommand(gameArea.getPlayer()));
-        terminal.addCommand("giveitem", new GiveItemCommand(gameArea.getPlayer()));
-
-        PopupDisplay cardInventory = new PopupDisplay("Card Inventory");
-        cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
-
-        PopupDisplay itemInventory = new PopupDisplay("Item Inventory");
-        itemInventory.setMinSize(400f, 400f);
-        InventoryPopupComponent inventoryPopup =
-                new InventoryPopupComponent(game.getRunState(), itemInventory);
-
-        Stage stage = ServiceLocator.getRenderService().getStage();
-        Entity battleUi =
-                new Entity()
-                        .addComponent(new InputDecorator(stage, 10))
-                        .addComponent(uiFactory)
-                        .addComponent(displays)
-                        .addComponent(new BattleActions(controller, game))
-                        .addComponent(cardPlayAdapter)
-                        .addComponent(cardInventory)
-                        .addComponent(itemInventory)
-                        .addComponent(inventoryPopup)
-                        .addComponent(new PauseMenuDisplay())
-                        .addComponent(new PauseMenuInput())
-                        .addComponent(new PauseMenuActions(game))
-                        .addComponent(
-                                new DamageOnCardPlayComponent(
-                                        gameArea.getPlayer().getComponent(CombatStatsComponent.class)))
-                        .addComponent(new CardEffectDebugComponent(cardEffects))
-                        .addComponent(new KeyboardCardEffectDebugInputComponent())
-                        .addComponent(new CardEffectDebugDisplay())
-                        .addComponent(terminal)
-                        .addComponent(new KeyboardTerminalInputComponent())
-                        .addComponent(new TerminalDisplay());
-
-        // Keep the on-screen row in sync with the deck: whenever the hand changes (a card played, or
-        // one retrieved from the discard pile after its cooldown elapses) rebuild from the live deck,
-        // so the affected slot's disabled/shaded state updates in place.
-        battleUi
-                .getEvents()
-                .addListener(
-                        BattleActions.HAND_CHANGED_EVENT,
-                        (List<CardInstance> hand) -> uiFactory.rebuildHand(buildHandRecords()));
-
-        // battleUi must be registered (and so cardInventory.create() must have run, giving it a
-        // content table) before the deck editor's create() tries to add widgets to that table below.
-        gameArea.displayUI(battleUi);
-
-        // The deck editor's own per-card toggle buttons need a ClickableFactory of their own — an
-        // entity can only hold one component of a given class, and battleUi already has uiFactory.
-        ClickableFactory deckPoolFactory = new ClickableFactory(new ArrayList<>());
-        DeckEditorComponent deckEditor =
-                new DeckEditorComponent(
-                        cardPlayService, library, cardInventory, deckPoolFactory, this::onDeckRearranged);
-        Entity deckEditorEntity = new Entity().addComponent(deckPoolFactory).addComponent(deckEditor);
-        ServiceLocator.getEntityService().register(deckEditorEntity);
-
-        battleUi.getEvents().addListener("openMenu", deckEditor::open);
-        battleUi.getEvents().addListener("openInventory", inventoryPopup::open);
-    }
-
-    /**
-     * Called after the deck editor commits a hand rearrange, with the full confirmed selection —
-     * including any still-on-cooldown picks {@link CardPlayService#rearrangeHand} left in the discard
-     * pile untouched. Unlike a normal play/cooldown-retrieval hand change, the whole set of slots may
-     * now be different, so — unlike {@link #buildHandRecords()}'s usual in-place toggling — the row's
-     * slots themselves are reset to match. A slot holding a still-discarded pick simply renders
-     * disabled (same as any other discarded card) until its cooldown naturally elapses and it's
-     * retrieved into the real hand, at which point the normal HAND_CHANGED_EVENT listener un-dims it.
-     */
-    private void onDeckRearranged(List<CardInstance> newHandRow) {
-        handRowOrder = new ArrayList<>(newHandRow);
-        uiFactory.rebuildHand(buildHandRecords());
-    }
-
-    @Override
-    public void render(float delta) {
-        ServiceLocator.getEntityService().update();
-        renderer.render();
-    }
-
-    @Override
-    public void resize(int width, int height) {
-        renderer.resize(width, height);
-        logger.trace("Resized renderer: ({} x {})", width, height);
-    }
-
-    @Override
-    public void dispose() {
-        playerState.captureFrom(gameArea.getPlayer());
-        renderer.dispose();
-        ServiceLocator.getRenderService().dispose();
-        ServiceLocator.getEntityService().dispose();
-        ServiceLocator.clear();
-    }
-
-    private void loadAssets() {
-        logger.debug("Loading assets");
-        ResourceService resourceService = ServiceLocator.getResourceService();
-        resourceService.loadTextures(mainGameTextures);
-        ServiceLocator.getResourceService().loadAll();
-    }
-
-    private List<ClickableRecord> buildAllRecords() {
-        List<ClickableRecord> records = new ArrayList<>(buildHandRecords());
-        records.addAll(staticUiRecords);
-        return records;
-    }
-
-    /**
-     * Builds one widget per card slot in {@link #handRowOrder} — a fixed left-to-right layout that
-     * only changes wholesale via {@link #onDeckRearranged}. Each slot renders the exact {@link
-     * CardInstance} dealt to it: still in hand, it's normal and playable; currently sitting in the
-     * discard pile (played, or on cooldown), it renders {@code disabled(true)} (shaded, inert to
-     * clicks/drags — see {@link com.csse3200.game.components.spritedisplay.clickable.Clickable}) in
-     * that SAME slot. Checking discard-pile membership by exact instance — not by card ID — is what
-     * lets duplicate copies of the same card (e.g. two "strike"s) be dimmed independently of each
-     * other. Positions never reflow and the row never grows/shrinks, so playing a card reads as "this
-     * slot went dull", not as a new card being dealt.
-     */
-    private List<ClickableRecord> buildHandRecords() {
-        Set<CardInstance> discardedInstances = new HashSet<>(battleDeck.getDiscardPileInstances());
-
-        List<ClickableRecord> records = new ArrayList<>();
-        float x = HAND_START_X;
-        for (CardInstance instance : handRowOrder) {
-            String cardId = instance.cardId();
-            boolean disabled = discardedInstances.contains(instance);
-
-            Optional<CardConfig> maybeCard = library.getCard(cardId);
-            if (maybeCard.isEmpty()) {
-                logger.warn("Card ID {} not found in library, skipping", cardId);
-                continue;
-            }
-            CardConfig card = maybeCard.get();
-            boolean selfTarget = card.target == TargetType.SELF;
-            String variant = selfTarget ? "inout" : "drag";
-
-            Skin cardSkin = CardImageSkins.forTexturePath(card.texturePath);
-
-            ClickableRecord.Builder builder =
-                    ClickableRecord.builder("playCard")
-                            .label(card.name)
-                            .variant(variant)
-                            .position(x, HAND_Y)
-                            .size(CARD_WIDTH, CARD_HEIGHT)
-                            .skin(cardSkin)
-                            .disabled(disabled);
-
-            if (selfTarget) {
-                // No drop target involved — target is fixed at "player".
-                builder.args(instance.instanceId(), "player");
-            } else {
-                // Enemy id isn't known yet; EnemyDropTargetComponent appends it at drop-time.
-                builder.args(instance.instanceId());
-            }
-
-            records.add(builder.build());
-            x += HAND_SPACING;
-        }
-        return records;
-    }
+    return records;
+  }
 }
