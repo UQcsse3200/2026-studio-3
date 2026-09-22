@@ -18,28 +18,54 @@ import java.util.Map;
 
 /** Adds the battle encounter roster using the shared area's and enemy factory's existing APIs. */
 public class BattleGameArea extends ForestGameArea {
-  private static final List<String> ADDITIONAL_ENEMIES = List.of("lesser_shade");
   private final int progression;
+  private final List<String> enemyIds;
   private final Map<String, Entity> enemyTargets = new LinkedHashMap<>();
   private String[] additionalAtlases = new String[0];
-
+  /**
+   * Creates a battle area with the default line-up.
+   *
+   * @param terrainFactory factory used to build the terrain
+   * @param progression map progression of the node, used to scale enemy stats
+   * @param runState state of the current run
+   * @param backgroundId id of the background to show
+   */
   public BattleGameArea(
-      TerrainFactory terrainFactory, int progression, RunState runState, String backgroundId) {
-    super(terrainFactory, progression, runState, backgroundId);
-    this.progression = progression;
+          TerrainFactory terrainFactory, int progression, RunState runState, String backgroundId) {
+    this(terrainFactory, progression, runState, backgroundId, EncounterComposer.DEFAULT_ENEMIES);
   }
 
+  /**
+   * Creates a battle area for the given line-up.
+   *
+   * @param terrainFactory factory used to build the terrain
+   * @param progression map progression of the node, used to scale enemy stats
+   * @param runState state of the current run
+   * @param backgroundId id of the background to show
+   * @param enemyIds enemy ids to spawn, from left to right
+   */
+  public BattleGameArea(
+          TerrainFactory terrainFactory,
+          int progression,
+          RunState runState,
+          String backgroundId,
+          List<String> enemyIds) {
+    super(terrainFactory, progression, runState, backgroundId);
+    this.progression = progression;
+    this.enemyIds = List.copyOf(enemyIds);
+  }
+  /** This area spawns every enemy itself, so the shared area's default enemy is not wanted. */
+  @Override
+  protected boolean spawnsDefaultEnemy() {
+    return false;
+  }
   @Override
   public void create() {
     super.create();
-    // The shared forest area's Bone Crawler gets its drop-target ID from EnemyFactory, which
-    // keys it by the entity's numeric ID rather than its name, so the target map must match.
-    Entity boneCrawler = super.getEnemies().getFirst();
-    enemyTargets.put(Integer.toString(boneCrawler.getId()), boneCrawler);
 
     EnemyConfigs roster = FileLoader.readClass(EnemyConfigs.class, "configs/enemies.json");
     List<EnemyConfig> configs =
-        ADDITIONAL_ENEMIES.stream()
+            enemyIds.stream()
             .map(id -> EnemyScaling.scale(roster.get(id), progression))
             .toList();
     for (int index = 0; index < configs.size(); index++) {
@@ -47,12 +73,6 @@ public class BattleGameArea extends ForestGameArea {
       if (config.sprite == null || config.sprite.isBlank()) {
         config.sprite = "images/enemies/" + config.id + ".atlas";
       }
-      // TODO: remove once Team 3 confirms nothing else relied on the suffix.
-      // The factory accepts an explicit sprite and target ID. Keep instances distinct even when
-      // the encounter contains several copies of the same enemy type, without changing the roster.
-      // config.id = config.id + "_" + (index + 1);
-      // Leave config.id as the roster id: the bestiary looks it up in enemies.json. Instances are
-      // already distinct, since each config is a fresh copy and drop targets use the entity's ID.
     }
     additionalAtlases =
         configs.stream().map(config -> config.sprite).distinct().toArray(String[]::new);
@@ -62,7 +82,7 @@ public class BattleGameArea extends ForestGameArea {
     for (int index = 0; index < configs.size(); index++) {
       EnemyConfig config = configs.get(index);
       Entity enemy = EnemyFactory.create(config);
-      spawnEntityAt(enemy, new GridPoint2(27 + index * 7, 20), true, true);
+      spawnEntityAt(enemy, new GridPoint2(20 + index * 7, 20), true, true);
       // Keyed by the entity's numeric ID to match the drop-target ID EnemyFactory assigns it.
       enemyTargets.put(Integer.toString(enemy.getId()), enemy);
     }
