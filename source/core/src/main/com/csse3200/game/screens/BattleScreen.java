@@ -207,7 +207,7 @@ public class BattleScreen extends ScreenAdapter {
 
     uiFactory = new ClickableFactory(buildAllRecords());
 
-    Team3CardPlayAdapter cardPlayAdapter = new Team3CardPlayAdapter(library, controller);
+    Team3CardPlayAdapter cardPlayAdapter = new Team3CardPlayAdapter(cardPlayService, controller);
 
     PopupDisplay cardInventory = new PopupDisplay("Card Inventory");
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
@@ -238,7 +238,7 @@ public class BattleScreen extends ScreenAdapter {
         .getEvents()
         .addListener(
             BattleActions.HAND_CHANGED_EVENT,
-            (List<String> hand) -> uiFactory.rebuildHand(buildHandRecords()));
+            (List<CardInstance> hand) -> uiFactory.rebuildHand(buildHandRecords()));
 
     // battleUi must be registered (and so cardInventory.create() must have run, giving it a
     // content table) before the deck editor's create() tries to add widgets to that table below.
@@ -346,10 +346,10 @@ public class BattleScreen extends ScreenAdapter {
 
       if (selfTarget) {
         // No drop target involved — target is fixed at "player".
-        builder.args(card.id, "player");
+        builder.args(instance.instanceId(), "player");
       } else {
         // Enemy id isn't known yet; EnemyDropTargetComponent appends it at drop-time.
-        builder.args(card.id);
+        builder.args(instance.instanceId());
       }
 
       records.add(builder.build());
