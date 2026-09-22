@@ -428,6 +428,18 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/IntentIcons.html#ATTACK" class="member-name-link">ATTACK</a> - Static variable in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/IntentIcons.html" title="class in com.csse3200.game.components.enemy">IntentIcons</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/save/AutosaveCoordinator.html#AUTOSAVE_SLOT_ID" class="member-name-link">AUTOSAVE_SLOT_ID</a> - Static variable in class com.csse3200.game.save.<a href="com/csse3200/game/save/AutosaveCoordinator.html" title="class in com.csse3200.game.save">AutosaveCoordinator</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/save/AutosaveCoordinator.html" class="type-name-link" title="class in com.csse3200.game.save">AutosaveCoordinator</a> - Class in <a href="com/csse3200/game/save/package-summary.html">com.csse3200.game.save</a></dt>
+<dd>
+<div class="block">Saves a completed encounter only after its screen has released the live player state.</div>
+</dd>
+<dt><a href="com/csse3200/game/save/AutosaveCoordinator.html#%3Cinit%3E(com.csse3200.game.maps.RunState,java.util.function.Supplier)" class="member-name-link">AutosaveCoordinator(RunState, Supplier&lt;SaveGameService&gt;)</a> - Constructor for class com.csse3200.game.save.<a href="com/csse3200/game/save/AutosaveCoordinator.html" title="class in com.csse3200.game.save">AutosaveCoordinator</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/GdxGame.html#autosaveOnMapReady()" class="member-name-link">autosaveOnMapReady()</a> - Method in class com.csse3200.game.<a href="com/csse3200/game/GdxGame.html" title="class in com.csse3200.game">GdxGame</a></dt>
+<dd>
+<div class="block">Flushes a scheduled autosave once the completed encounter's screen has been disposed.</div>
+</dd>
 <dt><a href="com/csse3200/game/shop/PurchaseResult.html#available(com.csse3200.game.shop.ShopItem)" class="member-name-link">available(ShopItem)</a> - Static method in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/PurchaseResult.html" title="class in com.csse3200.game.shop">PurchaseResult</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/maps/NodeState.html#AVAILABLE" class="member-name-link">AVAILABLE</a> - Enum constant in enum class com.csse3200.game.maps.<a href="com/csse3200/game/maps/NodeState.html" title="enum class in com.csse3200.game.maps">NodeState</a></dt>
@@ -6114,6 +6126,14 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/physics/raycast/SingleHitCallback.html#reportRayFixture(com.badlogic.gdx.physics.box2d.Fixture,com.badlogic.gdx.math.Vector2,com.badlogic.gdx.math.Vector2,float)" class="member-name-link">reportRayFixture(Fixture, Vector2, Vector2, float)</a> - Method in class com.csse3200.game.physics.raycast.<a href="com/csse3200/game/physics/raycast/SingleHitCallback.html" title="class in com.csse3200.game.physics.raycast">SingleHitCallback</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/save/AutosaveCoordinator.html#requestAfterSuccessfulEncounter()" class="member-name-link">requestAfterSuccessfulEncounter()</a> - Method in class com.csse3200.game.save.<a href="com/csse3200/game/save/AutosaveCoordinator.html" title="class in com.csse3200.game.save">AutosaveCoordinator</a></dt>
+<dd>
+<div class="block">Called after a successful encounter has advanced the map.</div>
+</dd>
+<dt><a href="com/csse3200/game/GdxGame.html#requestAutosaveAfterEncounter()" class="member-name-link">requestAutosaveAfterEncounter()</a> - Method in class com.csse3200.game.<a href="com/csse3200/game/GdxGame.html" title="class in com.csse3200.game">GdxGame</a></dt>
+<dd>
+<div class="block">Schedules one autosave for the current run after a completed encounter.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/cards/CardUpgradeSelection.html#reset()" class="member-name-link">reset()</a> - Method in class com.csse3200.game.components.cards.<a href="com/csse3200/game/components/cards/CardUpgradeSelection.html" title="class in com.csse3200.game.components.cards">CardUpgradeSelection</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/combat/BattleController.html#resetBattle()" class="member-name-link">resetBattle()</a> - Method in class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a></dt>
@@ -6477,6 +6497,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/save/SaveGameSnapshotProvider.html" class="type-name-link" title="interface in com.csse3200.game.save">SaveGameSnapshotProvider</a> - Interface in <a href="com/csse3200/game/save/package-summary.html">com.csse3200.game.save</a></dt>
 <dd>
 <div class="block">Captures the live run as serializable save data.</div>
+</dd>
+<dt><a href="com/csse3200/game/save/AutosaveCoordinator.html#saveIfPending()" class="member-name-link">saveIfPending()</a> - Method in class com.csse3200.game.save.<a href="com/csse3200/game/save/AutosaveCoordinator.html" title="class in com.csse3200.game.save">AutosaveCoordinator</a></dt>
+<dd>
+<div class="block">Called when the map is shown, after the outgoing encounter screen has been disposed.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/save/SaveLoadPanel.html" class="type-name-link" title="class in com.csse3200.game.components.save">SaveLoadPanel</a> - Class in <a href="com/csse3200/game/components/save/package-summary.html">com.csse3200.game.components.save</a></dt>
 <dd>
@@ -6971,6 +6995,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Result of validating or executing a cross-system shop transaction.</div>
 </dd>
+<dt><a href="com/csse3200/game/screens/MapScreen.html#show()" class="member-name-link">show()</a> - Method in class com.csse3200.game.screens.<a href="com/csse3200/game/screens/MapScreen.html" title="class in com.csse3200.game.screens">MapScreen</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ui/PopupDisplay.html#show()" class="member-name-link">show()</a> - Method in class com.csse3200.game.ui.<a href="com/csse3200/game/ui/PopupDisplay.html" title="class in com.csse3200.game.ui">PopupDisplay</a></dt>
 <dd>
 <div class="block">Shows the popup, centred on the stage and in front of everything else.</div>
