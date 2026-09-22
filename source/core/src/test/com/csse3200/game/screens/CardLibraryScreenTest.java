@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.components.library.CardLibraryDisplay;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.extensions.GameExtension;
 import java.util.Arrays;
@@ -21,7 +22,7 @@ class CardLibraryScreenTest {
     List<String> texturePaths = Arrays.asList(CardLibraryScreen.collectTexturePaths());
 
     assertTrue(texturePaths.contains(MainMenuDisplay.BACKGROUND_TEXTURE));
-    assertTrue(texturePaths.contains(MainMenuDisplay.BUTTON_FRAME_TEXTURE));
+    assertTrue(texturePaths.contains(CardLibraryDisplay.BUTTON_TEXTURE));
     for (CardConfig card : CardConfigLoader.loadCards()) {
       assertTrue(texturePaths.contains(card.texturePath));
     }

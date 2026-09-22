@@ -85,7 +85,7 @@ public class CardLibraryScreen extends ScreenAdapter {
   static String[] collectTexturePaths() {
     Set<String> paths = new LinkedHashSet<>();
     paths.add(MainMenuDisplay.BACKGROUND_TEXTURE);
-    paths.add(MainMenuDisplay.BUTTON_FRAME_TEXTURE);
+    paths.add(CardLibraryDisplay.BUTTON_TEXTURE);
     try {
       for (CardConfig card : CardConfigLoader.loadCards()) {
         if (card.texturePath != null && !card.texturePath.isBlank()) {
