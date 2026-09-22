@@ -3,34 +3,24 @@ package com.csse3200.game.maps;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.entities.Entity;
+import com.csse3200.game.rewards.ItemEffectApplier;
+import com.csse3200.game.rewards.ItemType;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Run-scoped player values that must survive screen disposal.
- *
- * <p>Gameplay screens create and dispose their own player entities. Keeping the durable values in
- * this small model prevents health and gold from silently resetting whenever the player leaves a
- * battle, and gives Save/Load a real source and destination that is independent of a rendered
- * entity.
- *
- * <p>Note: goldBonusMultiplier and shopDiscount are persisted across screen transitions within a
- * run, but are NOT currently included in {@link com.csse3200.game.save.PlayerSaveData} — loading a
- * save resets them to 0. Extending save/load to cover these is tracked separately with the
- * save/load team.
- */
+/** Run-scoped player values that must survive screen disposal. */
 public class PlayerRunState {
+  private static final float LUCKY_COIN_BONUS = 0.1f;
+  private static final float MERCHANTS_FAVOR_DISCOUNT = 0.05f;
+  private static final float MAX_SHOP_DISCOUNT = 0.5f;
+
   private int currentHealth;
   private int maxHealth;
   private int gold;
-  private float goldBonusMultiplier;
-  private float shopDiscount;
+  private final List<ItemType> ownedItems = new ArrayList<>();
 
   public PlayerRunState(int currentHealth, int maxHealth, int gold) {
-    this(currentHealth, maxHealth, gold, 0f, 0f);
-  }
-
-  public PlayerRunState(
-      int currentHealth, int maxHealth, int gold, float goldBonusMultiplier, float shopDiscount) {
-    restore(currentHealth, maxHealth, gold, goldBonusMultiplier, shopDiscount);
+    restore(currentHealth, maxHealth, gold);
   }
 
   public int getCurrentHealth() {
@@ -45,15 +35,49 @@ public class PlayerRunState {
     return gold;
   }
 
+  /**
+   * Calculates the bonus from the durable owned-item list.
+   *
+   * @return accumulated Lucky Coin multiplier
+   */
   public float getGoldBonusMultiplier() {
-    return goldBonusMultiplier;
+    long luckyCoinCount = ownedItems.stream().filter(item -> item == ItemType.LUCKY_COIN).count();
+    return luckyCoinCount * LUCKY_COIN_BONUS;
   }
 
+  /**
+   * Calculates the discount from the durable owned-item list.
+   *
+   * @return accumulated shop discount, capped at 50%
+   */
   public float getShopDiscount() {
-    return shopDiscount;
+    long favourCount = ownedItems.stream().filter(item -> item == ItemType.MERCHANTS_FAVOR).count();
+    return Math.min(favourCount * MERCHANTS_FAVOR_DISCOUNT, MAX_SHOP_DISCOUNT);
   }
 
-  /** Applies the durable values to the player entity created for a gameplay screen. */
+  public void addGold(int amount) {
+    if (amount < 0) {
+      throw new IllegalArgumentException("amount must not be negative");
+    }
+    gold += amount;
+  }
+
+  public void addOwnedItem(ItemType itemId) {
+    if (itemId == null) {
+      throw new IllegalArgumentException("itemId must not be null");
+    }
+    ownedItems.add(itemId);
+  }
+
+  public List<ItemType> getOwnedItems() {
+    return List.copyOf(ownedItems);
+  }
+
+  /**
+   * Applies durable state to a newly-created player entity.
+   *
+   * <p>This method must be called exactly once for each newly-created player entity.
+   */
   public void applyTo(Entity player) {
     CombatStatsComponent stats = requireStats(player);
     InventoryComponent inventory = requireInventory(player);
@@ -61,33 +85,40 @@ public class PlayerRunState {
     stats.setMaxHealth(maxHealth);
     stats.setHealth(currentHealth);
     inventory.setGold(gold);
-    inventory.setGoldBonusMultiplier(goldBonusMultiplier);
-    inventory.setShopDiscount(shopDiscount);
+
+    // Reconstruct derived values from the durable item list.
+    inventory.setGoldBonusMultiplier(0f);
+    inventory.setShopDiscount(0f);
+
+    for (ItemType itemId : ownedItems) {
+      ItemEffectApplier.applyItemEffect(itemId, player);
+    }
   }
 
-  /** Captures the latest values before a gameplay screen disposes its player entity. */
+  /** Captures mutable base values before a gameplay entity is disposed. */
   public void captureFrom(Entity player) {
     CombatStatsComponent stats = requireStats(player);
     InventoryComponent inventory = requireInventory(player);
-    restore(
-        stats.getHealth(),
-        stats.getMaxHealth(),
-        inventory.getGold(),
-        inventory.getGoldBonusMultiplier(),
-        inventory.getShopDiscount());
+
+    restore(stats.getHealth(), stats.getMaxHealth(), inventory.getGold());
   }
 
   /**
-   * Replaces health and gold, resetting goldBonusMultiplier and shopDiscount to 0. Used by
-   * Save/Load, which does not currently persist item bonuses — see class Javadoc.
+   * Replaces health and gold while retaining the current owned-item list.
+   *
+   * @param currentHealth current player health
+   * @param maxHealth maximum player health
+   * @param gold current player gold
    */
   public void restore(int currentHealth, int maxHealth, int gold) {
-    restore(currentHealth, maxHealth, gold, 0f, 0f);
+    validateState(currentHealth, maxHealth, gold);
+
+    this.currentHealth = currentHealth;
+    this.maxHealth = maxHealth;
+    this.gold = gold;
   }
 
-  /** Replaces all persisted player values after validating them as one atomic state. */
-  public void restore(
-      int currentHealth, int maxHealth, int gold, float goldBonusMultiplier, float shopDiscount) {
+  private void validateState(int currentHealth, int maxHealth, int gold) {
     if (maxHealth <= 0) {
       throw new IllegalArgumentException("maxHealth must be positive");
     }
@@ -97,19 +128,15 @@ public class PlayerRunState {
     if (gold < 0) {
       throw new IllegalArgumentException("gold must not be negative");
     }
-
-    this.currentHealth = currentHealth;
-    this.maxHealth = maxHealth;
-    this.gold = gold;
-    this.goldBonusMultiplier = goldBonusMultiplier;
-    this.shopDiscount = shopDiscount;
   }
 
   private CombatStatsComponent requireStats(Entity player) {
     if (player == null) {
       throw new IllegalArgumentException("player must not be null");
     }
+
     CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+
     if (stats == null) {
       throw new IllegalArgumentException("player must have CombatStatsComponent");
     }
@@ -117,7 +144,12 @@ public class PlayerRunState {
   }
 
   private InventoryComponent requireInventory(Entity player) {
+    if (player == null) {
+      throw new IllegalArgumentException("player must not be null");
+    }
+
     InventoryComponent inventory = player.getComponent(InventoryComponent.class);
+
     if (inventory == null) {
       throw new IllegalArgumentException("player must have InventoryComponent");
     }
