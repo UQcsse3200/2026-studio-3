@@ -25,8 +25,7 @@ public record CardFusionResult(
     if (rewardedCardId == null || rewardedCardId.isBlank()) {
       throw new IllegalArgumentException("rewardedCardId must not be null or blank");
     }
-    return new CardFusionResult(
-        true, Optional.of(rewardedCardId), CardFusionFailureReason.NONE);
+    return new CardFusionResult(true, Optional.of(rewardedCardId), CardFusionFailureReason.NONE);
   }
 
   /** Creates an unsuccessful fusion result without changing the player's deck. */

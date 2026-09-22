@@ -135,7 +135,9 @@ class PlayerDeckTest {
 
     assertEquals(2, deck.size());
     assertEquals(1, deck.countByCardId("strike"));
-    assertFalse(deck.getCards().stream().anyMatch(card -> card.instanceId().equals(secondStrikeInstanceId)));
+    assertFalse(
+        deck.getCards().stream()
+            .anyMatch(card -> card.instanceId().equals(secondStrikeInstanceId)));
   }
 
   @Test
