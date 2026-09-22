@@ -44,14 +44,17 @@ public final class BattleEncounterSelector {
   /**
    * Gets the seed that fixes which encounter the active node gets.
    *
+   * <p>Combines the run's seed with the node id, so a node keeps its encounter for the whole run,
+   * including after a reload, while a new run places different encounters on the same node.
+   *
    * @param runState state of the current run
    * @return a seed for the active node
    */
   static long seedFor(RunState runState) {
     Integer nodeId = runState.getActiveNodeId();
-    // Temporary: the node id alone keeps each node stable, but repeats across runs. A run-level
-    // seed saved with the run will be mixed in here.
-    return nodeId == null ? 0L : nodeId;
+    Long runSeed = runState.getEncounterSeed();
+    long node = nodeId == null ? 0L : nodeId;
+    return runSeed == null ? node : runSeed * 31 + node;
   }
 
   private static MapNode activeNode(RunState runState) {
