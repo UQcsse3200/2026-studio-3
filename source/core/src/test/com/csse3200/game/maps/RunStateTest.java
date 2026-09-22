@@ -223,6 +223,16 @@ public class RunStateTest {
   }
 
   @Test
+  void endRunRestoresTheCardFusionAllowanceForTheNextRun() {
+    RunState runState = new RunState();
+    runState.markCardFusionUsed();
+
+    runState.endRun();
+
+    assertFalse(runState.hasUsedCardFusion());
+  }
+
+  @Test
   void initialisePlayerStatsPreservesPreconfiguredMaxEnergy() {
     RunState runState = new RunState();
 

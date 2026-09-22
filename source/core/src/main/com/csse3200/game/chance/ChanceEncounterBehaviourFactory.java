@@ -26,6 +26,9 @@ public final class ChanceEncounterBehaviourFactory {
     if (DiceEncounterBehaviour.ENCOUNTER_ID.equals(encounter.getId())) {
       return new DiceEncounterBehaviour(random, cardService);
     }
+    if (CardFusionEncounterBehaviour.ENCOUNTER_ID.equals(encounter.getId())) {
+      return new CardFusionEncounterBehaviour();
+    }
     return new FixedChanceEncounterBehaviour(encounter);
   }
 

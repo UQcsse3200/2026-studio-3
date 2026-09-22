@@ -26,6 +26,7 @@ public class RunState {
   private int playerMaxHealth;
   private int playerMaxEnergy;
   private boolean playerStatsInitialised;
+  private boolean cardFusionUsed;
   private PlayerRunState playerState;
   private boolean pendingEliteTempleReward;
 
@@ -263,6 +264,7 @@ public class RunState {
     playerMaxHealth = 0;
     playerMaxEnergy = 0;
     playerStatsInitialised = false;
+    cardFusionUsed = false;
     playerState = null;
     pendingEliteTempleReward = false;
   }
@@ -289,6 +291,18 @@ public class RunState {
   /** Clears the pending hidden Elite reward. */
   public void clearPendingEliteTempleReward() {
     pendingEliteTempleReward = false;
+  }
+
+  /**
+   * @return true once this run has completed its one permitted card fusion
+   */
+  public boolean hasUsedCardFusion() {
+    return cardFusionUsed;
+  }
+
+  /** Records that the run's one permitted card fusion completed successfully. */
+  public void markCardFusionUsed() {
+    cardFusionUsed = true;
   }
 
   private RewardOption pendingReward;

@@ -166,6 +166,33 @@ class ChanceEncounterSessionTest {
   }
 
   @Test
+  void shouldCompleteDelegatedFlowAsASuccessfulMapEncounter() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 50);
+    RecordingCallback callback = new RecordingCallback();
+    ChanceEncounter encounter =
+        new ChanceEncounter(
+            "delegated-event",
+            "Delegated event",
+            List.of(new ChanceChoice("continue", "Continue", new ChanceOutcome(0, 0))));
+    ChanceEncounterSession session =
+        new ChanceEncounterSession(
+            1,
+            encounter,
+            choiceId -> ChanceBehaviourResult.delegated(),
+            new ChanceOutcomeApplier(player),
+            callback);
+
+    session.resolveChoice("continue");
+
+    assertTrue(session.completeDelegated());
+    assertFalse(session.completeDelegated());
+    assertTrue(session.isCompleted());
+    assertEquals(1, callback.count);
+    assertEquals(1, callback.nodeId);
+    assertTrue(callback.success);
+  }
+
+  @Test
   void shouldKeepSessionOpenWithoutApplyingStateWhileStagedChoiceIsPending() {
     MockPlayerStateGateway player = new MockPlayerStateGateway(100, 50);
     AtomicInteger resolutionCount = new AtomicInteger();
