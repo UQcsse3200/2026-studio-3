@@ -59,12 +59,32 @@ class ShopDisplayTest {
   void shouldResolveArtworkFromTheSharedCardService() {
     CardService cardService = mock(CardService.class);
     CardConfig card = new CardConfig();
+    card.name = "Battle Card";
+    card.description = "Deal 8 damage.";
+    card.cost = 2;
     card.texturePath = "images/cards/card.png";
     when(cardService.getCard("card")).thenReturn(Optional.of(card));
 
     ShopDisplay display = new ShopDisplay(null, cardService);
 
-    assertEquals("images/shop/cards/card.png", display.resolveArtworkPath(item));
+    assertEquals("images/cards/card.png", display.resolveArtworkPath(item));
+    assertEquals("Battle Card", display.resolveCardName(item));
+    assertEquals("Deal 8 damage.", display.resolveCardDescription(item));
+    assertEquals("2 ENERGY", display.resolveEnergyText(item));
     assertNull(display.resolveArtworkPath(null));
+  }
+
+  @Test
+  void shouldFallBackToShopTextWhenCardDefinitionIsMissing() {
+    CardService cardService = mock(CardService.class);
+    when(cardService.getCard("card")).thenReturn(Optional.empty());
+    ShopItem describedItem =
+        new ShopItem("offer", "card", "Fallback Card", "Fallback description.", 20, 1);
+
+    ShopDisplay display = new ShopDisplay(null, cardService);
+
+    assertEquals("Fallback Card", display.resolveCardName(describedItem));
+    assertEquals("Fallback description.", display.resolveCardDescription(describedItem));
+    assertEquals("-- ENERGY", display.resolveEnergyText(describedItem));
   }
 }

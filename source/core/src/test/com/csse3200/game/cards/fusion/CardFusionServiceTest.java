@@ -46,8 +46,8 @@ class CardFusionServiceTest {
     String rewardId = result.rewardedCardId().orElseThrow();
     assertEquals(CardFusionFailureReason.NONE, result.failureReason());
     assertEquals(2, deck.size());
-    assertTrue(deck.contains("poison_dagger"));
-    assertTrue(deck.contains(rewardId));
+    assertEquals(1, deck.countByCardId("poison_dagger"));
+    assertEquals(1, deck.countByCardId(rewardId));
     assertEquals(Rarity.RARE, cardService.getCard(rewardId).orElseThrow().rarity);
     assertTrue(runState.hasUsedCardFusion());
   }

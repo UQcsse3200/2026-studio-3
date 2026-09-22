@@ -22,11 +22,13 @@ public class EnemyStatsDisplay extends UIComponent {
   private static final float FONT_SCALE = 0.75f;
   private static final String STYLE_NAME_LARGE = "large";
 
+  @Override
   public void create() {
     super.create();
     addActors();
 
     entity.getEvents().addListener("updateHealth", this::updateEnemyHealthUI);
+    entity.getEvents().addListener("updateArmour", this::updateEnemyArmourUI);
   }
 
   /**
@@ -36,9 +38,6 @@ public class EnemyStatsDisplay extends UIComponent {
    */
   private void addActors() {
     table = new Table(skin);
-    // table.setPosition(ENEMY_SPAWN.x, ENEMY_SPAWN.y);
-    // table.setFillParent(true);
-    // table.padTop(45f).padLeft(5f);
 
     // Image size
     float imageSideLength = 20f;
@@ -59,7 +58,7 @@ public class EnemyStatsDisplay extends UIComponent {
         new Image(ServiceLocator.getResourceService().getAsset("images/armour.png", Texture.class));
 
     // Armour text
-    int armour = entity.getComponent(CombatStatsComponent.class).getArmor();
+    int armour = entity.getComponent(CombatStatsComponent.class).getArmour();
     CharSequence armourText = String.format("Armour: %d", armour);
     armourLabel = new Label(armourText, skin, STYLE_NAME_LARGE);
     armourLabel.setFontScale(FONT_SCALE);

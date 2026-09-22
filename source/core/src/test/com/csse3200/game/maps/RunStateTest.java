@@ -231,4 +231,23 @@ public class RunStateTest {
 
     assertFalse(runState.hasUsedCardFusion());
   }
+
+  @Test
+  void initialisePlayerStatsPreservesPreconfiguredMaxEnergy() {
+    RunState runState = new RunState();
+
+    runState.setPlayerMaxEnergy(4);
+    runState.initialisePlayerStats(100, 100, 3);
+
+    assertEquals(4, runState.getPlayerMaxEnergy());
+  }
+
+  @Test
+  void initialisePlayerStatsUsesDefaultMaxEnergyWhenUnset() {
+    RunState runState = new RunState();
+
+    runState.initialisePlayerStats(100, 100, 3);
+
+    assertEquals(3, runState.getPlayerMaxEnergy());
+  }
 }

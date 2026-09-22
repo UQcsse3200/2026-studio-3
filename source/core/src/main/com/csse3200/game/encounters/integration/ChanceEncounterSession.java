@@ -1,12 +1,16 @@
 package com.csse3200.game.encounters.integration;
 
 import com.csse3200.game.chance.ChanceBehaviourResult;
+import com.csse3200.game.chance.ChanceChoice;
 import com.csse3200.game.chance.ChanceEncounter;
 import com.csse3200.game.chance.ChanceEncounterBehaviour;
 import com.csse3200.game.chance.ChanceOutcome;
+import com.csse3200.game.chance.DiceRoll;
 import com.csse3200.game.chance.FixedChanceEncounterBehaviour;
 import com.csse3200.game.maps.EncounterCallback;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /** Coordinates choice resolution, player updates, and map completion for one Chance Encounter. */
 public final class ChanceEncounterSession {
@@ -196,6 +200,32 @@ public final class ChanceEncounterSession {
    */
   public ChanceEncounter getEncounter() {
     return encounter;
+  }
+
+  /** Returns the catalogue choices valid at the current stage, in catalogue order. */
+  public List<ChanceChoice> getAvailableChoices() {
+    if (completed || isResolved()) {
+      return List.of();
+    }
+    List<String> availableIds = behaviour.getAvailableChoiceIds(encounter);
+    return encounter.getChoices().stream()
+        .filter(choice -> availableIds.contains(choice.getId()))
+        .toList();
+  }
+
+  /** Returns the current stage's player-facing choice instruction. */
+  public String getChoicePrompt() {
+    return behaviour.getChoicePrompt();
+  }
+
+  /** Returns feedback for an accepted choice that advanced to another stage. */
+  public String getStageResultText() {
+    return behaviour.getStageResultText();
+  }
+
+  /** Returns the latest two dice faces without changing the encounter result. */
+  public Optional<DiceRoll> getLastDiceRoll() {
+    return behaviour.getLastDiceRoll();
   }
 
   /**

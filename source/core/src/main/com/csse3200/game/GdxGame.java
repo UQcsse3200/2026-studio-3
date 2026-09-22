@@ -8,9 +8,12 @@ import com.badlogic.gdx.Screen;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.files.UserSettings;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.screens.AncientTempleScreen;
 import com.csse3200.game.screens.BattleScreen;
 import com.csse3200.game.screens.BestiaryScreen;
+import com.csse3200.game.screens.CampfireScreen;
 import com.csse3200.game.screens.CardLibraryScreen;
+import com.csse3200.game.screens.ElitePortalScreen;
 import com.csse3200.game.screens.EncounterScreen;
 import com.csse3200.game.screens.EndBattleScreen;
 import com.csse3200.game.screens.LibraryScreen;
@@ -19,6 +22,7 @@ import com.csse3200.game.screens.MainMenuScreen;
 import com.csse3200.game.screens.MapScreen;
 import com.csse3200.game.screens.SaveLoadScreen;
 import com.csse3200.game.screens.SettingsScreen;
+import com.csse3200.game.screens.TempleCardSelectionScreen;
 import com.csse3200.game.services.ServiceLocator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,9 +86,15 @@ public class GdxGame extends Game {
     setScreen(newScreen(screenType));
   }
 
-  /** Opens the battle screen. Used by encounter navigation and the temporary debug shortcut. */
+  /** Opens the battle screen. */
   public void startBattle() {
     setScreen(ScreenType.BATTLE_SCREEN);
+  }
+
+  /** Temporary development shortcut for previewing the Elite portal flow. */
+  public void startElitePortalDebug() {
+    runState.setPendingEliteTempleReward(true);
+    setScreen(ScreenType.ELITE_PORTAL);
   }
 
   @Override
@@ -117,10 +127,18 @@ public class GdxGame extends Game {
         return new MapScreen(this);
       case ENCOUNTER:
         return new EncounterScreen(this);
+      case CAMPFIRE:
+        return new CampfireScreen(this);
       case BATTLE_SCREEN:
         return new BattleScreen(this);
       case VICTORY:
         return new EndBattleScreen(this, true);
+      case ELITE_PORTAL:
+        return new ElitePortalScreen(this);
+      case ANCIENT_TEMPLE:
+        return new AncientTempleScreen(this);
+      case TEMPLE_CARD_SELECTION:
+        return new TempleCardSelectionScreen(this);
       case DEFEAT:
         return new EndBattleScreen(this, false);
       case BESTIARY:
@@ -139,9 +157,13 @@ public class GdxGame extends Game {
     CARD_LIBRARY,
     MAP,
     ENCOUNTER,
+    CAMPFIRE,
     BATTLE_SCREEN,
     VICTORY,
     DEFEAT,
+    ELITE_PORTAL,
+    ANCIENT_TEMPLE,
+    TEMPLE_CARD_SELECTION,
     BESTIARY
   }
 

@@ -18,6 +18,17 @@ import org.junit.jupiter.api.Test;
 
 class ChanceEncounterSessionTest {
   @Test
+  void shouldExposeFixedEncounterChoicesWithoutChangingTheirOrder() {
+    ChanceEncounterSession session =
+        createSession(new MockPlayerStateGateway(100, 50), new RecordingCallback());
+
+    assertEquals(
+        List.of("accept", "leave"),
+        session.getAvailableChoices().stream().map(choice -> choice.getId()).toList());
+    assertEquals("CHOOSE YOUR RESPONSE", session.getChoicePrompt());
+  }
+
+  @Test
   void shouldRejectInvalidChoiceAndKeepSessionOpen() {
     MockPlayerStateGateway player = new MockPlayerStateGateway(100, 50);
     RecordingCallback callback = new RecordingCallback();

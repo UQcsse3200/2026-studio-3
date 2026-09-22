@@ -176,7 +176,7 @@ public class DeckEditorComponent extends UIComponent {
     }
     discardedInstances = new HashSet<>(cardPlayService.discardedInstances());
     selected.clear();
-    selected.addAll(cardPlayService.handInstances());
+    selected.addAll(cardPlayService.currentHand());
     currentPage = 0;
   }
 

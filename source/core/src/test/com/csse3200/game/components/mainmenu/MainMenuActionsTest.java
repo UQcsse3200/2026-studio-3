@@ -73,6 +73,8 @@ class MainMenuActionsTest {
     menu.getEvents().trigger("map");
     menu.getEvents().trigger("shop");
     menu.getEvents().trigger("battle");
+    menu.getEvents().trigger("demoShop");
+    menu.getEvents().trigger("demoEvent");
 
     verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
     verify(game, never()).exit();

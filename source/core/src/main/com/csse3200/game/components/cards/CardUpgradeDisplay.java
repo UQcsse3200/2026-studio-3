@@ -27,10 +27,13 @@ public class CardUpgradeDisplay extends UIComponent {
   private static final Color DISABLED_FACE = new Color(0.62f, 0.60f, 0.55f, 1f);
   private static final Color SCRIM = new Color(0.02f, 0.02f, 0.02f, 0.76f);
   private static final Color PANEL = new Color(0.10f, 0.08f, 0.06f, 0.95f);
-  private final Map<Integer, Table> tilesByDeckIndex = new LinkedHashMap<>();
+  private final Map<String, Table> tilesByInstanceId = new LinkedHashMap<>();
   private final CardUpgradeCommitter committer;
+  private final boolean launcherVisible;
+  private final Runnable onUpgradeCommitted;
   private Table buttonTable;
   private Table libraryOverlay;
+  private TextButton upgradeButton;
   private TextButton confirmButton;
   private boolean libraryVisible;
   private final CardUpgradeSelection selection;
@@ -42,8 +45,26 @@ public class CardUpgradeDisplay extends UIComponent {
    * @param committer receive card upgrade commit
    */
   public CardUpgradeDisplay(CardUpgradeSelection selection, CardUpgradeCommitter committer) {
+    this(selection, committer, true, () -> {});
+  }
+
+  /**
+   * Creates a card upgrade display.
+   *
+   * @param selection card upgrade selection model
+   * @param committer applies selected upgrades to the persistent deck
+   * @param launcherVisible whether this display should show its own Upgrade button
+   * @param onUpgradeCommitted callback invoked after an upgrade is successfully committed
+   */
+  public CardUpgradeDisplay(
+      CardUpgradeSelection selection,
+      CardUpgradeCommitter committer,
+      boolean launcherVisible,
+      Runnable onUpgradeCommitted) {
     this.selection = selection;
     this.committer = committer;
+    this.launcherVisible = launcherVisible;
+    this.onUpgradeCommitted = onUpgradeCommitted == null ? () -> {} : onUpgradeCommitted;
   }
 
   @Override
@@ -58,15 +79,15 @@ public class CardUpgradeDisplay extends UIComponent {
     buttonTable.top().right();
     buttonTable.padTop(56f).padRight(10f);
 
-    TextButton cardsButton = new TextButton("Upgrade", skin);
-    cardsButton.addListener(
+    upgradeButton = new TextButton("Upgrade", skin);
+    upgradeButton.addListener(
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
             toggleLibrary();
           }
         });
-    cardsButton.addListener(
+    upgradeButton.addListener(
         new InputListener() {
           @Override
           public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -74,21 +95,13 @@ public class CardUpgradeDisplay extends UIComponent {
             return true;
           }
         });
-    buttonTable.add(cardsButton).width(96f).height(40f).right();
+    buttonTable.add(upgradeButton).width(96f).height(40f).right();
 
-    libraryOverlay = createLibraryOverlay();
-    libraryOverlay.setVisible(false);
-    libraryOverlay.addListener(
-        new InputListener() {
-          @Override
-          public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-            event.stop();
-            return true;
-          }
-        });
-    stage.addActor(buttonTable);
-    stage.addActor(libraryOverlay);
-    refresh();
+    if (launcherVisible) {
+      stage.addActor(buttonTable);
+    }
+
+    rebuildLibraryOverlay();
   }
 
   private Table createLibraryOverlay() {
@@ -134,7 +147,7 @@ public class CardUpgradeDisplay extends UIComponent {
     for (int i = 0; i < options.size(); i++) {
       CardUpgradeSelection.UpgradeOption option = options.get(i);
       Table tile = createTile(option);
-      tilesByDeckIndex.put(option.deckIndex(), tile);
+      tilesByInstanceId.put(option.instance().instanceId(), tile);
       cardGrid.add(tile).width(CARD_WIDTH).height(CARD_HEIGHT);
       if ((i + 1) % CARDS_PER_ROW == 0) {
         cardGrid.row();
@@ -149,9 +162,10 @@ public class CardUpgradeDisplay extends UIComponent {
             if (!selection.canConfirm()) {
               return;
             }
-            committer.commitUpgrades(selection.getSelectedDeckIndices());
-            selection.reset();
-            hideLibrary();
+            committer.commitUpgrades(selection.getSelectedInstanceIds());
+            selection.refresh();
+            rebuildLibraryOverlay();
+            onUpgradeCommitted.run();
           }
         });
     libraryPanel.add(cardGrid).center().padTop(10f);
@@ -162,11 +176,25 @@ public class CardUpgradeDisplay extends UIComponent {
   }
 
   private void toggleLibrary() {
+    if (selection.getCardUpgradeOption().isEmpty()) {
+      return;
+    }
     libraryVisible = !libraryVisible;
     libraryOverlay.setVisible(libraryVisible);
     if (libraryVisible) {
       libraryOverlay.toFront();
     }
+  }
+
+  /** Opens the card upgrade library from an external launcher such as the Campfire Forge button. */
+  public void showLibrary() {
+    if (selection.getCardUpgradeOption().isEmpty()) {
+      return;
+    }
+
+    libraryVisible = true;
+    libraryOverlay.setVisible(true);
+    libraryOverlay.toFront();
   }
 
   private void hideLibrary() {
@@ -206,7 +234,7 @@ public class CardUpgradeDisplay extends UIComponent {
         new ClickListener() {
           @Override
           public void clicked(InputEvent event, float x, float y) {
-            selection.toggle(option.deckIndex());
+            selection.toggle(option.instance().instanceId());
             refresh();
           }
         });
@@ -245,19 +273,49 @@ public class CardUpgradeDisplay extends UIComponent {
   }
 
   private void refresh() {
-    for (Map.Entry<Integer, Table> entry : tilesByDeckIndex.entrySet()) {
-      int deckIndex = entry.getKey();
+    for (Map.Entry<String, Table> entry : tilesByInstanceId.entrySet()) {
+      String instanceId = entry.getKey();
       Color face;
-      if (selection.isSelected(deckIndex)) {
+      if (selection.isSelected(instanceId)) {
         face = SELECTED_FACE;
-      } else if (!selection.canSelect(deckIndex)) {
+      } else if (!selection.canSelect(instanceId)) {
         face = DISABLED_FACE;
       } else {
         face = CARD_FACE;
       }
       entry.getValue().setBackground(skin.newDrawable("white", face));
     }
-    confirmButton.setText("Upgrade (" + selection.getSelectedDeckIndices().size() + ")");
+    confirmButton.setText("Upgrade (" + selection.getSelectedInstanceIds().size() + ")");
     confirmButton.setDisabled(!selection.canConfirm());
+    upgradeButton.setDisabled(selection.getCardUpgradeOption().isEmpty());
+  }
+
+  /** Replaces the stale card grid after the backing player deck has changed. */
+  private void rebuildLibraryOverlay() {
+    if (libraryOverlay != null) {
+      libraryOverlay.remove();
+    }
+    tilesByInstanceId.clear();
+    libraryVisible = false;
+    libraryOverlay = createLibraryOverlay();
+    libraryOverlay.setVisible(false);
+    libraryOverlay.addListener(
+        new InputListener() {
+          @Override
+          public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+            event.stop();
+            return true;
+          }
+        });
+    stage.addActor(libraryOverlay);
+    refresh();
+  }
+
+  TextButton getConfirmButton() {
+    return confirmButton;
+  }
+
+  int getDisplayedOptionCount() {
+    return tilesByInstanceId.size();
   }
 }

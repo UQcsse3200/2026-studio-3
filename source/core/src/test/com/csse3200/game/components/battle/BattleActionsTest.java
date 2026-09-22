@@ -100,7 +100,7 @@ class BattleActionsTest {
         new Entity().addComponent(new BattleActions(mockController, mock(GdxGame.class)));
     battleUI.create();
 
-    battleUI.getEvents().trigger("endturn");
+    battleUI.getEvents().trigger("endTurn");
 
     verify(mockController).endPlayerTurn();
   }
@@ -120,6 +120,7 @@ class BattleActionsTest {
             new PlayerDeck(
                 TestCardService.withCards("strike", "bandage"), List.of("strike", "bandage")));
     deck.drawCards(1);
+    String strikeInstanceId = deck.getHand().get(0).instanceId();
     Entity testPlayer =
         new Entity()
             .addComponent(new CombatStatsComponent(20, 0))
@@ -144,11 +145,11 @@ class BattleActionsTest {
             (String cardName, String targetId) -> playedEvents.add(cardName + ":" + targetId));
     realController.start();
 
-    battleUI.getEvents().trigger("playCard", "strike", "enemy");
+    battleUI.getEvents().trigger("playCard", strikeInstanceId, "enemy");
 
     assertTrue(playedEvents.isEmpty());
     assertEquals(3, testPlayer.getComponent(EnergyComponent.class).getCurrentEnergy());
-    assertEquals(List.of("strike"), deck.getHand());
+    assertEquals(strikeInstanceId, deck.getHand().get(0).instanceId());
   }
 
   @Test

@@ -22,6 +22,50 @@ import org.junit.jupiter.api.Test;
 
 class DiceEncounterBehaviourTest {
   @Test
+  void shouldExposeActualDiceFacesWithoutRollingAgainForStageChoices() {
+    DiceEncounterBehaviour behaviour = behaviour(0, 5, 2, 3);
+
+    assertTrue(behaviour.getLastDiceRoll().isEmpty());
+    behaviour.resolveChoice(DiceEncounterBehaviour.LOW_CHOICE_ID);
+    assertEquals(new DiceRoll(1, 6, 1), behaviour.getLastDiceRoll().orElseThrow());
+
+    behaviour.resolveChoice(DiceEncounterBehaviour.DOUBLE_DOWN_CHOICE_ID);
+    assertEquals(new DiceRoll(1, 6, 1), behaviour.getLastDiceRoll().orElseThrow());
+
+    behaviour.resolveChoice(DiceEncounterBehaviour.HIGH_CHOICE_ID);
+    assertEquals(new DiceRoll(3, 4, 2), behaviour.getLastDiceRoll().orElseThrow());
+  }
+
+  @Test
+  void shouldExposeOnlyChoicesForCurrentDiceStage() {
+    DiceEncounterBehaviour behaviour = behaviour(0, 5, 0, 0, 0, 5, 0);
+    ChanceEncounter encounter = diceEncounter();
+
+    assertEquals(List.of("low", "high"), behaviour.getAvailableChoiceIds(encounter));
+    assertEquals("ROUND 1 - PREDICT LOW OR HIGH", behaviour.getChoicePrompt());
+
+    behaviour.resolveChoice("low");
+    assertEquals(List.of("take", "double-down"), behaviour.getAvailableChoiceIds(encounter));
+
+    behaviour.resolveChoice("double-down");
+    assertEquals(List.of("low", "high"), behaviour.getAvailableChoiceIds(encounter));
+
+    behaviour.resolveChoice("low");
+    assertEquals(List.of("cash-out", "continue"), behaviour.getAvailableChoiceIds(encounter));
+    assertTrue(behaviour.getChoicePrompt().contains("30 GOLD"));
+
+    behaviour.resolveChoice("continue");
+    assertEquals(List.of("low", "high"), behaviour.getAvailableChoiceIds(encounter));
+    assertEquals("ROUND 2 - PREDICT LOW OR HIGH", behaviour.getChoicePrompt());
+
+    behaviour.resolveChoice("low");
+    assertEquals(List.of("take", "double-down"), behaviour.getAvailableChoiceIds(encounter));
+
+    behaviour.resolveChoice("take");
+    assertEquals(List.of(), behaviour.getAvailableChoiceIds(encounter));
+  }
+
+  @Test
   void shouldWinLowAndHighPredictionsAcrossTheirInclusiveRanges() {
     assertStakeAfterPrediction(DiceEncounterBehaviour.LOW_CHOICE_ID, 2, 0, 0);
     assertStakeAfterPrediction(DiceEncounterBehaviour.LOW_CHOICE_ID, 6, 2, 2);
@@ -337,9 +381,18 @@ class DiceEncounterBehaviourTest {
             new ChanceOutcomeApplier(player, new CardServiceCatalogAdapter(cards), deck),
             (nodeId, success) -> completionCount[0]++);
 
+    assertEquals(
+        List.of("low", "high"),
+        session.getAvailableChoices().stream().map(ChanceChoice::getId).toList());
     ChanceResolution roundOne = session.resolveChoice(DiceEncounterBehaviour.LOW_CHOICE_ID);
+    assertEquals(
+        List.of("cash-out", "continue"),
+        session.getAvailableChoices().stream().map(ChanceChoice::getId).toList());
     ChanceResolution continueResult =
         session.resolveChoice(DiceEncounterBehaviour.CONTINUE_CHOICE_ID);
+    assertEquals(
+        List.of("low", "high"),
+        session.getAvailableChoices().stream().map(ChanceChoice::getId).toList());
 
     assertEquals(ChanceResolution.Status.AWAITING_CHOICE, roundOne.getStatus());
     assertEquals(ChanceResolution.Status.AWAITING_CHOICE, continueResult.getStatus());
