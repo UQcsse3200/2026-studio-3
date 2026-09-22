@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardType;
 import com.csse3200.game.cards.EffectType;
@@ -95,6 +96,7 @@ class CardWidgetTest {
     assertTrue(widget.getListeners().isEmpty());
     assertEquals(CardWidget.CARD_WIDTH, widget.getPrefWidth());
     assertEquals(CardWidget.CARD_HEIGHT, widget.getPrefHeight());
+    assertEquals(Scaling.fit, CardWidget.ARTWORK_SCALING);
   }
 
   @Test

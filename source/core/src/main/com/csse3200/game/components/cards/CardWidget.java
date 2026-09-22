@@ -34,6 +34,7 @@ public final class CardWidget extends Stack {
   private static final float META_HEIGHT = 24f;
   private static final float COST_BADGE_SIZE = 48f;
   private static final float UPGRADE_BADGE_SIZE = 40f;
+  static final Scaling ARTWORK_SCALING = Scaling.fit;
 
   private final CardWidgetAssets assets;
   private final Table frame;
@@ -76,7 +77,10 @@ public final class CardWidget extends Stack {
     namePlate.add(nameLabel).expand().fill();
 
     artwork = new Image();
-    artwork.setScaling(Scaling.fit);
+    // Preserve the complete authored composition for both landscape and portrait card art. The
+    // dark artwork backdrop deliberately absorbs any letterboxing instead of stretching or
+    // silently cropping the configured texture.
+    artwork.setScaling(ARTWORK_SCALING);
     artwork.setTouchable(Touchable.disabled);
     Table artworkBackdrop = new Table();
     artworkBackdrop.setTouchable(Touchable.disabled);
