@@ -101,6 +101,26 @@ class PlayerRunStateTest {
   }
 
   @Test
+  void combatItemsAreReappliedOnceToEachNewBattlePlayer() {
+    PlayerRunState state = new PlayerRunState(65, 100, 42);
+    state.addOwnedItem(ItemType.IRON_AEGIS);
+    state.addOwnedItem(ItemType.WARRIORS_CREST);
+
+    Entity battleOnePlayer = player(65, 100, 42);
+    Entity battleTwoPlayer = player(65, 100, 42);
+
+    state.applyTo(battleOnePlayer);
+    state.applyTo(battleTwoPlayer);
+
+    CombatStatsComponent battleOneStats = battleOnePlayer.getComponent(CombatStatsComponent.class);
+    CombatStatsComponent battleTwoStats = battleTwoPlayer.getComponent(CombatStatsComponent.class);
+    assertEquals(5, battleOneStats.getArmour());
+    assertEquals(6, battleOneStats.getBaseAttack());
+    assertEquals(5, battleTwoStats.getArmour());
+    assertEquals(6, battleTwoStats.getBaseAttack());
+  }
+
+  @Test
   void shopDiscountStillRespectsCapAcrossManyOwnedItems() {
     PlayerRunState state = new PlayerRunState(65, 100, 42);
     for (int i = 0; i < 20; i++) {

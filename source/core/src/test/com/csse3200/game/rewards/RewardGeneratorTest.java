@@ -3,6 +3,7 @@ package com.csse3200.game.rewards;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.extensions.GameExtension;
+import java.util.EnumSet;
 import java.util.Random;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,5 +29,17 @@ class RewardGeneratorTest {
     int amountB = generatorB.generateGoldOption().getBaseAmount();
 
     assertTrue(amountA == amountB);
+  }
+
+  @Test
+  void itemRewardPoolIncludesEveryGameplayItem() {
+    RewardGenerator generator = new RewardGenerator(new Random(42));
+    EnumSet<ItemType> generated = EnumSet.noneOf(ItemType.class);
+
+    for (int i = 0; i < 200; i++) {
+      generated.add(generator.generateItemRewardOption().itemId);
+    }
+
+    assertTrue(generated.containsAll(EnumSet.allOf(ItemType.class)));
   }
 }
