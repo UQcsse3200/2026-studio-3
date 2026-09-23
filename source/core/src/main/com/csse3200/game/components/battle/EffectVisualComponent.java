@@ -21,24 +21,29 @@ public class EffectVisualComponent extends RenderComponent {
   private final Texture texture;
   private final EffectVisualStyle style;
   private final float baseSize;
+  private final float startDelay;
   private float elapsed;
 
   /**
    * @param texture texture to draw, or null to skip drawing (the lifetime still elapses)
    * @param style the look and timing of this visual
    * @param baseSize size, in world units, that the style's start/end scales are relative to
+   * @param startDelay seconds to wait, from creation, before this visual starts playing; use 0 for
+   *     no delay. Lets several effects on the same card play one after another instead of at once.
    */
-  public EffectVisualComponent(Texture texture, EffectVisualStyle style, float baseSize) {
+  public EffectVisualComponent(
+      Texture texture, EffectVisualStyle style, float baseSize, float startDelay) {
     this.texture = texture;
     this.style = style;
     this.baseSize = baseSize;
+    this.startDelay = Math.max(0f, startDelay);
   }
 
   /**
    * @return true once this visual has played for its full duration and can be removed
    */
   public boolean isExpired() {
-    return elapsed >= style.duration();
+    return elapsed >= startDelay + style.duration();
   }
 
   @Override
@@ -53,11 +58,12 @@ public class EffectVisualComponent extends RenderComponent {
 
   @Override
   protected void draw(SpriteBatch batch) {
-    if (texture == null) {
+    if (texture == null || elapsed < startDelay) {
       return;
     }
 
-    float t = Math.min(elapsed / style.duration(), 1f);
+    float playTime = elapsed - startDelay;
+    float t = Math.min(playTime / style.duration(), 1f);
     // Ease-out: fast growth at first, slowing near the end. Feels punchier than a linear grow.
     float eased = 1f - (1f - t) * (1f - t);
 

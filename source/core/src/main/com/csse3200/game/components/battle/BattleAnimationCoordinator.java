@@ -84,32 +84,38 @@ public class BattleAnimationCoordinator extends Component {
     }
   }
 
+  private static final float EFFECT_STAGGER_SECONDS = 0.15f;
+
   /** Fires before the controller applies the effects, so the targets are still alive to read. */
   private void onEnemyEffects(List<ResolvedCardEffect> effects) {
     CardPlayRequest request = controller.getCardPlayRequest();
     if (request == null || effects == null || effects.isEmpty()) {
       return;
     }
+    List<EffectType> orderedTypes = distinctTypesInOrder(effects);
     for (Entity target : effectHandler.getLivingEnemyTargets(request, enemies)) {
-      for (EffectType type : distinctTypesInOrder(effects)) {
-        spawnVisual(type, target);
+      for (int i = 0; i < orderedTypes.size(); i++) {
+        spawnVisual(orderedTypes.get(i), target, i * EFFECT_STAGGER_SECONDS);
       }
     }
   }
 
   private void onPlayerEffects(List<ResolvedCardEffect> effects) {
-    for (EffectType type : distinctTypesInOrder(effects)) {
-      spawnVisual(type, player);
+    List<EffectType> orderedTypes = distinctTypesInOrder(effects);
+    for (int i = 0; i < orderedTypes.size(); i++) {
+      spawnVisual(orderedTypes.get(i), player, i * EFFECT_STAGGER_SECONDS);
     }
   }
 
-  private void spawnVisual(EffectType type, Entity target) {
+  private void spawnVisual(EffectType type, Entity target, float startDelay) {
     EffectVisualStyle style = registry.lookup(type);
     Vector2 scale = target.getScale();
     float baseSize = Math.max(MIN_SIZE, Math.max(scale.x, scale.y) * SIZE_FACTOR);
 
     Entity visual =
-        new Entity().addComponent(new EffectVisualComponent(textureFor(style), style, baseSize));
+        new Entity()
+            .addComponent(
+                new EffectVisualComponent(textureFor(style), style, baseSize, startDelay));
     visual.setPosition(target.getCenterPosition());
     ServiceLocator.getEntityService().register(visual);
     activeVisuals.add(visual);
@@ -128,14 +134,14 @@ public class BattleAnimationCoordinator extends Component {
   }
 
   /** Preserves each effect's first appearance order, dropping later duplicates of the same type. */
-  private static Set<EffectType> distinctTypesInOrder(List<ResolvedCardEffect> effects) {
-    Set<EffectType> types = new LinkedHashSet<>();
+  private static List<EffectType> distinctTypesInOrder(List<ResolvedCardEffect> effects) {
+    Set<EffectType> seen = new LinkedHashSet<>();
     if (effects != null) {
       for (ResolvedCardEffect effect : effects) {
-        types.add(effect.type());
+        seen.add(effect.type());
       }
     }
-    return types;
+    return new ArrayList<>(seen);
   }
 
   private static void safely(String what, Runnable action) {
