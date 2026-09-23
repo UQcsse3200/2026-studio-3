@@ -115,9 +115,9 @@ class PlayerRunStateTest {
     CombatStatsComponent battleOneStats = battleOnePlayer.getComponent(CombatStatsComponent.class);
     CombatStatsComponent battleTwoStats = battleTwoPlayer.getComponent(CombatStatsComponent.class);
     assertEquals(5, battleOneStats.getArmour());
-    assertEquals(6, battleOneStats.getBaseAttack());
+    assertEquals(1, battleOneStats.getStatusEffect("STRENGTH").getValue());
     assertEquals(5, battleTwoStats.getArmour());
-    assertEquals(6, battleTwoStats.getBaseAttack());
+    assertEquals(1, battleTwoStats.getStatusEffect("STRENGTH").getValue());
   }
 
   @Test

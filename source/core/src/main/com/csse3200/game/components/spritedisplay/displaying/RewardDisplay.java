@@ -257,7 +257,7 @@ public class RewardDisplay extends Displaying {
                 case ENERGY_CRYSTAL -> "+1 Max Energy";
                 case MERCHANTS_FAVOR -> "+10% Shop Discount\nMaximum 50%";
                 case IRON_AEGIS -> "+5 Armour at Battle Start";
-                case WARRIORS_CREST -> "+1 Base Attack";
+                case WARRIORS_CREST -> "+1 Strength at Battle Start";
               };
     };
   }

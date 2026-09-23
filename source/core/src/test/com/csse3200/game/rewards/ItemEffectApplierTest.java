@@ -33,6 +33,6 @@ class ItemEffectApplierTest {
     ItemEffectApplier.applyItemEffect(ItemType.WARRIORS_CREST, player);
 
     assertEquals(5, stats.getArmour());
-    assertEquals(6, stats.getBaseAttack());
+    assertEquals(1, stats.getStatusEffect("STRENGTH").getValue());
   }
 }
