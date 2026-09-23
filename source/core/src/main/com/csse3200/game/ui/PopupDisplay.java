@@ -2,6 +2,7 @@ package com.csse3200.game.ui;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -12,6 +13,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.csse3200.game.services.ServiceLocator;
 
 /**
  * Generic reusable popup: a dimmed backdrop behind a centred, closable window.
@@ -32,6 +35,7 @@ public class PopupDisplay extends UIComponent {
   private Image backdrop;
   private Window window;
   private Table content;
+  private TextButton closeButton;
 
   private Runnable onShow;
   private Runnable onHide;
@@ -61,6 +65,25 @@ public class PopupDisplay extends UIComponent {
     window.setBackground(skin.newDrawable("white", colour));
   }
 
+  /** Uses a loaded texture as this popup's complete window background. */
+  public void setBackgroundTexture(String texturePath) {
+    Texture texture = ServiceLocator.getResourceService().getAsset(texturePath, Texture.class);
+    TextureRegionDrawable background = new TextureRegionDrawable(texture);
+    background.setMinWidth(0f);
+    background.setMinHeight(0f);
+    window.setBackground(background);
+  }
+
+  /** Sets the inset between the window frame and its title/content. */
+  public void setPadding(float top, float left, float bottom, float right) {
+    window.pad(top, left, bottom, right);
+  }
+
+  /** Shows or hides the generic title-bar close button. */
+  public void setDefaultCloseButtonVisible(boolean visible) {
+    closeButton.setVisible(visible);
+  }
+
   /** Applies a colour and skin font to the popup title without changing other popups. */
   public void setTitleStyle(Color colour, String fontName) {
     LabelStyle style = new LabelStyle(window.getTitleLabel().getStyle());
@@ -84,7 +107,7 @@ public class PopupDisplay extends UIComponent {
     window.pad(20f);
     window.top();
 
-    TextButton closeButton = new TextButton("X", skin);
+    closeButton = new TextButton("X", skin);
     closeButton.addListener(
         new ChangeListener() {
           @Override

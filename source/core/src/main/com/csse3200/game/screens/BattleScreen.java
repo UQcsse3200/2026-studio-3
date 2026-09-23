@@ -80,7 +80,11 @@ public class BattleScreen extends ScreenAdapter {
     "images/money.png",
     "images/piety.png",
     "images/enemy.png",
-    "images/armour.png"
+    "images/armour.png",
+    "images/ui/inventory-panel.png",
+    "images/ui/lucky-coin.png",
+    "images/ui/energy-crystal.png",
+    "images/ui/merchants-favor.png"
   };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
 
@@ -239,8 +243,8 @@ public class BattleScreen extends ScreenAdapter {
     PopupDisplay cardInventory = new PopupDisplay("Card Inventory");
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
-    PopupDisplay itemInventory = new PopupDisplay("INVENTORY");
-    itemInventory.setMinSize(720f, 500f);
+    PopupDisplay itemInventory = new PopupDisplay("");
+    itemInventory.setMinSize(470f, 360f);
     InventoryPopupComponent inventoryPopup =
         new InventoryPopupComponent(game.getRunState(), itemInventory);
 
