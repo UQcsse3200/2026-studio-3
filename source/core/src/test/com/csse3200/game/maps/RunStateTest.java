@@ -211,6 +211,41 @@ public class RunStateTest {
   }
 
   @Test
+  void restoringRunFixesNodeStuckMidBattle() {
+    // Regression test for a real bug reported by Jayden (Team 4): saving mid-battle leaves that
+    // node CURRENT and MapGraph.currentNode pointing at it. Both must be corrected on restore, or
+    // the node is permanently unselectable -- see RunState.restoreRun() for the full explanation.
+    RunState runState = new RunState();
+    MapGraph graph = createGraph();
+    graph.getNode(0).setState(NodeState.COMPLETED); // the real prior position
+    graph.getNode(1).setState(NodeState.CURRENT); // interrupted mid-battle when the save was made
+    // addConnection() in createGraph() is one-directional; connectNodes() is what real save data
+    // uses (see SaveGameRestoreService.buildMapGraph()) and adds the reverse link too, which the
+    // fix's neighbour search over node 1's own connections needs.
+    graph.connectNodes(1, 0);
+    graph.restoreCurrentNode(1); // simulates buildMapGraph(), which runs before restoreRun()
+
+    assertTrue(runState.restoreRun(graph, 1));
+
+    assertEquals(NodeState.AVAILABLE, graph.getNode(1).getState());
+    assertSame(graph.getNode(0), graph.getCurrentNode());
+  }
+
+  @Test
+  void restoringRunWithNoActiveEncounterLeavesNodesUnaffected() {
+    RunState runState = new RunState();
+    MapGraph graph = createGraph();
+    graph.getNode(0).setState(NodeState.CURRENT);
+    graph.restoreCurrentNode(0);
+
+    assertTrue(runState.restoreRun(graph, null));
+
+    assertEquals(NodeState.CURRENT, graph.getNode(0).getState());
+    assertSame(graph.getNode(0), graph.getCurrentNode());
+    assertNull(runState.getActiveNodeId());
+  }
+
+  @Test
   void endRunDiscardsTheMap() {
     RunState runState = new RunState();
     runState.startRun(createGraph(), 0);
