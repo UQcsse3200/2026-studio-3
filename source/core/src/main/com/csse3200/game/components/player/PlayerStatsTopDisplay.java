@@ -29,7 +29,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
     super.create();
     addActors();
 
-    entity.getEvents().addListener("updatePiety", this::updatePlayerLevelUI);
+    entity.getEvents().addListener("updateLevel", this::updatePlayerLevelUI);
     entity.getEvents().addListener("updateMoney", this::updatePlayerMoneyUI);
   }
 
