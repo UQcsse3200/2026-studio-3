@@ -33,6 +33,7 @@ class PauseMenuDisplayTest {
   private AtomicInteger saveLoadCount;
   private AtomicInteger settingsCount;
   private AtomicInteger exitCount;
+  private AtomicInteger quitCount;
 
   @BeforeEach
   void setUp() {
@@ -45,10 +46,12 @@ class PauseMenuDisplayTest {
     saveLoadCount = new AtomicInteger();
     settingsCount = new AtomicInteger();
     exitCount = new AtomicInteger();
+    quitCount = new AtomicInteger();
 
     display = new PauseMenuDisplay();
     Entity entity = new Entity().addComponent(display);
     entity.getEvents().addListener(PauseMenuDisplay.RESUME_EVENT, resumeCount::incrementAndGet);
+    entity.getEvents().addListener(PauseMenuDisplay.QUIT_EVENT, quitCount::incrementAndGet);
     entity
         .getEvents()
         .addListener(PauseMenuDisplay.SAVE_LOAD_EVENT, saveLoadCount::incrementAndGet);
@@ -192,5 +195,29 @@ class PauseMenuDisplayTest {
 
     assertEquals(0, exitCount.get());
     assertNull(display.getConfirmDialog().getStage());
+  }
+
+  @Test
+  void quitShowsDialogAndDoesNotQuitUntilConfirmed() {
+    click(display.getQuitButton());
+
+    // Dialog is shown, but nothing has quit yet.
+    assertNotNull(display.getConfirmDialog().getStage());
+    assertEquals(0, quitCount.get());
+    assertEquals(0, exitCount.get()); // quit and main-menu share the dialog but not the action
+
+    click(display.getConfirmButton());
+
+    assertEquals(1, quitCount.get());
+    assertEquals(0, exitCount.get());
+  }
+
+  @Test
+  void saveDisabledOmitsSaveButton() {
+    PauseMenuDisplay noSave = new PauseMenuDisplay(false);
+    new Entity().addComponent(noSave).create();
+
+    assertFalse(noSave.hasSaveLoadButton());
+    assertNull(noSave.getSaveLoadButton());
   }
 }

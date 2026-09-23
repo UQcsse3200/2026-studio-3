@@ -47,6 +47,9 @@ public class PauseMenuDisplay extends UIComponent {
   /** Fired only after the player confirms leaving the current run. */
   public static final String EXIT_TO_MENU_EVENT = "exitToMenu";
 
+  /** Fired only after the player confirms quitting the game to the desktop. */
+  public static final String QUIT_EVENT = "quit";
+
   /**
    * Received (not fired by the display) to open the pause menu. Opening is idempotent, so once
    * paused, pressing Escape again does nothing; the menu is only closed via {@link #RESUME_EVENT}.
@@ -55,17 +58,35 @@ public class PauseMenuDisplay extends UIComponent {
 
   private static final float OVERLAY_OPACITY = 0.7f;
 
+  private final boolean saveEnabled;
   private Table table;
   private Table menuTable;
   private Table settingsTable;
   private Dialog confirmDialog;
+  private Label confirmMessage;
+  private Runnable pendingConfirm;
   private TextButton resumeButton;
   private TextButton saveLoadButton;
   private TextButton settingsButton;
   private TextButton returnButton;
+  private TextButton quitButton;
   private TextButton confirmButton;
   private TextButton cancelButton;
   private TextButton settingsBackButton;
+
+  /** Creates a pause menu with the Save &amp; Load option enabled. */
+  public PauseMenuDisplay() {
+    this(true);
+  }
+
+  /**
+   * @param saveEnabled whether to show the Save &amp; Load button. It is disabled on screens where
+   *     an encounter is active (battles/encounters), because a mid-encounter save can't be cleanly
+   *     restored — saving is meant to happen from the map.
+   */
+  public PauseMenuDisplay(boolean saveEnabled) {
+    this.saveEnabled = saveEnabled;
+  }
 
   @Override
   public void create() {
@@ -100,9 +121,12 @@ public class PauseMenuDisplay extends UIComponent {
     table.center();
 
     resumeButton = menuButton("Resume", RESUME_EVENT);
-    saveLoadButton = menuButton("Save & Load", SAVE_LOAD_EVENT);
+    if (saveEnabled) {
+      saveLoadButton = menuButton("Save & Load", SAVE_LOAD_EVENT);
+    }
     settingsButton = menuButton("Settings", SETTINGS_EVENT);
-    returnButton = menuButton("Main Menu", null); // opens the confirm dialog instead
+    returnButton = menuButton("Main Menu", null); // opens a confirm dialog instead
+    quitButton = menuButton("Quit Game", null); // opens a confirm dialog instead
 
     settingsButton.addListener(
         new ChangeListener() {
@@ -117,7 +141,20 @@ public class PauseMenuDisplay extends UIComponent {
           @Override
           public void changed(ChangeEvent changeEvent, Actor actor) {
             logger.debug("Return to main menu clicked, asking for confirmation");
-            confirmDialog.show(stage);
+            showConfirm(
+                "Leave this run? Progress may be lost",
+                () -> entity.getEvents().trigger(EXIT_TO_MENU_EVENT));
+          }
+        });
+
+    quitButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent changeEvent, Actor actor) {
+            logger.debug("Quit game clicked, asking for confirmation");
+            showConfirm(
+                "Quit to desktop? Unsaved progress may be lost",
+                () -> entity.getEvents().trigger(QUIT_EVENT));
           }
         });
 
@@ -134,9 +171,12 @@ public class PauseMenuDisplay extends UIComponent {
     menuTable = new Table();
     menuTable.add(titleLabel("Paused")).padBottom(MenuTheme.TITLE_SPACING).row();
     addMenuRow(resumeButton);
-    addMenuRow(saveLoadButton);
+    if (saveEnabled) {
+      addMenuRow(saveLoadButton);
+    }
     addMenuRow(settingsButton);
-    menuTable.add(returnButton).width(MenuTheme.BUTTON_WIDTH).height(MenuTheme.BUTTON_HEIGHT);
+    addMenuRow(returnButton);
+    menuTable.add(quitButton).width(MenuTheme.BUTTON_WIDTH).height(MenuTheme.BUTTON_HEIGHT);
   }
 
   private void addMenuRow(TextButton button) {
@@ -160,7 +200,10 @@ public class PauseMenuDisplay extends UIComponent {
     return root;
   }
 
-  /** Builds the "leave this run" confirmation dialog. It only fires the exit event on confirm. */
+  /**
+   * Builds a reusable confirmation dialog. The message and the on-confirm action are set per use via
+   * {@link #showConfirm(String, Runnable)}, so both "Main Menu" and "Quit Game" share one dialog.
+   */
   private void buildConfirmDialog() {
     Window.WindowStyle windowStyle = new Window.WindowStyle(skin.get(Window.WindowStyle.class));
     Color panel = MenuTheme.deepPlum();
@@ -170,10 +213,8 @@ public class PauseMenuDisplay extends UIComponent {
 
     Label.LabelStyle messageStyle =
         new Label.LabelStyle(skin.getFont("font_large"), MenuTheme.warmParchment());
-    confirmDialog
-        .getContentTable()
-        .add(new Label("Leave this run? Progress may be lost", messageStyle))
-        .pad(24f);
+    confirmMessage = new Label("", messageStyle);
+    confirmDialog.getContentTable().add(confirmMessage).pad(24f);
 
     confirmButton = menuButton("Confirm", null);
     cancelButton = menuButton("Cancel", null);
@@ -182,9 +223,11 @@ public class PauseMenuDisplay extends UIComponent {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent changeEvent, Actor actor) {
-            logger.debug("Leaving run confirmed");
-            entity.getEvents().trigger(EXIT_TO_MENU_EVENT);
+            logger.debug("Confirmation confirmed");
             confirmDialog.hide(null);
+            if (pendingConfirm != null) {
+              pendingConfirm.run();
+            }
           }
         });
 
@@ -192,7 +235,7 @@ public class PauseMenuDisplay extends UIComponent {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent changeEvent, Actor actor) {
-            logger.debug("Leaving run cancelled");
+            logger.debug("Confirmation cancelled");
             confirmDialog.hide(null);
           }
         });
@@ -209,6 +252,13 @@ public class PauseMenuDisplay extends UIComponent {
         .width(MenuTheme.BUTTON_WIDTH)
         .height(MenuTheme.BUTTON_HEIGHT)
         .pad(10f);
+  }
+
+  /** Shows the confirmation dialog with {@code message}; runs {@code onConfirm} if the player confirms. */
+  private void showConfirm(String message, Runnable onConfirm) {
+    confirmMessage.setText(message);
+    pendingConfirm = onConfirm;
+    confirmDialog.show(stage);
   }
 
   /**
@@ -324,6 +374,14 @@ public class PauseMenuDisplay extends UIComponent {
 
   TextButton getReturnButton() {
     return returnButton;
+  }
+
+  TextButton getQuitButton() {
+    return quitButton;
+  }
+
+  boolean hasSaveLoadButton() {
+    return saveLoadButton != null;
   }
 
   TextButton getConfirmButton() {

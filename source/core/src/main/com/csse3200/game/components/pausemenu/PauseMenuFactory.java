@@ -47,7 +47,6 @@ public final class PauseMenuFactory {
     loadMenuAssets();
 
     SaveLoadPanel savePanel = buildSavePanel(game);
-
     uiEntity
         .addComponent(new PauseMenuDisplay())
         .addComponent(new PauseMenuInput())
