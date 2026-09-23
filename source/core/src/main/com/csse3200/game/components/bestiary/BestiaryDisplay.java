@@ -254,7 +254,7 @@ public class BestiaryDisplay extends UIComponent {
   private void rebuildEnemyList() {
     String selectedEnemyId = displayedEntry == null ? null : displayedEntry.enemyId();
     enemyListTable.clearChildren();
-    List<BestiaryEntryView> filtered = bestiary.getEntriesByTier(activeTier);
+    List<BestiaryEntryView> filtered = bestiary.getDiscoveredEntriesByTier(activeTier);
     if (filtered.isEmpty()) {
       Label empty =
           new Label("No enemies in this category yet.", createLabelStyle(SMALL, MUTED_COLOUR));
