@@ -49,6 +49,16 @@ public class PopupDisplay extends UIComponent {
     this.minHeight = minHeight;
   }
 
+  /**
+   * Overrides this popup's window background colour, letting callers match their content's visual
+   * theme instead of using the skin's default window style.
+   *
+   * @param colour solid background colour for the window
+   */
+  public void setBackgroundColour(Color colour) {
+    window.setBackground(skin.newDrawable("white", colour));
+  }
+
   @Override
   public void create() {
     super.create();

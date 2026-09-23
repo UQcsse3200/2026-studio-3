@@ -1,7 +1,9 @@
 package com.csse3200.game.components.battle;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rewards.ItemFormatting;
@@ -11,6 +13,7 @@ import com.csse3200.game.ui.UIComponent;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.IntFunction;
 
 /**
  * A popup UI (hosted in a {@link PopupDisplay}) that shows the items the player currently owns,
@@ -22,12 +25,28 @@ import java.util.Map;
  */
 public class InventoryPopupComponent extends UIComponent {
 
-  private static final Map<ItemType, String> ITEM_DESCRIPTIONS = new EnumMap<>(ItemType.class);
+  private static final Map<ItemType, IntFunction<String>> ITEM_DESCRIPTIONS =
+      new EnumMap<>(ItemType.class);
+
+  private LabelStyle createLabelStyle(Color colour) {
+    LabelStyle style = new LabelStyle(skin.get("default", LabelStyle.class));
+    style.fontColor = colour;
+    return style;
+  }
+
+  private static final Color NAME_COLOUR = new Color(0.9f, 0.84f, 0.73f, 1f);
+  private static final Color DESCRIPTION_COLOUR = new Color(0.65f, 0.58f, 0.52f, 1f);
 
   static {
-    ITEM_DESCRIPTIONS.put(ItemType.ENERGY_CRYSTAL, "+1 max energy");
-    ITEM_DESCRIPTIONS.put(ItemType.MERCHANTS_FAVOR, "+5% shop discount (caps at 50%)");
-    ITEM_DESCRIPTIONS.put(ItemType.LUCKY_COIN, "+10% bonus gold from rewards");
+    ITEM_DESCRIPTIONS.put(ItemType.ENERGY_CRYSTAL, count -> "+" + count + " max energy");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.MERCHANTS_FAVOR,
+        count -> {
+          float discount = Math.min(count * 0.10f, 0.5f);
+          return String.format("+%.0f%% shop discount (caps at 50%%)", discount * 100);
+        });
+    ITEM_DESCRIPTIONS.put(
+        ItemType.LUCKY_COIN, count -> "+" + (count * 10) + "% bonus gold from rewards");
   }
 
   private final RunState runState;
@@ -41,6 +60,7 @@ public class InventoryPopupComponent extends UIComponent {
   @Override
   public void create() {
     super.create();
+    popup.setBackgroundColour(new Color(0.105f, 0.07f, 0.065f, 0.98f));
     popup.setOnShow(this::refresh);
   }
 
@@ -54,22 +74,34 @@ public class InventoryPopupComponent extends UIComponent {
     Table content = popup.getContentTable();
     content.clear();
 
-    List<ItemType> ownedItems = runState.getOrCreatePlayerState().getOwnedItems();
+    var playerState = runState.getOrCreatePlayerState();
+    List<ItemType> ownedItems = playerState.getOwnedItems();
 
     if (ownedItems.isEmpty()) {
-      content.add(new Label("No items yet", skin)).pad(10f);
+      Label emptyLabel = new Label("No items yet", createLabelStyle(DESCRIPTION_COLOUR));
+      content.add(emptyLabel).pad(10f);
       return;
     }
 
-    for (ItemType itemId : ownedItems) {
-      content
-          .add(new Label(ItemFormatting.formatItemName(itemId), skin))
-          .left()
-          .padRight(20f)
-          .padTop(6f);
-      content.add(new Label(ITEM_DESCRIPTIONS.getOrDefault(itemId, ""), skin)).left().padTop(6f);
+    for (ItemType itemId : distinctInOrder(ownedItems)) {
+      int count = playerState.getOwnedItemCount(itemId);
+      String name = ItemFormatting.formatItemName(itemId);
+      String labelText = count > 1 ? name + " x" + count : name;
+      String description =
+          ITEM_DESCRIPTIONS.containsKey(itemId) ? ITEM_DESCRIPTIONS.get(itemId).apply(count) : "";
+
+      Label nameLabel = new Label(labelText, createLabelStyle(NAME_COLOUR));
+      Label descriptionLabel = new Label(description, createLabelStyle(DESCRIPTION_COLOUR));
+
+      content.add(nameLabel).left().padRight(20f).padTop(6f);
+      content.add(descriptionLabel).left().padTop(6f);
       content.row();
     }
+  }
+
+  /** Returns each distinct item type once, in the order it was first acquired. */
+  private static List<ItemType> distinctInOrder(List<ItemType> items) {
+    return items.stream().distinct().toList();
   }
 
   @Override

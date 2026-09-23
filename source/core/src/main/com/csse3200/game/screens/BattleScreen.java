@@ -244,6 +244,10 @@ public class BattleScreen extends ScreenAdapter {
     InventoryPopupComponent inventoryPopup =
         new InventoryPopupComponent(game.getRunState(), itemInventory);
 
+    Entity itemInventoryEntity =
+        new Entity().addComponent(itemInventory).addComponent(inventoryPopup);
+    ServiceLocator.getEntityService().register(itemInventoryEntity);
+
     Stage stage = ServiceLocator.getRenderService().getStage();
     Entity battleUi =
         new Entity()
@@ -253,8 +257,6 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new BattleActions(controller, game))
             .addComponent(cardPlayAdapter)
             .addComponent(cardInventory)
-            .addComponent(itemInventory)
-            .addComponent(inventoryPopup)
             .addComponent(new PauseMenuDisplay())
             .addComponent(new PauseMenuInput())
             .addComponent(new PauseMenuActions(game))
