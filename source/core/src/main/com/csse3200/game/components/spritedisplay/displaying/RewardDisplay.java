@@ -142,7 +142,7 @@ public class RewardDisplay extends Displaying {
         .padLeft(12f)
         .padRight(12f);
     footer.add(line()).width(panelWidth * 0.11f).height(1f);
-    content.add(footer).center().padTop(panelHeight * 0.025f);
+    content.add(footer).center().padTop(panelHeight * -0.015f);
     return content;
   }
 
