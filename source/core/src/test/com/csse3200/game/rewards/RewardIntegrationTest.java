@@ -1,102 +1,97 @@
 package com.csse3200.game.rewards;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
+import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
-import com.csse3200.game.maps.RunState;
+import com.csse3200.game.maps.PlayerRunState;
+import java.util.List;
+import java.util.Random;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(GameExtension.class)
 class RewardIntegrationTest {
 
-    @Test
-    void pendingRewardFlowsCorrectlyFromRunStateToPlayer() {
-        // Simulates the player selecting an option on RewardDisplay
-        RunState runState = new RunState();
-        RewardOption selectedOption = new RewardOption(RewardType.GOLD);
-        selectedOption.goldAmount = 25;
-        runState.setPendingReward(selectedOption);
+  @Test
+  void claimedGoldIsImmediatelyStoredInRunState() {
+    PlayerRunState playerState = new PlayerRunState(100, 100, 50);
 
-        // Simulates BattleScreen reading and applying the pending reward
-        // (mirrors the real logic in BattleScreen.java lines 129-137)
-        Entity player = new Entity();
-        player.addComponent(new InventoryComponent(0));
-        RewardService rewardService = new RewardService();
+    playerState.addGold(25);
 
-        RewardOption pendingReward = runState.getPendingReward();
-        if (pendingReward != null) {
-            rewardService.claimReward(player, pendingReward);
-            runState.clearPendingReward();
-        }
+    assertEquals(75, playerState.getGold());
+  }
 
-        assertEquals(25, player.getComponent(InventoryComponent.class).getGold());
-        assertNull(runState.getPendingReward());
-    }
+  @Test
+  void luckyCoinAffectsGeneratedGoldExactlyOnce() {
+    PlayerRunState playerState = new PlayerRunState(100, 100, 50);
+    playerState.addOwnedItem(ItemType.LUCKY_COIN);
 
-    @Test
-    void noRewardMeansNoChangeToPlayerGold() {
-        RunState runState = new RunState();
-        Entity player = new Entity();
-        player.addComponent(new InventoryComponent(50));
-        RewardService rewardService = new RewardService();
+    RewardService service = new RewardService(new RewardGenerator(new Random(42)));
 
-        RewardOption pendingReward = runState.getPendingReward();
-        if (pendingReward != null) {
-            rewardService.claimReward(player, pendingReward);
-            runState.clearPendingReward();
-        }
+    List<RewardOption> options =
+        service.generateRewardOptions(playerState.getGoldBonusMultiplier());
 
-        assertEquals(50, player.getComponent(InventoryComponent.class).getGold());
-    }
+    RewardOption goldOption = options.get(0);
 
-    @Test
-    void itemRewardShouldApplyLuckyCoinBonusCorrectly() {
-        RunState runState = new RunState();
-        RewardOption luckyCoin = new RewardOption(RewardType.ITEM);
-        luckyCoin.itemId = ItemType.LUCKY_COIN;
-        runState.setPendingReward(luckyCoin);
+    RewardGenerator baseGenerator = new RewardGenerator(new Random(42));
 
-        Entity player = new Entity();
-        player.addComponent(new InventoryComponent(0));
-        RewardService rewardService = new RewardService();
+    int baseAmount = baseGenerator.generateGoldRewardOption().goldAmount;
 
-        RewardOption pending = runState.getPendingReward();
-        rewardService.claimReward(player, pending);
-        runState.clearPendingReward();
+    assertEquals(Math.round(baseAmount * 1.1f), goldOption.goldAmount);
 
-        InventoryComponent inventory = player.getComponent(InventoryComponent.class);
-        assertEquals(0.1f, inventory.getGoldBonusMultiplier(), 0.001f);
+    playerState.addGold(goldOption.goldAmount);
 
-        RewardOption goldReward = new RewardOption(RewardType.GOLD);
-        goldReward.goldAmount = 20;
-        rewardService.claimReward(player, goldReward);
+    assertEquals(50 + goldOption.goldAmount, playerState.getGold());
+  }
 
-        assertEquals(22, inventory.getGold());
-    }
+  @Test
+  void luckyCoinIsReappliedToEachNewPlayerEntity() {
+    PlayerRunState playerState = new PlayerRunState(100, 100, 50);
+    playerState.addOwnedItem(ItemType.LUCKY_COIN);
 
-    @Test
-    void demonstratesTheKnownPersistenceIssue() {
-        // Intentionally simulates a new Entity being created each battle,
-        // matching real behaviour in PlayerFactory.createPlayer().
-        // Documents the known limitation: bonuses do not survive across
-        // a fresh Player entity.
-        Entity player1 = new Entity();
-        player1.addComponent(new InventoryComponent(0));
-        RewardService rewardService = new RewardService();
+    Entity firstPlayer = createPlayer();
+    playerState.applyTo(firstPlayer);
 
-        RewardOption luckyCoin = new RewardOption(RewardType.ITEM);
-        luckyCoin.itemId = ItemType.LUCKY_COIN;
-        rewardService.claimReward(player1, luckyCoin);
+    assertEquals(
+        0.1f, firstPlayer.getComponent(InventoryComponent.class).getGoldBonusMultiplier(), 0.001f);
 
-        assertEquals(0.1f, player1.getComponent(InventoryComponent.class).getGoldBonusMultiplier(), 0.001f);
+    Entity secondPlayer = createPlayer();
+    playerState.applyTo(secondPlayer);
 
-        Entity player2 = new Entity();
-        player2.addComponent(new InventoryComponent(0));
+    assertEquals(
+        0.1f, secondPlayer.getComponent(InventoryComponent.class).getGoldBonusMultiplier(), 0.001f);
+  }
 
-        assertEquals(0f, player2.getComponent(InventoryComponent.class).getGoldBonusMultiplier(), 0.001f);
-    }
+  @Test
+  void energyCrystalAddsOneMaximumEnergy() {
+    PlayerRunState playerState = new PlayerRunState(100, 100, 50);
+    playerState.addOwnedItem(ItemType.ENERGY_CRYSTAL);
+
+    Entity player = createPlayer();
+    playerState.applyTo(player);
+
+    assertEquals(4, player.getComponent(EnergyComponent.class).getMaxEnergy());
+  }
+
+  @Test
+  void merchantsFavorAddsTenPercentDiscount() {
+    PlayerRunState playerState = new PlayerRunState(100, 100, 50);
+    playerState.addOwnedItem(ItemType.MERCHANTS_FAVOR);
+
+    Entity player = createPlayer();
+    playerState.applyTo(player);
+
+    assertEquals(0.10f, player.getComponent(InventoryComponent.class).getShopDiscount(), 0.001f);
+  }
+
+  private Entity createPlayer() {
+    return new Entity()
+        .addComponent(new CombatStatsComponent(100, 5, 100))
+        .addComponent(new InventoryComponent(0))
+        .addComponent(new EnergyComponent(3));
+  }
 }

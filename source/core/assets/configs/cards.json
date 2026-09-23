@@ -9,7 +9,25 @@
         "rarity": "COMMON",
         "target": "SINGLE_ENEMY",
         "effects": [{ "type": "DAMAGE", "value": 6, "duration": 0 }],
-        "texturePath": "images/cards/strike.png"
+        "texturePath": "images/cards/strike.png",
+        "upgrade": {
+          "name": "Strike+",
+          "description": "Deal 12 damage.",
+          "cost": 1,
+          "rarity": "COMMON",
+          "effects": [{ "type": "DAMAGE", "value": 12, "duration": 0 }]
+        }
+      },
+      {
+        "id": "warding_sweep",
+        "name": "Warding Sweep",
+        "description": "Deal 4 damage to all enemies.",
+        "cost": 2,
+        "type": "ATTACK",
+        "rarity": "COMMON",
+        "target": "ALL_ENEMIES",
+        "effects": [{ "type": "DAMAGE", "value": 4, "duration": 0 }],
+        "texturePath": "images/cards/warding_sweep.png"
       },
       {
         "id": "defend",
@@ -68,6 +86,281 @@
         "target": "SELF",
         "effects": [{ "type": "HEAL", "value": 6, "duration": 0 }],
         "texturePath": "images/cards/bandage.png"
+      },
+      {
+        "id": "sentinels_rebuke",
+        "name": "Sentinel's Rebuke",
+        "description": "Deal 4 damage. Apply 1 Feeble for 2 turns.",
+        "cost": 1,
+        "type": "ATTACK",
+        "rarity": "UNCOMMON",
+        "target": "SINGLE_ENEMY",
+        "effects": [
+          { "type": "DAMAGE", "value": 4, "duration": 0 },
+          { "type": "FEEBLE", "value": 1, "duration": 2 }
+        ],
+        "texturePath": "images/cards/sentinels_rebuke.png"
+      },
+      {
+        "id": "poison_flask",
+        "name": "Poison Flask",
+        "description": "Apply 5 Poison for 3 turns.",
+        "cost": 1,
+        "type": "SKILL",
+        "rarity": "UNCOMMON",
+        "target": "SINGLE_ENEMY",
+        "effects": [
+          { "type": "POISON", "value": 5, "duration": 3 }
+        ],
+        "texturePath": "images/cards/poison_flask.png"
+      },
+      {
+        "id": "poison_blade",
+        "name": "Poison Blade",
+        "description": "Deal 10 piercing damage, ignoring Block and Armour. Apply 4 Poison for 2 turns.",
+        "cost": 2,
+        "type": "ATTACK",
+        "rarity": "UNCOMMON",
+        "target": "SINGLE_ENEMY",
+        "effects": [
+          { "type": "PIERCE", "value": 10, "duration": 0 },
+          { "type": "POISON", "value": 4, "duration": 2 }
+        ],
+        "texturePath": "images/cards/poison_blade.png"
+      },
+      {
+        "id": "poison_cloud",
+        "name": "Poison Cloud",
+        "description": "Apply 3 Poison to all enemies for 3 turns.",
+        "cost": 2,
+        "type": "SKILL",
+        "rarity": "UNCOMMON",
+        "target": "ALL_ENEMIES",
+        "effects": [
+          { "type": "POISON", "value": 3, "duration": 3 }
+        ],
+        "texturePath": "images/cards/poison_cloud.png"
+      },
+      {
+        "id": "poison_mark",
+        "name": "Poison Mark",
+        "description": "Apply 2 Vulnerable and 2 Poison to an enemy for 2 turns.",
+        "cost": 1,
+        "type": "SKILL",
+        "rarity": "RARE",
+        "target": "SINGLE_ENEMY",
+        "effects": [
+          { "type": "VULNERABLE", "value": 2, "duration": 2 },
+          { "type": "POISON", "value": 2, "duration": 2 }
+        ],
+        "texturePath": "images/cards/poison_mark.png"
+      },
+      {
+        "id": "starfall",
+        "name": "Starfall",
+        "description": "Deal 6 damage to all enemies.",
+        "cost": 2,
+        "type": "ATTACK",
+        "rarity": "UNCOMMON",
+        "target": "ALL_ENEMIES",
+        "effects": [{ "type": "DAMAGE", "value": 6, "duration": 0 }],
+        "texturePath": "images/cards/starfall.png"
+      },
+      {
+        "id": "rift_lance",
+        "name": "Rift Lance",
+        "description": "Deal 4 damage. Apply 1 Vulnerable for 2 turns.",
+        "cost": 1,
+        "type": "ATTACK",
+        "rarity": "UNCOMMON",
+        "target": "SINGLE_ENEMY",
+        "effects": [
+          { "type": "DAMAGE", "value": 4, "duration": 0 },
+          { "type": "VULNERABLE", "value": 1, "duration": 2 }
+        ],
+        "texturePath": "images/cards/rift_lance.png"
+      },
+      {
+        "id": "wardens_judgement",
+        "name": "Warden's Judgement",
+        "description": "Deal 9 damage.",
+        "cost": 2,
+        "type": "ATTACK",
+        "rarity": "UNCOMMON",
+        "target": "SINGLE_ENEMY",
+        "effects": [{ "type": "DAMAGE", "value": 9, "duration": 0 }],
+        "texturePath": "images/cards/wardens_judgement.png"
+      },
+      {
+        "id": "unseal_the_breach",
+        "name": "Unseal the Breach",
+        "description": "Deal 2 damage. Reduce the enemy's armour by 3.",
+        "cost": 1,
+        "type": "ATTACK",
+        "rarity": "UNCOMMON",
+        "target": "SINGLE_ENEMY",
+        "effects": [
+          { "type": "SUNDER", "value": 3, "duration": 0 },
+          { "type": "DAMAGE", "value": 2, "duration": 0 }
+        ],
+        "texturePath": "images/cards/unseal_the_breach.png"
+      },
+      {
+        "id": "astral_ward",
+        "name": "Astral Ward",
+        "description": "Gain 4 Block and 1 Strength for the rest of combat. Restore 1 Energy.",
+        "cost": 2,
+        "type": "SKILL",
+        "rarity": "UNCOMMON",
+        "target": "SELF",
+        "effects": [
+          { "type": "BLOCK", "value": 4, "duration": 0 },
+          { "type": "STRENGTH", "value": 1, "duration": 0 },
+          { "type": "ENERGY_GAIN", "value": 1, "duration": 0 }
+        ],
+        "texturePath": "images/cards/astral_ward.png"
+      },
+      {
+        "id": "resurrection",
+        "name": "Resurrection",
+        "description": "Heal 6 HP at the start of your next 3 turns.",
+        "cost": 5,
+        "type": "SKILL",
+        "rarity": "RARE",
+        "target": "SELF",
+        "effects": [{ "type": "HEAL", "value": 6, "duration": 3 }],
+        "texturePath": "images/cards/resurrection.png"
+      },
+      {
+        "id": "makeshift_shelter",
+        "name": "Makeshift Shelter",
+        "description": "Gain 7 Block. Heal 3.",
+        "cost": 2,
+        "type": "SKILL",
+        "rarity": "UNCOMMON",
+        "target": "SELF",
+        "effects": [
+          { "type": "BLOCK", "value": 7, "duration": 0 },
+          { "type": "HEAL", "value": 3, "duration": 0 }
+        ],
+        "texturePath": "images/cards/makeshift_shelter.png"
+      },
+      {
+        "id": "rubble_barricade",
+        "name": "Rubble Barricade",
+        "description": "Gain 12 Block.",
+        "cost": 2,
+        "type": "SKILL",
+        "rarity": "UNCOMMON",
+        "target": "SELF",
+        "effects": [{ "type": "BLOCK", "value": 12, "duration": 0 }],
+        "texturePath": "images/cards/rubble_barricade.png"
+      },
+      {
+        "id": "emergency_salve",
+        "name": "Emergency Salve",
+        "description": "Heal 10 health.",
+        "cost": 2,
+        "type": "SKILL",
+        "rarity": "UNCOMMON",
+        "target": "SELF",
+        "effects": [{ "type": "HEAL", "value": 10, "duration": 0 }],
+        "texturePath": "images/cards/emergency_salve.png"
+      },
+      {
+        "id": "purify",
+        "name": "Purify",
+        "description": "Remove all negative effects from yourself.",
+        "cost": 1,
+        "type": "SKILL",
+        "rarity": "UNCOMMON",
+        "target": "SELF",
+        "effects": [{ "type": "CLEANSE", "value": 1, "duration": 0 }],
+        "texturePath": "images/cards/purify.png"
+      },
+      {
+        "id": "sealed_pact",
+        "name": "Sealed Pact",
+        "description": "Bind your fate to the archive. Gain 3 Strength and 6 Block.",
+        "cost": 3,
+        "type": "POWER",
+        "rarity": "RARE",
+        "target": "SELF",
+        "effects": [
+          { "type": "STRENGTH", "value": 3, "duration": 0 },
+          { "type": "BLOCK", "value": 6, "duration": 0 }
+        ],
+        "texturePath": "images/cards/sealed_pact.png",
+        "upgrade": {
+          "name": "Sealed Pact+",
+          "description": "Bind your fate to the archive. Gain 4 Strength and 9 Block.",
+          "cost": 3,
+          "rarity": "RARE",
+          "effects": [
+            { "type": "STRENGTH", "value": 4, "duration": 0 },
+            { "type": "BLOCK", "value": 9, "duration": 0 }
+          ]
+        }
+      },
+      {
+        "id": "blood_price",
+        "name": "Blood Price",
+        "description": "Release forbidden power. Deal 20 damage.",
+        "cost": 3,
+        "type": "ATTACK",
+        "rarity": "UNCOMMON",
+        "target": "SINGLE_ENEMY",
+        "effects": [{ "type": "DAMAGE", "value": 20, "duration": 0 }],
+        "texturePath": "images/cards/blood_price.png",
+        "upgrade": {
+          "name": "Blood Price+",
+          "description": "Release forbidden power. Deal 28 damage.",
+          "cost": 3,
+          "rarity": "UNCOMMON",
+          "effects": [{ "type": "DAMAGE", "value": 28, "duration": 0 }]
+        }
+      },
+      {
+        "id": "doom_sigil",
+        "name": "Doom Sigil",
+        "description": "Mark an enemy with ruin. Apply 1 Vulnerable for 2 turns and 4 Poison for 3 turns.",
+        "cost": 2,
+        "type": "SKILL",
+        "rarity": "RARE",
+        "target": "SINGLE_ENEMY",
+        "effects": [
+          { "type": "VULNERABLE", "value": 1, "duration": 2 },
+          { "type": "POISON", "value": 4, "duration": 3 }
+        ],
+        "texturePath": "images/cards/doom_sigil.png",
+        "upgrade": {
+          "name": "Doom Sigil+",
+          "description": "Mark an enemy with ruin. Apply 2 Vulnerable for 2 turns and 6 Poison for 3 turns.",
+          "cost": 2,
+          "rarity": "RARE",
+          "effects": [
+            { "type": "VULNERABLE", "value": 2, "duration": 2 },
+            { "type": "POISON", "value": 6, "duration": 3 }
+          ]
+        }
+      },
+      {
+        "id": "iron_oath",
+        "name": "Iron Oath",
+        "description": "Swear a forbidden oath. Gain 4 Armour.",
+        "cost": 1,
+        "type": "SKILL",
+        "rarity": "UNCOMMON",
+        "target": "SELF",
+        "effects": [{ "type": "FORTIFY", "value": 4, "duration": 0 }],
+        "texturePath": "images/cards/iron_oath.png",
+        "upgrade": {
+          "name": "Iron Oath+",
+          "description": "Swear a forbidden oath. Gain 6 Armour.",
+          "cost": 1,
+          "rarity": "UNCOMMON",
+          "effects": [{ "type": "FORTIFY", "value": 6, "duration": 0 }]
+        }
       }
     ]
   }

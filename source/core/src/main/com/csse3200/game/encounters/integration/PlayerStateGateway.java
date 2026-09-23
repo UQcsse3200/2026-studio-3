@@ -16,11 +16,25 @@ public interface PlayerStateGateway {
   int getHealth();
 
   /**
+   * Returns the player's maximum health.
+   *
+   * @return the player's maximum health
+   */
+  int getMaxHealth();
+
+  /**
    * Updates the player's health. The concrete Player system owns its health bounds.
    *
    * @param health requested health value
    */
   void setHealth(int health);
+
+  /**
+   * Applies a signed direct health delta using the Player system's non-combat health semantics.
+   *
+   * @param amount positive to heal, negative to lose health, or zero for no change
+   */
+  void applyDirectHealthChange(int amount);
 
   /**
    * Returns the player's current spendable currency.
@@ -35,4 +49,11 @@ public interface PlayerStateGateway {
    * @param currency non-negative currency value
    */
   void setCurrency(int currency);
+
+  /**
+   * Returns the player's current shop discount, as a fraction (e.g. 0.05f for 5% off).
+   *
+   * @return the player's current shop discount
+   */
+  float getShopDiscount();
 }

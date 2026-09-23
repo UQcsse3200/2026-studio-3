@@ -1,5 +1,6 @@
 package com.csse3200.game.rendering;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -41,6 +42,12 @@ public class AnimationRenderComponent extends RenderComponent {
   private Animation<TextureRegion> currentAnimation;
   private String currentAnimationName;
   private float animationPlayTime;
+
+  // 战斗特效用的整体染色：flashTint 会在 tintTimeRemaining 用完后自动清除，
+  // setPersistentTint 则要显式调用 clearTint 才会消失（比如激怒状态要一直红到死亡）
+  private Color activeTint;
+  private boolean tintPersistent;
+  private float tintTimeRemaining;
 
   /**
    * Create the component for a given texture atlas.
@@ -174,6 +181,50 @@ public class AnimationRenderComponent extends RenderComponent {
     return currentAnimation != null && currentAnimation.isAnimationFinished(animationPlayTime);
   }
 
+  /**
+   * Flashes the sprite a solid colour for a short time, then automatically returns to normal.
+   *
+   * @param color the flash colour
+   * @param durationSeconds how long the flash lasts
+   */
+  public void flashTint(Color color, float durationSeconds) {
+    activeTint = color;
+    tintPersistent = false;
+    tintTimeRemaining = durationSeconds;
+  }
+
+  /**
+   * Tints the sprite a solid colour until {@link #clearTint()} is called (e.g. an enraged state
+   * that should persist until the enemy dies).
+   *
+   * @param color the persistent tint colour
+   */
+  public void setPersistentTint(Color color) {
+    activeTint = color;
+    tintPersistent = true;
+  }
+
+  /** Removes any active tint, flashing or persistent. */
+  public void clearTint() {
+    activeTint = null;
+    tintPersistent = false;
+    tintTimeRemaining = 0f;
+  }
+
+  /**
+   * @return the colour currently tinting the sprite, or null if none is active
+   */
+  public Color getActiveTint() {
+    return activeTint;
+  }
+
+  /**
+   * @return true if the active tint persists until explicitly cleared, rather than expiring
+   */
+  public boolean isTintPersistent() {
+    return tintPersistent;
+  }
+
   @Override
   protected void draw(SpriteBatch batch) {
     if (currentAnimation == null) {
@@ -182,13 +233,29 @@ public class AnimationRenderComponent extends RenderComponent {
     TextureRegion region = currentAnimation.getKeyFrame(animationPlayTime);
     Vector2 pos = entity.getPosition();
     Vector2 scale = entity.getScale();
-    batch.draw(region, pos.x, pos.y, scale.x, scale.y);
+
+    if (activeTint != null) {
+      // SpriteBatch 的颜色是全局状态，画完必须马上还原，不然会污染其他实体的绘制颜色
+      float previousColor = batch.getPackedColor();
+      batch.setColor(activeTint);
+      batch.draw(region, pos.x, pos.y, scale.x, scale.y);
+      batch.setPackedColor(previousColor);
+
+      if (!tintPersistent) {
+        tintTimeRemaining -= timeSource.getDeltaTime();
+        if (tintTimeRemaining <= 0f) {
+          activeTint = null;
+        }
+      }
+    } else {
+      batch.draw(region, pos.x, pos.y, scale.x, scale.y);
+    }
+
     animationPlayTime += timeSource.getDeltaTime();
   }
 
   @Override
   public void dispose() {
-    atlas.dispose();
     super.dispose();
   }
 }

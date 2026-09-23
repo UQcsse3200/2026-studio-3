@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.csse3200.game.chance.ChanceChoice;
 import com.csse3200.game.chance.ChanceEncounter;
 import com.csse3200.game.chance.ChanceOutcome;
+import com.csse3200.game.encounters.integration.mocks.MockCardCatalogGateway;
+import com.csse3200.game.encounters.integration.mocks.MockDeckGateway;
 import com.csse3200.game.encounters.integration.mocks.MockPlayerStateGateway;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -55,6 +57,32 @@ class ChanceEncounterSessionTest {
     assertEquals(1, callback.count);
     assertEquals(1, callback.nodeId);
     assertTrue(callback.success);
+  }
+
+  @Test
+  void shouldRetryRejectedCardOutcomeWithoutAccumulatingReward() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(70, 100, 40);
+    player.rejectNextHealthUpdate();
+    MockDeckGateway deck = new MockDeckGateway();
+    ChanceEncounter encounter =
+        new ChanceEncounter(
+            "reward-event",
+            "Reward event",
+            List.of(new ChanceChoice("accept", "Accept", new ChanceOutcome(20, 0, "bandage"))));
+    ChanceEncounterSession session =
+        new ChanceEncounterSession(
+            1,
+            encounter,
+            new ChanceOutcomeApplier(player, new MockCardCatalogGateway("bandage"), deck),
+            (nodeId, success) -> {});
+
+    ChanceResolution firstAttempt = session.resolveChoice("accept");
+    ChanceResolution retry = session.resolveChoice("accept");
+
+    assertEquals(ChanceResolution.Status.PLAYER_UPDATE_FAILED, firstAttempt.getStatus());
+    assertTrue(retry.isSuccess());
+    assertEquals(List.of("bandage"), deck.getCardIds());
+    assertEquals(90, player.getHealth());
   }
 
   private ChanceEncounterSession createSession(

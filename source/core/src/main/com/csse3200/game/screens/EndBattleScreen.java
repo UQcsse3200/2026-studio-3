@@ -3,6 +3,13 @@ package com.csse3200.game.screens;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.GdxGame;
+import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardLibrary;
+import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.components.cards.CardUpgradeDisplay;
+import com.csse3200.game.components.cards.CardUpgradeSelection;
+import com.csse3200.game.components.cards.PlayerDeckCardUpgradeCommitter;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord;
 import com.csse3200.game.components.spritedisplay.displaying.EndBattleDisplay;
@@ -59,6 +66,18 @@ public class EndBattleScreen extends ScreenAdapter {
       DisplayingRecord rewardRecord =
           DisplayingRecord.builder("").position(0, 500).variant("reward").build();
       ui.addComponent(new RewardDisplay(rewardRecord, rewardService, game.getRunState()));
+      CardService cardLibrary = new CardLibrary(CardConfigLoader.loadCards());
+      RunState runState = game.getRunState();
+      if (runState != null) {
+        PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(cardLibrary);
+        CardUpgradeSelection upgradeSelection =
+            CardUpgradeSelection.forPlayerDeck(playerDeck, cardLibrary, 2);
+        if (!upgradeSelection.getCardUpgradeOption().isEmpty()) {
+          ui.addComponent(
+              new CardUpgradeDisplay(
+                  upgradeSelection, new PlayerDeckCardUpgradeCommitter(playerDeck)));
+        }
+      }
     }
 
     ui.getEvents().addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, this::returnToMenu);

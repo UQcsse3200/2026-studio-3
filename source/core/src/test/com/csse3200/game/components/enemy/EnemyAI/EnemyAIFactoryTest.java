@@ -49,4 +49,63 @@ class EnemyAIFactoryTest {
 
     assertInstanceOf(CycleAttackDefendAI.class, ai);
   }
+
+  @Test
+  void shouldCreateEnrageLowHealthAI() {
+    EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.ENRAGE_LOW_HEALTH);
+
+    assertInstanceOf(EnrageLowHealthAI.class, ai);
+  }
+
+  @Test
+  void shouldCreateVoidKnightRetaliationAI() {
+    EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.SHIELD_BREAK_RETALIATION);
+
+    assertInstanceOf(ShieldBreakRetaliationAI.class, ai);
+  }
+
+  @Test
+  void shouldCreateSeparateVoidKnightAIInstances() {
+    EnemyAI first = EnemyAIFactory.create(EnemyAIFactory.SHIELD_BREAK_RETALIATION);
+
+    EnemyAI second = EnemyAIFactory.create(EnemyAIFactory.SHIELD_BREAK_RETALIATION);
+
+    assertNotSame(first, second);
+  }
+
+  @Test
+  void shouldCreateBossAI() {
+    EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.BOSS);
+
+    assertInstanceOf(BossAI.class, ai);
+  }
+
+  @Test
+  void shouldCreateSeparateBossAIInstances() {
+    EnemyAI first = EnemyAIFactory.create(EnemyAIFactory.BOSS);
+    EnemyAI second = EnemyAIFactory.create(EnemyAIFactory.BOSS);
+
+    assertNotSame(first, second);
+  }
+
+  @Test
+  void shouldCreateDefensiveStanceAI() {
+    EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.DEFENSIVE_STANCE);
+
+    assertInstanceOf(DefensiveStanceAI.class, ai);
+  }
+
+  @Test
+  void shouldCreateArmourScalingAI() {
+    EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.ARMOUR_SCALING);
+
+    assertInstanceOf(ArmourScalingAI.class, ai);
+  }
+
+  @Test
+  void shouldCreateRandomStanceAI() {
+    EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.ERRATIC);
+
+    assertInstanceOf(RandomStanceAI.class, ai);
+  }
 }

@@ -16,6 +16,9 @@ public class CardHandDisplay extends UIComponent {
   private static final int CARDS_PER_ROW = 3;
   private static final float CARD_WIDTH = 150f;
   private static final float CARD_HEIGHT = 214f;
+  private static final String WHITE = "white";
+  private static final String LARGE = "large";
+  private static final String SMALL = "small";
   private static final List<DemoCard> DEMO_HAND =
       List.of(
           new DemoCard("Strike", "1", "Deal 6 damage.", new Color(0.74f, 0.18f, 0.16f, 1f)),
@@ -71,13 +74,13 @@ public class CardHandDisplay extends UIComponent {
     Table overlay = new Table();
     overlay.setFillParent(true);
     overlay.setTouchable(Touchable.enabled);
-    overlay.setBackground(skin.newDrawable("white", new Color(0.02f, 0.02f, 0.02f, 0.76f)));
+    overlay.setBackground(skin.newDrawable(WHITE, new Color(0.02f, 0.02f, 0.02f, 0.76f)));
     overlay.pad(34f);
 
     Table libraryPanel = new Table();
     libraryPanel.top();
     libraryPanel.defaults().pad(6f);
-    libraryPanel.setBackground(skin.newDrawable("white", new Color(0.10f, 0.08f, 0.06f, 0.95f)));
+    libraryPanel.setBackground(skin.newDrawable(WHITE, new Color(0.10f, 0.08f, 0.06f, 0.95f)));
     libraryPanel.pad(18f);
 
     Table header = new Table();
@@ -97,7 +100,7 @@ public class CardHandDisplay extends UIComponent {
     libraryPanel.add(header).expandX().fillX();
     libraryPanel.row();
 
-    Label sectionTitle = new Label("Current Hand", skin, "large");
+    Label sectionTitle = new Label("Current Hand", skin, LARGE);
     sectionTitle.setColor(Color.WHITE);
     libraryPanel.add(sectionTitle).left().expandX().fillX().padTop(6f);
     libraryPanel.row();
@@ -121,22 +124,22 @@ public class CardHandDisplay extends UIComponent {
     Table cardTable = new Table();
     cardTable.top();
     cardTable.pad(8f);
-    cardTable.setBackground(skin.newDrawable("white", new Color(0.95f, 0.91f, 0.78f, 1f)));
+    cardTable.setBackground(skin.newDrawable(WHITE, new Color(0.95f, 0.91f, 0.78f, 1f)));
 
-    Label cost = new Label(card.cost, skin, "large");
+    Label cost = new Label(card.cost, skin, LARGE);
     cost.setColor(Color.WHITE);
     Table costBadge = new Table();
-    costBadge.setBackground(skin.newDrawable("white", card.accent));
+    costBadge.setBackground(skin.newDrawable(WHITE, card.accent));
     costBadge.add(cost).center();
 
-    Label name = new Label(card.name, skin, "small");
+    Label name = new Label(card.name, skin, SMALL);
     name.setColor(Color.BLACK);
     name.setWrap(true);
 
-    Label type = new Label("DEMO CARD", skin, "small");
+    Label type = new Label("DEMO CARD", skin, SMALL);
     type.setColor(card.accent);
 
-    Label description = new Label(card.description, skin, "small");
+    Label description = new Label(card.description, skin, SMALL);
     description.setColor(Color.BLACK);
     description.setWrap(true);
 

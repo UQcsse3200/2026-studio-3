@@ -1,0 +1,22 @@
+{
+  "cards": [
+    {
+      "id": "poison_dagger",
+      "name": "Poison Dagger",
+      "description": "Deal damage and apply Poison.",
+      "cost": 1,
+      "type": "ATTACK",
+      "rarity": "UNCOMMON",
+      "target": "SINGLE_ENEMY",
+      "effects": [{ "type": "POISON", "value": 3, "duration": 3 }],
+      "texturePath": "images/cards/poison_dagger.png",
+      "upgrade": {
+        "name": "Poison Dagger+",
+        "description": "Apply more Poison.",
+        "cost": 1,
+        "rarity": "UNCOMMON",
+        "effects": [{ "type": "POISON", "value": 5, "duration": 0 }]
+      }
+    }
+  ]
+}

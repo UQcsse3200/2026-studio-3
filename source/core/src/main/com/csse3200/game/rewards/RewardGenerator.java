@@ -13,6 +13,9 @@ public class RewardGenerator {
   }
 
   public RewardGenerator(Random random) {
+    if (random == null) {
+      throw new IllegalArgumentException("random must not be null");
+    }
     this.random = random;
   }
 
@@ -21,37 +24,39 @@ public class RewardGenerator {
     return new GoldReward(base);
   }
 
-  /**
-   * Generates exactly one gold reward option.
-   *
-   * @return a randomly generated gold reward option
-   */
+  /** Generates gold without an item multiplier. */
   public RewardOption generateGoldRewardOption() {
-    GoldReward goldReward = generateGoldOption();
-    RewardOption option = new RewardOption(RewardType.GOLD);
-    option.goldAmount = goldReward.getBaseAmount();
-    return option;
+    return generateGoldRewardOption(0f);
   }
 
   /**
-   * Generates exactly one item reward option, randomly chosen from the eligible item pool.
+   * Generates the final gold amount, including the player's current Lucky Coin multiplier.
    *
-   * @return a randomly generated item reward option
+   * @param goldBonusMultiplier accumulated gold bonus
+   * @return final gold reward option
    */
+  public RewardOption generateGoldRewardOption(float goldBonusMultiplier) {
+    if (!Float.isFinite(goldBonusMultiplier) || goldBonusMultiplier < 0f) {
+      throw new IllegalArgumentException("goldBonusMultiplier must be finite and non-negative");
+    }
+
+    int baseAmount = generateGoldOption().getBaseAmount();
+    int finalAmount = Math.round(baseAmount * (1f + goldBonusMultiplier));
+
+    RewardOption option = new RewardOption(RewardType.GOLD);
+    option.goldAmount = finalAmount;
+    return option;
+  }
+
   public RewardOption generateItemRewardOption() {
     ItemType[] items = ItemType.values();
     ItemType picked = items[random.nextInt(items.length)];
+
     RewardOption option = new RewardOption(RewardType.ITEM);
     option.itemId = picked;
     return option;
   }
 
-  /**
-   * Generates a single reward option, randomly choosing between a gold reward and an item reward.
-   * Kept for compatibility with callers that just need one arbitrary option.
-   *
-   * @return a randomly generated reward option
-   */
   public RewardOption generateRewardOption() {
     return random.nextBoolean() ? generateGoldRewardOption() : generateItemRewardOption();
   }

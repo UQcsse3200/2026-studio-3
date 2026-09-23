@@ -34,6 +34,7 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
 
   @Override
   public ShopTransactionStatus validatePurchase(String cardId, int price) {
+
     if (cardId == null || cardId.isBlank()) {
       return ShopTransactionStatus.INVALID_CARD;
     }
@@ -50,7 +51,15 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
     if (!cardExists) {
       return ShopTransactionStatus.CARD_NOT_FOUND;
     }
-    if (player.getCurrency() < price) {
+    try {
+      if (!deck.canAddCard(cardId)) {
+        return ShopTransactionStatus.CARD_ADD_FAILED;
+      }
+    } catch (RuntimeException exception) {
+      return ShopTransactionStatus.CARD_ADD_FAILED;
+    }
+    int finalPrice = applyDiscount(price);
+    if (player.getCurrency() < finalPrice) {
       return ShopTransactionStatus.INSUFFICIENT_CURRENCY;
     }
     return ShopTransactionStatus.READY;
@@ -63,6 +72,7 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
       return validation;
     }
 
+    int finalPrice = applyDiscount(price);
     int currencyBefore = player.getCurrency();
     boolean cardAdded;
     try {
@@ -75,10 +85,11 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
     }
 
     try {
-      player.setCurrency(currencyBefore - price);
-      if (player.getCurrency() != currencyBefore - price) {
+      player.setCurrency(currencyBefore - finalPrice);
+      if (player.getCurrency() != currencyBefore - finalPrice) {
         throw new IllegalStateException("Player currency update was not accepted");
       }
+      deck.commitCardAddition(cardId);
     } catch (RuntimeException exception) {
       return rollback(cardId, currencyBefore);
     }
@@ -89,7 +100,7 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
   private ShopTransactionStatus rollback(String cardId, int currencyBefore) {
     boolean cardRemoved;
     try {
-      cardRemoved = deck.removeCard(cardId);
+      cardRemoved = deck.rollbackCardAddition(cardId);
     } catch (RuntimeException exception) {
       cardRemoved = false;
     }
@@ -107,12 +118,13 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
         : ShopTransactionStatus.ROLLBACK_FAILED;
   }
 
-  /**
-   * Returns 0 for now — the Player/Card/Deck boundary does not yet expose a discount getter. TODO:
-   * wire this up once PlayerStateGateway supports shop discount.
-   */
   @Override
   public float getShopDiscount() {
-    return 0f;
+    return player.getShopDiscount();
+  }
+
+  private int applyDiscount(int price) {
+    float discount = getShopDiscount();
+    return Math.round(price * (1f - discount));
   }
 }

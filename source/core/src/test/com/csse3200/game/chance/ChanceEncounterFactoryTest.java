@@ -4,20 +4,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.csse3200.game.extensions.GameExtension;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(GameExtension.class)
 class ChanceEncounterFactoryTest {
   @Test
   void shouldCreateInitialEncountersInDeterministicOrder() {
     List<ChanceEncounter> encounters = ChanceEncounterFactory.createInitialEncounters();
 
-    assertEquals(3, encounters.size());
-    assertEquals("mysterious-shrine", encounters.get(0).getId());
-    assertEquals("healing-spring", encounters.get(1).getId());
-    assertEquals("forgotten-cache", encounters.get(2).getId());
+    assertEquals(
+        List.of(
+            "mysterious-shrine",
+            "healing-spring",
+            "forgotten-cache",
+            "wandering-healer",
+            "flooded-crossing",
+            "abandoned-mine",
+            "roadside-riddle"),
+        encounters.stream().map(ChanceEncounter::getId).toList());
   }
 
   @Test

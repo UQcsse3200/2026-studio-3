@@ -1,0 +1,28 @@
+{
+  "entries": [
+    {
+      "enemyId": "lesser_shade",
+      "description": "An unstable shade that chooses unpredictably between attacking and defending."
+    },
+    {
+      "enemyId": "bone_crawler",
+      "description": "A patient scavenger that spends most turns reinforcing its defences before striking."
+    },
+    {
+      "enemyId": "dark_acolyte",
+      "description": "A corrupted devotee whose stored armour also empowers its next attack."
+    },
+    {
+      "enemyId": "tomb_guardian",
+      "description": "An armoured sentinel that retaliates when its shield is broken, then restores its guard."
+    },
+    {
+      "enemyId": "void_knight",
+      "description": "A fallen warrior whose attacks become far more dangerous below half health."
+    },
+    {
+      "enemyId": "boss_knight",
+      "description": "The final guardian of the ruins, using phase-based attacks, defences and debilitating magic."
+    }
+  ]
+}

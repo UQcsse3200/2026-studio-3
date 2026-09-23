@@ -38,11 +38,52 @@ class JsonSaveGameRepositoryTest {
     assertEquals(2, loadResult.data().metadata.slotId);
     assertEquals("Second run", loadResult.data().metadata.runLabel);
     assertEquals(43, loadResult.data().player.currentHealth);
-    assertEquals(List.of("strike", "defend", "strike"), loadResult.data().deck.cardIds);
+    assertEquals(
+        List.of("strike", "defend", "strike"),
+        loadResult.data().deck.cards.stream().map(card -> card.cardId).toList());
     assertEquals(7, loadResult.data().map.currentNodeId);
     assertEquals(List.of(8, 9), loadResult.data().map.nodes.get(0).connectionIds);
-    assertEquals(List.of("shop-1"), loadResult.data().progress.completedEncounterIds);
+    assertEquals("CURRENT", loadResult.data().map.nodes.get(0).state);
+    assertEquals("reward-2", loadResult.data().progress.pendingRewardId);
+    assertEquals("MAP", loadResult.data().progress.resumeScreen);
+    assertEquals(2, loadResult.data().progress.bestiary.size());
+    assertEquals("lesser_shade", loadResult.data().progress.bestiary.get(0).enemyId);
+    assertEquals("DEFEATED", loadResult.data().progress.bestiary.get(0).unlockState);
+    assertEquals("boss_knight", loadResult.data().progress.bestiary.get(1).enemyId);
+    assertEquals("ENCOUNTERED", loadResult.data().progress.bestiary.get(1).unlockState);
     assertFalse(Files.exists(temporaryDirectory.resolve("slot-2.json.tmp")));
+  }
+
+  @Test
+  void shouldIgnoreLegacyCompletedEncounterIds() throws IOException {
+    Files.writeString(
+        temporaryDirectory.resolve("slot-1.json"),
+        """
+        {
+          "schemaVersion": 1,
+          "metadata": {"slotId": 1, "savedAtEpochMillis": 123456, "runLabel": "Legacy run"},
+          "player": {"currentHealth": 43, "maxHealth": 60, "gold": 120, "piety": 0},
+          "deck": {"cardIds": ["strike"]},
+          "map": {
+            "nodes": [
+              {"nodeId": 7, "roomType": "COMBAT", "state": "COMPLETED", "connectionIds": []}
+            ],
+            "currentNodeId": 7
+          },
+          "progress": {
+            "completedEncounterIds": ["7"],
+            "pendingRewardId": "",
+            "resumeScreen": "MAP"
+          }
+        }
+        """);
+
+    LoadResult result = repository.load(1);
+
+    assertTrue(result.success());
+    assertEquals("COMPLETED", result.data().map.nodes.get(0).state);
+    assertEquals("MAP", result.data().progress.resumeScreen);
+    assertTrue(result.data().progress.bestiary.isEmpty());
   }
 
   @Test
@@ -156,14 +197,19 @@ class JsonSaveGameRepositoryTest {
     SaveGameData data =
         new SaveGameData(
             new PlayerSaveData(43, 60, 120, 8),
-            new DeckSaveData(List.of("strike", "defend", "strike")),
+            DeckSaveData.ofCardIds(List.of("strike", "defend", "strike")),
             new MapSaveData(
                 List.of(
                     new MapNodeSaveData(7, "COMBAT", "CURRENT", List.of(8, 9)),
                     new MapNodeSaveData(8, "SHOP", "AVAILABLE", List.of(7))),
                 7,
                 null),
-            new ProgressSaveData(List.of("shop-1"), "reward-2", "MAP"));
+            new ProgressSaveData(
+                "reward-2",
+                "MAP",
+                List.of(
+                    new BestiaryProgressSaveData("lesser_shade", "DEFEATED"),
+                    new BestiaryProgressSaveData("boss_knight", "ENCOUNTERED"))));
     data.metadata = new SaveSlotMetadata(slotId, 123456L, label, 321L, "MAP");
     assertNotNull(data.metadata);
     return data;

@@ -27,8 +27,18 @@ public final class ComponentPlayerStateAdapter implements PlayerStateGateway {
   }
 
   @Override
+  public int getMaxHealth() {
+    return combatStats.getMaxHealth();
+  }
+
+  @Override
   public void setHealth(int health) {
     combatStats.setHealth(health);
+  }
+
+  @Override
+  public void applyDirectHealthChange(int amount) {
+    combatStats.applyDirectHealthChange(amount);
   }
 
   @Override
@@ -39,5 +49,10 @@ public final class ComponentPlayerStateAdapter implements PlayerStateGateway {
   @Override
   public void setCurrency(int currency) {
     inventory.setGold(currency);
+  }
+
+  @Override
+  public float getShopDiscount() {
+    return inventory.getShopDiscount();
   }
 }

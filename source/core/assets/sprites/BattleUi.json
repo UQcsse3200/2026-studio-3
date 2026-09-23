@@ -1,36 +1,30 @@
 {
   "Clickable": [
     {
-      "text": "Exit",
+      "text": "Card Inventory",
       "x": 20,
       "y": 100,
-      "trigger": "exit"
+      "trigger": "openMenu"
     },
     {
-      "text": "Up",
-      "x": 20,
-      "y": 150,
-      "trigger": "up"
-    },
-    {
-      "text": "Down",
+      "text": "Item Inventory",
       "x": 20,
       "y": 200,
-      "trigger": "down"
+      "trigger": "openInventory"
     },
     {
       "text": "End Turn",
       "x": 20,
-      "y": 250,
-      "trigger": "endturn"
-
+      "y": 150,
+      "trigger": "endTurn",
+      "variant": "gated"
     }
   ],
   "Displaying": [
     {
-      "text": "Click a card",
-      "x": 500,
-      "y": 500,
+      "text": "Click or drag a card to your opponent",
+      "x": 300,
+      "y": 650,
       "fontName": "large",
       "scale": 1,
       "variant": "cardDisplay"
@@ -40,6 +34,7 @@
       "x": 0,
       "y": 90,
       "scale": 1.3,
+      "colour": "DBBEA1",
       "trigger": "battleLog",
       "variant": "battleLog"
     }

@@ -60,9 +60,18 @@ public final class Team7PlayerStateAdapter implements PlayerStateView, PlayerEff
     for (ResolvedCardEffect effect : ordered) {
       switch (effect.type()) {
         case BLOCK -> combatStats.addBlock(effect.value());
-        case HEAL -> combatStats.heal(effect.value());
+        case HEAL -> {
+          if (effect.duration() > 0) {
+            combatStats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
+          } else {
+            combatStats.heal(effect.value());
+          }
+        }
         case STRENGTH ->
             combatStats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
+        case ENERGY_GAIN -> energy.restoreEnergy(effect.value());
+        case CLEANSE -> combatStats.clearNegativeStatusEffects();
+        case FORTIFY -> combatStats.addArmour(effect.value());
         default -> throw unsupportedPlayerEffect(effect.type());
       }
     }
@@ -81,7 +90,10 @@ public final class Team7PlayerStateAdapter implements PlayerStateView, PlayerEff
       }
       if (effect.type() != EffectType.BLOCK
           && effect.type() != EffectType.HEAL
-          && effect.type() != EffectType.STRENGTH) {
+          && effect.type() != EffectType.STRENGTH
+          && effect.type() != EffectType.ENERGY_GAIN
+          && effect.type() != EffectType.CLEANSE
+          && effect.type() != EffectType.FORTIFY) {
         throw unsupportedPlayerEffect(effect.type());
       }
     }

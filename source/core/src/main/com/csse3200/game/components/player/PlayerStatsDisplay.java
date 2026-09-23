@@ -1,7 +1,10 @@
 package com.csse3200.game.components.player;
 
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -16,10 +19,6 @@ public class PlayerStatsDisplay extends UIComponent {
   private Label healthLabel;
   private Image energyImage;
   private Label energyLabel;
-  private Image pietyImage;
-  private Label pietyLabel;
-  private Image moneyImage;
-  private Label moneyLabel;
   private static final float FONT_SCALE = 0.75f;
   private static final String STYLE_NAME_LARGE = "large";
 
@@ -31,8 +30,6 @@ public class PlayerStatsDisplay extends UIComponent {
 
     entity.getEvents().addListener("updateHealth", this::updatePlayerHealthUI);
     entity.getEvents().addListener("updateEnergy", this::updatePlayerEnergyUI);
-    entity.getEvents().addListener("updatePiety", this::updatePlayerPietyUI);
-    entity.getEvents().addListener("updateMoney", this::updatePlayerMoneyUI);
   }
 
   /**
@@ -41,10 +38,7 @@ public class PlayerStatsDisplay extends UIComponent {
    * @see Table for positioning options
    */
   private void addActors() {
-    table = new Table();
-    table.left();
-    table.setFillParent(true);
-    table.padTop(45f).padLeft(5f);
+    table = new Table(skin);
 
     // Image size
     float imageSideLength = 20f;
@@ -72,45 +66,42 @@ public class PlayerStatsDisplay extends UIComponent {
     energyLabel = new Label(energyText, skin, STYLE_NAME_LARGE);
     energyLabel.setFontScale(FONT_SCALE);
 
-    // Piety image
-    pietyImage =
-        new Image(ServiceLocator.getResourceService().getAsset("images/piety.png", Texture.class));
-
-    // Piety text
-    pietyLabel = new Label("Level: 1", skin, STYLE_NAME_LARGE);
-    pietyLabel.setFontScale(FONT_SCALE);
-
-    // Money image
-    moneyImage =
-        new Image(ServiceLocator.getResourceService().getAsset("images/money.png", Texture.class));
-
-    // Money text
-    InventoryComponent inventoryComponent = entity.getComponent(InventoryComponent.class);
-    int money = inventoryComponent.getGold();
-    CharSequence moneyText = String.format("Gold: $%d", money);
-    moneyLabel = new Label(moneyText, skin, STYLE_NAME_LARGE);
-    moneyLabel.setFontScale(FONT_SCALE);
-
     table.add(heartImage).size(imageSideLength).pad(5);
     table.add(healthLabel);
     table.row();
 
     table.add(energyImage).size(imageSideLength).pad(5);
     table.add(energyLabel).left();
-    table.row();
-
-    table.add(pietyImage).size(imageSideLength).pad(5);
-    table.add(pietyLabel).left();
-    table.row();
-
-    table.add(moneyImage).size(imageSideLength).pad(5);
-    table.add(moneyLabel).left();
     stage.addActor(table);
   }
 
   @Override
   public void draw(SpriteBatch batch) {
     // draw is handled by the stage
+  }
+
+  @Override
+  public void update() {
+    updatePosition();
+  }
+
+  /** Updates the position of the enemy's stats, so they are displayed directly below the enemy */
+  public void updatePosition() {
+    Vector2 position = entity.getPosition();
+    Vector2 scale = entity.getScale();
+
+    float enemyX = position.x + scale.x / 2f;
+    float enemyY = position.y - 0.5f;
+
+    Vector3 screenPosition = new Vector3(enemyX, enemyY, 0);
+
+    Camera camera = ServiceLocator.getCamera();
+    if (camera == null) {
+      return;
+    }
+    camera.project(screenPosition); // converts coordinates
+
+    table.setPosition(screenPosition.x - table.getWidth() / 2f, screenPosition.y);
   }
 
   /**
@@ -135,26 +126,6 @@ public class PlayerStatsDisplay extends UIComponent {
     energyLabel.setText(text);
   }
 
-  /**
-   * s* Updates the player's piety on the ui.
-   *
-   * @param piety player piety
-   */
-  public void updatePlayerPietyUI(int piety) {
-    CharSequence text = String.format("Piety: %d", piety);
-    pietyLabel.setText(text);
-  }
-
-  /**
-   * Updates the player's money on the ui.
-   *
-   * @param money player money
-   */
-  public void updatePlayerMoneyUI(int money) {
-    CharSequence text = String.format("Money: %d", money);
-    moneyLabel.setText(text);
-  }
-
   @Override
   public void dispose() {
     super.dispose();
@@ -162,9 +133,5 @@ public class PlayerStatsDisplay extends UIComponent {
     healthLabel.remove();
     energyImage.remove();
     energyLabel.remove();
-    pietyImage.remove();
-    pietyLabel.remove();
-    moneyImage.remove();
-    moneyLabel.remove();
   }
 }
