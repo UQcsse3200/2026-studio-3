@@ -121,11 +121,14 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory,int,com.csse3200.game.maps.RunState,java.lang.String)" class="member-name-link">BattleGameArea</a><wbr>(<a href="../../areas/terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory,int,com.csse3200.game.maps.RunState,java.lang.String,java.util.List)" class="member-name-link">BattleGameArea</a><wbr>(<a href="../../areas/terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory,
  int&nbsp;progression,
  <a href="../../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState,
- <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;backgroundId)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;backgroundId,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;enemyIds)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Creates a battle area for the given line-up.</div>
+</div>
 </div>
 </section>
 </li>
@@ -158,6 +161,11 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">IDs supplied by the existing enemy drop targets, mapped to their encounter instances.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#spawnsDefaultEnemy()" class="member-name-link">spawnsDefaultEnemy</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">This area spawns every enemy itself, so the shared area's default enemy is not wanted.</div>
+</div>
 </div>
 </div>
 </div>
@@ -182,12 +190,22 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(com.csse3200.game.areas.terrain.TerrainFactory,int,com.csse3200.game.maps.RunState,java.lang.String)">
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.areas.terrain.TerrainFactory,int,com.csse3200.game.maps.RunState,java.lang.String,java.util.List)">
 <h3>BattleGameArea</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">BattleGameArea</span><wbr><span class="parameters">(<a href="../../areas/terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory,
  int&nbsp;progression,
  <a href="../../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState,
- <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;backgroundId)</span></div>
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;backgroundId,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;enemyIds)</span></div>
+<div class="block">Creates a battle area for the given line-up.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>terrainFactory</code> - factory used to build the terrain</dd>
+<dd><code>progression</code> - map progression of the node, used to scale enemy stats</dd>
+<dd><code>runState</code> - state of the current run</dd>
+<dd><code>backgroundId</code> - id of the background to show</dd>
+<dd><code>enemyIds</code> - enemy ids to spawn, from left to right</dd>
+</dl>
 </section>
 </li>
 </ul>
@@ -198,6 +216,19 @@ loadScripts(document, 'script');</script>
 <section class="method-details" id="method-detail">
 <h2>Method Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="spawnsDefaultEnemy()">
+<h3>spawnsDefaultEnemy</h3>
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">spawnsDefaultEnemy</span>()</div>
+<div class="block">This area spawns every enemy itself, so the shared area's default enemy is not wanted.</div>
+<dl class="notes">
+<dt>Overrides:</dt>
+<dd><code><a href="../../areas/ForestGameArea.html#spawnsDefaultEnemy()">spawnsDefaultEnemy</a></code>&nbsp;in class&nbsp;<code><a href="../../areas/ForestGameArea.html" title="class in com.csse3200.game.areas">ForestGameArea</a></code></dd>
+<dt>Returns:</dt>
+<dd>true to spawn the default enemy</dd>
+</dl>
+</section>
+</li>
 <li>
 <section class="detail" id="create()">
 <h3>create</h3>
