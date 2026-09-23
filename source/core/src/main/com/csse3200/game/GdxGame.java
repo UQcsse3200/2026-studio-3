@@ -7,6 +7,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.files.UserSettings;
 import com.csse3200.game.maps.RunState;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 public class GdxGame extends Game {
   private static final Logger logger = LoggerFactory.getLogger(GdxGame.class);
   private BestiaryService bestiaryService;
+  private CardDiscoveryService cardDiscoveryService;
 
   /**
    * Gets discovery progress shared by all screens in this game session.
@@ -45,6 +47,15 @@ public class GdxGame extends Game {
    */
   public BestiaryService getBestiaryService() {
     return bestiaryService;
+  }
+
+  /**
+   * Gets card discovery progress shared by all screens in this game session.
+   *
+   * @return process-lifetime card discovery service
+   */
+  public CardDiscoveryService getCardDiscoveryService() {
+    return cardDiscoveryService;
   }
 
   // Lives here rather than on a screen, since setScreen() disposes the outgoing screen.
@@ -74,7 +85,8 @@ public class GdxGame extends Game {
             runState.getOrCreatePlayerState(),
             runState.getOrCreatePlayerDeck(cardLibrary),
             runState,
-            bestiaryService));
+            bestiaryService,
+            cardDiscoveryService));
   }
 
   @Override
@@ -82,6 +94,7 @@ public class GdxGame extends Game {
     logger.info("Creating game");
     loadSettings();
     bestiaryService = BestiaryService.loadDefault();
+    cardDiscoveryService = CardDiscoveryService.loadDefault();
 
     // Sets background to light yellow
     Gdx.gl.glClearColor(162f / 255f, 73 / 255f, 54 / 255f, 1);
@@ -108,6 +121,7 @@ public class GdxGame extends Game {
       currentScreen.dispose();
     }
     ServiceLocator.registerBestiaryService(bestiaryService);
+    ServiceLocator.registerCardDiscoveryService(cardDiscoveryService);
     setScreen(newScreen(screenType));
   }
 

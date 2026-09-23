@@ -72,9 +72,18 @@ public class SaveLoadScreen extends ScreenAdapter {
         new SaveGameService(
             new JsonSaveGameRepository(),
             new GameStateSnapshotProvider(
-                playerState, playerDeck, runState, game.getBestiaryService()));
+                playerState,
+                playerDeck,
+                runState,
+                game.getBestiaryService(),
+                game.getCardDiscoveryService()));
     SaveGameRestoreService restoreService =
-        new SaveGameRestoreService(playerState, playerDeck, runState, game.getBestiaryService());
+        new SaveGameRestoreService(
+            playerState,
+            playerDeck,
+            runState,
+            game.getBestiaryService(),
+            game.getCardDiscoveryService());
 
     Entity ui = new Entity();
     ui.addComponent(new InputDecorator(stage, 10))

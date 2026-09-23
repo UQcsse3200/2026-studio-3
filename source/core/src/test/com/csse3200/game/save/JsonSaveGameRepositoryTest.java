@@ -84,6 +84,37 @@ class JsonSaveGameRepositoryTest {
     assertEquals("COMPLETED", result.data().map.nodes.get(0).state);
     assertEquals("MAP", result.data().progress.resumeScreen);
     assertTrue(result.data().progress.bestiary.isEmpty());
+    assertTrue(result.data().progress.cards.isEmpty());
+  }
+
+  @Test
+  void loadsOldSaveWithoutCardProgress() throws IOException {
+    Files.writeString(
+        temporaryDirectory.resolve("slot-1.json"),
+        """
+        {
+          "schemaVersion": 1,
+          "metadata": {"slotId": 1, "savedAtEpochMillis": 123456, "runLabel": "Old run"},
+          "player": {"currentHealth": 43, "maxHealth": 60, "gold": 120, "piety": 0},
+          "deck": {"cardIds": ["strike"]},
+          "map": {
+            "nodes": [
+              {"nodeId": 7, "roomType": "COMBAT", "state": "CURRENT", "connectionIds": []}
+            ],
+            "currentNodeId": 7
+          },
+          "progress": {
+            "bestiary": [
+              {"enemyId": "lesser_shade", "unlockState": "ENCOUNTERED"}
+            ]
+          }
+        }
+        """);
+
+    LoadResult result = repository.load(1);
+
+    assertTrue(result.success());
+    assertTrue(result.data().progress.cards.isEmpty());
   }
 
   @Test
