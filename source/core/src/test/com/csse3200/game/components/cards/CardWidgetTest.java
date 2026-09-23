@@ -100,6 +100,17 @@ class CardWidgetTest {
   }
 
   @Test
+  void shouldScaleLongNameToProtectHeaderLayout() {
+    CardWidget widget =
+        new CardWidget(
+            card("Warden's Judgement", "Deal 9 damage.", 2, Rarity.UNCOMMON, false), assets);
+
+    assertEquals("Warden's Judgement", widget.displayedName());
+    assertTrue(widget.displayedNameScale() < 1f);
+    assertTrue(widget.displayedNameScale() >= 0.72f);
+  }
+
+  @Test
   void shouldHideArtworkWhenProviderHasNoLoadedTexture() {
     ResolvedCard missingArtwork =
         new ResolvedCard(

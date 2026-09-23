@@ -25,19 +25,21 @@ public final class CardWidgetAssets {
     Drawable get(String texturePath);
   }
 
-  private static final Color CARD_FACE = new Color(0.075f, 0.065f, 0.09f, 1f);
-  private static final Color NAME_PLATE = new Color(0.16f, 0.095f, 0.07f, 0.98f);
-  private static final Color ARTWORK_BACKDROP = new Color(0.025f, 0.025f, 0.04f, 1f);
-  private static final Color DESCRIPTION_PANEL = new Color(0.84f, 0.76f, 0.61f, 1f);
-  private static final Color COST_BADGE = new Color(0.12f, 0.31f, 0.59f, 1f);
-  private static final Color UPGRADE_BADGE = new Color(0.18f, 0.48f, 0.29f, 1f);
-  private static final Color COMMON_FRAME = new Color(0.49f, 0.42f, 0.36f, 1f);
-  private static final Color UNCOMMON_FRAME = new Color(0.30f, 0.57f, 0.72f, 1f);
-  private static final Color RARE_FRAME = new Color(0.91f, 0.64f, 0.19f, 1f);
-  private static final Color LIGHT_TEXT = new Color(0.96f, 0.91f, 0.80f, 1f);
-  private static final Color DARK_TEXT = new Color(0.12f, 0.08f, 0.07f, 1f);
+  private static final Color CARD_FACE = new Color(0.025f, 0.035f, 0.05f, 1f);
+  private static final Color INNER_RIM = new Color(0.15f, 0.11f, 0.065f, 1f);
+  private static final Color NAME_PLATE = new Color(0.035f, 0.065f, 0.085f, 1f);
+  private static final Color ARTWORK_BACKDROP = new Color(0.01f, 0.015f, 0.025f, 1f);
+  private static final Color DESCRIPTION_PANEL = new Color(0.82f, 0.75f, 0.61f, 1f);
+  private static final Color COST_BADGE = new Color(0.055f, 0.20f, 0.38f, 1f);
+  private static final Color UPGRADE_BADGE = new Color(0.12f, 0.40f, 0.23f, 1f);
+  private static final Color COMMON_FRAME = new Color(0.68f, 0.51f, 0.28f, 1f);
+  private static final Color UNCOMMON_FRAME = new Color(0.36f, 0.62f, 0.75f, 1f);
+  private static final Color RARE_FRAME = new Color(0.93f, 0.61f, 0.14f, 1f);
+  private static final Color LIGHT_TEXT = new Color(0.94f, 0.87f, 0.70f, 1f);
+  private static final Color DARK_TEXT = new Color(0.10f, 0.065f, 0.045f, 1f);
 
   private final Drawable cardFace;
+  private final Drawable innerRim;
   private final Drawable namePlate;
   private final Drawable artworkBackdrop;
   private final Drawable descriptionPanel;
@@ -59,20 +61,21 @@ public final class CardWidgetAssets {
         Objects.requireNonNull(artworkProvider, "artworkProvider cannot be null");
 
     cardFace = skin.newDrawable("white", CARD_FACE);
+    innerRim = skin.newDrawable("white", INNER_RIM);
     namePlate = skin.newDrawable("white", NAME_PLATE);
     artworkBackdrop = skin.newDrawable("white", ARTWORK_BACKDROP);
     descriptionPanel = skin.newDrawable("white", DESCRIPTION_PANEL);
-    costBadge = skin.newDrawable("white", COST_BADGE);
-    upgradeBadge = skin.newDrawable("white", UPGRADE_BADGE);
+    costBadge = skin.newDrawable("touchpad", COST_BADGE);
+    upgradeBadge = skin.newDrawable("touchpad-knob", UPGRADE_BADGE);
     commonFrame = skin.newDrawable("white", COMMON_FRAME);
     uncommonFrame = skin.newDrawable("white", UNCOMMON_FRAME);
     rareFrame = skin.newDrawable("white", RARE_FRAME);
 
-    nameStyle = copyLabelStyle(skin, "default", LIGHT_TEXT);
-    costStyle = copyLabelStyle(skin, "large", Color.WHITE);
+    nameStyle = copyLabelStyle(skin, "small", LIGHT_TEXT);
+    costStyle = copyLabelStyle(skin, "default", Color.WHITE);
     metaStyle = copyLabelStyle(skin, "small", LIGHT_TEXT);
     descriptionStyle = copyLabelStyle(skin, "small", DARK_TEXT);
-    upgradeStyle = copyLabelStyle(skin, "large", Color.WHITE);
+    upgradeStyle = copyLabelStyle(skin, "default", Color.WHITE);
   }
 
   /**
@@ -110,6 +113,10 @@ public final class CardWidgetAssets {
 
   Drawable cardFace() {
     return cardFace;
+  }
+
+  Drawable innerRim() {
+    return innerRim;
   }
 
   Drawable namePlate() {
