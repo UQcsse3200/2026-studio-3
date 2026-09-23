@@ -1,8 +1,10 @@
 package com.csse3200.game.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.areas.ForestGameArea;
@@ -22,15 +24,19 @@ import com.csse3200.game.cards.play.integration.Team1EnemyStateAdapter;
 import com.csse3200.game.cards.play.integration.Team3CardPlayAdapter;
 import com.csse3200.game.cards.play.integration.Team7PlayerStateAdapter;
 import com.csse3200.game.cards.runtime.CardInstance;
+import com.csse3200.game.cards.runtime.CardResolver;
+import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.cards.CardEffectHandler;
+import com.csse3200.game.components.cards.CardWidget;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.pausemenu.PauseMenuActions;
 import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.player.EnergyComponent;
-import com.csse3200.game.components.spritedisplay.clickable.CardImageSkins;
+import com.csse3200.game.components.spritedisplay.clickable.Clickable;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
@@ -86,15 +92,20 @@ public class BattleScreen extends ScreenAdapter {
   private static final float HAND_START_X = 25f;
   private static final float HAND_Y = 1000f;
   private static final float HAND_SPACING = 250f;
-  private static final float CARD_WIDTH = 225;
-  private static final float CARD_HEIGHT = 456;
+  private static final float CARD_WIDTH = CardWidget.CARD_WIDTH;
+  private static final float CARD_HEIGHT = CardWidget.CARD_HEIGHT;
   private static final float CARD_INVENTORY_MIN_WIDTH = 800f;
   private static final float CARD_INVENTORY_MIN_HEIGHT = 600f;
   private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
+  private static final String CARD_WIDGET_SKIN = "flat-earth/skin/flat-earth-ui.json";
 
   private final BattleController controller;
   private final CardLibrary library;
   private final BattleDeck battleDeck;
+  private final CardResolver cardResolver = new CardResolver();
+  private final Skin cardWidgetSkin;
+  private final Skin cardInteractionSkin;
+  private final CardWidgetAssets cardWidgetAssets;
   // Shared with the debug dialog so it reflects real, live resolutions instead of a
   // separate copy.
   private final CardEffectResolutionService cardEffects;
@@ -156,6 +167,11 @@ public class BattleScreen extends ScreenAdapter {
     List<CardConfig> configs = CardConfigLoader.loadCards(); // reads configs/cards.json
     library = new CardLibrary(configs);
     ServiceLocator.registerCardLibrary(library);
+    loadCardAssets(configs);
+    cardWidgetSkin = new Skin(Gdx.files.internal(CARD_WIDGET_SKIN));
+    cardWidgetAssets =
+        CardWidgetAssets.fromManagedResources(cardWidgetSkin, ServiceLocator.getResourceService());
+    cardInteractionSkin = createCardInteractionSkin();
 
     PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(library);
     battleDeck = new BattleDeck(playerDeck);
@@ -256,11 +272,15 @@ public class BattleScreen extends ScreenAdapter {
         .getEvents()
         .addListener(
             BattleActions.HAND_CHANGED_EVENT,
-            (List<CardInstance> hand) -> uiFactory.rebuildHand(buildHandRecords()));
+            (List<CardInstance> hand) -> {
+              uiFactory.rebuildHand(buildHandRecords());
+              installHandCardWidgets();
+            });
 
     // battleUi must be registered (and so cardInventory.create() must have run, giving it a
     // content table) before the deck editor's create() tries to add widgets to that table below.
     gameArea.displayUI(battleUi);
+    installHandCardWidgets();
 
     // The deck editor's own per-card toggle buttons need a ClickableFactory of their own — an
     // entity can only hold one component of a given class, and battleUi already has uiFactory.
@@ -286,6 +306,7 @@ public class BattleScreen extends ScreenAdapter {
   private void onDeckRearranged(List<CardInstance> newHandRow) {
     handRowOrder = new ArrayList<>(newHandRow);
     uiFactory.rebuildHand(buildHandRecords());
+    installHandCardWidgets();
   }
 
   @Override
@@ -306,6 +327,8 @@ public class BattleScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
+    cardInteractionSkin.dispose();
+    cardWidgetSkin.dispose();
     ServiceLocator.clear();
   }
 
@@ -314,6 +337,24 @@ public class BattleScreen extends ScreenAdapter {
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(mainGameTextures);
     ServiceLocator.getResourceService().loadAll();
+  }
+
+  private void loadCardAssets(List<CardConfig> configs) {
+    String[] texturePaths =
+        configs.stream()
+            .map(config -> config.texturePath)
+            .filter(Objects::nonNull)
+            .distinct()
+            .toArray(String[]::new);
+    ResourceService resources = ServiceLocator.getResourceService();
+    resources.loadTextures(texturePaths);
+    resources.loadAll();
+  }
+
+  private static Skin createCardInteractionSkin() {
+    Skin skin = new Skin();
+    skin.add("default", new ImageButton.ImageButtonStyle(), ImageButton.ImageButtonStyle.class);
+    return skin;
   }
 
   private List<ClickableRecord> buildAllRecords() {
@@ -347,19 +388,24 @@ public class BattleScreen extends ScreenAdapter {
         logger.warn("Card ID {} not found in library, skipping", cardId);
         continue;
       }
-      CardConfig card = maybeCard.get();
-      boolean selfTarget = card.target == TargetType.SELF;
+      ResolvedCard card;
+      try {
+        card = cardResolver.resolve(maybeCard.get(), instance);
+      } catch (IllegalArgumentException | IllegalStateException exception) {
+        logger.warn(
+            "Could not resolve card instance {}, skipping", instance.instanceId(), exception);
+        continue;
+      }
+      boolean selfTarget = card.target() == TargetType.SELF;
       String variant = selfTarget ? "inout" : "drag";
-
-      Skin cardSkin = CardImageSkins.forTexturePath(card.texturePath);
 
       ClickableRecord.Builder builder =
           ClickableRecord.builder("playCard")
-              .label(card.name)
+              .label(card.name())
               .variant(variant)
               .position(x, HAND_Y)
               .size(CARD_WIDTH, CARD_HEIGHT)
-              .skin(cardSkin)
+              .skin(cardInteractionSkin)
               .disabled(disabled);
 
       if (selfTarget) {
@@ -374,5 +420,36 @@ public class BattleScreen extends ScreenAdapter {
       x += HAND_SPACING;
     }
     return records;
+  }
+
+  private void installHandCardWidgets() {
+    Map<String, CardInstance> instancesById = new HashMap<>();
+    for (CardInstance instance : handRowOrder) {
+      instancesById.put(instance.instanceId(), instance);
+    }
+
+    for (Clickable clickable : uiFactory.getByTrigger("playCard")) {
+      Object[] args = clickable.getArgs();
+      if (args.length == 0 || !(args[0] instanceof String instanceId)) {
+        logger.warn("Play-card clickable is missing an instanceId payload");
+        continue;
+      }
+      CardInstance instance = instancesById.get(instanceId);
+      if (instance == null) {
+        logger.warn("No hand-row instance found for clickable payload {}", instanceId);
+        continue;
+      }
+      Optional<CardConfig> config = library.getCard(instance.cardId());
+      if (config.isEmpty()) {
+        continue;
+      }
+
+      try {
+        ResolvedCard resolved = cardResolver.resolve(config.get(), instance);
+        clickable.setVisualContent(() -> new CardWidget(resolved, cardWidgetAssets));
+      } catch (IllegalArgumentException | IllegalStateException exception) {
+        logger.warn("Could not install card widget for instance {}", instanceId, exception);
+      }
+    }
   }
 }

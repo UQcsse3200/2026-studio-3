@@ -1,6 +1,7 @@
 package com.csse3200.game.components.spritedisplay.clickable;
 
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
@@ -116,13 +117,22 @@ public class DragNDrop extends InOutOnTrigger {
   }
 
   private Button createDragVisual(Button original) {
+    Button dragVisual;
     if (original instanceof ImageButton ib) {
-      return new ImageButton(ib.getStyle());
+      dragVisual = new ImageButton(ib.getStyle());
     } else if (original instanceof ImageTextButton itb) {
-      return new ImageTextButton(itb.getText().toString(), itb.getStyle());
+      dragVisual = new ImageTextButton(itb.getText().toString(), itb.getStyle());
     } else if (original instanceof TextButton tb) {
-      return new TextButton(tb.getText().toString(), tb.getStyle());
+      dragVisual = new TextButton(tb.getText().toString(), tb.getStyle());
+    } else {
+      dragVisual = new Button(original.getStyle());
     }
-    return new Button(original.getStyle());
+
+    Actor visualContent = createVisualContent();
+    if (visualContent != null) {
+      dragVisual.clearChildren();
+      dragVisual.add(visualContent).expand().fill();
+    }
+    return dragVisual;
   }
 }

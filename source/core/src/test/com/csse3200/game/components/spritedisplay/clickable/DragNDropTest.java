@@ -1,9 +1,12 @@
 package com.csse3200.game.components.spritedisplay.clickable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -34,6 +37,7 @@ import com.csse3200.game.services.ServiceLocator;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -77,6 +81,36 @@ class DragNDropTest {
         new CardPlayRequest(
             STRIKE_INSTANCE_ID, new CardPlayTarget(TargetType.SINGLE_ENEMY, "bone_crawler")),
         received.get());
+  }
+
+  @Test
+  void shouldBuildIndependentDragVisualFromEmbeddedContentFactory() throws Exception {
+    DragNDropService dragService = new DragNDropService();
+    ServiceLocator.registerDragNDropService(dragService);
+    AtomicInteger created = new AtomicInteger();
+    DragNDrop card =
+        new DragNDrop(
+            ClickableRecord.builder("playCard")
+                .text("Strike")
+                .args(STRIKE_INSTANCE_ID)
+                .variant("drag")
+                .build());
+    card.setVisualContent(
+        () -> {
+          Actor content = new Actor();
+          content.setUserObject(created.incrementAndGet());
+          return content;
+        });
+    Actor liveContent = card.getBtn().getChildren().first();
+
+    DragAndDrop.Source source = getOnlySource(dragService.getDragAndDrop());
+    DragAndDrop.Payload payload = source.dragStart(new InputEvent(), 0f, 0f, 0);
+
+    Button dragVisual = assertInstanceOf(Button.class, payload.getDragActor());
+    Actor dragContent = dragVisual.getChildren().first();
+    assertNotSame(liveContent, dragContent);
+    assertEquals(1, liveContent.getUserObject());
+    assertEquals(2, dragContent.getUserObject());
   }
 
   @Test
