@@ -141,7 +141,7 @@ public class SaveGameRestoreService {
       return RestoreResult.failure(
           RestoreError.INVALID_PLAYER_STATE, "Saved current health is outside the valid range");
     }
-    if (playerData.gold < 0 || playerData.piety < 0) {
+    if (playerData.gold < 0 || playerData.level < 0) {
       return RestoreResult.failure(
           RestoreError.INVALID_PLAYER_STATE, "Saved player resources cannot be negative");
     }

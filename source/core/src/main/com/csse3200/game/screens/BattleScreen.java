@@ -70,7 +70,7 @@ public class BattleScreen extends ScreenAdapter {
     "images/heart.png",
     "images/energy.png",
     "images/money.png",
-    "images/piety.png",
+    "images/level.png",
     "images/enemy.png",
     "images/armour.png"
   };

@@ -59,13 +59,13 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
   }
 
   private PlayerSaveData capturePlayer() {
-    // Piety is confirmed not implemented for this sprint (Amber_Teng, Team 7, 9/10) — dropped
-    // from scope in favor of concrete Status Effects. PlayerSaveData.piety is a leftover field
+    // Level is confirmed not implemented for this sprint (Amber_Teng, Team 7, 9/10) — dropped
+    // from scope in favor of concrete Status Effects. PlayerSaveData.level is a leftover field
     // from an earlier design; left at 0 intentionally, not a placeholder awaiting a real source.
-    int piety = 0;
+    int level = 0;
 
     return new PlayerSaveData(
-        playerState.getCurrentHealth(), playerState.getMaxHealth(), playerState.getGold(), piety);
+        playerState.getCurrentHealth(), playerState.getMaxHealth(), playerState.getGold(), level);
   }
 
   private DeckSaveData captureDeck() {

@@ -11,8 +11,8 @@ import com.csse3200.game.ui.UIComponent;
 
 public class PlayerStatsTopDisplay extends UIComponent {
   Table table;
-  private Image pietyImage;
-  private Label pietyLabel;
+  private Image levelImage;
+  private Label levelLabel;
   private Image moneyImage;
   private Label moneyLabel;
   private RunState runState;
@@ -29,7 +29,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
     super.create();
     addActors();
 
-    entity.getEvents().addListener("updatePiety", this::updatePlayerPietyUI);
+    entity.getEvents().addListener("updatePiety", this::updatePlayerLevelUI);
     entity.getEvents().addListener("updateMoney", this::updatePlayerMoneyUI);
   }
 
@@ -47,14 +47,14 @@ public class PlayerStatsTopDisplay extends UIComponent {
     // Image size
     float imageSideLength = 20f;
 
-    // Piety image
-    pietyImage =
-        new Image(ServiceLocator.getResourceService().getAsset("images/piety.png", Texture.class));
+    // Level image
+    levelImage =
+        new Image(ServiceLocator.getResourceService().getAsset("images/level.png", Texture.class));
 
-    // Piety text
-    String pietyText = String.format("Level: %d", runState.getMapProgression());
-    pietyLabel = new Label(pietyText, skin, STYLE_NAME_LARGE);
-    pietyLabel.setFontScale(FONT_SCALE);
+    // Level text
+    String levelText = String.format("Level: %d", runState.getMapProgression());
+    levelLabel = new Label(levelText, skin, STYLE_NAME_LARGE);
+    levelLabel.setFontScale(FONT_SCALE);
 
     // Money image
     moneyImage =
@@ -67,8 +67,8 @@ public class PlayerStatsTopDisplay extends UIComponent {
     moneyLabel = new Label(moneyText, skin, STYLE_NAME_LARGE);
     moneyLabel.setFontScale(FONT_SCALE);
 
-    table.add(pietyImage).size(imageSideLength).pad(5);
-    table.add(pietyLabel).left().pad(10);
+    table.add(levelImage).size(imageSideLength).pad(5);
+    table.add(levelLabel).left().pad(10);
 
     table.add(moneyImage).size(imageSideLength).pad(5);
     table.add(moneyLabel).left();
@@ -81,13 +81,13 @@ public class PlayerStatsTopDisplay extends UIComponent {
   }
 
   /**
-   * s* Updates the player's piety on the ui.
+   * s* Updates the player's level on the ui.
    *
-   * @param piety player piety
+   * @param level player's current level
    */
-  public void updatePlayerPietyUI(int piety) {
-    CharSequence text = String.format("Level: %d", piety);
-    pietyLabel.setText(text);
+  public void updatePlayerLevelUI(int level) {
+    CharSequence text = String.format("Level: %d", level);
+    levelLabel.setText(text);
   }
 
   /**
@@ -103,8 +103,8 @@ public class PlayerStatsTopDisplay extends UIComponent {
   @Override
   public void dispose() {
     super.dispose();
-    pietyImage.remove();
-    pietyLabel.remove();
+    levelImage.remove();
+    levelLabel.remove();
     moneyImage.remove();
     moneyLabel.remove();
   }
