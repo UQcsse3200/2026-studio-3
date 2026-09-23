@@ -30,6 +30,7 @@ class PauseMenuDisplayTest {
   private Stage stage;
   private PauseMenuDisplay display;
   private AtomicInteger resumeCount;
+  private AtomicInteger saveLoadCount;
   private AtomicInteger settingsCount;
   private AtomicInteger exitCount;
 
@@ -41,12 +42,16 @@ class PauseMenuDisplayTest {
     ServiceLocator.registerRenderService(renderService);
 
     resumeCount = new AtomicInteger();
+    saveLoadCount = new AtomicInteger();
     settingsCount = new AtomicInteger();
     exitCount = new AtomicInteger();
 
     display = new PauseMenuDisplay();
     Entity entity = new Entity().addComponent(display);
     entity.getEvents().addListener(PauseMenuDisplay.RESUME_EVENT, resumeCount::incrementAndGet);
+    entity
+        .getEvents()
+        .addListener(PauseMenuDisplay.SAVE_LOAD_EVENT, saveLoadCount::incrementAndGet);
     entity.getEvents().addListener(PauseMenuDisplay.SETTINGS_EVENT, settingsCount::incrementAndGet);
     entity.getEvents().addListener(PauseMenuDisplay.EXIT_TO_MENU_EVENT, exitCount::incrementAndGet);
     entity.create();
@@ -88,6 +93,15 @@ class PauseMenuDisplayTest {
 
     assertEquals(1, resumeCount.get());
     assertEquals(0, settingsCount.get());
+    assertEquals(0, exitCount.get());
+  }
+
+  @Test
+  void clickingSaveLoadFiresSaveLoadEvent() {
+    click(display.getSaveLoadButton());
+
+    assertEquals(1, saveLoadCount.get());
+    assertEquals(0, resumeCount.get());
     assertEquals(0, exitCount.get());
   }
 

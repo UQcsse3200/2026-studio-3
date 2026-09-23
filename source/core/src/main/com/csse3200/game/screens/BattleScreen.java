@@ -26,10 +26,9 @@ import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.combat.BattleController;
-import com.csse3200.game.components.pausemenu.PauseMenuActions;
-import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
-import com.csse3200.game.components.pausemenu.PauseMenuInput;
+import com.csse3200.game.components.pausemenu.PauseMenuFactory;
 import com.csse3200.game.components.player.EnergyComponent;
+import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.components.spritedisplay.clickable.CardImageSkins;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
@@ -235,9 +234,6 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new BattleActions(controller, game))
             .addComponent(cardPlayAdapter)
             .addComponent(cardInventory)
-            .addComponent(new PauseMenuDisplay())
-            .addComponent(new PauseMenuInput())
-            .addComponent(new PauseMenuActions(game))
             .addComponent(
                 new DamageOnCardPlayComponent(
                     gameArea.getPlayer().getComponent(CombatStatsComponent.class)))
@@ -257,9 +253,13 @@ public class BattleScreen extends ScreenAdapter {
             BattleActions.HAND_CHANGED_EVENT,
             (List<CardInstance> hand) -> uiFactory.rebuildHand(buildHandRecords()));
 
+    // Pause menu + in-place save/load overlay (added before the entity is created).
+    SaveLoadPanel savePanel = PauseMenuFactory.attach(battleUi, game);
+
     // battleUi must be registered (and so cardInventory.create() must have run, giving it a
     // content table) before the deck editor's create() tries to add widgets to that table below.
     gameArea.displayUI(battleUi);
+    savePanel.hide(); // save overlay starts hidden, opened by the Save & Load button
 
     // The deck editor's own per-card toggle buttons need a ClickableFactory of their own — an
     // entity can only hold one component of a given class, and battleUi already has uiFactory.

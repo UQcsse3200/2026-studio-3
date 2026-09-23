@@ -12,6 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.csse3200.game.GdxGame;
+import com.csse3200.game.components.pausemenu.PauseMenuFactory;
+import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -113,7 +115,10 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         .addComponent(new KeyboardTerminalInputComponent())
         .addComponent(new TerminalDisplay());
 
+    // Pause menu + in-place save/load overlay (the map is the natural place to save a run).
+    SaveLoadPanel savePanel = PauseMenuFactory.attach(ui, game);
     ServiceLocator.getEntityService().register(ui);
+    savePanel.hide(); // save overlay starts hidden, opened by the Save & Load button
 
     createExitButton(game);
   }
