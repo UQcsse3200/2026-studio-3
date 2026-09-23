@@ -18,15 +18,15 @@ public final class CardAimController implements AimSession {
 
   private final Stage stage;
   private final Camera worldCamera;
-  private final Map<String, Entity> enemies;
+  private final Map<String, Entity> targets;
   private final AimArrowActor arrow;
   private final Vector2 source = new Vector2();
   private boolean active;
 
-  public CardAimController(Stage stage, Camera worldCamera, Map<String, Entity> enemies) {
+  public CardAimController(Stage stage, Camera worldCamera, Map<String, Entity> targets) {
     this.stage = stage;
     this.worldCamera = worldCamera;
-    this.enemies = enemies;
+    this.targets = targets;
     arrow = new AimArrowActor();
     stage.addActor(arrow);
   }
@@ -74,21 +74,21 @@ public final class CardAimController implements AimSession {
   }
 
   private boolean isAlive(String id) {
-    Entity enemy = enemies.get(id);
+    Entity target = targets.get(id);
     CombatStatsComponent stats =
-        enemy == null ? null : enemy.getComponent(CombatStatsComponent.class);
+        target == null ? null : target.getComponent(CombatStatsComponent.class);
     return stats != null && !stats.isDead();
   }
 
   private Map<String, Rectangle> currentBounds() {
     Map<String, Rectangle> bounds = new LinkedHashMap<>();
-    enemies.forEach((id, enemy) -> bounds.put(id, stageBounds(enemy)));
+    targets.forEach((id, target) -> bounds.put(id, stageBounds(target)));
     return bounds;
   }
 
-  private Rectangle stageBounds(Entity enemy) {
-    Vector2 position = enemy.getPosition();
-    Vector2 scale = enemy.getScale();
+  private Rectangle stageBounds(Entity target) {
+    Vector2 position = target.getPosition();
+    Vector2 scale = target.getScale();
     Vector2 bottomLeft = project(position.x, position.y);
     Vector2 topRight = project(position.x + scale.x, position.y + scale.y);
     float left = Math.min(bottomLeft.x, topRight.x) - TARGET_PADDING;

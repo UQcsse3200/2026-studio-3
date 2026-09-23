@@ -91,6 +91,33 @@ class DragNDropTest {
   }
 
   @Test
+  void aimedDragPlaysSelectedPlayerWithoutDropActor() throws Exception {
+    DragNDropService dragService = new DragNDropService();
+    ServiceLocator.registerDragNDropService(dragService);
+    DragNDrop card =
+        new DragNDrop(
+            ClickableRecord.builder("playCard")
+                .text("Defend")
+                .args("defend-instance-1")
+                .build(),
+            new RecordingAim("player"));
+    Entity battleUi = new Entity().addComponent(card);
+    AtomicReference<String> playedTarget = new AtomicReference<>();
+    battleUi
+        .getEvents()
+        .addListener(
+            "playCard",
+            (String instanceId, String targetId) ->
+                playedTarget.set(instanceId + ":" + targetId));
+
+    DragAndDrop.Source source = getOnlySource(dragService.getDragAndDrop());
+    DragAndDrop.Payload payload = source.dragStart(new InputEvent(), 0f, 0f, 0);
+    source.dragStop(new InputEvent(), 0f, 0f, 0, payload, null);
+
+    assertEquals("defend-instance-1:player", playedTarget.get());
+  }
+
+  @Test
   void aimedDragWithoutSelectionDoesNotPlayCard() throws Exception {
     DragNDropService dragService = new DragNDropService();
     ServiceLocator.registerDragNDropService(dragService);
