@@ -8,10 +8,12 @@ import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.Rarity;
 import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.cards.configs.CardUpgradeConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.play.CardPlayService;
+import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.BattleActions;
 import com.csse3200.game.components.cards.CardEffectHandler;
@@ -28,6 +30,48 @@ import org.junit.jupiter.api.Test;
 class Team3CardPlayAdapterTest {
 
   @Test
+  void shouldPlayOnlyTheSelectedUpgradedDuplicateByInstanceId() {
+    CardConfig strike = upgradedStrike();
+    CardLibrary cards = new CardLibrary(List.of(strike));
+    CardInstance baseStrike = new CardInstance("strike-base", "strike", 0);
+    CardInstance upgradedStrike = new CardInstance("strike-plus", "strike", 1);
+    BattleDeck deck =
+        new BattleDeck(PlayerDeck.fromInstances(cards, List.of(baseStrike, upgradedStrike)));
+    deck.drawCards(2);
+
+    EnergyComponent energy = new EnergyComponent(3);
+    Entity player = new Entity().addComponent(new CombatStatsComponent(10, 1)).addComponent(energy);
+    Entity enemy =
+        new Entity()
+            .addComponent(new CombatStatsComponent(12, 1))
+            .addComponent(new EnemyBehaviourComponent("test"));
+    Team7PlayerStateAdapter playerState =
+        new Team7PlayerStateAdapter(energy, player.getComponent(CombatStatsComponent.class));
+    Team1EnemyStateAdapter enemyState = new Team1EnemyStateAdapter(Map.of("enemy-1", enemy));
+    CardPlayService playService = new CardPlayService(cards, deck, energy, playerState, enemyState);
+    BattleController controller =
+        new BattleController(
+            player, List.of(enemy), new CardEffectHandler(Map.of("enemy-1", enemy)), playService);
+    Entity battleFlow =
+        new Entity().addComponent(new Team3CardPlayAdapter(playService, controller));
+    battleFlow.create();
+    controller.start();
+
+    while (controller.getCurrentPhase() != BattlePhase.PLAYER_TURN) {
+      controller.endPlayerTurn();
+    }
+
+    battleFlow
+        .getEvents()
+        .trigger(Team3CardPlayAdapter.PLAY_CARD_EVENT, upgradedStrike.instanceId(), "enemy-1");
+
+    assertEquals(1, energy.getCurrentEnergy());
+    assertEquals(3, enemy.getComponent(CombatStatsComponent.class).getHealth());
+    assertEquals(List.of(baseStrike), deck.getHand());
+    assertEquals(List.of(upgradedStrike), deck.getDiscardPile());
+  }
+
+  @Test
   void shouldSubmitCardPlayRequestToBattleController() {
     CardConfig strike = strike();
     CardConfig defend = defend();
@@ -36,7 +80,7 @@ class Team3CardPlayAdapterTest {
 
     BattleDeck deck = new BattleDeck(new PlayerDeck(cards, List.of("strike", "defend")));
 
-    deck.drawOne();
+    CardInstance strikeInstance = deck.drawOne();
 
     EnergyComponent energy = new EnergyComponent(3);
 
@@ -59,7 +103,7 @@ class Team3CardPlayAdapterTest {
     CardEffectHandler effectHandler = new CardEffectHandler(Map.of("enemy-1", enemy));
     BattleController controller = new BattleController(player, enemies, effectHandler, playService);
 
-    Team3CardPlayAdapter adapter = new Team3CardPlayAdapter(cards, controller);
+    Team3CardPlayAdapter adapter = new Team3CardPlayAdapter(playService, controller);
 
     Entity battleFlow = new Entity().addComponent(adapter);
 
@@ -72,7 +116,9 @@ class Team3CardPlayAdapterTest {
       controller.endPlayerTurn();
     }
 
-    battleFlow.getEvents().trigger(Team3CardPlayAdapter.PLAY_CARD_EVENT, "strike", "enemy-1");
+    battleFlow
+        .getEvents()
+        .trigger(Team3CardPlayAdapter.PLAY_CARD_EVENT, strikeInstance.instanceId(), "enemy-1");
 
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
 
@@ -81,7 +127,7 @@ class Team3CardPlayAdapterTest {
 
     // strike was discarded and not replaced.
     assertEquals(List.of(), deck.getHand());
-    assertEquals(List.of("strike"), deck.getDiscardPile());
+    assertEquals(List.of(strikeInstance), deck.getDiscardPile());
 
     // The BattleController applies the resolved card effects.
     assertEquals(4, enemy.getComponent(CombatStatsComponent.class).getHealth());
@@ -105,13 +151,25 @@ class Team3CardPlayAdapterTest {
     CardConfig card = new CardConfig();
     card.id = "defend";
     card.name = "Defend";
-    card.description = "Add armor";
+    card.description = "Add armour";
     card.cost = 1;
     card.type = CardType.SKILL;
     card.rarity = Rarity.COMMON;
     card.target = TargetType.SELF;
     card.texturePath = "images/cards/defend.png";
     card.effects = new EffectConfig[] {new EffectConfig(EffectType.HEAL, 3)};
+    return card;
+  }
+
+  private static CardConfig upgradedStrike() {
+    CardConfig card = strike();
+    CardUpgradeConfig upgrade = new CardUpgradeConfig();
+    upgrade.name = "Strike+";
+    upgrade.description = "Deal 9 damage";
+    upgrade.cost = 2;
+    upgrade.rarity = Rarity.COMMON;
+    upgrade.effects = new EffectConfig[] {new EffectConfig(EffectType.DAMAGE, 9)};
+    card.upgrade = upgrade;
     return card;
   }
 
@@ -123,7 +181,7 @@ class Team3CardPlayAdapterTest {
     CardLibrary cards = new CardLibrary(List.of(strike, defend));
     BattleDeck deck = new BattleDeck(new PlayerDeck(cards, List.of("strike", "defend")));
 
-    deck.drawOne();
+    CardInstance strikeInstance = deck.drawOne();
 
     EnergyComponent energy = new EnergyComponent(3);
 
@@ -148,7 +206,7 @@ class Team3CardPlayAdapterTest {
 
     BattleController controller = new BattleController(player, enemies, effectHandler, playService);
 
-    Team3CardPlayAdapter adapter = new Team3CardPlayAdapter(cards, controller);
+    Team3CardPlayAdapter adapter = new Team3CardPlayAdapter(playService, controller);
 
     Entity battleFlow = new Entity().addComponent(adapter);
 
@@ -168,188 +226,190 @@ class Team3CardPlayAdapterTest {
         .getEvents()
         .addListener(BattleActions.BATTLE_LOG_EVENT, (String message) -> logs.add(message));
 
-    battleFlow.getEvents().trigger(Team3CardPlayAdapter.PLAY_CARD_EVENT, "strike", "enemy-1");
+    battleFlow
+        .getEvents()
+        .trigger(Team3CardPlayAdapter.PLAY_CARD_EVENT, strikeInstance.instanceId(), "enemy-1");
 
     assertEquals(List.of("You are silenced and cannot play cards."), logs);
 
     assertEquals(3, energy.getCurrentEnergy());
-    assertEquals(List.of("strike"), deck.getHand());
+    assertEquals(List.of(strikeInstance), deck.getHand());
     assertEquals(List.of(), deck.getDiscardPile());
     assertEquals(10, enemy.getComponent(CombatStatsComponent.class).getHealth());
 
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }
 
-  //  @Test
-  //  void shouldAllowCardWhenPlayerIsNotSilenced() {
-  //    CardConfig strike = strike();
-  //    CardConfig defend = defend();
+  //    @Test
+  //    void shouldAllowCardWhenPlayerIsNotSilenced() {
+  //      CardConfig strike = strike();
+  //      CardConfig defend = defend();
   //
-  //    CardLibrary cards = new CardLibrary(List.of(strike, defend));
-  //    BattleDeck deck = new BattleDeck(new PlayerDeck(cards, List.of("strike", "defend")));
+  //      CardLibrary cards = new CardLibrary(List.of(strike, defend));
+  //      BattleDeck deck = new BattleDeck(new PlayerDeck(cards, List.of("strike", "defend")));
   //
-  //    deck.drawOne();
+  //      deck.drawOne();
   //
-  //    EnergyComponent energy = new EnergyComponent(3);
-  //    CombatStatsComponent playerStats = new CombatStatsComponent(10, 1);
+  //      EnergyComponent energy = new EnergyComponent(3);
+  //      CombatStatsComponent playerStats = new CombatStatsComponent(10, 1);
   //
-  //    Entity player = new Entity().addComponent(playerStats).addComponent(energy);
+  //      Entity player = new Entity().addComponent(playerStats).addComponent(energy);
   //
-  //    Entity enemy1 =
-  //            new Entity()
-  //                    .addComponent(new CombatStatsComponent(10, 1))
-  //                    .addComponent(new EnemyBehaviourComponent("test"));
+  //      Entity enemy1 =
+  //              new Entity()
+  //                      .addComponent(new CombatStatsComponent(10, 1))
+  //                      .addComponent(new EnemyBehaviourComponent("test"));
   //
-  //    Entity enemy2 =
-  //            new Entity()
-  //                    .addComponent(new CombatStatsComponent(10, 1))
-  //                    .addComponent(new EnemyBehaviourComponent("test"));
+  //      Entity enemy2 =
+  //              new Entity()
+  //                      .addComponent(new CombatStatsComponent(10, 1))
+  //                      .addComponent(new EnemyBehaviourComponent("test"));
   //
-  //    List<Entity> enemies = List.of(enemy1, enemy2);
+  //      List<Entity> enemies = List.of(enemy1, enemy2);
   //
-  //    Team7PlayerStateAdapter playerState =
-  //            new Team7PlayerStateAdapter(energy, playerStats);
+  //      Team7PlayerStateAdapter playerState =
+  //              new Team7PlayerStateAdapter(energy, playerStats);
   //
-  //    Team1EnemyStateAdapter enemyState =
-  //            new Team1EnemyStateAdapter(
-  //                    Map.of(
-  //                            "enemy-1", enemy1,
-  //                            "enemy-2", enemy2));
+  //      Team1EnemyStateAdapter enemyState =
+  //              new Team1EnemyStateAdapter(
+  //                      Map.of(
+  //                              "enemy-1", enemy1,
+  //                              "enemy-2", enemy2));
   //
-  //    CardPlayService playService =
-  //            new CardPlayService(cards, deck, energy, playerState, enemyState);
+  //      CardPlayService playService =
+  //              new CardPlayService(cards, deck, energy, playerState, enemyState);
   //
-  //    CardEffectHandler effectHandler = new CardEffectHandler();
+  //      CardEffectHandler effectHandler = new CardEffectHandler();
   //
-  //    BattleController controller =
-  //            new BattleController(player, enemies, effectHandler, playService);
+  //      BattleController controller =
+  //              new BattleController(player, enemies, effectHandler, playService);
   //
-  //    Team3CardPlayAdapter adapter =
-  //            new Team3CardPlayAdapter(cards, controller);
+  //      Team3CardPlayAdapter adapter =
+  //              new Team3CardPlayAdapter(playService, controller);
   //
-  //    Entity battleFlow = new Entity().addComponent(adapter);
+  //      Entity battleFlow = new Entity().addComponent(adapter);
   //
-  //    battleFlow.create();
+  //      battleFlow.create();
   //
-  //    controller.start();
+  //      controller.start();
   //
-  //    while (controller.getCurrentPhase() != BattlePhase.PLAYER_TURN) {
-  //      controller.endPlayerTurn();
+  //      while (controller.getCurrentPhase() != BattlePhase.PLAYER_TURN) {
+  //        controller.endPlayerTurn();
+  //      }
+  //
+  //      List<String> played = new ArrayList<>();
+  //
+  //      battleFlow
+  //              .getEvents()
+  //              .addListener(
+  //                      Team3CardPlayAdapter.CARD_PLAY_RESULT_EVENT,
+  //                      (String cardId, String targetId) -> played.add(cardId));
+  //
+  //      battleFlow
+  //              .getEvents()
+  //              .trigger(
+  //                      Team3CardPlayAdapter.PLAY_CARD_EVENT,
+  //                      "strike",
+  //                      "enemy-1");
+  //
+  //      assertEquals(List.of("strike"), played);
+  //      assertEquals(2, energy.getCurrentEnergy());
+  //      assertEquals(4, enemy1.getComponent(CombatStatsComponent.class).getHealth());
   //    }
   //
-  //    List<String> played = new ArrayList<>();
+  //    @Test
+  //    void shouldAllowCardAfterSilenceIsRemoved() {
+  //      CardConfig strike = strike();
+  //      CardConfig defend = defend();
   //
-  //    battleFlow
-  //            .getEvents()
-  //            .addListener(
-  //                    Team3CardPlayAdapter.CARD_PLAY_RESULT_EVENT,
-  //                    (String cardId, String targetId) -> played.add(cardId));
+  //      CardLibrary cards = new CardLibrary(List.of(strike, defend));
+  //      BattleDeck deck = new BattleDeck(new PlayerDeck(cards, List.of("strike", "defend")));
   //
-  //    battleFlow
-  //            .getEvents()
-  //            .trigger(
-  //                    Team3CardPlayAdapter.PLAY_CARD_EVENT,
-  //                    "strike",
-  //                    "enemy-1");
+  //      deck.drawOne();
   //
-  //    assertEquals(List.of("strike"), played);
-  //    assertEquals(2, energy.getCurrentEnergy());
-  //    assertEquals(4, enemy1.getComponent(CombatStatsComponent.class).getHealth());
-  //  }
-
-  //  @Test
-  //  void shouldAllowCardAfterSilenceIsRemoved() {
-  //    CardConfig strike = strike();
-  //    CardConfig defend = defend();
+  //      EnergyComponent energy = new EnergyComponent(3);
+  //      CombatStatsComponent playerStats = new CombatStatsComponent(10, 1);
   //
-  //    CardLibrary cards = new CardLibrary(List.of(strike, defend));
-  //    BattleDeck deck = new BattleDeck(new PlayerDeck(cards, List.of("strike", "defend")));
+  //      Entity player = new Entity().addComponent(playerStats).addComponent(energy);
   //
-  //    deck.drawOne();
+  //      Entity enemy1 =
+  //              new Entity()
+  //                      .addComponent(new CombatStatsComponent(10, 1))
+  //                      .addComponent(new EnemyBehaviourComponent("test"));
   //
-  //    EnergyComponent energy = new EnergyComponent(3);
-  //    CombatStatsComponent playerStats = new CombatStatsComponent(10, 1);
+  //      Entity enemy2 =
+  //              new Entity()
+  //                      .addComponent(new CombatStatsComponent(10, 1))
+  //                      .addComponent(new EnemyBehaviourComponent("test"));
   //
-  //    Entity player = new Entity().addComponent(playerStats).addComponent(energy);
+  //      List<Entity> enemies = List.of(enemy1, enemy2);
   //
-  //    Entity enemy1 =
-  //            new Entity()
-  //                    .addComponent(new CombatStatsComponent(10, 1))
-  //                    .addComponent(new EnemyBehaviourComponent("test"));
+  //      Team7PlayerStateAdapter playerState =
+  //              new Team7PlayerStateAdapter(energy, playerStats);
   //
-  //    Entity enemy2 =
-  //            new Entity()
-  //                    .addComponent(new CombatStatsComponent(10, 1))
-  //                    .addComponent(new EnemyBehaviourComponent("test"));
+  //      Team1EnemyStateAdapter enemyState =
+  //              new Team1EnemyStateAdapter(
+  //                      Map.of(
+  //                              "enemy-1", enemy1,
+  //                              "enemy-2", enemy2));
   //
-  //    List<Entity> enemies = List.of(enemy1, enemy2);
+  //      CardPlayService playService =
+  //              new CardPlayService(cards, deck, energy, playerState, enemyState);
   //
-  //    Team7PlayerStateAdapter playerState =
-  //            new Team7PlayerStateAdapter(energy, playerStats);
+  //      CardEffectHandler effectHandler = new CardEffectHandler();
   //
-  //    Team1EnemyStateAdapter enemyState =
-  //            new Team1EnemyStateAdapter(
-  //                    Map.of(
-  //                            "enemy-1", enemy1,
-  //                            "enemy-2", enemy2));
+  //      BattleController controller =
+  //              new BattleController(player, enemies, effectHandler, playService);
   //
-  //    CardPlayService playService =
-  //            new CardPlayService(cards, deck, energy, playerState, enemyState);
+  //      Team3CardPlayAdapter adapter =
+  //              new Team3CardPlayAdapter(playService, controller);
   //
-  //    CardEffectHandler effectHandler = new CardEffectHandler();
+  //      Entity battleFlow = new Entity().addComponent(adapter);
   //
-  //    BattleController controller =
-  //            new BattleController(player, enemies, effectHandler, playService);
+  //      battleFlow.create();
   //
-  //    Team3CardPlayAdapter adapter =
-  //            new Team3CardPlayAdapter(cards, controller);
+  //      controller.start();
   //
-  //    Entity battleFlow = new Entity().addComponent(adapter);
+  //      while (controller.getCurrentPhase() != BattlePhase.PLAYER_TURN) {
+  //        controller.endPlayerTurn();
+  //      }
   //
-  //    battleFlow.create();
+  //      playerStats.applyStatusEffect("SILENCE", 1, 2);
   //
-  //    controller.start();
+  //      List<String> played = new ArrayList<>();
   //
-  //    while (controller.getCurrentPhase() != BattlePhase.PLAYER_TURN) {
-  //      controller.endPlayerTurn();
+  //      battleFlow
+  //              .getEvents()
+  //              .addListener(
+  //                      Team3CardPlayAdapter.CARD_PLAY_RESULT_EVENT,
+  //                      (String cardId, String targetId) -> played.add(cardId));
+  //
+  //      // First attempt is rejected while silenced.
+  //      battleFlow
+  //              .getEvents()
+  //              .trigger(
+  //                      Team3CardPlayAdapter.PLAY_CARD_EVENT,
+  //                      "strike",
+  //                      "enemy-1");
+  //
+  //      assertTrue(played.isEmpty());
+  //      assertEquals(3, energy.getCurrentEnergy());
+  //      assertEquals(List.of("strike"), deck.getHand());
+  //
+  //      // Remove silence and try again.
+  //      playerStats.removeStatusEffect("SILENCE");
+  //
+  //      battleFlow
+  //              .getEvents()
+  //              .trigger(
+  //                      Team3CardPlayAdapter.PLAY_CARD_EVENT,
+  //                      "strike",
+  //                      "enemy-1");
+  //
+  //      assertEquals(List.of("strike"), played);
+  //      assertEquals(2, energy.getCurrentEnergy());
+  //      assertEquals(4, enemy1.getComponent(CombatStatsComponent.class).getHealth());
   //    }
-  //
-  //    playerStats.applyStatusEffect("SILENCE", 1, 2);
-  //
-  //    List<String> played = new ArrayList<>();
-  //
-  //    battleFlow
-  //            .getEvents()
-  //            .addListener(
-  //                    Team3CardPlayAdapter.CARD_PLAY_RESULT_EVENT,
-  //                    (String cardId, String targetId) -> played.add(cardId));
-  //
-  //    // First attempt is rejected while silenced.
-  //    battleFlow
-  //            .getEvents()
-  //            .trigger(
-  //                    Team3CardPlayAdapter.PLAY_CARD_EVENT,
-  //                    "strike",
-  //                    "enemy-1");
-  //
-  //    assertTrue(played.isEmpty());
-  //    assertEquals(3, energy.getCurrentEnergy());
-  //    assertEquals(List.of("strike"), deck.getHand());
-  //
-  //    // Remove silence and try again.
-  //    playerStats.removeStatusEffect("SILENCE");
-  //
-  //    battleFlow
-  //            .getEvents()
-  //            .trigger(
-  //                    Team3CardPlayAdapter.PLAY_CARD_EVENT,
-  //                    "strike",
-  //                    "enemy-1");
-  //
-  //    assertEquals(List.of("strike"), played);
-  //    assertEquals(2, energy.getCurrentEnergy());
-  //    assertEquals(4, enemy1.getComponent(CombatStatsComponent.class).getHealth());
-  //  }
 
   @Test
   void shouldNotLogSilenceMessageWhenPlayerIsNotSilenced() {
@@ -359,7 +419,7 @@ class Team3CardPlayAdapterTest {
     CardLibrary cards = new CardLibrary(List.of(strike, defend));
     BattleDeck deck = new BattleDeck(new PlayerDeck(cards, List.of("strike", "defend")));
 
-    deck.drawOne();
+    CardInstance strikeInstance = deck.drawOne();
 
     EnergyComponent energy = new EnergyComponent(3);
 
@@ -381,7 +441,7 @@ class Team3CardPlayAdapterTest {
     BattleController controller =
         new BattleController(player, List.of(enemy), new CardEffectHandler(), playService);
 
-    Team3CardPlayAdapter adapter = new Team3CardPlayAdapter(cards, controller);
+    Team3CardPlayAdapter adapter = new Team3CardPlayAdapter(playService, controller);
 
     Entity battleFlow = new Entity().addComponent(adapter);
 
@@ -399,7 +459,9 @@ class Team3CardPlayAdapterTest {
         .getEvents()
         .addListener(BattleActions.BATTLE_LOG_EVENT, (String message) -> logs.add(message));
 
-    battleFlow.getEvents().trigger(Team3CardPlayAdapter.PLAY_CARD_EVENT, "strike", "enemy-1");
+    battleFlow
+        .getEvents()
+        .trigger(Team3CardPlayAdapter.PLAY_CARD_EVENT, strikeInstance.instanceId(), "enemy-1");
 
     assertFalse(logs.contains("You are silenced and cannot play cards."));
   }

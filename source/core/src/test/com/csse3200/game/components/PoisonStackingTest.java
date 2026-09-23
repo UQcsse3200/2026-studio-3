@@ -59,7 +59,7 @@ class PoisonStackingTest {
   void totalHitUsesDefensesAndTicksEvenWhenFullyBlocked() {
     CombatStatsComponent stats = new CombatStatsComponent(100, 0);
     stats.setBlock(3);
-    stats.setArmor(9);
+    stats.setArmour(9);
     stats.applyStatusEffect("POISON", 7, 1);
     stats.applyStatusEffect("POISON", 5, 2);
     List<Integer> hits = new ArrayList<>();
@@ -71,7 +71,7 @@ class PoisonStackingTest {
     assertEquals(List.of(12), hits);
     assertEquals(100, stats.getHealth());
     assertEquals(0, stats.getBlock());
-    assertEquals(0, stats.getArmor());
+    assertEquals(0, stats.getArmour());
     assertEquals(Map.of(1, 5), stats.getPoisonStacksByDuration());
     stats.processPoisonTick(stats::takeDamage);
     assertEquals(95, stats.getHealth());

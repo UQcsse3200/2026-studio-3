@@ -1,8 +1,10 @@
 package com.csse3200.game.cards.play;
 
+import static com.csse3200.game.cards.CardTestInstances.id;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -30,51 +32,51 @@ class CardPlayServiceTest {
   void shouldSpendEnergyResolveEffectsAndDiscardPlayedCard() {
     CardConfig strike =
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
-    CardConfig defend = card("defend", 1, TargetType.SELF, new EffectConfig(EffectType.BLOCK, 3));
-
-    CardLibrary cardLibrary = new CardLibrary(List.of(strike, defend));
-
-    BattleDeck battleDeck =
-        new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike", "defend")));
-
+    CardLibrary cardLibrary = new CardLibrary(List.of(strike));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike")));
     battleDeck.drawOne();
-
     EnergyComponent energyComponent = new EnergyComponent(3);
     CardEffectResolutionService resolutionService = new CardEffectResolutionService(cardLibrary);
-
     CardPlayService playService =
         new CardPlayService(cardLibrary, resolutionService, battleDeck, energyComponent);
 
-    CardPlayResult result = playService.playCard("strike");
+    CardPlayResult result =
+        playService.playCard(CardPlayRequest.singleEnemy(id(battleDeck, "strike"), "enemy-1"));
 
     assertTrue(result.successful());
     assertEquals(CardPlayFailureReason.NONE, result.failureReason());
-
-    // Energy was spent for the played card.
     assertEquals(1, result.energyCost());
     assertEquals(2, energyComponent.getCurrentEnergy());
-
-    // The played card was discarded.
-    assertIterableEquals(List.of("strike"), battleDeck.getDiscardPile());
-    assertIterableEquals(List.of("strike"), result.updatedDiscardPile());
-
-    // No replacement is drawn — the hand just shrinks by the played card.
-    assertTrue(battleDeck.getHand().isEmpty());
-    assertTrue(result.updatedHand().isEmpty());
-
-    // The draw pile is untouched.
-    assertIterableEquals(List.of("defend"), battleDeck.getDrawPile());
-    assertIterableEquals(List.of("defend"), result.updatedDrawPile());
-
-    // The card's effects were resolved correctly.
+    assertTrue(
+        battleDeck.getHand().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList()
+            .isEmpty());
+    assertIterableEquals(
+        List.of("strike"),
+        battleDeck.getDiscardPile().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList());
+    assertTrue(
+        result.updatedHand().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList()
+            .isEmpty());
+    assertTrue(
+        result.updatedDrawPile().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList()
+            .isEmpty());
+    assertIterableEquals(
+        List.of("strike"),
+        result.updatedDiscardPile().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList());
     assertIterableEquals(
         List.of(
             new ResolvedCardEffect("strike", EffectType.DAMAGE, TargetType.SINGLE_ENEMY, 6, 0, 0)),
         result.enemyEffects());
-
     assertTrue(result.playerEffects().isEmpty());
-
-    // The resolution was recorded by the resolution service.
     assertIterableEquals(List.of(result.resolution()), resolutionService.getResolutions());
   }
 
@@ -96,7 +98,7 @@ class CardPlayServiceTest {
     EnergyComponent energyComponent = new EnergyComponent(3);
     CardPlayService playService = new CardPlayService(cardLibrary, battleDeck, energyComponent);
 
-    CardPlayRequest request = CardPlayRequest.singleEnemy("strike", "enemy-1");
+    CardPlayRequest request = CardPlayRequest.singleEnemy(id(battleDeck, "strike"), "enemy-1");
 
     CardPlayResult result = playService.playCard(request);
 
@@ -107,29 +109,28 @@ class CardPlayServiceTest {
     assertEquals(1, result.energyCost());
     assertEquals(2, energyComponent.getCurrentEnergy());
 
-    // strike was played and not replaced — the hand is now empty.
     assertTrue(result.updatedHand().isEmpty());
 
-    // The draw pile is untouched.
-    assertIterableEquals(List.of("defend"), result.updatedDrawPile());
+    assertIterableEquals(
+        List.of("defend"), result.updatedDrawPile().stream().map(CardInstance::cardId).toList());
 
-    // strike was moved to the discard pile.
-    assertIterableEquals(List.of("strike"), result.updatedDiscardPile());
+    assertIterableEquals(
+        List.of("strike"),
+        result.updatedDiscardPile().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList());
 
-    // defend is not playable because it was never drawn into the hand.
-    assertFalse(playService.canPlay(CardPlayRequest.singleEnemy("defend", "enemy-1")));
+    assertFalse(
+        playService.canPlay(CardPlayRequest.singleEnemy(id(battleDeck, "defend"), "enemy-1")));
   }
 
   @Test
   void shouldResolveDamageFromPlayerAndEnemyStateViews() {
     CardConfig strike =
         card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
-    CardConfig defend = card("defend", 1, TargetType.SELF, new EffectConfig(EffectType.BLOCK, 3));
-    CardLibrary cardLibrary = new CardLibrary(List.of(strike, defend));
+    CardLibrary cardLibrary = new CardLibrary(List.of(strike));
     BattleDeck battleDeck =
-        new BattleDeck(
-            new PlayerDeck(
-                TestCardService.withCards("strike", "defend"), List.of("strike", "defend")));
+        new BattleDeck(new PlayerDeck(TestCardService.withCards("strike"), List.of("strike")));
     battleDeck.drawOne();
     EnergyComponent energyComponent = new EnergyComponent(3);
     PlayerStateView playerState = playerStateView(energyComponent, 2, 1);
@@ -137,7 +138,8 @@ class CardPlayServiceTest {
     CardPlayService playService =
         new CardPlayService(cardLibrary, battleDeck, energyComponent, playerState, enemyState);
 
-    CardPlayResult result = playService.playCard(CardPlayRequest.singleEnemy("strike", "enemy-1"));
+    CardPlayResult result =
+        playService.playCard(CardPlayRequest.singleEnemy(id(battleDeck, "strike"), "enemy-1"));
 
     assertTrue(result.success());
     assertEquals(
@@ -145,7 +147,46 @@ class CardPlayServiceTest {
             new ResolvedCardEffect("strike", EffectType.DAMAGE, TargetType.SINGLE_ENEMY, 9, 0, 0)),
         result.enemyEffects());
     assertEquals(2, energyComponent.getCurrentEnergy());
-    assertIterableEquals(List.of("strike"), result.updatedDiscardPile());
+    assertIterableEquals(
+        List.of("strike"),
+        result.updatedDiscardPile().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList());
+  }
+
+  @Test
+  void shouldResolveOnTheExplicitlySharedResolutionServiceInstance() {
+    // Proves the exact constructor combination BattleScreen relies on to share one
+    // CardEffectResolutionService between real card play and the debug dialog: passing an
+    // explicit resolutionService alongside playerStateView/enemyStateView (not the adapter-only
+    // overload, which builds its own internal service the caller can never observe).
+    CardConfig strike =
+        card("strike", 1, TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
+    CardLibrary cardLibrary = new CardLibrary(List.of(strike));
+    BattleDeck battleDeck = new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike")));
+    battleDeck.drawOne();
+    EnergyComponent energyComponent = new EnergyComponent(3);
+    PlayerStateView playerState = playerStateView(energyComponent, 0, 0);
+    EnemyStateView enemyState = enemyStateView("enemy-1", 0);
+    CardEffectResolutionService sharedResolutionService =
+        new CardEffectResolutionService(cardLibrary);
+    CardPlayService playService =
+        new CardPlayService(
+            cardLibrary,
+            sharedResolutionService,
+            battleDeck,
+            energyComponent,
+            playerState,
+            enemyState);
+
+    CardPlayResult result =
+        playService.playCard(CardPlayRequest.singleEnemy(id(battleDeck, "strike"), "enemy-1"));
+
+    assertTrue(result.success());
+    // The externally-held service the caller kept a reference to (e.g. to hand to a debug
+    // dialog) must show the same resolution playCard() just produced internally.
+    assertEquals(1, sharedResolutionService.getResolutions().size());
+    assertEquals("strike", sharedResolutionService.getResolutions().getFirst().cardId());
   }
 
   @Test
@@ -162,12 +203,17 @@ class CardPlayServiceTest {
         new CardPlayService(cardLibrary, battleDeck, energyComponent, playerState, enemyState);
 
     CardPlayResult result =
-        playService.playCard(CardPlayRequest.singleEnemy("strike", "missing-enemy"));
+        playService.playCard(
+            CardPlayRequest.singleEnemy(id(battleDeck, "strike"), "missing-enemy"));
 
     assertFalse(result.success());
     assertEquals(CardPlayFailureReason.INVALID_TARGET, result.failureReason());
     assertEquals(3, energyComponent.getCurrentEnergy());
-    assertIterableEquals(List.of("strike"), result.updatedHand());
+    assertIterableEquals(
+        List.of("strike"),
+        result.updatedHand().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList());
   }
 
   @Test
@@ -182,13 +228,21 @@ class CardPlayServiceTest {
     CardPlayService playService =
         new CardPlayService(cardLibrary, resolutionService, battleDeck, energyComponent);
 
-    CardPlayResult result = playService.playCard(CardPlayRequest.self("strike"));
+    CardPlayResult result = playService.playCard(CardPlayRequest.self(id(battleDeck, "strike")));
 
     assertFalse(result.success());
     assertEquals(CardPlayFailureReason.INVALID_TARGET, result.failureReason());
     assertEquals(3, energyComponent.getCurrentEnergy());
-    assertIterableEquals(List.of("strike"), result.updatedHand());
-    assertTrue(result.updatedDiscardPile().isEmpty());
+    assertIterableEquals(
+        List.of("strike"),
+        result.updatedHand().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList());
+    assertTrue(
+        result.updatedDiscardPile().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList()
+            .isEmpty());
     assertTrue(result.enemyEffects().isEmpty());
     assertTrue(resolutionService.getResolutions().isEmpty());
   }
@@ -202,13 +256,18 @@ class CardPlayServiceTest {
     EnergyComponent energyComponent = new EnergyComponent(3);
     CardPlayService playService = new CardPlayService(cardLibrary, battleDeck, energyComponent);
 
-    CardPlayResult result = playService.playCard(CardPlayRequest.singleEnemy("missing", "enemy-1"));
+    CardPlayResult result =
+        playService.playCard(CardPlayRequest.singleEnemy(id(battleDeck, "strike"), "enemy-1"));
 
     assertFalse(result.success());
     assertEquals(CardPlayFailureReason.UNKNOWN_CARD, result.failureReason());
     assertEquals(0, result.energyCost());
     assertEquals(3, energyComponent.getCurrentEnergy());
-    assertIterableEquals(List.of("strike"), result.updatedHand());
+    assertIterableEquals(
+        List.of("strike"),
+        result.updatedHand().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList());
   }
 
   @Test
@@ -222,12 +281,17 @@ class CardPlayServiceTest {
     EnergyComponent energyComponent = new EnergyComponent(3);
     CardPlayService playService = new CardPlayService(cardLibrary, battleDeck, energyComponent);
 
-    CardPlayResult result = playService.playCard(CardPlayRequest.singleEnemy("strike", "enemy-1"));
+    CardPlayResult result =
+        playService.playCard(CardPlayRequest.singleEnemy(id(battleDeck, "strike"), "enemy-1"));
 
     assertFalse(result.success());
     assertEquals(CardPlayFailureReason.INVALID_CARD_CONFIG, result.failureReason());
     assertEquals(3, energyComponent.getCurrentEnergy());
-    assertIterableEquals(List.of("strike"), result.updatedHand());
+    assertIterableEquals(
+        List.of("strike"),
+        result.updatedHand().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList());
     assertTrue(result.enemyEffects().isEmpty());
   }
 
@@ -239,21 +303,19 @@ class CardPlayServiceTest {
     BattleDeck failingDeck =
         new BattleDeck(new PlayerDeck(cardLibrary, List.of("strike"))) {
           @Override
-          public List<String> getHand() {
-            return List.of("strike");
-          }
-
-          @Override
-          public boolean playCard(String cardId) {
-            return false;
+          public CardInstance discardCardInstance(String instanceId) {
+            return null;
           }
         };
+    failingDeck.drawOne();
     EnergyComponent energyComponent = new EnergyComponent(3);
     CardPlayService playService = new CardPlayService(cardLibrary, failingDeck, energyComponent);
 
     assertThrows(
         IllegalStateException.class,
-        () -> playService.playCard(CardPlayRequest.singleEnemy("strike", "enemy-1")));
+        () ->
+            playService.playCard(
+                CardPlayRequest.singleEnemy(id(failingDeck, "strike"), "enemy-1")));
     assertEquals(3, energyComponent.getCurrentEnergy());
   }
 
@@ -270,13 +332,22 @@ class CardPlayServiceTest {
     CardPlayService playService =
         new CardPlayService(cardLibrary, resolutionService, battleDeck, energyComponent);
 
-    CardPlayResult result = playService.playCard("inner_focus");
+    CardPlayResult result =
+        playService.playCard(CardPlayRequest.self(id(battleDeck, "inner_focus")));
 
     assertFalse(result.successful());
     assertEquals(CardPlayFailureReason.NOT_ENOUGH_ENERGY, result.failureReason());
     assertEquals(1, energyComponent.getCurrentEnergy());
-    assertIterableEquals(List.of("inner_focus"), battleDeck.getHand());
-    assertTrue(battleDeck.getDiscardPile().isEmpty());
+    assertIterableEquals(
+        List.of("inner_focus"),
+        battleDeck.getHand().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList());
+    assertTrue(
+        battleDeck.getDiscardPile().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList()
+            .isEmpty());
     assertTrue(result.enemyEffects().isEmpty());
     assertTrue(result.playerEffects().isEmpty());
     assertTrue(resolutionService.getResolutions().isEmpty());
@@ -293,14 +364,27 @@ class CardPlayServiceTest {
     CardPlayService playService =
         new CardPlayService(cardLibrary, resolutionService, battleDeck, energyComponent);
 
-    CardPlayResult result = playService.playCard("strike");
+    CardPlayResult result =
+        playService.playCard(CardPlayRequest.singleEnemy(id(battleDeck, "strike"), "enemy-1"));
 
     assertFalse(result.successful());
     assertEquals(CardPlayFailureReason.CARD_NOT_IN_HAND, result.failureReason());
     assertEquals(3, energyComponent.getCurrentEnergy());
-    assertIterableEquals(List.of("strike"), battleDeck.getDrawPile());
-    assertTrue(battleDeck.getHand().isEmpty());
-    assertTrue(battleDeck.getDiscardPile().isEmpty());
+    assertIterableEquals(
+        List.of("strike"),
+        battleDeck.getDrawPile().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList());
+    assertTrue(
+        battleDeck.getHand().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList()
+            .isEmpty());
+    assertTrue(
+        battleDeck.getDiscardPile().stream()
+            .map(com.csse3200.game.cards.runtime.CardInstance::cardId)
+            .toList()
+            .isEmpty());
     assertTrue(resolutionService.getResolutions().isEmpty());
   }
 
@@ -314,7 +398,7 @@ class CardPlayServiceTest {
     EnergyComponent energyComponent = new EnergyComponent(3);
     CardPlayService playService = new CardPlayService(cardLibrary, battleDeck, energyComponent);
 
-    assertTrue(playService.canPlay("strike"));
+    assertTrue(playService.canPlay(id(battleDeck, "strike")));
     assertEquals(3, energyComponent.getCurrentEnergy());
   }
 
@@ -350,22 +434,57 @@ class CardPlayServiceTest {
                 new ResolvedCardEffect(
                     "strike", EffectType.DAMAGE, TargetType.SINGLE_ENEMY, 6, 0, 0)));
 
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new CardPlayResult("strike", true, 1, null, CardPlayFailureReason.NONE));
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            new CardPlayResult(
-                "strike", true, 1, resolution, CardPlayFailureReason.NOT_ENOUGH_ENERGY));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new CardPlayResult("strike", false, 1, null, CardPlayFailureReason.NONE));
+    CardPlayTarget selfTarget = CardPlayTarget.self();
+    DeckSnapshot emptyDeck = DeckSnapshot.empty();
+
     assertThrows(
         IllegalArgumentException.class,
         () ->
             new CardPlayResult(
-                "strike", false, 1, resolution, CardPlayFailureReason.CARD_NOT_IN_HAND));
+                "strike-instance",
+                "strike",
+                selfTarget,
+                true,
+                1,
+                null,
+                CardPlayFailureReason.NONE,
+                emptyDeck));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            new CardPlayResult(
+                "strike-instance",
+                "strike",
+                selfTarget,
+                true,
+                1,
+                resolution,
+                CardPlayFailureReason.NOT_ENOUGH_ENERGY,
+                emptyDeck));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            new CardPlayResult(
+                "strike-instance",
+                "strike",
+                selfTarget,
+                false,
+                1,
+                null,
+                CardPlayFailureReason.NONE,
+                emptyDeck));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            new CardPlayResult(
+                "strike-instance",
+                "strike",
+                selfTarget,
+                false,
+                1,
+                resolution,
+                CardPlayFailureReason.CARD_NOT_IN_HAND,
+                emptyDeck));
   }
 
   @Test
@@ -394,7 +513,8 @@ class CardPlayServiceTest {
     CardPlayService playService =
         new CardPlayService(cardLibrary, resolutionService, battleDeck, energyComponent);
 
-    CardPlayResult result = playService.playCard("strike");
+    CardPlayResult result =
+        playService.playCard(CardPlayRequest.singleEnemy(id(battleDeck, "strike"), "enemy-1"));
     assertTrue(result.successful());
 
     List<CardInstance> remainingHand = battleDeck.getHandInstances();
@@ -405,8 +525,8 @@ class CardPlayServiceTest {
 
     // Only the copy that was actually played is on cooldown; the other "strike" still sitting in
     // hand must not be affected just because it shares the same card ID.
-    assertTrue(playService.isOnCooldown(discarded.get(0)));
-    assertFalse(playService.isOnCooldown(remainingHand.get(0)));
+    assertTrue(playService.isOnCooldown(discarded.getFirst()));
+    assertFalse(playService.isOnCooldown(remainingHand.getFirst()));
   }
 
   @Test
@@ -425,17 +545,20 @@ class CardPlayServiceTest {
     CardPlayService playService =
         new CardPlayService(cardLibrary, resolutionService, battleDeck, energyComponent);
 
-    playService.playCard("strike");
+    playService.playCard(CardPlayRequest.singleEnemy(id(battleDeck, "strike"), "enemy-1"));
     // Discard the remaining copy directly (not through play), so the discard pile ends up with
     // two "strike" copies but only the played one is tracked for cooldown.
-    battleDeck.discardCard("strike");
+    CardInstance manuallyDiscarded = battleDeck.getHand().getFirst();
+    battleDeck.discardCard(manuallyDiscarded.instanceId());
     assertEquals(2, battleDeck.getDiscardPileSize());
 
     assertTrue(playService.onPlayerRoundStart().isEmpty());
-    List<String> secondTick = playService.onPlayerRoundStart();
+    List<CardInstance> secondTick = playService.onPlayerRoundStart();
 
     // Only the tracked (played) instance comes back; the manually-discarded copy stays put.
-    assertEquals(List.of("strike"), secondTick);
+    assertEquals(1, secondTick.size());
+    assertEquals("strike", secondTick.getFirst().cardId());
+    assertNotEquals(manuallyDiscarded, secondTick.getFirst());
     assertEquals(1, battleDeck.getHandSize());
     assertEquals(1, battleDeck.getDiscardPileSize());
   }
@@ -502,13 +625,13 @@ class CardPlayServiceTest {
         new CardPlayService(
             cardLibrary, new CardEffectResolutionService(cardLibrary), battleDeck, energyComponent);
 
-    playService.playCard("strike");
+    playService.playCard(CardPlayRequest.singleEnemy(id(battleDeck, "strike"), "enemy-1"));
     List<CardInstance> discarded = playService.discardedInstances();
-    CardInstance remainingInHand = battleDeck.getHandInstances().get(0);
+    CardInstance remainingInHand = battleDeck.getHandInstances().getFirst();
 
     // Selecting the on-cooldown copy alongside the one still in hand must not move the cooldown
     // copy (it stays exactly where it was, cooldown untouched) and must not disturb its sibling.
-    boolean changed = playService.rearrangeHand(List.of(discarded.get(0), remainingInHand));
+    boolean changed = playService.rearrangeHand(List.of(discarded.getFirst(), remainingInHand));
 
     assertFalse(changed);
     assertIterableEquals(discarded, playService.discardedInstances());

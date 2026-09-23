@@ -336,6 +336,7 @@ class BattleControllerTest {
     CardLibrary cardService = new CardLibrary(List.of(purify, strike));
     BattleDeck deck = new BattleDeck(new PlayerDeck(cardService, List.of("purify", "strike")));
     deck.drawCards(1);
+    String purifyInstanceId = deck.getHand().get(0).instanceId();
     EnergyComponent energy = cleansePlayer.getComponent(EnergyComponent.class);
     CardPlayService cardPlayService = new CardPlayService(cardService, deck, energy);
     CardEffectHandler effectHandler = new CardEffectHandler();
@@ -343,7 +344,7 @@ class BattleControllerTest {
         new BattleController(cleansePlayer, enemies, effectHandler, cardPlayService);
 
     battle.start();
-    boolean accepted = battle.submitCardPlayRequest(CardPlayRequest.self("purify"));
+    boolean accepted = battle.submitCardPlayRequest(CardPlayRequest.self(purifyInstanceId));
 
     assertTrue(accepted);
     assertFalse(stats.hasStatusEffect("POISON"));
@@ -541,7 +542,7 @@ class BattleControllerTest {
   void poisonShouldBypassDefensesAndExpireAfterTwoEnemyTurns() {
     CombatStatsComponent stats = new CombatStatsComponent(20, 0);
     stats.setBlock(3);
-    stats.setArmor(4);
+    stats.setArmour(4);
     stats.applyStatusEffect(new StatusEffect("POISON", 5, 2));
 
     Entity enemy = createPoisonTestEnemy(stats, firstEnemyBehaviour);
@@ -563,7 +564,8 @@ class BattleControllerTest {
 
     assertEquals(15, stats.getHealth());
     assertEquals(3, stats.getBlock());
-    assertEquals(4, stats.getArmor());
+    assertEquals(4, stats.getArmour());
+
     assertEquals(1, stats.getStatusEffect("POISON").getDuration());
     assertEquals(List.of(15), healthAtAction);
     assertEquals(BattlePhase.PLAYER_TURN, battle.getCurrentPhase());
@@ -573,7 +575,8 @@ class BattleControllerTest {
 
     assertEquals(10, stats.getHealth());
     assertEquals(3, stats.getBlock());
-    assertEquals(4, stats.getArmor());
+    assertEquals(4, stats.getArmour());
+
     assertNull(stats.getStatusEffect("POISON"));
     assertEquals(List.of(15, 10), healthAtAction);
 
@@ -582,7 +585,7 @@ class BattleControllerTest {
 
     assertEquals(10, stats.getHealth());
     assertEquals(3, stats.getBlock());
-    assertEquals(4, stats.getArmor());
+    assertEquals(4, stats.getArmour());
     assertEquals(List.of(15, 10, 10), healthAtAction);
     verify(firstEnemyBehaviour, times(3)).executeIntent(player);
   }
@@ -621,7 +624,7 @@ class BattleControllerTest {
     BattleController battle = new BattleController(player, List.of(enemy));
 
     List<Boolean> outcomes = new ArrayList<>();
-    battle.addBattleEndListener(won -> outcomes.add(won));
+    battle.addBattleEndListener(outcomes::add);
 
     battle.start();
     battle.endPlayerTurn();

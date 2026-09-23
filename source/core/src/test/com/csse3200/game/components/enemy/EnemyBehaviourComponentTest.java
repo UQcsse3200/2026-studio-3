@@ -133,7 +133,7 @@ class EnemyBehaviourComponentTest {
   }
 
   @Test
-  void shouldGainArmorWhenResolvingDefend() {
+  void shouldGainArmourWhenResolvingDefend() {
     EnemyBehaviourComponent behaviour =
         new EnemyBehaviourComponent(EnemyAIFactory.CYCLE_ATTACK_DEFEND);
     CombatStatsComponent stats = enemyStats();
@@ -143,7 +143,7 @@ class EnemyBehaviourComponentTest {
     behaviour.rollIntent();
     behaviour.executeIntent(null);
 
-    assertEquals(2, stats.getArmor());
+    assertEquals(2, stats.getArmour());
   }
 
   @Test

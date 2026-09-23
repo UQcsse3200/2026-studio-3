@@ -23,12 +23,15 @@ import com.csse3200.game.components.combat.BattlePhase;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
+import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.extensions.GameExtension;
+import com.csse3200.game.maps.RunState;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 
 @ExtendWith(GameExtension.class)
 class BattleActionsTest {
@@ -100,7 +103,7 @@ class BattleActionsTest {
         new Entity().addComponent(new BattleActions(mockController, mock(GdxGame.class)));
     battleUI.create();
 
-    battleUI.getEvents().trigger("endturn");
+    battleUI.getEvents().trigger("endTurn");
 
     verify(mockController).endPlayerTurn();
   }
@@ -120,6 +123,7 @@ class BattleActionsTest {
             new PlayerDeck(
                 TestCardService.withCards("strike", "bandage"), List.of("strike", "bandage")));
     deck.drawCards(1);
+    String strikeInstanceId = deck.getHand().get(0).instanceId();
     Entity testPlayer =
         new Entity()
             .addComponent(new CombatStatsComponent(20, 0))
@@ -144,11 +148,11 @@ class BattleActionsTest {
             (String cardName, String targetId) -> playedEvents.add(cardName + ":" + targetId));
     realController.start();
 
-    battleUI.getEvents().trigger("playCard", "strike", "enemy");
+    battleUI.getEvents().trigger("playCard", strikeInstanceId, "enemy");
 
     assertTrue(playedEvents.isEmpty());
     assertEquals(3, testPlayer.getComponent(EnergyComponent.class).getCurrentEnergy());
-    assertEquals(List.of("strike"), deck.getHand());
+    assertEquals(strikeInstanceId, deck.getHand().get(0).instanceId());
   }
 
   @Test
@@ -168,6 +172,44 @@ class BattleActionsTest {
     entity.getEvents().trigger("playCard", "strike", "bone_crawler");
 
     assertEquals(BattlePhase.SETUP, controller.getCurrentPhase());
+  }
+
+  @Test
+  void shouldRequestAutosaveAfterWinningAnActiveEncounter() {
+    BattleController battleController = mock(BattleController.class);
+    GdxGame game = mock(GdxGame.class);
+    RunState runState = mock(RunState.class);
+    when(game.getRunState()).thenReturn(runState);
+    when(runState.getActiveNodeId()).thenReturn(7);
+    new Entity().addComponent(new BattleActions(battleController, game)).create();
+
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<EventListener1<Boolean>> endListener =
+        ArgumentCaptor.forClass(EventListener1.class);
+    verify(battleController).addBattleEndListener(endListener.capture());
+    endListener.getValue().handle(true);
+
+    verify(runState).completeEncounter(true);
+    verify(game).requestAutosaveAfterEncounter();
+  }
+
+  @Test
+  void shouldNotRequestAutosaveAfterDefeat() {
+    BattleController battleController = mock(BattleController.class);
+    GdxGame game = mock(GdxGame.class);
+    RunState runState = mock(RunState.class);
+    when(game.getRunState()).thenReturn(runState);
+    when(runState.getActiveNodeId()).thenReturn(7);
+    new Entity().addComponent(new BattleActions(battleController, game)).create();
+
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<EventListener1<Boolean>> endListener =
+        ArgumentCaptor.forClass(EventListener1.class);
+    verify(battleController).addBattleEndListener(endListener.capture());
+    endListener.getValue().handle(false);
+
+    verify(runState).completeEncounter(false);
+    verify(game, never()).requestAutosaveAfterEncounter();
   }
 
   private void advanceToPlayerTurn() {

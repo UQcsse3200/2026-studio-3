@@ -7,6 +7,8 @@ import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.cards.play.CardPlayResult;
 import com.csse3200.game.cards.play.CardPlayService;
+import com.csse3200.game.cards.runtime.CardInstance;
+import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.cards.CardEffectHandler;
@@ -325,12 +327,11 @@ public class BattleController {
   }
 
   /**
-   * Adds a listener that receives the player's hand (card IDs) after it changes, e.g. once a played
-   * card has moved from hand to discard. The UI uses this to refresh the on-screen hand.
+   * Adds a listener that receives the exact hand instances after it changes.
    *
    * @param listener receives the updated hand
    */
-  public void addHandChangedListener(EventListener1<List<String>> listener) {
+  public void addHandChangedListener(EventListener1<List<CardInstance>> listener) {
     Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(HAND_CHANGED_EVENT, listener);
   }
@@ -479,12 +480,12 @@ public class BattleController {
    * Prints a summary string for a game event that occurs. For use in printing actions within a
    * battle sequence.
    *
-   * @param request The card that is being played.
+   * @param cardName player-facing name of the card being played
    * @param result The result of the card being played.
    * @return A string summarising the card being played and the resulting actions.
    */
-  private String summarise(CardPlayRequest request, CardPlayResult result) {
-    StringBuilder summary = new StringBuilder("You played ").append(request.cardId());
+  private String summarise(String cardName, CardPlayResult result) {
+    StringBuilder summary = new StringBuilder("You played ").append(cardName);
     for (ResolvedCardEffect effect : result.enemyEffects()) {
       summary
           .append(" - ")
@@ -536,6 +537,21 @@ public class BattleController {
     return !stats.isDead();
   }
 
+  /**
+   * Debug/cheat entry point: kills every enemy via piercing damage (bypassing block/armor, same as
+   * a real killing blow) and lets the normal outcome check pick it up, so this reuses the real win
+   * path instead of faking a VICTORY transition directly.
+   */
+  public void forceEnemiesDefeated() {
+    for (Entity enemy : this.enemies) {
+      CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
+      if (stats != null && !stats.isDead()) {
+        stats.takePiercingDamage(stats.getHealth());
+      }
+    }
+    queueBattleOutcomeIfOver();
+  }
+
   /** Applies and counts down timed HEAL once per player turn, starting on the next turn. */
   private void applyHealingAtTurnStart() {
     CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
@@ -563,7 +579,7 @@ public class BattleController {
 
   private void finishPlayerCardAction() {
     if (lastCardPlaySucceeded && pendingCard != null) {
-      eventHandler.trigger("cardPlayed", pendingCard.cardId(), pendingCard.target().targetId());
+      eventHandler.trigger("cardPlayed", pendingCard.instanceId(), pendingCard.target().targetId());
     }
 
     pendingCard = null;
@@ -592,11 +608,14 @@ public class BattleController {
       return;
     }
 
+    String cardName =
+        cardPlayService.resolveInHand(request.instanceId()).map(ResolvedCard::name).orElse("card");
+
     if (effectHandler != null
         && request.target().type() != TargetType.SELF
         && effectHandler.getLivingEnemyTargets(request, enemies).isEmpty()) {
       lastCardPlaySucceeded = false;
-      narrate("Couldn't play " + request.cardId() + ": target is no longer available.");
+      narrate("Couldn't play " + cardName + ": target is no longer available.");
       finishPlayerCardAction();
       return;
     }
@@ -606,7 +625,7 @@ public class BattleController {
     if (result == null) {
       // Card system not wired in (e.g. unit tests without a resolution service).
       lastCardPlaySucceeded = true;
-      narrate("You played " + request.cardId() + ".");
+      narrate("You played " + cardName + ".");
       finishPlayerCardAction();
       return;
     }
@@ -614,14 +633,14 @@ public class BattleController {
     if (!result.success()) {
       // No effects produced; the card stays in hand and the player keeps their turn.
       lastCardPlaySucceeded = false;
-      narrate("Couldn't play " + request.cardId() + ": " + result.failureReason());
+      narrate("Couldn't play " + cardName + ": " + result.failureReason());
       finishPlayerCardAction();
       return;
     }
 
     lastCardPlaySucceeded = true;
     dispatchCardEffects(request, result);
-    narrate(summarise(request, result));
+    narrate(summarise(cardName, result));
     finishPlayerCardAction();
   }
 
@@ -718,7 +737,7 @@ public class BattleController {
     if (cardPlayService == null) {
       return;
     }
-    List<String> retrieved = cardPlayService.onPlayerRoundStart();
+    List<CardInstance> retrieved = cardPlayService.onPlayerRoundStart();
     if (retrieved.isEmpty()) {
       return;
     }

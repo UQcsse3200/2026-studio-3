@@ -44,6 +44,12 @@ public class ChanceEncounterDisplay extends UIComponent {
   private static final Color BODY_COLOUR = new Color(0.9f, 0.84f, 0.73f, 1f);
   private static final Color MUTED_COLOUR = new Color(0.66f, 0.59f, 0.53f, 1f);
 
+  private static final String WHITE = "white";
+  private static final String LARGE = "large";
+  private static final String SMALL = "small";
+  private static final String DEFAULT = "default";
+  private static final String BUTTON = "button";
+
   private final ChanceEncounter encounter;
   private final ChanceEncounterSession encounterSession;
   private final EncounterCallback completionCallback;
@@ -111,7 +117,7 @@ public class ChanceEncounterDisplay extends UIComponent {
   private void addActors() {
     rootTable = new Table();
     rootTable.setFillParent(true);
-    rootTable.setBackground(skin.newDrawable("white", BACKDROP_COLOUR));
+    rootTable.setBackground(skin.newDrawable(WHITE, BACKDROP_COLOUR));
     rootTable.setTouchable(Touchable.enabled);
     rootTable.center();
     rootTable.getColor().a = 0f;
@@ -121,11 +127,11 @@ public class ChanceEncounterDisplay extends UIComponent {
     encounterTable.pad(30f, 40f, 34f, 40f);
     encounterTable.defaults().spaceBottom(14f);
 
-    Label eyebrowLabel = new Label("CHANCE ENCOUNTER", createLabelStyle("small", GOLD_COLOUR));
+    Label eyebrowLabel = new Label("CHANCE ENCOUNTER", createLabelStyle(SMALL, GOLD_COLOUR));
     Label titleLabel =
-        new Label(formatTitle(encounter.getId()), createLabelStyle("large", BODY_COLOUR));
+        new Label(formatTitle(encounter.getId()), createLabelStyle(LARGE, BODY_COLOUR));
     Label descriptionLabel =
-        new Label(encounter.getDescription(), createLabelStyle("default", BODY_COLOUR));
+        new Label(encounter.getDescription(), createLabelStyle(DEFAULT, BODY_COLOUR));
     eyebrowLabel.setFontScale(1.25f);
     titleLabel.setFontScale(1.4f);
     descriptionLabel.setFontScale(1.3f);
@@ -140,7 +146,7 @@ public class ChanceEncounterDisplay extends UIComponent {
     encounterTable.add(descriptionLabel).left().width(CONTENT_WIDTH).padBottom(12f);
     encounterTable.row();
 
-    Label promptLabel = new Label("CHOOSE YOUR RESPONSE", createLabelStyle("small", MUTED_COLOUR));
+    Label promptLabel = new Label("CHOOSE YOUR RESPONSE", createLabelStyle(SMALL, MUTED_COLOUR));
     promptLabel.setFontScale(1.25f);
     encounterTable.add(promptLabel).left().width(CONTENT_WIDTH).padBottom(2f);
     encounterTable.row();
@@ -154,11 +160,11 @@ public class ChanceEncounterDisplay extends UIComponent {
     }
 
     Table resultTable = new Table();
-    resultTable.setBackground(skin.newDrawable("white", RESULT_COLOUR));
+    resultTable.setBackground(skin.newDrawable(WHITE, RESULT_COLOUR));
     resultTable.pad(14f, 18f, 14f, 18f);
     resultLabel =
         new Label(
-            "Your decision will determine the outcome.", createLabelStyle("default", MUTED_COLOUR));
+            "Your decision will determine the outcome.", createLabelStyle(DEFAULT, MUTED_COLOUR));
     resultLabel.setFontScale(1.3f);
     resultLabel.setWrap(true);
     resultTable.add(resultLabel).left().width(CONTENT_WIDTH - 36f);
@@ -185,7 +191,7 @@ public class ChanceEncounterDisplay extends UIComponent {
 
   private Table createDivider() {
     Table divider = new Table();
-    divider.setBackground(skin.newDrawable("white", GOLD_COLOUR));
+    divider.setBackground(skin.newDrawable(WHITE, GOLD_COLOUR));
     return divider;
   }
 
@@ -197,10 +203,10 @@ public class ChanceEncounterDisplay extends UIComponent {
 
   private TextButtonStyle createChoiceStyle() {
     TextButtonStyle style = new TextButtonStyle(skin.get(TextButtonStyle.class));
-    style.up = skin.newDrawable("button", new Color(0.27f, 0.17f, 0.14f, 1f));
-    style.over = skin.newDrawable("button", new Color(0.48f, 0.29f, 0.16f, 1f));
+    style.up = skin.newDrawable(BUTTON, new Color(0.27f, 0.17f, 0.14f, 1f));
+    style.over = skin.newDrawable(BUTTON, new Color(0.48f, 0.29f, 0.16f, 1f));
     style.down = skin.newDrawable("button-pressed", new Color(0.62f, 0.4f, 0.2f, 1f));
-    style.disabled = skin.newDrawable("button", new Color(0.12f, 0.1f, 0.11f, 1f));
+    style.disabled = skin.newDrawable(BUTTON, new Color(0.12f, 0.1f, 0.11f, 1f));
     style.fontColor = BODY_COLOUR;
     style.overFontColor = Color.WHITE;
     style.downFontColor = Color.WHITE;
@@ -210,15 +216,15 @@ public class ChanceEncounterDisplay extends UIComponent {
 
   private TextButtonStyle createSelectedChoiceStyle(TextButtonStyle choiceStyle) {
     TextButtonStyle style = new TextButtonStyle(choiceStyle);
-    style.disabled = skin.newDrawable("button", new Color(0.53f, 0.34f, 0.16f, 1f));
+    style.disabled = skin.newDrawable(BUTTON, new Color(0.53f, 0.34f, 0.16f, 1f));
     style.disabledFontColor = Color.WHITE;
     return style;
   }
 
   private TextButtonStyle createContinueStyle() {
     TextButtonStyle style = new TextButtonStyle(skin.get(TextButtonStyle.class));
-    style.up = skin.newDrawable("button", new Color(0.52f, 0.3f, 0.11f, 1f));
-    style.over = skin.newDrawable("button", new Color(0.75f, 0.48f, 0.18f, 1f));
+    style.up = skin.newDrawable(BUTTON, new Color(0.52f, 0.3f, 0.11f, 1f));
+    style.over = skin.newDrawable(BUTTON, new Color(0.75f, 0.48f, 0.18f, 1f));
     style.down = skin.newDrawable("button-pressed", new Color(0.4f, 0.22f, 0.08f, 1f));
     style.fontColor = Color.WHITE;
     style.overFontColor = Color.WHITE;
@@ -257,14 +263,14 @@ public class ChanceEncounterDisplay extends UIComponent {
     } else {
       ChanceResolution resolution = encounterSession.resolveChoice(choice.getId());
       if (!resolution.isSuccess()) {
-        resultLabel.setStyle(createLabelStyle("default", new Color(0.9f, 0.35f, 0.3f, 1f)));
+        resultLabel.setStyle(createLabelStyle(DEFAULT, new Color(0.9f, 0.35f, 0.3f, 1f)));
         resultLabel.setText("OUTCOME\n" + resolution.getMessage());
         return;
       }
       outcome = resolution.getOutcome();
     }
     if (outcome == null) {
-      resultLabel.setStyle(createLabelStyle("default", new Color(0.9f, 0.35f, 0.3f, 1f)));
+      resultLabel.setStyle(createLabelStyle(DEFAULT, new Color(0.9f, 0.35f, 0.3f, 1f)));
       resultLabel.setText(
           "OUTCOME\nThis choice could not be resolved. Please select another option.");
       return;
@@ -277,7 +283,7 @@ public class ChanceEncounterDisplay extends UIComponent {
     selectedButton.setStyle(selectedChoiceStyle);
     selectedButton.setText("SELECTED  -  " + originalButtonText);
 
-    resultLabel.setStyle(createLabelStyle("default", BODY_COLOUR));
+    resultLabel.setStyle(createLabelStyle(DEFAULT, BODY_COLOUR));
     resultLabel.setText("OUTCOME\n" + formatOutcome(outcome));
     continueButton.setVisible(true);
   }

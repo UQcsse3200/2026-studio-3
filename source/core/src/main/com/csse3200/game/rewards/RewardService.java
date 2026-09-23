@@ -36,10 +36,6 @@ public class RewardService {
         int finalAmount = GoldReward.calculateFinalGold(player, selected.goldAmount);
         player.getComponent(InventoryComponent.class).addGold(finalAmount);
       }
-      case CARD_UPGRADE -> {
-        // TODO: 待 celia0419 确认 upgradeCard 接口后接入
-        throw new UnsupportedOperationException("Card upgrade not yet implemented");
-      }
       case ITEM -> ItemEffectApplier.applyItemEffect(selected.itemId, player);
     }
   }
