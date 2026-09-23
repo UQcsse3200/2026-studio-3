@@ -139,7 +139,7 @@ public class MapDisplay extends UIComponent {
 
       group.addActor(nodeActor);
 
-      Label idLabel = new Label(String.valueOf(node.getNodeId()), skin);
+      Label idLabel = new Label(node.getNodeId() + " (h" + node.getHeight() + ")", skin);
       idLabel.setFontScale(0.6f);
       idLabel.setPosition(x, y + nodeActor.getNodeSize());
       idLabel.setVisible(false);

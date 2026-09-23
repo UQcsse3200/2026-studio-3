@@ -1,0 +1,82 @@
+{
+  "encounters": [
+    {
+      "id": "crawler_alone",
+      "roomType": "COMBAT",
+      "minProgression": 0,
+      "maxProgression": 2,
+      "weight": 8,
+      "enemies": ["bone_crawler"]
+    },
+    {
+      "id": "shade_pair",
+      "roomType": "COMBAT",
+      "minProgression": 0,
+      "maxProgression": 3,
+      "weight": 10,
+      "enemies": ["lesser_shade", "lesser_shade"]
+    },
+    {
+      "id": "crawler_and_shade",
+      "roomType": "COMBAT",
+      "minProgression": 0,
+      "maxProgression": 5,
+      "weight": 10,
+      "enemies": ["bone_crawler", "lesser_shade"]
+    },
+    {
+      "id": "acolyte_and_shade",
+      "roomType": "COMBAT",
+      "minProgression": 2,
+      "maxProgression": 6,
+      "weight": 8,
+      "enemies": ["dark_acolyte", "lesser_shade"]
+    },
+    {
+      "id": "crawler_and_acolyte",
+      "roomType": "COMBAT",
+      "minProgression": 4,
+      "weight": 10,
+      "enemies": ["bone_crawler", "dark_acolyte"]
+    },
+    {
+      "id": "acolyte_pair",
+      "roomType": "COMBAT",
+      "minProgression": 6,
+      "weight": 6,
+      "enemies": ["dark_acolyte", "dark_acolyte"]
+    },
+    {
+      "id": "guardian_and_shade",
+      "roomType": "ELITE",
+      "weight": 10,
+      "enemies": ["tomb_guardian", "lesser_shade"]
+    },
+    {
+      "id": "guardian_and_acolyte",
+      "roomType": "ELITE",
+      "minProgression": 5,
+      "weight": 8,
+      "enemies": ["tomb_guardian", "dark_acolyte"]
+    },
+    {
+      "id": "void_knight_alone",
+      "roomType": "ELITE",
+      "weight": 10,
+      "enemies": ["void_knight"]
+    },
+    {
+      "id": "void_knight_and_crawler",
+      "roomType": "ELITE",
+      "minProgression": 5,
+      "weight": 8,
+      "enemies": ["void_knight", "bone_crawler"]
+    },
+    {
+      "id": "boss_knight",
+      "roomType": "FINAL",
+      "weight": 1,
+      "enemies": ["boss_knight"]
+    }
+  ]
+}
