@@ -108,7 +108,7 @@ public class RewardDisplay extends Displaying {
   private Table createPanelContent(float panelWidth, float panelHeight) {
     Table content = new Table();
     content.top();
-    content.pad(panelHeight * 0.13f, panelWidth * 0.135f, panelHeight * 0.1f, panelWidth * 0.135f);
+    content.pad(panelHeight * 0.13f, panelWidth * 0.135f, panelHeight * 0.15f, panelWidth * 0.135f);
 
     Image victory = new Image(texture(VICTORY_TITLE_TEXTURE));
     victory.setScaling(Scaling.fit);
@@ -194,7 +194,7 @@ public class RewardDisplay extends Displaying {
         .width(cardWidth * 0.78f)
         .height(cardHeight * 0.12f)
         .center()
-        .padBottom(cardHeight * 0.012f);
+        .padBottom(cardHeight * 0.055f);
     card.add(details);
 
     card.setTouchable(Touchable.enabled);
