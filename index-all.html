@@ -76,6 +76,11 @@ loadScripts(document, 'script');</script>
 <div class="block">Uses current block to absorb as much of the incoming damage as possible, reducing block
  accordingly, and returns whatever damage remains.</div>
 </dd>
+<dt><a href="com/csse3200/game/maps/MapNodeActor.html#act(float)" class="member-name-link">act(float)</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/MapNodeActor.html" title="class in com.csse3200.game.maps">MapNodeActor</a></dt>
+<dd>
+<div class="block">Re-checks the node's state every frame and refreshes the visual if it changed since last
+ render.</div>
+</dd>
 <dt><a href="com/csse3200/game/ui/terminal/commands/Command.html#action(java.util.ArrayList)" class="member-name-link">action(ArrayList&lt;String&gt;)</a> - Method in interface com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/Command.html" title="interface in com.csse3200.game.ui.terminal.commands">Command</a></dt>
 <dd>
 <div class="block">Action a command.</div>
@@ -87,6 +92,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/ui/terminal/commands/GiveGoldCommand.html#action(java.util.ArrayList)" class="member-name-link">action(ArrayList&lt;String&gt;)</a> - Method in class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/GiveGoldCommand.html" title="class in com.csse3200.game.ui.terminal.commands">GiveGoldCommand</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ui/terminal/commands/GiveItemCommand.html#action(java.util.ArrayList)" class="member-name-link">action(ArrayList&lt;String&gt;)</a> - Method in class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/GiveItemCommand.html" title="class in com.csse3200.game.ui.terminal.commands">GiveItemCommand</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/GotoCommand.html#action(java.util.ArrayList)" class="member-name-link">action(ArrayList&lt;String&gt;)</a> - Method in class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/GotoCommand.html" title="class in com.csse3200.game.ui.terminal.commands">GotoCommand</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ui/terminal/commands/ListNodesCommand.html#action(java.util.ArrayList)" class="member-name-link">action(ArrayList&lt;String&gt;)</a> - Method in class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/ListNodesCommand.html" title="class in com.csse3200.game.ui.terminal.commands">ListNodesCommand</a></dt>
 <dd>&nbsp;</dd>
@@ -4171,6 +4178,15 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/rewards/GoldReward.html" class="type-name-link" title="class in com.csse3200.game.rewards">GoldReward</a> - Class in <a href="com/csse3200/game/rewards/package-summary.html">com.csse3200.game.rewards</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/rewards/GoldReward.html#%3Cinit%3E(int)" class="member-name-link">GoldReward(int)</a> - Constructor for class com.csse3200.game.rewards.<a href="com/csse3200/game/rewards/GoldReward.html" title="class in com.csse3200.game.rewards">GoldReward</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/GotoCommand.html" class="type-name-link" title="class in com.csse3200.game.ui.terminal.commands">GotoCommand</a> - Class in <a href="com/csse3200/game/ui/terminal/commands/package-summary.html">com.csse3200.game.ui.terminal.commands</a></dt>
+<dd>
+<div class="block">Debug/cheat command: jumps to a node matching a given floor (height) and room type, going through
+ the normal unlock/connect/select flow (same as UnlockNodeCommand) rather than faking a screen
+ transition, so encounter selection logic (which picks enemies based on floor/room type) runs
+ exactly as it would in a real playthrough.</div>
+</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/GotoCommand.html#%3Cinit%3E(com.csse3200.game.maps.RunState,com.csse3200.game.maps.MapSelectionController)" class="member-name-link">GotoCommand(RunState, MapSelectionController)</a> - Constructor for class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/GotoCommand.html" title="class in com.csse3200.game.ui.terminal.commands">GotoCommand</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/utils/math/GridPoint2Utils.html" class="type-name-link" title="class in com.csse3200.game.utils.math">GridPoint2Utils</a> - Class in <a href="com/csse3200/game/utils/math/package-summary.html">com.csse3200.game.utils.math</a></dt>
 <dd>

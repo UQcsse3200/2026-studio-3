@@ -157,29 +157,35 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MapNode.html" title="class in com.csse3200.game.maps">MapNode</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getNode()" class="member-name-link">getNode</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#act(float)" class="member-name-link">act</a><wbr>(float&nbsp;delta)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Re-checks the node's state every frame and refreshes the visual if it changed since last
+ render.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MapNode.html" title="class in com.csse3200.game.maps">MapNode</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getNode()" class="member-name-link">getNode</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Gets the Node</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getNodeId()" class="member-name-link">getNodeId</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getNodeId()" class="member-name-link">getNodeId</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the node's ID</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>float</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getNodeSize()" class="member-name-link">getNodeSize</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>float</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getNodeSize()" class="member-name-link">getNodeSize</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Size of the Node used typically for padding in MapDisplay</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setHovered(boolean)" class="member-name-link">setHovered</a><wbr>(boolean&nbsp;hovered)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setHovered(boolean)" class="member-name-link">setHovered</a><wbr>(boolean&nbsp;hovered)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Defines what happens when a node is hovered</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setNodeSize(float)" class="member-name-link">setNodeSize</a><wbr>(float&nbsp;size)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setNodeSize(float)" class="member-name-link">setNodeSize</a><wbr>(float&nbsp;size)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the node to a specified size</div>
 </div>
 </div>
@@ -187,7 +193,7 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-com.badlogic.gdx.scenes.scene2d.Group">Methods inherited from class&nbsp;com.badlogic.gdx.scenes.scene2d.Group</h3>
-<code>act, addActor, addActorAfter, addActorAt, addActorBefore, applyTransform, applyTransform, childrenChanged, clear, clear, clearChildren, clearChildren, computeTransform, debugAll, draw, drawChildren, drawDebug, drawDebugChildren, findActor, getChild, getChildren, getCullingArea, hasChildren, hit, isTransform, localToDescendantCoordinates, removeActor, removeActor, removeActorAt, resetTransform, resetTransform, setCullingArea, setDebug, setStage, setTransform, swapActor, swapActor, toString</code></div>
+<code>addActor, addActorAfter, addActorAt, addActorBefore, applyTransform, applyTransform, childrenChanged, clear, clear, clearChildren, clearChildren, computeTransform, debugAll, draw, drawChildren, drawDebug, drawDebugChildren, findActor, getChild, getChildren, getCullingArea, hasChildren, hit, isTransform, localToDescendantCoordinates, removeActor, removeActor, removeActorAt, resetTransform, resetTransform, setCullingArea, setDebug, setStage, setTransform, swapActor, swapActor, toString</code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-com.badlogic.gdx.scenes.scene2d.Actor">Methods inherited from class&nbsp;com.badlogic.gdx.scenes.scene2d.Actor</h3>
 <code>addAction, addCaptureListener, addListener, ancestorsVisible, ascendantsVisible, clearActions, clearListeners, clipBegin, clipBegin, clipEnd, debug, drawDebugBounds, fire, firstAscendant, getActions, getCaptureListeners, getColor, getDebug, getHeight, getListeners, getName, getOriginX, getOriginY, getParent, getRight, getRotation, getScaleX, getScaleY, getStage, getTop, getTouchable, getUserObject, getWidth, getX, getX, getY, getY, getZIndex, hasActions, hasKeyboardFocus, hasParent, hasScrollFocus, isAscendantOf, isDescendantOf, isTouchable, isTouchFocusListener, isTouchFocusTarget, isVisible, localToActorCoordinates, localToAscendantCoordinates, localToParentCoordinates, localToScreenCoordinates, localToStageCoordinates, moveBy, notify, parentToLocalCoordinates, positionChanged, remove, removeAction, removeCaptureListener, removeListener, rotateBy, rotationChanged, scaleBy, scaleBy, scaleChanged, screenToLocalCoordinates, setBounds, setColor, setColor, setDebug, setHeight, setName, setOrigin, setOrigin, setOriginX, setOriginY, setParent, setPosition, setPosition, setRotation, setScale, setScale, setScaleX, setScaleY, setSize, setTouchable, setUserObject, setVisible, setWidth, setX, setX, setY, setY, setZIndex, sizeBy, sizeBy, sizeChanged, stageToLocalCoordinates, toBack, toFront</code></div>
@@ -296,6 +302,21 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>Node Size</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="act(float)">
+<h3>act</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">act</span><wbr><span class="parameters">(float&nbsp;delta)</span></div>
+<div class="block">Re-checks the node's state every frame and refreshes the visual if it changed since last
+ render. Without this, a node's appearance is frozen at construction time — previously only
+ "worked" because a real state change always came with a full MapScreen/MapDisplay rebuild
+ (entering then returning from an encounter). A state change without a screen transition (e.g. a
+ debug command like 'goto') would otherwise silently not show up on screen at all.</div>
+<dl class="notes">
+<dt>Overrides:</dt>
+<dd><code>act</code>&nbsp;in class&nbsp;<code>com.badlogic.gdx.scenes.scene2d.Group</code></dd>
 </dl>
 </section>
 </li>
