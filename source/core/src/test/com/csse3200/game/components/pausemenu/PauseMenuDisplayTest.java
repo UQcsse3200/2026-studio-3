@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -219,5 +220,102 @@ class PauseMenuDisplayTest {
 
     assertFalse(noSave.hasSaveLoadButton());
     assertNull(noSave.getSaveLoadButton());
+  }
+
+  /** Fires a keyboard-navigation event on the display's entity. */
+  private void nav(String navEvent) {
+    display.getEntity().getEvents().trigger(navEvent);
+  }
+
+  @Test
+  void openingMenuStartsInMouseModeWithNoKeyboardFocus() {
+    nav(PauseMenuDisplay.PAUSE_EVENT);
+    assertNull(display.getFocusedButton());
+  }
+
+  @Test
+  void firstNavDownActivatesKeyboardFocusOnFirstButton() {
+    nav(PauseMenuDisplay.PAUSE_EVENT);
+    nav(PauseMenuDisplay.NAV_DOWN_EVENT);
+    assertSame(display.getResumeButton(), display.getFocusedButton());
+  }
+
+  @Test
+  void navDownTwiceFocusesSecondButton() {
+    nav(PauseMenuDisplay.PAUSE_EVENT);
+    nav(PauseMenuDisplay.NAV_DOWN_EVENT); // Resume
+    nav(PauseMenuDisplay.NAV_DOWN_EVENT); // Save & Load
+    assertSame(display.getSaveLoadButton(), display.getFocusedButton());
+  }
+
+  @Test
+  void firstNavUpWrapsToLastButton() {
+    nav(PauseMenuDisplay.PAUSE_EVENT);
+    nav(PauseMenuDisplay.NAV_UP_EVENT);
+    assertSame(display.getQuitButton(), display.getFocusedButton());
+  }
+
+  @Test
+  void navSelectActivatesFocusedButton() {
+    nav(PauseMenuDisplay.PAUSE_EVENT);
+    nav(PauseMenuDisplay.NAV_DOWN_EVENT); // activate keyboard focus on Resume
+    nav(PauseMenuDisplay.NAV_SELECT_EVENT);
+    assertEquals(1, resumeCount.get());
+  }
+
+  @Test
+  void navSelectInMouseModeDoesNothing() {
+    nav(PauseMenuDisplay.PAUSE_EVENT); // no nav key pressed yet -> still mouse mode
+    nav(PauseMenuDisplay.NAV_SELECT_EVENT);
+    assertEquals(0, resumeCount.get());
+  }
+
+  @Test
+  void mouseMovementClearsKeyboardFocus() {
+    nav(PauseMenuDisplay.PAUSE_EVENT);
+    nav(PauseMenuDisplay.NAV_DOWN_EVENT);
+    assertSame(display.getResumeButton(), display.getFocusedButton());
+
+    InputEvent moved = new InputEvent();
+    moved.setType(InputEvent.Type.mouseMoved);
+    display.getRootTable().fire(moved);
+
+    assertNull(display.getFocusedButton());
+  }
+
+  @Test
+  void keyboardNavigatingToSettingsOpensSettingsView() {
+    nav(PauseMenuDisplay.PAUSE_EVENT);
+    nav(PauseMenuDisplay.NAV_DOWN_EVENT); // Resume
+    nav(PauseMenuDisplay.NAV_DOWN_EVENT); // Save & Load
+    nav(PauseMenuDisplay.NAV_DOWN_EVENT); // Settings
+    nav(PauseMenuDisplay.NAV_SELECT_EVENT);
+
+    assertTrue(display.isSettingsVisible());
+    assertEquals(1, settingsCount.get());
+  }
+
+  @Test
+  void navBackReturnsFromSettingsToPauseButtons() {
+    nav(PauseMenuDisplay.PAUSE_EVENT);
+    click(display.getSettingsButton());
+    assertTrue(display.isSettingsVisible());
+
+    nav(PauseMenuDisplay.NAV_BACK_EVENT);
+
+    assertFalse(display.isSettingsVisible());
+    assertTrue(display.isMenuVisible());
+  }
+
+  @Test
+  void navBackCancelsConfirmDialogWithoutExiting() {
+    nav(PauseMenuDisplay.PAUSE_EVENT);
+    click(display.getReturnButton());
+    assertNotNull(display.getConfirmDialog().getStage());
+
+    nav(PauseMenuDisplay.NAV_BACK_EVENT);
+
+    assertNull(display.getConfirmDialog().getStage());
+    assertEquals(0, exitCount.get());
   }
 }

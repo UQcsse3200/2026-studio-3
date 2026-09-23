@@ -19,6 +19,8 @@ import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +58,16 @@ public class PauseMenuDisplay extends UIComponent {
    */
   public static final String PAUSE_EVENT = "pause";
 
+  /** Keyboard navigation events, fired by {@code PauseMenuInput} while the menu is open. */
+  public static final String NAV_UP_EVENT = "navUp";
+
+  public static final String NAV_DOWN_EVENT = "navDown";
+
+  public static final String NAV_SELECT_EVENT = "navSelect";
+
+  /** Backs out of the current view (settings subview / confirm dialog); no-op on the root menu. */
+  public static final String NAV_BACK_EVENT = "navBack";
+
   private static final float OVERLAY_OPACITY = 0.7f;
 
   private final boolean saveEnabled;
@@ -73,6 +85,10 @@ public class PauseMenuDisplay extends UIComponent {
   private TextButton confirmButton;
   private TextButton cancelButton;
   private TextButton settingsBackButton;
+
+  // Keyboard-navigation focus: the buttons of the currently shown view, and which one is focused.
+  private final List<TextButton> focusables = new ArrayList<>();
+  private int focusedIndex;
 
   /** Creates a pause menu with the Save &amp; Load option enabled. */
   public PauseMenuDisplay() {
@@ -94,6 +110,10 @@ public class PauseMenuDisplay extends UIComponent {
     addActors();
     entity.getEvents().addListener(PAUSE_EVENT, this::showMenu);
     entity.getEvents().addListener(RESUME_EVENT, this::hideMenu);
+    entity.getEvents().addListener(NAV_UP_EVENT, this::focusPrevious);
+    entity.getEvents().addListener(NAV_DOWN_EVENT, this::focusNext);
+    entity.getEvents().addListener(NAV_SELECT_EVENT, this::activateFocused);
+    entity.getEvents().addListener(NAV_BACK_EVENT, this::navigateBack);
   }
 
   private void addActors() {
@@ -116,6 +136,13 @@ public class PauseMenuDisplay extends UIComponent {
           public boolean scrolled(
               InputEvent event, float x, float y, float amountX, float amountY) {
             return table.isVisible();
+          }
+
+          @Override
+          public boolean mouseMoved(InputEvent event, float x, float y) {
+            // Any mouse movement drops keyboard mode so hover is the only highlight again.
+            clearKeyboardFocus();
+            return false;
           }
         });
     table.center();
@@ -237,6 +264,7 @@ public class PauseMenuDisplay extends UIComponent {
           public void changed(ChangeEvent changeEvent, Actor actor) {
             logger.debug("Confirmation cancelled");
             confirmDialog.hide(null);
+            setFocus(pauseFocusables());
           }
         });
 
@@ -259,6 +287,7 @@ public class PauseMenuDisplay extends UIComponent {
     confirmMessage.setText(message);
     pendingConfirm = onConfirm;
     confirmDialog.show(stage);
+    setFocus(List.of(confirmButton, cancelButton));
   }
 
   /**
@@ -320,12 +349,96 @@ public class PauseMenuDisplay extends UIComponent {
     settingsTable = buildSettingsTable();
     table.clearChildren();
     table.add(settingsTable);
+    setFocus(List.of(settingsBackButton));
   }
 
   private void showPauseButtons() {
     table.clearChildren();
     table.add(menuTable);
     settingsTable = null;
+    setFocus(pauseFocusables());
+  }
+
+  /** The buttons the player can keyboard-navigate on the root pause view, top to bottom. */
+  private List<TextButton> pauseFocusables() {
+    List<TextButton> buttons = new ArrayList<>();
+    buttons.add(resumeButton);
+    if (saveLoadButton != null) {
+      buttons.add(saveLoadButton);
+    }
+    buttons.add(settingsButton);
+    buttons.add(returnButton);
+    buttons.add(quitButton);
+    return buttons;
+  }
+
+  /**
+   * Sets the keyboard-focusable buttons for the current view. Keyboard focus starts inactive
+   * ({@code -1}) so the menu opens in "mouse mode" (only hover highlights); the first nav key
+   * activates keyboard highlighting.
+   */
+  private void setFocus(List<TextButton> buttons) {
+    for (TextButton button : focusables) {
+      button.setColor(Color.WHITE);
+    }
+    focusables.clear();
+    focusables.addAll(buttons);
+    focusedIndex = -1;
+    applyHighlight();
+  }
+
+  private void focusPrevious() {
+    if (focusables.isEmpty()) {
+      return;
+    }
+    focusedIndex =
+        focusedIndex < 0
+            ? focusables.size() - 1
+            : (focusedIndex - 1 + focusables.size()) % focusables.size();
+    applyHighlight();
+  }
+
+  private void focusNext() {
+    if (focusables.isEmpty()) {
+      return;
+    }
+    focusedIndex = focusedIndex < 0 ? 0 : (focusedIndex + 1) % focusables.size();
+    applyHighlight();
+  }
+
+  /** Activates the focused button, exactly as a mouse click would. No-op in mouse mode. */
+  private void activateFocused() {
+    if (focusedIndex >= 0 && focusedIndex < focusables.size()) {
+      focusables.get(focusedIndex).fire(new ChangeListener.ChangeEvent());
+    }
+  }
+
+  /** Drops back to mouse mode (clears the keyboard highlight) when the mouse is used. */
+  private void clearKeyboardFocus() {
+    if (focusedIndex >= 0) {
+      focusedIndex = -1;
+      applyHighlight();
+    }
+  }
+
+  /** Backs out of the settings subview or confirm dialog; does nothing on the root menu. */
+  private void navigateBack() {
+    if (confirmDialog.getStage() != null) {
+      confirmDialog.hide(null);
+      setFocus(pauseFocusables());
+    } else if (settingsTable != null) {
+      showPauseButtons();
+    }
+  }
+
+  /** Tints the focused button so keyboard selection is visible; resets the others. */
+  private void applyHighlight() {
+    for (TextButton button : focusables) {
+      button.setColor(Color.WHITE);
+    }
+    if (focusedIndex >= 0 && focusedIndex < focusables.size()) {
+      focusables.get(focusedIndex).setColor(MenuTheme.softCoral());
+    }
   }
 
   /** Hides the menu (and any open confirmation dialog). Triggered by Resume. */
@@ -398,6 +511,10 @@ public class PauseMenuDisplay extends UIComponent {
 
   boolean isMenuVisible() {
     return table.isVisible();
+  }
+
+  TextButton getFocusedButton() {
+    return focusedIndex < 0 || focusables.isEmpty() ? null : focusables.get(focusedIndex);
   }
 
   boolean isSettingsVisible() {

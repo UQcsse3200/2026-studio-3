@@ -21,13 +21,33 @@ import org.junit.jupiter.api.extension.ExtendWith;
 class PauseMenuInputTest {
   private PauseMenuInput input;
   private AtomicInteger pauseCount;
+  private AtomicInteger navUpCount;
+  private AtomicInteger navDownCount;
+  private AtomicInteger navSelectCount;
+  private AtomicInteger navBackCount;
 
   @BeforeEach
   void setUp() {
     pauseCount = new AtomicInteger();
+    navUpCount = new AtomicInteger();
+    navDownCount = new AtomicInteger();
+    navSelectCount = new AtomicInteger();
+    navBackCount = new AtomicInteger();
     input = new PauseMenuInput();
     Entity entity = new Entity().addComponent(input);
     entity.getEvents().addListener(PauseMenuDisplay.PAUSE_EVENT, pauseCount::incrementAndGet);
+    entity.getEvents().addListener(PauseMenuDisplay.NAV_UP_EVENT, navUpCount::incrementAndGet);
+    entity.getEvents().addListener(PauseMenuDisplay.NAV_DOWN_EVENT, navDownCount::incrementAndGet);
+    entity
+        .getEvents()
+        .addListener(PauseMenuDisplay.NAV_SELECT_EVENT, navSelectCount::incrementAndGet);
+    entity.getEvents().addListener(PauseMenuDisplay.NAV_BACK_EVENT, navBackCount::incrementAndGet);
+  }
+
+  private static void pauseGame() {
+    GamePauseService pauseService = mock(GamePauseService.class);
+    when(pauseService.isPaused()).thenReturn(true);
+    ServiceLocator.registerPauseService(pauseService);
   }
 
   @Test
@@ -48,13 +68,34 @@ class PauseMenuInputTest {
 
   @Test
   void otherKeysAreConsumedWhilePaused() {
-    GamePauseService pauseService = mock(GamePauseService.class);
-    when(pauseService.isPaused()).thenReturn(true);
-    ServiceLocator.registerPauseService(pauseService);
+    pauseGame();
 
-    assertTrue(input.keyDown(Keys.SPACE));
     assertTrue(input.keyTyped('a'));
     assertTrue(input.keyUp(Keys.SPACE));
+    assertEquals(0, pauseCount.get());
+  }
+
+  @Test
+  void arrowsAndEnterFireNavEventsWhilePaused() {
+    pauseGame();
+
+    assertTrue(input.keyDown(Keys.UP));
+    assertTrue(input.keyDown(Keys.DOWN));
+    assertTrue(input.keyDown(Keys.ENTER));
+
+    assertEquals(1, navUpCount.get());
+    assertEquals(1, navDownCount.get());
+    assertEquals(1, navSelectCount.get());
+    assertEquals(0, pauseCount.get());
+  }
+
+  @Test
+  void escapeWhilePausedFiresNavBackNotPause() {
+    pauseGame();
+
+    assertTrue(input.keyDown(Keys.ESCAPE));
+
+    assertEquals(1, navBackCount.get());
     assertEquals(0, pauseCount.get());
   }
 

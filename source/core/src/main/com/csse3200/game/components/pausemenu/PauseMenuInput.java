@@ -6,9 +6,10 @@ import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.ServiceLocator;
 
 /**
- * Listens for the Escape key and opens the pause menu by firing {@link
- * PauseMenuDisplay#PAUSE_EVENT} on its entity's events. The display (and the actions component)
- * decide what to do with that event.
+ * Keyboard control for the pause menu. When the game isn't paused, Escape opens the menu. While
+ * paused, it drives the menu by keyboard — Up/Down (or W/S) move the selection, Enter/Space
+ * activates it, Escape backs out of a subview/dialog — and swallows all other input so gameplay
+ * shortcuts don't leak through. The display and actions components handle the fired events.
  */
 public class PauseMenuInput extends InputComponent {
   private static final int PAUSE_INPUT_PRIORITY = 100;
@@ -19,11 +20,34 @@ public class PauseMenuInput extends InputComponent {
 
   @Override
   public boolean keyDown(int keycode) {
-    if (keycode == Keys.ESCAPE) {
-      entity.getEvents().trigger(PauseMenuDisplay.PAUSE_EVENT);
-      return true;
+    if (!isPaused()) {
+      if (keycode == Keys.ESCAPE) {
+        entity.getEvents().trigger(PauseMenuDisplay.PAUSE_EVENT);
+        return true;
+      }
+      return false;
     }
-    return isPaused();
+
+    // Paused: keyboard-drive the menu, and consume everything else.
+    switch (keycode) {
+      case Keys.UP:
+      case Keys.W:
+        entity.getEvents().trigger(PauseMenuDisplay.NAV_UP_EVENT);
+        return true;
+      case Keys.DOWN:
+      case Keys.S:
+        entity.getEvents().trigger(PauseMenuDisplay.NAV_DOWN_EVENT);
+        return true;
+      case Keys.ENTER:
+      case Keys.SPACE:
+        entity.getEvents().trigger(PauseMenuDisplay.NAV_SELECT_EVENT);
+        return true;
+      case Keys.ESCAPE:
+        entity.getEvents().trigger(PauseMenuDisplay.NAV_BACK_EVENT);
+        return true;
+      default:
+        return true;
+    }
   }
 
   @Override
