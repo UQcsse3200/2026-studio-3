@@ -37,6 +37,7 @@ public class EndBattleScreen extends ScreenAdapter {
   private final Renderer renderer;
   private final boolean won;
   private boolean returning = false;
+  private boolean rewardClaimed = false;
 
   public EndBattleScreen(GdxGame game, boolean won) {
     this.game = game;
@@ -65,7 +66,9 @@ public class EndBattleScreen extends ScreenAdapter {
       RewardService rewardService = new RewardService();
       DisplayingRecord rewardRecord =
           DisplayingRecord.builder("").position(0, 500).variant("reward").build();
-      ui.addComponent(new RewardDisplay(rewardRecord, rewardService, game.getRunState()));
+      ui.addComponent(
+          new RewardDisplay(
+              rewardRecord, rewardService, game.getRunState(), game::autosaveAfterRewardClaimed));
       CardService cardLibrary = new CardLibrary(CardConfigLoader.loadCards());
       RunState runState = game.getRunState();
       if (runState != null) {
@@ -80,6 +83,7 @@ public class EndBattleScreen extends ScreenAdapter {
       }
     }
 
+    ui.getEvents().addListener(RewardDisplay.REWARD_CLAIMED_EVENT, this::onRewardClaimed);
     ui.getEvents().addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, this::returnToMenu);
     ServiceLocator.getEntityService().register(ui);
 
@@ -92,6 +96,12 @@ public class EndBattleScreen extends ScreenAdapter {
    * main menu.
    */
   private void returnToMenu() {
+    // Under the chosen checkpoint policy, a victory is not durable until its reward has been
+    // applied. Ignore the generic click/key-to-continue event until a reward button is selected.
+    if (won && !rewardClaimed) {
+      logger.debug("Ignoring victory-screen exit before a reward is claimed");
+      return;
+    }
     if (returning) {
       return;
     }
@@ -107,6 +117,10 @@ public class EndBattleScreen extends ScreenAdapter {
       runState.endRun();
     }
     game.setScreen(GdxGame.ScreenType.MAIN_MENU);
+  }
+
+  private void onRewardClaimed() {
+    rewardClaimed = true;
   }
 
   @Override

@@ -9,20 +9,38 @@ import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.rewards.RewardService;
 import java.util.List;
+import java.util.Objects;
 
 public class RewardDisplay extends Displaying {
   public static final String REWARD_CLAIMED_EVENT = "rewardClaimed";
 
   private final RunState runState;
   private final RewardService rewardService;
+  private final Runnable afterRewardApplied;
 
   private List<RewardOption> options;
   private boolean claimed;
 
   public RewardDisplay(DisplayingRecord rec, RewardService rewardService, RunState runState) {
+    this(rec, rewardService, runState, () -> {});
+  }
+
+  /**
+   * Creates the reward picker.
+   *
+   * @param afterRewardApplied callback run after the selected reward mutates persistent run state
+   *     and before any navigation event is fired
+   */
+  public RewardDisplay(
+      DisplayingRecord rec,
+      RewardService rewardService,
+      RunState runState,
+      Runnable afterRewardApplied) {
     super(rec);
-    this.rewardService = rewardService;
+    this.rewardService = Objects.requireNonNull(rewardService, "rewardService must not be null");
     this.runState = runState;
+    this.afterRewardApplied =
+        Objects.requireNonNull(afterRewardApplied, "afterRewardApplied must not be null");
   }
 
   @Override
@@ -106,7 +124,7 @@ public class RewardDisplay extends Displaying {
     };
   }
 
-  private void claimOption(RewardOption option) {
+  void claimOption(RewardOption option) {
     if (claimed || option == null || option.type == null) {
       return;
     }
@@ -127,6 +145,9 @@ public class RewardDisplay extends Displaying {
       }
     }
 
+    // This is deliberately before the navigation events below. A durable checkpoint therefore
+    // contains the claimed reward, and a subsequent MapScreen flush is a no-op.
+    afterRewardApplied.run();
     entity.getEvents().trigger(REWARD_CLAIMED_EVENT);
     entity.getEvents().trigger(EndBattleDisplay.RETURN_TO_MENU_EVENT);
   }
