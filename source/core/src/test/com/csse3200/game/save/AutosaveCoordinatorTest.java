@@ -1,5 +1,6 @@
 package com.csse3200.game.save;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -28,7 +29,7 @@ class AutosaveCoordinatorTest {
   @TempDir Path temporaryDirectory;
 
   @Test
-  void writesOnceOnlyAfterMapIsReady() {
+  void writesOnceAtTheFirstSafeCheckpoint() {
     RunState runState = activeRun();
     SaveGameService service = mock(SaveGameService.class);
     when(service.saveGame(AutosaveCoordinator.AUTOSAVE_SLOT_ID))
@@ -98,7 +99,58 @@ class AutosaveCoordinatorTest {
   }
 
   @Test
-  void autosaveRestoresAfterRelaunchWithoutOverwritingManualSlot() {
+  void unexpectedSaveExceptionDoesNotBlockNavigationOrRetry() {
+    RunState runState = activeRun();
+    AutosaveCoordinator coordinator =
+        new AutosaveCoordinator(
+            runState,
+            () -> {
+              throw new IllegalStateException("Repository unavailable");
+            });
+
+    runState.enterEncounter(1);
+    runState.completeEncounter(true);
+    coordinator.requestAfterSuccessfulEncounter();
+
+    assertDoesNotThrow(coordinator::saveIfPending);
+    assertDoesNotThrow(coordinator::saveIfPending);
+  }
+
+  @Test
+  void quittingBeforeRewardClaimKeepsPreviousValidCheckpoint() {
+    RunState runState = activeRun();
+    PlayerRunState player = new PlayerRunState(75, 100, 10);
+    SaveGameService service =
+        new SaveGameService(
+            new JsonSaveGameRepository(new FileHandle(temporaryDirectory.toFile())),
+            new GameStateSnapshotProvider(
+                player,
+                PlayerDeckFactory.createStarterDeck(),
+                runState,
+                BestiaryService.loadDefault()));
+    assertTrue(service.saveGame(AutosaveCoordinator.AUTOSAVE_SLOT_ID).success());
+
+    assertTrue(runState.getMapGraph().moveToNode(1));
+    runState.enterEncounter(1);
+    runState.completeEncounter(true);
+    player.restore(43, 100, 99);
+    AutosaveCoordinator coordinator = new AutosaveCoordinator(runState, () -> service);
+    coordinator.requestAfterSuccessfulEncounter();
+
+    // Relaunching before a reward is claimed loses the in-memory request by design. The prior
+    // durable checkpoint must remain intact rather than recording a consumed or replayable reward.
+    SaveGameService relaunchedService =
+        new SaveGameService(
+            new JsonSaveGameRepository(new FileHandle(temporaryDirectory.toFile())));
+    LoadResult autosave = relaunchedService.loadGame(AutosaveCoordinator.AUTOSAVE_SLOT_ID);
+    assertTrue(autosave.success());
+    assertEquals(75, autosave.data().player.currentHealth);
+    assertEquals(10, autosave.data().player.gold);
+    assertEquals(0, autosave.data().map.currentNodeId);
+  }
+
+  @Test
+  void rewardedBattleAutosaveRestoresAfterRelaunchWithoutOverwritingManualSlot() {
     RunState runState = activeRun();
 
     PlayerRunState player = new PlayerRunState(75, 100, 50);
@@ -115,9 +167,14 @@ class AutosaveCoordinatorTest {
     assertTrue(runState.getMapGraph().moveToNode(1));
     runState.enterEncounter(1);
     runState.completeEncounter(true);
-    player.restore(43, 100, 28);
+    player.restore(43, 100, 3);
     AutosaveCoordinator coordinator = new AutosaveCoordinator(runState, () -> service);
     coordinator.requestAfterSuccessfulEncounter();
+
+    // The reward is applied on the victory screen, then the checkpoint is written before the map
+    // is created. This is the durable post-battle path used by RewardDisplay.
+    player.addGold(25);
+    coordinator.saveIfPending();
     coordinator.saveIfPending();
 
     // New service and run-scoped objects simulate quitting and launching the game again.
