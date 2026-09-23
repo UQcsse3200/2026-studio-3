@@ -69,12 +69,38 @@ class MainMenuActionsTest {
   }
 
   @Test
+  void demoEventOpensMapFreePreviewWithoutResettingTheRun() {
+    menu.getEvents().trigger(MainMenuDisplay.DEMO_EVENT_EVENT);
+
+    verify(game).openDemoEvent();
+    verify(runState, never()).endRun();
+    verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
+  }
+
+  @Test
+  void demoCampfireOpensMapFreePreviewWithoutResettingTheRun() {
+    menu.getEvents().trigger(MainMenuDisplay.DEMO_CAMPFIRE_EVENT);
+
+    verify(game).openDemoCampfire();
+    verify(runState, never()).endRun();
+    verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
+  }
+
+  @Test
+  void demoFusionOpensMapFreePreviewWithoutResettingTheRun() {
+    menu.getEvents().trigger(MainMenuDisplay.DEMO_FUSION_EVENT);
+
+    verify(game).openDemoCardFusion();
+    verify(runState, never()).endRun();
+    verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
+  }
+
+  @Test
   void debugRoutesAreNotRegistered() {
     menu.getEvents().trigger("map");
     menu.getEvents().trigger("shop");
     menu.getEvents().trigger("battle");
     menu.getEvents().trigger("demoShop");
-    menu.getEvents().trigger("demoEvent");
 
     verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
     verify(game, never()).exit();

@@ -26,11 +26,66 @@ import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.services.ServiceLocator;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(GameExtension.class)
 class ChanceEncounterDisplayTest {
+
+  @Test
+  void abandonedMineSceneKeepsChoicesAndCompletionWorking() {
+    Stage stage = new Stage(new FitViewport(1280f, 800f), mock(Batch.class));
+    RenderService renderService = new RenderService();
+    renderService.setStage(stage);
+    ServiceLocator.registerRenderService(renderService);
+    EntityService entities = new EntityService();
+    ServiceLocator.registerEntityService(entities);
+
+    ChanceEncounter encounter =
+        new ChanceEncounter(
+            "abandoned-mine",
+            "The mouth of an abandoned mine promises danger and forgotten riches.",
+            List.of(
+                new ChanceChoice(
+                    "search-tunnels",
+                    "Search the unstable tunnels for valuables.",
+                    new ChanceOutcome(-12, 30)),
+                new ChanceChoice("leave", "Leave the mine undisturbed.", new ChanceOutcome(0, 0))));
+    AtomicInteger completions = new AtomicInteger();
+    ChanceEncounterDisplay display =
+        new ChanceEncounterDisplay(
+            encounter, (nodeId, success) -> completions.incrementAndGet(), 7);
+    Entity entity = new Entity().addComponent(display);
+    entities.register(entity);
+
+    try {
+      assertEquals(2, display.getChoiceButtons().size());
+      assertEquals(
+          "1.  Search the unstable tunnels for valuables.",
+          display.getChoiceButtons().get(0).getText().toString());
+      assertEquals(
+          "2.  Leave the mine undisturbed.",
+          display.getChoiceButtons().get(1).getText().toString());
+      ((Table) display.getChoiceButtons().get(0).getParent()).layout();
+      assertTrue(
+          display.getChoiceButtons().get(0).getX() < display.getChoiceButtons().get(1).getX());
+
+      display.getChoiceButtons().get(0).fire(new ChangeEvent());
+      assertEquals("OUTCOME\nYou lose 12 health.\nYou gain 30 gold.", display.getResultText());
+      assertTrue(display.getContinueButton().isVisible());
+      assertTrue(display.getChoiceButtons().get(0).isDisabled());
+      assertEquals(0, completions.get());
+
+      display.getContinueButton().fire(new ChangeEvent());
+      stage.act(0.3f);
+      stage.act(0.3f);
+      assertEquals(1, completions.get());
+    } finally {
+      entity.dispose();
+      stage.dispose();
+    }
+  }
 
   @Test
   void shouldRefreshDiceButtonsAfterEachStagedChoice() {

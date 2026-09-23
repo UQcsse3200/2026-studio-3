@@ -171,8 +171,7 @@ class EncounterGameAreaTest {
         EncounterGameArea.createCardFusionEncounterFlow(encounter, session, runState, cardService);
 
     session.resolveChoice("fuse");
-    assertEquals(
-        CardFusionFailureReason.FUSION_ALREADY_USED, fusionFlow.fuse(ids).failureReason());
+    assertEquals(CardFusionFailureReason.FUSION_ALREADY_USED, fusionFlow.fuse(ids).failureReason());
     assertEquals(0, completions.get());
     assertTrue(fusionFlow.leave());
     assertEquals(1, completions.get());
@@ -183,7 +182,8 @@ class EncounterGameAreaTest {
   void shouldLeaveAfterNoRareRewardIsAvailable() {
     CardService fullCatalog = new CardLibrary(CardConfigLoader.loadCards());
     RunState runState = runWithThreeCommonCards(fullCatalog);
-    CardService noRareCatalog = new CardLibrary(List.of(fullCatalog.getCard("strike").orElseThrow()));
+    CardService noRareCatalog =
+        new CardLibrary(List.of(fullCatalog.getCard("strike").orElseThrow()));
     List<String> ids =
         runState.getOrCreatePlayerDeck(fullCatalog).getCards().stream()
             .map(CardInstance::instanceId)
@@ -192,7 +192,8 @@ class EncounterGameAreaTest {
     ChanceEncounter encounter = cardFusionEncounter();
     ChanceEncounterSession session = startSession(controller(completions), encounter, fullCatalog);
     CardFusionEncounterFlow fusionFlow =
-        EncounterGameArea.createCardFusionEncounterFlow(encounter, session, runState, noRareCatalog);
+        EncounterGameArea.createCardFusionEncounterFlow(
+            encounter, session, runState, noRareCatalog);
 
     session.resolveChoice("fuse");
     assertEquals(

@@ -25,6 +25,7 @@ import com.csse3200.game.chance.ChanceOutcome;
 import com.csse3200.game.chance.DiceEncounterBehaviour;
 import com.csse3200.game.chance.DiceRoll;
 import com.csse3200.game.components.shop.ShopDisplay;
+import com.csse3200.game.encounters.integration.CardFusionEncounterFlow;
 import com.csse3200.game.encounters.integration.ChanceEncounterSession;
 import com.csse3200.game.encounters.integration.ChanceResolution;
 import com.csse3200.game.maps.EncounterCallback;
@@ -47,6 +48,8 @@ import java.util.Objects;
  */
 public class ChanceEncounterDisplay extends UIComponent {
   public static final String DICE_GAME_BACKGROUND_TEXTURE = "images/chance/dice_game_scene_v1.png";
+  public static final String ABANDONED_MINE_BACKGROUND_TEXTURE =
+      "images/chance/abandoned_mine_scene_v1.png";
 
   private static final float Z_INDEX = 3f;
   private static final float PANEL_WIDTH = 1080f;
@@ -69,7 +72,9 @@ public class ChanceEncounterDisplay extends UIComponent {
 
   private final ChanceEncounter encounter;
   private final ChanceEncounterSession encounterSession;
+  private final CardFusionEncounterFlow cardFusionFlow;
   private final boolean scenicDiceGame;
+  private final boolean scenicAbandonedMine;
   private final EncounterCallback completionCallback;
   private final Integer nodeId;
   private final List<TextButton> choiceButtons = new ArrayList<>();
@@ -82,6 +87,7 @@ public class ChanceEncounterDisplay extends UIComponent {
   private TextButtonStyle choiceStyle;
   private TextButtonStyle selectedChoiceStyle;
   private DiceRollDisplay diceRollDisplay;
+  private CardFusionSelectionView cardFusionView;
   private int lastDisplayedRollSequence;
   private boolean choiceResolved;
   private boolean completionSent;
@@ -104,7 +110,7 @@ public class ChanceEncounterDisplay extends UIComponent {
    */
   public ChanceEncounterDisplay(
       ChanceEncounter encounter, EncounterCallback completionCallback, Integer nodeId) {
-    this(encounter, completionCallback, nodeId, null);
+    this(encounter, completionCallback, nodeId, null, null);
   }
 
   /**
@@ -113,22 +119,32 @@ public class ChanceEncounterDisplay extends UIComponent {
    * @param encounterSession session that applies outcomes and reports completion to the map
    */
   public ChanceEncounterDisplay(ChanceEncounterSession encounterSession) {
+    this(encounterSession, null);
+  }
+
+  /** Creates a display that can hand Card Fusion choices to the run-scoped Fusion flow. */
+  public ChanceEncounterDisplay(
+      ChanceEncounterSession encounterSession, CardFusionEncounterFlow cardFusionFlow) {
     this(
         Objects.requireNonNull(encounterSession, "encounterSession cannot be null").getEncounter(),
         null,
         encounterSession.getNodeId(),
-        encounterSession);
+        encounterSession,
+        cardFusionFlow);
   }
 
   private ChanceEncounterDisplay(
       ChanceEncounter encounter,
       EncounterCallback completionCallback,
       Integer nodeId,
-      ChanceEncounterSession encounterSession) {
+      ChanceEncounterSession encounterSession,
+      CardFusionEncounterFlow cardFusionFlow) {
     this.encounter = Objects.requireNonNull(encounter, "encounter cannot be null");
     this.encounterSession = encounterSession;
+    this.cardFusionFlow = cardFusionFlow;
     this.scenicDiceGame =
         encounterSession != null && DiceEncounterBehaviour.ENCOUNTER_ID.equals(encounter.getId());
+    this.scenicAbandonedMine = "abandoned-mine".equals(encounter.getId());
     this.completionCallback = completionCallback;
     this.nodeId = Objects.requireNonNull(nodeId, "nodeId cannot be null");
   }
@@ -142,6 +158,10 @@ public class ChanceEncounterDisplay extends UIComponent {
   private void addActors() {
     if (scenicDiceGame) {
       addDiceGameActors();
+      return;
+    }
+    if (scenicAbandonedMine) {
+      addAbandonedMineActors();
       return;
     }
 
@@ -307,6 +327,108 @@ public class ChanceEncounterDisplay extends UIComponent {
     rootTable.addAction(Actions.fadeIn(0.25f));
   }
 
+  /** The mine scene changes only presentation; choices still use the shared encounter lifecycle. */
+  private void addAbandonedMineActors() {
+    rootTable = new Table();
+    rootTable.setFillParent(true);
+    rootTable.setBackground(skin.newDrawable(WHITE, BACKDROP_COLOUR));
+    rootTable.setTouchable(Touchable.enabled);
+    rootTable.getColor().a = 0f;
+
+    Group scene = new Group();
+    scene.setSize(SCENE_WIDTH, SCENE_HEIGHT);
+    ResourceService resources = ServiceLocator.getResourceService();
+    if (resources != null
+        && resources.containsAsset(ABANDONED_MINE_BACKGROUND_TEXTURE, Texture.class)) {
+      Texture texture = resources.getAsset(ABANDONED_MINE_BACKGROUND_TEXTURE, Texture.class);
+      texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+      Image background = new Image(new TextureRegionDrawable(new TextureRegion(texture)));
+      background.setBounds(0f, 0f, SCENE_WIDTH, SCENE_HEIGHT);
+      background.setTouchable(Touchable.disabled);
+      scene.addActor(background);
+    }
+
+    Label eyebrowLabel = new Label("CHANCE ENCOUNTER", createLabelStyle(SMALL, GOLD_COLOUR));
+    eyebrowLabel.setFontScale(1.16f);
+    eyebrowLabel.setBounds(60f, 710f, 530f, 34f);
+    scene.addActor(eyebrowLabel);
+
+    Label titleLabel =
+        new Label(formatTitle(encounter.getId()), createLabelStyle(LARGE, BODY_COLOUR));
+    titleLabel.setFontScale(1.55f);
+    titleLabel.setBounds(60f, 650f, 560f, 56f);
+    scene.addActor(titleLabel);
+
+    Image divider = new Image(skin.newDrawable(WHITE, new Color(0.48f, 0.30f, 0.20f, 0.85f)));
+    divider.setBounds(60f, 638f, 525f, 2f);
+    divider.setTouchable(Touchable.disabled);
+    scene.addActor(divider);
+
+    Label descriptionLabel =
+        new Label(encounter.getDescription(), createLabelStyle(DEFAULT, BODY_COLOUR));
+    descriptionLabel.setFontScale(1.13f);
+    descriptionLabel.setWrap(true);
+    descriptionLabel.setBounds(60f, 515f, 540f, 108f);
+    scene.addActor(descriptionLabel);
+
+    // The original prompt remains available to refreshChoices, but the scene and buttons
+    // provide the visual invitation without another opaque panel over the mine cart.
+    promptLabel = new Label("CHOOSE YOUR RESPONSE", createLabelStyle(SMALL, MUTED_COLOUR));
+    promptLabel.setVisible(false);
+    scene.addActor(promptLabel);
+
+    choiceStyle = createMineChoiceStyle(new Color(0.83f, 0.65f, 0.48f, 1f));
+    selectedChoiceStyle = new TextButtonStyle(choiceStyle);
+    choicesTable = new Table();
+    choicesTable.setBounds(55f, 23f, 1170f, 105f);
+    scene.addActor(choicesTable);
+    refreshChoices();
+
+    Table resultTable = new Table();
+    resultTable.setBackground(createDicePlaqueDrawable(new Color(0.55f, 0.45f, 0.48f, 0.96f)));
+    resultTable.pad(12f, 24f, 12f, 24f);
+    resultLabel =
+        new Label(
+            "Your decision will determine the outcome.", createLabelStyle(DEFAULT, BODY_COLOUR));
+    resultLabel.setFontScale(1.06f);
+    resultLabel.setWrap(true);
+    resultTable.add(resultLabel).left().grow();
+    resultTable.setBounds(170f, 138f, 940f, 100f);
+    resultTable.setVisible(false);
+    scene.addActor(resultTable);
+
+    continueButton =
+        new TextButton("Continue", createMineChoiceStyle(new Color(0.64f, 0.55f, 0.55f, 1f)));
+    continueButton.getLabel().setFontScale(1.12f);
+    continueButton.setBounds(490f, 25f, 300f, 90f);
+    continueButton.setVisible(false);
+    continueButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent changeEvent, Actor actor) {
+            completeEncounter();
+          }
+        });
+    scene.addActor(continueButton);
+
+    rootTable.add(scene).size(SCENE_WIDTH, SCENE_HEIGHT);
+    stage.addActor(rootTable);
+    rootTable.addAction(Actions.fadeIn(0.25f));
+  }
+
+  private TextButtonStyle createMineChoiceStyle(Color tint) {
+    TextButtonStyle style = new TextButtonStyle(skin.get(TextButtonStyle.class));
+    style.up = createDicePlaqueDrawable(tint);
+    style.over = createDicePlaqueDrawable(new Color(tint).mul(1.13f, 1.13f, 1.13f, 1f));
+    style.down = createDicePlaqueDrawable(new Color(tint).mul(0.82f, 0.82f, 0.82f, 1f));
+    style.disabled = createDicePlaqueDrawable(new Color(0.35f, 0.32f, 0.35f, 0.94f));
+    style.fontColor = BODY_COLOUR;
+    style.overFontColor = Color.WHITE;
+    style.downFontColor = BODY_COLOUR;
+    style.disabledFontColor = MUTED_COLOUR;
+    return style;
+  }
+
   private TextButtonStyle createDiceChoiceStyle() {
     TextButtonStyle style = new TextButtonStyle(skin.get(TextButtonStyle.class));
     style.up = createDicePlaqueDrawable(new Color(0.72f, 0.42f, 0.43f, 0.96f));
@@ -401,14 +523,22 @@ public class ChanceEncounterDisplay extends UIComponent {
     return resultLabel.getText().toString();
   }
 
+  TextButton getContinueButton() {
+    return continueButton;
+  }
+
   DiceRollDisplay getDiceRollDisplay() {
     return diceRollDisplay;
+  }
+
+  CardFusionSelectionView getCardFusionView() {
+    return cardFusionView;
   }
 
   private void addChoiceButton(ChanceChoice choice, int choiceNumber) {
     String buttonText = String.format("%d.  %s", choiceNumber, choice.getDescription());
     TextButton choiceButton = new TextButton(buttonText, choiceStyle);
-    choiceButton.getLabel().setFontScale(scenicDiceGame ? 1.08f : 1.3f);
+    choiceButton.getLabel().setFontScale(scenicDiceGame || scenicAbandonedMine ? 1.08f : 1.3f);
     choiceButton.getLabel().setWrap(true);
     choiceButton.addListener(
         new ChangeListener() {
@@ -421,6 +551,11 @@ public class ChanceEncounterDisplay extends UIComponent {
     choiceButtons.add(choiceButton);
     if (scenicDiceGame) {
       choicesTable.add(choiceButton).width(455f).height(76f).padRight(30f);
+    } else if (scenicAbandonedMine) {
+      if (choiceNumber == 2) {
+        choiceButton.setStyle(createMineChoiceStyle(new Color(0.48f, 0.50f, 0.57f, 1f)));
+      }
+      choicesTable.add(choiceButton).width(560f).height(100f).padRight(25f);
     } else {
       choicesTable.add(choiceButton).left().width(CONTENT_WIDTH).minHeight(80f).padBottom(14f);
       choicesTable.row();
@@ -459,6 +594,13 @@ public class ChanceEncounterDisplay extends UIComponent {
 
   private void handleSessionResolution(
       ChanceResolution resolution, TextButton selectedButton, String originalButtonText) {
+    if (resolution.getStatus() == ChanceResolution.Status.DELEGATED && cardFusionFlow != null) {
+      rootTable.setVisible(false);
+      cardFusionView =
+          new CardFusionSelectionView(cardFusionFlow, ServiceLocator.getCardLibrary(), skin, stage);
+      cardFusionView.show();
+      return;
+    }
     if (resolution.getStatus() == ChanceResolution.Status.AWAITING_CHOICE) {
       refreshChoices();
       resultLabel.setStyle(createLabelStyle(DEFAULT, BODY_COLOUR));
@@ -471,6 +613,9 @@ public class ChanceEncounterDisplay extends UIComponent {
       }
       resultLabel.setStyle(createLabelStyle(DEFAULT, new Color(0.9f, 0.35f, 0.3f, 1f)));
       resultLabel.setText("OUTCOME\n" + resolution.getMessage());
+      if (scenicAbandonedMine) {
+        resultLabel.getParent().setVisible(true);
+      }
       return;
     }
     showOutcome(resolution.getOutcome(), selectedButton, originalButtonText);
@@ -485,6 +630,9 @@ public class ChanceEncounterDisplay extends UIComponent {
       resultLabel.setStyle(createLabelStyle(DEFAULT, new Color(0.9f, 0.35f, 0.3f, 1f)));
       resultLabel.setText(
           "OUTCOME\nThis choice could not be resolved. Please select another option.");
+      if (scenicAbandonedMine) {
+        resultLabel.getParent().setVisible(true);
+      }
       return;
     }
 
@@ -497,6 +645,10 @@ public class ChanceEncounterDisplay extends UIComponent {
 
     resultLabel.setStyle(createLabelStyle(DEFAULT, BODY_COLOUR));
     resultLabel.setText("OUTCOME\n" + formatOutcome(outcome));
+    if (scenicAbandonedMine) {
+      resultLabel.getParent().setVisible(true);
+      choicesTable.setVisible(false);
+    }
     continueButton.setVisible(true);
   }
 
@@ -584,6 +736,9 @@ public class ChanceEncounterDisplay extends UIComponent {
 
   @Override
   public void dispose() {
+    if (cardFusionView != null) {
+      cardFusionView.dispose();
+    }
     if (rootTable != null) {
       rootTable.remove();
     }

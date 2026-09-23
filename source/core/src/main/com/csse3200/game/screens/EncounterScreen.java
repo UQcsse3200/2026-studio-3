@@ -47,6 +47,8 @@ public class EncounterScreen extends ScreenAdapter {
   private final Renderer renderer;
   private final PhysicsEngine physicsEngine;
   private final EncounterGameArea encounterGameArea;
+  private GdxGame.ScreenType pendingFusionReturn;
+  private float fusionResultSeconds;
 
   public EncounterScreen(GdxGame game) {
     this.game = game;
@@ -169,7 +171,12 @@ public class EncounterScreen extends ScreenAdapter {
     GdxGame.ScreenType targetScreen =
         playerDefeated ? GdxGame.ScreenType.DEFEAT : GdxGame.ScreenType.MAP;
 
-    Gdx.app.postRunnable(() -> game.setScreen(targetScreen));
+    if (encounterGameArea.getCardFusionEncounterFlow().isPresent()) {
+      pendingFusionReturn = targetScreen;
+      fusionResultSeconds = 2f;
+    } else {
+      Gdx.app.postRunnable(() -> game.setScreen(targetScreen));
+    }
   }
 
   static boolean isPlayerDefeated(Entity player) {
@@ -186,6 +193,14 @@ public class EncounterScreen extends ScreenAdapter {
     physicsEngine.update();
     ServiceLocator.getEntityService().update();
     renderer.render();
+    if (pendingFusionReturn != null) {
+      fusionResultSeconds -= delta;
+      if (fusionResultSeconds <= 0f) {
+        GdxGame.ScreenType destination = pendingFusionReturn;
+        pendingFusionReturn = null;
+        game.setScreen(destination);
+      }
+    }
   }
 
   @Override
