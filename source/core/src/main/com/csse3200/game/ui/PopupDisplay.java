@@ -1,10 +1,12 @@
 package com.csse3200.game.ui;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
@@ -59,6 +61,14 @@ public class PopupDisplay extends UIComponent {
     window.setBackground(skin.newDrawable("white", colour));
   }
 
+  /** Applies a colour and skin font to the popup title without changing other popups. */
+  public void setTitleStyle(Color colour, String fontName) {
+    LabelStyle style = new LabelStyle(window.getTitleLabel().getStyle());
+    style.font = skin.getFont(fontName);
+    style.fontColor = colour;
+    window.getTitleLabel().setStyle(style);
+  }
+
   @Override
   public void create() {
     super.create();
@@ -100,6 +110,18 @@ public class PopupDisplay extends UIComponent {
           public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
             if (onWindowClicked != null) {
               onWindowClicked.run();
+            }
+            return false;
+          }
+        });
+
+    window.addListener(
+        new com.badlogic.gdx.scenes.scene2d.InputListener() {
+          @Override
+          public boolean keyDown(InputEvent event, int keycode) {
+            if (keycode == Input.Keys.ESCAPE) {
+              hide();
+              return true;
             }
             return false;
           }
@@ -164,6 +186,7 @@ public class PopupDisplay extends UIComponent {
     window.setVisible(true);
     backdrop.toFront();
     window.toFront();
+    stage.setKeyboardFocus(window);
     if (onShow != null) {
       onShow.run();
     }

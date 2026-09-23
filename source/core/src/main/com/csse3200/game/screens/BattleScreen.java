@@ -239,8 +239,8 @@ public class BattleScreen extends ScreenAdapter {
     PopupDisplay cardInventory = new PopupDisplay("Card Inventory");
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
-    PopupDisplay itemInventory = new PopupDisplay("Item Inventory");
-    itemInventory.setMinSize(400f, 400f);
+    PopupDisplay itemInventory = new PopupDisplay("INVENTORY");
+    itemInventory.setMinSize(720f, 500f);
     InventoryPopupComponent inventoryPopup =
         new InventoryPopupComponent(game.getRunState(), itemInventory);
 
