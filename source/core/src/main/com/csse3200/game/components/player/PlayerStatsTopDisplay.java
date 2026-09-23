@@ -7,12 +7,15 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.UIComponent;
 
 public class PlayerStatsTopDisplay extends UIComponent {
   Table table;
+  private Image heartImage;
+  private Label healthLabel;
   private Image levelImage;
   private Label levelLabel;
   private Image moneyImage;
@@ -33,6 +36,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
     super.create();
     addActors();
 
+    entity.getEvents().addListener("updateHealth", this::updatePlayerHealthUI);
     entity.getEvents().addListener("updateLevel", this::updatePlayerLevelUI);
     entity.getEvents().addListener("updateMoney", this::updatePlayerMoneyUI);
   }
@@ -43,7 +47,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
    * @see Table for positioning options
    */
   private void addActors() {
-    table = new Table();
+    table = new Table(skin);
     table.top().left();
     table.setSize(mapWidth, 50);
     table.setPosition(0, mapHeight - 50);
@@ -53,6 +57,17 @@ public class PlayerStatsTopDisplay extends UIComponent {
 
     // Image size
     float imageSideLength = 20f;
+
+    // Heart image
+    heartImage =
+        new Image(ServiceLocator.getResourceService().getAsset("images/heart.png", Texture.class));
+
+    // Health text
+    int currentHealth = entity.getComponent(CombatStatsComponent.class).getHealth();
+    int maxHealth = entity.getComponent(CombatStatsComponent.class).getMaxHealth();
+    CharSequence healthText = String.format("Health: %d / %d", currentHealth, maxHealth);
+    healthLabel = new Label(healthText, skin, STYLE_NAME_LARGE);
+    healthLabel.setFontScale(FONT_SCALE);
 
     // Level image
     levelImage =
@@ -74,6 +89,9 @@ public class PlayerStatsTopDisplay extends UIComponent {
     moneyLabel = new Label(moneyText, skin, STYLE_NAME_LARGE);
     moneyLabel.setFontScale(FONT_SCALE);
 
+    table.add(heartImage).size(imageSideLength).pad(5);
+    table.add(healthLabel).left().pad(10);
+
     table.add(levelImage).size(imageSideLength).pad(5);
     table.add(levelLabel).left().pad(10);
 
@@ -85,6 +103,17 @@ public class PlayerStatsTopDisplay extends UIComponent {
   @Override
   public void draw(SpriteBatch batch) {
     // draw is handled by the stage
+  }
+
+  /**
+   * Updates the player's health on the ui.
+   *
+   * @param currentHealth player's current health
+   * @param maxHealth player's max health
+   */
+  public void updatePlayerHealthUI(int currentHealth, int maxHealth) {
+    CharSequence text = String.format("Health: %d / %d", currentHealth, maxHealth);
+    healthLabel.setText(text);
   }
 
   /**
@@ -110,6 +139,8 @@ public class PlayerStatsTopDisplay extends UIComponent {
   @Override
   public void dispose() {
     super.dispose();
+    heartImage.remove();
+    healthLabel.remove();
     levelImage.remove();
     levelLabel.remove();
     moneyImage.remove();
