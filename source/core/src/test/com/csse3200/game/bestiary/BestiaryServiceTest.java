@@ -210,6 +210,23 @@ class BestiaryServiceTest {
   }
 
   @Test
+  void shouldReturnOnlyDiscoveredEntriesByTier() {
+    BestiaryService service = createService();
+
+    assertTrue(service.getDiscoveredEntriesByTier(EnemyTier.NORMAL).isEmpty());
+    assertTrue(service.getDiscoveredEntriesByTier(EnemyTier.ELITE).isEmpty());
+    assertTrue(service.getDiscoveredEntriesByTier(EnemyTier.BOSS).isEmpty());
+    assertTrue(service.getDiscoveredEntriesByTier(null).isEmpty());
+
+    service.recordEncountered("shade");
+    service.recordDefeated("guardian");
+
+    assertEquals(List.of("shade"), ids(service.getDiscoveredEntriesByTier(EnemyTier.NORMAL)));
+    assertTrue(service.getDiscoveredEntriesByTier(EnemyTier.ELITE).isEmpty());
+    assertEquals(List.of("guardian"), ids(service.getDiscoveredEntriesByTier(EnemyTier.BOSS)));
+  }
+
+  @Test
   void shouldRejectNullRoster() {
     assertThrows(IllegalArgumentException.class, () -> new BestiaryService(null));
   }
