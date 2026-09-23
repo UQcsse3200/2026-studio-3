@@ -11,8 +11,9 @@ import java.util.Objects;
  * <p>This is intentionally generic — it has no knowledge of cards, health, or any other game
  * concept. {@link com.csse3200.game.components.spritedisplay.clickable.DragNDrop} packs one of
  * these into the drag payload from whatever {@link ClickableRecord} it was built from, and {@link
- * com.csse3200.game.components.spritedisplay.reactive.EnemyDropTargetComponent} supplies the target
- * ID. {@link DragNDrop} then fires {@code trigger(instanceId, targetId)} on the source entity.
+ * com.csse3200.game.components.spritedisplay.reactive.EnemyDropTargetComponent} or the battle's
+ * aiming controller supplies the target ID. {@link DragNDrop} then fires {@code
+ * trigger(instanceId, targetId)} on the source entity.
  * Neither class needs to know *what* trigger/args mean — that's entirely up to whoever defined the
  * card/button (e.g. via JSON) and whoever listens for the resulting event (e.g. PlayerActions).
  *
