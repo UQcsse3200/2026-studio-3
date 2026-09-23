@@ -32,6 +32,15 @@ import org.slf4j.LoggerFactory;
 /** Terminal screen shown when a battle ends, for either a win or a loss. */
 public class EndBattleScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(EndBattleScreen.class);
+  private static final String[] REWARD_TEXTURES = {
+    "images/battle_background.png",
+    "images/ui/reward-panel.png",
+    "images/ui/reward-card.png",
+    "images/ui/gold-reward.png",
+    "images/ui/lucky-coin.png",
+    "images/ui/energy-crystal.png",
+    "images/ui/merchants-favor.png"
+  };
 
   private final GdxGame game;
   private final Renderer renderer;
@@ -47,6 +56,9 @@ public class EndBattleScreen extends ScreenAdapter {
     ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
+
+    ServiceLocator.getResourceService().loadTextures(REWARD_TEXTURES);
+    ServiceLocator.getResourceService().loadAll();
 
     renderer = RenderFactory.createRenderer();
     createUI(won);
