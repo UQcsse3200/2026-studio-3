@@ -1,11 +1,14 @@
 package com.csse3200.game.components.spritedisplay.clickable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardType;
@@ -41,6 +44,74 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(GameExtension.class)
 class DragNDropTest {
   private static final String STRIKE_INSTANCE_ID = "strike-instance-1";
+
+  @Test
+  void selfTargetCardStillPlaysByClick() {
+    InOutOnTrigger card =
+        new InOutOnTrigger(
+            ClickableRecord.builder("playCard")
+                .text("Defend")
+                .args("defend-instance-1", "player")
+                .build());
+    Entity battleUi = new Entity().addComponent(card);
+    AtomicReference<String> played = new AtomicReference<>();
+    battleUi
+        .getEvents()
+        .addListener("playCard", (String instanceId, String targetId) ->
+            played.set(instanceId + ":" + targetId));
+
+    card.getBtn().fire(new ChangeListener.ChangeEvent());
+
+    assertEquals("defend-instance-1:player", played.get());
+  }
+
+  @Test
+  void aimedDragPlaysSelectedEnemyEvenWithoutDropActor() throws Exception {
+    DragNDropService dragService = new DragNDropService();
+    ServiceLocator.registerDragNDropService(dragService);
+    RecordingAim aim = new RecordingAim("enemy-11");
+    DragNDrop card =
+        new DragNDrop(
+            ClickableRecord.builder("playCard").text("Strike").args(STRIKE_INSTANCE_ID).build(),
+            aim);
+    Entity battleUi = new Entity().addComponent(card);
+    AtomicReference<String> playedTarget = new AtomicReference<>();
+    battleUi
+        .getEvents()
+        .addListener(
+            "playCard",
+            (String instanceId, String targetId) ->
+                playedTarget.set(instanceId + ":" + targetId));
+
+    DragAndDrop.Source source = getOnlySource(dragService.getDragAndDrop());
+    DragAndDrop.Payload payload = source.dragStart(new InputEvent(), 0f, 0f, 0);
+    source.dragStop(new InputEvent(), 0f, 0f, 0, payload, null);
+
+    assertEquals(STRIKE_INSTANCE_ID + ":enemy-11", playedTarget.get());
+  }
+
+  @Test
+  void aimedDragWithoutSelectionDoesNotPlayCard() throws Exception {
+    DragNDropService dragService = new DragNDropService();
+    ServiceLocator.registerDragNDropService(dragService);
+    RecordingAim aim = new RecordingAim(null);
+    DragNDrop card =
+        new DragNDrop(
+            ClickableRecord.builder("playCard").text("Strike").args(STRIKE_INSTANCE_ID).build(),
+            aim);
+    Entity battleUi = new Entity().addComponent(card);
+    AtomicReference<String> playedTarget = new AtomicReference<>();
+    battleUi
+        .getEvents()
+        .addListener(
+            "playCard", (String instanceId, String targetId) -> playedTarget.set(targetId));
+
+    DragAndDrop.Source source = getOnlySource(dragService.getDragAndDrop());
+    DragAndDrop.Payload payload = source.dragStart(new InputEvent(), 0f, 0f, 0);
+    source.dragStop(new InputEvent(), 0f, 0f, 0, payload, null);
+
+    assertNull(playedTarget.get());
+  }
 
   @Test
   void shouldSendCardInstanceAndTargetIdsToSourceEntityAfterDrop() throws Exception {
@@ -162,6 +233,22 @@ class DragNDropTest {
       public void drop(
           DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {}
     };
+  }
+
+  private record RecordingAim(String targetId) implements AimSession {
+    @Override
+    public void begin(Vector2 cardPosition, Vector2 pointer) {}
+
+    @Override
+    public void update(Vector2 pointer) {}
+
+    @Override
+    public String release(Vector2 pointer) {
+      return targetId;
+    }
+
+    @Override
+    public void cancel() {}
   }
 
   @SuppressWarnings("unchecked")
