@@ -37,6 +37,7 @@ public class EndBattleScreen extends ScreenAdapter {
     "images/ui/reward-panel.png",
     "images/ui/reward-card.png",
     "images/ui/gold-reward.png",
+    "images/ui/victory-title.png",
     "images/ui/lucky-coin.png",
     "images/ui/energy-crystal.png",
     "images/ui/merchants-favor.png"

@@ -30,6 +30,7 @@ public class RewardDisplay extends Displaying {
   private static final String PANEL_TEXTURE = "images/ui/reward-panel.png";
   private static final String CARD_TEXTURE = "images/ui/reward-card.png";
   private static final String GOLD_TEXTURE = "images/ui/gold-reward.png";
+  private static final String VICTORY_TITLE_TEXTURE = "images/ui/victory-title.png";
   private static final Color SCRIM = new Color(0.015f, 0.01f, 0.025f, 0.58f);
   private static final Color GOLD = new Color(0.96f, 0.78f, 0.38f, 1f);
   private static final Color CREAM = new Color(0.93f, 0.87f, 0.73f, 1f);
@@ -84,7 +85,7 @@ public class RewardDisplay extends Displaying {
     scrim = dimmer;
     stage.addActor(dimmer);
 
-    float panelWidth = Math.min(stage.getWidth() * 0.78f, 1020f);
+    float panelWidth = Math.min(stage.getWidth() * 0.7f, 900f);
     float panelHeight = panelWidth * 0.625f;
     if (panelHeight > stage.getHeight() * 0.9f) {
       panelHeight = stage.getHeight() * 0.9f;
@@ -107,25 +108,22 @@ public class RewardDisplay extends Displaying {
   private Table createPanelContent(float panelWidth, float panelHeight) {
     Table content = new Table();
     content.top();
-    content.pad(
-        panelHeight * 0.105f, panelWidth * 0.135f, panelHeight * 0.075f, panelWidth * 0.135f);
+    content.pad(panelHeight * 0.13f, panelWidth * 0.135f, panelHeight * 0.1f, panelWidth * 0.135f);
 
-    Label victory = new Label("VICTORY", titleStyle());
-    victory.setFontScale(1.4f);
-    content.add(victory).center();
+    Image victory = new Image(texture(VICTORY_TITLE_TEXTURE));
+    victory.setScaling(Scaling.fit);
+    content.add(victory).size(panelWidth * 0.38f, panelHeight * 0.1f).center();
     content.row();
 
-    content
-        .add(new Label("CHOOSE ONE REWARD", largeStyle(GOLD)))
-        .center()
-        .padTop(-4f)
-        .padBottom(panelHeight * 0.025f);
+    Label subtitle = new Label("CHOOSE ONE REWARD", largeStyle(GOLD));
+    subtitle.setFontScale(0.82f);
+    content.add(subtitle).center().padTop(2f).padBottom(panelHeight * 0.018f);
     content.row();
 
     Table cards = new Table();
     cards.defaults().padLeft(panelWidth * 0.012f).padRight(panelWidth * 0.012f);
-    float cardWidth = panelWidth * 0.285f;
-    float cardHeight = panelHeight * 0.58f;
+    float cardWidth = panelWidth * 0.27f;
+    float cardHeight = panelHeight * 0.54f;
     for (RewardOption option : options) {
       if (option != null) {
         cards
@@ -144,7 +142,7 @@ public class RewardDisplay extends Displaying {
         .padLeft(12f)
         .padRight(12f);
     footer.add(line()).width(panelWidth * 0.11f).height(1f);
-    content.add(footer).center().padTop(panelHeight * 0.018f);
+    content.add(footer).center().padTop(panelHeight * 0.025f);
     return content;
   }
 
@@ -158,10 +156,11 @@ public class RewardDisplay extends Displaying {
     Table details = new Table();
     details.top();
     details.setTouchable(Touchable.disabled);
-    details.pad(cardHeight * 0.09f, cardWidth * 0.095f, cardHeight * 0.06f, cardWidth * 0.095f);
+    details.pad(cardHeight * 0.115f, cardWidth * 0.095f, cardHeight * 0.055f, cardWidth * 0.095f);
 
     Label name = new Label(rewardTitle(option), largeStyle(GOLD));
-    name.setEllipsis(true);
+    name.setFontScale(isLongItemName(option) ? 0.68f : 0.82f);
+    name.setAlignment(com.badlogic.gdx.utils.Align.center);
     details.add(name).width(cardWidth * 0.8f).center();
     details.row();
 
@@ -169,9 +168,9 @@ public class RewardDisplay extends Displaying {
     icon.setScaling(Scaling.fit);
     details
         .add(icon)
-        .size(cardWidth * 0.48f, cardHeight * 0.37f)
+        .size(cardWidth * 0.44f, cardHeight * 0.34f)
         .center()
-        .padTop(cardHeight * 0.035f);
+        .padTop(cardHeight * 0.025f);
     details.row();
 
     Label description = new Label(rewardDescription(option), smallStyle(CREAM));
@@ -179,17 +178,23 @@ public class RewardDisplay extends Displaying {
     description.setAlignment(com.badlogic.gdx.utils.Align.center);
     details
         .add(description)
-        .width(cardWidth * 0.78f)
-        .minHeight(cardHeight * 0.1f)
+        .width(cardWidth * 0.84f)
+        .height(cardHeight * 0.13f)
         .center()
-        .padTop(cardHeight * 0.012f);
+        .padTop(cardHeight * 0.008f);
     details.row();
 
+    details.add().expandY();
+    details.row();
+    Label select = new Label("SELECT", largeStyle(GOLD));
+    select.setFontScale(0.82f);
+    select.setAlignment(com.badlogic.gdx.utils.Align.center);
     details
-        .add(new Label("SELECT", largeStyle(GOLD)))
-        .expandY()
-        .bottom()
-        .padBottom(cardHeight * 0.015f);
+        .add(select)
+        .width(cardWidth * 0.78f)
+        .height(cardHeight * 0.12f)
+        .center()
+        .padBottom(cardHeight * 0.012f);
     card.add(details);
 
     card.setTouchable(Touchable.enabled);
@@ -248,9 +253,15 @@ public class RewardDisplay extends Displaying {
               : switch (option.itemId) {
                 case LUCKY_COIN -> "+10% Gold Rewards";
                 case ENERGY_CRYSTAL -> "+1 Max Energy";
-                case MERCHANTS_FAVOR -> "+10% Shop Discount | Maximum 50%";
+                case MERCHANTS_FAVOR -> "+10% Shop Discount\nMaximum 50%";
               };
     };
+  }
+
+  private boolean isLongItemName(RewardOption option) {
+    return option != null
+        && option.type == RewardType.ITEM
+        && option.itemId == ItemType.MERCHANTS_FAVOR;
   }
 
   private String rewardIcon(RewardOption option) {
@@ -258,12 +269,6 @@ public class RewardDisplay extends Displaying {
       return ITEM_ICONS.getOrDefault(option.itemId, GOLD_TEXTURE);
     }
     return GOLD_TEXTURE;
-  }
-
-  private LabelStyle titleStyle() {
-    LabelStyle style = new LabelStyle(skin.get("title", LabelStyle.class));
-    style.fontColor = GOLD;
-    return style;
   }
 
   private LabelStyle largeStyle(Color colour) {
