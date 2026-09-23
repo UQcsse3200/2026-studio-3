@@ -246,6 +246,38 @@ public class RunStateTest {
   }
 
   @Test
+  void firstBattleOfARunAlwaysLeavesACompletedNeighbourToFallBackOn() {
+    // Regression test addressing a review question from Zaidan on PR #315: does the fix's
+    // COMPLETED-neighbour search find anything for the very first battle of a run, before
+    // anything else has been completed? Confirms the invariant holds: entering any encounter
+    // (enterEncounter()) always closes off the node the player just moved from, and that node
+    // is guaranteed to be a genuine, bidirectional neighbour of the new CURRENT node, since
+    // moveToNode() only succeeds via a real connectNodes()-created connection. So by the time a
+    // mid-battle save is even possible (activeNodeId != null), a COMPLETED neighbour always
+    // exists. The true "nothing completed yet" case -- the start node itself -- has no battle of
+    // its own (RoomType.START), so activeNodeId stays null there and the fix's block never runs.
+    RunState runState = new RunState();
+    MapGraph graph = createGraph();
+    // createGraph()'s addConnection() is one-directional; the real graph-building path
+    // (connectNodes(), used by SaveGameRestoreService.buildMapGraph()) adds both directions.
+    graph.connectNodes(1, 0);
+
+    runState.startRun(graph, 0); // node 0: CURRENT, nodes 1 & 2: AVAILABLE
+    graph.moveToNode(1); // the very first move of the run
+    runState.enterEncounter(1); // the very first encounter of the run
+
+    assertEquals(NodeState.COMPLETED, graph.getNode(0).getState());
+    assertTrue(graph.getNode(1).getConnections().contains(graph.getNode(0)));
+
+    // Simulate saving mid-battle right here and reloading.
+    graph.restoreCurrentNode(1);
+    assertTrue(runState.restoreRun(graph, 1));
+
+    assertEquals(NodeState.AVAILABLE, graph.getNode(1).getState());
+    assertSame(graph.getNode(0), graph.getCurrentNode());
+  }
+
+  @Test
   void endRunDiscardsTheMap() {
     RunState runState = new RunState();
     runState.startRun(createGraph(), 0);
