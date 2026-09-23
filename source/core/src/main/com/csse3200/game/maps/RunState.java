@@ -6,6 +6,7 @@ import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.entities.factories.PlayerFactory;
 import com.csse3200.game.rewards.RewardOption;
 import java.util.Objects;
+import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,7 @@ public class RunState {
   private int playerMaxEnergy;
   private boolean playerStatsInitialised;
   private PlayerRunState playerState;
+  private Long encounterSeed;
 
   /**
    * Returns the durable player values for this run, initialising them from the player config on
@@ -141,6 +143,7 @@ public class RunState {
 
     this.mapGraph = mapGraph;
     this.activeNodeId = null;
+    this.encounterSeed = new Random().nextLong();
     return true;
   }
 
@@ -157,6 +160,26 @@ public class RunState {
 
   public boolean isRunActive() {
     return mapGraph != null;
+  }
+
+  /**
+   * Gets the seed that decides which encounter each node of this run holds.
+   *
+   * @return the run's encounter seed, or null if no run is in progress
+   */
+  public Long getEncounterSeed() {
+    return encounterSeed;
+  }
+
+  /**
+   * Puts back the encounter seed from a save, so every node keeps the encounter it had before.
+   *
+   * @param savedSeed seed read from the save, or null for saves made before it was recorded
+   */
+  public void restoreEncounterSeed(Long savedSeed) {
+    if (savedSeed != null) {
+      encounterSeed = savedSeed;
+    }
   }
 
   public MapGraph getMapGraph() {
@@ -182,6 +205,9 @@ public class RunState {
 
     this.mapGraph = mapGraph;
     this.activeNodeId = activeNodeId;
+    // A fresh seed covers saves made before the seed was recorded; restoreEncounterSeed puts
+    // back the saved one when there is one.
+    this.encounterSeed = new Random().nextLong();
     return true;
   }
 
@@ -251,6 +277,7 @@ public class RunState {
   public void endRun() {
     mapGraph = null;
     activeNodeId = null;
+    encounterSeed = null;
     playerDeck = null;
     playerHealth = 0;
     playerMaxHealth = 0;
