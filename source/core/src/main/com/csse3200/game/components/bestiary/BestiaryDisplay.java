@@ -1,9 +1,11 @@
 package com.csse3200.game.components.bestiary;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
@@ -16,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.bestiary.BestiaryEntryView;
@@ -34,6 +37,7 @@ public class BestiaryDisplay extends UIComponent {
   private static final float Z_INDEX = 3f;
   private static final float PANEL_WIDTH = 1160f;
   private static final String FALLBACK_ATLAS = "images/enemies/default.atlas";
+  public static final String BUTTON_TEXTURE = "images/bestiary_button_frame.png";
   private static final Color BACKDROP_COLOUR = new Color(0.018f, 0.012f, 0.02f, 0.92f);
   private static final Color PANEL_COLOUR = new Color(0.105f, 0.07f, 0.065f, 0.98f);
   private static final Color LIST_COLOUR = new Color(0.13f, 0.09f, 0.085f, 1f);
@@ -132,7 +136,7 @@ public class BestiaryDisplay extends UIComponent {
         });
 
     panel.add(titleBlock).left().expandX();
-    panel.add(backButton).right().width(180f).height(58f);
+    panel.add(backButton).right().width(180f).height(60f);
   }
 
   private void addDivider(Table panel) {
@@ -143,7 +147,7 @@ public class BestiaryDisplay extends UIComponent {
 
   private TextButton addFilters(Table panel) {
     Table filters = new Table();
-    filters.defaults().width(185f).height(52f).padRight(12f);
+    filters.defaults().width(185f).height(62f).padRight(12f);
     ButtonGroup<TextButton> filterGroup = new ButtonGroup<>();
     filterGroup.setMinCheckCount(1);
     filterGroup.setMaxCheckCount(1);
@@ -161,7 +165,7 @@ public class BestiaryDisplay extends UIComponent {
   private TextButton createFilterButton(
       String text, EnemyTier tier, ButtonGroup<TextButton> group) {
     TextButtonStyle style = createButtonStyle();
-    style.checked = skin.newDrawable("button-pressed", new Color(0.57f, 0.35f, 0.12f, 1f));
+    style.checked = buttonDrawable(new Color(1f, 0.72f, 0.3f, 1f));
     style.checkedFontColor = Color.WHITE;
     TextButton button = new TextButton(text, style);
     button.getLabel().setFontScale(1.15f);
@@ -274,7 +278,7 @@ public class BestiaryDisplay extends UIComponent {
               showDetails(entry);
             }
           });
-      enemyListTable.add(entryButton).width(285f).height(62f).padBottom(10f);
+      enemyListTable.add(entryButton).width(285f).height(76f).padBottom(8f);
       enemyListTable.row();
     }
     BestiaryEntryView selection =
@@ -391,13 +395,22 @@ public class BestiaryDisplay extends UIComponent {
 
   private TextButtonStyle createButtonStyle() {
     TextButtonStyle style = new TextButtonStyle(skin.get(TextButtonStyle.class));
-    style.up = skin.newDrawable("button", new Color(0.22f, 0.15f, 0.13f, 1f));
-    style.over = skin.newDrawable("button", new Color(0.44f, 0.27f, 0.14f, 1f));
-    style.down = skin.newDrawable("button-pressed", new Color(0.58f, 0.38f, 0.17f, 1f));
+    style.up = buttonDrawable(null);
+    style.over = buttonDrawable(new Color(1f, 0.82f, 0.58f, 1f));
+    style.down = buttonDrawable(new Color(0.68f, 0.48f, 0.44f, 1f));
     style.fontColor = BODY_COLOUR;
     style.overFontColor = Color.WHITE;
     style.downFontColor = Color.WHITE;
     return style;
+  }
+
+  private Drawable buttonDrawable(Color tint) {
+    Texture texture = ServiceLocator.getResourceService().getAsset(BUTTON_TEXTURE, Texture.class);
+    texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    TextureRegionDrawable drawable = new TextureRegionDrawable(new TextureRegion(texture));
+    drawable.setMinWidth(0f);
+    drawable.setMinHeight(0f);
+    return tint == null ? drawable : drawable.tint(tint);
   }
 
   @Override

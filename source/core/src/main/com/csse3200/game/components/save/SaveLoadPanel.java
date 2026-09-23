@@ -1,16 +1,15 @@
 package com.csse3200.game.components.save;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.save.AutosaveCoordinator;
 import com.csse3200.game.save.DeleteSaveResult;
@@ -47,24 +46,16 @@ public class SaveLoadPanel extends UIComponent {
   private final Runnable backAction;
 
   private static final String BACKGROUND_TEXTURE = "images/main_menu_background.png";
-  private static final int PILL_HEIGHT = 64;
-  private static final int PILL_WIDTH = 160;
-  private static final int PILL_RADIUS = PILL_HEIGHT / 2;
-  private static final float PANEL_WIDTH = 760f;
-  private static final float PANEL_HEIGHT = 430f;
+  public static final String BUTTON_TEXTURE = "images/save_load_button_frame.png";
+  private static final float ACTION_BUTTON_WIDTH = 168f;
+  private static final float ACTION_BUTTON_HEIGHT = 56f;
+  private static final float PANEL_WIDTH = 880f;
+  private static final float PANEL_HEIGHT = 500f;
 
   private Stack rootStack;
   private Table rootTable;
   private Label statusLabel;
-  private final List<Texture> generatedPillTextures = new java.util.ArrayList<>();
-
-  // Cached once and reused across every button and every refresh() call — MenuTheme colors don't
-  // change at runtime, so regenerating these per-button (the original approach) created roughly
-  // 40 new 160x64 textures per save/load/delete refresh, an unbounded GPU memory leak flagged in
-  // review (PR #208, Anran).
-  private NinePatchDrawable upDrawable;
-  private NinePatchDrawable downDrawable;
-  private NinePatchDrawable overDrawable;
+  private TextButton.TextButtonStyle archiveButtonStyle;
 
   public SaveLoadPanel(SaveGameService saveGameService, List<Integer> slotIds) {
     this(saveGameService, slotIds, null, null);
@@ -129,44 +120,25 @@ public class SaveLoadPanel extends UIComponent {
   }
 
   private TextButton.TextButtonStyle themedButtonStyle() {
-    if (upDrawable == null) {
-      upDrawable = pillDrawable(MenuTheme.burntRust());
-      downDrawable = pillDrawable(MenuTheme.dustyMauve());
-      overDrawable = pillDrawable(MenuTheme.softCoral());
+    if (archiveButtonStyle == null) {
+      Texture texture = ServiceLocator.getResourceService().getAsset(BUTTON_TEXTURE, Texture.class);
+      texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+      TextureRegionDrawable frame = new TextureRegionDrawable(new TextureRegion(texture));
+      frame.setMinWidth(0f);
+      frame.setMinHeight(0f);
+
+      archiveButtonStyle =
+          new TextButton.TextButtonStyle(skin.get(TextButton.TextButtonStyle.class));
+      archiveButtonStyle.up = frame;
+      archiveButtonStyle.over = frame.tint(new Color(1f, 0.9f, 0.72f, 1f));
+      archiveButtonStyle.down = frame.tint(new Color(0.78f, 0.62f, 0.68f, 1f));
+      archiveButtonStyle.disabled = frame.tint(new Color(0.42f, 0.38f, 0.38f, 0.72f));
+      archiveButtonStyle.fontColor = MenuTheme.warmParchment();
+      archiveButtonStyle.overFontColor = Color.WHITE;
+      archiveButtonStyle.downFontColor = MenuTheme.warmParchment();
+      archiveButtonStyle.disabledFontColor = MenuTheme.mutedBrown();
     }
-
-    TextButton.TextButtonStyle style =
-        new TextButton.TextButtonStyle(skin.get(TextButton.TextButtonStyle.class));
-    style.up = upDrawable;
-    style.down = downDrawable;
-    style.over = overDrawable;
-    style.disabled = upDrawable; // same color as enabled, by design (see disabledFontColor)
-    style.fontColor = MenuTheme.warmParchment();
-    style.overFontColor = Color.WHITE;
-    style.downFontColor = MenuTheme.warmParchment();
-    style.disabledFontColor = MenuTheme.warmParchment();
-    return style;
-  }
-
-  /**
-   * Builds a rounded-pill drawable in an exact {@link MenuTheme} color. The flat-earth skin only
-   * ships pre-colored green pill textures (tinting them would multiply, not replace, the color) and
-   * its only neutral region is a 1x1 white pixel (no rounding), so the shape is generated here
-   * instead: two filled circles at the ends plus a connecting rectangle, composited onto one
-   * texture via {@link Pixmap}. Wrapping it in a {@link NinePatch} keeps the rounded ends fixed
-   * size while the middle stretches to fit each button's actual width.
-   */
-  private NinePatchDrawable pillDrawable(Color color) {
-    Pixmap pixmap = new Pixmap(PILL_WIDTH, PILL_HEIGHT, Pixmap.Format.RGBA8888);
-    pixmap.setColor(color);
-    pixmap.fillCircle(PILL_RADIUS, PILL_RADIUS, PILL_RADIUS);
-    pixmap.fillCircle(PILL_WIDTH - PILL_RADIUS - 1, PILL_RADIUS, PILL_RADIUS);
-    pixmap.fillRectangle(PILL_RADIUS, 0, PILL_WIDTH - PILL_HEIGHT, PILL_HEIGHT);
-    Texture texture = new Texture(pixmap);
-    pixmap.dispose();
-    generatedPillTextures.add(texture);
-    NinePatch ninePatch = new NinePatch(texture, PILL_RADIUS, PILL_RADIUS, 0, 0);
-    return new NinePatchDrawable(ninePatch);
+    return archiveButtonStyle;
   }
 
   private void addHeader() {
@@ -182,7 +154,12 @@ public class SaveLoadPanel extends UIComponent {
               backAction.run();
             }
           });
-      rootTable.add(backButton).padBottom(20f).row();
+      rootTable
+          .add(backButton)
+          .width(ACTION_BUTTON_WIDTH)
+          .height(ACTION_BUTTON_HEIGHT)
+          .padBottom(20f)
+          .row();
     } else {
       rootTable.add().padBottom(20f).row();
     }
@@ -224,7 +201,11 @@ public class SaveLoadPanel extends UIComponent {
     rootTable.add(new Label(label, themedLabelStyle())).left().padRight(20f);
 
     if (isAutosave) {
-      rootTable.add(new Label("Auto", themedLabelStyle())).padRight(10f);
+      rootTable
+          .add(new Label("Auto", themedLabelStyle()))
+          .width(ACTION_BUTTON_WIDTH)
+          .height(ACTION_BUTTON_HEIGHT)
+          .padRight(10f);
     } else {
       TextButton saveButton = new TextButton("Save", themedButtonStyle());
       saveButton.addListener(
@@ -234,7 +215,11 @@ public class SaveLoadPanel extends UIComponent {
               onSave(slotId);
             }
           });
-      rootTable.add(saveButton).padRight(10f);
+      rootTable
+          .add(saveButton)
+          .width(ACTION_BUTTON_WIDTH)
+          .height(ACTION_BUTTON_HEIGHT)
+          .padRight(10f);
     }
 
     TextButton loadButton = new TextButton("Load", themedButtonStyle());
@@ -246,7 +231,7 @@ public class SaveLoadPanel extends UIComponent {
             onLoad(slotId);
           }
         });
-    rootTable.add(loadButton).padRight(10f);
+    rootTable.add(loadButton).width(ACTION_BUTTON_WIDTH).height(ACTION_BUTTON_HEIGHT).padRight(10f);
 
     TextButton deleteButton = new TextButton("Delete", themedButtonStyle());
     deleteButton.setDisabled(!hasSave);
@@ -257,7 +242,12 @@ public class SaveLoadPanel extends UIComponent {
             onDelete(slotId);
           }
         });
-    rootTable.add(deleteButton).padBottom(12f).row();
+    rootTable
+        .add(deleteButton)
+        .width(ACTION_BUTTON_WIDTH)
+        .height(ACTION_BUTTON_HEIGHT)
+        .padBottom(12f)
+        .row();
   }
 
   private void onSave(int slotId) {
@@ -323,10 +313,6 @@ public class SaveLoadPanel extends UIComponent {
       rootStack.remove();
       rootStack.clear();
     }
-    for (Texture texture : generatedPillTextures) {
-      texture.dispose();
-    }
-    generatedPillTextures.clear();
     super.dispose();
   }
 }
