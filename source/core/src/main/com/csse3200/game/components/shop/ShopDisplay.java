@@ -15,15 +15,16 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
+import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.components.player.InventoryComponent;
-import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.maps.EncounterCallback;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.shop.PurchaseResult;
-import com.csse3200.game.shop.ShopConfig;
 import com.csse3200.game.shop.ShopEncounter;
+import com.csse3200.game.shop.ShopInventoryGenerator;
 import com.csse3200.game.shop.ShopItem;
 import com.csse3200.game.shop.ShopService;
 import com.csse3200.game.ui.UIComponent;
@@ -46,7 +47,6 @@ import org.slf4j.LoggerFactory;
  */
 public class ShopDisplay extends UIComponent {
   private static final Logger logger = LoggerFactory.getLogger(ShopDisplay.class);
-  private static final String SHOP_CONFIG = "configs/shopItems.json";
   private static final String SHOP_ART_DIRECTORY = "images/shop/cards/";
   private static final String BUTTON = "button";
   private static final String WHITE = "white";
@@ -120,13 +120,7 @@ public class ShopDisplay extends UIComponent {
    * @param nodeId identifier of the associated map node
    */
   public ShopDisplay(InventoryComponent inventory, EncounterCallback callback, Integer nodeId) {
-    this(
-        inventory,
-        new ShopEncounter(
-            nodeId,
-            inventory,
-            new ShopService(FileLoader.readClass(ShopConfig.class, SHOP_CONFIG)),
-            callback));
+    this(inventory, new ShopEncounter(nodeId, inventory, createGeneratedShop(), callback));
   }
 
   /**
@@ -153,7 +147,7 @@ public class ShopDisplay extends UIComponent {
       InventoryComponent inventory, ShopEncounter shopEncounter, CardService cardService) {
     this.shopEncounter =
         shopEncounter == null
-            ? new ShopEncounter(inventory, new ShopService((ShopConfig) null))
+            ? new ShopEncounter(inventory, createGeneratedShop())
             : shopEncounter;
     this.cardService = cardService;
   }
@@ -175,6 +169,20 @@ public class ShopDisplay extends UIComponent {
    */
   public ShopDisplay(ShopEncounter shopEncounter, CardService cardService) {
     this(null, shopEncounter, cardService);
+  }
+
+  /**
+   * Builds a live shop inventory from the card library using the shared acquisition allow-list.
+   *
+   * <p>Replaces the old fixed {@code shopItems.json} catalog so Round 2 cards can appear in normal
+   * play.
+   */
+  static ShopService createGeneratedShop() {
+    CardService cards = ServiceLocator.getCardLibrary();
+    if (cards == null) {
+      cards = new CardLibrary(CardConfigLoader.loadCards());
+    }
+    return new ShopInventoryGenerator(cards).createShop();
   }
 
   @Override

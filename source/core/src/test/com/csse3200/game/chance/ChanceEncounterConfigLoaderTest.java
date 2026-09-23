@@ -31,10 +31,12 @@ class ChanceEncounterConfigLoaderTest {
             "wandering-healer",
             "flooded-crossing",
             "abandoned-mine",
-            "roadside-riddle"),
+            "roadside-riddle",
+            "corrupted-alchemist"),
         encounters.stream().map(ChanceEncounter::getId).toList());
     assertEquals(
-        List.of(3, 2, 3, 2, 3, 2, 2), encounters.stream().map(ChanceEncounter::getWeight).toList());
+        List.of(3, 2, 3, 2, 3, 2, 2, 2),
+        encounters.stream().map(ChanceEncounter::getWeight).toList());
   }
 
   @Test
@@ -58,6 +60,8 @@ class ChanceEncounterConfigLoaderTest {
         "forgotten-cache",
         "You discover an abandoned cache hidden beneath loose stones.",
         new ExpectedChoice("take-coins", "Take the coins from the cache.", 0, 15),
+        new ExpectedChoice(
+            "claim-iron-oath", "Claim a sealed iron oath tablet from the cache.", 0, 0, "iron_oath"),
         new ExpectedChoice("leave", "Leave the cache untouched.", 0, 0));
     assertEncounter(
         encounters.get(3),
@@ -79,13 +83,34 @@ class ChanceEncounterConfigLoaderTest {
         "abandoned-mine",
         "The mouth of an abandoned mine promises danger and forgotten riches.",
         new ExpectedChoice("search-tunnels", "Search the unstable tunnels for valuables.", -12, 30),
+        new ExpectedChoice(
+            "recover-doom-sigil",
+            "Recover a forbidden doom sigil from the mine wall.",
+            -5,
+            0,
+            "doom_sigil"),
         new ExpectedChoice("leave", "Leave the mine undisturbed.", 0, 0));
     assertEncounter(
         encounters.get(6),
         "roadside-riddle",
         "A hooded traveller offers a coin reward for solving a riddle.",
         new ExpectedChoice("answer-riddle", "Attempt to solve the traveller's riddle.", 0, 12),
+        new ExpectedChoice(
+            "accept-sealed-pact",
+            "Accept a sealed pact scroll as payment instead of coins.",
+            0,
+            0,
+            "sealed_pact"),
         new ExpectedChoice("walk-on", "Continue along the road.", 0, 0));
+    assertEncounter(
+        encounters.get(7),
+        "corrupted-alchemist",
+        "A corrupted alchemist barters strange reagents from a cracked satchel.",
+        new ExpectedChoice(
+            "buy-poison-flask", "Trade coins for a poison flask.", 0, -12, "poison_flask"),
+        new ExpectedChoice(
+            "take-purify", "Accept a purifying tincture for free.", 0, 0, "purify"),
+        new ExpectedChoice("refuse", "Refuse the alchemist's bargains.", 0, 0));
   }
 
   @Test
