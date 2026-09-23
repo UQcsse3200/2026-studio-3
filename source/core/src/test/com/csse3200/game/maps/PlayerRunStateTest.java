@@ -2,6 +2,7 @@ package com.csse3200.game.maps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.player.EnergyComponent;
@@ -150,5 +151,21 @@ class PlayerRunStateTest {
     state.addOwnedItem(ItemType.LUCKY_COIN);
 
     assertEquals(0.2f, state.getGoldBonusMultiplier(), 1e-6f);
+  }
+
+  @Test
+  void removingOneOwnedItemUpdatesDerivedEffects() {
+    PlayerRunState state = new PlayerRunState(100, 100, 50);
+    state.addOwnedItem(ItemType.MERCHANTS_FAVOR);
+    state.addOwnedItem(ItemType.MERCHANTS_FAVOR);
+
+    assertEquals(2, state.getOwnedItemCount(ItemType.MERCHANTS_FAVOR));
+    assertEquals(0.2f, state.getShopDiscount(), 1e-6f);
+    assertTrue(state.hasOwnedItem(ItemType.MERCHANTS_FAVOR));
+
+    assertTrue(state.removeOwnedItem(ItemType.MERCHANTS_FAVOR));
+
+    assertEquals(1, state.getOwnedItemCount(ItemType.MERCHANTS_FAVOR));
+    assertEquals(0.1f, state.getShopDiscount(), 1e-6f);
   }
 }

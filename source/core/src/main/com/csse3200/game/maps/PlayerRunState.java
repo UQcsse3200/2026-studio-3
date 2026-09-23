@@ -4,8 +4,8 @@ import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.rewards.ItemEffectApplier;
+import com.csse3200.game.rewards.ItemInventory;
 import com.csse3200.game.rewards.ItemType;
-import java.util.ArrayList;
 import java.util.List;
 
 /** Run-scoped player values that must survive screen disposal. */
@@ -17,7 +17,7 @@ public class PlayerRunState {
   private int currentHealth;
   private int maxHealth;
   private int gold;
-  private final List<ItemType> ownedItems = new ArrayList<>();
+  private final ItemInventory itemInventory = new ItemInventory();
 
   public PlayerRunState(int currentHealth, int maxHealth, int gold) {
     restore(currentHealth, maxHealth, gold);
@@ -41,8 +41,7 @@ public class PlayerRunState {
    * @return accumulated Lucky Coin multiplier
    */
   public float getGoldBonusMultiplier() {
-    long luckyCoinCount = ownedItems.stream().filter(item -> item == ItemType.LUCKY_COIN).count();
-    return luckyCoinCount * LUCKY_COIN_BONUS;
+    return itemInventory.getItemCount(ItemType.LUCKY_COIN) * LUCKY_COIN_BONUS;
   }
 
   /**
@@ -51,8 +50,9 @@ public class PlayerRunState {
    * @return accumulated shop discount, capped at 50%
    */
   public float getShopDiscount() {
-    long favourCount = ownedItems.stream().filter(item -> item == ItemType.MERCHANTS_FAVOR).count();
-    return Math.min(favourCount * MERCHANTS_FAVOR_DISCOUNT, MAX_SHOP_DISCOUNT);
+    return Math.min(
+        itemInventory.getItemCount(ItemType.MERCHANTS_FAVOR) * MERCHANTS_FAVOR_DISCOUNT,
+        MAX_SHOP_DISCOUNT);
   }
 
   public void addGold(int amount) {
@@ -63,14 +63,26 @@ public class PlayerRunState {
   }
 
   public void addOwnedItem(ItemType itemId) {
-    if (itemId == null) {
-      throw new IllegalArgumentException("itemId must not be null");
-    }
-    ownedItems.add(itemId);
+    itemInventory.addItem(itemId);
+  }
+
+  /** Removes one copy of an owned item. */
+  public boolean removeOwnedItem(ItemType itemId) {
+    return itemInventory.removeItem(itemId);
+  }
+
+  /** Returns whether the player owns at least one copy of an item. */
+  public boolean hasOwnedItem(ItemType itemId) {
+    return itemInventory.hasItem(itemId);
+  }
+
+  /** Returns the number of copies owned for an item. */
+  public int getOwnedItemCount(ItemType itemId) {
+    return itemInventory.getItemCount(itemId);
   }
 
   public List<ItemType> getOwnedItems() {
-    return List.copyOf(ownedItems);
+    return itemInventory.getItems();
   }
 
   /**
@@ -90,7 +102,7 @@ public class PlayerRunState {
     inventory.setGoldBonusMultiplier(0f);
     inventory.setShopDiscount(0f);
 
-    for (ItemType itemId : ownedItems) {
+    for (ItemType itemId : itemInventory.getItems()) {
       ItemEffectApplier.applyItemEffect(itemId, player);
     }
   }

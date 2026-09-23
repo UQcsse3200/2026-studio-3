@@ -24,6 +24,7 @@ import com.csse3200.game.cards.play.integration.Team7PlayerStateAdapter;
 import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
+import com.csse3200.game.components.battle.BattleEncounterSelector;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.pausemenu.PauseMenuActions;
@@ -144,7 +145,12 @@ public class BattleScreen extends ScreenAdapter {
     logger.debug("Initialising main game screen entities");
     TerrainFactory terrainFactory = new TerrainFactory(renderer.getCamera());
     BattleGameArea forestGameArea =
-        new BattleGameArea(terrainFactory, mapProgression, game.getRunState(), "dungeon");
+        new BattleGameArea(
+            terrainFactory,
+            mapProgression,
+            game.getRunState(),
+            "dungeon",
+            BattleEncounterSelector.enemiesFor(game.getRunState()));
     this.gameArea = forestGameArea;
     forestGameArea.create();
 
