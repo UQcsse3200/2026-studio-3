@@ -40,7 +40,9 @@ public class EndBattleScreen extends ScreenAdapter {
     "images/ui/victory-title.png",
     "images/ui/lucky-coin.png",
     "images/ui/energy-crystal.png",
-    "images/ui/merchants-favor.png"
+    "images/ui/merchants-favor.png",
+    "images/ui/iron-aegis.png",
+    "images/ui/warriors-crest.png"
   };
 
   private final GdxGame game;

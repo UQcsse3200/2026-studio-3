@@ -84,7 +84,9 @@ public class BattleScreen extends ScreenAdapter {
     "images/ui/inventory-panel.png",
     "images/ui/lucky-coin.png",
     "images/ui/energy-crystal.png",
-    "images/ui/merchants-favor.png"
+    "images/ui/merchants-favor.png",
+    "images/ui/iron-aegis.png",
+    "images/ui/warriors-crest.png"
   };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
 

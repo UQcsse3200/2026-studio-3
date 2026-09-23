@@ -51,7 +51,9 @@ public class InventoryPopupComponent extends UIComponent {
       Map.of(
           ItemType.LUCKY_COIN, "images/ui/lucky-coin.png",
           ItemType.ENERGY_CRYSTAL, "images/ui/energy-crystal.png",
-          ItemType.MERCHANTS_FAVOR, "images/ui/merchants-favor.png");
+          ItemType.MERCHANTS_FAVOR, "images/ui/merchants-favor.png",
+          ItemType.IRON_AEGIS, "images/ui/iron-aegis.png",
+          ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png");
 
   static {
     ITEM_DESCRIPTIONS.put(ItemType.ENERGY_CRYSTAL, count -> "+" + count + " Max Energy");
@@ -62,6 +64,8 @@ public class InventoryPopupComponent extends UIComponent {
           return String.format("+%.0f%% Shop Discount  |  Max 50%%", discount * 100);
         });
     ITEM_DESCRIPTIONS.put(ItemType.LUCKY_COIN, count -> "+" + (count * 10) + "% Gold Rewards");
+    ITEM_DESCRIPTIONS.put(ItemType.IRON_AEGIS, count -> "+" + (count * 5) + " Starting Armour");
+    ITEM_DESCRIPTIONS.put(ItemType.WARRIORS_CREST, count -> "+" + count + " Starting Strength");
   }
 
   private final RunState runState;

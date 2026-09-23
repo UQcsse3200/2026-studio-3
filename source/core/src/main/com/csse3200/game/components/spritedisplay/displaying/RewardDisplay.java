@@ -39,7 +39,9 @@ public class RewardDisplay extends Displaying {
       Map.of(
           ItemType.LUCKY_COIN, "images/ui/lucky-coin.png",
           ItemType.ENERGY_CRYSTAL, "images/ui/energy-crystal.png",
-          ItemType.MERCHANTS_FAVOR, "images/ui/merchants-favor.png");
+          ItemType.MERCHANTS_FAVOR, "images/ui/merchants-favor.png",
+          ItemType.IRON_AEGIS, "images/ui/iron-aegis.png",
+          ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png");
 
   private final RunState runState;
   private final RewardService rewardService;
@@ -265,7 +267,7 @@ public class RewardDisplay extends Displaying {
   private boolean isLongItemName(RewardOption option) {
     return option != null
         && option.type == RewardType.ITEM
-        && option.itemId == ItemType.MERCHANTS_FAVOR;
+        && (option.itemId == ItemType.MERCHANTS_FAVOR || option.itemId == ItemType.WARRIORS_CREST);
   }
 
   private String rewardIcon(RewardOption option) {
