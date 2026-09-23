@@ -59,13 +59,22 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
   }
 
   private PlayerSaveData capturePlayer() {
-    // Piety is confirmed not implemented for this sprint (Amber_Teng, Team 7, 9/10) — dropped
-    // from scope in favor of concrete Status Effects. PlayerSaveData.piety is a leftover field
-    // from an earlier design; left at 0 intentionally, not a placeholder awaiting a real source.
-    int piety = 0;
+    // PlayerSaveData.piety is a snapshot-only mirror of the player's map-progression "level" —
+    // see #Sprint 3 rename discussion with Josie/Aidan/Linh, 9/22 (flagged by Amber in review,
+    // PR #303). MapGraph is the single authoritative source for level: it is restored directly
+    // by SaveGameRestoreService (restoreCurrentNode), and PlayerStatsTopDisplay reads the live
+    // value straight from RunState.getMapProgression(), never from this field. This field is
+    // therefore captured for save-file schema completeness only — nothing currently reads it
+    // back on restore, and nothing needs to, since the real source of truth is never lost.
+    // Derived from the current node's height rather than RunState.getMapProgression() itself,
+    // since that only returns non-zero while mid-encounter and would read 0 for essentially
+    // every real save (saves happen from the map screen).
+    MapGraph mapGraph = runState.getMapGraph();
+    MapNode currentNode = mapGraph == null ? null : mapGraph.getCurrentNode();
+    int level = currentNode == null ? 0 : currentNode.getHeight();
 
     return new PlayerSaveData(
-        playerState.getCurrentHealth(), playerState.getMaxHealth(), playerState.getGold(), piety);
+        playerState.getCurrentHealth(), playerState.getMaxHealth(), playerState.getGold(), level);
   }
 
   private DeckSaveData captureDeck() {
@@ -122,6 +131,9 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
       }
     }
 
-    return new ProgressSaveData(pendingRewardId, resumeScreen, bestiaryProgress);
+    ProgressSaveData progress =
+        new ProgressSaveData(pendingRewardId, resumeScreen, bestiaryProgress);
+    progress.encounterSeed = runState.getEncounterSeed();
+    return progress;
   }
 }

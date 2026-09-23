@@ -33,6 +33,10 @@ public class TerminalDisplay extends UIComponent {
   public void draw(SpriteBatch batch) {
     if (terminal.isOpen()) {
       label.setVisible(true);
+      // Bring the label back above anything added to the stage since it was created — e.g. the
+      // hand gets rebuilt (fresh actors added to the same stage) every time a card is played,
+      // which otherwise renders those cards in front of the terminal text.
+      label.toFront();
       String message = terminal.getEnteredMessage();
       label.setText("> " + message);
     } else {
