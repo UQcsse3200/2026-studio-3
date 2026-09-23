@@ -15,8 +15,8 @@ import com.csse3200.game.components.chance.ChanceEncounterDisplay;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.components.shop.ShopDisplay;
 import com.csse3200.game.encounters.integration.CardCatalogGateway;
-import com.csse3200.game.encounters.integration.CardServiceCatalogAdapter;
 import com.csse3200.game.encounters.integration.CardFusionEncounterFlow;
+import com.csse3200.game.encounters.integration.CardServiceCatalogAdapter;
 import com.csse3200.game.encounters.integration.ChanceEncounterSession;
 import com.csse3200.game.encounters.integration.ComponentPlayerStateAdapter;
 import com.csse3200.game.encounters.integration.DeckGateway;
@@ -35,6 +35,7 @@ import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.shop.ShopEncounter;
 import com.csse3200.game.shop.ShopInventoryGenerator;
 import com.csse3200.game.shop.ShopService;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -56,7 +57,8 @@ public class EncounterGameArea extends GameArea {
     ShopDisplay.PANEL_FRAME_TEXTURE,
     ShopDisplay.CARD_FRAME_TEXTURE,
     ShopDisplay.PLAQUE_FRAME_TEXTURE,
-    ChanceEncounterDisplay.DICE_GAME_BACKGROUND_TEXTURE
+    ChanceEncounterDisplay.DICE_GAME_BACKGROUND_TEXTURE,
+    ChanceEncounterDisplay.ABANDONED_MINE_BACKGROUND_TEXTURE
   };
 
   private final Integer nodeId;
@@ -69,6 +71,7 @@ public class EncounterGameArea extends GameArea {
   private EncounterFlowController encounterFlow;
   private CardCatalogGateway cardCatalog;
   private final RunState runState;
+  private final String previewEncounterId;
   private CardFusionEncounterFlow cardFusionEncounterFlow;
 
   /**
@@ -140,6 +143,29 @@ public class EncounterGameArea extends GameArea {
       PlayerRunState sharedPlayerState,
       PlayerDeck sharedPlayerDeck,
       RunState runState) {
+    this(
+        terrainFactory,
+        nodeId,
+        roomType,
+        completionCallback,
+        sharedPlayerState,
+        sharedPlayerDeck,
+        runState,
+        null);
+  }
+
+  /**
+   * Selects a specific catalogue Event in a map-free preview; normal map selection stays random.
+   */
+  public EncounterGameArea(
+      TerrainFactory terrainFactory,
+      Integer nodeId,
+      RoomType roomType,
+      EncounterCallback completionCallback,
+      PlayerRunState sharedPlayerState,
+      PlayerDeck sharedPlayerDeck,
+      RunState runState,
+      String previewEncounterId) {
     super();
 
     Objects.requireNonNull(terrainFactory, "terrainFactory cannot be null");
@@ -150,6 +176,7 @@ public class EncounterGameArea extends GameArea {
     this.sharedPlayerState = sharedPlayerState;
     this.sharedPlayerDeck = sharedPlayerDeck;
     this.runState = runState;
+    this.previewEncounterId = previewEncounterId;
   }
 
   /** Creates the logical player state and launches the selected encounter. */
@@ -221,10 +248,17 @@ public class EncounterGameArea extends GameArea {
 
   private void displayChanceEncounter() {
     CardService cardService = ServiceLocator.getCardLibrary();
-    ChanceEncounterSelector selector =
-        new ChanceEncounterSelector(
-            ChanceEncounterFactory.createInitialEncounters(cardCatalog), new Random());
-    ChanceEncounter encounter = selector.select();
+    List<ChanceEncounter> available = ChanceEncounterFactory.createInitialEncounters(cardCatalog);
+    ChanceEncounter encounter =
+        previewEncounterId == null
+            ? new ChanceEncounterSelector(available, new Random()).select()
+            : available.stream()
+                .filter(candidate -> candidate.getId().equals(previewEncounterId))
+                .findFirst()
+                .orElseThrow(
+                    () ->
+                        new IllegalArgumentException(
+                            "Unknown preview Event: " + previewEncounterId));
     ChanceEncounterBehaviour behaviour =
         ChanceEncounterBehaviourFactory.create(encounter, new Random(), cardService);
     ChanceEncounterSession session = encounterFlow.startChance(nodeId, encounter, behaviour);
@@ -232,7 +266,7 @@ public class EncounterGameArea extends GameArea {
         createCardFusionEncounterFlow(encounter, session, runState, cardService);
 
     Entity chanceUi = new Entity();
-    chanceUi.addComponent(new ChanceEncounterDisplay(session));
+    chanceUi.addComponent(new ChanceEncounterDisplay(session, cardFusionEncounterFlow));
     spawnEntity(chanceUi);
   }
 

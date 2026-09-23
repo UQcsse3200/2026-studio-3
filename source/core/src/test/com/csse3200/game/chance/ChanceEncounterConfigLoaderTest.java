@@ -39,8 +39,7 @@ class ChanceEncounterConfigLoaderTest {
     assertFalse(encounterIds.contains("forgotten-cache"));
     assertFalse(encounterIds.contains("roadside-riddle"));
     assertEquals(
-        List.of(1, 1, 1, 1, 2, 2, 2),
-        encounters.stream().map(ChanceEncounter::getWeight).toList());
+        List.of(1, 1, 1, 1, 2, 2, 2), encounters.stream().map(ChanceEncounter::getWeight).toList());
     assertEquals(10, encounters.stream().mapToInt(ChanceEncounter::getWeight).sum());
   }
 

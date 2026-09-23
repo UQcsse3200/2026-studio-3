@@ -6,6 +6,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.chance.CardFusionEncounterBehaviour;
 import com.csse3200.game.files.UserSettings;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.screens.AncientTempleScreen;
@@ -13,6 +14,8 @@ import com.csse3200.game.screens.BattleScreen;
 import com.csse3200.game.screens.BestiaryScreen;
 import com.csse3200.game.screens.CampfireScreen;
 import com.csse3200.game.screens.CardLibraryScreen;
+import com.csse3200.game.screens.DemoCampfireScreen;
+import com.csse3200.game.screens.DemoEventScreen;
 import com.csse3200.game.screens.ElitePortalScreen;
 import com.csse3200.game.screens.EncounterScreen;
 import com.csse3200.game.screens.EndBattleScreen;
@@ -89,6 +92,35 @@ public class GdxGame extends Game {
   /** Opens the battle screen. */
   public void startBattle() {
     setScreen(ScreenType.BATTLE_SCREEN);
+  }
+
+  /** Opens a temporary Event preview without entering or changing the run map. */
+  public void openDemoEvent() {
+    openDemoEvent(null);
+  }
+
+  /** Opens the Card Fusion catalogue Event directly for UI work. */
+  public void openDemoCardFusion() {
+    openDemoEvent(CardFusionEncounterBehaviour.ENCOUNTER_ID);
+  }
+
+  private void openDemoEvent(String previewEncounterId) {
+    Screen currentScreen = getScreen();
+    if (currentScreen != null) {
+      currentScreen.dispose();
+    }
+    ServiceLocator.registerBestiaryService(bestiaryService);
+    setScreen(new DemoEventScreen(this, previewEncounterId));
+  }
+
+  /** Opens a temporary Campfire preview with no map node or persistent run changes. */
+  public void openDemoCampfire() {
+    Screen currentScreen = getScreen();
+    if (currentScreen != null) {
+      currentScreen.dispose();
+    }
+    ServiceLocator.registerBestiaryService(bestiaryService);
+    setScreen(new DemoCampfireScreen(this));
   }
 
   /** Temporary development shortcut for previewing the Elite portal flow. */

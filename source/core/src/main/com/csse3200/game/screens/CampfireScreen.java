@@ -45,8 +45,13 @@ public class CampfireScreen extends ScreenAdapter {
   private final Skin skin;
 
   public CampfireScreen(GdxGame game) {
+    this(game, game.getRunState());
+  }
+
+  /** Allows a standalone preview to supply its own isolated run state. */
+  protected CampfireScreen(GdxGame game, RunState runState) {
     this.game = game;
-    this.runState = game.getRunState();
+    this.runState = runState;
 
     if (runState == null) {
       throw new IllegalStateException("CampfireScreen opened without a RunState");
@@ -168,7 +173,7 @@ public class CampfireScreen extends ScreenAdapter {
     finishCampfire();
   }
 
-  private void finishCampfire() {
+  protected void finishCampfire() {
     runState.completeEncounter(true);
     game.setScreen(GdxGame.ScreenType.MAP);
   }

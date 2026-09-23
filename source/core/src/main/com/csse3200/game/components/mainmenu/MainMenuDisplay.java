@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -33,6 +34,9 @@ public class MainMenuDisplay extends UIComponent {
   public static final String BESTIARY_EVENT = "bestiary";
   public static final String SETTINGS_EVENT = "settings";
   public static final String EXIT_EVENT = "exit";
+  public static final String DEMO_EVENT_EVENT = "demoEvent";
+  public static final String DEMO_CAMPFIRE_EVENT = "demoCampfire";
+  public static final String DEMO_FUSION_EVENT = "demoFusion";
 
   private Stack rootStack;
   private Table menuTable;
@@ -41,6 +45,9 @@ public class MainMenuDisplay extends UIComponent {
   private TextButton bestiaryButton;
   private TextButton settingsButton;
   private TextButton exitButton;
+  private TextButton demoEventButton;
+  private TextButton demoCampfireButton;
+  private TextButton demoFusionButton;
 
   @Override
   public void create() {
@@ -64,19 +71,19 @@ public class MainMenuDisplay extends UIComponent {
     overlay.setBackground(skin.newDrawable("white", overlayColour));
     rootStack.add(overlay);
 
-    rootStack.add(buildContent());
+    Texture buttonFrameTexture = getTexture(BUTTON_FRAME_TEXTURE);
+    buttonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    rootStack.add(buildContent(buttonFrameTexture));
+    rootStack.add(buildDemoPanel(buttonFrameTexture));
     stage.addActor(rootStack);
   }
 
-  private Table buildContent() {
+  private Table buildContent(Texture buttonFrameTexture) {
     Texture titleTexture = getTexture(TITLE_LOGO_TEXTURE);
     titleTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     // Set the filter to Nearest to avoid blurring the pixel art
     Image titleLogo = new Image(titleTexture);
     titleLogo.setScaling(Scaling.fit);
-
-    Texture buttonFrameTexture = getTexture(BUTTON_FRAME_TEXTURE);
-    buttonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
     // Build the buttons and add them to the menu table
     newGameButton = createButton("New Game", START_EVENT, buttonFrameTexture);
@@ -111,6 +118,27 @@ public class MainMenuDisplay extends UIComponent {
   private void addMenuButton(TextButton button) {
     menuTable.add(button);
     menuTable.row().padTop(MenuTheme.BUTTON_SPACING);
+  }
+
+  /** Temporary shortcut, separate from the player-facing menu layout. */
+  private Table buildDemoPanel(Texture buttonFrameTexture) {
+    demoEventButton = createButton("Demo Event", DEMO_EVENT_EVENT, buttonFrameTexture);
+    demoEventButton.getLabel().setFontScale(0.62f);
+    demoCampfireButton = createButton("Demo Campfire", DEMO_CAMPFIRE_EVENT, buttonFrameTexture);
+    demoCampfireButton.getLabel().setFontScale(0.56f);
+    demoFusionButton = createButton("Demo Fusion", DEMO_FUSION_EVENT, buttonFrameTexture);
+    demoFusionButton.getLabel().setFontScale(0.62f);
+
+    Table panel = new Table();
+    panel.setFillParent(true);
+    panel.setTouchable(Touchable.childrenOnly);
+    panel.top().right().pad(18f);
+    panel.add(demoEventButton).width(220f).height(68f);
+    panel.row().padTop(8f);
+    panel.add(demoCampfireButton).width(220f).height(68f);
+    panel.row().padTop(8f);
+    panel.add(demoFusionButton).width(220f).height(68f);
+    return panel;
   }
 
   private TextButton createButton(String text, String eventName, Texture buttonFrameTexture) {
@@ -160,5 +188,17 @@ public class MainMenuDisplay extends UIComponent {
 
   List<TextButton> getMenuButtons() {
     return List.of(newGameButton, loadGameButton, bestiaryButton, settingsButton, exitButton);
+  }
+
+  TextButton getDemoEventButton() {
+    return demoEventButton;
+  }
+
+  TextButton getDemoCampfireButton() {
+    return demoCampfireButton;
+  }
+
+  TextButton getDemoFusionButton() {
+    return demoFusionButton;
   }
 }
