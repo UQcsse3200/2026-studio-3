@@ -9,12 +9,12 @@ import java.util.*;
 
 /** A class to gives information about the card upgrade selection when call */
 public class CardUpgradeSelection {
-  private final List<String> deck;
+  private final List<CardInstance> deck;
   private final CardService cardService;
   private final int maxSelections;
   private final List<UpgradeOption> options;
-  private final LinkedHashSet<Integer> selected = new LinkedHashSet<>();
-  private final Set<Integer> selectableIndices;
+  private final LinkedHashSet<String> selected = new LinkedHashSet<>();
+  private final Set<String> selectableIds;
 
   /**
    * A constructor for Card upgrade selection
@@ -26,7 +26,7 @@ public class CardUpgradeSelection {
    * @throws IllegalArgumentException CardService being null
    * @throws IllegalArgumentException Max Selections being less than 1
    */
-  public CardUpgradeSelection(List<String> deck, CardService cardService, int maxSelections) {
+  public CardUpgradeSelection(List<CardInstance> deck, CardService cardService, int maxSelections) {
     if (deck == null) {
       throw new IllegalArgumentException("Deck cannot be null");
     }
@@ -40,53 +40,47 @@ public class CardUpgradeSelection {
     this.cardService = cardService;
     this.maxSelections = maxSelections;
     this.options = buildUpgradeOptions();
-    Set<Integer> selectableIndicesCreate = new HashSet<>();
+    Set<String> selectableIdsCreate = new HashSet<>();
 
     for (UpgradeOption card : this.options) {
-      selectableIndicesCreate.add(card.deckIndex());
+      selectableIdsCreate.add(card.instanceId());
     }
-    this.selectableIndices = Set.copyOf(selectableIndicesCreate);
+    this.selectableIds = Set.copyOf(selectableIdsCreate);
   }
 
   /**
    * Blueprint for the upgrade option
    *
-   * @param deckIndex for keeping the index of the cards
+   * @param instanceId for keeping the index of the cards
    * @param current look at the current card
    * @param preview look at the card's upgraded
    */
-  public record UpgradeOption(int deckIndex, ResolvedCard current, ResolvedCard preview) {}
+  public record UpgradeOption(String instanceId, ResolvedCard current, ResolvedCard preview) {}
 
   private List<UpgradeOption> buildUpgradeOptions() {
     ArrayList<UpgradeOption> copies = new ArrayList<>();
     CardResolver resolver = new CardResolver();
-    for (int index = 0; index < deck.size(); index++) {
-      String cardId = deck.get(index);
-      Optional<CardConfig> found = cardService.getCard(cardId);
-
-      if (found.isEmpty() || found.get().upgrade == null) {
+    for (CardInstance cardInstance : deck) {
+      Optional<CardConfig> found = cardService.getCard(cardInstance.cardId());
+      if (found.isEmpty() || found.get().upgrade == null || cardInstance.isUpgraded()) {
         continue;
       }
       CardConfig cardConfig = found.get();
-      CardInstance cardInstance =
-          new CardInstance("preview-" + index, cardId, CardInstance.BASE_LEVEL);
       ResolvedCard baseCard = resolver.resolve(cardConfig, cardInstance);
       ResolvedCard upgradedCard = resolver.resolve(cardConfig, cardInstance.upgrade());
-
-      copies.add(new UpgradeOption(index, baseCard, upgradedCard));
+      copies.add(new UpgradeOption(cardInstance.instanceId(), baseCard, upgradedCard));
     }
-
     return List.copyOf(copies);
   }
 
   /**
-   * Return true if the deck index is selected and false if not
+   * Return true if the instance ID is selected and false if not
    *
-   * @param deckIndex The current deck Index of the chosen card
-   * @return boolean, true if the deck index is selected and false if not
+   * @param instanceId The current instance ID of the chosen card
+   * @return boolean, true if the instance ID is selected and false if not
    */
-  public boolean isSelected(int deckIndex) {
-    return this.selected.contains(deckIndex);
+  public boolean isSelected(String instanceId) {
+    return this.selected.contains(instanceId);
   }
 
   /**
@@ -119,13 +113,13 @@ public class CardUpgradeSelection {
   /**
    * Return true if the card can be selected
    *
-   * @param deckIndex The current deck Index of the chosen card
+   * @param instanceId The current instance ID of the chosen card
    * @return Return true if the card is in the selectable list and is selected or the remaining
    *     selectable is more than 0
    */
-  public boolean canSelect(int deckIndex) {
-    return selectableIndices.contains(deckIndex)
-        && (selected.contains(deckIndex) || (remainingSelectable() > 0));
+  public boolean canSelect(String instanceId) {
+    return selectableIds.contains(instanceId)
+        && (selected.contains(instanceId) || (remainingSelectable() > 0));
   }
 
   /**
@@ -133,34 +127,32 @@ public class CardUpgradeSelection {
    * is always allowed so the player can revise a choice after reaching the cap. An unselected card
    * is selected only while the cap has room; at the cap the call changes nothing.
    *
-   * @param deckIndex The current deck Index of the chosen card
+   * @param instanceId The current instance ID of the chosen card
    * @return true if the card is selected after this call, false if it is not
-   * @throws IllegalArgumentException if the deck index is not an upgradable option
+   * @throws IllegalArgumentException if the instance ID is not an upgradable option
    */
-  public boolean toggle(int deckIndex) {
-    if (!selectableIndices.contains(deckIndex)) {
+  public boolean toggle(String instanceId) {
+    if (!selectableIds.contains(instanceId)) {
       throw new IllegalArgumentException(
-          "Deck index " + deckIndex + " is not an upgradable option");
-    } else if (isSelected(deckIndex)) {
-      selected.remove(deckIndex);
+          "instance ID " + instanceId + " is not an upgradable option");
+    } else if (isSelected(instanceId)) {
+      selected.remove(instanceId);
       return false;
-    } else if (!canSelect(deckIndex)) {
+    } else if (!canSelect(instanceId)) {
       return false;
     } else {
-      selected.add(deckIndex);
+      selected.add(instanceId);
       return true;
     }
   }
 
   /**
-   * Return the list of selected Deck Indices in sorted order
+   * Return the instance IDs of the selected cards, in the order that they were selected.
    *
-   * @return Return the list of selected Deck Indices in sorted order
+   * @return list of selected card instance IDs.
    */
-  public List<Integer> getSelectedDeckIndices() {
-    List<Integer> sortedList = new ArrayList<>(selected);
-    sortedList.sort(Comparator.reverseOrder());
-    return List.copyOf(sortedList);
+  public List<String> getSelectedInstanceIds() {
+    return List.copyOf(selected);
   }
 
   /** Clear selected list */
