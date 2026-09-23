@@ -156,6 +156,32 @@ public class PlayerDeck {
   }
 
   /**
+   * cards is replaced in place keeping it position and instanceId
+   *
+   * @param instanceId upgrade target card instance id
+   * @throws IllegalArgumentException cardId must not be null or blank, when it doesn't pass the
+   *     validation
+   * @return If card upgrade successful return true else false
+   */
+  public boolean upgradeCard(String instanceId) {
+    validateCardId(instanceId);
+    for (int i = 0; i < cards.size(); i++) {
+      CardInstance card = cards.get(i);
+      if (card.instanceId().equals(instanceId)) {
+        if (card.isUpgraded()) {
+          return false;
+        }
+        if (cardService.getCard(card.cardId()).map(c -> c.upgrade).isEmpty()) {
+          return false;
+        }
+        cards.set(i, card.upgrade());
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Checks whether the deck contains at least one copy of a card.
    *
    * @param cardId card ID to search for

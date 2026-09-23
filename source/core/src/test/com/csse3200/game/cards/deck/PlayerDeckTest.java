@@ -23,6 +23,7 @@ class PlayerDeckTest {
           "inner_focus",
           "bandage",
           "new_team_six_card");
+  private static final CardService UPGRADABLE_CARDS = TestCardService.withCardsUpgrade("strike");
 
   @Test
   void shouldCreateEmptyDeck() {
@@ -180,5 +181,51 @@ class PlayerDeckTest {
 
     assertTrue(deck.isEmpty());
     assertEquals(0, deck.size());
+  }
+
+  @Test
+  void shouldUpgradeOnlyTheTargetedCopy() {
+    PlayerDeck deck =
+        new PlayerDeck(UPGRADABLE_CARDS, List.of("strike", "strike", "strike", "strike"));
+    List<CardInstance> before = deck.getCards();
+    String id = before.get(2).instanceId();
+    assertTrue(deck.upgradeCard(id));
+    List<CardInstance> after = deck.getCards();
+    assertFalse(before.get(2).isUpgraded());
+    assertTrue(after.get(2).isUpgraded());
+    assertFalse(after.get(0).isUpgraded());
+    assertFalse(after.get(1).isUpgraded());
+    assertFalse(after.get(3).isUpgraded());
+    assertEquals(id, after.get(2).instanceId());
+    assertEquals(4, after.size());
+  }
+
+  @Test
+  void shouldReturnFalseWhenUpgradingTwice() {
+    PlayerDeck deck = new PlayerDeck(UPGRADABLE_CARDS, List.of("strike"));
+    String id = deck.getCards().getFirst().instanceId();
+    assertTrue(deck.upgradeCard(id));
+    assertFalse(deck.upgradeCard(id));
+    assertTrue(deck.getCards().getFirst().isUpgraded());
+  }
+
+  @Test
+  void shouldReturnFalseForUnknownInstanceId() {
+    PlayerDeck deck = new PlayerDeck(UPGRADABLE_CARDS, List.of("strike", "strike"));
+    assertFalse(deck.upgradeCard("no-such-instance"));
+  }
+
+  @Test
+  void shouldReturnFalseWhenCardHasNoUpgradeDefinition() {
+    PlayerDeck deck = new PlayerDeck(CARDS, List.of("bandage"));
+    String id = deck.getCards().getFirst().instanceId();
+    assertFalse(deck.upgradeCard(id));
+  }
+
+  @Test
+  void shouldRejectInvalidInstanceIds() {
+    PlayerDeck deck = new PlayerDeck(CARDS, List.of("bandage"));
+    assertThrows(IllegalArgumentException.class, () -> deck.upgradeCard(null));
+    assertThrows(IllegalArgumentException.class, () -> deck.upgradeCard(""));
   }
 }

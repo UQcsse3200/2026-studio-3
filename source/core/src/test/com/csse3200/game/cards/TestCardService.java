@@ -1,6 +1,7 @@
 package com.csse3200.game.cards;
 
 import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.cards.configs.CardUpgradeConfig;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,6 +29,26 @@ public final class TestCardService implements CardService {
         .forEach(
             id -> {
               CardConfig config = new CardConfig();
+              config.id = id;
+              cards.put(id, config);
+            });
+    return new TestCardService(cards);
+  }
+
+  /**
+   * Creates a catalogue containing the supplied IDs with upgrade field.
+   *
+   * @param cardIds IDs that should be considered valid
+   * @return test card catalogue
+   */
+  public static CardService withCardsUpgrade(String... cardIds) {
+    Map<String, CardConfig> cards = new LinkedHashMap<>();
+    Arrays.stream(cardIds)
+        .filter(id -> id != null && !id.isBlank())
+        .forEach(
+            id -> {
+              CardConfig config = new CardConfig();
+              config.upgrade = new CardUpgradeConfig();
               config.id = id;
               cards.put(id, config);
             });
