@@ -146,9 +146,7 @@ public class ShopDisplay extends UIComponent {
   private ShopDisplay(
       InventoryComponent inventory, ShopEncounter shopEncounter, CardService cardService) {
     this.shopEncounter =
-        shopEncounter == null
-            ? new ShopEncounter(inventory, createGeneratedShop())
-            : shopEncounter;
+        shopEncounter == null ? new ShopEncounter(inventory, createGeneratedShop()) : shopEncounter;
     this.cardService = cardService;
   }
 

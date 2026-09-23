@@ -61,7 +61,11 @@ class ChanceEncounterConfigLoaderTest {
         "You discover an abandoned cache hidden beneath loose stones.",
         new ExpectedChoice("take-coins", "Take the coins from the cache.", 0, 15),
         new ExpectedChoice(
-            "claim-iron-oath", "Claim a sealed iron oath tablet from the cache.", 0, 0, "iron_oath"),
+            "claim-iron-oath",
+            "Claim a sealed iron oath tablet from the cache.",
+            0,
+            0,
+            "iron_oath"),
         new ExpectedChoice("leave", "Leave the cache untouched.", 0, 0));
     assertEncounter(
         encounters.get(3),
@@ -108,8 +112,7 @@ class ChanceEncounterConfigLoaderTest {
         "A corrupted alchemist barters strange reagents from a cracked satchel.",
         new ExpectedChoice(
             "buy-poison-flask", "Trade coins for a poison flask.", 0, -12, "poison_flask"),
-        new ExpectedChoice(
-            "take-purify", "Accept a purifying tincture for free.", 0, 0, "purify"),
+        new ExpectedChoice("take-purify", "Accept a purifying tincture for free.", 0, 0, "purify"),
         new ExpectedChoice("refuse", "Refuse the alchemist's bargains.", 0, 0));
   }
 
@@ -290,10 +293,11 @@ class ChanceEncounterConfigLoaderTest {
   void shouldSelectEveryEncounterFromExpandedConfiguration() {
     List<ChanceEncounter> encounters = ChanceEncounterConfigLoader.loadEncounters();
     ChanceEncounterSelector selector =
-        new ChanceEncounterSelector(encounters, new SequenceRandom(0, 3, 5, 8, 10, 13, 15));
+        new ChanceEncounterSelector(encounters, new SequenceRandom(0, 3, 5, 8, 10, 13, 15, 17));
 
     List<String> selectedIds =
         List.of(
+            selector.select().getId(),
             selector.select().getId(),
             selector.select().getId(),
             selector.select().getId(),
