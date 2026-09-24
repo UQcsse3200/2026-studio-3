@@ -856,6 +856,10 @@ public class BattleController {
       return;
     }
 
+    Entity enemy = getActiveEnemy();
+    CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
+    enemyStats.tickStatusEffect("FEEBLE");
+
     // If another enemy is successfully targeted.
     if (this.advanceToNextLivingEnemy()) {
       this.setEnemyIntent(resolveEnemyIntent(this.getActiveEnemy()));
