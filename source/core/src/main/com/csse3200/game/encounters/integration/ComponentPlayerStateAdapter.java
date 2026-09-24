@@ -50,4 +50,9 @@ public final class ComponentPlayerStateAdapter implements PlayerStateGateway {
   public void setCurrency(int currency) {
     inventory.setGold(currency);
   }
+
+  @Override
+  public float getShopDiscount() {
+    return inventory.getShopDiscount();
+  }
 }

@@ -46,6 +46,17 @@ class Team7PlayerStateAdapterTest {
   }
 
   @Test
+  void shouldStackCardStrengthOnExistingItemStrength() {
+    CombatStatsComponent stats = new CombatStatsComponent(10, 1);
+    stats.applyStatusEffect(EffectType.STRENGTH.name(), 1, 0);
+    Team7PlayerStateAdapter adapter = new Team7PlayerStateAdapter(new EnergyComponent(3), stats);
+
+    adapter.applyPlayerEffects(List.of(effect(EffectType.STRENGTH, 2, 0, 0)));
+
+    assertEquals(3, stats.getStatusEffect(EffectType.STRENGTH.name()).getValue());
+  }
+
+  @Test
   void shouldClearDebuffsAndKeepStrengthWhenCleansing() {
     CombatStatsComponent stats = new CombatStatsComponent(10, 1);
     stats.applyStatusEffect(EffectType.POISON.name(), 3, 2);

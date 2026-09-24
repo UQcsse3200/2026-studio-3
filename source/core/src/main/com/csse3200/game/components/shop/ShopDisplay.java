@@ -19,6 +19,8 @@ import com.csse3200.game.cards.CardService;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.maps.EncounterCallback;
+import com.csse3200.game.maps.PlayerRunState;
+import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.shop.PurchaseResult;
@@ -92,12 +94,14 @@ public class ShopDisplay extends UIComponent {
   }
 
   private final ShopEncounter shopEncounter;
+  private final PlayerRunState playerRunState;
   private final CardService cardService;
   private final Map<String, ItemWidgets> itemWidgets = new HashMap<>();
   private final Set<String> purchasedItemIds = new HashSet<>();
 
   private Table rootTable;
   private Label goldLabel;
+  private Label merchantsFavorLabel;
   private Label statusLabel;
   private TextButtonStyle availableButtonStyle;
   private TextButtonStyle unaffordableButtonStyle;
@@ -156,6 +160,7 @@ public class ShopDisplay extends UIComponent {
             ? new ShopEncounter(inventory, new ShopService((ShopConfig) null))
             : shopEncounter;
     this.cardService = cardService;
+    this.playerRunState = null;
   }
 
   /**
@@ -267,6 +272,17 @@ public class ShopDisplay extends UIComponent {
     goldLabel.setFontScale(1.5f);
     purse.add(goldLabel);
 
+    goldLabel = new Label("", createLabelStyle(DEFAULT, GOLD_COLOUR));
+    goldLabel.setFontScale(1.5f);
+    purse.add(goldLabel);
+
+    purse.row();
+    merchantsFavorLabel = new Label("", createLabelStyle(SMALL, MUTED_COLOUR));
+    merchantsFavorLabel.setFontScale(1.05f);
+    purse.add(merchantsFavorLabel).padTop(4f);
+    shopPanel.add(titleBlock).left().expandX().colspan(2);
+    shopPanel.add(purse).right();
+
     shopPanel.add(titleBlock).left().expandX().colspan(2);
     shopPanel.add(purse).right();
   }
@@ -295,8 +311,21 @@ public class ShopDisplay extends UIComponent {
 
     Actor artwork = createArtwork(item);
 
-    Label priceLabel =
-        new Label(String.format("%d GOLD", item.price), createLabelStyle(DEFAULT, GOLD_COLOUR));
+    int fullPrice = item.price;
+    float discount = playerRunState != null ? playerRunState.getShopDiscount() : 0f;
+    int discountedPrice = Math.round(fullPrice * (1f - discount));
+
+    Label priceLabel;
+    if (discount > 0f) {
+      priceLabel =
+          new Label(
+              String.format("%d GOLD (-%.0f%%)", discountedPrice, discount * 100),
+              createLabelStyle(DEFAULT, GOLD_COLOUR));
+    } else {
+      priceLabel =
+          new Label(String.format("%d GOLD", fullPrice), createLabelStyle(DEFAULT, GOLD_COLOUR));
+    }
+
     Label stockLabel = new Label("", createLabelStyle(SMALL, MUTED_COLOUR));
     Label stateLabel = new Label("", createLabelStyle(SMALL, AVAILABLE_COLOUR));
     priceLabel.setFontScale(1.12f);
@@ -434,6 +463,15 @@ public class ShopDisplay extends UIComponent {
     Integer currency = shopEncounter.getCurrency();
     goldLabel.setText(currency == null ? "GOLD  --" : String.format("GOLD  %d", currency));
 
+    long merchantsFavorCount =
+        playerRunState == null
+            ? 0
+            : playerRunState.getOwnedItems().stream()
+                .filter(itemId -> itemId == ItemType.MERCHANTS_FAVOR)
+                .count();
+    merchantsFavorLabel.setText(
+        merchantsFavorCount == 0 ? "" : String.format("Merchant's Favor x%d", merchantsFavorCount));
+
     for (ShopItem item : shopEncounter.getItems()) {
       ItemWidgets widgets = itemWidgets.get(item.id);
       if (widgets == null) {
@@ -528,5 +566,20 @@ public class ShopDisplay extends UIComponent {
       rootTable.remove();
     }
     super.dispose();
+  }
+
+  /**
+   * Creates a Shop display backed by a supplied Shop Service and player run state, enabling
+   * discount and owned-item display.
+   *
+   * @param shopEncounter shop encounter driving purchase logic
+   * @param cardService card lookup used to resolve card artwork
+   * @param playerRunState player's durable run state, used to read shop discount and owned items
+   */
+  public ShopDisplay(
+      ShopEncounter shopEncounter, CardService cardService, PlayerRunState playerRunState) {
+    this.shopEncounter = shopEncounter;
+    this.cardService = cardService;
+    this.playerRunState = playerRunState;
   }
 }

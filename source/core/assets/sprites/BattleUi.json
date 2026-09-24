@@ -7,9 +7,15 @@
       "trigger": "openMenu"
     },
     {
-      "text": "End Turn",
+      "text": "Item Inventory",
       "x": 20,
       "y": 150,
+      "trigger": "openInventory"
+    },
+    {
+      "text": "End Turn",
+      "x": 20,
+      "y": 200,
       "trigger": "endTurn",
       "variant": "gated"
     }
