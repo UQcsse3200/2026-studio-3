@@ -9,13 +9,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryUnlockState;
+import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardDiscoveryService;
+import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.CardUnlockState;
 import com.csse3200.game.cards.TestCardService;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.CardUpgradeConfig;
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.maps.MapGraph;
@@ -24,6 +27,7 @@ import com.csse3200.game.maps.NodeState;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.services.ServiceLocator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -257,6 +261,39 @@ class SaveGameRestoreServiceTest {
     assertEquals(CardUnlockState.SEEN, cards.getProgressSnapshot().get(STRIKE));
     assertEquals(CardUnlockState.LOCKED, cards.getProgressSnapshot().get(DEFEND));
     assertFalse(cards.getProgressSnapshot().containsKey("retired_card"));
+  }
+
+  @Test
+  void restoringSaveDoesNotKeepStarterCardsSeenBeyondSavedProgress() {
+    CardDiscoveryService cards = CardDiscoveryService.loadDefault();
+    ServiceLocator.registerCardDiscoveryService(cards);
+    CardLibrary cardLibrary = new CardLibrary(CardConfigLoader.loadCards());
+    PlayerRunState playerState = new PlayerRunState(12, 50, 3);
+    RunState runState = new RunState();
+    PlayerDeck deck = runState.createStarterDeckForNewRun(cardLibrary);
+    runState.startRun(existingMap(), 0);
+    assertTrue(
+        PlayerDeckFactory.getStarterDeckCardIds().stream()
+            .allMatch(id -> cards.getProgressSnapshot().get(id) == CardUnlockState.SEEN));
+
+    SaveGameData saveData = validSaveData();
+    saveData.progress.cards =
+        List.of(new CardProgressSaveData(STRIKE, CardUnlockState.SEEN.name()));
+
+    RestoreResult result =
+        new SaveGameRestoreService(
+                playerState, deck, runState, BestiaryService.loadDefault(), cards)
+            .restore(saveData);
+
+    assertTrue(result.success());
+    assertEquals(CardUnlockState.SEEN, cards.getProgressSnapshot().get(STRIKE));
+    assertEquals(CardUnlockState.LOCKED, cards.getProgressSnapshot().get(DEFEND));
+    assertEquals(CardUnlockState.LOCKED, cards.getProgressSnapshot().get(BANDAGE));
+    assertEquals(
+        1,
+        cards.getProgressSnapshot().values().stream()
+            .filter(state -> state == CardUnlockState.SEEN)
+            .count());
   }
 
   @Test
