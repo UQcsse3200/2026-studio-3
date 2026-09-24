@@ -3,6 +3,7 @@ package com.csse3200.game.components.library;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -11,16 +12,19 @@ import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLoadingException;
+import com.csse3200.game.cards.Rarity;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.cards.runtime.CardResolver;
 import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
+import com.csse3200.game.components.cards.UncommonCardLibraryWidget;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.MenuTheme;
@@ -48,7 +52,9 @@ public class CardLibraryDisplay extends UIComponent {
 
   private Stack rootStack;
   private Table cardList;
+  private Stack cardPreview;
   private CardWidget cardWidget;
+  private UncommonCardLibraryWidget uncommonCardWidget;
   private TextButton.TextButtonStyle buttonStyle;
 
   public CardLibraryDisplay(GdxGame game) {
@@ -195,7 +201,30 @@ public class CardLibraryDisplay extends UIComponent {
     if (!cards.isEmpty()) {
       CardWidgetAssets widgetAssets =
           CardWidgetAssets.fromManagedResources(skin, ServiceLocator.getResourceService());
-      cardWidget = new CardWidget(resolveForDisplay(cards.getFirst()), widgetAssets);
+      ResolvedCard initialCard = resolveForDisplay(cards.getFirst());
+      cardWidget = new CardWidget(initialCard, widgetAssets);
+
+      cards.stream()
+          .filter(card -> card.rarity == Rarity.UNCOMMON)
+          .findFirst()
+          .ifPresent(
+              uncommonCard -> {
+                Texture frameTexture = getTexture(UncommonCardLibraryWidget.FRAME_TEXTURE);
+                frameTexture.setFilter(
+                    Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+                uncommonCardWidget =
+                    new UncommonCardLibraryWidget(
+                        resolveForDisplay(uncommonCard),
+                        widgetAssets,
+                        new TextureRegionDrawable(new TextureRegion(frameTexture)));
+              });
+
+      cardPreview = new Stack();
+      cardPreview.add(cardWidget);
+      if (uncommonCardWidget != null) {
+        cardPreview.add(uncommonCardWidget);
+      }
+      showResolvedCard(initialCard);
     }
 
     panel.add(listPanel).width(350f).expandY().fillY().padRight(22f);
@@ -206,10 +235,10 @@ public class CardLibraryDisplay extends UIComponent {
     Table detailPanel = new Table();
     detailPanel.setBackground(skin.newDrawable(WHITE, DETAIL_COLOUR));
     detailPanel.pad(24f);
-    if (cardWidget == null) {
+    if (cardPreview == null) {
       detailPanel.add(new Label("No cards are available.", bodyLabelStyle()));
     } else {
-      detailPanel.add(cardWidget).size(CardWidget.CARD_WIDTH, CardWidget.CARD_HEIGHT).center();
+      detailPanel.add(cardPreview).size(CardWidget.CARD_WIDTH, CardWidget.CARD_HEIGHT).center();
     }
     return detailPanel;
   }
@@ -219,8 +248,21 @@ public class CardLibraryDisplay extends UIComponent {
   }
 
   private void showCard(CardConfig card) {
-    if (cardWidget != null) {
-      cardWidget.setCard(resolveForDisplay(card));
+    if (cardPreview != null) {
+      showResolvedCard(resolveForDisplay(card));
+    }
+  }
+
+  private void showResolvedCard(ResolvedCard card) {
+    boolean useUncommonFrame = card.rarity() == Rarity.UNCOMMON && uncommonCardWidget != null;
+    if (useUncommonFrame) {
+      uncommonCardWidget.setCard(card);
+    } else {
+      cardWidget.setCard(card);
+    }
+    cardWidget.setVisible(!useUncommonFrame);
+    if (uncommonCardWidget != null) {
+      uncommonCardWidget.setVisible(useUncommonFrame);
     }
   }
 
