@@ -34,7 +34,8 @@ class EnemyTargetSelectorTest {
     enemies.put("10", new Rectangle(100, 100, 80, 100));
     enemies.put("11", new Rectangle(260, 100, 80, 100));
 
-    assertNull(EnemyTargetSelector.select(enemies, new Vector2(140, 150), id -> !id.equals("10"), 90));
+    assertNull(
+        EnemyTargetSelector.select(enemies, new Vector2(140, 150), id -> !id.equals("10"), 90));
     assertNull(EnemyTargetSelector.select(enemies, new Vector2(500, 150), id -> true, 90));
   }
 }

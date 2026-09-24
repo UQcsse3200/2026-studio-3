@@ -29,9 +29,7 @@ public final class EnemyTargetSelector {
       float centerDy = box.y + box.height / 2f - pointer.y;
       float centerDistance = centerDx * centerDx + centerDy * centerDy;
       if (distance <= bestDistance
-          && (selected == null
-              || distance < bestDistance
-              || centerDistance < bestCenterDistance)) {
+          && (selected == null || distance < bestDistance || centerDistance < bestCenterDistance)) {
         selected = entry.getKey();
         bestDistance = distance;
         bestCenterDistance = centerDistance;

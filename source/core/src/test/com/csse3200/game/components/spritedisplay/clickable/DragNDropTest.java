@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardType;
@@ -57,8 +57,9 @@ class DragNDropTest {
     AtomicReference<String> played = new AtomicReference<>();
     battleUi
         .getEvents()
-        .addListener("playCard", (String instanceId, String targetId) ->
-            played.set(instanceId + ":" + targetId));
+        .addListener(
+            "playCard",
+            (String instanceId, String targetId) -> played.set(instanceId + ":" + targetId));
 
     card.getBtn().fire(new ChangeListener.ChangeEvent());
 
@@ -80,8 +81,7 @@ class DragNDropTest {
         .getEvents()
         .addListener(
             "playCard",
-            (String instanceId, String targetId) ->
-                playedTarget.set(instanceId + ":" + targetId));
+            (String instanceId, String targetId) -> playedTarget.set(instanceId + ":" + targetId));
 
     DragAndDrop.Source source = getOnlySource(dragService.getDragAndDrop());
     DragAndDrop.Payload payload = source.dragStart(new InputEvent(), 0f, 0f, 0);
@@ -96,10 +96,7 @@ class DragNDropTest {
     ServiceLocator.registerDragNDropService(dragService);
     DragNDrop card =
         new DragNDrop(
-            ClickableRecord.builder("playCard")
-                .text("Defend")
-                .args("defend-instance-1")
-                .build(),
+            ClickableRecord.builder("playCard").text("Defend").args("defend-instance-1").build(),
             new RecordingAim("player"));
     Entity battleUi = new Entity().addComponent(card);
     AtomicReference<String> playedTarget = new AtomicReference<>();
@@ -107,8 +104,7 @@ class DragNDropTest {
         .getEvents()
         .addListener(
             "playCard",
-            (String instanceId, String targetId) ->
-                playedTarget.set(instanceId + ":" + targetId));
+            (String instanceId, String targetId) -> playedTarget.set(instanceId + ":" + targetId));
 
     DragAndDrop.Source source = getOnlySource(dragService.getDragAndDrop());
     DragAndDrop.Payload payload = source.dragStart(new InputEvent(), 0f, 0f, 0);
