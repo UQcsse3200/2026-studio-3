@@ -25,7 +25,8 @@ class ChanceEncounterFactoryTest {
             "wandering-healer",
             "flooded-crossing",
             "abandoned-mine",
-            "roadside-riddle"),
+            "roadside-riddle",
+            "corrupted-alchemist"),
         encounters.stream().map(ChanceEncounter::getId).toList());
   }
 
@@ -74,9 +75,24 @@ class ChanceEncounterFactoryTest {
 
     assertEquals(
         "You discover an abandoned cache hidden beneath loose stones.", encounter.getDescription());
-    assertEquals(2, encounter.getChoices().size());
+    assertEquals(3, encounter.getChoices().size());
     assertChoice(encounter, 0, "take-coins", "Take the coins from the cache.", 0, 15);
-    assertChoice(encounter, 1, "leave", "Leave the cache untouched.", 0, 0);
+    assertChoice(
+        encounter, 1, "claim-iron-oath", "Claim a sealed iron oath tablet from the cache.", 0, 0);
+    assertChoice(encounter, 2, "leave", "Leave the cache untouched.", 0, 0);
+  }
+
+  @Test
+  void shouldCreateCorruptedAlchemist() {
+    ChanceEncounter encounter = ChanceEncounterFactory.createInitialEncounters().get(7);
+
+    assertEquals(
+        "A corrupted alchemist barters strange reagents from a cracked satchel.",
+        encounter.getDescription());
+    assertEquals(3, encounter.getChoices().size());
+    assertChoice(encounter, 0, "buy-poison-flask", "Trade coins for a poison flask.", 0, -12);
+    assertChoice(encounter, 1, "take-purify", "Accept a purifying tincture for free.", 0, 0);
+    assertChoice(encounter, 2, "refuse", "Refuse the alchemist's bargains.", 0, 0);
   }
 
   private static void assertChoice(
@@ -93,7 +109,9 @@ class ChanceEncounterFactoryTest {
     assertEquals(expectedDescription, choice.getDescription());
     assertEquals(expectedHealthDelta, outcome.getHealthDelta());
     assertEquals(expectedCurrencyDelta, outcome.getCurrencyDelta());
-    assertEquals(expectedHealthDelta == 0 && expectedCurrencyDelta == 0, outcome.isNoEffect());
+    assertEquals(
+        expectedHealthDelta == 0 && expectedCurrencyDelta == 0 && outcome.getCardRewardId() == null,
+        outcome.isNoEffect());
     assertSame(outcome, encounter.resolveChoice(expectedId));
   }
 }

@@ -2,6 +2,7 @@ package com.csse3200.game.shop;
 
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.Rarity;
+import com.csse3200.game.cards.acquisition.CardAcquisitionAllowList;
 import com.csse3200.game.cards.configs.CardConfig;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -45,9 +46,11 @@ public final class ShopInventoryGenerator {
   }
 
   /**
-   * Generates a shop from a random subset of currently registered cards.
+   * Generates a shop from a random subset of currently allowed cards.
    *
-   * <p>If fewer valid cards are available than requested, every valid card is offered once.
+   * <p>Candidates are filtered by {@code CardAcquisitionAllowList} so cards whose live combat
+   * effects are still dropped (SUNDER / PIERCE) are never offered. If fewer valid cards are
+   * available than requested, every allowed card is offered once.
    *
    * @param offerCount maximum number of distinct cards to offer
    * @param minStock minimum stock for each offer, inclusive
@@ -89,7 +92,8 @@ public final class ShopInventoryGenerator {
           && card.name != null
           && !card.name.isBlank()
           && card.rarity != null
-          && cardService.getCard(card.id).isPresent()) {
+          && cardService.getCard(card.id).isPresent()
+          && CardAcquisitionAllowList.isAllowed(card)) {
         candidates.add(card);
       }
     }

@@ -60,6 +60,15 @@
           }
         },
         {
+          "id": "claim-iron-oath",
+          "description": "Claim a sealed iron oath tablet from the cache.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0,
+            "cardRewardId": "iron_oath"
+          }
+        },
+        {
           "id": "leave",
           "description": "Leave the cache untouched.",
           "outcome": {
@@ -146,6 +155,15 @@
           }
         },
         {
+          "id": "recover-doom-sigil",
+          "description": "Recover a forbidden doom sigil from the mine wall.",
+          "outcome": {
+            "healthDelta": -5,
+            "currencyDelta": 0,
+            "cardRewardId": "doom_sigil"
+          }
+        },
+        {
           "id": "leave",
           "description": "Leave the mine undisturbed.",
           "outcome": {
@@ -169,8 +187,50 @@
           }
         },
         {
+          "id": "accept-sealed-pact",
+          "description": "Accept a sealed pact scroll as payment instead of coins.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0,
+            "cardRewardId": "sealed_pact"
+          }
+        },
+        {
           "id": "walk-on",
           "description": "Continue along the road.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "corrupted-alchemist",
+      "description": "A corrupted alchemist barters strange reagents from a cracked satchel.",
+      "weight": 2,
+      "choices": [
+        {
+          "id": "buy-poison-flask",
+          "description": "Trade coins for a poison flask.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": -12,
+            "cardRewardId": "poison_flask"
+          }
+        },
+        {
+          "id": "take-purify",
+          "description": "Accept a purifying tincture for free.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0,
+            "cardRewardId": "purify"
+          }
+        },
+        {
+          "id": "refuse",
+          "description": "Refuse the alchemist's bargains.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0

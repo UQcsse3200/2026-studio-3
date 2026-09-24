@@ -57,14 +57,29 @@ class ShopInventoryGeneratorTest {
   }
 
   @Test
-  void shouldReturnAllCardsWhenOfferCountExceedsLibrarySize() {
+  void shouldReturnAllAllowedCardsWhenOfferCountExceedsLibrarySize() {
     CardService cards = createCardService();
     ShopInventoryGenerator generator = new ShopInventoryGenerator(cards, new Random(3));
 
     ShopService shop = generator.createShop(100, 1, 1);
 
     assertFalse(cards.getAllCards().isEmpty());
-    assertEquals(cards.getAllCards().size(), shop.getItems().size());
+    assertEquals(cards.getAllCards().size() - 2, shop.getItems().size());
+  }
+
+  @Test
+  void shouldExcludeCardsWithDroppedLiveEffects() {
+    CardService cards = createCardService();
+    ShopInventoryGenerator generator = new ShopInventoryGenerator(cards, new Random(11));
+
+    ShopService shop = generator.createShop(100, 1, 1);
+
+    Set<String> offered = new HashSet<>();
+    shop.getItems().forEach(item -> offered.add(item.cardId));
+    assertFalse(offered.contains("poison_blade"));
+    assertFalse(offered.contains("unseal_the_breach"));
+    assertTrue(offered.contains("iron_oath"));
+    assertEquals(cards.getAllCards().size() - 2, shop.getItems().size());
   }
 
   @Test
