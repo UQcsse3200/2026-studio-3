@@ -11,6 +11,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.ui.UIComponent;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -33,17 +35,42 @@ public class CardUpgradeDisplay extends UIComponent {
   private Table libraryOverlay;
   private TextButton confirmButton;
   private boolean libraryVisible;
-  private final CardUpgradeSelection selection;
+  private CardUpgradeSelection selection;
+  private final PlayerDeck playerDeck;
+  private final CardService cardService;
+  private final boolean showOpenButton;
+  private static final int DEFAULT_MAX_UPGRADES = 2;
+  private Table cardGrid;
 
   /**
    * A constructor for Card upgrade selection
    *
-   * @param selection receive the list of the player's selection
+   * @param deck receive the player deck
+   * @param cardService receive the card service
    * @param committer receive card upgrade commit
+   * @param showOpenButton receive boolean to toggle button or not
+   * @throws IllegalArgumentException deck cannot be null
+   * @throws IllegalArgumentException Card service cannot be null
+   * @throws IllegalArgumentException Card upgrade committer cannot be null
    */
-  public CardUpgradeDisplay(CardUpgradeSelection selection, CardUpgradeCommitter committer) {
-    this.selection = selection;
+  public CardUpgradeDisplay(
+      PlayerDeck deck,
+      CardService cardService,
+      CardUpgradeCommitter committer,
+      boolean showOpenButton) {
+    if (deck == null) {
+      throw new IllegalArgumentException("Deck cannot be null");
+    }
+    if (cardService == null) {
+      throw new IllegalArgumentException("Card Service cannot be null");
+    }
+    if (committer == null) {
+      throw new IllegalArgumentException("Card Upgrade Committer cannot be null");
+    }
+    this.playerDeck = deck;
+    this.cardService = cardService;
     this.committer = committer;
+    this.showOpenButton = showOpenButton;
   }
 
   @Override
@@ -63,6 +90,9 @@ public class CardUpgradeDisplay extends UIComponent {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
+            if (selection == null || !selection.canConfirm()) {
+              return;
+            }
             toggleLibrary();
           }
         });
@@ -86,9 +116,10 @@ public class CardUpgradeDisplay extends UIComponent {
             return true;
           }
         });
-    stage.addActor(buttonTable);
+    if (showOpenButton) {
+      stage.addActor(buttonTable);
+    }
     stage.addActor(libraryOverlay);
-    refresh();
   }
 
   private Table createLibraryOverlay() {
@@ -113,6 +144,9 @@ public class CardUpgradeDisplay extends UIComponent {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
+            if (selection == null || !selection.canConfirm()) {
+              return;
+            }
             hideLibrary();
           }
         });
@@ -127,26 +161,15 @@ public class CardUpgradeDisplay extends UIComponent {
     libraryPanel.add(sectionTitle).left().expandX().fillX().padTop(6f);
     libraryPanel.row();
 
-    Table cardGrid = new Table();
+    cardGrid = new Table();
     cardGrid.defaults().pad(10f);
-
-    List<CardUpgradeSelection.UpgradeOption> options = selection.getCardUpgradeOption();
-    for (int i = 0; i < options.size(); i++) {
-      CardUpgradeSelection.UpgradeOption option = options.get(i);
-      Table tile = createTile(option);
-      tilesByInstanceIds.put(option.instanceId(), tile);
-      cardGrid.add(tile).width(CARD_WIDTH).height(CARD_HEIGHT);
-      if ((i + 1) % CARDS_PER_ROW == 0) {
-        cardGrid.row();
-      }
-    }
 
     confirmButton = new TextButton("Upgrade (0)", skin);
     confirmButton.addListener(
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
-            if (!selection.canConfirm()) {
+            if (selection == null || !selection.canConfirm()) {
               return;
             }
             committer.commitUpgrades(selection.getSelectedInstanceIds());
@@ -162,17 +185,16 @@ public class CardUpgradeDisplay extends UIComponent {
   }
 
   private void toggleLibrary() {
-    libraryVisible = !libraryVisible;
-    libraryOverlay.setVisible(libraryVisible);
     if (libraryVisible) {
-      libraryOverlay.toFront();
+      hideLibrary();
+    } else {
+      open(DEFAULT_MAX_UPGRADES);
     }
   }
 
   private void hideLibrary() {
     libraryVisible = false;
     libraryOverlay.setVisible(false);
-    refresh();
   }
 
   @Override
@@ -245,6 +267,9 @@ public class CardUpgradeDisplay extends UIComponent {
   }
 
   private void refresh() {
+    if (selection == null) {
+      return;
+    }
     for (Map.Entry<String, Table> entry : tilesByInstanceIds.entrySet()) {
       String instanceId = entry.getKey();
       Color face;
@@ -259,5 +284,38 @@ public class CardUpgradeDisplay extends UIComponent {
     }
     confirmButton.setText("Upgrade (" + selection.getSelectedInstanceIds().size() + ")");
     confirmButton.setDisabled(!selection.canConfirm());
+  }
+
+  private void rebuildGrid() {
+    cardGrid.clear();
+    tilesByInstanceIds.clear();
+    List<CardUpgradeSelection.UpgradeOption> options = selection.getCardUpgradeOption();
+    for (int i = 0; i < options.size(); i++) {
+      CardUpgradeSelection.UpgradeOption option = options.get(i);
+      Table tile = createTile(option);
+      tilesByInstanceIds.put(option.instanceId(), tile);
+      cardGrid.add(tile).width(CARD_WIDTH).height(CARD_HEIGHT);
+      if ((i + 1) % CARDS_PER_ROW == 0) {
+        cardGrid.row();
+      }
+    }
+  }
+
+  /**
+   * A function to open the upgrade overlay
+   *
+   * @param maxUpgrades select the maximum amount of card that can be upgrade
+   */
+  public void open(int maxUpgrades) {
+    if (libraryOverlay == null) {
+      throw new IllegalStateException(
+          "CardUpgradeDisplay must be added to an entity before open is called");
+    }
+    selection = new CardUpgradeSelection(playerDeck.getCards(), cardService, maxUpgrades);
+    rebuildGrid();
+    refresh();
+    libraryVisible = true;
+    libraryOverlay.setVisible(true);
+    libraryOverlay.toFront();
   }
 }

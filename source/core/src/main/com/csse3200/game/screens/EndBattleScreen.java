@@ -8,7 +8,6 @@ import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.components.cards.CardUpgradeDisplay;
-import com.csse3200.game.components.cards.CardUpgradeSelection;
 import com.csse3200.game.components.cards.DeckUpgradeCommitter;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord;
@@ -70,12 +69,9 @@ public class EndBattleScreen extends ScreenAdapter {
       RunState runState = game.getRunState();
       if (runState != null) {
         PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(cardLibrary);
-        CardUpgradeSelection upgradeSelection =
-            new CardUpgradeSelection(playerDeck.getCards(), cardLibrary, 2);
-        if (!upgradeSelection.getCardUpgradeOption().isEmpty()) {
-          ui.addComponent(
-              new CardUpgradeDisplay(upgradeSelection, new DeckUpgradeCommitter(playerDeck)));
-        }
+        ui.addComponent(
+            new CardUpgradeDisplay(
+                playerDeck, cardLibrary, new DeckUpgradeCommitter(playerDeck), true));
       }
     }
 
