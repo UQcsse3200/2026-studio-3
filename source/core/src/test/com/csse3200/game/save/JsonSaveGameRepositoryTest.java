@@ -62,7 +62,7 @@ class JsonSaveGameRepositoryTest {
         {
           "schemaVersion": 1,
           "metadata": {"slotId": 1, "savedAtEpochMillis": 123456, "runLabel": "Legacy run"},
-          "player": {"currentHealth": 43, "maxHealth": 60, "gold": 120, "piety": 0},
+          "player": {"currentHealth": 43, "maxHealth": 60, "gold": 120, "level": 0},
           "deck": {"cardIds": ["strike"]},
           "map": {
             "nodes": [

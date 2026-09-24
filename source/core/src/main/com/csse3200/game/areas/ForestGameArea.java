@@ -137,7 +137,7 @@ public class ForestGameArea extends GameArea {
   }
 
   public void displayUI(Entity ui) {
-    ui.addComponent(new GameAreaDisplay("The Fall of Pantheons"));
+    ui.addComponent(new GameAreaDisplay(""));
     spawnEntity(ui);
   }
 
