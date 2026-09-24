@@ -9,13 +9,13 @@
     {
       "text": "Item Inventory",
       "x": 20,
-      "y": 200,
+      "y": 150,
       "trigger": "openInventory"
     },
     {
       "text": "End Turn",
       "x": 20,
-      "y": 150,
+      "y": 200,
       "trigger": "endTurn",
       "variant": "gated"
     }
