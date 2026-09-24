@@ -1,6 +1,8 @@
 package com.csse3200.game.components.library;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -11,6 +13,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardDiscoveryService;
+import com.csse3200.game.cards.CardEntryView;
 import com.csse3200.game.cards.CardUnlockState;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.rendering.RenderService;
@@ -35,6 +38,8 @@ class CardLibraryDisplayTest {
     assertEquals("Cost: ???", display.getCostText());
     assertEquals("???", CardLibraryDisplay.formatCardButton(display.getDisplayedEntry()));
     assertTrue(display.isLockedArtworkVisible());
+    assertFalse(display.isStandardCardVisible());
+    assertFalse(display.isUncommonCardVisible());
     display.dispose();
   }
 
@@ -49,10 +54,46 @@ class CardLibraryDisplayTest {
 
     assertEquals(CardUnlockState.SEEN, display.getDisplayedEntry().unlockState());
     assertEquals("SEEN", display.getStateText());
+    assertFalse(display.isLockedArtworkVisible());
 
     display.dispose();
     discovery.replaceProgress(Map.of());
     assertEquals(CardUnlockState.SEEN, display.getDisplayedEntry().unlockState());
+  }
+
+  @Test
+  void shouldSelectFrameOnlyAfterDiscoveryUsingLatestEntryView() {
+    CardDiscoveryService discovery = CardDiscoveryService.loadDefault();
+    CardLibraryDisplay display = createDisplay(discovery);
+    display.create();
+
+    discovery.recordSeen("poison_dagger");
+    display.showCard(discovery.getEntry("poison_dagger").orElseThrow());
+
+    assertTrue(display.isUncommonCardVisible());
+    assertFalse(display.isStandardCardVisible());
+    assertFalse(display.isLockedArtworkVisible());
+
+    discovery.recordSeen("strike");
+    display.showCard(discovery.getEntry("strike").orElseThrow());
+
+    assertTrue(display.isStandardCardVisible());
+    assertFalse(display.isUncommonCardVisible());
+    display.dispose();
+  }
+
+  @Test
+  void shouldResolveOnlySeenEntriesForPresentation() {
+    CardDiscoveryService discovery = CardDiscoveryService.loadDefault();
+    CardEntryView locked = discovery.getEntry("strike").orElseThrow();
+
+    assertThrows(
+        IllegalArgumentException.class, () -> CardLibraryDisplay.resolveForDisplay(locked));
+
+    discovery.recordSeen("strike");
+    CardEntryView seen = discovery.getEntry("strike").orElseThrow();
+
+    assertEquals("strike", CardLibraryDisplay.resolveForDisplay(seen).cardId());
   }
 
   private CardLibraryDisplay createDisplay(CardDiscoveryService discovery) {
