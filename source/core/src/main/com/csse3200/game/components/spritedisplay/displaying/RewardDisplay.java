@@ -47,6 +47,7 @@ public class RewardDisplay extends Displaying {
   private final RewardService rewardService;
   private List<RewardOption> options;
   private boolean claimed;
+  private boolean goldRewardUsesLuckyCoin;
   private Actor background;
   private Actor scrim;
   private Actor rewardUi;
@@ -61,12 +62,12 @@ public class RewardDisplay extends Displaying {
   public void create() {
     super.create();
 
-    float multiplier = 0f;
     if (runState != null) {
-      multiplier = runState.getOrCreatePlayerState().getGoldBonusMultiplier();
+      PlayerRunState playerState = runState.getOrCreatePlayerState();
+      goldRewardUsesLuckyCoin = playerState.hasOwnedItem(ItemType.LUCKY_COIN);
     }
 
-    options = rewardService.generateRewardOptions(multiplier);
+    options = rewardService.generateRewardOptions();
     buildRewardScreen();
   }
 
@@ -231,7 +232,7 @@ public class RewardDisplay extends Displaying {
       return "";
     }
     return switch (option.type) {
-      case GOLD -> option.goldAmount + " GOLD";
+      case GOLD -> option.goldAmount + luckyCoinBonus(option) + " GOLD";
       case ITEM ->
           option.itemId == null
               ? "ITEM"
@@ -250,18 +251,40 @@ public class RewardDisplay extends Displaying {
       return "";
     }
     return switch (option.type) {
-      case GOLD -> "Added to your run";
+      case GOLD -> goldRewardDescription(option);
       case ITEM ->
           option.itemId == null
               ? ""
               : switch (option.itemId) {
-                case LUCKY_COIN -> "+10% Gold Rewards";
+                case LUCKY_COIN -> "+10% Total Gold\nMaximum +20";
                 case ENERGY_CRYSTAL -> "+1 Max Energy";
                 case MERCHANTS_FAVOR -> "+10% Shop Discount\nMaximum 50%";
-                case IRON_AEGIS -> "+5 Armour at Battle Start";
-                case WARRIORS_CREST -> "+1 Strength at Battle Start";
+                case IRON_AEGIS -> "+5 Armour when used";
+                case WARRIORS_CREST -> "+1 Strength when used";
               };
     };
+  }
+
+  private String goldRewardDescription(RewardOption option) {
+    int luckyBonus = luckyCoinBonus(option);
+    if (luckyBonus == 0 || runState == null) {
+      return "Added to your run";
+    }
+
+    int totalAfterClaim =
+        runState.getOrCreatePlayerState().getGold() + option.goldAmount + luckyBonus;
+    return option.goldAmount
+        + " Base + "
+        + luckyBonus
+        + " Lucky Coin\nTotal Gold: "
+        + totalAfterClaim;
+  }
+
+  private int luckyCoinBonus(RewardOption option) {
+    if (!goldRewardUsesLuckyCoin || runState == null || option == null) {
+      return 0;
+    }
+    return runState.getOrCreatePlayerState().calculateLuckyCoinBonus(option.goldAmount);
   }
 
   private boolean isLongItemName(RewardOption option) {
@@ -308,7 +331,10 @@ public class RewardDisplay extends Displaying {
       PlayerRunState playerState = runState.getOrCreatePlayerState();
 
       switch (option.type) {
-        case GOLD -> playerState.addGold(option.goldAmount);
+        case GOLD -> {
+          playerState.claimGoldReward(option.goldAmount, goldRewardUsesLuckyCoin);
+          goldRewardUsesLuckyCoin = false;
+        }
         case ITEM -> {
           if (option.itemId != null) {
             playerState.addOwnedItem(option.itemId);

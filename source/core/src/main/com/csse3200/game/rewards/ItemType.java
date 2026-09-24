@@ -5,5 +5,10 @@ public enum ItemType {
   ENERGY_CRYSTAL,
   MERCHANTS_FAVOR,
   IRON_AEGIS,
-  WARRIORS_CREST
+  WARRIORS_CREST;
+
+  /** Returns whether this item is consumed to apply an effect during the player's turn. */
+  public boolean isBattleConsumable() {
+    return this == IRON_AEGIS || this == WARRIORS_CREST;
+  }
 }

@@ -3,7 +3,7 @@ package com.csse3200.game.rewards;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.entities.Entity;
 
-/** Grants five armour whenever the player's battle entity is created. */
+/** Grants five armour when one Iron Aegis is actively used during battle. */
 public class IronAegisEffect implements ItemEffect {
   private static final int ARMOUR_BONUS = 5;
 

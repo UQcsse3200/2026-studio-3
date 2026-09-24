@@ -164,12 +164,6 @@ public class BattleScreen extends ScreenAdapter {
     playerState = runState.getOrCreatePlayerState();
     Entity player = forestGameArea.getPlayer();
 
-    // Reward claiming now happens directly in RewardDisplay (addOwnedItem/addGold on
-    // PlayerRunState), so nothing pending needs to be read or replayed here — applyTo() below
-    // already reconstructs everything (stats, gold, and every owned item's effect) from durable
-    // state on its own.
-    playerState.applyTo(player);
-
     // Card + deck state has to exist before the controller so it can be handed the single
     // card-play entry point and the deck it mutates.
     List<CardConfig> configs = CardConfigLoader.loadCards(); // reads configs/cards.json
@@ -248,7 +242,8 @@ public class BattleScreen extends ScreenAdapter {
     PopupDisplay itemInventory = new PopupDisplay("");
     itemInventory.setMinSize(470f, 360f);
     InventoryPopupComponent inventoryPopup =
-        new InventoryPopupComponent(game.getRunState(), itemInventory);
+        new InventoryPopupComponent(
+            game.getRunState(), itemInventory, gameArea.getPlayer(), controller::isPlayerTurn);
 
     Entity itemInventoryEntity =
         new Entity().addComponent(itemInventory).addComponent(inventoryPopup);
