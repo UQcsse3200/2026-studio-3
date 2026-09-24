@@ -197,7 +197,8 @@ public class CardUpgradeDisplay extends UIComponent {
     libraryOverlay.toFront();
   }
 
-  private void hideLibrary() {
+  /** Closes the existing upgrade overlay without changing the selected cards or deck. */
+  public void hideLibrary() {
     libraryVisible = false;
     libraryOverlay.setVisible(false);
     refresh();
