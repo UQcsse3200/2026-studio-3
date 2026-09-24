@@ -1,0 +1,16 @@
+{
+  "encounters": [
+    {
+      "id": "test_pair",
+      "roomType": "ELITE",
+      "minProgression": 1,
+      "maxProgression": 3,
+      "weight": 7,
+      "enemies": ["enemy_a", "enemy_b"]
+    },
+    {
+      "id": "test_defaults",
+      "enemies": ["enemy_a"]
+    }
+  ]
+}
