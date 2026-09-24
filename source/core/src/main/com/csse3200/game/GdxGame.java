@@ -66,6 +66,15 @@ public class GdxGame extends Game {
     autosaveCoordinator.saveIfPending();
   }
 
+  /**
+   * Flushes a victorious battle's autosave after its reward has been applied but before leaving the
+   * reward screen. The coordinator owns idempotency, so the following map transition cannot write a
+   * duplicate checkpoint.
+   */
+  public void autosaveAfterRewardClaimed() {
+    autosaveCoordinator.saveIfPending();
+  }
+
   private SaveGameService newAutosaveService() {
     CardLibrary cardLibrary = new CardLibrary(CardConfigLoader.loadCards());
     return new SaveGameService(

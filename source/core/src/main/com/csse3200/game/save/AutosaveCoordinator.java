@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Saves a completed encounter only after its screen has released the live player state. */
+/** Saves a completed encounter once its screen has released the live player state. */
 public class AutosaveCoordinator {
   public static final int AUTOSAVE_SLOT_ID = 4;
 
@@ -31,9 +31,11 @@ public class AutosaveCoordinator {
   }
 
   /**
-   * Called when the map is shown, after the outgoing encounter screen has been disposed. A request
-   * belongs to one particular run, so starting or loading another run cannot accidentally save that
-   * run. A failed write is reported but is not retried on every map visit.
+   * Writes at the first safe checkpoint after the outgoing encounter screen has been disposed. For
+   * battles this may be immediately after the reward is applied; other encounters flush when the
+   * map is shown. A request belongs to one particular run, so starting or loading another run
+   * cannot accidentally save that run. A failed write is reported but is not retried on every map
+   * visit.
    */
   public void saveIfPending() {
     if (pendingRun == null) {
