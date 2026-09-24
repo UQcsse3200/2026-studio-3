@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.csse3200.game.maps.NodeState;
+import com.csse3200.game.maps.RoomType;
+
 /** Represents the map graph containing all map nodes. */
 public class MapGraph implements EncounterCallback {
 
@@ -188,6 +191,15 @@ public class MapGraph implements EncounterCallback {
       for (MapNode connected : node.getConnections()) {
         if (connected.getState() == NodeState.LOCKED) {
           connected.setState(NodeState.AVAILABLE);
+        }
+      }
+
+      // Ensures the nodes adjacent to the completed node are set to locked
+      for (MapNode horizontalNode : getNodesByHeight(node.getHeight())) {
+        if (horizontalNode.getNodeId() != nodeId) {
+          if (horizontalNode.getState() != NodeState.LOCKED) {
+            horizontalNode.setState(NodeState.LOCKED);
+          }
         }
       }
     }
