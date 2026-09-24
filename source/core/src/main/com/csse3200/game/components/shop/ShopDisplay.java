@@ -172,8 +172,8 @@ public class ShopDisplay extends UIComponent {
    * allow-list.
    *
    * <p>Replaces the old fixed {@code shopItems.json} catalog so Round 2 cards can appear in normal
-   * play. Requires {@link ServiceLocator#getCardLibrary()} to be registered — a missing library is a
-   * setup error, not something to paper over by re-reading {@code cards.json}.
+   * play. Requires a card library to already be registered with {@link ServiceLocator}. A missing
+   * library is a setup error, not something to paper over by re-reading {@code cards.json}.
    */
   static ShopService createGeneratedShop() {
     CardService cards = ServiceLocator.getCardLibrary();
