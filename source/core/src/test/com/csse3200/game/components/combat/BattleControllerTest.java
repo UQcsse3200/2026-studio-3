@@ -537,9 +537,9 @@ class BattleControllerTest {
     return enemy;
   }
 
-  /** Verifies poison consumes defenses, ticks once per turn and expires. */
+  /** Verifies poison bypasses defenses, ticks once per turn and expires. */
   @Test
-  void poisonShouldUseDefensesAndExpireAfterTwoEnemyTurns() {
+  void poisonShouldBypassDefensesAndExpireAfterTwoEnemyTurns() {
     CombatStatsComponent stats = new CombatStatsComponent(20, 0);
     stats.setBlock(3);
     stats.setArmour(4);
@@ -560,24 +560,25 @@ class BattleControllerTest {
     battle.start();
     battle.endPlayerTurn();
 
-    assertEquals(20, stats.getHealth());
-    assertEquals(0, stats.getBlock());
-    assertEquals(2, stats.getArmour());
+    assertEquals(15, stats.getHealth());
+    assertEquals(3, stats.getBlock());
+    assertEquals(4, stats.getArmour());
     assertEquals(1, stats.getStatusEffect("POISON").getDuration());
-    assertEquals(List.of(20), healthAtAction);
+    assertEquals(List.of(15), healthAtAction);
     assertEquals(BattlePhase.PLAYER_TURN, battle.getCurrentPhase());
 
     battle.endPlayerTurn();
 
-    assertEquals(17, stats.getHealth());
-    assertEquals(0, stats.getArmour());
+    assertEquals(10, stats.getHealth());
+    assertEquals(3, stats.getBlock());
+    assertEquals(4, stats.getArmour());
     assertNull(stats.getStatusEffect("POISON"));
-    assertEquals(List.of(20, 17), healthAtAction);
+    assertEquals(List.of(15, 10), healthAtAction);
 
     battle.endPlayerTurn();
 
-    assertEquals(17, stats.getHealth());
-    assertEquals(List.of(20, 17, 17), healthAtAction);
+    assertEquals(10, stats.getHealth());
+    assertEquals(List.of(15, 10, 10), healthAtAction);
     verify(firstEnemyBehaviour, times(3)).executeIntent(player);
   }
 
@@ -624,6 +625,27 @@ class BattleControllerTest {
     verify(firstEnemyBehaviour, never()).executeIntent(player);
     assertEquals(BattlePhase.VICTORY, battle.getCurrentPhase());
     assertEquals(List.of(true), outcomes);
+  }
+
+  @Test
+  void enemyDebuffsShouldTickAfterTheAffectedEnemyActs() {
+    CombatStatsComponent stats = new CombatStatsComponent(20, 0);
+    stats.applyStatusEffect("FEEBLE", 1, 2);
+    stats.applyStatusEffect("VULNERABLE", 1, 2);
+    Entity enemy = createPoisonTestEnemy(stats, firstEnemyBehaviour);
+    BattleController battle = new BattleController(player, List.of(enemy));
+
+    battle.start();
+    battle.endPlayerTurn();
+
+    assertEquals(1, stats.getStatusEffect("FEEBLE").getDuration());
+    assertEquals(1, stats.getStatusEffect("VULNERABLE").getDuration());
+
+    battle.endPlayerTurn();
+
+    assertNull(stats.getStatusEffect("FEEBLE"));
+    assertNull(stats.getStatusEffect("VULNERABLE"));
+    verify(firstEnemyBehaviour, times(2)).executeIntent(player);
   }
 
   /**

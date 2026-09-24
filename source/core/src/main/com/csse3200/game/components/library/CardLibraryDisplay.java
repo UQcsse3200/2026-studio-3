@@ -3,7 +3,9 @@ package com.csse3200.game.components.library;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
@@ -11,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
@@ -32,6 +35,7 @@ import org.slf4j.LoggerFactory;
 /** Read-only card library view backed by the current Team 6 card configuration file. */
 public class CardLibraryDisplay extends UIComponent {
   private static final Logger logger = LoggerFactory.getLogger(CardLibraryDisplay.class);
+  public static final String BUTTON_TEXTURE = "images/card_library_button_frame.png";
   private static final float PANEL_WIDTH = 1120f;
   private static final float PANEL_HEIGHT = 680f;
   private static final Color PANEL_COLOUR = new Color(0.105f, 0.07f, 0.065f, 0.96f);
@@ -72,9 +76,7 @@ public class CardLibraryDisplay extends UIComponent {
     rootStack.setFillParent(true);
     addBackground(rootStack);
 
-    Texture buttonFrameTexture = getTexture(MainMenuDisplay.BUTTON_FRAME_TEXTURE);
-    buttonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-    buttonStyle = MenuTheme.createButtonStyle(skin, buttonFrameTexture);
+    buttonStyle = createButtonStyle();
 
     Table panel = new Table();
     panel.setBackground(skin.newDrawable(WHITE, PANEL_COLOUR));
@@ -172,16 +174,28 @@ public class CardLibraryDisplay extends UIComponent {
   private void addCards(List<CardConfig> cards, Table panel) {
     cardList = new Table();
     cardList.top();
-    cardList.defaults().width(290f).height(58f).padBottom(8f).left();
+    cardList.defaults().width(290f).height(76f).padBottom(8f).left();
+
+    ButtonGroup<TextButton> cardGroup = new ButtonGroup<>();
+    cardGroup.setMinCheckCount(0);
+    cardGroup.setMaxCheckCount(1);
+    cardGroup.setUncheckLast(true);
+    TextButton firstButton = null;
 
     for (CardConfig card : cards) {
       TextButton cardButton = new TextButton(formatCardButton(card), buttonStyle);
       cardButton.getLabel().setFontScale(0.75f);
+      cardGroup.add(cardButton);
+      if (firstButton == null) {
+        firstButton = cardButton;
+      }
       cardButton.addListener(
           new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-              showCard(card);
+              if (cardButton.isChecked()) {
+                showCard(card);
+              }
             }
           });
       cardList.add(cardButton).row();
@@ -200,6 +214,11 @@ public class CardLibraryDisplay extends UIComponent {
 
     panel.add(listPanel).width(350f).expandY().fillY().padRight(22f);
     panel.add(createDetailPanel()).expand().fill();
+
+    cardGroup.setMinCheckCount(cards.isEmpty() ? 0 : 1);
+    if (firstButton != null) {
+      firstButton.setChecked(true);
+    }
   }
 
   private Table createDetailPanel() {
@@ -308,6 +327,31 @@ public class CardLibraryDisplay extends UIComponent {
     Label.LabelStyle style = new Label.LabelStyle(skin.get(baseStyle, Label.LabelStyle.class));
     style.fontColor = colour;
     return style;
+  }
+
+  private TextButton.TextButtonStyle createButtonStyle() {
+    TextButton.TextButtonStyle style =
+        new TextButton.TextButtonStyle(skin.get(TextButton.TextButtonStyle.class));
+    style.font = skin.getFont("font_large");
+    style.up = buttonDrawable(null);
+    style.over = buttonDrawable(new Color(1f, 0.88f, 0.68f, 1f));
+    style.down = buttonDrawable(new Color(0.7f, 0.48f, 0.58f, 1f));
+    style.checked = buttonDrawable(new Color(1f, 0.72f, 0.34f, 1f));
+    style.checkedOver = buttonDrawable(new Color(1f, 0.86f, 0.55f, 1f));
+    style.fontColor = MenuTheme.warmParchment();
+    style.overFontColor = Color.WHITE;
+    style.downFontColor = Color.WHITE;
+    style.checkedFontColor = Color.WHITE;
+    return style;
+  }
+
+  private Drawable buttonDrawable(Color tint) {
+    Texture texture = getTexture(BUTTON_TEXTURE);
+    texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    TextureRegionDrawable drawable = new TextureRegionDrawable(new TextureRegion(texture));
+    drawable.setMinWidth(0f);
+    drawable.setMinHeight(0f);
+    return tint == null ? drawable : drawable.tint(tint);
   }
 
   private Texture getTexture(String path) {

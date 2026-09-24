@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.bestiary.BestiaryEntryView;
 import com.csse3200.game.bestiary.BestiaryService;
@@ -84,7 +85,10 @@ class BestiaryDisplayTest {
     RenderService renderService = mock(RenderService.class);
     when(renderService.getStage()).thenReturn(mock(Stage.class));
     ServiceLocator.registerRenderService(renderService);
-    ServiceLocator.registerResourceService(mock(ResourceService.class));
+    ResourceService resourceService = mock(ResourceService.class);
+    when(resourceService.getAsset(BestiaryDisplay.BUTTON_TEXTURE, Texture.class))
+        .thenReturn(mock(Texture.class));
+    ServiceLocator.registerResourceService(resourceService);
 
     BestiaryDisplay display = new BestiaryDisplay(service, () -> {});
     display.create();

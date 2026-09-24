@@ -40,10 +40,10 @@ public class CardEffectHandler {
         switch (effect.type()) {
           case DAMAGE -> stats.takeDamage(effect.value());
           case PIERCE -> stats.takePiercingDamage(effect.value());
-          case SUNDER -> stats.setArmour(stats.getArmour() - effect.value());
           case POISON, VULNERABLE, FEEBLE ->
               stats.applyStatusEffect(
                   new StatusEffect(effect.type().name(), effect.value(), effect.duration()));
+          case SUNDER -> stats.reduceArmour(effect.value());
           default -> {
             // BLOCK / HEAL / STRENGTH are not enemy-facing.
           }
@@ -65,7 +65,7 @@ public class CardEffectHandler {
     }
     for (ResolvedCardEffect effect : effects) {
       switch (effect.type()) {
-        case BLOCK -> stats.addArmour(effect.value());
+        case BLOCK -> stats.addBlock(effect.value());
         case HEAL -> {
           if (effect.duration() > 0) {
             stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());

@@ -20,9 +20,8 @@ import org.slf4j.LoggerFactory;
  * distinct mechanics, not two names for the same thing. Armour is a permanent damage-reduction
  * pool. It persists until consumed by incoming damage or explicitly cleared via clearArmour() - it
  * does not reset automatically at any point in the turn cycle. Block is a per-turn damage-reduction
- * pool, matching the "Slay the Spire" style block mechanic (Team 6). It is intended to reset to 0
- * once per turn via resetBlock(), regardless of whether it was consumed. TODO: exact reset timing
- * (start vs end of turn) is not yet wired up - depends on Team 3's turn/battle-sequence event.
+ * pool, matching the "Slay the Spire" style block mechanic (Team 6). The battle controller resets
+ * it at the start of the player's next turn, regardless of whether it was consumed.
  */
 public class CombatStatsComponent extends Component {
 
@@ -359,11 +358,7 @@ public class CombatStatsComponent extends Component {
     setBlock(this.block + amount);
   }
 
-  /**
-   * Resets block to 0. Intended to be called once per turn, regardless of whether the block was
-   * consumed. TODO: wire this up to Team 3's turn event, same as updateStatusEffects() - timing
-   * (start vs end of turn) still needs confirmation.
-   */
+  /** Resets block to 0 at the start of the owning entity's next turn. */
   public void resetBlock() {
     setBlock(0);
   }
@@ -387,9 +382,8 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
-   * Applies a status effect to this entity. If an effect with the same id is already active, it is
-   * overwritten by the new one (design choice: overwrite, not stack. To be confirmed with Team 5/6
-   * if card design expects stacking behaviour instead).
+   * Applies a status effect to this entity. Effects with the same id are overwritten rather than
+   * stacked. FEEBLE is the exception: reapplying it keeps whichever duration is longer.
    *
    * @param effect status effect to apply
    */
@@ -397,10 +391,25 @@ public class CombatStatsComponent extends Component {
     if (effect == null) {
       return;
     }
+
+    StatusEffect existing = statusEffects.get(effect.getType());
+    if (existing != null
+        && "FEEBLE".equalsIgnoreCase(effect.getType())
+        && lastsAtLeastAsLong(existing.getDuration(), effect.getDuration())) {
+      return;
+    }
+
     statusEffects.put(effect.getType(), effect);
     if (entity != null) {
       entity.getEvents().trigger("statusEffectApplied", effect.getType());
     }
+  }
+
+  private static boolean lastsAtLeastAsLong(int currentDuration, int newDuration) {
+    if (currentDuration <= 0) {
+      return true;
+    }
+    return newDuration > 0 && currentDuration >= newDuration;
   }
 
   /**

@@ -724,6 +724,10 @@ public class BattleController {
     if (energy != null) {
       energy.onTurnStart();
     }
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+    if (playerStats != null) {
+      playerStats.resetBlock();
+    }
     applyHealingAtTurnStart();
     retrieveCooledDownCards();
     handle(BattleEvent.PLAYER_TURN_STARTED);
@@ -769,18 +773,18 @@ public class BattleController {
     CombatStatsComponent playerStats = this.player.getComponent(CombatStatsComponent.class);
 
     if (playerStats != null) {
-      tickPlayerStatusEffect(playerStats, IntentEffectType.SILENCE.name());
-      tickPlayerStatusEffect(playerStats, IntentEffectType.DAMAGE_ON_CARD_PLAY.name());
+      tickStatusEffect(playerStats, IntentEffectType.SILENCE.name());
+      tickStatusEffect(playerStats, IntentEffectType.DAMAGE_ON_CARD_PLAY.name());
     }
 
     handle(BattleEvent.PLAYER_TURN_ENDED);
   }
 
-  /** Counts down one player status without changing effects owned by other turn hooks. */
-  private void tickPlayerStatusEffect(CombatStatsComponent playerStats, String effectType) {
-    StatusEffect effect = playerStats.getStatusEffect(effectType);
+  /** Counts down one status without changing effects owned by other turn hooks. */
+  private void tickStatusEffect(CombatStatsComponent stats, String effectType) {
+    StatusEffect effect = stats.getStatusEffect(effectType);
     if (effect != null && effect.tickAndCheckExpired()) {
-      playerStats.removeStatusEffect(effectType);
+      stats.removeStatusEffect(effectType);
     }
   }
 
@@ -789,10 +793,9 @@ public class BattleController {
 
     if (skipEnemyTurnIfDead(enemy)) return;
 
-    // Resolve poison before the enemy acts. Poison uses normal damage, so block and armour absorb
-    // it.
+    // Resolve poison before the enemy acts. Status damage bypasses block and armour.
     CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
-    enemyStats.processPoisonTick(enemyStats::takeDamage);
+    enemyStats.processPoisonTick(enemyStats::takePiercingDamage);
 
     if (skipEnemyTurnIfDead(enemy)) return;
 
@@ -852,6 +855,15 @@ public class BattleController {
   }
 
   private void enterEnemyResolved() {
+    Entity enemy = getActiveEnemy();
+    if (isEnemyAlive(enemy)) {
+      CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
+      if (enemyStats != null) {
+        tickStatusEffect(enemyStats, EffectType.FEEBLE.name());
+        tickStatusEffect(enemyStats, EffectType.VULNERABLE.name());
+      }
+    }
+
     // If the battle is over, abort and head straight to ending
     if (this.queueBattleOutcomeIfOver()) {
       return;
