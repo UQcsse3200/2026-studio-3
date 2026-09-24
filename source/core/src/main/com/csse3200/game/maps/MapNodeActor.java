@@ -17,6 +17,7 @@ public class MapNodeActor extends Group {
   public float size;
   private Image nodeIcon;
   private Image completedCross;
+  private NodeState lastRenderedState;
 
   /**
    * Constructer class to intialize a MapNodeActor. The size of the node is determined from the
@@ -113,6 +114,21 @@ public class MapNodeActor extends Group {
   }
 
   /**
+   * Re-checks the node's state every frame and refreshes the visual if it changed since last
+   * render. Without this, a node's appearance is frozen at construction time — previously only
+   * "worked" because a real state change always came with a full MapScreen/MapDisplay rebuild
+   * (entering then returning from an encounter). A state change without a screen transition (e.g. a
+   * debug command like 'goto') would otherwise silently not show up on screen at all.
+   */
+  @Override
+  public void act(float delta) {
+    super.act(delta);
+    if (node.getState() != lastRenderedState) {
+      checkNodeState();
+    }
+  }
+
+  /**
    * Sets the node to a specified size
    *
    * @param size size of node
@@ -161,6 +177,13 @@ public class MapNodeActor extends Group {
 
   /** Modifies the node based on the NodeState to visually indicate the player */
   private void checkNodeState() {
+    lastRenderedState = node.getState();
+    // Reset to baseline before applying this state's styling: the switch below only ever adds
+    // dimming/enlarging for specific states, so without a reset here, styling from a previous
+    // state (e.g. LOCKED's dimmed alpha) would persist even after transitioning to CURRENT, which
+    // never explicitly restores it. This only started mattering once act() began re-running this
+    // on the same actor across multiple state changes, instead of once at construction.
+    nodeIcon.getColor().a = 1f;
     float iconSize = size;
     switch (node.getState()) {
       case LOCKED:

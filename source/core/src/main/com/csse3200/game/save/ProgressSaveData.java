@@ -10,6 +10,9 @@ public class ProgressSaveData {
   public List<BestiaryProgressSaveData> bestiary = new ArrayList<>();
   public List<CardProgressSaveData> cards = new ArrayList<>();
 
+  /** Seed that fixes each node's encounter for this run; null in saves made before it existed. */
+  public Long encounterSeed = null;
+
   /** Required for JSON deserialisation. */
   public ProgressSaveData() {}
 

@@ -12,31 +12,60 @@ public class RewardService {
   }
 
   public RewardService(RewardGenerator generator) {
+    if (generator == null) {
+      throw new IllegalArgumentException("generator must not be null");
+    }
     this.generator = generator;
   }
 
-  /**
-   * Generates a fixed set of reward options: one GOLD option and one ITEM option.
-   *
-   * @return a list containing exactly one GOLD RewardOption and one ITEM RewardOption
-   */
+  /** Generates rewards for a player without a gold bonus. */
   public List<RewardOption> generateRewardOptions() {
-    return List.of(generator.generateGoldRewardOption(), generator.generateItemRewardOption());
+    return generateRewardOptions(0f);
   }
 
   /**
-   * Applies the selected reward option to the player's actual state.
+   * Generates one final gold option and one item option.
    *
-   * @param player the player entity to apply the reward to
-   * @param selected the reward option the player chose/claimed
+   * @param goldBonusMultiplier current Lucky Coin multiplier
+   * @return one gold option and one item option
+   */
+  public List<RewardOption> generateRewardOptions(float goldBonusMultiplier) {
+    return List.of(
+        generator.generateGoldRewardOption(goldBonusMultiplier),
+        generator.generateItemRewardOption());
+  }
+
+  /**
+   * Applies a generated reward to a live player entity.
+   *
+   * <p>The gold amount has already been finalised by RewardGenerator and must not be multiplied
+   * again here.
    */
   public void claimReward(Entity player, RewardOption selected) {
+    if (player == null) {
+      throw new IllegalArgumentException("player must not be null");
+    }
+    if (selected == null || selected.type == null) {
+      throw new IllegalArgumentException("selected reward must not be null");
+    }
+
     switch (selected.type) {
       case GOLD -> {
-        int finalAmount = GoldReward.calculateFinalGold(player, selected.goldAmount);
-        player.getComponent(InventoryComponent.class).addGold(finalAmount);
+        InventoryComponent inventory = player.getComponent(InventoryComponent.class);
+
+        if (inventory == null) {
+          throw new IllegalArgumentException("player must have InventoryComponent");
+        }
+
+        inventory.addGold(selected.goldAmount);
       }
-      case ITEM -> ItemEffectApplier.applyItemEffect(selected.itemId, player);
+
+      case ITEM -> {
+        if (selected.itemId == null) {
+          throw new IllegalArgumentException("item reward must have an itemId");
+        }
+        ItemEffectApplier.applyItemEffect(selected.itemId, player);
+      }
     }
   }
 }

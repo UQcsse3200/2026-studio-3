@@ -80,6 +80,7 @@ public class SaveGameRestoreService {
       if (!runState.restoreRun(restoredMap, data.map.activeEncounterNodeId)) {
         return RestoreResult.failure(RestoreError.APPLY_FAILED, "Unable to restore run state");
       }
+      runState.restoreEncounterSeed(data.progress == null ? null : data.progress.encounterSeed);
       restoreBestiaryProgress(data.progress);
       restoreCardProgress(data.progress);
       return RestoreResult.success(resolveResumeScreen(data));
