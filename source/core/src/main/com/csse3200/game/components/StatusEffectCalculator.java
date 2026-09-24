@@ -41,7 +41,6 @@ public final class StatusEffectCalculator {
     if (poison == null) {
       return 0;
     }
-
     return Math.max(poison.getValue(), 0);
   }
 }

@@ -789,10 +789,9 @@ public class BattleController {
 
     if (skipEnemyTurnIfDead(enemy)) return;
 
-    // Resolve poison before the enemy acts. Poison uses normal damage, so block and armour absorb
-    // it.
+    // Poison uses piercing damage, skip block and armor
     CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
-    enemyStats.processPoisonTick(enemyStats::takeDamage);
+    enemyStats.processPoisonTick(enemyStats::takePiercingDamage);
 
     if (skipEnemyTurnIfDead(enemy)) return;
 
