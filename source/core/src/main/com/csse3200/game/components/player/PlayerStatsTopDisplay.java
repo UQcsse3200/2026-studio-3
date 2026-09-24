@@ -65,7 +65,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
     // Health text
     int currentHealth = entity.getComponent(CombatStatsComponent.class).getHealth();
     int maxHealth = entity.getComponent(CombatStatsComponent.class).getMaxHealth();
-    CharSequence healthText = String.format("Health: %d / %d", currentHealth, maxHealth);
+    CharSequence healthText = String.format("%d / %d", currentHealth, maxHealth);
     healthLabel = new Label(healthText, skin, STYLE_NAME_LARGE);
     healthLabel.setFontScale(FONT_SCALE);
 
@@ -74,7 +74,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
         new Image(ServiceLocator.getResourceService().getAsset("images/level.png", Texture.class));
 
     // Level text
-    String levelText = String.format("Level: %d", runState.getMapProgression());
+    String levelText = String.format("%d", runState.getMapProgression());
     levelLabel = new Label(levelText, skin, STYLE_NAME_LARGE);
     levelLabel.setFontScale(FONT_SCALE);
 
@@ -85,7 +85,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
     // Money text
     InventoryComponent inventoryComponent = entity.getComponent(InventoryComponent.class);
     int money = inventoryComponent.getGold();
-    CharSequence moneyText = String.format("Gold: $%d", money);
+    CharSequence moneyText = String.format("$%d", money);
     moneyLabel = new Label(moneyText, skin, STYLE_NAME_LARGE);
     moneyLabel.setFontScale(FONT_SCALE);
 
@@ -112,7 +112,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
    * @param maxHealth player's max health
    */
   public void updatePlayerHealthUI(int currentHealth, int maxHealth) {
-    CharSequence text = String.format("Health: %d / %d", currentHealth, maxHealth);
+    CharSequence text = String.format("%d / %d", currentHealth, maxHealth);
     healthLabel.setText(text);
   }
 
@@ -122,7 +122,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
    * @param level player's current level
    */
   public void updatePlayerLevelUI(int level) {
-    CharSequence text = String.format("Level: %d", level);
+    CharSequence text = String.format("%d", level);
     levelLabel.setText(text);
   }
 
@@ -132,7 +132,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
    * @param money player money
    */
   public void updatePlayerMoneyUI(int money) {
-    CharSequence text = String.format("Gold: $%d", money);
+    CharSequence text = String.format("$%d", money);
     moneyLabel.setText(text);
   }
 
