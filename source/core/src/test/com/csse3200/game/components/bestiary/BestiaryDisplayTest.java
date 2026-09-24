@@ -1,6 +1,7 @@
 package com.csse3200.game.components.bestiary;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,7 +29,7 @@ class BestiaryDisplayTest {
   private final BestiaryEntryView defeated = createView(BestiaryUnlockState.DEFEATED);
 
   @Test
-  void shouldHideLockedEnemyName() {
+  void shouldKeepLockedEntryDataObscuredAsDefenceInDepth() {
     assertEquals("???", BestiaryDisplay.visibleName(locked));
     assertEquals(
         "Encounter this enemy to reveal its record.", BestiaryDisplay.descriptionFor(locked));
@@ -71,7 +72,7 @@ class BestiaryDisplayTest {
   }
 
   @Test
-  void shouldRefreshVisibleEntryAndUnsubscribeOnDispose() {
+  void shouldHideUndiscoveredEntryThenRevealItOnEncounter() {
     EnemyConfig config = new EnemyConfig();
     config.id = "enemy";
     config.name = "Enemy";
@@ -91,7 +92,7 @@ class BestiaryDisplayTest {
 
     BestiaryDisplay display = new BestiaryDisplay(service, () -> {});
     display.create();
-    assertEquals(BestiaryUnlockState.LOCKED, display.getDisplayedEntry().unlockState());
+    assertNull(display.getDisplayedEntry());
 
     service.recordEncountered("enemy");
     assertEquals(BestiaryUnlockState.ENCOUNTERED, display.getDisplayedEntry().unlockState());
