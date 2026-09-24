@@ -53,8 +53,6 @@ class EncounterGameAreaTest {
             item -> {
               assertTrue(cardIds.add(item.cardId));
               assertTrue(cardLibrary.getCard(item.cardId).isPresent());
-              assertTrue(
-                  !item.cardId.equals("poison_blade") && !item.cardId.equals("unseal_the_breach"));
             });
   }
 }

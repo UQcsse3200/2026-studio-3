@@ -11,14 +11,12 @@ import java.util.Set;
 /**
  * Shared allow-list for shop and event card acquisition.
  *
- * <p>Excludes cards that still rely on effects dropped by the live {@code CardEffectHandler}
- * (currently {@link EffectType#SUNDER} and {@link EffectType#PIERCE}). Member 5 acquisition and
- * Member 2 post-battle rewards should share this list so players only receive cards that resolve in
- * real combat.
+ * <p>This is the shared place for future acquisition exclusions. It currently excludes nothing:
+ * live {@code CardEffectHandler} already resolves {@link EffectType#SUNDER} and {@link
+ * EffectType#PIERCE}. Member 5 acquisition and Member 2 post-battle rewards should share this list.
  */
 public final class CardAcquisitionAllowList {
-  private static final Set<EffectType> EXCLUDED_LIVE_EFFECTS =
-      EnumSet.of(EffectType.SUNDER, EffectType.PIERCE);
+  private static final Set<EffectType> EXCLUDED_LIVE_EFFECTS = EnumSet.noneOf(EffectType.class);
 
   private CardAcquisitionAllowList() {
     throw new IllegalStateException("Utility class");
@@ -28,7 +26,7 @@ public final class CardAcquisitionAllowList {
    * Returns whether a card may be offered through production acquisition routes.
    *
    * @param card card definition to evaluate
-   * @return true when base and upgrade effects are all safe for live combat acquisition
+   * @return true when the card has a usable id and does not use an excluded live effect
    */
   public static boolean isAllowed(CardConfig card) {
     Objects.requireNonNull(card, "card cannot be null");
@@ -39,9 +37,9 @@ public final class CardAcquisitionAllowList {
   }
 
   /**
-   * Effects that are silently dropped in live combat and therefore must not be sold or rewarded.
+   * Effects that must not be sold or rewarded through production acquisition routes.
    *
-   * @return immutable view of excluded effect types
+   * @return immutable view of excluded effect types (empty until a future exclusion is added)
    */
   public static Set<EffectType> excludedLiveEffects() {
     return Set.copyOf(EXCLUDED_LIVE_EFFECTS);
@@ -52,7 +50,7 @@ public final class CardAcquisitionAllowList {
   }
 
   private static boolean usesExcludedEffect(EffectConfig[] effects) {
-    if (effects == null) {
+    if (effects == null || EXCLUDED_LIVE_EFFECTS.isEmpty()) {
       return false;
     }
     for (EffectConfig effect : effects) {

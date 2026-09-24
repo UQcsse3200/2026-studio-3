@@ -48,8 +48,7 @@ public final class ShopInventoryGenerator {
   /**
    * Generates a shop from a random subset of currently allowed cards.
    *
-   * <p>Candidates are filtered by {@code CardAcquisitionAllowList} so cards whose live combat
-   * effects are still dropped (SUNDER / PIERCE) are never offered. If fewer valid cards are
+   * <p>Candidates are filtered by {@code CardAcquisitionAllowList}. If fewer valid cards are
    * available than requested, every allowed card is offered once.
    *
    * @param offerCount maximum number of distinct cards to offer

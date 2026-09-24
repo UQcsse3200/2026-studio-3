@@ -15,8 +15,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
-import com.csse3200.game.cards.CardConfigLoader;
-import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.maps.EncounterCallback;
@@ -170,15 +168,18 @@ public class ShopDisplay extends UIComponent {
   }
 
   /**
-   * Builds a live shop inventory from the card library using the shared acquisition allow-list.
+   * Builds a live shop inventory from the registered card library using the shared acquisition
+   * allow-list.
    *
    * <p>Replaces the old fixed {@code shopItems.json} catalog so Round 2 cards can appear in normal
-   * play.
+   * play. Requires {@link ServiceLocator#getCardLibrary()} to be registered — a missing library is a
+   * setup error, not something to paper over by re-reading {@code cards.json}.
    */
   static ShopService createGeneratedShop() {
     CardService cards = ServiceLocator.getCardLibrary();
     if (cards == null) {
-      cards = new CardLibrary(CardConfigLoader.loadCards());
+      throw new IllegalStateException(
+          "Card library must be registered with ServiceLocator before opening the shop");
     }
     return new ShopInventoryGenerator(cards).createShop();
   }
