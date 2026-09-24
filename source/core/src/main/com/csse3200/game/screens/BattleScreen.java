@@ -30,9 +30,11 @@ import com.csse3200.game.components.pausemenu.PauseMenuActions;
 import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.player.EnergyComponent;
+import com.csse3200.game.components.spritedisplay.clickable.CardAimController;
 import com.csse3200.game.components.spritedisplay.clickable.CardImageSkins;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
+import com.csse3200.game.components.spritedisplay.clickable.DragNDrop;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
@@ -92,6 +94,8 @@ public class BattleScreen extends ScreenAdapter {
   // separate copy.
   private final CardEffectResolutionService cardEffects;
   private final CardPlayService cardPlayService;
+  private final CardAimController enemyCardAim;
+  private final CardAimController playerCardAim;
   private ClickableFactory uiFactory;
   private final PlayerRunState playerState;
   private List<ClickableRecord> staticUiRecords;
@@ -160,6 +164,14 @@ public class BattleScreen extends ScreenAdapter {
     EnergyComponent energy = player.getComponent(EnergyComponent.class);
 
     Map<String, Entity> enemyTargets = forestGameArea.getEnemyTargets();
+    enemyCardAim =
+        new CardAimController(
+            ServiceLocator.getRenderService().getStage(), ServiceLocator.getCamera(), enemyTargets);
+    playerCardAim =
+        new CardAimController(
+            ServiceLocator.getRenderService().getStage(),
+            ServiceLocator.getCamera(),
+            Map.of("player", player));
     cardEffects = new CardEffectResolutionService(library);
     cardPlayService =
         new CardPlayService(
@@ -205,6 +217,8 @@ public class BattleScreen extends ScreenAdapter {
     staticUiRecords = ClickableFactory.loadRecordsFromJson(battleUiJson);
 
     uiFactory = new ClickableFactory(buildAllRecords());
+    uiFactory.registerInstanceVariant("aimDrag", rec -> new DragNDrop(rec, enemyCardAim));
+    uiFactory.registerInstanceVariant("selfAimDrag", rec -> new DragNDrop(rec, playerCardAim));
 
     Team3CardPlayAdapter cardPlayAdapter = new Team3CardPlayAdapter(cardPlayService, controller);
 
@@ -284,6 +298,8 @@ public class BattleScreen extends ScreenAdapter {
   @Override
   public void dispose() {
     playerState.captureFrom(gameArea.getPlayer());
+    enemyCardAim.dispose();
+    playerCardAim.dispose();
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
@@ -329,8 +345,10 @@ public class BattleScreen extends ScreenAdapter {
         continue;
       }
       CardConfig card = maybeCard.get();
-      boolean selfTarget = card.target == TargetType.SELF;
-      String variant = selfTarget ? "inout" : "drag";
+      String variant =
+          card.target == TargetType.SELF
+              ? "selfAimDrag"
+              : card.target == TargetType.SINGLE_ENEMY ? "aimDrag" : "drag";
 
       Skin cardSkin = CardImageSkins.forTexturePath(card.texturePath);
 
@@ -343,13 +361,8 @@ public class BattleScreen extends ScreenAdapter {
               .skin(cardSkin)
               .disabled(disabled);
 
-      if (selfTarget) {
-        // No drop target involved — target is fixed at "player".
-        builder.args(instance.instanceId(), "player");
-      } else {
-        // Enemy id isn't known yet; EnemyDropTargetComponent appends it at drop-time.
-        builder.args(instance.instanceId());
-      }
+      // The drag source supplies the selected player or enemy ID on release.
+      builder.args(instance.instanceId());
 
       records.add(builder.build());
       x += HAND_SPACING;
