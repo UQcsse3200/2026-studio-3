@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.maps.MapGraph;
@@ -109,7 +110,8 @@ class AutosaveCoordinatorTest {
                 player,
                 PlayerDeckFactory.createStarterDeck(),
                 runState,
-                BestiaryService.loadDefault()));
+                BestiaryService.loadDefault(),
+                CardDiscoveryService.loadDefault()));
     assertTrue(service.saveGame(1).success());
 
     assertTrue(runState.getMapGraph().moveToNode(1));
@@ -144,7 +146,8 @@ class AutosaveCoordinatorTest {
                 restoredPlayer,
                 PlayerDeckFactory.createStarterDeck(),
                 restoredRun,
-                BestiaryService.loadDefault())
+                BestiaryService.loadDefault(),
+                CardDiscoveryService.loadDefault())
             .restore(autosave.data());
     assertTrue(restored.success());
     assertEquals(43, restoredPlayer.getCurrentHealth());

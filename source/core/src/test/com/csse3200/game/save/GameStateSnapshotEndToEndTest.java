@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.badlogic.gdx.files.FileHandle;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryUnlockState;
+import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.extensions.GameExtension;
@@ -50,7 +51,8 @@ class GameStateSnapshotEndToEndTest {
     bestiary.recordEncountered("boss_knight");
 
     GameStateSnapshotProvider provider =
-        new GameStateSnapshotProvider(playerState, deck, runState, bestiary);
+        new GameStateSnapshotProvider(
+            playerState, deck, runState, bestiary, CardDiscoveryService.loadDefault());
     JsonSaveGameRepository repository =
         new JsonSaveGameRepository(new FileHandle(temporaryDirectory.toFile()));
     saveGameService = new SaveGameService(repository, provider);
@@ -127,7 +129,11 @@ class GameStateSnapshotEndToEndTest {
 
     RestoreResult restoreResult =
         new SaveGameRestoreService(
-                restoredPlayerState, restoredDeck, restoredRunState, restoredBestiary)
+                restoredPlayerState,
+                restoredDeck,
+                restoredRunState,
+                restoredBestiary,
+                CardDiscoveryService.loadDefault())
             .restore(loadResult.data());
 
     assertTrue(restoreResult.success());
@@ -164,7 +170,8 @@ class GameStateSnapshotEndToEndTest {
     SaveGameService generatedSaveGameService =
         new SaveGameService(
             new JsonSaveGameRepository(new FileHandle(temporaryDirectory.toFile())),
-            new GameStateSnapshotProvider(playerState, deck, runState, bestiaryService));
+            new GameStateSnapshotProvider(
+                playerState, deck, runState, bestiaryService, CardDiscoveryService.loadDefault()));
     assertTrue(generatedSaveGameService.saveGame(2).success());
 
     LoadResult loadResult =
@@ -178,7 +185,8 @@ class GameStateSnapshotEndToEndTest {
                 new PlayerRunState(1, 10, 0),
                 PlayerDeckFactory.createStarterDeck(),
                 restoredRunState,
-                BestiaryService.loadDefault())
+                BestiaryService.loadDefault(),
+                CardDiscoveryService.loadDefault())
             .restore(loadResult.data());
 
     assertTrue(restoreResult.success());

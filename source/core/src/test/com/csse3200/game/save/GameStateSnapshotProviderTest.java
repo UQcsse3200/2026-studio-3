@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryUnlockState;
+import com.csse3200.game.cards.CardDiscoveryService;
+import com.csse3200.game.cards.CardUnlockState;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.extensions.GameExtension;
@@ -27,7 +29,12 @@ class GameStateSnapshotProviderTest {
     RunState runState = buildRunStateWithSingleNode();
 
     SaveGameData data =
-        new GameStateSnapshotProvider(playerState, deck, runState, BestiaryService.loadDefault())
+        new GameStateSnapshotProvider(
+                playerState,
+                deck,
+                runState,
+                BestiaryService.loadDefault(),
+                CardDiscoveryService.loadDefault())
             .capture();
 
     assertEquals(80, data.player.currentHealth);
@@ -42,7 +49,12 @@ class GameStateSnapshotProviderTest {
     RunState runState = buildRunStateWithSingleNode();
 
     SaveGameData data =
-        new GameStateSnapshotProvider(playerState, deck, runState, BestiaryService.loadDefault())
+        new GameStateSnapshotProvider(
+                playerState,
+                deck,
+                runState,
+                BestiaryService.loadDefault(),
+                CardDiscoveryService.loadDefault())
             .capture();
 
     assertEquals(1, data.map.nodes.size());
@@ -59,7 +71,9 @@ class GameStateSnapshotProviderTest {
     bestiary.recordDefeated("boss_knight");
 
     SaveGameData data =
-        new GameStateSnapshotProvider(playerState, deck, runState, bestiary).capture();
+        new GameStateSnapshotProvider(
+                playerState, deck, runState, bestiary, CardDiscoveryService.loadDefault())
+            .capture();
 
     assertEquals(2, data.progress.bestiary.size());
     assertEquals("lesser_shade", data.progress.bestiary.get(0).enemyId);
@@ -76,7 +90,40 @@ class GameStateSnapshotProviderTest {
 
     assertThrows(
         IllegalArgumentException.class,
-        () -> new GameStateSnapshotProvider(playerState, deck, runState, null));
+        () ->
+            new GameStateSnapshotProvider(
+                playerState, deck, runState, null, CardDiscoveryService.loadDefault()));
+  }
+
+  @Test
+  void capturesOnlySeenCardProgress() {
+    PlayerRunState playerState = new PlayerRunState(100, 100, 50);
+    PlayerDeck deck = PlayerDeckFactory.createStarterDeck();
+    RunState runState = buildRunStateWithSingleNode();
+    CardDiscoveryService cards = CardDiscoveryService.loadDefault();
+    cards.recordSeen("strike");
+
+    SaveGameData data =
+        new GameStateSnapshotProvider(
+                playerState, deck, runState, BestiaryService.loadDefault(), cards)
+            .capture();
+
+    assertEquals(1, data.progress.cards.size());
+    assertEquals("strike", data.progress.cards.get(0).cardId);
+    assertEquals(CardUnlockState.SEEN.name(), data.progress.cards.get(0).unlockState);
+  }
+
+  @Test
+  void rejectsMissingCardDiscoveryService() {
+    PlayerRunState playerState = new PlayerRunState(100, 100, 50);
+    PlayerDeck deck = PlayerDeckFactory.createStarterDeck();
+    RunState runState = buildRunStateWithSingleNode();
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            new GameStateSnapshotProvider(
+                playerState, deck, runState, BestiaryService.loadDefault(), null));
   }
 
   private RunState buildRunStateWithSingleNode() {

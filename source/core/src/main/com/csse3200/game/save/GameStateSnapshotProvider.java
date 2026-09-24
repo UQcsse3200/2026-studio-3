@@ -3,6 +3,8 @@ package com.csse3200.game.save;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryUnlockState;
+import com.csse3200.game.cards.CardDiscoveryService;
+import com.csse3200.game.cards.CardUnlockState;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.maps.MapGraph;
@@ -24,12 +26,14 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
   private final PlayerDeck playerDeck;
   private final RunState runState;
   private final BestiaryService bestiaryService;
+  private final CardDiscoveryService cardDiscoveryService;
 
   public GameStateSnapshotProvider(
       PlayerRunState playerState,
       PlayerDeck playerDeck,
       RunState runState,
-      BestiaryService bestiaryService) {
+      BestiaryService bestiaryService,
+      CardDiscoveryService cardDiscoveryService) {
     if (playerState == null) {
       throw new IllegalArgumentException("playerState must not be null");
     }
@@ -42,10 +46,14 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
     if (bestiaryService == null) {
       throw new IllegalArgumentException("bestiaryService must not be null");
     }
+    if (cardDiscoveryService == null) {
+      throw new IllegalArgumentException("cardDiscoveryService must not be null");
+    }
     this.playerState = playerState;
     this.playerDeck = playerDeck;
     this.runState = runState;
     this.bestiaryService = bestiaryService;
+    this.cardDiscoveryService = cardDiscoveryService;
   }
 
   @Override
@@ -122,6 +130,14 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
       }
     }
 
-    return new ProgressSaveData(pendingRewardId, resumeScreen, bestiaryProgress);
+    List<CardProgressSaveData> cardProgress = new ArrayList<>();
+    for (Map.Entry<String, CardUnlockState> entry :
+        cardDiscoveryService.getProgressSnapshot().entrySet()) {
+      if (entry.getValue() != CardUnlockState.LOCKED) {
+        cardProgress.add(new CardProgressSaveData(entry.getKey(), entry.getValue().name()));
+      }
+    }
+
+    return new ProgressSaveData(pendingRewardId, resumeScreen, bestiaryProgress, cardProgress);
   }
 }

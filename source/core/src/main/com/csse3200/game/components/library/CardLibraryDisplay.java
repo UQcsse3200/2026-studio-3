@@ -15,17 +15,23 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardDiscoveryService;
+import com.csse3200.game.cards.CardEntryView;
 import com.csse3200.game.cards.CardLoadingException;
+import com.csse3200.game.cards.CardUnlockState;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
+import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
-import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,10 +49,17 @@ public class CardLibraryDisplay extends UIComponent {
   private static final String DEFAULT = "default";
 
   private final GdxGame game;
+  private final CardDiscoveryService discovery;
+  private final EventListener1<CardEntryView> entryUpdatedListener = this::onEntryUpdated;
+  private final Map<String, TextButton> cardButtons = new HashMap<>();
+  private CardEntryView displayedEntry;
 
   private Stack rootStack;
   private Table cardList;
   private Image cardImage;
+  private Label lockedArtLabel;
+  private Label discoveryCounterLabel;
+  private Label stateLabel;
   private Label nameLabel;
   private Label descriptionLabel;
   private Label costLabel;
@@ -57,14 +70,18 @@ public class CardLibraryDisplay extends UIComponent {
   private Label artworkLabel;
   private TextButton.TextButtonStyle buttonStyle;
 
-  public CardLibraryDisplay(GdxGame game) {
-    this.game = game;
+  public CardLibraryDisplay(GdxGame game, CardDiscoveryService discovery) {
+    this.game = Objects.requireNonNull(game, "game cannot be null");
+    this.discovery = Objects.requireNonNull(discovery, "discovery cannot be null");
   }
 
   @Override
   public void create() {
     super.create();
     addActors();
+    discovery
+        .getEvents()
+        .addListener(CardDiscoveryService.ENTRY_UPDATED_EVENT, entryUpdatedListener);
   }
 
   private void addActors() {
@@ -119,12 +136,16 @@ public class CardLibraryDisplay extends UIComponent {
     eyebrow.setFontScale(1.15f);
     title.setFontScale(1.35f);
     subtitle.setFontScale(1.05f);
+    discoveryCounterLabel = new Label("", labelStyle(SMALL, MenuTheme.softCoral()));
+    discoveryCounterLabel.setFontScale(1.05f);
 
     titleBlock.add(eyebrow).left();
     titleBlock.row();
     titleBlock.add(title).left().padTop(2f);
     titleBlock.row();
     titleBlock.add(subtitle).left().padTop(5f);
+    titleBlock.row();
+    titleBlock.add(discoveryCounterLabel).left().padTop(5f);
 
     TextButton backButton = new TextButton("Back", buttonStyle);
     backButton.getLabel().setFontScale(0.85f);
@@ -149,9 +170,22 @@ public class CardLibraryDisplay extends UIComponent {
   private void addCardContent(Table panel) {
     try {
       List<CardConfig> cards = loadSortedCards();
-      addCards(cards, panel);
-      if (!cards.isEmpty()) {
-        showCard(cards.get(0));
+      List<CardEntryView> entries =
+          cards.stream()
+              .flatMap(
+                  card -> {
+                    var entry = discovery.getEntry(card.id);
+                    if (entry.isEmpty()) {
+                      logger.warn(
+                          "Skipping card '{}' because it is not registered for discovery", card.id);
+                    }
+                    return entry.stream();
+                  })
+              .toList();
+      addCards(entries, panel);
+      updateDiscoveryCounter();
+      if (!entries.isEmpty()) {
+        showCard(entries.get(0));
       }
     } catch (CardLoadingException exception) {
       logger.warn("Failed to load cards for library display", exception);
@@ -169,12 +203,13 @@ public class CardLibraryDisplay extends UIComponent {
         .toList();
   }
 
-  private void addCards(List<CardConfig> cards, Table panel) {
+  private void addCards(List<CardEntryView> cards, Table panel) {
     cardList = new Table();
+    cardButtons.clear();
     cardList.top();
     cardList.defaults().width(290f).height(58f).padBottom(8f).left();
 
-    for (CardConfig card : cards) {
+    for (CardEntryView card : cards) {
       TextButton cardButton = new TextButton(formatCardButton(card), buttonStyle);
       cardButton.getLabel().setFontScale(0.75f);
       cardButton.addListener(
@@ -185,6 +220,7 @@ public class CardLibraryDisplay extends UIComponent {
             }
           });
       cardList.add(cardButton).row();
+      cardButtons.put(card.cardId(), cardButton);
     }
 
     ScrollPane scrollPane = new ScrollPane(cardList, skin);
@@ -208,6 +244,7 @@ public class CardLibraryDisplay extends UIComponent {
     detailPanel.pad(24f);
     detailPanel.top();
 
+    stateLabel = new Label("", labelStyle(SMALL, MenuTheme.softCoral()));
     nameLabel = new Label("", labelStyle(LARGE, MenuTheme.warmParchment()));
     descriptionLabel = new Label("", bodyLabelStyle());
     costLabel = new Label("", labelStyle(DEFAULT, MenuTheme.softCoral()));
@@ -217,19 +254,25 @@ public class CardLibraryDisplay extends UIComponent {
     effectsLabel = new Label("", labelStyle(DEFAULT, MenuTheme.warmParchment()));
     artworkLabel = new Label("", labelStyle(SMALL, MenuTheme.warmParchment()));
     cardImage = new Image();
+    lockedArtLabel = new Label("?", labelStyle(LARGE, MenuTheme.warmParchment()));
 
+    stateLabel.setFontScale(1.05f);
     nameLabel.setFontScale(1.25f);
     descriptionLabel.setFontScale(1.1f);
     descriptionLabel.setWrap(true);
     effectsLabel.setWrap(true);
     artworkLabel.setWrap(true);
     cardImage.setScaling(Scaling.fit);
+    lockedArtLabel.setFontScale(4f);
 
     Table artworkBackground = new Table();
     artworkBackground.setBackground(skin.newDrawable(WHITE, new Color(0.035f, 0.03f, 0.04f, 1f)));
     Stack artwork = new Stack();
     artwork.add(artworkBackground);
     artwork.add(cardImage);
+    Table lockedLayer = new Table();
+    lockedLayer.add(lockedArtLabel).center();
+    artwork.add(lockedLayer);
 
     Table meta = new Table();
     meta.defaults().left().padBottom(8f);
@@ -238,6 +281,8 @@ public class CardLibraryDisplay extends UIComponent {
     meta.add(targetLabel).row();
     meta.add(rarityLabel).row();
 
+    detailPanel.add(stateLabel).left().expandX();
+    detailPanel.row();
     detailPanel.add(nameLabel).left().expandX();
     detailPanel.row();
     detailPanel.add(descriptionLabel).width(650f).left().padTop(8f).padBottom(16f);
@@ -252,20 +297,49 @@ public class CardLibraryDisplay extends UIComponent {
     return detailPanel;
   }
 
-  private String formatCardButton(CardConfig card) {
-    return card.cost + "  " + card.name;
+  static String formatCardButton(CardEntryView card) {
+    if (card.unlockState() == CardUnlockState.LOCKED) {
+      return "???";
+    }
+    return card.cost().orElseThrow() + "  " + card.displayName();
   }
 
-  private void showCard(CardConfig card) {
-    nameLabel.setText(card.name);
-    descriptionLabel.setText(card.description);
-    costLabel.setText("Cost: " + card.cost);
-    typeLabel.setText("Type: " + card.type);
-    targetLabel.setText("Target: " + card.target);
-    rarityLabel.setText("Rarity: " + card.rarity);
-    effectsLabel.setText("Effects resolve in this order:\n" + formatEffects(card.effects));
-    artworkLabel.setText("Artwork: " + card.texturePath);
-    setCardImage(card.texturePath);
+  private void showCard(CardEntryView card) {
+    displayedEntry = card;
+    nameLabel.setText(card.displayName());
+    descriptionLabel.setText(descriptionFor(card));
+    costLabel.setText("Cost: " + valueOrPlaceholder(card.cost()));
+    typeLabel.setText("Type: " + card.type().map(Enum::name).orElse("???"));
+    targetLabel.setText("Target: " + card.target().map(Enum::name).orElse("???"));
+    rarityLabel.setText("Rarity: " + card.rarity().map(Enum::name).orElse("???"));
+
+    if (card.unlockState() == CardUnlockState.LOCKED) {
+      stateLabel.setText("UNDISCOVERED");
+      effectsLabel.setText("Effects: ???");
+      artworkLabel.setText("Artwork: ???");
+      cardImage.setDrawable(null);
+      cardImage.setVisible(false);
+      lockedArtLabel.setVisible(true);
+      return;
+    }
+
+    stateLabel.setText(card.unlockState().name());
+    effectsLabel.setText(
+        "Effects resolve in this order:\n" + formatEffects(card.effects().orElse(List.of())));
+    artworkLabel.setText("Artwork: " + card.texturePath().orElse(""));
+    lockedArtLabel.setVisible(false);
+    setCardImage(card.texturePath().orElse(""));
+  }
+
+  static String descriptionFor(CardEntryView card) {
+    if (card.unlockState() == CardUnlockState.LOCKED) {
+      return "Find this card to reveal its record.";
+    }
+    return card.description().orElse("");
+  }
+
+  private static String valueOrPlaceholder(java.util.OptionalInt value) {
+    return value.isPresent() ? Integer.toString(value.getAsInt()) : "???";
   }
 
   private void setCardImage(String texturePath) {
@@ -284,12 +358,53 @@ public class CardLibraryDisplay extends UIComponent {
     cardImage.setVisible(true);
   }
 
-  private String formatEffects(EffectConfig[] effects) {
-    if (effects == null || effects.length == 0) {
+  private String formatEffects(List<EffectConfig> effects) {
+    if (effects == null || effects.isEmpty()) {
       return "None";
     }
 
-    return Arrays.stream(effects).map(this::formatEffect).reduce((a, b) -> a + "\n" + b).orElse("");
+    return effects.stream().map(this::formatEffect).reduce((a, b) -> a + "\n" + b).orElse("");
+  }
+
+  private void onEntryUpdated(CardEntryView entry) {
+    TextButton button = cardButtons.get(entry.cardId());
+    if (button != null) {
+      button.setText(formatCardButton(entry));
+    }
+    if (displayedEntry != null && displayedEntry.cardId().equals(entry.cardId())) {
+      showCard(entry);
+    }
+    updateDiscoveryCounter();
+  }
+
+  private void updateDiscoveryCounter() {
+    if (discoveryCounterLabel == null) {
+      return;
+    }
+    Map<String, CardUnlockState> progress = discovery.getProgressSnapshot();
+    long discovered =
+        progress.values().stream().filter(state -> state == CardUnlockState.SEEN).count();
+    discoveryCounterLabel.setText(discovered + " / " + progress.size() + " discovered");
+  }
+
+  CardEntryView getDisplayedEntry() {
+    return displayedEntry;
+  }
+
+  String getStateText() {
+    return stateLabel.getText().toString();
+  }
+
+  String getDescriptionText() {
+    return descriptionLabel.getText().toString();
+  }
+
+  String getCostText() {
+    return costLabel.getText().toString();
+  }
+
+  boolean isLockedArtworkVisible() {
+    return lockedArtLabel.isVisible() && !cardImage.isVisible();
   }
 
   private String formatEffect(EffectConfig effect) {
@@ -326,6 +441,9 @@ public class CardLibraryDisplay extends UIComponent {
 
   @Override
   public void dispose() {
+    discovery
+        .getEvents()
+        .removeListener(CardDiscoveryService.ENTRY_UPDATED_EVENT, entryUpdatedListener);
     if (rootStack != null) {
       rootStack.remove();
       rootStack.clear();

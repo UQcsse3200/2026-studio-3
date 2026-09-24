@@ -4,6 +4,7 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardLoadingException;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.components.library.CardLibraryDisplay;
@@ -29,10 +30,12 @@ public class CardLibraryScreen extends ScreenAdapter {
 
   private final GdxGame game;
   private final Renderer renderer;
+  private final CardDiscoveryService discovery;
   private final String[] cardLibraryTextures;
 
   public CardLibraryScreen(GdxGame game) {
     this.game = game;
+    this.discovery = game.getCardDiscoveryService();
     this.cardLibraryTextures = collectTexturePaths();
 
     logger.debug("Initialising card library screen services");
@@ -56,7 +59,8 @@ public class CardLibraryScreen extends ScreenAdapter {
   private void createUI() {
     Stage stage = ServiceLocator.getRenderService().getStage();
     Entity ui = new Entity();
-    ui.addComponent(new InputDecorator(stage, 10)).addComponent(new CardLibraryDisplay(game));
+    ui.addComponent(new InputDecorator(stage, 10))
+        .addComponent(new CardLibraryDisplay(game, discovery));
     ServiceLocator.getEntityService().register(ui);
   }
 
