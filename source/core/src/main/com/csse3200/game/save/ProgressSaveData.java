@@ -9,6 +9,9 @@ public class ProgressSaveData {
   public String resumeScreen = "";
   public List<BestiaryProgressSaveData> bestiary = new ArrayList<>();
 
+  /** Seed that fixes each node's encounter for this run; null in saves made before it existed. */
+  public Long encounterSeed = null;
+
   /** Required for JSON deserialisation. */
   public ProgressSaveData() {}
 
