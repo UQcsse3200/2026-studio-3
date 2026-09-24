@@ -89,6 +89,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
     moneyLabel = new Label(moneyText, skin, STYLE_NAME_LARGE);
     moneyLabel.setFontScale(FONT_SCALE);
 
+    // adds stats to the table
     table.add(heartImage).size(imageSideLength).pad(5);
     table.add(healthLabel).left().pad(10);
 
