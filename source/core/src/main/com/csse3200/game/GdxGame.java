@@ -19,6 +19,7 @@ import com.csse3200.game.screens.BestiaryScreen;
 import com.csse3200.game.screens.CardLibraryScreen;
 import com.csse3200.game.screens.EncounterScreen;
 import com.csse3200.game.screens.EndBattleScreen;
+import com.csse3200.game.screens.ItemLibraryScreen;
 import com.csse3200.game.screens.LibraryScreen;
 import com.csse3200.game.screens.MainGameScreen;
 import com.csse3200.game.screens.MainMenuScreen;
@@ -154,6 +155,8 @@ public class GdxGame extends Game {
         return new EndBattleScreen(this, false);
       case BESTIARY:
         return new BestiaryScreen(this);
+      case ITEM_LIBRARY:
+        return new ItemLibraryScreen(this);
       default:
         return null;
     }
@@ -171,7 +174,8 @@ public class GdxGame extends Game {
     BATTLE_SCREEN,
     VICTORY,
     DEFEAT,
-    BESTIARY
+    BESTIARY,
+    ITEM_LIBRARY
   }
 
   /** Exit the game. */
