@@ -31,22 +31,22 @@ public class EnemyAIContext {
    * @param turnNumber current battle turn number
    */
   public EnemyAIContext(
-          int playerHealth,
-          int enemyHealth,
-          int enemyMaxHealth,
-          int enemyAttack,
-          int enemyArmour,
-          EnemyIntent previousIntent,
-          int turnNumber) {
+      int playerHealth,
+      int enemyHealth,
+      int enemyMaxHealth,
+      int enemyAttack,
+      int enemyArmour,
+      EnemyIntent previousIntent,
+      int turnNumber) {
     this(
-            playerHealth,
-            enemyHealth,
-            enemyMaxHealth,
-            enemyAttack,
-            enemyArmour,
-            previousIntent,
-            turnNumber,
-            PlayerMemory.empty());
+        playerHealth,
+        enemyHealth,
+        enemyMaxHealth,
+        enemyAttack,
+        enemyArmour,
+        previousIntent,
+        turnNumber,
+        PlayerMemory.empty());
   }
 
   /**
@@ -62,24 +62,22 @@ public class EnemyAIContext {
    * @param playerMemory immutable snapshot of the player's observed combat behaviour
    */
   public EnemyAIContext(
-          int playerHealth,
-          int enemyHealth,
-          int enemyMaxHealth,
-          int enemyAttack,
-          int enemyArmour,
-          EnemyIntent previousIntent,
-          int turnNumber,
-          PlayerMemory playerMemory) {
+      int playerHealth,
+      int enemyHealth,
+      int enemyMaxHealth,
+      int enemyAttack,
+      int enemyArmour,
+      EnemyIntent previousIntent,
+      int turnNumber,
+      PlayerMemory playerMemory) {
     this.playerHealth = Math.max(0, playerHealth);
     this.enemyHealth = Math.max(0, enemyHealth);
     this.enemyMaxHealth = Math.max(0, enemyMaxHealth);
     this.enemyAttack = Math.max(0, enemyAttack);
     this.enemyArmour = Math.max(0, enemyArmour);
-    this.previousIntent =
-            Objects.requireNonNull(previousIntent, "previousIntent cannot be null");
+    this.previousIntent = Objects.requireNonNull(previousIntent, "previousIntent cannot be null");
     this.turnNumber = Math.max(1, turnNumber);
-    this.playerMemory =
-            Objects.requireNonNull(playerMemory, "playerMemory cannot be null");
+    this.playerMemory = Objects.requireNonNull(playerMemory, "playerMemory cannot be null");
   }
 
   public int getPlayerHealth() {
