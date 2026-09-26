@@ -34,6 +34,7 @@ public abstract class Clickable extends Component {
   float height;
   Object[] args;
   String label;
+  float rotation;
 
   private static Skin getDefaultSkin() {
     if (defaultSkin == null) {
@@ -51,6 +52,7 @@ public abstract class Clickable extends Component {
     this.args = rec.args();
     this.label = rec.label();
     this.disabled = rec.disabled();
+    this.rotation = rec.rotation();
 
     String text = rec.text();
     String styleName = rec.styleName();
@@ -229,13 +231,36 @@ public abstract class Clickable extends Component {
   }
 
   public void draw() {
-    // int screenHeight = Gdx.graphics.getHeight();
     float stageHeight = btn.getStage().getViewport().getWorldHeight();
     btn.setPosition(this.getX(), stageHeight - this.getY());
 
+    applySizeAndRotation();
+  }
+
+  /**
+   * Applies the configured size (if set) and rotation to the button. Rotation is applied around
+   * the button's center rather than its default bottom-left origin, so a non-zero {@link
+   * #rotation} tilts the widget in place instead of swinging it around a corner. Shared by {@link
+   * #draw()} and {@link InOutOnTrigger#draw()}, which otherwise handle position differently.
+   *
+   * <p>{@code Button} extends {@code Table}/{@code WidgetGroup}, which disables group transforms
+   * ({@code setTransform(false)}) by default for performance — without turning it back on here,
+   * {@code setRotation} is silently a no-op, since {@code Group.draw()} skips applying its
+   * rotation/scale matrix entirely when transform is off.
+   */
+  protected void applySizeAndRotation() {
     if (this.getWidth() > 0 && this.getHeight() > 0) {
       btn.setSize(this.getWidth(), this.getHeight());
     }
+    if (rotation != 0f) {
+      btn.setTransform(true);
+      btn.setOrigin(btn.getWidth() / 2f, btn.getHeight() / 2f);
+      btn.setRotation(rotation);
+    }
+  }
+
+  public float getRotation() {
+    return rotation;
   }
 
   /**

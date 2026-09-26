@@ -87,14 +87,10 @@ public class BattleActions extends Component {
     if (nextPhase == BattlePhase.ENEMY_TURN && previousPhase == BattlePhase.PLAYER_END) {
       deferringEnemyTurn = true;
       entity.getEvents().trigger(PHASE_CHANGED_EVENT, nextPhase);
-      entity.getEvents().trigger("down");
       return;
     }
 
     dispatch(() -> entity.getEvents().trigger(PHASE_CHANGED_EVENT, nextPhase));
-    if (nextPhase == BattlePhase.PLAYER_TURN) {
-      dispatch(() -> entity.getEvents().trigger("up"));
-    }
 
     boolean enemyTurnOver =
         (nextPhase == BattlePhase.PLAYER_TURN && previousPhase == BattlePhase.PLAYER_START)
