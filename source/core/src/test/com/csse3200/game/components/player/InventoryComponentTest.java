@@ -136,7 +136,7 @@ class InventoryComponentTest {
     entity.addComponent(inventory);
 
     final int[] receivedGold = {-1};
-    entity.getEvents().addListener("updateGold", (Integer gold) -> receivedGold[0] = gold);
+    entity.getEvents().addListener("updateMoney", (Integer gold) -> receivedGold[0] = gold);
 
     inventory.setGold(75);
 
@@ -150,7 +150,7 @@ class InventoryComponentTest {
     entity.addComponent(inventory);
 
     final int[] receivedGold = {-1};
-    entity.getEvents().addListener("updateGold", (Integer gold) -> receivedGold[0] = gold);
+    entity.getEvents().addListener("updateMoney", (Integer gold) -> receivedGold[0] = gold);
 
     inventory.addGold(20);
     assertEquals(70, receivedGold[0]);

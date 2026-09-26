@@ -79,4 +79,35 @@ class EnemyScalingTest {
     assertEquals("custom_behaviour", scaled.behaviour);
     assertEquals("images/enemies/custom.atlas", scaled.sprite);
   }
+
+  @Test
+  void scalingLeavesBaseChangeUnchanged() {
+    EnemyConfig base = new EnemyConfig();
+    base.health = 100;
+    base.baseAttack = 20;
+    base.tier = EnemyTier.NORMAL;
+
+    EnemyConfig scaled = EnemyScaling.scale(base, 5);
+
+    assertEquals(140, scaled.health);
+    assertEquals(25, scaled.baseAttack);
+    assertEquals(100, base.health);
+    assertEquals(20, base.baseAttack);
+  }
+
+  @Test
+  void repeatedScalingReturnsSameStats() {
+    EnemyConfig base = new EnemyConfig();
+    base.health = 100;
+    base.baseAttack = 20;
+    base.tier = EnemyTier.NORMAL;
+
+    EnemyConfig first = EnemyScaling.scale(base, 5);
+    EnemyConfig second = EnemyScaling.scale(base, 5);
+
+    assertEquals(140, first.health);
+    assertEquals(25, first.baseAttack);
+    assertEquals(first.health, second.health);
+    assertEquals(first.baseAttack, second.baseAttack);
+  }
 }

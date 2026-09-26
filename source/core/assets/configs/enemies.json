@@ -25,16 +25,25 @@
       "baseAttack": 7,
       "armour": 1,
       "tier": "NORMAL",
-      "behaviour": "armour_sacrifice"
+      "behaviour": "armour_scaling"
     },
     {
-      "id": "void_knight",
-      "name": "Void Knight",
+      "id": "tomb_guardian",
+      "name": "Tomb Guardian",
       "health": 72,
       "baseAttack": 10,
       "armour": 5,
       "tier": "ELITE",
-      "behaviour": "cycle_attack_defend"
+      "behaviour": "shield_break_retaliation"
+    },
+    {
+      "id": "void_knight",
+      "name": "Void Knight",
+      "health": 40,
+      "baseAttack": 16,
+      "armour": 0,
+      "tier": "ELITE",
+      "behaviour": "enrage_low_health"
     },
     {
       "id": "boss_knight",
@@ -43,7 +52,7 @@
       "baseAttack": 14,
       "armour": 8,
       "tier": "BOSS",
-      "behaviour": "BOSS",
+      "behaviour": "boss",
       "sprite": "images/enemies/boss_knight.atlas"
     }
   ]

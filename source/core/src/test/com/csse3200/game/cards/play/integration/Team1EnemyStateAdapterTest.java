@@ -31,10 +31,10 @@ class Team1EnemyStateAdapterTest {
   }
 
   @Test
-  void shouldApplyResolvedDamageBeforeTeamOneBlockArmorAndHealthHandling() {
+  void shouldApplyResolvedDamageBeforeTeamOneBlockArmourAndHealthHandling() {
     CombatStatsComponent stats = new CombatStatsComponent(10, 1);
     stats.addBlock(3);
-    stats.addArmor(2);
+    stats.addArmour(2);
     Team1EnemyStateAdapter adapter =
         new Team1EnemyStateAdapter(Map.of("enemy-1", enemyWith(stats)));
 
@@ -44,7 +44,7 @@ class Team1EnemyStateAdapterTest {
 
     assertEquals(5, stats.getHealth());
     assertEquals(0, stats.getBlock());
-    assertEquals(0, stats.getArmor());
+    assertEquals(0, stats.getArmour());
   }
 
   @Test
@@ -61,6 +61,34 @@ class Team1EnemyStateAdapterTest {
 
     assertEquals(1, first.getStatusEffect(EffectType.VULNERABLE.name()).getValue());
     assertEquals(1, second.getStatusEffect(EffectType.VULNERABLE.name()).getValue());
+  }
+
+  @Test
+  void shouldReduceEnemyArmourWithSunder() {
+    CombatStatsComponent stats = new CombatStatsComponent(10, 1);
+    stats.addArmour(5);
+    Team1EnemyStateAdapter adapter =
+        new Team1EnemyStateAdapter(Map.of("enemy-1", enemyWith(stats)));
+
+    adapter.applyEnemyEffects(
+        CardPlayTarget.singleEnemy("enemy-1"),
+        List.of(enemyEffect(EffectType.SUNDER, TargetType.SINGLE_ENEMY, 3, 0, 0)));
+
+    assertEquals(2, stats.getArmour());
+  }
+
+  @Test
+  void shouldNotReduceEnemyArmourBelowZeroWithSunder() {
+    CombatStatsComponent stats = new CombatStatsComponent(10, 1);
+    stats.addArmour(2);
+    Team1EnemyStateAdapter adapter =
+        new Team1EnemyStateAdapter(Map.of("enemy-1", enemyWith(stats)));
+
+    adapter.applyEnemyEffects(
+        CardPlayTarget.singleEnemy("enemy-1"),
+        List.of(enemyEffect(EffectType.SUNDER, TargetType.SINGLE_ENEMY, 3, 0, 0)));
+
+    assertEquals(0, stats.getArmour());
   }
 
   @Test
@@ -85,5 +113,42 @@ class Team1EnemyStateAdapterTest {
   private static ResolvedCardEffect enemyEffect(
       EffectType type, TargetType target, int value, int duration, int sequence) {
     return new ResolvedCardEffect("enemy_card", type, target, value, duration, sequence);
+  }
+
+  @Test
+  void shouldApplyPiercingDamageWithoutConsumingBlockOrArmour() {
+    CombatStatsComponent stats = new CombatStatsComponent(20, 1);
+    stats.addBlock(3);
+    stats.addArmour(4);
+    Team1EnemyStateAdapter adapter =
+        new Team1EnemyStateAdapter(Map.of("enemy-1", enemyWith(stats)));
+
+    adapter.applyEnemyEffects(
+        CardPlayTarget.singleEnemy("enemy-1"),
+        List.of(enemyEffect(EffectType.PIERCE, TargetType.SINGLE_ENEMY, 6, 0, 0)));
+
+    assertEquals(14, stats.getHealth());
+    assertEquals(3, stats.getBlock());
+    assertEquals(4, stats.getArmour());
+  }
+
+  @Test
+  void shouldApplyPiercingDamageToAllAvailableEnemies() {
+    CombatStatsComponent first = new CombatStatsComponent(20, 1);
+    CombatStatsComponent second = new CombatStatsComponent(20, 1);
+    first.addArmour(4);
+    second.addBlock(3);
+    Team1EnemyStateAdapter adapter =
+        new Team1EnemyStateAdapter(
+            Map.of("enemy-1", enemyWith(first), "enemy-2", enemyWith(second)));
+
+    adapter.applyEnemyEffects(
+        CardPlayTarget.allEnemies(),
+        List.of(enemyEffect(EffectType.PIERCE, TargetType.ALL_ENEMIES, 6, 0, 0)));
+
+    assertEquals(14, first.getHealth());
+    assertEquals(14, second.getHealth());
+    assertEquals(4, first.getArmour());
+    assertEquals(3, second.getBlock());
   }
 }

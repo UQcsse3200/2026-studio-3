@@ -1,0 +1,28 @@
+{
+  "encounters": [
+    {
+      "id": "wrong-weight-type",
+      "description": "Uses a string weight.",
+      "weight": "heavy",
+      "choices": [
+        {
+          "id": "continue",
+          "description": "Continue.",
+          "outcome": { "healthDelta": 0, "currencyDelta": 0 }
+        }
+      ]
+    },
+    {
+      "id": "out-of-range-weight",
+      "description": "Uses an out-of-range weight.",
+      "weight": 2147483648,
+      "choices": [
+        {
+          "id": "continue",
+          "description": "Continue.",
+          "outcome": { "healthDelta": 0, "currencyDelta": 0 }
+        }
+      ]
+    }
+  ]
+}

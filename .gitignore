@@ -3,3 +3,13 @@
 ### Gradle ###
 .gradle/
 .gradle-local/
+<<<<<<< Updated upstream
+stuff
+source/core/assets/images/silly_ghost.png
+source/core/assets/images/sillyGhost.atlas
+source/sprint2-test-run.log
+=======
+/stuff
+source/core/assets/images/silly_ghost.png
+source/core/assets/images/sillyGhost.atlas
+>>>>>>> Stashed changes

@@ -35,6 +35,9 @@ public class CardEffectDebugDisplay extends UIComponent {
     EFFECT_COLORS.put(EffectType.POISON, new Color(0.45f, 0.75f, 0.2f, 1f));
     EFFECT_COLORS.put(EffectType.VULNERABLE, new Color(0.9f, 0.4f, 0.1f, 1f));
     EFFECT_COLORS.put(EffectType.STRENGTH, new Color(1f, 0.92f, 0.15f, 1f));
+    EFFECT_COLORS.put(EffectType.ENERGY_GAIN, new Color(0.2f, 0.75f, 1f, 1f));
+    EFFECT_COLORS.put(EffectType.CLEANSE, new Color(0.85f, 0.9f, 1f, 1f));
+    EFFECT_COLORS.put(EffectType.FORTIFY, new Color(0.72f, 0.58f, 0.35f, 1f));
   }
 
   private CardEffectDebugComponent debug;
@@ -82,6 +85,10 @@ public class CardEffectDebugDisplay extends UIComponent {
     boolean open = debug.isOpen();
     window.setVisible(open);
     if (open) {
+      // Bring the window back above anything added to the stage since it was created — e.g. the
+      // hand gets rebuilt (fresh actors added to the same stage) every time a card is played,
+      // which otherwise renders those cards in front of an already-open dialog.
+      window.toFront();
       refreshRows();
     }
   }
