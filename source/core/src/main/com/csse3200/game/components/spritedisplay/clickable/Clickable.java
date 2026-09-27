@@ -238,10 +238,10 @@ public abstract class Clickable extends Component {
   }
 
   /**
-   * Applies the configured size (if set) and rotation to the button. Rotation is applied around
-   * the button's center rather than its default bottom-left origin, so a non-zero {@link
-   * #rotation} tilts the widget in place instead of swinging it around a corner. Shared by {@link
-   * #draw()} and {@link InOutOnTrigger#draw()}, which otherwise handle position differently.
+   * Applies the configured size (if set) and rotation to the button. Rotation is applied around the
+   * button's center rather than its default bottom-left origin, so a non-zero {@link #rotation}
+   * tilts the widget in place instead of swinging it around a corner. Shared by {@link #draw()} and
+   * {@link InOutOnTrigger#draw()}, which otherwise handle position differently.
    *
    * <p>{@code Button} extends {@code Table}/{@code WidgetGroup}, which disables group transforms
    * ({@code setTransform(false)}) by default for performance — without turning it back on here,

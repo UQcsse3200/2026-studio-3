@@ -87,8 +87,7 @@ class ClickableRecordTest {
   void hasSize_falseWhenOnlyWidthSet() {
     ClickableRecord rec =
         new ClickableRecord(
-            "Attack", null, 0, 0, null, "attackCard", null, 64, -1, "drag", null, null, false,
-            0f);
+            "Attack", null, 0, 0, null, "attackCard", null, 64, -1, "drag", null, null, false, 0f);
 
     assertFalse(rec.hasSize());
   }
@@ -97,8 +96,7 @@ class ClickableRecordTest {
   void hasSize_falseWhenOnlyHeightSet() {
     ClickableRecord rec =
         new ClickableRecord(
-            "Attack", null, 0, 0, null, "attackCard", null, -1, 32, "drag", null, null, false,
-            0f);
+            "Attack", null, 0, 0, null, "attackCard", null, -1, 32, "drag", null, null, false, 0f);
 
     assertFalse(rec.hasSize());
   }
