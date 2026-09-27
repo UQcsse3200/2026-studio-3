@@ -66,7 +66,8 @@ public class GdxGame extends Game {
    * @return String background id for the current battle
    */
   public String getBackgroundId() {
-    String backgroundId = BACKGROUND_IDS[(getRunState().getMapProgression() - 1) % BACKGROUND_IDS.length];
+    String backgroundId =
+        BACKGROUND_IDS[(getRunState().getMapProgression() - 1) % BACKGROUND_IDS.length];
     logger.debug("Background Id: {}", backgroundId);
     return backgroundId;
   }
@@ -166,7 +167,6 @@ public class GdxGame extends Game {
       case VICTORY -> new EndBattleScreen(this, true);
       case DEFEAT -> new EndBattleScreen(this, false);
       case BESTIARY -> new BestiaryScreen(this);
-      default -> null;
     };
   }
 
