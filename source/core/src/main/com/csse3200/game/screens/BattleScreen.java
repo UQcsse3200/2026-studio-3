@@ -9,7 +9,6 @@ import com.csse3200.game.areas.ForestGameArea;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
-import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.debug.CardEffectDebugComponent;
 import com.csse3200.game.cards.debug.CardEffectDebugDisplay;
@@ -86,9 +85,13 @@ public class BattleScreen extends ScreenAdapter {
   };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
 
-  private static final float HAND_START_X = 25f;
   private static final float HAND_Y = 1000f;
-  private static final float HAND_SPACING = 250f;
+  // Less than CARD_WIDTH on purpose: cards overlap like a fanned hand instead of sitting
+  // edge-to-edge, so a full hand still fits across the screen.
+  private static final float HAND_SPACING = 90f;
+  // Fan-out: how far each card tilts and dips per slot away from the hand's middle card.
+  private static final float HAND_ROTATION_STEP_DEGREES = 6f;
+  private static final float HAND_ARC_DROP_PER_CARD = 18f;
   private static final float CARD_WIDTH = 225;
   private static final float CARD_HEIGHT = 456;
   private static final float CARD_INVENTORY_MIN_WIDTH = 800f;
@@ -212,7 +215,7 @@ public class BattleScreen extends ScreenAdapter {
 
     controller.addBattleEndListener(
         won -> {
-          if (won) {
+          if (Boolean.TRUE.equals(won)) {
             int currentHealth =
                 forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getHealth();
             int maxHealth =
@@ -265,6 +268,7 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(uiFactory)
             .addComponent(displays)
             .addComponent(new BattleActions(controller, game))
+            .addComponent(new CardActions(controller, gameArea.getPlayer()))
             .addComponent(cardPlayAdapter)
             .addComponent(cardInventory)
             .addComponent(new PauseMenuDisplay())
@@ -370,8 +374,17 @@ public class BattleScreen extends ScreenAdapter {
     Set<CardInstance> discardedInstances = new HashSet<>(battleDeck.getDiscardPileInstances());
 
     List<ClickableRecord> records = new ArrayList<>();
-    float x = HAND_START_X;
-    for (CardInstance instance : handRowOrder) {
+    // Centre the whole row horizontally rather than always starting at a fixed left edge, so a
+    // hand of 3 cards and a hand of 8 both sit in the middle of the screen instead of hugging
+    // the left side.
+    float stageWidth = ServiceLocator.getRenderService().getStage().getViewport().getWorldWidth();
+    float handWidth = CARD_WIDTH + Math.max(0, handRowOrder.size() - 1) * HAND_SPACING;
+    float x = (stageWidth - handWidth) / 2f;
+    // Fan the hand out from its middle slot: cards further from center tilt outward and dip
+    // down a little, so the row reads as a hand of cards rather than a flat strip.
+    float centerIndex = (handRowOrder.size() - 1) / 2f;
+    for (int i = 0; i < handRowOrder.size(); i++) {
+      CardInstance instance = handRowOrder.get(i);
       String cardId = instance.cardId();
       boolean disabled = discardedInstances.contains(instance);
 
@@ -382,19 +395,26 @@ public class BattleScreen extends ScreenAdapter {
       }
       CardConfig card = maybeCard.get();
       String variant =
-          card.target == TargetType.SELF
-              ? "selfAimDrag"
-              : card.target == TargetType.SINGLE_ENEMY ? "aimDrag" : "drag";
+          switch (card.target) {
+            case SELF -> "selfAimDrag";
+            case SINGLE_ENEMY -> "aimDrag";
+            case ALL_ENEMIES -> "drag";
+          };
 
       Skin cardSkin = CardImageSkins.forTexturePath(card.texturePath);
+
+      float offsetFromCenter = i - centerIndex;
+      float rotation = -offsetFromCenter * HAND_ROTATION_STEP_DEGREES;
+      float y = HAND_Y + Math.abs(offsetFromCenter) * HAND_ARC_DROP_PER_CARD;
 
       ClickableRecord.Builder builder =
           ClickableRecord.builder("playCard")
               .label(card.name)
               .variant(variant)
-              .position(x, HAND_Y)
+              .position(x, y)
               .size(CARD_WIDTH, CARD_HEIGHT)
               .skin(cardSkin)
+              .rotation(rotation)
               .disabled(disabled);
 
       // The drag source supplies the selected player or enemy ID on release.
