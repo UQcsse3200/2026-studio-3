@@ -114,7 +114,7 @@ public class SettingsPanel extends Table {
     displayModeSelect.setItems(getDisplayModes(Gdx.graphics.getMonitor()));
     addControlRow("Resolution", displayModeSelect, null);
 
-    resetButton = themedButton("Reset Defaults", "reset-defaults");
+    resetButton = themedButton("Reset", "reset-defaults");
     backButton = themedButton("Back", "back");
     applyButton = themedButton("Apply", "apply");
     wireActions();
