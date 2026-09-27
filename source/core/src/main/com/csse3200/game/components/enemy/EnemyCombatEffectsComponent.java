@@ -23,6 +23,7 @@ public class EnemyCombatEffectsComponent extends Component {
   private static final Color DEFEND_COLOR = Color.CYAN;
   private static final Color ATTACK_TELEGRAPH_COLOR = Color.YELLOW;
   private static final Color ENRAGE_COLOR = new Color(1f, 0.3f, 0.3f, 1f);
+  private static final Color DEFEATED_COLOR = new Color(0.35f, 0.35f, 0.35f, 1f);
 
   private AnimationRenderComponent animator;
   private int lastArmour;
@@ -39,6 +40,7 @@ public class EnemyCombatEffectsComponent extends Component {
     entity.getEvents().addListener("updateArmour", this::onArmourUpdated);
     entity.getEvents().addListener("enemyEnraged", this::onEnraged);
     entity.getEvents().addListener("intentChanged", this::onIntentChanged);
+    entity.getEvents().addListener("enemyDefeated", this::onDefeated);
   }
 
   private void onDamaged(int amount) {
@@ -54,6 +56,10 @@ public class EnemyCombatEffectsComponent extends Component {
 
   private void onEnraged() {
     animator.setPersistentTint(ENRAGE_COLOR);
+  }
+
+  private void onDefeated() {
+    animator.setPersistentTint(DEFEATED_COLOR);
   }
 
   // 攻击意图刚决定时（还没真正命中）先给一次闪烁，当作"预警"

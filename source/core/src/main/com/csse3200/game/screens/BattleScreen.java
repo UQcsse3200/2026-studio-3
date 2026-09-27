@@ -247,8 +247,6 @@ public class BattleScreen extends ScreenAdapter {
     uiFactory.registerInstanceVariant("aimDrag", rec -> new DragNDrop(rec, enemyCardAim));
     uiFactory.registerInstanceVariant("selfAimDrag", rec -> new DragNDrop(rec, playerCardAim));
 
-    Team3CardPlayAdapter cardPlayAdapter = new Team3CardPlayAdapter(cardPlayService, controller);
-
     // PROPOSED: debug terminal for cheats/commands during battle (skip battle, give gold, etc.
     // — commands added separately). Same Terminal/KeyboardTerminalInputComponent/TerminalDisplay
     // trio MainGameScreen already wires up; F1 toggles it open/closed.
@@ -269,7 +267,7 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(displays)
             .addComponent(new BattleActions(controller, game))
             .addComponent(new CardActions(controller, gameArea.getPlayer()))
-            .addComponent(cardPlayAdapter)
+            .addComponent(new Team3CardPlayAdapter(cardPlayService, controller))
             .addComponent(cardInventory)
             .addComponent(new PauseMenuDisplay())
             .addComponent(new PauseMenuInput())
