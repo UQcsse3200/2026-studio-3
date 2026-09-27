@@ -9,11 +9,11 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.csse3200.game.components.settingsmenu.SettingsPanel;
 import com.csse3200.game.ui.UIComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +59,7 @@ public class PauseMenuDisplay extends UIComponent {
   private TextButton confirmButton;
   private TextButton cancelButton;
   private TextButton settingsBackButton;
+  private SettingsPanel settingsPanel;
 
   @Override
   public void create() {
@@ -139,22 +140,9 @@ public class PauseMenuDisplay extends UIComponent {
   }
 
   private Table buildSettingsTable() {
-    Table root = new Table();
-
-    Label title = new Label("Settings", skin, "title");
-    root.add(title).padBottom(25f);
-    root.row();
-    settingsBackButton = new TextButton("Back", skin);
-    settingsBackButton.addListener(
-        new ChangeListener() {
-          @Override
-          public void changed(ChangeEvent changeEvent, Actor actor) {
-            logger.debug("Pause settings back button clicked");
-            showPauseButtons();
-          }
-        });
-    root.add(settingsBackButton);
-    return root;
+    settingsPanel = new SettingsPanel(skin, this::showPauseButtons);
+    settingsBackButton = settingsPanel.getBackButton();
+    return settingsPanel;
   }
 
   /** Builds the "leave this run" confirmation dialog. It only fires the exit event on confirm. */
@@ -219,6 +207,7 @@ public class PauseMenuDisplay extends UIComponent {
     table.clearChildren();
     table.add(menuTable);
     settingsTable = null;
+    settingsPanel = null;
   }
 
   /** Hides the menu (and any open confirmation dialog). Triggered by Resume. */
@@ -294,5 +283,9 @@ public class PauseMenuDisplay extends UIComponent {
 
   Table getRootTable() {
     return table;
+  }
+
+  SettingsPanel getSettingsPanel() {
+    return settingsPanel;
   }
 }
