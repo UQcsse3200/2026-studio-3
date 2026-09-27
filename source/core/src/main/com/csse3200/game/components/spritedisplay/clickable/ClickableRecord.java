@@ -18,7 +18,8 @@ public record ClickableRecord(
     String variant,
     Object[] args,
     String label,
-    boolean disabled) {
+    boolean disabled,
+    float rotation) {
 
   public enum ButtonType {
     TEXT,
@@ -47,7 +48,7 @@ public record ClickableRecord(
   }
 
   // Explicit equals/hashCode/toString because the auto-generated record versions compare the
-  // Object[] args by reference, not content. A 12-component record deconstruction pattern here
+  // Object[] args by reference, not content. A 13-component record deconstruction pattern here
   // would be far less readable than accessor comparison, so java:S6878 is suppressed.
   @Override
   public boolean equals(Object o) {
@@ -59,6 +60,7 @@ public record ClickableRecord(
         && Float.compare(y, other.y) == 0
         && Float.compare(width, other.width) == 0
         && Float.compare(height, other.height) == 0
+        && Float.compare(rotation, other.rotation) == 0
         && type == other.type
         && Objects.equals(text, other.text)
         && Objects.equals(btnSkin, other.btnSkin)
@@ -85,7 +87,8 @@ public record ClickableRecord(
         variant,
         Arrays.hashCode(args),
         label,
-        disabled);
+        disabled,
+        rotation);
   }
 
   @Override
@@ -116,6 +119,8 @@ public record ClickableRecord(
         + label
         + ", disabled="
         + disabled
+        + ", rotation="
+        + rotation
         + "]";
   }
 
@@ -136,6 +141,7 @@ public record ClickableRecord(
     private Object[] args = NO_ARGS;
     private String label;
     private boolean disabled = false;
+    private float rotation = 0f;
 
     private Builder(String trigger) {
       this.trigger = trigger;
@@ -197,11 +203,17 @@ public record ClickableRecord(
       return this;
     }
 
+    /** Rotation of the widget in degrees, applied around its center. Defaults to 0 (unrotated). */
+    public Builder rotation(float rotation) {
+      this.rotation = rotation;
+      return this;
+    }
+
     public ClickableRecord build() {
       ButtonType type = inferType(text, btnSkin);
       return new ClickableRecord(
           text, btnSkin, x, y, styleName, trigger, type, width, height, variant, args, label,
-          disabled);
+          disabled, rotation);
     }
 
     private static ButtonType inferType(String text, Skin btnSkin) {
