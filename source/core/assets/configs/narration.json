@@ -1,0 +1,12 @@
+{
+  "opening": [
+    ["[PLACEHOLDER] Opening passage one.", "[PLACEHOLDER] Text to be supplied by Ziqin."],
+    ["[PLACEHOLDER] Opening passage two.", "[PLACEHOLDER] Text to be supplied by Ziqin."],
+    ["[PLACEHOLDER] Opening passage three.", "[PLACEHOLDER] Text to be supplied by Ziqin."]
+  ],
+  "pre_boss": [
+    ["[PLACEHOLDER] Pre-boss passage one.", "[PLACEHOLDER] Text to be supplied by Ziqin."],
+    ["[PLACEHOLDER] Pre-boss passage two.", "[PLACEHOLDER] Text to be supplied by Ziqin."],
+    ["[PLACEHOLDER] Pre-boss passage three.", "[PLACEHOLDER] Text to be supplied by Ziqin."]
+  ]
+}
