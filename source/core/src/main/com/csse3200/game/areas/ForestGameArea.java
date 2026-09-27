@@ -48,7 +48,16 @@ public class ForestGameArea extends GameArea {
     "images/iso_grass_3.png",
     "images/enemies/intents/attack.png",
     "images/enemies/intents/defend.png",
-    "images/battle_background.png"
+    "images/dungeon.png",
+    "images/stones_ruins.png",
+    "images/inside_castle.png",
+    "images/mystical_tree.png",
+    "images/forest.png",
+    "images/cemetery.png",
+    "images/underwater.png",
+    "images/temple.png",
+    "images/autumn_forest.png",
+    "images/forest_with_sun.png"
   };
   private static final String[] forestTextureAtlases = {
     "images/terrain_iso_grass.atlas",
@@ -128,14 +137,16 @@ public class ForestGameArea extends GameArea {
     spawnBackground();
     spawnTerrain();
 
-    enemy = spawnEnemy();
+    if (spawnsDefaultEnemy()) {
+      enemy = spawnEnemy();
+    }
     player = spawnPlayer();
 
     // playMusic();
   }
 
   public void displayUI(Entity ui) {
-    ui.addComponent(new GameAreaDisplay("The Fall of Pantheons"));
+    ui.addComponent(new GameAreaDisplay(""));
     spawnEntity(ui);
   }
 
@@ -213,12 +224,22 @@ public class ForestGameArea extends GameArea {
     return newEnemy;
   }
 
+  /**
+   * Whether {@link #create()} should spawn the default enemy. Subclasses that place their own
+   * enemies override this to return false.
+   *
+   * @return true to spawn the default enemy
+   */
+  protected boolean spawnsDefaultEnemy() {
+    return true;
+  }
+
   public Entity getPlayer() {
     return player;
   }
 
   public List<Entity> getEnemies() {
-    return List.of(enemy);
+    return enemy == null ? List.of() : List.of(enemy);
   }
 
   //  private void playMusic() {

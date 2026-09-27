@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
 public class MainGameScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(MainGameScreen.class);
   private static final String[] mainGameTextures = {
-    "images/heart.png", "images/energy.png", "images/piety.png", "images/money.png"
+    "images/heart.png", "images/energy.png", "images/level.png", "images/money.png"
   };
   private static final String[] shopCardTextures = {
     "images/shop/cards/bandage.png",
