@@ -3,6 +3,7 @@ package com.csse3200.game.screens;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.GdxGame;
+import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.components.settingsmenu.SettingsMenuDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
@@ -20,6 +21,9 @@ import org.slf4j.LoggerFactory;
 /** The game screen containing the settings. */
 public class SettingsScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(SettingsScreen.class);
+  private static final String[] SETTINGS_TEXTURES = {
+    MainMenuDisplay.BACKGROUND_TEXTURE, MainMenuDisplay.BUTTON_FRAME_TEXTURE
+  };
 
   private final GdxGame game;
   private final Renderer renderer;
@@ -36,6 +40,10 @@ public class SettingsScreen extends ScreenAdapter {
 
     renderer = RenderFactory.createRenderer();
     renderer.getCamera().getEntity().setPosition(5f, 5f);
+
+    ResourceService resourceService = ServiceLocator.getResourceService();
+    resourceService.loadTextures(SETTINGS_TEXTURES);
+    resourceService.loadAll();
 
     createUI();
   }
@@ -56,6 +64,8 @@ public class SettingsScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
+    ServiceLocator.getResourceService().unloadAssets(SETTINGS_TEXTURES);
+    ServiceLocator.getResourceService().dispose();
 
     ServiceLocator.clear();
   }
