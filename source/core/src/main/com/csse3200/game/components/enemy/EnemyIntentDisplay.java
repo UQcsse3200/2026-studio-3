@@ -40,6 +40,10 @@ public class EnemyIntentDisplay extends RenderComponent {
     this.currentIntent = null;
   }
 
+  public EnemyIntent getCurrentIntent() {
+    return currentIntent;
+  }
+
   @Override
   protected void draw(SpriteBatch batch) {
     if (currentIntent == null) {
