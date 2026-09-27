@@ -151,21 +151,21 @@ public class GdxGame extends Game {
    * @return new screen
    */
   private Screen newScreen(ScreenType screenType) {
-      return switch (screenType) {
-          case MAIN_MENU -> new MainMenuScreen(this);
-          case MAIN_GAME -> new MainGameScreen(this);
-          case SETTINGS -> new SettingsScreen(this);
-          case SAVE_LOAD -> new SaveLoadScreen(this);
-          case LIBRARY -> new LibraryScreen(this);
-          case CARD_LIBRARY -> new CardLibraryScreen(this);
-          case MAP -> new MapScreen(this);
-          case ENCOUNTER -> new EncounterScreen(this);
-          case BATTLE_SCREEN -> new BattleScreen(this);
-          case VICTORY -> new EndBattleScreen(this, true);
-          case DEFEAT -> new EndBattleScreen(this, false);
-          case BESTIARY -> new BestiaryScreen(this);
-          default -> null;
-      };
+    return switch (screenType) {
+      case MAIN_MENU -> new MainMenuScreen(this);
+      case MAIN_GAME -> new MainGameScreen(this);
+      case SETTINGS -> new SettingsScreen(this);
+      case SAVE_LOAD -> new SaveLoadScreen(this);
+      case LIBRARY -> new LibraryScreen(this);
+      case CARD_LIBRARY -> new CardLibraryScreen(this);
+      case MAP -> new MapScreen(this);
+      case ENCOUNTER -> new EncounterScreen(this);
+      case BATTLE_SCREEN -> new BattleScreen(this);
+      case VICTORY -> new EndBattleScreen(this, true);
+      case DEFEAT -> new EndBattleScreen(this, false);
+      case BESTIARY -> new BestiaryScreen(this);
+      default -> null;
+    };
   }
 
   public enum ScreenType {
