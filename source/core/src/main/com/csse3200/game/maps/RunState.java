@@ -1,10 +1,12 @@
 package com.csse3200.game.maps;
 
+import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.entities.factories.PlayerFactory;
 import com.csse3200.game.rewards.RewardOption;
+import com.csse3200.game.services.ServiceLocator;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,16 @@ public class RunState {
       playerDeck = PlayerDeckFactory.createStarterDeck(cardService);
     }
     return playerDeck;
+  }
+
+  /** Creates the starter deck for a new run and records its card definitions as seen. */
+  public PlayerDeck createStarterDeckForNewRun(CardService cardService) {
+    PlayerDeck deck = getOrCreatePlayerDeck(cardService);
+    CardDiscoveryService discovery = ServiceLocator.getCardDiscoveryService();
+    if (discovery != null) {
+      discovery.recordSeenAll(PlayerDeckFactory.getStarterDeckCardIds());
+    }
+    return deck;
   }
 
   /**
