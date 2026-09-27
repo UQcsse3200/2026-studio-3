@@ -48,7 +48,16 @@ public class ForestGameArea extends GameArea {
     "images/iso_grass_3.png",
     "images/enemies/intents/attack.png",
     "images/enemies/intents/defend.png",
-    "images/battle_background.png"
+    "images/dungeon.png",
+    "images/stones_ruins.png",
+    "images/inside_castle.png",
+    "images/mystical_tree.png",
+    "images/forest.png",
+    "images/cemetery.png",
+    "images/underwater.png",
+    "images/temple.png",
+    "images/autumn_forest.png",
+    "images/forest_with_sun.png"
   };
   private static final String[] forestTextureAtlases = {
     "images/terrain_iso_grass.atlas",

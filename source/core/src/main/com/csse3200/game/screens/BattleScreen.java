@@ -153,7 +153,7 @@ public class BattleScreen extends ScreenAdapter {
             terrainFactory,
             mapProgression,
             game.getRunState(),
-            "dungeon",
+            game.getBackgroundId(),
             BattleEncounterSelector.enemiesFor(game.getRunState()));
     this.gameArea = forestGameArea;
     forestGameArea.create();

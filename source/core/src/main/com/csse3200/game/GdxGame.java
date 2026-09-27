@@ -37,6 +37,19 @@ import org.slf4j.LoggerFactory;
 public class GdxGame extends Game {
   private static final Logger logger = LoggerFactory.getLogger(GdxGame.class);
   private BestiaryService bestiaryService;
+  private static final String[] BACKGROUND_IDS =
+      new String[] {
+        "dungeon",
+        "forest",
+        "temple",
+        "stones_ruins",
+        "autumn_forest",
+        "inside_castle",
+        "mystical_tree",
+        "underwater",
+        "cemetery",
+        "forest_with_sun"
+      };
 
   /**
    * Gets discovery progress shared by all screens in this game session.
@@ -45,6 +58,15 @@ public class GdxGame extends Game {
    */
   public BestiaryService getBestiaryService() {
     return bestiaryService;
+  }
+
+  /**
+   * Returns the background id of the current battle instance
+   *
+   * @return String background id for the current battle
+   */
+  public String getBackgroundId() {
+    return BACKGROUND_IDS[(getRunState().getMapProgression() - 1) % BACKGROUND_IDS.length];
   }
 
   // Lives here rather than on a screen, since setScreen() disposes the outgoing screen.
@@ -129,34 +151,21 @@ public class GdxGame extends Game {
    * @return new screen
    */
   private Screen newScreen(ScreenType screenType) {
-    switch (screenType) {
-      case MAIN_MENU:
-        return new MainMenuScreen(this);
-      case MAIN_GAME:
-        return new MainGameScreen(this);
-      case SETTINGS:
-        return new SettingsScreen(this);
-      case SAVE_LOAD:
-        return new SaveLoadScreen(this);
-      case LIBRARY:
-        return new LibraryScreen(this);
-      case CARD_LIBRARY:
-        return new CardLibraryScreen(this);
-      case MAP:
-        return new MapScreen(this);
-      case ENCOUNTER:
-        return new EncounterScreen(this);
-      case BATTLE_SCREEN:
-        return new BattleScreen(this);
-      case VICTORY:
-        return new EndBattleScreen(this, true);
-      case DEFEAT:
-        return new EndBattleScreen(this, false);
-      case BESTIARY:
-        return new BestiaryScreen(this);
-      default:
-        return null;
-    }
+      return switch (screenType) {
+          case MAIN_MENU -> new MainMenuScreen(this);
+          case MAIN_GAME -> new MainGameScreen(this);
+          case SETTINGS -> new SettingsScreen(this);
+          case SAVE_LOAD -> new SaveLoadScreen(this);
+          case LIBRARY -> new LibraryScreen(this);
+          case CARD_LIBRARY -> new CardLibraryScreen(this);
+          case MAP -> new MapScreen(this);
+          case ENCOUNTER -> new EncounterScreen(this);
+          case BATTLE_SCREEN -> new BattleScreen(this);
+          case VICTORY -> new EndBattleScreen(this, true);
+          case DEFEAT -> new EndBattleScreen(this, false);
+          case BESTIARY -> new BestiaryScreen(this);
+          default -> null;
+      };
   }
 
   public enum ScreenType {
