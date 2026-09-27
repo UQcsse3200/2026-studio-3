@@ -66,7 +66,9 @@ public class GdxGame extends Game {
    * @return String background id for the current battle
    */
   public String getBackgroundId() {
-    return BACKGROUND_IDS[(getRunState().getMapProgression() - 1) % BACKGROUND_IDS.length];
+    String backgroundId = BACKGROUND_IDS[(getRunState().getMapProgression() - 1) % BACKGROUND_IDS.length];
+    logger.debug("Background Id: {}", backgroundId);
+    return backgroundId;
   }
 
   // Lives here rather than on a screen, since setScreen() disposes the outgoing screen.
