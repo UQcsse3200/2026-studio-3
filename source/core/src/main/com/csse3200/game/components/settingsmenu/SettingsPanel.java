@@ -25,6 +25,7 @@ import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.utils.StringDecorator;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -355,6 +356,11 @@ public class SettingsPanel extends Table {
 
   public TextButton getBackButton() {
     return backButton;
+  }
+
+  /** Buttons used by the pause menu's keyboard-navigation controller, in visual order. */
+  public List<TextButton> getNavigationButtons() {
+    return List.of(resetButton, backButton, applyButton);
   }
 
   TextButton getApplyButton() {

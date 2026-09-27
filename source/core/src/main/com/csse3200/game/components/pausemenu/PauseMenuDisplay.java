@@ -1,31 +1,38 @@
 package com.csse3200.game.components.pausemenu;
 
-import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.components.settingsmenu.SettingsPanel;
+import com.csse3200.game.services.ResourceService;
+import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A ui component for the in-game pause menu. Shows a full-screen dimmed overlay with Resume,
- * Settings and Return to Main Menu buttons.
+ * An ui component for the in-game pause menu. Shows a full-screen dimmed overlay (styled to match
+ * the main menu) with Resume, Save & Load, Settings and Return to Main Menu buttons.
  *
- * <p>The component only owns the view and the button wiring. It fires events that a separate
- * actions component (owned by another team member) listens for; it does not change screens or game
- * state itself. Returning to the main menu is guarded by a confirmation dialog so a run is not
- * abandoned by a single click.
+ * <p>The component only owns the view and the button wiring. It fires events that separate
+ * components listen for, it does not change screens or game state itself. The Save/Load and
+ * Settings subviews are shown in place (no screen switch) so the current run is never lost.
+ * Returning to the main menu is guarded by a confirmation dialog.
  */
 public class PauseMenuDisplay extends UIComponent {
   private static final Logger logger = LoggerFactory.getLogger(PauseMenuDisplay.class);
@@ -34,11 +41,17 @@ public class PauseMenuDisplay extends UIComponent {
   /** Fired when the player chooses to resume the game. */
   public static final String RESUME_EVENT = "resume";
 
-  /** Fired when the player opens the settings screen from the pause menu. */
+  /** Fired when the player opens the save/load panel from the pause menu. */
+  public static final String SAVE_LOAD_EVENT = "saveLoad";
+
+  /** Fired when the player opens the settings view from the pause menu. */
   public static final String SETTINGS_EVENT = "settings";
 
   /** Fired only after the player confirms leaving the current run. */
   public static final String EXIT_TO_MENU_EVENT = "exitToMenu";
+
+  /** Fired only after the player confirms quitting the game to the desktop. */
+  public static final String QUIT_EVENT = "quit";
 
   /**
    * Received (not fired by the display) to open the pause menu. Opening is idempotent, so once
@@ -46,20 +59,52 @@ public class PauseMenuDisplay extends UIComponent {
    */
   public static final String PAUSE_EVENT = "pause";
 
-  private static final float BACKGROUND_OPACITY = 0.7f;
+  /** Keyboard navigation events, fired by {@code PauseMenuInput} while the menu is open. */
+  public static final String NAV_UP_EVENT = "navUp";
 
+  public static final String NAV_DOWN_EVENT = "navDown";
+
+  public static final String NAV_SELECT_EVENT = "navSelect";
+
+  /** Backs out of the current view (settings subview / confirm dialog); no-op on the root menu. */
+  public static final String NAV_BACK_EVENT = "navBack";
+
+  private static final float OVERLAY_OPACITY = 0.7f;
+
+  private final boolean saveEnabled;
   private Table table;
   private Table menuTable;
   private Table settingsTable;
-  private Texture backgroundTexture;
   private Dialog confirmDialog;
+  private Label confirmMessage;
+  private Runnable pendingConfirm;
   private TextButton resumeButton;
+  private TextButton saveLoadButton;
   private TextButton settingsButton;
   private TextButton returnButton;
+  private TextButton quitButton;
   private TextButton confirmButton;
   private TextButton cancelButton;
   private TextButton settingsBackButton;
   private SettingsPanel settingsPanel;
+
+  // Keyboard-navigation focus: the buttons of the currently shown view, and which one is focused.
+  private final List<TextButton> focusables = new ArrayList<>();
+  private int focusedIndex;
+
+  /** Creates a pause menu with the Save &amp; Load option enabled. */
+  public PauseMenuDisplay() {
+    this(true);
+  }
+
+  /**
+   * @param saveEnabled whether to show the Save &amp; Load button. It is disabled on screens where
+   *     an encounter is active (battles/encounters), because a mid-encounter save can't be cleanly
+   *     restored — saving is meant to happen from the map.
+   */
+  public PauseMenuDisplay(boolean saveEnabled) {
+    this.saveEnabled = saveEnabled;
+  }
 
   @Override
   public void create() {
@@ -67,12 +112,20 @@ public class PauseMenuDisplay extends UIComponent {
     addActors();
     entity.getEvents().addListener(PAUSE_EVENT, this::showMenu);
     entity.getEvents().addListener(RESUME_EVENT, this::hideMenu);
+    entity.getEvents().addListener(NAV_UP_EVENT, this::focusPrevious);
+    entity.getEvents().addListener(NAV_DOWN_EVENT, this::focusNext);
+    entity.getEvents().addListener(NAV_SELECT_EVENT, this::activateFocused);
+    entity.getEvents().addListener(NAV_BACK_EVENT, this::navigateBack);
   }
 
   private void addActors() {
     table = new Table();
     table.setFillParent(true);
-    table.setBackground(new TextureRegionDrawable(new TextureRegion(createBackgroundTexture())));
+    // Deep-plum dim (matches the main menu palette) that leaves the game faintly visible behind.
+    Color dim = MenuTheme.deepPlum();
+    dim.a = OVERLAY_OPACITY;
+    table.setBackground(skin.newDrawable("white", dim));
+    // Catch clicks/scroll so they don't fall through to the gameplay UI behind the overlay.
     table.setTouchable(Touchable.enabled);
     table.addListener(
         new InputListener() {
@@ -86,28 +139,28 @@ public class PauseMenuDisplay extends UIComponent {
               InputEvent event, float x, float y, float amountX, float amountY) {
             return table.isVisible();
           }
+
+          @Override
+          public boolean mouseMoved(InputEvent event, float x, float y) {
+            // Any mouse movement drops keyboard mode so hover is the only highlight again.
+            clearKeyboardFocus();
+            return false;
+          }
         });
     table.center();
 
-    resumeButton = new TextButton("Resume", skin);
-    settingsButton = new TextButton("Settings", skin);
-    returnButton = new TextButton("Return to Main Menu", skin);
-
-    resumeButton.addListener(
-        new ChangeListener() {
-          @Override
-          public void changed(ChangeEvent changeEvent, Actor actor) {
-            logger.debug("Resume button clicked");
-            entity.getEvents().trigger(RESUME_EVENT);
-          }
-        });
+    resumeButton = menuButton("Resume", RESUME_EVENT);
+    if (saveEnabled) {
+      saveLoadButton = menuButton("Save & Load", SAVE_LOAD_EVENT);
+    }
+    settingsButton = menuButton("Settings", SETTINGS_EVENT);
+    returnButton = menuButton("Main Menu", null); // opens a confirm dialog instead
+    quitButton = menuButton("Quit Game", null); // opens a confirm dialog instead
 
     settingsButton.addListener(
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent changeEvent, Actor actor) {
-            logger.debug("Settings button clicked");
-            entity.getEvents().trigger(SETTINGS_EVENT);
             showSettings();
           }
         });
@@ -117,7 +170,20 @@ public class PauseMenuDisplay extends UIComponent {
           @Override
           public void changed(ChangeEvent changeEvent, Actor actor) {
             logger.debug("Return to main menu clicked, asking for confirmation");
-            confirmDialog.show(stage);
+            showConfirm(
+                "Leave this run? Progress may be lost",
+                () -> entity.getEvents().trigger(EXIT_TO_MENU_EVENT));
+          }
+        });
+
+    quitButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent changeEvent, Actor actor) {
+            logger.debug("Quit game clicked, asking for confirmation");
+            showConfirm(
+                "Quit to desktop? Unsaved progress may be lost",
+                () -> entity.getEvents().trigger(QUIT_EVENT));
           }
         });
 
@@ -132,11 +198,19 @@ public class PauseMenuDisplay extends UIComponent {
 
   private void buildMenuTable() {
     menuTable = new Table();
-    menuTable.add(resumeButton).padBottom(15f);
-    menuTable.row();
-    menuTable.add(settingsButton).padBottom(15f);
-    menuTable.row();
-    menuTable.add(returnButton);
+    menuTable.add(titleLabel("Paused")).padBottom(MenuTheme.TITLE_SPACING).row();
+    addMenuRow(resumeButton);
+    if (saveEnabled) {
+      addMenuRow(saveLoadButton);
+    }
+    addMenuRow(settingsButton);
+    addMenuRow(returnButton);
+    menuTable.add(quitButton).width(MenuTheme.BUTTON_WIDTH).height(MenuTheme.BUTTON_HEIGHT);
+  }
+
+  private void addMenuRow(TextButton button) {
+    menuTable.add(button).width(MenuTheme.BUTTON_WIDTH).height(MenuTheme.BUTTON_HEIGHT);
+    menuTable.row().padTop(MenuTheme.BUTTON_SPACING);
   }
 
   private Table buildSettingsTable() {
@@ -145,21 +219,35 @@ public class PauseMenuDisplay extends UIComponent {
     return settingsPanel;
   }
 
-  /** Builds the "leave this run" confirmation dialog. It only fires the exit event on confirm. */
+  /**
+   * Builds a reusable confirmation dialog. The message and the on-confirm action are set per use
+   * via {@link #showConfirm(String, Runnable)}, so both "Main Menu" and "Quit Game" share one
+   * dialog.
+   */
   private void buildConfirmDialog() {
-    confirmDialog = new Dialog("", skin);
-    confirmDialog.text("Leave this run? Progress may be lost");
+    Window.WindowStyle windowStyle = new Window.WindowStyle(skin.get(Window.WindowStyle.class));
+    Color panel = MenuTheme.deepPlum();
+    panel.a = 0.96f;
+    windowStyle.background = skin.newDrawable("white", panel);
+    confirmDialog = new Dialog("", windowStyle);
 
-    confirmButton = new TextButton("Confirm", skin);
-    cancelButton = new TextButton("Cancel", skin);
+    Label.LabelStyle messageStyle =
+        new Label.LabelStyle(skin.getFont("font_large"), MenuTheme.warmParchment());
+    confirmMessage = new Label("", messageStyle);
+    confirmDialog.getContentTable().add(confirmMessage).pad(24f);
+
+    confirmButton = menuButton("Confirm", null);
+    cancelButton = menuButton("Cancel", null);
 
     confirmButton.addListener(
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent changeEvent, Actor actor) {
-            logger.debug("Leaving run confirmed");
-            entity.getEvents().trigger(EXIT_TO_MENU_EVENT);
+            logger.debug("Confirmation confirmed");
             confirmDialog.hide(null);
+            if (pendingConfirm != null) {
+              pendingConfirm.run();
+            }
           }
         });
 
@@ -167,23 +255,79 @@ public class PauseMenuDisplay extends UIComponent {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent changeEvent, Actor actor) {
-            logger.debug("Leaving run cancelled");
+            logger.debug("Confirmation cancelled");
             confirmDialog.hide(null);
+            setFocus(pauseFocusables());
           }
         });
 
-    confirmDialog.getButtonTable().add(confirmButton).pad(10f);
-    confirmDialog.getButtonTable().add(cancelButton).pad(10f);
+    confirmDialog
+        .getButtonTable()
+        .add(confirmButton)
+        .width(MenuTheme.BUTTON_WIDTH)
+        .height(MenuTheme.BUTTON_HEIGHT)
+        .pad(10f);
+    confirmDialog
+        .getButtonTable()
+        .add(cancelButton)
+        .width(MenuTheme.BUTTON_WIDTH)
+        .height(MenuTheme.BUTTON_HEIGHT)
+        .pad(10f);
   }
 
-  /** Creates a 1x1 dimmed texture used as the full-screen overlay background. */
-  private Texture createBackgroundTexture() {
-    Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-    pixmap.setColor(0f, 0f, 0f, BACKGROUND_OPACITY);
-    pixmap.fill();
-    backgroundTexture = new Texture(pixmap);
-    pixmap.dispose();
-    return backgroundTexture;
+  /**
+   * Shows the confirmation dialog with {@code message}; runs {@code onConfirm} if the player
+   * confirms.
+   */
+  private void showConfirm(String message, Runnable onConfirm) {
+    confirmMessage.setText(message);
+    pendingConfirm = onConfirm;
+    confirmDialog.show(stage);
+    setFocus(List.of(confirmButton, cancelButton));
+  }
+
+  /**
+   * Creates a button styled like the main menu (pixel-art frame + palette). Falls back to the
+   * default skin style when the frame texture isn't loaded (e.g. in unit tests). When {@code
+   * eventName} is non-null, clicking the button triggers that event on the entity.
+   */
+  private TextButton menuButton(String text, String eventName) {
+    TextButton button = new TextButton(text, buttonStyle());
+    if (eventName != null) {
+      button.addListener(
+          new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent changeEvent, Actor actor) {
+              logger.debug("{} button clicked", text);
+              entity.getEvents().trigger(eventName);
+            }
+          });
+    }
+    return button;
+  }
+
+  private TextButtonStyle buttonStyle() {
+    Texture frame = loadedButtonFrame();
+    return frame != null
+        ? MenuTheme.createButtonStyle(skin, frame)
+        : new TextButtonStyle(skin.get(TextButtonStyle.class));
+  }
+
+  private Label titleLabel(String text) {
+    return new Label(
+        text, new Label.LabelStyle(skin.getFont("font_large"), MenuTheme.warmParchment()));
+  }
+
+  /** Returns the main-menu button frame texture if it has been loaded, otherwise null. */
+  private Texture loadedButtonFrame() {
+    ResourceService resources = ServiceLocator.getResourceService();
+    if (resources != null
+        && resources.containsAsset(MainMenuDisplay.BUTTON_FRAME_TEXTURE, Texture.class)) {
+      Texture frame = resources.getAsset(MainMenuDisplay.BUTTON_FRAME_TEXTURE, Texture.class);
+      frame.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+      return frame;
+    }
+    return null;
   }
 
   /**
@@ -201,6 +345,7 @@ public class PauseMenuDisplay extends UIComponent {
     settingsTable = buildSettingsTable();
     table.clearChildren();
     table.add(settingsTable);
+    setFocus(settingsPanel.getNavigationButtons());
   }
 
   private void showPauseButtons() {
@@ -208,6 +353,89 @@ public class PauseMenuDisplay extends UIComponent {
     table.add(menuTable);
     settingsTable = null;
     settingsPanel = null;
+    setFocus(pauseFocusables());
+  }
+
+  /** The buttons the player can keyboard-navigate on the root pause view, top to bottom. */
+  private List<TextButton> pauseFocusables() {
+    List<TextButton> buttons = new ArrayList<>();
+    buttons.add(resumeButton);
+    if (saveLoadButton != null) {
+      buttons.add(saveLoadButton);
+    }
+    buttons.add(settingsButton);
+    buttons.add(returnButton);
+    buttons.add(quitButton);
+    return buttons;
+  }
+
+  /**
+   * Sets the keyboard-focusable buttons for the current view. Keyboard focus starts inactive
+   * ({@code -1}) so the menu opens in "mouse mode" (only hover highlights); the first nav key
+   * activates keyboard highlighting.
+   */
+  private void setFocus(List<TextButton> buttons) {
+    for (TextButton button : focusables) {
+      button.setColor(Color.WHITE);
+    }
+    focusables.clear();
+    focusables.addAll(buttons);
+    focusedIndex = -1;
+    applyHighlight();
+  }
+
+  private void focusPrevious() {
+    if (focusables.isEmpty()) {
+      return;
+    }
+    focusedIndex =
+        focusedIndex < 0
+            ? focusables.size() - 1
+            : (focusedIndex - 1 + focusables.size()) % focusables.size();
+    applyHighlight();
+  }
+
+  private void focusNext() {
+    if (focusables.isEmpty()) {
+      return;
+    }
+    focusedIndex = focusedIndex < 0 ? 0 : (focusedIndex + 1) % focusables.size();
+    applyHighlight();
+  }
+
+  /** Activates the focused button, exactly as a mouse click would. No-op in mouse mode. */
+  private void activateFocused() {
+    if (focusedIndex >= 0 && focusedIndex < focusables.size()) {
+      focusables.get(focusedIndex).fire(new ChangeListener.ChangeEvent());
+    }
+  }
+
+  /** Drops back to mouse mode (clears the keyboard highlight) when the mouse is used. */
+  private void clearKeyboardFocus() {
+    if (focusedIndex >= 0) {
+      focusedIndex = -1;
+      applyHighlight();
+    }
+  }
+
+  /** Backs out of the settings subview or confirm dialog; does nothing on the root menu. */
+  private void navigateBack() {
+    if (confirmDialog.getStage() != null) {
+      confirmDialog.hide(null);
+      setFocus(pauseFocusables());
+    } else if (settingsTable != null) {
+      showPauseButtons();
+    }
+  }
+
+  /** Tints the focused button so keyboard selection is visible; resets the others. */
+  private void applyHighlight() {
+    for (TextButton button : focusables) {
+      button.setColor(Color.WHITE);
+    }
+    if (focusedIndex >= 0 && focusedIndex < focusables.size()) {
+      focusables.get(focusedIndex).setColor(MenuTheme.softCoral());
+    }
   }
 
   /** Hides the menu (and any open confirmation dialog). Triggered by Resume. */
@@ -237,9 +465,6 @@ public class PauseMenuDisplay extends UIComponent {
     if (table != null) {
       table.clear();
     }
-    if (backgroundTexture != null) {
-      backgroundTexture.dispose();
-    }
     super.dispose();
   }
 
@@ -249,12 +474,24 @@ public class PauseMenuDisplay extends UIComponent {
     return resumeButton;
   }
 
+  TextButton getSaveLoadButton() {
+    return saveLoadButton;
+  }
+
   TextButton getSettingsButton() {
     return settingsButton;
   }
 
   TextButton getReturnButton() {
     return returnButton;
+  }
+
+  TextButton getQuitButton() {
+    return quitButton;
+  }
+
+  boolean hasSaveLoadButton() {
+    return saveLoadButton != null;
   }
 
   TextButton getConfirmButton() {
@@ -271,6 +508,10 @@ public class PauseMenuDisplay extends UIComponent {
 
   boolean isMenuVisible() {
     return table.isVisible();
+  }
+
+  TextButton getFocusedButton() {
+    return focusedIndex < 0 || focusables.isEmpty() ? null : focusables.get(focusedIndex);
   }
 
   boolean isSettingsVisible() {
