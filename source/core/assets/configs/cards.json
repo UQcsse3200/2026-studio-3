@@ -21,7 +21,7 @@
       {
         "id": "warding_sweep",
         "name": "Warding Sweep",
-        "description": "Deal 4 damage to all enemies.",
+        "description": "The old guard's circle still holds. Deal 4 damage to all enemies.",
         "cost": 2,
         "type": "ATTACK",
         "rarity": "COMMON",
@@ -90,7 +90,7 @@
       {
         "id": "sentinels_rebuke",
         "name": "Sentinel's Rebuke",
-        "description": "Deal 4 damage. Apply 1 Feeble for 2 turns.",
+        "description": "A final admonition recalls the fallen to silence. Deal 4 damage. Apply 1 Feeble for 2 turns.",
         "cost": 1,
         "type": "ATTACK",
         "rarity": "UNCOMMON",
@@ -183,7 +183,7 @@
       {
         "id": "wardens_judgement",
         "name": "Warden's Judgement",
-        "description": "Deal 9 damage.",
+        "description": "Mercy is pronounced beneath a broken oath. Deal 9 damage.",
         "cost": 2,
         "type": "ATTACK",
         "rarity": "UNCOMMON",
@@ -193,8 +193,8 @@
       },
       {
         "id": "unseal_the_breach",
-        "name": "Unseal the Breach",
-        "description": "Deal 2 damage. Reduce the enemy's armour by 3.",
+        "name": "Break the Seal",
+        "description": "No ward shall bar the way to absolution. Deal 2 damage. Reduce the enemy's armour by 3.",
         "cost": 1,
         "type": "ATTACK",
         "rarity": "UNCOMMON",
