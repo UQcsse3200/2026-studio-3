@@ -14,14 +14,24 @@ class NarrationConfigLoaderTest {
   @TempDir Path directory;
 
   @Test
-  void loadsKnownSequencesAndPreservesLines() {
-    var opening = NarrationConfigLoader.loadSequence("opening");
-    assertEquals(3, opening.size());
-    assertEquals(2, opening.get(0).size());
-    assertEquals("[PLACEHOLDER] Opening passage one.", opening.get(0).get(0));
-    assertEquals("[PLACEHOLDER] Text to be supplied by Ziqin.", opening.get(0).get(1));
-    assertEquals(3, NarrationConfigLoader.loadSequence("pre_boss").size());
+  void productionConfigDefinesAllStorySequences() {
+    for (String id : new String[] {"opening", "pre_boss", "victory", "defeat"}) {
+      assertFalse(
+          NarrationConfigLoader.loadSequence(id).isEmpty(),
+          "Missing or empty narration sequence: " + id);
+    }
+  }
+
+  @Test
+  void loadsPassagesInOrderAsImmutableLists() throws Exception {
+    Path file = directory.resolve("narration.json");
+    Files.writeString(file, "{\"opening\": [[\"Line one.\", \"Line two.\"], [\"Solo line.\"]]}");
+    var opening = NarrationConfigLoader.loadSequence(file.toString(), "opening");
+    assertEquals(2, opening.size());
+    assertEquals(java.util.List.of("Line one.", "Line two."), opening.get(0));
+    assertEquals(java.util.List.of("Solo line."), opening.get(1));
     assertThrows(UnsupportedOperationException.class, () -> opening.get(0).add("changed"));
+    assertThrows(UnsupportedOperationException.class, () -> opening.add(java.util.List.of("x")));
   }
 
   @Test

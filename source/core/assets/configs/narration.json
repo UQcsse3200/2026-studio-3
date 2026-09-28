@@ -8,5 +8,15 @@
     ["[PLACEHOLDER] Pre-boss passage one.", "[PLACEHOLDER] Text to be supplied by Ziqin."],
     ["[PLACEHOLDER] Pre-boss passage two.", "[PLACEHOLDER] Text to be supplied by Ziqin."],
     ["[PLACEHOLDER] Pre-boss passage three.", "[PLACEHOLDER] Text to be supplied by Ziqin."]
+  ],
+  "victory": [
+    ["[PLACEHOLDER] Victory passage one.", "[PLACEHOLDER] Text to be supplied by Ziqin."],
+    ["[PLACEHOLDER] Victory passage two.", "[PLACEHOLDER] Text to be supplied by Ziqin."],
+    ["[PLACEHOLDER] Victory passage three.", "[PLACEHOLDER] Text to be supplied by Ziqin."]
+  ],
+  "defeat": [
+    ["[PLACEHOLDER] Defeat passage one.", "[PLACEHOLDER] Text to be supplied by Ziqin."],
+    ["[PLACEHOLDER] Defeat passage two.", "[PLACEHOLDER] Text to be supplied by Ziqin."],
+    ["[PLACEHOLDER] Defeat passage three.", "[PLACEHOLDER] Text to be supplied by Ziqin."]
   ]
 }
