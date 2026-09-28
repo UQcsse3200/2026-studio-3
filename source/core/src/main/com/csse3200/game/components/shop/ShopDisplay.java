@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
+import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.files.FileLoader;
@@ -278,6 +279,11 @@ public class ShopDisplay extends UIComponent {
   }
 
   private void addShopItems(Table shopPanel) {
+    CardDiscoveryService discovery = ServiceLocator.getCardDiscoveryService();
+    if (discovery != null) {
+      discovery.recordSeenAll(shopEncounter.getItems().stream().map(item -> item.cardId).toList());
+    }
+
     int itemNumber = 0;
     int itemCount = shopEncounter.getItems().size();
     for (ShopItem item : shopEncounter.getItems()) {
