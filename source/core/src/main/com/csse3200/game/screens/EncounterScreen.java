@@ -51,6 +51,11 @@ public class EncounterScreen extends ScreenAdapter {
   private float fusionResultSeconds;
 
   public EncounterScreen(GdxGame game) {
+    this(game, null);
+  }
+
+  /** Opens the active map Event by ID, or selects randomly when no ID is supplied. */
+  public EncounterScreen(GdxGame game, String forcedEventId) {
     this.game = game;
     this.runState = game.getRunState();
 
@@ -60,6 +65,9 @@ public class EncounterScreen extends ScreenAdapter {
     if (roomType != RoomType.EVENT && roomType != RoomType.SHOP) {
       throw new IllegalStateException(
           "EncounterScreen only handles EVENT and SHOP nodes, but received " + roomType);
+    }
+    if (forcedEventId != null && roomType != RoomType.EVENT) {
+      throw new IllegalStateException("A forced Event requires an active EVENT node");
     }
 
     logger.info("Opening {} encounter for map node {}", roomType, activeNode.getNodeId());
@@ -106,7 +114,8 @@ public class EncounterScreen extends ScreenAdapter {
             this::onEncounterComplete,
             playerState,
             playerDeck,
-            runState);
+            runState,
+            forcedEventId);
     encounterGameArea.create();
   }
 

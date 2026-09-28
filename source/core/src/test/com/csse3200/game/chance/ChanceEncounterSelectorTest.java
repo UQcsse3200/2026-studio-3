@@ -54,6 +54,28 @@ class ChanceEncounterSelectorTest {
   }
 
   @Test
+  void shouldSelectExactEncounterByIdWithoutAdvancingRandom() {
+    ChanceEncounter first = createEncounter("first", 1);
+    ChanceEncounter second = createEncounter("second", 2);
+    ChanceEncounterSelector selector =
+        new ChanceEncounterSelector(List.of(first, second), new SequenceRandom(0));
+
+    assertSame(second, selector.selectById("second"));
+    assertSame(first, selector.select());
+  }
+
+  @Test
+  void shouldRejectUnknownOrBlankEventIds() {
+    ChanceEncounterSelector selector =
+        new ChanceEncounterSelector(List.of(createEncounter("first", 1)), new Random(266L));
+
+    assertThrows(IllegalArgumentException.class, () -> selector.selectById("missing"));
+    assertThrows(IllegalArgumentException.class, () -> selector.selectById(""));
+    assertThrows(IllegalArgumentException.class, () -> selector.selectById("  "));
+    assertThrows(IllegalArgumentException.class, () -> selector.selectById(null));
+  }
+
+  @Test
   void shouldReproduceSequenceWithSameSeed() {
     List<ChanceEncounter> encounters =
         List.of(

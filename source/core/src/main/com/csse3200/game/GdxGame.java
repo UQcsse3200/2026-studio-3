@@ -7,7 +7,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.chance.CardFusionEncounterBehaviour;
+import com.csse3200.game.chance.ChanceEncounterFactory;
+import com.csse3200.game.chance.ChanceEncounterSelector;
 import com.csse3200.game.files.UserSettings;
+import com.csse3200.game.maps.MapNode;
+import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.screens.AncientTempleScreen;
 import com.csse3200.game.screens.BattleScreen;
@@ -27,6 +31,7 @@ import com.csse3200.game.screens.SaveLoadScreen;
 import com.csse3200.game.screens.SettingsScreen;
 import com.csse3200.game.screens.TempleCardSelectionScreen;
 import com.csse3200.game.services.ServiceLocator;
+import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,6 +97,39 @@ public class GdxGame extends Game {
   /** Opens the battle screen. */
   public void startBattle() {
     setScreen(ScreenType.BATTLE_SCREEN);
+  }
+
+  /**
+   * Opens a specific configured Event for the active map node using the persistent run.
+   *
+   * <p>The caller must first enter a real EVENT node. Validation happens before the current screen
+   * is disposed, so an invalid request leaves it in place.
+   *
+   * @param eventId stable ID from the Event catalogue
+   * @throws IllegalArgumentException if the ID is blank or unknown
+   * @throws IllegalStateException if no EVENT map node is active
+   */
+  public void startEvent(String eventId) {
+    if (eventId == null || eventId.isBlank()) {
+      throw new IllegalArgumentException("Event ID must not be null or blank");
+    }
+    Integer nodeId = runState.getActiveNodeId();
+    MapNode activeNode =
+        runState.getMapGraph() == null || nodeId == null
+            ? null
+            : runState.getMapGraph().getNode(nodeId);
+    if (activeNode == null || activeNode.getRoomType() != RoomType.EVENT) {
+      throw new IllegalStateException("startEvent requires an active EVENT node");
+    }
+    new ChanceEncounterSelector(ChanceEncounterFactory.createInitialEncounters(), new Random())
+        .selectById(eventId);
+
+    Screen currentScreen = getScreen();
+    if (currentScreen != null) {
+      currentScreen.dispose();
+    }
+    ServiceLocator.registerBestiaryService(bestiaryService);
+    setScreen(new EncounterScreen(this, eventId));
   }
 
   /** Opens a temporary Event preview without entering or changing the run map. */

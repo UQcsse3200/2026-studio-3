@@ -71,7 +71,7 @@ public class EncounterGameArea extends GameArea {
   private EncounterFlowController encounterFlow;
   private CardCatalogGateway cardCatalog;
   private final RunState runState;
-  private final String previewEncounterId;
+  private final String forcedEventId;
   private CardFusionEncounterFlow cardFusionEncounterFlow;
 
   /**
@@ -154,9 +154,7 @@ public class EncounterGameArea extends GameArea {
         null);
   }
 
-  /**
-   * Selects a specific catalogue Event in a map-free preview; normal map selection stays random.
-   */
+  /** Selects a specific catalogue Event when requested; normal map selection stays random. */
   public EncounterGameArea(
       TerrainFactory terrainFactory,
       Integer nodeId,
@@ -165,7 +163,7 @@ public class EncounterGameArea extends GameArea {
       PlayerRunState sharedPlayerState,
       PlayerDeck sharedPlayerDeck,
       RunState runState,
-      String previewEncounterId) {
+      String forcedEventId) {
     super();
 
     Objects.requireNonNull(terrainFactory, "terrainFactory cannot be null");
@@ -176,7 +174,7 @@ public class EncounterGameArea extends GameArea {
     this.sharedPlayerState = sharedPlayerState;
     this.sharedPlayerDeck = sharedPlayerDeck;
     this.runState = runState;
-    this.previewEncounterId = previewEncounterId;
+    this.forcedEventId = forcedEventId;
   }
 
   /** Creates the logical player state and launches the selected encounter. */
@@ -249,16 +247,7 @@ public class EncounterGameArea extends GameArea {
   private void displayChanceEncounter() {
     CardService cardService = ServiceLocator.getCardLibrary();
     List<ChanceEncounter> available = ChanceEncounterFactory.createInitialEncounters(cardCatalog);
-    ChanceEncounter encounter =
-        previewEncounterId == null
-            ? new ChanceEncounterSelector(available, new Random()).select()
-            : available.stream()
-                .filter(candidate -> candidate.getId().equals(previewEncounterId))
-                .findFirst()
-                .orElseThrow(
-                    () ->
-                        new IllegalArgumentException(
-                            "Unknown preview Event: " + previewEncounterId));
+    ChanceEncounter encounter = selectChanceEncounter(available, new Random(), forcedEventId);
     ChanceEncounterBehaviour behaviour =
         ChanceEncounterBehaviourFactory.create(encounter, new Random(), cardService);
     ChanceEncounterSession session = encounterFlow.startChance(nodeId, encounter, behaviour);
@@ -268,6 +257,12 @@ public class EncounterGameArea extends GameArea {
     Entity chanceUi = new Entity();
     chanceUi.addComponent(new ChanceEncounterDisplay(session, cardFusionEncounterFlow));
     spawnEntity(chanceUi);
+  }
+
+  static ChanceEncounter selectChanceEncounter(
+      List<ChanceEncounter> available, Random random, String forcedEventId) {
+    ChanceEncounterSelector selector = new ChanceEncounterSelector(available, random);
+    return forcedEventId == null ? selector.select() : selector.selectById(forcedEventId);
   }
 
   static CardFusionEncounterFlow createCardFusionEncounterFlow(

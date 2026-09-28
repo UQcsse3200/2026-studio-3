@@ -7,6 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
@@ -39,6 +42,37 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(GameExtension.class)
 class EncounterGameAreaTest {
+  @Test
+  void shouldKeepRandomCatalogueSelectionWithoutForcedId() {
+    List<ChanceEncounter> encounters = ChanceEncounterFactory.createInitialEncounters();
+    Random random = mock(Random.class);
+    when(random.nextInt(10)).thenReturn(9);
+
+    assertEquals(
+        "card-fusion", EncounterGameArea.selectChanceEncounter(encounters, random, null).getId());
+    verify(random).nextInt(10);
+  }
+
+  @Test
+  void shouldSelectRequestedCatalogueEventWithoutUsingRandom() {
+    List<ChanceEncounter> encounters = ChanceEncounterFactory.createInitialEncounters();
+    Random random = mock(Random.class);
+
+    assertEquals(
+        "wishing-fountain",
+        EncounterGameArea.selectChanceEncounter(encounters, random, "wishing-fountain").getId());
+    verifyNoInteractions(random);
+  }
+
+  @Test
+  void shouldRejectUnknownForcedEventId() {
+    List<ChanceEncounter> encounters = ChanceEncounterFactory.createInitialEncounters();
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> EncounterGameArea.selectChanceEncounter(encounters, new Random(), "healing-spring"));
+  }
+
   @Test
   void shouldRouteEventNodeToChanceEncounter() {
     assertEquals(
@@ -83,7 +117,9 @@ class EncounterGameAreaTest {
     PlayerDeck sharedDeck = runState.getOrCreatePlayerDeck(cardService);
     AtomicInteger completions = new AtomicInteger();
     EncounterFlowController controller = controller(completions);
-    ChanceEncounter encounter = cardFusionEncounter();
+    ChanceEncounter encounter =
+        EncounterGameArea.selectChanceEncounter(
+            ChanceEncounterFactory.createInitialEncounters(), new Random(), "card-fusion");
     ChanceEncounterSession session = startSession(controller, encounter, cardService);
     CardFusionEncounterFlow fusionFlow =
         EncounterGameArea.createCardFusionEncounterFlow(encounter, session, runState, cardService);
