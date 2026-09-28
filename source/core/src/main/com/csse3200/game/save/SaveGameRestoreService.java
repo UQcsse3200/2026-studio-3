@@ -80,6 +80,7 @@ public class SaveGameRestoreService {
       if (!runState.restoreRun(restoredMap, data.map.activeEncounterNodeId)) {
         return RestoreResult.failure(RestoreError.APPLY_FAILED, "Unable to restore run state");
       }
+      runState.restoreEncounterSeed(data.progress == null ? null : data.progress.encounterSeed);
       restoreBestiaryProgress(data.progress);
       restoreCardProgress(data.progress);
       return RestoreResult.success(resolveResumeScreen(data));
@@ -184,7 +185,7 @@ public class SaveGameRestoreService {
       return RestoreResult.failure(
           RestoreError.INVALID_PLAYER_STATE, "Saved current health is outside the valid range");
     }
-    if (playerData.gold < 0 || playerData.piety < 0) {
+    if (playerData.gold < 0 || playerData.level < 0) {
       return RestoreResult.failure(
           RestoreError.INVALID_PLAYER_STATE, "Saved player resources cannot be negative");
     }

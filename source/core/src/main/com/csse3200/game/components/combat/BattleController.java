@@ -724,6 +724,10 @@ public class BattleController {
     if (energy != null) {
       energy.onTurnStart();
     }
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+    if (playerStats != null) {
+      playerStats.resetBlock();
+    }
     applyHealingAtTurnStart();
     retrieveCooledDownCards();
     handle(BattleEvent.PLAYER_TURN_STARTED);
@@ -771,6 +775,8 @@ public class BattleController {
     if (playerStats != null) {
       tickPlayerStatusEffect(playerStats, IntentEffectType.SILENCE.name());
       tickPlayerStatusEffect(playerStats, IntentEffectType.DAMAGE_ON_CARD_PLAY.name());
+      tickPlayerStatusEffect(playerStats, EffectType.VULNERABLE.name());
+      tickPlayerStatusEffect(playerStats, EffectType.FEEBLE.name());
     }
 
     handle(BattleEvent.PLAYER_TURN_ENDED);
@@ -789,10 +795,9 @@ public class BattleController {
 
     if (skipEnemyTurnIfDead(enemy)) return;
 
-    // Resolve poison before the enemy acts. Poison uses normal damage, so block and armour absorb
-    // it.
+    // Poison uses piercing damage, skip block and armor
     CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
-    enemyStats.processPoisonTick(enemyStats::takeDamage);
+    enemyStats.processPoisonTick(enemyStats::takePiercingDamage);
 
     if (skipEnemyTurnIfDead(enemy)) return;
 
@@ -856,6 +861,11 @@ public class BattleController {
     if (this.queueBattleOutcomeIfOver()) {
       return;
     }
+
+    Entity enemy = getActiveEnemy();
+    CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
+    enemyStats.tickStatusEffect("FEEBLE");
+    enemyStats.tickStatusEffect("VULNERABLE");
 
     // If another enemy is successfully targeted.
     if (this.advanceToNextLivingEnemy()) {

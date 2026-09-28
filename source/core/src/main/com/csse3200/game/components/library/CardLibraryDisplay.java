@@ -3,6 +3,7 @@ package com.csse3200.game.components.library;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -19,11 +20,15 @@ import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardEntryView;
 import com.csse3200.game.cards.CardLoadingException;
 import com.csse3200.game.cards.CardUnlockState;
+import com.csse3200.game.cards.Rarity;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
+import com.csse3200.game.cards.runtime.ResolvedCard;
+import com.csse3200.game.components.cards.CardWidget;
+import com.csse3200.game.components.cards.CardWidgetAssets;
+import com.csse3200.game.components.cards.UncommonCardLibraryWidget;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.events.listeners.EventListener1;
-import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
@@ -35,7 +40,7 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Read-only card library view backed by the current Team 6 card configuration file. */
+/** Read-only, discovery-aware card library backed by the current card configuration file. */
 public class CardLibraryDisplay extends UIComponent {
   private static final Logger logger = LoggerFactory.getLogger(CardLibraryDisplay.class);
   private static final float PANEL_WIDTH = 1120f;
@@ -43,6 +48,7 @@ public class CardLibraryDisplay extends UIComponent {
   private static final Color PANEL_COLOUR = new Color(0.105f, 0.07f, 0.065f, 0.96f);
   private static final Color LIST_COLOUR = new Color(0.13f, 0.09f, 0.085f, 1f);
   private static final Color DETAIL_COLOUR = new Color(0.075f, 0.055f, 0.065f, 1f);
+  private static final Color LOCKED_COLOUR = new Color(0.035f, 0.03f, 0.04f, 1f);
   private static final String WHITE = "white";
   private static final String LARGE = "large";
   private static final String SMALL = "small";
@@ -56,8 +62,13 @@ public class CardLibraryDisplay extends UIComponent {
 
   private Stack rootStack;
   private Table cardList;
-  private Image cardImage;
+  private Stack cardPreview;
+  private Table lockedPreview;
   private Label lockedArtLabel;
+  private CardWidget cardWidget;
+  private UncommonCardLibraryWidget uncommonCardWidget;
+  private CardWidgetAssets widgetAssets;
+
   private Label discoveryCounterLabel;
   private Label stateLabel;
   private Label nameLabel;
@@ -131,7 +142,7 @@ public class CardLibraryDisplay extends UIComponent {
     Label title = new Label("Card Library", labelStyle(LARGE, MenuTheme.warmParchment()));
     Label subtitle =
         new Label(
-            "Browse the current card definitions and effect order.",
+            "Discover cards during a run to reveal their archive records.",
             labelStyle(SMALL, MenuTheme.warmParchment()));
     eyebrow.setFontScale(1.15f);
     title.setFontScale(1.35f);
@@ -185,7 +196,7 @@ public class CardLibraryDisplay extends UIComponent {
       addCards(entries, panel);
       updateDiscoveryCounter();
       if (!entries.isEmpty()) {
-        showCard(entries.get(0));
+        showCard(entries.getFirst());
       }
     } catch (CardLoadingException exception) {
       logger.warn("Failed to load cards for library display", exception);
@@ -212,15 +223,16 @@ public class CardLibraryDisplay extends UIComponent {
     for (CardEntryView card : cards) {
       TextButton cardButton = new TextButton(formatCardButton(card), buttonStyle);
       cardButton.getLabel().setFontScale(0.75f);
+      String cardId = card.cardId();
       cardButton.addListener(
           new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-              showCard(card);
+              discovery.getEntry(cardId).ifPresent(CardLibraryDisplay.this::showCard);
             }
           });
       cardList.add(cardButton).row();
-      cardButtons.put(card.cardId(), cardButton);
+      cardButtons.put(cardId, cardButton);
     }
 
     ScrollPane scrollPane = new ScrollPane(cardList, skin);
@@ -234,67 +246,79 @@ public class CardLibraryDisplay extends UIComponent {
     listPanel.row();
     listPanel.add(scrollPane).expand().fill().padTop(12f);
 
+    if (!cards.isEmpty()) {
+      widgetAssets =
+          CardWidgetAssets.fromManagedResources(skin, ServiceLocator.getResourceService());
+    }
+
     panel.add(listPanel).width(350f).expandY().fillY().padRight(22f);
-    panel.add(createDetailPanel()).expand().fill();
+    panel.add(createDetailPanel(cards.isEmpty())).expand().fill();
   }
 
-  private Table createDetailPanel() {
+  private Table createDetailPanel(boolean empty) {
     Table detailPanel = new Table();
     detailPanel.setBackground(skin.newDrawable(WHITE, DETAIL_COLOUR));
-    detailPanel.pad(24f);
-    detailPanel.top();
+    detailPanel.pad(18f);
+
+    if (empty) {
+      detailPanel.add(new Label("No cards are available.", bodyLabelStyle()));
+      return detailPanel;
+    }
 
     stateLabel = new Label("", labelStyle(SMALL, MenuTheme.softCoral()));
+    stateLabel.setFontScale(1.05f);
+
+    cardPreview = new Stack();
+    lockedPreview = createLockedPreview();
+    cardPreview.add(lockedPreview);
+
     nameLabel = new Label("", labelStyle(LARGE, MenuTheme.warmParchment()));
     descriptionLabel = new Label("", bodyLabelStyle());
     costLabel = new Label("", labelStyle(DEFAULT, MenuTheme.softCoral()));
     typeLabel = new Label("", bodyLabelStyle());
     targetLabel = new Label("", bodyLabelStyle());
     rarityLabel = new Label("", bodyLabelStyle());
-    effectsLabel = new Label("", labelStyle(DEFAULT, MenuTheme.warmParchment()));
+    effectsLabel = new Label("", labelStyle(SMALL, MenuTheme.warmParchment()));
     artworkLabel = new Label("", labelStyle(SMALL, MenuTheme.warmParchment()));
-    cardImage = new Image();
-    lockedArtLabel = new Label("?", labelStyle(LARGE, MenuTheme.warmParchment()));
 
-    stateLabel.setFontScale(1.05f);
-    nameLabel.setFontScale(1.25f);
-    descriptionLabel.setFontScale(1.1f);
+    nameLabel.setFontScale(0.9f);
+    descriptionLabel.setFontScale(0.78f);
     descriptionLabel.setWrap(true);
+    effectsLabel.setFontScale(0.72f);
     effectsLabel.setWrap(true);
+    artworkLabel.setFontScale(0.62f);
     artworkLabel.setWrap(true);
-    cardImage.setScaling(Scaling.fit);
-    lockedArtLabel.setFontScale(4f);
 
-    Table artworkBackground = new Table();
-    artworkBackground.setBackground(skin.newDrawable(WHITE, new Color(0.035f, 0.03f, 0.04f, 1f)));
-    Stack artwork = new Stack();
-    artwork.add(artworkBackground);
-    artwork.add(cardImage);
-    Table lockedLayer = new Table();
-    lockedLayer.add(lockedArtLabel).center();
-    artwork.add(lockedLayer);
+    Table archiveDetails = new Table();
+    archiveDetails.top().left();
+    archiveDetails.defaults().left().padBottom(7f);
+    archiveDetails.add(nameLabel).width(330f).row();
+    archiveDetails.add(descriptionLabel).width(330f).padBottom(12f).row();
+    archiveDetails.add(costLabel).row();
+    archiveDetails.add(typeLabel).row();
+    archiveDetails.add(targetLabel).row();
+    archiveDetails.add(rarityLabel).row();
+    archiveDetails.add(effectsLabel).width(330f).padTop(8f).row();
+    archiveDetails.add(artworkLabel).width(330f).padTop(5f).row();
 
-    Table meta = new Table();
-    meta.defaults().left().padBottom(8f);
-    meta.add(costLabel).row();
-    meta.add(typeLabel).row();
-    meta.add(targetLabel).row();
-    meta.add(rarityLabel).row();
-
-    detailPanel.add(stateLabel).left().expandX();
+    detailPanel.top();
+    detailPanel.add(stateLabel).colspan(2).left().expandX().padBottom(8f);
     detailPanel.row();
-    detailPanel.add(nameLabel).left().expandX();
-    detailPanel.row();
-    detailPanel.add(descriptionLabel).width(650f).left().padTop(8f).padBottom(16f);
-    detailPanel.row();
-    detailPanel.add(artwork).width(650f).height(230f).padBottom(16f);
-    detailPanel.row();
-    detailPanel.add(meta).left().expandX();
-    detailPanel.row();
-    detailPanel.add(effectsLabel).width(650f).left().top().padTop(8f);
-    detailPanel.row();
-    detailPanel.add(artworkLabel).width(650f).left().top().padTop(10f);
+    detailPanel.add(cardPreview).size(CardWidget.CARD_WIDTH, CardWidget.CARD_HEIGHT).top();
+    detailPanel.add(archiveDetails).width(330f).expandY().fillY().top().padLeft(18f);
     return detailPanel;
+  }
+
+  private Table createLockedPreview() {
+    Table preview = new Table();
+    preview.setBackground(skin.newDrawable(WHITE, LOCKED_COLOUR));
+    lockedArtLabel = new Label("?", labelStyle(LARGE, MenuTheme.warmParchment()));
+    lockedArtLabel.setFontScale(4f);
+    Label lockedMessage = new Label("UNDISCOVERED", labelStyle(SMALL, MenuTheme.warmParchment()));
+    preview.add(lockedArtLabel).center();
+    preview.row();
+    preview.add(lockedMessage).center().padTop(14f);
+    return preview;
   }
 
   static String formatCardButton(CardEntryView card) {
@@ -304,8 +328,8 @@ public class CardLibraryDisplay extends UIComponent {
     return card.cost().orElseThrow() + "  " + card.displayName();
   }
 
-  private void showCard(CardEntryView card) {
-    displayedEntry = card;
+  void showCard(CardEntryView card) {
+    displayedEntry = Objects.requireNonNull(card, "card cannot be null");
     nameLabel.setText(card.displayName());
     descriptionLabel.setText(descriptionFor(card));
     costLabel.setText("Cost: " + valueOrPlaceholder(card.cost()));
@@ -314,21 +338,86 @@ public class CardLibraryDisplay extends UIComponent {
     rarityLabel.setText("Rarity: " + card.rarity().map(Enum::name).orElse("???"));
 
     if (card.unlockState() == CardUnlockState.LOCKED) {
-      stateLabel.setText("UNDISCOVERED");
-      effectsLabel.setText("Effects: ???");
-      artworkLabel.setText("Artwork: ???");
-      cardImage.setDrawable(null);
-      cardImage.setVisible(false);
-      lockedArtLabel.setVisible(true);
+      showLockedCard();
       return;
     }
 
     stateLabel.setText(card.unlockState().name());
     effectsLabel.setText(
-        "Effects resolve in this order:\n" + formatEffects(card.effects().orElse(List.of())));
-    artworkLabel.setText("Artwork: " + card.texturePath().orElse(""));
-    lockedArtLabel.setVisible(false);
-    setCardImage(card.texturePath().orElse(""));
+        "Effects resolve in this order:\n" + formatEffects(card.effects().orElseThrow()));
+    artworkLabel.setText("Artwork: " + card.texturePath().orElseThrow());
+    showResolvedCard(resolveForDisplay(card));
+  }
+
+  private void showLockedCard() {
+    stateLabel.setText("UNDISCOVERED");
+    effectsLabel.setText("Effects: ???");
+    artworkLabel.setText("Artwork: ???");
+    lockedPreview.setVisible(true);
+    if (cardWidget != null) {
+      cardWidget.setVisible(false);
+    }
+    if (uncommonCardWidget != null) {
+      uncommonCardWidget.setVisible(false);
+    }
+  }
+
+  private void showResolvedCard(ResolvedCard card) {
+    boolean useUncommonFrame = card.rarity() == Rarity.UNCOMMON;
+    lockedPreview.setVisible(false);
+
+    if (useUncommonFrame) {
+      ensureUncommonWidget(card);
+      uncommonCardWidget.setCard(card);
+    } else {
+      ensureStandardWidget(card);
+      cardWidget.setCard(card);
+    }
+
+    if (cardWidget != null) {
+      cardWidget.setVisible(!useUncommonFrame);
+    }
+    if (uncommonCardWidget != null) {
+      uncommonCardWidget.setVisible(useUncommonFrame);
+    }
+  }
+
+  private void ensureStandardWidget(ResolvedCard card) {
+    if (cardWidget == null) {
+      cardWidget = new CardWidget(card, widgetAssets);
+      cardPreview.add(cardWidget);
+    }
+  }
+
+  private void ensureUncommonWidget(ResolvedCard card) {
+    if (uncommonCardWidget != null) {
+      return;
+    }
+    Texture frameTexture = getTexture(UncommonCardLibraryWidget.FRAME_TEXTURE);
+    frameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    uncommonCardWidget =
+        new UncommonCardLibraryWidget(
+            card, widgetAssets, new TextureRegionDrawable(new TextureRegion(frameTexture)));
+    cardPreview.add(uncommonCardWidget);
+  }
+
+  static ResolvedCard resolveForDisplay(CardEntryView card) {
+    Objects.requireNonNull(card, "card cannot be null");
+    if (!card.unlockState().isAtLeast(CardUnlockState.SEEN)) {
+      throw new IllegalArgumentException("locked card cannot be resolved for display");
+    }
+    return new ResolvedCard(
+        "library-preview-" + card.cardId(),
+        card.cardId(),
+        card.displayName(),
+        card.description().orElseThrow(),
+        card.cost().orElseThrow(),
+        card.type().orElseThrow(),
+        card.rarity().orElseThrow(),
+        card.target().orElseThrow(),
+        card.effects().orElseThrow(),
+        card.texturePath().orElseThrow(),
+        false);
   }
 
   static String descriptionFor(CardEntryView card) {
@@ -342,28 +431,19 @@ public class CardLibraryDisplay extends UIComponent {
     return value.isPresent() ? Integer.toString(value.getAsInt()) : "???";
   }
 
-  private void setCardImage(String texturePath) {
-    ResourceService resources = ServiceLocator.getResourceService();
-    if (texturePath == null
-        || texturePath.isBlank()
-        || !resources.containsAsset(texturePath, Texture.class)) {
-      cardImage.setDrawable(null);
-      cardImage.setVisible(false);
-      return;
-    }
-
-    Texture texture = resources.getAsset(texturePath, Texture.class);
-    texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-    cardImage.setDrawable(new TextureRegionDrawable(texture));
-    cardImage.setVisible(true);
-  }
-
   private String formatEffects(List<EffectConfig> effects) {
     if (effects == null || effects.isEmpty()) {
       return "None";
     }
-
     return effects.stream().map(this::formatEffect).reduce((a, b) -> a + "\n" + b).orElse("");
+  }
+
+  private String formatEffect(EffectConfig effect) {
+    String text = "- " + effect.type + " value " + effect.value;
+    if (effect.duration > 0) {
+      text += " for " + effect.duration + " turns";
+    }
+    return text;
   }
 
   private void onEntryUpdated(CardEntryView entry) {
@@ -404,15 +484,18 @@ public class CardLibraryDisplay extends UIComponent {
   }
 
   boolean isLockedArtworkVisible() {
-    return lockedArtLabel.isVisible() && !cardImage.isVisible();
+    return lockedPreview.isVisible()
+        && lockedArtLabel.isVisible()
+        && (cardWidget == null || !cardWidget.isVisible())
+        && (uncommonCardWidget == null || !uncommonCardWidget.isVisible());
   }
 
-  private String formatEffect(EffectConfig effect) {
-    String text = "- " + effect.type + " value " + effect.value;
-    if (effect.duration > 0) {
-      text += " for " + effect.duration + " turns";
-    }
-    return text;
+  boolean isStandardCardVisible() {
+    return cardWidget != null && cardWidget.isVisible();
+  }
+
+  boolean isUncommonCardVisible() {
+    return uncommonCardWidget != null && uncommonCardWidget.isVisible();
   }
 
   private Label.LabelStyle bodyLabelStyle() {

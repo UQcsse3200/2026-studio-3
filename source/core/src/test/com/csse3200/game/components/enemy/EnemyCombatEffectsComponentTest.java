@@ -1,8 +1,6 @@
 package com.csse3200.game.components.enemy;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -95,7 +93,18 @@ class EnemyCombatEffectsComponentTest {
     enemy.getEvents().trigger("enemyEnraged");
 
     assertTrue(animator.isTintPersistent());
-    assertTrue(animator.getActiveTint() != null);
+    assertNotNull(animator.getActiveTint());
+  }
+
+  @Test
+  void shouldSetPersistentTintOnDefeat() {
+    Entity enemy = newEnemy();
+    AnimationRenderComponent animator = enemy.getComponent(AnimationRenderComponent.class);
+
+    enemy.getEvents().trigger("enemyDefeated");
+
+    assertTrue(animator.isTintPersistent());
+    assertNotNull(animator.getActiveTint());
   }
 
   @Test

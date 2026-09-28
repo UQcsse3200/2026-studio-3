@@ -7,6 +7,7 @@ import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardLoadingException;
 import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.components.cards.UncommonCardLibraryWidget;
 import com.csse3200.game.components.library.CardLibraryDisplay;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.entities.Entity;
@@ -90,6 +91,7 @@ public class CardLibraryScreen extends ScreenAdapter {
     Set<String> paths = new LinkedHashSet<>();
     paths.add(MainMenuDisplay.BACKGROUND_TEXTURE);
     paths.add(MainMenuDisplay.BUTTON_FRAME_TEXTURE);
+    paths.add(UncommonCardLibraryWidget.FRAME_TEXTURE);
     try {
       for (CardConfig card : CardConfigLoader.loadCards()) {
         if (card.texturePath != null && !card.texturePath.isBlank()) {

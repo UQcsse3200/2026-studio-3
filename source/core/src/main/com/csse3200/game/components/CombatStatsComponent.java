@@ -176,7 +176,7 @@ public class CombatStatsComponent extends Component {
     if (damage >= 0 && !isDead()) {
       setHealth(Math.max(this.health - damage, 0));
       if (entity != null && isDead()) {
-        entity.getEvents().trigger(EVT_IS_DEAD);
+        entity.getEvents().trigger("entityIsDead");
       }
     }
   }
@@ -279,7 +279,7 @@ public class CombatStatsComponent extends Component {
     if (amount <= 0) {
       return;
     }
-    setArmour(this.armour + amount);
+    setArmour((int) Math.min(Integer.MAX_VALUE, (long) this.armour + amount));
   }
 
   /**
@@ -387,9 +387,11 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
-   * Applies a status effect to this entity. If an effect with the same id is already active, it is
-   * overwritten by the new one (design choice: overwrite, not stack. To be confirmed with Team 5/6
-   * if card design expects stacking behaviour instead).
+   * Applies a status effect.
+   *
+   * <p>Poison stacks are grouped by remaining duration. Feeble does not stack its damage reduction
+   * and keeps the longer duration on reapplication; permanent duration takes precedence. Other
+   * statuses retain their overwrite behaviour.
    *
    * @param effect status effect to apply
    */
@@ -397,9 +399,64 @@ public class CombatStatsComponent extends Component {
     if (effect == null) {
       return;
     }
-    statusEffects.put(effect.getType(), effect);
+
+    String type = statusKey(effect.getType());
+
+    if ("POISON".equals(type)) {
+      StatusEffect existingEffect = statusEffects.get(type);
+
+      // Do not add an existing live object's stacks to itself.
+      if (existingEffect != effect) {
+        PoisonStatusEffect targetPoison;
+
+        if (existingEffect instanceof PoisonStatusEffect) {
+          targetPoison = (PoisonStatusEffect) existingEffect;
+        } else {
+          targetPoison = new PoisonStatusEffect();
+        }
+
+        if (effect instanceof PoisonStatusEffect) {
+          // Incoming poison may already contain several duration groups.
+          PoisonStatusEffect incomingPoison = (PoisonStatusEffect) effect;
+
+          Map<Integer, Integer> incomingGroups = incomingPoison.getStacksByDuration();
+
+          for (Map.Entry<Integer, Integer> group : incomingGroups.entrySet()) {
+            int duration = group.getKey();
+            int stacks = group.getValue();
+
+            targetPoison.addApplication(stacks, duration);
+          }
+        } else {
+          // An ordinary StatusEffect represents one incoming duration group.
+          int stacks = effect.getValue();
+          int duration = effect.getDuration();
+
+          targetPoison.addApplication(stacks, duration);
+        }
+
+        statusEffects.put(type, targetPoison);
+      }
+    } else if ("FEEBLE".equals(type)) {
+      StatusEffect existing = statusEffects.get(type);
+      int duration = effect.getDuration();
+
+      if (existing != null) {
+        if (existing.getDuration() <= 0 || duration <= 0) {
+          duration = 0;
+        } else {
+          duration = Math.max(existing.getDuration(), duration);
+        }
+      }
+
+      // Feeble does not stack its damage reduction.
+      statusEffects.put(type, new StatusEffect(type, 1, duration));
+    } else {
+      // Preserve the existing behaviour for other statuses.
+      statusEffects.put(type, effect);
+    }
     if (entity != null) {
-      entity.getEvents().trigger("statusEffectApplied", effect.getType());
+      entity.getEvents().trigger("statusEffectApplied", type);
     }
   }
 
@@ -422,7 +479,7 @@ public class CombatStatsComponent extends Component {
    * @return active StatusEffect, or null
    */
   public StatusEffect getStatusEffect(String type) {
-    return statusEffects.get(type);
+    return statusEffects.get(statusKey(type));
   }
 
   /**
@@ -432,7 +489,7 @@ public class CombatStatsComponent extends Component {
    * @return whether the effect is active
    */
   public boolean hasStatusEffect(String type) {
-    return statusEffects.containsKey(type);
+    return statusEffects.containsKey(statusKey(type));
   }
 
   /**
@@ -441,9 +498,31 @@ public class CombatStatsComponent extends Component {
    * @param type status effect type identifier
    */
   public void removeStatusEffect(String type) {
-    if (statusEffects.remove(type) != null && entity != null) {
-      entity.getEvents().trigger("statusEffectRemoved", type);
+    String key = statusKey(type);
+    if (statusEffects.remove(key) != null && entity != null) {
+      entity.getEvents().trigger("statusEffectRemoved", key);
     }
+  }
+
+  private static String statusKey(String type) {
+    if ("POISON".equalsIgnoreCase(type)) {
+      return "POISON";
+    }
+    if ("FEEBLE".equalsIgnoreCase(type)) {
+      return "FEEBLE";
+    }
+    return type;
+  }
+
+  public Map<Integer, Integer> getPoisonStacksByDuration() {
+    StatusEffect effect = getStatusEffect("POISON");
+
+    if (effect instanceof PoisonStatusEffect) {
+      PoisonStatusEffect poison = (PoisonStatusEffect) effect;
+      return poison.getStacksByDuration();
+    }
+
+    return Map.of();
   }
 
   /**
@@ -474,11 +553,38 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
-   * Ticks down the duration of all active status effects by one and removes any that have expired.
-   * This method's internal logic (tick/expire/cleanup) is self-contained. IMPORTANT - external
-   * dependency: this method must be called exactly once per turn for durations to mean "number of
-   * turns". WHEN it gets called is not yet wired up - it depends on Team 3's turn/battle-sequence
-   * event, which is not confirmed yet.
+   * Decrements only the named status and removes it when expired. Missing and permanent statuses
+   * are left unchanged.
+   *
+   * <p>Poison must use processPoisonTick instead. Do not also tick the same status through
+   * updateStatusEffects.
+   *
+   * @param type status identifier
+   * @return true if the status expired and was removed
+   * @throws IllegalArgumentException if type identifies poison
+   */
+  public boolean tickStatusEffect(String type) {
+    String key = statusKey(type);
+
+    if ("POISON".equals(key)) {
+      throw new IllegalArgumentException(
+          "Use processPoisonTick to process poison damage and expiry");
+    }
+
+    StatusEffect effect = statusEffects.get(key);
+    if (effect == null || !effect.tickAndCheckExpired()) {
+      return false;
+    }
+
+    removeStatusEffect(key);
+    return true;
+  }
+
+  /**
+   * Decrements every active status and removes expired effects.
+   *
+   * <p>This includes Poison and Feeble. The caller must avoid ticking the same status twice through
+   * this method and processPoisonTick or tickStatusEffect.
    */
   public void updateStatusEffects() {
     statusEffects
@@ -510,26 +616,20 @@ public class CombatStatsComponent extends Component {
     if (applyDamage == null) {
       throw new IllegalArgumentException("Damage handler must not be null");
     }
+
     if (isDead()) {
       return;
     }
 
-    StatusEffect poison = getStatusEffect(POISON);
-    if (poison == null) {
+    StatusEffect effect = getStatusEffect(POISON);
+    if (!(effect instanceof PoisonStatusEffect)) {
       return;
     }
 
-    int damage = StatusEffectCalculator.getPoisonDamage(this);
-    if (damage > 0) {
-      applyDamage.accept(damage);
-    }
+    PoisonStatusEffect poison = (PoisonStatusEffect) effect;
+    boolean expired = poison.processTick(applyDamage, () -> getStatusEffect(POISON) == poison);
 
-    // Do not tick a replacement effect created by the damage callback.
-    if (getStatusEffect(POISON) != poison) {
-      return;
-    }
-
-    if (poison.tickAndCheckExpired()) {
+    if (expired && getStatusEffect(POISON) == poison) {
       removeStatusEffect(POISON);
     }
   }
