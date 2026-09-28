@@ -1,6 +1,8 @@
 package com.csse3200.game.encounters.integration;
 
+import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.chance.ChanceOutcome;
+import com.csse3200.game.services.ServiceLocator;
 import java.util.Objects;
 
 /**
@@ -154,7 +156,7 @@ public final class ChanceOutcomeApplier {
 
     if (cardRewardId != null) {
       try {
-        deck.commitCardAddition(cardRewardId);
+        commitCardReward(cardRewardId);
       } catch (RuntimeException exception) {
         if (player.getHealth() == healthBefore) {
           boolean rollbackSucceeded = rollbackBeforeHealth(cardRewardId, currencyBefore);
@@ -253,9 +255,17 @@ public final class ChanceOutcomeApplier {
       return;
     }
     try {
-      deck.commitCardAddition(cardRewardId);
+      commitCardReward(cardRewardId);
     } catch (RuntimeException ignored) {
       // The outcome is already a partial failure and health-event rollback is unsafe.
+    }
+  }
+
+  private void commitCardReward(String cardRewardId) {
+    deck.commitCardAddition(cardRewardId);
+    CardDiscoveryService discovery = ServiceLocator.getCardDiscoveryService();
+    if (discovery != null) {
+      discovery.recordSeen(cardRewardId);
     }
   }
 
