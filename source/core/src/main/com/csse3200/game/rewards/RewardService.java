@@ -7,7 +7,6 @@ import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.entities.Entity;
-import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,11 +76,10 @@ public class RewardService {
   public void claimRunReward(RunState runState, RewardOption selected, String selectedCardId) {
     Objects.requireNonNull(runState, "runState must not be null");
     validateOption(selected);
-    PlayerRunState playerState = runState.getOrCreatePlayerState();
 
     switch (selected.type) {
-      case GOLD -> playerState.addGold(selected.goldAmount);
-      case ITEM -> playerState.addOwnedItem(selected.itemId);
+      case GOLD -> runState.getOrCreatePlayerState().addGold(selected.goldAmount);
+      case ITEM -> runState.getOrCreatePlayerState().addOwnedItem(selected.itemId);
       case CARD -> {
         if (!selected.cardSelection.contains(selectedCardId)) {
           throw new IllegalArgumentException("selected card is not part of this reward");

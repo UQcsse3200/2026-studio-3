@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.csse3200.game.cards.CardAcquisitionPool;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
@@ -100,6 +101,23 @@ class RewardServiceTest {
     assertThrows(
         IllegalArgumentException.class,
         () -> service.claimRunReward(runState, cardOption, "defend"));
+    assertEquals(initialSize, runState.getOrCreatePlayerDeck(cards).size());
+  }
+
+  @Test
+  void shouldRejectKnownCardThatIsNoLongerEligibleWithoutMutatingDeck() {
+    CardService cards = new CardLibrary(CardConfigLoader.loadCards());
+    CardAcquisitionPool pool = new CardAcquisitionPool(cards, List.of("defend"));
+    RewardService service =
+        new RewardService(new RewardGenerator(new Random(1)), cards, pool, new Random(2));
+    RunState runState = new RunState();
+    int initialSize = runState.getOrCreatePlayerDeck(cards).size();
+    RewardOption staleOption = RewardOption.cards(new CardRewardSelection(List.of("strike")));
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> service.claimRunReward(runState, staleOption, "strike"));
+
     assertEquals(initialSize, runState.getOrCreatePlayerDeck(cards).size());
   }
 
