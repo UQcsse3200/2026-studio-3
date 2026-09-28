@@ -279,16 +279,17 @@ public class ShopDisplay extends UIComponent {
   }
 
   private void addShopItems(Table shopPanel) {
+    CardDiscoveryService discovery = ServiceLocator.getCardDiscoveryService();
+    if (discovery != null) {
+      discovery.recordSeenAll(shopEncounter.getItems().stream().map(item -> item.cardId).toList());
+    }
+
     int itemNumber = 0;
     int itemCount = shopEncounter.getItems().size();
-    CardDiscoveryService discovery = ServiceLocator.getCardDiscoveryService();
     for (ShopItem item : shopEncounter.getItems()) {
       Table card = createItemCard(item);
       float rightPadding = itemNumber < itemCount - 1 ? 34f : 0f;
       shopPanel.add(card).top().width(CARD_WIDTH).minHeight(505f).padRight(rightPadding);
-      if (discovery != null) {
-        discovery.recordSeen(item.cardId);
-      }
       itemNumber++;
     }
   }

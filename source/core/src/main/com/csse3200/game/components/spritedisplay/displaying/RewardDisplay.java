@@ -40,6 +40,7 @@ public class RewardDisplay extends Displaying {
   private boolean claimed;
   private boolean cardRewardCommitted;
   private boolean claimInProgress;
+  private boolean created;
   private boolean disposed;
   private Table optionsTable;
   private Table cardSelectionTable;
@@ -58,11 +59,16 @@ public class RewardDisplay extends Displaying {
     this.rewardService = Objects.requireNonNull(rewardService, "rewardService cannot be null");
     this.runState = runState;
     this.cardService = Objects.requireNonNull(cardService, "cardService cannot be null");
-    this.cardDiscoveryService = cardDiscoveryService;
+    this.cardDiscoveryService =
+        Objects.requireNonNull(cardDiscoveryService, "cardDiscoveryService cannot be null");
   }
 
   @Override
   public void create() {
+    if (created || disposed) {
+      return;
+    }
+    created = true;
     super.create();
 
     float multiplier = 0f;
@@ -236,9 +242,7 @@ public class RewardDisplay extends Displaying {
 
     // Hidden generation must not reveal cards. Advance discovery only once every face is ready to
     // be shown.
-    if (cardDiscoveryService != null) {
-      cardDiscoveryService.recordSeenAll(option.cardSelection.cardIds());
-    }
+    cardDiscoveryService.recordSeenAll(option.cardSelection.cardIds());
     stage.addActor(cardSelectionTable);
   }
 

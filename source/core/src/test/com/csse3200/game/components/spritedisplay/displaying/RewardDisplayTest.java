@@ -2,6 +2,7 @@ package com.csse3200.game.components.spritedisplay.displaying;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -82,6 +83,31 @@ class RewardDisplayTest {
   }
 
   @Test
+  void goldAndItemClaimsDoNotRevealHiddenCardCandidates() {
+    RewardDisplay goldDisplay = createDisplay(defaultService());
+    List<String> goldCandidateIds = cardOption(goldDisplay).cardSelection.cardIds();
+
+    goldDisplay.getOptionButtons().get(0).fire(new ChangeEvent());
+
+    assertTrue(
+        goldCandidateIds.stream()
+            .allMatch(id -> discovery.getProgressSnapshot().get(id) == CardUnlockState.LOCKED));
+
+    entity.dispose();
+    entity = null;
+    discovery = new CardDiscoveryService(CardConfigLoader.loadCards());
+    runState = new RunState();
+    RewardDisplay itemDisplay = createDisplay(defaultService());
+    List<String> itemCandidateIds = cardOption(itemDisplay).cardSelection.cardIds();
+
+    itemDisplay.getOptionButtons().get(1).fire(new ChangeEvent());
+
+    assertTrue(
+        itemCandidateIds.stream()
+            .allMatch(id -> discovery.getProgressSnapshot().get(id) == CardUnlockState.LOCKED));
+  }
+
+  @Test
   void openingCardShowsBaseWidgetsAndMarksEveryVisibleCandidateSeen() {
     RewardDisplay display = createDisplay(defaultService());
     RewardOption cardOption = cardOption(display);
@@ -153,6 +179,125 @@ class RewardDisplayTest {
   }
 
   @Test
+  void smallPoolsShowOnlyTheAvailableDistinctCards() {
+    assertVisibleChoiceCount(List.of("strike"), 1);
+    entity.dispose();
+    entity = null;
+    assertVisibleChoiceCount(List.of("strike", "defend"), 2);
+  }
+
+  @Test
+  void repeatedCreateDoesNotRerollOrDuplicateActors() {
+    AtomicInteger generationCalls = new AtomicInteger();
+    RewardService service =
+        new RewardService(fixedRewardGenerator(), cardService, new Random(11)) {
+          @Override
+          public List<RewardOption> generateRewardOptions(float goldBonusMultiplier) {
+            generationCalls.incrementAndGet();
+            return super.generateRewardOptions(goldBonusMultiplier);
+          }
+        };
+    RewardDisplay display = createDisplay(service);
+    List<String> offeredIds = cardOption(display).cardSelection.cardIds();
+    int actorCount = stage.getActors().size;
+
+    display.create();
+
+    assertEquals(1, generationCalls.get());
+    assertEquals(offeredIds, cardOption(display).cardSelection.cardIds());
+    assertEquals(actorCount, stage.getActors().size);
+    assertEquals(3, display.getOptionButtons().size());
+  }
+
+  @Test
+  void missingRunStateLeavesEveryRewardUnclaimed() {
+    RewardDisplay display = createDisplay(defaultService(), null, discovery);
+    AtomicInteger completionEvents = new AtomicInteger();
+    entity
+        .getEvents()
+        .addListener(RewardDisplay.REWARD_CLAIMED_EVENT, completionEvents::incrementAndGet);
+
+    display.getOptionButtons().get(0).fire(new ChangeEvent());
+    cardButton(display).fire(new ChangeEvent());
+
+    assertFalse(display.isClaimed());
+    assertFalse(display.isCardRewardCommitted());
+    assertEquals(0, completionEvents.get());
+  }
+
+  @Test
+  void claimFailuresStayOnTheRewardScreenAndCanBeRetried() {
+    AtomicInteger attempts = new AtomicInteger();
+    RewardService failingService =
+        new RewardService(fixedRewardGenerator(), cardService, new Random(11)) {
+          @Override
+          public void claimRunReward(RunState state, RewardOption selected, String selectedCardId) {
+            attempts.incrementAndGet();
+            throw new IllegalStateException("simulated claim failure");
+          }
+        };
+    RewardDisplay display = createDisplay(failingService);
+    int initialGold = runState.getOrCreatePlayerState().getGold();
+    AtomicInteger returnEvents = new AtomicInteger();
+    entity
+        .getEvents()
+        .addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, returnEvents::incrementAndGet);
+
+    display.getOptionButtons().get(0).fire(new ChangeEvent());
+    display.getOptionButtons().get(0).fire(new ChangeEvent());
+
+    assertEquals(2, attempts.get());
+    assertFalse(display.isClaimed());
+    assertEquals(initialGold, runState.getOrCreatePlayerState().getGold());
+    assertEquals(0, returnEvents.get());
+  }
+
+  @Test
+  void cardClaimFailureDoesNotMutateDeckOrCompleteReward() {
+    AtomicInteger attempts = new AtomicInteger();
+    RewardService failingService =
+        new RewardService(fixedRewardGenerator(), cardService, new Random(11)) {
+          @Override
+          public void claimRunReward(RunState state, RewardOption selected, String selectedCardId) {
+            attempts.incrementAndGet();
+            throw new IllegalStateException("simulated card claim failure");
+          }
+        };
+    RewardDisplay display = createDisplay(failingService);
+    int initialDeckSize = runState.getOrCreatePlayerDeck(cardService).size();
+    AtomicInteger returnEvents = new AtomicInteger();
+    entity
+        .getEvents()
+        .addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, returnEvents::incrementAndGet);
+
+    cardButton(display).fire(new ChangeEvent());
+    Button selectedCard = display.getCardChoiceButtons().get(0);
+    selectedCard.fire(new ChangeEvent());
+    selectedCard.fire(new ChangeEvent());
+
+    assertEquals(2, attempts.get());
+    assertFalse(display.isClaimed());
+    assertEquals(initialDeckSize, runState.getOrCreatePlayerDeck(cardService).size());
+    assertEquals(0, returnEvents.get());
+  }
+
+  @Test
+  void constructorRejectsMissingRequiredServices() {
+    DisplayingRecord record = DisplayingRecord.builder("").variant("reward").build();
+    RewardService service = defaultService();
+
+    assertThrows(
+        NullPointerException.class,
+        () -> new RewardDisplay(record, null, runState, cardService, discovery));
+    assertThrows(
+        NullPointerException.class,
+        () -> new RewardDisplay(record, service, runState, null, discovery));
+    assertThrows(
+        NullPointerException.class,
+        () -> new RewardDisplay(record, service, runState, cardService, null));
+  }
+
+  @Test
   void disposeRemovesDynamicActorsAndStaleButtonsCannotClaim() {
     RewardDisplay display = createDisplay(defaultService());
     cardButton(display).fire(new ChangeEvent());
@@ -168,16 +313,33 @@ class RewardDisplayTest {
   }
 
   private RewardDisplay createDisplay(RewardService service) {
+    return createDisplay(service, runState, discovery);
+  }
+
+  private RewardDisplay createDisplay(
+      RewardService service, RunState displayRunState, CardDiscoveryService displayDiscovery) {
     RewardDisplay display =
         new RewardDisplay(
             DisplayingRecord.builder("").variant("reward").build(),
             service,
-            runState,
+            displayRunState,
             cardService,
-            discovery);
+            displayDiscovery);
     entity = new Entity().addComponent(display);
     entity.create();
     return display;
+  }
+
+  private void assertVisibleChoiceCount(List<String> eligibleIds, int expectedChoices) {
+    CardAcquisitionPool pool = new CardAcquisitionPool(cardService, eligibleIds);
+    RewardService service =
+        new RewardService(fixedRewardGenerator(), cardService, pool, new Random(7));
+    RewardDisplay display = createDisplay(service);
+
+    cardButton(display).fire(new ChangeEvent());
+
+    assertEquals(expectedChoices, display.getCardChoiceButtons().size());
+    assertEquals(expectedChoices, display.getCardWidgets().size());
   }
 
   private RewardService defaultService() {

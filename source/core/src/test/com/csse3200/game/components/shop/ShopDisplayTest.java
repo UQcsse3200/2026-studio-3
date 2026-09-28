@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.CardUnlockState;
@@ -22,14 +23,34 @@ import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.shop.PurchaseResult;
 import com.csse3200.game.shop.ShopItem;
 import com.csse3200.game.shop.ShopService;
-import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(GameExtension.class)
 class ShopDisplayTest {
   private final ShopItem item = new ShopItem("offer", "card", "Test Card", 20, 1);
+  private Stage stage;
+  private Entity entity;
+
+  @BeforeEach
+  void setUp() {
+    RenderService renderService = new RenderService();
+    stage = new Stage(new ScreenViewport(), mock(SpriteBatch.class));
+    renderService.setStage(stage);
+    ServiceLocator.registerRenderService(renderService);
+    ServiceLocator.registerEntityService(new EntityService());
+  }
+
+  @AfterEach
+  void tearDown() {
+    if (entity != null) {
+      entity.dispose();
+    }
+    stage.dispose();
+  }
 
   @Test
   void shouldShowAvailableWhenPurchaseCheckSucceeds() {
@@ -81,30 +102,22 @@ class ShopDisplayTest {
   }
 
   @Test
-  void openingShopMarksOfferedCardsAsSeen() {
-    CardConfig card = new CardConfig();
-    card.id = item.cardId;
-    CardDiscoveryService discovery = new CardDiscoveryService(List.of(card));
+  void shouldRecordEveryDisplayedShopCardSeen() {
+    CardDiscoveryService discovery = new CardDiscoveryService(CardConfigLoader.loadCards());
     ServiceLocator.registerCardDiscoveryService(discovery);
+    InventoryComponent inventory = new InventoryComponent(100);
+    ShopService shopService =
+        new ShopService(
+            new ShopItem[] {
+              new ShopItem("strike-offer", "strike", "Strike", 20, 1),
+              new ShopItem("bandage-offer", "bandage", "Bandage", 20, 1)
+            });
+    ShopDisplay display = new ShopDisplay(inventory, shopService);
+    entity = new Entity().addComponent(display);
 
-    RenderService renderService = new RenderService();
-    Stage stage = new Stage(new ScreenViewport(), mock(SpriteBatch.class));
-    renderService.setStage(stage);
-    ServiceLocator.registerRenderService(renderService);
-    ServiceLocator.registerEntityService(new EntityService());
+    entity.create();
 
-    Entity shop =
-        new Entity()
-            .addComponent(
-                new ShopDisplay(
-                    new InventoryComponent(100), new ShopService(new ShopItem[] {item})));
-    try {
-      shop.create();
-
-      assertEquals(CardUnlockState.SEEN, discovery.getProgressSnapshot().get(item.cardId));
-    } finally {
-      shop.dispose();
-      stage.dispose();
-    }
+    assertEquals(CardUnlockState.SEEN, discovery.getProgressSnapshot().get("strike"));
+    assertEquals(CardUnlockState.SEEN, discovery.getProgressSnapshot().get("bandage"));
   }
 }

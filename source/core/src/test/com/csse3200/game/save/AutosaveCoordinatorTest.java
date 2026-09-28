@@ -9,8 +9,12 @@ import static org.mockito.Mockito.when;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardDiscoveryService;
+import com.csse3200.game.cards.CardLibrary;
+import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
+import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.maps.MapGraph;
 import com.csse3200.game.maps.MapNode;
@@ -18,8 +22,14 @@ import com.csse3200.game.maps.NodeState;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.CardRewardSelection;
+import com.csse3200.game.rewards.RewardGenerator;
+import com.csse3200.game.rewards.RewardOption;
+import com.csse3200.game.rewards.RewardService;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -153,6 +163,51 @@ class AutosaveCoordinatorTest {
     assertEquals(43, restoredPlayer.getCurrentHealth());
     assertEquals(28, restoredPlayer.getGold());
     assertEquals(1, restoredRun.getMapGraph().getCurrentNode().getNodeId());
+  }
+
+  @Test
+  void pendingPostBattleAutosaveIncludesCardClaimedBeforeReturningToMap() {
+    RunState runState = activeRun();
+    CardService cards = new CardLibrary(CardConfigLoader.loadCards());
+    CardDiscoveryService discovery = CardDiscoveryService.loadDefault();
+    BestiaryService bestiary = BestiaryService.loadDefault();
+    JsonSaveGameRepository repository =
+        new JsonSaveGameRepository(new FileHandle(temporaryDirectory.toFile()));
+    AutosaveCoordinator coordinator =
+        new AutosaveCoordinator(
+            runState,
+            () ->
+                new SaveGameService(
+                    repository,
+                    new GameStateSnapshotProvider(
+                        runState.getOrCreatePlayerState(),
+                        runState.getOrCreatePlayerDeck(cards),
+                        runState,
+                        bestiary,
+                        discovery)));
+
+    assertTrue(runState.getMapGraph().moveToNode(1));
+    runState.enterEncounter(1);
+    runState.completeEncounter(true);
+    coordinator.requestAfterSuccessfulEncounter();
+
+    RewardService rewards =
+        new RewardService(new RewardGenerator(new Random(1)), cards, new Random(2));
+    rewards.claimRunReward(
+        runState, RewardOption.cards(new CardRewardSelection(List.of("starfall"))), "starfall");
+    CardInstance acquired = runState.getOrCreatePlayerDeck(cards).getCards().getLast();
+
+    coordinator.saveIfPending();
+
+    LoadResult autosave = repository.load(AutosaveCoordinator.AUTOSAVE_SLOT_ID);
+    assertTrue(autosave.success());
+    CardInstanceSaveData saved =
+        autosave.data().deck.cards.stream()
+            .filter(card -> acquired.instanceId().equals(card.instanceId))
+            .findFirst()
+            .orElseThrow();
+    assertEquals("starfall", saved.cardId);
+    assertEquals(CardInstance.BASE_LEVEL, saved.upgradeLevel);
   }
 
   private RunState activeRun() {
