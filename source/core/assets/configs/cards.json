@@ -233,8 +233,8 @@
       },
       {
         "id": "makeshift_shelter",
-        "name": "Makeshift Shelter",
-        "description": "Gain 7 Block. Heal 3.",
+        "name": "Humble Sanctuary",
+        "description": "Even a lesser blessing can become a refuge. Gain 7 Block. Heal 3.",
         "cost": 2,
         "type": "SKILL",
         "rarity": "UNCOMMON",
@@ -247,8 +247,8 @@
       },
       {
         "id": "rubble_barricade",
-        "name": "Rubble Barricade",
-        "description": "Gain 12 Block.",
+        "name": "Consecrated Rampart",
+        "description": "Even broken stone can bear a sacred ward. Gain 12 Block.",
         "cost": 2,
         "type": "SKILL",
         "rarity": "UNCOMMON",
@@ -258,8 +258,8 @@
       },
       {
         "id": "emergency_salve",
-        "name": "Emergency Salve",
-        "description": "Heal 10 health.",
+        "name": "Balm of Grace",
+        "description": "Grace settles into wounded flesh. Heal 10 health.",
         "cost": 2,
         "type": "SKILL",
         "rarity": "UNCOMMON",
@@ -270,7 +270,7 @@
       {
         "id": "purify",
         "name": "Purify",
-        "description": "Remove all negative effects from yourself.",
+        "description": "The stain of corruption is washed away. Remove all negative effects from yourself.",
         "cost": 1,
         "type": "SKILL",
         "rarity": "UNCOMMON",
