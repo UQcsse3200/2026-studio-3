@@ -69,6 +69,30 @@ class GameStateSnapshotProviderTest {
   }
 
   @Test
+  void capturesPietyAsCurrentNodeHeightForSchemaCompleteness() {
+    // Regression test for PR #303 review: confirms a non-zero current-node height is actually
+    // captured into PlayerSaveData.piety. Note this field is snapshot-only (see the doc comment
+    // on capturePlayer()) -- MapGraph itself, not this field, is what SaveGameRestoreService
+    // restores and what PlayerStatsTopDisplay reads live, so this test only verifies the capture
+    // side, not a restore round-trip.
+    PlayerRunState playerState = new PlayerRunState(100, 100, 50);
+    PlayerDeck deck = PlayerDeckFactory.createStarterDeck();
+
+    Map<Integer, MapNode> nodes = new HashMap<>();
+    nodes.put(21, new MapNode(21, RoomType.COMBAT)); // height = 21 / MAP_WIDTH(7) = 3
+    MapGraph mapGraph = new MapGraph(nodes, false);
+    mapGraph.restoreCurrentNode(21);
+    RunState runState = new RunState();
+    runState.setMapGraph(mapGraph);
+
+    SaveGameData data =
+        new GameStateSnapshotProvider(playerState, deck, runState, BestiaryService.loadDefault())
+            .capture();
+
+    assertEquals(3, data.player.piety);
+  }
+
+  @Test
   void rejectsMissingBestiaryService() {
     PlayerRunState playerState = new PlayerRunState(100, 100, 50);
     PlayerDeck deck = PlayerDeckFactory.createStarterDeck();

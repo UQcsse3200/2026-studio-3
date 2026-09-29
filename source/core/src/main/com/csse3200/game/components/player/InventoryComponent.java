@@ -199,8 +199,24 @@ public class InventoryComponent extends Component {
     return true;
   }
 
+  /**
+   * Increases the shop discount by a given amount, capped at 50%.
+   *
+   * @param amount discount to add, as a fraction (e.g. 0.05f for 5%)
+   */
   public void addShopDiscount(float amount) {
     this.shopDiscount = Math.min(this.shopDiscount + amount, 0.5f);
+  }
+
+  /**
+   * Sets the shop discount directly, clamped between 0 and 50%. Used to restore a persisted
+   * discount value (e.g. from {@link com.csse3200.game.maps.PlayerRunState}) without re-adding on
+   * top of whatever the discount currently is.
+   *
+   * @param discount discount value to set, as a fraction
+   */
+  public void setShopDiscount(float discount) {
+    this.shopDiscount = Math.min(Math.max(discount, 0f), 0.5f);
   }
 
   public float getShopDiscount() {
@@ -211,7 +227,23 @@ public class InventoryComponent extends Component {
     return goldBonusMultiplier;
   }
 
+  /**
+   * Increases the gold bonus multiplier by a given amount (e.g. from a Lucky Coin item).
+   *
+   * @param bonus multiplier to add, as a fraction (e.g. 0.1f for +10%)
+   */
   public void addGoldBonusMultiplier(float bonus) {
     this.goldBonusMultiplier += bonus;
+  }
+
+  /**
+   * Sets the gold bonus multiplier directly. Used to restore a persisted multiplier value (e.g.
+   * from {@link com.csse3200.game.maps.PlayerRunState}) without re-adding on top of whatever the
+   * multiplier currently is.
+   *
+   * @param multiplier multiplier value to set, as a fraction
+   */
+  public void setGoldBonusMultiplier(float multiplier) {
+    this.goldBonusMultiplier = Math.max(multiplier, 0f);
   }
 }

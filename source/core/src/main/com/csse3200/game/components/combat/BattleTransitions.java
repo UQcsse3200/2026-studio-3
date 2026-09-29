@@ -27,6 +27,10 @@ public class BattleTransitions {
         BattlePhase.PLAYER_TURN, BattleEvent.CARD_PLAY_REQUESTED, BattlePhase.CARD_RESOLVING);
     this.addTransition(
         BattlePhase.PLAYER_TURN, BattleEvent.PLAYER_END_REQUESTED, BattlePhase.PLAYER_END);
+    // Every other phase already allows ENEMIES_DEFEATED->VICTORY; PLAYER_TURN was missing it
+    // (nothing normally defeats an enemy while idly waiting to play a card), but a debug cheat
+    // that force-kills every enemy needs this to fire from exactly that phase.
+    this.addTransition(BattlePhase.PLAYER_TURN, BattleEvent.ENEMIES_DEFEATED, BattlePhase.VICTORY);
     this.addTransition(
         BattlePhase.CARD_RESOLVING, BattleEvent.CARD_RESOLVED, BattlePhase.PLAYER_TURN);
     this.addTransition(BattlePhase.CARD_RESOLVING, BattleEvent.PLAYER_DEFEATED, BattlePhase.DEFEAT);

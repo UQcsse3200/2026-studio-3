@@ -128,7 +128,9 @@ public class ForestGameArea extends GameArea {
     spawnBackground();
     spawnTerrain();
 
-    enemy = spawnEnemy();
+    if (spawnsDefaultEnemy()) {
+      enemy = spawnEnemy();
+    }
     player = spawnPlayer();
 
     // playMusic();
@@ -213,12 +215,22 @@ public class ForestGameArea extends GameArea {
     return newEnemy;
   }
 
+  /**
+   * Whether {@link #create()} should spawn the default enemy. Subclasses that place their own
+   * enemies override this to return false.
+   *
+   * @return true to spawn the default enemy
+   */
+  protected boolean spawnsDefaultEnemy() {
+    return true;
+  }
+
   public Entity getPlayer() {
     return player;
   }
 
   public List<Entity> getEnemies() {
-    return List.of(enemy);
+    return enemy == null ? List.of() : List.of(enemy);
   }
 
   //  private void playMusic() {

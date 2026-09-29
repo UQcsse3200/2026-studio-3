@@ -63,6 +63,9 @@ class BattleTransitionsTest {
             BattlePhase.PLAYER_TURN, BattleEvent.CARD_PLAY_REQUESTED, BattlePhase.CARD_RESOLVING),
         transition(
             BattlePhase.PLAYER_TURN, BattleEvent.PLAYER_END_REQUESTED, BattlePhase.PLAYER_END),
+        // Debug cheat entry point (BattleController.forceEnemiesDefeated) needs this — every
+        // other phase already allows ENEMIES_DEFEATED->VICTORY, PLAYER_TURN was the one gap.
+        transition(BattlePhase.PLAYER_TURN, BattleEvent.ENEMIES_DEFEATED, BattlePhase.VICTORY),
         transition(BattlePhase.CARD_RESOLVING, BattleEvent.CARD_RESOLVED, BattlePhase.PLAYER_TURN),
         transition(BattlePhase.CARD_RESOLVING, BattleEvent.ENEMIES_DEFEATED, BattlePhase.VICTORY),
         transition(BattlePhase.CARD_RESOLVING, BattleEvent.PLAYER_DEFEATED, BattlePhase.DEFEAT),
