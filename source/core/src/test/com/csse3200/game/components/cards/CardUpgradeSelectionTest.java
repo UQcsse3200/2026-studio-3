@@ -175,12 +175,11 @@ class CardUpgradeSelectionTest {
                 () -> new CardUpgradeSelection(deck, cardService, 0)));
   }
 
-    @Test
-    void shouldNotAllowSelectingIneligibleCardWithRoomLeft() {
-      boolean canSelect = selection.canSelect("defend-1");
-      assertFalse(canSelect);
-    }
-
+  @Test
+  void shouldNotAllowSelectingIneligibleCardWithRoomLeft() {
+    boolean canSelect = selection.canSelect("defend-1");
+    assertFalse(canSelect);
+  }
 
   private String id(int index) {
     return deck.get(index).instanceId();

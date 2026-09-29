@@ -7,12 +7,17 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.TestCardService;
 import com.csse3200.game.cards.runtime.CardInstance;
+import com.csse3200.game.extensions.GameExtension;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(GameExtension.class)
 class PlayerDeckTest {
   private static final CardService CARDS =
       TestCardService.withCards(
@@ -23,6 +28,7 @@ class PlayerDeckTest {
           "inner_focus",
           "bandage",
           "new_team_six_card");
+  private static final CardService UPGRADABLE_CARDS = new CardLibrary(CardConfigLoader.loadCards());
 
   @Test
   void shouldCreateEmptyDeck() {
@@ -183,5 +189,34 @@ class PlayerDeckTest {
 
     assertTrue(deck.isEmpty());
     assertEquals(0, deck.size());
+  }
+
+  @Test
+  void shouldThrowWhenUpgradingTwice() {
+    PlayerDeck deck = new PlayerDeck(UPGRADABLE_CARDS, List.of("strike"));
+    String id = deck.getCards().getFirst().instanceId();
+    deck.upgradeCard(id);
+    assertThrows(IllegalStateException.class, () -> deck.upgradeCard(id));
+    assertTrue(deck.getCards().getFirst().isUpgraded());
+  }
+
+  @Test
+  void shouldThrowForUnknownInstanceId() {
+    PlayerDeck deck = new PlayerDeck(UPGRADABLE_CARDS, List.of("strike", "strike"));
+    assertThrows(IllegalArgumentException.class, () -> deck.upgradeCard("no-such-instance"));
+  }
+
+  @Test
+  void shouldThrowWhenCardHasNoUpgradeDefinition() {
+    PlayerDeck deck = new PlayerDeck(CARDS, List.of("bandage"));
+    String id = deck.getCards().getFirst().instanceId();
+    assertThrows(IllegalArgumentException.class, () -> deck.upgradeCard(id));
+  }
+
+  @Test
+  void shouldRejectInvalidInstanceIds() {
+    PlayerDeck deck = new PlayerDeck(CARDS, List.of("bandage"));
+    assertThrows(IllegalArgumentException.class, () -> deck.upgradeCard(null));
+    assertThrows(IllegalArgumentException.class, () -> deck.upgradeCard(""));
   }
 }
