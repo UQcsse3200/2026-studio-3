@@ -21,6 +21,7 @@ public class EnemyBehaviourComponent extends Component {
   private EnemyIntent currentIntent = EnemyIntent.unknown();
   private int turnNumber = 0;
   private CombatStatsComponent playerStats;
+  private EnemyMemoryComponent enemyMemory;
 
   /**
    * Creates a behaviour that resolves its AI from a behaviour identifier.
@@ -63,6 +64,19 @@ public class EnemyBehaviourComponent extends Component {
   }
 
   /**
+   * Supplies the shared enemy-memory component attached to the player.
+   *
+   * <p>All enemies may read the same memory component, but each enemy still owns an independent AI
+   * instance and makes its own decision.
+   *
+   * @param enemyMemory memory component attached to the player, or null to return to empty player
+   *     memory
+   */
+  public void setEnemyMemory(EnemyMemoryComponent enemyMemory) {
+    this.enemyMemory = enemyMemory;
+  }
+
+  /**
    * @return the intent telegraphed for the coming round
    */
   public EnemyIntent getCurrentIntent() {
@@ -97,6 +111,8 @@ public class EnemyBehaviourComponent extends Component {
    * @return a snapshot of the current battle state
    */
   private EnemyAIContext buildContext(CombatStatsComponent stats) {
+    PlayerMemory playerMemory = enemyMemory == null ? PlayerMemory.empty() : enemyMemory.snapshot();
+
     return new EnemyAIContext(
         playerStats == null ? UNKNOWN_PLAYER_HEALTH : playerStats.getHealth(),
         stats.getHealth(),
@@ -104,7 +120,8 @@ public class EnemyBehaviourComponent extends Component {
         stats.getBaseAttack(),
         stats.getArmour(),
         currentIntent,
-        turnNumber);
+        turnNumber,
+        playerMemory);
   }
 
   /**
