@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.enemy.IntentType;
-import com.csse3200.game.components.enemy.PlayerMemory;
+import com.csse3200.game.components.enemy.Memory.PlayerMemory;
 import org.junit.jupiter.api.Test;
 
 class ArmourScalingAITest {

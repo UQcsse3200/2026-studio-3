@@ -1,8 +1,8 @@
 package com.csse3200.game.entities.factories;
 
 import com.csse3200.game.components.CombatStatsComponent;
-import com.csse3200.game.components.enemy.EnemyMemoryComponent;
-import com.csse3200.game.components.enemy.PlayerTrackerComponent;
+import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
+import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
 import com.csse3200.game.components.player.*;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.configs.PlayerConfig;
