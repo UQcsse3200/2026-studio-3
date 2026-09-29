@@ -27,6 +27,7 @@ import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
 import com.csse3200.game.ui.terminal.commands.GotoCommand;
+import com.csse3200.game.ui.terminal.commands.StartEventCommand;
 import com.csse3200.game.ui.terminal.commands.ListNodesCommand;
 import com.csse3200.game.ui.terminal.commands.UnlockNodeCommand;
 import java.util.Comparator;
@@ -105,6 +106,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     terminal.addCommand("unlocknode", new UnlockNodeCommand(runState));
     terminal.addCommand("listnodes", new ListNodesCommand(runState));
     terminal.addCommand("goto", new GotoCommand(runState, mapDisplay.getMapSelectionController()));
+    terminal.addCommand("start-event", new StartEventCommand(runState, game));
 
     Entity ui = new Entity();
     ui.addComponent(new InputDecorator(ServiceLocator.getRenderService().getStage(), 10))
