@@ -1,9 +1,11 @@
 package com.csse3200.game.encounters.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.csse3200.game.cards.CardAcquisitionPool;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
@@ -24,6 +26,27 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(GameExtension.class)
 class ChanceCardRewardIntegrationTest {
+  @Test
+  void shouldValidateExplicitEventCardsAgainstTheSharedAcquisitionPool() {
+    CardService cardService = new CardLibrary(CardConfigLoader.loadCards());
+    CardAcquisitionPool pool = new CardAcquisitionPool(cardService, List.of("strike"));
+    PlayerDeck playerDeck = new PlayerDeck(cardService);
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
+    ChanceOutcomeApplier applier =
+        new ChanceOutcomeApplier(
+            player,
+            new CardServiceCatalogAdapter(cardService, pool),
+            new PlayerDeckAdapter(playerDeck));
+
+    ChanceResolution excluded = applier.apply(new ChanceOutcome(0, 0, "bandage"));
+    ChanceResolution eligible = applier.apply(new ChanceOutcome(0, 0, "strike"));
+
+    assertFalse(excluded.isSuccess());
+    assertEquals(ChanceResolution.Status.CARD_NOT_FOUND, excluded.getStatus());
+    assertTrue(eligible.isSuccess());
+    assertEquals(List.of("strike"), cardIds(playerDeck));
+  }
+
   @Test
   void shouldRollbackExactRewardAfterRejectedHealthWithoutRemovingExistingDuplicate() {
     CardService cardService = TestCardService.withCards("bandage", "strike");

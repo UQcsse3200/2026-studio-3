@@ -11,12 +11,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.chance.ChanceChoice;
 import com.csse3200.game.chance.ChanceEncounter;
 import com.csse3200.game.chance.ChanceOutcome;
 import com.csse3200.game.encounters.integration.ChanceEncounterSession;
 import com.csse3200.game.encounters.integration.ChanceResolution;
 import com.csse3200.game.maps.EncounterCallback;
+import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.UIComponent;
 import java.util.ArrayList;
 import java.util.List;
@@ -105,7 +107,10 @@ public class ChanceEncounterDisplay extends UIComponent {
     this.encounter = Objects.requireNonNull(encounter, "encounter cannot be null");
     this.encounterSession = encounterSession;
     this.completionCallback = completionCallback;
-    this.nodeId = Objects.requireNonNull(nodeId, "nodeId cannot be null");
+    if ((completionCallback != null || encounterSession != null) && nodeId == null) {
+      throw new IllegalArgumentException("nodeId cannot be null for an integrated encounter");
+    }
+    this.nodeId = nodeId;
   }
 
   @Override
@@ -285,7 +290,16 @@ public class ChanceEncounterDisplay extends UIComponent {
 
     resultLabel.setStyle(createLabelStyle(DEFAULT, BODY_COLOUR));
     resultLabel.setText("OUTCOME\n" + formatOutcome(outcome));
+    recordVisibleCard(outcome);
     continueButton.setVisible(true);
+  }
+
+  private void recordVisibleCard(ChanceOutcome outcome) {
+    String cardId = outcome.getCardRewardId();
+    CardDiscoveryService discovery = ServiceLocator.getCardDiscoveryService();
+    if (cardId != null && discovery != null) {
+      discovery.recordSeen(cardId);
+    }
   }
 
   private void completeEncounter() {
@@ -358,6 +372,10 @@ public class ChanceEncounterDisplay extends UIComponent {
       title.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
     }
     return title.toString();
+  }
+
+  List<TextButton> getChoiceButtons() {
+    return List.copyOf(choiceButtons);
   }
 
   @Override

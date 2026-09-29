@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAI;
@@ -161,6 +162,26 @@ class EnemyBehaviourComponentTest {
     behaviour.executeIntent(player);
 
     assertEquals(24, playerStats.getHealth());
+  }
+
+  @Test
+  void shouldApplyStrengthFeebleAndTargetVulnerableToAttackDamageOnce() {
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent(EnemyAIFactory.CYCLE_ATTACK_DEFEND);
+    CombatStatsComponent attackerStats = enemyStats();
+    attackerStats.applyStatusEffect(EffectType.STRENGTH.name(), 2, 0);
+    attackerStats.applyStatusEffect(EffectType.FEEBLE.name(), 1, 2);
+    enemyWith(behaviour, attackerStats);
+
+    CombatStatsComponent playerStats = new CombatStatsComponent(30, 4);
+    playerStats.applyStatusEffect(EffectType.VULNERABLE.name(), 1, 2);
+    Entity player = new Entity().addComponent(playerStats);
+    player.create();
+
+    behaviour.rollIntent();
+    behaviour.executeIntent(player);
+
+    assertEquals(21, playerStats.getHealth());
   }
 
   // 攻击伤害应该等于意图里广播出去的数值，而不是重新按自身 baseAttack 计算——

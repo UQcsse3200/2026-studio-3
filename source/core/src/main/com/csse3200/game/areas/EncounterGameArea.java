@@ -1,6 +1,7 @@
 package com.csse3200.game.areas;
 
 import com.csse3200.game.areas.terrain.TerrainFactory;
+import com.csse3200.game.cards.CardAcquisitionPoolLoader;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.chance.ChanceEncounterFactory;
@@ -202,7 +203,10 @@ public class EncounterGameArea extends GameArea {
     ComponentPlayerStateAdapter playerState =
         new ComponentPlayerStateAdapter(combatStats, inventory);
 
-    cardCatalog = new CardServiceCatalogAdapter(ServiceLocator.getCardLibrary());
+    CardService cardService = ServiceLocator.getCardLibrary();
+    cardCatalog =
+        new CardServiceCatalogAdapter(
+            cardService, CardAcquisitionPoolLoader.loadDefault(cardService));
 
     DeckGateway deck =
         sharedPlayerDeck != null

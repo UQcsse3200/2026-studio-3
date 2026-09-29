@@ -1,7 +1,10 @@
 package com.csse3200.game.components.enemy;
 
+import com.csse3200.game.cards.EffectType;
+import com.csse3200.game.cards.effects.CardEffectResolutionContext;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.Component;
+import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAI;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIFactory;
@@ -140,8 +143,23 @@ public class EnemyBehaviourComponent extends Component {
 
     CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
     if (targetStats != null) {
-      targetStats.takeDamage(currentIntent.getValue());
+      CombatStatsComponent attackerStats = entity.getComponent(CombatStatsComponent.class);
+      int strength = statusValue(attackerStats, EffectType.STRENGTH);
+      int feeble = statusValue(attackerStats, EffectType.FEEBLE);
+      int vulnerable = statusValue(targetStats, EffectType.VULNERABLE);
+      int damage =
+          new CardEffectResolutionContext(strength, feeble, vulnerable)
+              .resolveDamage(currentIntent.getValue());
+      targetStats.takeDamage(damage);
     }
+  }
+
+  private static int statusValue(CombatStatsComponent stats, EffectType type) {
+    if (stats == null) {
+      return 0;
+    }
+    StatusEffect status = stats.getStatusEffect(type.name());
+    return status == null ? 0 : Math.max(0, status.getValue());
   }
 
   private void defend() {
