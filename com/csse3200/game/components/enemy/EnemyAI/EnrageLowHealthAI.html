@@ -97,10 +97,18 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">EnrageLowHealthAI</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements <a href="EnemyAI.html" title="interface in com.csse3200.game.components.enemy.EnemyAI">EnemyAI</a></span></div>
-<div class="block">Elite behaviour that follows a four-stance combat pattern and becomes stronger at low health.
+<div class="block">Elite behaviour that follows a four-stance combat pattern and may enter enrage based on either
+ combat health or observed player behaviour.
 
- <p>The base behaviour is provided by <a href="CycleFourStanceAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI"><code>CycleFourStanceAI</code></a>. When the enemy falls below half
- health, all attack intents deal double damage. Defensive intents are not affected by enrage.</div>
+ <p>The base behaviour is provided by <a href="CycleFourStanceAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI"><code>CycleFourStanceAI</code></a>. Attack intents deal double damage
+ when either:
+
+ <ul>
+   <li>the enemy is below half health, or
+   <li>player memory reports that the player has remained undefended.
+ </ul>
+
+ <p>Defensive intents are never converted into attacks and are not otherwise changed by enrage.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">

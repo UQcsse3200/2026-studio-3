@@ -22,6 +22,7 @@ com.csse3200.game.components.chance
 com.csse3200.game.components.combat
 com.csse3200.game.components.enemy
 com.csse3200.game.components.enemy.EnemyAI
+com.csse3200.game.components.enemy.Memory
 com.csse3200.game.components.gamearea
 com.csse3200.game.components.library
 com.csse3200.game.components.maingame

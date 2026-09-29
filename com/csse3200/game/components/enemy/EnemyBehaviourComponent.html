@@ -153,8 +153,13 @@ loadScripts(document, 'script');</script>
 <div class="block">Decides the action for the coming round and telegraphs it.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setPlayerStats(com.csse3200.game.components.CombatStatsComponent)" class="member-name-link">setPlayerStats</a><wbr>(<a href="../CombatStatsComponent.html" title="class in com.csse3200.game.components">CombatStatsComponent</a>&nbsp;playerStats)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setEnemyMemory(com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent)" class="member-name-link">setEnemyMemory</a><wbr>(<a href="Memory/EnemyMemoryComponent.html" title="class in com.csse3200.game.components.enemy.Memory">EnemyMemoryComponent</a>&nbsp;enemyMemory)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Supplies the shared enemy-memory component attached to the player.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setPlayerStats(com.csse3200.game.components.CombatStatsComponent)" class="member-name-link">setPlayerStats</a><wbr>(<a href="../CombatStatsComponent.html" title="class in com.csse3200.game.components">CombatStatsComponent</a>&nbsp;playerStats)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Supplies the player's combat stats so intents can react to the player's condition.</div>
 </div>
 </div>
@@ -213,6 +218,21 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>playerStats</code> - the player's combat stats, or null to clear them</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="setEnemyMemory(com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent)">
+<h3>setEnemyMemory</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setEnemyMemory</span><wbr><span class="parameters">(<a href="Memory/EnemyMemoryComponent.html" title="class in com.csse3200.game.components.enemy.Memory">EnemyMemoryComponent</a>&nbsp;enemyMemory)</span></div>
+<div class="block">Supplies the shared enemy-memory component attached to the player.
+
+ <p>All enemies may read the same memory component, but each enemy still owns an independent AI
+ instance and makes its own decision.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>enemyMemory</code> - memory component attached to the player, or null to return to empty player
+     memory</dd>
 </dl>
 </section>
 </li>

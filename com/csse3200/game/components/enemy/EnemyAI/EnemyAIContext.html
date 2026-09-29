@@ -112,7 +112,18 @@ loadScripts(document, 'script');</script>
  <a href="../EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a>&nbsp;previousIntent,
  int&nbsp;turnNumber)</code></div>
 <div class="col-last even-row-color">
-<div class="block">* Creates a snapshot of the battle state for enemy decision-making.</div>
+<div class="block">Creates a battle-state snapshot without player behaviour history.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(int,int,int,int,int,com.csse3200.game.components.enemy.EnemyIntent,int,com.csse3200.game.components.enemy.Memory.PlayerMemory)" class="member-name-link">EnemyAIContext</a><wbr>(int&nbsp;playerHealth,
+ int&nbsp;enemyHealth,
+ int&nbsp;enemyMaxHealth,
+ int&nbsp;enemyAttack,
+ int&nbsp;enemyArmour,
+ <a href="../EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a>&nbsp;previousIntent,
+ int&nbsp;turnNumber,
+ <a href="../Memory/PlayerMemory.html" title="class in com.csse3200.game.components.enemy.Memory">PlayerMemory</a>&nbsp;playerMemory)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a complete battle-state snapshot including the player's observed combat behaviour.</div>
 </div>
 </div>
 </section>
@@ -131,7 +142,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#canDefeatPlayer()" class="member-name-link">canDefeatPlayer</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">* Checks whether a normal attack can defeat the player.</div>
+<div class="block">Checks whether a normal attack can defeat the player.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getEnemyArmour()" class="member-name-link">getEnemyArmour</a>()</code></div>
@@ -145,7 +156,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>float</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getEnemyHealthRatio()" class="member-name-link">getEnemyHealthRatio</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">* Returns the enemy's health as a value between 0 and 1.</div>
+<div class="block">Returns the enemy's health as a value between 0 and 1.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getEnemyMaxHealth()" class="member-name-link">getEnemyMaxHealth</a>()</code></div>
@@ -153,12 +164,17 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPlayerHealth()" class="member-name-link">getPlayerHealth</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPreviousIntent()" class="member-name-link">getPreviousIntent</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTurnNumber()" class="member-name-link">getTurnNumber</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../Memory/PlayerMemory.html" title="class in com.csse3200.game.components.enemy.Memory">PlayerMemory</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPlayerMemory()" class="member-name-link">getPlayerMemory</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns an immutable snapshot of the player's observed combat behaviour.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPreviousIntent()" class="member-name-link">getPreviousIntent</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTurnNumber()" class="member-name-link">getTurnNumber</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -186,11 +202,46 @@ loadScripts(document, 'script');</script>
  int&nbsp;enemyArmour,
  <a href="../EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a>&nbsp;previousIntent,
  int&nbsp;turnNumber)</span></div>
-<div class="block">* Creates a snapshot of the battle state for enemy decision-making. * * @param playerHealth
- player's current health * @param enemyHealth enemy's current health * @param enemyMaxHealth
- enemy's maximum health * @param enemyAttack enemy's current base attack * @param enemyArmour
- enemy's current armour * @param previousIntent enemy's intent from the previous turn * @param
- turnNumber current battle turn number</div>
+<div class="block">Creates a battle-state snapshot without player behaviour history.
+
+ <p>This constructor is retained for backwards compatibility. Existing enemy AI classes and
+ tests can continue using the original seven arguments. The context receives an empty player
+ memory instead of <code>null</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>playerHealth</code> - player's current health</dd>
+<dd><code>enemyHealth</code> - enemy's current health</dd>
+<dd><code>enemyMaxHealth</code> - enemy's maximum health</dd>
+<dd><code>enemyAttack</code> - enemy's current base attack</dd>
+<dd><code>enemyArmour</code> - enemy's current armour</dd>
+<dd><code>previousIntent</code> - enemy's intent from the previous turn</dd>
+<dd><code>turnNumber</code> - current battle turn number</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(int,int,int,int,int,com.csse3200.game.components.enemy.EnemyIntent,int,com.csse3200.game.components.enemy.Memory.PlayerMemory)">
+<h3>EnemyAIContext</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">EnemyAIContext</span><wbr><span class="parameters">(int&nbsp;playerHealth,
+ int&nbsp;enemyHealth,
+ int&nbsp;enemyMaxHealth,
+ int&nbsp;enemyAttack,
+ int&nbsp;enemyArmour,
+ <a href="../EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a>&nbsp;previousIntent,
+ int&nbsp;turnNumber,
+ <a href="../Memory/PlayerMemory.html" title="class in com.csse3200.game.components.enemy.Memory">PlayerMemory</a>&nbsp;playerMemory)</span></div>
+<div class="block">Creates a complete battle-state snapshot including the player's observed combat behaviour.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>playerHealth</code> - player's current health</dd>
+<dd><code>enemyHealth</code> - enemy's current health</dd>
+<dd><code>enemyMaxHealth</code> - enemy's maximum health</dd>
+<dd><code>enemyAttack</code> - enemy's current base attack</dd>
+<dd><code>enemyArmour</code> - enemy's current armour</dd>
+<dd><code>previousIntent</code> - enemy's intent from the previous turn</dd>
+<dd><code>turnNumber</code> - current battle turn number</dd>
+<dd><code>playerMemory</code> - immutable snapshot of the player's observed combat behaviour</dd>
+</dl>
 </section>
 </li>
 </ul>
@@ -244,19 +295,36 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="getPlayerMemory()">
+<h3>getPlayerMemory</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../Memory/PlayerMemory.html" title="class in com.csse3200.game.components.enemy.Memory">PlayerMemory</a></span>&nbsp;<span class="element-name">getPlayerMemory</span>()</div>
+<div class="block">Returns an immutable snapshot of the player's observed combat behaviour.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>player behaviour memory, never <code>null</code></dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="getEnemyHealthRatio()">
 <h3>getEnemyHealthRatio</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">float</span>&nbsp;<span class="element-name">getEnemyHealthRatio</span>()</div>
-<div class="block">* Returns the enemy's health as a value between 0 and 1. * * @return current health divided by
- maximum health</div>
+<div class="block">Returns the enemy's health as a value between 0 and 1.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>current health divided by maximum health</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="canDefeatPlayer()">
 <h3>canDefeatPlayer</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">canDefeatPlayer</span>()</div>
-<div class="block">* Checks whether a normal attack can defeat the player. * * @return true when the enemy's
- current attack is at least the player's health</div>
+<div class="block">Checks whether a normal attack can defeat the player.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>true when the enemy's current attack is at least the player's health</dd>
+</dl>
 </section>
 </li>
 </ul>
