@@ -82,7 +82,9 @@ public class BattleScreen extends ScreenAdapter {
     "images/money.png",
     "images/piety.png",
     "images/enemy.png",
-    "images/armour.png"
+    "images/armour.png",
+    "images/effects/shield.png",
+    "images/effects/fortify.png"
   };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
 
@@ -199,6 +201,7 @@ public class BattleScreen extends ScreenAdapter {
         new BattleController(player, forestGameArea.getEnemies(), effectHandler, cardPlayService);
     EffectVisualRegistry effectVisualRegistry = new EffectVisualRegistry();
     OffensiveEffectVisuals.registerAll(effectVisualRegistry);
+    PlayerEffectVisuals.registerAll(effectVisualRegistry);
     Entity animationCoordinatorEntity =
         new Entity()
             .addComponent(
