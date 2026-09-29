@@ -28,6 +28,7 @@ import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
+import com.csse3200.game.ui.terminal.commands.DiscoverAllCardsCommand;
 import com.csse3200.game.ui.terminal.commands.GotoCommand;
 import com.csse3200.game.ui.terminal.commands.ListNodesCommand;
 import com.csse3200.game.ui.terminal.commands.UnlockNodeCommand;
@@ -108,6 +109,8 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     terminal.addCommand("unlocknode", new UnlockNodeCommand(runState));
     terminal.addCommand("listnodes", new ListNodesCommand(runState));
     terminal.addCommand("goto", new GotoCommand(runState, mapDisplay.getMapSelectionController()));
+    terminal.addCommand(
+        "discoverallcards", new DiscoverAllCardsCommand(game.getCardDiscoveryService()));
 
     Entity ui = new Entity();
     ui.addComponent(new InputDecorator(ServiceLocator.getRenderService().getStage(), 10))
