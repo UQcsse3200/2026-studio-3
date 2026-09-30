@@ -88,9 +88,9 @@ public class EnemyFactory {
    * @return the assembled enemy entity
    */
   public static Entity create(EnemyConfig config) {
-    AnimationRenderComponent animator =
-        new AnimationRenderComponent(
-            ServiceLocator.getResourceService().getAsset(atlasPath(config), TextureAtlas.class));
+    TextureAtlas atlas =
+        ServiceLocator.getResourceService().getAsset(atlasPath(config), TextureAtlas.class);
+    AnimationRenderComponent animator = new AnimationRenderComponent(atlas);
     animator.addAnimation("idle", IDLE_FRAME_DURATION, Animation.PlayMode.LOOP);
     animator.addAnimation("hurt", HURT_FRAME_DURATION, Animation.PlayMode.NORMAL);
     // Attack and death are optional for legacy atlases. Missing regions are logged and skipped.
@@ -139,11 +139,7 @@ public class EnemyFactory {
     if (bestiary != null && bestiary.contains(config.id)) {
       enemy.addComponent(new BestiaryTrackingComponent(config.id, bestiary));
     }
-    // Enemies were left at the default 1x1 world size, which renders them small and ignores the
-    // sprite's aspect ratio. Scale to the sprite, then enlarge so they read clearly on screen.
-    animator.scaleEntity();
-    enemy.setScale(enemy.getScale().scl(ENEMY_RENDER_SCALE * config.renderScale));
-
+    scaleToSprite(atlas, animator, enemy, config);
     return enemy;
   }
 
@@ -165,6 +161,29 @@ public class EnemyFactory {
       return SPRITE_DIR + config.id + ".atlas";
     }
     return DEFAULT_ATLAS;
+  }
+
+  /**
+   * Sizes the enemy to its sprite's aspect ratio, then enlarges it so it reads clearly on screen.
+   *
+   * <p>Enemies were previously left at the default 1x1 world size, which rendered them small and
+   * ignored the sprite's proportions.
+   *
+   * <p>{@link AnimationRenderComponent#scaleEntity()} needs a region named {@code default} in the
+   * atlas. Test atlases and any future atlas without that region fall back to the entity's current
+   * size rather than failing enemy creation.
+   *
+   * @param atlas the atlas backing the enemy's animations
+   * @param animator the enemy's animation component
+   * @param enemy the enemy being built
+   * @param config the enemy's configuration, which carries its own render scale
+   */
+  private static void scaleToSprite(
+      TextureAtlas atlas, AnimationRenderComponent animator, Entity enemy, EnemyConfig config) {
+    if (atlas != null && atlas.findRegion("default") != null) {
+      animator.scaleEntity();
+    }
+    enemy.setScale(enemy.getScale().scl(ENEMY_RENDER_SCALE * config.renderScale));
   }
 
   /**
