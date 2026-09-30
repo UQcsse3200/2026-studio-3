@@ -23,7 +23,7 @@ public class EnemyIntentDisplay extends RenderComponent {
    * with transparent padding, so anchoring to the top of the entity box would float the icon well
    * above the art.
    */
-  private static final float SPRITE_FILL = 0.65f;
+  private static final float SPRITE_FILL = 0.9f;
 
   private EnemyIntent currentIntent;
 
