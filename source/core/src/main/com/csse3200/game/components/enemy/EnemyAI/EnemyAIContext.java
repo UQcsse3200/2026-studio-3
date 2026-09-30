@@ -1,7 +1,7 @@
 package com.csse3200.game.components.enemy.EnemyAI;
 
 import com.csse3200.game.components.enemy.EnemyIntent;
-import com.csse3200.game.components.enemy.PlayerMemory;
+import com.csse3200.game.components.enemy.Memory.PlayerMemory;
 import java.util.Objects;
 
 /** Read-only battle information used by an enemy AI to select its next intent. */
