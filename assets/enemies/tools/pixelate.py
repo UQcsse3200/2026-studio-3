@@ -70,13 +70,29 @@ def _shared_palette(smalls, colors, vivid_slots=6, glow_slots=3):
     reserved = (vivid_slots if vivid else 0) + (glow_slots if glow else 0)
     entries = _median_cut(base, colors - reserved)
     if vivid:
-        entries += _median_cut(vivid, vivid_slots)
+        entries += _vivid_entries(vivid, vivid_slots)
     if glow:
         entries += _median_cut(glow, glow_slots)
     flat = [c for rgb in entries for c in rgb]
     palette = Image.new("P", (1, 1))
     palette.putpalette(flat + flat[:3] * (256 - len(entries)))
     return palette
+
+
+def _vivid_entries(vivid, slots, hue_bins=12, min_pixels=3):
+    # 每种色相（绿、橙、红、青……）先保证至少一个名额，剩下的再按面积分，
+    # 这样少量但颜色独特的细节（比如绿眼睛）不会被大面积的同类色（比如琥珀色符文）吞掉
+    import colorsys
+
+    bins = {}
+    for p in vivid:
+        h = colorsys.rgb_to_hsv(*[c / 255 for c in p])[0]
+        bins.setdefault(int(h * hue_bins) % hue_bins, []).append(p)
+    groups = sorted((g for g in bins.values() if len(g) >= min_pixels), key=len, reverse=True)
+    entries = [tuple(sum(c[i] for c in g) // len(g) for i in range(3)) for g in groups[:slots]]
+    if len(entries) < slots:
+        entries += _median_cut(vivid, slots - len(entries))
+    return entries
 
 
 def _is_vivid(rgb):
