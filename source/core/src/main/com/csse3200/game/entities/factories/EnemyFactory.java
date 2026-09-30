@@ -43,6 +43,9 @@ public class EnemyFactory {
   private static final float DEFEND_FRAME_DURATION = 0.1f;
   private static final float BOSS_DEATH_FRAME_DURATION = 0.12f;
 
+  /** Multiplier applied on top of the sprite's own size so enemies read clearly on screen. */
+  private static final float ENEMY_RENDER_SCALE = 3.5f;
+
   private static EnemyConfigs loadRoster() {
     EnemyConfigs configs = FileLoader.readClass(EnemyConfigs.class, "configs/enemies.json");
 
@@ -136,6 +139,10 @@ public class EnemyFactory {
     if (bestiary != null && bestiary.contains(config.id)) {
       enemy.addComponent(new BestiaryTrackingComponent(config.id, bestiary));
     }
+    // Enemies were left at the default 1x1 world size, which renders them small and ignores the
+    // sprite's aspect ratio. Scale to the sprite, then enlarge so they read clearly on screen.
+    animator.scaleEntity();
+    enemy.setScale(enemy.getScale().scl(ENEMY_RENDER_SCALE * config.renderScale));
 
     return enemy;
   }

@@ -17,4 +17,9 @@ public class EnemyConfig extends BaseEntityConfig {
    * {@code images/enemies/<id>.atlas} by convention, falling back to a shared default atlas.
    */
   public String sprite = "";
+  /**
+   * Multiplier on top of the factory's render scale, so sprites drawn at different sizes still
+   * read consistently on screen. 1.0 keeps the sprite's own proportions.
+   */
+  public float renderScale = 1f;
 }

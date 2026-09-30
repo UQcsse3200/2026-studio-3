@@ -7,7 +7,8 @@
       "baseAttack": 6,
       "armour": 0,
       "tier": "NORMAL",
-      "behaviour": "erratic"
+      "behaviour": "erratic",
+      "renderScale": 0.85
     },
     {
       "id": "bone_crawler",
@@ -16,7 +17,8 @@
       "baseAttack": 5,
       "armour": 2,
       "tier": "NORMAL",
-      "behaviour": "defensive_stance"
+      "behaviour": "defensive_stance",
+      "renderScale": 0.7
     },
     {
       "id": "dark_acolyte",
@@ -34,11 +36,12 @@
       "baseAttack": 10,
       "armour": 5,
       "tier": "ELITE",
-      "behaviour": "shield_break_retaliation"
+      "behaviour": "shield_break_retaliation",
+      "renderScale": 0.55
     },
     {
       "id": "void_knight",
-      "name": "Void Knight",
+      "name": "Riven Knight",
       "health": 40,
       "baseAttack": 16,
       "armour": 0,
@@ -47,7 +50,7 @@
     },
     {
       "id": "boss_knight",
-      "name": "Boss Knight",
+      "name": "Vitium",
       "health": 150,
       "baseAttack": 14,
       "armour": 8,
