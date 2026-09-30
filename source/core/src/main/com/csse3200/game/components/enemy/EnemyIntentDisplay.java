@@ -18,6 +18,13 @@ public class EnemyIntentDisplay extends RenderComponent {
   private static final float ICON_SIZE = 0.5f;
   private static final float GAP_ABOVE_ENEMY = 0.2f;
 
+  /**
+   * Fraction of the entity's height that the visible sprite occupies. Enemy atlas frames are square
+   * with transparent padding, so anchoring to the top of the entity box would float the icon well
+   * above the art.
+   */
+  private static final float SPRITE_FILL = 0.65f;
+
   private EnemyIntent currentIntent;
 
   @Override
@@ -64,7 +71,7 @@ public class EnemyIntentDisplay extends RenderComponent {
     Vector2 position = entity.getPosition();
     Vector2 scale = entity.getScale();
     float x = position.x + (scale.x - ICON_SIZE) / 2f;
-    float y = position.y + scale.y + GAP_ABOVE_ENEMY;
+    float y = position.y + scale.y * SPRITE_FILL + GAP_ABOVE_ENEMY;
 
     batch.draw(icon, x, y, ICON_SIZE, ICON_SIZE);
   }
