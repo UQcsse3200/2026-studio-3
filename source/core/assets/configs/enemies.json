@@ -51,7 +51,7 @@
       "armour": 0,
       "tier": "ELITE",
       "behaviour": "enrage_low_health",
-      "description": "Once a knight of the god's host, sworn to bring wars to an end. The corruption turned that oath inside out: now the fight is all it wants, and it has cast off its armour to have more of it. Wound it badly and the light in its cracks turns red — that is when it is most dangerous."
+      "description": "The god's last champion stands at the summit of the sanctum. It was told to let no one pass, and it is still following that order, still certain it is doing right. The corruption settled in it longest, and the sanctum came to call it by the corruption's name: Vitium. It fights in phases — steel, then walls of stone, then magic that silences your hand — and it never steps back. Breaking it is the only way to set it free. The name was never its own. It was only the first to be given it."
     },
     {
       "id": "boss_knight",
