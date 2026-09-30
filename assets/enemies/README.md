@@ -28,6 +28,10 @@ Smooth frames (`frames/`):
   Floating enemies sit above that line.
 - `void_knight` was brightened with `tools/brighten.py` (gamma 0.5, rim 0.55) so it reads against the
   dark dungeon background.
+- `tomb_guardian` was redrawn (ivory stone armour, bronze trim, rune shield). Its source images have a
+  light grey background and a floor shadow, so `tools/cutout.py` was run with `grey_sat` (drops grey
+  shadow and haze) and, for the idle image only, `floor_y` (treats darker grey below the feet as
+  background while stopping at the boots' outline).
 
 Pixel-art frames (`frames_pixel/`):
 
