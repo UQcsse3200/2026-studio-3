@@ -8,7 +8,7 @@
       "armour": 0,
       "tier": "NORMAL",
       "behaviour": "erratic",
-      "renderScale": 0.85
+      "renderScale": 0.85,
       "description": "Lesser Shades once carried messages between the halls of the sanctum. The corruption scattered the words they carried, and now they cannot tell which order is true. One moment they attack, the next they hide."
     },
     {
@@ -19,7 +19,7 @@
       "armour": 2,
       "tier": "NORMAL",
       "behaviour": "defensive_stance",
-      "renderScale": 0.7
+      "renderScale": 0.7,
       "description": "Bone Crawlers were set to tend the sanctum's ossuary and keep the bones of the faithful safe. Fallen, they wear those bones as armour and guard them from everyone. A Bone Crawler stays behind its plates for as long as it can, and strikes only when the shell is thick enough."
     },
     {
@@ -40,7 +40,7 @@
       "armour": 5,
       "tier": "ELITE",
       "behaviour": "shield_break_retaliation",
-      "renderScale": 0.55
+      "renderScale": 0.55,
       "description": "The Tomb Guardian swore an oath to keep vigil over the sealed tombs. It still keeps that oath, long after it has forgotten why. It draws every attack towards itself, and when its shield breaks, it answers in kind."
     },
     {
