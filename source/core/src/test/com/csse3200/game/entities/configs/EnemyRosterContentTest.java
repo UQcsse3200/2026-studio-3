@@ -15,7 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(GameExtension.class)
 class EnemyRosterContentTest {
   // wiki《The Fall of the Pantheon》写作规范禁止的旧设定（档案馆版）用词
-  private static final List<String> RETIRED_WORDS = List.of("archive", "catalogue", "shelf", "record");
+  private static final List<String> RETIRED_WORDS =
+      List.of("archive", "catalogue", "shelf", "record");
 
   private EnemyConfigs roster;
 
