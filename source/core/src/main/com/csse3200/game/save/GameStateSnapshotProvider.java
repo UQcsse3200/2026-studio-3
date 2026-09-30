@@ -59,7 +59,7 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
   }
 
   private PlayerSaveData capturePlayer() {
-    // PlayerSaveData.piety is a snapshot-only mirror of the player's map-progression "level" —
+    // PlayerSaveData.level is a snapshot-only mirror of the player's map-progression "level" —
     // see #Sprint 3 rename discussion with Josie/Aidan/Linh, 9/22 (flagged by Amber in review,
     // PR #303). MapGraph is the single authoritative source for level: it is restored directly
     // by SaveGameRestoreService (restoreCurrentNode), and PlayerStatsTopDisplay reads the live

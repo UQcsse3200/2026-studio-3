@@ -9,7 +9,6 @@ import com.csse3200.game.areas.ForestGameArea;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
-import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.debug.CardEffectDebugComponent;
 import com.csse3200.game.cards.debug.CardEffectDebugDisplay;
@@ -34,9 +33,11 @@ import com.csse3200.game.components.pausemenu.PauseMenuActions;
 import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.player.EnergyComponent;
+import com.csse3200.game.components.spritedisplay.clickable.CardAimController;
 import com.csse3200.game.components.spritedisplay.clickable.CardImageSkins;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
+import com.csse3200.game.components.spritedisplay.clickable.DragNDrop;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
@@ -81,15 +82,19 @@ public class BattleScreen extends ScreenAdapter {
     "images/heart.png",
     "images/energy.png",
     "images/money.png",
-    "images/piety.png",
+    "images/level.png",
     "images/enemy.png",
     "images/armour.png"
   };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
 
-  private static final float HAND_START_X = 25f;
   private static final float HAND_Y = 1000f;
-  private static final float HAND_SPACING = 250f;
+  // Less than CARD_WIDTH on purpose: cards overlap like a fanned hand instead of sitting
+  // edge-to-edge, so a full hand still fits across the screen.
+  private static final float HAND_SPACING = 90f;
+  // Fan-out: how far each card tilts and dips per slot away from the hand's middle card.
+  private static final float HAND_ROTATION_STEP_DEGREES = 6f;
+  private static final float HAND_ARC_DROP_PER_CARD = 18f;
   private static final float CARD_WIDTH = 225;
   private static final float CARD_HEIGHT = 456;
   private static final float CARD_INVENTORY_MIN_WIDTH = 800f;
@@ -103,6 +108,8 @@ public class BattleScreen extends ScreenAdapter {
   // separate copy.
   private final CardEffectResolutionService cardEffects;
   private final CardPlayService cardPlayService;
+  private final CardAimController enemyCardAim;
+  private final CardAimController playerCardAim;
   private ClickableFactory uiFactory;
   private final PlayerRunState playerState;
   private List<ClickableRecord> staticUiRecords;
@@ -152,7 +159,7 @@ public class BattleScreen extends ScreenAdapter {
             terrainFactory,
             mapProgression,
             game.getRunState(),
-            "dungeon",
+            game.getBackgroundId(),
             BattleEncounterSelector.enemiesFor(game.getRunState()));
     this.gameArea = forestGameArea;
     forestGameArea.create();
@@ -175,6 +182,14 @@ public class BattleScreen extends ScreenAdapter {
     EnergyComponent energy = player.getComponent(EnergyComponent.class);
 
     Map<String, Entity> enemyTargets = forestGameArea.getEnemyTargets();
+    enemyCardAim =
+        new CardAimController(
+            ServiceLocator.getRenderService().getStage(), ServiceLocator.getCamera(), enemyTargets);
+    playerCardAim =
+        new CardAimController(
+            ServiceLocator.getRenderService().getStage(),
+            ServiceLocator.getCamera(),
+            Map.of("player", player));
     cardEffects = new CardEffectResolutionService(library);
     cardPlayService =
         new CardPlayService(
@@ -206,10 +221,22 @@ public class BattleScreen extends ScreenAdapter {
         behaviour.setEnemyMemory(enemyMemory);
       }
     }
+    EffectVisualRegistry effectVisualRegistry = new EffectVisualRegistry();
+    OffensiveEffectVisuals.registerAll(effectVisualRegistry);
+    Entity animationCoordinatorEntity =
+        new Entity()
+            .addComponent(
+                new BattleAnimationCoordinator(
+                    controller,
+                    effectHandler,
+                    forestGameArea.getEnemies(),
+                    player,
+                    effectVisualRegistry));
+    ServiceLocator.getEntityService().register(animationCoordinatorEntity);
 
     controller.addBattleEndListener(
         won -> {
-          if (won) {
+          if (Boolean.TRUE.equals(won)) {
             int currentHealth =
                 forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getHealth();
             int maxHealth =
@@ -238,8 +265,8 @@ public class BattleScreen extends ScreenAdapter {
     staticUiRecords = ClickableFactory.loadRecordsFromJson(battleUiJson);
 
     uiFactory = new ClickableFactory(buildAllRecords());
-
-    Team3CardPlayAdapter cardPlayAdapter = new Team3CardPlayAdapter(cardPlayService, controller);
+    uiFactory.registerInstanceVariant("aimDrag", rec -> new DragNDrop(rec, enemyCardAim));
+    uiFactory.registerInstanceVariant("selfAimDrag", rec -> new DragNDrop(rec, playerCardAim));
 
     // PROPOSED: debug terminal for cheats/commands during battle (skip battle, give gold, etc.
     // — commands added separately). Same Terminal/KeyboardTerminalInputComponent/TerminalDisplay
@@ -260,7 +287,8 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(uiFactory)
             .addComponent(displays)
             .addComponent(new BattleActions(controller, game))
-            .addComponent(cardPlayAdapter)
+            .addComponent(new CardActions(controller, gameArea.getPlayer()))
+            .addComponent(new Team3CardPlayAdapter(cardPlayService, controller))
             .addComponent(cardInventory)
             .addComponent(new PauseMenuDisplay())
             .addComponent(new PauseMenuInput())
@@ -329,6 +357,8 @@ public class BattleScreen extends ScreenAdapter {
   @Override
   public void dispose() {
     playerState.captureFrom(gameArea.getPlayer());
+    enemyCardAim.dispose();
+    playerCardAim.dispose();
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
@@ -363,8 +393,17 @@ public class BattleScreen extends ScreenAdapter {
     Set<CardInstance> discardedInstances = new HashSet<>(battleDeck.getDiscardPileInstances());
 
     List<ClickableRecord> records = new ArrayList<>();
-    float x = HAND_START_X;
-    for (CardInstance instance : handRowOrder) {
+    // Centre the whole row horizontally rather than always starting at a fixed left edge, so a
+    // hand of 3 cards and a hand of 8 both sit in the middle of the screen instead of hugging
+    // the left side.
+    float stageWidth = ServiceLocator.getRenderService().getStage().getViewport().getWorldWidth();
+    float handWidth = CARD_WIDTH + Math.max(0, handRowOrder.size() - 1) * HAND_SPACING;
+    float x = (stageWidth - handWidth) / 2f;
+    // Fan the hand out from its middle slot: cards further from center tilt outward and dip
+    // down a little, so the row reads as a hand of cards rather than a flat strip.
+    float centerIndex = (handRowOrder.size() - 1) / 2f;
+    for (int i = 0; i < handRowOrder.size(); i++) {
+      CardInstance instance = handRowOrder.get(i);
       String cardId = instance.cardId();
       boolean disabled = discardedInstances.contains(instance);
 
@@ -374,27 +413,31 @@ public class BattleScreen extends ScreenAdapter {
         continue;
       }
       CardConfig card = maybeCard.get();
-      boolean selfTarget = card.target == TargetType.SELF;
-      String variant = selfTarget ? "inout" : "drag";
+      String variant =
+          switch (card.target) {
+            case SELF -> "selfAimDrag";
+            case SINGLE_ENEMY -> "aimDrag";
+            case ALL_ENEMIES -> "drag";
+          };
 
       Skin cardSkin = CardImageSkins.forTexturePath(card.texturePath);
+
+      float offsetFromCenter = i - centerIndex;
+      float rotation = -offsetFromCenter * HAND_ROTATION_STEP_DEGREES;
+      float y = HAND_Y + Math.abs(offsetFromCenter) * HAND_ARC_DROP_PER_CARD;
 
       ClickableRecord.Builder builder =
           ClickableRecord.builder("playCard")
               .label(card.name)
               .variant(variant)
-              .position(x, HAND_Y)
+              .position(x, y)
               .size(CARD_WIDTH, CARD_HEIGHT)
               .skin(cardSkin)
+              .rotation(rotation)
               .disabled(disabled);
 
-      if (selfTarget) {
-        // No drop target involved — target is fixed at "player".
-        builder.args(instance.instanceId(), "player");
-      } else {
-        // Enemy id isn't known yet; EnemyDropTargetComponent appends it at drop-time.
-        builder.args(instance.instanceId());
-      }
+      // The drag source supplies the selected player or enemy ID on release.
+      builder.args(instance.instanceId());
 
       records.add(builder.build());
       x += HAND_SPACING;

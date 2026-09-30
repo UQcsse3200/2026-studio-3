@@ -204,7 +204,7 @@ public class MapDisplay extends UIComponent {
    *
    * <p>Player stats is assumed to be stored in "configs/player.json"
    *
-   * <p>Piety is the height of the current node
+   * <p>Level is the height of the current node
    */
   private void addPlayerStats() {
     Table playerTable = new Table();
@@ -271,16 +271,16 @@ public class MapDisplay extends UIComponent {
     Label moneyLabel = new Label(moneyText, moneyStyle);
     moneyLabel.setFontScale(0.75f);
 
-    // Piety image
-    Image pietyImage =
-        new Image(ServiceLocator.getResourceService().getAsset("images/piety.png", Texture.class));
+    // Level image
+    Image levelImage =
+        new Image(ServiceLocator.getResourceService().getAsset("images/level.png", Texture.class));
 
-    // Piety text
-    Label.LabelStyle pietyStyle = new Label.LabelStyle(skin.get(LARGE, Label.LabelStyle.class));
-    pietyStyle.fontColor = new Color(0.95f, 0.73f, 0.28f, 1f);
-    String pietyText = String.format("Piety: %d", mapGraph.getCurrentNode().getHeight());
-    Label pietyLabel = new Label(pietyText, pietyStyle);
-    pietyLabel.setFontScale(0.75f);
+    // Level text
+    Label.LabelStyle levelStyle = new Label.LabelStyle(skin.get(LARGE, Label.LabelStyle.class));
+    levelStyle.fontColor = new Color(0.95f, 0.73f, 0.28f, 1f);
+    String levelText = String.format("Level: %d", mapGraph.getCurrentNode().getHeight());
+    Label levelLabel = new Label(levelText, levelStyle);
+    levelLabel.setFontScale(0.75f);
 
     // Add stats to table
     table.add(heartImage).size(imageSideLength).padRight(5f).center();
@@ -289,8 +289,8 @@ public class MapDisplay extends UIComponent {
     table.add(moneyImage).size(imageSideLength).padRight(5f).center();
     table.add(moneyLabel).padRight(25f).center();
 
-    table.add(pietyImage).size(imageSideLength).padRight(5f).center();
-    table.add(pietyLabel).padRight(25f).center();
+    table.add(levelImage).size(imageSideLength).padRight(5f).center();
+    table.add(levelLabel).padRight(25f).center();
 
     playerTable.add(table);
   }
@@ -363,7 +363,7 @@ public class MapDisplay extends UIComponent {
       "images/map/background.png",
       "images/heart.png",
       "images/energy.png",
-      "images/piety.png",
+      "images/level.png",
       "images/money.png",
       "images/map/cross.png",
       "images/map/legend.png",

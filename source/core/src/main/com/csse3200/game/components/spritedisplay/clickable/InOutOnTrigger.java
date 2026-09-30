@@ -24,6 +24,17 @@ public class InOutOnTrigger extends Clickable {
   // Track whether the button is currently animating
   protected boolean isAnimating = false;
 
+  // Fired on the shared entity whenever one of these widgets is hovered/unhovered, so overlapping
+  // siblings (e.g. the rest of a fanned hand) can slide out of the way to reveal it. Carries the
+  // hovered widget itself and whether it's now hovered (true) or just stopped being (false).
+  private static final String HOVER_EVENT = "handCardHover";
+
+  // How far a sibling slides away from a hovered card, so its overlapped edge becomes visible.
+  private static final float SIBLING_SPREAD_PX = 70f;
+
+  // Duration of the sibling-spread slide, snappier than the full up/down slide.
+  private static final float SPREAD_DURATION = 0.2f;
+
   public InOutOnTrigger(ClickableRecord rec) {
     super(rec);
     this.targetX = rec.x();
@@ -40,6 +51,10 @@ public class InOutOnTrigger extends Clickable {
     // Listen for events that trigger the animation
     entity.getEvents().addListener("up", this::slideUp);
     entity.getEvents().addListener("down", this::slideDown);
+
+    // Every widget of this type listens for every other one's hover state, so the group can
+    // spread apart around whichever one is currently hovered.
+    entity.getEvents().addListener(HOVER_EVENT, this::onSiblingHoverChanged);
   }
 
   /** Snap straight to the visible resting position, e.g. for a card drawn mid-turn. */
@@ -139,13 +154,13 @@ public class InOutOnTrigger extends Clickable {
     // Move up by 10 pixels from current position
     // Using "moveBy" with a curved easing (slow in, fast out)
     btn.addAction(Actions.moveTo(targetX, targetY + 120, 0.3f, Interpolation.sineOut));
+
+    entity.getEvents().trigger(HOVER_EVENT, this, true);
   }
 
   @Override
   public void draw() {
-    if (this.getWidth() > 0 && this.getHeight() > 0) {
-      btn.setSize(this.getWidth(), this.getHeight());
-    }
+    applySizeAndRotation();
   }
 
   @Override
@@ -156,5 +171,34 @@ public class InOutOnTrigger extends Clickable {
     // Move down by 10 pixels (back to original)
     // Use a slightly different curve for a nice feel
     btn.addAction(Actions.moveTo(targetX, targetY, 0.3f, Interpolation.sineIn));
+
+    entity.getEvents().trigger(HOVER_EVENT, this, false);
+  }
+
+  /**
+   * Reacts to a sibling widget (sharing this one's trigger, e.g. every "playCard" hand slot)
+   * becoming hovered or unhovered. Slides this widget sideways, away from the hovered one, so its
+   * overlapped edge is no longer hidden underneath it; moves back to {@link #targetX} once nothing
+   * is hovered. Does nothing for a widget reacting to its own hover (that's handled by {@link
+   * #onEnter()}/{@link #onExit()} already) or to a widget with a different trigger (e.g. the hand
+   * shouldn't react to the End Turn button).
+   */
+  private void onSiblingHoverChanged(InOutOnTrigger sibling, boolean hovering) {
+    if (sibling == this || !trigger.equals(sibling.trigger)) {
+      return;
+    }
+
+    float offset = 0f;
+    if (hovering) {
+      float direction = Math.signum(targetX - sibling.targetX);
+      offset = (direction == 0f ? 1f : direction) * SIBLING_SPREAD_PX;
+    }
+    // Without clearing first, a quick exit-then-enter while the mouse crosses overlapping cards
+    // (moving off one card straight onto the next) stacks a "snap back to center" moveTo and a
+    // "spread to new offset" moveTo on top of each other — libGDX runs both in parallel rather
+    // than queuing them, so they fight over the actor's position every frame and jitter.
+    btn.clearActions();
+    btn.addAction(
+        Actions.moveTo(targetX + offset, targetY, SPREAD_DURATION, Interpolation.sineOut));
   }
 }
