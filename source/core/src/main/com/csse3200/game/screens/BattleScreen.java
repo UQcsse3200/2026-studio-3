@@ -86,7 +86,7 @@ public class BattleScreen extends ScreenAdapter {
     "images/enemy.png",
     "images/armour.png"
   };
-  private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
+  private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
   private static final float HAND_Y = 1000f;
   // Less than CARD_WIDTH on purpose: cards overlap like a fanned hand instead of sitting
@@ -235,6 +235,18 @@ public class BattleScreen extends ScreenAdapter {
         behaviour.setEnemyMemory(enemyMemory);
       }
     }
+    EffectVisualRegistry effectVisualRegistry = new EffectVisualRegistry();
+    OffensiveEffectVisuals.registerAll(effectVisualRegistry);
+    Entity animationCoordinatorEntity =
+        new Entity()
+            .addComponent(
+                new BattleAnimationCoordinator(
+                    controller,
+                    effectHandler,
+                    forestGameArea.getEnemies(),
+                    player,
+                    effectVisualRegistry));
+    ServiceLocator.getEntityService().register(animationCoordinatorEntity);
 
     controller.addBattleEndListener(
         won -> {
