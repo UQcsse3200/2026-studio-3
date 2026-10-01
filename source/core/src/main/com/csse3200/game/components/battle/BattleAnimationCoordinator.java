@@ -78,11 +78,14 @@ public class BattleAnimationCoordinator extends Component {
       Entity visual = iterator.next();
       boolean expired = true;
       EffectVisualComponent icon = visual.getComponent(EffectVisualComponent.class);
+      EffectBurstComponent burst = visual.getComponent(EffectBurstComponent.class);
+      EffectProjectileComponent projectile = visual.getComponent(EffectProjectileComponent.class);
       if (icon != null) {
         expired = icon.isExpired();
-      } else {
-        EffectBurstComponent burst = visual.getComponent(EffectBurstComponent.class);
-        expired = burst == null || burst.isExpired();
+      } else if (burst != null) {
+        expired = burst.isExpired();
+      } else if (projectile != null) {
+        expired = projectile.isExpired();
       }
       if (expired) {
         iterator.remove();
@@ -122,6 +125,9 @@ public class BattleAnimationCoordinator extends Component {
     Entity visual = new Entity();
     if (OffensiveEffectVisuals.usesBurst(type)) {
       visual.addComponent(new EffectBurstComponent(style, baseSize, startDelay));
+    } else if (OffensiveEffectVisuals.usesProjectile(type)) {
+      visual.addComponent(
+          OffensiveEffectVisuals.createPierceComponent(style, baseSize, startDelay));
     } else {
       visual.addComponent(
           new EffectVisualComponent(textureFor(style), style, baseSize, startDelay));
