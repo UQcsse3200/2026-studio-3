@@ -140,6 +140,7 @@ public class EnemyBehaviourComponent extends Component {
 
     CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
     if (targetStats != null) {
+      entity.getEvents().trigger("enemyAttack");
       targetStats.takeDamage(currentIntent.getValue());
     }
   }
