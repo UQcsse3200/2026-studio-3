@@ -326,7 +326,7 @@ class EnemyAnimationControllerTest {
       Entity player = new Entity().addComponent(playerStats);
       SpriteBatch batch = mock(SpriteBatch.class);
       try {
-        assertEquals("tomb_guardian".equals(id), hasAttack, id);
+        assertEquals(!"boss_knight".equals(id) && !"default".equals(id), hasAttack, id);
         for (int attack = 1; attack <= 3; attack++) {
           behaviour.rollIntent();
           behaviour.executeIntent(player);
