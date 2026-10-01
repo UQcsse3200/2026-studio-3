@@ -1,26 +1,24 @@
 package com.csse3200.game.components.battle;
 
-/**
- * Registers the visuals for offensive (damage-related) card effects.
- *
- * <p>Each teammate has one file like this for their own effect group, so registering a visual never
- * requires editing a shared file. Call {@link #registerAll(EffectVisualRegistry)} once, from
- * wherever the registry is created.
- */
+import com.badlogic.gdx.graphics.Color;
+import com.csse3200.game.cards.EffectType;
+
 public final class OffensiveEffectVisuals {
 
   private OffensiveEffectVisuals() {
     throw new IllegalStateException("Utility class");
   }
 
-  /**
-   * Registers every offensive effect's visual style into the given registry.
-   *
-   * <p>TODO: register Damage, Pierce and Sunder once the visuals are finalised.
-   *
-   * @param registry the shared registry to register into
-   */
+  /** Registers every offensive effect's visual style into the given registry. */
   public static void registerAll(EffectVisualRegistry registry) {
-    // Intentionally empty for now — offensive visuals are still being designed.
+    registry.register(
+        EffectType.DAMAGE,
+        new EffectVisualStyle(null, new Color(1f, 0.35f, 0.15f, 1f), 0.35f, 1f, 0.4f, 0f));
+    // TODO: Pierce, Sunder — different rendering style, added separately.
+  }
+
+  /** Whether this effect type uses the burst renderer instead of the icon renderer. */
+  public static boolean usesBurst(EffectType type) {
+    return type == EffectType.DAMAGE;
   }
 }
