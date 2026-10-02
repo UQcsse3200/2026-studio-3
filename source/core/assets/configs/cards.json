@@ -281,7 +281,7 @@
       {
         "id": "sealed_pact",
         "name": "Sealed Pact",
-        "description": "Bind your fate to the archive. Gain 3 Strength and 6 Block.",
+        "description": "An oath no angel should bind. Gain 3 Strength and 6 Block.",
         "cost": 3,
         "type": "POWER",
         "rarity": "RARE",
@@ -293,7 +293,7 @@
         "texturePath": "images/cards/sealed_pact.png",
         "upgrade": {
           "name": "Sealed Pact+",
-          "description": "Bind your fate to the archive. Gain 4 Strength and 9 Block.",
+          "description": "An oath no angel should bind. Gain 4 Strength and 9 Block.",
           "cost": 3,
           "rarity": "RARE",
           "effects": [
@@ -305,7 +305,7 @@
       {
         "id": "blood_price",
         "name": "Blood Price",
-        "description": "Release forbidden power. Deal 20 damage.",
+        "description": "The cost of release is paid in your own strength. Deal 20 damage.",
         "cost": 3,
         "type": "ATTACK",
         "rarity": "UNCOMMON",
@@ -314,7 +314,7 @@
         "texturePath": "images/cards/blood_price.png",
         "upgrade": {
           "name": "Blood Price+",
-          "description": "Release forbidden power. Deal 28 damage.",
+          "description": "The cost of release is paid in your own strength. Deal 28 damage.",
           "cost": 3,
           "rarity": "UNCOMMON",
           "effects": [{ "type": "DAMAGE", "value": 28, "duration": 0 }]
@@ -323,7 +323,7 @@
       {
         "id": "doom_sigil",
         "name": "Doom Sigil",
-        "description": "Mark an enemy with ruin. Apply 1 Vulnerable for 2 turns and 4 Poison for 3 turns.",
+        "description": "A mark that lays corruption bare. Apply 1 Vulnerable for 2 turns and 4 Poison for 3 turns.",
         "cost": 2,
         "type": "SKILL",
         "rarity": "RARE",
@@ -335,7 +335,7 @@
         "texturePath": "images/cards/doom_sigil.png",
         "upgrade": {
           "name": "Doom Sigil+",
-          "description": "Mark an enemy with ruin. Apply 2 Vulnerable for 2 turns and 6 Poison for 3 turns.",
+          "description": "A mark that lays corruption bare. Apply 2 Vulnerable for 2 turns and 6 Poison for 3 turns.",
           "cost": 2,
           "rarity": "RARE",
           "effects": [
@@ -347,7 +347,7 @@
       {
         "id": "iron_oath",
         "name": "Iron Oath",
-        "description": "Swear a forbidden oath. Gain 4 Armour.",
+        "description": "You swear upon iron that the fallen shall be released. Gain 4 Armour.",
         "cost": 1,
         "type": "SKILL",
         "rarity": "UNCOMMON",
@@ -356,7 +356,7 @@
         "texturePath": "images/cards/iron_oath.png",
         "upgrade": {
           "name": "Iron Oath+",
-          "description": "Swear a forbidden oath. Gain 6 Armour.",
+          "description": "You swear upon iron that the fallen shall be released. Gain 6 Armour.",
           "cost": 1,
           "rarity": "UNCOMMON",
           "effects": [{ "type": "FORTIFY", "value": 6, "duration": 0 }]
