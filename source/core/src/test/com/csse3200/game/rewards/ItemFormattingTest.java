@@ -7,17 +7,27 @@ import org.junit.jupiter.api.Test;
 class ItemFormattingTest {
 
   @Test
-  void formatsMultiWordNameWithUnderscores() {
-    assertEquals("Energy Crystal", ItemFormatting.formatItemName(ItemType.ENERGY_CRYSTAL));
+  void formatsLuckyCoin() {
+    assertEquals("Shard of Fortune", ItemFormatting.formatItemName(ItemType.LUCKY_COIN));
   }
 
   @Test
-  void formatsThreeOrMoreUnderscoreSeparatedWords() {
-    assertEquals("Lucky Coin", ItemFormatting.formatItemName(ItemType.LUCKY_COIN));
+  void formatsEnergyCrystal() {
+    assertEquals("Ember of the Divine", ItemFormatting.formatItemName(ItemType.ENERGY_CRYSTAL));
   }
 
   @Test
   void formatsMerchantsFavor() {
-    assertEquals("Merchants Favor", ItemFormatting.formatItemName(ItemType.MERCHANTS_FAVOR));
+    assertEquals("Relic of Commerce", ItemFormatting.formatItemName(ItemType.MERCHANTS_FAVOR));
+  }
+
+  @Test
+  void formatsIronAegis() {
+    assertEquals("Aegis Fragment", ItemFormatting.formatItemName(ItemType.IRON_AEGIS));
+  }
+
+  @Test
+  void formatsWarriorsCrest() {
+    assertEquals("Blessed Crest", ItemFormatting.formatItemName(ItemType.WARRIORS_CREST));
   }
 }

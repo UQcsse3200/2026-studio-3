@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.rewards.RewardService;
@@ -232,16 +233,7 @@ public class RewardDisplay extends Displaying {
     }
     return switch (option.type) {
       case GOLD -> option.goldAmount + " GOLD";
-      case ITEM ->
-          option.itemId == null
-              ? "ITEM"
-              : switch (option.itemId) {
-                case LUCKY_COIN -> "Lucky Coin";
-                case ENERGY_CRYSTAL -> "Energy Crystal";
-                case MERCHANTS_FAVOR -> "Merchant's Favor";
-                case IRON_AEGIS -> "Iron Aegis";
-                case WARRIORS_CREST -> "Warrior's Crest";
-              };
+      case ITEM -> option.itemId == null ? "ITEM" : ItemFormatting.formatItemName(option.itemId);
     };
   }
 
