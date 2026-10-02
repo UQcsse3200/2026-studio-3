@@ -10,9 +10,7 @@ import static org.mockito.Mockito.when;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -80,13 +78,7 @@ class MainMenuDisplayTest {
         List.of("start", "load", "bestiary", "settings", "exit"),
         display.getMenuButtons().stream().map(TextButton::getName).toList());
     assertInstanceOf(Image.class, display.getRootStack().getChild(0));
-    assertEquals(4, display.getRootStack().getChildren().size);
-    assertEquals("Demo Event", display.getDemoEventButton().getText().toString());
-    assertEquals("Demo Shop", display.getDemoShopButton().getText().toString());
-    assertEquals("Demo Campfire", display.getDemoCampfireButton().getText().toString());
-    assertEquals("Demo Fusion", display.getDemoFusionButton().getText().toString());
-    assertEquals(
-        Touchable.childrenOnly, ((Table) display.getRootStack().getChild(3)).getTouchable());
+    assertEquals(3, display.getRootStack().getChildren().size);
     verify(resourceService).getAsset(MainMenuDisplay.BACKGROUND_TEXTURE, Texture.class);
     verify(resourceService).getAsset(MainMenuDisplay.TITLE_LOGO_TEXTURE, Texture.class);
     verify(resourceService).getAsset(MainMenuDisplay.BUTTON_FRAME_TEXTURE, Texture.class);
@@ -108,28 +100,6 @@ class MainMenuDisplayTest {
       display.getMenuButtons().get(i).fire(new ChangeEvent());
       assertEquals(1, eventCount.get());
     }
-
-    AtomicInteger demoEventCount = new AtomicInteger();
-    menu.getEvents().addListener(MainMenuDisplay.DEMO_EVENT_EVENT, demoEventCount::incrementAndGet);
-    display.getDemoEventButton().fire(new ChangeEvent());
-    assertEquals(1, demoEventCount.get());
-
-    AtomicInteger demoShopCount = new AtomicInteger();
-    menu.getEvents().addListener(MainMenuDisplay.DEMO_SHOP_EVENT, demoShopCount::incrementAndGet);
-    display.getDemoShopButton().fire(new ChangeEvent());
-    assertEquals(1, demoShopCount.get());
-
-    AtomicInteger demoCampfireCount = new AtomicInteger();
-    menu.getEvents()
-        .addListener(MainMenuDisplay.DEMO_CAMPFIRE_EVENT, demoCampfireCount::incrementAndGet);
-    display.getDemoCampfireButton().fire(new ChangeEvent());
-    assertEquals(1, demoCampfireCount.get());
-
-    AtomicInteger demoFusionCount = new AtomicInteger();
-    menu.getEvents()
-        .addListener(MainMenuDisplay.DEMO_FUSION_EVENT, demoFusionCount::incrementAndGet);
-    display.getDemoFusionButton().fire(new ChangeEvent());
-    assertEquals(1, demoFusionCount.get());
   }
 
   @Test
