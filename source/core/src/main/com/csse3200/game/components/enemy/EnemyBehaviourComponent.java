@@ -193,8 +193,15 @@ public class EnemyBehaviourComponent extends Component {
     CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
     if (targetStats != null) {
       entity.getEvents().trigger("enemyCast");
-      targetStats.applyStatusEffect(
-          effectType.name(), currentIntent.getValue(), currentIntent.getDuration());
+
+      String statusKey =
+          effectType == IntentEffectType.TAUNT
+              ? IntentEffectType.TAUNT.name() + ":" + entity.getId()
+              : effectType.name();
+      int statusValue =
+          effectType == IntentEffectType.TAUNT ? entity.getId() : currentIntent.getValue();
+
+      targetStats.applyStatusEffect(statusKey, statusValue, currentIntent.getDuration());
     }
   }
 }

@@ -237,6 +237,25 @@ class EnemyBehaviourComponentTest {
   }
 
   @Test
+  void shouldStoreTauntUnderTheCasterIdWithTheCasterAsItsValue() {
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent(
+            "test_taunt", fixedAi(EnemyIntent.debuff(IntentEffectType.TAUNT, 0, 2)));
+    Entity enemy = enemyWith(behaviour, enemyStats());
+    CombatStatsComponent playerStats = new CombatStatsComponent(30, 4);
+    Entity player = new Entity().addComponent(playerStats);
+    player.create();
+
+    behaviour.rollIntent();
+    behaviour.executeIntent(player);
+
+    StatusEffect applied = playerStats.getStatusEffect("TAUNT:" + enemy.getId());
+    assertNotNull(applied);
+    assertEquals(enemy.getId(), applied.getValue());
+    assertEquals(2, applied.getDuration());
+  }
+
+  @Test
   void shouldIgnoreDebuffAgainstNullTarget() {
     EnemyBehaviourComponent behaviour =
         new EnemyBehaviourComponent(

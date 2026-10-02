@@ -98,6 +98,20 @@ public class BattleController {
     this.currentEnemyIntent = null;
     this.eventHandler = new EventHandler();
     this.eventQueue = new ArrayDeque<>();
+    for (Entity enemy : this.enemies) {
+      EventHandler enemyEvents = enemy.getEvents();
+      if (enemyEvents != null) {
+        enemyEvents.addListener(
+            "enemyDefeated",
+            () -> {
+              CombatStatsComponent playerStats =
+                  this.player.getComponent(CombatStatsComponent.class);
+              if (playerStats != null) {
+                playerStats.removeStatusEffect(IntentEffectType.TAUNT.name() + ":" + enemy.getId());
+              }
+            });
+      }
+    }
   }
 
   /**
@@ -213,6 +227,25 @@ public class BattleController {
   public boolean playerHasStatusEffect(String effectType) {
     CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
     return stats != null && stats.hasStatusEffect(effectType);
+  }
+
+  /** Target IDs of living enemies whose taunt is active on the player. */
+  public List<String> getAliveTaunterTargetIds() {
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+    if (playerStats == null) {
+      return List.of();
+    }
+
+    return enemies.stream()
+        .filter(this::isEnemyAlive)
+        .filter(
+            enemy -> {
+              StatusEffect effect =
+                  playerStats.getStatusEffect(IntentEffectType.TAUNT.name() + ":" + enemy.getId());
+              return effect != null && effect.getValue() == enemy.getId();
+            })
+        .map(enemy -> Integer.toString(enemy.getId()))
+        .toList();
   }
 
   /** Player decides to end their turn */
@@ -771,6 +804,9 @@ public class BattleController {
     if (playerStats != null) {
       tickPlayerStatusEffect(playerStats, IntentEffectType.SILENCE.name());
       tickPlayerStatusEffect(playerStats, IntentEffectType.DAMAGE_ON_CARD_PLAY.name());
+      for (Entity enemy : enemies) {
+        tickPlayerStatusEffect(playerStats, IntentEffectType.TAUNT.name() + ":" + enemy.getId());
+      }
     }
 
     handle(BattleEvent.PLAYER_TURN_ENDED);
