@@ -76,15 +76,25 @@ public class BattleAnimationCoordinator extends Component {
     Iterator<Entity> iterator = activeVisuals.iterator();
     while (iterator.hasNext()) {
       Entity visual = iterator.next();
-      EffectVisualComponent component = visual.getComponent(EffectVisualComponent.class);
-      if (component == null || component.isExpired()) {
+      boolean expired = true;
+      EffectVisualComponent icon = visual.getComponent(EffectVisualComponent.class);
+      EffectBurstComponent burst = visual.getComponent(EffectBurstComponent.class);
+      EffectProjectileComponent projectile = visual.getComponent(EffectProjectileComponent.class);
+      if (icon != null) {
+        expired = icon.isExpired();
+      } else if (burst != null) {
+        expired = burst.isExpired();
+      } else if (projectile != null) {
+        expired = projectile.isExpired();
+      }
+      if (expired) {
         iterator.remove();
         visual.dispose();
       }
     }
   }
 
-  private static final float EFFECT_STAGGER_SECONDS = 0.15f;
+  private static final float EFFECT_STAGGER_SECONDS = 0.3f;
 
   /** Fires before the controller applies the effects, so the targets are still alive to read. */
   private void onEnemyEffects(List<ResolvedCardEffect> effects) {
@@ -112,10 +122,17 @@ public class BattleAnimationCoordinator extends Component {
     Vector2 scale = target.getScale();
     float baseSize = Math.max(MIN_SIZE, Math.max(scale.x, scale.y) * SIZE_FACTOR);
 
-    Entity visual =
-        new Entity()
-            .addComponent(
-                new EffectVisualComponent(textureFor(style), style, baseSize, startDelay));
+    Entity visual = new Entity();
+    if (OffensiveEffectVisuals.usesBurst(type)) {
+      visual.addComponent(
+          OffensiveEffectVisuals.createBurstComponent(type, style, baseSize, startDelay));
+    } else if (OffensiveEffectVisuals.usesProjectile(type)) {
+      visual.addComponent(
+          OffensiveEffectVisuals.createPierceComponent(style, baseSize, startDelay));
+    } else {
+      visual.addComponent(
+          new EffectVisualComponent(textureFor(style), style, baseSize, startDelay));
+    }
     visual.setPosition(target.getCenterPosition());
     ServiceLocator.getEntityService().register(visual);
     activeVisuals.add(visual);
