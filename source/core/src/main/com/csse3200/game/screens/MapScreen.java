@@ -7,11 +7,14 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.csse3200.game.GdxGame;
+import com.csse3200.game.components.battle.InventoryPopupComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -23,6 +26,7 @@ import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.ui.PopupDisplay;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
@@ -116,6 +120,58 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     ServiceLocator.getEntityService().register(ui);
 
     createExitButton(game);
+    createInventoryButton(runState);
+  }
+
+  /**
+   * Adds an "Item Inventory" button and its popup to the map screen, so players can check their
+   * owned items between encounters. Backed by its own entity (not the shared {@code ui} entity in
+   * {@link #createUi}) since an entity can only hold one component of a given class, mirroring the
+   * pattern BattleScreen uses for the same popup.
+   *
+   * @param runState shared run state, used to read the player's owned items
+   */
+  private void createInventoryButton(RunState runState) {
+    ResourceService resourceService = ServiceLocator.getResourceService();
+    String inventoryPanelTexture = "images/ui/inventory-panel.png";
+    if (!resourceService.containsAsset(inventoryPanelTexture, Texture.class)) {
+      resourceService.loadTextures(new String[] {inventoryPanelTexture});
+      resourceService.loadAll();
+    }
+
+    Stage stage = ServiceLocator.getRenderService().getStage();
+
+    PopupDisplay itemInventory = new PopupDisplay("Item Inventory");
+    itemInventory.setMinSize(400f, 400f);
+
+    // Map screen has no live player entity (only battles do), and item USE actions only make
+    // sense mid-combat — so canUseBattleItems always returns false here, which means
+    // InventoryPopupComponent never actually dereferences the null player.
+    InventoryPopupComponent inventoryPopup =
+        new InventoryPopupComponent(runState, itemInventory, null, () -> false);
+
+    Entity itemInventoryEntity =
+        new Entity().addComponent(itemInventory).addComponent(inventoryPopup);
+    ServiceLocator.getEntityService().register(itemInventoryEntity);
+
+    Skin skin = new Skin(Gdx.files.internal("flat-earth/skin/flat-earth-ui.json"));
+    TextButton inventoryButton = new TextButton("Item Inventory", skin);
+
+    float buttonWidth = 220f;
+    float buttonHeight = 56f;
+    float offset = 24f;
+    inventoryButton.setSize(buttonWidth, buttonHeight);
+    inventoryButton.setPosition(offset, stage.getHeight() - buttonHeight - offset);
+
+    inventoryButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            inventoryPopup.open();
+          }
+        });
+
+    stage.addActor(inventoryButton);
   }
 
   /**
