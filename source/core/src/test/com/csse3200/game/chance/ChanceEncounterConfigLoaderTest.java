@@ -48,7 +48,8 @@ class ChanceEncounterConfigLoaderTest {
         "mysterious-shrine",
         "A cracked sanctum shrine still burns with a god's spoiled light. An angel might leave an"
             + " offering here to learn what the fallen still demand.",
-        new ExpectedChoice("make-offering", "Bleed a little of your light into the shrine.", -10, 25),
+        new ExpectedChoice(
+            "make-offering", "Bleed a little of your light into the shrine.", -10, 25),
         new ExpectedChoice("leave", "Pass without kneeling.", 0, 0));
     assertEncounter(
         encounters.get(1),
@@ -56,8 +57,7 @@ class ChanceEncounterConfigLoaderTest {
         "Water wells from broken stone where a sanctum once washed the wounded. An angel could"
             + " drink and rise again for the climb ahead.",
         new ExpectedChoice("drink", "Drink from the spring.", 15, 0),
-        new ExpectedChoice(
-            "leave", "Leave the water for whatever still wanders here.", 0, 0));
+        new ExpectedChoice("leave", "Leave the water for whatever still wanders here.", 0, 0));
     assertEncounter(
         encounters.get(2),
         "forgotten-cache",
@@ -65,19 +65,14 @@ class ChanceEncounterConfigLoaderTest {
             + " angel might claim what they meant for the climb.",
         new ExpectedChoice("take-coins", "Take the coins from the cache.", 0, 15),
         new ExpectedChoice(
-            "claim-iron-oath",
-            "Claim the iron oath tablet sealed inside.",
-            0,
-            0,
-            "iron_oath"),
+            "claim-iron-oath", "Claim the iron oath tablet sealed inside.", 0, 0, "iron_oath"),
         new ExpectedChoice("leave", "Leave the cache buried.", 0, 0));
     assertEncounter(
         encounters.get(3),
         "wandering-healer",
         "A faded attendant still tends the hurt along the sanctum road, following orders that once"
             + " meant mercy. An angel could accept that help without asking who gives it.",
-        new ExpectedChoice(
-            "purchase-remedy", "Buy the attendant's restorative draught.", 20, -10),
+        new ExpectedChoice("purchase-remedy", "Buy the attendant's restorative draught.", 20, -10),
         new ExpectedChoice(
             "accept-bandage", "Accept a spare bandage for the road.", 0, 0, "bandage"),
         new ExpectedChoice("decline", "Decline and continue the climb.", 0, 0));
@@ -96,11 +91,7 @@ class ChanceEncounterConfigLoaderTest {
             + " dark for tools of release.",
         new ExpectedChoice("search-tunnels", "Search the unstable tunnels for valuables.", -12, 30),
         new ExpectedChoice(
-            "recover-doom-sigil",
-            "Pull a doom sigil free from the wall.",
-            -5,
-            0,
-            "doom_sigil"),
+            "recover-doom-sigil", "Pull a doom sigil free from the wall.", -5, 0, "doom_sigil"),
         new ExpectedChoice("leave", "Leave the workings closed.", 0, 0));
     assertEncounter(
         encounters.get(6),
@@ -109,11 +100,7 @@ class ChanceEncounterConfigLoaderTest {
             + " may earn coin—or a sealed rite instead.",
         new ExpectedChoice("answer-riddle", "Answer the riddle for coin.", 0, 12),
         new ExpectedChoice(
-            "accept-sealed-pact",
-            "Accept a sealed pact in place of coin.",
-            0,
-            0,
-            "sealed_pact"),
+            "accept-sealed-pact", "Accept a sealed pact in place of coin.", 0, 0, "sealed_pact"),
         new ExpectedChoice("walk-on", "Walk on without answering.", 0, 0));
     assertEncounter(
         encounters.get(7),
