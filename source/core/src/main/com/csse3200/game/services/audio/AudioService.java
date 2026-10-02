@@ -4,6 +4,8 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.csse3200.game.services.ServiceLocator;
 
+import java.util.Random;
+
 public class AudioService {
 
     private static Music playing;
@@ -11,19 +13,19 @@ public class AudioService {
     private static final String[] soundPaths = {
             "sounds/Impact4.ogg",
             "sounds/menuClick.mp3",
-            "sounds/itemPurchase.mp3"
+            "sounds/itemPurchase.mp3",
+            "sounds/swordSlice.mp3"
     };
     private static final String[] musicPaths = {
             "music/BGM_03_mp3.mp3"
     };
+    private static final Random rand = new Random();
 
     /**
      * Loads all the audio files defined in their respective path arrays. Called once in GdxGame at game start.
      **/
     public static void load() {
 
-        playing.setVolume(musicVolume);
-        playing.setLooping(true);
         ServiceLocator.getResourceService().loadSounds(soundPaths);
         ServiceLocator.getResourceService().loadMusic(musicPaths);
     }
@@ -37,7 +39,8 @@ public class AudioService {
     public static void playSound(SoundId soundID, float volume) {
 
         Sound sound = ServiceLocator.getResourceService().getAsset(soundPaths[soundID.ordinal()], Sound.class);
-        sound.play(volume);
+        sound.setPitch(sound.play(volume), rand.nextFloat(0.90f, 1.10f));
+        // varying the pitch may be better if its optional but for most sfx it helps a lot
     }
 
     public static boolean isMusicPlaying() {
@@ -52,11 +55,13 @@ public class AudioService {
      */
     public static void playMusic(MusicId musicID) {
 
-        if (playing.isPlaying()) {
+        if (playing != null && playing.isPlaying()) {
             playing.stop();
         }
 
         playing = ServiceLocator.getResourceService().getAsset(musicPaths[musicID.ordinal()], Music.class);
+        playing.setVolume(musicVolume);
+        playing.setLooping(true);
         playing.play();
     }
 

@@ -23,6 +23,8 @@ import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
@@ -97,7 +99,10 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     mapDisplay
         .getMapSelectionController()
         .getEvents()
-        .addListener("nodeSelected", (Integer nodeId) -> enterEncounter(game, runState, nodeId));
+        .addListener("nodeSelected", (Integer nodeId) -> {
+                  AudioService.playSound(SoundId.SWORD_SLICE, 0.4f);
+                  enterEncounter(game, runState, nodeId);
+        });
 
     // PROPOSED: debug terminal for cheats/commands on the map (unlock nodes, etc.). Same
     // Terminal/KeyboardTerminalInputComponent/TerminalDisplay trio used elsewhere; F1 toggles it.

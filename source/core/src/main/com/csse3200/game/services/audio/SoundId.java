@@ -4,4 +4,5 @@ public enum SoundId {
     IMPACT, // TODO: remove
     MENU_CLICK,
     ITEM_PURCHASE,
+    SWORD_SLICE
 }

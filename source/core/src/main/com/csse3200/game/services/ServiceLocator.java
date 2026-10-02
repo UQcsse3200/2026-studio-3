@@ -1,5 +1,6 @@
 package com.csse3200.game.services;
 
+import com.badlogic.gdx.Audio;
 import com.badlogic.gdx.graphics.Camera;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.cards.CardLibrary;
@@ -7,6 +8,7 @@ import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.input.InputService;
 import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.RenderService;
+import com.csse3200.game.services.audio.AudioService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +33,7 @@ public class ServiceLocator {
   private static Camera camera;
   private static CardLibrary cardLibrary;
   private static BestiaryService bestiaryService;
+  private static AudioService audioService;
 
   public static EntityService getEntityService() {
     return entityService;
@@ -130,6 +133,11 @@ public class ServiceLocator {
     bestiaryService = service;
   }
 
+  public static void registerAudioService(AudioService service) {
+    logger.debug("Registering Audio service {}", service);
+    audioService = service;
+  }
+
   public static void clear() {
     entityService = null;
     renderService = null;
@@ -142,6 +150,7 @@ public class ServiceLocator {
     camera = null;
     cardLibrary = null;
     bestiaryService = null;
+    audioService = null;
   }
 
   private ServiceLocator() {
