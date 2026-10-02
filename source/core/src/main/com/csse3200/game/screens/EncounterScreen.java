@@ -213,7 +213,6 @@ public class EncounterScreen extends ScreenAdapter {
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getResourceService().unloadAssets(cardTexturePaths);
     ServiceLocator.getResourceService().unloadAssets(SHOP_CARD_TEXTURES);
-    ServiceLocator.getResourceService().dispose();
 
     ServiceLocator.clear();
   }

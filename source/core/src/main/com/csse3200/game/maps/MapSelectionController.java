@@ -1,6 +1,9 @@
 package com.csse3200.game.maps;
 
 import com.csse3200.game.events.EventHandler;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,6 +94,7 @@ public class MapSelectionController {
 
     if (accepted) {
       events.trigger("nodeSelected", nodeId);
+      AudioService.playSound(SoundId.SWORD_SLICE, 0.4f);
     } else {
       events.trigger("nodeSelectionRejected", nodeId);
     }

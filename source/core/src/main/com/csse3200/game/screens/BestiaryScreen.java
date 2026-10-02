@@ -66,7 +66,6 @@ public class BestiaryScreen extends ScreenAdapter {
     ServiceLocator.getResourceService().unloadAssets(atlasPaths);
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
-    ServiceLocator.clear();
   }
 
   private void loadAssets() {

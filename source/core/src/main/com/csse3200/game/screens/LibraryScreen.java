@@ -74,7 +74,5 @@ public class LibraryScreen extends ScreenAdapter {
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getResourceService().unloadAssets(LIBRARY_TEXTURES);
-    ServiceLocator.getResourceService().dispose();
-    ServiceLocator.clear();
   }
 }

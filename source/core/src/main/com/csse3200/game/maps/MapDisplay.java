@@ -15,6 +15,7 @@ import com.csse3200.game.entities.configs.PlayerConfig;
 import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.ui.UIComponent;
 import java.util.HashMap;
 import java.util.Map;
@@ -371,6 +372,7 @@ public class MapDisplay extends UIComponent {
     };
 
     ResourceService resourceService = ServiceLocator.getResourceService();
+    AudioService.load();
     resourceService.loadTextures(mapAssets);
     resourceService.loadAll();
   }

@@ -54,13 +54,14 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     logger.debug("Initialising map screen services");
     ServiceLocator.registerTimeSource(new GameTime());
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
     renderer = RenderFactory.createRenderer();
 
     RunState runState = game.getRunState();
+    AudioService.load();
+
 
     if (!runState.isRunActive()) {
       logger.info("No run in progress, generating a new map");
@@ -100,7 +101,6 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         .getMapSelectionController()
         .getEvents()
         .addListener("nodeSelected", (Integer nodeId) -> {
-                  AudioService.playSound(SoundId.SWORD_SLICE, 0.4f);
                   enterEncounter(game, runState, nodeId);
         });
 
@@ -208,8 +208,6 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getRenderService().dispose();
-    ServiceLocator.getResourceService().dispose();
     ScreenUtils.clear(new Color(248f / 255f, 249f / 255f, 178f / 255f, 1f));
-    ServiceLocator.clear();
   }
 }

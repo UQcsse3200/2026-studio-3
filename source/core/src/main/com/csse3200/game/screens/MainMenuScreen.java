@@ -42,7 +42,6 @@ public class MainMenuScreen extends ScreenAdapter {
     ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
-    ServiceLocator.registerAudioService(new AudioService());
 
     renderer = RenderFactory.createRenderer();
     configureViewport();
@@ -95,7 +94,6 @@ public class MainMenuScreen extends ScreenAdapter {
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getResourceService().unloadAssets(MAIN_MENU_TEXTURES);
 
-    ServiceLocator.clear();
   }
 
   /**
