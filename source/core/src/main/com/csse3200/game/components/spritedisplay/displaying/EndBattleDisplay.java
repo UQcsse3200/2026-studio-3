@@ -21,9 +21,20 @@ public class EndBattleDisplay extends Displaying {
   public static final String RETURN_TO_MENU_EVENT = "returnToMenu";
 
   private boolean fired = false;
+  private boolean clickToReturnEnabled = true;
 
   public EndBattleDisplay(DisplayingRecord rec) {
     super(rec);
+  }
+
+  /**
+   * Controls whether clicking/pressing a key anywhere on this screen triggers {@link
+   * #RETURN_TO_MENU_EVENT}. Disabled on victory screens that show a reward the player must pick
+   * first — otherwise an accidental click before choosing a reward returns to the menu without the
+   * reward ever being claimed.
+   */
+  public void setClickToReturnEnabled(boolean enabled) {
+    this.clickToReturnEnabled = enabled;
   }
 
   @Override
@@ -44,7 +55,7 @@ public class EndBattleDisplay extends Displaying {
   }
 
   private boolean requestReturn() {
-    if (fired) {
+    if (fired || !clickToReturnEnabled) {
       return false;
     }
     fired = true;
@@ -57,5 +68,12 @@ public class EndBattleDisplay extends Displaying {
     // Centre horizontally; use the record's y as an offset down from the top of the screen.
     label.setPosition(
         (Gdx.graphics.getWidth() - label.getPrefWidth()) / 2f, Gdx.graphics.getHeight() - getY());
+  }
+
+  private boolean visible = true;
+
+  public void setVisible(boolean visible) {
+    this.visible = visible;
+    label.setVisible(visible);
   }
 }
