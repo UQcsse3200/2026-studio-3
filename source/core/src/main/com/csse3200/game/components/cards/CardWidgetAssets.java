@@ -8,7 +8,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.csse3200.game.cards.Rarity;
+import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.services.ResourceService;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -19,6 +24,14 @@ import java.util.Objects;
  * interactive card consumers reuse one presentation component.
  */
 public final class CardWidgetAssets {
+  /** Authored frame shared by Common cards in every view. */
+  public static final String COMMON_FRAME_TEXTURE = "images/cards/common_card_frame.png";
+
+  // Register replacement Uncommon/Rare layouts here when their PNGs are ready. All consumers and
+  // screen preload lists use this registry; missing textures still use the coloured fallback.
+  private static final Map<Rarity, CardFrameLayout> FRAME_LAYOUTS =
+      Map.of(Rarity.COMMON, CardFrameLayout.COMMON);
+
   /** Resolves an already-managed artwork drawable for a configured texture path. */
   @FunctionalInterface
   public interface ArtworkProvider {
@@ -46,11 +59,12 @@ public final class CardWidgetAssets {
   private final Drawable costBadge;
   private final Drawable upgradeBadge;
   private final Drawable commonFrame;
+  private final Map<Rarity, Drawable> authoredFrames = new EnumMap<>(Rarity.class);
   private final Drawable uncommonFrame;
   private final Drawable rareFrame;
   private final Label.LabelStyle nameStyle;
   private final Label.LabelStyle costStyle;
-  private final Label.LabelStyle metaStyle;
+  private final Label.LabelStyle targetStyle;
   private final Label.LabelStyle descriptionStyle;
   private final Label.LabelStyle upgradeStyle;
   private final ArtworkProvider artworkProvider;
@@ -68,12 +82,14 @@ public final class CardWidgetAssets {
     costBadge = skin.newDrawable("touchpad", COST_BADGE);
     upgradeBadge = skin.newDrawable("touchpad-knob", UPGRADE_BADGE);
     commonFrame = skin.newDrawable("white", COMMON_FRAME);
+    FRAME_LAYOUTS.forEach(
+        (rarity, layout) -> authoredFrames.put(rarity, artworkProvider.get(layout.texturePath())));
     uncommonFrame = skin.newDrawable("white", UNCOMMON_FRAME);
     rareFrame = skin.newDrawable("white", RARE_FRAME);
 
     nameStyle = copyLabelStyle(skin, "small", LIGHT_TEXT);
     costStyle = copyLabelStyle(skin, "default", Color.WHITE);
-    metaStyle = copyLabelStyle(skin, "small", LIGHT_TEXT);
+    targetStyle = copyLabelStyle(skin, "small", LIGHT_TEXT);
     descriptionStyle = copyLabelStyle(skin, "small", DARK_TEXT);
     upgradeStyle = copyLabelStyle(skin, "default", Color.WHITE);
   }
@@ -109,6 +125,31 @@ public final class CardWidgetAssets {
           texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
           return new TextureRegionDrawable(new TextureRegion(texture));
         });
+  }
+
+  /** Collects the shared frame and distinct artwork paths for screen-owned loading/unloading. */
+  public static String[] collectTexturePaths(Collection<CardConfig> configs) {
+    LinkedHashSet<String> paths = new LinkedHashSet<>();
+    FRAME_LAYOUTS.values().forEach(layout -> paths.add(layout.texturePath()));
+    for (CardConfig config : configs) {
+      if (config.texturePath != null && !config.texturePath.isBlank()) {
+        paths.add(config.texturePath);
+      }
+    }
+    return paths.toArray(String[]::new);
+  }
+
+  /** Whether this rarity has a registered authored frame whose texture is already loaded. */
+  public boolean hasAuthoredFrame(Rarity rarity) {
+    return authoredFrames.get(rarity) != null;
+  }
+
+  Drawable authoredFrameFor(Rarity rarity) {
+    return authoredFrames.get(rarity);
+  }
+
+  CardFrameLayout frameLayoutFor(Rarity rarity) {
+    return FRAME_LAYOUTS.get(rarity);
   }
 
   Drawable cardFace() {
@@ -147,14 +188,6 @@ public final class CardWidgetAssets {
     };
   }
 
-  Color colourFor(Rarity rarity) {
-    return switch (Objects.requireNonNull(rarity, "rarity cannot be null")) {
-      case COMMON -> new Color(COMMON_FRAME);
-      case UNCOMMON -> new Color(UNCOMMON_FRAME);
-      case RARE -> new Color(RARE_FRAME);
-    };
-  }
-
   Label.LabelStyle nameStyle() {
     return nameStyle;
   }
@@ -163,8 +196,8 @@ public final class CardWidgetAssets {
     return costStyle;
   }
 
-  Label.LabelStyle metaStyle() {
-    return metaStyle;
+  Label.LabelStyle targetStyle() {
+    return targetStyle;
   }
 
   Label.LabelStyle descriptionStyle() {

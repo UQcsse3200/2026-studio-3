@@ -397,12 +397,7 @@ public class BattleScreen extends ScreenAdapter {
   }
 
   private void loadCardAssets(List<CardConfig> configs) {
-    String[] texturePaths =
-        configs.stream()
-            .map(config -> config.texturePath)
-            .filter(Objects::nonNull)
-            .distinct()
-            .toArray(String[]::new);
+    String[] texturePaths = CardWidgetAssets.collectTexturePaths(configs);
     ResourceService resources = ServiceLocator.getResourceService();
     resources.loadTextures(texturePaths);
     resources.loadAll();

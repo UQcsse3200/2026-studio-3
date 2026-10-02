@@ -150,7 +150,7 @@ public class ShopDisplay extends UIComponent {
       InventoryComponent inventory, ShopEncounter shopEncounter, CardService cardService) {
     this.shopEncounter =
         shopEncounter == null ? new ShopEncounter(inventory, createGeneratedShop()) : shopEncounter;
-    this.cardService = cardService;
+    this.cardService = cardService == null ? ServiceLocator.getCardLibrary() : cardService;
   }
 
   /**

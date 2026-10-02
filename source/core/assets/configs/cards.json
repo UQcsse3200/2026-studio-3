@@ -71,7 +71,7 @@
         "description": "Gain 2 Strength for the rest of combat.",
         "cost": 2,
         "type": "POWER",
-        "rarity": "RARE",
+        "rarity": "UNCOMMON",
         "target": "SELF",
         "effects": [{ "type": "STRENGTH", "value": 2, "duration": 0 }],
         "texturePath": "images/cards/inner_focus.png"
