@@ -5,6 +5,7 @@ import static com.badlogic.gdx.Gdx.app;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
@@ -80,6 +81,7 @@ public class GdxGame extends Game {
   @Override
   public void create() {
     logger.info("Creating game");
+    AudioService.load();
     loadSettings();
     bestiaryService = BestiaryService.loadDefault();
 
