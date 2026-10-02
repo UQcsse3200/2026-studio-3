@@ -26,14 +26,13 @@ class RewardIntegrationTest {
   }
 
   @Test
-  void luckyCoinAffectsGeneratedGoldExactlyOnce() {
+  void luckyCoinBoostsAndIsConsumedOnlyWhenGoldIsClaimed() {
     PlayerRunState playerState = new PlayerRunState(100, 100, 50);
     playerState.addOwnedItem(ItemType.LUCKY_COIN);
 
     RewardService service = new RewardService(new RewardGenerator(new Random(42)));
 
-    List<RewardOption> options =
-        service.generateRewardOptions(playerState.getGoldBonusMultiplier());
+    List<RewardOption> options = service.generateRewardOptions();
 
     RewardOption goldOption = options.get(0);
 
@@ -41,29 +40,26 @@ class RewardIntegrationTest {
 
     int baseAmount = baseGenerator.generateGoldRewardOption().goldAmount;
 
-    assertEquals(Math.round(baseAmount * 1.1f), goldOption.goldAmount);
+    assertEquals(baseAmount, goldOption.goldAmount);
 
-    playerState.addGold(goldOption.goldAmount);
+    int previewBonus = playerState.calculateLuckyCoinBonus(goldOption.goldAmount);
+    playerState.claimGoldReward(goldOption.goldAmount, true);
 
-    assertEquals(50 + goldOption.goldAmount, playerState.getGold());
+    int subtotal = 50 + goldOption.goldAmount;
+    assertEquals(subtotal + previewBonus, playerState.getGold());
+    assertEquals(0, playerState.getOwnedItemCount(ItemType.LUCKY_COIN));
+    assertEquals(0f, playerState.getGoldBonusMultiplier(), 0.001f);
   }
 
   @Test
-  void luckyCoinIsReappliedToEachNewPlayerEntity() {
+  void luckyCoinIsRetainedWhenAnItemRewardIsChosen() {
     PlayerRunState playerState = new PlayerRunState(100, 100, 50);
     playerState.addOwnedItem(ItemType.LUCKY_COIN);
 
-    Entity firstPlayer = createPlayer();
-    playerState.applyTo(firstPlayer);
+    playerState.addOwnedItem(ItemType.ENERGY_CRYSTAL);
 
-    assertEquals(
-        0.1f, firstPlayer.getComponent(InventoryComponent.class).getGoldBonusMultiplier(), 0.001f);
-
-    Entity secondPlayer = createPlayer();
-    playerState.applyTo(secondPlayer);
-
-    assertEquals(
-        0.1f, secondPlayer.getComponent(InventoryComponent.class).getGoldBonusMultiplier(), 0.001f);
+    assertEquals(1, playerState.getOwnedItemCount(ItemType.LUCKY_COIN));
+    assertEquals(0.1f, playerState.getGoldBonusMultiplier(), 0.001f);
   }
 
   @Test

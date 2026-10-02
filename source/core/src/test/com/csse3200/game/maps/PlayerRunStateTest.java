@@ -1,6 +1,8 @@
 package com.csse3200.game.maps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -101,23 +103,29 @@ class PlayerRunStateTest {
   }
 
   @Test
-  void combatItemsAreReappliedOnceToEachNewBattlePlayer() {
+  void battleConsumablesRemainOwnedUntilExplicitlyUsed() {
     PlayerRunState state = new PlayerRunState(65, 100, 42);
     state.addOwnedItem(ItemType.IRON_AEGIS);
     state.addOwnedItem(ItemType.WARRIORS_CREST);
 
-    Entity battleOnePlayer = player(65, 100, 42);
-    Entity battleTwoPlayer = player(65, 100, 42);
+    Entity battlePlayer = player(65, 100, 42);
+    state.applyTo(battlePlayer);
 
-    state.applyTo(battleOnePlayer);
-    state.applyTo(battleTwoPlayer);
+    CombatStatsComponent stats = battlePlayer.getComponent(CombatStatsComponent.class);
+    assertEquals(0, stats.getArmour());
+    assertNull(stats.getStatusEffect("STRENGTH"));
+    assertEquals(1, state.getOwnedItemCount(ItemType.IRON_AEGIS));
+    assertEquals(1, state.getOwnedItemCount(ItemType.WARRIORS_CREST));
 
-    CombatStatsComponent battleOneStats = battleOnePlayer.getComponent(CombatStatsComponent.class);
-    CombatStatsComponent battleTwoStats = battleTwoPlayer.getComponent(CombatStatsComponent.class);
-    assertEquals(5, battleOneStats.getArmour());
-    assertEquals(1, battleOneStats.getStatusEffect("STRENGTH").getValue());
-    assertEquals(5, battleTwoStats.getArmour());
-    assertEquals(1, battleTwoStats.getStatusEffect("STRENGTH").getValue());
+    assertTrue(state.useBattleItem(ItemType.IRON_AEGIS, battlePlayer));
+    assertEquals(5, stats.getArmour());
+    assertEquals(0, state.getOwnedItemCount(ItemType.IRON_AEGIS));
+
+    assertTrue(state.useBattleItem(ItemType.WARRIORS_CREST, battlePlayer));
+    assertEquals(1, stats.getStatusEffect("STRENGTH").getValue());
+    assertEquals(0, state.getOwnedItemCount(ItemType.WARRIORS_CREST));
+
+    assertFalse(state.useBattleItem(ItemType.IRON_AEGIS, battlePlayer));
   }
 
   @Test
@@ -147,8 +155,7 @@ class PlayerRunStateTest {
   @Test
   void ownedItemsSurviveCaptureAndApply() {
     // Regression test: captureFrom() must not wipe out ownedItems — it only snapshots
-    // health/gold, so the item list (and therefore derived bonuses like gold multiplier)
-    // must still be intact and correctly reapplied to the next player entity.
+    // health/gold, so consumables must remain available across screen transitions.
     PlayerRunState state = new PlayerRunState(100, 100, 50);
     state.addOwnedItem(ItemType.LUCKY_COIN);
 
@@ -160,17 +167,51 @@ class PlayerRunStateTest {
     state.applyTo(secondPlayer);
 
     assertEquals(List.of(ItemType.LUCKY_COIN), state.getOwnedItems());
+    assertEquals(0.1f, state.getGoldBonusMultiplier(), 1e-6f);
     assertEquals(
-        0.1f, secondPlayer.getComponent(InventoryComponent.class).getGoldBonusMultiplier(), 1e-6f);
+        0f, secondPlayer.getComponent(InventoryComponent.class).getGoldBonusMultiplier(), 1e-6f);
   }
 
   @Test
-  void multipleLuckyCoinsStack() {
+  void multipleLuckyCoinsAreUsedOnePerGoldReward() {
     PlayerRunState state = new PlayerRunState(100, 100, 50);
     state.addOwnedItem(ItemType.LUCKY_COIN);
     state.addOwnedItem(ItemType.LUCKY_COIN);
 
-    assertEquals(0.2f, state.getGoldBonusMultiplier(), 1e-6f);
+    assertEquals(0.1f, state.getGoldBonusMultiplier(), 1e-6f);
+
+    state.claimGoldReward(11, true);
+    assertEquals(67, state.getGold());
+    assertEquals(0.1f, state.getGoldBonusMultiplier(), 1e-6f);
+
+    state.claimGoldReward(12, true);
+    assertEquals(87, state.getGold());
+    assertEquals(0f, state.getGoldBonusMultiplier(), 1e-6f);
+  }
+
+  @Test
+  void luckyCoinTotalGoldBonusIsCappedAtTwenty() {
+    PlayerRunState state = new PlayerRunState(100, 100, 200);
+    state.addOwnedItem(ItemType.LUCKY_COIN);
+
+    assertEquals(20, state.calculateLuckyCoinBonus(25));
+    state.claimGoldReward(25, true);
+
+    assertEquals(245, state.getGold());
+    assertEquals(0, state.getOwnedItemCount(ItemType.LUCKY_COIN));
+  }
+
+  @Test
+  void luckyCoinPreviewMatchesClaimedGold() {
+    PlayerRunState state = new PlayerRunState(100, 100, 50);
+    state.addOwnedItem(ItemType.LUCKY_COIN);
+
+    int previewBonus = state.calculateLuckyCoinBonus(25);
+    assertEquals(8, previewBonus);
+
+    state.claimGoldReward(25, true);
+
+    assertEquals(50 + 25 + previewBonus, state.getGold());
   }
 
   @Test

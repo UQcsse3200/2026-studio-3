@@ -4,7 +4,7 @@ import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.entities.Entity;
 
-/** Grants one permanent Strength whenever the player's battle entity is created. */
+/** Grants one Strength for the current battle when one Warrior's Crest is actively used. */
 public class WarriorsCrestEffect implements ItemEffect {
   private static final int STRENGTH_BONUS = 1;
   private static final String STRENGTH = "STRENGTH";
