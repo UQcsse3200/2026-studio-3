@@ -107,7 +107,7 @@ public class DemoEventScreen extends ScreenAdapter {
     }
     completionQueued = true;
     if (encounterGameArea.getCardFusionEncounterFlow().isPresent()) {
-      fusionResultSeconds = 2f;
+      fusionResultSeconds = encounterGameArea.isCardFusionPresentationComplete() ? 0.2f : 0f;
     } else {
       Gdx.app.postRunnable(() -> game.setScreen(GdxGame.ScreenType.MAIN_MENU));
     }
@@ -119,6 +119,9 @@ public class DemoEventScreen extends ScreenAdapter {
     ServiceLocator.getEntityService().update();
     renderer.render();
     if (fusionResultSeconds >= 0f) {
+      if (!encounterGameArea.isCardFusionPresentationComplete()) {
+        return;
+      }
       fusionResultSeconds -= delta;
       if (fusionResultSeconds < 0f) {
         game.setScreen(GdxGame.ScreenType.MAIN_MENU);

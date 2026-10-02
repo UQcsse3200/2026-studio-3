@@ -39,6 +39,8 @@ public class CardEffectHandler {
       for (ResolvedCardEffect effect : effects) {
         switch (effect.type()) {
           case DAMAGE -> stats.takeDamage(effect.value());
+          case PIERCE -> stats.takePiercingDamage(effect.value());
+          case SUNDER -> stats.setArmour(stats.getArmour() - effect.value());
           case POISON, VULNERABLE, FEEBLE ->
               stats.applyStatusEffect(
                   new StatusEffect(effect.type().name(), effect.value(), effect.duration()));

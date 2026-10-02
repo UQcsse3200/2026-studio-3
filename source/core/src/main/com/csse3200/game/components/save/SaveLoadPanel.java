@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Scaling;
+import com.csse3200.game.save.AutosaveCoordinator;
 import com.csse3200.game.save.DeleteSaveResult;
 import com.csse3200.game.save.LoadResult;
 import com.csse3200.game.save.RestoreResult;
@@ -213,22 +214,28 @@ public class SaveLoadPanel extends UIComponent {
 
   private void addSlotRow(int slotId, SaveSlotMetadata metadata) {
     boolean hasSave = metadata != null && metadata.loadable;
+    boolean isAutosave = slotId == AutosaveCoordinator.AUTOSAVE_SLOT_ID;
+    String slotName = isAutosave ? "Autosave" : "Slot " + slotId;
 
     String label =
         hasSave
-            ? "Slot " + slotId + " — " + describeTimestamp(metadata.savedAtEpochMillis)
-            : "Slot " + slotId + " — empty";
+            ? slotName + " — " + describeTimestamp(metadata.savedAtEpochMillis)
+            : slotName + " — empty";
     rootTable.add(new Label(label, themedLabelStyle())).left().padRight(20f);
 
-    TextButton saveButton = new TextButton("Save", themedButtonStyle());
-    saveButton.addListener(
-        new ChangeListener() {
-          @Override
-          public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-            onSave(slotId);
-          }
-        });
-    rootTable.add(saveButton).padRight(10f);
+    if (isAutosave) {
+      rootTable.add(new Label("Auto", themedLabelStyle())).padRight(10f);
+    } else {
+      TextButton saveButton = new TextButton("Save", themedButtonStyle());
+      saveButton.addListener(
+          new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+              onSave(slotId);
+            }
+          });
+      rootTable.add(saveButton).padRight(10f);
+    }
 
     TextButton loadButton = new TextButton("Load", themedButtonStyle());
     loadButton.setDisabled(!hasSave);

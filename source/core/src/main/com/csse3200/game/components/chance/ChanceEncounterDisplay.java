@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -19,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.csse3200.game.chance.CardFusionEncounterBehaviour;
 import com.csse3200.game.chance.ChanceChoice;
 import com.csse3200.game.chance.ChanceEncounter;
 import com.csse3200.game.chance.ChanceOutcome;
@@ -50,6 +52,9 @@ public class ChanceEncounterDisplay extends UIComponent {
   public static final String DICE_GAME_BACKGROUND_TEXTURE = "images/chance/dice_game_scene_v1.png";
   public static final String ABANDONED_MINE_BACKGROUND_TEXTURE =
       "images/chance/abandoned_mine_scene_v1.png";
+  public static final String FUSION_BACKGROUND_TEXTURE = "images/chance/card_fusion_forge_v1.png";
+  public static final String FUSION_CARD_BACK_TEXTURE =
+      "images/chance/card_fusion_back_balanced.png";
 
   private static final float Z_INDEX = 3f;
   private static final float PANEL_WIDTH = 1080f;
@@ -75,6 +80,7 @@ public class ChanceEncounterDisplay extends UIComponent {
   private final CardFusionEncounterFlow cardFusionFlow;
   private final boolean scenicDiceGame;
   private final boolean scenicAbandonedMine;
+  private final boolean scenicCardFusion;
   private final EncounterCallback completionCallback;
   private final Integer nodeId;
   private final List<TextButton> choiceButtons = new ArrayList<>();
@@ -145,6 +151,9 @@ public class ChanceEncounterDisplay extends UIComponent {
     this.scenicDiceGame =
         encounterSession != null && DiceEncounterBehaviour.ENCOUNTER_ID.equals(encounter.getId());
     this.scenicAbandonedMine = "abandoned-mine".equals(encounter.getId());
+    this.scenicCardFusion =
+        cardFusionFlow != null
+            && CardFusionEncounterBehaviour.ENCOUNTER_ID.equals(encounter.getId());
     this.completionCallback = completionCallback;
     this.nodeId = Objects.requireNonNull(nodeId, "nodeId cannot be null");
   }
@@ -162,6 +171,10 @@ public class ChanceEncounterDisplay extends UIComponent {
     }
     if (scenicAbandonedMine) {
       addAbandonedMineActors();
+      return;
+    }
+    if (scenicCardFusion) {
+      addFusionIntroActors();
       return;
     }
 
@@ -236,6 +249,232 @@ public class ChanceEncounterDisplay extends UIComponent {
     rootTable.add(encounterTable).width(PANEL_WIDTH);
     stage.addActor(rootTable);
     rootTable.addAction(Actions.fadeIn(0.25f));
+  }
+
+  /** A dedicated forge scene; the Event choices and session still own all gameplay effects. */
+  private void addFusionIntroActors() {
+    rootTable = new Table();
+    rootTable.setFillParent(true);
+    rootTable.setBackground(skin.newDrawable(WHITE, BACKDROP_COLOUR));
+    rootTable.setTouchable(Touchable.enabled);
+    rootTable.getColor().a = 0f;
+
+    Group scene = new Group();
+    scene.setSize(FusionSceneAssets.WIDTH, FusionSceneAssets.HEIGHT);
+    scene.addActor(FusionSceneAssets.background(skin));
+    addFusionAltarLighting(scene);
+    addFusionAltarEmbers(scene);
+
+    Label eyebrow = new Label("CHANCE ENCOUNTER", createLabelStyle(SMALL, GOLD_COLOUR));
+    eyebrow.setBounds(68f, 721f, 520f, 30f);
+    scene.addActor(eyebrow);
+    Label title = new Label("CARD FUSION", createLabelStyle(LARGE, BODY_COLOUR));
+    title.setFontScale(1.35f);
+    title.setBounds(68f, 657f, 660f, 57f);
+    scene.addActor(title);
+
+    addFusionPreviewCard(scene, 395f, 354f, 12f, 0f);
+    addFusionPreviewCard(scene, 570f, 370f, 0f, 0.55f);
+    addFusionPreviewCard(scene, 745f, 354f, -12f, 1.1f);
+
+    Label descriptionShadow =
+        new Label(
+            encounter.getDescription(),
+            createLabelStyle(DEFAULT, new Color(0.02f, 0.02f, 0.04f, 0.85f)));
+    descriptionShadow.setAlignment(com.badlogic.gdx.utils.Align.center);
+    descriptionShadow.setWrap(true);
+    descriptionShadow.setBounds(182f, 157f, 920f, 58f);
+    scene.addActor(descriptionShadow);
+    Label description =
+        new Label(encounter.getDescription(), createLabelStyle(DEFAULT, BODY_COLOUR));
+    description.setAlignment(com.badlogic.gdx.utils.Align.center);
+    description.setWrap(true);
+    description.setBounds(180f, 159f, 920f, 58f);
+    scene.addActor(description);
+
+    promptLabel = new Label("CHOOSE YOUR RESPONSE", createLabelStyle(SMALL, MUTED_COLOUR));
+    promptLabel.setVisible(false);
+    scene.addActor(promptLabel);
+    choiceStyle = FusionSceneAssets.buttonStyle(skin, true);
+    selectedChoiceStyle = new TextButtonStyle(choiceStyle);
+    choicesTable = new Table();
+    choicesTable.setBounds(137f, 54f, 1006f, 98f);
+    scene.addActor(choicesTable);
+    refreshChoices();
+
+    Table resultPanel = new Table();
+    resultPanel.setBackground(
+        FusionSceneAssets.plaque(skin, new Color(0.53f, 0.50f, 0.54f, 0.97f)));
+    resultPanel.pad(14f, 25f, 14f, 25f);
+    resultLabel = new Label("", createLabelStyle(DEFAULT, BODY_COLOUR));
+    resultLabel.setWrap(true);
+    resultPanel.add(resultLabel).grow();
+    resultPanel.setBounds(200f, 157f, 880f, 112f);
+    resultPanel.setVisible(false);
+    scene.addActor(resultPanel);
+
+    continueButton = FusionSceneAssets.button("Continue", skin, true);
+    continueButton.setBounds(492f, 48f, 296f, 76f);
+    continueButton.setVisible(false);
+    continueButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            completeEncounter();
+          }
+        });
+    scene.addActor(continueButton);
+
+    rootTable.add(scene).size(FusionSceneAssets.WIDTH, FusionSceneAssets.HEIGHT);
+    stage.addActor(rootTable);
+    rootTable.addAction(Actions.fadeIn(0.25f));
+  }
+
+  private void addFusionAltarLighting(Group scene) {
+    Image distantWarmth = FusionSceneAssets.warmGlow(skin, 0.028f);
+    distantWarmth.setBounds(420f, 365f, 440f, 230f);
+    scene.addActor(distantWarmth);
+
+    Image risingHeat = FusionSceneAssets.warmGlow(skin, 0.24f);
+    risingHeat.setBounds(360f, 340f, 560f, 145f);
+    scene.addActor(risingHeat);
+
+    Image lightBridge = FusionSceneAssets.warmGlow(skin, 0.20f);
+    lightBridge.setBounds(440f, 342f, 400f, 155f);
+    scene.addActor(lightBridge);
+
+    Image altarEdge = FusionSceneAssets.warmGlow(skin, 0.44f);
+    altarEdge.setBounds(315f, 315f, 650f, 105f);
+    scene.addActor(altarEdge);
+
+    Image rimCore = FusionSceneAssets.warmGlow(skin, 0.42f);
+    rimCore.setBounds(486f, 335f, 308f, 62f);
+    scene.addActor(rimCore);
+
+    Image altarSymbol = FusionSceneAssets.warmGlow(skin, 0.43f);
+    altarSymbol.setBounds(568f, 239f, 144f, 125f);
+    scene.addActor(altarSymbol);
+
+    Image symbolCore = FusionSceneAssets.warmGlow(skin, 0.36f);
+    symbolCore.setBounds(602f, 267f, 76f, 75f);
+    scene.addActor(symbolCore);
+
+    Image leftStone = FusionSceneAssets.warmGlow(skin, 0.06f);
+    leftStone.setBounds(295f, 251f, 245f, 140f);
+    scene.addActor(leftStone);
+    Image rightStone = FusionSceneAssets.warmGlow(skin, 0.06f);
+    rightStone.setBounds(740f, 251f, 245f, 140f);
+    scene.addActor(rightStone);
+
+    float[][] rimMarks = {
+      {456f, 352f, 26f},
+      {510f, 352f, 30f},
+      {568f, 353f, 36f},
+      {620f, 353f, 40f},
+      {682f, 353f, 30f},
+      {748f, 352f, 27f},
+      {804f, 352f, 20f}
+    };
+    for (float[] mark : rimMarks) {
+      addFusionHeatPixel(scene, mark[0], mark[1], mark[2], 2f, 0.52f);
+    }
+
+    float[][] cracks = {
+      {564f, 300f, 8f, 2f}, {572f, 296f, 2f, 5f},
+      {704f, 301f, 9f, 2f}, {710f, 296f, 2f, 6f},
+      {611f, 255f, 7f, 2f}, {665f, 256f, 8f, 2f}
+    };
+    for (float[] crack : cracks) {
+      addFusionHeatPixel(scene, crack[0], crack[1], crack[2], crack[3], 0.44f);
+    }
+  }
+
+  private void addFusionHeatPixel(
+      Group scene, float x, float y, float width, float height, float alpha) {
+    Image mark = new Image(skin.newDrawable(WHITE, new Color(1f, 0.56f, 0.22f, alpha)));
+    mark.setBounds(x, y, width, height);
+    mark.setTouchable(Touchable.disabled);
+    scene.addActor(mark);
+  }
+
+  private void addFusionAltarEmbers(Group scene) {
+    float[][] positions = {{525f, 354f}, {562f, 382f}, {642f, 359f}, {704f, 382f}, {748f, 354f}};
+    for (int i = 0; i < positions.length; i++) {
+      Image ember = new Image(skin.newDrawable(WHITE, new Color(1f, 0.55f, 0.24f, 0.72f)));
+      ember.setBounds(positions[i][0], positions[i][1], 2f, 2f);
+      ember.setTouchable(Touchable.disabled);
+      ember.getColor().a = 0f;
+      ember.addAction(
+          Actions.forever(
+              Actions.sequence(
+                  Actions.delay(i * 0.23f),
+                  Actions.parallel(
+                      Actions.alpha(0.55f, 0.8f, Interpolation.sine),
+                      Actions.moveBy(0f, 4f, 0.8f, Interpolation.sine)),
+                  Actions.parallel(
+                      Actions.alpha(0f, 1.1f, Interpolation.sine),
+                      Actions.moveBy(i % 2 == 0 ? 1f : -1f, 7f, 1.1f, Interpolation.sine)),
+                  Actions.moveTo(positions[i][0], positions[i][1]))));
+      scene.addActor(ember);
+    }
+  }
+
+  private void addFusionPreviewCard(
+      Group scene, float x, float y, float rotation, float floatDelay) {
+    Group card = new Group();
+    card.setBounds(x, y, 150f, 210f);
+    card.setOrigin(75f, 105f);
+    card.setRotation(rotation);
+    Image reflectedLight = FusionSceneAssets.warmGlow(skin, 0.06f);
+    reflectedLight.setBounds(-14f, -16f, 178f, 120f);
+    card.addActor(reflectedLight);
+    Image back = FusionSceneAssets.cardBack(skin);
+    back.setBounds(0f, 0f, 150f, 210f);
+    card.addActor(back);
+    Image coreLight = FusionSceneAssets.warmGlow(skin, 0.07f);
+    coreLight.setBounds(55f, 75f, 40f, 60f);
+    card.addActor(coreLight);
+    addFusionCardSparkles(card);
+    scene.addActor(card);
+    card.addAction(
+        Actions.sequence(
+            Actions.delay(floatDelay),
+            Actions.forever(
+                Actions.sequence(
+                    Actions.moveBy(0f, 3f, 1.65f, Interpolation.sine),
+                    Actions.moveBy(0f, -3f, 1.65f, Interpolation.sine)))));
+  }
+
+  private void addFusionCardSparkles(Group card) {
+    float[][] positions = {{-2f, 36f}, {145f, 58f}, {119f, 9f}};
+    for (int i = 0; i < positions.length; i++) {
+      Group spark = new Group();
+      spark.setBounds(positions[i][0], positions[i][1], 6f, 6f);
+      spark.setTouchable(Touchable.disabled);
+      Color warm = new Color(0.96f, 0.69f, 0.38f, 0.65f);
+      Image vertical = new Image(skin.newDrawable(WHITE, warm));
+      vertical.setBounds(2f, 0f, 2f, 6f);
+      spark.addActor(vertical);
+      Image horizontal = new Image(skin.newDrawable(WHITE, warm));
+      horizontal.setBounds(0f, 2f, 6f, 2f);
+      spark.addActor(horizontal);
+      Image center = new Image(skin.newDrawable(WHITE, new Color(1f, 0.91f, 0.68f, 0.8f)));
+      center.setBounds(2f, 2f, 2f, 2f);
+      spark.addActor(center);
+      spark.getColor().a = 0.1f;
+      spark.addAction(
+          Actions.forever(
+              Actions.sequence(
+                  Actions.delay(i * 0.16f),
+                  Actions.parallel(
+                      Actions.alpha(0.55f, 0.8f, Interpolation.sine),
+                      Actions.moveBy(0f, 2f, 0.8f, Interpolation.sine)),
+                  Actions.parallel(
+                      Actions.alpha(0.1f, 1.1f, Interpolation.sine),
+                      Actions.moveBy(0f, 5f, 1.1f, Interpolation.sine)),
+                  Actions.moveTo(positions[i][0], positions[i][1]))));
+      card.addActor(spark);
+    }
   }
 
   private void addDiceGameActors() {
@@ -535,10 +774,17 @@ public class ChanceEncounterDisplay extends UIComponent {
     return cardFusionView;
   }
 
+  /** True once the delegated success/leave scene has been acknowledged by the player. */
+  public boolean isCardFusionPresentationComplete() {
+    return cardFusionView == null || cardFusionView.isExitRequested();
+  }
+
   private void addChoiceButton(ChanceChoice choice, int choiceNumber) {
     String buttonText = String.format("%d.  %s", choiceNumber, choice.getDescription());
     TextButton choiceButton = new TextButton(buttonText, choiceStyle);
-    choiceButton.getLabel().setFontScale(scenicDiceGame || scenicAbandonedMine ? 1.08f : 1.3f);
+    choiceButton
+        .getLabel()
+        .setFontScale(scenicDiceGame || scenicAbandonedMine || scenicCardFusion ? 1.02f : 1.3f);
     choiceButton.getLabel().setWrap(true);
     choiceButton.addListener(
         new ChangeListener() {
@@ -556,6 +802,11 @@ public class ChanceEncounterDisplay extends UIComponent {
         choiceButton.setStyle(createMineChoiceStyle(new Color(0.48f, 0.50f, 0.57f, 1f)));
       }
       choicesTable.add(choiceButton).width(560f).height(100f).padRight(25f);
+    } else if (scenicCardFusion) {
+      if (choiceNumber == 2) {
+        choiceButton.setStyle(FusionSceneAssets.buttonStyle(skin, false));
+      }
+      choicesTable.add(choiceButton).width(490f).height(86f).padRight(20f);
     } else {
       choicesTable.add(choiceButton).left().width(CONTENT_WIDTH).minHeight(80f).padBottom(14f);
       choicesTable.row();
@@ -613,7 +864,7 @@ public class ChanceEncounterDisplay extends UIComponent {
       }
       resultLabel.setStyle(createLabelStyle(DEFAULT, new Color(0.9f, 0.35f, 0.3f, 1f)));
       resultLabel.setText("OUTCOME\n" + resolution.getMessage());
-      if (scenicAbandonedMine) {
+      if (scenicAbandonedMine || scenicCardFusion) {
         resultLabel.getParent().setVisible(true);
       }
       return;
@@ -630,7 +881,7 @@ public class ChanceEncounterDisplay extends UIComponent {
       resultLabel.setStyle(createLabelStyle(DEFAULT, new Color(0.9f, 0.35f, 0.3f, 1f)));
       resultLabel.setText(
           "OUTCOME\nThis choice could not be resolved. Please select another option.");
-      if (scenicAbandonedMine) {
+      if (scenicAbandonedMine || scenicCardFusion) {
         resultLabel.getParent().setVisible(true);
       }
       return;
@@ -645,7 +896,7 @@ public class ChanceEncounterDisplay extends UIComponent {
 
     resultLabel.setStyle(createLabelStyle(DEFAULT, BODY_COLOUR));
     resultLabel.setText("OUTCOME\n" + formatOutcome(outcome));
-    if (scenicAbandonedMine) {
+    if (scenicAbandonedMine || scenicCardFusion) {
       resultLabel.getParent().setVisible(true);
       choicesTable.setVisible(false);
     }

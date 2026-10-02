@@ -154,13 +154,15 @@ public class BattleActions extends Component {
     // Report the result to the run so the map node is marked done (win) or the run stays put
     // (loss). The end screen reads this to decide whether to go back to the map or the menu.
     RunState runState = game.getRunState();
-
     if (runState != null) {
+      boolean hadActiveEncounter = runState.getActiveNodeId() != null;
       if (win && isEligibleEliteVictory(runState)) {
         runState.setPendingEliteTempleReward(true);
       }
-
       runState.completeEncounter(win);
+      if (win && hadActiveEncounter) {
+        game.requestAutosaveAfterEncounter();
+      }
     }
 
     GdxGame.ScreenType target = win ? GdxGame.ScreenType.VICTORY : GdxGame.ScreenType.DEFEAT;
