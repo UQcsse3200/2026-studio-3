@@ -153,6 +153,126 @@ class EnemyStatusEffectVisualComponentTest {
   }
 
   @Test
+  void vulnerablePulsesAndFeebleDescendsOverTheBodyInsteadOfBecomingCornerIcons() {
+    for (EffectType type : new EffectType[] {EffectType.VULNERABLE, EffectType.FEEBLE}) {
+      clearInvocations(batch);
+      target.setPosition(2f, 4f);
+      stats.applyStatusEffect(type.name(), 1, 2);
+      EnemyStatusEffectVisualComponent visual =
+          new EnemyStatusEffectVisualComponent(texture, registry.lookup(type), target, 0f, type);
+      visual.showPersistent();
+      visual.render(batch);
+      when(time.getDeltaTime()).thenReturn(0.3f);
+      visual.update();
+      visual.render(batch);
+      when(time.getDeltaTime()).thenReturn(0.5f);
+      visual.update();
+      visual.render(batch);
+      target.setPosition(5f, 6f);
+      visual.render(batch);
+
+      ArgumentCaptor<TextureRegion> frames = ArgumentCaptor.forClass(TextureRegion.class);
+      ArgumentCaptor<Float> xs = ArgumentCaptor.forClass(Float.class);
+      ArgumentCaptor<Float> ys = ArgumentCaptor.forClass(Float.class);
+      ArgumentCaptor<Float> sizes = ArgumentCaptor.forClass(Float.class);
+      ArgumentCaptor<Float> alphas = ArgumentCaptor.forClass(Float.class);
+      verify(batch, times(7))
+          .draw(frames.capture(), xs.capture(), ys.capture(), sizes.capture(), anyFloat());
+      verify(batch, times(7)).setColor(anyFloat(), anyFloat(), anyFloat(), alphas.capture());
+      assertEquals(0, frames.getAllValues().get(1).getRegionX());
+      assertEquals(256, frames.getAllValues().get(1).getRegionY());
+      assertEquals(256, frames.getAllValues().get(2).getRegionX());
+      assertEquals(0, frames.getAllValues().get(2).getRegionY());
+      if (type == EffectType.VULNERABLE) {
+        assertNotEquals(sizes.getAllValues().get(1), sizes.getAllValues().get(3));
+      } else {
+        assertTrue(ys.getAllValues().get(3) < ys.getAllValues().get(1));
+      }
+      assertNotEquals(alphas.getAllValues().get(1), alphas.getAllValues().get(3));
+      for (int i = 0; i < 5; i++) {
+        assertTrue(xs.getAllValues().get(i) >= 2f);
+        assertTrue(xs.getAllValues().get(i) + sizes.getAllValues().get(i) <= 4f);
+        assertTrue(ys.getAllValues().get(i) >= 4f);
+        assertTrue(ys.getAllValues().get(i) + sizes.getAllValues().get(i) <= 7f);
+      }
+      assertEquals(3f, xs.getAllValues().get(5) - xs.getAllValues().get(3), 0.0001f);
+      assertEquals(2f, ys.getAllValues().get(5) - ys.getAllValues().get(3), 0.0001f);
+      assertFalse(visual.isExpired());
+      assertEquals(30, stats.getHealth());
+      assertEquals(2, stats.getStatusEffect(type.name()).getDuration());
+    }
+  }
+
+  @Test
+  void persistentPoisonKeepsMovingAndBlendingOverTheBodyWithoutTickingStatus() {
+    stats.applyStatusEffect("POISON", 3, 2);
+    EnemyStatusEffectVisualComponent visual =
+        new EnemyStatusEffectVisualComponent(
+            texture, registry.lookup(EffectType.POISON), target, 0f, EffectType.POISON);
+    visual.showPersistent();
+    visual.render(batch);
+    when(time.getDeltaTime()).thenReturn(0.6f);
+    visual.update();
+    visual.render(batch);
+    when(time.getDeltaTime()).thenReturn(1.2f);
+    visual.update();
+    visual.render(batch);
+    target.setPosition(5f, 6f);
+    visual.render(batch);
+
+    ArgumentCaptor<TextureRegion> frames = ArgumentCaptor.forClass(TextureRegion.class);
+    ArgumentCaptor<Float> xs = ArgumentCaptor.forClass(Float.class);
+    ArgumentCaptor<Float> ys = ArgumentCaptor.forClass(Float.class);
+    ArgumentCaptor<Float> sizes = ArgumentCaptor.forClass(Float.class);
+    verify(batch, times(7))
+        .draw(frames.capture(), xs.capture(), ys.capture(), sizes.capture(), anyFloat());
+    assertEquals(0, frames.getAllValues().get(1).getRegionX());
+    assertEquals(256, frames.getAllValues().get(1).getRegionY());
+    assertEquals(256, frames.getAllValues().get(2).getRegionX());
+    assertEquals(0, frames.getAllValues().get(2).getRegionY());
+    assertNotEquals(xs.getAllValues().get(1), xs.getAllValues().get(3));
+    assertNotEquals(ys.getAllValues().get(1), ys.getAllValues().get(3));
+    assertNotEquals(sizes.getAllValues().get(1), sizes.getAllValues().get(3));
+    for (int i = 0; i < 5; i++) {
+      assertTrue(xs.getAllValues().get(i) >= 2f);
+      assertTrue(xs.getAllValues().get(i) + sizes.getAllValues().get(i) <= 4f);
+      assertTrue(ys.getAllValues().get(i) >= 4f);
+      assertTrue(ys.getAllValues().get(i) + sizes.getAllValues().get(i) <= 7f);
+    }
+    assertEquals(3f, xs.getAllValues().get(5) - xs.getAllValues().get(3), 0.0001f);
+    assertEquals(2f, ys.getAllValues().get(5) - ys.getAllValues().get(3), 0.0001f);
+    assertFalse(visual.isExpired());
+    assertEquals(30, stats.getHealth());
+    assertEquals(3, stats.getStatusEffect("POISON").getValue());
+    assertEquals(2, stats.getStatusEffect("POISON").getDuration());
+    stats.removeStatusEffect("POISON");
+    clearInvocations(batch);
+    visual.render(batch);
+    assertTrue(visual.isExpired());
+    verifyNoInteractions(batch);
+  }
+
+  @Test
+  void clearedOrDeadStatusesStopDrawingEvenBeforeCoordinatorCleanup() {
+    for (EffectType type :
+        new EffectType[] {EffectType.POISON, EffectType.VULNERABLE, EffectType.FEEBLE}) {
+      stats.setHealth(30);
+      stats.applyStatusEffect(type.name(), 1, 2);
+      EnemyStatusEffectVisualComponent visual =
+          new EnemyStatusEffectVisualComponent(texture, registry.lookup(type), target, 0f, type);
+      visual.showPersistent();
+      stats.removeStatusEffect(type.name());
+      assertTrue(visual.isExpired());
+      visual.render(batch);
+      stats.applyStatusEffect(type.name(), 1, 2);
+      stats.setHealth(0);
+      assertTrue(visual.isExpired());
+      visual.render(batch);
+    }
+    verifyNoInteractions(batch);
+  }
+
+  @Test
   void statusRegistrationLeavesOtherTeamsStylesAloneAndUsesTransparentFourCellAssets()
       throws Exception {
     EffectVisualStyle damage = registry.lookup(EffectType.DAMAGE);

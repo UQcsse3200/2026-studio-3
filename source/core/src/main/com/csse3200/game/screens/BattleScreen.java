@@ -34,8 +34,8 @@ import com.csse3200.game.components.pausemenu.PauseMenuActions;
 import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.player.EnergyComponent;
-import com.csse3200.game.components.spritedisplay.clickable.CardAimController;
 import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
+import com.csse3200.game.components.spritedisplay.clickable.CardAimController;
 import com.csse3200.game.components.spritedisplay.clickable.CardImageSkins;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
@@ -230,6 +230,7 @@ public class BattleScreen extends ScreenAdapter {
 
     EffectVisualRegistry effectVisualRegistry = new EffectVisualRegistry();
     OffensiveEffectVisuals.registerAll(effectVisualRegistry);
+    EnemyStatusEffectVisuals.registerAll(effectVisualRegistry);
     Entity animationCoordinatorEntity =
         new Entity()
             .addComponent(
@@ -381,6 +382,7 @@ public class BattleScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
+    ServiceLocator.getResourceService().unloadAssets(EnemyStatusEffectVisuals.texturePaths());
     ServiceLocator.clear();
   }
 
@@ -388,6 +390,7 @@ public class BattleScreen extends ScreenAdapter {
     logger.debug("Loading assets");
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(mainGameTextures);
+    resourceService.loadTextures(EnemyStatusEffectVisuals.texturePaths());
     ServiceLocator.getResourceService().loadAll();
   }
 
