@@ -31,6 +31,15 @@ public class PopupDisplay extends UIComponent {
   private final String title;
   private float minWidth = 0f;
   private float minHeight = 0f;
+  private String backgroundTexturePath;
+  private Color backgroundColour;
+  private float paddingTop = 20f;
+  private float paddingLeft = 20f;
+  private float paddingBottom = 20f;
+  private float paddingRight = 20f;
+  private boolean defaultCloseButtonVisible = true;
+  private Color titleColour;
+  private String titleFontName;
 
   private Image backdrop;
   private Window window;
@@ -62,33 +71,67 @@ public class PopupDisplay extends UIComponent {
    * @param colour solid background colour for the window
    */
   public void setBackgroundColour(Color colour) {
-    window.setBackground(skin.newDrawable("white", colour));
+    backgroundColour = colour.cpy();
+    backgroundTexturePath = null;
+    if (window != null) {
+      applyBackgroundColour();
+    }
   }
 
   /** Uses a loaded texture as this popup's complete window background. */
   public void setBackgroundTexture(String texturePath) {
-    Texture texture = ServiceLocator.getResourceService().getAsset(texturePath, Texture.class);
+    backgroundTexturePath = texturePath;
+    backgroundColour = null;
+    if (window != null) {
+      applyBackgroundTexture();
+    }
+  }
+
+  private void applyBackgroundTexture() {
+    Texture texture =
+        ServiceLocator.getResourceService().getAsset(backgroundTexturePath, Texture.class);
     TextureRegionDrawable background = new TextureRegionDrawable(texture);
     background.setMinWidth(0f);
     background.setMinHeight(0f);
     window.setBackground(background);
   }
 
+  private void applyBackgroundColour() {
+    window.setBackground(skin.newDrawable("white", backgroundColour));
+  }
+
   /** Sets the inset between the window frame and its title/content. */
   public void setPadding(float top, float left, float bottom, float right) {
-    window.pad(top, left, bottom, right);
+    paddingTop = top;
+    paddingLeft = left;
+    paddingBottom = bottom;
+    paddingRight = right;
+    if (window != null) {
+      window.pad(top, left, bottom, right);
+    }
   }
 
   /** Shows or hides the generic title-bar close button. */
   public void setDefaultCloseButtonVisible(boolean visible) {
-    closeButton.setVisible(visible);
+    defaultCloseButtonVisible = visible;
+    if (closeButton != null) {
+      closeButton.setVisible(visible);
+    }
   }
 
   /** Applies a colour and skin font to the popup title without changing other popups. */
   public void setTitleStyle(Color colour, String fontName) {
+    titleColour = colour.cpy();
+    titleFontName = fontName;
+    if (window != null) {
+      applyTitleStyle();
+    }
+  }
+
+  private void applyTitleStyle() {
     LabelStyle style = new LabelStyle(window.getTitleLabel().getStyle());
-    style.font = skin.getFont(fontName);
-    style.fontColor = colour;
+    style.font = skin.getFont(titleFontName);
+    style.fontColor = titleColour;
     window.getTitleLabel().setStyle(style);
   }
 
@@ -119,6 +162,8 @@ public class PopupDisplay extends UIComponent {
 
     content = new Table();
     window.add(content).expand().fill().padTop(10f);
+
+    applyPendingConfiguration();
 
     // Window unconditionally toFront()s itself on every touch down inside it (baked into its
     // constructor's own captureListener, unrelated to setMovable) — which, for callers with
@@ -152,6 +197,21 @@ public class PopupDisplay extends UIComponent {
 
     stage.addActor(backdrop);
     stage.addActor(window);
+  }
+
+  private void applyPendingConfiguration() {
+    window.pad(paddingTop, paddingLeft, paddingBottom, paddingRight);
+    closeButton.setVisible(defaultCloseButtonVisible);
+
+    if (backgroundTexturePath != null) {
+      applyBackgroundTexture();
+    } else if (backgroundColour != null) {
+      applyBackgroundColour();
+    }
+
+    if (titleColour != null && titleFontName != null) {
+      applyTitleStyle();
+    }
   }
 
   /** The table callers add their own widgets to. */
