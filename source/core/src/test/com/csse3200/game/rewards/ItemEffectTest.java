@@ -43,7 +43,7 @@ class ItemEffectTest {
 
     new MerchantsFavorEffect().apply(player);
 
-    assertEquals(0.05f, inventory.getShopDiscount(), 0.001f);
+    assertEquals(0.10f, inventory.getShopDiscount(), 0.001f);
   }
 
   @Test

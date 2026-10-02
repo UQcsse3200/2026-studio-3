@@ -2,14 +2,23 @@
   "Clickable": [
     {
       "text": "Card Inventory",
-      "x": 20,
-      "y": 100,
+      "x": 24,
+      "y": 180,
+      "size": [247, 48],
       "trigger": "openMenu"
     },
     {
+      "text": "Item Inventory",
+      "x": 24,
+      "y": 239,
+      "size": [247, 48],
+      "trigger": "openInventory"
+    },
+    {
       "text": "End Turn",
-      "x": 20,
-      "y": 150,
+      "x": 24,
+      "y": 299,
+      "size": [154, 48],
       "trigger": "endTurn",
       "variant": "gated"
     }
