@@ -1,12 +1,10 @@
 package com.csse3200.game.components.shop;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -14,9 +12,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.cards.runtime.CardResolver;
+import com.csse3200.game.cards.runtime.ResolvedCard;
+import com.csse3200.game.components.cards.CardWidget;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.maps.EncounterCallback;
 import com.csse3200.game.services.ResourceService;
@@ -41,12 +43,12 @@ import org.slf4j.LoggerFactory;
  * states. Purchase validation and inventory changes are handled by the underlying Shop Encounter
  * and Shop Service rather than this display component.
  *
- * <p>Card artwork is resolved through the Cards/Library system. A placeholder is retained when a
- * card or its texture is unavailable.
+ * <p>Offered cards use the same {@link CardWidget} face as the Card Library and post-battle
+ * rewards, so name, cost, type, rarity and rules text stay readable even when the artwork has no
+ * baked-in labels. A placeholder is retained when a card cannot be resolved.
  */
 public class ShopDisplay extends UIComponent {
   private static final Logger logger = LoggerFactory.getLogger(ShopDisplay.class);
-  private static final String SHOP_ART_DIRECTORY = "images/shop/cards/";
   private static final String BUTTON = "button";
   private static final String WHITE = "white";
   private static final String LARGE = "large";
@@ -92,8 +94,10 @@ public class ShopDisplay extends UIComponent {
 
   private final ShopEncounter shopEncounter;
   private final CardService cardService;
+  private final CardResolver cardResolver = new CardResolver();
   private final Map<String, ItemWidgets> itemWidgets = new HashMap<>();
   private final Set<String> purchasedItemIds = new HashSet<>();
+  private CardWidgetAssets cardWidgetAssets;
 
   private Table rootTable;
   private Label goldLabel;
@@ -295,7 +299,7 @@ public class ShopDisplay extends UIComponent {
     for (ShopItem item : shopEncounter.getItems()) {
       Table card = createItemCard(item);
       float rightPadding = itemNumber < itemCount - 1 ? 34f : 0f;
-      shopPanel.add(card).top().width(CARD_WIDTH).minHeight(505f).padRight(rightPadding);
+      shopPanel.add(card).top().width(CARD_WIDTH).minHeight(560f).padRight(rightPadding);
       itemNumber++;
     }
   }
@@ -331,7 +335,7 @@ public class ShopDisplay extends UIComponent {
           }
         });
 
-    card.add(artwork).width(CARD_CONTENT_WIDTH).height(355f).top();
+    card.add(artwork).size(CardWidget.CARD_WIDTH, CardWidget.CARD_HEIGHT).top();
     card.row();
     card.add(detailsRow).width(CARD_CONTENT_WIDTH).fillX().padTop(8f);
     card.row();
@@ -344,19 +348,50 @@ public class ShopDisplay extends UIComponent {
   }
 
   private Actor createArtwork(ShopItem item) {
-    String texturePath = resolveArtworkPath(item);
-    ResourceService resources = ServiceLocator.getResourceService();
-    if (resources != null && !isLoadedTexture(resources, texturePath)) {
-      texturePath = resolveConfiguredArtworkPath(item);
+    CardWidget widget = createCardWidget(item);
+    if (widget != null) {
+      return widget;
     }
-    if (resources != null && isLoadedTexture(resources, texturePath)) {
-      Texture texture = resources.getAsset(texturePath, Texture.class);
-      texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-      Image artwork = new Image(texture);
-      artwork.setScaling(Scaling.fit);
-      return artwork;
+    return createUnavailablePlaceholder();
+  }
+
+  private CardWidget createCardWidget(ShopItem item) {
+    CardService cards = resolveCardService();
+    ResourceService resources = ServiceLocator.getResourceService();
+    if (cards == null || resources == null || item == null || item.cardId == null) {
+      return null;
     }
 
+    CardConfig config = cards.getCard(item.cardId).orElse(null);
+    if (config == null) {
+      return null;
+    }
+
+    try {
+      ResolvedCard resolved = cardResolver.resolveBasePreview(config, "shop-preview-" + item.id);
+      return new CardWidget(resolved, cardWidgetAssets());
+    } catch (RuntimeException exception) {
+      logger.warn("Could not resolve shop card {} for offer {}", item.cardId, item.id, exception);
+      return null;
+    }
+  }
+
+  private CardService resolveCardService() {
+    if (cardService != null) {
+      return cardService;
+    }
+    return ServiceLocator.getCardLibrary();
+  }
+
+  private CardWidgetAssets cardWidgetAssets() {
+    if (cardWidgetAssets == null) {
+      cardWidgetAssets =
+          CardWidgetAssets.fromManagedResources(skin, ServiceLocator.getResourceService());
+    }
+    return cardWidgetAssets;
+  }
+
+  private Table createUnavailablePlaceholder() {
     Table placeholder = new Table();
     placeholder.setBackground(skin.newDrawable(WHITE, ART_COLOUR));
     Label label = new Label("CARD ART\nUNAVAILABLE", createLabelStyle(SMALL, MUTED_COLOUR));
@@ -364,31 +399,6 @@ public class ShopDisplay extends UIComponent {
     label.setAlignment(Align.center);
     placeholder.add(label).center();
     return placeholder;
-  }
-
-  String resolveArtworkPath(ShopItem item) {
-    String configuredPath = resolveConfiguredArtworkPath(item);
-    if (configuredPath == null) {
-      return null;
-    }
-    int separator = configuredPath.lastIndexOf('/');
-    String fileName = separator < 0 ? configuredPath : configuredPath.substring(separator + 1);
-    return SHOP_ART_DIRECTORY + fileName;
-  }
-
-  private String resolveConfiguredArtworkPath(ShopItem item) {
-    if (cardService == null || item == null || item.cardId == null || item.cardId.isBlank()) {
-      return null;
-    }
-    return cardService
-        .getCard(item.cardId)
-        .map(card -> card.texturePath)
-        .filter(path -> path != null && !path.isBlank())
-        .orElse(null);
-  }
-
-  private static boolean isLoadedTexture(ResourceService resources, String texturePath) {
-    return texturePath != null && resources.containsAsset(texturePath, Texture.class);
   }
 
   private void addFooter(Table shopPanel) {
