@@ -7,14 +7,14 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.components.battle.InventoryPopupComponent;
+import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -163,11 +163,15 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         new Entity().addComponent(itemInventory).addComponent(inventoryPopup);
     ServiceLocator.getEntityService().register(itemInventoryEntity);
 
-    Skin skin = new Skin(Gdx.files.internal("flat-earth/skin/flat-earth-ui.json"));
-    TextButton inventoryButton = new TextButton("Item Inventory", skin);
+    ImageTextButton inventoryButton =
+        new ImageTextButton(
+            "Item Inventory", BattleMenuSkins.forIcon(BattleMenuSkins.Icon.INVENTORY));
+    inventoryButton.pad(6f, 12f, 6f, 18f);
+    inventoryButton.getImageCell().size(48f);
+    inventoryButton.getLabelCell().expandX().right();
 
-    float buttonWidth = 220f;
-    float buttonHeight = 56f;
+    float buttonWidth = 247f;
+    float buttonHeight = 48f;
     float offset = 24f;
     inventoryButton.setSize(buttonWidth, buttonHeight);
     inventoryButton.setPosition(offset, stage.getHeight() - buttonHeight - offset);
