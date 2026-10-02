@@ -138,15 +138,6 @@ public class RewardDisplay extends Displaying {
     }
     content.add(cards).expand().center();
     content.row();
-
-    Table footer = new Table();
-    footer.add(line()).width(panelWidth * 0.11f).height(1f);
-    footer
-        .add(new Label("Choose one reward to continue", smallStyle(MUTED)))
-        .padLeft(12f)
-        .padRight(12f);
-    footer.add(line()).width(panelWidth * 0.11f).height(1f);
-    content.add(footer).center().padTop(panelHeight * -0.015f);
     return content;
   }
 
@@ -302,10 +293,6 @@ public class RewardDisplay extends Displaying {
     LabelStyle style = new LabelStyle(skin.get("small", LabelStyle.class));
     style.fontColor = colour;
     return style;
-  }
-
-  private Image line() {
-    return new Image(skin.newDrawable("white", new Color(0.48f, 0.32f, 0.17f, 1f)));
   }
 
   private Texture texture(String path) {

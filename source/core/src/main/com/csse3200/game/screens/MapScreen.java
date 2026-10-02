@@ -133,11 +133,20 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
    */
   private void createInventoryButton(RunState runState) {
     ResourceService resourceService = ServiceLocator.getResourceService();
-    String inventoryPanelTexture = "images/ui/inventory-panel.png";
-    if (!resourceService.containsAsset(inventoryPanelTexture, Texture.class)) {
-      resourceService.loadTextures(new String[] {inventoryPanelTexture});
-      resourceService.loadAll();
+    String[] inventoryTextures = {
+      "images/ui/inventory-panel.png",
+      "images/ui/lucky-coin.png",
+      "images/ui/energy-crystal.png",
+      "images/ui/merchants-favor.png",
+      "images/ui/iron-aegis.png",
+      "images/ui/warriors-crest.png"
+    };
+    for (String texturePath : inventoryTextures) {
+      if (!resourceService.containsAsset(texturePath, Texture.class)) {
+        resourceService.loadTextures(new String[] {texturePath});
+      }
     }
+    resourceService.loadAll();
 
     Stage stage = ServiceLocator.getRenderService().getStage();
 
