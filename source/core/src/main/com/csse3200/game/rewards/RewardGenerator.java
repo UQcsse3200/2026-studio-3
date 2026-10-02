@@ -7,9 +7,13 @@ public class RewardGenerator {
   private static final int MAX_GOLD = 30;
   private static final ItemType[] ITEM_REWARD_POOL = {
     ItemType.LUCKY_COIN,
+    ItemType.LUCKY_COIN,
     ItemType.ENERGY_CRYSTAL,
     ItemType.MERCHANTS_FAVOR,
+    ItemType.MERCHANTS_FAVOR,
     ItemType.IRON_AEGIS,
+    ItemType.IRON_AEGIS,
+    ItemType.WARRIORS_CREST,
     ItemType.WARRIORS_CREST
   };
 

@@ -15,7 +15,8 @@ import com.csse3200.game.components.Component;
  */
 public class EnemyStatsComponent extends Component {
   private static final String DEFAULT_DISPLAY_NAME = "Unknown Enemy";
-  // 血量跌破上限的这个比例时触发一次"激怒"事件
+  // Triggers the enemyEnraged event once when health falls to or below this proportion of max
+  // health.
   private static final double ENRAGE_HEALTH_THRESHOLD = 0.3;
 
   private final String displayName;
@@ -47,7 +48,8 @@ public class EnemyStatsComponent extends Component {
       entity.getEvents().trigger("enemyDamaged", lastHealth - health);
     }
 
-    // 只在活着的时候判断激怒，死亡走下面的 enemyDefeated，不会重复触发
+    // Check for enrage only while the enemy is alive. A killing blow is handled by enemyDefeated
+    // below and must not also trigger enemyEnraged.
     if (!enraged && health > 0 && health <= maxHealth * ENRAGE_HEALTH_THRESHOLD) {
       enraged = true;
       entity.getEvents().trigger("enemyEnraged");

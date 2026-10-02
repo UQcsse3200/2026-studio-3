@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.rewards.RewardService;
@@ -137,15 +138,6 @@ public class RewardDisplay extends Displaying {
     }
     content.add(cards).expand().center();
     content.row();
-
-    Table footer = new Table();
-    footer.add(line()).width(panelWidth * 0.11f).height(1f);
-    footer
-        .add(new Label("Choose one reward to continue", smallStyle(MUTED)))
-        .padLeft(12f)
-        .padRight(12f);
-    footer.add(line()).width(panelWidth * 0.11f).height(1f);
-    content.add(footer).center().padTop(panelHeight * -0.015f);
     return content;
   }
 
@@ -233,16 +225,7 @@ public class RewardDisplay extends Displaying {
     }
     return switch (option.type) {
       case GOLD -> option.goldAmount + luckyCoinBonus(option) + " GOLD";
-      case ITEM ->
-          option.itemId == null
-              ? "ITEM"
-              : switch (option.itemId) {
-                case LUCKY_COIN -> "Lucky Coin";
-                case ENERGY_CRYSTAL -> "Energy Crystal";
-                case MERCHANTS_FAVOR -> "Merchant's Favor";
-                case IRON_AEGIS -> "Iron Aegis";
-                case WARRIORS_CREST -> "Warrior's Crest";
-              };
+      case ITEM -> option.itemId == null ? "ITEM" : ItemFormatting.formatItemName(option.itemId);
     };
   }
 
@@ -310,10 +293,6 @@ public class RewardDisplay extends Displaying {
     LabelStyle style = new LabelStyle(skin.get("small", LabelStyle.class));
     style.fontColor = colour;
     return style;
-  }
-
-  private Image line() {
-    return new Image(skin.newDrawable("white", new Color(0.48f, 0.32f, 0.17f, 1f)));
   }
 
   private Texture texture(String path) {

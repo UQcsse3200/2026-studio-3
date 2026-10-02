@@ -3,6 +3,7 @@ package com.csse3200.game.rewards;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.extensions.GameExtension;
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Random;
 import org.junit.jupiter.api.Test;
@@ -41,5 +42,32 @@ class RewardGeneratorTest {
     }
 
     assertTrue(generated.containsAll(EnumSet.allOf(ItemType.class)));
+  }
+
+  @Test
+  void energyCrystalIsRarerThanOtherItems() {
+    RewardGenerator generator = new RewardGenerator(new Random(42));
+    EnumMap<ItemType, Integer> counts = new EnumMap<>(ItemType.class);
+    for (ItemType type : ItemType.values()) {
+      counts.put(type, 0);
+    }
+
+    int trials = 9000;
+    for (int i = 0; i < trials; i++) {
+      ItemType picked = generator.generateItemRewardOption().itemId;
+      counts.merge(picked, 1, Integer::sum);
+    }
+
+    // Energy Crystal should land close to 1/9 of trials, noticeably less than the other items
+    // which should each land close to 2/9.
+    int energyCrystalCount = counts.get(ItemType.ENERGY_CRYSTAL);
+    for (ItemType type : ItemType.values()) {
+      if (type == ItemType.ENERGY_CRYSTAL) {
+        continue;
+      }
+      assertTrue(
+          energyCrystalCount < counts.get(type),
+          "Expected ENERGY_CRYSTAL to appear less often than " + type);
+    }
   }
 }

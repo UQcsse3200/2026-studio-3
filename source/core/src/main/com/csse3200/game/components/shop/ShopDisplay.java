@@ -20,6 +20,7 @@ import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.maps.EncounterCallback;
 import com.csse3200.game.maps.PlayerRunState;
+import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
@@ -470,7 +471,11 @@ public class ShopDisplay extends UIComponent {
                 .filter(itemId -> itemId == ItemType.MERCHANTS_FAVOR)
                 .count();
     merchantsFavorLabel.setText(
-        merchantsFavorCount == 0 ? "" : String.format("Merchant's Favor x%d", merchantsFavorCount));
+        merchantsFavorCount == 0
+            ? ""
+            : String.format(
+                "%s x%d",
+                ItemFormatting.formatItemName(ItemType.MERCHANTS_FAVOR), merchantsFavorCount));
 
     for (ShopItem item : shopEncounter.getItems()) {
       ItemWidgets widgets = itemWidgets.get(item.id);

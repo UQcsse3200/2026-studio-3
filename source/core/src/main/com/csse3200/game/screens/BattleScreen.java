@@ -27,10 +27,14 @@ import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.battle.BattleEncounterSelector;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
+import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
+import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
 import com.csse3200.game.components.pausemenu.PauseMenuActions;
 import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.player.EnergyComponent;
+import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
 import com.csse3200.game.components.spritedisplay.clickable.CardImageSkins;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
@@ -192,6 +196,25 @@ public class BattleScreen extends ScreenAdapter {
 
     controller =
         new BattleController(player, forestGameArea.getEnemies(), effectHandler, cardPlayService);
+    PlayerTrackerComponent playerTracker =
+        Objects.requireNonNull(
+            player.getComponent(PlayerTrackerComponent.class),
+            "Battle player requires PlayerTrackerComponent");
+
+    playerTracker.connect(controller, library, battleDeck);
+    EnemyMemoryComponent enemyMemory =
+        Objects.requireNonNull(
+            player.getComponent(EnemyMemoryComponent.class),
+            "Player entity must contain EnemyMemoryComponent");
+
+    for (Entity enemy : forestGameArea.getEnemies()) {
+      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+
+      if (behaviour != null) {
+        behaviour.setEnemyMemory(enemyMemory);
+      }
+    }
+
     EffectVisualRegistry effectVisualRegistry = new EffectVisualRegistry();
     OffensiveEffectVisuals.registerAll(effectVisualRegistry);
     Entity animationCoordinatorEntity =
@@ -353,7 +376,37 @@ public class BattleScreen extends ScreenAdapter {
 
   private List<ClickableRecord> buildAllRecords() {
     List<ClickableRecord> records = new ArrayList<>(buildHandRecords());
-    records.addAll(staticUiRecords);
+    records.addAll(buildBattleMenuRecords());
+    return records;
+  }
+
+  private List<ClickableRecord> buildBattleMenuRecords() {
+    List<ClickableRecord> records = new ArrayList<>();
+    for (ClickableRecord record : staticUiRecords) {
+      BattleMenuSkins.Icon icon =
+          switch (record.trigger()) {
+            case "openMenu" -> BattleMenuSkins.Icon.CARD;
+            case "openInventory" -> BattleMenuSkins.Icon.INVENTORY;
+            case "endTurn" -> BattleMenuSkins.Icon.END_TURN;
+            default -> null;
+          };
+      if (icon == null) {
+        records.add(record);
+        continue;
+      }
+
+      records.add(
+          ClickableRecord.builder(record.trigger())
+              .text(record.text())
+              .skin(BattleMenuSkins.forIcon(icon))
+              .position(record.x(), record.y())
+              .size(record.width(), record.height())
+              .variant(record.variant())
+              .args(record.args())
+              .label(record.label())
+              .disabled(record.disabled())
+              .build());
+    }
     return records;
   }
 
