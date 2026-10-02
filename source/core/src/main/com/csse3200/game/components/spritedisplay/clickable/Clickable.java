@@ -69,6 +69,17 @@ public abstract class Clickable extends Component {
                   : new ImageTextButton(text, btnSkin);
         };
 
+    if (btn instanceof ImageTextButton imageTextButton) {
+      boolean isEndTurn = "endTurn".equals(rec.trigger());
+      imageTextButton.pad(6f, 12f, 6f, isEndTurn ? 25f : 18f);
+      if (isEndTurn) {
+        imageTextButton.getImageCell().size(48f).padLeft(6f).padRight(-6f);
+      } else {
+        imageTextButton.getImageCell().size(48f);
+      }
+      imageTextButton.getLabelCell().expandX().right();
+    }
+
     if (this.disabled) {
       // Blocks clicks/drags and hover hit-testing (so onEnter/onExit never fire) in one go.
       btn.setTouchable(Touchable.disabled);
