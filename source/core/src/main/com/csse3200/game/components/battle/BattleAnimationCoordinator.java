@@ -94,7 +94,7 @@ public class BattleAnimationCoordinator extends Component {
     }
   }
 
-  private static final float EFFECT_STAGGER_SECONDS = 0.15f;
+  private static final float EFFECT_STAGGER_SECONDS = 0.3f;
 
   /** Fires before the controller applies the effects, so the targets are still alive to read. */
   private void onEnemyEffects(List<ResolvedCardEffect> effects) {
@@ -124,7 +124,8 @@ public class BattleAnimationCoordinator extends Component {
 
     Entity visual = new Entity();
     if (OffensiveEffectVisuals.usesBurst(type)) {
-      visual.addComponent(new EffectBurstComponent(style, baseSize, startDelay));
+      visual.addComponent(
+          OffensiveEffectVisuals.createBurstComponent(type, style, baseSize, startDelay));
     } else if (OffensiveEffectVisuals.usesProjectile(type)) {
       visual.addComponent(
           OffensiveEffectVisuals.createPierceComponent(style, baseSize, startDelay));
