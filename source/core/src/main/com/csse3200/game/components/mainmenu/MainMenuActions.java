@@ -25,6 +25,7 @@ public class MainMenuActions extends Component {
     entity.getEvents().addListener(MainMenuDisplay.SETTINGS_EVENT, this::onSettings);
     entity.getEvents().addListener(MainMenuDisplay.EXIT_EVENT, this::onExit);
     entity.getEvents().addListener(MainMenuDisplay.DEMO_EVENT_EVENT, this::onDemoEvent);
+    entity.getEvents().addListener(MainMenuDisplay.DEMO_SHOP_EVENT, this::onDemoShop);
     entity.getEvents().addListener(MainMenuDisplay.DEMO_CAMPFIRE_EVENT, this::onDemoCampfire);
     entity.getEvents().addListener(MainMenuDisplay.DEMO_FUSION_EVENT, this::onDemoFusion);
     entity.getEvents().addListener("library", this::onLibrary);
@@ -72,6 +73,11 @@ public class MainMenuActions extends Component {
   /** Temporary map-free Event preview entry. */
   private void onDemoEvent() {
     game.openDemoEvent();
+  }
+
+  /** Temporary map-free Shop preview entry. */
+  private void onDemoShop() {
+    game.openDemoShop();
   }
 
   /** Temporary map-free Campfire preview entry. */

@@ -58,7 +58,9 @@ public class EncounterGameArea extends GameArea {
     ShopDisplay.CARD_FRAME_TEXTURE,
     ShopDisplay.PLAQUE_FRAME_TEXTURE,
     ChanceEncounterDisplay.DICE_GAME_BACKGROUND_TEXTURE,
-    ChanceEncounterDisplay.ABANDONED_MINE_BACKGROUND_TEXTURE
+    ChanceEncounterDisplay.ABANDONED_MINE_BACKGROUND_TEXTURE,
+    ChanceEncounterDisplay.FUSION_BACKGROUND_TEXTURE,
+    ChanceEncounterDisplay.FUSION_CARD_BACK_TEXTURE
   };
 
   private final Integer nodeId;
@@ -72,6 +74,7 @@ public class EncounterGameArea extends GameArea {
   private CardCatalogGateway cardCatalog;
   private final String forcedEventId;
   private CardFusionEncounterFlow cardFusionEncounterFlow;
+  private ChanceEncounterDisplay chanceDisplay;
 
   /**
    * Creates the standalone Shop preview used by the legacy MainGameScreen shortcut.
@@ -217,6 +220,11 @@ public class EncounterGameArea extends GameArea {
     return Optional.ofNullable(cardFusionEncounterFlow);
   }
 
+  /** Presentation-only gate; the run and Event lifecycle are still completed by the flow. */
+  public boolean isCardFusionPresentationComplete() {
+    return chanceDisplay == null || chanceDisplay.isCardFusionPresentationComplete();
+  }
+
   private void displayEncounter() {
     switch (encounterTypeFor(roomType)) {
       case CHANCE:
@@ -270,7 +278,8 @@ public class EncounterGameArea extends GameArea {
         createCardFusionEncounterFlow(encounter, session, runState, cardService);
 
     Entity chanceUi = new Entity();
-    chanceUi.addComponent(new ChanceEncounterDisplay(session, cardFusionEncounterFlow));
+    chanceDisplay = new ChanceEncounterDisplay(session, cardFusionEncounterFlow);
+    chanceUi.addComponent(chanceDisplay);
     spawnEntity(chanceUi);
   }
 

@@ -78,6 +78,15 @@ class MainMenuActionsTest {
   }
 
   @Test
+  void demoShopOpensMapFreePreviewWithoutResettingTheRun() {
+    menu.getEvents().trigger(MainMenuDisplay.DEMO_SHOP_EVENT);
+
+    verify(game).openDemoShop();
+    verify(runState, never()).endRun();
+    verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
+  }
+
+  @Test
   void demoCampfireOpensMapFreePreviewWithoutResettingTheRun() {
     menu.getEvents().trigger(MainMenuDisplay.DEMO_CAMPFIRE_EVENT);
 
@@ -100,7 +109,6 @@ class MainMenuActionsTest {
     menu.getEvents().trigger("map");
     menu.getEvents().trigger("shop");
     menu.getEvents().trigger("battle");
-    menu.getEvents().trigger("demoShop");
 
     verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
     verify(game, never()).exit();

@@ -35,6 +35,7 @@ public class MainMenuDisplay extends UIComponent {
   public static final String SETTINGS_EVENT = "settings";
   public static final String EXIT_EVENT = "exit";
   public static final String DEMO_EVENT_EVENT = "demoEvent";
+  public static final String DEMO_SHOP_EVENT = "demoShop";
   public static final String DEMO_CAMPFIRE_EVENT = "demoCampfire";
   public static final String DEMO_FUSION_EVENT = "demoFusion";
 
@@ -46,6 +47,7 @@ public class MainMenuDisplay extends UIComponent {
   private TextButton settingsButton;
   private TextButton exitButton;
   private TextButton demoEventButton;
+  private TextButton demoShopButton;
   private TextButton demoCampfireButton;
   private TextButton demoFusionButton;
 
@@ -124,6 +126,8 @@ public class MainMenuDisplay extends UIComponent {
   private Table buildDemoPanel(Texture buttonFrameTexture) {
     demoEventButton = createButton("Demo Event", DEMO_EVENT_EVENT, buttonFrameTexture);
     demoEventButton.getLabel().setFontScale(0.62f);
+    demoShopButton = createButton("Demo Shop", DEMO_SHOP_EVENT, buttonFrameTexture);
+    demoShopButton.getLabel().setFontScale(0.62f);
     demoCampfireButton = createButton("Demo Campfire", DEMO_CAMPFIRE_EVENT, buttonFrameTexture);
     demoCampfireButton.getLabel().setFontScale(0.56f);
     demoFusionButton = createButton("Demo Fusion", DEMO_FUSION_EVENT, buttonFrameTexture);
@@ -134,6 +138,8 @@ public class MainMenuDisplay extends UIComponent {
     panel.setTouchable(Touchable.childrenOnly);
     panel.top().right().pad(18f);
     panel.add(demoEventButton).width(220f).height(68f);
+    panel.row().padTop(8f);
+    panel.add(demoShopButton).width(220f).height(68f);
     panel.row().padTop(8f);
     panel.add(demoCampfireButton).width(220f).height(68f);
     panel.row().padTop(8f);
@@ -192,6 +198,10 @@ public class MainMenuDisplay extends UIComponent {
 
   TextButton getDemoEventButton() {
     return demoEventButton;
+  }
+
+  TextButton getDemoShopButton() {
+    return demoShopButton;
   }
 
   TextButton getDemoCampfireButton() {

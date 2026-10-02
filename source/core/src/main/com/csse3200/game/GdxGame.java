@@ -26,6 +26,7 @@ import com.csse3200.game.screens.CampfireScreen;
 import com.csse3200.game.screens.CardLibraryScreen;
 import com.csse3200.game.screens.DemoCampfireScreen;
 import com.csse3200.game.screens.DemoEventScreen;
+import com.csse3200.game.screens.DemoShopScreen;
 import com.csse3200.game.screens.ElitePortalScreen;
 import com.csse3200.game.screens.EncounterScreen;
 import com.csse3200.game.screens.EndBattleScreen;
@@ -188,6 +189,16 @@ public class GdxGame extends Game {
     }
     ServiceLocator.registerBestiaryService(bestiaryService);
     setScreen(new DemoCampfireScreen(this));
+  }
+
+  /** Opens a temporary Shop preview using isolated player state and no map node. */
+  public void openDemoShop() {
+    Screen currentScreen = getScreen();
+    if (currentScreen != null) {
+      currentScreen.dispose();
+    }
+    ServiceLocator.registerBestiaryService(bestiaryService);
+    setScreen(new DemoShopScreen(this));
   }
 
   /** Temporary development shortcut for previewing the Elite portal flow. */

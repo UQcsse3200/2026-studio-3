@@ -82,6 +82,7 @@ class MainMenuDisplayTest {
     assertInstanceOf(Image.class, display.getRootStack().getChild(0));
     assertEquals(4, display.getRootStack().getChildren().size);
     assertEquals("Demo Event", display.getDemoEventButton().getText().toString());
+    assertEquals("Demo Shop", display.getDemoShopButton().getText().toString());
     assertEquals("Demo Campfire", display.getDemoCampfireButton().getText().toString());
     assertEquals("Demo Fusion", display.getDemoFusionButton().getText().toString());
     assertEquals(
@@ -112,6 +113,11 @@ class MainMenuDisplayTest {
     menu.getEvents().addListener(MainMenuDisplay.DEMO_EVENT_EVENT, demoEventCount::incrementAndGet);
     display.getDemoEventButton().fire(new ChangeEvent());
     assertEquals(1, demoEventCount.get());
+
+    AtomicInteger demoShopCount = new AtomicInteger();
+    menu.getEvents().addListener(MainMenuDisplay.DEMO_SHOP_EVENT, demoShopCount::incrementAndGet);
+    display.getDemoShopButton().fire(new ChangeEvent());
+    assertEquals(1, demoShopCount.get());
 
     AtomicInteger demoCampfireCount = new AtomicInteger();
     menu.getEvents()

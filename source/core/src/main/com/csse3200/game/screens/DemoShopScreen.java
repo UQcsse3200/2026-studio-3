@@ -25,18 +25,19 @@ import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.shop.ShopEncounter;
 import java.util.List;
 
 /**
- * Temporary map-free host for the existing Event encounter UI.
+ * Temporary map-free host for the real Shop UI and transaction flow.
  *
- * <p>Remove this class and the Demo Event hooks in GdxGame and the main menu to remove the preview.
- * No map node or real game run state is created or changed here. An isolated temporary run state is
- * used so run-scoped Events such as Card Fusion can be previewed safely.
+ * <p>The preview owns an isolated run state and returns to the main menu when the player leaves.
+ * Removing this class and the Demo Shop main-menu hooks removes the shortcut without changing map
+ * encounters.
  */
-public class DemoEventScreen extends ScreenAdapter {
+public final class DemoShopScreen extends ScreenAdapter {
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
-  private static final int DEMO_NODE_ID = -1;
+  private static final int DEMO_GOLD = 200;
 
   private final GdxGame game;
   private final Renderer renderer;
@@ -44,14 +45,8 @@ public class DemoEventScreen extends ScreenAdapter {
   private final EncounterGameArea encounterGameArea;
   private final String[] cardTexturePaths;
   private boolean completionQueued;
-  private float fusionResultSeconds = -1f;
 
-  public DemoEventScreen(GdxGame game) {
-    this(game, null);
-  }
-
-  /** Opens one catalogue Event directly when an ID is supplied, or a random Event otherwise. */
-  public DemoEventScreen(GdxGame game, String previewEncounterId) {
+  public DemoShopScreen(GdxGame game) {
     this.game = game;
 
     ServiceLocator.registerTimeSource(new GameTime());
@@ -86,18 +81,19 @@ public class DemoEventScreen extends ScreenAdapter {
 
     RunState demoRunState = new RunState();
     PlayerRunState demoPlayerState = demoRunState.getOrCreatePlayerState();
+    demoPlayerState.restore(
+        demoPlayerState.getCurrentHealth(), demoPlayerState.getMaxHealth(), DEMO_GOLD);
     PlayerDeck demoPlayerDeck = demoRunState.getOrCreatePlayerDeck(cardLibrary);
 
     encounterGameArea =
         new EncounterGameArea(
             new TerrainFactory(renderer.getCamera()),
-            DEMO_NODE_ID,
-            RoomType.EVENT,
+            ShopEncounter.DEFAULT_NODE_ID,
+            RoomType.SHOP,
             (nodeId, success) -> returnToMainMenu(),
             demoPlayerState,
             demoPlayerDeck,
-            demoRunState,
-            previewEncounterId);
+            demoRunState);
     encounterGameArea.create();
   }
 
@@ -106,11 +102,7 @@ public class DemoEventScreen extends ScreenAdapter {
       return;
     }
     completionQueued = true;
-    if (encounterGameArea.getCardFusionEncounterFlow().isPresent()) {
-      fusionResultSeconds = encounterGameArea.isCardFusionPresentationComplete() ? 0.2f : 0f;
-    } else {
-      Gdx.app.postRunnable(() -> game.setScreen(GdxGame.ScreenType.MAIN_MENU));
-    }
+    Gdx.app.postRunnable(() -> game.setScreen(GdxGame.ScreenType.MAIN_MENU));
   }
 
   @Override
@@ -118,15 +110,6 @@ public class DemoEventScreen extends ScreenAdapter {
     physicsEngine.update();
     ServiceLocator.getEntityService().update();
     renderer.render();
-    if (fusionResultSeconds >= 0f) {
-      if (!encounterGameArea.isCardFusionPresentationComplete()) {
-        return;
-      }
-      fusionResultSeconds -= delta;
-      if (fusionResultSeconds < 0f) {
-        game.setScreen(GdxGame.ScreenType.MAIN_MENU);
-      }
-    }
   }
 
   @Override

@@ -183,7 +183,7 @@ public class EncounterScreen extends ScreenAdapter {
 
     if (encounterGameArea.getCardFusionEncounterFlow().isPresent()) {
       pendingFusionReturn = targetScreen;
-      fusionResultSeconds = 2f;
+      fusionResultSeconds = encounterGameArea.isCardFusionPresentationComplete() ? 0.2f : 0f;
     } else {
       Gdx.app.postRunnable(() -> game.setScreen(targetScreen));
     }
@@ -204,6 +204,9 @@ public class EncounterScreen extends ScreenAdapter {
     ServiceLocator.getEntityService().update();
     renderer.render();
     if (pendingFusionReturn != null) {
+      if (!encounterGameArea.isCardFusionPresentationComplete()) {
+        return;
+      }
       fusionResultSeconds -= delta;
       if (fusionResultSeconds <= 0f) {
         GdxGame.ScreenType destination = pendingFusionReturn;
