@@ -27,6 +27,7 @@ import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.CardUnlockState;
+import com.csse3200.game.cards.Rarity;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
@@ -152,6 +153,25 @@ class RewardDisplayTest {
       assertEquals(config.type, widget.getCard().type());
       assertFalse(widget.getCard().upgraded());
     }
+  }
+
+  @Test
+  void innerFocusRewardUsesUncommonRarityFromConfiguration() {
+    CardAcquisitionPool pool = new CardAcquisitionPool(cardService, List.of("inner_focus"));
+    RewardDisplay display =
+        createDisplay(new RewardService(fixedRewardGenerator(), cardService, pool, new Random(7)));
+
+    cardButton(display).fire(new ChangeEvent());
+
+    assertEquals(1, display.getCardWidgets().size());
+    var card = display.getCardWidgets().getFirst().getCard();
+    assertEquals("inner_focus", card.cardId());
+    assertEquals(Rarity.UNCOMMON, card.rarity());
+    assertEquals("Inner Focus", card.name());
+    assertEquals(2, card.cost());
+    assertEquals("Gain 2 Strength for the rest of combat.", card.description());
+    assertFalse(card.upgraded());
+    assertEquals(CardUnlockState.SEEN, discovery.getProgressSnapshot().get("inner_focus"));
   }
 
   @Test

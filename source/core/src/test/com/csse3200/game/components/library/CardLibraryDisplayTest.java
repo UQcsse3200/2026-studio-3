@@ -24,6 +24,7 @@ import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardEntryView;
 import com.csse3200.game.cards.CardUnlockState;
+import com.csse3200.game.cards.Rarity;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
@@ -138,6 +139,23 @@ class CardLibraryDisplayTest {
 
     assertTrue(display.isStandardCardVisible());
     assertFalse(display.isUncommonCardVisible());
+    display.dispose();
+  }
+
+  @Test
+  void shouldShowDiscoveredInnerFocusWithUncommonFrame() {
+    CardDiscoveryService discovery = CardDiscoveryService.loadDefault();
+    CardLibraryDisplay display = createDisplay(discovery);
+    display.create();
+    discovery.recordSeen("inner_focus");
+    CardEntryView entry = discovery.getEntry("inner_focus").orElseThrow();
+
+    display.showCard(entry);
+
+    assertEquals(Rarity.UNCOMMON, CardLibraryDisplay.resolveForDisplay(entry).rarity());
+    assertTrue(display.isUncommonCardVisible());
+    assertFalse(display.isStandardCardVisible());
+    assertFalse(display.isLockedArtworkVisible());
     display.dispose();
   }
 
