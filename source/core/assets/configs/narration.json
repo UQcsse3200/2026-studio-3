@@ -1,22 +1,22 @@
 {
   "opening": [
-    ["[PLACEHOLDER] Opening passage one.", "[PLACEHOLDER] Text to be supplied by Ziqin."],
-    ["[PLACEHOLDER] Opening passage two.", "[PLACEHOLDER] Text to be supplied by Ziqin."],
-    ["[PLACEHOLDER] Opening passage three.", "[PLACEHOLDER] Text to be supplied by Ziqin."]
+    ["Heaven sent a lesser angel", "to walk among the fallen gods."],
+    ["The pantheon was appointed to keep the world in order.", "A villain corrupted them, and still they do not know."],
+    ["They keep their duties. Their servants keep their posts.", "You were sent not to destroy them, but to set them free."]
   ],
   "pre_boss": [
-    ["[PLACEHOLDER] Pre-boss passage one.", "[PLACEHOLDER] Text to be supplied by Ziqin."],
-    ["[PLACEHOLDER] Pre-boss passage two.", "[PLACEHOLDER] Text to be supplied by Ziqin."],
-    ["[PLACEHOLDER] Pre-boss passage three.", "[PLACEHOLDER] Text to be supplied by Ziqin."]
+    ["Beyond this path, a fallen power", "still carries out its sacred duty."],
+    ["Corruption has twisted the command,", "but not the will to obey it."],
+    ["Go. Break the corruption,", "and release what Heaven once appointed."]
   ],
   "victory": [
-    ["[PLACEHOLDER] Victory passage one.", "[PLACEHOLDER] Text to be supplied by Ziqin."],
-    ["[PLACEHOLDER] Victory passage two.", "[PLACEHOLDER] Text to be supplied by Ziqin."],
-    ["[PLACEHOLDER] Victory passage three.", "[PLACEHOLDER] Text to be supplied by Ziqin."]
+    ["The corruption breaks.", "The old duty is no longer twisted."],
+    ["They were never meant to be destroyed.", "Only freed from what had bound them."],
+    ["The work is done.", "They are free."]
   ],
   "defeat": [
-    ["[PLACEHOLDER] Defeat passage one.", "[PLACEHOLDER] Text to be supplied by Ziqin."],
-    ["[PLACEHOLDER] Defeat passage two.", "[PLACEHOLDER] Text to be supplied by Ziqin."],
-    ["[PLACEHOLDER] Defeat passage three.", "[PLACEHOLDER] Text to be supplied by Ziqin."]
+    ["The command still holds.", "The fallen still believe they serve."],
+    ["The angel's work is unfinished.", "Their duties continue unchanged."],
+    ["The corruption endures.", "They are not yet free."]
   ]
 }
