@@ -240,7 +240,7 @@ public class BattleController {
  * @return immutable mapping from status effect type to remaining duration, or an empty map when
  *     the player has no combat stats
  */
-public Map<String, Integer> getPlayerStatusEffectDurations() {
+  public Map<String, Integer> getPlayerStatusEffectDurations() {
   CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
 
   if (stats == null) {
@@ -251,7 +251,7 @@ public Map<String, Integer> getPlayerStatusEffectDurations() {
 }
 
 /** Target IDs of living enemies whose taunt is active on the player. */
-public List<String> getAliveTaunterTargetIds() {
+  public List<String> getAliveTaunterTargetIds() {
   CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
   if (playerStats == null) {
     return List.of();
