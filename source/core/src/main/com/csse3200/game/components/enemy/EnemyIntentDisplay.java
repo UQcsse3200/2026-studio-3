@@ -1,6 +1,8 @@
 package com.csse3200.game.components.enemy;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.csse3200.game.rendering.RenderComponent;
@@ -17,12 +19,22 @@ import com.csse3200.game.services.ServiceLocator;
 public class EnemyIntentDisplay extends RenderComponent {
   private static final float ICON_SIZE = 0.5f;
   private static final float GAP_ABOVE_ENEMY = 0.2f;
+  private static final float DURATION_TEXT_GAP = 0.05f;
+  private static final float DURATION_TEXT_VERTICAL_OFFSET = 0.34f;
+  private static final float FONT_SCALE = 0.025f;
 
   private EnemyIntent currentIntent;
+  private BitmapFont durationFont;
 
   @Override
   public void create() {
     super.create();
+
+    durationFont = new BitmapFont();
+    durationFont.setUseIntegerPositions(false);
+    durationFont.getData().setScale(FONT_SCALE);
+    durationFont.setColor(Color.WHITE);
+
     entity.getEvents().addListener("intentChanged", this::onIntentChanged);
   }
 
@@ -49,17 +61,49 @@ public class EnemyIntentDisplay extends RenderComponent {
     String iconPath =
             IntentIcons.pathFor(currentIntent.getType(), currentIntent.getEffectType());
 
-    Texture icon =
-        resourceService.getAsset(IntentIcons.pathFor(currentIntent.getType()), Texture.class);
+    Texture icon = resourceService.getAsset(iconPath, Texture.class);
     if (icon == null) {
       return;
     }
 
     Vector2 position = entity.getPosition();
     Vector2 scale = entity.getScale();
-    float x = position.x + (scale.x - ICON_SIZE) / 2f;
-    float y = position.y + scale.y + GAP_ABOVE_ENEMY;
+    float iconX = position.x + (scale.x - ICON_SIZE) / 2f;
+    float iconY = position.y + scale.y + GAP_ABOVE_ENEMY;
 
-    batch.draw(icon, x, y, ICON_SIZE, ICON_SIZE);
+    batch.draw(icon, iconX, iconY, ICON_SIZE, ICON_SIZE);
+
+    drawDuration(batch, iconX, iconY);
+  }
+
+  /**
+   * Draws the number of turns for which the intent's status effect will remain active.
+   *
+   * <p>Zero and negative durations represent effects without a finite duration, so no number is
+   * drawn for them.
+   *
+   * @param batch sprite batch currently used by the render service
+   * @param iconX horizontal position of the intent icon
+   * @param iconY vertical position of the intent icon
+   */
+  private void drawDuration(SpriteBatch batch, float iconX, float iconY) {
+    if (durationFont == null || currentIntent.getDuration() <= 0) {
+      return;
+    }
+
+    float textX = iconX + ICON_SIZE + DURATION_TEXT_GAP;
+    float textY = iconY + DURATION_TEXT_VERTICAL_OFFSET;
+
+    durationFont.draw(batch, Integer.toString(currentIntent.getDuration()), textX, textY);
+  }
+
+  @Override
+  public void dispose() {
+    super.dispose();
+
+    if (durationFont != null) {
+      durationFont.dispose();
+      durationFont = null;
+    }
   }
 }
