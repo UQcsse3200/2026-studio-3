@@ -1,5 +1,4 @@
 package com.csse3200.game.screens;
-import com.csse3200.game.narration.NarrationConfigLoader;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -13,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.csse3200.game.entities.factories.RenderFactory;
 import com.csse3200.game.extensions.GameExtension;
+import com.csse3200.game.narration.NarrationConfigLoader;
 import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.ServiceLocator;
 import org.junit.jupiter.api.AfterEach;
@@ -26,6 +26,7 @@ class NarrationScreenTest {
   private static String expectedPassage(String sequenceId, int index) {
     return String.join("\n", NarrationConfigLoader.loadSequence(sequenceId).get(index));
   }
+
   private Stage stage;
   private MockedStatic<RenderFactory> factory;
   private NarrationScreen screen;
