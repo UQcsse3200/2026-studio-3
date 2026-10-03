@@ -73,15 +73,61 @@ class BestiaryDisplayTest {
 
   @Test
   void shouldHideUndiscoveredEntryThenRevealItOnEncounter() {
-    EnemyConfig config = new EnemyConfig();
-    config.id = "enemy";
-    config.name = "Enemy";
-    config.tier = EnemyTier.NORMAL;
-    config.health = 24;
     EnemyConfigs configs = new EnemyConfigs();
-    configs.enemies = new EnemyConfig[] {config};
+    configs.enemies = new EnemyConfig[] {createConfig("enemy", "Enemy", EnemyTier.NORMAL)};
     BestiaryService service = new BestiaryService(configs);
+    BestiaryDisplay display = createDisplay(service);
+    display.create();
+    assertNull(display.getDisplayedEntry());
+    assertEquals(BestiaryDisplay.EMPTY_STATE_MESSAGE, display.getEmptyStateText());
 
+    service.recordEncountered("enemy");
+    assertEquals(BestiaryUnlockState.ENCOUNTERED, display.getDisplayedEntry().unlockState());
+    assertNull(display.getEmptyStateText());
+
+    display.dispose();
+    service.recordDefeated("enemy");
+    assertEquals(BestiaryUnlockState.ENCOUNTERED, display.getDisplayedEntry().unlockState());
+  }
+
+  @Test
+  void shouldSwitchTiersAndRefreshAnEmptyCategoryAfterDiscovery() {
+    EnemyConfigs configs = new EnemyConfigs();
+    configs.enemies =
+        new EnemyConfig[] {
+          createConfig("normal_enemy", "Normal Enemy", EnemyTier.NORMAL),
+          createConfig("elite_enemy", "Elite Enemy", EnemyTier.ELITE),
+          createConfig("boss_enemy", "Boss Enemy", EnemyTier.BOSS)
+        };
+    BestiaryService service = new BestiaryService(configs);
+    service.recordEncountered("elite_enemy");
+
+    BestiaryDisplay display = createDisplay(service);
+    display.create();
+
+    assertNull(display.getDisplayedEntry());
+    assertEquals(BestiaryDisplay.EMPTY_STATE_MESSAGE, display.getEmptyStateText());
+
+    display.applyFilter(EnemyTier.ELITE);
+    assertEquals("elite_enemy", display.getDisplayedEntry().enemyId());
+    assertNull(display.getEmptyStateText());
+
+    display.applyFilter(EnemyTier.BOSS);
+    assertNull(display.getDisplayedEntry());
+    assertEquals(BestiaryDisplay.EMPTY_STATE_MESSAGE, display.getEmptyStateText());
+
+    service.recordEncountered("boss_enemy");
+    assertEquals("boss_enemy", display.getDisplayedEntry().enemyId());
+    assertNull(display.getEmptyStateText());
+
+    display.applyFilter(EnemyTier.NORMAL);
+    assertNull(display.getDisplayedEntry());
+    assertEquals(BestiaryDisplay.EMPTY_STATE_MESSAGE, display.getEmptyStateText());
+
+    display.dispose();
+  }
+
+  private BestiaryDisplay createDisplay(BestiaryService service) {
     RenderService renderService = mock(RenderService.class);
     when(renderService.getStage()).thenReturn(mock(Stage.class));
     ServiceLocator.registerRenderService(renderService);
@@ -89,17 +135,16 @@ class BestiaryDisplayTest {
     when(resourceService.getAsset(BestiaryDisplay.BUTTON_TEXTURE, Texture.class))
         .thenReturn(mock(Texture.class));
     ServiceLocator.registerResourceService(resourceService);
+    return new BestiaryDisplay(service, () -> {});
+  }
 
-    BestiaryDisplay display = new BestiaryDisplay(service, () -> {});
-    display.create();
-    assertNull(display.getDisplayedEntry());
-
-    service.recordEncountered("enemy");
-    assertEquals(BestiaryUnlockState.ENCOUNTERED, display.getDisplayedEntry().unlockState());
-
-    display.dispose();
-    service.recordDefeated("enemy");
-    assertEquals(BestiaryUnlockState.ENCOUNTERED, display.getDisplayedEntry().unlockState());
+  private EnemyConfig createConfig(String id, String name, EnemyTier tier) {
+    EnemyConfig config = new EnemyConfig();
+    config.id = id;
+    config.name = name;
+    config.tier = tier;
+    config.health = 24;
+    return config;
   }
 
   private BestiaryEntryView createView(BestiaryUnlockState state) {

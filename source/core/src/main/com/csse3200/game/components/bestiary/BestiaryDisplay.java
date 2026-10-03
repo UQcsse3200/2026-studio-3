@@ -49,6 +49,7 @@ public class BestiaryDisplay extends UIComponent {
   private static final String LARGE = "large";
   private static final String SMALL = "small";
   private static final String DEFAULT = "default";
+  static final String EMPTY_STATE_MESSAGE = "No enemies discovered in this category yet.";
   private final BestiaryService bestiary;
   private final Runnable returnAction;
   private final EventListener1<BestiaryEntryView> entryUpdatedListener = this::onEntryUpdated;
@@ -57,6 +58,7 @@ public class BestiaryDisplay extends UIComponent {
 
   private Table rootTable;
   private Table enemyListTable;
+  private Label emptyStateLabel;
   private Image detailImage;
   private Label lockedArtLabel;
   private Label detailStateLabel;
@@ -250,7 +252,7 @@ public class BestiaryDisplay extends UIComponent {
     return detailPanel;
   }
 
-  private void applyFilter(EnemyTier tier) {
+  void applyFilter(EnemyTier tier) {
     activeTier = tier;
     rebuildEnemyList();
   }
@@ -258,12 +260,12 @@ public class BestiaryDisplay extends UIComponent {
   private void rebuildEnemyList() {
     String selectedEnemyId = displayedEntry == null ? null : displayedEntry.enemyId();
     enemyListTable.clearChildren();
+    emptyStateLabel = null;
     List<BestiaryEntryView> filtered = bestiary.getDiscoveredEntriesByTier(activeTier);
     if (filtered.isEmpty()) {
-      Label empty =
-          new Label("No enemies in this category yet.", createLabelStyle(SMALL, MUTED_COLOUR));
-      empty.setWrap(true);
-      enemyListTable.add(empty).width(285f).padTop(24f);
+      emptyStateLabel = new Label(EMPTY_STATE_MESSAGE, createLabelStyle(SMALL, MUTED_COLOUR));
+      emptyStateLabel.setWrap(true);
+      enemyListTable.add(emptyStateLabel).width(285f).padTop(24f);
       clearDetails();
       return;
     }
@@ -329,6 +331,10 @@ public class BestiaryDisplay extends UIComponent {
 
   BestiaryEntryView getDisplayedEntry() {
     return displayedEntry;
+  }
+
+  String getEmptyStateText() {
+    return emptyStateLabel == null ? null : emptyStateLabel.getText().toString();
   }
 
   static String visibleName(BestiaryEntryView entry) {
