@@ -259,12 +259,12 @@ class SaveGameRestoreServiceTest {
 
     assertTrue(result.success());
     assertEquals(CardUnlockState.SEEN, cards.getProgressSnapshot().get(STRIKE));
-    assertEquals(CardUnlockState.LOCKED, cards.getProgressSnapshot().get(DEFEND));
+    assertEquals(CardUnlockState.SEEN, cards.getProgressSnapshot().get(DEFEND));
     assertFalse(cards.getProgressSnapshot().containsKey("retired_card"));
   }
 
   @Test
-  void restoringSaveDoesNotKeepStarterCardsSeenBeyondSavedProgress() {
+  void restoringSaveKeepsCardsDiscoveredOutsideTheSave() {
     CardDiscoveryService cards = CardDiscoveryService.loadDefault();
     ServiceLocator.registerCardDiscoveryService(cards);
     CardLibrary cardLibrary = new CardLibrary(CardConfigLoader.loadCards());
@@ -287,13 +287,10 @@ class SaveGameRestoreServiceTest {
 
     assertTrue(result.success());
     assertEquals(CardUnlockState.SEEN, cards.getProgressSnapshot().get(STRIKE));
-    assertEquals(CardUnlockState.LOCKED, cards.getProgressSnapshot().get(DEFEND));
-    assertEquals(CardUnlockState.LOCKED, cards.getProgressSnapshot().get(BANDAGE));
-    assertEquals(
-        1,
-        cards.getProgressSnapshot().values().stream()
-            .filter(state -> state == CardUnlockState.SEEN)
-            .count());
+    assertTrue(
+        PlayerDeckFactory.getStarterDeckCardIds().stream()
+            .allMatch(id -> cards.getProgressSnapshot().get(id) == CardUnlockState.SEEN));
+    assertEquals(CardUnlockState.LOCKED, cards.getProgressSnapshot().get("poison_flask"));
   }
 
   @Test

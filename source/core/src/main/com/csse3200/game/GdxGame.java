@@ -8,6 +8,7 @@ import com.badlogic.gdx.Screen;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardDiscoveryService;
+import com.csse3200.game.cards.CardDiscoveryStore;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.files.UserSettings;
 import com.csse3200.game.maps.RunState;
@@ -120,6 +121,13 @@ public class GdxGame extends Game {
     loadSettings();
     bestiaryService = BestiaryService.loadDefault();
     cardDiscoveryService = CardDiscoveryService.loadDefault();
+    CardDiscoveryStore cardDiscoveryStore = CardDiscoveryStore.defaultStore();
+    cardDiscoveryService.mergeProgress(cardDiscoveryStore.load());
+    cardDiscoveryService
+        .getEvents()
+        .addListener(
+            CardDiscoveryService.ENTRY_UPDATED_EVENT,
+            ignored -> cardDiscoveryStore.save(cardDiscoveryService.getProgressSnapshot()));
 
     // Sets background to light yellow
     Gdx.gl.glClearColor(162f / 255f, 73 / 255f, 54 / 255f, 1);
