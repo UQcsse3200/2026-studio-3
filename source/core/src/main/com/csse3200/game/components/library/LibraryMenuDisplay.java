@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
@@ -14,6 +16,8 @@ import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
 import org.slf4j.Logger;
@@ -82,6 +86,18 @@ public class LibraryMenuDisplay extends UIComponent {
           }
         });
 
+    cardLibraryButton.addListener(
+            new InputListener() {
+              @Override
+              public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                super.enter(event, x, y, pointer, fromActor);
+                if (pointer == -1) {
+                  AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
+                }
+              }
+            }
+    );
+
     enemyLibraryButton.addListener(
         new ChangeListener() {
           @Override
@@ -91,6 +107,18 @@ public class LibraryMenuDisplay extends UIComponent {
           }
         });
 
+    enemyLibraryButton.addListener(
+            new InputListener() {
+              @Override
+              public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                super.enter(event, x, y, pointer, fromActor);
+                if (pointer == -1) {
+                  AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
+                }
+              }
+            }
+    );
+
     backButton.addListener(
         new ChangeListener() {
           @Override
@@ -98,6 +126,17 @@ public class LibraryMenuDisplay extends UIComponent {
             game.setScreen(GdxGame.ScreenType.MAIN_MENU);
           }
         });
+
+    backButton.addListener(
+            new InputListener() {
+              @Override
+              public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                if (pointer == -1) {
+                  AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
+                }
+              }
+            }
+    );
 
     rootTable.add(title).padBottom(12f).row();
     rootTable.defaults().width(MenuTheme.BUTTON_WIDTH).height(MenuTheme.BUTTON_HEIGHT);
