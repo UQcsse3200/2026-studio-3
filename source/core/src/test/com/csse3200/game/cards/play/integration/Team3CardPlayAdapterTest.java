@@ -736,4 +736,26 @@ class Team3CardPlayAdapterTest {
     assertTrue(battle.outcomes().isEmpty());
     assertEquals(BattlePhase.PLAYER_TURN, battle.controller().getCurrentPhase());
   }
+
+  @Test
+  void shouldNotTakeDamageWhenEnergyIsInsufficient() {
+    DamageBattle battle = createDamageBattle(20, 20, 4);
+
+    battle
+        .battleFlow()
+        .getEvents()
+        .trigger(
+            Team3CardPlayAdapter.PLAY_CARD_EVENT,
+            battle.strikeInstance().instanceId(),
+            "enemy");
+
+    assertEquals(20, battle.playerStats().getHealth());
+    assertEquals(20, battle.enemyStats().getHealth());
+    assertEquals(3, battle.energy().getCurrentEnergy());
+    assertEquals(List.of(battle.strikeInstance()), battle.deck().getHand());
+    assertTrue(battle.deck().getDiscardPile().isEmpty());
+    assertTrue(battle.playedInstances().isEmpty());
+    assertTrue(battle.outcomes().isEmpty());
+    assertEquals(BattlePhase.PLAYER_TURN, battle.controller().getCurrentPhase());
+  }
 }
