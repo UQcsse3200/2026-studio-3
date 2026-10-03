@@ -696,4 +696,21 @@ class Team3CardPlayAdapterTest {
         List.of(battle.strikeInstance().instanceId()), battle.playedInstances());
     assertEquals(BattlePhase.PLAYER_TURN, battle.controller().getCurrentPhase());
   }
+
+  @Test
+  void shouldLoseBattleWhenCardPlayDamageKillsPlayer() {
+    DamageBattle battle = createDamageBattle(2, 20, 1);
+
+    battle
+        .battleFlow()
+        .getEvents()
+        .trigger(
+            Team3CardPlayAdapter.PLAY_CARD_EVENT,
+            battle.strikeInstance().instanceId(),
+            "enemy");
+
+    assertEquals(0, battle.playerStats().getHealth());
+    assertEquals(BattlePhase.DEFEAT, battle.controller().getCurrentPhase());
+    assertEquals(List.of(false), battle.outcomes());
+  }
 }
