@@ -44,7 +44,6 @@ public class EndBattleScreen extends ScreenAdapter {
 
     logger.debug("Initialising end-of-battle screen (won={})", won);
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 

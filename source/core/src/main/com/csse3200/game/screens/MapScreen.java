@@ -48,6 +48,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
   private final GdxGame game;
   private final Renderer renderer;
+  private MapDisplay mapDisplay;
 
   public MapScreen(GdxGame game) {
     this.game = game;
@@ -95,7 +96,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
   /** Puts the map display on a UI entity so it is rendered and receives input. */
   private void createUi(GdxGame game, RunState runState) {
-    MapDisplay mapDisplay = new MapDisplay(runState.getMapGraph(), runState);
+    mapDisplay = new MapDisplay(runState.getMapGraph(), runState);
 
     mapDisplay
         .getMapSelectionController()
@@ -206,6 +207,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
   public void dispose() {
     logger.debug("Disposing map screen");
     renderer.dispose();
+    mapDisplay.dispose();
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getRenderService().dispose();
     ScreenUtils.clear(new Color(248f / 255f, 249f / 255f, 178f / 255f, 1f));

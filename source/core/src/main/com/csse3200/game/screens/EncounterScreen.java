@@ -71,7 +71,6 @@ public class EncounterScreen extends ScreenAdapter {
 
     ServiceLocator.registerTimeSource(new GameTime());
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
@@ -214,6 +213,5 @@ public class EncounterScreen extends ScreenAdapter {
     ServiceLocator.getResourceService().unloadAssets(cardTexturePaths);
     ServiceLocator.getResourceService().unloadAssets(SHOP_CARD_TEXTURES);
 
-    ServiceLocator.clear();
   }
 }

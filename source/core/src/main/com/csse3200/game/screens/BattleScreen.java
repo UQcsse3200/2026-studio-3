@@ -331,6 +331,7 @@ public class BattleScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
+    ServiceLocator.getResourceService().unloadAssets(mainGameTextures);
   }
 
   private void loadAssets() {

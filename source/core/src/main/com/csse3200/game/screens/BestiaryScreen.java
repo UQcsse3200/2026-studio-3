@@ -40,7 +40,6 @@ public class BestiaryScreen extends ScreenAdapter {
 
     logger.debug("Initialising bestiary screen services");
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
