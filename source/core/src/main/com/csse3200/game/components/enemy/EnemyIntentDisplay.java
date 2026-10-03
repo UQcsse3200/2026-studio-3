@@ -46,6 +46,9 @@ public class EnemyIntentDisplay extends RenderComponent {
       return;
     }
 
+    String iconPath =
+            IntentIcons.pathFor(currentIntent.getType(), currentIntent.getEffectType());
+
     Texture icon =
         resourceService.getAsset(IntentIcons.pathFor(currentIntent.getType()), Texture.class);
     if (icon == null) {
