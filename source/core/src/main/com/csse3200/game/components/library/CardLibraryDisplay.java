@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
@@ -73,6 +74,8 @@ public class CardLibraryDisplay extends UIComponent {
   private Label stateLabel;
   private Label nameLabel;
   private Label descriptionLabel;
+  private Label loreLabel;
+  private Cell<Label> loreCell;
   private Label costLabel;
   private Label typeLabel;
   private Label targetLabel;
@@ -274,6 +277,7 @@ public class CardLibraryDisplay extends UIComponent {
 
     nameLabel = new Label("", labelStyle(LARGE, MenuTheme.warmParchment()));
     descriptionLabel = new Label("", bodyLabelStyle());
+    loreLabel = new Label("", bodyLabelStyle());
     costLabel = new Label("", labelStyle(DEFAULT, MenuTheme.softCoral()));
     typeLabel = new Label("", bodyLabelStyle());
     targetLabel = new Label("", bodyLabelStyle());
@@ -284,6 +288,8 @@ public class CardLibraryDisplay extends UIComponent {
     nameLabel.setFontScale(0.9f);
     descriptionLabel.setFontScale(0.78f);
     descriptionLabel.setWrap(true);
+    loreLabel.setFontScale(0.78f);
+    loreLabel.setWrap(true);
     effectsLabel.setFontScale(0.72f);
     effectsLabel.setWrap(true);
     artworkLabel.setFontScale(0.62f);
@@ -294,6 +300,8 @@ public class CardLibraryDisplay extends UIComponent {
     archiveDetails.defaults().left().padBottom(7f);
     archiveDetails.add(nameLabel).width(330f).row();
     archiveDetails.add(descriptionLabel).width(330f).padBottom(12f).row();
+    loreCell = archiveDetails.add(loreLabel).width(330f).padBottom(0f);
+    archiveDetails.row();
     archiveDetails.add(costLabel).row();
     archiveDetails.add(typeLabel).row();
     archiveDetails.add(targetLabel).row();
@@ -332,6 +340,15 @@ public class CardLibraryDisplay extends UIComponent {
     displayedEntry = Objects.requireNonNull(card, "card cannot be null");
     nameLabel.setText(card.displayName());
     descriptionLabel.setText(descriptionFor(card));
+    String lore = card.lore().orElse("");
+    loreLabel.setText(lore);
+    if (lore.isEmpty()) {
+      loreCell.setActor(null);
+      loreCell.padBottom(0f);
+    } else {
+      loreCell.setActor(loreLabel);
+      loreCell.padBottom(12f);
+    }
     costLabel.setText("Cost: " + valueOrPlaceholder(card.cost()));
     typeLabel.setText("Type: " + card.type().map(Enum::name).orElse("???"));
     targetLabel.setText("Target: " + card.target().map(Enum::name).orElse("???"));
@@ -477,6 +494,10 @@ public class CardLibraryDisplay extends UIComponent {
 
   String getDescriptionText() {
     return descriptionLabel.getText().toString();
+  }
+
+  String getLoreText() {
+    return loreLabel.getText().toString();
   }
 
   String getCostText() {
