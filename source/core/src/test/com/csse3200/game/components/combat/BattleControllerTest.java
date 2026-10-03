@@ -27,6 +27,7 @@ import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
+import com.csse3200.game.components.enemy.EnemyStatsComponent;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.PlayerActions;
 import com.csse3200.game.entities.Entity;
@@ -96,6 +97,89 @@ class BattleControllerTest {
     controller.start();
 
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+  }
+
+  @Test
+  void shouldReportWhetherThePlayerCanAct() {
+    assertFalse(controller.isPlayerTurn());
+
+    controller.start();
+
+    assertTrue(controller.isPlayerTurn());
+  }
+
+  @Test
+  void shouldResetToSetupAfterTheBattleHasStarted() {
+    controller.start();
+
+    controller.resetBattle();
+
+    assertEquals(BattlePhase.SETUP, controller.getCurrentPhase());
+  }
+
+  @Test
+  void shouldAllowAnyLivingTaunterAndRemoveTheDefeatedOne() {
+    Entity first =
+        new Entity()
+            .addComponent(new CombatStatsComponent(10, 1))
+            .addComponent(new EnemyStatsComponent("First"));
+    Entity second =
+        new Entity()
+            .addComponent(new CombatStatsComponent(10, 1))
+            .addComponent(new EnemyStatsComponent("Second"));
+    first.create();
+    second.create();
+
+    BattleController battle = new BattleController(player, List.of(first, second));
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+    String firstId = Integer.toString(first.getId());
+    String secondId = Integer.toString(second.getId());
+    assertEquals(List.of(), battle.getAliveTaunterTargetIds());
+    playerStats.applyStatusEffect("TAUNT:" + firstId, second.getId(), 2);
+    assertEquals(List.of(), battle.getAliveTaunterTargetIds());
+    playerStats.applyStatusEffect("TAUNT:" + firstId, first.getId(), 2);
+    playerStats.applyStatusEffect("TAUNT:" + secondId, second.getId(), 2);
+
+    assertEquals(List.of(firstId, secondId), battle.getAliveTaunterTargetIds());
+
+    first.getComponent(CombatStatsComponent.class).takePiercingDamage(10);
+
+    assertFalse(playerStats.hasStatusEffect("TAUNT:" + firstId));
+    assertEquals(List.of(secondId), battle.getAliveTaunterTargetIds());
+  }
+
+  @Test
+  void shouldHandleTaunterDeathWhenPlayerHasNoCombatStats() {
+    Entity playerWithoutStats = new Entity();
+    Entity taunter =
+        new Entity()
+            .addComponent(new CombatStatsComponent(10, 1))
+            .addComponent(new EnemyStatsComponent("Taunter"));
+    taunter.create();
+    BattleController battle = new BattleController(playerWithoutStats, List.of(taunter));
+
+    assertEquals(List.of(), battle.getAliveTaunterTargetIds());
+
+    taunter.getComponent(CombatStatsComponent.class).takePiercingDamage(10);
+
+    assertEquals(List.of(), battle.getAliveTaunterTargetIds());
+  }
+
+  @Test
+  void shouldExpireTauntAfterTwoPlayerTurns() {
+    Entity taunter = createPoisonTestEnemy(new CombatStatsComponent(10, 1), firstEnemyBehaviour);
+    BattleController battle = new BattleController(player, List.of(taunter));
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+    String key = "TAUNT:" + taunter.getId();
+
+    battle.start();
+    playerStats.applyStatusEffect(key, taunter.getId(), 2);
+
+    battle.endPlayerTurn();
+    assertEquals(1, playerStats.getStatusEffect(key).getDuration());
+
+    battle.endPlayerTurn();
+    assertNull(playerStats.getStatusEffect(key));
   }
 
   @Test

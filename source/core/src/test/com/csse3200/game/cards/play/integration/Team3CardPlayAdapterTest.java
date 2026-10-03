@@ -21,6 +21,7 @@ import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattlePhase;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
+import com.csse3200.game.components.enemy.EnemyStatsComponent;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
 import java.util.ArrayList;
@@ -29,6 +30,227 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class Team3CardPlayAdapterTest {
+
+  @Test
+  void shouldRejectOtherEnemyDuringTauntWithoutSpendingEnergyOrPlayingTheCard() {
+    CardLibrary cards = new CardLibrary(List.of(strike()));
+    CardInstance strikeInstance = new CardInstance("strike-taunt", "strike", 0);
+    BattleDeck deck = new BattleDeck(PlayerDeck.fromInstances(cards, List.of(strikeInstance)));
+    deck.drawOne();
+
+    EnergyComponent energy = new EnergyComponent(3);
+    CombatStatsComponent playerStats = new CombatStatsComponent(20, 1);
+    Entity player = new Entity().addComponent(playerStats).addComponent(energy);
+    Entity taunter =
+        new Entity()
+            .addComponent(new CombatStatsComponent(10, 1))
+            .addComponent(new EnemyBehaviourComponent("test"));
+    Entity other =
+        new Entity()
+            .addComponent(new CombatStatsComponent(10, 1))
+            .addComponent(new EnemyBehaviourComponent("test"));
+    String taunterId = Integer.toString(taunter.getId());
+    String otherId = Integer.toString(other.getId());
+    Map<String, Entity> targets = Map.of(taunterId, taunter, otherId, other);
+    CardPlayService playService =
+        new CardPlayService(
+            cards,
+            deck,
+            energy,
+            new Team7PlayerStateAdapter(energy, playerStats),
+            new Team1EnemyStateAdapter(targets));
+    BattleController controller =
+        new BattleController(
+            player, List.of(taunter, other), new CardEffectHandler(targets), playService);
+    Entity battleFlow =
+        new Entity().addComponent(new Team3CardPlayAdapter(playService, controller));
+    battleFlow.create();
+    controller.start();
+    playerStats.applyStatusEffect("TAUNT:" + taunterId, taunter.getId(), 2);
+
+    List<String> logs = new ArrayList<>();
+    List<String> played = new ArrayList<>();
+    battleFlow
+        .getEvents()
+        .addListener(BattleActions.BATTLE_LOG_EVENT, (String message) -> logs.add(message));
+    battleFlow
+        .getEvents()
+        .addListener(
+            Team3CardPlayAdapter.CARD_PLAY_RESULT_EVENT,
+            (String instanceId, String targetId) -> played.add(instanceId));
+
+    battleFlow
+        .getEvents()
+        .trigger(Team3CardPlayAdapter.PLAY_CARD_EVENT, strikeInstance.instanceId(), otherId);
+
+    assertEquals(List.of("A taunting enemy must be targeted."), logs);
+    assertTrue(played.isEmpty());
+    assertEquals(3, energy.getCurrentEnergy());
+    assertEquals(List.of(strikeInstance), deck.getHand());
+    assertEquals(10, other.getComponent(CombatStatsComponent.class).getHealth());
+
+    battleFlow
+        .getEvents()
+        .trigger(Team3CardPlayAdapter.PLAY_CARD_EVENT, strikeInstance.instanceId(), taunterId);
+
+    assertEquals(List.of(strikeInstance.instanceId()), played);
+    assertEquals(2, energy.getCurrentEnergy());
+    assertEquals(List.of(), deck.getHand());
+    assertEquals(4, taunter.getComponent(CombatStatsComponent.class).getHealth());
+  }
+
+  @Test
+  void shouldAllowEitherTaunterAndOtherEnemiesAfterBothTauntersDie() {
+    CardLibrary cards = new CardLibrary(List.of(strike()));
+    CardInstance firstStrike = new CardInstance("strike-first-taunt", "strike", 0);
+    CardInstance secondStrike = new CardInstance("strike-second-taunt", "strike", 0);
+    CardInstance thirdStrike = new CardInstance("strike-after-taunt", "strike", 0);
+    BattleDeck deck =
+        new BattleDeck(
+            PlayerDeck.fromInstances(cards, List.of(firstStrike, secondStrike, thirdStrike)));
+    deck.drawCards(3);
+
+    EnergyComponent energy = new EnergyComponent(3);
+    CombatStatsComponent playerStats = new CombatStatsComponent(20, 1);
+    Entity player = new Entity().addComponent(playerStats).addComponent(energy);
+    Entity firstTaunter =
+        new Entity()
+            .addComponent(new CombatStatsComponent(6, 1))
+            .addComponent(new EnemyStatsComponent("First taunter"))
+            .addComponent(new EnemyBehaviourComponent("test"));
+    Entity secondTaunter =
+        new Entity()
+            .addComponent(new CombatStatsComponent(6, 1))
+            .addComponent(new EnemyStatsComponent("Second taunter"))
+            .addComponent(new EnemyBehaviourComponent("test"));
+    Entity other =
+        new Entity()
+            .addComponent(new CombatStatsComponent(10, 1))
+            .addComponent(new EnemyBehaviourComponent("test"));
+    firstTaunter.create();
+    secondTaunter.create();
+
+    String firstId = Integer.toString(firstTaunter.getId());
+    String secondId = Integer.toString(secondTaunter.getId());
+    String otherId = Integer.toString(other.getId());
+    Map<String, Entity> targets =
+        Map.of(firstId, firstTaunter, secondId, secondTaunter, otherId, other);
+    CardPlayService playService =
+        new CardPlayService(
+            cards,
+            deck,
+            energy,
+            new Team7PlayerStateAdapter(energy, playerStats),
+            new Team1EnemyStateAdapter(targets));
+    BattleController controller =
+        new BattleController(
+            player,
+            List.of(firstTaunter, secondTaunter, other),
+            new CardEffectHandler(targets),
+            playService);
+    Entity battleFlow =
+        new Entity().addComponent(new Team3CardPlayAdapter(playService, controller));
+    battleFlow.create();
+    controller.start();
+    playerStats.applyStatusEffect("TAUNT:" + firstId, firstTaunter.getId(), 2);
+    playerStats.applyStatusEffect("TAUNT:" + secondId, secondTaunter.getId(), 2);
+    assertEquals(List.of(firstId, secondId), controller.getAliveTaunterTargetIds());
+
+    List<String> played = new ArrayList<>();
+    battleFlow
+        .getEvents()
+        .addListener(
+            Team3CardPlayAdapter.CARD_PLAY_RESULT_EVENT,
+            (String instanceId, String targetId) -> played.add(instanceId));
+
+    battleFlow
+        .getEvents()
+        .trigger(Team3CardPlayAdapter.PLAY_CARD_EVENT, firstStrike.instanceId(), secondId);
+    assertFalse(playerStats.hasStatusEffect("TAUNT:" + secondId));
+    assertEquals(List.of(firstId), controller.getAliveTaunterTargetIds());
+
+    battleFlow
+        .getEvents()
+        .trigger(Team3CardPlayAdapter.PLAY_CARD_EVENT, secondStrike.instanceId(), firstId);
+    assertFalse(playerStats.hasStatusEffect("TAUNT:" + firstId));
+    assertEquals(List.of(), controller.getAliveTaunterTargetIds());
+
+    battleFlow
+        .getEvents()
+        .trigger(Team3CardPlayAdapter.PLAY_CARD_EVENT, thirdStrike.instanceId(), otherId);
+
+    assertEquals(
+        List.of(firstStrike.instanceId(), secondStrike.instanceId(), thirdStrike.instanceId()),
+        played);
+    assertEquals(0, energy.getCurrentEnergy());
+    assertEquals(List.of(), deck.getHand());
+    assertEquals(4, other.getComponent(CombatStatsComponent.class).getHealth());
+  }
+
+  @Test
+  void shouldAllowSelfAndAllEnemyCardsDuringTaunt() {
+    CardConfig self = defend();
+    CardConfig allEnemies = strike();
+    allEnemies.id = "sweep";
+    allEnemies.name = "Sweep";
+    allEnemies.target = TargetType.ALL_ENEMIES;
+    CardLibrary cards = new CardLibrary(List.of(self, allEnemies));
+    CardInstance selfInstance = new CardInstance("defend-taunt", "defend", 0);
+    CardInstance allInstance = new CardInstance("sweep-taunt", "sweep", 0);
+    BattleDeck deck =
+        new BattleDeck(PlayerDeck.fromInstances(cards, List.of(selfInstance, allInstance)));
+    deck.drawCards(2);
+
+    EnergyComponent energy = new EnergyComponent(3);
+    CombatStatsComponent playerStats = new CombatStatsComponent(20, 1);
+    Entity player = new Entity().addComponent(playerStats).addComponent(energy);
+    Entity taunter =
+        new Entity()
+            .addComponent(new CombatStatsComponent(10, 1))
+            .addComponent(new EnemyBehaviourComponent("test"));
+    Entity other =
+        new Entity()
+            .addComponent(new CombatStatsComponent(10, 1))
+            .addComponent(new EnemyBehaviourComponent("test"));
+    String taunterId = Integer.toString(taunter.getId());
+    String otherId = Integer.toString(other.getId());
+    Map<String, Entity> targets = Map.of(taunterId, taunter, otherId, other);
+    CardPlayService playService =
+        new CardPlayService(
+            cards,
+            deck,
+            energy,
+            new Team7PlayerStateAdapter(energy, playerStats),
+            new Team1EnemyStateAdapter(targets));
+    BattleController controller =
+        new BattleController(
+            player, List.of(taunter, other), new CardEffectHandler(targets), playService);
+    Entity battleFlow =
+        new Entity().addComponent(new Team3CardPlayAdapter(playService, controller));
+    battleFlow.create();
+    controller.start();
+    playerStats.applyStatusEffect("TAUNT:" + taunterId, taunter.getId(), 2);
+
+    List<String> played = new ArrayList<>();
+    battleFlow
+        .getEvents()
+        .addListener(
+            Team3CardPlayAdapter.CARD_PLAY_RESULT_EVENT,
+            (String instanceId, String targetId) -> played.add(instanceId));
+
+    battleFlow
+        .getEvents()
+        .trigger(Team3CardPlayAdapter.PLAY_CARD_EVENT, selfInstance.instanceId(), "player");
+    battleFlow
+        .getEvents()
+        .trigger(Team3CardPlayAdapter.PLAY_CARD_EVENT, allInstance.instanceId(), otherId);
+
+    assertEquals(List.of(selfInstance.instanceId(), allInstance.instanceId()), played);
+    assertEquals(1, energy.getCurrentEnergy());
+    assertEquals(List.of(), deck.getHand());
+    assertEquals(4, taunter.getComponent(CombatStatsComponent.class).getHealth());
+    assertEquals(4, other.getComponent(CombatStatsComponent.class).getHealth());
+  }
 
   @Test
   void shouldPlayOnlyTheSelectedUpgradedDuplicateByInstanceId() {
