@@ -135,7 +135,10 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     MapNode node = runState.getMapGraph() == null ? null : runState.getMapGraph().getNode(nodeId);
     RoomType roomType = node == null ? null : node.getRoomType();
 
-    if (roomType == RoomType.COMBAT || roomType == RoomType.FINAL || roomType == RoomType.ELITE) {
+    if (roomType == RoomType.FINAL) {
+      logger.info("Node {} ({}) selected, entering battle", nodeId, roomType);
+      game.showNarration("pre_boss", GdxGame.ScreenType.BATTLE_SCREEN);
+    } else if (roomType == RoomType.COMBAT || roomType == RoomType.ELITE) {
       logger.info("Node {} ({}) selected, entering battle", nodeId, roomType);
       game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
     } else {
