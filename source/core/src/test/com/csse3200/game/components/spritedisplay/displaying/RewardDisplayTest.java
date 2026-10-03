@@ -7,10 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.Layout;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.csse3200.game.cards.CardAcquisitionPool;
 import com.csse3200.game.cards.CardConfigLoader;
@@ -141,6 +143,36 @@ class RewardDisplayTest {
       assertEquals(config.rarity, widget.getCard().rarity());
       assertEquals(config.type, widget.getCard().type());
       assertFalse(widget.getCard().upgraded());
+    }
+  }
+
+  @Test
+  void mixedRarityRewardsWithLongDescriptionsShouldHaveEqualCardBounds() {
+    CardAcquisitionPool pool =
+        new CardAcquisitionPool(cardService, List.of("starfall", "poison_cloud", "poison_mark"));
+    RewardDisplay display =
+        createDisplay(new RewardService(fixedRewardGenerator(), cardService, pool, new Random(7)));
+    stage.getViewport().update(1280, 960, true);
+
+    cardButton(display).fire(new ChangeEvent());
+    for (Actor actor : stage.getActors()) {
+      if (actor instanceof Layout layout) {
+        layout.validate();
+      }
+    }
+
+    assertEquals(3, display.getCardWidgets().size());
+    Button firstButton = display.getCardChoiceButtons().getFirst();
+    for (int i = 0; i < display.getCardWidgets().size(); i++) {
+      CardWidget widget = display.getCardWidgets().get(i);
+      Button button = display.getCardChoiceButtons().get(i);
+      assertEquals(CardWidget.CARD_WIDTH, widget.getWidth());
+      assertEquals(CardWidget.CARD_HEIGHT, widget.getHeight());
+      assertEquals(firstButton.getWidth(), button.getWidth());
+      assertEquals(firstButton.getHeight(), button.getHeight());
+      assertEquals(firstButton.getY(), button.getY());
+      assertTrue(widget.getY() >= 0f);
+      assertTrue(widget.getY() + widget.getHeight() <= button.getHeight());
     }
   }
 

@@ -7,10 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardDiscoveryService;
@@ -21,10 +25,12 @@ import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 
 @ExtendWith(GameExtension.class)
 class CardLibraryDisplayTest {
@@ -117,6 +123,42 @@ class CardLibraryDisplayTest {
     display.showCard(discovery.getEntry("defend").orElseThrow());
     assertEquals("", display.getLoreText());
     display.dispose();
+  }
+
+  @Test
+  void shouldOmitArtworkPathsFromAllLibraryDetails() {
+    CardDiscoveryService discovery = CardDiscoveryService.loadDefault();
+    CardLibraryDisplay display = createDisplay(discovery);
+    display.create();
+    ArgumentCaptor<Actor> root = ArgumentCaptor.forClass(Actor.class);
+    verify(ServiceLocator.getRenderService().getStage()).addActor(root.capture());
+
+    assertNoArtworkPath(root.getValue());
+    for (CardConfig card : CardConfigLoader.loadCards()) {
+      discovery.recordSeen(card.id);
+      display.showCard(discovery.getEntry(card.id).orElseThrow());
+      assertEquals(card.description, display.getDescriptionText(), card.id);
+      assertNoArtworkPath(root.getValue());
+    }
+    display.dispose();
+  }
+
+  private static void assertNoArtworkPath(Actor root) {
+    List<String> texts = new ArrayList<>();
+    collectLabelTexts(root, texts);
+    assertFalse(texts.stream().anyMatch(text -> text.contains("Artwork:")));
+    assertFalse(texts.stream().anyMatch(text -> text.contains("images/cards/")));
+  }
+
+  private static void collectLabelTexts(Actor actor, List<String> texts) {
+    if (actor instanceof Label label) {
+      texts.add(label.getText().toString());
+    }
+    if (actor instanceof Group group) {
+      for (Actor child : group.getChildren()) {
+        collectLabelTexts(child, texts);
+      }
+    }
   }
 
   private CardLibraryDisplay createDisplay(CardDiscoveryService discovery) {

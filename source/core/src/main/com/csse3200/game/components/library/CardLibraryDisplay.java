@@ -81,7 +81,6 @@ public class CardLibraryDisplay extends UIComponent {
   private Label targetLabel;
   private Label rarityLabel;
   private Label effectsLabel;
-  private Label artworkLabel;
   private TextButton.TextButtonStyle buttonStyle;
 
   public CardLibraryDisplay(GdxGame game, CardDiscoveryService discovery) {
@@ -283,7 +282,6 @@ public class CardLibraryDisplay extends UIComponent {
     targetLabel = new Label("", bodyLabelStyle());
     rarityLabel = new Label("", bodyLabelStyle());
     effectsLabel = new Label("", labelStyle(SMALL, MenuTheme.warmParchment()));
-    artworkLabel = new Label("", labelStyle(SMALL, MenuTheme.warmParchment()));
 
     nameLabel.setFontScale(0.9f);
     descriptionLabel.setFontScale(0.78f);
@@ -292,8 +290,6 @@ public class CardLibraryDisplay extends UIComponent {
     loreLabel.setWrap(true);
     effectsLabel.setFontScale(0.72f);
     effectsLabel.setWrap(true);
-    artworkLabel.setFontScale(0.62f);
-    artworkLabel.setWrap(true);
 
     Table archiveDetails = new Table();
     archiveDetails.top().left();
@@ -307,7 +303,6 @@ public class CardLibraryDisplay extends UIComponent {
     archiveDetails.add(targetLabel).row();
     archiveDetails.add(rarityLabel).row();
     archiveDetails.add(effectsLabel).width(330f).padTop(8f).row();
-    archiveDetails.add(artworkLabel).width(330f).padTop(5f).row();
 
     detailPanel.top();
     detailPanel.add(stateLabel).colspan(2).left().expandX().padBottom(8f);
@@ -362,14 +357,12 @@ public class CardLibraryDisplay extends UIComponent {
     stateLabel.setText(card.unlockState().name());
     effectsLabel.setText(
         "Effects resolve in this order:\n" + formatEffects(card.effects().orElseThrow()));
-    artworkLabel.setText("Artwork: " + card.texturePath().orElseThrow());
     showResolvedCard(resolveForDisplay(card));
   }
 
   private void showLockedCard() {
     stateLabel.setText("UNDISCOVERED");
     effectsLabel.setText("Effects: ???");
-    artworkLabel.setText("Artwork: ???");
     lockedPreview.setVisible(true);
     if (cardWidget != null) {
       cardWidget.setVisible(false);

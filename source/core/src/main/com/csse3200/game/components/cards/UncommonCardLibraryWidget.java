@@ -138,6 +138,8 @@ public final class UncommonCardLibraryWidget extends WidgetGroup {
     setBounds(nameLabel, NAME_BOUNDS);
     setBounds(metaLabel, META_BOUNDS);
     setBounds(descriptionLabel, DESCRIPTION_BOUNDS);
+    CardTextFitter.fit(descriptionLabel, 0.72f);
+    descriptionLabel.validate();
     setBounds(targetLabel, TARGET_BOUNDS);
   }
 

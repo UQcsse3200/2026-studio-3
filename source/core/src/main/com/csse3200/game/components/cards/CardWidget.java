@@ -97,7 +97,7 @@ public final class CardWidget extends Stack {
     artworkFrame = new Table();
     artworkFrame.setTouchable(Touchable.disabled);
     artworkFrame.pad(2f);
-    artworkFrame.add(artworkStack).expand().fill();
+    artworkFrame.add(artworkStack).minSize(0f).expand().fill();
 
     metaLabel = new Label("", assets.metaStyle());
     metaLabel.setAlignment(Align.center);
@@ -115,12 +115,13 @@ public final class CardWidget extends Stack {
     descriptionPanel.setTouchable(Touchable.disabled);
     descriptionPanel.setBackground(assets.descriptionPanel());
     descriptionPanel.pad(8f, 9f, 8f, 9f);
-    descriptionPanel.add(descriptionLabel).expand().fill();
+    // Wrapped text must not set the minimum height of the card face.
+    descriptionPanel.add(descriptionLabel).minSize(0f).expand().fill();
 
     descriptionFrame = new Table();
     descriptionFrame.setTouchable(Touchable.disabled);
     descriptionFrame.pad(2f);
-    descriptionFrame.add(descriptionPanel).expand().fill();
+    descriptionFrame.add(descriptionPanel).minSize(0f).expand().fill();
 
     costLabel = new Label("", assets.costStyle());
     costLabel.setAlignment(Align.center);
@@ -150,14 +151,14 @@ public final class CardWidget extends Stack {
     face.row();
     face.add(metaPlate).height(META_HEIGHT).expandX().fillX().padTop(5f);
     face.row();
-    face.add(descriptionFrame).expand().fill().padTop(5f);
+    face.add(descriptionFrame).minSize(0f).expand().fill().padTop(5f);
 
     Table innerRim = new Table();
     innerRim.setTouchable(Touchable.disabled);
     innerRim.setBackground(assets.innerRim());
     innerRim.pad(INNER_RIM_THICKNESS);
-    innerRim.add(face).expand().fill();
-    frame.add(innerRim).expand().fill();
+    innerRim.add(face).minSize(0f).expand().fill();
+    frame.add(innerRim).minSize(0f).expand().fill();
 
     add(frame);
     setCard(card);
@@ -188,6 +189,23 @@ public final class CardWidget extends Stack {
   /** Returns the immutable resolved snapshot currently displayed by this widget. */
   public ResolvedCard getCard() {
     return card;
+  }
+
+  @Override
+  public void layout() {
+    super.layout();
+    CardTextFitter.fit(descriptionLabel, 1f);
+    descriptionLabel.validate();
+  }
+
+  @Override
+  public float getMinWidth() {
+    return CARD_WIDTH;
+  }
+
+  @Override
+  public float getMinHeight() {
+    return CARD_HEIGHT;
   }
 
   @Override

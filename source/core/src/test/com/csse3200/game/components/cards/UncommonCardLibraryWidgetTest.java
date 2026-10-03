@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.csse3200.game.cards.CardConfigLoader;
@@ -125,6 +126,7 @@ class UncommonCardLibraryWidgetTest {
     for (CardConfig config : uncommonCards) {
       ResolvedCard resolved = resolve(config, resolver);
       widget.setCard(resolved);
+      widget.validate();
 
       assertAll(
           config.id,
@@ -133,6 +135,12 @@ class UncommonCardLibraryWidgetTest {
           () -> assertTrue(widget.displayedMeta().contains("Uncommon")),
           () -> assertEquals(resolved.description(), widget.displayedDescription()),
           () -> assertNotNull(widget.displayedArtwork()));
+      for (Actor child : widget.getChildren()) {
+        if (child instanceof Label label && label.getWrap()) {
+          assertTrue(label.getPrefHeight() <= label.getHeight() + 1f, config.id);
+          assertTrue(label.getGlyphLayout().width <= label.getWidth() + 1f, config.id);
+        }
+      }
     }
   }
 
