@@ -527,4 +527,79 @@ class Team3CardPlayAdapterTest {
 
     assertFalse(logs.contains("You are silenced and cannot play cards."));
   }
+
+  @Test
+  void shouldExpireSilenceAfterTwoPlayerTurns() {
+    CardConfig strike = strike();
+    CardLibrary cards = new CardLibrary(List.of(strike));
+    BattleDeck deck = new BattleDeck(new PlayerDeck(cards, List.of("strike")));
+    CardInstance strikeInstance = deck.drawOne();
+
+    EnergyComponent energy = new EnergyComponent(3);
+    CombatStatsComponent playerStats = new CombatStatsComponent(20, 1);
+    Entity player = new Entity().addComponent(playerStats).addComponent(energy);
+    Entity enemy =
+        new Entity()
+            .addComponent(new CombatStatsComponent(20, 1))
+            .addComponent(new EnemyBehaviourComponent("test"));
+
+    CardPlayService playService =
+        new CardPlayService(
+            cards,
+            deck,
+            energy,
+            new Team7PlayerStateAdapter(energy, playerStats),
+            new Team1EnemyStateAdapter(Map.of("enemy-1", enemy)));
+    BattleController controller =
+        new BattleController(
+            player,
+            List.of(enemy),
+            new CardEffectHandler(Map.of("enemy-1", enemy)),
+            playService);
+    Entity battleFlow =
+        new Entity().addComponent(new Team3CardPlayAdapter(playService, controller));
+    battleFlow.create();
+    controller.start();
+
+    while (controller.getCurrentPhase() != BattlePhase.PLAYER_TURN) {
+      controller.endPlayerTurn();
+    }
+
+    playerStats.applyStatusEffect("SILENCE", 1, 2);
+    List<String> playedInstances = new ArrayList<>();
+    battleFlow
+        .getEvents()
+        .addListener(
+            Team3CardPlayAdapter.CARD_PLAY_RESULT_EVENT,
+            (String instanceId, String targetId) -> playedInstances.add(instanceId));
+
+    battleFlow
+        .getEvents()
+        .trigger(
+            Team3CardPlayAdapter.PLAY_CARD_EVENT, strikeInstance.instanceId(), "enemy-1");
+    assertTrue(playedInstances.isEmpty());
+    assertEquals(2, playerStats.getStatusEffect("SILENCE").getDuration());
+
+    controller.endPlayerTurn();
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+    assertEquals(1, playerStats.getStatusEffect("SILENCE").getDuration());
+
+    battleFlow
+        .getEvents()
+        .trigger(
+            Team3CardPlayAdapter.PLAY_CARD_EVENT, strikeInstance.instanceId(), "enemy-1");
+    assertTrue(playedInstances.isEmpty());
+    assertEquals(1, playerStats.getStatusEffect("SILENCE").getDuration());
+
+    controller.endPlayerTurn();
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+    assertFalse(playerStats.hasStatusEffect("SILENCE"));
+
+    battleFlow
+        .getEvents()
+        .trigger(
+            Team3CardPlayAdapter.PLAY_CARD_EVENT, strikeInstance.instanceId(), "enemy-1");
+    assertEquals(List.of(strikeInstance.instanceId()), playedInstances);
+    assertEquals(2, energy.getCurrentEnergy());
+  }
 }
