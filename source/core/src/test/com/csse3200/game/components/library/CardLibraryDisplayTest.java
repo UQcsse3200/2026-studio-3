@@ -12,13 +12,16 @@ import static org.mockito.Mockito.when;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.GdxGame;
+import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardEntryView;
 import com.csse3200.game.cards.CardUnlockState;
+import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -94,6 +97,26 @@ class CardLibraryDisplayTest {
     CardEntryView seen = discovery.getEntry("strike").orElseThrow();
 
     assertEquals("strike", CardLibraryDisplay.resolveForDisplay(seen).cardId());
+  }
+
+  @Test
+  void shouldShowLoreOnlyForDiscoveredCardsThatHaveIt() {
+    List<CardConfig> cards = CardConfigLoader.loadCards();
+    CardConfig strike =
+        cards.stream().filter(card -> "strike".equals(card.id)).findFirst().orElseThrow();
+    strike.lore = "A test-only fragment of card history.";
+    CardDiscoveryService discovery = new CardDiscoveryService(cards);
+    discovery.recordSeen("strike");
+    discovery.recordSeen("defend");
+    CardLibraryDisplay display = createDisplay(discovery);
+    display.create();
+
+    display.showCard(discovery.getEntry("strike").orElseThrow());
+    assertEquals("A test-only fragment of card history.", display.getLoreText());
+
+    display.showCard(discovery.getEntry("defend").orElseThrow());
+    assertEquals("", display.getLoreText());
+    display.dispose();
   }
 
   private CardLibraryDisplay createDisplay(CardDiscoveryService discovery) {

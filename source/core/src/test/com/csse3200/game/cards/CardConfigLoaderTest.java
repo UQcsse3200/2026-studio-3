@@ -53,6 +53,18 @@ class CardConfigLoaderTest {
   }
 
   @Test
+  void shouldLoadCardsWithAndWithoutOptionalLore() {
+    List<CardConfig> cards = CardConfigLoader.loadCards(TEST_DIRECTORY + "optional_lore.json");
+    CardConfig withLore =
+        cards.stream().filter(card -> "lore_card".equals(card.id)).findFirst().orElseThrow();
+    CardConfig withoutLore =
+        cards.stream().filter(card -> "plain_card".equals(card.id)).findFirst().orElseThrow();
+
+    assertEquals("An old story follows this card.", withLore.lore);
+    assertTrue(withoutLore.lore == null);
+  }
+
+  @Test
   void shouldReturnImmutableCardList() {
     List<CardConfig> cards = CardConfigLoader.loadCards();
 
