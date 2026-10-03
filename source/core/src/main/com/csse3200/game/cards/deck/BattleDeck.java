@@ -1,6 +1,9 @@
 package com.csse3200.game.cards.deck;
 
 import com.csse3200.game.cards.runtime.CardInstance;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -77,6 +80,7 @@ public class BattleDeck {
       }
       drawnCards.add(card);
     }
+
     return List.copyOf(drawnCards);
   }
 

@@ -9,6 +9,8 @@ public enum SoundId {
     SWORD_SLICE,
     ENTER_SHOP,
     ERROR,
-    ENTER_ENCOUNTER
+    ENTER_ENCOUNTER,
+    CARD_HOVER,
+    CARD_SHUFFLE
 
 }

@@ -54,6 +54,8 @@ import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.ui.PopupDisplay;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
@@ -281,7 +283,9 @@ public class BattleScreen extends ScreenAdapter {
         .getEvents()
         .addListener(
             BattleActions.HAND_CHANGED_EVENT,
-            (List<CardInstance> hand) -> uiFactory.rebuildHand(buildHandRecords()));
+            (List<CardInstance> hand) -> {
+              uiFactory.rebuildHand(buildHandRecords());
+            });
 
     // battleUi must be registered (and so cardInventory.create() must have run, giving it a
     // content table) before the deck editor's create() tries to add widgets to that table below.

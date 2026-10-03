@@ -8,7 +8,11 @@ import java.util.Random;
 
 public class AudioService {
 
+    private static final int SFX_COOLDOWN = 100; // 100ms sound cooldown
+    private static final float LOWER_PITCH_BOUND = 0.90f;
+    private static final float UPPER_PITCH_BOUND = 1.10f;
     private static Music playing;
+    private static long timestamp;
     private static float musicVolume = 0.5f; // TODO: decide default music volume
     private static final String[] soundPaths = {
             "sounds/Impact4.ogg",
@@ -18,6 +22,8 @@ public class AudioService {
             "sounds/enterShop.mp3",
             "sounds/error.mp3",
             "sounds/enterEncounter.mp3",
+            "sounds/cardHover.mp3",
+            "sounds/cardShuffle.mp3"
     };
     private static final String[] musicPaths = {
             "music/BGM_03_mp3.mp3"
@@ -29,21 +35,25 @@ public class AudioService {
      **/
     public static void load() {
 
+        timestamp = System.currentTimeMillis();
         ServiceLocator.getResourceService().loadSounds(soundPaths);
         ServiceLocator.getResourceService().loadMusic(musicPaths);
     }
 
     /**
      * Plays a chosen sound effect where it is called. Uses the ordinal of the SoundID enum parameter to find the sound
-     * index from array.
+     * index from array. Additionally, it has a cooldown timer for all sound effects so they do not get spammed.
      * @param soundID Enumerator type code that translates to an index of the sound path array.
      * @param volume Floating point value that sets the volume. Likely varies between sfx.
      */
     public static void playSound(SoundId soundID, float volume) {
 
-        Sound sound = ServiceLocator.getResourceService().getAsset(soundPaths[soundID.ordinal()], Sound.class);
-        sound.setPitch(sound.play(volume), rand.nextFloat(0.90f, 1.10f));
-        // varying the pitch may be better if its optional but for most sfx it helps a lot
+        if ( System.currentTimeMillis() - timestamp > SFX_COOLDOWN) {
+
+            Sound sound = ServiceLocator.getResourceService().getAsset(soundPaths[soundID.ordinal()], Sound.class);
+            sound.setPitch(sound.play(volume), rand.nextFloat(LOWER_PITCH_BOUND, UPPER_PITCH_BOUND));
+            timestamp = System.currentTimeMillis();
+        }
     }
 
     public static boolean isMusicPlaying() {
