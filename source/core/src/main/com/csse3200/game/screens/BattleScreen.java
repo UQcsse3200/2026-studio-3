@@ -318,9 +318,11 @@ public class BattleScreen extends ScreenAdapter {
     // content table) before the deck editor's create() tries to add widgets to that table below.
     gameArea.displayUI(battleUi);
 
-    // The deck editor's own per-card toggle buttons need a ClickableFactory of their own — an
-    // entity can only hold one component of a given class, and battleUi already has uiFactory.
-    ClickableFactory deckPoolFactory = new ClickableFactory(new ArrayList<>());
+    // The deck editor's own widgets need a ClickableFactory of their own — an entity can only hold
+    // one component of a given class, and battleUi already has uiFactory. Its static widgets (the
+    // scroll up/down buttons) are loaded from JSON; the per-card toggles and the preview card are
+    // built dynamically by DeckEditorComponent.
+    ClickableFactory deckPoolFactory = new ClickableFactory(Path.of("sprites/DeckEditorUi.json"));
     DeckEditorComponent deckEditor =
         new DeckEditorComponent(
             cardPlayService, library, cardInventory, deckPoolFactory, this::onDeckRearranged);
