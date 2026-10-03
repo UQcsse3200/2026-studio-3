@@ -32,6 +32,9 @@ import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
+import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
+import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
 import com.csse3200.game.components.pausemenu.PauseMenuActions;
 import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuInput;
@@ -228,6 +231,25 @@ public class BattleScreen extends ScreenAdapter {
                     player,
                     effectVisualRegistry));
     ServiceLocator.getEntityService().register(animationCoordinatorEntity);
+
+    PlayerTrackerComponent playerTracker =
+        Objects.requireNonNull(
+            player.getComponent(PlayerTrackerComponent.class),
+            "Battle player requires PlayerTrackerComponent");
+
+    playerTracker.connect(controller, library, battleDeck);
+    EnemyMemoryComponent enemyMemory =
+        Objects.requireNonNull(
+            player.getComponent(EnemyMemoryComponent.class),
+            "Player entity must contain EnemyMemoryComponent");
+
+    for (Entity enemy : forestGameArea.getEnemies()) {
+      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+
+      if (behaviour != null) {
+        behaviour.setEnemyMemory(enemyMemory);
+      }
+    }
 
     controller.addBattleEndListener(
         won -> {

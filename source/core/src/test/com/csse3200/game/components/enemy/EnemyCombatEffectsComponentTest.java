@@ -71,7 +71,8 @@ class EnemyCombatEffectsComponentTest {
     assertEquals(Color.CYAN, animator.getActiveTint());
   }
 
-  // updateArmour 在护甲减少（比如被伤害吸收）时也会触发，这种情况不应该播放防御闪烁
+  // updateArmour is also emitted when armour decreases, such as when it absorbs damage.
+  // A decrease should not trigger the defend flash.
   @Test
   void shouldNotFlashWhenArmourDecreases() {
     Entity enemy = newEnemy();
@@ -117,7 +118,7 @@ class EnemyCombatEffectsComponentTest {
     assertEquals(Color.YELLOW, animator.getActiveTint());
   }
 
-  // 防御意图不应该触发攻击预警的黄色闪烁
+  // A defend intent should not trigger the yellow attack-warning flash.
   @Test
   void shouldNotFlashOnDefendIntent() {
     Entity enemy = newEnemy();
