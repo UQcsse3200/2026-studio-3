@@ -81,6 +81,7 @@ public class MapSelectionController {
     }
 
     if (node.getState() == NodeState.COMPLETED) {
+      AudioService.playSound(SoundId.ERROR, 0.5f);
       events.trigger("nodeCompleted", nodeId);
       return false;
     }
