@@ -9,12 +9,16 @@ import org.junit.jupiter.api.Test;
 class CardEntryViewTest {
   @Test
   void shouldMaskEveryCardDetailWhileLocked() {
-    CardEntryView view = CardEntryView.from(card(), CardUnlockState.LOCKED);
+    CardConfig card = card();
+    card.lore = "Hidden lore.";
+
+    CardEntryView view = CardEntryView.from(card, CardUnlockState.LOCKED);
 
     assertEquals("strike", view.cardId());
     assertEquals(CardUnlockState.LOCKED, view.unlockState());
     assertEquals("???", view.displayName());
     assertTrue(view.description().isEmpty());
+    assertTrue(view.lore().isEmpty());
     assertTrue(view.cost().isEmpty());
     assertTrue(view.type().isEmpty());
     assertTrue(view.target().isEmpty());
@@ -26,17 +30,26 @@ class CardEntryViewTest {
   @Test
   void shouldExposeEveryCardDetailWhenSeen() {
     CardConfig card = card();
+    card.lore = "Discovered lore.";
 
     CardEntryView view = CardEntryView.from(card, CardUnlockState.SEEN);
 
     assertEquals(card.name, view.displayName());
     assertEquals(card.description, view.description().orElseThrow());
+    assertEquals(card.lore, view.lore().orElseThrow());
     assertEquals(card.cost, view.cost().orElseThrow());
     assertEquals(card.type, view.type().orElseThrow());
     assertEquals(card.target, view.target().orElseThrow());
     assertEquals(card.rarity, view.rarity().orElseThrow());
     assertEquals(0, view.effects().orElseThrow().size());
     assertEquals(card.texturePath, view.texturePath().orElseThrow());
+  }
+
+  @Test
+  void shouldLeaveLoreEmptyWhenSeenCardHasNoLore() {
+    CardEntryView view = CardEntryView.from(card(), CardUnlockState.SEEN);
+
+    assertTrue(view.lore().isEmpty());
   }
 
   private static CardConfig card() {

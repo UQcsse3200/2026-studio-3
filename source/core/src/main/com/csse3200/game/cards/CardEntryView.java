@@ -14,6 +14,7 @@ public record CardEntryView(
     CardUnlockState unlockState,
     String displayName,
     Optional<String> description,
+    Optional<String> lore,
     OptionalInt cost,
     Optional<CardType> type,
     Optional<TargetType> target,
@@ -28,6 +29,7 @@ public record CardEntryView(
     Objects.requireNonNull(unlockState, "unlockState");
     Objects.requireNonNull(displayName, "displayName");
     Objects.requireNonNull(description, "description");
+    Objects.requireNonNull(lore, "lore");
     Objects.requireNonNull(cost, "cost");
     Objects.requireNonNull(type, "type");
     Objects.requireNonNull(target, "target");
@@ -45,6 +47,7 @@ public record CardEntryView(
         state,
         seen ? card.name : LOCKED_DISPLAY_NAME,
         seen ? optionalText(card.description) : Optional.empty(),
+        seen ? optionalText(card.lore) : Optional.empty(),
         seen ? OptionalInt.of(card.cost) : OptionalInt.empty(),
         seen ? Optional.ofNullable(card.type) : Optional.empty(),
         seen ? Optional.ofNullable(card.target) : Optional.empty(),
