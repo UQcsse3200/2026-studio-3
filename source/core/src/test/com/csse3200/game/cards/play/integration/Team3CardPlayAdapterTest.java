@@ -16,6 +16,7 @@ import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.BattleActions;
+import com.csse3200.game.components.battle.DamageOnCardPlayComponent;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattlePhase;
@@ -601,5 +602,98 @@ class Team3CardPlayAdapterTest {
             Team3CardPlayAdapter.PLAY_CARD_EVENT, strikeInstance.instanceId(), "enemy-1");
     assertEquals(List.of(strikeInstance.instanceId()), playedInstances);
     assertEquals(2, energy.getCurrentEnergy());
+  }
+
+  private record DamageBattle(
+      CombatStatsComponent playerStats,
+      CombatStatsComponent enemyStats,
+      EnergyComponent energy,
+      BattleDeck deck,
+      BattleController controller,
+      Entity battleFlow,
+      CardInstance strikeInstance,
+      List<String> playedInstances,
+      List<Boolean> outcomes) {}
+
+  private DamageBattle createDamageBattle(int playerHealth, int enemyHealth, int cardCost) {
+    CardConfig strike = strike();
+    strike.cost = cardCost;
+
+    CardLibrary cards = new CardLibrary(List.of(strike));
+    BattleDeck deck = new BattleDeck(new PlayerDeck(cards, List.of("strike")));
+    CardInstance strikeInstance = deck.drawOne();
+
+    CombatStatsComponent playerStats = new CombatStatsComponent(playerHealth, 0);
+    playerStats.applyStatusEffect("DAMAGE_ON_CARD_PLAY", 3, 2);
+    EnergyComponent energy = new EnergyComponent(3);
+    Entity player = new Entity().addComponent(playerStats).addComponent(energy);
+
+    CombatStatsComponent enemyStats = new CombatStatsComponent(enemyHealth, 1);
+    Entity enemy =
+        new Entity()
+            .addComponent(enemyStats)
+            .addComponent(new EnemyBehaviourComponent("test"));
+
+    CardPlayService playService =
+        new CardPlayService(
+            cards,
+            deck,
+            energy,
+            new Team7PlayerStateAdapter(energy, playerStats),
+            new Team1EnemyStateAdapter(Map.of("enemy", enemy)));
+    BattleController controller =
+        new BattleController(
+            player,
+            List.of(enemy),
+            new CardEffectHandler(Map.of("enemy", enemy)),
+            playService);
+    Entity battleFlow =
+        new Entity()
+            .addComponent(new Team3CardPlayAdapter(playService, controller))
+            .addComponent(new DamageOnCardPlayComponent(playerStats));
+    battleFlow.create();
+
+    List<String> playedInstances = new ArrayList<>();
+    List<Boolean> outcomes = new ArrayList<>();
+    battleFlow
+        .getEvents()
+        .addListener(
+            Team3CardPlayAdapter.CARD_PLAY_RESULT_EVENT,
+            (String instanceId, String targetId) -> playedInstances.add(instanceId));
+    controller.addBattleEndListener(outcomes::add);
+    controller.start();
+
+    while (controller.getCurrentPhase() != BattlePhase.PLAYER_TURN) {
+      controller.endPlayerTurn();
+    }
+
+    return new DamageBattle(
+        playerStats,
+        enemyStats,
+        energy,
+        deck,
+        controller,
+        battleFlow,
+        strikeInstance,
+        playedInstances,
+        outcomes);
+  }
+
+  @Test
+  void shouldDamagePlayerOnlyOnceAfterSuccessfulPlay() {
+    DamageBattle battle = createDamageBattle(20, 20, 1);
+
+    battle
+        .battleFlow()
+        .getEvents()
+        .trigger(
+            Team3CardPlayAdapter.PLAY_CARD_EVENT,
+            battle.strikeInstance().instanceId(),
+            "enemy");
+
+    assertEquals(17, battle.playerStats().getHealth());
+    assertEquals(
+        List.of(battle.strikeInstance().instanceId()), battle.playedInstances());
+    assertEquals(BattlePhase.PLAYER_TURN, battle.controller().getCurrentPhase());
   }
 }
