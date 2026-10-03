@@ -38,7 +38,10 @@ import com.csse3200.game.components.spritedisplay.clickable.CardImageSkins;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.clickable.DragNDrop;
+import com.csse3200.game.components.spritedisplay.displaying.CardPreviewDisplay;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
+import com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord;
+import com.csse3200.game.components.spritedisplay.displaying.PopupTextDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -320,16 +323,136 @@ public class BattleScreen extends ScreenAdapter {
 
     // The deck editor's own widgets need a ClickableFactory of their own — an entity can only hold
     // one component of a given class, and battleUi already has uiFactory. Its static widgets (the
-    // scroll up/down buttons) are loaded from JSON; the per-card toggles and the preview card are
-    // built dynamically by DeckEditorComponent.
+    // scroll up/down buttons) are loaded from JSON; the grid cards are built dynamically by
+    // DeckEditorComponent.
     ClickableFactory deckPoolFactory = new ClickableFactory(Path.of("sprites/DeckEditorUi.json"));
+
+    // Popup-anchored displays for the deck editor (summary, error, preview art+details, badges).
+    // These are stage-level actors driven by DeckEditorEvents, not Clickables.
+    //
+    // NOTE: skin is null for now — CardBadgesDisplay falls back to a plain BitmapFont, so badges
+    // render as bare white numbers without the dark rounded box. See the class-level comment in
+    // CardBadgesDisplay for how to feed it the real UI skin once you find the right accessor
+    // (PopupDisplay.getSkin() / UIComponent's skin source).
+    DisplayingFactory deckEditorDisplays = buildDeckEditorDisplays(cardInventory, null);
+
     DeckEditorComponent deckEditor =
         new DeckEditorComponent(
-            cardPlayService, library, cardInventory, deckPoolFactory, this::onDeckRearranged);
-    Entity deckEditorEntity = new Entity().addComponent(deckPoolFactory).addComponent(deckEditor);
+            cardPlayService,
+            library,
+            cardInventory,
+            deckPoolFactory,
+            deckEditorDisplays,
+            this::onDeckRearranged);
+
+    // Add order matters: both factories' create() must run before DeckEditorComponent.create(),
+    // so their event listeners are registered before the editor starts firing OPENED / PREVIEW /
+    // etc.
+    Entity deckEditorEntity =
+        new Entity()
+            .addComponent(deckPoolFactory)
+            .addComponent(deckEditorDisplays)
+            .addComponent(deckEditor);
     ServiceLocator.getEntityService().register(deckEditorEntity);
 
     battleUi.getEvents().addListener("openMenu", deckEditor::open);
+  }
+
+  /**
+   * Builds the {@link DisplayingFactory} that carries the deck editor's popup-anchored displays:
+   *
+   * <ul>
+   *   <li>{@code popupText} records for the selection summary line and the error line — {@link
+   *       DeckEditorEvents#SUMMARY} / {@link DeckEditorEvents#ERROR}.
+   *   <li>{@code cardPreview} record for the enlarged preview card + details — {@link
+   *       DeckEditorEvents#PREVIEW}.
+   *   <li>{@code cardBadges} record for the numbered selection badges — {@link
+   *       DeckEditorEvents#BADGES}.
+   * </ul>
+   *
+   * <p>The {@code popupText} and {@code cardPreview} variants need the popup, so they're registered
+   * as instance variants here (they shadow the static entries that would NPE without a popup).
+   *
+   * <p>Record {@code x}/{@code y} are offsets from the popup window's TOP-LEFT corner (y grows
+   * downward). The constants below mirror {@code DeckEditorComponent}'s own layout constants
+   * (GRID_LEFT_INSET, GRID_TOP_INSET, CARD_WIDTH, ...), because they're private to that class — if
+   * you ever change the grid layout there, update these too.
+   *
+   * @param popup the deck editor's popup window (its live bounds anchor everything)
+   * @param skin optional UI skin for Label styling; may be {@code null}, in which case the display
+   *     variants fall back to unstyled defaults
+   */
+  private DisplayingFactory buildDeckEditorDisplays(PopupDisplay popup, Skin skin) {
+    // Mirrors DeckEditorComponent's private layout constants.
+    float gridWidth = 4 * 100f + 3 * 14f; // COLUMNS / CARD_WIDTH / GRID_GAP
+    float gridHeight = 2 * 145f + 1 * 14f; // ROWS_VISIBLE / CARD_HEIGHT / GRID_GAP
+    float gridLeftInset = 40f + 10f + 40f; // GRID_LEFT_INSET
+    float gridTopInset = 70f; // GRID_TOP_INSET
+    float previewGap = 30f; // PREVIEW_GAP
+    float previewPanelWidth = 190f;// PREVIEW_PANEL_WIDTH
+    String textDisplay = "popupText";
+
+    // Summary line: just under the grid, spanning the width of grid + preview area.
+    DisplayingRecord summaryRec =
+        DisplayingRecord.builder("")
+            .trigger(DeckEditorEvents.SUMMARY)
+            .skin(skin)
+            .position(gridLeftInset, gridTopInset + gridHeight + 12f)
+            .size(gridWidth + previewGap + previewPanelWidth, 36f)
+            .variant(textDisplay)
+            .build();
+
+    // Error line: one row below the summary.
+    DisplayingRecord errorRec =
+        DisplayingRecord.builder("")
+            .trigger(DeckEditorEvents.ERROR)
+            .skin(skin)
+            .colour("FA8072") // only used if your skin defines a "salmon" colour
+            .position(gridLeftInset, gridTopInset + gridHeight + 56f)
+            .size(gridWidth + previewGap + previewPanelWidth, 36f)
+            .variant(textDisplay)
+            .build();
+
+    // Preview panel: to the right of the grid, top-aligned with it. CardPreviewDisplay handles
+    // the art / text split internally, so this is just the panel box.
+    DisplayingRecord previewRec =
+        DisplayingRecord.builder("")
+            .trigger(DeckEditorEvents.PREVIEW)
+            .position(gridLeftInset + gridWidth + previewGap, gridTopInset)
+            .size(previewPanelWidth, gridHeight)
+            .variant("cardPreview")
+            .build();
+
+    // Badges: no position/size — CardBadgesDisplay positions each badge from the payload.
+    // Its skin is optional; see CardBadgesDisplay for the fallback behaviour.
+    DisplayingRecord badgesRec =
+        DisplayingRecord.builder("")
+            .trigger(DeckEditorEvents.BADGES)
+            .skin(skin)
+            .variant("selectBadges")
+            .build();
+
+    DisplayingFactory factory =
+        new DisplayingFactory(List.of(summaryRec, errorRec, previewRec, badgesRec));
+
+    // popupText and cardPreview need the popup; register per-screen instance variants so they
+    // shadow the static entries (which would NPE with a null popup).
+    factory.registerInstanceVariant(
+            textDisplay,
+        rec -> {
+          PopupTextDisplay d = new PopupTextDisplay(rec);
+          d.addPopup(popup);
+          return d;
+        });
+    factory.registerInstanceVariant(
+        "cardPreview",
+        rec -> {
+          CardPreviewDisplay d = new CardPreviewDisplay(rec);
+          d.addPopup(popup);
+          return d;
+        });
+    // cardBadges is a static variant — no popup needed.
+    return factory;
   }
 
   /**

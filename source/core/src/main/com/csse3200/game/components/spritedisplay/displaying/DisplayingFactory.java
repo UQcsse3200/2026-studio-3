@@ -24,6 +24,9 @@ public class DisplayingFactory extends UIComponent {
     registerVariant(DEFAULT_VARIANT, rec -> new Displaying(rec) {});
     registerVariant("battleLog", BattleLogDisplay::new);
     registerVariant("endBattle", EndBattleDisplay::new);
+    registerVariant("selectBadges", CardBadgesDisplay::new);
+    registerVariant("cardPreview", CardPreviewDisplay::new);
+    registerVariant("popupText", PopupTextDisplay::new);
     // Add more variants here as needed.
   }
 

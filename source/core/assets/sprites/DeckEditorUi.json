@@ -1,6 +1,6 @@
 {
   "Clickable": [
-    { "trigger": "deckScrollUp", "text": "^", "x": 0, "y": 0, "width": 40, "height": 40 },
-    { "trigger": "deckScrollDown", "text": "v", "x": 0, "y": 0, "width": 40, "height": 40 }
+    { "trigger": "deckScrollUp", "text": "^", "x": 100, "y": 100, "width": 40, "height": 40 },
+    { "trigger": "deckScrollDown", "text": "v", "x": 100, "y": 100, "width": 40, "height": 40 }
   ]
 }
