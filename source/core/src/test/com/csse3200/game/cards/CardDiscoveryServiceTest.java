@@ -87,6 +87,75 @@ class CardDiscoveryServiceTest {
   }
 
   @Test
+  void shouldMergeProgressByUpgradingLockedEntries() {
+    CardDiscoveryService service = createService();
+
+    service.mergeProgress(Map.of("strike", CardUnlockState.SEEN));
+
+    assertEquals(CardUnlockState.SEEN, service.getProgressSnapshot().get("strike"));
+    assertEquals(CardUnlockState.LOCKED, service.getProgressSnapshot().get("defend"));
+  }
+
+  @Test
+  void shouldNeverDowngradeProgressWhenMerging() {
+    CardDiscoveryService service = createService();
+    service.recordSeen("strike");
+
+    service.mergeProgress(Map.of("strike", CardUnlockState.LOCKED));
+
+    assertEquals(CardUnlockState.SEEN, service.getProgressSnapshot().get("strike"));
+  }
+
+  @Test
+  void shouldIgnoreUnknownIdsWhenMerging() {
+    CardDiscoveryService service = createService();
+
+    service.mergeProgress(Map.of("retired_card", CardUnlockState.SEEN));
+
+    assertFalse(service.getProgressSnapshot().containsKey("retired_card"));
+    assertTrue(
+        service.getProgressSnapshot().values().stream()
+            .allMatch(state -> state == CardUnlockState.LOCKED));
+  }
+
+  @Test
+  void shouldRejectInvalidMergeWithoutMutatingProgress() {
+    CardDiscoveryService service = createService();
+    Map<String, CardUnlockState> before = service.getProgressSnapshot();
+    Map<String, CardUnlockState> invalid = new LinkedHashMap<>();
+    invalid.put("strike", CardUnlockState.SEEN);
+    invalid.put("defend", null);
+
+    assertThrows(IllegalArgumentException.class, () -> service.mergeProgress(null));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> service.mergeProgress(Map.of(" ", CardUnlockState.SEEN)));
+    assertThrows(IllegalArgumentException.class, () -> service.mergeProgress(invalid));
+    assertEquals(before, service.getProgressSnapshot());
+  }
+
+  @Test
+  void shouldNotifyOnlyForEntriesChangedByMerge() {
+    CardDiscoveryService service = createService();
+    service.recordSeen("strike");
+    @SuppressWarnings("unchecked")
+    EventListener1<CardEntryView> listener =
+        (EventListener1<CardEntryView>) mock(EventListener1.class);
+    service.getEvents().addListener(CardDiscoveryService.ENTRY_UPDATED_EVENT, listener);
+
+    service.mergeProgress(
+        Map.of(
+            "strike", CardUnlockState.LOCKED,
+            "defend", CardUnlockState.SEEN,
+            "retired_card", CardUnlockState.SEEN));
+
+    ArgumentCaptor<CardEntryView> update = ArgumentCaptor.forClass(CardEntryView.class);
+    verify(listener, times(1)).handle(update.capture());
+    assertEquals("defend", update.getValue().cardId());
+    assertEquals(CardUnlockState.SEEN, update.getValue().unlockState());
+  }
+
+  @Test
   void shouldNotifyOnlyForActualChanges() {
     CardDiscoveryService service = createService();
     @SuppressWarnings("unchecked")
