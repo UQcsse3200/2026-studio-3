@@ -2,12 +2,12 @@
   "encounters": [
     {
       "id": "mysterious-shrine",
-      "description": "An ancient shrine hums with an unsettling energy.",
+      "description": "A cracked sanctum shrine still burns with a god's spoiled light. An angel might leave an offering here to learn what the fallen still demand.",
       "weight": 3,
       "choices": [
         {
           "id": "make-offering",
-          "description": "Offer some of your vitality.",
+          "description": "Bleed a little of your light into the shrine.",
           "outcome": {
             "healthDelta": -10,
             "currencyDelta": 25
@@ -15,7 +15,7 @@
         },
         {
           "id": "leave",
-          "description": "Leave the shrine untouched.",
+          "description": "Pass without kneeling.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0
@@ -25,7 +25,7 @@
     },
     {
       "id": "healing-spring",
-      "description": "A clear spring glows softly beside the path.",
+      "description": "Water wells from broken stone where a sanctum once washed the wounded. An angel could drink and rise again for the climb ahead.",
       "weight": 2,
       "choices": [
         {
@@ -38,7 +38,7 @@
         },
         {
           "id": "leave",
-          "description": "Continue without drinking.",
+          "description": "Leave the water for whatever still wanders here.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0
@@ -48,7 +48,7 @@
     },
     {
       "id": "forgotten-cache",
-      "description": "You discover an abandoned cache hidden beneath loose stones.",
+      "description": "Under loose flagstones you find a sanctum cache left by servants who never returned. An angel might claim what they meant for the climb.",
       "weight": 3,
       "choices": [
         {
@@ -60,8 +60,17 @@
           }
         },
         {
+          "id": "claim-iron-oath",
+          "description": "Claim the iron oath tablet sealed inside.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0,
+            "cardRewardId": "iron_oath"
+          }
+        },
+        {
           "id": "leave",
-          "description": "Leave the cache untouched.",
+          "description": "Leave the cache buried.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0
@@ -71,12 +80,12 @@
     },
     {
       "id": "wandering-healer",
-      "description": "A wandering healer offers a restorative draught for a modest fee.",
+      "description": "A faded attendant still tends the hurt along the sanctum road, following orders that once meant mercy. An angel could accept that help without asking who gives it.",
       "weight": 2,
       "choices": [
         {
           "id": "purchase-remedy",
-          "description": "Buy the healer's restorative draught.",
+          "description": "Buy the attendant's restorative draught.",
           "outcome": {
             "healthDelta": 20,
             "currencyDelta": -10
@@ -93,7 +102,7 @@
         },
         {
           "id": "decline",
-          "description": "Politely decline the healer's offer.",
+          "description": "Decline and continue the climb.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0
@@ -103,12 +112,12 @@
     },
     {
       "id": "flooded-crossing",
-      "description": "A flooded crossing blocks the road ahead.",
+      "description": "A flooded sanctum court bars the way upward. An angel must choose how to cross without abandoning the path.",
       "weight": 3,
       "choices": [
         {
           "id": "hire-ferryman",
-          "description": "Pay a ferryman for safe passage.",
+          "description": "Pay a silent ferryman for safe passage.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": -8
@@ -116,7 +125,7 @@
         },
         {
           "id": "ford-river",
-          "description": "Attempt to ford the river alone.",
+          "description": "Wade the flood alone.",
           "outcome": {
             "healthDelta": -8,
             "currencyDelta": 0
@@ -124,7 +133,7 @@
         },
         {
           "id": "wait",
-          "description": "Wait for the water to recede.",
+          "description": "Wait for the waters to sink.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0
@@ -134,7 +143,7 @@
     },
     {
       "id": "abandoned-mine",
-      "description": "The mouth of an abandoned mine promises danger and forgotten riches.",
+      "description": "Beneath the sanctum, old workings still hold relics of the fallen. An angel might risk the dark for tools of release.",
       "weight": 2,
       "choices": [
         {
@@ -146,8 +155,17 @@
           }
         },
         {
+          "id": "recover-doom-sigil",
+          "description": "Pull a doom sigil free from the wall.",
+          "outcome": {
+            "healthDelta": -5,
+            "currencyDelta": 0,
+            "cardRewardId": "doom_sigil"
+          }
+        },
+        {
           "id": "leave",
-          "description": "Leave the mine undisturbed.",
+          "description": "Leave the workings closed.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0
@@ -157,20 +175,62 @@
     },
     {
       "id": "roadside-riddle",
-      "description": "A hooded traveller offers a coin reward for solving a riddle.",
+      "description": "A hooded servant still tests travellers with an old sanctum riddle. An angel who answers may earn coin—or a sealed rite instead.",
       "weight": 2,
       "choices": [
         {
           "id": "answer-riddle",
-          "description": "Attempt to solve the traveller's riddle.",
+          "description": "Answer the riddle for coin.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 12
           }
         },
         {
+          "id": "accept-sealed-pact",
+          "description": "Accept a sealed pact in place of coin.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0,
+            "cardRewardId": "sealed_pact"
+          }
+        },
+        {
           "id": "walk-on",
-          "description": "Continue along the road.",
+          "description": "Walk on without answering.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "corrupted-alchemist",
+      "description": "A sanctum alchemist still mixes reagents from the corruption itself. An angel might trade for poison—or take a purifying draught.",
+      "weight": 2,
+      "choices": [
+        {
+          "id": "buy-poison-flask",
+          "description": "Trade coins for a poison flask.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": -12,
+            "cardRewardId": "poison_flask"
+          }
+        },
+        {
+          "id": "take-purify",
+          "description": "Accept a purifying tincture for free.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0,
+            "cardRewardId": "purify"
+          }
+        },
+        {
+          "id": "refuse",
+          "description": "Refuse the bargains.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0
