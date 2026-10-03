@@ -24,6 +24,7 @@ import com.csse3200.game.events.listeners.EventListener2;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -227,6 +228,26 @@ public class BattleController {
   public boolean playerHasStatusEffect(String effectType) {
     CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
     return stats != null && stats.hasStatusEffect(effectType);
+  }
+
+  /**
+   * Returns an immutable snapshot of the player's active status effects and remaining durations.
+   *
+   * <p>The returned map is safe for UI and integration code to read. Modifying the result cannot
+   * alter the player's combat state. A duration greater than zero is the number of turns remaining;
+   * zero or less represents an effect without a finite duration.
+   *
+   * @return immutable mapping from status effect type to remaining duration, or an empty map when
+   *     the player has no combat stats
+   */
+  public Map<String, Integer> getPlayerStatusEffectDurations() {
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+
+    if (stats == null) {
+      return Map.of();
+    }
+
+    return stats.getStatusEffectDurations();
   }
 
   /** Target IDs of living enemies whose taunt is active on the player. */

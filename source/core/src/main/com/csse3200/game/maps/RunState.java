@@ -205,6 +205,40 @@ public class RunState {
 
     this.mapGraph = mapGraph;
     this.activeNodeId = activeNodeId;
+
+    // A mid-battle save leaves that node's state as CURRENT, since only a completed encounter
+    // flips it to COMPLETED (see enterEncounter()/completeEncounter()). On restore, a save is
+    // always resumed to the Map rather than mid-battle (see GameStateSnapshotProvider), so a
+    // node still marked CURRENT here is one whose encounter never actually finished. Left as
+    // CURRENT, MapSelectionController.isSelectable() rejects it (only AVAILABLE is selectable),
+    // permanently stranding the player: the node can't be re-entered, and since it never
+    // COMPLETED, the next nodes never unlock either. Revert it to AVAILABLE so the player can
+    // re-select and retry it, same outcome as abandoning the encounter normally. (Found via a
+    // real repro from Jayden, Team 4 — mid-battle saving wasn't possible before their pause-menu
+    // save button existed, so this state combination was previously unreachable.)
+    if (activeNodeId != null) {
+      MapNode interruptedNode = mapGraph.getNode(activeNodeId);
+      if (interruptedNode != null && interruptedNode.getState() == NodeState.CURRENT) {
+        interruptedNode.setState(NodeState.AVAILABLE);
+
+        // Reverting the node's own state isn't enough on its own: MapGraph.currentNode was also
+        // restored (by buildMapGraph(), before this method runs) to point at this same
+        // interrupted node, and moveToNode() requires currentNode's connections to contain the
+        // target -- a node is never its own connection, so the reverted-to-AVAILABLE node would
+        // still be permanently unselectable. previousNode isn't persisted (a known gap, PR #220,
+        // Zaidan), so it can't be restored directly; instead, move currentNode to any COMPLETED
+        // neighbour of the interrupted node -- a real prior position the player actually came
+        // from -- using restoreCurrentNode(), which sets it directly without the connectivity
+        // check that would otherwise apply.
+        for (MapNode neighbour : interruptedNode.getConnections()) {
+          if (neighbour.getState() == NodeState.COMPLETED) {
+            mapGraph.restoreCurrentNode(neighbour.getNodeId());
+            break;
+          }
+        }
+      }
+    }
+
     // A fresh seed covers saves made before the seed was recorded; restoreEncounterSeed puts
     // back the saved one when there is one.
     this.encounterSeed = new Random().nextLong();
