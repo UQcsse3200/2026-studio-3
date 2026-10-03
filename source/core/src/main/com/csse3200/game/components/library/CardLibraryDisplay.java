@@ -373,7 +373,8 @@ public class CardLibraryDisplay extends UIComponent {
   }
 
   private void showResolvedCard(ResolvedCard card) {
-    boolean useUncommonFrame = card.rarity() == Rarity.UNCOMMON;
+    boolean useUncommonFrame =
+        card.rarity() == Rarity.UNCOMMON && !widgetAssets.hasAuthoredFrame(card.rarity());
     lockedPreview.setVisible(false);
 
     if (useUncommonFrame) {

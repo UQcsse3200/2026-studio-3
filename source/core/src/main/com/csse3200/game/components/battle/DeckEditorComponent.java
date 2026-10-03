@@ -3,8 +3,9 @@ package com.csse3200.game.components.battle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -14,10 +15,15 @@ import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.cards.runtime.CardInstance;
+import com.csse3200.game.cards.runtime.CardResolver;
+import com.csse3200.game.cards.runtime.ResolvedCard;
+import com.csse3200.game.components.cards.CardWidget;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.spritedisplay.clickable.CardImageSkins;
 import com.csse3200.game.components.spritedisplay.clickable.Clickable;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
+import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.PopupDisplay;
 import com.csse3200.game.ui.UIComponent;
 import java.util.ArrayList;
@@ -95,6 +101,8 @@ public class DeckEditorComponent extends UIComponent {
   private Label summaryLabel;
   private Label errorLabel;
   private Cell<Actor> gridSpacerCell;
+  private CardWidgetAssets cardWidgetAssets;
+  private Skin framedCardSkin;
 
   /**
    * @param cardPlayService source of the player's card pool/hand and the rearrange operation
@@ -123,6 +131,12 @@ public class DeckEditorComponent extends UIComponent {
   @Override
   public void create() {
     super.create();
+    if (ServiceLocator.getResourceService() != null) {
+      cardWidgetAssets =
+          CardWidgetAssets.fromManagedResources(skin, ServiceLocator.getResourceService());
+      framedCardSkin = new Skin();
+      framedCardSkin.add("default", new ImageButton.ImageButtonStyle());
+    }
     entity.getEvents().addListener(SELECT_TRIGGER, this::toggleSelection);
     entity.getEvents().addListener(PREV_PAGE_TRIGGER, this::previousPage);
     entity.getEvents().addListener(NEXT_PAGE_TRIGGER, this::nextPage);
@@ -238,6 +252,8 @@ public class DeckEditorComponent extends UIComponent {
     int end = Math.min(pool.size(), start + PAGE_SIZE);
 
     List<ClickableRecord> cardRecords = new ArrayList<>();
+    Map<String, ResolvedCard> framedCards = new HashMap<>();
+    CardResolver resolver = new CardResolver();
     for (int i = start; i < end; i++) {
       CardInstance instance = pool.get(i);
       Optional<CardConfig> maybeCard = library.getCard(instance.cardId());
@@ -255,14 +271,21 @@ public class DeckEditorComponent extends UIComponent {
       float screenBottomY = screenTopY - CARD_HEIGHT;
       float recordY = stageHeight - screenBottomY;
 
-      Skin cardSkin = CardImageSkins.forTexturePath(card.texturePath);
+      ResolvedCard resolved = resolver.resolve(card, instance);
+      boolean useFramedFace =
+          cardWidgetAssets != null && cardWidgetAssets.hasAuthoredFrame(resolved.rarity());
+      Skin cardSkin =
+          useFramedFace ? framedCardSkin : CardImageSkins.forTexturePath(card.texturePath);
+      if (useFramedFace) {
+        framedCards.put(instance.instanceId(), resolved);
+      }
 
       // Discarded (on-cooldown) cards stay selectable here — see rearrangeHand's javadoc — so this
       // deliberately never sets ClickableRecord.disabled(true); discarded/selected state is shown
       // entirely through applySelectionHighlights' tinting instead.
       ClickableRecord record =
           ClickableRecord.builder(SELECT_TRIGGER)
-              .label(card.name)
+              .label(resolved.name())
               .position(screenX, recordY)
               .size(CARD_WIDTH, CARD_HEIGHT)
               .skin(cardSkin)
@@ -293,6 +316,13 @@ public class DeckEditorComponent extends UIComponent {
             .build();
 
     poolFactory.rebuildByTrigger(SELECT_TRIGGER, cardRecords);
+    for (Clickable clickable : poolFactory.getByTrigger(SELECT_TRIGGER)) {
+      Object[] args = clickable.getArgs();
+      ResolvedCard resolved = args.length == 0 ? null : framedCards.get(String.valueOf(args[0]));
+      if (resolved != null) {
+        clickable.setVisualContent(() -> new CardWidget(resolved, cardWidgetAssets));
+      }
+    }
     poolFactory.rebuildByTrigger(PREV_PAGE_TRIGGER, List.of(prevRecord));
     poolFactory.rebuildByTrigger(NEXT_PAGE_TRIGGER, List.of(nextRecord));
     applySelectionHighlights();
@@ -309,12 +339,26 @@ public class DeckEditorComponent extends UIComponent {
         continue;
       }
       Color tint = tintFor(discardedInstances.contains(instance), selected.contains(instance));
-      Button btn = widget.getBtn();
-      btn.setColor(tint);
-      for (Actor child : btn.getChildren()) {
-        child.setColor(tint);
+      applyTint(widget.getBtn(), tint);
+    }
+  }
+
+  private static void applyTint(Actor actor, Color tint) {
+    actor.setColor(tint);
+    if (actor instanceof Group group) {
+      for (Actor child : group.getChildren()) {
+        applyTint(child, tint);
       }
     }
+  }
+
+  @Override
+  public void dispose() {
+    onClosed();
+    if (framedCardSkin != null) {
+      framedCardSkin.dispose();
+    }
+    super.dispose();
   }
 
   private static Color tintFor(boolean discarded, boolean selected) {

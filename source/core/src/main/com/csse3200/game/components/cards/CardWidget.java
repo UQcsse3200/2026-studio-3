@@ -10,16 +10,15 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.cards.runtime.ResolvedCard;
-import java.util.Locale;
 import java.util.Objects;
 
 /**
  * Presentation-only Scene2D card face bound to one {@link ResolvedCard}.
  *
- * <p>The widget renders the resolved name, energy cost, rarity, type, rules description, artwork
- * and upgrade marker. It performs no card lookup, upgrade calculation, input handling, targeting or
- * deck mutation. Interactive consumers should embed this actor inside their own click/drag/hover
- * actor.
+ * <p>The widget renders the resolved name, energy cost, type, target, rules description, artwork
+ * and upgrade marker. Frame styling communicates rarity; the Library retains detailed metadata. It
+ * performs no card lookup, upgrade calculation, input handling, targeting or deck mutation.
+ * Interactive consumers should embed this actor inside their own click/drag/hover actor.
  */
 public final class CardWidget extends Stack {
   /** Intended in-game card width. */
@@ -33,7 +32,8 @@ public final class CardWidget extends Stack {
   private static final float FACE_PADDING = 6f;
   private static final float HEADER_HEIGHT = 40f;
   private static final float ARTWORK_HEIGHT = 226f;
-  private static final float META_HEIGHT = 28f;
+  private static final float TYPE_HEIGHT = 28f;
+  private static final float TARGET_HEIGHT = 18f;
   private static final float COST_BADGE_SIZE = 34f;
   private static final float UPGRADE_BADGE_SIZE = 24f;
   private static final float NAME_TEXT_WIDTH = 123f;
@@ -47,9 +47,11 @@ public final class CardWidget extends Stack {
   private final Image artwork;
   private final Label nameLabel;
   private final Label costLabel;
-  private final Label metaLabel;
+  private final Label typeLabel;
+  private final Label targetLabel;
   private final Label descriptionLabel;
   private final Label upgradeLabel;
+  private FramedCardFace authoredFace;
   private ResolvedCard card;
 
   /**
@@ -99,13 +101,23 @@ public final class CardWidget extends Stack {
     artworkFrame.pad(2f);
     artworkFrame.add(artworkStack).minSize(0f).expand().fill();
 
-    metaLabel = new Label("", assets.metaStyle());
-    metaLabel.setAlignment(Align.center);
-    metaLabel.setTouchable(Touchable.disabled);
-    Table metaPlate = new Table();
-    metaPlate.setTouchable(Touchable.disabled);
-    metaPlate.setBackground(assets.namePlate());
-    metaPlate.add(metaLabel).expand().fill();
+    typeLabel = new Label("", assets.targetStyle());
+    typeLabel.setName("card-type");
+    typeLabel.setAlignment(Align.center);
+    typeLabel.setTouchable(Touchable.disabled);
+    Table typePlate = new Table();
+    typePlate.setTouchable(Touchable.disabled);
+    typePlate.setBackground(assets.namePlate());
+    typePlate.add(typeLabel).minSize(0f).expand().fill();
+
+    targetLabel = new Label("", assets.targetStyle());
+    targetLabel.setName("card-target");
+    targetLabel.setAlignment(Align.center);
+    targetLabel.setTouchable(Touchable.disabled);
+    Table targetPlate = new Table();
+    targetPlate.setTouchable(Touchable.disabled);
+    targetPlate.setBackground(assets.namePlate());
+    targetPlate.add(targetLabel).minSize(0f).expand().fill();
 
     descriptionLabel = new Label("", assets.descriptionStyle());
     descriptionLabel.setAlignment(Align.center);
@@ -149,9 +161,11 @@ public final class CardWidget extends Stack {
     face.row();
     face.add(artworkFrame).height(ARTWORK_HEIGHT).expandX().fillX().padTop(6f);
     face.row();
-    face.add(metaPlate).height(META_HEIGHT).expandX().fillX().padTop(5f);
+    face.add(typePlate).height(TYPE_HEIGHT).expandX().fillX().padTop(5f);
     face.row();
     face.add(descriptionFrame).minSize(0f).expand().fill().padTop(5f);
+    face.row();
+    face.add(targetPlate).height(TARGET_HEIGHT).expandX().fillX().padTop(3f);
 
     Table innerRim = new Table();
     innerRim.setTouchable(Touchable.disabled);
@@ -160,7 +174,6 @@ public final class CardWidget extends Stack {
     innerRim.add(face).minSize(0f).expand().fill();
     frame.add(innerRim).minSize(0f).expand().fill();
 
-    add(frame);
     setCard(card);
   }
 
@@ -171,8 +184,8 @@ public final class CardWidget extends Stack {
     nameLabel.setText(card.name());
     fitName(card.name());
     costLabel.setText(Integer.toString(card.cost()));
-    metaLabel.setText(formatEnum(card.type().name()) + "  |  " + formatEnum(card.rarity().name()));
-    metaLabel.setColor(assets.colourFor(card.rarity()));
+    typeLabel.setText(FramedCardFace.formatType(card.type()));
+    targetLabel.setText(FramedCardFace.formatTarget(card.target()));
     descriptionLabel.setText(card.description());
     frame.setBackground(assets.frameFor(card.rarity()));
     artworkFrame.setBackground(assets.frameFor(card.rarity()));
@@ -182,6 +195,28 @@ public final class CardWidget extends Stack {
     artwork.setDrawable(artworkDrawable);
     artwork.setVisible(artworkDrawable != null);
     upgradeLabel.getParent().setVisible(card.upgraded());
+
+    if (usesAuthoredFrame()) {
+      CardFrameLayout layout = assets.frameLayoutFor(card.rarity());
+      if (authoredFace == null || authoredFace.frameLayout() != layout) {
+        if (authoredFace != null) {
+          authoredFace.remove();
+        }
+        authoredFace = new FramedCardFace(assets, assets.authoredFrameFor(card.rarity()), layout);
+      }
+      authoredFace.setCard(card);
+      frame.remove();
+      if (authoredFace.getParent() != this) {
+        add(authoredFace);
+      }
+    } else {
+      if (authoredFace != null) {
+        authoredFace.remove();
+      }
+      if (frame.getParent() != this) {
+        add(frame);
+      }
+    }
 
     invalidateHierarchy();
   }
@@ -194,8 +229,14 @@ public final class CardWidget extends Stack {
   @Override
   public void layout() {
     super.layout();
-    CardTextFitter.fit(descriptionLabel, 1f);
-    descriptionLabel.validate();
+    if (!usesAuthoredFrame()) {
+      CardTextFitter.fit(typeLabel, 1f);
+      typeLabel.validate();
+      CardTextFitter.fit(targetLabel, 0.72f);
+      targetLabel.validate();
+      CardTextFitter.fit(descriptionLabel, 1f);
+      descriptionLabel.validate();
+    }
   }
 
   @Override
@@ -219,49 +260,56 @@ public final class CardWidget extends Stack {
   }
 
   String displayedName() {
-    return nameLabel.getText().toString();
+    return usesAuthoredFrame() ? authoredFace.displayedName() : nameLabel.getText().toString();
   }
 
   String displayedCost() {
-    return costLabel.getText().toString();
+    return usesAuthoredFrame() ? authoredFace.displayedCost() : costLabel.getText().toString();
   }
 
-  String displayedMeta() {
-    return metaLabel.getText().toString();
+  String displayedTarget() {
+    return usesAuthoredFrame() ? authoredFace.displayedTarget() : targetLabel.getText().toString();
+  }
+
+  String displayedType() {
+    return usesAuthoredFrame() ? authoredFace.displayedType() : typeLabel.getText().toString();
   }
 
   String displayedDescription() {
-    return descriptionLabel.getText().toString();
+    return usesAuthoredFrame()
+        ? authoredFace.displayedDescription()
+        : descriptionLabel.getText().toString();
   }
 
   Drawable displayedArtwork() {
-    return artwork.getDrawable();
+    return usesAuthoredFrame() ? authoredFace.displayedArtwork() : artwork.getDrawable();
   }
 
   boolean isArtworkVisible() {
-    return artwork.isVisible();
+    return usesAuthoredFrame() ? authoredFace.isArtworkVisible() : artwork.isVisible();
   }
 
   boolean displaysUpgradeMarker() {
-    return upgradeLabel.getParent().isVisible();
+    return usesAuthoredFrame()
+        ? authoredFace.displaysUpgradeMarker()
+        : upgradeLabel.getParent().isVisible();
   }
 
   Drawable displayedFrame() {
-    return frame.getBackground();
+    return usesAuthoredFrame() ? authoredFace.displayedFrame() : frame.getBackground();
   }
 
   float displayedNameScale() {
-    return nameLabel.getFontScaleX();
+    return usesAuthoredFrame() ? authoredFace.displayedNameScale() : nameLabel.getFontScaleX();
+  }
+
+  private boolean usesAuthoredFrame() {
+    return assets.hasAuthoredFrame(card.rarity());
   }
 
   private void fitName(String name) {
     GlyphLayout layout = new GlyphLayout(nameLabel.getStyle().font, name);
     float scale = layout.width == 0f ? 1f : Math.min(1f, NAME_TEXT_WIDTH / layout.width);
     nameLabel.setFontScale(Math.max(MIN_NAME_SCALE, scale));
-  }
-
-  private static String formatEnum(String value) {
-    String lowerCase = value.toLowerCase(Locale.ROOT).replace('_', ' ');
-    return Character.toUpperCase(lowerCase.charAt(0)) + lowerCase.substring(1);
   }
 }

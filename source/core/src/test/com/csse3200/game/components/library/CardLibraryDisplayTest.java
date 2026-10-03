@@ -2,6 +2,8 @@ package com.csse3200.game.components.library;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -14,13 +16,17 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardEntryView;
 import com.csse3200.game.cards.CardUnlockState;
 import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.components.cards.CardWidget;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.services.ResourceService;
@@ -34,6 +40,50 @@ import org.mockito.ArgumentCaptor;
 
 @ExtendWith(GameExtension.class)
 class CardLibraryDisplayTest {
+  @Test
+  void shouldUseManagedCommonFrameOnlyAfterCardIsDiscovered() {
+    CardDiscoveryService discovery = CardDiscoveryService.loadDefault();
+    CardLibraryDisplay display = createDisplay(discovery);
+    ResourceService resources = ServiceLocator.getResourceService();
+    Texture frame = mock(Texture.class);
+    when(frame.getWidth()).thenReturn(450);
+    when(frame.getHeight()).thenReturn(912);
+    when(resources.containsAsset(CardWidgetAssets.COMMON_FRAME_TEXTURE, Texture.class))
+        .thenReturn(true);
+    when(resources.getAsset(CardWidgetAssets.COMMON_FRAME_TEXTURE, Texture.class))
+        .thenReturn(frame);
+    display.create();
+    assertTrue(display.isLockedArtworkVisible());
+
+    discovery.recordSeen("strike");
+    display.showCard(discovery.getEntry("strike").orElseThrow());
+    ArgumentCaptor<Actor> root = ArgumentCaptor.forClass(Actor.class);
+    verify(ServiceLocator.getRenderService().getStage()).addActor(root.capture());
+    CardWidget widget = findWidget(root.getValue());
+    assertTrue(display.isStandardCardVisible());
+    assertEquals("Strike", widget.getCard().name());
+    Image frameImage = ((Group) widget.getChildren().first()).findActor("card-frame");
+    TextureRegionDrawable drawable =
+        assertInstanceOf(TextureRegionDrawable.class, frameImage.getDrawable());
+    assertSame(frame, drawable.getRegion().getTexture());
+    display.dispose();
+  }
+
+  private static CardWidget findWidget(Actor actor) {
+    if (actor instanceof CardWidget widget) {
+      return widget;
+    }
+    if (actor instanceof Group group) {
+      for (Actor child : group.getChildren()) {
+        CardWidget found = findWidget(child);
+        if (found != null) {
+          return found;
+        }
+      }
+    }
+    return null;
+  }
+
   @Test
   void shouldRenderLockedPlaceholders() {
     CardDiscoveryService discovery = CardDiscoveryService.loadDefault();

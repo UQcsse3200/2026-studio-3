@@ -17,6 +17,10 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.cards.runtime.CardResolver;
+import com.csse3200.game.components.cards.CardWidget;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.maps.EncounterCallback;
 import com.csse3200.game.services.ResourceService;
@@ -146,7 +150,7 @@ public class ShopDisplay extends UIComponent {
       InventoryComponent inventory, ShopEncounter shopEncounter, CardService cardService) {
     this.shopEncounter =
         shopEncounter == null ? new ShopEncounter(inventory, createGeneratedShop()) : shopEncounter;
-    this.cardService = cardService;
+    this.cardService = cardService == null ? ServiceLocator.getCardLibrary() : cardService;
   }
 
   /**
@@ -344,8 +348,16 @@ public class ShopDisplay extends UIComponent {
   }
 
   private Actor createArtwork(ShopItem item) {
-    String texturePath = resolveArtworkPath(item);
     ResourceService resources = ServiceLocator.getResourceService();
+    CardConfig config = cardService == null ? null : cardService.getCard(item.cardId).orElse(null);
+    if (config != null && resources != null) {
+      CardWidgetAssets assets = CardWidgetAssets.fromManagedResources(skin, resources);
+      if (assets.hasAuthoredFrame(config.rarity)) {
+        return new CardWidget(
+            new CardResolver().resolveBasePreview(config, "shop-preview-" + item.id), assets);
+      }
+    }
+    String texturePath = resolveArtworkPath(item);
     if (resources != null && !isLoadedTexture(resources, texturePath)) {
       texturePath = resolveConfiguredArtworkPath(item);
     }

@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 
-/** Fits complete wrapped rules text into the space allocated by a card's fixed layout. */
+/** Fits one whole text block uniformly into its allocated card placeholder. */
 final class CardTextFitter {
   private CardTextFitter() {}
 
@@ -47,7 +47,8 @@ final class CardTextFitter {
 
   private static boolean fits(Label label, BitmapFont font, GlyphLayout layout, float scale) {
     font.getData().setScale(scale);
-    layout.setText(font, label.getText(), Color.WHITE, label.getWidth(), Align.center, true);
+    layout.setText(
+        font, label.getText(), Color.WHITE, label.getWidth(), Align.center, label.getWrap());
     return layout.width <= label.getWidth()
         && layout.height - font.getDescent() * 2f <= label.getHeight();
   }

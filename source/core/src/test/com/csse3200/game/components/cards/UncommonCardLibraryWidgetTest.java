@@ -66,7 +66,7 @@ class UncommonCardLibraryWidgetTest {
     assertAll(
         () -> assertEquals("1", widget.displayedCost()),
         () -> assertEquals("Poison Dagger", widget.displayedName()),
-        () -> assertEquals("Attack  |  Uncommon", widget.displayedMeta()),
+        () -> assertEquals("Attack", widget.displayedType()),
         () -> assertEquals(poisonDagger.description(), widget.displayedDescription()),
         () -> assertEquals("One Enemy", widget.displayedTarget()),
         () -> assertSame(artwork, widget.displayedArtwork()),
@@ -74,8 +74,8 @@ class UncommonCardLibraryWidgetTest {
         () -> assertEquals(CardWidget.CARD_WIDTH, widget.getPrefWidth()),
         () -> assertEquals(CardWidget.CARD_HEIGHT, widget.getPrefHeight()));
 
-    // Backdrop + artwork + frame, followed by one actor for each of the five text placeholders.
-    assertEquals(8, widget.getChildren().size);
+    // Backdrop + artwork + frame, followed by cost, name, rules, type, target and upgrade marker.
+    assertEquals(9, widget.getChildren().size);
     for (Actor placeholder : widget.getChildren()) {
       assertAll(
           () -> assertTrue(placeholder.getWidth() > 0f),
@@ -103,7 +103,7 @@ class UncommonCardLibraryWidgetTest {
     assertAll(
         () -> assertEquals("2", widget.displayedCost()),
         () -> assertEquals("Iron Oath", widget.displayedName()),
-        () -> assertEquals("Power  |  Uncommon", widget.displayedMeta()),
+        () -> assertEquals("Power", widget.displayedType()),
         () -> assertEquals("Gain 4 Armour.", widget.displayedDescription()),
         () -> assertEquals("Self", widget.displayedTarget()),
         () -> assertSame(next, widget.getCard()),
@@ -132,7 +132,10 @@ class UncommonCardLibraryWidgetTest {
           config.id,
           () -> assertEquals(resolved.name(), widget.displayedName()),
           () -> assertEquals(Integer.toString(resolved.cost()), widget.displayedCost()),
-          () -> assertTrue(widget.displayedMeta().contains("Uncommon")),
+          () -> assertEquals(FramedCardFace.formatType(resolved.type()), widget.displayedType()),
+          () ->
+              assertEquals(
+                  FramedCardFace.formatTarget(resolved.target()), widget.displayedTarget()),
           () -> assertEquals(resolved.description(), widget.displayedDescription()),
           () -> assertNotNull(widget.displayedArtwork()));
       for (Actor child : widget.getChildren()) {
@@ -153,6 +156,37 @@ class UncommonCardLibraryWidgetTest {
 
     assertThrows(
         IllegalArgumentException.class, () -> new UncommonCardLibraryWidget(common, assets, frame));
+  }
+
+  @Test
+  void shouldScaleExistingLibraryFrameAndTextTogetherAtSmallerSizes() {
+    ResolvedCard uncommon =
+        card(
+            "Expose",
+            "Apply 2 Vulnerable to all enemies for 2 turns.",
+            1,
+            CardType.SKILL,
+            Rarity.UNCOMMON,
+            TargetType.ALL_ENEMIES);
+    UncommonCardLibraryWidget widget =
+        new UncommonCardLibraryWidget(uncommon, assets, skin.newDrawable("white", Color.SLATE));
+    widget.setSize(150f, 220f);
+    widget.validate();
+    for (Actor child : widget.getChildren()) {
+      assertTrue(child.getX() >= 0f);
+      assertTrue(child.getY() >= 0f);
+      assertTrue(child.getX() + child.getWidth() <= widget.getWidth() + 0.01f);
+      assertTrue(child.getY() + child.getHeight() <= widget.getHeight() + 0.01f);
+      if (child instanceof Label label) {
+        label.validate();
+        assertTrue(label.getGlyphLayout().width <= label.getWidth() + 0.01f);
+        assertTrue(label.getPrefHeight() <= label.getHeight() + 0.01f);
+      }
+    }
+    assertEquals("All Enemies", widget.displayedTarget());
+    Label type = widget.findActor("card-type");
+    Label target = widget.findActor("card-target");
+    assertTrue(type.getY() > target.getY());
   }
 
   private static ResolvedCard card(

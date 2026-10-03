@@ -41,7 +41,7 @@ class RepresentativeStrikeCardWidgetIntegrationTest {
   void setUp() {
     skin = new Skin(Gdx.files.internal("flat-earth/skin/flat-earth-ui.json"));
     resources = new ResourceService();
-    resources.loadTextures(new String[] {STRIKE_ART});
+    resources.loadTextures(new String[] {STRIKE_ART, CardWidgetAssets.COMMON_FRAME_TEXTURE});
     resources.loadAll();
   }
 
@@ -71,11 +71,15 @@ class RepresentativeStrikeCardWidgetIntegrationTest {
     Texture managedTexture = baseArtwork.getRegion().getTexture();
     assertEquals("Strike", widget.displayedName());
     assertEquals("1", widget.displayedCost());
-    assertEquals("Attack  |  Common", widget.displayedMeta());
+    assertEquals("One Enemy", widget.displayedTarget());
+    assertEquals("Attack", widget.displayedType());
     assertEquals("Deal 6 damage.", widget.displayedDescription());
     assertEquals(CardWidget.CARD_WIDTH, widget.getPrefWidth());
     assertEquals(CardWidget.CARD_HEIGHT, widget.getPrefHeight());
     assertEquals(Scaling.fit, CardWidget.ARTWORK_SCALING);
+    assertSame(
+        resources.getAsset(CardWidgetAssets.COMMON_FRAME_TEXTURE, Texture.class),
+        ((TextureRegionDrawable) widget.displayedFrame()).getRegion().getTexture());
     assertEquals(1024, managedTexture.getWidth());
     assertEquals(768, managedTexture.getHeight());
     assertEquals(Texture.TextureFilter.Nearest, managedTexture.getMinFilter());

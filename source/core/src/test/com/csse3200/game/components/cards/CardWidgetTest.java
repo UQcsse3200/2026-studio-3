@@ -64,7 +64,8 @@ class CardWidgetTest {
 
     assertEquals("Strike", widget.displayedName());
     assertEquals("1", widget.displayedCost());
-    assertEquals("Attack  |  Common", widget.displayedMeta());
+    assertEquals("Attack", widget.displayedType());
+    assertEquals("One Enemy", widget.displayedTarget());
     assertEquals("Deal 6 damage.", widget.displayedDescription());
     assertSame(strikeArtwork, widget.displayedArtwork());
     assertTrue(widget.isArtworkVisible());
@@ -83,7 +84,8 @@ class CardWidgetTest {
 
     assertEquals("Strike+", widget.displayedName());
     assertEquals("0", widget.displayedCost());
-    assertEquals("Attack  |  Rare", widget.displayedMeta());
+    assertEquals("Attack", widget.displayedType());
+    assertEquals("One Enemy", widget.displayedTarget());
     assertEquals("Deal 12 damage.", widget.displayedDescription());
     assertSame(strikeArtwork, widget.displayedArtwork());
     assertTrue(widget.displaysUpgradeMarker());
@@ -101,6 +103,39 @@ class CardWidgetTest {
     assertEquals(CardWidget.CARD_WIDTH, widget.getPrefWidth());
     assertEquals(CardWidget.CARD_HEIGHT, widget.getPrefHeight());
     assertEquals(Scaling.fit, CardWidget.ARTWORK_SCALING);
+  }
+
+  @Test
+  void shouldKeepTypeAndTargetSeparateWhenFallbackFaceIsRebound() {
+    ResolvedCard attack = card("Strike", "Deal 6 damage.", 1, Rarity.COMMON, false);
+    CardWidget widget = new CardWidget(attack, assets);
+    widget.validate();
+    Label type = widget.findActor("card-type");
+    Label target = widget.findActor("card-target");
+    assertEquals("Attack", type.getText().toString());
+    assertEquals("One Enemy", target.getText().toString());
+    assertNotSame(type, target);
+
+    ResolvedCard skill =
+        new ResolvedCard(
+            attack.instanceId(),
+            attack.cardId(),
+            "Defend",
+            "Gain 5 Block.",
+            attack.cost(),
+            CardType.SKILL,
+            attack.rarity(),
+            TargetType.SELF,
+            attack.effects(),
+            attack.texturePath(),
+            false);
+    widget.setCard(skill);
+    widget.validate();
+    assertEquals("Skill", widget.displayedType());
+    assertEquals("Self", widget.displayedTarget());
+    assertEquals("Skill", type.getText().toString());
+    assertEquals("Self", target.getText().toString());
+    assertEquals("Gain 5 Block.", widget.displayedDescription());
   }
 
   @Test
@@ -166,6 +201,7 @@ class CardWidgetTest {
 
       assertEquals(resolved.name(), widget.displayedName(), config.id);
       assertEquals(Integer.toString(resolved.cost()), widget.displayedCost(), config.id);
+      assertEquals(FramedCardFace.formatType(resolved.type()), widget.displayedType(), config.id);
       assertEquals(resolved.description(), widget.displayedDescription(), config.id);
       assertFalse(widget.displaysUpgradeMarker(), config.id);
     }

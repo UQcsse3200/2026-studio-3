@@ -2,17 +2,24 @@ package com.csse3200.game.components.spritedisplay.displaying;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.Layout;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.csse3200.game.cards.CardAcquisitionPool;
 import com.csse3200.game.cards.CardConfigLoader;
@@ -22,6 +29,7 @@ import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.CardUnlockState;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.components.cards.CardWidget;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.extensions.GameExtension;
@@ -143,6 +151,39 @@ class RewardDisplayTest {
       assertEquals(config.rarity, widget.getCard().rarity());
       assertEquals(config.type, widget.getCard().type());
       assertFalse(widget.getCard().upgraded());
+    }
+  }
+
+  @Test
+  void commonRewardsUseSharedManagedFrameAndStillKeepEqualBounds() {
+    Texture frame = mock(Texture.class);
+    when(frame.getWidth()).thenReturn(450);
+    when(frame.getHeight()).thenReturn(912);
+    ResourceService resources = ServiceLocator.getResourceService();
+    when(resources.containsAsset(CardWidgetAssets.COMMON_FRAME_TEXTURE, Texture.class))
+        .thenReturn(true);
+    when(resources.getAsset(CardWidgetAssets.COMMON_FRAME_TEXTURE, Texture.class))
+        .thenReturn(frame);
+    CardAcquisitionPool pool =
+        new CardAcquisitionPool(cardService, List.of("strike", "defend", "bandage"));
+    RewardDisplay display =
+        createDisplay(new RewardService(fixedRewardGenerator(), cardService, pool, new Random(7)));
+    stage.getViewport().update(1280, 960, true);
+    cardButton(display).fire(new ChangeEvent());
+    for (Actor actor : stage.getActors()) {
+      if (actor instanceof Layout layout) {
+        layout.validate();
+      }
+    }
+
+    assertEquals(3, display.getCardWidgets().size());
+    for (CardWidget widget : display.getCardWidgets()) {
+      assertEquals(CardWidget.CARD_WIDTH, widget.getWidth());
+      assertEquals(CardWidget.CARD_HEIGHT, widget.getHeight());
+      Image frameImage = ((Group) widget.getChildren().first()).findActor("card-frame");
+      TextureRegionDrawable drawable =
+          assertInstanceOf(TextureRegionDrawable.class, frameImage.getDrawable());
+      assertSame(frame, drawable.getRegion().getTexture());
     }
   }
 
