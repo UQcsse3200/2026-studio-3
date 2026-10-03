@@ -436,6 +436,28 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
+   * Returns an immutable snapshot of the active status effects and their remaining durations.
+   *
+   * <p>The returned map is detached from this component's internal status collection. Callers
+   * cannot add, remove or replace entries, and later changes to this component do not alter an
+   * earlier snapshot.
+   *
+   * <p>A duration greater than zero is the number of turns remaining. A duration of zero or less
+   * represents an effect without a finite duration.
+   *
+   * @return immutable mapping from status effect type to remaining duration
+   */
+  public Map<String, Integer> getStatusEffectDurations() {
+    Map<String, Integer> durations = new HashMap<>();
+
+    for (Map.Entry<String, StatusEffect> entry : statusEffects.entrySet()) {
+      durations.put(entry.getKey(), entry.getValue().getDuration());
+    }
+
+    return Map.copyOf(durations);
+  }
+
+  /**
    * Explicitly removes a status effect from this entity, if present.
    *
    * @param type status effect type identifier
