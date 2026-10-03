@@ -758,4 +758,25 @@ class Team3CardPlayAdapterTest {
     assertTrue(battle.outcomes().isEmpty());
     assertEquals(BattlePhase.PLAYER_TURN, battle.controller().getCurrentPhase());
   }
+
+  @Test
+  void shouldResolveDefeatOnceWhenBothSidesDieFromOnePlay() {
+    DamageBattle battle = createDamageBattle(2, 5, 1);
+
+    battle
+        .battleFlow()
+        .getEvents()
+        .trigger(
+            Team3CardPlayAdapter.PLAY_CARD_EVENT,
+            battle.strikeInstance().instanceId(),
+            "enemy");
+
+    assertEquals(0, battle.enemyStats().getHealth());
+    assertEquals(0, battle.playerStats().getHealth());
+    assertEquals(2, battle.energy().getCurrentEnergy());
+    assertEquals(
+        List.of(battle.strikeInstance().instanceId()), battle.playedInstances());
+    assertEquals(BattlePhase.DEFEAT, battle.controller().getCurrentPhase());
+    assertEquals(List.of(false), battle.outcomes());
+  }
 }
