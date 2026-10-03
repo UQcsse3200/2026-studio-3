@@ -31,7 +31,7 @@ public class MainMenuActions extends Component {
   private void onStart() {
     logger.info("Opening map");
     game.getRunState().endRun();
-    game.setScreen(GdxGame.ScreenType.MAP);
+    game.showNarration("opening", GdxGame.ScreenType.MAP);
   }
 
   /** Opens the Save/Load screen. */
