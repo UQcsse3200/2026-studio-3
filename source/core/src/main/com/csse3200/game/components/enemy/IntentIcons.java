@@ -3,8 +3,8 @@ package com.csse3200.game.components.enemy;
 /**
  * Maps enemy intents to their HUD icon textures.
  *
- * <p>The textures live under {@code images/enemies/intents/} and are queued for loading by
- * {@code EnemyFactory.loadAssets()}.
+ * <p>The textures live under {@code images/enemies/intents/} and are queued for loading by {@code
+ * EnemyFactory.loadAssets()}.
  */
 public final class IntentIcons {
   private static final String DIR = "images/enemies/intents/";
@@ -25,14 +25,7 @@ public final class IntentIcons {
    * Any newly added icon must also be added here.
    */
   private static final String[] ALL = {
-          ATTACK,
-          DEFEND,
-          BUFF,
-          DEBUFF,
-          UNKNOWN,
-          SILENCE,
-          DAMAGE_ON_CARD_PLAY,
-          TAUNT
+    ATTACK, DEFEND, BUFF, DEBUFF, UNKNOWN, SILENCE, DAMAGE_ON_CARD_PLAY, TAUNT
   };
 
   /**

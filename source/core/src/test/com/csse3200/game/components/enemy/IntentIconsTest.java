@@ -35,43 +35,35 @@ class IntentIconsTest {
   @Test
   void shouldReturnSilenceIconForSilenceDebuff() {
     assertEquals(
-            IntentIcons.SILENCE,
-            IntentIcons.pathFor(IntentType.DEBUFF, IntentEffectType.SILENCE));
+        IntentIcons.SILENCE, IntentIcons.pathFor(IntentType.DEBUFF, IntentEffectType.SILENCE));
   }
 
   @Test
   void shouldReturnDamageOnCardPlayIconForDamageOnCardPlayDebuff() {
     assertEquals(
-            IntentIcons.DAMAGE_ON_CARD_PLAY,
-            IntentIcons.pathFor(
-                    IntentType.DEBUFF, IntentEffectType.DAMAGE_ON_CARD_PLAY));
+        IntentIcons.DAMAGE_ON_CARD_PLAY,
+        IntentIcons.pathFor(IntentType.DEBUFF, IntentEffectType.DAMAGE_ON_CARD_PLAY));
   }
 
   @Test
   void shouldReturnGenericDebuffIconWhenEffectTypeIsNull() {
-    assertEquals(
-            IntentIcons.DEBUFF,
-            IntentIcons.pathFor(IntentType.DEBUFF, null));
+    assertEquals(IntentIcons.DEBUFF, IntentIcons.pathFor(IntentType.DEBUFF, null));
   }
 
   @Test
   void shouldIgnoreEffectTypeForNonDebuffIntents() {
     assertEquals(
-            IntentIcons.ATTACK,
-            IntentIcons.pathFor(IntentType.ATTACK, IntentEffectType.SILENCE));
+        IntentIcons.ATTACK, IntentIcons.pathFor(IntentType.ATTACK, IntentEffectType.SILENCE));
 
     assertEquals(
-            IntentIcons.DEFEND,
-            IntentIcons.pathFor(
-                    IntentType.DEFEND, IntentEffectType.DAMAGE_ON_CARD_PLAY));
+        IntentIcons.DEFEND,
+        IntentIcons.pathFor(IntentType.DEFEND, IntentEffectType.DAMAGE_ON_CARD_PLAY));
   }
 
   @Test
   void shouldReturnUnknownIconWhenIntentTypeIsNull() {
     assertEquals(IntentIcons.UNKNOWN, IntentIcons.pathFor(null));
-    assertEquals(
-            IntentIcons.UNKNOWN,
-            IntentIcons.pathFor(null, IntentEffectType.SILENCE));
+    assertEquals(IntentIcons.UNKNOWN, IntentIcons.pathFor(null, IntentEffectType.SILENCE));
   }
 
   @Test

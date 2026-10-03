@@ -651,14 +651,12 @@ class BattleControllerTest {
 
   @Test
   void shouldReturnPlayerStatusDurations() {
-    CombatStatsComponent playerStats =
-            player.getComponent(CombatStatsComponent.class);
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
 
     playerStats.applyStatusEffect("SILENCE", 1, 2);
     playerStats.applyStatusEffect("DAMAGE_ON_CARD_PLAY", 3, 4);
 
-    Map<String, Integer> durations =
-            controller.getPlayerStatusEffectDurations();
+    Map<String, Integer> durations = controller.getPlayerStatusEffectDurations();
 
     assertEquals(2, durations.size());
     assertEquals(2, durations.get("SILENCE"));
@@ -667,21 +665,16 @@ class BattleControllerTest {
 
   @Test
   void shouldReturnUnmodifiablePlayerStatusDurations() {
-    CombatStatsComponent playerStats =
-            player.getComponent(CombatStatsComponent.class);
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
 
     playerStats.applyStatusEffect("SILENCE", 1, 2);
 
-    Map<String, Integer> durations =
-            controller.getPlayerStatusEffectDurations();
+    Map<String, Integer> durations = controller.getPlayerStatusEffectDurations();
 
     assertThrows(
-            UnsupportedOperationException.class,
-            () -> durations.put("DAMAGE_ON_CARD_PLAY", 3));
+        UnsupportedOperationException.class, () -> durations.put("DAMAGE_ON_CARD_PLAY", 3));
 
-    assertThrows(
-            UnsupportedOperationException.class,
-            () -> durations.remove("SILENCE"));
+    assertThrows(UnsupportedOperationException.class, () -> durations.remove("SILENCE"));
 
     assertTrue(playerStats.hasStatusEffect("SILENCE"));
     assertFalse(playerStats.hasStatusEffect("DAMAGE_ON_CARD_PLAY"));
@@ -690,29 +683,24 @@ class BattleControllerTest {
   @Test
   void shouldReturnEmptyPlayerStatusDurationsWhenCombatStatsAreMissing() {
     Entity playerWithoutStats = new Entity();
-    BattleController controllerWithoutStats =
-            new BattleController(playerWithoutStats, enemies);
+    BattleController controllerWithoutStats = new BattleController(playerWithoutStats, enemies);
 
-    Map<String, Integer> durations =
-            controllerWithoutStats.getPlayerStatusEffectDurations();
+    Map<String, Integer> durations = controllerWithoutStats.getPlayerStatusEffectDurations();
 
     assertTrue(durations.isEmpty());
   }
 
   @Test
   void shouldReturnUpdatedPlayerStatusDurationsAfterRemoval() {
-    CombatStatsComponent playerStats =
-            player.getComponent(CombatStatsComponent.class);
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
 
     playerStats.applyStatusEffect("SILENCE", 1, 2);
 
-    Map<String, Integer> beforeRemoval =
-            controller.getPlayerStatusEffectDurations();
+    Map<String, Integer> beforeRemoval = controller.getPlayerStatusEffectDurations();
 
     playerStats.removeStatusEffect("SILENCE");
 
-    Map<String, Integer> afterRemoval =
-            controller.getPlayerStatusEffectDurations();
+    Map<String, Integer> afterRemoval = controller.getPlayerStatusEffectDurations();
 
     assertEquals(Map.of("SILENCE", 2), beforeRemoval);
     assertTrue(afterRemoval.isEmpty());
