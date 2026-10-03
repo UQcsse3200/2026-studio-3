@@ -1,4 +1,5 @@
 package com.csse3200.game.screens;
+import com.csse3200.game.narration.NarrationConfigLoader;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -22,6 +23,9 @@ import org.mockito.MockedStatic;
 
 @ExtendWith(GameExtension.class)
 class NarrationScreenTest {
+  private static String expectedPassage(String sequenceId, int index) {
+    return String.join("\n", NarrationConfigLoader.loadSequence(sequenceId).get(index));
+  }
   private Stage stage;
   private MockedStatic<RenderFactory> factory;
   private NarrationScreen screen;
@@ -69,14 +73,14 @@ class NarrationScreenTest {
   void fadesHoldsAdvancesAndCompletesExactlyOnce() {
     screen = new NarrationScreen("opening", callback);
     advance(0.3f);
-    assertTrue(passage().getText().toString().contains("passage one"));
+    assertEquals(expectedPassage("opening", 0), passage().getText().toString());
     assertTrue(passage().getColor().a > 0f && passage().getColor().a < 1f);
     advance(1f);
     assertEquals(1f, passage().getColor().a, 0.01f);
     advance(2.1f);
     assertTrue(passage().getColor().a < 1f);
     advance(0.7f);
-    assertTrue(passage().getText().toString().contains("passage two"));
+    assertEquals(expectedPassage("opening", 1), passage().getText().toString());
     verifyNoInteractions(callback);
     advance(8f);
     verify(callback, times(1)).run();
@@ -108,7 +112,7 @@ class NarrationScreenTest {
     advance(NarrationScreen.FADE_SECONDS / 2f + 0.05f);
     verify(callback, times(1)).run();
     assertEquals(0, passage().getActions().size);
-    assertTrue(passage().getText().toString().contains("passage one"));
+    assertEquals(expectedPassage("pre_boss", 0), passage().getText().toString());
     advance(15f);
     verify(callback, times(1)).run();
   }
