@@ -230,45 +230,44 @@ public class BattleController {
     return stats != null && stats.hasStatusEffect(effectType);
   }
 
-/**
- * Returns an immutable snapshot of the player's active status effects and remaining durations.
- *
- * <p>The returned map is safe for UI and integration code to read. Modifying the result cannot
- * alter the player's combat state. A duration greater than zero is the number of turns remaining;
- * zero or less represents an effect without a finite duration.
- *
- * @return immutable mapping from status effect type to remaining duration, or an empty map when
- *     the player has no combat stats
- */
+  /**
+   * Returns an immutable snapshot of the player's active status effects and remaining durations.
+   *
+   * <p>The returned map is safe for UI and integration code to read. Modifying the result cannot
+   * alter the player's combat state. A duration greater than zero is the number of turns remaining;
+   * zero or less represents an effect without a finite duration.
+   *
+   * @return immutable mapping from status effect type to remaining duration, or an empty map when
+   *     the player has no combat stats
+   */
   public Map<String, Integer> getPlayerStatusEffectDurations() {
-  CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
 
-  if (stats == null) {
-    return Map.of();
+    if (stats == null) {
+      return Map.of();
+    }
+
+    return stats.getStatusEffectDurations();
   }
 
-  return stats.getStatusEffectDurations();
-}
-
-/** Target IDs of living enemies whose taunt is active on the player. */
+  /** Target IDs of living enemies whose taunt is active on the player. */
   public List<String> getAliveTaunterTargetIds() {
-  CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
-  if (playerStats == null) {
-    return List.of();
-  }
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+    if (playerStats == null) {
+      return List.of();
+    }
 
-  return enemies.stream()
-      .filter(this::isEnemyAlive)
-      .filter(
-          enemy -> {
-            StatusEffect effect =
-                playerStats.getStatusEffect(
-                    IntentEffectType.TAUNT.name() + ":" + enemy.getId());
-            return effect != null && effect.getValue() == enemy.getId();
-          })
-      .map(enemy -> Integer.toString(enemy.getId()))
-      .toList();
-}
+    return enemies.stream()
+        .filter(this::isEnemyAlive)
+        .filter(
+            enemy -> {
+              StatusEffect effect =
+                  playerStats.getStatusEffect(IntentEffectType.TAUNT.name() + ":" + enemy.getId());
+              return effect != null && effect.getValue() == enemy.getId();
+            })
+        .map(enemy -> Integer.toString(enemy.getId()))
+        .toList();
+  }
 
   /** Player decides to end their turn */
   public void endPlayerTurn() {
