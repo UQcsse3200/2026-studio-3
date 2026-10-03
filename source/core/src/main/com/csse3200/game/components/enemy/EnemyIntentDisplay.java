@@ -58,8 +58,7 @@ public class EnemyIntentDisplay extends RenderComponent {
       return;
     }
 
-    String iconPath =
-            IntentIcons.pathFor(currentIntent.getType(), currentIntent.getEffectType());
+    String iconPath = IntentIcons.pathFor(currentIntent.getType(), currentIntent.getEffectType());
 
     Texture icon = resourceService.getAsset(iconPath, Texture.class);
     if (icon == null) {
@@ -79,22 +78,42 @@ public class EnemyIntentDisplay extends RenderComponent {
   /**
    * Draws the number of turns for which the intent's status effect will remain active.
    *
-   * <p>Zero and negative durations represent effects without a finite duration, so no number is
-   * drawn for them.
-   *
    * @param batch sprite batch currently used by the render service
    * @param iconX horizontal position of the intent icon
    * @param iconY vertical position of the intent icon
    */
   private void drawDuration(SpriteBatch batch, float iconX, float iconY) {
-    if (durationFont == null || currentIntent.getDuration() <= 0) {
+    if (durationFont == null) {
+      return;
+    }
+
+    String durationText = durationTextFor(currentIntent);
+    if (durationText.isEmpty()) {
       return;
     }
 
     float textX = iconX + ICON_SIZE + DURATION_TEXT_GAP;
     float textY = iconY + DURATION_TEXT_VERTICAL_OFFSET;
 
-    durationFont.draw(batch, Integer.toString(currentIntent.getDuration()), textX, textY);
+    durationFont.draw(batch, durationText, textX, textY);
+  }
+
+  /**
+   * Converts an intent's finite duration into the text displayed beside its icon.
+   *
+   * <p>Zero and negative durations represent effects without a finite duration, so they produce no
+   * text. This method does not depend on libGDX rendering state, allowing the display rule to be
+   * tested without an OpenGL context.
+   *
+   * @param intent intent whose duration should be displayed
+   * @return the positive duration as text, or an empty string when no duration should be displayed
+   */
+  static String durationTextFor(EnemyIntent intent) {
+    if (intent == null || intent.getDuration() <= 0) {
+      return "";
+    }
+
+    return Integer.toString(intent.getDuration());
   }
 
   @Override
