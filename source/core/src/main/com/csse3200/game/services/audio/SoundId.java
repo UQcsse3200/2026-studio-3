@@ -1,8 +1,14 @@
 package com.csse3200.game.services.audio;
 
+/** Stores positions of sound effects in the path string and makes function calls easily understood.
+ *  ID's must be added in the order of position in soundPath in AudioService.  */
 public enum SoundId {
     IMPACT, // TODO: remove
-    MENU_CLICK,
+    MENU_HOVER,
     ITEM_PURCHASE,
-    SWORD_SLICE
+    SWORD_SLICE,
+    ENTER_SHOP,
+    ERROR,
+    ENTER_ENCOUNTER
+
 }

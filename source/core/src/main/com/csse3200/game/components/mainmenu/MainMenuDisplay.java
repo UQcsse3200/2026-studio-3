@@ -11,7 +11,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
@@ -136,7 +135,7 @@ public class MainMenuDisplay extends UIComponent {
               public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
                 super.enter(event, x, y, pointer, fromActor);
                 if (pointer == -1 && !button.isDisabled()) {
-                  AudioService.playSound(SoundId.MENU_CLICK, 0.5f);
+                  AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
                 }
               }
             }

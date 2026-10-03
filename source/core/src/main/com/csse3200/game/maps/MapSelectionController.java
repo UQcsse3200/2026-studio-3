@@ -86,6 +86,7 @@ public class MapSelectionController {
     }
 
     if (node.getState() != NodeState.AVAILABLE) {
+      AudioService.playSound(SoundId.ERROR, 0.5f);
       events.trigger("nodeLocked", nodeId);
       return false;
     }
@@ -93,9 +94,17 @@ public class MapSelectionController {
     boolean accepted = mapGraph.moveToNode(nodeId);
 
     if (accepted) {
+
+      switch (node.getRoomType()) {
+        case SHOP -> AudioService.playSound(SoundId.ENTER_SHOP, 0.5f);
+        case COMBAT, ELITE -> AudioService.playSound(SoundId.SWORD_SLICE, 0.4f);
+        case EVENT -> AudioService.playSound(SoundId.ENTER_ENCOUNTER, 2.0f);
+      }
+
       events.trigger("nodeSelected", nodeId);
-      AudioService.playSound(SoundId.SWORD_SLICE, 0.4f);
     } else {
+
+      AudioService.playSound(SoundId.ERROR, 0.5f);
       events.trigger("nodeSelectionRejected", nodeId);
     }
 

@@ -12,9 +12,12 @@ public class AudioService {
     private static float musicVolume = 0.5f; // TODO: decide default music volume
     private static final String[] soundPaths = {
             "sounds/Impact4.ogg",
-            "sounds/menuClick.mp3",
+            "sounds/menuHover.mp3",
             "sounds/itemPurchase.mp3",
-            "sounds/swordSlice.mp3"
+            "sounds/swordSlice.mp3",
+            "sounds/enterShop.mp3",
+            "sounds/error.mp3",
+            "sounds/enterEncounter.mp3",
     };
     private static final String[] musicPaths = {
             "music/BGM_03_mp3.mp3"

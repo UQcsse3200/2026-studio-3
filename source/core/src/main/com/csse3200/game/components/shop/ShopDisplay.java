@@ -21,6 +21,8 @@ import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.maps.EncounterCallback;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.shop.PurchaseResult;
 import com.csse3200.game.shop.ShopConfig;
 import com.csse3200.game.shop.ShopEncounter;
@@ -416,9 +418,11 @@ public class ShopDisplay extends UIComponent {
       purchasedItemIds.add(itemId);
       String itemName = result.getItem() == null ? "the offer" : result.getItem().getDisplayName();
       statusLabel.setStyle(createLabelStyle(SMALL, AVAILABLE_COLOUR));
+      AudioService.playSound(SoundId.ITEM_PURCHASE, 0.5f);
       statusLabel.setText(String.format("Purchased %s. It was added to your deck.", itemName));
     } else {
       statusLabel.setStyle(createLabelStyle(SMALL, UNAFFORDABLE_COLOUR));
+      AudioService.playSound(SoundId.ERROR, 0.5f);
       statusLabel.setText(result.getMessage());
     }
     refresh();
