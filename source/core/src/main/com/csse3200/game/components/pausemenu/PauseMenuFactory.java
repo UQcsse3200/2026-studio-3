@@ -1,5 +1,6 @@
 package com.csse3200.game.components.pausemenu;
 
+import com.badlogic.gdx.utils.Align;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
@@ -43,6 +44,36 @@ public final class PauseMenuFactory {
    * @return the save/load panel, so the caller can hide it after the entity is created
    */
   public static SaveLoadPanel attach(Entity uiEntity, GdxGame game) {
+    return attach(uiEntity, game, Align.topRight);
+  }
+
+  /**
+   * As {@link #attach(Entity, GdxGame)}, but places the on-screen pause button in the given corner
+   * (an {@link Align} constant) so each screen can keep it clear of its own HUD.
+   */
+  public static SaveLoadPanel attach(Entity uiEntity, GdxGame game, int pauseButtonAlign) {
+    return attach(uiEntity, game, new PauseButtonDisplay(pauseButtonAlign));
+  }
+
+  /**
+   * As above, but also insets the pause button from the screen edges, to nudge it clear of nearby
+   * HUD (e.g. beside the Map's own Main Menu button).
+   */
+  public static SaveLoadPanel attach(
+      Entity uiEntity, GdxGame game, int pauseButtonAlign, float pauseButtonEdgePad) {
+    return attach(uiEntity, game, new PauseButtonDisplay(pauseButtonAlign, pauseButtonEdgePad));
+  }
+
+  /**
+   * Attaches the pause menu with Escape-only access (no on-screen pause button) — for screens where
+   * the button doesn't fit the HUD, e.g. the map.
+   */
+  public static SaveLoadPanel attachWithoutButton(Entity uiEntity, GdxGame game) {
+    return attach(uiEntity, game, (PauseButtonDisplay) null);
+  }
+
+  private static SaveLoadPanel attach(
+      Entity uiEntity, GdxGame game, PauseButtonDisplay pauseButton) {
     ensurePauseService();
     loadMenuAssets();
 
@@ -52,6 +83,9 @@ public final class PauseMenuFactory {
         .addComponent(new PauseMenuInput())
         .addComponent(new PauseMenuActions(game))
         .addComponent(savePanel);
+    if (pauseButton != null) {
+      uiEntity.addComponent(pauseButton);
+    }
 
     // Open the save overlay when the pause menu's Save & Load button fires its event.
     uiEntity.getEvents().addListener(PauseMenuDisplay.SAVE_LOAD_EVENT, savePanel::show);

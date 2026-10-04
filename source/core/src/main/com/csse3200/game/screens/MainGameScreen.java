@@ -191,7 +191,9 @@ public class MainGameScreen extends ScreenAdapter {
         .addComponent(new DebugShortcutInputComponent(this.game));
 
     // Pause menu + in-place save/load overlay (added before the entity is created).
-    SaveLoadPanel savePanel = PauseMenuFactory.attach(ui, this.game);
+    // Top-left, since this screen's Exit button sits top-right.
+    SaveLoadPanel savePanel =
+        PauseMenuFactory.attach(ui, this.game, com.badlogic.gdx.utils.Align.topLeft);
     ServiceLocator.getEntityService().register(ui);
     savePanel.hide(); // save overlay starts hidden, opened by the Save & Load button
   }
