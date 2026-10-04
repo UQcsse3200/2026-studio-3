@@ -143,7 +143,7 @@ public class DisplayingFactory extends UIComponent {
 
   @Override
   protected void draw(SpriteBatch batch) {
-      //drawn by battle screen
+    // drawn by battle screen
   }
 
   @Override

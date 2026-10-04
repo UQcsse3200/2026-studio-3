@@ -561,6 +561,6 @@ public class DeckEditorComponent extends UIComponent {
 
   @Override
   protected void draw(SpriteBatch batch) {
-      //drawn by BattleScreen
+    // drawn by BattleScreen
   }
 }

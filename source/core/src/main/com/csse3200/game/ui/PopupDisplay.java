@@ -43,7 +43,6 @@ public class PopupDisplay extends UIComponent {
   private static final float HEADER_HEIGHT = 35f; // title bar height = the window's top padding
   private static final float SIDE_PADDING = 20f;
 
-
   /**
    * @param title text in the window's title bar
    * @param styleName skin style used for the window and its close button (see class javadoc)
@@ -149,7 +148,6 @@ public class PopupDisplay extends UIComponent {
   public float getWindowY() {
     return window.getY();
   }
-
 
   public float getWindowHeight() {
     return window.getHeight();
