@@ -17,7 +17,7 @@ public class AudioService {
     private static float musicVolume = 0.5f; // TODO: decide default music volume
     private static final Random pitchModifier = new Random();
 
-    // this may appear to be a lot to load into ram, but each file is only kilobytes big
+    // this may appear to be a lot to load into ram, but these files are kilobytes big
     private static final String[] soundPaths = {
             "sounds/Impact4.ogg",
             "sounds/menuHover.mp3",
@@ -35,7 +35,8 @@ public class AudioService {
             "sounds/bandage.mp3",
             "sounds/poison.mp3",
             "sounds/armorBreak.mp3",
-            "sounds/magicChime.mp3"
+            "sounds/magicChime.mp3",
+            "sounds/leaveShop.mp3",
     };
     private static final String[] musicPaths = {
             "music/BGM_03_mp3.mp3"

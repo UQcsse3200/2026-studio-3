@@ -42,7 +42,7 @@ public class CardEffectHandler {
       for (ResolvedCardEffect effect : effects) {
         switch (effect.type()) {
           case DAMAGE -> {
-            AudioService.playSound(SoundId.SWORD_SWING, 0.5f);
+            AudioService.playSound(SoundId.SWORD_SWING, 0.6f);
             stats.takeDamage(effect.value());
           }
           case PIERCE -> {
@@ -80,11 +80,11 @@ public class CardEffectHandler {
     for (ResolvedCardEffect effect : effects) {
       switch (effect.type()) {
         case BLOCK, FORTIFY -> {
-          AudioService.playSound(SoundId.SHIELD_GUARD, 0.5f);
+          AudioService.playSound(SoundId.SHIELD_GUARD, 0.3f);
           stats.addArmour(effect.value());
         }
         case HEAL -> {
-          AudioService.playSound(SoundId.BANDAGE, 0.5f);
+          AudioService.playSound(SoundId.BANDAGE, 0.4f);
           if (effect.duration() > 0) {
             stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
           } else {

@@ -19,5 +19,6 @@ public enum SoundId {
     BANDAGE,
     BOTTLE_CORK,
     ARMOR_BREAK,
-    MAGIC_CHIME
+    MAGIC_CHIME,
+    LEAVE_SHOP
 }

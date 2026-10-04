@@ -430,6 +430,7 @@ public class ShopDisplay extends UIComponent {
 
   private void leaveShop() {
     logger.debug("Shop encounter completed for node {}", shopEncounter.getNodeId());
+    AudioService.playSound(SoundId.LEAVE_SHOP, 0.3f);
     shopEncounter.leave();
     rootTable.addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
   }
