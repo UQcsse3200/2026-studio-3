@@ -43,7 +43,11 @@ import com.csse3200.game.components.spritedisplay.clickable.Clickable;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.clickable.DragNDrop;
-import com.csse3200.game.components.spritedisplay.displaying.*;
+import com.csse3200.game.components.spritedisplay.displaying.CardBadgesDisplay;
+import com.csse3200.game.components.spritedisplay.displaying.CardPreviewDisplay;
+import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
+import com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord;
+import com.csse3200.game.components.spritedisplay.displaying.PopupTextDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -94,7 +98,7 @@ public class BattleScreen extends ScreenAdapter {
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
   private static final float HAND_Y = 1000f;
-  private static final float HAND_SPACING = 120f;
+  private static final float HAND_SPACING = 90f;
   private static final float HAND_ROTATION_STEP_DEGREES = 6f;
   private static final float HAND_ARC_DROP_PER_CARD = 18f;
   private static final float CARD_WIDTH = CardWidget.CARD_WIDTH;
@@ -116,8 +120,6 @@ public class BattleScreen extends ScreenAdapter {
   private final Skin cardWidgetSkin;
   private final Skin cardInteractionSkin;
   private final CardWidgetAssets cardWidgetAssets;
-  // Shared with the debug dialog so it reflects real, live resolutions instead of a
-  // separate copy.
   private final CardEffectResolutionService cardEffects;
   private final CardPlayService cardPlayService;
   private final CardAimController enemyCardAim;
@@ -265,7 +267,6 @@ public class BattleScreen extends ScreenAdapter {
 
   public void createUI() {
     Path battleUiJson = Path.of(BATTLE_UI_JSON);
-    Path deckEditorUiJson = Path.of(DECK_EDITOR_UI_JSON);
 
     DisplayingFactory displays = new DisplayingFactory(battleUiJson);
 
@@ -319,6 +320,7 @@ public class BattleScreen extends ScreenAdapter {
     gameArea.displayUI(battleUi);
     installHandCardWidgets();
 
+    Path deckEditorUiJson = Path.of(DECK_EDITOR_UI_JSON);
     List<ClickableRecord> deckEditorClickables =
         ClickableFactory.loadRecordsFromJson(deckEditorUiJson);
     ClickableFactory deckPoolFactory = new ClickableFactory(deckEditorClickables);
@@ -335,6 +337,7 @@ public class BattleScreen extends ScreenAdapter {
             cardInventory,
             deckPoolFactory,
             deckEditorDisplays,
+            cardWidgetAssets,
             this::onDeckRearranged);
 
     Entity deckEditorEntity =
@@ -344,24 +347,27 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(deckEditor);
     ServiceLocator.getEntityService().register(deckEditorEntity);
 
+    // Hide the deck editor's scroll buttons until the popup opens. DeckEditorComponent.create()
+    // tries to do this itself, but runs before the JSON-loaded clickables are registered in the
+    // factory, so nothing gets hidden. These two loops fix that.
+    for (Clickable c : deckPoolFactory.getByTrigger("deckScrollUp")) {
+      c.getBtn().setVisible(false);
+    }
+    for (Clickable c : deckPoolFactory.getByTrigger("deckScrollDown")) {
+      c.getBtn().setVisible(false);
+    }
+
     battleUi.getEvents().addListener("openMenu", deckEditor::open);
   }
 
-  /** Builds the {@link DisplayingFactory} from the deck editor's own JSON-loaded records. */
   private DisplayingFactory buildDeckEditorDisplays(
       PopupDisplay popup, List<DisplayingRecord> records) {
 
-    // 1. Badges (dynamic positioning, so not in JSON)
     DisplayingRecord badgesRec =
         DisplayingRecord.builder("").trigger(DeckEditorEvents.BADGES).variant("cardBadges").build();
 
-    // 2. Frames (dynamic positioning, so not in JSON)
-    DisplayingRecord framesRec =
-        DisplayingRecord.builder("").trigger(DeckEditorEvents.FRAMES).variant("cardFrames").build();
-
     List<DisplayingRecord> all = new ArrayList<>(records);
     all.add(badgesRec);
-    all.add(framesRec);
 
     DisplayingFactory factory = new DisplayingFactory(all);
 
@@ -381,8 +387,6 @@ public class BattleScreen extends ScreenAdapter {
         });
 
     factory.registerInstanceVariant("cardBadges", CardBadgesDisplay::new);
-    factory.registerInstanceVariant("cardFrames", CardFramesDisplay::new);
-
     return factory;
   }
 

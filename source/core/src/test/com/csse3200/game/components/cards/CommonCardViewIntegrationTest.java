@@ -160,14 +160,16 @@ class CommonCardViewIntegrationTest {
     when(play.discardedInstances()).thenReturn(List.of(upgraded));
     PopupDisplay popup = new PopupDisplay("Deck", "popup");
     ClickableFactory factory = new ClickableFactory(List.of());
-    DisplayingFactory displays = new DisplayingFactory(List.of());
+    DisplayingFactory displayFactory = new DisplayingFactory(List.of());
+    CardWidgetAssets assets =
+        CardWidgetAssets.fromManagedResources(UIComponent.getSharedSkin(), resources);
     DeckEditorComponent editor =
-        new DeckEditorComponent(play, library, popup, factory, displays, null);
+        new DeckEditorComponent(play, library, popup, factory, displayFactory, assets, null);
     entity =
         new Entity()
             .addComponent(popup)
             .addComponent(factory)
-            .addComponent(displays)
+            .addComponent(displayFactory)
             .addComponent(editor);
     entity.create();
     List<List<CardBadgesDisplay.Badge>> badges = new ArrayList<>();
@@ -184,10 +186,8 @@ class CommonCardViewIntegrationTest {
 
     List<Clickable> cards = factory.getByTrigger("toggleDeckCard");
     assertEquals(2, cards.size());
-    CardWidget baseFace =
-        assertInstanceOf(CardWidget.class, cards.getFirst().getBtn().getChildren().first());
-    CardWidget upgradeFace =
-        assertInstanceOf(CardWidget.class, cards.getLast().getBtn().getChildren().first());
+    CardWidget baseFace = cardFace(cards.getFirst());
+    CardWidget upgradeFace = cardFace(cards.getLast());
     assertCommonFrame(baseFace);
     assertCommonFrame(upgradeFace);
     assertEquals(base.instanceId(), cards.getFirst().getArgs()[0]);
@@ -203,15 +203,18 @@ class CommonCardViewIntegrationTest {
     hover.setType(InputEvent.Type.enter);
     hover.setPointer(-1);
     cards.getLast().getBtn().fire(hover);
-    assertEquals("Strike+\nTarget: SINGLE_ENEMY", previews.getLast().details());
+    assertEquals(
+        "Strike+\nCost: 1\nAttack  |  Common\nTarget: SINGLE_ENEMY\n\nDeal 12 damage.",
+        previews.getLast().details());
 
     cards.getFirst().getBtn().fire(new ChangeEvent());
     assertTrue(badges.getLast().isEmpty());
     assertEquals(Color.WHITE, frameImage(baseFace).getColor());
     assertEquals(new Color(0.35f, 0.35f, 0.35f, 1f), frameImage(upgradeFace).getColor());
     cards.getFirst().getBtn().validate();
-    assertTrue(baseFace.getWidth() <= cards.getFirst().getBtn().getWidth());
-    assertTrue(baseFace.getHeight() <= cards.getFirst().getBtn().getHeight());
+    assertTrue(baseFace.getWidth() * baseFace.getScaleX() <= cards.getFirst().getBtn().getWidth());
+    assertTrue(
+        baseFace.getHeight() * baseFace.getScaleY() <= cards.getFirst().getBtn().getHeight());
     popup.hide();
     assertTrue(factory.getByTrigger("toggleDeckCard").isEmpty());
   }
@@ -270,6 +273,13 @@ class CommonCardViewIntegrationTest {
     List<CardWidget> widgets = widgets();
     assertEquals(6, widgets.size());
     widgets.forEach(this::assertRarityFrame);
+  }
+
+  private static CardWidget cardFace(Clickable clickable) {
+    List<CardWidget> faces = new ArrayList<>();
+    collectWidgets(clickable.getBtn(), faces);
+    assertEquals(1, faces.size());
+    return faces.getFirst();
   }
 
   private List<CardWidget> widgets() {
