@@ -111,10 +111,10 @@ public class EndBattleScreen extends ScreenAdapter {
   }
 
   /**
-   * Leaves the end screen. A final victory ends the run and plays the victory crawl before the
-   * main menu. Other active-run wins continue to the Elite portal when eligible, or to the map.
-   * A loss in an active run ends it and plays the defeat crawl before the main menu; otherwise,
-   * the run is discarded and the main menu opens directly.
+   * Leaves the end screen. A final victory ends the run and plays the victory crawl before the main
+   * menu. Other active-run wins continue to the Elite portal when eligible, or to the map. A loss
+   * in an active run ends it and plays the defeat crawl before the main menu; otherwise, the run is
+   * discarded and the main menu opens directly.
    */
   private void returnToMenu() {
     if (returning) {

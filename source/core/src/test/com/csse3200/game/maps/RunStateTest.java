@@ -56,8 +56,7 @@ public class RunStateTest {
   private MapGraph createFinalEncounterGraph() {
     MapGraph graph =
         new MapGraph(
-            Map.of(0, new MapNode(0, RoomType.COMBAT), 1, new MapNode(1, RoomType.FINAL)),
-            false);
+            Map.of(0, new MapNode(0, RoomType.COMBAT), 1, new MapNode(1, RoomType.FINAL)), false);
     graph.connectNodes(0, 1);
     return graph;
   }
