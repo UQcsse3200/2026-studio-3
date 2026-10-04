@@ -113,9 +113,10 @@ public class MapNodeActor extends Group {
   public float getNodeSize() {
     return this.size;
   }
+
   /**
    * Scale factor on the image
-   * 
+   *
    * @return the scale factor applied on the image
    */
   public float getNodeScale() {
