@@ -17,6 +17,8 @@ import com.csse3200.game.files.UserSettings;
 import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.narration.NarrationConfigLoader;
+import com.csse3200.game.narration.NarrationLoadingException;
 import com.csse3200.game.save.AutosaveCoordinator;
 import com.csse3200.game.save.GameStateSnapshotProvider;
 import com.csse3200.game.save.JsonSaveGameRepository;
@@ -169,12 +171,19 @@ public class GdxGame extends Game {
 
   /**
    * Plays a story crawl, then continues to {@code next}. An unknown or empty sequence completes on
-   * its first frame, so the game always continues.
+   * its first frame. Narration file errors skip the crawl and continue to {@code next}.
    *
    * @param sequenceId story sequence to play
    * @param next destination after completion or skipping
    */
   public void showNarration(String sequenceId, ScreenType next) {
+    try {
+      NarrationConfigLoader.loadSequence(sequenceId);
+    } catch (NarrationLoadingException exception) {
+      logger.error("Unable to load narration sequence {}", sequenceId, exception);
+      setScreen(next);
+      return;
+    }
     prepareScreenTransition();
     super.setScreen(new NarrationScreen(sequenceId, () -> setScreen(next)));
   }
