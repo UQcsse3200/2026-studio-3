@@ -93,7 +93,6 @@ public class MainMenuScreen extends ScreenAdapter {
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getResourceService().unloadAssets(MAIN_MENU_TEXTURES);
-
   }
 
   /**

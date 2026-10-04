@@ -130,16 +130,15 @@ public class MainMenuDisplay extends UIComponent {
           }
         });
     button.addListener(
-            new InputListener() {
-              @Override
-              public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                super.enter(event, x, y, pointer, fromActor);
-                if (pointer == -1 && !button.isDisabled()) {
-                  AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
-                }
-              }
+        new InputListener() {
+          @Override
+          public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+            super.enter(event, x, y, pointer, fromActor);
+            if (pointer == -1 && !button.isDisabled()) {
+              AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
             }
-    );
+          }
+        });
     return button;
   }
 

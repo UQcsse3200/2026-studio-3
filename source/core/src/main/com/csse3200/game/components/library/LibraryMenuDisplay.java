@@ -87,16 +87,15 @@ public class LibraryMenuDisplay extends UIComponent {
         });
 
     cardLibraryButton.addListener(
-            new InputListener() {
-              @Override
-              public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                super.enter(event, x, y, pointer, fromActor);
-                if (pointer == -1) {
-                  AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
-                }
-              }
+        new InputListener() {
+          @Override
+          public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+            super.enter(event, x, y, pointer, fromActor);
+            if (pointer == -1) {
+              AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
             }
-    );
+          }
+        });
 
     enemyLibraryButton.addListener(
         new ChangeListener() {
@@ -108,16 +107,15 @@ public class LibraryMenuDisplay extends UIComponent {
         });
 
     enemyLibraryButton.addListener(
-            new InputListener() {
-              @Override
-              public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                super.enter(event, x, y, pointer, fromActor);
-                if (pointer == -1) {
-                  AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
-                }
-              }
+        new InputListener() {
+          @Override
+          public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+            super.enter(event, x, y, pointer, fromActor);
+            if (pointer == -1) {
+              AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
             }
-    );
+          }
+        });
 
     backButton.addListener(
         new ChangeListener() {
@@ -128,15 +126,14 @@ public class LibraryMenuDisplay extends UIComponent {
         });
 
     backButton.addListener(
-            new InputListener() {
-              @Override
-              public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                if (pointer == -1) {
-                  AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
-                }
-              }
+        new InputListener() {
+          @Override
+          public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+            if (pointer == -1) {
+              AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
             }
-    );
+          }
+        });
 
     rootTable.add(title).padBottom(12f).row();
     rootTable.defaults().width(MenuTheme.BUTTON_WIDTH).height(MenuTheme.BUTTON_HEIGHT);

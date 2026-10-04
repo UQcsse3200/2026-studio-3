@@ -9,7 +9,6 @@ import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.services.audio.SoundId;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -92,8 +91,8 @@ public class CardEffectHandler {
           }
         }
         case STRENGTH -> {
-            AudioService.playSound(SoundId.MAGIC_CHIME, 0.5f);
-            stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
+          AudioService.playSound(SoundId.MAGIC_CHIME, 0.5f);
+          stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
         }
         case ENERGY_GAIN -> {
           AudioService.playSound(SoundId.MAGIC_CHIME, 0.5f);
@@ -106,7 +105,7 @@ public class CardEffectHandler {
           AudioService.playSound(SoundId.MAGIC_CHIME, 0.5f);
           stats.clearNegativeStatusEffects();
         }
-          default -> {
+        default -> {
           // Enemy-facing effects are handled separately.
         }
       }

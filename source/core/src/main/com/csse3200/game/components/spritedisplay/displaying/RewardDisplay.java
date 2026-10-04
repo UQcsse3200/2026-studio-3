@@ -10,7 +10,6 @@ import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.rewards.RewardService;
 import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.services.audio.SoundId;
-
 import java.util.List;
 
 public class RewardDisplay extends Displaying {

@@ -54,8 +54,6 @@ import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
-import com.csse3200.game.services.audio.AudioService;
-import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.ui.PopupDisplay;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;

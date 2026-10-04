@@ -140,15 +140,14 @@ public class CardLibraryDisplay extends UIComponent {
           }
         });
     backButton.addListener(
-            new InputListener() {
-              @Override
-              public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                if (pointer == -1) {
-                  AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
-                }
-              }
+        new InputListener() {
+          @Override
+          public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+            if (pointer == -1) {
+              AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
             }
-    );
+          }
+        });
     panel.add(titleBlock).left().expandX();
     panel.add(backButton).right().width(170f).height(58f);
   }
@@ -198,15 +197,14 @@ public class CardLibraryDisplay extends UIComponent {
             }
           });
       cardButton.addListener(
-              new InputListener() {
-                @Override
-                public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                  if (pointer == -1) {
-                    AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
-                  }
-                }
+          new InputListener() {
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+              if (pointer == -1) {
+                AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
               }
-      );
+            }
+          });
       cardList.add(cardButton).row();
     }
 
