@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
+import com.csse3200.game.components.settingsmenu.SettingsPanel;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.MenuTheme;
@@ -85,6 +86,7 @@ public class PauseMenuDisplay extends UIComponent {
   private TextButton confirmButton;
   private TextButton cancelButton;
   private TextButton settingsBackButton;
+  private SettingsPanel settingsPanel;
 
   // Keyboard-navigation focus: the buttons of the currently shown view, and which one is focused.
   private final List<TextButton> focusables = new ArrayList<>();
@@ -212,19 +214,9 @@ public class PauseMenuDisplay extends UIComponent {
   }
 
   private Table buildSettingsTable() {
-    Table root = new Table();
-    root.add(titleLabel("Settings")).padBottom(25f).row();
-    settingsBackButton = menuButton("Back", null);
-    settingsBackButton.addListener(
-        new ChangeListener() {
-          @Override
-          public void changed(ChangeEvent changeEvent, Actor actor) {
-            logger.debug("Pause settings back button clicked");
-            showPauseButtons();
-          }
-        });
-    root.add(settingsBackButton).width(MenuTheme.BUTTON_WIDTH).height(MenuTheme.BUTTON_HEIGHT);
-    return root;
+    settingsPanel = new SettingsPanel(skin, this::showPauseButtons);
+    settingsBackButton = settingsPanel.getBackButton();
+    return settingsPanel;
   }
 
   /**
@@ -353,13 +345,14 @@ public class PauseMenuDisplay extends UIComponent {
     settingsTable = buildSettingsTable();
     table.clearChildren();
     table.add(settingsTable);
-    setFocus(List.of(settingsBackButton));
+    setFocus(settingsPanel.getNavigationButtons());
   }
 
   private void showPauseButtons() {
     table.clearChildren();
     table.add(menuTable);
     settingsTable = null;
+    settingsPanel = null;
     setFocus(pauseFocusables());
   }
 
@@ -531,5 +524,9 @@ public class PauseMenuDisplay extends UIComponent {
 
   Table getRootTable() {
     return table;
+  }
+
+  SettingsPanel getSettingsPanel() {
+    return settingsPanel;
   }
 }

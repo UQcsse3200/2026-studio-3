@@ -296,6 +296,21 @@ class PauseMenuDisplayTest {
   }
 
   @Test
+  void keyboardNavigationIncludesAllSettingsActions() {
+    nav(PauseMenuDisplay.PAUSE_EVENT);
+    click(display.getSettingsButton());
+
+    nav(PauseMenuDisplay.NAV_DOWN_EVENT);
+    assertSame(
+        display.getSettingsPanel().getNavigationButtons().get(0), display.getFocusedButton());
+    nav(PauseMenuDisplay.NAV_DOWN_EVENT);
+    assertSame(display.getSettingsBackButton(), display.getFocusedButton());
+    nav(PauseMenuDisplay.NAV_DOWN_EVENT);
+    assertSame(
+        display.getSettingsPanel().getNavigationButtons().get(2), display.getFocusedButton());
+  }
+
+  @Test
   void navBackReturnsFromSettingsToPauseButtons() {
     nav(PauseMenuDisplay.PAUSE_EVENT);
     click(display.getSettingsButton());
