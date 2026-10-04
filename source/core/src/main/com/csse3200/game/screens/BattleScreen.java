@@ -23,7 +23,6 @@ import com.csse3200.game.cards.play.integration.Team7PlayerStateAdapter;
 import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
-import com.csse3200.game.components.battle.BattleEncounterSelector;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
@@ -38,10 +37,7 @@ import com.csse3200.game.components.spritedisplay.clickable.CardImageSkins;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.clickable.DragNDrop;
-import com.csse3200.game.components.spritedisplay.displaying.CardPreviewDisplay;
-import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
-import com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord;
-import com.csse3200.game.components.spritedisplay.displaying.PopupTextDisplay;
+import com.csse3200.game.components.spritedisplay.displaying.*;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -92,10 +88,7 @@ public class BattleScreen extends ScreenAdapter {
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
   private static final float HAND_Y = 1000f;
-  // Less than CARD_WIDTH on purpose: cards overlap like a fanned hand instead of sitting
-  // edge-to-edge, so a full hand still fits across the screen.
-  private static final float HAND_SPACING = 90f;
-  // Fan-out: how far each card tilts and dips per slot away from the hand's middle card.
+  private static final float HAND_SPACING = 120f;
   private static final float HAND_ROTATION_STEP_DEGREES = 6f;
   private static final float HAND_ARC_DROP_PER_CARD = 18f;
   private static final float CARD_WIDTH = 225;
@@ -104,11 +97,14 @@ public class BattleScreen extends ScreenAdapter {
   private static final float CARD_INVENTORY_MIN_HEIGHT = 600f;
   private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
 
+  private static final String CARD_INVENTORY_STYLE = "popup";
+
+  private static final String BATTLE_UI_JSON = "sprites/BattleUi.json";
+  private static final String DECK_EDITOR_UI_JSON = "sprites/DeckEditorUi.json";
+
   private final BattleController controller;
   private final CardLibrary library;
   private final BattleDeck battleDeck;
-  // Shared with the debug dialog so it reflects real, live resolutions instead of a
-  // separate copy.
   private final CardEffectResolutionService cardEffects;
   private final CardPlayService cardPlayService;
   private final CardAimController enemyCardAim;
@@ -117,11 +113,6 @@ public class BattleScreen extends ScreenAdapter {
   private final PlayerRunState playerState;
   private List<ClickableRecord> staticUiRecords;
 
-  // Fixed left-to-right slot order for the on-screen row: each entry is the exact physical card
-  // (see CardInstance) occupying that slot. Captured at deal time, and reset wholesale whenever the
-  // player deliberately rearranges their hand via the deck editor — otherwise left untouched, so a
-  // played card's slot just toggles disabled in place (its instance shows up in the discard pile)
-  // instead of the row reflowing and making it look like a new card was drawn.
   private List<CardInstance> handRowOrder = new ArrayList<>();
 
   public BattleScreen(GdxGame game) {
@@ -144,7 +135,7 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
-    loadAssets(); // <-- MOVED UP: load "images/heart.png" before anything uses it
+    loadAssets();
 
     renderer = RenderFactory.createRenderer();
     renderer.getCamera().getEntity().setPosition(CAMERA_POSITION);
@@ -152,7 +143,6 @@ public class BattleScreen extends ScreenAdapter {
 
     ServiceLocator.registerCamera(renderer.getCamera().getCamera());
 
-    // Integer for scaling difficulty level
     Integer mapProgression = game.getRunState().getMapProgression();
 
     logger.debug("Initialising main game screen entities");
@@ -169,9 +159,7 @@ public class BattleScreen extends ScreenAdapter {
     RunState runState = game.getRunState();
     playerState = runState.getOrCreatePlayerState();
 
-    // Card + deck state has to exist before the controller so it can be handed the single
-    // card-play entry point and the deck it mutates.
-    List<CardConfig> configs = CardConfigLoader.loadCards(); // reads configs/cards.json
+    List<CardConfig> configs = CardConfigLoader.loadCards();
     library = new CardLibrary(configs);
     ServiceLocator.registerCardLibrary(library);
 
@@ -259,11 +247,8 @@ public class BattleScreen extends ScreenAdapter {
   }
 
   public void createUI() {
-    // sprites/BattleUi.json holds both the static "Clickable" UI (exit/up/down/end turn) and the
-    // "Displaying" text overlays (the card-label prompt and the between-turns battle log). The card
-    // hand itself is dealt dynamically from the battle deck, so it is merged in below rather than
-    // living in JSON.
-    Path battleUiJson = Path.of("sprites/BattleUi.json");
+    Path battleUiJson = Path.of(BATTLE_UI_JSON);
+    Path deckEditorUiJson = Path.of(DECK_EDITOR_UI_JSON);
 
     DisplayingFactory displays = new DisplayingFactory(battleUiJson);
 
@@ -273,16 +258,13 @@ public class BattleScreen extends ScreenAdapter {
     uiFactory.registerInstanceVariant("aimDrag", rec -> new DragNDrop(rec, enemyCardAim));
     uiFactory.registerInstanceVariant("selfAimDrag", rec -> new DragNDrop(rec, playerCardAim));
 
-    // PROPOSED: debug terminal for cheats/commands during battle (skip battle, give gold, etc.
-    // — commands added separately). Same Terminal/KeyboardTerminalInputComponent/TerminalDisplay
-    // trio MainGameScreen already wires up; F1 toggles it open/closed.
     Terminal terminal = new Terminal();
     terminal.addCommand("skipbattle", new SkipBattleCommand(controller));
     terminal.addCommand("givegold", new GiveGoldCommand(gameArea.getPlayer()));
     terminal.addCommand("sethealth", new SetHealthCommand(gameArea.getPlayer()));
     terminal.addCommand("giveitem", new GiveItemCommand(gameArea.getPlayer()));
 
-    PopupDisplay cardInventory = new PopupDisplay("Card Inventory");
+    PopupDisplay cardInventory = new PopupDisplay("Card Inventory", CARD_INVENTORY_STYLE);
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
     Stage stage = ServiceLocator.getRenderService().getStage();
@@ -308,33 +290,22 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new KeyboardTerminalInputComponent())
             .addComponent(new TerminalDisplay());
 
-    // Keep the on-screen row in sync with the deck: whenever the hand changes (a card played, or
-    // one retrieved from the discard pile after its cooldown elapses) rebuild from the live deck,
-    // so the affected slot's disabled/shaded state updates in place.
     battleUi
         .getEvents()
         .addListener(
             BattleActions.HAND_CHANGED_EVENT,
             (List<CardInstance> hand) -> uiFactory.rebuildHand(buildHandRecords()));
 
-    // battleUi must be registered (and so cardInventory.create() must have run, giving it a
-    // content table) before the deck editor's create() tries to add widgets to that table below.
     gameArea.displayUI(battleUi);
 
-    // The deck editor's own widgets need a ClickableFactory of their own — an entity can only hold
-    // one component of a given class, and battleUi already has uiFactory. Its static widgets (the
-    // scroll up/down buttons) are loaded from JSON; the grid cards are built dynamically by
-    // DeckEditorComponent.
-    ClickableFactory deckPoolFactory = new ClickableFactory(Path.of("sprites/DeckEditorUi.json"));
+    List<ClickableRecord> deckEditorClickables =
+        ClickableFactory.loadRecordsFromJson(deckEditorUiJson);
+    ClickableFactory deckPoolFactory = new ClickableFactory(deckEditorClickables);
 
-    // Popup-anchored displays for the deck editor (summary, error, preview art+details, badges).
-    // These are stage-level actors driven by DeckEditorEvents, not Clickables.
-    //
-    // NOTE: skin is null for now — CardBadgesDisplay falls back to a plain BitmapFont, so badges
-    // render as bare white numbers without the dark rounded box. See the class-level comment in
-    // CardBadgesDisplay for how to feed it the real UI skin once you find the right accessor
-    // (PopupDisplay.getSkin() / UIComponent's skin source).
-    DisplayingFactory deckEditorDisplays = buildDeckEditorDisplays(cardInventory, null);
+    List<DisplayingRecord> deckEditorDisplayRecords =
+        DisplayingFactory.loadRecordsFromJson(deckEditorUiJson);
+    DisplayingFactory deckEditorDisplays =
+        buildDeckEditorDisplays(cardInventory, deckEditorDisplayRecords);
 
     DeckEditorComponent deckEditor =
         new DeckEditorComponent(
@@ -345,9 +316,6 @@ public class BattleScreen extends ScreenAdapter {
             deckEditorDisplays,
             this::onDeckRearranged);
 
-    // Add order matters: both factories' create() must run before DeckEditorComponent.create(),
-    // so their event listeners are registered before the editor starts firing OPENED / PREVIEW /
-    // etc.
     Entity deckEditorEntity =
         new Entity()
             .addComponent(deckPoolFactory)
@@ -358,87 +326,26 @@ public class BattleScreen extends ScreenAdapter {
     battleUi.getEvents().addListener("openMenu", deckEditor::open);
   }
 
-  /**
-   * Builds the {@link DisplayingFactory} that carries the deck editor's popup-anchored displays:
-   *
-   * <ul>
-   *   <li>{@code popupText} records for the selection summary line and the error line — {@link
-   *       DeckEditorEvents#SUMMARY} / {@link DeckEditorEvents#ERROR}.
-   *   <li>{@code cardPreview} record for the enlarged preview card + details — {@link
-   *       DeckEditorEvents#PREVIEW}.
-   *   <li>{@code cardBadges} record for the numbered selection badges — {@link
-   *       DeckEditorEvents#BADGES}.
-   * </ul>
-   *
-   * <p>The {@code popupText} and {@code cardPreview} variants need the popup, so they're registered
-   * as instance variants here (they shadow the static entries that would NPE without a popup).
-   *
-   * <p>Record {@code x}/{@code y} are offsets from the popup window's TOP-LEFT corner (y grows
-   * downward). The constants below mirror {@code DeckEditorComponent}'s own layout constants
-   * (GRID_LEFT_INSET, GRID_TOP_INSET, CARD_WIDTH, ...), because they're private to that class — if
-   * you ever change the grid layout there, update these too.
-   *
-   * @param popup the deck editor's popup window (its live bounds anchor everything)
-   * @param skin optional UI skin for Label styling; may be {@code null}, in which case the display
-   *     variants fall back to unstyled defaults
-   */
-  private DisplayingFactory buildDeckEditorDisplays(PopupDisplay popup, Skin skin) {
-    // Mirrors DeckEditorComponent's private layout constants.
-    float gridWidth = 4 * 100f + 3 * 14f; // COLUMNS / CARD_WIDTH / GRID_GAP
-    float gridHeight = 2 * 145f + 1 * 14f; // ROWS_VISIBLE / CARD_HEIGHT / GRID_GAP
-    float gridLeftInset = 40f + 10f + 40f; // GRID_LEFT_INSET
-    float gridTopInset = 70f; // GRID_TOP_INSET
-    float previewGap = 30f; // PREVIEW_GAP
-    float previewPanelWidth = 190f;// PREVIEW_PANEL_WIDTH
-    String textDisplay = "popupText";
+  /** Builds the {@link DisplayingFactory} from the deck editor's own JSON-loaded records. */
+  private DisplayingFactory buildDeckEditorDisplays(
+      PopupDisplay popup, List<DisplayingRecord> records) {
 
-    // Summary line: just under the grid, spanning the width of grid + preview area.
-    DisplayingRecord summaryRec =
-        DisplayingRecord.builder("")
-            .trigger(DeckEditorEvents.SUMMARY)
-            .skin(skin)
-            .position(gridLeftInset, gridTopInset + gridHeight + 12f)
-            .size(gridWidth + previewGap + previewPanelWidth, 36f)
-            .variant(textDisplay)
-            .build();
-
-    // Error line: one row below the summary.
-    DisplayingRecord errorRec =
-        DisplayingRecord.builder("")
-            .trigger(DeckEditorEvents.ERROR)
-            .skin(skin)
-            .colour("FA8072") // only used if your skin defines a "salmon" colour
-            .position(gridLeftInset, gridTopInset + gridHeight + 56f)
-            .size(gridWidth + previewGap + previewPanelWidth, 36f)
-            .variant(textDisplay)
-            .build();
-
-    // Preview panel: to the right of the grid, top-aligned with it. CardPreviewDisplay handles
-    // the art / text split internally, so this is just the panel box.
-    DisplayingRecord previewRec =
-        DisplayingRecord.builder("")
-            .trigger(DeckEditorEvents.PREVIEW)
-            .position(gridLeftInset + gridWidth + previewGap, gridTopInset)
-            .size(previewPanelWidth, gridHeight)
-            .variant("cardPreview")
-            .build();
-
-    // Badges: no position/size — CardBadgesDisplay positions each badge from the payload.
-    // Its skin is optional; see CardBadgesDisplay for the fallback behaviour.
+    // 1. Badges (dynamic positioning, so not in JSON)
     DisplayingRecord badgesRec =
-        DisplayingRecord.builder("")
-            .trigger(DeckEditorEvents.BADGES)
-            .skin(skin)
-            .variant("selectBadges")
-            .build();
+        DisplayingRecord.builder("").trigger(DeckEditorEvents.BADGES).variant("cardBadges").build();
 
-    DisplayingFactory factory =
-        new DisplayingFactory(List.of(summaryRec, errorRec, previewRec, badgesRec));
+    // 2. Frames (dynamic positioning, so not in JSON)
+    DisplayingRecord framesRec =
+        DisplayingRecord.builder("").trigger(DeckEditorEvents.FRAMES).variant("cardFrames").build();
 
-    // popupText and cardPreview need the popup; register per-screen instance variants so they
-    // shadow the static entries (which would NPE with a null popup).
+    List<DisplayingRecord> all = new ArrayList<>(records);
+    all.add(badgesRec);
+    all.add(framesRec);
+
+    DisplayingFactory factory = new DisplayingFactory(all);
+
     factory.registerInstanceVariant(
-            textDisplay,
+        "popupText",
         rec -> {
           PopupTextDisplay d = new PopupTextDisplay(rec);
           d.addPopup(popup);
@@ -451,19 +358,13 @@ public class BattleScreen extends ScreenAdapter {
           d.addPopup(popup);
           return d;
         });
-    // cardBadges is a static variant — no popup needed.
+
+    factory.registerInstanceVariant("cardBadges", CardBadgesDisplay::new);
+    factory.registerInstanceVariant("cardFrames", CardFramesDisplay::new);
+
     return factory;
   }
 
-  /**
-   * Called after the deck editor commits a hand rearrange, with the full confirmed selection —
-   * including any still-on-cooldown picks {@link CardPlayService#rearrangeHand} left in the discard
-   * pile untouched. Unlike a normal play/cooldown-retrieval hand change, the whole set of slots may
-   * now be different, so — unlike {@link #buildHandRecords()}'s usual in-place toggling — the row's
-   * slots themselves are reset to match. A slot holding a still-discarded pick simply renders
-   * disabled (same as any other discarded card) until its cooldown naturally elapses and it's
-   * retrieved into the real hand, at which point the normal HAND_CHANGED_EVENT listener un-dims it.
-   */
   private void onDeckRearranged(List<CardInstance> newHandRow) {
     handRowOrder = new ArrayList<>(newHandRow);
     uiFactory.rebuildHand(buildHandRecords());
@@ -505,29 +406,13 @@ public class BattleScreen extends ScreenAdapter {
     return records;
   }
 
-  /**
-   * Builds one widget per card slot in {@link #handRowOrder} — a fixed left-to-right layout that
-   * only changes wholesale via {@link #onDeckRearranged}. Each slot renders the exact {@link
-   * CardInstance} dealt to it: still in hand, it's normal and playable; currently sitting in the
-   * discard pile (played, or on cooldown), it renders {@code disabled(true)} (shaded, inert to
-   * clicks/drags — see {@link com.csse3200.game.components.spritedisplay.clickable.Clickable}) in
-   * that SAME slot. Checking discard-pile membership by exact instance — not by card ID — is what
-   * lets duplicate copies of the same card (e.g. two "strike"s) be dimmed independently of each
-   * other. Positions never reflow and the row never grows/shrinks, so playing a card reads as "this
-   * slot went dull", not as a new card being dealt.
-   */
   private List<ClickableRecord> buildHandRecords() {
     Set<CardInstance> discardedInstances = new HashSet<>(battleDeck.getDiscardPileInstances());
 
     List<ClickableRecord> records = new ArrayList<>();
-    // Centre the whole row horizontally rather than always starting at a fixed left edge, so a
-    // hand of 3 cards and a hand of 8 both sit in the middle of the screen instead of hugging
-    // the left side.
     float stageWidth = ServiceLocator.getRenderService().getStage().getViewport().getWorldWidth();
     float handWidth = CARD_WIDTH + Math.max(0, handRowOrder.size() - 1) * HAND_SPACING;
     float x = (stageWidth - handWidth) / 2f;
-    // Fan the hand out from its middle slot: cards further from center tilt outward and dip
-    // down a little, so the row reads as a hand of cards rather than a flat strip.
     float centerIndex = (handRowOrder.size() - 1) / 2f;
     for (int i = 0; i < handRowOrder.size(); i++) {
       CardInstance instance = handRowOrder.get(i);
@@ -563,7 +448,6 @@ public class BattleScreen extends ScreenAdapter {
               .rotation(rotation)
               .disabled(disabled);
 
-      // The drag source supplies the selected player or enemy ID on release.
       builder.args(instance.instanceId());
 
       records.add(builder.build());

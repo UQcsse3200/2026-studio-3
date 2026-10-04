@@ -1,13 +1,10 @@
 package com.csse3200.game.components.spritedisplay.displaying;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.csse3200.game.components.battle.DeckEditorEvents;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,15 +12,12 @@ import java.util.List;
 /**
  * Display-only numbered badges that straddle the top-right corner of cards. The deck editor owns
  * the card layout, so it pushes the badge list in (fire the record's {@code trigger} with a {@code
- * List<Badge>}); this class only owns how a badge looks (size, colour, font). An empty list, or
+ * List<Badge>}); this class only owns how a badge looks (size, colours, font). An empty list, or
  * {@link DeckEditorEvents#CLOSED}, clears them.
  *
  * <p>The record's own position/size/text are unused here (badge positions come from the payload).
- *
- * <p>The record's {@code skin} is optional. If supplied, the badge picks up the skin's default
- * {@code Label.LabelStyle} and, if the skin defines a {@code "white"} drawable, gets a semi-opaque
- * dark background box. If {@code skin} is null (or the skin has no {@code Label.LabelStyle}), a
- * plain {@link BitmapFont} fallback is used and the badge renders as a bare white number.
+ * The badge font comes from the UI skin's default {@code Label.LabelStyle}, and its background is a
+ * flat box built from the skin's {@code "white"} drawable.
  */
 public class CardBadgesDisplay extends Displaying {
 
@@ -37,13 +31,11 @@ public class CardBadgesDisplay extends Displaying {
   private static final float SIZE = 24f;
   // How much of the badge pokes out past the corner (the rest sits inside the card).
   private static final float OVERHANG = SIZE * 0.25f;
-  private static final Color BACKGROUND = new Color(0.1f, 0.1f, 0.1f, 0.9f);
+  private static final Color BACKGROUND = new Color(0.06f, 0.03f, 0.04f, 0.92f); // near-black
+  private static final Color TEXT = Color.valueOf("F2BA47"); // gold
 
   private final List<Label> badges = new ArrayList<>();
   private Label.LabelStyle badgeStyle;
-  // Only non-null when we fell back to a plain BitmapFont (no skin supplied). Owned by us, so
-  // disposed in dispose().
-  private BitmapFont fallbackFont;
 
   public CardBadgesDisplay(DisplayingRecord rec) {
     super(rec);
@@ -53,31 +45,12 @@ public class CardBadgesDisplay extends Displaying {
   @Override
   public void create() {
     super.create();
-    badgeStyle = buildBadgeStyle();
+    badgeStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+    badgeStyle.fontColor = TEXT;
+    // "white" is a plain rectangle in the skin's atlas; newDrawable tints a copy of it.
+    badgeStyle.background = skin.newDrawable("white", BACKGROUND);
     entity.getEvents().addListener(DeckEditorEvents.CLOSED, this::clear);
     entity.getEvents().addListener(DeckEditorEvents.TO_FRONT, () -> badges.forEach(Label::toFront));
-  }
-
-  /**
-   * Prefers the record's own skin for styling; falls back to a plain {@link BitmapFont} if the skin
-   * is null or missing a default {@code Label.LabelStyle}. Never throws.
-   */
-  private Label.LabelStyle buildBadgeStyle() {
-    if (skin != null) {
-      try {
-        Label.LabelStyle style = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
-        style.fontColor = Color.WHITE;
-        if (skin.has("white", Drawable.class)) {
-          style.background = skin.newDrawable("white", BACKGROUND);
-        }
-        return style;
-      } catch (GdxRuntimeException ignored) {
-        // No Label.LabelStyle registered under the default key — fall through to the fallback.
-      }
-    }
-    fallbackFont = new BitmapFont();
-    fallbackFont.getData().setScale(1.2f);
-    return new Label.LabelStyle(fallbackFont, Color.WHITE);
   }
 
   @Override
@@ -118,10 +91,6 @@ public class CardBadgesDisplay extends Displaying {
   @Override
   public void dispose() {
     clear();
-    if (fallbackFont != null) {
-      fallbackFont.dispose();
-      fallbackFont = null;
-    }
     super.dispose();
   }
 }

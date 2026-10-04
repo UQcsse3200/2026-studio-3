@@ -1,4 +1,3 @@
-// DisplayingFactory.java
 package com.csse3200.game.components.spritedisplay.displaying;
 
 import com.badlogic.gdx.Gdx;
@@ -27,11 +26,44 @@ public class DisplayingFactory extends UIComponent {
     registerVariant("selectBadges", CardBadgesDisplay::new);
     registerVariant("cardPreview", CardPreviewDisplay::new);
     registerVariant("popupText", PopupTextDisplay::new);
-    // Add more variants here as needed.
+    registerVariant("cardDisplay", CardPreviewDisplay::new);
   }
 
   public static void registerVariant(String name, DisplayingSupplier supplier) {
     STATIC_VARIANTS.put(name, supplier);
+  }
+
+  /**
+   * NEW: Statically parse a JSON file and return the list of DisplayingRecords without creating a
+   * factory. Skins are left null; callers that need skins can load them separately. Use this when
+   * you want to filter / re-inject the records before building the factory.
+   */
+  public static List<DisplayingRecord> loadRecordsFromJson(Path file) {
+    List<DisplayingRecord> out = new ArrayList<>();
+    JsonValue root = new JsonReader().parse(Gdx.files.internal(file.toString()));
+    JsonValue displayingArray = root.get(DEFAULT_VARIANT);
+    if (displayingArray == null) {
+      return out;
+    }
+
+    for (JsonValue entry : displayingArray) {
+      DisplayingRecord.Builder b =
+          DisplayingRecord.builder(entry.getString("text"))
+              .trigger(entry.getString("trigger", null))
+              .position(entry.getFloat("x"), entry.getFloat("y"))
+              .fontName(entry.getString("fontName", null))
+              .colour(entry.getString("colour", null))
+              .scale(entry.getFloat("scale", 1f))
+              .variant(entry.getString("variant", DEFAULT_VARIANT));
+
+      JsonValue sizeArray = entry.get("size");
+      if (sizeArray != null) {
+        b.size(sizeArray.getFloat(0), sizeArray.getFloat(1));
+      }
+
+      out.add(b.build());
+    }
+    return out;
   }
 
   private final List<DisplayingRecord> records = new ArrayList<>();
@@ -103,10 +135,6 @@ public class DisplayingFactory extends UIComponent {
       }
 
       Displaying displaying = supplier.create(rec);
-      // Factory-managed, not registered as an entity component: it shares this factory's entity so
-      // its event listeners still work, and this factory owns its create/dispose lifecycle (the
-      // entity has already snapshotted its component list by the time this runs). Mirrors
-      // ClickableFactory.
       displaying.setEntity(this.entity);
       displaying.create();
       displayings.add(displaying);
@@ -115,7 +143,7 @@ public class DisplayingFactory extends UIComponent {
 
   @Override
   protected void draw(SpriteBatch batch) {
-    // Each Displaying is a UIComponent and draws itself via the render service.
+      //drawn by battle screen
   }
 
   @Override

@@ -48,19 +48,19 @@ public class CardActions extends Component {
    * BattleController.endPlayerTurn()} to succeed.
    */
   private void onEnergyChanged(int currentEnergy, int maxEnergy) {
-      if (currentEnergy == 0) {
-          entity.getEvents().trigger("down");
-          if (controller.isPlayerTurn()) {
-              Gdx.app.postRunnable(
-                      () -> {
-                          // Re-check: state may have changed before the runnable runs
-                          if (controller.isPlayerTurn()) {
-                              entity.getEvents().trigger("endTurn");
-                          }
-                      });
-          }
-      } else if (controller.isPlayerTurn()) {
-          entity.getEvents().trigger("up");
+    if (currentEnergy == 0) {
+      entity.getEvents().trigger("down");
+      if (controller.isPlayerTurn()) {
+        Gdx.app.postRunnable(
+            () -> {
+              // Re-check: state may have changed before the runnable runs
+              if (controller.isPlayerTurn()) {
+                entity.getEvents().trigger("endTurn");
+              }
+            });
       }
+    } else if (controller.isPlayerTurn()) {
+      entity.getEvents().trigger("up");
+    }
   }
 }
