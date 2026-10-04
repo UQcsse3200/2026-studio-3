@@ -28,7 +28,6 @@ public class PopupPanelDisplay extends Displaying {
 
   private final Image border = new Image();
   private final Image fill = new Image();
-  private PopupDisplay popup;
 
   public PopupPanelDisplay(DisplayingRecord rec) {
     super(rec);

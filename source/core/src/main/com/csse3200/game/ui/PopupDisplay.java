@@ -25,7 +25,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
  */
 public class PopupDisplay extends UIComponent {
   private static final float Z_INDEX = 20f;
-  private static final String DEFAULT_STYLE = "default";
   private static final Color BACKDROP_COLOUR = new Color(0f, 0f, 0f, 0.6f); // around the popup
 
   private final String title;
@@ -44,10 +43,6 @@ public class PopupDisplay extends UIComponent {
   private static final float HEADER_HEIGHT = 35f; // title bar height = the window's top padding
   private static final float SIDE_PADDING = 20f;
 
-
-  public PopupDisplay(String title) {
-    this(title, DEFAULT_STYLE);
-  }
 
   /**
    * @param title text in the window's title bar
