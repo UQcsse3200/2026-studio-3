@@ -1,6 +1,8 @@
 package com.csse3200.game.chance;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,21 +24,23 @@ class ChanceEncounterConfigLoaderTest {
   @Test
   void shouldLoadAllConfiguredEncountersFromDefaultFile() {
     List<ChanceEncounter> encounters = ChanceEncounterConfigLoader.loadEncounters();
+    List<String> encounterIds = encounters.stream().map(ChanceEncounter::getId).toList();
 
     assertEquals(
         List.of(
             "mysterious-shrine",
-            "healing-spring",
-            "forgotten-cache",
             "wandering-healer",
             "flooded-crossing",
             "abandoned-mine",
-            "roadside-riddle",
-            "corrupted-alchemist"),
-        encounters.stream().map(ChanceEncounter::getId).toList());
+            "wishing-fountain",
+            "dice-game",
+            "card-fusion"),
+        encounterIds);
+    assertFalse(encounterIds.contains("forgotten-cache"));
+    assertFalse(encounterIds.contains("roadside-riddle"));
     assertEquals(
-        List.of(3, 2, 3, 2, 3, 2, 2, 2),
-        encounters.stream().map(ChanceEncounter::getWeight).toList());
+        List.of(1, 1, 1, 1, 2, 2, 2), encounters.stream().map(ChanceEncounter::getWeight).toList());
+    assertEquals(10, encounters.stream().mapToInt(ChanceEncounter::getWeight).sum());
   }
 
   @Test
@@ -46,71 +50,53 @@ class ChanceEncounterConfigLoaderTest {
     assertEncounter(
         encounters.get(0),
         "mysterious-shrine",
-        "A cracked sanctum shrine still burns with a god's spoiled light. An angel might leave an"
-            + " offering here to learn what the fallen still demand.",
+        "A cracked sanctum shrine still burns with a god's spoiled light. An angel might leave an offering here to learn what the fallen still demand.",
         new ExpectedChoice(
             "make-offering", "Bleed a little of your light into the shrine.", -10, 25),
         new ExpectedChoice("leave", "Pass without kneeling.", 0, 0));
     assertEncounter(
         encounters.get(1),
-        "healing-spring",
-        "Water wells from broken stone where a sanctum once washed the wounded. An angel could"
-            + " drink and rise again for the climb ahead.",
-        new ExpectedChoice("drink", "Drink from the spring.", 15, 0),
-        new ExpectedChoice("leave", "Leave the water for whatever still wanders here.", 0, 0));
-    assertEncounter(
-        encounters.get(2),
-        "forgotten-cache",
-        "Under loose flagstones you find a sanctum cache left by servants who never returned. An"
-            + " angel might claim what they meant for the climb.",
-        new ExpectedChoice("take-coins", "Take the coins from the cache.", 0, 15),
-        new ExpectedChoice(
-            "claim-iron-oath", "Claim the iron oath tablet sealed inside.", 0, 0, "iron_oath"),
-        new ExpectedChoice("leave", "Leave the cache buried.", 0, 0));
-    assertEncounter(
-        encounters.get(3),
         "wandering-healer",
-        "A faded attendant still tends the hurt along the sanctum road, following orders that once"
-            + " meant mercy. An angel could accept that help without asking who gives it.",
+        "A faded attendant still tends the hurt along the sanctum road, following orders that once meant mercy. An angel could accept that help without asking who gives it.",
         new ExpectedChoice("purchase-remedy", "Buy the attendant's restorative draught.", 20, -10),
         new ExpectedChoice(
             "accept-bandage", "Accept a spare bandage for the road.", 0, 0, "bandage"),
         new ExpectedChoice("decline", "Decline and continue the climb.", 0, 0));
     assertEncounter(
-        encounters.get(4),
+        encounters.get(2),
         "flooded-crossing",
-        "A flooded sanctum court bars the way upward. An angel must choose how to cross without"
-            + " abandoning the path.",
+        "A flooded sanctum court bars the way upward. An angel must choose how to cross without abandoning the path.",
         new ExpectedChoice("hire-ferryman", "Pay a silent ferryman for safe passage.", 0, -8),
-        new ExpectedChoice("ford-river", "Wade the flood alone.", -8, 0),
-        new ExpectedChoice("wait", "Wait for the waters to sink.", 0, 0));
+        new ExpectedChoice("ford-river", "Wade the flood alone.", -8, 0));
+    assertNull(encounters.get(2).resolveChoice("wait"));
     assertEncounter(
-        encounters.get(5),
+        encounters.get(3),
         "abandoned-mine",
-        "Beneath the sanctum, old workings still hold relics of the fallen. An angel might risk the"
-            + " dark for tools of release.",
+        "Beneath the sanctum, old workings still hold relics of the fallen. An angel might risk the dark for tools of release.",
         new ExpectedChoice("search-tunnels", "Search the unstable tunnels for valuables.", -12, 30),
-        new ExpectedChoice(
-            "recover-doom-sigil", "Pull a doom sigil free from the wall.", -5, 0, "doom_sigil"),
         new ExpectedChoice("leave", "Leave the workings closed.", 0, 0));
     assertEncounter(
-        encounters.get(6),
-        "roadside-riddle",
-        "A hooded servant still tests travellers with an old sanctum riddle. An angel who answers"
-            + " may earn coin—or a sealed rite instead.",
-        new ExpectedChoice("answer-riddle", "Answer the riddle for coin.", 0, 12),
-        new ExpectedChoice(
-            "accept-sealed-pact", "Accept a sealed pact in place of coin.", 0, 0, "sealed_pact"),
-        new ExpectedChoice("walk-on", "Walk on without answering.", 0, 0));
+        encounters.get(4),
+        "wishing-fountain",
+        "An old wishing fountain shimmers beside the path.",
+        new ExpectedChoice("make-wish", "Make a wish at the fountain.", 0, 0),
+        new ExpectedChoice("leave", "Leave the fountain without making a wish.", 0, 0));
     assertEncounter(
-        encounters.get(7),
-        "corrupted-alchemist",
-        "A sanctum alchemist still mixes reagents from the corruption itself. An angel might trade"
-            + " for poison—or take a purifying draught.",
-        new ExpectedChoice(
-            "buy-poison-flask", "Trade coins for a poison flask.", 0, -12, "poison_flask"),
-        new ExpectedChoice("take-purify", "Accept a purifying tincture for free.", 0, 0, "purify"),
-        new ExpectedChoice("refuse", "Refuse the bargains.", 0, 0));
+        encounters.get(5),
+        "dice-game",
+        "A masked dice keeper invites you to test your luck with two dice.",
+        new ExpectedChoice("low", "Predict Low (2-6).", 0, 0),
+        new ExpectedChoice("high", "Predict High (8-12).", 0, 0),
+        new ExpectedChoice("take", "Take the Lucky Seven offer.", 0, 0),
+        new ExpectedChoice("double-down", "Double down on another prediction.", 0, 0),
+        new ExpectedChoice("cash-out", "Cash out the current Gold stake.", 0, 0),
+        new ExpectedChoice("continue", "Risk the current Gold stake in round two.", 0, 0));
+    assertEncounter(
+        encounters.get(6),
+        "card-fusion",
+        "An ancient forge offers to fuse three of your Common cards into one Rare card.",
+        new ExpectedChoice("fuse", "Choose three Common cards to fuse.", 0, 0),
+        new ExpectedChoice("leave", "Leave the forge without fusing cards.", 0, 0));
   }
 
   @Test
@@ -225,7 +211,7 @@ class ChanceEncounterConfigLoaderTest {
         ChanceEncounterConfigLoader.loadEncountersWithCatalog(
             new CardServiceCatalogAdapter(new CardLibrary(CardConfigLoader.loadCards())));
 
-    ChanceOutcome reward = encounters.get(3).resolveChoice("accept-bandage");
+    ChanceOutcome reward = encounters.get(1).resolveChoice("accept-bandage");
 
     assertEquals("bandage", reward.getCardRewardId());
   }
@@ -290,11 +276,10 @@ class ChanceEncounterConfigLoaderTest {
   void shouldSelectEveryEncounterFromExpandedConfiguration() {
     List<ChanceEncounter> encounters = ChanceEncounterConfigLoader.loadEncounters();
     ChanceEncounterSelector selector =
-        new ChanceEncounterSelector(encounters, new SequenceRandom(0, 3, 5, 8, 10, 13, 15, 17));
+        new ChanceEncounterSelector(encounters, new SequenceRandom(0, 1, 2, 3, 4, 6, 8));
 
     List<String> selectedIds =
         List.of(
-            selector.select().getId(),
             selector.select().getId(),
             selector.select().getId(),
             selector.select().getId(),

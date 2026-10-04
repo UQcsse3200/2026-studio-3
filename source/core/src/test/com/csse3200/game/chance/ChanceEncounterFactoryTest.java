@@ -1,6 +1,8 @@
 package com.csse3200.game.chance;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -16,18 +18,20 @@ class ChanceEncounterFactoryTest {
   @Test
   void shouldCreateInitialEncountersInDeterministicOrder() {
     List<ChanceEncounter> encounters = ChanceEncounterFactory.createInitialEncounters();
+    List<String> encounterIds = encounters.stream().map(ChanceEncounter::getId).toList();
 
     assertEquals(
         List.of(
             "mysterious-shrine",
-            "healing-spring",
-            "forgotten-cache",
             "wandering-healer",
             "flooded-crossing",
             "abandoned-mine",
-            "roadside-riddle",
-            "corrupted-alchemist"),
-        encounters.stream().map(ChanceEncounter::getId).toList());
+            "wishing-fountain",
+            "dice-game",
+            "card-fusion"),
+        encounterIds);
+    assertFalse(encounterIds.contains("forgotten-cache"));
+    assertFalse(encounterIds.contains("roadside-riddle"));
   }
 
   @Test
@@ -54,8 +58,7 @@ class ChanceEncounterFactoryTest {
     ChanceEncounter encounter = ChanceEncounterFactory.createInitialEncounters().get(0);
 
     assertEquals(
-        "A cracked sanctum shrine still burns with a god's spoiled light. An angel might leave an"
-            + " offering here to learn what the fallen still demand.",
+        "A cracked sanctum shrine still burns with a god's spoiled light. An angel might leave an offering here to learn what the fallen still demand.",
         encounter.getDescription());
     assertEquals(2, encounter.getChoices().size());
     assertChoice(
@@ -64,45 +67,36 @@ class ChanceEncounterFactoryTest {
   }
 
   @Test
-  void shouldCreateHealingSpring() {
-    ChanceEncounter encounter = ChanceEncounterFactory.createInitialEncounters().get(1);
+  void shouldCreateWishingFountain() {
+    ChanceEncounter encounter = ChanceEncounterFactory.createInitialEncounters().get(4);
 
-    assertEquals(
-        "Water wells from broken stone where a sanctum once washed the wounded. An angel could"
-            + " drink and rise again for the climb ahead.",
-        encounter.getDescription());
+    assertEquals("An old wishing fountain shimmers beside the path.", encounter.getDescription());
     assertEquals(2, encounter.getChoices().size());
-    assertChoice(encounter, 0, "drink", "Drink from the spring.", 15, 0);
-    assertChoice(encounter, 1, "leave", "Leave the water for whatever still wanders here.", 0, 0);
+    assertChoice(encounter, 0, "make-wish", "Make a wish at the fountain.", 0, 0);
+    assertChoice(encounter, 1, "leave", "Leave the fountain without making a wish.", 0, 0);
   }
 
   @Test
-  void shouldCreateForgottenCache() {
+  void shouldCreateCardFusionWithInitialLeave() {
+    ChanceEncounter encounter = ChanceEncounterFactory.createInitialEncounters().get(6);
+
+    assertEquals("card-fusion", encounter.getId());
+    assertEquals(2, encounter.getWeight());
+    assertChoice(encounter, 0, "fuse", "Choose three Common cards to fuse.", 0, 0);
+    assertChoice(encounter, 1, "leave", "Leave the forge without fusing cards.", 0, 0);
+  }
+
+  @Test
+  void shouldCreateForcedCostFloodedCrossing() {
     ChanceEncounter encounter = ChanceEncounterFactory.createInitialEncounters().get(2);
 
     assertEquals(
-        "Under loose flagstones you find a sanctum cache left by servants who never returned. An"
-            + " angel might claim what they meant for the climb.",
+        "A flooded sanctum court bars the way upward. An angel must choose how to cross without abandoning the path.",
         encounter.getDescription());
-    assertEquals(3, encounter.getChoices().size());
-    assertChoice(encounter, 0, "take-coins", "Take the coins from the cache.", 0, 15);
-    assertChoice(
-        encounter, 1, "claim-iron-oath", "Claim the iron oath tablet sealed inside.", 0, 0);
-    assertChoice(encounter, 2, "leave", "Leave the cache buried.", 0, 0);
-  }
-
-  @Test
-  void shouldCreateCorruptedAlchemist() {
-    ChanceEncounter encounter = ChanceEncounterFactory.createInitialEncounters().get(7);
-
-    assertEquals(
-        "A sanctum alchemist still mixes reagents from the corruption itself. An angel might trade"
-            + " for poison—or take a purifying draught.",
-        encounter.getDescription());
-    assertEquals(3, encounter.getChoices().size());
-    assertChoice(encounter, 0, "buy-poison-flask", "Trade coins for a poison flask.", 0, -12);
-    assertChoice(encounter, 1, "take-purify", "Accept a purifying tincture for free.", 0, 0);
-    assertChoice(encounter, 2, "refuse", "Refuse the bargains.", 0, 0);
+    assertEquals(2, encounter.getChoices().size());
+    assertChoice(encounter, 0, "hire-ferryman", "Pay a silent ferryman for safe passage.", 0, -8);
+    assertChoice(encounter, 1, "ford-river", "Wade the flood alone.", -8, 0);
+    assertNull(encounter.resolveChoice("wait"));
   }
 
   private static void assertChoice(
@@ -119,9 +113,7 @@ class ChanceEncounterFactoryTest {
     assertEquals(expectedDescription, choice.getDescription());
     assertEquals(expectedHealthDelta, outcome.getHealthDelta());
     assertEquals(expectedCurrencyDelta, outcome.getCurrencyDelta());
-    assertEquals(
-        expectedHealthDelta == 0 && expectedCurrencyDelta == 0 && outcome.getCardRewardId() == null,
-        outcome.isNoEffect());
+    assertEquals(expectedHealthDelta == 0 && expectedCurrencyDelta == 0, outcome.isNoEffect());
     assertSame(outcome, encounter.resolveChoice(expectedId));
   }
 }

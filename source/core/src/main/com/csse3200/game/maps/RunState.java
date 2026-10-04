@@ -29,7 +29,9 @@ public class RunState {
   private int playerMaxHealth;
   private int playerMaxEnergy;
   private boolean playerStatsInitialised;
+  private boolean cardFusionUsed;
   private PlayerRunState playerState;
+  private boolean pendingEliteTempleReward;
   private Long encounterSeed;
 
   /**
@@ -81,7 +83,13 @@ public class RunState {
     if (!playerStatsInitialised) {
       playerHealth = startingHealth;
       playerMaxHealth = startingMaxHealth;
-      playerMaxEnergy = startingMaxEnergy;
+
+      // Preserve a max-energy value that was already granted before the
+      // player's first battle, such as Blessing of Eternity.
+      if (playerMaxEnergy <= 0) {
+        playerMaxEnergy = startingMaxEnergy;
+      }
+
       playerStatsInitialised = true;
     }
   }
@@ -329,7 +337,50 @@ public class RunState {
     playerMaxHealth = 0;
     playerMaxEnergy = 0;
     playerStatsInitialised = false;
+    cardFusionUsed = false;
     playerState = null;
+    pendingEliteTempleReward = false;
+  }
+
+  /**
+   * Records whether the player has unlocked the hidden Elite temple reward and has not entered it
+   * yet.
+   *
+   * @param pending whether the hidden Elite reward is waiting
+   */
+  public void setPendingEliteTempleReward(boolean pending) {
+    this.pendingEliteTempleReward = pending;
+  }
+
+  /**
+   * Returns whether a hidden Elite temple reward is waiting to be entered.
+   *
+   * @return true when the Elite reward flow is pending
+   */
+  public boolean hasPendingEliteTempleReward() {
+    return pendingEliteTempleReward;
+  }
+
+  /** Clears the pending hidden Elite reward. */
+  public void clearPendingEliteTempleReward() {
+    pendingEliteTempleReward = false;
+  }
+
+  /**
+   * @return true once this run has completed its one permitted card fusion
+   */
+  public boolean hasUsedCardFusion() {
+    return cardFusionUsed;
+  }
+
+  /** Records that the run's one permitted card fusion completed successfully. */
+  public void markCardFusionUsed() {
+    cardFusionUsed = true;
+  }
+
+  /** Restores the saved card fusion allowance state. */
+  public void restoreCardFusionUsed(boolean used) {
+    cardFusionUsed = used;
   }
 
   private RewardOption pendingReward;

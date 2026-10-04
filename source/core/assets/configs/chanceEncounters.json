@@ -3,7 +3,7 @@
     {
       "id": "mysterious-shrine",
       "description": "A cracked sanctum shrine still burns with a god's spoiled light. An angel might leave an offering here to learn what the fallen still demand.",
-      "weight": 3,
+      "weight": 1,
       "choices": [
         {
           "id": "make-offering",
@@ -24,64 +24,9 @@
       ]
     },
     {
-      "id": "healing-spring",
-      "description": "Water wells from broken stone where a sanctum once washed the wounded. An angel could drink and rise again for the climb ahead.",
-      "weight": 2,
-      "choices": [
-        {
-          "id": "drink",
-          "description": "Drink from the spring.",
-          "outcome": {
-            "healthDelta": 15,
-            "currencyDelta": 0
-          }
-        },
-        {
-          "id": "leave",
-          "description": "Leave the water for whatever still wanders here.",
-          "outcome": {
-            "healthDelta": 0,
-            "currencyDelta": 0
-          }
-        }
-      ]
-    },
-    {
-      "id": "forgotten-cache",
-      "description": "Under loose flagstones you find a sanctum cache left by servants who never returned. An angel might claim what they meant for the climb.",
-      "weight": 3,
-      "choices": [
-        {
-          "id": "take-coins",
-          "description": "Take the coins from the cache.",
-          "outcome": {
-            "healthDelta": 0,
-            "currencyDelta": 15
-          }
-        },
-        {
-          "id": "claim-iron-oath",
-          "description": "Claim the iron oath tablet sealed inside.",
-          "outcome": {
-            "healthDelta": 0,
-            "currencyDelta": 0,
-            "cardRewardId": "iron_oath"
-          }
-        },
-        {
-          "id": "leave",
-          "description": "Leave the cache buried.",
-          "outcome": {
-            "healthDelta": 0,
-            "currencyDelta": 0
-          }
-        }
-      ]
-    },
-    {
       "id": "wandering-healer",
       "description": "A faded attendant still tends the hurt along the sanctum road, following orders that once meant mercy. An angel could accept that help without asking who gives it.",
-      "weight": 2,
+      "weight": 1,
       "choices": [
         {
           "id": "purchase-remedy",
@@ -113,7 +58,7 @@
     {
       "id": "flooded-crossing",
       "description": "A flooded sanctum court bars the way upward. An angel must choose how to cross without abandoning the path.",
-      "weight": 3,
+      "weight": 1,
       "choices": [
         {
           "id": "hire-ferryman",
@@ -130,21 +75,13 @@
             "healthDelta": -8,
             "currencyDelta": 0
           }
-        },
-        {
-          "id": "wait",
-          "description": "Wait for the waters to sink.",
-          "outcome": {
-            "healthDelta": 0,
-            "currencyDelta": 0
-          }
         }
       ]
     },
     {
       "id": "abandoned-mine",
       "description": "Beneath the sanctum, old workings still hold relics of the fallen. An angel might risk the dark for tools of release.",
-      "weight": 2,
+      "weight": 1,
       "choices": [
         {
           "id": "search-tunnels",
@@ -152,15 +89,6 @@
           "outcome": {
             "healthDelta": -12,
             "currencyDelta": 30
-          }
-        },
-        {
-          "id": "recover-doom-sigil",
-          "description": "Pull a doom sigil free from the wall.",
-          "outcome": {
-            "healthDelta": -5,
-            "currencyDelta": 0,
-            "cardRewardId": "doom_sigil"
           }
         },
         {
@@ -174,30 +102,21 @@
       ]
     },
     {
-      "id": "roadside-riddle",
-      "description": "A hooded servant still tests travellers with an old sanctum riddle. An angel who answers may earn coin—or a sealed rite instead.",
+      "id": "wishing-fountain",
+      "description": "An old wishing fountain shimmers beside the path.",
       "weight": 2,
       "choices": [
         {
-          "id": "answer-riddle",
-          "description": "Answer the riddle for coin.",
+          "id": "make-wish",
+          "description": "Make a wish at the fountain.",
           "outcome": {
             "healthDelta": 0,
-            "currencyDelta": 12
+            "currencyDelta": 0
           }
         },
         {
-          "id": "accept-sealed-pact",
-          "description": "Accept a sealed pact in place of coin.",
-          "outcome": {
-            "healthDelta": 0,
-            "currencyDelta": 0,
-            "cardRewardId": "sealed_pact"
-          }
-        },
-        {
-          "id": "walk-on",
-          "description": "Walk on without answering.",
+          "id": "leave",
+          "description": "Leave the fountain without making a wish.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0
@@ -206,31 +125,76 @@
       ]
     },
     {
-      "id": "corrupted-alchemist",
-      "description": "A sanctum alchemist still mixes reagents from the corruption itself. An angel might trade for poison—or take a purifying draught.",
+      "id": "dice-game",
+      "description": "A masked dice keeper invites you to test your luck with two dice.",
       "weight": 2,
       "choices": [
         {
-          "id": "buy-poison-flask",
-          "description": "Trade coins for a poison flask.",
+          "id": "low",
+          "description": "Predict Low (2-6).",
           "outcome": {
             "healthDelta": 0,
-            "currencyDelta": -12,
-            "cardRewardId": "poison_flask"
+            "currencyDelta": 0
           }
         },
         {
-          "id": "take-purify",
-          "description": "Accept a purifying tincture for free.",
+          "id": "high",
+          "description": "Predict High (8-12).",
           "outcome": {
             "healthDelta": 0,
-            "currencyDelta": 0,
-            "cardRewardId": "purify"
+            "currencyDelta": 0
           }
         },
         {
-          "id": "refuse",
-          "description": "Refuse the bargains.",
+          "id": "take",
+          "description": "Take the Lucky Seven offer.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        },
+        {
+          "id": "double-down",
+          "description": "Double down on another prediction.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        },
+        {
+          "id": "cash-out",
+          "description": "Cash out the current Gold stake.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        },
+        {
+          "id": "continue",
+          "description": "Risk the current Gold stake in round two.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "card-fusion",
+      "description": "An ancient forge offers to fuse three of your Common cards into one Rare card.",
+      "weight": 2,
+      "choices": [
+        {
+          "id": "fuse",
+          "description": "Choose three Common cards to fuse.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
+          }
+        },
+        {
+          "id": "leave",
+          "description": "Leave the forge without fusing cards.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0

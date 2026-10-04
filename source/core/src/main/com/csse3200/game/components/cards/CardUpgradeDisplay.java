@@ -32,6 +32,8 @@ public class CardUpgradeDisplay extends UIComponent {
   private static final String SMALL = "small";
   private final Map<String, Table> tilesByInstanceId = new LinkedHashMap<>();
   private final CardUpgradeCommitter committer;
+  private final boolean launcherVisible;
+  private final Runnable onUpgradeCommitted;
   private Table buttonTable;
   private Table libraryOverlay;
   private TextButton upgradeButton;
@@ -47,8 +49,26 @@ public class CardUpgradeDisplay extends UIComponent {
    * @param committer receive card upgrade commit
    */
   public CardUpgradeDisplay(CardUpgradeSelection selection, CardUpgradeCommitter committer) {
+    this(selection, committer, true, () -> {});
+  }
+
+  /**
+   * Creates a card upgrade display.
+   *
+   * @param selection card upgrade selection model
+   * @param committer applies selected upgrades to the persistent deck
+   * @param launcherVisible whether this display should show its own Upgrade button
+   * @param onUpgradeCommitted callback invoked after an upgrade is successfully committed
+   */
+  public CardUpgradeDisplay(
+      CardUpgradeSelection selection,
+      CardUpgradeCommitter committer,
+      boolean launcherVisible,
+      Runnable onUpgradeCommitted) {
     this.selection = selection;
     this.committer = committer;
+    this.launcherVisible = launcherVisible;
+    this.onUpgradeCommitted = onUpgradeCommitted == null ? () -> {} : onUpgradeCommitted;
   }
 
   @Override
@@ -85,7 +105,10 @@ public class CardUpgradeDisplay extends UIComponent {
         });
     buttonTable.add(upgradeButton).width(96f).height(40f).right();
 
-    stage.addActor(buttonTable);
+    if (launcherVisible) {
+      stage.addActor(buttonTable);
+    }
+
     rebuildLibraryOverlay();
   }
 
@@ -150,6 +173,7 @@ public class CardUpgradeDisplay extends UIComponent {
             committer.commitUpgrades(selection.getSelectedInstanceIds());
             selection.refresh();
             rebuildLibraryOverlay();
+            onUpgradeCommitted.run();
           }
         });
     libraryPanel.add(cardGrid).center().padTop(10f);
@@ -170,7 +194,19 @@ public class CardUpgradeDisplay extends UIComponent {
     }
   }
 
-  private void hideLibrary() {
+  /** Opens the card upgrade library from an external launcher such as the Campfire Forge button. */
+  public void showLibrary() {
+    if (selection.getCardUpgradeOption().isEmpty()) {
+      return;
+    }
+
+    libraryVisible = true;
+    libraryOverlay.setVisible(true);
+    libraryOverlay.toFront();
+  }
+
+  /** Closes the existing upgrade overlay without changing the selected cards or deck. */
+  public void hideLibrary() {
     libraryVisible = false;
     libraryOverlay.setVisible(false);
     refresh();

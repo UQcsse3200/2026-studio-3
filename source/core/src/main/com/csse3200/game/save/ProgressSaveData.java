@@ -13,6 +13,12 @@ public class ProgressSaveData {
   /** Seed that fixes each node's encounter for this run; null in saves made before it existed. */
   public Long encounterSeed = null;
 
+  /** Whether the hidden Elite temple reward is waiting to be entered. */
+  public boolean pendingEliteTempleReward = false;
+
+  /** Whether this run has already used its one permitted card fusion. */
+  public boolean cardFusionUsed = false;
+
   /** Required for JSON deserialisation. */
   public ProgressSaveData() {}
 

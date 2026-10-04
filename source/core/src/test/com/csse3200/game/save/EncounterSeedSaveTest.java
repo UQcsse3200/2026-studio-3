@@ -73,6 +73,28 @@ class EncounterSeedSaveTest {
     assertNotNull(restored.getEncounterSeed());
   }
 
+  @Test
+  void shouldWriteRunProgressFlagsIntoSave() {
+    runState.setPendingEliteTempleReward(true);
+    runState.markCardFusionUsed();
+
+    SaveGameData loaded = saveAndLoad();
+
+    assertTrue(loaded.progress.pendingEliteTempleReward);
+    assertTrue(loaded.progress.cardFusionUsed);
+  }
+
+  @Test
+  void shouldRestoreRunProgressFlagsAfterRelaunch() {
+    runState.setPendingEliteTempleReward(true);
+    runState.markCardFusionUsed();
+
+    RunState restored = relaunchAndRestore(saveAndLoad());
+
+    assertTrue(restored.hasPendingEliteTempleReward());
+    assertTrue(restored.hasUsedCardFusion());
+  }
+
   private JsonSaveGameRepository repository() {
     return new JsonSaveGameRepository(new FileHandle(temporaryDirectory.toFile()));
   }

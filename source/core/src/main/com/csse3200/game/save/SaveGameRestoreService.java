@@ -81,6 +81,14 @@ public class SaveGameRestoreService {
         return RestoreResult.failure(RestoreError.APPLY_FAILED, "Unable to restore run state");
       }
       runState.restoreEncounterSeed(data.progress == null ? null : data.progress.encounterSeed);
+
+      boolean pendingEliteTempleReward =
+          data.progress != null && data.progress.pendingEliteTempleReward;
+      boolean cardFusionUsed = data.progress != null && data.progress.cardFusionUsed;
+
+      runState.setPendingEliteTempleReward(pendingEliteTempleReward);
+      runState.restoreCardFusionUsed(cardFusionUsed);
+
       restoreBestiaryProgress(data.progress);
       restoreCardProgress(data.progress);
       return RestoreResult.success(resolveResumeScreen(data));

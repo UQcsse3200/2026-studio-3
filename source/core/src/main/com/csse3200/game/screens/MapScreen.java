@@ -141,6 +141,9 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     } else if (roomType == RoomType.COMBAT || roomType == RoomType.ELITE) {
       logger.info("Node {} ({}) selected, entering battle", nodeId, roomType);
       game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
+    } else if (roomType == RoomType.CAMPFIRE) {
+      logger.info("Node {} ({}) selected, entering campfire", nodeId, roomType);
+      game.setScreen(GdxGame.ScreenType.CAMPFIRE);
     } else {
       logger.info("Node {} ({}) selected, entering encounter", nodeId, roomType);
       game.setScreen(GdxGame.ScreenType.ENCOUNTER);
@@ -213,7 +216,6 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getResourceService().dispose();
-    ScreenUtils.clear(new Color(248f / 255f, 249f / 255f, 178f / 255f, 1f));
     ServiceLocator.clear();
   }
 }
