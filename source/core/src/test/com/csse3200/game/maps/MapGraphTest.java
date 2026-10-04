@@ -252,7 +252,7 @@ public class MapGraphTest {
     assertEquals(start, graph.getCurrentNode());
   }
 
-    @Test 
+  @Test
   void availableAdjacantNodesToCompletedNodesAreLockedAfterEncounterSuccess() {
     MapGenerationConfig config = new MapGenerationConfig();
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
@@ -271,7 +271,7 @@ public class MapGraphTest {
     middle1.setHeight(0);
     middle2.setHeight(0);
     next.setHeight(1);
-    
+
     graph.completeNode(start.getNodeId(), true);
 
     assertEquals(middle1.getState(), NodeState.LOCKED);
