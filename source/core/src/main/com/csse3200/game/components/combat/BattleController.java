@@ -12,10 +12,7 @@ import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.cards.CardEffectHandler;
-import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
-import com.csse3200.game.components.enemy.EnemyIntent;
-import com.csse3200.game.components.enemy.IntentEffectType;
-import com.csse3200.game.components.enemy.IntentType;
+import com.csse3200.game.components.enemy.*;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.events.EventHandler;
@@ -402,6 +399,28 @@ public class BattleController {
   }
 
   /**
+   * Announces a telegraphed status effect, so the player can plan around it before it lands.
+   *
+   * @param enemy the enemy whose intent was just rolled
+   * @param intent the intent it will carry out next turn
+   */
+  private void narrateDebuffIntent(Entity enemy, EnemyIntent intent) {
+    if (intent == null || intent.getEffectType() == null) {
+      return;
+    }
+
+    EnemyStatsComponent stats = enemy.getComponent(EnemyStatsComponent.class);
+    String name = stats == null ? "The enemy" : stats.getDisplayName();
+    int turns = intent.getDuration();
+
+    switch (intent.getEffectType()) {
+      case TAUNT -> narrate(name + " will taunt you for " + turns + " turns.");
+      case SILENCE -> narrate(name + " will silence you for " + turns + " turns.");
+      case DAMAGE_ON_CARD_PLAY -> narrate(name + " will curse your cards for " + turns + " turns.");
+    }
+  }
+
+  /**
    * Convenience function for returning if a given event can be handled within a state.
    *
    * @param event The event to check.
@@ -754,7 +773,7 @@ public class BattleController {
         // Enemies live on their own entity and cannot reach the player, so hand the player's stats
         // over each round. Refreshing here keeps the AI reading the player's current condition.
         behaviour.setPlayerStats(player.getComponent(CombatStatsComponent.class));
-        behaviour.rollIntent();
+        narrateDebuffIntent(enemy, behaviour.rollIntent());
       }
     }
 

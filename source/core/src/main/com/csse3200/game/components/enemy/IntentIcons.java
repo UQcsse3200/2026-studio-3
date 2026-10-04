@@ -78,7 +78,7 @@ public final class IntentIcons {
     return switch (effectType) {
       case SILENCE -> SILENCE;
       case DAMAGE_ON_CARD_PLAY -> DAMAGE_ON_CARD_PLAY;
-      case TAUNT -> DEBUFF;
+      case TAUNT -> TAUNT;
     };
   }
 

@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.areas.terrain.TerrainFactory.TerrainType;
+import com.csse3200.game.components.enemy.IntentIcons;
 import com.csse3200.game.components.gamearea.CombatBackgroundComponent;
 import com.csse3200.game.components.gamearea.CombatBackgroundConfig;
 import com.csse3200.game.components.gamearea.CombatBackgroundConfigs;
@@ -46,8 +47,6 @@ public class ForestGameArea extends GameArea {
     "images/iso_grass_1.png",
     "images/iso_grass_2.png",
     "images/iso_grass_3.png",
-    "images/enemies/intents/attack.png",
-    "images/enemies/intents/defend.png",
     "images/battle_background.png"
   };
   private static final String[] forestTextureAtlases = {
@@ -244,6 +243,8 @@ public class ForestGameArea extends GameArea {
     logger.debug("Loading assets");
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(forestTextures);
+    // Every intent icon, so any telegraphed intent can be drawn without a missing-asset crash.
+    resourceService.loadTextures(IntentIcons.all());
     resourceService.loadTextureAtlases(forestTextureAtlases);
     resourceService.loadSounds(forestSounds);
     // resourceService.loadMusic(forestMusic);
@@ -261,6 +262,7 @@ public class ForestGameArea extends GameArea {
     resourceService.unloadAssets(forestTextureAtlases);
     resourceService.unloadAssets(forestSounds);
     // resourceService.unloadAssets(forestMusic);
+    resourceService.unloadAssets(IntentIcons.all());
   }
 
   @Override
