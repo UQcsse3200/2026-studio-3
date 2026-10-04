@@ -28,9 +28,7 @@ import java.util.Map;
 
 /**
  * Read-only catalogue of every {@link ItemType}, mirroring {@link CardLibraryDisplay}'s
- * list-plus-detail layout. Unlike {@link
- * com.csse3200.game.components.battle.InventoryPopupComponent}, this shows all item types
- * regardless of what the player currently owns — it's a reference library, not a live inventory.
+ * list-plus-detail layout.
  */
 public class ItemLibraryDisplay extends UIComponent {
   private static final float PANEL_WIDTH = 1120f;
@@ -57,10 +55,8 @@ public class ItemLibraryDisplay extends UIComponent {
         ItemType.LUCKY_COIN,
         "Consumed when claiming a GOLD reward: adds 10% of your gold (current + reward), capped"
             + " at +20. Only one copy used per claim.");
-    ITEM_DESCRIPTIONS.put(ItemType.IRON_AEGIS, "+5 Armour at the start of each battle, stacks.");
-    ITEM_DESCRIPTIONS.put(
-        ItemType.WARRIORS_CREST,
-        "+1 Strength at the start of each battle. Each stack adds +1 damage to damaging cards.");
+    ITEM_DESCRIPTIONS.put(ItemType.IRON_AEGIS, "Consume during battle to gain +5 Armour.");
+    ITEM_DESCRIPTIONS.put(ItemType.WARRIORS_CREST, "Consume during battle to gain +1 Strength.");
   }
 
   private final GdxGame game;
