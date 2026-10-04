@@ -18,13 +18,14 @@ public class AudioService {
             "sounds/Impact4.ogg",
             "sounds/menuHover.mp3",
             "sounds/itemPurchase.mp3",
-            "sounds/swordSlice.mp3",
+            "sounds/enterCombat.mp3",
             "sounds/enterShop.mp3",
             "sounds/error.mp3",
             "sounds/enterEncounter.mp3",
             "sounds/cardHover.mp3",
             "sounds/cardShuffle.mp3",
-            "sounds/enterElite.mp3"
+            "sounds/enterElite.mp3",
+            "sounds/itemPickup.mp3"
     };
     private static final String[] musicPaths = {
             "music/BGM_03_mp3.mp3"

@@ -8,6 +8,9 @@ import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.rewards.RewardService;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
+
 import java.util.List;
 
 public class RewardDisplay extends Displaying {
@@ -117,10 +120,14 @@ public class RewardDisplay extends Displaying {
       PlayerRunState playerState = runState.getOrCreatePlayerState();
 
       switch (option.type) {
-        case GOLD -> playerState.addGold(option.goldAmount);
+        case GOLD -> {
+          AudioService.playSound(SoundId.ITEM_PURCHASE, 0.5f);
+          playerState.addGold(option.goldAmount);
+        }
 
         case ITEM -> {
           if (option.itemId != null) {
+            AudioService.playSound(SoundId.ITEM_PICKUP, 0.5f);
             playerState.addOwnedItem(option.itemId);
           }
         }

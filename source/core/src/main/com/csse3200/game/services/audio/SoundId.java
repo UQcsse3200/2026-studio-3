@@ -6,12 +6,13 @@ public enum SoundId {
     IMPACT, // TODO: remove
     MENU_HOVER,
     ITEM_PURCHASE,
-    SWORD_SLICE,
+    ENTER_COMBAT,
     ENTER_SHOP,
     ERROR,
     ENTER_ENCOUNTER,
     CARD_HOVER,
     CARD_SHUFFLE,
-    ENTER_ELITE
+    ENTER_ELITE,
+    ITEM_PICKUP
 
 }
