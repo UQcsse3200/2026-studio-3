@@ -127,7 +127,7 @@ public class RewardDisplay extends Displaying {
 
         case ITEM -> {
           if (option.itemId != null) {
-            AudioService.playSound(SoundId.ITEM_PICKUP, 0.5f);
+            AudioService.playSound(SoundId.ITEM_PICKUP, 0.7f);
             playerState.addOwnedItem(option.itemId);
           }
         }

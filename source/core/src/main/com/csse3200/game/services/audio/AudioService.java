@@ -25,7 +25,13 @@ public class AudioService {
             "sounds/cardHover.mp3",
             "sounds/cardShuffle.mp3",
             "sounds/enterElite.mp3",
-            "sounds/itemPickup.mp3"
+            "sounds/itemPickup.mp3",
+            "sounds/swordSwing.mp3",
+            "sounds/shieldGuard.mp3",
+            "sounds/bandage.mp3",
+            "sounds/poison.mp3",
+            "sounds/armorBreak.mp3",
+            "sounds/magicChime.mp3"
     };
     private static final String[] musicPaths = {
             "music/BGM_03_mp3.mp3"
@@ -50,7 +56,7 @@ public class AudioService {
      */
     public static void playSound(SoundId soundID, float volume) {
 
-        if ( System.currentTimeMillis() - timestamp > SFX_COOLDOWN) {
+        if (System.currentTimeMillis() - timestamp > SFX_COOLDOWN) {
 
             Sound sound = ServiceLocator.getResourceService().getAsset(soundPaths[soundID.ordinal()], Sound.class);
             sound.setPitch(sound.play(volume), rand.nextFloat(LOWER_PITCH_BOUND, UPPER_PITCH_BOUND));

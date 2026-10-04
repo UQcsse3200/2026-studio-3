@@ -13,6 +13,11 @@ public enum SoundId {
     CARD_HOVER,
     CARD_SHUFFLE,
     ENTER_ELITE,
-    ITEM_PICKUP
-
+    ITEM_PICKUP,
+    SWORD_SWING,
+    SHIELD_GUARD,
+    BANDAGE,
+    BOTTLE_CORK,
+    ARMOR_BREAK,
+    MAGIC_CHIME
 }
