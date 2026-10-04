@@ -174,11 +174,10 @@ public class ItemLibraryDisplay extends UIComponent {
   private void addItemList(ItemType[] items, Table panel) {
     Table itemList = new Table();
     itemList.top();
-    itemList.defaults().width(290f).height(58f).padBottom(8f).left();
-
+    itemList.defaults().width(290f).height(76f).padBottom(8f).left();
     for (ItemType item : items) {
       TextButton itemButton = new TextButton(ItemFormatting.formatItemName(item), buttonStyle);
-      itemButton.getLabel().setFontScale(0.75f);
+      itemButton.getLabel().setFontScale(0.6f);
       itemButton.addListener(
           new ChangeListener() {
             @Override
