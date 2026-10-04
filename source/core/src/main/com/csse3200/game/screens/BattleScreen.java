@@ -288,7 +288,7 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new InputDecorator(stage, 10))
             .addComponent(uiFactory)
             .addComponent(displays)
-            .addComponent(new BattleActions(controller, game))
+            .addComponent(new BattleActions(controller, game, gameArea.getEnemies()))
             .addComponent(new CardActions(controller, gameArea.getPlayer()))
             .addComponent(new Team3CardPlayAdapter(cardPlayService, controller))
             .addComponent(cardInventory)

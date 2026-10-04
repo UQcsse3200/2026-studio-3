@@ -8,6 +8,7 @@ import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattlePhase;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.entities.Entity;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +40,7 @@ public class BattleActions extends Component {
 
   private final BattleController controller;
   private final GdxGame game;
+  private final List<Entity> enemies;
 
   // While true, reveals (log, effects, phase changes, the hand coming back up) are queued instead
   // of fired immediately, so the enemy's whole turn can be held back and replayed together after
@@ -48,10 +50,14 @@ public class BattleActions extends Component {
   private final List<Runnable> queuedReveals = new ArrayList<>();
 
   public BattleActions(BattleController controller, GdxGame game) {
-    this.controller = controller;
-    this.game = game;
+    this(controller, game, List.of());
   }
 
+  public BattleActions(BattleController controller, GdxGame game, List<Entity> enemies) {
+    this.controller = controller;
+    this.game = game;
+    this.enemies = List.copyOf(enemies);
+  }
   /**
    * Returns whether the battle is waiting for player input.
    *
