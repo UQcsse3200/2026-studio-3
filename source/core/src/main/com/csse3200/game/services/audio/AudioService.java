@@ -9,11 +9,15 @@ import java.util.Random;
 public class AudioService {
 
     private static final int SFX_COOLDOWN = 100; // 100ms sound cooldown
-    private static final float LOWER_PITCH_BOUND = 0.90f;
-    private static final float UPPER_PITCH_BOUND = 1.10f;
+    private static final float LOWER_PITCH_BOUND = 0.90f, UPPER_PITCH_BOUND = 1.10f;
+    private static final float OVERLAP_DAMPING = 0.2f;
     private static Music playing;
-    private static long timestamp;
+    private static SoundId lastSound = SoundId.MENU_HOVER;
+    private static long cooldownTimestamp;
     private static float musicVolume = 0.5f; // TODO: decide default music volume
+    private static final Random pitchModifier = new Random();
+
+    // this may appear to be a lot to load into ram, but each file is only kilobytes big
     private static final String[] soundPaths = {
             "sounds/Impact4.ogg",
             "sounds/menuHover.mp3",
@@ -36,14 +40,13 @@ public class AudioService {
     private static final String[] musicPaths = {
             "music/BGM_03_mp3.mp3"
     };
-    private static final Random rand = new Random();
 
     /**
      * Loads all the audio files defined in their respective path arrays. Called once in GdxGame at game start.
      **/
     public static void load() {
 
-        timestamp = System.currentTimeMillis();
+        cooldownTimestamp = System.currentTimeMillis();
         ServiceLocator.getResourceService().loadSounds(soundPaths);
         ServiceLocator.getResourceService().loadMusic(musicPaths);
     }
@@ -56,11 +59,17 @@ public class AudioService {
      */
     public static void playSound(SoundId soundID, float volume) {
 
-        if (System.currentTimeMillis() - timestamp > SFX_COOLDOWN) {
+        if (System.currentTimeMillis() - cooldownTimestamp > SFX_COOLDOWN) {
 
             Sound sound = ServiceLocator.getResourceService().getAsset(soundPaths[soundID.ordinal()], Sound.class);
-            sound.setPitch(sound.play(volume), rand.nextFloat(LOWER_PITCH_BOUND, UPPER_PITCH_BOUND));
-            timestamp = System.currentTimeMillis();
+            sound.setPitch(sound.play(volume), pitchModifier.nextFloat(LOWER_PITCH_BOUND, UPPER_PITCH_BOUND));
+            lastSound = soundID;
+            cooldownTimestamp = System.currentTimeMillis();
+
+        } else if (soundID != lastSound) { // allows for different sound effects to overlap
+
+            Sound sound = ServiceLocator.getResourceService().getAsset(soundPaths[soundID.ordinal()], Sound.class);
+            sound.setPitch(sound.play(volume - OVERLAP_DAMPING), pitchModifier.nextFloat(LOWER_PITCH_BOUND, UPPER_PITCH_BOUND));
         }
     }
 
