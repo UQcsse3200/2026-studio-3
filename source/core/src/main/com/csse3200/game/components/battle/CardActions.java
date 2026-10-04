@@ -1,5 +1,6 @@
 package com.csse3200.game.components.battle;
 
+import com.badlogic.gdx.Gdx;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattlePhase;
@@ -49,6 +50,15 @@ public class CardActions extends Component {
   private void onEnergyChanged(int currentEnergy, int maxEnergy) {
     if (currentEnergy == 0) {
       entity.getEvents().trigger("down");
+      if (controller.isPlayerTurn()) {
+        Gdx.app.postRunnable(
+            () -> {
+              // Re-check: state may have changed before the runnable runs
+              if (controller.isPlayerTurn()) {
+                entity.getEvents().trigger("endTurn");
+              }
+            });
+      }
     } else if (controller.isPlayerTurn()) {
       entity.getEvents().trigger("up");
     }
