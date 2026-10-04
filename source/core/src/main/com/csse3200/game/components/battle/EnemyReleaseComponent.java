@@ -15,11 +15,6 @@ public class EnemyReleaseComponent extends Component {
     private final Color startingColour = new Color(Color.WHITE);
     private final Color currentColour = new Color();
 
-    @Override
-    public void update() {
-        elapsed += ServiceLocator.getTimeSource().getDeltaTime();
-    }
-
     public boolean isFinished() {
         return elapsed >= DURATION;
     }
@@ -33,5 +28,19 @@ public class EnemyReleaseComponent extends Component {
         if (animator != null && animator.getActiveTint() != null) {
             startingColour.set(animator.getActiveTint());
         }
+    }
+
+    @Override
+    public void update() {
+       elapsed = Math.min(
+               elapsed + ServiceLocator.getTimeSource().getDeltaTime(), DURATION
+       );
+
+       if (animator != null) {
+           float progress =  elapsed / DURATION;
+           // using lerp to blend the colour over a duration instead of a cold switch
+           currentColour.set(startingColour).lerp(RELEASE_COLOUR, progress);
+           animator.setPersistentTint(currentColour);
+       }
     }
 }
