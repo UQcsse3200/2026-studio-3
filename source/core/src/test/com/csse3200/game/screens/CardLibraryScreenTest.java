@@ -26,6 +26,7 @@ class CardLibraryScreenTest {
     assertTrue(texturePaths.contains(MainMenuDisplay.BUTTON_FRAME_TEXTURE));
     assertTrue(texturePaths.contains(UncommonCardLibraryWidget.FRAME_TEXTURE));
     assertTrue(texturePaths.contains(CardWidgetAssets.COMMON_FRAME_TEXTURE));
+    assertTrue(texturePaths.contains(CardWidgetAssets.RARE_FRAME_TEXTURE));
     for (CardConfig card : CardConfigLoader.loadCards()) {
       assertTrue(texturePaths.contains(card.texturePath));
     }

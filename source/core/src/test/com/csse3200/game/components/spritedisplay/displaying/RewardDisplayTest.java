@@ -175,17 +175,21 @@ class RewardDisplayTest {
   }
 
   @Test
-  void commonRewardsUseSharedManagedFrameAndStillKeepEqualBounds() {
-    Texture frame = mock(Texture.class);
-    when(frame.getWidth()).thenReturn(450);
-    when(frame.getHeight()).thenReturn(912);
+  void allRewardRaritiesUseSharedManagedFramesAndStillKeepEqualBounds() {
     ResourceService resources = ServiceLocator.getResourceService();
-    when(resources.containsAsset(CardWidgetAssets.COMMON_FRAME_TEXTURE, Texture.class))
-        .thenReturn(true);
-    when(resources.getAsset(CardWidgetAssets.COMMON_FRAME_TEXTURE, Texture.class))
-        .thenReturn(frame);
+    for (String path :
+        List.of(
+            CardWidgetAssets.COMMON_FRAME_TEXTURE,
+            CardWidgetAssets.UNCOMMON_FRAME_TEXTURE,
+            CardWidgetAssets.RARE_FRAME_TEXTURE)) {
+      Texture frame = mock(Texture.class);
+      when(frame.getWidth()).thenReturn(450);
+      when(frame.getHeight()).thenReturn(912);
+      when(resources.containsAsset(path, Texture.class)).thenReturn(true);
+      when(resources.getAsset(path, Texture.class)).thenReturn(frame);
+    }
     CardAcquisitionPool pool =
-        new CardAcquisitionPool(cardService, List.of("strike", "defend", "bandage"));
+        new CardAcquisitionPool(cardService, List.of("strike", "inner_focus", "poison_mark"));
     RewardDisplay display =
         createDisplay(new RewardService(fixedRewardGenerator(), cardService, pool, new Random(7)));
     stage.getViewport().update(1280, 960, true);
@@ -203,7 +207,13 @@ class RewardDisplayTest {
       Image frameImage = ((Group) widget.getChildren().first()).findActor("card-frame");
       TextureRegionDrawable drawable =
           assertInstanceOf(TextureRegionDrawable.class, frameImage.getDrawable());
-      assertSame(frame, drawable.getRegion().getTexture());
+      String path =
+          switch (widget.getCard().rarity()) {
+            case COMMON -> CardWidgetAssets.COMMON_FRAME_TEXTURE;
+            case UNCOMMON -> CardWidgetAssets.UNCOMMON_FRAME_TEXTURE;
+            case RARE -> CardWidgetAssets.RARE_FRAME_TEXTURE;
+          };
+      assertSame(resources.getAsset(path, Texture.class), drawable.getRegion().getTexture());
     }
   }
 

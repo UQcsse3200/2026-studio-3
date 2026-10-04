@@ -86,6 +86,49 @@ class CardLibraryDisplayTest {
   }
 
   @Test
+  void shouldKeepManagedRarityFramesHiddenUntilDiscovery() {
+    CardDiscoveryService discovery = CardDiscoveryService.loadDefault();
+    CardLibraryDisplay display = createDisplay(discovery);
+    ResourceService resources = ServiceLocator.getResourceService();
+    for (String path :
+        List.of(
+            CardWidgetAssets.COMMON_FRAME_TEXTURE,
+            CardWidgetAssets.UNCOMMON_FRAME_TEXTURE,
+            CardWidgetAssets.RARE_FRAME_TEXTURE)) {
+      Texture frame = mock(Texture.class);
+      when(frame.getWidth()).thenReturn(450);
+      when(frame.getHeight()).thenReturn(912);
+      when(resources.containsAsset(path, Texture.class)).thenReturn(true);
+      when(resources.getAsset(path, Texture.class)).thenReturn(frame);
+    }
+    display.create();
+    ArgumentCaptor<Actor> root = ArgumentCaptor.forClass(Actor.class);
+    verify(ServiceLocator.getRenderService().getStage()).addActor(root.capture());
+    for (String cardId : List.of("strike", "inner_focus", "poison_mark")) {
+      display.showCard(discovery.getEntry(cardId).orElseThrow());
+      assertTrue(display.isLockedArtworkVisible());
+      assertFalse(display.isStandardCardVisible());
+      discovery.recordSeen(cardId);
+      assertTrue(display.isStandardCardVisible());
+      assertFalse(display.isUncommonCardVisible());
+      assertFalse(display.isLockedArtworkVisible());
+      CardWidget widget = findWidget(root.getValue());
+      assertEquals(cardId, widget.getCard().cardId());
+      String path =
+          switch (widget.getCard().rarity()) {
+            case COMMON -> CardWidgetAssets.COMMON_FRAME_TEXTURE;
+            case UNCOMMON -> CardWidgetAssets.UNCOMMON_FRAME_TEXTURE;
+            case RARE -> CardWidgetAssets.RARE_FRAME_TEXTURE;
+          };
+      Image frameImage = ((Group) widget.getChildren().first()).findActor("card-frame");
+      TextureRegionDrawable drawable =
+          assertInstanceOf(TextureRegionDrawable.class, frameImage.getDrawable());
+      assertSame(resources.getAsset(path, Texture.class), drawable.getRegion().getTexture());
+    }
+    display.dispose();
+  }
+
+  @Test
   void shouldRenderLockedPlaceholders() {
     CardDiscoveryService discovery = CardDiscoveryService.loadDefault();
     CardLibraryDisplay display = createDisplay(discovery);

@@ -6,17 +6,17 @@ import com.csse3200.game.cards.runtime.ResolvedCard;
 import java.util.Objects;
 
 /**
- * Compatibility wrapper for the existing Library-only Uncommon frame. Placeholder rendering is
+ * Compatibility wrapper for callers of the original Library-only Uncommon widget. Rendering is
  * shared with every other authored card frame; the Library's discovery and selection stay
  * unchanged.
  */
 public final class UncommonCardLibraryWidget extends FramedCardFace {
-  public static final String FRAME_TEXTURE = "images/cards/uncommon_card_frame.png";
+  public static final String FRAME_TEXTURE = CardWidgetAssets.UNCOMMON_FRAME_TEXTURE;
 
   /** Creates an Uncommon card face using externally owned frame and artwork resources. */
   public UncommonCardLibraryWidget(
       ResolvedCard card, CardWidgetAssets assets, Drawable frameDrawable) {
-    super(assets, frameDrawable, CardFrameLayout.LIBRARY_UNCOMMON);
+    super(assets, frameDrawable, CardFrameLayout.UNCOMMON);
     setCard(card);
   }
 

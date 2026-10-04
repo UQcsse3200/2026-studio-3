@@ -20,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
+import com.csse3200.game.cards.Rarity;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.cards.runtime.CardInstance;
@@ -69,13 +70,7 @@ class CommonCardViewIntegrationTest {
     library = new CardLibrary(CardConfigLoader.loadCards());
     ServiceLocator.registerCardLibrary(library);
     resources = new ResourceService();
-    resources.loadTextures(
-        new String[] {
-          CardWidgetAssets.COMMON_FRAME_TEXTURE,
-          "images/cards/strike.png",
-          "images/cards/defend.png",
-          "images/cards/bandage.png"
-        });
+    resources.loadTextures(CardWidgetAssets.collectTexturePaths(library.getAllCards()));
     resources.loadAll();
     ServiceLocator.registerResourceService(resources);
   }
@@ -87,6 +82,26 @@ class CommonCardViewIntegrationTest {
     }
     stage.dispose();
     resources.dispose();
+  }
+
+  @Test
+  void shopOffersUseSharedFacesForAllRarities() {
+    ShopService shop =
+        new ShopService(
+            new ShopItem[] {
+              new ShopItem("common", "strike", "Strike", 20, 1),
+              new ShopItem("uncommon", "inner_focus", "Inner Focus", 30, 1),
+              new ShopItem("rare", "poison_mark", "Poison Mark", 40, 1)
+            });
+    entity =
+        new Entity()
+            .addComponent(
+                new ShopDisplay(new ShopEncounter(new InventoryComponent(100), shop), library));
+    entity.create();
+    assertEquals(3, widgets().size());
+    for (CardWidget widget : widgets()) {
+      assertRarityFrame(widget);
+    }
   }
 
   @Test
@@ -106,8 +121,16 @@ class CommonCardViewIntegrationTest {
   }
 
   @Test
-  void upgradeChooserUsesCommonFaceAndKeepsExactInstanceSelection() {
-    CardInstance instance = new CardInstance("owned-strike", "strike", 0);
+  void upgradeChooserUsesRarityFaceAndKeepsExactInstanceSelection() {
+    for (String cardId : List.of("strike", "iron_oath", "sealed_pact")) {
+      assertUpgradeChooser(cardId);
+      entity.dispose();
+      entity = null;
+    }
+  }
+
+  private void assertUpgradeChooser(String cardId) {
+    CardInstance instance = new CardInstance("owned-" + cardId, cardId, 0);
     PlayerDeck deck = PlayerDeck.fromInstances(library, List.of(instance));
     CardUpgradeSelection selection = CardUpgradeSelection.forPlayerDeck(deck, library, 1);
     entity =
@@ -117,7 +140,7 @@ class CommonCardViewIntegrationTest {
     entity.create();
 
     CardWidget face = widgets().getFirst();
-    assertCommonFrame(face);
+    assertRarityFrame(face);
     assertEquals(instance.instanceId(), face.getCard().instanceId());
     selection.toggle(instance.instanceId());
     assertEquals(List.of(instance.instanceId()), selection.getSelectedInstanceIds());
@@ -164,7 +187,13 @@ class CommonCardViewIntegrationTest {
   }
 
   @Test
-  void battleDragPreviewUsesSameCommonFrameWithoutReparentingLiveCard() {
+  void battleDragPreviewUsesSameRarityFrameWithoutReparentingLiveCard() {
+    for (String cardId : List.of("strike", "iron_oath", "sealed_pact")) {
+      assertBattleDragPreview(cardId);
+    }
+  }
+
+  private void assertBattleDragPreview(String cardId) {
     DragAndDrop dragAndDrop = mock(DragAndDrop.class);
     DragNDropService dragService = mock(DragNDropService.class);
     when(dragService.getDragAndDrop()).thenReturn(dragAndDrop);
@@ -172,12 +201,12 @@ class CommonCardViewIntegrationTest {
     var resolved =
         new CardResolver()
             .resolve(
-                library.getCard("strike").orElseThrow(),
-                new CardInstance("battle-strike-plus", "strike", 1));
+                library.getCard(cardId).orElseThrow(),
+                new CardInstance("battle-" + cardId, cardId, 1));
     DragNDrop clickable =
         new DragNDrop(
             ClickableRecord.builder("playCard")
-                .text("Strike+")
+                .text(resolved.name())
                 .args(resolved.instanceId())
                 .size(90f, 130f)
                 .build());
@@ -193,24 +222,24 @@ class CommonCardViewIntegrationTest {
     Button ghost = assertInstanceOf(Button.class, payload.getDragActor());
     ghost.validate();
     CardWidget preview = assertInstanceOf(CardWidget.class, ghost.getChildren().first());
-    assertCommonFrame(live);
-    assertCommonFrame(preview);
+    assertRarityFrame(live);
+    assertRarityFrame(preview);
     assertNotSame(live, preview);
     assertSame(clickable.getBtn(), live.getParent());
     assertEquals(resolved.instanceId(), preview.getCard().instanceId());
-    assertEquals("Strike+", preview.displayedName());
+    assertEquals(resolved.name(), preview.displayedName());
     assertTrue(preview.getWidth() <= ghost.getWidth());
     assertTrue(preview.getHeight() <= ghost.getHeight());
     clickable.remove();
   }
 
   @Test
-  void legacyCardsOverlayAlsoUsesSharedFacesForItsCommonDefinitions() {
+  void legacyCardsOverlayAlsoUsesSharedFacesForAllItsDefinitions() {
     entity = new Entity().addComponent(new CardHandDisplay());
     entity.create();
     List<CardWidget> widgets = widgets();
-    assertEquals(3, widgets.size());
-    widgets.forEach(this::assertCommonFrame);
+    assertEquals(6, widgets.size());
+    widgets.forEach(this::assertRarityFrame);
   }
 
   private List<CardWidget> widgets() {
@@ -232,10 +261,21 @@ class CommonCardViewIntegrationTest {
   }
 
   private void assertCommonFrame(CardWidget widget) {
+    assertEquals(Rarity.COMMON, widget.getCard().rarity());
+    assertRarityFrame(widget);
+  }
+
+  private void assertRarityFrame(CardWidget widget) {
     TextureRegionDrawable frame =
         assertInstanceOf(TextureRegionDrawable.class, widget.displayedFrame());
     assertSame(
-        resources.getAsset(CardWidgetAssets.COMMON_FRAME_TEXTURE, Texture.class),
+        resources.getAsset(
+            switch (widget.getCard().rarity()) {
+              case COMMON -> CardWidgetAssets.COMMON_FRAME_TEXTURE;
+              case UNCOMMON -> CardWidgetAssets.UNCOMMON_FRAME_TEXTURE;
+              case RARE -> CardWidgetAssets.RARE_FRAME_TEXTURE;
+            },
+            Texture.class),
         frame.getRegion().getTexture());
   }
 
