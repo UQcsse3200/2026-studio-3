@@ -186,12 +186,13 @@ public class SettingsMenuDisplay extends UIComponent {
   }
 
   private void applyChanges() {
-    UserSettings.Settings settings = UserSettings.get();
-
-    Integer fpsVal = parseOrNull(fpsText.getText());
-    if (fpsVal != null) {
-      settings.fps = fpsVal;
+    Integer fpsVal = FpsValidator.parse(fpsText.getText());
+    if (fpsVal == null) {
+      return;
     }
+
+    UserSettings.Settings settings = UserSettings.get();
+    settings.fps = fpsVal;
     settings.fullscreen = fullScreenCheck.isChecked();
     settings.uiScale = uiScaleSlider.getValue();
     settings.displayMode = new DisplaySettings(displayModeSelect.getSelected().object);
@@ -202,14 +203,6 @@ public class SettingsMenuDisplay extends UIComponent {
 
   private void exitMenu() {
     game.setScreen(ScreenType.MAIN_MENU);
-  }
-
-  private Integer parseOrNull(String num) {
-    try {
-      return Integer.parseInt(num, 10);
-    } catch (NumberFormatException e) {
-      return null;
-    }
   }
 
   @Override
