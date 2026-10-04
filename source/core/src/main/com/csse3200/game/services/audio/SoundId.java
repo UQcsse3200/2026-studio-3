@@ -11,6 +11,7 @@ public enum SoundId {
     ERROR,
     ENTER_ENCOUNTER,
     CARD_HOVER,
-    CARD_SHUFFLE
+    CARD_SHUFFLE,
+    ENTER_ELITE
 
 }

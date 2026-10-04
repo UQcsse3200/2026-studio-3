@@ -23,7 +23,8 @@ public class AudioService {
             "sounds/error.mp3",
             "sounds/enterEncounter.mp3",
             "sounds/cardHover.mp3",
-            "sounds/cardShuffle.mp3"
+            "sounds/cardShuffle.mp3",
+            "sounds/enterElite.mp3"
     };
     private static final String[] musicPaths = {
             "music/BGM_03_mp3.mp3"

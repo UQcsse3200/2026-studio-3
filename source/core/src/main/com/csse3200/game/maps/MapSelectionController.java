@@ -98,8 +98,9 @@ public class MapSelectionController {
 
       switch (node.getRoomType()) {
         case SHOP -> AudioService.playSound(SoundId.ENTER_SHOP, 0.5f);
-        case COMBAT, ELITE -> AudioService.playSound(SoundId.SWORD_SLICE, 0.4f);
-        case EVENT -> AudioService.playSound(SoundId.ENTER_ENCOUNTER, 2.0f);
+        case COMBAT -> AudioService.playSound(SoundId.SWORD_SLICE, 0.4f);
+        case EVENT -> AudioService.playSound(SoundId.ENTER_ENCOUNTER, 5.0f);
+        case FINAL, ELITE -> AudioService.playSound(SoundId.ENTER_ELITE, 0.6f);
       }
 
       events.trigger("nodeSelected", nodeId);
