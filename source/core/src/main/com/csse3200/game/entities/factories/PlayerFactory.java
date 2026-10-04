@@ -1,6 +1,8 @@
 package com.csse3200.game.entities.factories;
 
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
+import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
 import com.csse3200.game.components.player.*;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.configs.PlayerConfig;
@@ -61,7 +63,9 @@ public class PlayerFactory {
             .addComponent(inputComponent)
             .addComponent(new EnergyComponent(stats.maxEnergy))
             .addComponent(new PlayerStatsDisplay())
-            .addComponent(new PlayerStatsTopDisplay(runState));
+            .addComponent(new PlayerStatsTopDisplay(runState))
+            .addComponent(new EnemyMemoryComponent())
+            .addComponent(new PlayerTrackerComponent());
 
     runState.getOrCreatePlayerState().applyTo(player);
 
@@ -89,7 +93,9 @@ public class PlayerFactory {
             .addComponent(inputComponent)
             .addComponent(new EnergyComponent(stats.maxEnergy))
             .addComponent(new PlayerStatsDisplay())
-            .addComponent(new PlayerStatsTopDisplay(runState));
+            .addComponent(new PlayerStatsTopDisplay(runState))
+            .addComponent(new EnemyMemoryComponent())
+            .addComponent(new PlayerTrackerComponent());
 
     runState.getOrCreatePlayerState().applyTo(player);
 
