@@ -172,8 +172,9 @@ public class EncounterGameArea extends GameArea {
     ShopEncounter shopEncounter = encounterFlow.startShop(nodeId, shopService);
 
     Entity shopUi = new Entity();
-    shopUi.addComponent(new ShopDisplay(shopEncounter, ServiceLocator.getCardLibrary()));
-
+    shopUi.addComponent(
+        new ShopDisplay(
+            shopEncounter, ServiceLocator.getCardLibrary(), runState.getOrCreatePlayerState()));
     spawnEntity(shopUi);
   }
 
