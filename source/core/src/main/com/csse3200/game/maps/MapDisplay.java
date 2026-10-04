@@ -1,6 +1,5 @@
 package com.csse3200.game.maps;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -38,9 +37,15 @@ public class MapDisplay extends UIComponent {
 
   private Group group;
   private ScrollPane scrollPane;
-  private final float mapHeight;
-  private final float mapWidth = Gdx.graphics.getWidth();
-  private final float nodeWidth = mapWidth / 13f; // default size
+  private static final float UI_WIDTH = 1280f;
+  private static final float UI_HEIGHT = 800f;
+
+  private float mapHeight;
+  private float mapWidth = UI_WIDTH;
+  private float nodeWidth;
+
+  private Table playerTable;
+  private Table legendTable;
   // to store positions
   private final Map<Integer, Vector2> nodePositions = new HashMap<>();
   // Node-id labels, shown only while debug rendering is active — same toggle 'debug on'
@@ -61,7 +66,14 @@ public class MapDisplay extends UIComponent {
     this.runState = runState;
     this.mapSelectionController = new MapSelectionController(mapGraph);
     this.mapInputHandler = new MapInputHandler(mapSelectionController);
-    this.mapHeight = (MapGenerationConfig.MAP_HEIGHT + 1) * 2f * nodeWidth;
+
+    updateDimensions();
+  }
+
+  /** Calculates the dimensions */
+  private void updateDimensions() {
+    nodeWidth = mapWidth / 13f;
+    mapHeight = (MapGenerationConfig.MAP_HEIGHT + 1) * 2f * nodeWidth;
   }
 
   /**
@@ -207,10 +219,10 @@ public class MapDisplay extends UIComponent {
    * <p>Piety is the height of the current node
    */
   private void addPlayerStats() {
-    Table playerTable = new Table();
+    playerTable = new Table();
 
-    playerTable.setSize(mapWidth, 100);
-    playerTable.setPosition(0, Gdx.graphics.getHeight() - 100);
+    playerTable.setSize(UI_WIDTH, 100);
+    playerTable.setPosition(0, UI_HEIGHT - 100);
     playerTable.setBackground(skin.newDrawable("color", new Color(0.105f, 0.070f, 0.065f, 0.98f)));
     playerTable.setDebug(false); // for testing
     playerTable.left();
@@ -300,25 +312,47 @@ public class MapDisplay extends UIComponent {
    * represents
    */
   private void addLegend() {
-    Table playerTable = new Table();
+    legendTable = new Table();
 
-    playerTable.setSize(192, (32 + 16) * 7);
+    legendTable.setSize(192, (32 + 16) * 7);
     Image legend =
         new Image(
             ServiceLocator.getResourceService().getAsset("images/map/legend.png", Texture.class));
-    playerTable.add(legend);
-    playerTable.setPosition(
-        Gdx.graphics.getWidth() - 224,
-        Gdx.graphics.getHeight() / 2f - playerTable.getHeight() / 2f);
+    legendTable.add(legend);
+    legendTable.setPosition(UI_WIDTH - 224, UI_HEIGHT / 2f - legendTable.getHeight() / 2f);
 
-    stage.addActor(playerTable);
+    stage.addActor(legendTable);
   }
 
-  /**
-   * Returns the group to access UI elements
-   *
-   * @return group of Nodes, connections and background
-   */
+  /** Resizes the player stats and legend with window size */
+  public void resizeHud() {
+    float width = stage.getWidth();
+    float height = stage.getHeight();
+    float extraWidth = width - UI_WIDTH;
+    if (playerTable != null) {
+      float sideExtension = extraWidth / 2f;
+
+      playerTable.setSize(width + extraWidth, 100f);
+      playerTable.setPosition(-sideExtension, height - 100f);
+
+      // Keep stats 15 units inside the original 1280 area
+      playerTable.padLeft(sideExtension + 15f);
+
+      playerTable.invalidateHierarchy();
+      playerTable.layout();
+    }
+
+    if (legendTable != null) {
+      float scale = height / UI_HEIGHT;
+
+      legendTable.setScale(scale);
+
+      legendTable.setPosition(
+          width - legendTable.getWidth() * scale - 32f,
+          height / 2f - legendTable.getHeight() * scale / 2f);
+    }
+  }
+
   /**
    * Gets the selection controller driving this display, so a screen can listen for node selection
    * and start the matching encounter.
@@ -329,6 +363,11 @@ public class MapDisplay extends UIComponent {
     return mapSelectionController;
   }
 
+  /**
+   * Returns the group to access UI elements
+   *
+   * @return group of Nodes, connections and background
+   */
   public Group getGroup() {
     return group;
   }

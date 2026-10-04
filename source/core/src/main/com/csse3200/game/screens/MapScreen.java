@@ -46,6 +46,8 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
   private final GdxGame game;
   private final Renderer renderer;
+  private ImageButton exitButton;
+  private MapDisplay mapDisplay;
 
   public MapScreen(GdxGame game) {
     this.game = game;
@@ -92,7 +94,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
   /** Puts the map display on a UI entity so it is rendered and receives input. */
   private void createUi(GdxGame game, RunState runState) {
-    MapDisplay mapDisplay = new MapDisplay(runState.getMapGraph(), runState);
+    mapDisplay = new MapDisplay(runState.getMapGraph(), runState);
 
     mapDisplay
         .getMapSelectionController()
@@ -161,16 +163,10 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     style.imageUp = buttonDrawable;
     style.imageOver = buttonDrawableHover;
 
-    ImageButton exitButton = new ImageButton(style);
+    exitButton = new ImageButton(style);
 
-    float buttonWidth = 150f;
-    float buttonHeight = 50f;
-    float offset = 52f;
-
-    exitButton.setSize(buttonWidth, buttonHeight);
-
-    exitButton.setPosition(
-        stage.getWidth() - buttonWidth - offset, stage.getHeight() - offset * 1.5f);
+    exitButton.setSize(150f, 50f);
+    positionExitButton();
 
     exitButton.addListener(
         new ChangeListener() {
@@ -181,6 +177,16 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         });
 
     stage.addActor(exitButton);
+  }
+
+  private void positionExitButton() {
+    Stage stage = ServiceLocator.getRenderService().getStage();
+
+    float offset = 52f;
+
+    exitButton.setPosition(
+        stage.getWidth() - exitButton.getWidth() - offset,
+        stage.getHeight() - exitButton.getHeight() - offset / 2f);
   }
 
   @Override
@@ -198,6 +204,12 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
   @Override
   public void resize(int width, int height) {
     renderer.resize(width, height);
+
+    if (mapDisplay != null) {
+      mapDisplay.resizeHud();
+    }
+
+    positionExitButton();
   }
 
   @Override
