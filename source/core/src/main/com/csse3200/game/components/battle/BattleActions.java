@@ -198,7 +198,13 @@ public class BattleActions extends Component {
 
     boolean finishedRelease = releaseAnimations.stream()
             .allMatch(EnemyReleaseComponent::isFinished);
+
+    if (finishedRelease) {
+      awaitingRelease = false;
+      openResultScreen(true);
+    }
   }
+
   private void openResultScreen(boolean won) {
     GdxGame.ScreenType target =
             won ? GdxGame.ScreenType.VICTORY : GdxGame.ScreenType.DEFEAT;
