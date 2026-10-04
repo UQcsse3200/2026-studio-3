@@ -27,19 +27,25 @@ import com.csse3200.game.cards.runtime.CardResolver;
 import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
+import com.csse3200.game.components.battle.BattleEncounterSelector;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.combat.BattleController;
-import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
-import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
-import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
 import com.csse3200.game.components.pausemenu.PauseMenuActions;
 import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.player.EnergyComponent;
-import com.csse3200.game.components.spritedisplay.clickable.*;
-import com.csse3200.game.components.spritedisplay.displaying.*;
+import com.csse3200.game.components.spritedisplay.clickable.CardAimController;
+import com.csse3200.game.components.spritedisplay.clickable.Clickable;
+import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
+import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
+import com.csse3200.game.components.spritedisplay.clickable.DragNDrop;
+import com.csse3200.game.components.spritedisplay.displaying.CardBadgesDisplay;
+import com.csse3200.game.components.spritedisplay.displaying.CardPreviewDisplay;
+import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
+import com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord;
+import com.csse3200.game.components.spritedisplay.displaying.PopupTextDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -87,10 +93,10 @@ public class BattleScreen extends ScreenAdapter {
             "images/enemy.png",
             "images/armour.png"
     };
-    private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
+    private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
 
     private static final float HAND_Y = 1000f;
-    private static final float HAND_SPACING = 120f;
+    private static final float HAND_SPACING = 90f;
     private static final float HAND_ROTATION_STEP_DEGREES = 6f;
     private static final float HAND_ARC_DROP_PER_CARD = 18f;
     private static final float CARD_WIDTH = CardWidget.CARD_WIDTH;
@@ -206,7 +212,6 @@ public class BattleScreen extends ScreenAdapter {
 
         controller =
                 new BattleController(player, forestGameArea.getEnemies(), effectHandler, cardPlayService);
-
         EffectVisualRegistry effectVisualRegistry = new EffectVisualRegistry();
         OffensiveEffectVisuals.registerAll(effectVisualRegistry);
         Entity animationCoordinatorEntity =
@@ -219,25 +224,6 @@ public class BattleScreen extends ScreenAdapter {
                                         player,
                                         effectVisualRegistry));
         ServiceLocator.getEntityService().register(animationCoordinatorEntity);
-
-        PlayerTrackerComponent playerTracker =
-                Objects.requireNonNull(
-                        player.getComponent(PlayerTrackerComponent.class),
-                        "Battle player requires PlayerTrackerComponent");
-
-        playerTracker.connect(controller, library, battleDeck);
-        EnemyMemoryComponent enemyMemory =
-                Objects.requireNonNull(
-                        player.getComponent(EnemyMemoryComponent.class),
-                        "Player entity must contain EnemyMemoryComponent");
-
-        for (Entity enemy : forestGameArea.getEnemies()) {
-            EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
-
-            if (behaviour != null) {
-                behaviour.setEnemyMemory(enemyMemory);
-            }
-        }
 
         controller.addBattleEndListener(
                 won -> {
@@ -260,7 +246,6 @@ public class BattleScreen extends ScreenAdapter {
 
     public void createUI() {
         Path battleUiJson = Path.of(BATTLE_UI_JSON);
-        Path deckEditorUiJson = Path.of(DECK_EDITOR_UI_JSON);
 
         DisplayingFactory displays = new DisplayingFactory(battleUiJson);
 
@@ -314,6 +299,7 @@ public class BattleScreen extends ScreenAdapter {
         gameArea.displayUI(battleUi);
         installHandCardWidgets();
 
+        Path deckEditorUiJson = Path.of(DECK_EDITOR_UI_JSON);
         List<ClickableRecord> deckEditorClickables =
                 ClickableFactory.loadRecordsFromJson(deckEditorUiJson);
         ClickableFactory deckPoolFactory = new ClickableFactory(deckEditorClickables);
@@ -340,17 +326,25 @@ public class BattleScreen extends ScreenAdapter {
                         .addComponent(deckEditor);
         ServiceLocator.getEntityService().register(deckEditorEntity);
 
+        // Hide the deck editor's scroll buttons until the popup opens. DeckEditorComponent.create()
+        // tries to do this itself, but runs before the JSON-loaded clickables are registered in the
+        // factory, so nothing gets hidden. These two loops fix that.
+        for (Clickable c : deckPoolFactory.getByTrigger("deckScrollUp")) {
+            c.getBtn().setVisible(false);
+        }
+        for (Clickable c : deckPoolFactory.getByTrigger("deckScrollDown")) {
+            c.getBtn().setVisible(false);
+        }
+
         battleUi.getEvents().addListener("openMenu", deckEditor::open);
     }
 
-    /** Builds the {@link DisplayingFactory} from the deck editor's own JSON-loaded records. */
     private DisplayingFactory buildDeckEditorDisplays(
             PopupDisplay popup, List<DisplayingRecord> records) {
 
         DisplayingRecord badgesRec =
                 DisplayingRecord.builder("").trigger(DeckEditorEvents.BADGES).variant("cardBadges").build();
 
-        // CardFramesDisplay is no longer wired: CardWidget supplies its own frame now.
         List<DisplayingRecord> all = new ArrayList<>(records);
         all.add(badgesRec);
 
@@ -372,10 +366,6 @@ public class BattleScreen extends ScreenAdapter {
                 });
 
         factory.registerInstanceVariant("cardBadges", CardBadgesDisplay::new);
-
-        for (DisplayingRecord r : all) {
-            logger.info("display record: trigger={} variant={}", r.trigger(), r.variant());
-        }
         return factory;
     }
 
@@ -501,7 +491,29 @@ public class BattleScreen extends ScreenAdapter {
         for (CardInstance instance : handRowOrder) {
             instancesById.put(instance.instanceId(), instance);
         }
-        CardWidgetInstaller.install(
-                uiFactory, "playCard", library, cardWidgetAssets, instancesById);
+
+        for (Clickable clickable : uiFactory.getByTrigger("playCard")) {
+            Object[] args = clickable.getArgs();
+            if (args.length == 0 || !(args[0] instanceof String instanceId)) {
+                logger.warn("Play-card clickable is missing an instanceId payload");
+                continue;
+            }
+            CardInstance instance = instancesById.get(instanceId);
+            if (instance == null) {
+                logger.warn("No hand-row instance found for clickable payload {}", instanceId);
+                continue;
+            }
+            Optional<CardConfig> config = library.getCard(instance.cardId());
+            if (config.isEmpty()) {
+                continue;
+            }
+
+            try {
+                ResolvedCard resolved = cardResolver.resolve(config.get(), instance);
+                clickable.setVisualContent(() -> new CardWidget(resolved, cardWidgetAssets));
+            } catch (IllegalArgumentException | IllegalStateException exception) {
+                logger.warn("Could not install card widget for instance {}", instanceId, exception);
+            }
+        }
     }
 }
