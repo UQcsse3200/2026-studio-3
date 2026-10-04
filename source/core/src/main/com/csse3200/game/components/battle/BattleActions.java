@@ -7,8 +7,8 @@ import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattlePhase;
-import com.csse3200.game.maps.RunState;
 import com.csse3200.game.entities.Entity;
+import com.csse3200.game.maps.RunState;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,6 +61,7 @@ public class BattleActions extends Component {
     this.game = game;
     this.enemies = List.copyOf(enemies);
   }
+
   /**
    * Returns whether the battle is waiting for player input.
    *
@@ -196,8 +197,8 @@ public class BattleActions extends Component {
       return;
     }
 
-    boolean finishedRelease = releaseAnimations.stream()
-            .allMatch(EnemyReleaseComponent::isFinished);
+    boolean finishedRelease =
+        releaseAnimations.stream().allMatch(EnemyReleaseComponent::isFinished);
 
     if (finishedRelease) {
       awaitingRelease = false;
@@ -206,15 +207,15 @@ public class BattleActions extends Component {
   }
 
   private void openResultScreen(boolean won) {
-    GdxGame.ScreenType target =
-            won ? GdxGame.ScreenType.VICTORY : GdxGame.ScreenType.DEFEAT;
+    GdxGame.ScreenType target = won ? GdxGame.ScreenType.VICTORY : GdxGame.ScreenType.DEFEAT;
 
     if (Gdx.app != null) {
-      Gdx.app.postRunnable(() -> {
-        if (!released) {
-          game.setScreen(target);
-        }
-      });
+      Gdx.app.postRunnable(
+          () -> {
+            if (!released) {
+              game.setScreen(target);
+            }
+          });
     } else if (!released) {
       game.setScreen(target);
     }
