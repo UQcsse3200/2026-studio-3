@@ -12,14 +12,8 @@ import com.badlogic.gdx.graphics.Color;
  * Displaying} parses).
  */
 public final class PopupPalette {
-  /** Border lines around panels and card frames. */
+  /** borderlines around panels and card frames. */
   public static final Color BORDER = Color.valueOf("6B4423"); // brown
-
-  /** Panel / frame background. */
-  public static final Color PANEL_FILL = Color.valueOf("C1996B"); // light brown
-
-  /** Text drawn on top of a panel / frame. */
-  public static final Color PANEL_TEXT = Color.valueOf("351D16"); // dark brown
 
   private PopupPalette() {}
 }

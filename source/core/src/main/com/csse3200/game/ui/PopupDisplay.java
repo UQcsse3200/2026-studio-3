@@ -44,9 +44,6 @@ public class PopupDisplay extends UIComponent {
   private static final float HEADER_HEIGHT = 35f; // title bar height = the window's top padding
   private static final float SIDE_PADDING = 20f;
 
-  public PopupDisplay() {
-    this("");
-  }
 
   public PopupDisplay(String title) {
     this(title, DEFAULT_STYLE);
@@ -158,9 +155,6 @@ public class PopupDisplay extends UIComponent {
     return window.getY();
   }
 
-  public float getWindowWidth() {
-    return window.getWidth();
-  }
 
   public float getWindowHeight() {
     return window.getHeight();
@@ -187,10 +181,6 @@ public class PopupDisplay extends UIComponent {
     if (onHide != null) {
       onHide.run();
     }
-  }
-
-  public boolean isShowing() {
-    return window.isVisible();
   }
 
   @Override

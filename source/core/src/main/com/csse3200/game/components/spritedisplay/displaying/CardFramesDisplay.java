@@ -20,8 +20,8 @@ public class CardFramesDisplay extends Displaying {
   private static final Color FRAME_COLOR = new Color(0.82f, 0.71f, 0.55f, 1f); // Beige
 
   // A static white pixel to avoid skin issues
-  private static Texture whitePixel;
-  private static TextureRegionDrawable whiteDrawable;
+  private static final Texture whitePixel;
+  private static final TextureRegionDrawable whiteDrawable;
 
   static {
     Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
