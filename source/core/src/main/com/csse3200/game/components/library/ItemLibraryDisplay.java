@@ -3,6 +3,7 @@ package com.csse3200.game.components.library;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -11,9 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
@@ -78,7 +78,6 @@ public class ItemLibraryDisplay extends UIComponent {
   public ItemLibraryDisplay(GdxGame game) {
     this.game = game;
   }
-
 
   @Override
   public void create() {
@@ -265,9 +264,10 @@ public class ItemLibraryDisplay extends UIComponent {
   private Texture getTexture(String path) {
     return ServiceLocator.getResourceService().getAsset(path, Texture.class);
   }
+
   private TextButton.TextButtonStyle createButtonStyle() {
     TextButton.TextButtonStyle style =
-            new TextButton.TextButtonStyle(skin.get(TextButton.TextButtonStyle.class));
+        new TextButton.TextButtonStyle(skin.get(TextButton.TextButtonStyle.class));
     style.font = skin.getFont("font_large");
     style.up = buttonDrawable(null);
     style.over = buttonDrawable(new Color(1f, 0.88f, 0.68f, 1f));
@@ -289,8 +289,6 @@ public class ItemLibraryDisplay extends UIComponent {
     drawable.setMinHeight(0f);
     return tint == null ? drawable : drawable.tint(tint);
   }
-
-
 
   @Override
   protected void draw(SpriteBatch batch) {

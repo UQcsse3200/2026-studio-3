@@ -93,14 +93,13 @@ public class LibraryMenuDisplay extends UIComponent {
         });
 
     itemLibraryButton.addListener(
-            new ChangeListener() {
-              @Override
-              public void changed(ChangeEvent event, Actor actor) {
-                logger.debug("Item Library button clicked");
-                game.setScreen(GdxGame.ScreenType.ITEM_LIBRARY);
-              }
-            });
-
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            logger.debug("Item Library button clicked");
+            game.setScreen(GdxGame.ScreenType.ITEM_LIBRARY);
+          }
+        });
 
     backButton.addListener(
         new ChangeListener() {

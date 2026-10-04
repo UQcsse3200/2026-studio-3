@@ -3,9 +3,9 @@ package com.csse3200.game.screens;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.GdxGame;
+import com.csse3200.game.components.library.CardLibraryDisplay;
 import com.csse3200.game.components.library.ItemLibraryDisplay;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
-import com.csse3200.game.components.library.CardLibraryDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -16,7 +16,6 @@ import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +26,7 @@ public class ItemLibraryScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(ItemLibraryScreen.class);
   private static final String[] ITEM_LIBRARY_TEXTURES = {
     MainMenuDisplay.BACKGROUND_TEXTURE,
-          CardLibraryDisplay.BUTTON_TEXTURE,
+    CardLibraryDisplay.BUTTON_TEXTURE,
     "images/ui/energy-crystal.png",
     "images/ui/iron-aegis.png",
     "images/ui/lucky-coin.png",
