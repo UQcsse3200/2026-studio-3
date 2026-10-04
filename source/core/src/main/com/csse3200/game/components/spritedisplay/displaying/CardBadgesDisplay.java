@@ -6,7 +6,6 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 import com.csse3200.game.components.battle.DeckEditorEvents;
-
 import java.util.ArrayList;
 import java.util.List;
 

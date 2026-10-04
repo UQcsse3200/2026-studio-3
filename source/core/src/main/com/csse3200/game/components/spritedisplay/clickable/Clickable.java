@@ -312,7 +312,7 @@ public abstract class Clickable extends Component {
     // default does nothing
   }
 
-    public void setContentTint(com.badlogic.gdx.graphics.Color tint) {
-        applyTint(btn, tint);
-    }
+  public void setContentTint(com.badlogic.gdx.graphics.Color tint) {
+    applyTint(btn, tint);
+  }
 }
