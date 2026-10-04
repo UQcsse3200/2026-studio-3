@@ -17,7 +17,7 @@ public class EnemyReleaseComponent extends Component {
     private final Color currentColour = new Color();
 
     public boolean isFinished() {
-        return elapsed >= DURATION;
+        return started && elapsed >= DURATION;
     }
 
     @Override
@@ -26,8 +26,28 @@ public class EnemyReleaseComponent extends Component {
         animator = entity.getComponent(AnimationRenderComponent.class);
     }
 
+    public void startRelease() {
+        if (started) {
+            return;
+        }
+
+        startingColour.set(Color.WHITE);
+        // Captures enemy tint when the 'death' effect starts.
+        if (animator != null && animator.getActiveTint() != null) {
+            startingColour.set(animator.getActiveTint());
+        }
+
+        elapsed = 0;
+        started = true;
+    }
+
     @Override
     public void update() {
+
+        if (!started || isFinished()) {
+            return;
+        }
+
        elapsed = Math.min(
                elapsed + ServiceLocator.getTimeSource().getDeltaTime(), DURATION
        );
