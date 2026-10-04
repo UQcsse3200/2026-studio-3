@@ -148,8 +148,8 @@ class CommonCardViewIntegrationTest {
     assertEquals(List.of(instance.instanceId()), selection.getSelectedInstanceIds());
   }
 
-
-  @Disabled("Deck editor test out of scope on this branch; original written against integrate/card-discovery-dynamic-ui")
+  @Disabled(
+      "Deck editor test out of scope on this branch; original written against integrate/card-discovery-dynamic-ui")
   @Test
   void deckEditorKeepsDuplicateIdentityAndNestedSelectionTintsWithCommonFrame() {
     CardInstance base = new CardInstance("strike-base", "strike", 0);
@@ -158,19 +158,19 @@ class CommonCardViewIntegrationTest {
     when(play.allInstances()).thenReturn(List.of(base, upgraded));
     when(play.currentHand()).thenReturn(List.of(base));
     when(play.discardedInstances()).thenReturn(List.of(upgraded));
-      PopupDisplay popup = new PopupDisplay("Deck", "popup");
-      ClickableFactory factory = new ClickableFactory(List.of());
-      DisplayingFactory displayFactory = new DisplayingFactory(List.of());
-      CardWidgetAssets assets =
-              CardWidgetAssets.fromManagedResources(UIComponent.getSharedSkin(), resources);
-      DeckEditorComponent editor =
-              new DeckEditorComponent(play, library, popup, factory, displayFactory, assets, null);
-      entity =
-              new Entity()
-                      .addComponent(popup)
-                      .addComponent(factory)
-                      .addComponent(displayFactory)
-                      .addComponent(editor);
+    PopupDisplay popup = new PopupDisplay("Deck", "popup");
+    ClickableFactory factory = new ClickableFactory(List.of());
+    DisplayingFactory displayFactory = new DisplayingFactory(List.of());
+    CardWidgetAssets assets =
+        CardWidgetAssets.fromManagedResources(UIComponent.getSharedSkin(), resources);
+    DeckEditorComponent editor =
+        new DeckEditorComponent(play, library, popup, factory, displayFactory, assets, null);
+    entity =
+        new Entity()
+            .addComponent(popup)
+            .addComponent(factory)
+            .addComponent(displayFactory)
+            .addComponent(editor);
     entity.create();
     editor.open();
 
