@@ -14,11 +14,15 @@ import static org.mockito.Mockito.when;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -47,6 +51,7 @@ class SettingsMenuDisplayTest {
   private TextField fpsField;
   private CheckBox fullscreen;
   private TextButton applyButton;
+  private Label feedback;
 
   @BeforeEach
   void setUp() {
@@ -55,7 +60,7 @@ class SettingsMenuDisplayTest {
     Graphics.DisplayMode mode = mock(Graphics.DisplayMode.class);
     when(Gdx.graphics.getDisplayMode()).thenReturn(mode);
     when(Gdx.graphics.getDisplayModes(Gdx.graphics.getMonitor()))
-        .thenReturn(new Graphics.DisplayMode[] {mode});
+        .thenReturn(new Graphics.DisplayMode[] {mode, mock(Graphics.DisplayMode.class)});
 
     settings = new UserSettings.Settings();
     settingsMock = mockStatic(UserSettings.class);
@@ -78,8 +83,12 @@ class SettingsMenuDisplayTest {
             TextButton.class,
             button -> button.getText().toString().equals("Apply"));
     assertNotNull(fpsField);
+    // Make setText simulate the change events produced by user typing.
+    fpsField.setProgrammaticChangeEvents(true);
     assertNotNull(fullscreen);
     assertNotNull(applyButton);
+    feedback = stage.getRoot().findActor("settingsFeedback");
+    assertNotNull(feedback);
   }
 
   @AfterEach
@@ -114,6 +123,8 @@ class SettingsMenuDisplayTest {
       assertEquals(input, fpsField.getText());
       assertEquals(60, settings.fps);
       assertFalse(settings.fullscreen);
+      assertEquals("Invalid FPS. Enter a positive whole number.", feedback.getText().toString());
+      assertEquals(Color.SALMON, feedback.getColor());
     }
     settingsMock.verify(
         () -> UserSettings.set(any(UserSettings.Settings.class), eq(true)), never());
@@ -126,11 +137,60 @@ class SettingsMenuDisplayTest {
     applyButton.fire(new ChangeListener.ChangeEvent());
 
     fpsField.setText(" 120 ");
+    assertEquals("", feedback.getText().toString());
     applyButton.fire(new ChangeListener.ChangeEvent());
 
     assertEquals(120, settings.fps);
     assertTrue(settings.fullscreen);
     settingsMock.verify(() -> UserSettings.set(settings, true));
+    assertEquals("Settings applied.", feedback.getText().toString());
+    assertEquals(Color.GREEN, feedback.getColor());
+  }
+
+  @Test
+  void feedbackStartsEmpty() {
+    assertEquals("", feedback.getText().toString());
+  }
+
+  @Test
+  void editingAnySettingClearsSuccessFeedback() {
+    CheckBox vsync = findActor(stage.getRoot(), CheckBox.class, actor -> actor != fullscreen);
+    Slider scale = findActor(stage.getRoot(), Slider.class, actor -> true);
+    SelectBox<?> resolution = findActor(stage.getRoot(), SelectBox.class, actor -> true);
+    Runnable[] edits = {
+      () -> fpsField.setText("120"),
+      () -> fullscreen.setChecked(!fullscreen.isChecked()),
+      () -> vsync.setChecked(!vsync.isChecked()),
+      () -> scale.setValue(1.5f),
+      () -> resolution.setSelectedIndex(1)
+    };
+    for (Runnable edit : edits) {
+      applyButton.fire(new ChangeListener.ChangeEvent());
+      assertEquals("Settings applied.", feedback.getText().toString());
+      edit.run();
+      assertEquals("", feedback.getText().toString());
+    }
+  }
+
+  @Test
+  void failedApplyReplacesSuccessWithErrorAndAllowsRetry() {
+    applyButton.fire(new ChangeListener.ChangeEvent());
+    assertEquals("Settings applied.", feedback.getText().toString());
+    settingsMock
+        .when(() -> UserSettings.set(any(UserSettings.Settings.class), eq(true)))
+        .thenThrow(new IllegalStateException("Simulated settings write failure"));
+
+    applyButton.fire(new ChangeListener.ChangeEvent());
+
+    assertEquals("Could not apply settings. Please try again.", feedback.getText().toString());
+    assertEquals(Color.SALMON, feedback.getColor());
+    fpsField.setText("120");
+    assertEquals("", feedback.getText().toString());
+    settingsMock
+        .when(() -> UserSettings.set(any(UserSettings.Settings.class), eq(true)))
+        .thenAnswer(invocation -> null);
+    applyButton.fire(new ChangeListener.ChangeEvent());
+    assertEquals("Settings applied.", feedback.getText().toString());
   }
 
   private static <T extends Actor> T findActor(Group group, Class<T> type, Predicate<T> predicate) {

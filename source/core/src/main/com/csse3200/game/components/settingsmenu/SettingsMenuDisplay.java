@@ -3,11 +3,12 @@ package com.csse3200.game.components.settingsmenu;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics.DisplayMode;
 import com.badlogic.gdx.Graphics.Monitor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.GdxGame.ScreenType;
@@ -28,6 +29,7 @@ public class SettingsMenuDisplay extends UIComponent {
   private final GdxGame game;
 
   private Table rootTable;
+  private Label feedbackLabel;
   private TextField fpsText;
   private CheckBox fullScreenCheck;
   private CheckBox vsyncCheck;
@@ -46,6 +48,10 @@ public class SettingsMenuDisplay extends UIComponent {
   }
 
   private void addActors() {
+    feedbackLabel = new Label("", skin);
+    feedbackLabel.setName("settingsFeedback");
+    feedbackLabel.setWrap(true);
+    feedbackLabel.setAlignment(Align.center);
     Label title = new Label("Settings", skin, "title");
     Table settingsTable = makeSettingsTable();
     Table menuBtns = makeMenuBtns();
@@ -57,6 +63,9 @@ public class SettingsMenuDisplay extends UIComponent {
 
     rootTable.row().padTop(30f);
     rootTable.add(settingsTable).expandX().expandY();
+
+    rootTable.row();
+    rootTable.add(feedbackLabel).growX().minHeight(45f).pad(10f, 20f, 10f, 20f);
 
     rootTable.row();
     rootTable.add(menuBtns).fillX();
@@ -119,11 +128,25 @@ public class SettingsMenuDisplay extends UIComponent {
 
     // Events on inputs
     uiScaleSlider.addListener(
-        (Event event) -> {
-          float value = uiScaleSlider.getValue();
-          uiScaleValue.setText(String.format("%.2fx", value));
-          return true;
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            uiScaleValue.setText(String.format("%.2fx", uiScaleSlider.getValue()));
+          }
         });
+
+    ChangeListener clearFeedback =
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            feedbackLabel.setText("");
+          }
+        };
+
+    for (Actor control :
+        new Actor[] {fpsText, fullScreenCheck, vsyncCheck, uiScaleSlider, displayModeSelect}) {
+      control.addListener(clearFeedback);
+    }
 
     return table;
   }
@@ -188,17 +211,29 @@ public class SettingsMenuDisplay extends UIComponent {
   private void applyChanges() {
     Integer fpsVal = FpsValidator.parse(fpsText.getText());
     if (fpsVal == null) {
+      showFeedback("Invalid FPS. Enter a positive whole number.", Color.SALMON);
       return;
     }
 
-    UserSettings.Settings settings = UserSettings.get();
-    settings.fps = fpsVal;
-    settings.fullscreen = fullScreenCheck.isChecked();
-    settings.uiScale = uiScaleSlider.getValue();
-    settings.displayMode = new DisplaySettings(displayModeSelect.getSelected().object);
-    settings.vsync = vsyncCheck.isChecked();
+    try {
+      UserSettings.Settings settings = UserSettings.get();
+      settings.fps = fpsVal;
+      settings.fullscreen = fullScreenCheck.isChecked();
+      settings.uiScale = uiScaleSlider.getValue();
+      settings.displayMode = new DisplaySettings(displayModeSelect.getSelected().object);
+      settings.vsync = vsyncCheck.isChecked();
 
-    UserSettings.set(settings, true);
+      UserSettings.set(settings, true);
+      showFeedback("Settings applied.", Color.GREEN);
+    } catch (RuntimeException e) {
+      logger.error("Could not apply settings", e);
+      showFeedback("Could not apply settings. Please try again.", Color.SALMON);
+    }
+  }
+
+  private void showFeedback(String message, Color color) {
+    feedbackLabel.setText(message);
+    feedbackLabel.setColor(color);
   }
 
   private void exitMenu() {
