@@ -20,6 +20,14 @@ public class EnemyReleaseComponent extends Component {
         return started && elapsed >= DURATION;
     }
 
+    public boolean isPlaying() {
+        return started && !isFinished();
+    }
+
+    public float getElapsedTime() {
+        return elapsed;
+    }
+
     @Override
     public void create() {
         super.create();

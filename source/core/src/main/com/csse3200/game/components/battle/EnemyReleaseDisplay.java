@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.csse3200.game.rendering.RenderComponent;
+import com.badlogic.gdx.math.Vector2;
 import com.csse3200.game.services.ServiceLocator;
 
 public class EnemyReleaseDisplay extends RenderComponent {
@@ -39,6 +40,29 @@ public class EnemyReleaseDisplay extends RenderComponent {
 
     @Override
     protected void draw(SpriteBatch batch) {
-        // to implement
+        if (release == null || !release.isPlaying()) {
+            return;
+        }
+
+        // Let the recolour begin before the beam appears.
+        float beamTime = release.getElapsedTime() - 0.4f;
+
+        if (beamTime < 0f || beamAnimation.isAnimationFinished(beamTime)) {
+            return;
+        }
+
+        TextureRegion frame = beamAnimation.getKeyFrame(beamTime, false);
+
+        Vector2 position = entity.getPosition();
+        Vector2 scale = entity.getScale();
+
+        float size = Math.max(scale.x, scale.y) * 1.5f;
+        float x = position.x + scale.x / 2f - size / 2f;
+        float y = position.y;
+
+        float previousColour = batch.getPackedColor();
+        batch.setColor(1f, 1f, 1f, 0.75f);
+        batch.draw(frame, x, y, size, size);
+        batch.setPackedColor(previousColour);
     }
 }
