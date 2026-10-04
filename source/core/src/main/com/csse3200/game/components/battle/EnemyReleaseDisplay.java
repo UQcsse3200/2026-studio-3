@@ -70,11 +70,13 @@ public class EnemyReleaseDisplay extends RenderComponent {
         float alpha = fade * 0.35f;
 
         Vector2 position = entity.getPosition();
-        Vector2 scale = entity.getScale();
 
-        float width = scale.x * 0.65f;
-        float height = scale.y * 2f;
-        float x = position.x + (scale.x - width) / 2f;
+        float normalWidth = release.getOriginalScaleX();
+        float normalHeight = release.getOriginalScaleY();
+
+        float width = normalWidth * 0.65f;
+        float height = normalHeight * 2f;
+        float x = position.x + (normalWidth - width) / 2f;
 
         float previousColour = batch.getPackedColor();
         batch.setColor(1f, 1f, 1f, alpha);
