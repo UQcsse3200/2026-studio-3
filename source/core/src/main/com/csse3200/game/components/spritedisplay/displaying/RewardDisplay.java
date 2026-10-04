@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.rewards.RewardService;
 import java.util.List;
@@ -97,11 +98,16 @@ public class RewardDisplay extends Displaying {
           yield "Item";
         }
 
-        yield switch (option.itemId) {
-          case LUCKY_COIN -> "Lucky Coin (+10% Gold)";
-          case ENERGY_CRYSTAL -> "Energy Crystal (+1 Max Energy)";
-          case MERCHANTS_FAVOR -> "Merchant's Favor (+5% Shop Discount)";
-        };
+        yield ItemFormatting.formatItemName(option.itemId)
+            + " ("
+            + switch (option.itemId) {
+              case LUCKY_COIN -> "+10% Total Gold, max +20";
+              case ENERGY_CRYSTAL -> "+1 Max Energy";
+              case MERCHANTS_FAVOR -> "+10% Shop Discount";
+              case IRON_AEGIS -> "+5 Armour when used";
+              case WARRIORS_CREST -> "+1 Strength when used";
+            }
+            + ")";
       }
     };
   }

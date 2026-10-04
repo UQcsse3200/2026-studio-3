@@ -71,6 +71,7 @@ public class LibraryMenuDisplay extends UIComponent {
     TextButton.TextButtonStyle buttonStyle = MenuTheme.createButtonStyle(skin, buttonFrameTexture);
     TextButton cardLibraryButton = new TextButton("Card Library", buttonStyle);
     TextButton enemyLibraryButton = new TextButton("Enemy Library", buttonStyle);
+    TextButton itemLibraryButton = new TextButton("Item Library", buttonStyle);
     TextButton backButton = new TextButton("Back", buttonStyle);
 
     cardLibraryButton.addListener(
@@ -91,6 +92,15 @@ public class LibraryMenuDisplay extends UIComponent {
           }
         });
 
+    itemLibraryButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            logger.debug("Item Library button clicked");
+            game.setScreen(GdxGame.ScreenType.ITEM_LIBRARY);
+          }
+        });
+
     backButton.addListener(
         new ChangeListener() {
           @Override
@@ -103,6 +113,7 @@ public class LibraryMenuDisplay extends UIComponent {
     rootTable.defaults().width(MenuTheme.BUTTON_WIDTH).height(MenuTheme.BUTTON_HEIGHT);
     rootTable.add(cardLibraryButton).row();
     rootTable.add(enemyLibraryButton).row();
+    rootTable.add(itemLibraryButton).row();
     rootTable.add(backButton);
 
     rootStack.add(rootTable);
