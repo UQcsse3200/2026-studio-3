@@ -48,6 +48,7 @@ public class BattleController {
   private final CardPlayService cardPlayService;
   private CardPlayRequest pendingCard;
   private boolean lastCardPlaySucceeded;
+  private int playerTurnNumber;
 
   /** Logging Strings & Error messages */
   private static final String PHASE_CHANGED_EVENT = "battlePhaseChanged";
@@ -96,6 +97,7 @@ public class BattleController {
     this.currentPhase = BattlePhase.SETUP;
     this.currentEnemyIndex = -1;
     this.currentEnemyIntent = null;
+    this.playerTurnNumber = 0;
     this.eventHandler = new EventHandler();
     this.eventQueue = new ArrayDeque<>();
   }
@@ -237,6 +239,7 @@ public class BattleController {
     // Normal housekeeping for resetting the state machine.
     this.eventQueue.clear();
     this.resetEnemyCursor();
+    this.playerTurnNumber = 0;
     this.setEnemyIntent(null);
     this.setCurrentPhase(BattlePhase.SETUP);
     this.notifyPhaseChange(previousPhase, BattlePhase.SETUP);
@@ -259,6 +262,10 @@ public class BattleController {
    */
   public boolean isPlayerTurn() {
     return this.currentPhase == BattlePhase.PLAYER_TURN;
+  }
+
+  public int getPlayerTurnNumber() {
+    return this.playerTurnNumber;
   }
 
   /**
@@ -719,6 +726,8 @@ public class BattleController {
     if (this.queueBattleOutcomeIfOver()) {
       return;
     }
+
+    this.playerTurnNumber++;
     // Start-of-turn operations: refill energy for the new player turn.
     EnergyComponent energy = playerEnergy();
     if (energy != null) {
