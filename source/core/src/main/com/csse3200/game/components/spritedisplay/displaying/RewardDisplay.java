@@ -101,6 +101,8 @@ public class RewardDisplay extends Displaying {
           case LUCKY_COIN -> "Lucky Coin (+10% Gold)";
           case ENERGY_CRYSTAL -> "Energy Crystal (+1 Max Energy)";
           case MERCHANTS_FAVOR -> "Merchant's Favor (+5% Shop Discount)";
+          case IRON_AEGIS -> "Iron Aegis (+5 Armour)";
+          case WARRIORS_CREST -> "Warrior's Crest (+1 Strength)";
         };
       }
     };
