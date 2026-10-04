@@ -48,6 +48,9 @@ public class BattleActions extends Component {
   // flushDeferredReveals().
   private boolean deferringEnemyTurn = false;
   private final List<Runnable> queuedReveals = new ArrayList<>();
+  private final List<EnemyReleaseComponent> releaseAnimations = new ArrayList<>();
+  private boolean awaitingRelease;
+  private boolean released;
 
   public BattleActions(BattleController controller, GdxGame game) {
     this(controller, game, List.of());
@@ -162,16 +165,61 @@ public class BattleActions extends Component {
       }
     }
 
-    GdxGame.ScreenType target = win ? GdxGame.ScreenType.VICTORY : GdxGame.ScreenType.DEFEAT;
-    if (Gdx.app != null) {
-      Gdx.app.postRunnable(() -> game.setScreen(target));
-    } else {
-      game.setScreen(target);
+    // queue the release animations if the win conditions have been met.
+    if (win) {
+      releaseAnimations.clear();
+
+      for (Entity e : enemies) {
+        EnemyReleaseComponent release = e.getComponent(EnemyReleaseComponent.class);
+
+        if (release != null) {
+          release.startRelease();
+          releaseAnimations.add(release);
+        }
+      }
+
+      if (!releaseAnimations.isEmpty()) {
+        awaitingRelease = true;
+        return;
+      }
     }
+
+    openResultScreen(win);
   }
 
   private void triggerEndTurn() {
     controller.endPlayerTurn();
+  }
+
+  public void update() {
+    if (!awaitingRelease) {
+      return;
+    }
+
+    boolean finishedRelease = releaseAnimations.stream()
+            .allMatch(EnemyReleaseComponent::isFinished);
+  }
+  private void openResultScreen(boolean won) {
+    GdxGame.ScreenType target =
+            won ? GdxGame.ScreenType.VICTORY : GdxGame.ScreenType.DEFEAT;
+
+    if (Gdx.app != null) {
+      Gdx.app.postRunnable(() -> {
+        if (!released) {
+          game.setScreen(target);
+        }
+      });
+    } else if (!released) {
+      game.setScreen(target);
+    }
+  }
+
+  @Override
+  public void dispose() {
+    released = true;
+    awaitingRelease = false;
+    releaseAnimations.clear();
+    super.dispose();
   }
 
   private void onStart() {
