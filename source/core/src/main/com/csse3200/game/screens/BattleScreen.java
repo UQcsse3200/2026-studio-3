@@ -27,21 +27,19 @@ import com.csse3200.game.cards.runtime.CardResolver;
 import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
-import com.csse3200.game.components.battle.BattleEncounterSelector;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
+import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
+import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
 import com.csse3200.game.components.pausemenu.PauseMenuActions;
 import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.player.EnergyComponent;
-import com.csse3200.game.components.spritedisplay.clickable.CardAimController;
-import com.csse3200.game.components.spritedisplay.clickable.Clickable;
-import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
-import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
-import com.csse3200.game.components.spritedisplay.clickable.DragNDrop;
-import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
+import com.csse3200.game.components.spritedisplay.clickable.*;
+import com.csse3200.game.components.spritedisplay.displaying.*;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -76,428 +74,434 @@ import org.slf4j.LoggerFactory;
  * Entered from a combat/boss map node (or the debug shortcut).
  */
 public class BattleScreen extends ScreenAdapter {
-  private final GdxGame game;
-  private static final Logger logger = LoggerFactory.getLogger(BattleScreen.class);
-  private final Renderer renderer;
-  private final ForestGameArea gameArea;
+    private final GdxGame game;
+    private static final Logger logger = LoggerFactory.getLogger(BattleScreen.class);
+    private final Renderer renderer;
+    private final ForestGameArea gameArea;
 
-  private static final String[] mainGameTextures = {
-    "images/heart.png",
-    "images/energy.png",
-    "images/money.png",
-    "images/level.png",
-    "images/enemy.png",
-    "images/armour.png"
-  };
-  private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
+    private static final String[] mainGameTextures = {
+            "images/heart.png",
+            "images/energy.png",
+            "images/money.png",
+            "images/level.png",
+            "images/enemy.png",
+            "images/armour.png"
+    };
+    private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
-  private static final float HAND_Y = 1000f;
-  // Less than CARD_WIDTH on purpose: cards overlap like a fanned hand instead of sitting
-  // edge-to-edge, so a full hand still fits across the screen.
-  private static final float HAND_SPACING = 90f;
-  // Fan-out: how far each card tilts and dips per slot away from the hand's middle card.
-  private static final float HAND_ROTATION_STEP_DEGREES = 6f;
-  private static final float HAND_ARC_DROP_PER_CARD = 18f;
-  private static final float CARD_WIDTH = CardWidget.CARD_WIDTH;
-  private static final float CARD_HEIGHT = CardWidget.CARD_HEIGHT;
-  private static final float CARD_INVENTORY_MIN_WIDTH = 800f;
-  private static final float CARD_INVENTORY_MIN_HEIGHT = 600f;
-  private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
-  private static final String CARD_WIDGET_SKIN = "flat-earth/skin/flat-earth-ui.json";
+    private static final float HAND_Y = 1000f;
+    private static final float HAND_SPACING = 120f;
+    private static final float HAND_ROTATION_STEP_DEGREES = 6f;
+    private static final float HAND_ARC_DROP_PER_CARD = 18f;
+    private static final float CARD_WIDTH = CardWidget.CARD_WIDTH;
+    private static final float CARD_HEIGHT = CardWidget.CARD_HEIGHT;
+    private static final float CARD_INVENTORY_MIN_WIDTH = 800f;
+    private static final float CARD_INVENTORY_MIN_HEIGHT = 600f;
+    private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
+    private static final String CARD_WIDGET_SKIN = "flat-earth/skin/flat-earth-ui.json";
 
-  private final BattleController controller;
-  private final CardLibrary library;
-  private final BattleDeck battleDeck;
-  private final CardResolver cardResolver = new CardResolver();
-  private final Skin cardWidgetSkin;
-  private final Skin cardInteractionSkin;
-  private final CardWidgetAssets cardWidgetAssets;
-  // Shared with the debug dialog so it reflects real, live resolutions instead of a
-  // separate copy.
-  private final CardEffectResolutionService cardEffects;
-  private final CardPlayService cardPlayService;
-  private final CardAimController enemyCardAim;
-  private final CardAimController playerCardAim;
-  private ClickableFactory uiFactory;
-  private final PlayerRunState playerState;
-  private List<ClickableRecord> staticUiRecords;
+    private static final String CARD_INVENTORY_STYLE = "popup";
 
-  // Fixed left-to-right slot order for the on-screen row: each entry is the exact physical card
-  // (see CardInstance) occupying that slot. Captured at deal time, and reset wholesale whenever the
-  // player deliberately rearranges their hand via the deck editor — otherwise left untouched, so a
-  // played card's slot just toggles disabled in place (its instance shows up in the discard pile)
-  // instead of the row reflowing and making it look like a new card was drawn.
-  private List<CardInstance> handRowOrder = new ArrayList<>();
+    private static final String BATTLE_UI_JSON = "sprites/BattleUi.json";
+    private static final String DECK_EDITOR_UI_JSON = "sprites/DeckEditorUi.json";
 
-  public BattleScreen(GdxGame game) {
-    this.game = game;
+    private final BattleController controller;
+    private final CardLibrary library;
+    private final BattleDeck battleDeck;
+    private final CardResolver cardResolver = new CardResolver();
+    private final Skin cardWidgetSkin;
+    private final Skin cardInteractionSkin;
+    private final CardWidgetAssets cardWidgetAssets;
+    private final CardEffectResolutionService cardEffects;
+    private final CardPlayService cardPlayService;
+    private final CardAimController enemyCardAim;
+    private final CardAimController playerCardAim;
+    private ClickableFactory uiFactory;
+    private final PlayerRunState playerState;
+    private List<ClickableRecord> staticUiRecords;
 
-    ServiceLocator.registerDragNDropService(new DragNDropService());
+    private List<CardInstance> handRowOrder = new ArrayList<>();
 
-    logger.debug("Initialising main game screen services");
-    GameTime gameTime = new GameTime();
-    ServiceLocator.registerTimeSource(gameTime);
-    ServiceLocator.registerPauseService(new GamePauseService(gameTime));
+    public BattleScreen(GdxGame game) {
+        this.game = game;
 
-    PhysicsService physicsService = new PhysicsService();
-    ServiceLocator.registerPhysicsService(physicsService);
-    PhysicsEngine physicsEngine = physicsService.getPhysics();
+        ServiceLocator.registerDragNDropService(new DragNDropService());
 
-    ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
+        logger.debug("Initialising main game screen services");
+        GameTime gameTime = new GameTime();
+        ServiceLocator.registerTimeSource(gameTime);
+        ServiceLocator.registerPauseService(new GamePauseService(gameTime));
 
-    ServiceLocator.registerEntityService(new EntityService());
-    ServiceLocator.registerRenderService(new RenderService());
+        PhysicsService physicsService = new PhysicsService();
+        ServiceLocator.registerPhysicsService(physicsService);
+        PhysicsEngine physicsEngine = physicsService.getPhysics();
 
-    loadAssets(); // <-- MOVED UP: load "images/heart.png" before anything uses it
+        ServiceLocator.registerInputService(new InputService());
+        ServiceLocator.registerResourceService(new ResourceService());
 
-    renderer = RenderFactory.createRenderer();
-    renderer.getCamera().getEntity().setPosition(CAMERA_POSITION);
-    renderer.getDebug().renderPhysicsWorld(physicsEngine.getWorld());
+        ServiceLocator.registerEntityService(new EntityService());
+        ServiceLocator.registerRenderService(new RenderService());
 
-    ServiceLocator.registerCamera(renderer.getCamera().getCamera());
+        loadAssets();
 
-    // Integer for scaling difficulty level
-    Integer mapProgression = game.getRunState().getMapProgression();
+        renderer = RenderFactory.createRenderer();
+        renderer.getCamera().getEntity().setPosition(CAMERA_POSITION);
+        renderer.getDebug().renderPhysicsWorld(physicsEngine.getWorld());
 
-    logger.debug("Initialising main game screen entities");
-    TerrainFactory terrainFactory = new TerrainFactory(renderer.getCamera());
-    BattleGameArea forestGameArea =
-        new BattleGameArea(
-            terrainFactory,
-            mapProgression,
-            game.getRunState(),
-            game.getBackgroundId(),
-            BattleEncounterSelector.enemiesFor(game.getRunState()));
-    this.gameArea = forestGameArea;
-    forestGameArea.create();
-    RunState runState = game.getRunState();
-    playerState = runState.getOrCreatePlayerState();
+        ServiceLocator.registerCamera(renderer.getCamera().getCamera());
 
-    // Card + deck state has to exist before the controller so it can be handed the single
-    // card-play entry point and the deck it mutates.
-    List<CardConfig> configs = CardConfigLoader.loadCards(); // reads configs/cards.json
-    library = new CardLibrary(configs);
-    ServiceLocator.registerCardLibrary(library);
-    loadCardAssets(configs);
-    cardWidgetSkin = new Skin(Gdx.files.internal(CARD_WIDGET_SKIN));
-    cardWidgetAssets =
-        CardWidgetAssets.fromManagedResources(cardWidgetSkin, ServiceLocator.getResourceService());
-    cardInteractionSkin = createCardInteractionSkin();
+        Integer mapProgression = game.getRunState().getMapProgression();
 
-    PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(library);
-    battleDeck = new BattleDeck(playerDeck);
-    battleDeck.shuffleDrawPile();
-    battleDeck.drawCards(AMOUNT_OF_CARDS_IN_DECK);
-    handRowOrder = new ArrayList<>(battleDeck.getHandInstances());
+        logger.debug("Initialising main game screen entities");
+        TerrainFactory terrainFactory = new TerrainFactory(renderer.getCamera());
+        BattleGameArea forestGameArea =
+                new BattleGameArea(
+                        terrainFactory,
+                        mapProgression,
+                        game.getRunState(),
+                        game.getBackgroundId(),
+                        BattleEncounterSelector.enemiesFor(game.getRunState()));
+        this.gameArea = forestGameArea;
+        forestGameArea.create();
+        RunState runState = game.getRunState();
+        playerState = runState.getOrCreatePlayerState();
 
-    Entity player = forestGameArea.getPlayer();
-    EnergyComponent energy = player.getComponent(EnergyComponent.class);
+        List<CardConfig> configs = CardConfigLoader.loadCards();
+        library = new CardLibrary(configs);
+        ServiceLocator.registerCardLibrary(library);
+        loadCardAssets(configs);
+        cardWidgetSkin = new Skin(Gdx.files.internal(CARD_WIDGET_SKIN));
+        cardWidgetAssets =
+                CardWidgetAssets.fromManagedResources(cardWidgetSkin, ServiceLocator.getResourceService());
+        cardInteractionSkin = createCardInteractionSkin();
 
-    Map<String, Entity> enemyTargets = forestGameArea.getEnemyTargets();
-    enemyCardAim =
-        new CardAimController(
-            ServiceLocator.getRenderService().getStage(), ServiceLocator.getCamera(), enemyTargets);
-    playerCardAim =
-        new CardAimController(
-            ServiceLocator.getRenderService().getStage(),
-            ServiceLocator.getCamera(),
-            Map.of("player", player));
-    cardEffects = new CardEffectResolutionService(library);
-    cardPlayService =
-        new CardPlayService(
-            library,
-            cardEffects,
-            battleDeck,
-            energy,
-            new Team7PlayerStateAdapter(player),
-            new Team1EnemyStateAdapter(enemyTargets));
-    CardEffectHandler effectHandler = new CardEffectHandler(enemyTargets);
+        PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(library);
+        battleDeck = new BattleDeck(playerDeck);
+        battleDeck.shuffleDrawPile();
+        battleDeck.drawCards(AMOUNT_OF_CARDS_IN_DECK);
+        handRowOrder = new ArrayList<>(battleDeck.getHandInstances());
 
-    controller =
-        new BattleController(player, forestGameArea.getEnemies(), effectHandler, cardPlayService);
-    EffectVisualRegistry effectVisualRegistry = new EffectVisualRegistry();
-    OffensiveEffectVisuals.registerAll(effectVisualRegistry);
-    Entity animationCoordinatorEntity =
-        new Entity()
-            .addComponent(
-                new BattleAnimationCoordinator(
-                    controller,
-                    effectHandler,
-                    forestGameArea.getEnemies(),
-                    player,
-                    effectVisualRegistry));
-    ServiceLocator.getEntityService().register(animationCoordinatorEntity);
+        Entity player = forestGameArea.getPlayer();
+        EnergyComponent energy = player.getComponent(EnergyComponent.class);
 
-    controller.addBattleEndListener(
-        won -> {
-          if (Boolean.TRUE.equals(won)) {
-            int currentHealth =
-                forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getHealth();
-            int maxHealth =
-                forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getMaxHealth();
-            int maxEnergy =
-                forestGameArea.getPlayer().getComponent(EnergyComponent.class).getMaxEnergy();
+        Map<String, Entity> enemyTargets = forestGameArea.getEnemyTargets();
+        enemyCardAim =
+                new CardAimController(
+                        ServiceLocator.getRenderService().getStage(), ServiceLocator.getCamera(), enemyTargets);
+        playerCardAim =
+                new CardAimController(
+                        ServiceLocator.getRenderService().getStage(),
+                        ServiceLocator.getCamera(),
+                        Map.of("player", player));
+        cardEffects = new CardEffectResolutionService(library);
+        cardPlayService =
+                new CardPlayService(
+                        library,
+                        cardEffects,
+                        battleDeck,
+                        energy,
+                        new Team7PlayerStateAdapter(player),
+                        new Team1EnemyStateAdapter(enemyTargets));
+        CardEffectHandler effectHandler = new CardEffectHandler(enemyTargets);
 
-            game.getRunState().setPlayerHealth(currentHealth);
-            game.getRunState().setPlayerMaxHealth(maxHealth);
-            game.getRunState().setPlayerMaxEnergy(maxEnergy);
-          }
-        });
-    createUI();
-    controller.start();
-  }
+        controller =
+                new BattleController(player, forestGameArea.getEnemies(), effectHandler, cardPlayService);
 
-  public void createUI() {
-    // sprites/BattleUi.json holds both the static "Clickable" UI (exit/up/down/end turn) and the
-    // "Displaying" text overlays (the card-label prompt and the between-turns battle log). The card
-    // hand itself is dealt dynamically from the battle deck, so it is merged in below rather than
-    // living in JSON.
-    Path battleUiJson = Path.of("sprites/BattleUi.json");
+        EffectVisualRegistry effectVisualRegistry = new EffectVisualRegistry();
+        OffensiveEffectVisuals.registerAll(effectVisualRegistry);
+        Entity animationCoordinatorEntity =
+                new Entity()
+                        .addComponent(
+                                new BattleAnimationCoordinator(
+                                        controller,
+                                        effectHandler,
+                                        forestGameArea.getEnemies(),
+                                        player,
+                                        effectVisualRegistry));
+        ServiceLocator.getEntityService().register(animationCoordinatorEntity);
 
-    DisplayingFactory displays = new DisplayingFactory(battleUiJson);
+        PlayerTrackerComponent playerTracker =
+                Objects.requireNonNull(
+                        player.getComponent(PlayerTrackerComponent.class),
+                        "Battle player requires PlayerTrackerComponent");
 
-    staticUiRecords = ClickableFactory.loadRecordsFromJson(battleUiJson);
+        playerTracker.connect(controller, library, battleDeck);
+        EnemyMemoryComponent enemyMemory =
+                Objects.requireNonNull(
+                        player.getComponent(EnemyMemoryComponent.class),
+                        "Player entity must contain EnemyMemoryComponent");
 
-    uiFactory = new ClickableFactory(buildAllRecords());
-    uiFactory.registerInstanceVariant("aimDrag", rec -> new DragNDrop(rec, enemyCardAim));
-    uiFactory.registerInstanceVariant("selfAimDrag", rec -> new DragNDrop(rec, playerCardAim));
+        for (Entity enemy : forestGameArea.getEnemies()) {
+            EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
 
-    // PROPOSED: debug terminal for cheats/commands during battle (skip battle, give gold, etc.
-    // — commands added separately). Same Terminal/KeyboardTerminalInputComponent/TerminalDisplay
-    // trio MainGameScreen already wires up; F1 toggles it open/closed.
-    Terminal terminal = new Terminal();
-    terminal.addCommand("skipbattle", new SkipBattleCommand(controller));
-    terminal.addCommand("givegold", new GiveGoldCommand(gameArea.getPlayer()));
-    terminal.addCommand("sethealth", new SetHealthCommand(gameArea.getPlayer()));
-    terminal.addCommand("giveitem", new GiveItemCommand(gameArea.getPlayer()));
+            if (behaviour != null) {
+                behaviour.setEnemyMemory(enemyMemory);
+            }
+        }
 
-    PopupDisplay cardInventory = new PopupDisplay("Card Inventory");
-    cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
+        controller.addBattleEndListener(
+                won -> {
+                    if (Boolean.TRUE.equals(won)) {
+                        int currentHealth =
+                                forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getHealth();
+                        int maxHealth =
+                                forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getMaxHealth();
+                        int maxEnergy =
+                                forestGameArea.getPlayer().getComponent(EnergyComponent.class).getMaxEnergy();
 
-    Stage stage = ServiceLocator.getRenderService().getStage();
-    Entity battleUi =
-        new Entity()
-            .addComponent(new InputDecorator(stage, 10))
-            .addComponent(uiFactory)
-            .addComponent(displays)
-            .addComponent(new BattleActions(controller, game))
-            .addComponent(new CardActions(controller, gameArea.getPlayer()))
-            .addComponent(new Team3CardPlayAdapter(cardPlayService, controller))
-            .addComponent(cardInventory)
-            .addComponent(new PauseMenuDisplay())
-            .addComponent(new PauseMenuInput())
-            .addComponent(new PauseMenuActions(game))
-            .addComponent(
-                new DamageOnCardPlayComponent(
-                    gameArea.getPlayer().getComponent(CombatStatsComponent.class)))
-            .addComponent(new CardEffectDebugComponent(cardEffects))
-            .addComponent(new KeyboardCardEffectDebugInputComponent())
-            .addComponent(new CardEffectDebugDisplay())
-            .addComponent(terminal)
-            .addComponent(new KeyboardTerminalInputComponent())
-            .addComponent(new TerminalDisplay());
-
-    // Keep the on-screen row in sync with the deck: whenever the hand changes (a card played, or
-    // one retrieved from the discard pile after its cooldown elapses) rebuild from the live deck,
-    // so the affected slot's disabled/shaded state updates in place.
-    battleUi
-        .getEvents()
-        .addListener(
-            BattleActions.HAND_CHANGED_EVENT,
-            (List<CardInstance> hand) -> {
-              uiFactory.rebuildHand(buildHandRecords());
-              installHandCardWidgets();
-            });
-
-    // battleUi must be registered (and so cardInventory.create() must have run, giving it a
-    // content table) before the deck editor's create() tries to add widgets to that table below.
-    gameArea.displayUI(battleUi);
-    installHandCardWidgets();
-
-    // The deck editor's own per-card toggle buttons need a ClickableFactory of their own — an
-    // entity can only hold one component of a given class, and battleUi already has uiFactory.
-    ClickableFactory deckPoolFactory = new ClickableFactory(new ArrayList<>());
-    DeckEditorComponent deckEditor =
-        new DeckEditorComponent(
-            cardPlayService, library, cardInventory, deckPoolFactory, this::onDeckRearranged);
-    Entity deckEditorEntity = new Entity().addComponent(deckPoolFactory).addComponent(deckEditor);
-    ServiceLocator.getEntityService().register(deckEditorEntity);
-
-    battleUi.getEvents().addListener("openMenu", deckEditor::open);
-  }
-
-  /**
-   * Called after the deck editor commits a hand rearrange, with the full confirmed selection —
-   * including any still-on-cooldown picks {@link CardPlayService#rearrangeHand} left in the discard
-   * pile untouched. Unlike a normal play/cooldown-retrieval hand change, the whole set of slots may
-   * now be different, so — unlike {@link #buildHandRecords()}'s usual in-place toggling — the row's
-   * slots themselves are reset to match. A slot holding a still-discarded pick simply renders
-   * disabled (same as any other discarded card) until its cooldown naturally elapses and it's
-   * retrieved into the real hand, at which point the normal HAND_CHANGED_EVENT listener un-dims it.
-   */
-  private void onDeckRearranged(List<CardInstance> newHandRow) {
-    handRowOrder = new ArrayList<>(newHandRow);
-    uiFactory.rebuildHand(buildHandRecords());
-    installHandCardWidgets();
-  }
-
-  @Override
-  public void render(float delta) {
-    ServiceLocator.getEntityService().update();
-    renderer.render();
-  }
-
-  @Override
-  public void resize(int width, int height) {
-    renderer.resize(width, height);
-    logger.trace("Resized renderer: ({} x {})", width, height);
-  }
-
-  @Override
-  public void dispose() {
-    playerState.captureFrom(gameArea.getPlayer());
-    enemyCardAim.dispose();
-    playerCardAim.dispose();
-    renderer.dispose();
-    ServiceLocator.getRenderService().dispose();
-    ServiceLocator.getEntityService().dispose();
-    cardInteractionSkin.dispose();
-    cardWidgetSkin.dispose();
-    ServiceLocator.clear();
-  }
-
-  private void loadAssets() {
-    logger.debug("Loading assets");
-    ResourceService resourceService = ServiceLocator.getResourceService();
-    resourceService.loadTextures(mainGameTextures);
-    ServiceLocator.getResourceService().loadAll();
-  }
-
-  private void loadCardAssets(List<CardConfig> configs) {
-    String[] texturePaths =
-        configs.stream()
-            .map(config -> config.texturePath)
-            .filter(Objects::nonNull)
-            .distinct()
-            .toArray(String[]::new);
-    ResourceService resources = ServiceLocator.getResourceService();
-    resources.loadTextures(texturePaths);
-    resources.loadAll();
-  }
-
-  private static Skin createCardInteractionSkin() {
-    Skin skin = new Skin();
-    skin.add("default", new ImageButton.ImageButtonStyle(), ImageButton.ImageButtonStyle.class);
-    return skin;
-  }
-
-  private List<ClickableRecord> buildAllRecords() {
-    List<ClickableRecord> records = new ArrayList<>(buildHandRecords());
-    records.addAll(staticUiRecords);
-    return records;
-  }
-
-  /**
-   * Builds one widget per card slot in {@link #handRowOrder} — a fixed left-to-right layout that
-   * only changes wholesale via {@link #onDeckRearranged}. Each slot renders the exact {@link
-   * CardInstance} dealt to it: still in hand, it's normal and playable; currently sitting in the
-   * discard pile (played, or on cooldown), it renders {@code disabled(true)} (shaded, inert to
-   * clicks/drags — see {@link com.csse3200.game.components.spritedisplay.clickable.Clickable}) in
-   * that SAME slot. Checking discard-pile membership by exact instance — not by card ID — is what
-   * lets duplicate copies of the same card (e.g. two "strike"s) be dimmed independently of each
-   * other. Positions never reflow and the row never grows/shrinks, so playing a card reads as "this
-   * slot went dull", not as a new card being dealt.
-   */
-  private List<ClickableRecord> buildHandRecords() {
-    Set<CardInstance> discardedInstances = new HashSet<>(battleDeck.getDiscardPileInstances());
-
-    List<ClickableRecord> records = new ArrayList<>();
-    // Centre the whole row horizontally rather than always starting at a fixed left edge, so a
-    // hand of 3 cards and a hand of 8 both sit in the middle of the screen instead of hugging
-    // the left side.
-    float stageWidth = ServiceLocator.getRenderService().getStage().getViewport().getWorldWidth();
-    float handWidth = CARD_WIDTH + Math.max(0, handRowOrder.size() - 1) * HAND_SPACING;
-    float x = (stageWidth - handWidth) / 2f;
-    // Fan the hand out from its middle slot: cards further from center tilt outward and dip
-    // down a little, so the row reads as a hand of cards rather than a flat strip.
-    float centerIndex = (handRowOrder.size() - 1) / 2f;
-    for (int i = 0; i < handRowOrder.size(); i++) {
-      CardInstance instance = handRowOrder.get(i);
-      String cardId = instance.cardId();
-      boolean disabled = discardedInstances.contains(instance);
-
-      Optional<CardConfig> maybeCard = library.getCard(cardId);
-      if (maybeCard.isEmpty()) {
-        logger.warn("Card ID {} not found in library, skipping", cardId);
-        continue;
-      }
-      ResolvedCard card;
-      try {
-        card = cardResolver.resolve(maybeCard.get(), instance);
-      } catch (IllegalArgumentException | IllegalStateException exception) {
-        logger.warn(
-            "Could not resolve card instance {}, skipping", instance.instanceId(), exception);
-        continue;
-      }
-      String variant =
-          switch (card.target()) {
-            case SELF -> "selfAimDrag";
-            case SINGLE_ENEMY -> "aimDrag";
-            case ALL_ENEMIES -> "drag";
-          };
-
-      float offsetFromCenter = i - centerIndex;
-      float rotation = -offsetFromCenter * HAND_ROTATION_STEP_DEGREES;
-      float y = HAND_Y + Math.abs(offsetFromCenter) * HAND_ARC_DROP_PER_CARD;
-
-      ClickableRecord.Builder builder =
-          ClickableRecord.builder("playCard")
-              .label(card.name())
-              .variant(variant)
-              .position(x, y)
-              .size(CARD_WIDTH, CARD_HEIGHT)
-              .skin(cardInteractionSkin)
-              .rotation(rotation)
-              .disabled(disabled);
-
-      // The drag source supplies the selected player or enemy ID on release.
-      builder.args(instance.instanceId());
-
-      records.add(builder.build());
-      x += HAND_SPACING;
-    }
-    return records;
-  }
-
-  private void installHandCardWidgets() {
-    Map<String, CardInstance> instancesById = new HashMap<>();
-    for (CardInstance instance : handRowOrder) {
-      instancesById.put(instance.instanceId(), instance);
+                        game.getRunState().setPlayerHealth(currentHealth);
+                        game.getRunState().setPlayerMaxHealth(maxHealth);
+                        game.getRunState().setPlayerMaxEnergy(maxEnergy);
+                    }
+                });
+        createUI();
+        controller.start();
     }
 
-    for (Clickable clickable : uiFactory.getByTrigger("playCard")) {
-      Object[] args = clickable.getArgs();
-      if (args.length == 0 || !(args[0] instanceof String instanceId)) {
-        logger.warn("Play-card clickable is missing an instanceId payload");
-        continue;
-      }
-      CardInstance instance = instancesById.get(instanceId);
-      if (instance == null) {
-        logger.warn("No hand-row instance found for clickable payload {}", instanceId);
-        continue;
-      }
-      Optional<CardConfig> config = library.getCard(instance.cardId());
-      if (config.isEmpty()) {
-        continue;
-      }
+    public void createUI() {
+        Path battleUiJson = Path.of(BATTLE_UI_JSON);
+        Path deckEditorUiJson = Path.of(DECK_EDITOR_UI_JSON);
 
-      try {
-        ResolvedCard resolved = cardResolver.resolve(config.get(), instance);
-        clickable.setVisualContent(() -> new CardWidget(resolved, cardWidgetAssets));
-      } catch (IllegalArgumentException | IllegalStateException exception) {
-        logger.warn("Could not install card widget for instance {}", instanceId, exception);
-      }
+        DisplayingFactory displays = new DisplayingFactory(battleUiJson);
+
+        staticUiRecords = ClickableFactory.loadRecordsFromJson(battleUiJson);
+
+        uiFactory = new ClickableFactory(buildAllRecords());
+        uiFactory.registerInstanceVariant("aimDrag", rec -> new DragNDrop(rec, enemyCardAim));
+        uiFactory.registerInstanceVariant("selfAimDrag", rec -> new DragNDrop(rec, playerCardAim));
+
+        Terminal terminal = new Terminal();
+        terminal.addCommand("skipbattle", new SkipBattleCommand(controller));
+        terminal.addCommand("givegold", new GiveGoldCommand(gameArea.getPlayer()));
+        terminal.addCommand("sethealth", new SetHealthCommand(gameArea.getPlayer()));
+        terminal.addCommand("giveitem", new GiveItemCommand(gameArea.getPlayer()));
+
+        PopupDisplay cardInventory = new PopupDisplay("Card Inventory", CARD_INVENTORY_STYLE);
+        cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
+
+        Stage stage = ServiceLocator.getRenderService().getStage();
+        Entity battleUi =
+                new Entity()
+                        .addComponent(new InputDecorator(stage, 10))
+                        .addComponent(uiFactory)
+                        .addComponent(displays)
+                        .addComponent(new BattleActions(controller, game))
+                        .addComponent(new CardActions(controller, gameArea.getPlayer()))
+                        .addComponent(new Team3CardPlayAdapter(cardPlayService, controller))
+                        .addComponent(cardInventory)
+                        .addComponent(new PauseMenuDisplay())
+                        .addComponent(new PauseMenuInput())
+                        .addComponent(new PauseMenuActions(game))
+                        .addComponent(
+                                new DamageOnCardPlayComponent(
+                                        gameArea.getPlayer().getComponent(CombatStatsComponent.class)))
+                        .addComponent(new CardEffectDebugComponent(cardEffects))
+                        .addComponent(new KeyboardCardEffectDebugInputComponent())
+                        .addComponent(new CardEffectDebugDisplay())
+                        .addComponent(terminal)
+                        .addComponent(new KeyboardTerminalInputComponent())
+                        .addComponent(new TerminalDisplay());
+
+        battleUi
+                .getEvents()
+                .addListener(
+                        BattleActions.HAND_CHANGED_EVENT,
+                        (List<CardInstance> hand) -> {
+                            uiFactory.rebuildHand(buildHandRecords());
+                            installHandCardWidgets();
+                        });
+
+        gameArea.displayUI(battleUi);
+        installHandCardWidgets();
+
+        List<ClickableRecord> deckEditorClickables =
+                ClickableFactory.loadRecordsFromJson(deckEditorUiJson);
+        ClickableFactory deckPoolFactory = new ClickableFactory(deckEditorClickables);
+
+        List<DisplayingRecord> deckEditorDisplayRecords =
+                DisplayingFactory.loadRecordsFromJson(deckEditorUiJson);
+        DisplayingFactory deckEditorDisplays =
+                buildDeckEditorDisplays(cardInventory, deckEditorDisplayRecords);
+
+        DeckEditorComponent deckEditor =
+                new DeckEditorComponent(
+                        cardPlayService,
+                        library,
+                        cardInventory,
+                        deckPoolFactory,
+                        deckEditorDisplays,
+                        cardWidgetAssets,
+                        this::onDeckRearranged);
+
+        Entity deckEditorEntity =
+                new Entity()
+                        .addComponent(deckPoolFactory)
+                        .addComponent(deckEditorDisplays)
+                        .addComponent(deckEditor);
+        ServiceLocator.getEntityService().register(deckEditorEntity);
+
+        battleUi.getEvents().addListener("openMenu", deckEditor::open);
     }
-  }
+
+    /** Builds the {@link DisplayingFactory} from the deck editor's own JSON-loaded records. */
+    private DisplayingFactory buildDeckEditorDisplays(
+            PopupDisplay popup, List<DisplayingRecord> records) {
+
+        DisplayingRecord badgesRec =
+                DisplayingRecord.builder("").trigger(DeckEditorEvents.BADGES).variant("cardBadges").build();
+
+        // CardFramesDisplay is no longer wired: CardWidget supplies its own frame now.
+        List<DisplayingRecord> all = new ArrayList<>(records);
+        all.add(badgesRec);
+
+        DisplayingFactory factory = new DisplayingFactory(all);
+
+        factory.registerInstanceVariant(
+                "popupText",
+                rec -> {
+                    PopupTextDisplay d = new PopupTextDisplay(rec);
+                    d.addPopup(popup);
+                    return d;
+                });
+        factory.registerInstanceVariant(
+                "cardPreview",
+                rec -> {
+                    CardPreviewDisplay d = new CardPreviewDisplay(rec);
+                    d.addPopup(popup);
+                    return d;
+                });
+
+        factory.registerInstanceVariant("cardBadges", CardBadgesDisplay::new);
+
+        for (DisplayingRecord r : all) {
+            logger.info("display record: trigger={} variant={}", r.trigger(), r.variant());
+        }
+        return factory;
+    }
+
+    private void onDeckRearranged(List<CardInstance> newHandRow) {
+        handRowOrder = new ArrayList<>(newHandRow);
+        uiFactory.rebuildHand(buildHandRecords());
+        installHandCardWidgets();
+    }
+
+    @Override
+    public void render(float delta) {
+        ServiceLocator.getEntityService().update();
+        renderer.render();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        renderer.resize(width, height);
+        logger.trace("Resized renderer: ({} x {})", width, height);
+    }
+
+    @Override
+    public void dispose() {
+        playerState.captureFrom(gameArea.getPlayer());
+        enemyCardAim.dispose();
+        playerCardAim.dispose();
+        renderer.dispose();
+        ServiceLocator.getRenderService().dispose();
+        ServiceLocator.getEntityService().dispose();
+        cardInteractionSkin.dispose();
+        cardWidgetSkin.dispose();
+        ServiceLocator.clear();
+    }
+
+    private void loadAssets() {
+        logger.debug("Loading assets");
+        ResourceService resourceService = ServiceLocator.getResourceService();
+        resourceService.loadTextures(mainGameTextures);
+        ServiceLocator.getResourceService().loadAll();
+    }
+
+    private void loadCardAssets(List<CardConfig> configs) {
+        String[] texturePaths =
+                configs.stream()
+                        .map(config -> config.texturePath)
+                        .filter(Objects::nonNull)
+                        .distinct()
+                        .toArray(String[]::new);
+        ResourceService resources = ServiceLocator.getResourceService();
+        resources.loadTextures(texturePaths);
+        resources.loadAll();
+    }
+
+    private static Skin createCardInteractionSkin() {
+        Skin skin = new Skin();
+        skin.add("default", new ImageButton.ImageButtonStyle(), ImageButton.ImageButtonStyle.class);
+        return skin;
+    }
+
+    private List<ClickableRecord> buildAllRecords() {
+        List<ClickableRecord> records = new ArrayList<>(buildHandRecords());
+        records.addAll(staticUiRecords);
+        return records;
+    }
+
+    private List<ClickableRecord> buildHandRecords() {
+        Set<CardInstance> discardedInstances = new HashSet<>(battleDeck.getDiscardPileInstances());
+
+        List<ClickableRecord> records = new ArrayList<>();
+        float stageWidth = ServiceLocator.getRenderService().getStage().getViewport().getWorldWidth();
+        float handWidth = CARD_WIDTH + Math.max(0, handRowOrder.size() - 1) * HAND_SPACING;
+        float x = (stageWidth - handWidth) / 2f;
+        float centerIndex = (handRowOrder.size() - 1) / 2f;
+        for (int i = 0; i < handRowOrder.size(); i++) {
+            CardInstance instance = handRowOrder.get(i);
+            String cardId = instance.cardId();
+            boolean disabled = discardedInstances.contains(instance);
+
+            Optional<CardConfig> maybeCard = library.getCard(cardId);
+            if (maybeCard.isEmpty()) {
+                logger.warn("Card ID {} not found in library, skipping", cardId);
+                continue;
+            }
+            ResolvedCard card;
+            try {
+                card = cardResolver.resolve(maybeCard.get(), instance);
+            } catch (IllegalArgumentException | IllegalStateException exception) {
+                logger.warn(
+                        "Could not resolve card instance {}, skipping", instance.instanceId(), exception);
+                continue;
+            }
+            String variant =
+                    switch (card.target()) {
+                        case SELF -> "selfAimDrag";
+                        case SINGLE_ENEMY -> "aimDrag";
+                        case ALL_ENEMIES -> "drag";
+                    };
+
+            float offsetFromCenter = i - centerIndex;
+            float rotation = -offsetFromCenter * HAND_ROTATION_STEP_DEGREES;
+            float y = HAND_Y + Math.abs(offsetFromCenter) * HAND_ARC_DROP_PER_CARD;
+
+            ClickableRecord.Builder builder =
+                    ClickableRecord.builder("playCard")
+                            .label(card.name())
+                            .variant(variant)
+                            .position(x, y)
+                            .size(CARD_WIDTH, CARD_HEIGHT)
+                            .skin(cardInteractionSkin)
+                            .rotation(rotation)
+                            .disabled(disabled);
+
+            builder.args(instance.instanceId());
+
+            records.add(builder.build());
+            x += HAND_SPACING;
+        }
+        return records;
+    }
+
+    private void installHandCardWidgets() {
+        Map<String, CardInstance> instancesById = new HashMap<>();
+        for (CardInstance instance : handRowOrder) {
+            instancesById.put(instance.instanceId(), instance);
+        }
+        CardWidgetInstaller.install(
+                uiFactory, "playCard", library, cardWidgetAssets, instancesById);
+    }
 }

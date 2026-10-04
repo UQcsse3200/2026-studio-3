@@ -311,4 +311,8 @@ public abstract class Clickable extends Component {
   public void onAddedToStage(Stage stage) {
     // default does nothing
   }
+
+    public void setContentTint(com.badlogic.gdx.graphics.Color tint) {
+        applyTint(btn, tint);
+    }
 }
