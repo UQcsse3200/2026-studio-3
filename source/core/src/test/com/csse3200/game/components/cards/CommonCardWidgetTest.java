@@ -62,6 +62,59 @@ class CommonCardWidgetTest {
   }
 
   @Test
+  void everyRarityUsesItsManagedFrameAndFitsAllDynamicFieldsAtEveryConsumerSize() {
+    CardWidget widget =
+        new CardWidget(resolver.resolveBasePreview(configs.getFirst(), "first"), assets);
+    for (CardConfig config : configs) {
+      for (int level = 0; level <= (config.upgrade == null ? 0 : 1); level++) {
+        ResolvedCard card =
+            resolver.resolve(config, new CardInstance("owned-" + config.id, config.id, level));
+        widget.setCard(card);
+        for (float[] size : new float[][] {{225f, 456f}, {90f, 130f}, {150f, 214f}, {272f, 355f}}) {
+          widget.setSize(size[0], size[1]);
+          widget.validate();
+          assertSame(assets.authoredFrameFor(card.rarity()), widget.displayedFrame(), config.id);
+          assertEquals(1, widget.getChildren().size);
+          assertEquals(card.name(), widget.displayedName());
+          assertEquals(card.description(), widget.displayedDescription());
+          assertEquals(Integer.toString(card.cost()), widget.displayedCost());
+          assertEquals(FramedCardFace.formatType(card.type()), widget.displayedType());
+          assertEquals(FramedCardFace.formatTarget(card.target()), widget.displayedTarget());
+          assertEquals(card.upgraded(), widget.displaysUpgradeMarker());
+          Group face = (Group) widget.getChildren().first();
+          Image frame = face.findActor("card-frame");
+          Image art = face.findActor("card-artwork");
+          assertTrue(art.isVisible());
+          assertTrue(art.getZIndex() > frame.getZIndex(), config.id);
+          assertBounds(widget);
+          for (Actor child : face.getChildren()) {
+            if (child instanceof Label label) {
+              label.validate();
+              assertEquals(Align.center, label.getLabelAlign());
+              assertTrue(label.getGlyphLayout().width <= label.getWidth() + 1f, config.id);
+              assertTrue(label.getPrefHeight() <= label.getHeight() + 1f, config.id);
+              assertEquals(label.getFontScaleX(), label.getFontScaleY());
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @Test
+  void missingAuthoredTexturesKeepSafeFallbackForEveryRarity() {
+    CardWidgetAssets missing = CardWidgetAssets.fromSkin(skin, path -> null);
+    for (String id : List.of("strike", "inner_focus", "poison_mark")) {
+      ResolvedCard card = resolver.resolveBasePreview(config(id), "missing-" + id);
+      CardWidget widget = new CardWidget(card, missing);
+      widget.validate();
+      assertFalse(missing.hasAuthoredFrame(card.rarity()));
+      assertSame(missing.frameFor(card.rarity()), widget.displayedFrame());
+      assertEquals(card.description(), widget.displayedDescription());
+    }
+  }
+
+  @Test
   void everyCommonBaseAndUpgradeUsesManagedFrameWithCompleteDynamicText() {
     int checked = 0;
     for (CardConfig config : configs) {
@@ -122,7 +175,7 @@ class CommonCardWidgetTest {
 
     widget.setCard(rare);
     widget.validate();
-    assertSame(assets.frameFor(Rarity.RARE), widget.displayedFrame());
+    assertSame(assets.authoredFrameFor(Rarity.RARE), widget.displayedFrame());
     assertEquals(1, widget.getChildren().size);
     assertEquals(rare.description(), widget.displayedDescription());
 
@@ -140,7 +193,11 @@ class CommonCardWidgetTest {
     blank.texturePath = " ";
     CardConfig missing = new CardConfig();
     assertEquals(
-        List.of(CardWidgetAssets.COMMON_FRAME_TEXTURE, repeated.texturePath),
+        List.of(
+            CardWidgetAssets.COMMON_FRAME_TEXTURE,
+            CardWidgetAssets.UNCOMMON_FRAME_TEXTURE,
+            CardWidgetAssets.RARE_FRAME_TEXTURE,
+            repeated.texturePath),
         Arrays.asList(
             CardWidgetAssets.collectTexturePaths(List.of(repeated, repeated, blank, missing))));
     assertTrue(
@@ -308,9 +365,19 @@ class CommonCardWidgetTest {
 
   @Test
   void overlaidArtworkBoundsStayInsideBlackWindowWithoutCoveringOrnaments() {
-    Pixmap png = new Pixmap(Gdx.files.internal(CardWidgetAssets.COMMON_FRAME_TEXTURE));
+    for (Rarity rarity : Rarity.values()) {
+      CardFrameLayout layout = assets.frameLayoutFor(rarity);
+      assertSafeArtworkInset(layout);
+    }
+  }
+
+  private static void assertSafeArtworkInset(CardFrameLayout layout) {
+    Pixmap png = new Pixmap(Gdx.files.internal(layout.texturePath()));
     try {
-      CardFrameLayout.Bounds art = CardFrameLayout.COMMON.artwork();
+      assertEquals(450, png.getWidth());
+      assertEquals(912, png.getHeight());
+      assertEquals(0x000000ff, png.getPixel(225, 300));
+      CardFrameLayout.Bounds art = layout.artwork();
       int left = Math.round(art.x() * 2f);
       int right = Math.round((art.x() + art.width()) * 2f) - 1;
       int top = Math.round((CardWidget.CARD_HEIGHT - art.y() - art.height()) * 2f);

@@ -94,6 +94,7 @@ public class CardLibraryScreen extends ScreenAdapter {
     paths.add(MainMenuDisplay.BUTTON_FRAME_TEXTURE);
     paths.add(UncommonCardLibraryWidget.FRAME_TEXTURE);
     paths.add(CardWidgetAssets.COMMON_FRAME_TEXTURE);
+    paths.add(CardWidgetAssets.RARE_FRAME_TEXTURE);
     try {
       Collections.addAll(paths, CardWidgetAssets.collectTexturePaths(CardConfigLoader.loadCards()));
     } catch (CardLoadingException exception) {

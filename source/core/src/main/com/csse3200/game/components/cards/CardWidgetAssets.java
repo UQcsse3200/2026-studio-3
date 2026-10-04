@@ -27,10 +27,15 @@ public final class CardWidgetAssets {
   /** Authored frame shared by Common cards in every view. */
   public static final String COMMON_FRAME_TEXTURE = "images/cards/common_card_frame.png";
 
-  // Register replacement Uncommon/Rare layouts here when their PNGs are ready. All consumers and
-  // screen preload lists use this registry; missing textures still use the coloured fallback.
+  public static final String UNCOMMON_FRAME_TEXTURE = "images/cards/uncommon_card_frame.png";
+  public static final String RARE_FRAME_TEXTURE = "images/cards/rare_card_frame.png";
+
+  // All consumers and screen preload lists use this registry; missing textures use the fallback.
   private static final Map<Rarity, CardFrameLayout> FRAME_LAYOUTS =
-      Map.of(Rarity.COMMON, CardFrameLayout.COMMON);
+      Map.of(
+          Rarity.COMMON, CardFrameLayout.COMMON,
+          Rarity.UNCOMMON, CardFrameLayout.UNCOMMON,
+          Rarity.RARE, CardFrameLayout.RARE);
 
   /** Resolves an already-managed artwork drawable for a configured texture path. */
   @FunctionalInterface
@@ -130,7 +135,10 @@ public final class CardWidgetAssets {
   /** Collects the shared frame and distinct artwork paths for screen-owned loading/unloading. */
   public static String[] collectTexturePaths(Collection<CardConfig> configs) {
     LinkedHashSet<String> paths = new LinkedHashSet<>();
-    FRAME_LAYOUTS.values().forEach(layout -> paths.add(layout.texturePath()));
+    // Stable enum order makes screen loading predictable regardless of Map iteration order.
+    for (Rarity rarity : Rarity.values()) {
+      paths.add(FRAME_LAYOUTS.get(rarity).texturePath());
+    }
     for (CardConfig config : configs) {
       if (config.texturePath != null && !config.texturePath.isBlank()) {
         paths.add(config.texturePath);

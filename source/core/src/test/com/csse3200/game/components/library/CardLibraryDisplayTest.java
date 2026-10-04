@@ -18,6 +18,8 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardConfigLoader;
@@ -33,6 +35,7 @@ import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -41,6 +44,48 @@ import org.mockito.ArgumentCaptor;
 
 @ExtendWith(GameExtension.class)
 class CardLibraryDisplayTest {
+  @Test
+  void shouldSortAllCardsByRarityThenNameWithoutRevealingLockedEntries() {
+    List<CardConfig> cards = CardConfigLoader.loadCards();
+    List<CardConfig> expected =
+        List.of(Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE).stream()
+            .flatMap(
+                rarity ->
+                    cards.stream()
+                        .filter(card -> card.rarity == rarity)
+                        .sorted(Comparator.comparing(card -> card.name)))
+            .toList();
+    assertEquals(26, expected.size());
+    CardDiscoveryService discovery = new CardDiscoveryService(cards);
+    CardLibraryDisplay display = createDisplay(discovery);
+    display.create();
+    ArgumentCaptor<Actor> root = ArgumentCaptor.forClass(Actor.class);
+    verify(ServiceLocator.getRenderService().getStage()).addActor(root.capture());
+    Group cardList = ((Group) root.getValue()).findActor("card-library-list");
+    assertEquals(expected.size(), cardList.getChildren().size);
+
+    // Verify actual button order, including anonymous entries, rather than just a comparator.
+    for (int i = 0; i < expected.size(); i++) {
+      TextButton button = assertInstanceOf(TextButton.class, cardList.getChildren().get(i));
+      assertEquals("???", button.getText().toString());
+      button.fire(new ChangeEvent());
+      assertEquals(expected.get(i).id, display.getDisplayedEntry().cardId());
+      assertTrue(display.isLockedArtworkVisible());
+      assertEquals(CardUnlockState.LOCKED, display.getDisplayedEntry().unlockState());
+    }
+
+    discovery.recordSeenAll(cards.stream().map(card -> card.id).toList());
+    for (int i = 0; i < expected.size(); i++) {
+      TextButton button = assertInstanceOf(TextButton.class, cardList.getChildren().get(i));
+      CardConfig card = expected.get(i);
+      assertEquals(card.cost + "  " + card.name, button.getText().toString());
+      button.fire(new ChangeEvent());
+      assertEquals(card.id, display.getDisplayedEntry().cardId());
+      assertFalse(display.isLockedArtworkVisible());
+    }
+    display.dispose();
+  }
+
   @Test
   void shouldUseManagedCommonFrameOnlyAfterCardIsDiscovered() {
     CardDiscoveryService discovery = CardDiscoveryService.loadDefault();
@@ -83,6 +128,49 @@ class CardLibraryDisplayTest {
       }
     }
     return null;
+  }
+
+  @Test
+  void shouldKeepManagedRarityFramesHiddenUntilDiscovery() {
+    CardDiscoveryService discovery = CardDiscoveryService.loadDefault();
+    CardLibraryDisplay display = createDisplay(discovery);
+    ResourceService resources = ServiceLocator.getResourceService();
+    for (String path :
+        List.of(
+            CardWidgetAssets.COMMON_FRAME_TEXTURE,
+            CardWidgetAssets.UNCOMMON_FRAME_TEXTURE,
+            CardWidgetAssets.RARE_FRAME_TEXTURE)) {
+      Texture frame = mock(Texture.class);
+      when(frame.getWidth()).thenReturn(450);
+      when(frame.getHeight()).thenReturn(912);
+      when(resources.containsAsset(path, Texture.class)).thenReturn(true);
+      when(resources.getAsset(path, Texture.class)).thenReturn(frame);
+    }
+    display.create();
+    ArgumentCaptor<Actor> root = ArgumentCaptor.forClass(Actor.class);
+    verify(ServiceLocator.getRenderService().getStage()).addActor(root.capture());
+    for (String cardId : List.of("strike", "inner_focus", "poison_mark")) {
+      display.showCard(discovery.getEntry(cardId).orElseThrow());
+      assertTrue(display.isLockedArtworkVisible());
+      assertFalse(display.isStandardCardVisible());
+      discovery.recordSeen(cardId);
+      assertTrue(display.isStandardCardVisible());
+      assertFalse(display.isUncommonCardVisible());
+      assertFalse(display.isLockedArtworkVisible());
+      CardWidget widget = findWidget(root.getValue());
+      assertEquals(cardId, widget.getCard().cardId());
+      String path =
+          switch (widget.getCard().rarity()) {
+            case COMMON -> CardWidgetAssets.COMMON_FRAME_TEXTURE;
+            case UNCOMMON -> CardWidgetAssets.UNCOMMON_FRAME_TEXTURE;
+            case RARE -> CardWidgetAssets.RARE_FRAME_TEXTURE;
+          };
+      Image frameImage = ((Group) widget.getChildren().first()).findActor("card-frame");
+      TextureRegionDrawable drawable =
+          assertInstanceOf(TextureRegionDrawable.class, frameImage.getDrawable());
+      assertSame(resources.getAsset(path, Texture.class), drawable.getRegion().getTexture());
+    }
+    display.dispose();
   }
 
   @Test

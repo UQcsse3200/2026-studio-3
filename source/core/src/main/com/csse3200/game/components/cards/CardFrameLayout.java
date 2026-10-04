@@ -43,23 +43,40 @@ record CardFrameLayout(
           0.72f,
           true);
 
-  // Retain the existing Library-only frame until its replacement artwork is supplied.
-  static final CardFrameLayout LIBRARY_UNCOMMON =
-      new CardFrameLayout(
-          UncommonCardLibraryWidget.FRAME_TEXTURE,
-          new Bounds(32f, 198f, 161f, 164f),
-          new Bounds(13f, 369f, 36f, 29f),
-          new Bounds(55f, 371f, 134f, 27f),
-          new Bounds(36f, 69f, 153f, 97f),
-          new Bounds(46f, 174f, 134f, 18f),
-          new Bounds(79f, 47f, 68f, 16f),
-          new Bounds(189f, 377f, 10f, 14f),
-          0.78f,
-          0.82f,
-          0.72f,
-          0.72f,
-          0.72f,
-          false);
+  static final CardFrameLayout UNCOMMON =
+      standardFrame(
+          CardWidgetAssets.UNCOMMON_FRAME_TEXTURE,
+          new Bounds(23f, 39f, 179f, 105f),
+          new Bounds(75f, 153.5f, 75f, 17f),
+          new Bounds(80f, 17f, 65f, 16f));
+
+  static final CardFrameLayout RARE =
+      standardFrame(
+          CardWidgetAssets.RARE_FRAME_TEXTURE,
+          COMMON.description(),
+          COMMON.type(),
+          COMMON.target());
+
+  // These frames share the orb, nameplate and opaque artwork window. Their ribbons and paper
+  // panels may differ slightly, so each rarity retains its own placeholder geometry.
+  private static CardFrameLayout standardFrame(
+      String texturePath, Bounds description, Bounds type, Bounds target) {
+    return new CardFrameLayout(
+        texturePath,
+        COMMON.artwork(),
+        COMMON.cost(),
+        COMMON.name(),
+        description,
+        type,
+        target,
+        COMMON.upgrade(),
+        COMMON.costScale(),
+        COMMON.nameScale(),
+        COMMON.descriptionScale(),
+        COMMON.typeScale(),
+        COMMON.targetScale(),
+        true);
+  }
 
   record Bounds(float x, float y, float width, float height) {}
 }

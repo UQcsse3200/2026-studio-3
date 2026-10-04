@@ -212,12 +212,13 @@ public class CardLibraryDisplay extends UIComponent {
   private List<CardConfig> loadSortedCards() {
     return CardConfigLoader.loadCards().stream()
         .sorted(
-            Comparator.comparing((CardConfig card) -> card.type).thenComparing(card -> card.name))
+            Comparator.comparing((CardConfig card) -> card.rarity).thenComparing(card -> card.name))
         .toList();
   }
 
   private void addCards(List<CardEntryView> cards, Table panel) {
     cardList = new Table();
+    cardList.setName("card-library-list");
     cardButtons.clear();
     cardList.top();
     cardList.defaults().width(290f).height(58f).padBottom(8f).left();
