@@ -8,7 +8,7 @@ public class MapNode {
   private Integer nodeId;
 
   /** Refers to the layer of the map the node is placed */
-  private final Integer height;
+  private Integer height;
 
   private RoomType roomType;
 
@@ -46,6 +46,12 @@ public class MapNode {
 
   public void setRoomType(RoomType type) {
     roomType = type;
+  }
+
+  // made for testing purposes since height when theres few nodes will be the 
+  // same causing test to fail
+  public void setHeight(Integer height) {
+    this.height = height;
   }
 
   public NodeState getState() {

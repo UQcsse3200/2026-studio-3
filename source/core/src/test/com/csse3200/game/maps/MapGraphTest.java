@@ -127,6 +127,10 @@ public class MapGraphTest {
     MapNode connected1 = createNode(2, NodeState.LOCKED);
     MapNode connected2 = createNode(3, NodeState.LOCKED);
 
+    current.setHeight(0);
+    connected1.setHeight(1);
+    connected2.setHeight(2);
+
     graph.addNode(current);
     graph.addNode(connected1);
     graph.addNode(connected2);
@@ -150,6 +154,10 @@ public class MapGraphTest {
     MapNode completed = createNode(2, NodeState.COMPLETED);
     MapNode available = createNode(3, NodeState.AVAILABLE);
 
+    current.setHeight(1);
+    completed.setHeight(0);
+    available.setHeight(2);
+
     graph.addNode(current);
     graph.addNode(completed);
     graph.addNode(available);
@@ -170,6 +178,10 @@ public class MapGraphTest {
 
     MapNode current = createNode(1, NodeState.CURRENT);
     MapNode connected = createNode(2, NodeState.LOCKED);
+
+    
+    current.setHeight(0);
+    connected.setHeight(1);
 
     graph.addNode(current);
     graph.addNode(connected);
@@ -203,6 +215,9 @@ public class MapGraphTest {
 
     MapNode start = createNode(1, NodeState.AVAILABLE);
     MapNode next = createNode(2, NodeState.LOCKED);
+
+    start.setHeight(0);
+    next.setHeight(1);
     graph.addNode(start);
     graph.addNode(next);
     graph.connectNodes(start, next);

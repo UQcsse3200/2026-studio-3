@@ -261,6 +261,9 @@ class EncounterFlowControllerTest {
     map.addNode(chance);
     map.addNode(shop);
     map.addNode(returnNode);
+    shop.setHeight(1);
+    chance.setHeight(2);
+    returnNode.setHeight(3);
     map.connectNodes(1, 2);
     map.connectNodes(2, 3);
     return map;

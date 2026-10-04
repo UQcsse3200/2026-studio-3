@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.extensions.GameExtension;
+import com.csse3200.game.maps.RoomType;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,13 +43,28 @@ class MapSelectionControllerTest {
     //   0 (start) -- 1 -- 3 -- 4
     //            \-- 2 --/
     Map<Integer, MapNode> pool = new HashMap<>();
-    pool.put(0, node(0, RoomType.COMBAT));
-    pool.put(1, node(1, RoomType.COMBAT));
-    pool.put(2, node(2, RoomType.SHOP));
-    pool.put(3, node(3, RoomType.COMBAT));
-    pool.put(4, node(4, RoomType.FINAL));
+    MapNode node1 = new MapNode(0, RoomType.COMBAT);
+    MapNode node2 = new MapNode(1, RoomType.COMBAT);
+    MapNode node3 = new MapNode(2, RoomType.SHOP);
+    MapNode node4 = new MapNode(3, RoomType.COMBAT);
+    MapNode node5 = new MapNode(4, RoomType.FINAL);
+
+    node1.setHeight(0);
+    node2.setHeight(1);
+    node3.setHeight(1);
+    node4.setHeight(2);
+    node5.setHeight(3);
+    
+
+    pool.put(0, node1);
+    pool.put(1, node2);
+    pool.put(2, node3);
+    pool.put(3, node4);
+    pool.put(4, node5);
 
     mapGraph = new MapGraph(pool, false);
+
+
 
     mapGraph.connectNodes(0, 1);
     mapGraph.connectNodes(0, 2);
