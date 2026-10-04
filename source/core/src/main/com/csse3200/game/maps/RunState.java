@@ -366,6 +366,11 @@ public class RunState {
     cardFusionUsed = true;
   }
 
+  /** Restores the saved card fusion allowance state. */
+  public void restoreCardFusionUsed(boolean used) {
+    cardFusionUsed = used;
+  }
+
   private RewardOption pendingReward;
 
   public void setPendingReward(RewardOption reward) {
