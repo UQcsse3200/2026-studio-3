@@ -1,22 +1,22 @@
 package com.csse3200.game.components.battle;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.csse3200.game.rendering.RenderComponent;
 import com.badlogic.gdx.math.Vector2;
 import com.csse3200.game.services.ServiceLocator;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 
 public class EnemyReleaseDisplay extends RenderComponent {
     private static final String TEXTURE_PATH =
             "images/enemy_release/heavens_grace.png";
     private static final int FRAME_SIZE = 128;
-    private static final float FRAME_DURATION = 0.1f;
 
-    private Animation<TextureRegion> beamAnimation;
     private EnemyReleaseComponent release;
     private TextureRegion beamRegion;
+    private Texture particleTexture;
 
     @Override
     public void create() {
@@ -33,6 +33,17 @@ public class EnemyReleaseDisplay extends RenderComponent {
 
         beamRegion = new TextureRegion(
                 texture, 4 * FRAME_SIZE + 54, 0, 24, 40);
+
+        Pixmap pixmap = new Pixmap(2, 2, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+
+        particleTexture = new Texture(pixmap);
+        particleTexture.setFilter(
+                Texture.TextureFilter.Nearest,
+                Texture.TextureFilter.Nearest);
+
+        pixmap.dispose();
     }
 
     @Override
