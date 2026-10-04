@@ -130,6 +130,13 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">A constructor for Card upgrade selection</div>
 </div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.components.cards.CardUpgradeSelection,com.csse3200.game.components.cards.CardUpgradeCommitter,boolean,java.lang.Runnable)" class="member-name-link">CardUpgradeDisplay</a><wbr>(<a href="CardUpgradeSelection.html" title="class in com.csse3200.game.components.cards">CardUpgradeSelection</a>&nbsp;selection,
+ <a href="CardUpgradeCommitter.html" title="interface in com.csse3200.game.components.cards">CardUpgradeCommitter</a>&nbsp;committer,
+ boolean&nbsp;launcherVisible,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Runnable.html" title="class or interface in java.lang" class="external-link">Runnable</a>&nbsp;onUpgradeCommitted)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a card upgrade display.</div>
+</div>
 </div>
 </section>
 </li>
@@ -163,6 +170,16 @@ loadScripts(document, 'script');</script>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getZIndex()" class="member-name-link">getZIndex</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Z index controls rendering order within a layer.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hideLibrary()" class="member-name-link">hideLibrary</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Closes the existing upgrade overlay without changing the selected cards or deck.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#showLibrary()" class="member-name-link">showLibrary</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Opens the card upgrade library from an external launcher such as the Campfire Forge button.</div>
 </div>
 </div>
 </div>
@@ -209,6 +226,23 @@ loadScripts(document, 'script');</script>
 </dl>
 </section>
 </li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.components.cards.CardUpgradeSelection,com.csse3200.game.components.cards.CardUpgradeCommitter,boolean,java.lang.Runnable)">
+<h3>CardUpgradeDisplay</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">CardUpgradeDisplay</span><wbr><span class="parameters">(<a href="CardUpgradeSelection.html" title="class in com.csse3200.game.components.cards">CardUpgradeSelection</a>&nbsp;selection,
+ <a href="CardUpgradeCommitter.html" title="interface in com.csse3200.game.components.cards">CardUpgradeCommitter</a>&nbsp;committer,
+ boolean&nbsp;launcherVisible,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Runnable.html" title="class or interface in java.lang" class="external-link">Runnable</a>&nbsp;onUpgradeCommitted)</span></div>
+<div class="block">Creates a card upgrade display.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>selection</code> - card upgrade selection model</dd>
+<dd><code>committer</code> - applies selected upgrades to the persistent deck</dd>
+<dd><code>launcherVisible</code> - whether this display should show its own Upgrade button</dd>
+<dd><code>onUpgradeCommitted</code> - callback invoked after an upgrade is successfully committed</dd>
+</dl>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -228,6 +262,20 @@ loadScripts(document, 'script');</script>
 <dt>Overrides:</dt>
 <dd><code><a href="../../ui/UIComponent.html#create()">create</a></code>&nbsp;in class&nbsp;<code><a href="../../ui/UIComponent.html" title="class in com.csse3200.game.ui">UIComponent</a></code></dd>
 </dl>
+</section>
+</li>
+<li>
+<section class="detail" id="showLibrary()">
+<h3>showLibrary</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">showLibrary</span>()</div>
+<div class="block">Opens the card upgrade library from an external launcher such as the Campfire Forge button.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="hideLibrary()">
+<h3>hideLibrary</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">hideLibrary</span>()</div>
+<div class="block">Closes the existing upgrade overlay without changing the selected cards or deck.</div>
 </section>
 </li>
 <li>

@@ -9,6 +9,7 @@ com.csse3200.game.cards.configs
 com.csse3200.game.cards.debug
 com.csse3200.game.cards.deck
 com.csse3200.game.cards.effects
+com.csse3200.game.cards.fusion
 com.csse3200.game.cards.play
 com.csse3200.game.cards.play.integration
 com.csse3200.game.cards.runtime

@@ -184,10 +184,17 @@ implements <a href="../../maps/EncounterCallback.html" title="interface in com.c
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Starts a Chance Encounter for a map node.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../shop/ShopEncounter.html" title="class in com.csse3200.game.shop">ShopEncounter</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startShop(java.lang.Integer,com.csse3200.game.shop.ShopService)" class="member-name-link">startShop</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
- <a href="../../shop/ShopService.html" title="class in com.csse3200.game.shop">ShopService</a>&nbsp;shopService)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ChanceEncounterSession.html" title="class in com.csse3200.game.encounters.integration">ChanceEncounterSession</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startChance(java.lang.Integer,com.csse3200.game.chance.ChanceEncounter,com.csse3200.game.chance.ChanceEncounterBehaviour)" class="member-name-link">startChance</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
+ <a href="../../chance/ChanceEncounter.html" title="class in com.csse3200.game.chance">ChanceEncounter</a>&nbsp;encounter,
+ <a href="../../chance/ChanceEncounterBehaviour.html" title="interface in com.csse3200.game.chance">ChanceEncounterBehaviour</a>&nbsp;behaviour)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Starts a Chance Encounter with specialised runtime choice behaviour.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../shop/ShopEncounter.html" title="class in com.csse3200.game.shop">ShopEncounter</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startShop(java.lang.Integer,com.csse3200.game.shop.ShopService)" class="member-name-link">startShop</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
+ <a href="../../shop/ShopService.html" title="class in com.csse3200.game.shop">ShopService</a>&nbsp;shopService)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Starts a Shop Encounter for a map node.</div>
 </div>
 </div>
@@ -259,6 +266,25 @@ implements <a href="../../maps/EncounterCallback.html" title="interface in com.c
 <dt>Parameters:</dt>
 <dd><code>nodeId</code> - selected map node</dd>
 <dd><code>encounter</code> - encounter definition to resolve</dd>
+<dt>Returns:</dt>
+<dd>session ready for the Chance UI</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - when another encounter is active</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="startChance(java.lang.Integer,com.csse3200.game.chance.ChanceEncounter,com.csse3200.game.chance.ChanceEncounterBehaviour)">
+<h3>startChance</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ChanceEncounterSession.html" title="class in com.csse3200.game.encounters.integration">ChanceEncounterSession</a></span>&nbsp;<span class="element-name">startChance</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
+ <a href="../../chance/ChanceEncounter.html" title="class in com.csse3200.game.chance">ChanceEncounter</a>&nbsp;encounter,
+ <a href="../../chance/ChanceEncounterBehaviour.html" title="interface in com.csse3200.game.chance">ChanceEncounterBehaviour</a>&nbsp;behaviour)</span></div>
+<div class="block">Starts a Chance Encounter with specialised runtime choice behaviour.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>nodeId</code> - selected map node</dd>
+<dd><code>encounter</code> - encounter definition displayed by the UI</dd>
+<dd><code>behaviour</code> - player-independent resolver for this encounter</dd>
 <dt>Returns:</dt>
 <dd>session ready for the Chance UI</dd>
 <dt>Throws:</dt>

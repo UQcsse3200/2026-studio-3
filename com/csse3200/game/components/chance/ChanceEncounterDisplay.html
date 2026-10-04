@@ -47,7 +47,7 @@ loadScripts(document, 'script');</script>
 <li>
 <p>Detail:</p>
 <ul>
-<li>Field</li>
+<li><a href="#field-detail">Field</a></li>
 <li><a href="#constructor-detail">Constr</a></li>
 <li><a href="#method-detail">Method</a></li>
 </ul>
@@ -65,7 +65,7 @@ loadScripts(document, 'script');</script>
 </ul>
 <ul class="sub-nav-list">
 <li>Detail:&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field-detail">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor-detail">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method-detail">Method</a></li>
 </ul>
@@ -117,6 +117,24 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="field-summary" id="field-summary">
 <h2>Field Summary</h2>
+<div class="caption"><span>Fields</span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Field</div>
+<div class="table-header col-last">Description</div>
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#ABANDONED_MINE_BACKGROUND_TEXTURE" class="member-name-link">ABANDONED_MINE_BACKGROUND_TEXTURE</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#DICE_GAME_BACKGROUND_TEXTURE" class="member-name-link">DICE_GAME_BACKGROUND_TEXTURE</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#FUSION_BACKGROUND_TEXTURE" class="member-name-link">FUSION_BACKGROUND_TEXTURE</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#FUSION_CARD_BACK_TEXTURE" class="member-name-link">FUSION_CARD_BACK_TEXTURE</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+</div>
 <div class="inherited-list">
 <h3 id="fields-inherited-from-class-com.csse3200.game.ui.UIComponent">Fields inherited from class&nbsp;com.csse3200.game.ui.<a href="../../ui/UIComponent.html" title="class in com.csse3200.game.ui">UIComponent</a></h3>
 <code><a href="../../ui/UIComponent.html#skin">skin</a>, <a href="../../ui/UIComponent.html#stage">stage</a></code></div>
@@ -146,6 +164,11 @@ loadScripts(document, 'script');</script>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.encounters.integration.ChanceEncounterSession)" class="member-name-link">ChanceEncounterDisplay</a><wbr>(<a href="../../encounters/integration/ChanceEncounterSession.html" title="class in com.csse3200.game.encounters.integration">ChanceEncounterSession</a>&nbsp;encounterSession)</code></div>
 <div class="col-last even-row-color">
 <div class="block">Creates a display backed by a fully integrated Chance Encounter session.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.encounters.integration.ChanceEncounterSession,com.csse3200.game.encounters.integration.CardFusionEncounterFlow)" class="member-name-link">ChanceEncounterDisplay</a><wbr>(<a href="../../encounters/integration/ChanceEncounterSession.html" title="class in com.csse3200.game.encounters.integration">ChanceEncounterSession</a>&nbsp;encounterSession,
+ <a href="../../encounters/integration/CardFusionEncounterFlow.html" title="class in com.csse3200.game.encounters.integration">CardFusionEncounterFlow</a>&nbsp;cardFusionFlow)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a display that can hand Card Fusion choices to the run-scoped Fusion flow.</div>
 </div>
 </div>
 </section>
@@ -181,6 +204,11 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Z index controls rendering order within a layer.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isCardFusionPresentationComplete()" class="member-name-link">isCardFusionPresentationComplete</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">True once the delegated success/leave scene has been acknowledged by the player.</div>
+</div>
 </div>
 </div>
 </div>
@@ -208,6 +236,70 @@ loadScripts(document, 'script');</script>
 </section>
 <section class="details">
 <ul class="details-list">
+<!-- ============ FIELD DETAIL =========== -->
+<li>
+<section class="field-details" id="field-detail">
+<h2>Field Details</h2>
+<ul class="member-list">
+<li>
+<section class="detail" id="DICE_GAME_BACKGROUND_TEXTURE">
+<h3>DICE_GAME_BACKGROUND_TEXTURE</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">DICE_GAME_BACKGROUND_TEXTURE</span></div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../../constant-values.html#com.csse3200.game.components.chance.ChanceEncounterDisplay.DICE_GAME_BACKGROUND_TEXTURE">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="ABANDONED_MINE_BACKGROUND_TEXTURE">
+<h3>ABANDONED_MINE_BACKGROUND_TEXTURE</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">ABANDONED_MINE_BACKGROUND_TEXTURE</span></div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../../constant-values.html#com.csse3200.game.components.chance.ChanceEncounterDisplay.ABANDONED_MINE_BACKGROUND_TEXTURE">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="FUSION_BACKGROUND_TEXTURE">
+<h3>FUSION_BACKGROUND_TEXTURE</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">FUSION_BACKGROUND_TEXTURE</span></div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../../constant-values.html#com.csse3200.game.components.chance.ChanceEncounterDisplay.FUSION_BACKGROUND_TEXTURE">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="FUSION_CARD_BACK_TEXTURE">
+<h3>FUSION_CARD_BACK_TEXTURE</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">FUSION_CARD_BACK_TEXTURE</span></div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../../constant-values.html#com.csse3200.game.components.chance.ChanceEncounterDisplay.FUSION_CARD_BACK_TEXTURE">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</section>
+</li>
+</ul>
+</section>
+</li>
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <li>
 <section class="constructor-details" id="constructor-detail">
@@ -250,6 +342,14 @@ loadScripts(document, 'script');</script>
 </dl>
 </section>
 </li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.encounters.integration.ChanceEncounterSession,com.csse3200.game.encounters.integration.CardFusionEncounterFlow)">
+<h3>ChanceEncounterDisplay</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ChanceEncounterDisplay</span><wbr><span class="parameters">(<a href="../../encounters/integration/ChanceEncounterSession.html" title="class in com.csse3200.game.encounters.integration">ChanceEncounterSession</a>&nbsp;encounterSession,
+ <a href="../../encounters/integration/CardFusionEncounterFlow.html" title="class in com.csse3200.game.encounters.integration">CardFusionEncounterFlow</a>&nbsp;cardFusionFlow)</span></div>
+<div class="block">Creates a display that can hand Card Fusion choices to the run-scoped Fusion flow.</div>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -269,6 +369,13 @@ loadScripts(document, 'script');</script>
 <dt>Overrides:</dt>
 <dd><code><a href="../../ui/UIComponent.html#create()">create</a></code>&nbsp;in class&nbsp;<code><a href="../../ui/UIComponent.html" title="class in com.csse3200.game.ui">UIComponent</a></code></dd>
 </dl>
+</section>
+</li>
+<li>
+<section class="detail" id="isCardFusionPresentationComplete()">
+<h3>isCardFusionPresentationComplete</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isCardFusionPresentationComplete</span>()</div>
+<div class="block">True once the delegated success/leave scene has been acknowledged by the player.</div>
 </section>
 </li>
 <li>

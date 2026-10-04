@@ -108,10 +108,20 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="BestiaryProgressSaveData.html" title="class in com.csse3200.game.save">BestiaryProgressSaveData</a>&gt;</code></div>
 <div class="col-second even-row-color"><code><a href="#bestiary" class="member-name-link">bestiary</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#encounterSeed" class="member-name-link">encounterSeed</a></code></div>
+<div class="col-first odd-row-color"><code>boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#cardFusionUsed" class="member-name-link">cardFusionUsed</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">Whether this run has already used its one permitted card fusion.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a></code></div>
+<div class="col-second even-row-color"><code><a href="#encounterSeed" class="member-name-link">encounterSeed</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Seed that fixes each node's encounter for this run; null in saves made before it existed.</div>
+</div>
+<div class="col-first odd-row-color"><code>boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#pendingEliteTempleReward" class="member-name-link">pendingEliteTempleReward</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Whether the hidden Elite temple reward is waiting to be entered.</div>
 </div>
 <div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color"><code><a href="#pendingRewardId" class="member-name-link">pendingRewardId</a></code></div>
@@ -185,6 +195,20 @@ loadScripts(document, 'script');</script>
 <h3>encounterSeed</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a></span>&nbsp;<span class="element-name">encounterSeed</span></div>
 <div class="block">Seed that fixes each node's encounter for this run; null in saves made before it existed.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="pendingEliteTempleReward">
+<h3>pendingEliteTempleReward</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">pendingEliteTempleReward</span></div>
+<div class="block">Whether the hidden Elite temple reward is waiting to be entered.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="cardFusionUsed">
+<h3>cardFusionUsed</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">cardFusionUsed</span></div>
+<div class="block">Whether this run has already used its one permitted card fusion.</div>
 </section>
 </li>
 </ul>

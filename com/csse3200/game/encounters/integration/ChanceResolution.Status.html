@@ -135,13 +135,21 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Applying the outcome would overflow an integer player statistic.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#CARD_ADD_FAILED" class="member-name-link">CARD_ADD_FAILED</a></code></div>
+<div class="col-first odd-row-color"><code><a href="#AWAITING_CHOICE" class="member-name-link">AWAITING_CHOICE</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">The staged encounter accepted the choice and requires another choice.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#CARD_ADD_FAILED" class="member-name-link">CARD_ADD_FAILED</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">The persistent deck rejected the reward card.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#CARD_NOT_FOUND" class="member-name-link">CARD_NOT_FOUND</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#CARD_NOT_FOUND" class="member-name-link">CARD_NOT_FOUND</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">The reward card identifier is not registered in the card catalog.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#DELEGATED" class="member-name-link">DELEGATED</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">The selected choice is continuing in another flow and has not completed yet.</div>
 </div>
 <div class="col-first odd-row-color"><code><a href="#ENCOUNTER_CLOSED" class="member-name-link">ENCOUNTER_CLOSED</a></code></div>
 <div class="col-last odd-row-color">
@@ -242,6 +250,20 @@ the order they are declared.</div>
 <h3>ENCOUNTER_CLOSED</h3>
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></span>&nbsp;<span class="element-name">ENCOUNTER_CLOSED</span></div>
 <div class="block">The session has already completed or been cancelled.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="AWAITING_CHOICE">
+<h3>AWAITING_CHOICE</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></span>&nbsp;<span class="element-name">AWAITING_CHOICE</span></div>
+<div class="block">The staged encounter accepted the choice and requires another choice.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="DELEGATED">
+<h3>DELEGATED</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></span>&nbsp;<span class="element-name">DELEGATED</span></div>
+<div class="block">The selected choice is continuing in another flow and has not completed yet.</div>
 </section>
 </li>
 <li>

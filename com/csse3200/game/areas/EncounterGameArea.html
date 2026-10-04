@@ -134,6 +134,27 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color">
 <div class="block">Creates an isolated encounter area.</div>
 </div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback,com.csse3200.game.maps.PlayerRunState,com.csse3200.game.cards.deck.PlayerDeck,com.csse3200.game.maps.RunState)" class="member-name-link">EncounterGameArea</a><wbr>(<a href="terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
+ <a href="../maps/RoomType.html" title="enum class in com.csse3200.game.maps">RoomType</a>&nbsp;roomType,
+ <a href="../maps/EncounterCallback.html" title="interface in com.csse3200.game.maps">EncounterCallback</a>&nbsp;completionCallback,
+ <a href="../maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a>&nbsp;sharedPlayerState,
+ <a href="../cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a>&nbsp;sharedPlayerDeck,
+ <a href="../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Creates a map encounter area using the run that owns the shared deck and Fusion allowance.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback,com.csse3200.game.maps.PlayerRunState,com.csse3200.game.cards.deck.PlayerDeck,com.csse3200.game.maps.RunState,java.lang.String)" class="member-name-link">EncounterGameArea</a><wbr>(<a href="terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
+ <a href="../maps/RoomType.html" title="enum class in com.csse3200.game.maps">RoomType</a>&nbsp;roomType,
+ <a href="../maps/EncounterCallback.html" title="interface in com.csse3200.game.maps">EncounterCallback</a>&nbsp;completionCallback,
+ <a href="../maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a>&nbsp;sharedPlayerState,
+ <a href="../cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a>&nbsp;sharedPlayerDeck,
+ <a href="../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;forcedEventId)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Selects a specific catalogue Event when requested; normal map selection stays random.</div>
+</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback,com.csse3200.game.maps.RunState,com.csse3200.game.cards.deck.PlayerDeck)" class="member-name-link">EncounterGameArea</a><wbr>(<a href="terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
  <a href="../maps/RoomType.html" title="enum class in com.csse3200.game.maps">RoomType</a>&nbsp;roomType,
@@ -167,9 +188,19 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Captures gold and health changes made by Shop or Chance encounters before disposing the player.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPlayer()" class="member-name-link">getPlayer</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../encounters/integration/CardFusionEncounterFlow.html" title="class in com.csse3200.game.encounters.integration">CardFusionEncounterFlow</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCardFusionEncounterFlow()" class="member-name-link">getCardFusionEncounterFlow</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the selected Fusion flow for the player-facing UI, if Fusion was selected.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPlayer()" class="member-name-link">getPlayer</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isCardFusionPresentationComplete()" class="member-name-link">isCardFusionPresentationComplete</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Presentation-only gate; the run and Event lifecycle are still completed by the flow.</div>
+</div>
 </div>
 </div>
 </div>
@@ -243,6 +274,43 @@ loadScripts(document, 'script');</script>
 </dl>
 </section>
 </li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback,com.csse3200.game.maps.PlayerRunState,com.csse3200.game.cards.deck.PlayerDeck,com.csse3200.game.maps.RunState)">
+<h3>EncounterGameArea</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">EncounterGameArea</span><wbr><span class="parameters">(<a href="terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
+ <a href="../maps/RoomType.html" title="enum class in com.csse3200.game.maps">RoomType</a>&nbsp;roomType,
+ <a href="../maps/EncounterCallback.html" title="interface in com.csse3200.game.maps">EncounterCallback</a>&nbsp;completionCallback,
+ <a href="../maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a>&nbsp;sharedPlayerState,
+ <a href="../cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a>&nbsp;sharedPlayerDeck,
+ <a href="../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState)</span></div>
+<div class="block">Creates a map encounter area using the run that owns the shared deck and Fusion allowance.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>terrainFactory</code> - terrain factory supplied by the hosting screen</dd>
+<dd><code>nodeId</code> - active map node ID</dd>
+<dd><code>roomType</code> - active node room type</dd>
+<dd><code>completionCallback</code> - reports final encounter completion</dd>
+<dd><code>sharedPlayerState</code> - persistent player health and currency state</dd>
+<dd><code>sharedPlayerDeck</code> - persistent deck used by ordinary Event rewards and Shop</dd>
+<dd><code>runState</code> - active run that owns the same deck and Fusion allowance</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback,com.csse3200.game.maps.PlayerRunState,com.csse3200.game.cards.deck.PlayerDeck,com.csse3200.game.maps.RunState,java.lang.String)">
+<h3>EncounterGameArea</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">EncounterGameArea</span><wbr><span class="parameters">(<a href="terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
+ <a href="../maps/RoomType.html" title="enum class in com.csse3200.game.maps">RoomType</a>&nbsp;roomType,
+ <a href="../maps/EncounterCallback.html" title="interface in com.csse3200.game.maps">EncounterCallback</a>&nbsp;completionCallback,
+ <a href="../maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a>&nbsp;sharedPlayerState,
+ <a href="../cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a>&nbsp;sharedPlayerDeck,
+ <a href="../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;forcedEventId)</span></div>
+<div class="block">Selects a specific catalogue Event when requested; normal map selection stays random.</div>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -266,6 +334,26 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getPlayer()">
 <h3>getPlayer</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a></span>&nbsp;<span class="element-name">getPlayer</span>()</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getCardFusionEncounterFlow()">
+<h3>getCardFusionEncounterFlow</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../encounters/integration/CardFusionEncounterFlow.html" title="class in com.csse3200.game.encounters.integration">CardFusionEncounterFlow</a>&gt;</span>&nbsp;<span class="element-name">getCardFusionEncounterFlow</span>()</div>
+<div class="block">Returns the selected Fusion flow for the player-facing UI, if Fusion was selected.
+
+ <p>The UI must resolve the introductory <code>fuse</code> choice before calling the flow.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>the existing delegated flow, or empty for other encounters</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="isCardFusionPresentationComplete()">
+<h3>isCardFusionPresentationComplete</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isCardFusionPresentationComplete</span>()</div>
+<div class="block">Presentation-only gate; the run and Event lifecycle are still completed by the flow.</div>
 </section>
 </li>
 <li>

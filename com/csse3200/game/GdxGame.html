@@ -177,6 +177,26 @@ loadScripts(document, 'script');</script>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRunState()" class="member-name-link">getRunState</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#openDemoCampfire()" class="member-name-link">openDemoCampfire</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Opens a temporary Campfire preview with no map node or persistent run changes.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#openDemoCardFusion()" class="member-name-link">openDemoCardFusion</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Opens the Card Fusion catalogue Event directly for UI work.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#openDemoEvent()" class="member-name-link">openDemoEvent</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Opens a temporary Event preview without entering or changing the run map.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#openDemoShop()" class="member-name-link">openDemoShop</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Opens a temporary Shop preview using isolated player state and no map node.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#requestAutosaveAfterEncounter()" class="member-name-link">requestAutosaveAfterEncounter</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Schedules one autosave for the current run after a completed encounter.</div>
@@ -190,6 +210,16 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startBattle()" class="member-name-link">startBattle</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Opens the battle screen.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startElitePortalDebug()" class="member-name-link">startElitePortalDebug</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Temporary development shortcut for previewing the Elite portal flow.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startEvent(java.lang.String)" class="member-name-link">startEvent</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;eventId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Opens a specific configured Event for the active map node using the persistent run.</div>
 </div>
 </div>
 </div>
@@ -277,7 +307,59 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="startBattle()">
 <h3>startBattle</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">startBattle</span>()</div>
-<div class="block">Opens the battle screen. Used by encounter navigation and the temporary debug shortcut.</div>
+<div class="block">Opens the battle screen.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="startEvent(java.lang.String)">
+<h3>startEvent</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">startEvent</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;eventId)</span></div>
+<div class="block">Opens a specific configured Event for the active map node using the persistent run.
+
+ <p>The caller must first enter a real EVENT node. Validation happens before the current screen
+ is disposed, so an invalid request leaves it in place.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>eventId</code> - stable ID from the Event catalogue</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the ID is blank or unknown</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if no EVENT map node is active</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="openDemoEvent()">
+<h3>openDemoEvent</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">openDemoEvent</span>()</div>
+<div class="block">Opens a temporary Event preview without entering or changing the run map.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="openDemoCardFusion()">
+<h3>openDemoCardFusion</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">openDemoCardFusion</span>()</div>
+<div class="block">Opens the Card Fusion catalogue Event directly for UI work.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="openDemoCampfire()">
+<h3>openDemoCampfire</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">openDemoCampfire</span>()</div>
+<div class="block">Opens a temporary Campfire preview with no map node or persistent run changes.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="openDemoShop()">
+<h3>openDemoShop</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">openDemoShop</span>()</div>
+<div class="block">Opens a temporary Shop preview using isolated player state and no map node.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="startElitePortalDebug()">
+<h3>startElitePortalDebug</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">startElitePortalDebug</span>()</div>
+<div class="block">Temporary development shortcut for previewing the Elite portal flow.</div>
 </section>
 </li>
 <li>

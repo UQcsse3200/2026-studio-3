@@ -128,6 +128,11 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Selects one encounter according to the pool's relative weights.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ChanceEncounter.html" title="class in com.csse3200.game.chance">ChanceEncounter</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#selectById(java.lang.String)" class="member-name-link">selectById</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;eventId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Selects a configured encounter by its stable ID without using the random source.</div>
+</div>
 </div>
 </div>
 </div>
@@ -181,6 +186,21 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>selected encounter</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="selectById(java.lang.String)">
+<h3>selectById</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ChanceEncounter.html" title="class in com.csse3200.game.chance">ChanceEncounter</a></span>&nbsp;<span class="element-name">selectById</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;eventId)</span></div>
+<div class="block">Selects a configured encounter by its stable ID without using the random source.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>eventId</code> - non-blank encounter ID</dd>
+<dt>Returns:</dt>
+<dd>the matching encounter</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the ID is blank or absent from this pool</dd>
 </dl>
 </section>
 </li>

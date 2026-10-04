@@ -104,11 +104,19 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.lang.Integer,com.csse3200.game.chance.ChanceEncounter,com.csse3200.game.encounters.integration.ChanceOutcomeApplier,com.csse3200.game.maps.EncounterCallback)" class="member-name-link">ChanceEncounterSession</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.lang.Integer,com.csse3200.game.chance.ChanceEncounter,com.csse3200.game.chance.ChanceEncounterBehaviour,com.csse3200.game.encounters.integration.ChanceOutcomeApplier,com.csse3200.game.maps.EncounterCallback)" class="member-name-link">ChanceEncounterSession</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
  <a href="../../chance/ChanceEncounter.html" title="class in com.csse3200.game.chance">ChanceEncounter</a>&nbsp;encounter,
+ <a href="../../chance/ChanceEncounterBehaviour.html" title="interface in com.csse3200.game.chance">ChanceEncounterBehaviour</a>&nbsp;behaviour,
  <a href="ChanceOutcomeApplier.html" title="class in com.csse3200.game.encounters.integration">ChanceOutcomeApplier</a>&nbsp;outcomeApplier,
  <a href="../../maps/EncounterCallback.html" title="interface in com.csse3200.game.maps">EncounterCallback</a>&nbsp;completionCallback)</code></div>
 <div class="col-last even-row-color">
+<div class="block">Creates one Chance Encounter lifecycle session with an injected choice behaviour.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(java.lang.Integer,com.csse3200.game.chance.ChanceEncounter,com.csse3200.game.encounters.integration.ChanceOutcomeApplier,com.csse3200.game.maps.EncounterCallback)" class="member-name-link">ChanceEncounterSession</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
+ <a href="../../chance/ChanceEncounter.html" title="class in com.csse3200.game.chance">ChanceEncounter</a>&nbsp;encounter,
+ <a href="ChanceOutcomeApplier.html" title="class in com.csse3200.game.encounters.integration">ChanceOutcomeApplier</a>&nbsp;outcomeApplier,
+ <a href="../../maps/EncounterCallback.html" title="interface in com.csse3200.game.maps">EncounterCallback</a>&nbsp;completionCallback)</code></div>
+<div class="col-last odd-row-color">
 <div class="block">Creates one Chance Encounter lifecycle session.</div>
 </div>
 </div>
@@ -135,10 +143,30 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Completes a successfully resolved encounter and returns to the map.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../chance/ChanceEncounter.html" title="class in com.csse3200.game.chance">ChanceEncounter</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getEncounter()" class="member-name-link">getEncounter</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#completeDelegated()" class="member-name-link">completeDelegated</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Completes an encounter that handed control to a delegated flow.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../../chance/ChanceChoice.html" title="class in com.csse3200.game.chance">ChanceChoice</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAvailableChoices()" class="member-name-link">getAvailableChoices</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the catalogue choices valid at the current stage, in catalogue order.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getChoicePrompt()" class="member-name-link">getChoicePrompt</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the current stage's player-facing choice instruction.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../chance/ChanceEncounter.html" title="class in com.csse3200.game.chance">ChanceEncounter</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getEncounter()" class="member-name-link">getEncounter</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the immutable encounter definition displayed by the UI.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../../chance/DiceRoll.html" title="class in com.csse3200.game.chance">DiceRoll</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLastDiceRoll()" class="member-name-link">getLastDiceRoll</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the latest two dice faces without changing the encounter result.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getNodeId()" class="member-name-link">getNodeId</a>()</code></div>
@@ -149,6 +177,16 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getResolution()" class="member-name-link">getResolution</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the successful resolution retained by this session.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStageResultText()" class="member-name-link">getStageResultText</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns feedback for an accepted choice that advanced to another stage.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isAwaitingDelegatedCompletion()" class="member-name-link">isAwaitingDelegatedCompletion</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Reports whether this session is waiting for a delegated flow.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isCompleted()" class="member-name-link">isCompleted</a>()</code></div>
@@ -199,6 +237,29 @@ loadScripts(document, 'script');</script>
 </dl>
 </section>
 </li>
+<li>
+<section class="detail" id="&lt;init&gt;(java.lang.Integer,com.csse3200.game.chance.ChanceEncounter,com.csse3200.game.chance.ChanceEncounterBehaviour,com.csse3200.game.encounters.integration.ChanceOutcomeApplier,com.csse3200.game.maps.EncounterCallback)">
+<h3>ChanceEncounterSession</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ChanceEncounterSession</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
+ <a href="../../chance/ChanceEncounter.html" title="class in com.csse3200.game.chance">ChanceEncounter</a>&nbsp;encounter,
+ <a href="../../chance/ChanceEncounterBehaviour.html" title="interface in com.csse3200.game.chance">ChanceEncounterBehaviour</a>&nbsp;behaviour,
+ <a href="ChanceOutcomeApplier.html" title="class in com.csse3200.game.encounters.integration">ChanceOutcomeApplier</a>&nbsp;outcomeApplier,
+ <a href="../../maps/EncounterCallback.html" title="interface in com.csse3200.game.maps">EncounterCallback</a>&nbsp;completionCallback)</span></div>
+<div class="block">Creates one Chance Encounter lifecycle session with an injected choice behaviour.
+
+ <p>The encounter remains the immutable display definition. The behaviour independently resolves
+ choices, allowing later encounter types to compute runtime outcomes or delegate to a separate
+ flow without changing ordinary outcome application.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>nodeId</code> - map node that launched the encounter</dd>
+<dd><code>encounter</code> - Chance Encounter definition displayed by the UI</dd>
+<dd><code>behaviour</code> - player-independent choice resolver</dd>
+<dd><code>outcomeApplier</code> - service applying normal outcomes to the player</dd>
+<dd><code>completionCallback</code> - callback returning control to the map</dd>
+</dl>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -228,6 +289,21 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>true only for the first valid completion call</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="completeDelegated()">
+<h3>completeDelegated</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">completeDelegated</span>()</div>
+<div class="block">Completes an encounter that handed control to a delegated flow.
+
+ <p>A delegated flow owns its own result. For example, Card Fusion may either fuse cards or
+ leave without fusing, but either choice consumes the Event node and returns the player to the
+ map.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>true only when a pending delegated flow is completed for the first time</dd>
 </dl>
 </section>
 </li>
@@ -265,6 +341,34 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="getAvailableChoices()">
+<h3>getAvailableChoices</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../chance/ChanceChoice.html" title="class in com.csse3200.game.chance">ChanceChoice</a>&gt;</span>&nbsp;<span class="element-name">getAvailableChoices</span>()</div>
+<div class="block">Returns the catalogue choices valid at the current stage, in catalogue order.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getChoicePrompt()">
+<h3>getChoicePrompt</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">getChoicePrompt</span>()</div>
+<div class="block">Returns the current stage's player-facing choice instruction.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getStageResultText()">
+<h3>getStageResultText</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">getStageResultText</span>()</div>
+<div class="block">Returns feedback for an accepted choice that advanced to another stage.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getLastDiceRoll()">
+<h3>getLastDiceRoll</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../../chance/DiceRoll.html" title="class in com.csse3200.game.chance">DiceRoll</a>&gt;</span>&nbsp;<span class="element-name">getLastDiceRoll</span>()</div>
+<div class="block">Returns the latest two dice faces without changing the encounter result.</div>
+</section>
+</li>
+<li>
 <section class="detail" id="getResolution()">
 <h3>getResolution</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ChanceResolution.html" title="class in com.csse3200.game.encounters.integration">ChanceResolution</a></span>&nbsp;<span class="element-name">getResolution</span>()</div>
@@ -283,6 +387,17 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>true after a choice has been applied successfully</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="isAwaitingDelegatedCompletion()">
+<h3>isAwaitingDelegatedCompletion</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isAwaitingDelegatedCompletion</span>()</div>
+<div class="block">Reports whether this session is waiting for a delegated flow.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>true after behaviour delegates resolution and before the session is cancelled</dd>
 </dl>
 </section>
 </li>
