@@ -23,7 +23,17 @@ def _flood(w, h, seeds, ok):
     return reg
 
 
-def cutout(path, watermark=(1262, 1440, 1536, 1536), min_gap=300, bg_tol=3, alpha_min=0.03):
+def cutout(
+    path,
+    watermark=(1262, 1440, 1536, 1536),
+    min_gap=300,
+    bg_tol=3,
+    alpha_min=0.03,
+    grey_sat=None,
+    floor_y=None,
+):
+    # grey_sat: 设置后，背景区域里饱和度低于它的灰色像素（影子、灰雾、灰色速度线）直接去掉，有颜色的光效保留
+    # floor_y: 这一行以下，较深的灰色（地面影子）也算背景；遇到角色的深色描边会停下，不会吃进灰白色的靴子
     im = Image.open(path).convert("RGB")
     px = im.load()
     w, h = im.size
@@ -38,6 +48,8 @@ def cutout(path, watermark=(1262, 1440, 1536, 1536), min_gap=300, bg_tol=3, alph
 
     def light(x, y):
         s, v = sv[y][x]
+        if floor_y is not None and y >= floor_y and s < 0.12 and v > 0.42:
+            return True
         return v > 0.80 and s < 0.45
 
     border = [(x, 0) for x in range(w)] + [(x, h - 1) for x in range(w)]
@@ -76,6 +88,9 @@ def cutout(path, watermark=(1262, 1440, 1536, 1536), min_gap=300, bg_tol=3, alph
             r, g, b = px[x, y]
             if not reg[y * w + x]:
                 o[x, y] = (r, g, b, 255)
+                continue
+            if grey_sat is not None and sv[y][x][0] < grey_sat:
+                o[x, y] = (0, 0, 0, 0)
                 continue
             a = max(255 - r, 255 - g, 255 - b) / 255
             if a < alpha_min:
