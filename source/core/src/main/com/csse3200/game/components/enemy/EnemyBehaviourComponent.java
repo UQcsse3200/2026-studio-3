@@ -146,7 +146,7 @@ public class EnemyBehaviourComponent extends Component {
    * Deals damage equal to the telegraphed intent's value, not a freshly recomputed base attack.
    *
    * <p>Kept equal to {@code getBaseAttack()} for every current AI, so this is behaviour-preserving
-   * for them; it only starts to matter for an AI (such as an armour-to-damage trade) whose intent
+   * for them; it only starts to matter for an AI (such as an armor-to-damage trade) whose intent
    * value differs from the plain base attack, letting the damage actually dealt match what was
    * telegraphed to the player.
    *
@@ -193,8 +193,15 @@ public class EnemyBehaviourComponent extends Component {
     CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
     if (targetStats != null) {
       entity.getEvents().trigger("enemyCast");
-      targetStats.applyStatusEffect(
-          effectType.name(), currentIntent.getValue(), currentIntent.getDuration());
+
+      String statusKey =
+          effectType == IntentEffectType.TAUNT
+              ? IntentEffectType.TAUNT.name() + ":" + entity.getId()
+              : effectType.name();
+      int statusValue =
+          effectType == IntentEffectType.TAUNT ? entity.getId() : currentIntent.getValue();
+
+      targetStats.applyStatusEffect(statusKey, statusValue, currentIntent.getDuration());
     }
   }
 }
