@@ -13,9 +13,12 @@ import com.csse3200.game.input.InputDecorator;
 import com.csse3200.game.input.InputService;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
+import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,15 +27,17 @@ import org.slf4j.LoggerFactory;
  */
 public class ItemLibraryScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(ItemLibraryScreen.class);
-  private static final String[] ITEM_LIBRARY_TEXTURES = {
-    MainMenuDisplay.BACKGROUND_TEXTURE,
-    CardLibraryDisplay.BUTTON_TEXTURE,
-    "images/ui/energy-crystal.png",
-    "images/ui/iron-aegis.png",
-    "images/ui/lucky-coin.png",
-    "images/ui/merchants-favor.png",
-    "images/ui/warriors-crest.png"
-  };
+  private static final String[] ITEM_LIBRARY_TEXTURES = collectTexturePaths();
+
+  static String[] collectTexturePaths() {
+    Set<String> paths = new LinkedHashSet<>();
+    paths.add(MainMenuDisplay.BACKGROUND_TEXTURE);
+    paths.add(CardLibraryDisplay.BUTTON_TEXTURE);
+    for (ItemType item : ItemType.values()) {
+      paths.add(ItemLibraryDisplay.resolveArtworkPath(item));
+    }
+    return paths.toArray(new String[0]);
+  }
 
   private final GdxGame game;
   private final Renderer renderer;
