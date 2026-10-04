@@ -27,7 +27,6 @@ import com.csse3200.game.cards.runtime.CardResolver;
 import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
-import com.csse3200.game.components.battle.BattleEncounterSelector;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
@@ -96,7 +95,7 @@ public class BattleScreen extends ScreenAdapter {
     "images/enemy.png",
     "images/armour.png"
   };
-  private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
+  private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
   private static final float HAND_Y = 1000f;
   private static final float HAND_SPACING = 90f;

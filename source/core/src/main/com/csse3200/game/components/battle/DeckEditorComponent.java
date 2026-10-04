@@ -16,8 +16,14 @@ import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.cards.runtime.CardInstance;
+import com.csse3200.game.cards.runtime.CardResolver;
+import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.cards.CardWidgetAssets;
-import com.csse3200.game.components.spritedisplay.clickable.*;
+import com.csse3200.game.components.spritedisplay.clickable.CardImageSkins;
+import com.csse3200.game.components.spritedisplay.clickable.CardWidgetInstaller;
+import com.csse3200.game.components.spritedisplay.clickable.Clickable;
+import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
+import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.displaying.CardBadgesDisplay;
 import com.csse3200.game.components.spritedisplay.displaying.CardPreviewDisplay;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
@@ -380,7 +386,6 @@ public class DeckEditorComponent extends UIComponent {
   }
 
   private void showPreview(CardInstance instance) {
-    logger.info("PREVIEW trigger = {}", DeckEditorEvents.PREVIEW);
     previewed = instance;
     if (instance == null) {
       entity.getEvents().trigger(DeckEditorEvents.PREVIEW, CardPreviewDisplay.Content.NONE);
@@ -391,26 +396,26 @@ public class DeckEditorComponent extends UIComponent {
       entity.getEvents().trigger(DeckEditorEvents.PREVIEW, CardPreviewDisplay.Content.NONE);
       return;
     }
-    CardConfig card = maybeCard.get();
+    ResolvedCard card = new CardResolver().resolve(maybeCard.get(), instance);
     entity
         .getEvents()
         .trigger(
             DeckEditorEvents.PREVIEW,
-            new CardPreviewDisplay.Content(card.texturePath, previewText(card)));
+            new CardPreviewDisplay.Content(card.texturePath(), previewText(card)));
   }
 
-  private String previewText(CardConfig card) {
-    return card.name
+  private String previewText(ResolvedCard card) {
+    return card.name()
         + "\nCost: "
-        + card.cost
+        + card.cost()
         + "\n"
-        + formatEnum(card.type.name())
+        + formatEnum(card.type().name())
         + "  |  "
-        + formatEnum(card.rarity.name())
+        + formatEnum(card.rarity().name())
         + "\nTarget: "
-        + card.target
+        + card.target()
         + "\n\n"
-        + card.description;
+        + card.description();
   }
 
   private static String formatEnum(String value) {
@@ -530,7 +535,11 @@ public class DeckEditorComponent extends UIComponent {
       }
       text.append(number++)
           .append(' ')
-          .append(library.getCard(instance.cardId()).map(c -> c.name).orElse(instance.cardId()));
+          .append(
+              library
+                  .getCard(instance.cardId())
+                  .map(c -> new CardResolver().resolve(c, instance).name())
+                  .orElse(instance.cardId()));
     }
     return text.toString();
   }
@@ -538,6 +547,7 @@ public class DeckEditorComponent extends UIComponent {
   @Override
   public void dispose() {
     stage.removeListener(wheelListener);
+    onClosed();
     super.dispose();
   }
 

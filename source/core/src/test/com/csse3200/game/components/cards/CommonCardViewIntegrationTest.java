@@ -26,12 +26,15 @@ import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.cards.runtime.CardResolver;
 import com.csse3200.game.components.battle.DeckEditorComponent;
+import com.csse3200.game.components.battle.DeckEditorEvents;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.components.shop.ShopDisplay;
 import com.csse3200.game.components.spritedisplay.clickable.Clickable;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.clickable.DragNDrop;
+import com.csse3200.game.components.spritedisplay.displaying.CardBadgesDisplay;
+import com.csse3200.game.components.spritedisplay.displaying.CardPreviewDisplay;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
@@ -49,7 +52,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -148,8 +150,6 @@ class CommonCardViewIntegrationTest {
     assertEquals(List.of(instance.instanceId()), selection.getSelectedInstanceIds());
   }
 
-  @Disabled(
-      "Deck editor test out of scope on this branch; original written against integrate/card-discovery-dynamic-ui")
   @Test
   void deckEditorKeepsDuplicateIdentityAndNestedSelectionTintsWithCommonFrame() {
     CardInstance base = new CardInstance("strike-base", "strike", 0);
@@ -172,14 +172,22 @@ class CommonCardViewIntegrationTest {
             .addComponent(displayFactory)
             .addComponent(editor);
     entity.create();
+    List<List<CardBadgesDisplay.Badge>> badges = new ArrayList<>();
+    List<CardPreviewDisplay.Content> previews = new ArrayList<>();
+    entity
+        .getEvents()
+        .addListener(
+            DeckEditorEvents.BADGES, (List<CardBadgesDisplay.Badge> value) -> badges.add(value));
+    entity
+        .getEvents()
+        .addListener(
+            DeckEditorEvents.PREVIEW, (CardPreviewDisplay.Content value) -> previews.add(value));
     editor.open();
 
     List<Clickable> cards = factory.getByTrigger("toggleDeckCard");
     assertEquals(2, cards.size());
-    CardWidget baseFace =
-        assertInstanceOf(CardWidget.class, cards.getFirst().getBtn().getChildren().first());
-    CardWidget upgradeFace =
-        assertInstanceOf(CardWidget.class, cards.getLast().getBtn().getChildren().first());
+    CardWidget baseFace = cardFace(cards.getFirst());
+    CardWidget upgradeFace = cardFace(cards.getLast());
     assertCommonFrame(baseFace);
     assertCommonFrame(upgradeFace);
     assertEquals(base.instanceId(), cards.getFirst().getArgs()[0]);
@@ -188,13 +196,25 @@ class CommonCardViewIntegrationTest {
     assertEquals("Deal 12 damage.", upgradeFace.displayedDescription());
     assertEquals(new Color(0.35f, 0.35f, 0.35f, 1f), frameImage(upgradeFace).getColor());
     assertNotEquals(Color.WHITE, frameImage(baseFace).getColor());
+    assertEquals(1, badges.getLast().size());
+    assertEquals(1, badges.getLast().getFirst().number());
+
+    InputEvent hover = new InputEvent();
+    hover.setType(InputEvent.Type.enter);
+    hover.setPointer(-1);
+    cards.getLast().getBtn().fire(hover);
+    assertEquals(
+        "Strike+\nCost: 1\nAttack  |  Common\nTarget: SINGLE_ENEMY\n\nDeal 12 damage.",
+        previews.getLast().details());
 
     cards.getFirst().getBtn().fire(new ChangeEvent());
+    assertTrue(badges.getLast().isEmpty());
     assertEquals(Color.WHITE, frameImage(baseFace).getColor());
     assertEquals(new Color(0.35f, 0.35f, 0.35f, 1f), frameImage(upgradeFace).getColor());
     cards.getFirst().getBtn().validate();
-    assertTrue(baseFace.getWidth() <= cards.getFirst().getBtn().getWidth());
-    assertTrue(baseFace.getHeight() <= cards.getFirst().getBtn().getHeight());
+    assertTrue(baseFace.getWidth() * baseFace.getScaleX() <= cards.getFirst().getBtn().getWidth());
+    assertTrue(
+        baseFace.getHeight() * baseFace.getScaleY() <= cards.getFirst().getBtn().getHeight());
     popup.hide();
     assertTrue(factory.getByTrigger("toggleDeckCard").isEmpty());
   }
@@ -253,6 +273,13 @@ class CommonCardViewIntegrationTest {
     List<CardWidget> widgets = widgets();
     assertEquals(6, widgets.size());
     widgets.forEach(this::assertRarityFrame);
+  }
+
+  private static CardWidget cardFace(Clickable clickable) {
+    List<CardWidget> faces = new ArrayList<>();
+    collectWidgets(clickable.getBtn(), faces);
+    assertEquals(1, faces.size());
+    return faces.getFirst();
   }
 
   private List<CardWidget> widgets() {
