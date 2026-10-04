@@ -16,6 +16,7 @@ public class EnemyReleaseDisplay extends RenderComponent {
 
     private Animation<TextureRegion> beamAnimation;
     private EnemyReleaseComponent release;
+    private TextureRegion beamRegion;
 
     @Override
     public void create() {
@@ -30,12 +31,8 @@ public class EnemyReleaseDisplay extends RenderComponent {
                 Texture.TextureFilter.Nearest,
                 Texture.TextureFilter.Nearest);
 
-        TextureRegion[][] frames =
-                TextureRegion.split(texture, FRAME_SIZE, FRAME_SIZE);
-
-        beamAnimation = new Animation<>(
-                FRAME_DURATION, frames[0]);
-        beamAnimation.setPlayMode(Animation.PlayMode.NORMAL);
+        beamRegion = new TextureRegion(
+                texture, 4 * FRAME_SIZE + 54, 0, 24, 40);
     }
 
     @Override
@@ -44,25 +41,24 @@ public class EnemyReleaseDisplay extends RenderComponent {
             return;
         }
 
-        // Let the recolour begin before the beam appears.
-        float beamTime = release.getElapsedTime() - 0.4f;
+        float progress = release.getProgress();
 
-        if (beamTime < 0f || beamAnimation.isAnimationFinished(beamTime)) {
-            return;
-        }
-
-        TextureRegion frame = beamAnimation.getKeyFrame(beamTime, false);
+        // Fade in over the first quarter, then out over the last quarter.
+        float fade = Math.min(
+                Math.min(progress / 0.25f, (1f - progress) / 0.25f),
+                1f);
+        float alpha = fade * 0.35f;
 
         Vector2 position = entity.getPosition();
         Vector2 scale = entity.getScale();
 
-        float size = Math.max(scale.x, scale.y) * 1.5f;
-        float x = position.x + scale.x / 2f - size / 2f;
-        float y = position.y;
+        float width = scale.x * 0.65f;
+        float height = scale.y * 2f;
+        float x = position.x + (scale.x - width) / 2f;
 
         float previousColour = batch.getPackedColor();
-        batch.setColor(1f, 1f, 1f, 0.75f);
-        batch.draw(frame, x, y, size, size);
+        batch.setColor(1f, 1f, 1f, alpha);
+        batch.draw(beamRegion, x, position.y, width, height);
         batch.setPackedColor(previousColour);
     }
 

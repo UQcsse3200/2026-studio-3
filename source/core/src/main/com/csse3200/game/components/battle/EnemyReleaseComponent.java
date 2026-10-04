@@ -28,6 +28,10 @@ public class EnemyReleaseComponent extends Component {
         return elapsed;
     }
 
+    public float getProgress() {
+        return Math.min(elapsed / DURATION, 1f);
+    }
+
     @Override
     public void create() {
         super.create();
