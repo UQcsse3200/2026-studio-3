@@ -161,7 +161,7 @@ public class DragNDrop extends InOutOnTrigger {
     Actor visualContent = createVisualContent();
     if (visualContent != null) {
       dragVisual.clearChildren();
-      dragVisual.add(visualContent).expand().fill();
+      dragVisual.add(visualContent).minSize(0f).expand().fill();
     }
     return dragVisual;
   }

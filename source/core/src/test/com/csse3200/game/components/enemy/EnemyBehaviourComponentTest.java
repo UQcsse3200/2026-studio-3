@@ -9,12 +9,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import com.csse3200.game.cards.CardType;
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAI;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIFactory;
+import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
+import com.csse3200.game.components.enemy.Memory.PlayerMemory;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.extensions.GameExtension;
@@ -335,5 +338,128 @@ class EnemyBehaviourComponentTest {
     behaviour.rollIntent();
 
     assertEquals(0, captured[0].getPlayerHealth());
+  }
+
+  @Test
+  void shouldUseEmptyPlayerMemoryWhenMemoryIsNotSupplied() {
+    EnemyAIContext[] captured = new EnemyAIContext[1];
+
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent(
+            "test_memory",
+            context -> {
+              captured[0] = context;
+              return EnemyIntent.attack(1);
+            });
+
+    enemyWith(behaviour, enemyStats());
+
+    behaviour.rollIntent();
+
+    assertEquals(PlayerMemory.empty(), captured[0].getPlayerMemory());
+  }
+
+  @Test
+  void shouldProvidePlayerMemoryToEnemyAI() {
+    EnemyAIContext[] captured = new EnemyAIContext[1];
+
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent(
+            "test_memory",
+            context -> {
+              captured[0] = context;
+              return EnemyIntent.attack(1);
+            });
+
+    enemyWith(behaviour, enemyStats());
+
+    EnemyMemoryComponent memory = new EnemyMemoryComponent();
+
+    memory.recordCardPlayed(CardType.ATTACK, false);
+
+    memory.recordCardPlayed(CardType.SKILL, true);
+
+    memory.settlePlayerTurn();
+
+    behaviour.setEnemyMemory(memory);
+    behaviour.rollIntent();
+
+    PlayerMemory received = captured[0].getPlayerMemory();
+
+    assertEquals(memory.snapshot(), received);
+    assertEquals(1, received.attackCardsPlayed());
+    assertEquals(1, received.skillCardsPlayed());
+    assertEquals(2, received.cardsPlayedLastTurn());
+    assertEquals(0, received.consecutiveTurnsWithoutBlock());
+  }
+
+  @Test
+  void shouldReadLatestMemoryForEveryDecision() {
+    EnemyAIContext[] captured = new EnemyAIContext[1];
+
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent(
+            "test_memory",
+            context -> {
+              captured[0] = context;
+              return EnemyIntent.attack(1);
+            });
+
+    enemyWith(behaviour, enemyStats());
+
+    EnemyMemoryComponent memory = new EnemyMemoryComponent();
+
+    behaviour.setEnemyMemory(memory);
+
+    memory.recordCardPlayed(CardType.ATTACK, false);
+
+    behaviour.rollIntent();
+
+    PlayerMemory firstDecisionMemory = captured[0].getPlayerMemory();
+
+    assertEquals(1, firstDecisionMemory.attackCardsPlayed());
+
+    assertEquals(0, firstDecisionMemory.skillCardsPlayed());
+
+    memory.recordCardPlayed(CardType.SKILL, true);
+
+    memory.settlePlayerTurn();
+
+    behaviour.rollIntent();
+
+    PlayerMemory secondDecisionMemory = captured[0].getPlayerMemory();
+
+    assertEquals(1, secondDecisionMemory.attackCardsPlayed());
+
+    assertEquals(1, secondDecisionMemory.skillCardsPlayed());
+
+    assertEquals(2, secondDecisionMemory.cardsPlayedLastTurn());
+
+    assertEquals(0, secondDecisionMemory.consecutiveTurnsWithoutBlock());
+  }
+
+  @Test
+  void shouldReturnToEmptyMemoryWhenMemoryIsCleared() {
+    EnemyAIContext[] captured = new EnemyAIContext[1];
+
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent(
+            "test_memory",
+            context -> {
+              captured[0] = context;
+              return EnemyIntent.attack(1);
+            });
+
+    enemyWith(behaviour, enemyStats());
+
+    EnemyMemoryComponent memory = new EnemyMemoryComponent();
+
+    memory.recordCardPlayed(CardType.ATTACK, false);
+
+    behaviour.setEnemyMemory(memory);
+    behaviour.setEnemyMemory(null);
+    behaviour.rollIntent();
+
+    assertEquals(PlayerMemory.empty(), captured[0].getPlayerMemory());
   }
 }

@@ -10,6 +10,7 @@ import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.components.cards.CardUpgradeDisplay;
 import com.csse3200.game.components.cards.CardUpgradeSelection;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.cards.PlayerDeckCardUpgradeCommitter;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord;
@@ -29,7 +30,6 @@ import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,13 +104,7 @@ public class EndBattleScreen extends ScreenAdapter {
   }
 
   private void loadCardAssets(List<CardConfig> cardConfigs) {
-    cardTextures =
-        cardConfigs.stream()
-            .map(config -> config.texturePath)
-            .filter(Objects::nonNull)
-            .filter(path -> !path.isBlank())
-            .distinct()
-            .toArray(String[]::new);
+    cardTextures = CardWidgetAssets.collectTexturePaths(cardConfigs);
     ResourceService resources = ServiceLocator.getResourceService();
     resources.loadTextures(cardTextures);
     resources.loadAll();

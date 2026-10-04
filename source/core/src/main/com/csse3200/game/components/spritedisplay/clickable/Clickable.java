@@ -109,7 +109,7 @@ public abstract class Clickable extends Component {
     visualContentFactory = Objects.requireNonNull(factory, "visual content factory cannot be null");
     Actor content = createVisualContent();
     btn.clearChildren();
-    btn.add(content).expand().fill();
+    btn.add(content).minSize(0f).expand().fill();
     if (disabled) {
       applyDisabledShade();
     }

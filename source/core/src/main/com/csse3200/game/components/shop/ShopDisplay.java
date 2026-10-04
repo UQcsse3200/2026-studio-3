@@ -17,14 +17,17 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.cards.runtime.CardResolver;
+import com.csse3200.game.components.cards.CardWidget;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.player.InventoryComponent;
-import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.maps.EncounterCallback;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.shop.PurchaseResult;
-import com.csse3200.game.shop.ShopConfig;
 import com.csse3200.game.shop.ShopEncounter;
+import com.csse3200.game.shop.ShopInventoryGenerator;
 import com.csse3200.game.shop.ShopItem;
 import com.csse3200.game.shop.ShopService;
 import com.csse3200.game.ui.UIComponent;
@@ -47,7 +50,6 @@ import org.slf4j.LoggerFactory;
  */
 public class ShopDisplay extends UIComponent {
   private static final Logger logger = LoggerFactory.getLogger(ShopDisplay.class);
-  private static final String SHOP_CONFIG = "configs/shopItems.json";
   private static final String SHOP_ART_DIRECTORY = "images/shop/cards/";
   private static final String BUTTON = "button";
   private static final String WHITE = "white";
@@ -121,13 +123,7 @@ public class ShopDisplay extends UIComponent {
    * @param nodeId identifier of the associated map node
    */
   public ShopDisplay(InventoryComponent inventory, EncounterCallback callback, Integer nodeId) {
-    this(
-        inventory,
-        new ShopEncounter(
-            nodeId,
-            inventory,
-            new ShopService(FileLoader.readClass(ShopConfig.class, SHOP_CONFIG)),
-            callback));
+    this(inventory, new ShopEncounter(nodeId, inventory, createGeneratedShop(), callback));
   }
 
   /**
@@ -153,10 +149,8 @@ public class ShopDisplay extends UIComponent {
   private ShopDisplay(
       InventoryComponent inventory, ShopEncounter shopEncounter, CardService cardService) {
     this.shopEncounter =
-        shopEncounter == null
-            ? new ShopEncounter(inventory, new ShopService((ShopConfig) null))
-            : shopEncounter;
-    this.cardService = cardService;
+        shopEncounter == null ? new ShopEncounter(inventory, createGeneratedShop()) : shopEncounter;
+    this.cardService = cardService == null ? ServiceLocator.getCardLibrary() : cardService;
   }
 
   /**
@@ -176,6 +170,22 @@ public class ShopDisplay extends UIComponent {
    */
   public ShopDisplay(ShopEncounter shopEncounter, CardService cardService) {
     this(null, shopEncounter, cardService);
+  }
+
+  /**
+   * Builds a live shop inventory from the registered card library using {@link
+   * ShopInventoryGenerator} and the shared acquisition pool.
+   *
+   * <p>Requires {@link ServiceLocator#getCardLibrary()} to be registered. A missing library is a
+   * setup error, not something to paper over by re-reading {@code cards.json}.
+   */
+  static ShopService createGeneratedShop() {
+    CardService cards = ServiceLocator.getCardLibrary();
+    if (cards == null) {
+      throw new IllegalStateException(
+          "Card library must be registered with ServiceLocator before opening the shop");
+    }
+    return new ShopInventoryGenerator(cards).createShop();
   }
 
   @Override
@@ -229,7 +239,7 @@ public class ShopDisplay extends UIComponent {
 
     if (shopEncounter.getItems().isEmpty()) {
       Label emptyLabel =
-          new Label("The merchant has nothing to sell.", createLabelStyle(DEFAULT, MUTED_COLOUR));
+          new Label("No relics remain for sale.", createLabelStyle(DEFAULT, MUTED_COLOUR));
       shopPanel.add(emptyLabel).center().pad(80f).colspan(3);
     } else {
       addShopItems(shopPanel);
@@ -247,7 +257,7 @@ public class ShopDisplay extends UIComponent {
   private void addHeader(Table shopPanel) {
     Table titleBlock = new Table();
     Label eyebrow = new Label("SHOP ENCOUNTER", createLabelStyle(SMALL, GOLD_COLOUR));
-    Label title = new Label("The Wandering Merchant", createLabelStyle(LARGE, BODY_COLOUR));
+    Label title = new Label("Wayside Reliquary", createLabelStyle(LARGE, BODY_COLOUR));
     Label subtitle =
         new Label(
             "Choose carefully. Each offer may be purchased once.",
@@ -338,8 +348,16 @@ public class ShopDisplay extends UIComponent {
   }
 
   private Actor createArtwork(ShopItem item) {
-    String texturePath = resolveArtworkPath(item);
     ResourceService resources = ServiceLocator.getResourceService();
+    CardConfig config = cardService == null ? null : cardService.getCard(item.cardId).orElse(null);
+    if (config != null && resources != null) {
+      CardWidgetAssets assets = CardWidgetAssets.fromManagedResources(skin, resources);
+      if (assets.hasAuthoredFrame(config.rarity)) {
+        return new CardWidget(
+            new CardResolver().resolveBasePreview(config, "shop-preview-" + item.id), assets);
+      }
+    }
+    String texturePath = resolveArtworkPath(item);
     if (resources != null && !isLoadedTexture(resources, texturePath)) {
       texturePath = resolveConfiguredArtworkPath(item);
     }
@@ -394,7 +412,7 @@ public class ShopDisplay extends UIComponent {
     statusLabel.setWrap(true);
 
     TextButton leaveButton =
-        new TextButton("Leave Shop", createButtonStyle(new Color(0.22f, 0.16f, 0.15f, 1f)));
+        new TextButton("Leave Reliquary", createButtonStyle(new Color(0.22f, 0.16f, 0.15f, 1f)));
     leaveButton.getLabel().setFontScale(1.42f);
     leaveButton.addListener(
         new ChangeListener() {

@@ -112,6 +112,35 @@ public class CardDiscoveryService {
     }
   }
 
+  /**
+   * Merges discovery progress using stable card IDs without downgrading existing progress.
+   *
+   * <p>Unknown but well-formed card IDs are ignored so persisted progress remains loadable when
+   * definitions change between versions.
+   *
+   * @param incoming progress to merge into the current state
+   */
+  public void mergeProgress(Map<String, CardUnlockState> incoming) {
+    if (incoming == null) {
+      throw new IllegalArgumentException("incoming progress must not be null");
+    }
+    for (Map.Entry<String, CardUnlockState> entry : incoming.entrySet()) {
+      if (entry.getKey() == null || entry.getKey().isBlank() || entry.getValue() == null) {
+        throw new IllegalArgumentException("incoming progress contains an invalid entry");
+      }
+    }
+
+    for (Map.Entry<String, CardUnlockState> entry : incoming.entrySet()) {
+      String cardId = entry.getKey();
+      CardUnlockState incomingState = entry.getValue();
+      if (!entries.containsKey(cardId) || progress.get(cardId).isAtLeast(incomingState)) {
+        continue;
+      }
+      progress.put(cardId, incomingState);
+      events.trigger(ENTRY_UPDATED_EVENT, viewFor(cardId));
+    }
+  }
+
   /** Records that the player has seen a card. */
   public boolean recordSeen(String cardId) {
     if (cardId == null || cardId.isBlank() || !contains(cardId)) {

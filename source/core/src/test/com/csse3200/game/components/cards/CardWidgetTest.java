@@ -9,8 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.cards.CardConfigLoader;
@@ -60,7 +64,8 @@ class CardWidgetTest {
 
     assertEquals("Strike", widget.displayedName());
     assertEquals("1", widget.displayedCost());
-    assertEquals("Attack  |  Common", widget.displayedMeta());
+    assertEquals("Attack", widget.displayedType());
+    assertEquals("One Enemy", widget.displayedTarget());
     assertEquals("Deal 6 damage.", widget.displayedDescription());
     assertSame(strikeArtwork, widget.displayedArtwork());
     assertTrue(widget.isArtworkVisible());
@@ -79,7 +84,8 @@ class CardWidgetTest {
 
     assertEquals("Strike+", widget.displayedName());
     assertEquals("0", widget.displayedCost());
-    assertEquals("Attack  |  Rare", widget.displayedMeta());
+    assertEquals("Attack", widget.displayedType());
+    assertEquals("One Enemy", widget.displayedTarget());
     assertEquals("Deal 12 damage.", widget.displayedDescription());
     assertSame(strikeArtwork, widget.displayedArtwork());
     assertTrue(widget.displaysUpgradeMarker());
@@ -97,6 +103,39 @@ class CardWidgetTest {
     assertEquals(CardWidget.CARD_WIDTH, widget.getPrefWidth());
     assertEquals(CardWidget.CARD_HEIGHT, widget.getPrefHeight());
     assertEquals(Scaling.fit, CardWidget.ARTWORK_SCALING);
+  }
+
+  @Test
+  void shouldKeepTypeAndTargetSeparateWhenFallbackFaceIsRebound() {
+    ResolvedCard attack = card("Strike", "Deal 6 damage.", 1, Rarity.COMMON, false);
+    CardWidget widget = new CardWidget(attack, assets);
+    widget.validate();
+    Label type = widget.findActor("card-type");
+    Label target = widget.findActor("card-target");
+    assertEquals("Attack", type.getText().toString());
+    assertEquals("One Enemy", target.getText().toString());
+    assertNotSame(type, target);
+
+    ResolvedCard skill =
+        new ResolvedCard(
+            attack.instanceId(),
+            attack.cardId(),
+            "Defend",
+            "Gain 5 Block.",
+            attack.cost(),
+            CardType.SKILL,
+            attack.rarity(),
+            TargetType.SELF,
+            attack.effects(),
+            attack.texturePath(),
+            false);
+    widget.setCard(skill);
+    widget.validate();
+    assertEquals("Skill", widget.displayedType());
+    assertEquals("Self", widget.displayedTarget());
+    assertEquals("Skill", type.getText().toString());
+    assertEquals("Self", target.getText().toString());
+    assertEquals("Gain 5 Block.", widget.displayedDescription());
   }
 
   @Test
@@ -162,6 +201,7 @@ class CardWidgetTest {
 
       assertEquals(resolved.name(), widget.displayedName(), config.id);
       assertEquals(Integer.toString(resolved.cost()), widget.displayedCost(), config.id);
+      assertEquals(FramedCardFace.formatType(resolved.type()), widget.displayedType(), config.id);
       assertEquals(resolved.description(), widget.displayedDescription(), config.id);
       assertFalse(widget.displaysUpgradeMarker(), config.id);
     }
@@ -196,6 +236,89 @@ class CardWidgetTest {
       assertEquals(upgraded.description(), widget.displayedDescription(), config.id);
       assertTrue(widget.displaysUpgradeMarker(), config.id);
     }
+  }
+
+  @Test
+  void shouldKeepEveryCardFaceAndDescriptionInsideItsFixedBounds() {
+    CardResolver resolver = new CardResolver();
+    for (CardConfig config : CardConfigLoader.loadCards()) {
+      assertFixedLayout(resolver.resolveBasePreview(config, "preview-" + config.id));
+      if (config.upgrade != null) {
+        assertFixedLayout(
+            resolver.resolve(
+                config,
+                new CardInstance("upgrade-" + config.id, config.id, CardInstance.UPGRADED_LEVEL)));
+      }
+    }
+  }
+
+  @Test
+  void shouldRestoreDescriptionSizeWhenReboundFromLongToShortText() {
+    ResolvedCard longCard =
+        card(
+            "Poison Mark",
+            "A quiet sign reveals where the corruption has taken hold. Apply 2 Vulnerable and "
+                + "2 Poison to an enemy for 2 turns.",
+            1,
+            Rarity.RARE,
+            false);
+    CardWidget widget = new CardWidget(longCard, assets);
+    widget.validate();
+    Label description = findDescription(widget, longCard.description());
+    assertTrue(description.getFontScaleY() < 1f);
+
+    widget.setCard(card("Strike", "Deal 6 damage.", 1, Rarity.COMMON, false));
+    widget.validate();
+
+    assertEquals(1f, description.getFontScaleY());
+    assertEquals("Deal 6 damage.", description.getText().toString());
+  }
+
+  private void assertFixedLayout(ResolvedCard resolved) {
+    CardWidget widget = new CardWidget(resolved, assets);
+    Table container = new Table();
+    container.add(widget).size(CardWidget.CARD_WIDTH, CardWidget.CARD_HEIGHT);
+    container.setSize(CardWidget.CARD_WIDTH, CardWidget.CARD_HEIGHT);
+    container.validate();
+
+    assertEquals(CardWidget.CARD_WIDTH, widget.getWidth(), resolved.cardId());
+    assertEquals(CardWidget.CARD_HEIGHT, widget.getHeight(), resolved.cardId());
+    assertTrue(widget.getMinHeight() <= CardWidget.CARD_HEIGHT, resolved.cardId());
+    assertChildrenInside(widget, resolved.cardId());
+    Label description = findDescription(widget, resolved.description());
+    assertEquals(resolved.description(), description.getText().toString());
+    assertTrue(description.getPrefHeight() <= description.getHeight() + 1f, resolved.cardId());
+    assertTrue(
+        description.getGlyphLayout().width <= description.getWidth() + 1f, resolved.cardId());
+  }
+
+  private static void assertChildrenInside(Group parent, String cardId) {
+    for (Actor child : parent.getChildren()) {
+      assertTrue(child.getX() >= -1f, cardId + ": left overflow");
+      assertTrue(child.getY() >= -1f, cardId + ": bottom overflow");
+      assertTrue(
+          child.getX() + child.getWidth() <= parent.getWidth() + 1f, cardId + ": right overflow");
+      assertTrue(
+          child.getY() + child.getHeight() <= parent.getHeight() + 1f, cardId + ": top overflow");
+      if (child instanceof Group group) {
+        assertChildrenInside(group, cardId);
+      }
+    }
+  }
+
+  private static Label findDescription(Group parent, String description) {
+    for (Actor child : parent.getChildren()) {
+      if (child instanceof Label label && description.contentEquals(label.getText())) {
+        return label;
+      }
+      if (child instanceof Group group) {
+        Label found = findDescription(group, description);
+        if (found != null) {
+          return found;
+        }
+      }
+    }
+    return null;
   }
 
   private static ResolvedCard card(

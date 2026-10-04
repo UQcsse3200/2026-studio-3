@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.UIComponent;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,6 +38,7 @@ public class CardUpgradeDisplay extends UIComponent {
   private TextButton confirmButton;
   private boolean libraryVisible;
   private final CardUpgradeSelection selection;
+  private CardWidgetAssets cardWidgetAssets;
 
   /**
    * A constructor for Card upgrade selection
@@ -52,6 +54,10 @@ public class CardUpgradeDisplay extends UIComponent {
   @Override
   public void create() {
     super.create();
+    if (ServiceLocator.getResourceService() != null) {
+      cardWidgetAssets =
+          CardWidgetAssets.fromManagedResources(skin, ServiceLocator.getResourceService());
+    }
     addActors();
   }
 
@@ -205,6 +211,19 @@ public class CardUpgradeDisplay extends UIComponent {
             refresh();
           }
         });
+    if (cardWidgetAssets != null && cardWidgetAssets.hasAuthoredFrame(option.current().rarity())) {
+      CardWidget face = new CardWidget(option.current(), cardWidgetAssets);
+      Label preview =
+          new Label(
+              "-> " + option.preview().name() + "\n" + option.preview().description(), skin, SMALL);
+      preview.setColor(UPGRADE);
+      preview.setWrap(true);
+      preview.setFontScale(0.60f);
+      tile.add(face).size(CARD_WIDTH - 18f, 180f);
+      tile.row();
+      tile.add(preview).minSize(0f).width(CARD_WIDTH - 18f).height(58f).padTop(4f);
+      return tile;
+    }
     Label cost = new Label(String.valueOf(option.current().cost()), skin, SMALL);
     cost.setColor(Color.WHITE);
     Table costBadge = new Table();

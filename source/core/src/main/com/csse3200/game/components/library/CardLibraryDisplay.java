@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
@@ -73,12 +74,13 @@ public class CardLibraryDisplay extends UIComponent {
   private Label stateLabel;
   private Label nameLabel;
   private Label descriptionLabel;
+  private Label loreLabel;
+  private Cell<Label> loreCell;
   private Label costLabel;
   private Label typeLabel;
   private Label targetLabel;
   private Label rarityLabel;
   private Label effectsLabel;
-  private Label artworkLabel;
   private TextButton.TextButtonStyle buttonStyle;
 
   public CardLibraryDisplay(GdxGame game, CardDiscoveryService discovery) {
@@ -210,12 +212,13 @@ public class CardLibraryDisplay extends UIComponent {
   private List<CardConfig> loadSortedCards() {
     return CardConfigLoader.loadCards().stream()
         .sorted(
-            Comparator.comparing((CardConfig card) -> card.type).thenComparing(card -> card.name))
+            Comparator.comparing((CardConfig card) -> card.rarity).thenComparing(card -> card.name))
         .toList();
   }
 
   private void addCards(List<CardEntryView> cards, Table panel) {
     cardList = new Table();
+    cardList.setName("card-library-list");
     cardButtons.clear();
     cardList.top();
     cardList.defaults().width(290f).height(58f).padBottom(8f).left();
@@ -274,32 +277,33 @@ public class CardLibraryDisplay extends UIComponent {
 
     nameLabel = new Label("", labelStyle(LARGE, MenuTheme.warmParchment()));
     descriptionLabel = new Label("", bodyLabelStyle());
+    loreLabel = new Label("", bodyLabelStyle());
     costLabel = new Label("", labelStyle(DEFAULT, MenuTheme.softCoral()));
     typeLabel = new Label("", bodyLabelStyle());
     targetLabel = new Label("", bodyLabelStyle());
     rarityLabel = new Label("", bodyLabelStyle());
     effectsLabel = new Label("", labelStyle(SMALL, MenuTheme.warmParchment()));
-    artworkLabel = new Label("", labelStyle(SMALL, MenuTheme.warmParchment()));
 
     nameLabel.setFontScale(0.9f);
     descriptionLabel.setFontScale(0.78f);
     descriptionLabel.setWrap(true);
+    loreLabel.setFontScale(0.78f);
+    loreLabel.setWrap(true);
     effectsLabel.setFontScale(0.72f);
     effectsLabel.setWrap(true);
-    artworkLabel.setFontScale(0.62f);
-    artworkLabel.setWrap(true);
 
     Table archiveDetails = new Table();
     archiveDetails.top().left();
     archiveDetails.defaults().left().padBottom(7f);
     archiveDetails.add(nameLabel).width(330f).row();
     archiveDetails.add(descriptionLabel).width(330f).padBottom(12f).row();
+    loreCell = archiveDetails.add(loreLabel).width(330f).padBottom(0f);
+    archiveDetails.row();
     archiveDetails.add(costLabel).row();
     archiveDetails.add(typeLabel).row();
     archiveDetails.add(targetLabel).row();
     archiveDetails.add(rarityLabel).row();
     archiveDetails.add(effectsLabel).width(330f).padTop(8f).row();
-    archiveDetails.add(artworkLabel).width(330f).padTop(5f).row();
 
     detailPanel.top();
     detailPanel.add(stateLabel).colspan(2).left().expandX().padBottom(8f);
@@ -332,6 +336,15 @@ public class CardLibraryDisplay extends UIComponent {
     displayedEntry = Objects.requireNonNull(card, "card cannot be null");
     nameLabel.setText(card.displayName());
     descriptionLabel.setText(descriptionFor(card));
+    String lore = card.lore().orElse("");
+    loreLabel.setText(lore);
+    if (lore.isEmpty()) {
+      loreCell.setActor(null);
+      loreCell.padBottom(0f);
+    } else {
+      loreCell.setActor(loreLabel);
+      loreCell.padBottom(12f);
+    }
     costLabel.setText("Cost: " + valueOrPlaceholder(card.cost()));
     typeLabel.setText("Type: " + card.type().map(Enum::name).orElse("???"));
     targetLabel.setText("Target: " + card.target().map(Enum::name).orElse("???"));
@@ -345,14 +358,12 @@ public class CardLibraryDisplay extends UIComponent {
     stateLabel.setText(card.unlockState().name());
     effectsLabel.setText(
         "Effects resolve in this order:\n" + formatEffects(card.effects().orElseThrow()));
-    artworkLabel.setText("Artwork: " + card.texturePath().orElseThrow());
     showResolvedCard(resolveForDisplay(card));
   }
 
   private void showLockedCard() {
     stateLabel.setText("UNDISCOVERED");
     effectsLabel.setText("Effects: ???");
-    artworkLabel.setText("Artwork: ???");
     lockedPreview.setVisible(true);
     if (cardWidget != null) {
       cardWidget.setVisible(false);
@@ -363,7 +374,8 @@ public class CardLibraryDisplay extends UIComponent {
   }
 
   private void showResolvedCard(ResolvedCard card) {
-    boolean useUncommonFrame = card.rarity() == Rarity.UNCOMMON;
+    boolean useUncommonFrame =
+        card.rarity() == Rarity.UNCOMMON && !widgetAssets.hasAuthoredFrame(card.rarity());
     lockedPreview.setVisible(false);
 
     if (useUncommonFrame) {
@@ -477,6 +489,10 @@ public class CardLibraryDisplay extends UIComponent {
 
   String getDescriptionText() {
     return descriptionLabel.getText().toString();
+  }
+
+  String getLoreText() {
+    return loreLabel.getText().toString();
   }
 
   String getCostText() {

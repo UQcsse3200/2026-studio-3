@@ -2,15 +2,24 @@ package com.csse3200.game.components.spritedisplay.displaying;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.Layout;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.csse3200.game.cards.CardAcquisitionPool;
 import com.csse3200.game.cards.CardConfigLoader;
@@ -18,8 +27,10 @@ import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.CardUnlockState;
+import com.csse3200.game.cards.Rarity;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.components.cards.CardWidget;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.extensions.GameExtension;
@@ -141,6 +152,98 @@ class RewardDisplayTest {
       assertEquals(config.rarity, widget.getCard().rarity());
       assertEquals(config.type, widget.getCard().type());
       assertFalse(widget.getCard().upgraded());
+    }
+  }
+
+  @Test
+  void innerFocusRewardUsesUncommonRarityFromConfiguration() {
+    CardAcquisitionPool pool = new CardAcquisitionPool(cardService, List.of("inner_focus"));
+    RewardDisplay display =
+        createDisplay(new RewardService(fixedRewardGenerator(), cardService, pool, new Random(7)));
+
+    cardButton(display).fire(new ChangeEvent());
+
+    assertEquals(1, display.getCardWidgets().size());
+    var card = display.getCardWidgets().getFirst().getCard();
+    assertEquals("inner_focus", card.cardId());
+    assertEquals(Rarity.UNCOMMON, card.rarity());
+    assertEquals("Inner Focus", card.name());
+    assertEquals(2, card.cost());
+    assertEquals("Gain 2 Strength for the rest of combat.", card.description());
+    assertFalse(card.upgraded());
+    assertEquals(CardUnlockState.SEEN, discovery.getProgressSnapshot().get("inner_focus"));
+  }
+
+  @Test
+  void allRewardRaritiesUseSharedManagedFramesAndStillKeepEqualBounds() {
+    ResourceService resources = ServiceLocator.getResourceService();
+    for (String path :
+        List.of(
+            CardWidgetAssets.COMMON_FRAME_TEXTURE,
+            CardWidgetAssets.UNCOMMON_FRAME_TEXTURE,
+            CardWidgetAssets.RARE_FRAME_TEXTURE)) {
+      Texture frame = mock(Texture.class);
+      when(frame.getWidth()).thenReturn(450);
+      when(frame.getHeight()).thenReturn(912);
+      when(resources.containsAsset(path, Texture.class)).thenReturn(true);
+      when(resources.getAsset(path, Texture.class)).thenReturn(frame);
+    }
+    CardAcquisitionPool pool =
+        new CardAcquisitionPool(cardService, List.of("strike", "inner_focus", "poison_mark"));
+    RewardDisplay display =
+        createDisplay(new RewardService(fixedRewardGenerator(), cardService, pool, new Random(7)));
+    stage.getViewport().update(1280, 960, true);
+    cardButton(display).fire(new ChangeEvent());
+    for (Actor actor : stage.getActors()) {
+      if (actor instanceof Layout layout) {
+        layout.validate();
+      }
+    }
+
+    assertEquals(3, display.getCardWidgets().size());
+    for (CardWidget widget : display.getCardWidgets()) {
+      assertEquals(CardWidget.CARD_WIDTH, widget.getWidth());
+      assertEquals(CardWidget.CARD_HEIGHT, widget.getHeight());
+      Image frameImage = ((Group) widget.getChildren().first()).findActor("card-frame");
+      TextureRegionDrawable drawable =
+          assertInstanceOf(TextureRegionDrawable.class, frameImage.getDrawable());
+      String path =
+          switch (widget.getCard().rarity()) {
+            case COMMON -> CardWidgetAssets.COMMON_FRAME_TEXTURE;
+            case UNCOMMON -> CardWidgetAssets.UNCOMMON_FRAME_TEXTURE;
+            case RARE -> CardWidgetAssets.RARE_FRAME_TEXTURE;
+          };
+      assertSame(resources.getAsset(path, Texture.class), drawable.getRegion().getTexture());
+    }
+  }
+
+  @Test
+  void mixedRarityRewardsWithLongDescriptionsShouldHaveEqualCardBounds() {
+    CardAcquisitionPool pool =
+        new CardAcquisitionPool(cardService, List.of("starfall", "poison_cloud", "poison_mark"));
+    RewardDisplay display =
+        createDisplay(new RewardService(fixedRewardGenerator(), cardService, pool, new Random(7)));
+    stage.getViewport().update(1280, 960, true);
+
+    cardButton(display).fire(new ChangeEvent());
+    for (Actor actor : stage.getActors()) {
+      if (actor instanceof Layout layout) {
+        layout.validate();
+      }
+    }
+
+    assertEquals(3, display.getCardWidgets().size());
+    Button firstButton = display.getCardChoiceButtons().getFirst();
+    for (int i = 0; i < display.getCardWidgets().size(); i++) {
+      CardWidget widget = display.getCardWidgets().get(i);
+      Button button = display.getCardChoiceButtons().get(i);
+      assertEquals(CardWidget.CARD_WIDTH, widget.getWidth());
+      assertEquals(CardWidget.CARD_HEIGHT, widget.getHeight());
+      assertEquals(firstButton.getWidth(), button.getWidth());
+      assertEquals(firstButton.getHeight(), button.getHeight());
+      assertEquals(firstButton.getY(), button.getY());
+      assertTrue(widget.getY() >= 0f);
+      assertTrue(widget.getY() + widget.getHeight() <= button.getHeight());
     }
   }
 

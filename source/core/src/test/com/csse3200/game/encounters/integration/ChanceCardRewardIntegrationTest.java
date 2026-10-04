@@ -7,8 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.cards.CardAcquisitionPool;
 import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.CardUnlockState;
 import com.csse3200.game.cards.TestCardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.runtime.CardInstance;
@@ -20,6 +22,7 @@ import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.services.ServiceLocator;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,6 +71,9 @@ class ChanceCardRewardIntegrationTest {
   @Test
   void shouldKeepEarlierChangesWhenProductionHealthEventFailsAfterMutation() {
     CardService cardService = TestCardService.withCards("bandage");
+    CardDiscoveryService discovery =
+        new CardDiscoveryService(List.of(cardService.getCard("bandage").orElseThrow()));
+    ServiceLocator.registerCardDiscoveryService(discovery);
     PlayerDeck playerDeck = new PlayerDeck(cardService);
     CombatStatsComponent combatStats = new CombatStatsComponent(70, 10, 100);
     InventoryComponent inventory = new InventoryComponent(40);
@@ -90,6 +96,7 @@ class ChanceCardRewardIntegrationTest {
     assertEquals(60, player.getHealth());
     assertEquals(55, player.getCurrency());
     assertEquals(List.of("bandage"), cardIds(playerDeck));
+    assertEquals(CardUnlockState.SEEN, discovery.getProgressSnapshot().get("bandage"));
   }
 
   @Test

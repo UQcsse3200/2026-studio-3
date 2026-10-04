@@ -326,7 +326,7 @@ public class SaveGameRestoreService {
         }
       }
     }
-    cardDiscoveryService.replaceProgress(restoredProgress);
+    cardDiscoveryService.mergeProgress(restoredProgress);
   }
 
   private MapGraph buildMapGraph(MapSaveData mapData) {

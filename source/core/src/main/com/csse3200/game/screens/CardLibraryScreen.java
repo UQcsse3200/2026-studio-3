@@ -6,7 +6,7 @@ import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardLoadingException;
-import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.cards.UncommonCardLibraryWidget;
 import com.csse3200.game.components.library.CardLibraryDisplay;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
@@ -20,6 +20,7 @@ import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -92,12 +93,10 @@ public class CardLibraryScreen extends ScreenAdapter {
     paths.add(MainMenuDisplay.BACKGROUND_TEXTURE);
     paths.add(MainMenuDisplay.BUTTON_FRAME_TEXTURE);
     paths.add(UncommonCardLibraryWidget.FRAME_TEXTURE);
+    paths.add(CardWidgetAssets.COMMON_FRAME_TEXTURE);
+    paths.add(CardWidgetAssets.RARE_FRAME_TEXTURE);
     try {
-      for (CardConfig card : CardConfigLoader.loadCards()) {
-        if (card.texturePath != null && !card.texturePath.isBlank()) {
-          paths.add(card.texturePath);
-        }
-      }
+      Collections.addAll(paths, CardWidgetAssets.collectTexturePaths(CardConfigLoader.loadCards()));
     } catch (CardLoadingException exception) {
       logger.warn("Card library artwork preload skipped because cards could not load", exception);
     }

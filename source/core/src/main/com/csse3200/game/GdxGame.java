@@ -8,6 +8,7 @@ import com.badlogic.gdx.Screen;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardDiscoveryService;
+import com.csse3200.game.cards.CardDiscoveryStore;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.files.UserSettings;
 import com.csse3200.game.maps.RunState;
@@ -24,6 +25,7 @@ import com.csse3200.game.screens.LibraryScreen;
 import com.csse3200.game.screens.MainGameScreen;
 import com.csse3200.game.screens.MainMenuScreen;
 import com.csse3200.game.screens.MapScreen;
+import com.csse3200.game.screens.NarrationScreen;
 import com.csse3200.game.screens.SaveLoadScreen;
 import com.csse3200.game.screens.SettingsScreen;
 import com.csse3200.game.services.ServiceLocator;
@@ -120,6 +122,13 @@ public class GdxGame extends Game {
     loadSettings();
     bestiaryService = BestiaryService.loadDefault();
     cardDiscoveryService = CardDiscoveryService.loadDefault();
+    CardDiscoveryStore cardDiscoveryStore = CardDiscoveryStore.defaultStore();
+    cardDiscoveryService.mergeProgress(cardDiscoveryStore.load());
+    cardDiscoveryService
+        .getEvents()
+        .addListener(
+            CardDiscoveryService.ENTRY_UPDATED_EVENT,
+            ignored -> cardDiscoveryStore.save(cardDiscoveryService.getProgressSnapshot()));
 
     // Sets background to light yellow
     Gdx.gl.glClearColor(162f / 255f, 73 / 255f, 54 / 255f, 1);
@@ -141,13 +150,29 @@ public class GdxGame extends Game {
    */
   public void setScreen(ScreenType screenType) {
     logger.info("Setting game screen to {}", screenType);
+    prepareScreenTransition();
+    setScreen(newScreen(screenType));
+  }
+
+  /**
+   * Plays a story crawl, then continues to {@code next}. An unknown or empty sequence completes on
+   * its first frame, so the game always continues.
+   *
+   * @param sequenceId story sequence to play
+   * @param next destination after completion or skipping
+   */
+  public void showNarration(String sequenceId, ScreenType next) {
+    prepareScreenTransition();
+    super.setScreen(new NarrationScreen(sequenceId, () -> setScreen(next)));
+  }
+
+  private void prepareScreenTransition() {
     Screen currentScreen = getScreen();
     if (currentScreen != null) {
       currentScreen.dispose();
     }
     ServiceLocator.registerBestiaryService(bestiaryService);
     ServiceLocator.registerCardDiscoveryService(cardDiscoveryService);
-    setScreen(newScreen(screenType));
   }
 
   /** Opens the battle screen. Used by encounter navigation and the temporary debug shortcut. */

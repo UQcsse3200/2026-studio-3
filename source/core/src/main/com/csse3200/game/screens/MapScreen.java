@@ -12,6 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.csse3200.game.GdxGame;
+import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -66,6 +68,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
       MapGenerationController mapGen = new MapGenerationController();
 
       startNewRun(runState, mapGen.getMap());
+      runState.createStarterDeckForNewRun(new CardLibrary(CardConfigLoader.loadCards()));
     }
 
     createUi(game, runState);
@@ -132,7 +135,10 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     MapNode node = runState.getMapGraph() == null ? null : runState.getMapGraph().getNode(nodeId);
     RoomType roomType = node == null ? null : node.getRoomType();
 
-    if (roomType == RoomType.COMBAT || roomType == RoomType.FINAL || roomType == RoomType.ELITE) {
+    if (roomType == RoomType.FINAL) {
+      logger.info("Node {} ({}) selected, entering battle", nodeId, roomType);
+      game.showNarration("pre_boss", GdxGame.ScreenType.BATTLE_SCREEN);
+    } else if (roomType == RoomType.COMBAT || roomType == RoomType.ELITE) {
       logger.info("Node {} ({}) selected, entering battle", nodeId, roomType);
       game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
     } else {

@@ -400,9 +400,22 @@ public class DeckEditorComponent extends UIComponent {
   }
 
   private String previewText(CardConfig card) {
-    StringBuilder text = new StringBuilder(card.name);
-    text.append("\nTarget: ").append(card.target);
-    return text.toString();
+    return card.name
+        + "\nCost: "
+        + card.cost
+        + "\n"
+        + formatEnum(card.type.name())
+        + "  |  "
+        + formatEnum(card.rarity.name())
+        + "\nTarget: "
+        + card.target
+        + "\n\n"
+        + card.description;
+  }
+
+  private static String formatEnum(String value) {
+    String lower = value.toLowerCase(java.util.Locale.ROOT).replace('_', ' ');
+    return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
   }
 
   private void applySelectionHighlights() {
