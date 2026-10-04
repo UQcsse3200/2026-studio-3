@@ -28,6 +28,7 @@ public class PopupPanelDisplay extends Displaying {
 
   private final Image border = new Image();
   private final Image fill = new Image();
+  private PopupDisplay popup;
 
   public PopupPanelDisplay(DisplayingRecord rec) {
     super(rec);
@@ -38,6 +39,10 @@ public class PopupPanelDisplay extends Displaying {
     fill.setVisible(false);
   }
 
+  /** The popup whose window this panel is anchored to. Call before the factory creates it. */
+  public void addPopup(PopupDisplay popup) {
+    this.popup = popup;
+  }
 
   @Override
   public void create() {

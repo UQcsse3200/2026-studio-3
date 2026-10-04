@@ -497,7 +497,7 @@ public class DeckEditorComponent extends UIComponent {
         entity
             .getEvents()
             .trigger(
-                DeckEditorEvents.ERROR, "Hand is full — deselect a card before adding another.");
+                DeckEditorEvents.ERROR, "Hand is full, deselect a card before adding another.");
         return;
       }
       selected.add(instance);
