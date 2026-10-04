@@ -111,9 +111,10 @@ public class EndBattleScreen extends ScreenAdapter {
   }
 
   /**
-   * Leaves the end screen. After a win the run continues, so it goes back to the map to pick the
-   * next node; after a loss (or once the run is over) the run is discarded and it returns to the
-   * main menu.
+   * Leaves the end screen. A final victory ends the run and plays the victory crawl before the
+   * main menu. Other active-run wins continue to the Elite portal when eligible, or to the map.
+   * A loss in an active run ends it and plays the defeat crawl before the main menu; otherwise,
+   * the run is discarded and the main menu opens directly.
    */
   private void returnToMenu() {
     if (returning) {
@@ -122,6 +123,12 @@ public class EndBattleScreen extends ScreenAdapter {
     returning = true;
 
     RunState runState = game.getRunState();
+
+    if (won && runState != null && runState.isFinalEncounterCompleted()) {
+      runState.endRun();
+      game.showNarration("victory", GdxGame.ScreenType.MAIN_MENU);
+      return;
+    }
 
     if (won && runState != null && runState.isRunActive()) {
       if (runState.hasPendingEliteTempleReward()) {
@@ -134,10 +141,15 @@ public class EndBattleScreen extends ScreenAdapter {
       return;
     }
 
+    boolean lostRun = !won && runState != null && runState.isRunActive();
     if (runState != null) {
       runState.endRun();
     }
-    game.setScreen(GdxGame.ScreenType.MAIN_MENU);
+    if (lostRun) {
+      game.showNarration("defeat", GdxGame.ScreenType.MAIN_MENU);
+    } else {
+      game.setScreen(GdxGame.ScreenType.MAIN_MENU);
+    }
   }
 
   @Override
