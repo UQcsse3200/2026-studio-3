@@ -65,4 +65,9 @@ public class EnemyReleaseDisplay extends RenderComponent {
         batch.draw(frame, x, y, size, size);
         batch.setPackedColor(previousColour);
     }
+
+    @Override
+    public float getZIndex() {
+        return 1000f;
+    }
 }
