@@ -34,8 +34,8 @@ import com.csse3200.game.components.pausemenu.PauseMenuActions;
 import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.player.EnergyComponent;
-import com.csse3200.game.components.spritedisplay.clickable.CardAimController;
 import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
+import com.csse3200.game.components.spritedisplay.clickable.CardAimController;
 import com.csse3200.game.components.spritedisplay.clickable.CardImageSkins;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
@@ -94,7 +94,9 @@ public class BattleScreen extends ScreenAdapter {
     "images/ui/energy-crystal.png",
     "images/ui/merchants-favor.png",
     "images/ui/iron-aegis.png",
-    "images/ui/warriors-crest.png"
+    "images/ui/warriors-crest.png",
+    "images/effects/heal.png",
+    "images/enemies/intents/buff.png"
   };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
 
