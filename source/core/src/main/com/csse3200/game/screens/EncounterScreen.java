@@ -11,6 +11,8 @@ import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.pausemenu.PauseMenuFactory;
+import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -142,7 +144,11 @@ public class EncounterScreen extends ScreenAdapter {
   private void createInput() {
     Entity inputEntity = new Entity();
     inputEntity.addComponent(new InputDecorator(ServiceLocator.getRenderService().getStage(), 10));
+
+    // Pause menu + in-place save/load overlay.
+    SaveLoadPanel savePanel = PauseMenuFactory.attach(inputEntity, game);
     ServiceLocator.getEntityService().register(inputEntity);
+    savePanel.hide(); // save overlay starts hidden, opened by the Save & Load button
   }
 
   /**
