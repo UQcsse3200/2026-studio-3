@@ -100,6 +100,16 @@ public class BattleActions extends Component {
       return;
     }
 
+    if (nextPhase == BattlePhase.PLAYER_TURN
+            && previousPhase == BattlePhase.PLAYER_START
+            && controller.getPlayerTurnNumber() > 1) {
+      dispatch(
+              () ->
+                      entity
+                              .getEvents()
+                              .trigger("playerTurnStarted", controller.getPlayerTurnNumber()));
+    }
+
     dispatch(() -> entity.getEvents().trigger(PHASE_CHANGED_EVENT, nextPhase));
 
     boolean enemyTurnOver =
