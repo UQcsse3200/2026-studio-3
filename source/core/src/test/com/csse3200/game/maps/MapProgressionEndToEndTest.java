@@ -55,7 +55,6 @@ public class MapProgressionEndToEndTest {
     graph.getNode(SHOP).setHeight(1);
     graph.getNode(BOSS).setHeight(2);
 
-
     EventHandler events = new EventHandler();
     firedEvents = new ArrayList<>();
     for (String name :

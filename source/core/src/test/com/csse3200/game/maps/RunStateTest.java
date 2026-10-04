@@ -29,7 +29,6 @@ public class RunStateTest {
     graph.addNode(node2);
     graph.addNode(node3);
 
-
     graph.getNode(0).addConnection(graph.getNode(1));
     graph.getNode(0).addConnection(graph.getNode(2));
 

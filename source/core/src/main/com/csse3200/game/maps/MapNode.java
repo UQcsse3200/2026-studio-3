@@ -48,7 +48,7 @@ public class MapNode {
     roomType = type;
   }
 
-  // made for testing purposes since height when theres few nodes will be the 
+  // made for testing purposes since height when theres few nodes will be the
   // same causing test to fail
   public void setHeight(Integer height) {
     this.height = height;

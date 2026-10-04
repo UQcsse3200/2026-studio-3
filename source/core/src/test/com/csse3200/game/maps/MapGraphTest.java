@@ -179,7 +179,6 @@ public class MapGraphTest {
     MapNode current = createNode(1, NodeState.CURRENT);
     MapNode connected = createNode(2, NodeState.LOCKED);
 
-    
     current.setHeight(0);
     connected.setHeight(1);
 
