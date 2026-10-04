@@ -45,11 +45,11 @@ public class CardEffectHandler {
             stats.takeDamage(effect.value());
           }
           case PIERCE -> {
-            AudioService.playSound(SoundId.ARMOR_BREAK, 0.5f);
+            AudioService.playSound(SoundId.ARMOUR_BREAK, 0.5f);
             stats.takePiercingDamage(effect.value());
           }
           case SUNDER -> {
-            AudioService.playSound(SoundId.ARMOR_BREAK, 0.5f);
+            AudioService.playSound(SoundId.ARMOUR_BREAK, 0.5f);
             stats.setArmour(stats.getArmour() - effect.value());
           }
           case POISON, VULNERABLE, FEEBLE -> {
