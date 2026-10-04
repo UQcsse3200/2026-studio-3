@@ -228,8 +228,9 @@ public class PauseMenuDisplay extends UIComponent {
   }
 
   /**
-   * Builds a reusable confirmation dialog. The message and the on-confirm action are set per use via
-   * {@link #showConfirm(String, Runnable)}, so both "Main Menu" and "Quit Game" share one dialog.
+   * Builds a reusable confirmation dialog. The message and the on-confirm action are set per use
+   * via {@link #showConfirm(String, Runnable)}, so both "Main Menu" and "Quit Game" share one
+   * dialog.
    */
   private void buildConfirmDialog() {
     Window.WindowStyle windowStyle = new Window.WindowStyle(skin.get(Window.WindowStyle.class));
@@ -282,7 +283,10 @@ public class PauseMenuDisplay extends UIComponent {
         .pad(10f);
   }
 
-  /** Shows the confirmation dialog with {@code message}; runs {@code onConfirm} if the player confirms. */
+  /**
+   * Shows the confirmation dialog with {@code message}; runs {@code onConfirm} if the player
+   * confirms.
+   */
   private void showConfirm(String message, Runnable onConfirm) {
     confirmMessage.setText(message);
     pendingConfirm = onConfirm;

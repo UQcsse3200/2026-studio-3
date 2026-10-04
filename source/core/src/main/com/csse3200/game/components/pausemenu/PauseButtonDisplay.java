@@ -28,7 +28,8 @@ public class PauseButtonDisplay extends UIComponent {
   private static final float Z_INDEX = 2f;
   private static final float BUTTON_WIDTH = 170f;
   private static final float BUTTON_HEIGHT = 60f;
-  // The frame uses the large menu font; scale the label down so short labels fit this smaller button.
+  // The frame uses the large menu font; scale the label down so short labels fit this smaller
+  // button.
   private static final float LABEL_SCALE = 0.6f;
   private static final float DEFAULT_EDGE_PAD = 12f;
 
