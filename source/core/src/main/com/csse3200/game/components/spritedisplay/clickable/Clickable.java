@@ -15,6 +15,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.components.Component;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 
 public abstract class Clickable extends Component {
   // Shared default skin, only loaded if the record doesn't provide one.
@@ -100,6 +102,7 @@ public abstract class Clickable extends Component {
           @Override
           public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
             onEnter();
+            AudioService.playSound(SoundId.CARD_HOVER, 0.5f);
           }
 
           @Override

@@ -34,6 +34,24 @@ public class MapDisplay extends UIComponent {
   private final MapInputHandler mapInputHandler;
   private final MapSelectionController mapSelectionController;
   private static final String LARGE = "large";
+  private static final String[] mapAssets = {
+    "images/map/combat.png",
+    "images/map/combat_elite.png",
+    "images/map/start.png",
+    "images/map/boss.png",
+    "images/map/event.png",
+    "images/map/shop.png",
+    "images/map/nodeLine.png",
+    "images/map/background.png",
+    "images/heart.png",
+    "images/energy.png",
+    "images/piety.png",
+    "images/money.png",
+    "images/map/cross.png",
+    "images/map/legend.png",
+    "images/map/main_menu_btn.png",
+    "images/map/campfire.png"
+  };
 
   private Group group;
   private ScrollPane scrollPane;
@@ -385,30 +403,12 @@ public class MapDisplay extends UIComponent {
   /** Closes the MapUI */
   @Override
   public void dispose() {
-    super.dispose();
     scrollPane.remove();
+    ServiceLocator.getResourceService().unloadAssets(mapAssets);
   }
 
   /** Loads all assets needed to render the Map UI */
   private void loadMapAssets() {
-    String[] mapAssets = {
-      "images/map/combat.png",
-      "images/map/combat_elite.png",
-      "images/map/start.png",
-      "images/map/boss.png",
-      "images/map/event.png",
-      "images/map/shop.png",
-      "images/map/campfire.png",
-      "images/map/nodeLine.png",
-      "images/map/background.png",
-      "images/heart.png",
-      "images/energy.png",
-      "images/piety.png",
-      "images/money.png",
-      "images/map/cross.png",
-      "images/map/legend.png",
-      "images/map/main_menu_btn.png"
-    };
 
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(mapAssets);

@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -11,6 +13,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
 import java.util.List;
@@ -120,7 +124,18 @@ public class MainMenuDisplay extends UIComponent {
           @Override
           public void changed(ChangeEvent changeEvent, Actor actor) {
             logger.debug("{} button clicked", text);
+            // TODO: add confirmation sound here
             entity.getEvents().trigger(eventName);
+          }
+        });
+    button.addListener(
+        new InputListener() {
+          @Override
+          public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+            super.enter(event, x, y, pointer, fromActor);
+            if (pointer == -1 && !button.isDisabled()) {
+              AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
+            }
           }
         });
     return button;

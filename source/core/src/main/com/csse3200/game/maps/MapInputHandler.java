@@ -3,6 +3,8 @@ package com.csse3200.game.maps;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import java.util.List;
 
 /**
@@ -29,6 +31,27 @@ public class MapInputHandler {
         new InputListener() {
           @Override
           public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+            NodeState nodeState = actor.getNode().getState();
+
+            if (nodeState == NodeState.COMPLETED || nodeState == NodeState.LOCKED) {
+              AudioService.playSound(SoundId.ERROR, 0.5f);
+            } else {
+
+              switch (actor.getNode().getRoomType()) {
+                case SHOP -> {
+                  AudioService.playSound(SoundId.ENTER_SHOP, 0.5f);
+                }
+                case COMBAT -> {
+                  AudioService.playSound(SoundId.ENTER_COMBAT, 0.4f);
+                }
+                case EVENT -> {
+                  AudioService.playSound(SoundId.ENTER_ENCOUNTER, 0.4f);
+                }
+                case ELITE, FINAL -> {
+                  AudioService.playSound(SoundId.ENTER_ELITE, 0.6f);
+                }
+              }
+            }
             controller.onNodeClicked(actor.getNodeId());
             return true;
           }

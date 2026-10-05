@@ -12,6 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.csse3200.game.GdxGame;
+import com.csse3200.game.components.pausemenu.PauseMenuFactory;
+import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -21,8 +23,8 @@ import com.csse3200.game.maps.*;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.GameTime;
-import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
@@ -54,13 +56,13 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     logger.debug("Initialising map screen services");
     ServiceLocator.registerTimeSource(new GameTime());
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
     renderer = RenderFactory.createRenderer();
 
     RunState runState = game.getRunState();
+    AudioService.load();
 
     if (!runState.isRunActive()) {
       logger.info("No run in progress, generating a new map");
@@ -99,7 +101,11 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     mapDisplay
         .getMapSelectionController()
         .getEvents()
-        .addListener("nodeSelected", (Integer nodeId) -> enterEncounter(game, runState, nodeId));
+        .addListener(
+            "nodeSelected",
+            (Integer nodeId) -> {
+              enterEncounter(game, runState, nodeId);
+            });
 
     // PROPOSED: debug terminal for cheats/commands on the map (unlock nodes, etc.). Same
     // Terminal/KeyboardTerminalInputComponent/TerminalDisplay trio used elsewhere; F1 toggles it.
@@ -115,7 +121,11 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         .addComponent(new KeyboardTerminalInputComponent())
         .addComponent(new TerminalDisplay());
 
+    // Pause menu + in-place save/load overlay (the map is the natural place to save a run).
+    // No on-screen pause button here (it didn't fit the map HUD); Escape still opens the menu.
+    SaveLoadPanel savePanel = PauseMenuFactory.attachWithoutButton(ui, game);
     ServiceLocator.getEntityService().register(ui);
+    savePanel.hide(); // save overlay starts hidden, opened by the Save & Load button
 
     createExitButton(game);
   }
@@ -216,9 +226,9 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
   public void dispose() {
     logger.debug("Disposing map screen");
     renderer.dispose();
+    mapDisplay.dispose();
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getRenderService().dispose();
-    ServiceLocator.getResourceService().dispose();
-    ServiceLocator.clear();
+    ScreenUtils.clear(new Color(248f / 255f, 249f / 255f, 178f / 255f, 1f));
   }
 }

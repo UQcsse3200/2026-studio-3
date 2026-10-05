@@ -30,6 +30,9 @@ import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.PlayerActions;
 import com.csse3200.game.entities.Entity;
+import com.csse3200.game.services.ResourceService;
+import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -59,6 +62,9 @@ class BattleControllerTest {
     controller = new BattleController(player, enemies);
     phaseHistory.clear();
     controller.addPhaseChangeListener((previous, next) -> phaseHistory.add(next));
+    ServiceLocator.registerResourceService(new ResourceService());
+    AudioService.load();
+    ServiceLocator.getResourceService().loadAll();
   }
 
   @Test
