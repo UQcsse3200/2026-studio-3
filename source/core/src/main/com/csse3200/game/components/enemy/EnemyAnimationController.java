@@ -24,6 +24,8 @@ public class EnemyAnimationController extends Component {
   private AnimationRenderComponent animator;
   private Vector2 attackOrigin;
   private float attackElapsed;
+  private boolean attackInProgress;
+  private Runnable afterAttack;
   private boolean defeated;
   private boolean disposed;
 
@@ -41,7 +43,9 @@ public class EnemyAnimationController extends Component {
 
   @Override
   public void update() {
-    if (defeated || disposed) {
+    if (disposed) return;
+    if (defeated) {
+      finishAttack();
       return;
     }
     if (attackOrigin != null) {
@@ -64,6 +68,28 @@ public class EnemyAnimationController extends Component {
         && animator.isFinished()) {
       animator.startAnimation("idle");
     }
+    if (attackInProgress
+        && attackOrigin == null
+        && (!"attack".equals(currentAnimation) || animator.isFinished())) {
+      finishAttack();
+    }
+  }
+
+  /** Continue the battle once both the attack frames and return motion have finished. */
+  public void runAfterAttack(Runnable continuation) {
+    if (disposed) return;
+    if (attackInProgress) {
+      afterAttack = continuation;
+    } else {
+      continuation.run();
+    }
+  }
+
+  private void finishAttack() {
+    attackInProgress = false;
+    Runnable continuation = afterAttack;
+    afterAttack = null;
+    if (continuation != null) continuation.run();
   }
 
   private void onDamaged(int amount) {
@@ -105,10 +131,10 @@ public class EnemyAnimationController extends Component {
     }
     resetAttackMotion();
     startIfAvailable("attack", "idle");
-    if (!animator.hasAnimation("attack")) {
-      attackOrigin = entity.getPosition();
-      attackElapsed = 0f;
-    }
+    // Move with the attack frames; idle remains the fallback for missing frames.
+    attackOrigin = entity.getPosition();
+    attackElapsed = 0f;
+    attackInProgress = true;
   }
 
   private void resetAttackMotion() {
@@ -121,6 +147,8 @@ public class EnemyAnimationController extends Component {
   @Override
   public void dispose() {
     disposed = true;
+    afterAttack = null; // Leaving battle must not start another enemy's action.
+    attackInProgress = false;
     resetAttackMotion();
     entity.getEvents().removeListener("enemyAttack", attackListener);
     entity.getEvents().removeListener("enemyDamaged", damagedListener);
