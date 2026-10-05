@@ -10,6 +10,8 @@ import com.badlogic.gdx.utils.JsonValue;
  * that alias only when {@code level} is absent; writing always uses {@code level}.
  */
 public class PlayerSaveData implements Json.Serializable {
+  private static final String LEVEL_KEY = "level";
+
   public int currentHealth;
   public int maxHealth;
   public int gold;
@@ -30,7 +32,7 @@ public class PlayerSaveData implements Json.Serializable {
     json.writeValue("currentHealth", currentHealth);
     json.writeValue("maxHealth", maxHealth);
     json.writeValue("gold", gold);
-    json.writeValue("level", level);
+    json.writeValue(LEVEL_KEY, level);
   }
 
   @Override
@@ -38,6 +40,6 @@ public class PlayerSaveData implements Json.Serializable {
     currentHealth = jsonData.getInt("currentHealth", 0);
     maxHealth = jsonData.getInt("maxHealth", 0);
     gold = jsonData.getInt("gold", 0);
-    level = jsonData.has("level") ? jsonData.getInt("level") : jsonData.getInt("piety", 0);
+    level = jsonData.has(LEVEL_KEY) ? jsonData.getInt(LEVEL_KEY) : jsonData.getInt("piety", 0);
   }
 }

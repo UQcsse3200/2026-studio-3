@@ -20,9 +20,7 @@ import java.util.Map;
 /** A ui component for displaying player stats, e.g. health. */
 public class PlayerStatsDisplay extends UIComponent {
   Table table;
-  private Image heartImage;
   private Label healthLabel;
-  private Image energyImage;
   private Label energyLabel;
   private Image statusImage;
   private Table statusRow;
@@ -59,7 +57,7 @@ public class PlayerStatsDisplay extends UIComponent {
     float imageSideLength = 20f;
 
     // Heart image
-    heartImage =
+    Image heartImage =
         new Image(ServiceLocator.getResourceService().getAsset("images/heart.png", Texture.class));
 
     // Health text
@@ -70,7 +68,7 @@ public class PlayerStatsDisplay extends UIComponent {
     healthLabel.setFontScale(FONT_SCALE);
 
     // Energy image
-    energyImage =
+    Image energyImage =
         new Image(ServiceLocator.getResourceService().getAsset("images/energy.png", Texture.class));
 
     // Energy text
