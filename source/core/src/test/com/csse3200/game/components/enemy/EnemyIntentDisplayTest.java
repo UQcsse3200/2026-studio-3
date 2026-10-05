@@ -44,4 +44,25 @@ class EnemyIntentDisplayTest {
 
     assertEquals("", EnemyIntentDisplay.durationTextFor(intent));
   }
+
+  @Test
+  void shouldShowDamageForAttackIntents() {
+    assertEquals("16", EnemyIntentDisplay.labelTextFor(EnemyIntent.attack(16)));
+  }
+
+  @Test
+  void shouldShowArmourForDefendIntents() {
+    assertEquals("5", EnemyIntentDisplay.labelTextFor(EnemyIntent.defend(5)));
+  }
+
+  @Test
+  void shouldShowDurationForStatusIntents() {
+    assertEquals(
+        "2", EnemyIntentDisplay.labelTextFor(EnemyIntent.debuff(IntentEffectType.TAUNT, 0, 2)));
+  }
+
+  @Test
+  void shouldShowNothingForNullIntent() {
+    assertEquals("", EnemyIntentDisplay.labelTextFor(null));
+  }
 }

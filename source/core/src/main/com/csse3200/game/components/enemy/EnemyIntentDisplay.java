@@ -78,30 +78,50 @@ public class EnemyIntentDisplay extends RenderComponent {
     float iconY = position.y + scale.y * SPRITE_FILL + GAP_ABOVE_ENEMY;
 
     batch.draw(icon, iconX, iconY, ICON_SIZE, ICON_SIZE);
-    drawDuration(batch, iconX, iconY);
+    drawLabel(batch, iconX, iconY);
   }
 
   /**
-   * Draws the number of turns for which the intent's status effect will remain active.
+   * Draws the number beside the intent icon: damage or armour for a hit, turns for an effect.
    *
    * @param batch sprite batch currently used by the render service
    * @param iconX horizontal position of the intent icon
    * @param iconY vertical position of the intent icon
    */
-  private void drawDuration(SpriteBatch batch, float iconX, float iconY) {
+  private void drawLabel(SpriteBatch batch, float iconX, float iconY) {
     if (durationFont == null) {
       return;
     }
 
-    String durationText = durationTextFor(currentIntent);
-    if (durationText.isEmpty()) {
+    String labelText = labelTextFor(currentIntent);
+    if (labelText.isEmpty()) {
       return;
     }
 
     float textX = iconX + ICON_SIZE + DURATION_TEXT_GAP;
     float textY = iconY + DURATION_TEXT_VERTICAL_OFFSET;
 
-    durationFont.draw(batch, durationText, textX, textY);
+    durationFont.draw(batch, labelText, textX, textY);
+  }
+
+  /**
+   * Picks the number shown beside the icon.
+   *
+   * <p>Attacks and blocks show how much, so the player can decide whether to defend or push; every
+   * other intent keeps showing how many turns its effect will last.
+   *
+   * @param intent intent being telegraphed
+   * @return the number as text, or an empty string when there is nothing useful to show
+   */
+  static String labelTextFor(EnemyIntent intent) {
+    if (intent == null) {
+      return "";
+    }
+
+    return switch (intent.getType()) {
+      case ATTACK, DEFEND -> intent.getValue() <= 0 ? "" : Integer.toString(intent.getValue());
+      default -> durationTextFor(intent);
+    };
   }
 
   /**
