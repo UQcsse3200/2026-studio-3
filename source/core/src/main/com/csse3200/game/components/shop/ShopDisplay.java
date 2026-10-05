@@ -26,6 +26,9 @@ import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.maps.EncounterCallback;
+import com.csse3200.game.maps.PlayerRunState;
+import com.csse3200.game.rewards.ItemFormatting;
+import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.shop.PurchaseResult;
@@ -101,6 +104,8 @@ public class ShopDisplay extends UIComponent {
 
   private final ShopEncounter shopEncounter;
   private final CardService cardService;
+  private final PlayerRunState playerRunState;
+  private Label merchantsFavorLabel;
   private final Map<String, ItemWidgets> itemWidgets = new HashMap<>();
   private final Set<String> purchasedItemIds = new HashSet<>();
 
@@ -121,8 +126,17 @@ public class ShopDisplay extends UIComponent {
    *
    * @param inventory player inventory used for displaying gold and completing purchases
    */
-  public ShopDisplay(InventoryComponent inventory) {
-    this(inventory, null, ShopEncounter.DEFAULT_NODE_ID);
+  private ShopDisplay(
+      InventoryComponent inventory,
+      ShopEncounter shopEncounter,
+      CardService cardService,
+      PlayerRunState playerRunState) {
+    this.shopEncounter =
+        shopEncounter == null
+            ? new ShopEncounter(inventory, new ShopService((ShopConfig) null))
+            : shopEncounter;
+    this.cardService = cardService;
+    this.playerRunState = playerRunState;
   }
 
   /**
@@ -159,16 +173,7 @@ public class ShopDisplay extends UIComponent {
    * @param shopEncounter encounter session receiving purchase and completion actions
    */
   public ShopDisplay(InventoryComponent inventory, ShopEncounter shopEncounter) {
-    this(inventory, shopEncounter, null);
-  }
-
-  private ShopDisplay(
-      InventoryComponent inventory, ShopEncounter shopEncounter, CardService cardService) {
-    this.shopEncounter =
-        shopEncounter == null
-            ? new ShopEncounter(inventory, new ShopService((ShopConfig) null))
-            : shopEncounter;
-    this.cardService = cardService;
+    this(inventory, shopEncounter, null, null);
   }
 
   /**
@@ -187,7 +192,12 @@ public class ShopDisplay extends UIComponent {
    * @param cardService read-only source of card definitions and texture paths
    */
   public ShopDisplay(ShopEncounter shopEncounter, CardService cardService) {
-    this(null, shopEncounter, cardService);
+    this(null, shopEncounter, cardService, null);
+  }
+
+  public ShopDisplay(
+      ShopEncounter shopEncounter, CardService cardService, PlayerRunState playerRunState) {
+    this(null, shopEncounter, cardService, playerRunState);
   }
 
   @Override
@@ -380,6 +390,10 @@ public class ShopDisplay extends UIComponent {
     titleBlock.add(title).left();
     titleBlock.row();
     titleBlock.add(subtitle).left().padTop(6f);
+    titleBlock.row();
+    merchantsFavorLabel = new Label("", createLabelStyle("small", GOLD_COLOUR));
+    merchantsFavorLabel.setFontScale(0.92f);
+    titleBlock.add(merchantsFavorLabel).left().padTop(6f);
 
     Table purse = new Table();
     purse.setBackground(createPlaqueDrawable(new Color(0.76f, 0.63f, 0.45f, 1f)));
@@ -437,8 +451,13 @@ public class ShopDisplay extends UIComponent {
         .padLeft(CARD_IDENTITY_GAP)
         .right();
 
-    Label priceLabel =
-        new Label(String.format("%d GOLD", item.price), createLabelStyle("default", GOLD_COLOUR));
+    float discount = playerRunState != null ? playerRunState.getShopDiscount() : 0f;
+    int shownPrice = Math.round(item.price * (1f - discount));
+    String priceText =
+        discount > 0f
+            ? String.format("%d GOLD (-%.0f%%)", shownPrice, discount * 100)
+            : String.format("%d GOLD", item.price);
+    Label priceLabel = new Label(priceText, createLabelStyle("default", GOLD_COLOUR));
     Label stockLabel = new Label("", createLabelStyle("small", MUTED_COLOUR));
     Label stateLabel = new Label("", createLabelStyle("small", AVAILABLE_COLOUR));
     priceLabel.setFontScale(0.98f);
@@ -595,6 +614,21 @@ public class ShopDisplay extends UIComponent {
   private void refresh() {
     Integer currency = shopEncounter.getCurrency();
     goldLabel.setText(currency == null ? "GOLD  --" : String.format("GOLD  %d", currency));
+
+    long favorCount =
+        playerRunState == null
+            ? 0
+            : playerRunState.getOwnedItems().stream()
+                .filter(itemId -> itemId == ItemType.MERCHANTS_FAVOR)
+                .count();
+    merchantsFavorLabel.setText(
+        favorCount == 0
+            ? ""
+            : String.format(
+                "%s x%d  |  %.0f%% off all offers",
+                ItemFormatting.formatItemName(ItemType.MERCHANTS_FAVOR),
+                favorCount,
+                playerRunState.getShopDiscount() * 100));
 
     for (ShopItem item : shopEncounter.getItems()) {
       ItemWidgets widgets = itemWidgets.get(item.id);

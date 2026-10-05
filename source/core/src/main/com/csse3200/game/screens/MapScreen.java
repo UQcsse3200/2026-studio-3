@@ -150,7 +150,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
     Stage stage = ServiceLocator.getRenderService().getStage();
 
-    PopupDisplay itemInventory = new PopupDisplay("Item Inventory");
+    PopupDisplay itemInventory = new PopupDisplay("");
     itemInventory.setMinSize(400f, 400f);
 
     // Map screen has no live player entity (only battles do), and item USE actions only make
