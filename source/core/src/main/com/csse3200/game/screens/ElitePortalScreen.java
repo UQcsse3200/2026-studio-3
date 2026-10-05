@@ -72,7 +72,8 @@ public class ElitePortalScreen extends ScreenAdapter {
     inputEntity.addComponent(new InputDecorator(stage, 10));
     ServiceLocator.getEntityService().register(inputEntity);
 
-    backgroundTexture = new Texture(Gdx.files.internal("images/" + game.getBackgroundId() + ".png"));
+    backgroundTexture =
+        new Texture(Gdx.files.internal("images/" + game.getBackgroundId() + ".png"));
 
     portalTexture = new Texture(Gdx.files.internal("images/elite_portal.png"));
 
