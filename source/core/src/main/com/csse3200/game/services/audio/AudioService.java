@@ -18,7 +18,6 @@ public class AudioService {
 
   // this may appear to be a lot to load into ram, but these files are kilobytes big
   private static final String[] soundPaths = {
-    "sounds/Impact4.ogg",
     "sounds/menuHover.mp3",
     "sounds/itemPurchase.mp3",
     "sounds/enterCombat.mp3",

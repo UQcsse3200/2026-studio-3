@@ -5,7 +5,6 @@ package com.csse3200.game.services.audio;
  * ID's must be added in the order of position in soundPath in AudioService.
  */
 public enum SoundId {
-  IMPACT, // TODO: remove
   MENU_HOVER,
   ITEM_PURCHASE,
   ENTER_COMBAT,
