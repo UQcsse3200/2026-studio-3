@@ -116,7 +116,8 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         .addComponent(new TerminalDisplay());
 
     // Pause menu + in-place save/load overlay (the map is the natural place to save a run).
-    SaveLoadPanel savePanel = PauseMenuFactory.attach(ui, game);
+    // No on-screen pause button here (it didn't fit the map HUD); Escape still opens the menu.
+    SaveLoadPanel savePanel = PauseMenuFactory.attachWithoutButton(ui, game);
     ServiceLocator.getEntityService().register(ui);
     savePanel.hide(); // save overlay starts hidden, opened by the Save & Load button
 
