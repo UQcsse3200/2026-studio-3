@@ -33,7 +33,6 @@ public class SettingsScreen extends ScreenAdapter {
 
     logger.debug("Initialising settings screen services");
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
     ServiceLocator.registerTimeSource(new GameTime());
@@ -64,10 +63,6 @@ public class SettingsScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
-    ServiceLocator.getResourceService().unloadAssets(SETTINGS_TEXTURES);
-    ServiceLocator.getResourceService().dispose();
-
-    ServiceLocator.clear();
   }
 
   /**

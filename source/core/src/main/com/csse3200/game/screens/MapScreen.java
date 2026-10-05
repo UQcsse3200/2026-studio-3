@@ -23,8 +23,8 @@ import com.csse3200.game.maps.*;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.GameTime;
-import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
@@ -48,19 +48,20 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
   private final GdxGame game;
   private final Renderer renderer;
+  private MapDisplay mapDisplay;
 
   public MapScreen(GdxGame game) {
     this.game = game;
     logger.debug("Initialising map screen services");
     ServiceLocator.registerTimeSource(new GameTime());
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
     renderer = RenderFactory.createRenderer();
 
     RunState runState = game.getRunState();
+    AudioService.load();
 
     if (!runState.isRunActive()) {
       logger.info("No run in progress, generating a new map");
@@ -94,12 +95,16 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
   /** Puts the map display on a UI entity so it is rendered and receives input. */
   private void createUi(GdxGame game, RunState runState) {
-    MapDisplay mapDisplay = new MapDisplay(runState.getMapGraph(), runState);
+    mapDisplay = new MapDisplay(runState.getMapGraph(), runState);
 
     mapDisplay
         .getMapSelectionController()
         .getEvents()
-        .addListener("nodeSelected", (Integer nodeId) -> enterEncounter(game, runState, nodeId));
+        .addListener(
+            "nodeSelected",
+            (Integer nodeId) -> {
+              enterEncounter(game, runState, nodeId);
+            });
 
     // PROPOSED: debug terminal for cheats/commands on the map (unlock nodes, etc.). Same
     // Terminal/KeyboardTerminalInputComponent/TerminalDisplay trio used elsewhere; F1 toggles it.
@@ -210,9 +215,9 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
   public void dispose() {
     logger.debug("Disposing map screen");
     renderer.dispose();
+    mapDisplay.dispose();
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getRenderService().dispose();
-    ServiceLocator.getResourceService().dispose();
-    ServiceLocator.clear();
+    ScreenUtils.clear(new Color(248f / 255f, 249f / 255f, 178f / 255f, 1f));
   }
 }

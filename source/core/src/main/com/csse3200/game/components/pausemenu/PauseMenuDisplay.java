@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * An ui component for the in-game pause menu. Shows a full-screen dimmed overlay (styled to match
- * the main menu) with Resume, Save & Load, Settings and Return to Main Menu buttons.
+ * the main menu) with Resume, Save and Load, Settings and Return to Main Menu buttons.
  *
  * <p>The component only owns the view and the button wiring. It fires events that separate
  * components listen for, it does not change screens or game state itself. The Save/Load and

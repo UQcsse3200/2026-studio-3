@@ -109,7 +109,5 @@ public class SaveLoadScreen extends ScreenAdapter {
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getResourceService().unloadAssets(SAVE_LOAD_TEXTURES);
-    ServiceLocator.getResourceService().dispose();
-    ServiceLocator.clear();
   }
 }

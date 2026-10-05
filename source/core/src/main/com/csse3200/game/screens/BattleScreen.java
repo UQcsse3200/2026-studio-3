@@ -128,7 +128,6 @@ public class BattleScreen extends ScreenAdapter {
     PhysicsEngine physicsEngine = physicsService.getPhysics();
 
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
 
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
@@ -278,7 +277,9 @@ public class BattleScreen extends ScreenAdapter {
         .getEvents()
         .addListener(
             BattleActions.HAND_CHANGED_EVENT,
-            (List<CardInstance> hand) -> uiFactory.rebuildHand(buildHandRecords()));
+            (List<CardInstance> hand) -> {
+              uiFactory.rebuildHand(buildHandRecords());
+            });
 
     // Pause menu + in-place save/load overlay (added before the entity is created).
     SaveLoadPanel savePanel = PauseMenuFactory.attach(battleUi, game);
@@ -332,7 +333,7 @@ public class BattleScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
-    ServiceLocator.clear();
+    ServiceLocator.getResourceService().unloadAssets(mainGameTextures);
   }
 
   private void loadAssets() {
