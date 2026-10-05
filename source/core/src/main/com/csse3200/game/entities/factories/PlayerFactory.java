@@ -61,7 +61,7 @@ public class PlayerFactory {
             .addComponent(new InventoryComponent(stats.gold))
             .addComponent(new PlayerBehaviourComponent())
             .addComponent(inputComponent)
-            .addComponent(new EnergyComponent(stats.maxEnergy))
+            .addComponent(new EnergyComponent(resolveMaxEnergy(runState)))
             .addComponent(new PlayerStatsDisplay())
             .addComponent(new PlayerStatsTopDisplay(runState))
             .addComponent(new EnemyMemoryComponent())
@@ -91,7 +91,7 @@ public class PlayerFactory {
             .addComponent(new InventoryComponent(stats.gold))
             .addComponent(new PlayerBehaviourComponent())
             .addComponent(inputComponent)
-            .addComponent(new EnergyComponent(stats.maxEnergy))
+            .addComponent(new EnergyComponent(resolveMaxEnergy(runState)))
             .addComponent(new PlayerStatsDisplay())
             .addComponent(new PlayerStatsTopDisplay(runState))
             .addComponent(new EnemyMemoryComponent())
@@ -114,6 +114,14 @@ public class PlayerFactory {
    */
   public static PlayerRunState createInitialRunState() {
     return new PlayerRunState(stats.health, stats.maxHealth, stats.gold);
+  }
+
+  private static int resolveMaxEnergy(RunState runState) {
+    if (runState == null || runState.getPlayerMaxEnergy() <= 0) {
+      return stats.maxEnergy;
+    }
+
+    return runState.getPlayerMaxEnergy();
   }
 
   private PlayerFactory() {
