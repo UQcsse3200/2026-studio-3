@@ -94,6 +94,8 @@ public class ChanceEncounterDisplay extends UIComponent {
   private TextButtonStyle selectedChoiceStyle;
   private DiceRollDisplay diceRollDisplay;
   private CardFusionSelectionView cardFusionView;
+  private ContextualHelpDialog helpDialog;
+  private TextButton helpButton;
   private int lastDisplayedRollSequence;
   private boolean choiceResolved;
   private boolean completionSent;
@@ -561,6 +563,20 @@ public class ChanceEncounterDisplay extends UIComponent {
         });
     scene.addActor(continueButton);
 
+    helpDialog =
+        new ContextualHelpDialog(skin, EventHelpContent.DICE_TITLE, EventHelpContent.DICE_RULES);
+    helpButton = new TextButton("?", skin);
+    helpButton.setName("dice-help-button");
+    helpButton.setBounds(1150f, 685f, 68f, 58f);
+    helpButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent changeEvent, Actor actor) {
+            helpDialog.show(stage);
+          }
+        });
+    scene.addActor(helpButton);
+
     rootTable.add(scene).size(SCENE_WIDTH, SCENE_HEIGHT);
     stage.addActor(rootTable);
     rootTable.addAction(Actions.fadeIn(0.25f));
@@ -768,6 +784,14 @@ public class ChanceEncounterDisplay extends UIComponent {
 
   DiceRollDisplay getDiceRollDisplay() {
     return diceRollDisplay;
+  }
+
+  TextButton getHelpButton() {
+    return helpButton;
+  }
+
+  ContextualHelpDialog getHelpDialog() {
+    return helpDialog;
   }
 
   CardFusionSelectionView getCardFusionView() {
@@ -987,6 +1011,9 @@ public class ChanceEncounterDisplay extends UIComponent {
 
   @Override
   public void dispose() {
+    if (helpDialog != null) {
+      helpDialog.remove();
+    }
     if (cardFusionView != null) {
       cardFusionView.dispose();
     }

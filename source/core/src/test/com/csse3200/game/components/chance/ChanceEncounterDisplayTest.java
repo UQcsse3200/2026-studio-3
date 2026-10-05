@@ -2,6 +2,7 @@ package com.csse3200.game.components.chance;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -130,6 +131,20 @@ class ChanceEncounterDisplayTest {
 
     try {
       assertEquals(List.of("low", "high"), choiceIds(display));
+      List<TextButton> initialChoiceButtons = display.getChoiceButtons();
+      TextButton persistentHelpButton = display.getHelpButton();
+      assertEquals(
+          "Dice Game Rules",
+          display.getHelpDialog().getDialog().getTitleLabel().getText().toString());
+      assertTrue(
+          display.getHelpDialog().getBodyLabel().getText().toString().contains("Low (2-6)"));
+      display.getHelpButton().fire(new ChangeEvent());
+      assertEquals(stage, display.getHelpDialog().getDialog().getStage());
+      display.getHelpDialog().getCloseButton().fire(new ChangeEvent());
+      finishDialogClose(stage);
+      assertNull(display.getHelpDialog().getDialog().getStage());
+      assertEquals(List.of("low", "high"), choiceIds(display));
+      assertFalse(session.isResolved());
       assertEquals("TOTAL  ?", display.getDiceRollDisplay().getTotalText());
       assertEquals("?", display.getDiceRollDisplay().getDisplayedTotalValue());
       ((Table) display.getChoiceButtons().get(0).getParent()).layout();
@@ -155,6 +170,17 @@ class ChanceEncounterDisplayTest {
       assertEquals("TOTAL  7", display.getDiceRollDisplay().getTotalText());
       assertEquals("7", display.getDiceRollDisplay().getDisplayedTotalValue());
       assertEquals(List.of("take", "double-down"), choiceIds(display));
+      for (TextButton oldChoice : initialChoiceButtons) {
+        assertNull(oldChoice.getStage());
+      }
+      assertEquals(persistentHelpButton, display.getHelpButton());
+      assertEquals(stage, persistentHelpButton.getStage());
+      display.getHelpButton().fire(new ChangeEvent());
+      assertEquals(stage, display.getHelpDialog().getDialog().getStage());
+      display.getHelpDialog().getCloseButton().fire(new ChangeEvent());
+      finishDialogClose(stage);
+      assertNull(display.getHelpDialog().getDialog().getStage());
+      assertEquals(List.of("take", "double-down"), choiceIds(display));
       assertTrue(display.getResultText().contains("LUCKY SEVEN!"));
       assertTrue(display.getResultText().contains("dice total is 7"));
       assertFalse(session.isResolved());
@@ -176,6 +202,13 @@ class ChanceEncounterDisplayTest {
 
   private static ChanceChoice diceChoice(String id) {
     return new ChanceChoice(id, id, new ChanceOutcome(0, 0));
+  }
+
+  private static void finishDialogClose(Stage stage) {
+    // Dialog.hide() runs its fade, listener removal, and actor removal on separate stage ticks.
+    for (int tick = 0; tick < 3; tick++) {
+      stage.act(1f);
+    }
   }
 
   private static List<String> choiceIds(ChanceEncounterDisplay display) {
