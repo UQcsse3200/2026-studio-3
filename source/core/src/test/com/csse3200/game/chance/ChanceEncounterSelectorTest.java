@@ -5,11 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.csse3200.game.extensions.GameExtension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(GameExtension.class)
 class ChanceEncounterSelectorTest {
   @Test
   void shouldSelectUsingConfiguredWeights() {
@@ -29,6 +32,16 @@ class ChanceEncounterSelectorTest {
   }
 
   @Test
+  void shouldSelectCardFusionAtItsConfiguredBoundary() {
+    List<ChanceEncounter> encounters = ChanceEncounterFactory.createInitialEncounters();
+    ChanceEncounterSelector selector =
+        new ChanceEncounterSelector(encounters, new SequenceRandom(8, 9));
+
+    assertEquals("card-fusion", selector.select().getId());
+    assertEquals("card-fusion", selector.select().getId());
+  }
+
+  @Test
   void shouldUseCorrectSelectionBoundaries() {
     ChanceEncounter first = createEncounter("first", 2);
     ChanceEncounter second = createEncounter("second", 3);
@@ -38,6 +51,28 @@ class ChanceEncounterSelectorTest {
     assertSame(
         second,
         new ChanceEncounterSelector(List.of(first, second), new SequenceRandom(2)).select());
+  }
+
+  @Test
+  void shouldSelectExactEncounterByIdWithoutAdvancingRandom() {
+    ChanceEncounter first = createEncounter("first", 1);
+    ChanceEncounter second = createEncounter("second", 2);
+    ChanceEncounterSelector selector =
+        new ChanceEncounterSelector(List.of(first, second), new SequenceRandom(0));
+
+    assertSame(second, selector.selectById("second"));
+    assertSame(first, selector.select());
+  }
+
+  @Test
+  void shouldRejectUnknownOrBlankEventIds() {
+    ChanceEncounterSelector selector =
+        new ChanceEncounterSelector(List.of(createEncounter("first", 1)), new Random(266L));
+
+    assertThrows(IllegalArgumentException.class, () -> selector.selectById("missing"));
+    assertThrows(IllegalArgumentException.class, () -> selector.selectById(""));
+    assertThrows(IllegalArgumentException.class, () -> selector.selectById("  "));
+    assertThrows(IllegalArgumentException.class, () -> selector.selectById(null));
   }
 
   @Test
