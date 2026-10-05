@@ -579,11 +579,11 @@ public class ShopDisplay extends UIComponent {
     if (result.isSuccess()) {
       purchasedItemIds.add(itemId);
       String itemName = result.getItem() == null ? "the offer" : result.getItem().getDisplayName();
-      statusLabel.setStyle(createLabelStyle(SMALL, AVAILABLE_COLOUR));
+      statusLabel.setStyle(createLabelStyle("small", AVAILABLE_COLOUR));
       AudioService.playSound(SoundId.ITEM_PURCHASE, 0.5f);
       statusLabel.setText(String.format("Purchased %s. It was added to your deck.", itemName));
     } else {
-      statusLabel.setStyle(createLabelStyle(SMALL, UNAFFORDABLE_COLOUR));
+      statusLabel.setStyle(createLabelStyle("small", UNAFFORDABLE_COLOUR));
       AudioService.playSound(SoundId.ERROR, 0.5f);
       statusLabel.setText(result.getMessage());
     }
