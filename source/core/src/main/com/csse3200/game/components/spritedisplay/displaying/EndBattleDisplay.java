@@ -1,6 +1,5 @@
 package com.csse3200.game.components.spritedisplay.displaying;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -56,6 +55,7 @@ public class EndBattleDisplay extends Displaying {
   protected void draw(SpriteBatch batch) {
     // Centre horizontally; use the record's y as an offset down from the top of the screen.
     label.setPosition(
-        (Gdx.graphics.getWidth() - label.getPrefWidth()) / 2f, Gdx.graphics.getHeight() - getY());
+        (label.getStage().getViewport().getWorldWidth() - label.getPrefWidth()) / 2f,
+        label.getStage().getViewport().getWorldHeight() - getY());
   }
 }

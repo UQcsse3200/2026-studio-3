@@ -209,8 +209,8 @@ public class MapDisplay extends UIComponent {
   private void addPlayerStats() {
     Table playerTable = new Table();
 
-    playerTable.setSize(mapWidth, 100);
-    playerTable.setPosition(0, Gdx.graphics.getHeight() - 100);
+    playerTable.setSize(mapWidth, 50);
+    playerTable.setPosition(0, Gdx.graphics.getHeight() - 50);
     playerTable.setBackground(skin.newDrawable("color", new Color(0.105f, 0.070f, 0.065f, 0.98f)));
     playerTable.setDebug(false); // for testing
     playerTable.left();
@@ -218,12 +218,13 @@ public class MapDisplay extends UIComponent {
 
     Table table = new Table();
     table.left();
-    table.setFillParent(true);
-    table.padLeft(15f);
-    table.padTop(25);
+    table.padLeft(10f);
+    table.padTop(5f);
+
+    Table levelTable = new Table();
 
     // Image size
-    float imageSideLength = 48f;
+    float imageSideLength = 20f;
 
     PlayerRunState playerState = runState == null ? null : runState.getOrCreatePlayerState();
 
@@ -244,7 +245,7 @@ public class MapDisplay extends UIComponent {
       maxHealth = stats.maxHealth;
     }
 
-    String healthText = String.format("Health: %d / %d", currentHealth, maxHealth);
+    String healthText = String.format("%d / %d", currentHealth, maxHealth);
     Label.LabelStyle healthStyle = new Label.LabelStyle(skin.get(LARGE, Label.LabelStyle.class));
     healthStyle.fontColor = new Color(0.75f, 0.18f, 0.16f, 1f);
 
@@ -267,7 +268,7 @@ public class MapDisplay extends UIComponent {
 
     Label.LabelStyle moneyStyle = new Label.LabelStyle(skin.get(LARGE, Label.LabelStyle.class));
     moneyStyle.fontColor = new Color(0.95f, 0.73f, 0.28f, 1f);
-    String moneyText = String.format("Gold: $%d", money);
+    String moneyText = String.format("$%d", money);
     Label moneyLabel = new Label(moneyText, moneyStyle);
     moneyLabel.setFontScale(0.75f);
 
@@ -278,7 +279,7 @@ public class MapDisplay extends UIComponent {
     // Level text
     Label.LabelStyle levelStyle = new Label.LabelStyle(skin.get(LARGE, Label.LabelStyle.class));
     levelStyle.fontColor = new Color(0.95f, 0.73f, 0.28f, 1f);
-    String levelText = String.format("Level: %d", mapGraph.getCurrentNode().getHeight());
+    String levelText = String.format("%d", mapGraph.getCurrentNode().getHeight());
     Label levelLabel = new Label(levelText, levelStyle);
     levelLabel.setFontScale(0.75f);
 
@@ -291,6 +292,13 @@ public class MapDisplay extends UIComponent {
 
     table.add(levelImage).size(imageSideLength).padRight(5f).center();
     table.add(levelLabel).padRight(25f).center();
+
+    levelTable.add(levelImage).size(imageSideLength).pad(5);
+    levelTable.add(levelLabel).left().pad(10);
+    levelTable.pack();
+    levelTable.setPosition(
+        (mapWidth - levelTable.getWidth()) / 2f, (50f - levelTable.getHeight()) / 2f);
+    playerTable.addActor(levelTable);
 
     playerTable.add(table);
   }
@@ -359,6 +367,7 @@ public class MapDisplay extends UIComponent {
       "images/map/boss.png",
       "images/map/event.png",
       "images/map/shop.png",
+      "images/map/campfire.png",
       "images/map/nodeLine.png",
       "images/map/background.png",
       "images/heart.png",

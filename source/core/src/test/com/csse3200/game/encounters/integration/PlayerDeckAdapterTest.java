@@ -42,6 +42,20 @@ class PlayerDeckAdapterTest {
   }
 
   @Test
+  void shouldRollbackMultiplePendingDuplicateInstancesInReverseOrder() {
+    PlayerDeck deck = deck("strike", "defend", "strike");
+    PlayerDeckAdapter adapter = new PlayerDeckAdapter(deck);
+    List<CardInstance> before = deck.getCards();
+
+    assertTrue(adapter.addCard("strike"));
+    assertTrue(adapter.addCard("strike"));
+    assertTrue(adapter.rollbackCardAddition("strike"));
+    assertTrue(adapter.rollbackCardAddition("strike"));
+
+    assertEquals(before, deck.getCards());
+  }
+
+  @Test
   void shouldRejectRollbackWhenCardIdDoesNotMatchWithoutMutation() {
     PlayerDeck deck = deck("strike", "defend");
     PlayerDeckAdapter adapter = new PlayerDeckAdapter(deck);

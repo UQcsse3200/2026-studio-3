@@ -7,6 +7,9 @@ import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattlePhase;
+import com.csse3200.game.entities.Entity;
+import com.csse3200.game.maps.MapNode;
+import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +42,7 @@ public class BattleActions extends Component {
 
   private final BattleController controller;
   private final GdxGame game;
+  private final List<Entity> enemies;
 
   // While true, reveals (log, effects, phase changes, the hand coming back up) are queued instead
   // of fired immediately, so the enemy's whole turn can be held back and replayed together after
@@ -46,10 +50,18 @@ public class BattleActions extends Component {
   // flushDeferredReveals().
   private boolean deferringEnemyTurn = false;
   private final List<Runnable> queuedReveals = new ArrayList<>();
+  private final List<EnemyReleaseComponent> releaseAnimations = new ArrayList<>();
+  private boolean awaitingRelease;
+  private boolean released;
 
   public BattleActions(BattleController controller, GdxGame game) {
+    this(controller, game, List.of());
+  }
+
+  public BattleActions(BattleController controller, GdxGame game, List<Entity> enemies) {
     this.controller = controller;
     this.game = game;
+    this.enemies = List.copyOf(enemies);
   }
 
   /**
@@ -150,22 +162,101 @@ public class BattleActions extends Component {
     RunState runState = game.getRunState();
     if (runState != null) {
       boolean hadActiveEncounter = runState.getActiveNodeId() != null;
+      if (win && isEligibleEliteVictory(runState)) {
+        runState.setPendingEliteTempleReward(true);
+      }
       runState.completeEncounter(win);
       if (win && hadActiveEncounter) {
         game.requestAutosaveAfterEncounter();
       }
     }
 
-    GdxGame.ScreenType target = win ? GdxGame.ScreenType.VICTORY : GdxGame.ScreenType.DEFEAT;
-    if (Gdx.app != null) {
-      Gdx.app.postRunnable(() -> game.setScreen(target));
-    } else {
-      game.setScreen(target);
+    // queue the release animations if the win conditions have been met.
+    if (win) {
+      releaseAnimations.clear();
+
+      for (Entity e : enemies) {
+        EnemyReleaseComponent release = e.getComponent(EnemyReleaseComponent.class);
+
+        if (release != null) {
+          release.startRelease();
+          releaseAnimations.add(release);
+        }
+      }
+
+      if (!releaseAnimations.isEmpty()) {
+        awaitingRelease = true;
+        return;
+      }
     }
+
+    openResultScreen(win);
   }
 
   private void triggerEndTurn() {
     controller.endPlayerTurn();
+  }
+
+  public void update() {
+    if (!awaitingRelease) {
+      return;
+    }
+
+    boolean finishedRelease =
+        releaseAnimations.stream().allMatch(EnemyReleaseComponent::isFinished);
+
+    if (finishedRelease) {
+      awaitingRelease = false;
+      openResultScreen(true);
+    }
+  }
+
+  private void openResultScreen(boolean won) {
+    GdxGame.ScreenType target = won ? GdxGame.ScreenType.VICTORY : GdxGame.ScreenType.DEFEAT;
+
+    if (Gdx.app != null) {
+      Gdx.app.postRunnable(
+          () -> {
+            if (!released) {
+              game.setScreen(target);
+            }
+          });
+    } else if (!released) {
+      game.setScreen(target);
+    }
+  }
+
+  private boolean isEligibleEliteVictory(RunState runState) {
+    Integer activeNodeId = runState.getActiveNodeId();
+
+    if (activeNodeId == null || runState.getMapGraph() == null) {
+      return false;
+    }
+
+    MapNode activeNode = runState.getMapGraph().getNode(activeNodeId);
+
+    if (activeNode == null || activeNode.getRoomType() != RoomType.ELITE) {
+      return false;
+    }
+
+    int currentHealth = runState.getPlayerHealth();
+    int maxHealth = runState.getPlayerMaxHealth();
+
+    if (maxHealth <= 0) {
+      return false;
+    }
+
+    float healthRatio = (float) currentHealth / maxHealth;
+
+    return healthRatio >= 0.8f;
+  }
+
+  @Override
+  public void dispose() {
+    released = true;
+    awaitingRelease = false;
+    releaseAnimations.clear();
+    super.dispose();
   }
 
   private void onStart() {
