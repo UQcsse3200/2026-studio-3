@@ -1,5 +1,8 @@
 package com.csse3200.game.components.spritedisplay.displaying;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -13,8 +16,6 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.csse3200.game.components.battle.DeckEditorEvents;
 import com.csse3200.game.ui.PopupDisplay;
-import java.util.HashMap;
-import java.util.Map;
 
 public class CardPreviewDisplay extends Displaying {
 
@@ -134,8 +135,8 @@ public class CardPreviewDisplay extends Displaying {
       refreshVisibility();
       return;
     }
-    textureWidth = (float) texture.getWidth();
-    textureHeight = (float) texture.getHeight();
+    textureWidth = texture.getWidth();
+    textureHeight = texture.getHeight();
     art.setDrawable(new TextureRegionDrawable(new TextureRegion(texture)));
     label.setText(content.details());
     hasContent = true;

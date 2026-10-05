@@ -23,8 +23,8 @@ public class PlayerStatsTopDisplay extends UIComponent {
   private RunState runState;
   private static final float FONT_SCALE = 0.75f;
   private static final String STYLE_NAME_LARGE = "large";
-  private final float mapWidth = (float) Gdx.graphics.getWidth();
-  private final float mapHeight = (float) Gdx.graphics.getHeight();
+  private final float mapWidth = Gdx.graphics.getWidth();
+  private final float mapHeight = Gdx.graphics.getHeight();
 
   public PlayerStatsTopDisplay(RunState runState) {
     this.runState = runState;

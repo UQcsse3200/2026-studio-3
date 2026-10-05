@@ -1,5 +1,14 @@
 package com.csse3200.game.components.shop;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
@@ -37,13 +46,6 @@ import com.csse3200.game.shop.ShopInventoryGenerator;
 import com.csse3200.game.shop.ShopItem;
 import com.csse3200.game.shop.ShopService;
 import com.csse3200.game.ui.UIComponent;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Displays the Shop Encounter interface and sends purchase requests to {@link ShopEncounter}.
@@ -434,7 +436,7 @@ public class ShopDisplay extends UIComponent {
     Actor artwork = createArtwork(item);
 
     Label priceLabel =
-        new Label(String.format("%d GOLD", item.price), createLabelStyle("default", GOLD_COLOUR));
+        new Label(String.format("%d GOLD", item.price), createLabelStyle(DEFAULT, GOLD_COLOUR));
     Label stockLabel = new Label("", createLabelStyle("small", MUTED_COLOUR));
     Label stateLabel = new Label("", createLabelStyle("small", AVAILABLE_COLOUR));
     priceLabel.setFontScale(0.98f);
