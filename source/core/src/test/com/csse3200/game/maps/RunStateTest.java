@@ -17,9 +17,17 @@ public class RunStateTest {
   private MapGraph createGraph() {
     MapGenerationConfig config = new MapGenerationConfig();
     MapGraph graph = new MapGraph(NodePoolGenerator.generate(config));
-    graph.addNode(new MapNode(0, RoomType.COMBAT));
-    graph.addNode(new MapNode(1, RoomType.EVENT));
-    graph.addNode(new MapNode(2, RoomType.SHOP));
+
+    MapNode node1 = new MapNode(0, RoomType.COMBAT);
+    MapNode node2 = new MapNode(1, RoomType.EVENT);
+    MapNode node3 = new MapNode(2, RoomType.SHOP);
+
+    node1.setHeight(0);
+    node2.setHeight(1);
+    node3.setHeight(2);
+    graph.addNode(node1);
+    graph.addNode(node2);
+    graph.addNode(node3);
 
     graph.getNode(0).addConnection(graph.getNode(1));
     graph.getNode(0).addConnection(graph.getNode(2));
