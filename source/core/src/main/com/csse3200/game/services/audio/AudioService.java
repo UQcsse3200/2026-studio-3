@@ -25,12 +25,16 @@ public class AudioService {
   private static final float VICTORY_VOLUME = 0.7f;
   private static final float DEFEAT_VOLUME = 0.7f;
   private static final float CLICK_VOLUME = 0.5f;
+  private static final float FULL_MUSIC_VOLUME = 0.5f; // music volume with the sliders at 100%
   private static Music playing;
   private static SoundId lastSound = SoundId.MENU_HOVER;
   private static long cooldownTimestamp;
   private static float musicVolume = 0.5f; // TODO: decide default music volume
   private static boolean soundEffectsOn = true;
+  private static float soundEffectsVolume = 1f;
   private static Playlist nowPlaying;
+  private static Music heldTrack;
+  private static boolean gamePaused;
   private static final Random pitchModifier = new Random();
   private static final Random shuffle = new Random();
 
@@ -84,6 +88,7 @@ public class AudioService {
     "music/eliteBattle.ogg",
     "music/bossBattle.ogg",
     "music/shop.ogg",
+    "music/pauseMenu.ogg",
   };
 
   /** The music for each kind of screen. Arriving on one picks a random track from its list. */
@@ -144,7 +149,8 @@ public class AudioService {
       Sound sound =
           ServiceLocator.getResourceService().getAsset(soundPaths[soundID.ordinal()], Sound.class);
       sound.setPitch(
-          sound.play(volume), pitchModifier.nextFloat(LOWER_PITCH_BOUND, UPPER_PITCH_BOUND));
+          sound.play(volume * soundEffectsVolume),
+          pitchModifier.nextFloat(LOWER_PITCH_BOUND, UPPER_PITCH_BOUND));
       lastSound = soundID;
       cooldownTimestamp = System.currentTimeMillis();
 
@@ -153,7 +159,7 @@ public class AudioService {
       Sound sound =
           ServiceLocator.getResourceService().getAsset(soundPaths[soundID.ordinal()], Sound.class);
       sound.setPitch(
-          sound.play(volume - OVERLAP_DAMPING),
+          sound.play((volume - OVERLAP_DAMPING) * soundEffectsVolume),
           pitchModifier.nextFloat(LOWER_PITCH_BOUND, UPPER_PITCH_BOUND));
     }
   }
@@ -239,7 +245,8 @@ public class AudioService {
 
   /**
    * Called by GdxGame every time the screen changes. Starts the music for the screen, plays the
-   * victory or defeat sound when a battle ends, and makes the buttons on menu screens click.
+   * victory or defeat sound when a battle ends, makes the buttons on menu screens click and keeps
+   * the volume settings connected.
    *
    * <p>Battles check the room they were entered from, so elite fights and the final boss get their
    * own tracks, and the encounter screen only switches to shop music when it is a shop. The
@@ -251,6 +258,8 @@ public class AudioService {
    * @param run the current run, used to tell what kind of room the player has walked into
    */
   public static void onScreenChanged(ScreenType screen, RunState run) {
+    followVolumeSettings();
+    leavePauseMenu();
     switch (screen) {
       case MAIN_MENU -> startPlaylist(Playlist.MENU);
       case MAP -> startPlaylist(Playlist.MAP);
@@ -282,6 +291,77 @@ public class AudioService {
   /** The same as {@link #onScreenChanged(ScreenType, RunState)} for screens outside a run. */
   static void onScreenChanged(ScreenType screen) {
     onScreenChanged(screen, null);
+  }
+
+  /**
+   * Called when the pause menu opens. The song that was playing is paused so it can carry on from
+   * the same spot, and the pause menu music plays instead.
+   */
+  public static void onGamePaused() {
+    if (gamePaused) {
+      return;
+    }
+    gamePaused = true;
+    heldTrack = playing;
+    playing = null;
+    if (heldTrack != null) {
+      heldTrack.pause();
+    }
+    if (ensureLoaded(musicPaths[MusicId.PAUSE_MENU.ordinal()], Music.class)) {
+      playMusic(MusicId.PAUSE_MENU);
+    }
+  }
+
+  /** Called when the game is resumed. Stops the pause menu music and carries on the held song. */
+  public static void onGameResumed() {
+    if (!gamePaused) {
+      return;
+    }
+    gamePaused = false;
+    if (playing != null) {
+      playing.stop();
+    }
+    playing = heldTrack;
+    heldTrack = null;
+    if (playing != null) {
+      playing.setVolume(musicVolume);
+      playing.play();
+    }
+  }
+
+  /** Leaving a screen from its pause menu, like quitting to the main menu, ends the pause music. */
+  private static void leavePauseMenu() {
+    if (!gamePaused) {
+      return;
+    }
+    gamePaused = false;
+    stopMusic();
+    if (heldTrack != null) {
+      heldTrack.stop();
+      heldTrack = null;
+    }
+  }
+
+  /**
+   * Connects the volume settings to this class. Registering also applies the saved volumes, so the
+   * first song starts at the right level. Some screens clear the ServiceLocator when they close,
+   * which drops the connection, so this checks again on every screen change.
+   */
+  private static void followVolumeSettings() {
+    if (ServiceLocator.getAudioSettingsApplier() == null) {
+      ServiceLocator.registerAudioSettingsApplier(AudioService::applyVolumes);
+    }
+  }
+
+  /**
+   * Sets the volumes picked in the settings, with the master volume and mute already applied.
+   *
+   * @param music music volume from 0 to 1
+   * @param soundEffects sound effects volume from 0 to 1
+   */
+  private static void applyVolumes(float music, float soundEffects) {
+    setMusicVolume(music * FULL_MUSIC_VOLUME);
+    soundEffectsVolume = Math.max(0f, Math.min(1f, soundEffects));
   }
 
   private static Playlist battlePlaylist(RoomType room) {
@@ -370,5 +450,8 @@ public class AudioService {
     cooldownTimestamp = 0;
     musicVolume = 0.5f;
     soundEffectsOn = true;
+    soundEffectsVolume = 1f;
+    heldTrack = null;
+    gamePaused = false;
   }
 }
