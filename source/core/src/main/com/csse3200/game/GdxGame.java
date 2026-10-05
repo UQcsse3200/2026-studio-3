@@ -245,24 +245,24 @@ public class GdxGame extends Game {
    * @return new screen
    */
   private Screen newScreen(ScreenType screenType) {
-      return switch (screenType) {
-          case MAIN_MENU -> new MainMenuScreen(this);
-          case MAIN_GAME -> new MainGameScreen(this);
-          case SETTINGS -> new SettingsScreen(this);
-          case SAVE_LOAD -> new SaveLoadScreen(this);
-          case LIBRARY -> new LibraryScreen(this);
-          case CARD_LIBRARY -> new CardLibraryScreen(this);
-          case MAP -> new MapScreen(this);
-          case ENCOUNTER -> new EncounterScreen(this);
-          case CAMPFIRE -> new CampfireScreen(this);
-          case BATTLE_SCREEN -> new BattleScreen(this);
-          case VICTORY -> new EndBattleScreen(this, true);
-          case ELITE_PORTAL -> new ElitePortalScreen(this);
-          case ANCIENT_TEMPLE -> new AncientTempleScreen(this);
-          case TEMPLE_CARD_SELECTION -> new TempleCardSelectionScreen(this);
-          case DEFEAT -> new EndBattleScreen(this, false);
-          case BESTIARY -> new BestiaryScreen(this);
-      };
+    return switch (screenType) {
+      case MAIN_MENU -> new MainMenuScreen(this);
+      case MAIN_GAME -> new MainGameScreen(this);
+      case SETTINGS -> new SettingsScreen(this);
+      case SAVE_LOAD -> new SaveLoadScreen(this);
+      case LIBRARY -> new LibraryScreen(this);
+      case CARD_LIBRARY -> new CardLibraryScreen(this);
+      case MAP -> new MapScreen(this);
+      case ENCOUNTER -> new EncounterScreen(this);
+      case CAMPFIRE -> new CampfireScreen(this);
+      case BATTLE_SCREEN -> new BattleScreen(this);
+      case VICTORY -> new EndBattleScreen(this, true);
+      case ELITE_PORTAL -> new ElitePortalScreen(this);
+      case ANCIENT_TEMPLE -> new AncientTempleScreen(this);
+      case TEMPLE_CARD_SELECTION -> new TempleCardSelectionScreen(this);
+      case DEFEAT -> new EndBattleScreen(this, false);
+      case BESTIARY -> new BestiaryScreen(this);
+    };
   }
 
   public enum ScreenType {

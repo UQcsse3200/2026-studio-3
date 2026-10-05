@@ -56,7 +56,7 @@ class CombatBackgroundComponentTest {
     OrthographicCamera camera = new OrthographicCamera();
     CombatBackgroundComponent background = new CombatBackgroundComponent(texture, camera);
 
-    assertEquals(0, background.getLayer());
+    assertEquals(-1, background.getLayer());
     assertEquals(1f, background.getZIndex());
   }
 }

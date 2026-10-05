@@ -18,7 +18,6 @@ import com.csse3200.game.entities.factories.PlayerFactory;
 import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.CloudRenderComponent;
-import com.csse3200.game.rendering.TextureRenderComponent;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.utils.math.GridPoint2Utils;
