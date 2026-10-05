@@ -166,11 +166,11 @@ class EnemyStatusVisualIntegrationTest {
       coordinator.update();
       verify(entities, never()).unregister(visualEntity);
       // Sample the centre of each frame, after the existing coordinator's 0.3-second delay.
-      when(time.getDeltaTime()).thenReturn((allEnemies ? 0f : 0.3f) + 0.0625f);
+      when(time.getDeltaTime()).thenReturn((allEnemies ? 0f : 0.3f) + 0.09375f);
       visual.update();
       for (int frame = 0; frame < 4; frame++) {
         visual.render(batch);
-        when(time.getDeltaTime()).thenReturn(0.125f);
+        when(time.getDeltaTime()).thenReturn(0.1875f);
         visual.update();
       }
       ArgumentCaptor<TextureRegion> frames = ArgumentCaptor.forClass(TextureRegion.class);
@@ -256,7 +256,7 @@ class EnemyStatusVisualIntegrationTest {
     Entity marker = spawned(2).get(1);
     EnemyStatusEffectVisualComponent visual =
         marker.getComponent(EnemyStatusEffectVisualComponent.class);
-    when(time.getDeltaTime()).thenReturn(1f);
+    when(time.getDeltaTime()).thenReturn(1.1f);
     visual.update();
     coordinator.update();
     play(TargetType.SINGLE_ENEMY);
@@ -265,7 +265,7 @@ class EnemyStatusVisualIntegrationTest {
     assertNotNull(visuals.get(2).getComponent(EffectBurstComponent.class));
     SpriteBatch waitingBatch = mock(SpriteBatch.class);
     visual.render(waitingBatch);
-    verify(waitingBatch, times(2))
+    verify(waitingBatch, times(1))
         .draw(any(TextureRegion.class), anyFloat(), anyFloat(), anyFloat(), anyFloat());
     CombatStatsComponent stats = target.getComponent(CombatStatsComponent.class);
     assertEquals(22, stats.getHealth());
@@ -299,7 +299,7 @@ class EnemyStatusVisualIntegrationTest {
       ArgumentCaptor<TextureRegion> frame = ArgumentCaptor.forClass(TextureRegion.class);
       verify(batch).draw(frame.capture(), anyFloat(), anyFloat(), anyFloat(), anyFloat());
       assertEquals(0, frame.getValue().getRegionX());
-      assertEquals(256, frame.getValue().getRegionY());
+      assertEquals(0, frame.getValue().getRegionY());
       assertFalse(visual.isExpired());
     }
     stats.clearNegativeStatusEffects();

@@ -26,17 +26,17 @@ public final class EnemyStatusEffectVisuals {
     registry.register(
         EffectType.POISON,
         new EffectVisualStyle(
-            DIRECTORY + "poison.png", new Color(1f, 1f, 1f, 0.85f), 0.5f, 0.45f, 0.65f, 0.12f));
+            DIRECTORY + "poison.png", new Color(1f, 1f, 1f, 0.85f), 0.75f, 0.45f, 0.65f, 0.12f));
 
     registry.register(
         EffectType.VULNERABLE,
         new EffectVisualStyle(
-            DIRECTORY + "vulnerable.png", new Color(1f, 1f, 1f, 0.8f), 0.5f, 0.55f, 0.7f, 0f));
+            DIRECTORY + "vulnerable.png", new Color(1f, 1f, 1f, 0.8f), 0.75f, 0.55f, 0.7f, 0f));
 
     registry.register(
         EffectType.FEEBLE,
         new EffectVisualStyle(
-            DIRECTORY + "feeble.png", new Color(1f, 1f, 1f, 0.85f), 0.5f, 0.62f, 0.48f, -0.12f));
+            DIRECTORY + "feeble.png", new Color(1f, 1f, 1f, 0.85f), 0.75f, 0.62f, 0.48f, -0.12f));
   }
 
   /**
