@@ -16,14 +16,6 @@
   ],
   "Displaying": [
     {
-      "text": "Drag a card to yourself or your opponent",
-      "x": 300,
-      "y": 650,
-      "fontName": "large",
-      "scale": 1,
-      "variant": "cardDisplay"
-    },
-    {
       "text": "",
       "x": 0,
       "y": 90,

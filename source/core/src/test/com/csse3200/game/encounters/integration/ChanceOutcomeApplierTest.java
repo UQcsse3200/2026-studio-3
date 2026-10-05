@@ -153,6 +153,36 @@ class ChanceOutcomeApplierTest {
   }
 
   @Test
+  void shouldApplyTwoCardRewardsIncludingDuplicateIds() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
+    MockDeckGateway deck = new MockDeckGateway();
+
+    ChanceResolution result =
+        createCardApplier(player, deck)
+            .apply(ChanceOutcome.withCardRewards(0, 15, List.of("bandage", "bandage")));
+
+    assertTrue(result.isSuccess());
+    assertEquals(55, player.getCurrency());
+    assertEquals(List.of("bandage", "bandage"), deck.getCardIds());
+  }
+
+  @Test
+  void shouldRollbackEveryNewCardWithoutRemovingExistingDuplicatesWhenCurrencyFails() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
+    player.failNextCurrencyUpdate();
+    MockDeckGateway deck = new MockDeckGateway();
+    deck.addExistingCard("bandage");
+
+    ChanceResolution result =
+        createCardApplier(player, deck)
+            .apply(ChanceOutcome.withCardRewards(0, 15, List.of("bandage", "bandage")));
+
+    assertEquals(ChanceResolution.Status.PLAYER_UPDATE_FAILED, result.getStatus());
+    assertEquals(40, player.getCurrency());
+    assertEquals(List.of("bandage"), deck.getCardIds());
+  }
+
+  @Test
   void shouldRejectUnknownCardWithoutMutation() {
     MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
     MockDeckGateway deck = new MockDeckGateway();
