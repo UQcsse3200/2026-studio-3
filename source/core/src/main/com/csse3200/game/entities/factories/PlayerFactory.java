@@ -95,7 +95,6 @@ public class PlayerFactory {
             .addComponent(new PlayerStatsDisplay())
             .addComponent(new PlayerStatsTopDisplay(runState))
             .addComponent(new EnemyMemoryComponent())
-            .addComponent(new PlayerTrackerComponent())
             .addComponent(new PlayerTrackerComponent());
 
     runState.getOrCreatePlayerState().applyTo(player);

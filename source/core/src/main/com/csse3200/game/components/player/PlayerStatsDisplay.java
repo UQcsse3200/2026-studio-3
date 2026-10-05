@@ -120,7 +120,7 @@ public class PlayerStatsDisplay extends UIComponent {
     }
 
     Map<String, Integer> durations = stats.getStatusEffectDurations();
-    boolean hasStatus = !durations.isEmpty();
+    boolean hasStatus = durations.keySet().stream().anyMatch(PlayerStatsDisplay::isKnownDebuff);
     statusImage.setVisible(hasStatus);
     statusRow.setVisible(hasStatus);
 
@@ -130,6 +130,9 @@ public class PlayerStatsDisplay extends UIComponent {
     }
 
     for (Map.Entry<String, Integer> status : durations.entrySet()) {
+      if (!isKnownDebuff(status.getKey())) {
+        continue;
+      }
       Texture icon =
           ServiceLocator.getResourceService()
               .getAsset(IntentIcons.pathForStatus(status.getKey()), Texture.class);
@@ -143,6 +146,23 @@ public class PlayerStatsDisplay extends UIComponent {
       statusIcons.add(new Image(icon)).size(20f).padRight(2f);
       statusIcons.add(count).padRight(8f);
     }
+  }
+
+  /**
+   * Whether this status is one of the debuffs the row is meant to show.
+   *
+   * <p>The underlying map carries every status effect, including buffs from the player's own cards,
+   * which would otherwise appear under a "Debuff" label.
+   *
+   * @param statusKey key the effect is stored under
+   * @return true if the row should show it
+   */
+  private static boolean isKnownDebuff(String statusKey) {
+    String effectName = statusKey.split(":")[0];
+
+    return effectName.equals("SILENCE")
+        || effectName.equals("DAMAGE_ON_CARD_PLAY")
+        || effectName.equals("TAUNT");
   }
 
   /** Updates the position of the enemy's stats, so they are displayed directly below the enemy */

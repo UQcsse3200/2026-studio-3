@@ -38,7 +38,7 @@ public final class EnemyScaling {
     scaled.behaviour = base.behaviour;
     scaled.sprite = base.sprite;
     scaled.description = base.description;
-
+    scaled.renderScale = base.renderScale;
     return scaled;
   }
 
