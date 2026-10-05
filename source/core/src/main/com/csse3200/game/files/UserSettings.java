@@ -86,6 +86,12 @@ public class UserSettings {
     /** ui Scale. Currently unused, but can be implemented. */
     public float uiScale = 1f;
 
+    /** Music volume from 0 to 1, set by the slider on the settings screen. */
+    public float musicVolume = 0.5f;
+
+    /** Whether sound effects play, set by the switch on the settings screen. */
+    public boolean soundEffects = true;
+
     public DisplaySettings displayMode = null;
   }
 

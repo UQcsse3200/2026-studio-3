@@ -14,6 +14,7 @@ import com.csse3200.game.GdxGame.ScreenType;
 import com.csse3200.game.files.UserSettings;
 import com.csse3200.game.files.UserSettings.DisplaySettings;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.ui.UIComponent;
 import com.csse3200.game.utils.StringDecorator;
 import org.slf4j.Logger;
@@ -32,6 +33,8 @@ public class SettingsMenuDisplay extends UIComponent {
   private CheckBox fullScreenCheck;
   private CheckBox vsyncCheck;
   private Slider uiScaleSlider;
+  private Slider musicSlider;
+  private CheckBox soundEffectsCheck;
   private SelectBox<StringDecorator<DisplayMode>> displayModeSelect;
 
   public SettingsMenuDisplay(GdxGame game) {
@@ -85,6 +88,15 @@ public class SettingsMenuDisplay extends UIComponent {
     uiScaleSlider.setValue(settings.uiScale);
     Label uiScaleValue = new Label(String.format("%.2fx", settings.uiScale), skin);
 
+    Label musicLabel = new Label("Music Volume:", skin);
+    musicSlider = new Slider(0f, 1f, 0.05f, false, skin);
+    musicSlider.setValue(settings.musicVolume);
+    Label musicValue = new Label(percent(settings.musicVolume), skin);
+
+    Label soundEffectsLabel = new Label("Sound Effects:", skin);
+    soundEffectsCheck = new CheckBox("", skin);
+    soundEffectsCheck.setChecked(settings.soundEffects);
+
     Label displayModeLabel = new Label("Resolution:", skin);
     displayModeSelect = new SelectBox<>(skin);
     Monitor selectedMonitor = Gdx.graphics.getMonitor();
@@ -114,6 +126,18 @@ public class SettingsMenuDisplay extends UIComponent {
     table.add(uiScaleTable).left();
 
     table.row().padTop(10f);
+    Table musicTable = new Table();
+    musicTable.add(musicSlider).width(100).left();
+    musicTable.add(musicValue).left().padLeft(5f).expandX();
+
+    table.add(musicLabel).right().padRight(15f);
+    table.add(musicTable).left();
+
+    table.row().padTop(10f);
+    table.add(soundEffectsLabel).right().padRight(15f);
+    table.add(soundEffectsCheck).left();
+
+    table.row().padTop(10f);
     table.add(displayModeLabel).right().padRight(15f);
     table.add(displayModeSelect).left();
 
@@ -123,6 +147,17 @@ public class SettingsMenuDisplay extends UIComponent {
           float value = uiScaleSlider.getValue();
           uiScaleValue.setText(String.format("%.2fx", value));
           return true;
+        });
+
+    musicSlider.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent changeEvent, Actor actor) {
+            float value = musicSlider.getValue();
+            musicValue.setText(percent(value));
+            // Heard straight away so the player can judge it, but only saved on Apply.
+            AudioService.setMusicVolume(value);
+          }
         });
 
     return table;
@@ -194,14 +229,21 @@ public class SettingsMenuDisplay extends UIComponent {
     }
     settings.fullscreen = fullScreenCheck.isChecked();
     settings.uiScale = uiScaleSlider.getValue();
+    settings.musicVolume = musicSlider.getValue();
+    settings.soundEffects = soundEffectsCheck.isChecked();
     settings.displayMode = new DisplaySettings(displayModeSelect.getSelected().object);
     settings.vsync = vsyncCheck.isChecked();
 
     UserSettings.set(settings, true);
+    AudioService.setSoundEffectsOn(settings.soundEffects);
   }
 
   private void exitMenu() {
     game.setScreen(ScreenType.MAIN_MENU);
+  }
+
+  private static String percent(float volume) {
+    return Math.round(volume * 100) + "%";
   }
 
   private Integer parseOrNull(String num) {

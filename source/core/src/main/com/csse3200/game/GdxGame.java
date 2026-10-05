@@ -26,6 +26,7 @@ import com.csse3200.game.screens.MapScreen;
 import com.csse3200.game.screens.SaveLoadScreen;
 import com.csse3200.game.screens.SettingsScreen;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,6 +110,7 @@ public class GdxGame extends Game {
     }
     ServiceLocator.registerBestiaryService(bestiaryService);
     setScreen(newScreen(screenType));
+    AudioService.onScreenChanged(screenType, runState);
   }
 
   /** Opens the battle screen. Used by encounter navigation and the temporary debug shortcut. */
