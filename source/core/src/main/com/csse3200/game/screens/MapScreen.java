@@ -167,14 +167,23 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         new ImageTextButton(
             "Item Inventory", BattleMenuSkins.forIcon(BattleMenuSkins.Icon.INVENTORY));
     inventoryButton.pad(6f, 12f, 6f, 18f);
-    inventoryButton.getImageCell().size(48f);
     inventoryButton.getLabelCell().expandX().right();
 
     float buttonWidth = 247f;
     float buttonHeight = 48f;
     float offset = 24f;
+    float scale = 0.7f;
+    buttonWidth *= scale;
+    buttonHeight *= scale;
+    inventoryButton.getImageCell().size(48f * scale);
+    inventoryButton.getLabel().setFontScale(scale);
     inventoryButton.setSize(buttonWidth, buttonHeight);
-    inventoryButton.setPosition(offset, stage.getHeight() - buttonHeight - offset);
+
+    float legendCentreX = stage.getWidth() * 0.90f;
+    float legendBottomY = stage.getHeight() * 0.295f;
+    float gap = 56f;
+    inventoryButton.setPosition(
+        legendCentreX - buttonWidth / 2f, legendBottomY - buttonHeight - gap);
 
     inventoryButton.addListener(
         new ChangeListener() {
