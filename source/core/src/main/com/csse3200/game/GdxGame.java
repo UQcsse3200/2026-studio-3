@@ -80,7 +80,7 @@ public class GdxGame extends Game {
    */
   public String getBackgroundId() {
     String backgroundId =
-        BACKGROUND_IDS[(getRunState().getMapProgression() - 1) % BACKGROUND_IDS.length];
+        BACKGROUND_IDS[(getRunState().getMapGraph().getCurrentNode().getHeight() - 1) % BACKGROUND_IDS.length];
     logger.debug("Background Id: {}", backgroundId);
     return backgroundId;
   }
