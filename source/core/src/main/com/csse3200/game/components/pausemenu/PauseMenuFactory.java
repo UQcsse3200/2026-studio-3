@@ -17,6 +17,7 @@ import com.csse3200.game.save.SaveGameService;
 import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import java.util.List;
 
 /**
@@ -89,6 +90,10 @@ public final class PauseMenuFactory {
 
     // Open the save overlay when the pause menu's Save & Load button fires its event.
     uiEntity.getEvents().addListener(PauseMenuDisplay.SAVE_LOAD_EVENT, savePanel::show);
+
+    // Swap to the pause music while the menu is open.
+    uiEntity.getEvents().addListener(PauseMenuDisplay.PAUSE_EVENT, AudioService::onGamePaused);
+    uiEntity.getEvents().addListener(PauseMenuDisplay.RESUME_EVENT, AudioService::onGameResumed);
     return savePanel;
   }
 

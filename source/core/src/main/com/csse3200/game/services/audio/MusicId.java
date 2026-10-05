@@ -16,5 +16,6 @@ public enum MusicId {
   LIBRARY_STUDY,
   ELITE_BATTLE,
   BOSS_BATTLE,
-  SHOP
+  SHOP,
+  PAUSE_MENU
 }

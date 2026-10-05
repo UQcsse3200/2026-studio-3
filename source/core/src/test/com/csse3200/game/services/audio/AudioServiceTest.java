@@ -8,13 +8,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -22,6 +28,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.csse3200.game.GdxGame.ScreenType;
 import com.csse3200.game.extensions.GameExtension;
+import com.csse3200.game.files.UserSettings;
+import com.csse3200.game.files.UserSettings.Settings;
 import com.csse3200.game.maps.MapGraph;
 import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.RoomType;
@@ -29,6 +37,7 @@ import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,8 +46,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
-/** Covers the music, victory sound, button clicks and settings added to AudioService. */
+/** Covers the music, sounds, button clicks, volume settings and pause music in AudioService. */
 @ExtendWith(GameExtension.class)
 class AudioServiceTest {
   private static final List<String> MENU_TRACKS =
@@ -52,11 +62,16 @@ class AudioServiceTest {
   private static final String VICTORY = "sounds/victory.ogg";
   private static final String CLICK = "sounds/buttonClick.ogg";
   private static final String DEFEAT = "sounds/defeat.ogg";
+  private static final String ERROR = "sounds/error.mp3";
+  private static final String PAUSE = "music/pauseMenu.ogg";
+
+  @TempDir Path folder;
 
   private final List<String> started = new ArrayList<>();
   private final Map<String, Music> tracks = new HashMap<>();
   private final Map<String, Sound> sounds = new HashMap<>();
   private ResourceService resources;
+  private Files realFiles;
 
   @BeforeEach
   void setUp() {
@@ -72,11 +87,20 @@ class AudioServiceTest {
         .thenAnswer(call -> sounds.computeIfAbsent(call.getArgument(0), p -> mock(Sound.class)));
     ServiceLocator.registerResourceService(resources);
     AudioService.reset();
+
+    // keep the tests away from the real settings file, starting from the default settings
+    realFiles = Gdx.files;
+    Gdx.files = spy(realFiles);
+    doReturn(new FileHandle(folder.resolve("settings.json").toFile()))
+        .when(Gdx.files)
+        .external(anyString());
+    UserSettings.set(new Settings(), false);
   }
 
   @AfterEach
   void tearDown() {
     AudioService.reset();
+    Gdx.files = realFiles;
   }
 
   @Test
@@ -261,21 +285,58 @@ class AudioServiceTest {
     assertEquals(0, root.getListeners().size);
   }
 
+  /** 100% on the sliders is the normal music level of 0.5, so 60% plays at 0.3. */
   @Test
-  void tracksStartAtTheChosenVolume() {
-    AudioService.setMusicVolume(0.3f);
+  void tracksStartAtTheSavedVolume() {
+    UserSettings.set(volumes(0.6f, 1f), false);
 
     AudioService.onScreenChanged(ScreenType.MAP);
 
     verify(tracks.get(lastStarted())).setVolume(0.3f);
   }
 
-  /** Dragging the settings slider has to change the track you can already hear. */
+  /** Pressing Apply in the settings has to change the track you can already hear. */
   @Test
   void changingTheVolumeAffectsTheTrackAlreadyPlaying() {
     AudioService.onScreenChanged(ScreenType.MAP);
 
-    AudioService.setMusicVolume(0.2f);
+    UserSettings.applyAudioSettings(volumes(0.4f, 1f));
+
+    verify(tracks.get(lastStarted())).setVolume(0.2f);
+  }
+
+  @Test
+  void soundEffectsFollowTheirSlider() {
+    UserSettings.set(volumes(1f, 0.5f), false);
+    AudioService.onScreenChanged(ScreenType.MAP);
+
+    AudioService.playSound(SoundId.ERROR, 0.8f);
+
+    verify(sounds.get(ERROR)).play(0.4f);
+  }
+
+  @Test
+  void muteSilencesMusicAndSoundEffects() {
+    AudioService.onScreenChanged(ScreenType.MAP);
+    Settings muted = new Settings();
+    muted.muted = true;
+
+    UserSettings.applyAudioSettings(muted);
+    AudioService.playSound(SoundId.ERROR, 0.8f);
+
+    verify(tracks.get(lastStarted())).setVolume(0f);
+    verify(sounds.get(ERROR)).play(0f);
+  }
+
+  /** Some screens clear the ServiceLocator when they close, which unhooks the settings. */
+  @Test
+  void theSettingsStayConnectedAfterTheServiceLocatorIsCleared() {
+    AudioService.onScreenChanged(ScreenType.MAP);
+    ServiceLocator.clear();
+    ServiceLocator.registerResourceService(resources);
+
+    AudioService.onScreenChanged(ScreenType.BATTLE_SCREEN);
+    UserSettings.applyAudioSettings(volumes(0.4f, 1f));
 
     verify(tracks.get(lastStarted())).setVolume(0.2f);
   }
@@ -316,6 +377,78 @@ class AudioServiceTest {
     verify(tracks.get(lastStarted())).play();
   }
 
+  @Test
+  void pausingSwapsToThePauseMusic() {
+    AudioService.onScreenChanged(ScreenType.MAP);
+    Music mapTrack = tracks.get(lastStarted());
+
+    AudioService.onGamePaused();
+
+    verify(mapTrack).pause();
+    assertEquals(PAUSE, lastStarted());
+    verify(tracks.get(PAUSE)).play();
+  }
+
+  @Test
+  void resumingCarriesOnTheSameSong() {
+    AudioService.onScreenChanged(ScreenType.MAP);
+    Music mapTrack = tracks.get(lastStarted());
+
+    AudioService.onGamePaused();
+    AudioService.onGameResumed();
+
+    verify(tracks.get(PAUSE)).stop();
+    verify(mapTrack, times(2)).play();
+    assertEquals(2, started.size());
+  }
+
+  @Test
+  void pausingTwiceOnlyStartsThePauseMusicOnce() {
+    AudioService.onScreenChanged(ScreenType.MAP);
+
+    AudioService.onGamePaused();
+    AudioService.onGamePaused();
+
+    assertEquals(2, started.size());
+  }
+
+  @Test
+  void resumingWithoutPausingLeavesTheMusicAlone() {
+    AudioService.onScreenChanged(ScreenType.MAP);
+    Music mapTrack = tracks.get(lastStarted());
+
+    AudioService.onGameResumed();
+
+    verify(mapTrack, never()).stop();
+    verify(mapTrack, times(1)).play();
+  }
+
+  @Test
+  void quittingFromThePauseMenuGoesToTheMenuMusic() {
+    AudioService.onScreenChanged(ScreenType.MAP);
+    Music mapTrack = tracks.get(lastStarted());
+    AudioService.onGamePaused();
+
+    AudioService.onScreenChanged(ScreenType.MAIN_MENU);
+
+    verify(tracks.get(PAUSE)).stop();
+    verify(mapTrack).stop();
+    assertTrue(MENU_TRACKS.contains(lastStarted()));
+  }
+
+  @Test
+  void theVolumeCanChangeWhilePaused() {
+    AudioService.onScreenChanged(ScreenType.MAP);
+    Music mapTrack = tracks.get(lastStarted());
+    AudioService.onGamePaused();
+
+    UserSettings.applyAudioSettings(volumes(0.4f, 1f));
+    AudioService.onGameResumed();
+
+    verify(tracks.get(PAUSE)).setVolume(0.2f);
+    verify(mapTrack).setVolume(0.2f);
+  }
+
   /** The IDs match the file lists by position, so a missing or out of order entry shows up here. */
   @Test
   void everyMusicAndSoundPointsAtARealFile() {
@@ -347,6 +480,13 @@ class AudioServiceTest {
     run.startRun(graph, 0);
     run.enterEncounter(1);
     return run;
+  }
+
+  private static Settings volumes(float music, float soundEffects) {
+    Settings settings = new Settings();
+    settings.musicVolume = music;
+    settings.soundEffectsVolume = soundEffects;
+    return settings;
   }
 
   private String lastStarted() {
