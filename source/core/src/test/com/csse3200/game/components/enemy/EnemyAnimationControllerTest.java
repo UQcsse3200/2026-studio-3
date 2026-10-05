@@ -19,8 +19,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import com.csse3200.game.components.CombatStatsComponent;
-import com.csse3200.game.components.combat.BattleController;
-import com.csse3200.game.components.combat.BattlePhase;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.events.EventHandler;
@@ -31,7 +29,6 @@ import com.csse3200.game.rendering.AnimationRenderComponent;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ServiceLocator;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -409,47 +406,5 @@ class EnemyAnimationControllerTest {
     attacker.create();
     attacker.setPosition(10f, 3f);
     return attacker;
-  }
-
-  @Test
-  void battleWaitsBetweenEnemiesWithoutRepeatingDamageOrStatusTicks() {
-    Entity first = battleEnemy();
-    Entity second = battleEnemy();
-    CombatStatsComponent firstStats = first.getComponent(CombatStatsComponent.class);
-    firstStats.applyStatusEffect("FEEBLE", 1, 2);
-    firstStats.applyStatusEffect("POISON", 1, 2);
-    CombatStatsComponent playerStats = new CombatStatsComponent(100, 0);
-    Entity player = new Entity().addComponent(playerStats);
-    BattleController battle = new BattleController(player, List.of(first, second));
-    when(time.getDeltaTime()).thenReturn(0.15f);
-    battle.start();
-    for (int round = 0; round < 2; round++) {
-      int before = playerStats.getHealth();
-      battle.endPlayerTurn();
-      assertEquals(BattlePhase.ENEMY_ATTACK, battle.getCurrentPhase());
-      assertEquals(0, battle.getCurrentEnemyIndex());
-      assertEquals(before - 6, playerStats.getHealth());
-      assertEquals(29 - round, firstStats.getHealth());
-      assertEquals(2 - round, firstStats.getStatusEffect("FEEBLE").getDuration());
-      first.update();
-      assertTrue(first.getPosition().x < 10f);
-      assertEquals(new Vector2(10f, 3f), second.getPosition());
-      assertEquals(before - 6, playerStats.getHealth());
-      first.update();
-      assertEquals(new Vector2(10f, 3f), first.getPosition());
-      assertEquals(1, battle.getCurrentEnemyIndex());
-      assertEquals(before - 14, playerStats.getHealth());
-      if (round == 0) assertEquals(1, firstStats.getStatusEffect("FEEBLE").getDuration());
-      else assertFalse(firstStats.hasStatusEffect("FEEBLE"));
-      second.update();
-      assertTrue(second.getPosition().x < 10f);
-      second.update();
-      assertEquals(new Vector2(10f, 3f), second.getPosition());
-      assertEquals(BattlePhase.PLAYER_TURN, battle.getCurrentPhase());
-      first.update();
-      second.update();
-      assertEquals(before - 14, playerStats.getHealth());
-    }
-    assertFalse(firstStats.hasStatusEffect("POISON"));
   }
 }

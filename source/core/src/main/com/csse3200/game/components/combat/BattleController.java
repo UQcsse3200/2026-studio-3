@@ -12,7 +12,6 @@ import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.cards.CardEffectHandler;
-import com.csse3200.game.components.enemy.EnemyAnimationController;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.enemy.IntentEffectType;
@@ -826,19 +825,7 @@ public class BattleController {
             + damage
             + (playerStats != null ? " (you have " + playerStats.getHealth() + " HP)" : "")
             + ".");
-    // Keep each hit with its own action; advance only after this enemy returns.
-    Runnable resolved =
-        () -> {
-          if (currentPhase == BattlePhase.ENEMY_ATTACK && getActiveEnemy() == enemy) {
-            handle(BattleEvent.ENEMY_ACTION_RESOLVED);
-          }
-        };
-    EnemyAnimationController animation = enemy.getComponent(EnemyAnimationController.class);
-    if (animation == null) {
-      resolved.run();
-    } else {
-      animation.runAfterAttack(resolved);
-    }
+    handle(BattleEvent.ENEMY_ACTION_RESOLVED);
   }
 
   private void enterEnemyDefend() {
