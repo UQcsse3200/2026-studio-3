@@ -1,5 +1,6 @@
 package com.csse3200.game.components.spritedisplay.displaying;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Scaling;
+import com.csse3200.game.GdxGame;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rewards.ItemFormatting;
@@ -27,7 +29,6 @@ import java.util.Map;
 public class RewardDisplay extends Displaying {
   public static final String REWARD_CLAIMED_EVENT = "rewardClaimed";
 
-  private static final String BACKGROUND_TEXTURE = "images/battle_background.png";
   private static final String PANEL_TEXTURE = "images/ui/reward-panel.png";
   private static final String CARD_TEXTURE = "images/ui/reward-card.png";
   private static final String GOLD_TEXTURE = "images/ui/gold-reward.png";
@@ -45,6 +46,7 @@ public class RewardDisplay extends Displaying {
           ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png");
 
   private final RunState runState;
+  private final GdxGame game;
   private final RewardService rewardService;
   private List<RewardOption> options;
   private boolean claimed;
@@ -53,10 +55,11 @@ public class RewardDisplay extends Displaying {
   private Actor scrim;
   private Actor rewardUi;
 
-  public RewardDisplay(DisplayingRecord rec, RewardService rewardService, RunState runState) {
+  public RewardDisplay(DisplayingRecord rec, RewardService rewardService, GdxGame game) {
     super(rec);
     this.rewardService = rewardService;
-    this.runState = runState;
+    this.runState = game.getRunState();
+    this.game = game;
   }
 
   @Override
@@ -77,7 +80,8 @@ public class RewardDisplay extends Displaying {
       return;
     }
 
-    Image scene = new Image(texture(BACKGROUND_TEXTURE));
+    Image scene =
+        new Image(new Texture(Gdx.files.internal("images/" + game.getBackgroundId() + ".png")));
     scene.setScaling(Scaling.fill);
     scene.setFillParent(true);
     background = scene;

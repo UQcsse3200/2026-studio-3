@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 public class EndBattleScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(EndBattleScreen.class);
   private static final String[] REWARD_TEXTURES = {
-    "images/battle_background.png",
     "images/ui/reward-panel.png",
     "images/ui/reward-card.png",
     "images/ui/gold-reward.png",
@@ -80,7 +79,7 @@ public class EndBattleScreen extends ScreenAdapter {
       RewardService rewardService = new RewardService();
       DisplayingRecord rewardRecord =
           DisplayingRecord.builder("").position(0, 500).variant("reward").build();
-      ui.addComponent(new RewardDisplay(rewardRecord, rewardService, game.getRunState()));
+      ui.addComponent(new RewardDisplay(rewardRecord, rewardService, game));
       requiresPlayerChoice = true;
 
       CardService cardLibrary = new CardLibrary(CardConfigLoader.loadCards());

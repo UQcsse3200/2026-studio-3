@@ -463,12 +463,12 @@ public class ShopDisplay extends UIComponent {
     Label priceLabel;
     if (discount > 0f) {
       priceLabel =
-              new Label(
-                      String.format("%d GOLD (-%.0f%%)", discountedPrice, discount * 100),
-                      createLabelStyle(DEFAULT, GOLD_COLOUR));
+          new Label(
+              String.format("%d GOLD (-%.0f%%)", discountedPrice, discount * 100),
+              createLabelStyle(DEFAULT, GOLD_COLOUR));
     } else {
       priceLabel =
-              new Label(String.format("%d GOLD", fullPrice), createLabelStyle(DEFAULT, GOLD_COLOUR));
+          new Label(String.format("%d GOLD", fullPrice), createLabelStyle(DEFAULT, GOLD_COLOUR));
     }
 
     Label stockLabel = new Label("", createLabelStyle("small", MUTED_COLOUR));
