@@ -61,27 +61,43 @@ public class EnemyAnimationController extends Component {
       }
     }
     String currentAnimation = animator.getCurrentAnimation();
+    // Switching to idle resets the renderer's completion state.
+    boolean animationFinished = animator.isFinished();
     if (("hurt".equals(currentAnimation)
             || "attack".equals(currentAnimation)
             || "cast".equals(currentAnimation)
             || "defend".equals(currentAnimation))
-        && animator.isFinished()) {
+        && animationFinished) {
       animator.startAnimation("idle");
     }
     if (attackInProgress
         && attackOrigin == null
-        && (!"attack".equals(currentAnimation) || animator.isFinished())) {
+        && (!"attack".equals(currentAnimation) || animationFinished)) {
       finishAttack();
     }
   }
 
-  /** Continue the battle once both the attack frames and return motion have finished. */
+  /**
+   * Registers one continuation after an attack starts, or runs it immediately when idle. Completion
+   * or a combat interruption releases it once; cancellation and disposal discard it. The caller
+   * owns action ordering and must check whether the battle is still active.
+   */
   public void runAfterAttack(Runnable continuation) {
     if (disposed) return;
     if (attackInProgress) {
       afterAttack = continuation;
     } else {
       continuation.run();
+    }
+  }
+
+  /** Restore the position and discard the pending continuation without advancing combat. */
+  public void cancelAttack() {
+    afterAttack = null;
+    attackInProgress = false;
+    resetAttackMotion();
+    if (!disposed && !defeated && "attack".equals(animator.getCurrentAnimation())) {
+      animator.startAnimation("idle");
     }
   }
 
@@ -147,9 +163,7 @@ public class EnemyAnimationController extends Component {
   @Override
   public void dispose() {
     disposed = true;
-    afterAttack = null; // Leaving battle must not start another enemy's action.
-    attackInProgress = false;
-    resetAttackMotion();
+    cancelAttack();
     entity.getEvents().removeListener("enemyAttack", attackListener);
     entity.getEvents().removeListener("enemyDamaged", damagedListener);
     entity.getEvents().removeListener("enemyDefeated", defeatedListener);

@@ -372,9 +372,12 @@ class EnemyAnimationControllerTest {
   @Test
   void interruptedAttackCompletesButDisposalNeverContinuesBattle() {
     EnemyAnimationController controller = enemy.getComponent(EnemyAnimationController.class);
-    for (String event : new String[] {"enemyDamaged", "enemyDefeated"}) {
+    when(time.getDeltaTime()).thenReturn(0.1f);
+    for (String event :
+        new String[] {"enemyDamaged", "enemyCast", "enemyDefend", "enemyDefeated"}) {
       Runnable complete = mock(Runnable.class);
       enemy.getEvents().trigger("enemyAttack");
+      enemy.update();
       controller.runAfterAttack(complete);
       if (event.equals("enemyDamaged")) enemy.getEvents().trigger(event, 1);
       else enemy.getEvents().trigger(event);
@@ -395,16 +398,105 @@ class EnemyAnimationControllerTest {
     verify(afterExit, never()).run();
   }
 
+  @Test
+  void explicitCancellationDropsContinuationAndAllowsNextAttack() {
+    EnemyAnimationController controller = enemy.getComponent(EnemyAnimationController.class);
+    when(time.getDeltaTime()).thenReturn(0.1f);
+    when(animator.hasAnimation("attack")).thenReturn(true);
+    when(animator.getCurrentAnimation()).thenReturn("attack");
+    Runnable cancelled = mock(Runnable.class);
+    enemy.getEvents().trigger("enemyAttack");
+    controller.runAfterAttack(cancelled);
+    enemy.update();
+    assertTrue(enemy.getPosition().x < 10f);
+    controller.cancelAttack();
+    assertEquals(new Vector2(10f, 3f), enemy.getPosition());
+    verify(animator, times(2)).startAnimation("idle");
+    enemy.update();
+    verify(cancelled, never()).run();
+
+    Runnable next = mock(Runnable.class);
+    enemy.getEvents().trigger("enemyAttack");
+    controller.runAfterAttack(next);
+    when(animator.isFinished()).thenReturn(true);
+    when(time.getDeltaTime()).thenReturn(0.3f);
+    enemy.update();
+    enemy.update();
+    verify(next).run();
+    verify(cancelled, never()).run();
+    assertEquals(new Vector2(10f, 3f), enemy.getPosition());
+  }
+
   private Entity battleEnemy() {
+    return battleEnemy(mock(AnimationRenderComponent.class));
+  }
+
+  private Entity battleEnemy(AnimationRenderComponent animation) {
     Entity attacker =
         new Entity()
             .addComponent(new CombatStatsComponent(30, 8))
             .addComponent(new EnemyStatsComponent("audit"))
             .addComponent(new EnemyBehaviourComponent("attack", context -> EnemyIntent.attack(8)))
-            .addComponent(mock(AnimationRenderComponent.class))
+            .addComponent(animation)
             .addComponent(new EnemyAnimationController());
     attacker.create();
     attacker.setPosition(10f, 3f);
     return attacker;
+  }
+
+  @Test
+  void completionCanSequenceTwoRealAttacksWithoutReplayingDamage() {
+    ServiceLocator.registerRenderService(mock(RenderService.class));
+    ServiceLocator.registerEntityService(new EntityService());
+    when(time.getDeltaTime()).thenReturn(0.1f);
+    TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("images/enemies/tomb_guardian.atlas"));
+    AnimationRenderComponent animation = new AnimationRenderComponent(atlas);
+    animation.addAnimation("idle", 0.5f, Animation.PlayMode.LOOP);
+    animation.addAnimation("attack", 0.4f);
+    Entity first = battleEnemy(animation);
+    Entity second = battleEnemy();
+    CombatStatsComponent playerStats = new CombatStatsComponent(100, 0);
+    Entity player = new Entity().addComponent(playerStats);
+    Runnable complete = mock(Runnable.class);
+    SpriteBatch batch = mock(SpriteBatch.class);
+    try {
+      first.getComponent(EnemyBehaviourComponent.class).rollIntent();
+      second.getComponent(EnemyBehaviourComponent.class).rollIntent();
+      first.getComponent(EnemyBehaviourComponent.class).executeIntent(player);
+      // Simulates the caller's completion gate; the production turn loop is not wired to it yet.
+      first
+          .getComponent(EnemyAnimationController.class)
+          .runAfterAttack(
+              () -> {
+                assertEquals(new Vector2(10f, 3f), first.getPosition());
+                assertEquals("idle", animation.getCurrentAnimation());
+                second.getComponent(EnemyBehaviourComponent.class).executeIntent(player);
+                second.getComponent(EnemyAnimationController.class).runAfterAttack(complete);
+              });
+      for (int frame = 0; frame < 4; frame++) {
+        first.update();
+        second.update();
+        assertEquals(92, playerStats.getHealth());
+        assertEquals(new Vector2(10f, 3f), second.getPosition());
+        animation.render(batch);
+      }
+      first.update();
+      assertEquals(84, playerStats.getHealth());
+      second.update();
+      assertTrue(second.getPosition().x < 10f);
+      verify(complete, never()).run();
+      for (int frame = 0; frame < 5; frame++) {
+        first.update();
+        second.update();
+      }
+      verify(complete).run();
+      assertEquals(84, playerStats.getHealth());
+      assertEquals(new Vector2(10f, 3f), first.getPosition());
+      assertEquals(new Vector2(10f, 3f), second.getPosition());
+    } finally {
+      first.dispose();
+      second.dispose();
+      atlas.dispose();
+    }
   }
 }
