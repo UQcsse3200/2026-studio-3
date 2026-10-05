@@ -47,10 +47,20 @@ public final class PlayerEffectVisuals {
         new EffectVisualStyle(null, new Color(Color.PURPLE), 0.75f, 2f, 1.3f, 0f));
   }
 
+  /**
+   * Check if the effect type need to use Burst
+   *
+   * @return true if the effect type are either energy gain or cleanse. Else false
+   */
   public static boolean usesBurst(EffectType type) {
     return type == EffectType.ENERGY_GAIN || type == EffectType.CLEANSE;
   }
 
+  /**
+   * Check which type effect it is and change the component accordingly.
+   *
+   * @return EffectBurstComponent
+   */
   public static EffectBurstComponent createBurstComponent(
       EffectType type, EffectVisualStyle style, float baseSize, float startDelay) {
     boolean hasGravity = false;
