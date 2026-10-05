@@ -134,6 +134,8 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
     ProgressSaveData progress =
         new ProgressSaveData(pendingRewardId, resumeScreen, bestiaryProgress);
     progress.encounterSeed = runState.getEncounterSeed();
+    progress.pendingEliteTempleReward = runState.hasPendingEliteTempleReward();
+    progress.cardFusionUsed = runState.hasUsedCardFusion();
     return progress;
   }
 }
