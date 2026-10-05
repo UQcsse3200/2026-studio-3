@@ -1,6 +1,7 @@
 package com.csse3200.game.screens;
 
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -9,6 +10,7 @@ import com.csse3200.game.areas.ForestGameArea;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
+import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.debug.CardEffectDebugComponent;
 import com.csse3200.game.cards.debug.CardEffectDebugDisplay;
@@ -118,6 +120,7 @@ public class BattleScreen extends ScreenAdapter {
   private final CardPlayService cardPlayService;
   private final CardAimController enemyCardAim;
   private final CardAimController playerCardAim;
+  private final CardAimController allEnemiesCardAim;
   private ClickableFactory uiFactory;
   private final PlayerRunState playerState;
   private List<ClickableRecord> staticUiRecords;
@@ -198,7 +201,16 @@ public class BattleScreen extends ScreenAdapter {
         new CardAimController(
             ServiceLocator.getRenderService().getStage(),
             ServiceLocator.getCamera(),
-            Map.of("player", player));
+            Map.of("player", player),
+            TargetType.SELF,
+            this::battlefieldBounds);
+    allEnemiesCardAim =
+        new CardAimController(
+            ServiceLocator.getRenderService().getStage(),
+            ServiceLocator.getCamera(),
+            enemyTargets,
+            TargetType.ALL_ENEMIES,
+            this::battlefieldBounds);
     cardEffects = new CardEffectResolutionService(library);
     cardPlayService =
         new CardPlayService(
@@ -278,6 +290,8 @@ public class BattleScreen extends ScreenAdapter {
     uiFactory = new ClickableFactory(buildAllRecords());
     uiFactory.registerInstanceVariant("aimDrag", rec -> new DragNDrop(rec, enemyCardAim));
     uiFactory.registerInstanceVariant("selfAimDrag", rec -> new DragNDrop(rec, playerCardAim));
+    uiFactory.registerInstanceVariant(
+        "allEnemiesAimDrag", rec -> new DragNDrop(rec, allEnemiesCardAim));
 
     // PROPOSED: debug terminal for cheats/commands during battle (skip battle, give gold, etc.
     // — commands added separately). Same Terminal/KeyboardTerminalInputComponent/TerminalDisplay
@@ -381,6 +395,7 @@ public class BattleScreen extends ScreenAdapter {
     playerState.captureFrom(gameArea.getPlayer());
     enemyCardAim.dispose();
     playerCardAim.dispose();
+    allEnemiesCardAim.dispose();
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
@@ -432,6 +447,15 @@ public class BattleScreen extends ScreenAdapter {
     return records;
   }
 
+  /** The battle play area above the raised hand and below the top controls/battle log. */
+  private Rectangle battlefieldBounds() {
+    Stage stage = ServiceLocator.getRenderService().getStage();
+    // Cards rise by 120 on hover; leave another 24 pixels before accepting a battlefield drop.
+    float bottom = Math.max(0f, stage.getHeight() - HAND_Y + CARD_HEIGHT + 144f);
+    float top = stage.getHeight() - 180f;
+    return new Rectangle(0f, bottom, stage.getWidth(), Math.max(0f, top - bottom));
+  }
+
   /**
    * Builds one widget per card slot in {@link #handRowOrder} — a fixed left-to-right layout that
    * only changes wholesale via {@link #onDeckRearranged}. Each slot renders the exact {@link
@@ -471,7 +495,7 @@ public class BattleScreen extends ScreenAdapter {
           switch (card.target) {
             case SELF -> "selfAimDrag";
             case SINGLE_ENEMY -> "aimDrag";
-            case ALL_ENEMIES -> "drag";
+            case ALL_ENEMIES -> "allEnemiesAimDrag";
           };
 
       Skin cardSkin = CardImageSkins.forTexturePath(card.texturePath);
@@ -490,7 +514,7 @@ public class BattleScreen extends ScreenAdapter {
               .rotation(rotation)
               .disabled(disabled);
 
-      // The drag source supplies the selected player or enemy ID on release.
+      // The drag source supplies a player/enemy ID or an all-enemies marker on a valid drop.
       builder.args(instance.instanceId());
 
       records.add(builder.build());
