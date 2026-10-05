@@ -160,7 +160,7 @@ public class EnemyBehaviourComponent extends Component {
 
     CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
     if (targetStats != null) {
-      targetStats.takeDamage(currentIntent.getValue());
+      targetStats.takeDamage(outgoingDamage());
     }
   }
 
