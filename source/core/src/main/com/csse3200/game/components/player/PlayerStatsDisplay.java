@@ -9,9 +9,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.enemy.IntentIcons;
+import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.UIComponent;
+import java.util.HashMap;
 import java.util.Map;
 
 /** A ui component for displaying player stats, e.g. health. */
@@ -24,6 +27,10 @@ public class PlayerStatsDisplay extends UIComponent {
   private Image statusImage;
   private Table statusRow;
   private Table statusIcons;
+  private Map<String, Integer> displayedStatusDurations;
+  private boolean statusRowDirty = true;
+  private boolean disposed;
+  private final EventListener1<String> statusChangeListener = this::onStatusChanged;
   private static final float FONT_SCALE = 0.75f;
   private static final String STYLE_NAME_LARGE = "large";
 
@@ -35,6 +42,9 @@ public class PlayerStatsDisplay extends UIComponent {
 
     entity.getEvents().addListener("updateHealth", this::updatePlayerHealthUI);
     entity.getEvents().addListener("updateEnergy", this::updatePlayerEnergyUI);
+    entity.getEvents().addListener("statusEffectApplied", statusChangeListener);
+    entity.getEvents().addListener("statusEffectRemoved", statusChangeListener);
+    updateStatusRow();
   }
 
   /**
@@ -104,23 +114,59 @@ public class PlayerStatsDisplay extends UIComponent {
 
   @Override
   public void update() {
+    if (disposed) {
+      return;
+    }
     updatePosition();
     updateStatusRow();
+  }
+
+  private void onStatusChanged(String statusKey) {
+    if (isKnownDebuff(statusKey)) {
+      statusRowDirty = true;
+    }
+  }
+
+  private boolean hasStatusDurationChanged(CombatStatsComponent stats) {
+    for (Map.Entry<String, Integer> status : displayedStatusDurations.entrySet()) {
+      StatusEffect effect = stats.getStatusEffect(status.getKey());
+      if (effect == null || effect.getDuration() != status.getValue()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
    * Rebuilds the status row from the player's active effects, one icon and turn count each.
    *
-   * <p>The whole row is hidden while nothing is active, so the panel stays clean outside combat.
+   * <p>Application/removal events mark the row dirty. Cached durations are checked separately
+   * because ticking a live status does not always emit an event. Unchanged frames neither fetch a
+   * new status snapshot nor rebuild actors. The whole row is hidden while no displayed debuff is
+   * active.
    */
   private void updateStatusRow() {
     CombatStatsComponent stats = entity.getComponent(CombatStatsComponent.class);
     if (statusIcons == null || stats == null) {
       return;
     }
+    if (!statusRowDirty && !hasStatusDurationChanged(stats)) {
+      return;
+    }
 
-    Map<String, Integer> durations = stats.getStatusEffectDurations();
-    boolean hasStatus = durations.keySet().stream().anyMatch(PlayerStatsDisplay::isKnownDebuff);
+    statusRowDirty = false;
+    Map<String, Integer> durations = new HashMap<>();
+    for (Map.Entry<String, Integer> status : stats.getStatusEffectDurations().entrySet()) {
+      if (isKnownDebuff(status.getKey())) {
+        durations.put(status.getKey(), status.getValue());
+      }
+    }
+    if (durations.equals(displayedStatusDurations)) {
+      return;
+    }
+    displayedStatusDurations = Map.copyOf(durations);
+
+    boolean hasStatus = !durations.isEmpty();
     statusImage.setVisible(hasStatus);
     statusRow.setVisible(hasStatus);
 
@@ -130,9 +176,6 @@ public class PlayerStatsDisplay extends UIComponent {
     }
 
     for (Map.Entry<String, Integer> status : durations.entrySet()) {
-      if (!isKnownDebuff(status.getKey())) {
-        continue;
-      }
       Texture icon =
           ServiceLocator.getResourceService()
               .getAsset(IntentIcons.pathForStatus(status.getKey()), Texture.class);
@@ -208,10 +251,13 @@ public class PlayerStatsDisplay extends UIComponent {
 
   @Override
   public void dispose() {
+    if (disposed) {
+      return;
+    }
+    disposed = true;
+    entity.getEvents().removeListener("statusEffectApplied", statusChangeListener);
+    entity.getEvents().removeListener("statusEffectRemoved", statusChangeListener);
     super.dispose();
-    heartImage.remove();
-    healthLabel.remove();
-    energyImage.remove();
-    energyLabel.remove();
+    table.remove();
   }
 }
