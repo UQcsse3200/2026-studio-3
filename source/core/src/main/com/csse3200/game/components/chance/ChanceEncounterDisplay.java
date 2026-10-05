@@ -327,6 +327,21 @@ public class ChanceEncounterDisplay extends UIComponent {
         });
     scene.addActor(continueButton);
 
+    helpDialog =
+        new ContextualHelpDialog(
+            skin, EventHelpContent.FUSION_TITLE, EventHelpContent.FUSION_RULES);
+    helpButton = new TextButton("?", FusionSceneAssets.buttonStyle(skin, false));
+    helpButton.setName("fusion-intro-help-button");
+    helpButton.setBounds(1150f, 685f, 68f, 58f);
+    helpButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent changeEvent, Actor actor) {
+            helpDialog.show(stage);
+          }
+        });
+    scene.addActor(helpButton);
+
     rootTable.add(scene).size(FusionSceneAssets.WIDTH, FusionSceneAssets.HEIGHT);
     stage.addActor(rootTable);
     rootTable.addAction(Actions.fadeIn(0.25f));

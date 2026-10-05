@@ -67,6 +67,8 @@ final class CardFusionSelectionView {
   private TextButton fuseButton;
   private TextButton leaveButton;
   private TextButton continueButton;
+  private ContextualHelpDialog helpDialog;
+  private TextButton helpButton;
   private boolean unavailable;
   private boolean completed;
   private boolean exitRequested;
@@ -226,6 +228,21 @@ final class CardFusionSelectionView {
           }
         });
     selectionLayer.addActor(leaveButton);
+
+    helpDialog =
+        new ContextualHelpDialog(
+            skin, EventHelpContent.FUSION_TITLE, EventHelpContent.FUSION_RULES);
+    helpButton = new TextButton("?", FusionSceneAssets.buttonStyle(skin, false));
+    helpButton.setName("fusion-selection-help-button");
+    helpButton.setBounds(1150f, 685f, 68f, 58f);
+    helpButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            helpDialog.show(stage);
+          }
+        });
+    selectionLayer.addActor(helpButton);
   }
 
   private void addSmallDiamond(
@@ -791,6 +808,9 @@ final class CardFusionSelectionView {
   }
 
   void dispose() {
+    if (helpDialog != null) {
+      helpDialog.remove();
+    }
     if (root != null) {
       root.remove();
       root = null;
@@ -807,6 +827,14 @@ final class CardFusionSelectionView {
 
   TextButton getLeaveButton() {
     return leaveButton;
+  }
+
+  TextButton getHelpButton() {
+    return helpButton;
+  }
+
+  ContextualHelpDialog getHelpDialog() {
+    return helpDialog;
   }
 
   TextButton getContinueButton() {

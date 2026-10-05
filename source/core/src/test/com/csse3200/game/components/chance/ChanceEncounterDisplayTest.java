@@ -62,6 +62,7 @@ class ChanceEncounterDisplayTest {
 
     try {
       assertEquals(2, display.getChoiceButtons().size());
+      assertNull(display.getHelpButton());
       assertEquals(
           "1.  Search the unstable tunnels for valuables.",
           display.getChoiceButtons().get(0).getText().toString());

@@ -12,5 +12,13 @@ final class EventHelpContent {
           + "your Gold and awards one random card; Lucky Seven choices can raise the reward "
           + "to two or three cards. A losing prediction forfeits the stake and cards.";
 
+  static final String FUSION_TITLE = "Card Fusion Rules";
+  static final String FUSION_RULES =
+      "Select three different Common card copies from your deck; copies with the same name "
+          + "are allowed. Fusing replaces those three cards with one random Rare card. "
+          + "You can successfully fuse once per run.\n\n"
+          + "An invalid selection changes nothing and does not use your fusion chance. "
+          + "If fusion is unavailable, you can still Leave. Leaving does not use your chance.";
+
   private EventHelpContent() {}
 }
