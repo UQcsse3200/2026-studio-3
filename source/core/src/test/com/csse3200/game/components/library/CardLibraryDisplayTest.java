@@ -267,6 +267,9 @@ class CardLibraryDisplayTest {
     CardConfig strike =
         cards.stream().filter(card -> "strike".equals(card.id)).findFirst().orElseThrow();
     strike.lore = "A test-only fragment of card history.";
+    CardConfig defend =
+        cards.stream().filter(card -> "defend".equals(card.id)).findFirst().orElseThrow();
+    defend.lore = null;
     CardDiscoveryService discovery = new CardDiscoveryService(cards);
     discovery.recordSeen("strike");
     discovery.recordSeen("defend");
