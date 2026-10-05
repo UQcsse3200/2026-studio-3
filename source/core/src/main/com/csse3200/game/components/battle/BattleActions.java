@@ -226,30 +226,30 @@ public class BattleActions extends Component {
     }
   }
 
-    private boolean isEligibleEliteVictory(RunState runState) {
-        Integer activeNodeId = runState.getActiveNodeId();
+  private boolean isEligibleEliteVictory(RunState runState) {
+    Integer activeNodeId = runState.getActiveNodeId();
 
-        if (activeNodeId == null || runState.getMapGraph() == null) {
-            return false;
-        }
-
-        MapNode activeNode = runState.getMapGraph().getNode(activeNodeId);
-
-        if (activeNode == null || activeNode.getRoomType() != RoomType.ELITE) {
-            return false;
-        }
-
-        int currentHealth = runState.getPlayerHealth();
-        int maxHealth = runState.getPlayerMaxHealth();
-
-        if (maxHealth <= 0) {
-            return false;
-        }
-
-        float healthRatio = (float) currentHealth / maxHealth;
-
-        return healthRatio >= 0.8f;
+    if (activeNodeId == null || runState.getMapGraph() == null) {
+      return false;
     }
+
+    MapNode activeNode = runState.getMapGraph().getNode(activeNodeId);
+
+    if (activeNode == null || activeNode.getRoomType() != RoomType.ELITE) {
+      return false;
+    }
+
+    int currentHealth = runState.getPlayerHealth();
+    int maxHealth = runState.getPlayerMaxHealth();
+
+    if (maxHealth <= 0) {
+      return false;
+    }
+
+    float healthRatio = (float) currentHealth / maxHealth;
+
+    return healthRatio >= 0.8f;
+  }
 
   @Override
   public void dispose() {
