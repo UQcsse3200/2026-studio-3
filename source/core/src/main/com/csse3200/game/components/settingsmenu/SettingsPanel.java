@@ -201,7 +201,13 @@ public class SettingsPanel extends Table {
   }
 
   private void applyChanges() {
+    Integer parsedFps = FpsValidator.parse(fpsText.getText());
+    if (parsedFps == null) {
+      return;
+    }
+
     Settings updated = copyOf(appliedSettings);
+    updated.fps = parsedFps;
     updated.masterVolume = masterVolumeSlider.getValue();
     updated.musicVolume = musicVolumeSlider.getValue();
     updated.soundEffectsVolume = soundEffectsVolumeSlider.getValue();
@@ -209,10 +215,6 @@ public class SettingsPanel extends Table {
     updated.fullscreen = fullScreenCheck.isChecked();
     updated.vsync = vsyncCheck.isChecked();
 
-    Integer parsedFps = parsePositiveInt(fpsText.getText());
-    if (parsedFps != null) {
-      updated.fps = parsedFps;
-    }
     StringDecorator<DisplayMode> selectedMode = displayModeSelect.getSelected();
     if (selectedMode != null) {
       updated.displayMode = new DisplaySettings(selectedMode.object);
@@ -266,15 +268,6 @@ public class SettingsPanel extends Table {
 
   private void updateVolumeLabel(Slider slider, Label label) {
     label.setText(Math.round(slider.getValue() * 100f) + "%");
-  }
-
-  private Integer parsePositiveInt(String value) {
-    try {
-      int parsed = Integer.parseInt(value, 10);
-      return parsed > 0 ? parsed : null;
-    } catch (NumberFormatException exception) {
-      return null;
-    }
   }
 
   private Label themedLabel(String text) {

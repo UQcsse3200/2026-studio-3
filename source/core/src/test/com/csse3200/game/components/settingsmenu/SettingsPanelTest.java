@@ -3,6 +3,7 @@ package com.csse3200.game.components.settingsmenu;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -25,12 +26,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(GameExtension.class)
 class SettingsPanelTest {
   private Skin skin;
+  private Graphics originalGraphics;
   private Settings initial;
   private AtomicInteger backCount;
   private AtomicReference<Settings> written;
+  private AtomicInteger writeCount;
 
   @BeforeEach
   void setUp() {
+    originalGraphics = Gdx.graphics;
     DisplayMode activeMode = new TestDisplayMode(1280, 800, 60, 32);
     Graphics graphics = mock(Graphics.class);
     when(graphics.getDisplayMode()).thenReturn(activeMode);
@@ -49,11 +53,18 @@ class SettingsPanelTest {
     initial.vsync = false;
     backCount = new AtomicInteger();
     written = new AtomicReference<>();
+    writeCount = new AtomicInteger();
   }
 
   @AfterEach
   void tearDown() {
-    skin.dispose();
+    try {
+      if (skin != null) {
+        skin.dispose();
+      }
+    } finally {
+      Gdx.graphics = originalGraphics;
+    }
   }
 
   @Test
@@ -115,18 +126,84 @@ class SettingsPanelTest {
   }
 
   @Test
-  void invalidFpsKeepsLastAppliedValue() {
+  void invalidFpsBlocksAllEditsAndPreservesDraft() {
     SettingsPanel panel = createPanel();
-    panel.getFpsText().setText("not-a-number");
+    panel.getMasterVolumeSlider().setValue(0.5f);
+    panel.getFullScreenCheck().setChecked(false);
 
+    for (String input :
+        new String[] {"-60", "0", "not-a-number", "", " ", "60.5", "+60", "2147483648"}) {
+      panel.getFpsText().setText(input);
+      click(panel.getApplyButton());
+
+      assertNull(written.get(), input);
+      assertEquals(0, writeCount.get(), input);
+      assertEquals(input, panel.getFpsText().getText());
+      assertEquals(0.5f, panel.getMasterVolumeSlider().getValue(), 0.001f);
+      assertFalse(panel.getFullScreenCheck().isChecked());
+      assertEquals(75, initial.fps);
+      assertEquals(0.8f, initial.masterVolume, 0.001f);
+      assertTrue(initial.fullscreen);
+    }
+    assertEquals(0, backCount.get());
+  }
+
+  @Test
+  void correctingInvalidFpsWritesAllPendingEditsExactlyOnce() {
+    SettingsPanel panel = createPanel();
+    panel.getMasterVolumeSlider().setValue(0.5f);
+    panel.getMusicVolumeSlider().setValue(0.3f);
+    panel.getSoundEffectsVolumeSlider().setValue(0.2f);
+    panel.getMuteCheck().setChecked(false);
+    panel.getFullScreenCheck().setChecked(false);
+    panel.getVsyncCheck().setChecked(true);
+    panel.getFpsText().setText("-60");
+    click(panel.getApplyButton());
+    assertEquals(0, writeCount.get());
+
+    panel.getFpsText().setText(" 00120 ");
     click(panel.getApplyButton());
 
-    assertEquals(75, written.get().fps);
-    assertEquals("75", panel.getFpsText().getText());
+    assertEquals(1, writeCount.get());
+    Settings saved = written.get();
+    assertEquals(120, saved.fps);
+    assertEquals(0.5f, saved.masterVolume, 0.001f);
+    assertEquals(0.3f, saved.musicVolume, 0.001f);
+    assertEquals(0.2f, saved.soundEffectsVolume, 0.001f);
+    assertFalse(saved.muted);
+    assertFalse(saved.fullscreen);
+    assertTrue(saved.vsync);
+    assertEquals("120", panel.getFpsText().getText());
+    assertEquals(0, backCount.get());
+  }
+
+  @Test
+  void invalidApplyAfterSuccessLeavesLastSavedSettingsUnchanged() {
+    SettingsPanel panel = createPanel();
+    panel.getFpsText().setText("120");
+    click(panel.getApplyButton());
+    Settings saved = written.get();
+
+    panel.getFpsText().setText("-1");
+    panel.getMasterVolumeSlider().setValue(0.2f);
+    click(panel.getApplyButton());
+
+    assertEquals(1, writeCount.get());
+    assertSame(saved, written.get());
+    assertEquals(120, saved.fps);
+    assertEquals(0.8f, saved.masterVolume, 0.001f);
+    assertEquals("-1", panel.getFpsText().getText());
   }
 
   private SettingsPanel createPanel() {
-    return new SettingsPanel(skin, backCount::incrementAndGet, () -> initial, written::set);
+    return new SettingsPanel(
+        skin,
+        backCount::incrementAndGet,
+        () -> initial,
+        settings -> {
+          writeCount.incrementAndGet();
+          written.set(settings);
+        });
   }
 
   private static void click(Actor actor) {
