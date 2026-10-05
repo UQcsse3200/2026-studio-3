@@ -17,8 +17,6 @@ public class PlayerStatsDisplay extends UIComponent {
   Table table;
   private Image heartImage;
   private Label healthLabel;
-  private Image energyImage;
-  private Label energyLabel;
   private static final float FONT_SCALE = 0.75f;
   private static final String STYLE_NAME_LARGE = "large";
 
@@ -29,7 +27,6 @@ public class PlayerStatsDisplay extends UIComponent {
     addActors();
 
     entity.getEvents().addListener("updateHealth", this::updatePlayerHealthUI);
-    entity.getEvents().addListener("updateEnergy", this::updatePlayerEnergyUI);
   }
 
   /**
@@ -54,24 +51,9 @@ public class PlayerStatsDisplay extends UIComponent {
     healthLabel = new Label(healthText, skin, STYLE_NAME_LARGE);
     healthLabel.setFontScale(FONT_SCALE);
 
-    // Energy image
-    energyImage =
-        new Image(ServiceLocator.getResourceService().getAsset("images/energy.png", Texture.class));
-
-    // Energy text
-    EnergyComponent energyComponent = entity.getComponent(EnergyComponent.class);
-    int currentEnergy = energyComponent.getCurrentEnergy();
-    int maxEnergy = energyComponent.getMaxEnergy();
-    CharSequence energyText = String.format("Energy: %d / %d", currentEnergy, maxEnergy);
-    energyLabel = new Label(energyText, skin, STYLE_NAME_LARGE);
-    energyLabel.setFontScale(FONT_SCALE);
-
     table.add(heartImage).size(imageSideLength).pad(5);
     table.add(healthLabel);
-    table.row();
 
-    table.add(energyImage).size(imageSideLength).pad(5);
-    table.add(energyLabel).left();
     stage.addActor(table);
   }
 
@@ -115,23 +97,10 @@ public class PlayerStatsDisplay extends UIComponent {
     healthLabel.setText(text);
   }
 
-  /**
-   * Updates the player's energy on the ui.
-   *
-   * @param currentEnergy player's current energy
-   * @param maxEnergy player's max energy
-   */
-  public void updatePlayerEnergyUI(int currentEnergy, int maxEnergy) {
-    CharSequence text = String.format("Energy: %d / %d", currentEnergy, maxEnergy);
-    energyLabel.setText(text);
-  }
-
   @Override
   public void dispose() {
     super.dispose();
     heartImage.remove();
     healthLabel.remove();
-    energyImage.remove();
-    energyLabel.remove();
   }
 }
