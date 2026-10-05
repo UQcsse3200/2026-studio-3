@@ -1,14 +1,5 @@
 package com.csse3200.game.components.shop;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
@@ -46,6 +37,13 @@ import com.csse3200.game.shop.ShopInventoryGenerator;
 import com.csse3200.game.shop.ShopItem;
 import com.csse3200.game.shop.ShopService;
 import com.csse3200.game.ui.UIComponent;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Displays the Shop Encounter interface and sends purchase requests to {@link ShopEncounter}.
