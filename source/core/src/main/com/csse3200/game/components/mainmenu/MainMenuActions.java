@@ -30,8 +30,7 @@ public class MainMenuActions extends Component {
   /** Discards any run in progress and opens a fresh map. */
   private void onStart() {
     logger.info("Opening map");
-    game.getRunState().endRun();
-    game.setScreen(GdxGame.ScreenType.MAP);
+    game.startNewRun();
   }
 
   /** Opens the Save/Load screen. */

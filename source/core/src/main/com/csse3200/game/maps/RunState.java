@@ -328,6 +328,7 @@ public class RunState {
     cardFusionUsed = false;
     playerState = null;
     pendingEliteTempleReward = false;
+    pendingReward = null;
   }
 
   /**
