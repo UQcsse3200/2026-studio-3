@@ -4,10 +4,10 @@ import com.badlogic.gdx.graphics.Camera;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.entities.EntityService;
+import com.csse3200.game.files.UserSettings;
 import com.csse3200.game.input.InputService;
 import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.RenderService;
-import com.csse3200.game.services.audio.AudioService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ public class ServiceLocator {
   private static Camera camera;
   private static CardLibrary cardLibrary;
   private static BestiaryService bestiaryService;
-  private static AudioService audioService;
+  private static AudioSettingsApplier audioSettingsApplier;
 
   public static EntityService getEntityService() {
     return entityService;
@@ -72,6 +72,10 @@ public class ServiceLocator {
 
   public static BestiaryService getBestiaryService() {
     return bestiaryService;
+  }
+
+  public static AudioSettingsApplier getAudioSettingsApplier() {
+    return audioSettingsApplier;
   }
 
   public static void registerEntityService(EntityService service) {
@@ -132,9 +136,17 @@ public class ServiceLocator {
     bestiaryService = service;
   }
 
-  public static void registerAudioService(AudioService service) {
-    logger.debug("Registering Audio service {}", service);
-    audioService = service;
+  /**
+   * Registers the audio settings boundary and immediately synchronises persisted output volumes.
+   */
+  public static void registerAudioSettingsApplier(AudioSettingsApplier applier) {
+    logger.debug("Registering audio settings applier {}", applier);
+    audioSettingsApplier = applier;
+    if (applier != null) {
+      UserSettings.Settings settings = UserSettings.get();
+      applier.applyVolumes(
+          settings.getEffectiveMusicVolume(), settings.getEffectiveSoundEffectsVolume());
+    }
   }
 
   public static void clear() {
@@ -149,7 +161,7 @@ public class ServiceLocator {
     camera = null;
     cardLibrary = null;
     bestiaryService = null;
-    audioService = null;
+    audioSettingsApplier = null;
   }
 
   private ServiceLocator() {

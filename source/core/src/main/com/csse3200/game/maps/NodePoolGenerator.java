@@ -1,6 +1,8 @@
 package com.csse3200.game.maps;
 
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -55,6 +57,30 @@ public final class NodePoolGenerator {
         }
       }
     }
+    assignFixedCampfire(rand, map);
+  }
+
+  private static void assignFixedCampfire(Random rand, MapGraph map) {
+    int campfireHeight = MapGenerationConfig.MAP_HEIGHT - 1;
+
+    List<MapNode> layerNodes =
+        map.getNodesByHeight(campfireHeight).stream()
+            .sorted(Comparator.comparingInt(MapNode::getNodeId))
+            .toList();
+
+    if (layerNodes.isEmpty()) {
+      return;
+    }
+
+    // Prefer replacing a combat node so existing special rooms are preserved.
+    List<MapNode> combatCandidates =
+        layerNodes.stream().filter(node -> node.getRoomType() == RoomType.COMBAT).toList();
+
+    List<MapNode> candidates = combatCandidates.isEmpty() ? layerNodes : combatCandidates;
+
+    MapNode campfireNode = candidates.get(rand.nextInt(candidates.size()));
+
+    campfireNode.setRoomType(RoomType.CAMPFIRE);
   }
 
   /**

@@ -1,8 +1,6 @@
 package com.csse3200.game.maps;
 
 import com.csse3200.game.events.EventHandler;
-import com.csse3200.game.services.audio.AudioService;
-import com.csse3200.game.services.audio.SoundId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,13 +78,11 @@ public class MapSelectionController {
     }
 
     if (node.getState() == NodeState.COMPLETED) {
-      AudioService.playSound(SoundId.ERROR, 0.5f);
       events.trigger("nodeCompleted", nodeId);
       return false;
     }
 
     if (node.getState() != NodeState.AVAILABLE) {
-      AudioService.playSound(SoundId.ERROR, 0.5f);
       events.trigger("nodeLocked", nodeId);
       return false;
     }
@@ -95,17 +91,9 @@ public class MapSelectionController {
 
     if (accepted) {
 
-      switch (node.getRoomType()) {
-        case SHOP -> AudioService.playSound(SoundId.ENTER_SHOP, 0.5f);
-        case COMBAT -> AudioService.playSound(SoundId.ENTER_COMBAT, 0.4f);
-        case EVENT -> AudioService.playSound(SoundId.ENTER_ENCOUNTER, 5.0f);
-        case FINAL, ELITE -> AudioService.playSound(SoundId.ENTER_ELITE, 0.6f);
-      }
-
       events.trigger("nodeSelected", nodeId);
     } else {
 
-      AudioService.playSound(SoundId.ERROR, 0.5f);
       events.trigger("nodeSelectionRejected", nodeId);
     }
 

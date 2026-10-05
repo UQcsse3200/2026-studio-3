@@ -7,7 +7,6 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.GdxGame.ScreenType;
-import com.csse3200.game.files.UserSettings;
 import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
@@ -47,7 +46,6 @@ public class AudioService {
 
   // this may appear to be a lot to load into ram, but these files are kilobytes big
   private static final String[] soundPaths = {
-    "sounds/Impact4.ogg",
     "sounds/menuHover.mp3",
     "sounds/itemPurchase.mp3",
     "sounds/enterCombat.mp3",
@@ -125,11 +123,6 @@ public class AudioService {
     cooldownTimestamp = System.currentTimeMillis();
     ServiceLocator.getResourceService().loadSounds(soundPaths);
     ServiceLocator.getResourceService().loadMusic(musicPaths);
-
-    // picks up the music volume and sound effects switch saved from the settings screen
-    UserSettings.Settings settings = UserSettings.get();
-    setMusicVolume(settings.musicVolume);
-    soundEffectsOn = settings.soundEffects;
   }
 
   /**

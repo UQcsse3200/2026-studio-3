@@ -96,7 +96,14 @@ public class EndBattleScreen extends ScreenAdapter {
     returning = true;
 
     RunState runState = game.getRunState();
+
     if (won && runState != null && runState.isRunActive()) {
+      if (runState.hasPendingEliteTempleReward()) {
+        logger.info("Elite temple reward is eligible, opening portal");
+        game.setScreen(GdxGame.ScreenType.ELITE_PORTAL);
+        return;
+      }
+
       game.setScreen(GdxGame.ScreenType.MAP);
       return;
     }

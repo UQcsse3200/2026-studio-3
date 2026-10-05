@@ -12,6 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.csse3200.game.GdxGame;
+import com.csse3200.game.components.pausemenu.PauseMenuFactory;
+import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -118,7 +120,11 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         .addComponent(new KeyboardTerminalInputComponent())
         .addComponent(new TerminalDisplay());
 
+    // Pause menu + in-place save/load overlay (the map is the natural place to save a run).
+    // No on-screen pause button here (it didn't fit the map HUD); Escape still opens the menu.
+    SaveLoadPanel savePanel = PauseMenuFactory.attachWithoutButton(ui, game);
     ServiceLocator.getEntityService().register(ui);
+    savePanel.hide(); // save overlay starts hidden, opened by the Save & Load button
 
     createExitButton(game);
   }
@@ -137,6 +143,9 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     if (roomType == RoomType.COMBAT || roomType == RoomType.FINAL || roomType == RoomType.ELITE) {
       logger.info("Node {} ({}) selected, entering battle", nodeId, roomType);
       game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
+    } else if (roomType == RoomType.CAMPFIRE) {
+      logger.info("Node {} ({}) selected, entering campfire", nodeId, roomType);
+      game.setScreen(GdxGame.ScreenType.CAMPFIRE);
     } else {
       logger.info("Node {} ({}) selected, entering encounter", nodeId, roomType);
       game.setScreen(GdxGame.ScreenType.ENCOUNTER);

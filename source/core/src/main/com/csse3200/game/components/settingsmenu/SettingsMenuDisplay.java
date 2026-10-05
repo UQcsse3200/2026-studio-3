@@ -1,272 +1,76 @@
 package com.csse3200.game.components.settingsmenu;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Graphics.DisplayMode;
-import com.badlogic.gdx.Graphics.Monitor;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Event;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
-import com.csse3200.game.GdxGame.ScreenType;
-import com.csse3200.game.files.UserSettings;
-import com.csse3200.game.files.UserSettings.DisplaySettings;
+import com.csse3200.game.components.mainmenu.MainMenuDisplay;
+import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
-import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
-import com.csse3200.game.utils.StringDecorator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-/**
- * Settings menu display and logic. If you bork the settings, they can be changed manually in
- * DECO2800Game/settings.json under your home directory (This is C:/users/[username] on Windows).
- */
+/** Standalone settings-screen host for the reusable {@link SettingsPanel}. */
 public class SettingsMenuDisplay extends UIComponent {
-  private static final Logger logger = LoggerFactory.getLogger(SettingsMenuDisplay.class);
   private final GdxGame game;
-
-  private Table rootTable;
-  private TextField fpsText;
-  private CheckBox fullScreenCheck;
-  private CheckBox vsyncCheck;
-  private Slider uiScaleSlider;
-  private Slider musicSlider;
-  private CheckBox soundEffectsCheck;
-  private SelectBox<StringDecorator<DisplayMode>> displayModeSelect;
+  private Stack rootStack;
+  private SettingsPanel settingsPanel;
 
   public SettingsMenuDisplay(GdxGame game) {
-    super();
     this.game = game;
   }
 
   @Override
   public void create() {
     super.create();
-    addActors();
-  }
+    rootStack = new Stack();
+    rootStack.setFillParent(true);
 
-  private void addActors() {
-    Label title = new Label("Settings", skin, "title");
-    Table settingsTable = makeSettingsTable();
-    Table menuBtns = makeMenuBtns();
-
-    rootTable = new Table();
-    rootTable.setFillParent(true);
-
-    rootTable.add(title).expandX().top().padTop(20f);
-
-    rootTable.row().padTop(30f);
-    rootTable.add(settingsTable).expandX().expandY();
-
-    rootTable.row();
-    rootTable.add(menuBtns).fillX();
-
-    stage.addActor(rootTable);
-  }
-
-  private Table makeSettingsTable() {
-    // Get current values
-    UserSettings.Settings settings = UserSettings.get();
-
-    // Create components
-    Label fpsLabel = new Label("FPS Cap:", skin);
-    fpsText = new TextField(Integer.toString(settings.fps), skin);
-
-    Label fullScreenLabel = new Label("Fullscreen:", skin);
-    fullScreenCheck = new CheckBox("", skin);
-    fullScreenCheck.setChecked(settings.fullscreen);
-
-    Label vsyncLabel = new Label("VSync:", skin);
-    vsyncCheck = new CheckBox("", skin);
-    vsyncCheck.setChecked(settings.vsync);
-
-    Label uiScaleLabel = new Label("ui Scale (Unused):", skin);
-    uiScaleSlider = new Slider(0.2f, 2f, 0.1f, false, skin);
-    uiScaleSlider.setValue(settings.uiScale);
-    Label uiScaleValue = new Label(String.format("%.2fx", settings.uiScale), skin);
-
-    Label musicLabel = new Label("Music Volume:", skin);
-    musicSlider = new Slider(0f, 1f, 0.05f, false, skin);
-    musicSlider.setValue(settings.musicVolume);
-    Label musicValue = new Label(percent(settings.musicVolume), skin);
-
-    Label soundEffectsLabel = new Label("Sound Effects:", skin);
-    soundEffectsCheck = new CheckBox("", skin);
-    soundEffectsCheck.setChecked(settings.soundEffects);
-
-    Label displayModeLabel = new Label("Resolution:", skin);
-    displayModeSelect = new SelectBox<>(skin);
-    Monitor selectedMonitor = Gdx.graphics.getMonitor();
-    displayModeSelect.setItems(getDisplayModes(selectedMonitor));
-    displayModeSelect.setSelected(getActiveMode(displayModeSelect.getItems()));
-
-    // Position Components on table
-    Table table = new Table();
-
-    table.add(fpsLabel).right().padRight(15f);
-    table.add(fpsText).width(100).left();
-
-    table.row().padTop(10f);
-    table.add(fullScreenLabel).right().padRight(15f);
-    table.add(fullScreenCheck).left();
-
-    table.row().padTop(10f);
-    table.add(vsyncLabel).right().padRight(15f);
-    table.add(vsyncCheck).left();
-
-    table.row().padTop(10f);
-    Table uiScaleTable = new Table();
-    uiScaleTable.add(uiScaleSlider).width(100).left();
-    uiScaleTable.add(uiScaleValue).left().padLeft(5f).expandX();
-
-    table.add(uiScaleLabel).right().padRight(15f);
-    table.add(uiScaleTable).left();
-
-    table.row().padTop(10f);
-    Table musicTable = new Table();
-    musicTable.add(musicSlider).width(100).left();
-    musicTable.add(musicValue).left().padLeft(5f).expandX();
-
-    table.add(musicLabel).right().padRight(15f);
-    table.add(musicTable).left();
-
-    table.row().padTop(10f);
-    table.add(soundEffectsLabel).right().padRight(15f);
-    table.add(soundEffectsCheck).left();
-
-    table.row().padTop(10f);
-    table.add(displayModeLabel).right().padRight(15f);
-    table.add(displayModeSelect).left();
-
-    // Events on inputs
-    uiScaleSlider.addListener(
-        (Event event) -> {
-          float value = uiScaleSlider.getValue();
-          uiScaleValue.setText(String.format("%.2fx", value));
-          return true;
-        });
-
-    musicSlider.addListener(
-        new ChangeListener() {
-          @Override
-          public void changed(ChangeEvent changeEvent, Actor actor) {
-            float value = musicSlider.getValue();
-            musicValue.setText(percent(value));
-            // Heard straight away so the player can judge it, but only saved on Apply.
-            AudioService.setMusicVolume(value);
-          }
-        });
-
-    return table;
-  }
-
-  private StringDecorator<DisplayMode> getActiveMode(Array<StringDecorator<DisplayMode>> modes) {
-    DisplayMode active = Gdx.graphics.getDisplayMode();
-
-    for (StringDecorator<DisplayMode> stringMode : modes) {
-      DisplayMode mode = stringMode.object;
-      if (active.width == mode.width
-          && active.height == mode.height
-          && active.refreshRate == mode.refreshRate) {
-        return stringMode;
-      }
-    }
-    return null;
-  }
-
-  private Array<StringDecorator<DisplayMode>> getDisplayModes(Monitor monitor) {
-    DisplayMode[] displayModes = Gdx.graphics.getDisplayModes(monitor);
-    Array<StringDecorator<DisplayMode>> arr = new Array<>();
-
-    for (DisplayMode displayMode : displayModes) {
-      arr.add(new StringDecorator<>(displayMode, this::prettyPrint));
+    ResourceService resources = ServiceLocator.getResourceService();
+    if (resources != null
+        && resources.containsAsset(MainMenuDisplay.BACKGROUND_TEXTURE, Texture.class)) {
+      Texture texture = resources.getAsset(MainMenuDisplay.BACKGROUND_TEXTURE, Texture.class);
+      texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+      Image background = new Image(texture);
+      background.setScaling(Scaling.fill);
+      rootStack.add(background);
     }
 
-    return arr;
-  }
+    Color overlayColour = MenuTheme.deepPlum();
+    overlayColour.a = 0.62f;
+    Table overlay = new Table();
+    overlay.setBackground(skin.newDrawable("white", overlayColour));
+    rootStack.add(overlay);
 
-  private String prettyPrint(DisplayMode displayMode) {
-    return displayMode.width + "x" + displayMode.height + ", " + displayMode.refreshRate + "hz";
-  }
+    settingsPanel = new SettingsPanel(skin, () -> game.setScreen(GdxGame.ScreenType.MAIN_MENU));
+    Table wrapper = new Table();
+    wrapper.setFillParent(true);
+    wrapper.center().pad(MenuTheme.SCREEN_PADDING);
+    wrapper.add(settingsPanel).width(760f);
+    rootStack.add(wrapper);
 
-  private Table makeMenuBtns() {
-    TextButton exitBtn = new TextButton("Exit", skin);
-    TextButton applyBtn = new TextButton("Apply", skin);
-
-    exitBtn.addListener(
-        new ChangeListener() {
-          @Override
-          public void changed(ChangeEvent changeEvent, Actor actor) {
-            logger.debug("Exit button clicked");
-            exitMenu();
-          }
-        });
-
-    applyBtn.addListener(
-        new ChangeListener() {
-          @Override
-          public void changed(ChangeEvent changeEvent, Actor actor) {
-            logger.debug("Apply button clicked");
-            applyChanges();
-          }
-        });
-
-    Table table = new Table();
-    table.add(exitBtn).expandX().left().pad(0f, 15f, 15f, 0f);
-    table.add(applyBtn).expandX().right().pad(0f, 0f, 15f, 15f);
-    return table;
-  }
-
-  private void applyChanges() {
-    UserSettings.Settings settings = UserSettings.get();
-
-    Integer fpsVal = parseOrNull(fpsText.getText());
-    if (fpsVal != null) {
-      settings.fps = fpsVal;
-    }
-    settings.fullscreen = fullScreenCheck.isChecked();
-    settings.uiScale = uiScaleSlider.getValue();
-    settings.musicVolume = musicSlider.getValue();
-    settings.soundEffects = soundEffectsCheck.isChecked();
-    settings.displayMode = new DisplaySettings(displayModeSelect.getSelected().object);
-    settings.vsync = vsyncCheck.isChecked();
-
-    UserSettings.set(settings, true);
-    AudioService.setSoundEffectsOn(settings.soundEffects);
-  }
-
-  private void exitMenu() {
-    game.setScreen(ScreenType.MAIN_MENU);
-  }
-
-  private static String percent(float volume) {
-    return Math.round(volume * 100) + "%";
-  }
-
-  private Integer parseOrNull(String num) {
-    try {
-      return Integer.parseInt(num, 10);
-    } catch (NumberFormatException e) {
-      return null;
-    }
+    stage.addActor(rootStack);
   }
 
   @Override
   protected void draw(SpriteBatch batch) {
-    // draw is handled by the stage
-  }
-
-  @Override
-  public void update() {
-    stage.act(ServiceLocator.getTimeSource().getDeltaTime());
+    // Drawing is handled by the stage.
   }
 
   @Override
   public void dispose() {
-    rootTable.clear();
+    if (rootStack != null) {
+      rootStack.remove();
+      rootStack.clear();
+    }
     super.dispose();
+  }
+
+  SettingsPanel getSettingsPanel() {
+    return settingsPanel;
   }
 }
