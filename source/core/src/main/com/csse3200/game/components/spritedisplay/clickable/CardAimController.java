@@ -10,11 +10,12 @@ import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.entities.Entity;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 /** Owns the visible aim preview for a battle and resolves its target on release. */
 public final class CardAimController implements AimSession {
   private static final float SNAP_DISTANCE = 90f;
-  private static final float TARGET_PADDING = 12f;
+  private static final float TARGET_PADDING = 4f;
 
   private final Stage stage;
   private final Camera worldCamera;
@@ -48,7 +49,14 @@ public final class CardAimController implements AimSession {
     Rectangle box = selected == null ? null : bounds.get(selected);
     Vector2 destination =
         box == null ? pointer : new Vector2(box.x + box.width / 2f, box.y + box.height / 2f);
-    arrow.show(source, destination, box);
+    arrow.show(
+        source,
+        destination,
+        bounds,
+        selected == null ? Set.of() : Set.of(selected),
+        true,
+        null,
+        selected != null);
   }
 
   @Override
@@ -82,7 +90,10 @@ public final class CardAimController implements AimSession {
 
   private Map<String, Rectangle> currentBounds() {
     Map<String, Rectangle> bounds = new LinkedHashMap<>();
-    targets.forEach((id, target) -> bounds.put(id, stageBounds(target)));
+    targets.forEach(
+        (id, target) -> {
+          if (isAlive(id)) bounds.put(id, stageBounds(target));
+        });
     return bounds;
   }
 
