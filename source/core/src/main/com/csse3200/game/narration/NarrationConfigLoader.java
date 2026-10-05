@@ -26,6 +26,19 @@ public final class NarrationConfigLoader {
    * @throws NarrationLoadingException for missing files, invalid JSON or invalid structure
    */
   public static List<List<String>> loadSequence(String filename, String sequenceId) {
+    JsonValue root = readRoot(filename);
+    Map<String, List<List<String>>> sequences = new HashMap<>();
+    for (JsonValue sequence : root) {
+      if (sequence.name.isBlank() || !sequence.isArray() || sequences.containsKey(sequence.name)) {
+        throw new NarrationLoadingException(
+            "Invalid or duplicate sequence in " + filename + ": " + sequence.name);
+      }
+      sequences.put(sequence.name, readPassages(sequence));
+    }
+    return sequences.getOrDefault(sequenceId, List.of());
+  }
+
+  private static JsonValue readRoot(String filename) {
     if (filename == null || filename.isBlank()) {
       throw new NarrationLoadingException(
           "Narration configuration filename must not be null or blank");
@@ -46,30 +59,30 @@ public final class NarrationConfigLoader {
       throw new NarrationLoadingException(
           "Narration configuration root must be a JSON object: " + filename);
     }
-    Map<String, List<List<String>>> sequences = new HashMap<>();
-    for (JsonValue sequence : root) {
-      if (sequence.name.isBlank() || !sequence.isArray() || sequences.containsKey(sequence.name)) {
+    return root;
+  }
+
+  private static List<List<String>> readPassages(JsonValue sequence) {
+    List<List<String>> passages = new ArrayList<>();
+    for (JsonValue passage : sequence) {
+      if (!passage.isArray() || passage.size < 1 || passage.size > 3) {
         throw new NarrationLoadingException(
-            "Invalid or duplicate sequence in " + filename + ": " + sequence.name);
+            "Passages must contain one to three lines: " + sequence.name);
       }
-      List<List<String>> passages = new ArrayList<>();
-      for (JsonValue passage : sequence) {
-        if (!passage.isArray() || passage.size < 1 || passage.size > 3) {
-          throw new NarrationLoadingException(
-              "Passages must contain one to three lines: " + sequence.name);
-        }
-        List<String> lines = new ArrayList<>();
-        for (JsonValue line : passage) {
-          if (!line.isString() || line.asString().isBlank()) {
-            throw new NarrationLoadingException(
-                "Passage lines must be nonblank strings: " + sequence.name);
-          }
-          lines.add(line.asString());
-        }
-        passages.add(List.copyOf(lines));
-      }
-      sequences.put(sequence.name, List.copyOf(passages));
+      passages.add(readLines(passage, sequence.name));
     }
-    return sequences.getOrDefault(sequenceId, List.of());
+    return List.copyOf(passages);
+  }
+
+  private static List<String> readLines(JsonValue passage, String sequenceName) {
+    List<String> lines = new ArrayList<>();
+    for (JsonValue line : passage) {
+      if (!line.isString() || line.asString().isBlank()) {
+        throw new NarrationLoadingException(
+            "Passage lines must be nonblank strings: " + sequenceName);
+      }
+      lines.add(line.asString());
+    }
+    return List.copyOf(lines);
   }
 }

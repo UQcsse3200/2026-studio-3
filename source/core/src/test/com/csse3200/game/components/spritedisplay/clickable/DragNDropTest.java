@@ -288,16 +288,22 @@ class DragNDropTest {
 
       @Override
       public void drop(
-          DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {}
+          DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+        // DragNDrop dispatches the source event; this target only supplies an identity.
+      }
     };
   }
 
   private record RecordingAim(String targetId) implements AimSession {
     @Override
-    public void begin(Vector2 cardPosition, Vector2 pointer) {}
+    public void begin(Vector2 cardPosition, Vector2 pointer) {
+      // This fake only supplies the target chosen on release; no preview needs rendering.
+    }
 
     @Override
-    public void update(Vector2 pointer) {}
+    public void update(Vector2 pointer) {
+      // Pointer movement does not change this fake's predetermined target.
+    }
 
     @Override
     public String release(Vector2 pointer) {
@@ -305,7 +311,9 @@ class DragNDropTest {
     }
 
     @Override
-    public void cancel() {}
+    public void cancel() {
+      // This fake owns no actors or active-session state to clean up.
+    }
   }
 
   @SuppressWarnings("unchecked")

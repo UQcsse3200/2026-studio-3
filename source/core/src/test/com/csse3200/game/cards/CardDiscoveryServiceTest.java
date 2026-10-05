@@ -121,15 +121,14 @@ class CardDiscoveryServiceTest {
   @Test
   void shouldRejectInvalidMergeWithoutMutatingProgress() {
     CardDiscoveryService service = createService();
+    Map<String, CardUnlockState> blankId = Map.of(" ", CardUnlockState.SEEN);
     Map<String, CardUnlockState> before = service.getProgressSnapshot();
     Map<String, CardUnlockState> invalid = new LinkedHashMap<>();
     invalid.put("strike", CardUnlockState.SEEN);
     invalid.put("defend", null);
 
     assertThrows(IllegalArgumentException.class, () -> service.mergeProgress(null));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> service.mergeProgress(Map.of(" ", CardUnlockState.SEEN)));
+    assertThrows(IllegalArgumentException.class, () -> service.mergeProgress(blankId));
     assertThrows(IllegalArgumentException.class, () -> service.mergeProgress(invalid));
     assertEquals(before, service.getProgressSnapshot());
   }

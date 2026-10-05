@@ -959,9 +959,10 @@ public class ChanceEncounterDisplay extends UIComponent {
     } else if (outcome.getCurrencyDelta() < 0) {
       changes.add(String.format("You lose %d gold.", -outcome.getCurrencyDelta()));
     }
-    for (String cardId : outcome.getCardRewardIds()) {
-      changes.add(String.format("You receive the %s card.", formatTitle(cardId)));
-    }
+    changes.addAll(
+        outcome.getCardRewardIds().stream()
+            .map(cardId -> String.format("You receive the %s card.", formatTitle(cardId)))
+            .toList());
     return String.join("\n", changes);
   }
 

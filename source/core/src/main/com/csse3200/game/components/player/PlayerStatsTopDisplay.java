@@ -23,8 +23,8 @@ public class PlayerStatsTopDisplay extends UIComponent {
   private RunState runState;
   private static final float FONT_SCALE = 0.75f;
   private static final String STYLE_NAME_LARGE = "large";
-  private final float mapWidth = Gdx.graphics.getWidth();
-  private final float mapHeight = Gdx.graphics.getHeight();
+  private final float mapWidth = (float) Gdx.graphics.getWidth();
+  private final float mapHeight = (float) Gdx.graphics.getHeight();
 
   public PlayerStatsTopDisplay(RunState runState) {
     this.runState = runState;
@@ -52,7 +52,6 @@ public class PlayerStatsTopDisplay extends UIComponent {
     table.setSize(mapWidth, 50);
     table.setPosition(0, mapHeight - 50);
     table.setBackground(skin.newDrawable("color", new Color(0.105f, 0.070f, 0.065f, 0.98f)));
-    // table.setFillParent(true);
     table.padTop(5f).padLeft(10f);
 
     // Image size

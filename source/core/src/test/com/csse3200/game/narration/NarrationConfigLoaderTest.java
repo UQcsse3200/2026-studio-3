@@ -30,8 +30,10 @@ class NarrationConfigLoaderTest {
     assertEquals(2, opening.size());
     assertEquals(java.util.List.of("Line one.", "Line two."), opening.get(0));
     assertEquals(java.util.List.of("Solo line."), opening.get(1));
-    assertThrows(UnsupportedOperationException.class, () -> opening.get(0).add("changed"));
-    assertThrows(UnsupportedOperationException.class, () -> opening.add(java.util.List.of("x")));
+    var firstPassage = opening.get(0);
+    var extraPassage = java.util.List.of("x");
+    assertThrows(UnsupportedOperationException.class, () -> firstPassage.add("changed"));
+    assertThrows(UnsupportedOperationException.class, () -> opening.add(extraPassage));
   }
 
   @Test
@@ -42,12 +44,11 @@ class NarrationConfigLoaderTest {
 
   @Test
   void missingFileThrowsLoadingException() {
+    String missingPath = directory.resolve("missing.json").toString();
     var error =
         assertThrows(
             NarrationLoadingException.class,
-            () ->
-                NarrationConfigLoader.loadSequence(
-                    directory.resolve("missing.json").toString(), "opening"));
+            () -> NarrationConfigLoader.loadSequence(missingPath, "opening"));
     assertTrue(error.getMessage().contains("does not exist"));
   }
 
@@ -55,10 +56,11 @@ class NarrationConfigLoaderTest {
   void malformedFileWrapsParserFailure() throws Exception {
     Path file = directory.resolve("narration.json");
     Files.writeString(file, "{\"opening\": [");
+    String filename = file.toString();
     var error =
         assertThrows(
             NarrationLoadingException.class,
-            () -> NarrationConfigLoader.loadSequence(file.toString(), "opening"));
+            () -> NarrationConfigLoader.loadSequence(filename, "opening"));
     assertTrue(error.getMessage().contains("Malformed narration configuration file"));
     assertNotNull(error.getCause());
   }
@@ -66,6 +68,7 @@ class NarrationConfigLoaderTest {
   @Test
   void invalidPassagesAreRejectedEvenForUnknownId() throws Exception {
     Path file = directory.resolve("narration.json");
+    String filename = file.toString();
     for (String json :
         new String[] {
           "[]",
@@ -77,7 +80,7 @@ class NarrationConfigLoaderTest {
       Files.writeString(file, json);
       assertThrows(
           NarrationLoadingException.class,
-          () -> NarrationConfigLoader.loadSequence(file.toString(), "unknown"));
+          () -> NarrationConfigLoader.loadSequence(filename, "unknown"));
     }
   }
 }

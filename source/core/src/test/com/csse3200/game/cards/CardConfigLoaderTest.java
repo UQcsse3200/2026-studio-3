@@ -3,6 +3,7 @@ package com.csse3200.game.cards;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -49,7 +50,7 @@ class CardConfigLoaderTest {
         () -> assertEquals(1, strike.upgrade.cost),
         () -> assertEquals(Rarity.COMMON, strike.upgrade.rarity),
         () -> assertEquals(12, strike.upgrade.effects[0].value),
-        () -> assertTrue(defend.upgrade == null));
+        () -> assertNull(defend.upgrade));
   }
 
   @Test
@@ -61,7 +62,7 @@ class CardConfigLoaderTest {
         cards.stream().filter(card -> "plain_card".equals(card.id)).findFirst().orElseThrow();
 
     assertEquals("An old story follows this card.", withLore.lore);
-    assertTrue(withoutLore.lore == null);
+    assertNull(withoutLore.lore);
   }
 
   @Test

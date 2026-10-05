@@ -43,29 +43,31 @@ public class CardDiscoveryStore {
     try {
       StoreData data = json().fromJson(StoreData.class, file);
       if (data == null || data.progress == null) {
-        logger.warn("Card discovery file has an invalid structure: {}", file.path());
+        logger.warn("Card discovery file has an invalid structure: {}", file);
         return Map.of();
       }
 
       Map<String, CardUnlockState> loaded = new LinkedHashMap<>();
       for (ProgressEntry entry : data.progress) {
         if (entry == null || entry.cardId == null || entry.cardId.isBlank()) {
-          logger.warn("Card discovery file has an invalid entry: {}", file.path());
+          logger.warn("Card discovery file has an invalid entry: {}", file);
           continue;
         }
-        try {
-          loaded.put(entry.cardId, CardUnlockState.valueOf(entry.unlockState));
-        } catch (IllegalArgumentException | NullPointerException exception) {
-          logger.warn(
-              "Ignoring unknown card discovery state '{}' for '{}'",
-              entry.unlockState,
-              entry.cardId);
-        }
+        loadEntry(entry, loaded);
       }
       return loaded;
     } catch (RuntimeException exception) {
-      logger.warn("Unable to load card discovery from {}", file.path(), exception);
+      logger.warn("Unable to load card discovery from {}", file, exception);
       return Map.of();
+    }
+  }
+
+  private static void loadEntry(ProgressEntry entry, Map<String, CardUnlockState> loaded) {
+    try {
+      loaded.put(entry.cardId, CardUnlockState.valueOf(entry.unlockState));
+    } catch (IllegalArgumentException | NullPointerException exception) {
+      logger.warn(
+          "Ignoring unknown card discovery state '{}' for '{}'", entry.unlockState, entry.cardId);
     }
   }
 
@@ -81,7 +83,7 @@ public class CardDiscoveryStore {
       file.parent().mkdirs();
       file.writeString(json().prettyPrint(data), false, "UTF-8");
     } catch (RuntimeException exception) {
-      logger.warn("Unable to save card discovery to {}", file.path(), exception);
+      logger.warn("Unable to save card discovery to {}", file, exception);
     }
   }
 

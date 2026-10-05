@@ -457,20 +457,10 @@ public class BattleScreen extends ScreenAdapter {
     float centerIndex = (handRowOrder.size() - 1) / 2f;
     for (int i = 0; i < handRowOrder.size(); i++) {
       CardInstance instance = handRowOrder.get(i);
-      String cardId = instance.cardId();
       boolean disabled = discardedInstances.contains(instance);
 
-      Optional<CardConfig> maybeCard = library.getCard(cardId);
-      if (maybeCard.isEmpty()) {
-        logger.warn("Card ID {} not found in library, skipping", cardId);
-        continue;
-      }
-      ResolvedCard card;
-      try {
-        card = cardResolver.resolve(maybeCard.get(), instance);
-      } catch (IllegalArgumentException | IllegalStateException exception) {
-        logger.warn(
-            "Could not resolve card instance {}, skipping", instance.instanceId(), exception);
+      ResolvedCard card = resolveHandCard(instance);
+      if (card == null) {
         continue;
       }
       String variant =
@@ -502,6 +492,20 @@ public class BattleScreen extends ScreenAdapter {
     return records;
   }
 
+  private ResolvedCard resolveHandCard(CardInstance instance) {
+    Optional<CardConfig> config = library.getCard(instance.cardId());
+    if (config.isEmpty()) {
+      logger.warn("Card ID {} not found in library, skipping", instance.cardId());
+      return null;
+    }
+    try {
+      return cardResolver.resolve(config.get(), instance);
+    } catch (IllegalArgumentException | IllegalStateException exception) {
+      logger.warn("Could not resolve card instance {}, skipping", instance.instanceId(), exception);
+      return null;
+    }
+  }
+
   private void installHandCardWidgets() {
     Map<String, CardInstance> instancesById = new HashMap<>();
     for (CardInstance instance : handRowOrder) {
@@ -509,27 +513,30 @@ public class BattleScreen extends ScreenAdapter {
     }
 
     for (Clickable clickable : uiFactory.getByTrigger("playCard")) {
-      Object[] args = clickable.getArgs();
-      if (args.length == 0 || !(args[0] instanceof String instanceId)) {
-        logger.warn("Play-card clickable is missing an instanceId payload");
-        continue;
-      }
-      CardInstance instance = instancesById.get(instanceId);
-      if (instance == null) {
-        logger.warn("No hand-row instance found for clickable payload {}", instanceId);
-        continue;
-      }
-      Optional<CardConfig> config = library.getCard(instance.cardId());
-      if (config.isEmpty()) {
-        continue;
-      }
+      installHandCardWidget(clickable, instancesById);
+    }
+  }
 
-      try {
-        ResolvedCard resolved = cardResolver.resolve(config.get(), instance);
-        clickable.setVisualContent(() -> new CardWidget(resolved, cardWidgetAssets));
-      } catch (IllegalArgumentException | IllegalStateException exception) {
-        logger.warn("Could not install card widget for instance {}", instanceId, exception);
-      }
+  private void installHandCardWidget(Clickable clickable, Map<String, CardInstance> instancesById) {
+    Object[] args = clickable.getArgs();
+    if (args.length == 0 || !(args[0] instanceof String instanceId)) {
+      logger.warn("Play-card clickable is missing an instanceId payload");
+      return;
+    }
+    CardInstance instance = instancesById.get(instanceId);
+    if (instance == null) {
+      logger.warn("No hand-row instance found for clickable payload {}", instanceId);
+      return;
+    }
+    Optional<CardConfig> config = library.getCard(instance.cardId());
+    if (config.isEmpty()) {
+      return;
+    }
+    try {
+      ResolvedCard resolved = cardResolver.resolve(config.get(), instance);
+      clickable.setVisualContent(() -> new CardWidget(resolved, cardWidgetAssets));
+    } catch (IllegalArgumentException | IllegalStateException exception) {
+      logger.warn("Could not install card widget for instance {}", instanceId, exception);
     }
   }
 }

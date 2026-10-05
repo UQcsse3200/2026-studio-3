@@ -116,12 +116,11 @@ class GameStateSnapshotProviderTest {
     PlayerRunState playerState = new PlayerRunState(100, 100, 50);
     PlayerDeck deck = PlayerDeckFactory.createStarterDeck();
     RunState runState = buildRunStateWithSingleNode();
+    CardDiscoveryService discovery = CardDiscoveryService.loadDefault();
 
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            new GameStateSnapshotProvider(
-                playerState, deck, runState, null, CardDiscoveryService.loadDefault()));
+        () -> new GameStateSnapshotProvider(playerState, deck, runState, null, discovery));
   }
 
   @Test
@@ -149,12 +148,11 @@ class GameStateSnapshotProviderTest {
     PlayerRunState playerState = new PlayerRunState(100, 100, 50);
     PlayerDeck deck = PlayerDeckFactory.createStarterDeck();
     RunState runState = buildRunStateWithSingleNode();
+    BestiaryService bestiary = BestiaryService.loadDefault();
 
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            new GameStateSnapshotProvider(
-                playerState, deck, runState, BestiaryService.loadDefault(), null));
+        () -> new GameStateSnapshotProvider(playerState, deck, runState, bestiary, null));
   }
 
   private RunState buildRunStateWithSingleNode() {

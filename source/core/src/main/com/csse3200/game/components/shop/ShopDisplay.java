@@ -396,7 +396,7 @@ public class ShopDisplay extends UIComponent {
     Table purse = new Table();
     purse.setBackground(createPlaqueDrawable(new Color(0.76f, 0.63f, 0.45f, 1f)));
     purse.pad(12f, 18f, 12f, 18f);
-    goldLabel = new Label("", createLabelStyle("default", GOLD_COLOUR));
+    goldLabel = new Label("", createLabelStyle(DEFAULT, GOLD_COLOUR));
     goldLabel.setFontScale(1.22f);
     purse.add(goldLabel);
 

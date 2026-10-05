@@ -16,7 +16,6 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -28,7 +27,6 @@ import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.cards.runtime.CardResolver;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.components.shop.ShopDisplay;
-import com.csse3200.game.components.spritedisplay.clickable.Clickable;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.clickable.DragNDrop;
 import com.csse3200.game.entities.Entity;
@@ -200,13 +198,6 @@ class CommonCardViewIntegrationTest {
     widgets.forEach(this::assertRarityFrame);
   }
 
-  private static CardWidget cardFace(Clickable clickable) {
-    List<CardWidget> faces = new ArrayList<>();
-    collectWidgets(clickable.getBtn(), faces);
-    assertEquals(1, faces.size());
-    return faces.getFirst();
-  }
-
   private List<CardWidget> widgets() {
     List<CardWidget> result = new ArrayList<>();
     for (Actor actor : stage.getActors()) {
@@ -242,10 +233,5 @@ class CommonCardViewIntegrationTest {
             },
             Texture.class),
         frame.getRegion().getTexture());
-  }
-
-  private static Image frameImage(CardWidget widget) {
-    widget.validate();
-    return ((Group) widget.getChildren().first()).findActor("card-frame");
   }
 }

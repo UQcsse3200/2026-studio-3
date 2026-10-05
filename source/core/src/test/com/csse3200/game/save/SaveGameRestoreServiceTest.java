@@ -322,27 +322,20 @@ class SaveGameRestoreServiceTest {
     PlayerDeck deck = testDeck(List.of(STRIKE));
     RunState runState = new RunState();
     BestiaryService bestiary = BestiaryService.loadDefault();
+    CardDiscoveryService discovery = CardDiscoveryService.loadDefault();
 
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            new SaveGameRestoreService(
-                null, deck, runState, bestiary, CardDiscoveryService.loadDefault()));
+        () -> new SaveGameRestoreService(null, deck, runState, bestiary, discovery));
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            new SaveGameRestoreService(
-                playerState, null, runState, bestiary, CardDiscoveryService.loadDefault()));
+        () -> new SaveGameRestoreService(playerState, null, runState, bestiary, discovery));
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            new SaveGameRestoreService(
-                playerState, deck, null, bestiary, CardDiscoveryService.loadDefault()));
+        () -> new SaveGameRestoreService(playerState, deck, null, bestiary, discovery));
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            new SaveGameRestoreService(
-                playerState, deck, runState, null, CardDiscoveryService.loadDefault()));
+        () -> new SaveGameRestoreService(playerState, deck, runState, null, discovery));
     assertThrows(
         IllegalArgumentException.class,
         () -> new SaveGameRestoreService(playerState, deck, runState, bestiary, null));

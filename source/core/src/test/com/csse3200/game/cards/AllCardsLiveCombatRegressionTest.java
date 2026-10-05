@@ -84,7 +84,7 @@ class AllCardsLiveCombatRegressionTest {
     Set<String> eligible =
         new HashSet<>(CardAcquisitionPoolLoader.loadDefault(library).eligibleCardIds());
 
-    assertEquals(configured, EXPECTED_CARD_IDS);
+    assertEquals(EXPECTED_CARD_IDS, configured);
     assertEquals(configured, eligible);
   }
 
