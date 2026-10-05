@@ -84,7 +84,8 @@ public class BattleScreen extends ScreenAdapter {
     "images/money.png",
     "images/level.png",
     "images/enemy.png",
-    "images/armour.png"
+    "images/armour.png",
+    "images/enemy_release/heavens_grace.png"
   };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
@@ -288,7 +289,7 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new InputDecorator(stage, 10))
             .addComponent(uiFactory)
             .addComponent(displays)
-            .addComponent(new BattleActions(controller, game))
+            .addComponent(new BattleActions(controller, game, gameArea.getEnemies()))
             .addComponent(new CardActions(controller, gameArea.getPlayer()))
             .addComponent(new Team3CardPlayAdapter(cardPlayService, controller))
             .addComponent(cardInventory)

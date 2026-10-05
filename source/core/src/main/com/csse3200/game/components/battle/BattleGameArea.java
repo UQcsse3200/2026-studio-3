@@ -80,6 +80,7 @@ public class BattleGameArea extends ForestGameArea {
     for (int index = 0; index < configs.size(); index++) {
       EnemyConfig config = configs.get(index);
       Entity enemy = EnemyFactory.create(config);
+      enemy.addComponent(new EnemyReleaseDisplay());
       spawnEntityAt(
           enemy, new GridPoint2(FIRST_ENEMY_X + index * ENEMY_SPACING, ENEMY_Y), true, true);
       // Keyed by the entity's numeric ID to match the drop-target ID EnemyFactory assigns it.
