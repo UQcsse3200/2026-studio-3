@@ -396,7 +396,7 @@ public class ShopDisplay extends UIComponent {
     Table purse = new Table();
     purse.setBackground(createPlaqueDrawable(new Color(0.76f, 0.63f, 0.45f, 1f)));
     purse.pad(12f, 18f, 12f, 18f);
-    goldLabel = new Label("", createLabelStyle("default", GOLD_COLOUR));
+    goldLabel = new Label("", createLabelStyle(DEFAULT, GOLD_COLOUR));
     goldLabel.setFontScale(1.22f);
     purse.add(goldLabel);
 
@@ -434,7 +434,7 @@ public class ShopDisplay extends UIComponent {
     Actor artwork = createArtwork(item);
 
     Label priceLabel =
-        new Label(String.format("%d GOLD", item.price), createLabelStyle("default", GOLD_COLOUR));
+        new Label(String.format("%d GOLD", item.price), createLabelStyle(DEFAULT, GOLD_COLOUR));
     Label stockLabel = new Label("", createLabelStyle("small", MUTED_COLOUR));
     Label stateLabel = new Label("", createLabelStyle("small", AVAILABLE_COLOUR));
     priceLabel.setFontScale(0.98f);

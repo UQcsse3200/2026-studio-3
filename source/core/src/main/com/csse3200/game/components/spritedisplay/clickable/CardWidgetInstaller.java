@@ -28,24 +28,32 @@ public final class CardWidgetInstaller {
       CardWidgetAssets assets,
       Map<String, CardInstance> instancesById) {
     for (Clickable clickable : factory.getByTrigger(trigger)) {
-      Object[] args = clickable.getArgs();
-      if (args.length == 0 || !(args[0] instanceof String id)) {
-        continue;
-      }
-      CardInstance instance = instancesById.get(id);
-      if (instance == null) {
-        continue;
-      }
-      Optional<CardConfig> cfg = library.getCard(instance.cardId());
-      if (cfg.isEmpty()) {
-        continue;
-      }
-      try {
-        ResolvedCard resolved = RESOLVER.resolve(cfg.get(), instance);
-        clickable.setVisualContent(() -> buildFitted(resolved, assets, clickable));
-      } catch (IllegalArgumentException | IllegalStateException ex) {
-        logger.warn("Could not install card widget for {}", id, ex);
-      }
+      installCard(clickable, library, assets, instancesById);
+    }
+  }
+
+  private static void installCard(
+      Clickable clickable,
+      CardLibrary library,
+      CardWidgetAssets assets,
+      Map<String, CardInstance> instancesById) {
+    Object[] args = clickable.getArgs();
+    if (args.length == 0 || !(args[0] instanceof String id)) {
+      return;
+    }
+    CardInstance instance = instancesById.get(id);
+    if (instance == null) {
+      return;
+    }
+    Optional<CardConfig> cfg = library.getCard(instance.cardId());
+    if (cfg.isEmpty()) {
+      return;
+    }
+    try {
+      ResolvedCard resolved = RESOLVER.resolve(cfg.get(), instance);
+      clickable.setVisualContent(() -> buildFitted(resolved, assets, clickable));
+    } catch (IllegalArgumentException | IllegalStateException ex) {
+      logger.warn("Could not install card widget for {}", id, ex);
     }
   }
 

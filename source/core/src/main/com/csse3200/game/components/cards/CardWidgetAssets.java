@@ -10,11 +10,12 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.csse3200.game.cards.Rarity;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.services.ResourceService;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * Shared visual dependencies for {@link CardWidget}.
@@ -24,6 +25,9 @@ import java.util.Objects;
  * interactive card consumers reuse one presentation component.
  */
 public final class CardWidgetAssets {
+  private static final String WHITE = "white";
+  private static final String SMALL = "small";
+
   /** Authored frame shared by Common cards in every view. */
   public static final String COMMON_FRAME_TEXTURE = "images/cards/common_card_frame.png";
 
@@ -79,23 +83,23 @@ public final class CardWidgetAssets {
     this.artworkProvider =
         Objects.requireNonNull(artworkProvider, "artworkProvider cannot be null");
 
-    cardFace = skin.newDrawable("white", CARD_FACE);
-    innerRim = skin.newDrawable("white", INNER_RIM);
-    namePlate = skin.newDrawable("white", NAME_PLATE);
-    artworkBackdrop = skin.newDrawable("white", ARTWORK_BACKDROP);
-    descriptionPanel = skin.newDrawable("white", DESCRIPTION_PANEL);
+    cardFace = skin.newDrawable(WHITE, CARD_FACE);
+    innerRim = skin.newDrawable(WHITE, INNER_RIM);
+    namePlate = skin.newDrawable(WHITE, NAME_PLATE);
+    artworkBackdrop = skin.newDrawable(WHITE, ARTWORK_BACKDROP);
+    descriptionPanel = skin.newDrawable(WHITE, DESCRIPTION_PANEL);
     costBadge = skin.newDrawable("touchpad", COST_BADGE);
     upgradeBadge = skin.newDrawable("touchpad-knob", UPGRADE_BADGE);
-    commonFrame = skin.newDrawable("white", COMMON_FRAME);
+    commonFrame = skin.newDrawable(WHITE, COMMON_FRAME);
     FRAME_LAYOUTS.forEach(
         (rarity, layout) -> authoredFrames.put(rarity, artworkProvider.get(layout.texturePath())));
-    uncommonFrame = skin.newDrawable("white", UNCOMMON_FRAME);
-    rareFrame = skin.newDrawable("white", RARE_FRAME);
+    uncommonFrame = skin.newDrawable(WHITE, UNCOMMON_FRAME);
+    rareFrame = skin.newDrawable(WHITE, RARE_FRAME);
 
-    nameStyle = copyLabelStyle(skin, "small", LIGHT_TEXT);
+    nameStyle = copyLabelStyle(skin, SMALL, LIGHT_TEXT);
     costStyle = copyLabelStyle(skin, "default", Color.WHITE);
-    targetStyle = copyLabelStyle(skin, "small", LIGHT_TEXT);
-    descriptionStyle = copyLabelStyle(skin, "small", DARK_TEXT);
+    targetStyle = copyLabelStyle(skin, SMALL, LIGHT_TEXT);
+    descriptionStyle = copyLabelStyle(skin, SMALL, DARK_TEXT);
     upgradeStyle = copyLabelStyle(skin, "default", Color.WHITE);
   }
 
@@ -134,17 +138,15 @@ public final class CardWidgetAssets {
 
   /** Collects the shared frame and distinct artwork paths for screen-owned loading/unloading. */
   public static String[] collectTexturePaths(Collection<CardConfig> configs) {
-    LinkedHashSet<String> paths = new LinkedHashSet<>();
     // Stable enum order makes screen loading predictable regardless of Map iteration order.
-    for (Rarity rarity : Rarity.values()) {
-      paths.add(FRAME_LAYOUTS.get(rarity).texturePath());
-    }
-    for (CardConfig config : configs) {
-      if (config.texturePath != null && !config.texturePath.isBlank()) {
-        paths.add(config.texturePath);
-      }
-    }
-    return paths.toArray(String[]::new);
+    Stream<String> frames =
+        Arrays.stream(Rarity.values()).map(rarity -> FRAME_LAYOUTS.get(rarity).texturePath());
+    Stream<String> artwork =
+        configs.stream()
+            .map(config -> config.texturePath)
+            .filter(Objects::nonNull)
+            .filter(path -> !path.isBlank());
+    return Stream.concat(frames, artwork).distinct().toArray(String[]::new);
   }
 
   /** Whether this rarity has a registered authored frame whose texture is already loaded. */

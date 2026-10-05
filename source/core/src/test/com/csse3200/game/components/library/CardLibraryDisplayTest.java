@@ -319,11 +319,13 @@ class CardLibraryDisplayTest {
 
   private CardLibraryDisplay createDisplay(CardDiscoveryService discovery) {
     RenderService renderService = mock(RenderService.class);
-    when(renderService.getStage()).thenReturn(mock(Stage.class));
+    Stage libraryStage = mock(Stage.class);
+    when(renderService.getStage()).thenReturn(libraryStage);
     ServiceLocator.registerRenderService(renderService);
 
     ResourceService resources = mock(ResourceService.class);
-    when(resources.getAsset(anyString(), eq(Texture.class))).thenReturn(mock(Texture.class));
+    Texture artwork = mock(Texture.class);
+    when(resources.getAsset(anyString(), eq(Texture.class))).thenReturn(artwork);
     ServiceLocator.registerResourceService(resources);
     return new CardLibraryDisplay(mock(GdxGame.class), discovery);
   }

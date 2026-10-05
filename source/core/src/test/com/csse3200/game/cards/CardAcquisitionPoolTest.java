@@ -33,22 +33,21 @@ class CardAcquisitionPoolTest {
         pool.getEligibleCards().stream().map(card -> card.id).toList());
     assertTrue(pool.isEligible("strike"));
     assertFalse(pool.isEligible("poison_dagger"));
-    assertThrows(
-        UnsupportedOperationException.class, () -> pool.eligibleCardIds().add("poison_dagger"));
+    List<String> eligibleIds = pool.eligibleCardIds();
+    assertThrows(UnsupportedOperationException.class, () -> eligibleIds.add("poison_dagger"));
   }
 
   @Test
   void shouldRejectInvalidEligibility() {
-    assertThrows(NullPointerException.class, () -> new CardAcquisitionPool(null, List.of()));
+    List<String> empty = List.of();
+    List<String> duplicates = List.of("strike", "strike");
+    List<String> unknown = List.of("missing-card");
+    List<String> blank = List.of(" ");
+    assertThrows(NullPointerException.class, () -> new CardAcquisitionPool(null, empty));
     assertThrows(IllegalArgumentException.class, () -> new CardAcquisitionPool(cards, null));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new CardAcquisitionPool(cards, List.of("strike", "strike")));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new CardAcquisitionPool(cards, List.of("missing-card")));
-    assertThrows(
-        IllegalArgumentException.class, () -> new CardAcquisitionPool(cards, List.of(" ")));
+    assertThrows(IllegalArgumentException.class, () -> new CardAcquisitionPool(cards, duplicates));
+    assertThrows(IllegalArgumentException.class, () -> new CardAcquisitionPool(cards, unknown));
+    assertThrows(IllegalArgumentException.class, () -> new CardAcquisitionPool(cards, blank));
   }
 
   @Test

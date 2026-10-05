@@ -386,18 +386,18 @@ class RewardDisplayTest {
 
   @Test
   void constructorRejectsMissingRequiredServices() {
-    DisplayingRecord record = DisplayingRecord.builder("").variant("reward").build();
+    DisplayingRecord rewardRecord = DisplayingRecord.builder("").variant("reward").build();
     RewardService service = defaultService();
 
     assertThrows(
         NullPointerException.class,
-        () -> new RewardDisplay(record, null, runState, cardService, discovery));
+        () -> new RewardDisplay(rewardRecord, null, runState, cardService, discovery));
     assertThrows(
         NullPointerException.class,
-        () -> new RewardDisplay(record, service, runState, null, discovery));
+        () -> new RewardDisplay(rewardRecord, service, runState, null, discovery));
     assertThrows(
         NullPointerException.class,
-        () -> new RewardDisplay(record, service, runState, cardService, null));
+        () -> new RewardDisplay(rewardRecord, service, runState, cardService, null));
   }
 
   @Test

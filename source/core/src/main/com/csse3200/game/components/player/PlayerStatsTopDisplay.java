@@ -52,7 +52,6 @@ public class PlayerStatsTopDisplay extends UIComponent {
     table.setSize(mapWidth, 50);
     table.setPosition(0, mapHeight - 50);
     table.setBackground(skin.newDrawable("color", new Color(0.105f, 0.070f, 0.065f, 0.98f)));
-    // table.setFillParent(true);
     table.padTop(5f).padLeft(10f);
 
     // Image size

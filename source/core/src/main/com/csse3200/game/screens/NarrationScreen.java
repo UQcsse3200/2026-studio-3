@@ -137,6 +137,10 @@ public class NarrationScreen extends ScreenAdapter {
         previousClearColour.get(2),
         previousClearColour.get(3));
     // The callback may dispose this screen: never invoke it inside Stage.act/input dispatch.
+    completeIfRequested();
+  }
+
+  private void completeIfRequested() {
     if (finishRequested && !disposed && !completed) {
       completed = true;
       onComplete.run();

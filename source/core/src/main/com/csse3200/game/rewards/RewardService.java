@@ -118,9 +118,7 @@ public class RewardService {
         inventory.addGold(selected.goldAmount);
       }
 
-      case ITEM -> {
-        ItemEffectApplier.applyItemEffect(selected.itemId, player);
-      }
+      case ITEM -> ItemEffectApplier.applyItemEffect(selected.itemId, player);
       case CARD -> throw new IllegalArgumentException("card rewards require a persistent RunState");
     }
   }
@@ -129,22 +127,14 @@ public class RewardService {
     if (selected == null || selected.type == null) {
       throw new IllegalArgumentException("selected reward must not be null");
     }
-    switch (selected.type) {
-      case GOLD -> {
-        if (selected.goldAmount < 0) {
-          throw new IllegalArgumentException("gold reward must not be negative");
-        }
-      }
-      case ITEM -> {
-        if (selected.itemId == null) {
-          throw new IllegalArgumentException("item reward must have an itemId");
-        }
-      }
-      case CARD -> {
-        if (selected.cardSelection == null) {
-          throw new IllegalArgumentException("card reward must have a selection");
-        }
-      }
+    String error =
+        switch (selected.type) {
+          case GOLD -> selected.goldAmount < 0 ? "gold reward must not be negative" : null;
+          case ITEM -> selected.itemId == null ? "item reward must have an itemId" : null;
+          case CARD -> selected.cardSelection == null ? "card reward must have a selection" : null;
+        };
+    if (error != null) {
+      throw new IllegalArgumentException(error);
     }
   }
 

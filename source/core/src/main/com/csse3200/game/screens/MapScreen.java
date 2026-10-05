@@ -135,18 +135,17 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     MapNode node = runState.getMapGraph() == null ? null : runState.getMapGraph().getNode(nodeId);
     RoomType roomType = node == null ? null : node.getRoomType();
 
+    GdxGame.ScreenType destination =
+        switch (roomType) {
+          case FINAL, COMBAT, ELITE -> GdxGame.ScreenType.BATTLE_SCREEN;
+          case CAMPFIRE -> GdxGame.ScreenType.CAMPFIRE;
+          case null, default -> GdxGame.ScreenType.ENCOUNTER;
+        };
+    logger.info("Node {} ({}) selected, entering {}", nodeId, roomType, destination);
     if (roomType == RoomType.FINAL) {
-      logger.info("Node {} ({}) selected, entering battle", nodeId, roomType);
       game.showNarration("pre_boss", GdxGame.ScreenType.BATTLE_SCREEN);
-    } else if (roomType == RoomType.COMBAT || roomType == RoomType.ELITE) {
-      logger.info("Node {} ({}) selected, entering battle", nodeId, roomType);
-      game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
-    } else if (roomType == RoomType.CAMPFIRE) {
-      logger.info("Node {} ({}) selected, entering campfire", nodeId, roomType);
-      game.setScreen(GdxGame.ScreenType.CAMPFIRE);
     } else {
-      logger.info("Node {} ({}) selected, entering encounter", nodeId, roomType);
-      game.setScreen(GdxGame.ScreenType.ENCOUNTER);
+      game.setScreen(destination);
     }
   }
 

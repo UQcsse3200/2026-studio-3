@@ -19,8 +19,8 @@ class CardRewardSelectionTest {
     assertEquals(List.of("strike", "defend", "bandage"), selection.cardIds());
     assertTrue(selection.contains("defend"));
     assertFalse(selection.contains("poison_dagger"));
-    assertThrows(
-        UnsupportedOperationException.class, () -> selection.cardIds().add("poison_dagger"));
+    List<String> ids = selection.cardIds();
+    assertThrows(UnsupportedOperationException.class, () -> ids.add("poison_dagger"));
   }
 
   @Test
@@ -33,13 +33,14 @@ class CardRewardSelectionTest {
 
   @Test
   void shouldRejectInvalidSelections() {
+    List<String> empty = List.of();
+    List<String> tooMany = List.of("strike", "defend", "bandage", "expose");
+    List<String> duplicates = List.of("strike", "strike");
+    List<String> blank = List.of(" ");
     assertThrows(IllegalArgumentException.class, () -> new CardRewardSelection(null));
-    assertThrows(IllegalArgumentException.class, () -> new CardRewardSelection(List.of()));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new CardRewardSelection(List.of("strike", "defend", "bandage", "expose")));
-    assertThrows(
-        IllegalArgumentException.class, () -> new CardRewardSelection(List.of("strike", "strike")));
-    assertThrows(IllegalArgumentException.class, () -> new CardRewardSelection(List.of(" ")));
+    assertThrows(IllegalArgumentException.class, () -> new CardRewardSelection(empty));
+    assertThrows(IllegalArgumentException.class, () -> new CardRewardSelection(tooMany));
+    assertThrows(IllegalArgumentException.class, () -> new CardRewardSelection(duplicates));
+    assertThrows(IllegalArgumentException.class, () -> new CardRewardSelection(blank));
   }
 }

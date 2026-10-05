@@ -62,9 +62,9 @@ class ChanceEncounterDisplayTest {
 
   @Test
   void abandonedMineSceneKeepsChoicesAndCompletionWorking() {
-    Stage stage = new Stage(new FitViewport(1280f, 800f), mock(Batch.class));
+    Stage sceneStage = new Stage(new FitViewport(1280f, 800f), mock(Batch.class));
     RenderService renderService = new RenderService();
-    renderService.setStage(stage);
+    renderService.setStage(sceneStage);
     ServiceLocator.registerRenderService(renderService);
     EntityService entities = new EntityService();
     ServiceLocator.registerEntityService(entities);
@@ -83,8 +83,8 @@ class ChanceEncounterDisplayTest {
     ChanceEncounterDisplay display =
         new ChanceEncounterDisplay(
             encounter, (nodeId, success) -> completions.incrementAndGet(), 7);
-    Entity entity = new Entity().addComponent(display);
-    entities.register(entity);
+    Entity sceneEntity = new Entity().addComponent(display);
+    entities.register(sceneEntity);
 
     try {
       assertEquals(2, display.getChoiceButtons().size());
@@ -105,20 +105,20 @@ class ChanceEncounterDisplayTest {
       assertEquals(0, completions.get());
 
       display.getContinueButton().fire(new ChangeEvent());
-      stage.act(0.3f);
-      stage.act(0.3f);
+      sceneStage.act(0.3f);
+      sceneStage.act(0.3f);
       assertEquals(1, completions.get());
     } finally {
-      entity.dispose();
-      stage.dispose();
+      sceneEntity.dispose();
+      sceneStage.dispose();
     }
   }
 
   @Test
   void shouldRefreshDiceButtonsAfterEachStagedChoice() {
-    Stage stage = new Stage(new FitViewport(1280f, 800f), mock(Batch.class));
+    Stage sceneStage = new Stage(new FitViewport(1280f, 800f), mock(Batch.class));
     RenderService renderService = new RenderService();
-    renderService.setStage(stage);
+    renderService.setStage(sceneStage);
     ServiceLocator.registerRenderService(renderService);
     EntityService entities = new EntityService();
     ServiceLocator.registerEntityService(entities);
@@ -152,8 +152,8 @@ class ChanceEncounterDisplayTest {
             new ChanceOutcomeApplier(new MockPlayerStateGateway(100, 50)),
             (nodeId, success) -> {});
     ChanceEncounterDisplay display = new ChanceEncounterDisplay(session);
-    Entity entity = new Entity().addComponent(display);
-    entities.register(entity);
+    Entity sceneEntity = new Entity().addComponent(display);
+    entities.register(sceneEntity);
 
     try {
       assertEquals(List.of("low", "high"), choiceIds(display));
@@ -167,14 +167,14 @@ class ChanceEncounterDisplayTest {
       assertEquals("ROLLING...", display.getResultText());
       display.getChoiceButtons().get(1).fire(new ChangeEvent());
       for (int frame = 0; frame < 42; frame++) {
-        stage.act(1f / 60f);
+        sceneStage.act(1f / 60f);
       }
       assertTrue(display.getDiceRollDisplay().isRolling());
       assertEquals(1, display.getDiceRollDisplay().getFirstValue());
       assertEquals(6, display.getDiceRollDisplay().getSecondValue());
       assertEquals("ROLLING...", display.getDiceRollDisplay().getTotalText());
       for (int frame = 0; frame < 18; frame++) {
-        stage.act(1f / 60f);
+        sceneStage.act(1f / 60f);
       }
       assertFalse(display.getDiceRollDisplay().isRolling());
       assertEquals(1, display.getDiceRollDisplay().getFirstValue());
@@ -196,8 +196,8 @@ class ChanceEncounterDisplayTest {
       display.getChoiceButtons().get(0).fire(new ChangeEvent());
       assertTrue(session.isResolved());
     } finally {
-      entity.dispose();
-      stage.dispose();
+      sceneEntity.dispose();
+      sceneStage.dispose();
     }
   }
 

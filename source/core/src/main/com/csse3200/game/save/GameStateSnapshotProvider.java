@@ -139,13 +139,11 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
       }
     }
 
-    List<CardProgressSaveData> cardProgress = new ArrayList<>();
-    for (Map.Entry<String, CardUnlockState> entry :
-        cardDiscoveryService.getProgressSnapshot().entrySet()) {
-      if (entry.getValue() != CardUnlockState.LOCKED) {
-        cardProgress.add(new CardProgressSaveData(entry.getKey(), entry.getValue().name()));
-      }
-    }
+    List<CardProgressSaveData> cardProgress =
+        cardDiscoveryService.getProgressSnapshot().entrySet().stream()
+            .filter(entry -> entry.getValue() != CardUnlockState.LOCKED)
+            .map(entry -> new CardProgressSaveData(entry.getKey(), entry.getValue().name()))
+            .toList();
 
     ProgressSaveData progress =
         new ProgressSaveData(pendingRewardId, resumeScreen, bestiaryProgress, cardProgress);
