@@ -124,10 +124,91 @@ class SettingsPanelTest {
     assertFalse(panel.getFullScreenCheck().isChecked());
     assertTrue(panel.getVsyncCheck().isChecked());
     assertNull(written.get());
+    assertEquals("Defaults restored. Click Apply to save.", feedback(panel).getText().toString());
 
     click(panel.getBackButton());
     assertEquals(1, backCount.get());
     assertNull(written.get());
+    assertEquals(0, writeCount.get());
+    assertEquals(75, initial.fps);
+    assertEquals(0.8f, initial.masterVolume, 0.001f);
+    assertTrue(initial.muted);
+  }
+
+  @Test
+  void resetReplacesErrorAndSuccessFeedbackWithoutSaving() {
+    SettingsPanel panel = createPanel();
+    panel.getFpsText().setText("-1");
+    click(panel.getApplyButton());
+    assertEquals(
+        "Invalid FPS. Enter a positive whole number.", feedback(panel).getText().toString());
+
+    click(panel.getResetButton());
+    assertEquals("Defaults restored. Click Apply to save.", feedback(panel).getText().toString());
+    assertEquals("60", panel.getFpsText().getText());
+    assertEquals(0, writeCount.get());
+
+    click(panel.getApplyButton());
+    Settings saved = written.get();
+    assertEquals("Settings applied.", feedback(panel).getText().toString());
+    // Repeated reset must show the reminder even when the controls already contain defaults.
+    click(panel.getResetButton());
+    click(panel.getResetButton());
+    assertEquals("Defaults restored. Click Apply to save.", feedback(panel).getText().toString());
+    assertEquals(1, writeCount.get());
+    assertSame(saved, written.get());
+  }
+
+  @Test
+  void resetThenApplySavesAudioAndDisplayDefaultsOnce() {
+    SettingsPanel panel = createPanel();
+    click(panel.getResetButton());
+    assertEquals(0, writeCount.get());
+
+    click(panel.getApplyButton());
+
+    Settings saved = written.get();
+    assertEquals(60, saved.fps);
+    assertEquals(1f, saved.masterVolume);
+    assertEquals(1f, saved.musicVolume);
+    assertEquals(1f, saved.soundEffectsVolume);
+    assertFalse(saved.muted);
+    assertFalse(saved.fullscreen);
+    assertTrue(saved.vsync);
+    // Preserve the existing Reset behaviour: select the current display mode.
+    assertEquals(1280, saved.displayMode.width);
+    assertEquals(800, saved.displayMode.height);
+    assertEquals(60, saved.displayMode.refreshRate);
+    assertEquals(1, writeCount.get());
+    assertEquals(0, backCount.get());
+    assertEquals("Settings applied.", feedback(panel).getText().toString());
+  }
+
+  @Test
+  void editsAfterResetClearReminderAndApplyWithRemainingDefaults() {
+    SettingsPanel panel = createPanel();
+    panel.getFpsText().setProgrammaticChangeEvents(true);
+    click(panel.getResetButton());
+
+    panel.getFpsText().setText("120");
+    assertEquals("", feedback(panel).getText().toString());
+    click(panel.getResetButton());
+    panel.getMusicVolumeSlider().setValue(0.3f);
+    assertEquals("", feedback(panel).getText().toString());
+    panel.getFpsText().setText("120");
+    assertEquals(0, writeCount.get());
+    click(panel.getApplyButton());
+
+    Settings saved = written.get();
+    assertEquals(120, saved.fps);
+    assertEquals(0.3f, saved.musicVolume, 0.001f);
+    assertEquals(1f, saved.masterVolume);
+    assertEquals(1f, saved.soundEffectsVolume);
+    assertFalse(saved.muted);
+    assertFalse(saved.fullscreen);
+    assertTrue(saved.vsync);
+    assertEquals(1, writeCount.get());
+    assertEquals("Settings applied.", feedback(panel).getText().toString());
   }
 
   @Test

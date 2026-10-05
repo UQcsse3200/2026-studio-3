@@ -190,6 +190,7 @@ public class SettingsPanel extends Table {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
             populate(new Settings());
+            showFeedback("Defaults restored. Click Apply to save.", MenuTheme.warmParchment());
           }
         });
     backButton.addListener(
