@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -29,6 +30,7 @@ public class MainMenuDisplay extends UIComponent {
   public static final String TITLE_LOGO_TEXTURE = "images/main_menu_title_logo.png";
 
   public static final String START_EVENT = "start";
+  public static final String ENTER_TUTORIAL_EVENT = "enterTutorial";
   public static final String LOAD_EVENT = "load";
   public static final String BESTIARY_EVENT = "bestiary";
   public static final String SETTINGS_EVENT = "settings";
@@ -41,6 +43,7 @@ public class MainMenuDisplay extends UIComponent {
   private TextButton bestiaryButton;
   private TextButton settingsButton;
   private TextButton exitButton;
+  private Dialog tutorialChoiceDialog;
 
   @Override
   public void create() {
@@ -120,10 +123,54 @@ public class MainMenuDisplay extends UIComponent {
           @Override
           public void changed(ChangeEvent changeEvent, Actor actor) {
             logger.debug("{} button clicked", text);
-            entity.getEvents().trigger(eventName);
+            if (START_EVENT.equals(eventName)) {
+              showTutorialChoice();
+            } else {
+              entity.getEvents().trigger(eventName);
+            }
           }
         });
     return button;
+  }
+
+  /** Shows the choice between the battle tutorial and a normal new run. */
+  private void showTutorialChoice() {
+    if (tutorialChoiceDialog != null) {
+      return;
+    }
+
+    tutorialChoiceDialog =
+        new Dialog("Battle Tutorial", skin) {
+          @Override
+          protected void result(Object enterTutorial) {
+            if (tutorialChoiceDialog == null) {
+              return;
+            }
+
+            remove();
+            tutorialChoiceDialog = null;
+            entity
+                .getEvents()
+                .trigger(Boolean.TRUE.equals(enterTutorial) ? ENTER_TUTORIAL_EVENT : START_EVENT);
+          }
+        };
+
+    tutorialChoiceDialog.setName("tutorial-choice");
+    tutorialChoiceDialog.setModal(true);
+    tutorialChoiceDialog.setMovable(false);
+    tutorialChoiceDialog.getContentTable().pad(20f);
+    tutorialChoiceDialog.text("Would you like to start the battle tutorial?");
+    tutorialChoiceDialog.getButtonTable().defaults().width(220f).height(60f).pad(10f);
+
+    TextButton enterButton = new TextButton("Enter Tutorial", skin);
+    enterButton.setName(ENTER_TUTORIAL_EVENT);
+    tutorialChoiceDialog.button(enterButton, Boolean.TRUE);
+
+    TextButton skipButton = new TextButton("Skip Tutorial", skin);
+    skipButton.setName("skipTutorial");
+    tutorialChoiceDialog.button(skipButton, Boolean.FALSE);
+
+    tutorialChoiceDialog.show(stage);
   }
 
   private Texture getTexture(String path) {
@@ -142,6 +189,10 @@ public class MainMenuDisplay extends UIComponent {
 
   @Override
   public void dispose() {
+    if (tutorialChoiceDialog != null) {
+      tutorialChoiceDialog.remove();
+      tutorialChoiceDialog = null;
+    }
     if (rootStack != null) {
       rootStack.remove();
       rootStack.clear();

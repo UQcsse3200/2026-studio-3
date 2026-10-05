@@ -4,12 +4,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
-import com.csse3200.game.maps.RunState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,14 +15,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(GameExtension.class)
 class MainMenuActionsTest {
   private GdxGame game;
-  private RunState runState;
   private Entity menu;
 
   @BeforeEach
   void setUp() {
     game = mock(GdxGame.class);
-    runState = mock(RunState.class);
-    when(game.getRunState()).thenReturn(runState);
 
     menu = new Entity().addComponent(new MainMenuActions(game));
     menu.create();
@@ -34,8 +29,7 @@ class MainMenuActionsTest {
   void startBeginsANewRunOnTheMap() {
     menu.getEvents().trigger(MainMenuDisplay.START_EVENT);
 
-    verify(runState).endRun();
-    verify(game).setScreen(GdxGame.ScreenType.MAP);
+    verify(game).startNewRun();
   }
 
   @Test
@@ -43,7 +37,7 @@ class MainMenuActionsTest {
     menu.getEvents().trigger(MainMenuDisplay.LOAD_EVENT);
 
     verify(game).setScreen(GdxGame.ScreenType.SAVE_LOAD);
-    verify(runState, never()).endRun();
+    verify(game, never()).startNewRun();
   }
 
   @Test
@@ -51,7 +45,7 @@ class MainMenuActionsTest {
     menu.getEvents().trigger(MainMenuDisplay.BESTIARY_EVENT);
 
     verify(game).setScreen(GdxGame.ScreenType.LIBRARY);
-    verify(runState, never()).endRun();
+    verify(game, never()).startNewRun();
   }
 
   @Test
@@ -84,6 +78,6 @@ class MainMenuActionsTest {
     verify(game, never()).openDemoShop();
     verify(game, never()).openDemoCampfire();
     verify(game, never()).openDemoCardFusion();
-    verify(runState, never()).endRun();
+    verify(game, never()).startNewRun();
   }
 }

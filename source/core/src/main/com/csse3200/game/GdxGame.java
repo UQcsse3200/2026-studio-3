@@ -124,6 +124,25 @@ public class GdxGame extends Game {
     setScreen(newScreen(screenType));
   }
 
+  /**
+   * Discards the previous run and opens a fresh normal map.
+   *
+   * <p>The outgoing screen is disposed before resetting run state, so its final state capture
+   * cannot carry tutorial progress into the new run.
+   */
+  public void startNewRun() {
+    logger.info("Starting a fresh run");
+
+    Screen currentScreen = getScreen();
+    if (currentScreen != null) {
+      currentScreen.dispose();
+    }
+
+    runState.endRun();
+    ServiceLocator.registerBestiaryService(bestiaryService);
+    setScreen(newScreen(ScreenType.MAP));
+  }
+
   /** Opens the battle screen. */
   public void startBattle() {
     setScreen(ScreenType.BATTLE_SCREEN);
