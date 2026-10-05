@@ -1,6 +1,7 @@
 package com.csse3200.game.encounters.integration;
 
 import com.csse3200.game.chance.ChanceEncounter;
+import com.csse3200.game.chance.ChanceEncounterBehaviour;
 import com.csse3200.game.maps.EncounterCallback;
 import com.csse3200.game.shop.ShopEncounter;
 import com.csse3200.game.shop.ShopService;
@@ -78,6 +79,26 @@ public final class EncounterFlowController implements EncounterCallback {
     begin(nodeId, EncounterType.CHANCE);
     try {
       return new ChanceEncounterSession(nodeId, encounter, chanceOutcomeApplier, this);
+    } catch (RuntimeException exception) {
+      clearActiveEncounter();
+      throw exception;
+    }
+  }
+
+  /**
+   * Starts a Chance Encounter with specialised runtime choice behaviour.
+   *
+   * @param nodeId selected map node
+   * @param encounter encounter definition displayed by the UI
+   * @param behaviour player-independent resolver for this encounter
+   * @return session ready for the Chance UI
+   * @throws IllegalStateException when another encounter is active
+   */
+  public ChanceEncounterSession startChance(
+      Integer nodeId, ChanceEncounter encounter, ChanceEncounterBehaviour behaviour) {
+    begin(nodeId, EncounterType.CHANCE);
+    try {
+      return new ChanceEncounterSession(nodeId, encounter, behaviour, chanceOutcomeApplier, this);
     } catch (RuntimeException exception) {
       clearActiveEncounter();
       throw exception;
