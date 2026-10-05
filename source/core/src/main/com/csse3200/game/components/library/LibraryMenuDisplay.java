@@ -46,7 +46,7 @@ public class LibraryMenuDisplay extends UIComponent {
             .getAsset(MainMenuDisplay.BACKGROUND_TEXTURE, Texture.class);
     backgroundTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     Image background = new Image(backgroundTexture);
-    background.setScaling(Scaling.fill);
+    background.setScaling(Scaling.stretch);
     rootStack.add(background);
 
     Color overlayColour = MenuTheme.deepPlum();
