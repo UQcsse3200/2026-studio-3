@@ -73,6 +73,15 @@ public class PlayerRunState {
     return List.copyOf(ownedItems);
   }
 
+  /** Replaces the durable item list after all loaded values have been validated. */
+  public void replaceOwnedItems(List<ItemType> items) {
+    if (items == null || items.stream().anyMatch(item -> item == null)) {
+      throw new IllegalArgumentException("items must not be null or contain null");
+    }
+    ownedItems.clear();
+    ownedItems.addAll(items);
+  }
+
   /**
    * Applies durable state to a newly-created player entity.
    *
