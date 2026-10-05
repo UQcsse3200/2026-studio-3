@@ -9,8 +9,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.enemy.IntentIcons;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.UIComponent;
+import java.util.Map;
 
 /** A ui component for displaying player stats, e.g. health. */
 public class PlayerStatsDisplay extends UIComponent {
@@ -19,6 +21,9 @@ public class PlayerStatsDisplay extends UIComponent {
   private Label healthLabel;
   private Image energyImage;
   private Label energyLabel;
+  private Image statusImage;
+  private Table statusRow;
+  private Table statusIcons;
   private static final float FONT_SCALE = 0.75f;
   private static final String STYLE_NAME_LARGE = "large";
 
@@ -72,6 +77,23 @@ public class PlayerStatsDisplay extends UIComponent {
 
     table.add(energyImage).size(imageSideLength).pad(5);
     table.add(energyLabel).left();
+    table.row();
+
+    // Status effects: hidden until something is active, then one icon and count per effect.
+    statusImage =
+        new Image(ServiceLocator.getResourceService().getAsset(IntentIcons.DEBUFF, Texture.class));
+
+    Label statusLabel = new Label("Debuff:", skin, STYLE_NAME_LARGE);
+    statusLabel.setFontScale(FONT_SCALE);
+
+    statusIcons = new Table(skin);
+    statusRow = new Table(skin);
+    statusRow.add(statusLabel).padRight(8f);
+    statusRow.add(statusIcons).left();
+
+    table.add(statusImage).size(imageSideLength).pad(5);
+    table.add(statusRow).left();
+
     stage.addActor(table);
   }
 
@@ -83,6 +105,44 @@ public class PlayerStatsDisplay extends UIComponent {
   @Override
   public void update() {
     updatePosition();
+    updateStatusRow();
+  }
+
+  /**
+   * Rebuilds the status row from the player's active effects, one icon and turn count each.
+   *
+   * <p>The whole row is hidden while nothing is active, so the panel stays clean outside combat.
+   */
+  private void updateStatusRow() {
+    CombatStatsComponent stats = entity.getComponent(CombatStatsComponent.class);
+    if (statusIcons == null || stats == null) {
+      return;
+    }
+
+    Map<String, Integer> durations = stats.getStatusEffectDurations();
+    boolean hasStatus = !durations.isEmpty();
+    statusImage.setVisible(hasStatus);
+    statusRow.setVisible(hasStatus);
+
+    statusIcons.clear();
+    if (!hasStatus) {
+      return;
+    }
+
+    for (Map.Entry<String, Integer> status : durations.entrySet()) {
+      Texture icon =
+          ServiceLocator.getResourceService()
+              .getAsset(IntentIcons.pathForStatus(status.getKey()), Texture.class);
+      if (icon == null) {
+        continue;
+      }
+
+      Label count = new Label(Integer.toString(status.getValue()), skin, STYLE_NAME_LARGE);
+      count.setFontScale(FONT_SCALE);
+
+      statusIcons.add(new Image(icon)).size(20f).padRight(2f);
+      statusIcons.add(count).padRight(8f);
+    }
   }
 
   /** Updates the position of the enemy's stats, so they are displayed directly below the enemy */

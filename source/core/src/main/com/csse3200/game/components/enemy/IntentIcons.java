@@ -85,4 +85,23 @@ public final class IntentIcons {
   private IntentIcons() {
     throw new IllegalStateException("Instantiating utility class");
   }
+
+  /**
+   * Maps a status effect key stored on an entity to its icon.
+   *
+   * <p>Taunt keys carry the taunting enemy's id after a colon, so only the part before it is used.
+   *
+   * @param statusKey key the effect is stored under
+   * @return an internal texture path
+   */
+  public static String pathForStatus(String statusKey) {
+    String effectName = statusKey.split(":")[0];
+
+    return switch (effectName) {
+      case "SILENCE" -> SILENCE;
+      case "DAMAGE_ON_CARD_PLAY" -> DAMAGE_ON_CARD_PLAY;
+      case "TAUNT" -> TAUNT;
+      default -> DEBUFF;
+    };
+  }
 }
