@@ -132,6 +132,21 @@ public class BestiaryService {
   }
 
   /**
+   * Returns discovered entries belonging to one enemy tier.
+   *
+   * <p>Locked entries are deliberately excluded so presentation code cannot reveal undiscovered
+   * enemies as names, silhouettes, placeholders, or list rows.
+   *
+   * @param tier tier to filter by
+   * @return immutable list of encountered or defeated entries in the requested tier
+   */
+  public List<BestiaryEntryView> getDiscoveredEntriesByTier(EnemyTier tier) {
+    return getEntriesByTier(tier).stream()
+        .filter(entry -> entry.unlockState().isAtLeast(BestiaryUnlockState.ENCOUNTERED))
+        .toList();
+  }
+
+  /**
    * Looks up one progress-aware entry view.
    *
    * @param enemyId stable enemy identifier
