@@ -10,6 +10,7 @@ import com.csse3200.game.entities.configs.EnemyScaling;
 import com.csse3200.game.entities.factories.EnemyFactory;
 import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rendering.CloudRenderComponent;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import java.util.LinkedHashMap;
@@ -83,6 +84,13 @@ public class BattleGameArea extends ForestGameArea {
       enemy.addComponent(new EnemyReleaseDisplay());
       spawnEntityAt(
           enemy, new GridPoint2(FIRST_ENEMY_X + index * ENEMY_SPACING, ENEMY_Y), true, true);
+
+      // red cloud that enemy floats on
+      Entity platform = new Entity().addComponent(new CloudRenderComponent("images/red_cloud.png"));
+      platform.getComponent(CloudRenderComponent.class).scaleEntity();
+      platform.setScale(platform.getScale().scl(3.5f)); // scaling cloud to be bigger
+      spawnEntityAt(platform, new GridPoint2(FIRST_ENEMY_X + index * ENEMY_SPACING, ENEMY_Y).add(0, -3), true, true);
+
       // Keyed by the entity's numeric ID to match the drop-target ID EnemyFactory assigns it.
       enemyTargets.put(Integer.toString(enemy.getId()), enemy);
     }
