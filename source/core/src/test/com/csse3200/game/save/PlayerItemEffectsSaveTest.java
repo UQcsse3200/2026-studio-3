@@ -36,10 +36,10 @@ class PlayerItemEffectsSaveTest {
   void shouldRestoreOwnedItemsAndTheirEffectsAfterRelaunch() {
     PlayerRunState originalPlayer = new PlayerRunState(50, 80, 25);
     originalPlayer.addOwnedItem(ItemType.LUCKY_COIN);
-    originalPlayer.addOwnedItem(ItemType.LUCKY_COIN);
-    originalPlayer.addOwnedItem(ItemType.ENERGY_CRYSTAL);
     originalPlayer.addOwnedItem(ItemType.ENERGY_CRYSTAL);
     originalPlayer.addOwnedItem(ItemType.MERCHANTS_FAVOR);
+    originalPlayer.addOwnedItem(ItemType.IRON_AEGIS);
+    originalPlayer.addOwnedItem(ItemType.WARRIORS_CREST);
 
     SaveGameData loaded = saveAndLoad(originalPlayer);
     PlayerRunState restoredPlayer = restoreAfterRelaunch(loaded);
@@ -49,15 +49,15 @@ class PlayerItemEffectsSaveTest {
     assertEquals(
         List.of(
             ItemType.LUCKY_COIN,
-            ItemType.LUCKY_COIN,
             ItemType.ENERGY_CRYSTAL,
-            ItemType.ENERGY_CRYSTAL,
-            ItemType.MERCHANTS_FAVOR),
+            ItemType.MERCHANTS_FAVOR,
+            ItemType.IRON_AEGIS,
+            ItemType.WARRIORS_CREST),
         restoredPlayer.getOwnedItems());
     assertEquals(
-        0.2f, player.getComponent(InventoryComponent.class).getGoldBonusMultiplier(), 0.001f);
+        0.1f, player.getComponent(InventoryComponent.class).getGoldBonusMultiplier(), 0.001f);
     assertEquals(0.05f, player.getComponent(InventoryComponent.class).getShopDiscount(), 0.001f);
-    assertEquals(5, player.getComponent(EnergyComponent.class).getMaxEnergy());
+    assertEquals(4, player.getComponent(EnergyComponent.class).getMaxEnergy());
   }
 
   @Test
