@@ -356,7 +356,7 @@ public class CombatStatsComponent extends Component {
     if (amount <= 0) {
       return;
     }
-    setBlock(this.block + amount);
+    setBlock((int) Math.min(Integer.MAX_VALUE, (long) this.block + amount));
   }
 
   /**
@@ -585,18 +585,27 @@ public class CombatStatsComponent extends Component {
    *
    * <p>This includes Poison and Feeble. The caller must avoid ticking the same status twice through
    * this method and processPoisonTick or tickStatusEffect.
+   *
+   * <p>All expired entries are removed before notifications. Statuses applied by a removal listener
+   * retain their full duration and are not removed by this update.
    */
   public void updateStatusEffects() {
+    List<String> expiredTypes = new ArrayList<>();
     statusEffects
         .entrySet()
         .removeIf(
             entry -> {
               boolean expired = entry.getValue().tickAndCheckExpired();
-              if (expired && entity != null) {
-                entity.getEvents().trigger("statusEffectRemoved", entry.getKey());
+              if (expired) {
+                expiredTypes.add(entry.getKey());
               }
               return expired;
             });
+    if (entity != null) {
+      for (String type : expiredTypes) {
+        entity.getEvents().trigger("statusEffectRemoved", type);
+      }
+    }
   }
 
   /**

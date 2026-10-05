@@ -6,12 +6,12 @@ import com.csse3200.game.cards.EffectType;
 /**
  * Registers visual styles for enemy-facing status effects.
  *
- * <p>These effects share the generic debuff icon but use different colours and motion so they are
- * visually distinguishable without adding new shared rendering logic.
+ * <p>The textures are four-frame sheets, read by {@link EnemyStatusEffectVisualComponent}. Register
+ * these only alongside that renderer's coordinator integration, never as single-image visuals.
  */
 public final class EnemyStatusEffectVisuals {
 
-  private static final String DEBUFF_ICON = "images/enemies/intents/debuff.png";
+  private static final String DIRECTORY = "images/effects/enemy-status/";
 
   private EnemyStatusEffectVisuals() {
     throw new IllegalStateException("Utility class");
@@ -26,16 +26,30 @@ public final class EnemyStatusEffectVisuals {
     registry.register(
         EffectType.POISON,
         new EffectVisualStyle(
-            DEBUFF_ICON, new Color(0.35f, 0.9f, 0.3f, 1f), 0.55f, 0.45f, 1.15f, 0.25f));
+            DIRECTORY + "poison.png", new Color(1f, 1f, 1f, 0.85f), 0.75f, 0.45f, 0.65f, 0.12f));
 
     registry.register(
         EffectType.VULNERABLE,
         new EffectVisualStyle(
-            DEBUFF_ICON, new Color(0.85f, 0.3f, 0.85f, 1f), 0.5f, 0.45f, 1.25f, 0.1f));
+            DIRECTORY + "vulnerable.png", new Color(1f, 1f, 1f, 0.8f), 0.75f, 0.55f, 0.7f, 0f));
 
     registry.register(
         EffectType.FEEBLE,
         new EffectVisualStyle(
-            DEBUFF_ICON, new Color(0.65f, 0.75f, 0.9f, 1f), 0.5f, 0.5f, 1.1f, 0.15f));
+            DIRECTORY + "feeble.png", new Color(1f, 1f, 1f, 0.85f), 0.75f, 0.62f, 0.48f, -0.12f));
+  }
+
+  /**
+   * Runtime sheets to load once with the battle assets, and unload after its visuals are disposed.
+   */
+  public static String[] texturePaths() {
+    return new String[] {
+      DIRECTORY + "poison.png", DIRECTORY + "vulnerable.png", DIRECTORY + "feeble.png"
+    };
+  }
+
+  /** Whether this effect needs the enemy status sheet renderer. */
+  public static boolean supports(EffectType type) {
+    return type == EffectType.POISON || type == EffectType.VULNERABLE || type == EffectType.FEEBLE;
   }
 }

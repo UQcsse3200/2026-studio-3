@@ -1,7 +1,10 @@
 package com.csse3200.game.maps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.player.EnergyComponent;
@@ -53,42 +56,177 @@ class PlayerRunStateTest {
         .addComponent(new InventoryComponent(gold));
   }
 
-  @Test
-  void ownedItemsSurviveCaptureAndApply() {
-    PlayerRunState state = new PlayerRunState(100, 100, 50);
-
-    state.addOwnedItem(ItemType.LUCKY_COIN);
-
-    Entity firstPlayer =
-        new Entity()
-            .addComponent(new CombatStatsComponent(100, 5, 100))
-            .addComponent(new InventoryComponent(50))
-            .addComponent(new EnergyComponent(3));
-
-    state.applyTo(firstPlayer);
-    state.captureFrom(firstPlayer);
-
-    Entity secondPlayer =
-        new Entity()
-            .addComponent(new CombatStatsComponent(100, 5, 100))
-            .addComponent(new InventoryComponent(0))
-            .addComponent(new EnergyComponent(3));
-
-    state.applyTo(secondPlayer);
-
-    assertEquals(List.of(ItemType.LUCKY_COIN), state.getOwnedItems());
-
-    assertEquals(
-        0.1f, secondPlayer.getComponent(InventoryComponent.class).getGoldBonusMultiplier(), 0.001f);
+  private Entity playerWithEnergy(int health, int maxHealth, int gold, int maxEnergy) {
+    return new Entity()
+        .addComponent(new CombatStatsComponent(health, 5, maxHealth))
+        .addComponent(new InventoryComponent(gold))
+        .addComponent(new EnergyComponent(maxEnergy));
   }
 
   @Test
-  void multipleLuckyCoinsStack() {
+  void ownedItemEffectPersistsAcrossMultipleBattles() {
+    // Regression test: previously RunState.pendingReward only reapplied the single
+    // most-recently-claimed reward, so an item's effect (e.g. shop discount) was lost
+    // as soon as the next battle after that one began. Owned items must now be
+    // replayed on every new player entity, not just the one immediately following
+    // the claim.
+    PlayerRunState state = new PlayerRunState(65, 100, 42);
+    state.addOwnedItem(ItemType.MERCHANTS_FAVOR);
+
+    // Battle 1: new player entity, as BattleScreen creates on each screen transition.
+    Entity battleOnePlayer = player(65, 100, 42);
+    state.applyTo(battleOnePlayer);
+    assertEquals(
+        0.10f, battleOnePlayer.getComponent(InventoryComponent.class).getShopDiscount(), 1e-6f);
+
+    // Battle 2: a completely new player entity/components, same as after disposing
+    // battle 1's screen. The discount must still be there — recomputed fresh from
+    // ownedItems, not carried over as a stale snapshot.
+    Entity battleTwoPlayer = player(65, 100, 42);
+    state.applyTo(battleTwoPlayer);
+    assertEquals(
+        0.10f, battleTwoPlayer.getComponent(InventoryComponent.class).getShopDiscount(), 1e-6f);
+  }
+
+  @Test
+  void multipleOwnedItemsStackOnEachNewPlayer() {
+    PlayerRunState state = new PlayerRunState(65, 100, 42);
+    state.addOwnedItem(ItemType.MERCHANTS_FAVOR);
+    state.addOwnedItem(ItemType.MERCHANTS_FAVOR);
+    state.addOwnedItem(ItemType.ENERGY_CRYSTAL);
+
+    Entity player = playerWithEnergy(65, 100, 42, 3);
+    state.applyTo(player);
+
+    assertEquals(0.20f, player.getComponent(InventoryComponent.class).getShopDiscount(), 1e-6f);
+    assertEquals(4, player.getComponent(EnergyComponent.class).getMaxEnergy());
+  }
+
+  @Test
+  void battleConsumablesRemainOwnedUntilExplicitlyUsed() {
+    PlayerRunState state = new PlayerRunState(65, 100, 42);
+    state.addOwnedItem(ItemType.IRON_AEGIS);
+    state.addOwnedItem(ItemType.WARRIORS_CREST);
+
+    Entity battlePlayer = player(65, 100, 42);
+    state.applyTo(battlePlayer);
+
+    CombatStatsComponent stats = battlePlayer.getComponent(CombatStatsComponent.class);
+    assertEquals(0, stats.getArmour());
+    assertNull(stats.getStatusEffect("STRENGTH"));
+    assertEquals(1, state.getOwnedItemCount(ItemType.IRON_AEGIS));
+    assertEquals(1, state.getOwnedItemCount(ItemType.WARRIORS_CREST));
+
+    assertTrue(state.useBattleItem(ItemType.IRON_AEGIS, battlePlayer));
+    assertEquals(5, stats.getArmour());
+    assertEquals(0, state.getOwnedItemCount(ItemType.IRON_AEGIS));
+
+    assertTrue(state.useBattleItem(ItemType.WARRIORS_CREST, battlePlayer));
+    assertEquals(1, stats.getStatusEffect("STRENGTH").getValue());
+    assertEquals(0, state.getOwnedItemCount(ItemType.WARRIORS_CREST));
+
+    assertFalse(state.useBattleItem(ItemType.IRON_AEGIS, battlePlayer));
+  }
+
+  @Test
+  void shopDiscountStillRespectsCapAcrossManyOwnedItems() {
+    PlayerRunState state = new PlayerRunState(65, 100, 42);
+    for (int i = 0; i < 20; i++) {
+      state.addOwnedItem(ItemType.MERCHANTS_FAVOR);
+    }
+
+    Entity player = player(65, 100, 42);
+    state.applyTo(player);
+
+    assertEquals(0.5f, player.getComponent(InventoryComponent.class).getShopDiscount(), 1e-6f);
+  }
+
+  @Test
+  void getOwnedItemsReturnsImmutableView() {
+    PlayerRunState state = new PlayerRunState(65, 100, 42);
+    state.addOwnedItem(ItemType.LUCKY_COIN);
+
+    var ownedItems = state.getOwnedItems();
+
+    assertThrows(
+        UnsupportedOperationException.class, () -> ownedItems.add(ItemType.ENERGY_CRYSTAL));
+  }
+
+  @Test
+  void ownedItemsSurviveCaptureAndApply() {
+    // Regression test: captureFrom() must not wipe out ownedItems — it only snapshots
+    // health/gold, so consumables must remain available across screen transitions.
     PlayerRunState state = new PlayerRunState(100, 100, 50);
+    state.addOwnedItem(ItemType.LUCKY_COIN);
 
+    Entity firstPlayer = playerWithEnergy(100, 100, 50, 3);
+    state.applyTo(firstPlayer);
+    state.captureFrom(firstPlayer);
+
+    Entity secondPlayer = playerWithEnergy(100, 0, 0, 3);
+    state.applyTo(secondPlayer);
+
+    assertEquals(List.of(ItemType.LUCKY_COIN), state.getOwnedItems());
+    assertEquals(0.1f, state.getGoldBonusMultiplier(), 1e-6f);
+    assertEquals(
+        0f, secondPlayer.getComponent(InventoryComponent.class).getGoldBonusMultiplier(), 1e-6f);
+  }
+
+  @Test
+  void multipleLuckyCoinsAreUsedOnePerGoldReward() {
+    PlayerRunState state = new PlayerRunState(100, 100, 50);
     state.addOwnedItem(ItemType.LUCKY_COIN);
     state.addOwnedItem(ItemType.LUCKY_COIN);
 
-    assertEquals(0.2f, state.getGoldBonusMultiplier(), 0.001f);
+    assertEquals(0.1f, state.getGoldBonusMultiplier(), 1e-6f);
+
+    state.claimGoldReward(11, true);
+    assertEquals(67, state.getGold());
+    assertEquals(0.1f, state.getGoldBonusMultiplier(), 1e-6f);
+
+    state.claimGoldReward(12, true);
+    assertEquals(87, state.getGold());
+    assertEquals(0f, state.getGoldBonusMultiplier(), 1e-6f);
+  }
+
+  @Test
+  void luckyCoinTotalGoldBonusIsCappedAtTwenty() {
+    PlayerRunState state = new PlayerRunState(100, 100, 200);
+    state.addOwnedItem(ItemType.LUCKY_COIN);
+
+    assertEquals(20, state.calculateLuckyCoinBonus(25));
+    state.claimGoldReward(25, true);
+
+    assertEquals(245, state.getGold());
+    assertEquals(0, state.getOwnedItemCount(ItemType.LUCKY_COIN));
+  }
+
+  @Test
+  void luckyCoinPreviewMatchesClaimedGold() {
+    PlayerRunState state = new PlayerRunState(100, 100, 50);
+    state.addOwnedItem(ItemType.LUCKY_COIN);
+
+    int previewBonus = state.calculateLuckyCoinBonus(25);
+    assertEquals(8, previewBonus);
+
+    state.claimGoldReward(25, true);
+
+    assertEquals(50 + 25 + previewBonus, state.getGold());
+  }
+
+  @Test
+  void removingOneOwnedItemUpdatesDerivedEffects() {
+    PlayerRunState state = new PlayerRunState(100, 100, 50);
+    state.addOwnedItem(ItemType.MERCHANTS_FAVOR);
+    state.addOwnedItem(ItemType.MERCHANTS_FAVOR);
+
+    assertEquals(2, state.getOwnedItemCount(ItemType.MERCHANTS_FAVOR));
+    assertEquals(0.2f, state.getShopDiscount(), 1e-6f);
+    assertTrue(state.hasOwnedItem(ItemType.MERCHANTS_FAVOR));
+
+    assertTrue(state.removeOwnedItem(ItemType.MERCHANTS_FAVOR));
+
+    assertEquals(1, state.getOwnedItemCount(ItemType.MERCHANTS_FAVOR));
+    assertEquals(0.1f, state.getShopDiscount(), 1e-6f);
   }
 }

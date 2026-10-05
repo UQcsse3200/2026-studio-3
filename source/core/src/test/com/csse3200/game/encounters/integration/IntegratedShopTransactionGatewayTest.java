@@ -88,6 +88,90 @@ class IntegratedShopTransactionGatewayTest {
     assertEquals(1, deck.getCardCount("card_heal"));
   }
 
+  @Test
+  void shouldChargeDiscountedPriceWhenPlayerHasShopDiscount() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 50);
+    player.setShopDiscount(0.05f);
+    MockDeckGateway deck = new MockDeckGateway();
+    IntegratedShopTransactionGateway transactions = createGateway(player, deck);
+
+    // price 20, 5% off -> 19 (Math.round(20 * 0.95) = 19)
+    ShopTransactionStatus result = transactions.purchaseCard("card_heal", 20);
+
+    assertEquals(ShopTransactionStatus.SUCCESS, result);
+    assertEquals(31, player.getCurrency());
+    assertEquals(1, deck.getCardCount("card_heal"));
+  }
+
+  @Test
+  void shouldAllowPurchaseWhenDiscountedPriceIsAffordableButFullPriceIsNot() {
+    // Regression test: without the discount, this purchase would previously fail
+    // INSUFFICIENT_CURRENCY even though the player can afford the discounted price.
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 19);
+    player.setShopDiscount(0.05f);
+    MockDeckGateway deck = new MockDeckGateway();
+    IntegratedShopTransactionGateway transactions = createGateway(player, deck);
+
+    // price 20, 5% off -> 19, exactly what the player has.
+    ShopTransactionStatus result = transactions.purchaseCard("card_heal", 20);
+
+    assertEquals(ShopTransactionStatus.SUCCESS, result);
+    assertEquals(0, player.getCurrency());
+  }
+
+  @Test
+  void shouldRejectInsufficientCurrencyEvenWithDiscountApplied() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 5);
+    player.setShopDiscount(0.05f);
+    MockDeckGateway deck = new MockDeckGateway();
+    IntegratedShopTransactionGateway transactions = createGateway(player, deck);
+
+    // price 20, 5% off -> 19, still more than the player's 5 currency.
+    ShopTransactionStatus result = transactions.purchaseCard("card_heal", 20);
+
+    assertEquals(ShopTransactionStatus.INSUFFICIENT_CURRENCY, result);
+    assertEquals(5, player.getCurrency());
+    assertEquals(0, deck.getCardIds().size());
+  }
+
+  @Test
+  void shouldNotDiscountWhenPlayerHasNoShopDiscount() {
+    // MockPlayerStateGateway defaults shopDiscount to 0f, so no special setup needed —
+    // this locks in that full price is charged by default.
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 50);
+    MockDeckGateway deck = new MockDeckGateway();
+    IntegratedShopTransactionGateway transactions = createGateway(player, deck);
+
+    ShopTransactionStatus result = transactions.purchaseCard("card_heal", 20);
+
+    assertEquals(ShopTransactionStatus.SUCCESS, result);
+    assertEquals(30, player.getCurrency());
+  }
+
+  @Test
+  void shouldApplyDiscountAtTheCapWhenPlayerHasFiftyPercentOff() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 50);
+    player.setShopDiscount(0.5f);
+    MockDeckGateway deck = new MockDeckGateway();
+    IntegratedShopTransactionGateway transactions = createGateway(player, deck);
+
+    // price 20, 50% off -> 10
+    ShopTransactionStatus result = transactions.purchaseCard("card_heal", 20);
+
+    assertEquals(ShopTransactionStatus.SUCCESS, result);
+    assertEquals(40, player.getCurrency());
+  }
+
+  @Test
+  void getShopDiscountShouldExposePlayersCurrentDiscount() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 50);
+    player.setShopDiscount(0.1f);
+    MockDeckGateway deck = new MockDeckGateway();
+    IntegratedShopTransactionGateway transactions = createGateway(player, deck);
+
+    assertEquals(0.1f, transactions.getShopDiscount(), 0.0001f);
+  }
+
   private IntegratedShopTransactionGateway createGateway(
       MockPlayerStateGateway player, MockDeckGateway deck) {
     return new IntegratedShopTransactionGateway(

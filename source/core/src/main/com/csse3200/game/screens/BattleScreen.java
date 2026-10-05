@@ -33,6 +33,7 @@ import com.csse3200.game.components.pausemenu.PauseMenuActions;
 import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.player.EnergyComponent;
+import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
 import com.csse3200.game.components.spritedisplay.clickable.CardAimController;
 import com.csse3200.game.components.spritedisplay.clickable.CardImageSkins;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
@@ -85,7 +86,13 @@ public class BattleScreen extends ScreenAdapter {
     "images/level.png",
     "images/enemy.png",
     "images/armour.png",
-    "images/enemy_release/heavens_grace.png"
+    "images/enemy_release/heavens_grace.png",
+    "images/ui/inventory-panel.png",
+    "images/ui/lucky-coin.png",
+    "images/ui/energy-crystal.png",
+    "images/ui/merchants-favor.png",
+    "images/ui/iron-aegis.png",
+    "images/ui/warriors-crest.png"
   };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
@@ -164,8 +171,10 @@ public class BattleScreen extends ScreenAdapter {
             BattleEncounterSelector.enemiesFor(game.getRunState()));
     this.gameArea = forestGameArea;
     forestGameArea.create();
+
     RunState runState = game.getRunState();
     playerState = runState.getOrCreatePlayerState();
+    Entity player = forestGameArea.getPlayer();
 
     // Card + deck state has to exist before the controller so it can be handed the single
     // card-play entry point and the deck it mutates.
@@ -179,7 +188,6 @@ public class BattleScreen extends ScreenAdapter {
     battleDeck.drawCards(AMOUNT_OF_CARDS_IN_DECK);
     handRowOrder = new ArrayList<>(battleDeck.getHandInstances());
 
-    Entity player = forestGameArea.getPlayer();
     EnergyComponent energy = player.getComponent(EnergyComponent.class);
 
     Map<String, Entity> enemyTargets = forestGameArea.getEnemyTargets();
@@ -283,6 +291,16 @@ public class BattleScreen extends ScreenAdapter {
     PopupDisplay cardInventory = new PopupDisplay("Card Inventory");
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
+    PopupDisplay itemInventory = new PopupDisplay("");
+    itemInventory.setMinSize(470f, 360f);
+    InventoryPopupComponent inventoryPopup =
+        new InventoryPopupComponent(
+            game.getRunState(), itemInventory, gameArea.getPlayer(), controller::isPlayerTurn);
+
+    Entity itemInventoryEntity =
+        new Entity().addComponent(itemInventory).addComponent(inventoryPopup);
+    ServiceLocator.getEntityService().register(itemInventoryEntity);
+
     Stage stage = ServiceLocator.getRenderService().getStage();
     Entity battleUi =
         new Entity()
@@ -329,6 +347,7 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.getEntityService().register(deckEditorEntity);
 
     battleUi.getEvents().addListener("openMenu", deckEditor::open);
+    battleUi.getEvents().addListener("openInventory", inventoryPopup::open);
   }
 
   /**
@@ -365,6 +384,7 @@ public class BattleScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
+    ServiceLocator.getResourceService().unloadAssets(EnemyStatusEffectVisuals.texturePaths());
     ServiceLocator.clear();
   }
 
@@ -372,12 +392,43 @@ public class BattleScreen extends ScreenAdapter {
     logger.debug("Loading assets");
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(mainGameTextures);
+    resourceService.loadTextures(EnemyStatusEffectVisuals.texturePaths());
     ServiceLocator.getResourceService().loadAll();
   }
 
   private List<ClickableRecord> buildAllRecords() {
     List<ClickableRecord> records = new ArrayList<>(buildHandRecords());
-    records.addAll(staticUiRecords);
+    records.addAll(buildBattleMenuRecords());
+    return records;
+  }
+
+  private List<ClickableRecord> buildBattleMenuRecords() {
+    List<ClickableRecord> records = new ArrayList<>();
+    for (ClickableRecord record : staticUiRecords) {
+      BattleMenuSkins.Icon icon =
+          switch (record.trigger()) {
+            case "openMenu" -> BattleMenuSkins.Icon.CARD;
+            case "openInventory" -> BattleMenuSkins.Icon.INVENTORY;
+            case "endTurn" -> BattleMenuSkins.Icon.END_TURN;
+            default -> null;
+          };
+      if (icon == null) {
+        records.add(record);
+        continue;
+      }
+
+      records.add(
+          ClickableRecord.builder(record.trigger())
+              .text(record.text())
+              .skin(BattleMenuSkins.forIcon(icon))
+              .position(record.x(), record.y())
+              .size(record.width(), record.height())
+              .variant(record.variant())
+              .args(record.args())
+              .label(record.label())
+              .disabled(record.disabled())
+              .build());
+    }
     return records;
   }
 
