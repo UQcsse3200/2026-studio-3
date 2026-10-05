@@ -59,4 +59,21 @@ public final class ChanceEncounterSelector {
 
     throw new IllegalStateException("Unable to select from a validated Chance Encounter pool");
   }
+
+  /**
+   * Selects a configured encounter by its stable ID without using the random source.
+   *
+   * @param eventId non-blank encounter ID
+   * @return the matching encounter
+   * @throws IllegalArgumentException if the ID is blank or absent from this pool
+   */
+  public ChanceEncounter selectById(String eventId) {
+    if (eventId == null || eventId.isBlank()) {
+      throw new IllegalArgumentException("Event ID must not be null or blank");
+    }
+    return encounters.stream()
+        .filter(encounter -> encounter.getId().equals(eventId))
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Unknown Event ID: " + eventId));
+  }
 }
