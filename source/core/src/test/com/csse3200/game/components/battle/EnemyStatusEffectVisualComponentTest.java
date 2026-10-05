@@ -7,15 +7,12 @@ import static org.mockito.Mockito.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
-import com.csse3200.game.rendering.AnimationRenderComponent;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ServiceLocator;
@@ -166,99 +163,99 @@ class EnemyStatusEffectVisualComponentTest {
     verify(batch).setPackedColor(42f);
   }
 
-//  @Test
-//  void realTallAndCrawlerAssetsUseCenteredSinglesAndUniformForegroundOrbits() {
-//    String[] enemies = {"tomb_guardian", "bone_crawler"};
-//    int[][][] pixels = {
-//      {{136, 34, 369, 477}, {136, 28, 369, 471}},
-//      {{46, 312, 465, 477}, {46, 309, 465, 477}}
-//    };
-//    EffectType[] types = {EffectType.POISON, EffectType.VULNERABLE, EffectType.FEEBLE};
-//    for (int enemy = 0; enemy < enemies.length; enemy++) {
-//      TextureAtlas atlas =
-//          new TextureAtlas(Gdx.files.internal("images/enemies/" + enemies[enemy] + ".atlas"));
-//      RenderService service = new RenderService();
-//      ServiceLocator.registerRenderService(service);
-//      try {
-//        AnimationRenderComponent renderer = spy(new AnimationRenderComponent(atlas));
-//        stats = new CombatStatsComponent(30, 6);
-//        target = new Entity().addComponent(stats).addComponent(renderer);
-//        renderer.addAnimation("idle", 0.1f, Animation.PlayMode.LOOP);
-//        renderer.startAnimation("idle");
-//        EnemyStatusEffectVisualComponent[] visuals = new EnemyStatusEffectVisualComponent[3];
-//        for (int i : new int[] {2, 0, 1}) {
-//          stats.applyStatusEffect(types[i].name(), 1, 3);
-//          visuals[i] =
-//              spy(
-//                  new EnemyStatusEffectVisualComponent(
-//                      texture, registry.lookup(types[i]), target, 0f, types[i]));
-//          visuals[i].showPersistent();
-//          service.register(visuals[i]);
-//        }
-//        service.register(renderer);
-//        for (int frame = 0; frame < 2; frame++) {
-//          when(time.getDeltaTime()).thenReturn(0.3f);
-//          for (EnemyStatusEffectVisualComponent visual : visuals) visual.update();
-//          int[] box = pixels[enemy][frame];
-//          for (float[] transform : new float[][] {{2f, 4f, 2f, 3f}, {7f, -2f, 4f, 1.5f}}) {
-//            target.setPosition(transform[0], transform[1]);
-//            target.setScale(transform[2], transform[3]);
-//            when(time.getDeltaTime()).thenReturn(0f);
-//            clearInvocations(renderer, visuals[0], visuals[1], visuals[2]);
-//            service.render(batch);
-//            for (EnemyStatusEffectVisualComponent visual : visuals) {
-//              var order = inOrder(renderer, visual);
-//              order.verify(renderer).render(batch);
-//              order.verify(visual).render(batch);
-//              assertEquals(renderer.getZIndex() + 0.02f, visual.getZIndex(), 0.0001f);
-//            }
-//            float bottom = transform[1] + (511 - box[3]) / 512f * transform[3];
-//            float height = (box[3] - box[1] + 1) / 512f * transform[3];
-//            float left = transform[0] + box[0] / 512f * transform[2];
-//            float width = (box[2] - box[0] + 1) / 512f * transform[2];
-//            for (int mask : new int[] {7, 5, 4, 6, 2, 3, 1}) {
-//              for (int i = 0; i < 3; i++) {
-//                stats.removeStatusEffect(types[i].name());
-//                if ((mask & (1 << i)) != 0) stats.applyStatusEffect(types[i].name(), 1, 3);
-//              }
-//              int slot = 0;
-//              int count = Integer.bitCount(mask);
-//              for (int i = 0; i < 3; i++) {
-//                if ((mask & (1 << i)) == 0) continue;
-//                float[] effect = renderedBounds(visuals[i]);
-//                double angle = 2d * Math.PI * slot++ / count;
-//                float expectedWidth = width * (count == 1 ? 1.4f : 0.55f);
-//                float expectedHeight = count == 1 ? height * 1.4f : expectedWidth;
-//                assertEquals(expectedWidth, effect[2], 0.0001f);
-//                assertEquals(expectedHeight, effect[3], 0.0001f);
-//                assertEquals(
-//                    left + width / 2f + (count == 1 ? 0f : width * 0.65f * Math.cos(angle)),
-//                    effect[0] + effect[2] / 2f,
-//                    0.0001f);
-//                assertEquals(
-//                    bottom + height / 2f + (count == 1 ? 0f : height * 0.2f * Math.sin(angle)),
-//                    effect[1] + effect[3] / 2f,
-//                    0.0001f);
-//                assertEquals(0.9f, firstAlpha(), 0.0001f);
-//              }
-//            }
-//            for (EffectType type : types) {
-//              stats.removeStatusEffect(type.name());
-//              stats.applyStatusEffect(type.name(), 1, 3);
-//            }
-//          }
-//          when(time.getDeltaTime()).thenReturn(0.1f);
-//          renderer.render(mock(SpriteBatch.class));
-//        }
-//        for (EnemyStatusEffectVisualComponent visual : visuals) visual.dispose();
-//        assertEquals(30, stats.getHealth());
-//        assertEquals(3, stats.getStatusEffect("POISON").getDuration());
-//      } finally {
-//        service.dispose();
-//        atlas.dispose();
-//      }
-//    }
-//  }
+  //  @Test
+  //  void realTallAndCrawlerAssetsUseCenteredSinglesAndUniformForegroundOrbits() {
+  //    String[] enemies = {"tomb_guardian", "bone_crawler"};
+  //    int[][][] pixels = {
+  //      {{136, 34, 369, 477}, {136, 28, 369, 471}},
+  //      {{46, 312, 465, 477}, {46, 309, 465, 477}}
+  //    };
+  //    EffectType[] types = {EffectType.POISON, EffectType.VULNERABLE, EffectType.FEEBLE};
+  //    for (int enemy = 0; enemy < enemies.length; enemy++) {
+  //      TextureAtlas atlas =
+  //          new TextureAtlas(Gdx.files.internal("images/enemies/" + enemies[enemy] + ".atlas"));
+  //      RenderService service = new RenderService();
+  //      ServiceLocator.registerRenderService(service);
+  //      try {
+  //        AnimationRenderComponent renderer = spy(new AnimationRenderComponent(atlas));
+  //        stats = new CombatStatsComponent(30, 6);
+  //        target = new Entity().addComponent(stats).addComponent(renderer);
+  //        renderer.addAnimation("idle", 0.1f, Animation.PlayMode.LOOP);
+  //        renderer.startAnimation("idle");
+  //        EnemyStatusEffectVisualComponent[] visuals = new EnemyStatusEffectVisualComponent[3];
+  //        for (int i : new int[] {2, 0, 1}) {
+  //          stats.applyStatusEffect(types[i].name(), 1, 3);
+  //          visuals[i] =
+  //              spy(
+  //                  new EnemyStatusEffectVisualComponent(
+  //                      texture, registry.lookup(types[i]), target, 0f, types[i]));
+  //          visuals[i].showPersistent();
+  //          service.register(visuals[i]);
+  //        }
+  //        service.register(renderer);
+  //        for (int frame = 0; frame < 2; frame++) {
+  //          when(time.getDeltaTime()).thenReturn(0.3f);
+  //          for (EnemyStatusEffectVisualComponent visual : visuals) visual.update();
+  //          int[] box = pixels[enemy][frame];
+  //          for (float[] transform : new float[][] {{2f, 4f, 2f, 3f}, {7f, -2f, 4f, 1.5f}}) {
+  //            target.setPosition(transform[0], transform[1]);
+  //            target.setScale(transform[2], transform[3]);
+  //            when(time.getDeltaTime()).thenReturn(0f);
+  //            clearInvocations(renderer, visuals[0], visuals[1], visuals[2]);
+  //            service.render(batch);
+  //            for (EnemyStatusEffectVisualComponent visual : visuals) {
+  //              var order = inOrder(renderer, visual);
+  //              order.verify(renderer).render(batch);
+  //              order.verify(visual).render(batch);
+  //              assertEquals(renderer.getZIndex() + 0.02f, visual.getZIndex(), 0.0001f);
+  //            }
+  //            float bottom = transform[1] + (511 - box[3]) / 512f * transform[3];
+  //            float height = (box[3] - box[1] + 1) / 512f * transform[3];
+  //            float left = transform[0] + box[0] / 512f * transform[2];
+  //            float width = (box[2] - box[0] + 1) / 512f * transform[2];
+  //            for (int mask : new int[] {7, 5, 4, 6, 2, 3, 1}) {
+  //              for (int i = 0; i < 3; i++) {
+  //                stats.removeStatusEffect(types[i].name());
+  //                if ((mask & (1 << i)) != 0) stats.applyStatusEffect(types[i].name(), 1, 3);
+  //              }
+  //              int slot = 0;
+  //              int count = Integer.bitCount(mask);
+  //              for (int i = 0; i < 3; i++) {
+  //                if ((mask & (1 << i)) == 0) continue;
+  //                float[] effect = renderedBounds(visuals[i]);
+  //                double angle = 2d * Math.PI * slot++ / count;
+  //                float expectedWidth = width * (count == 1 ? 1.4f : 0.55f);
+  //                float expectedHeight = count == 1 ? height * 1.4f : expectedWidth;
+  //                assertEquals(expectedWidth, effect[2], 0.0001f);
+  //                assertEquals(expectedHeight, effect[3], 0.0001f);
+  //                assertEquals(
+  //                    left + width / 2f + (count == 1 ? 0f : width * 0.65f * Math.cos(angle)),
+  //                    effect[0] + effect[2] / 2f,
+  //                    0.0001f);
+  //                assertEquals(
+  //                    bottom + height / 2f + (count == 1 ? 0f : height * 0.2f * Math.sin(angle)),
+  //                    effect[1] + effect[3] / 2f,
+  //                    0.0001f);
+  //                assertEquals(0.9f, firstAlpha(), 0.0001f);
+  //              }
+  //            }
+  //            for (EffectType type : types) {
+  //              stats.removeStatusEffect(type.name());
+  //              stats.applyStatusEffect(type.name(), 1, 3);
+  //            }
+  //          }
+  //          when(time.getDeltaTime()).thenReturn(0.1f);
+  //          renderer.render(mock(SpriteBatch.class));
+  //        }
+  //        for (EnemyStatusEffectVisualComponent visual : visuals) visual.dispose();
+  //        assertEquals(30, stats.getHealth());
+  //        assertEquals(3, stats.getStatusEffect("POISON").getDuration());
+  //      } finally {
+  //        service.dispose();
+  //        atlas.dispose();
+  //      }
+  //    }
+  //  }
 
   @Test
   void orbitUsesSharedFrameTimeAndRedistributesWithoutResetOnReplay() {
@@ -465,10 +462,10 @@ class EnemyStatusEffectVisualComponentTest {
             sizes.capture(),
             heights.capture());
     return new float[] {
-      xs.getAllValues().get(0),
-      ys.getAllValues().get(0),
-      sizes.getAllValues().get(0),
-      heights.getAllValues().get(0)
+      xs.getAllValues().getFirst(),
+      ys.getAllValues().getFirst(),
+      sizes.getAllValues().getFirst(),
+      heights.getAllValues().getFirst()
     };
   }
 

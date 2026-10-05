@@ -68,8 +68,7 @@ public class BattleGameArea extends ForestGameArea {
         enemyIds.stream().map(id -> EnemyScaling.scale(roster.get(id), progression)).toList();
     // Leave config.id as the roster id: the bestiary looks it up in enemies.json. Instances are
     // already distinct, since each config is a fresh copy and drop targets use the entity's ID.
-    for (int index = 0; index < configs.size(); index++) {
-      EnemyConfig config = configs.get(index);
+    for (EnemyConfig config : configs) {
       if (config.sprite == null || config.sprite.isBlank()) {
         config.sprite = "images/enemies/" + config.id + ".atlas";
       }
@@ -89,7 +88,11 @@ public class BattleGameArea extends ForestGameArea {
       Entity platform = new Entity().addComponent(new CloudRenderComponent("images/red_cloud.png"));
       platform.getComponent(CloudRenderComponent.class).scaleEntity();
       platform.setScale(platform.getScale().scl(3.5f)); // scaling cloud to be bigger
-      spawnEntityAt(platform, new GridPoint2(FIRST_ENEMY_X + index * ENEMY_SPACING, ENEMY_Y).add(0, -3), true, true);
+      spawnEntityAt(
+          platform,
+          new GridPoint2(FIRST_ENEMY_X + index * ENEMY_SPACING, ENEMY_Y).add(0, -3),
+          true,
+          true);
 
       // Keyed by the entity's numeric ID to match the drop-target ID EnemyFactory assigns it.
       enemyTargets.put(Integer.toString(enemy.getId()), enemy);
