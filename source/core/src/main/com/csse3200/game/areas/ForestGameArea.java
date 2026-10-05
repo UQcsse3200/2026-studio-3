@@ -17,6 +17,8 @@ import com.csse3200.game.entities.factories.ObstacleFactory;
 import com.csse3200.game.entities.factories.PlayerFactory;
 import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rendering.CloudRenderComponent;
+import com.csse3200.game.rendering.TextureRenderComponent;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.utils.math.GridPoint2Utils;
@@ -33,6 +35,7 @@ public class ForestGameArea extends GameArea {
   private final RunState runState;
   private static final String[] forestTextures = {
     "images/star_player.png",
+    "images/cloud.png",
     "images/tree.png",
     "images/ghost_king.png",
     "images/ghost_1.png",
@@ -141,6 +144,7 @@ public class ForestGameArea extends GameArea {
       enemy = spawnEnemy();
     }
     player = spawnPlayer();
+    spawnCloudPlatform();
 
     // playMusic();
   }
@@ -211,6 +215,14 @@ public class ForestGameArea extends GameArea {
 
     spawnEntityAt(newPlayer, PLAYER_SPAWN, true, true);
     return newPlayer;
+  }
+
+  // cloud that the angel (player) stands on
+  private void spawnCloudPlatform() {
+    Entity cloud = new Entity().addComponent(new CloudRenderComponent("images/cloud.png"));
+    cloud.getComponent(CloudRenderComponent.class).scaleEntity();
+    cloud.setScale(cloud.getScale().scl(3.5f)); // scaling cloud to be bigger
+    spawnEntityAt(cloud, PLAYER_SPAWN.add(0, -1), true, true);
   }
 
   /**
