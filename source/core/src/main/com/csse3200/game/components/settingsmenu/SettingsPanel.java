@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.files.UserSettings;
@@ -28,9 +29,12 @@ import com.csse3200.game.utils.StringDecorator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Reusable settings controls for both the standalone screen and in-game pause overlay. */
 public class SettingsPanel extends Table {
+  private static final Logger logger = LoggerFactory.getLogger(SettingsPanel.class);
   private static final float VOLUME_STEP = 0.05f;
 
   private final Skin skin;
@@ -52,6 +56,7 @@ public class SettingsPanel extends Table {
   private TextButton resetButton;
   private TextButton backButton;
   private TextButton applyButton;
+  private Label feedbackLabel;
 
   /** Creates a panel backed by the global user-settings file. */
   public SettingsPanel(Skin skin, Runnable backAction) {
@@ -114,6 +119,12 @@ public class SettingsPanel extends Table {
     displayModeSelect.setItems(getDisplayModes(Gdx.graphics.getMonitor()));
     addControlRow("Resolution", displayModeSelect, null);
 
+    feedbackLabel = themedLabel("");
+    feedbackLabel.setName("settings-feedback");
+    feedbackLabel.setWrap(true);
+    feedbackLabel.setAlignment(Align.center);
+    add(feedbackLabel).colspan(3).growX().minHeight(40f).padTop(8f).row();
+
     resetButton = themedButton("Reset", "reset-defaults");
     backButton = themedButton("Back", "back");
     applyButton = themedButton("Apply", "apply");
@@ -153,11 +164,33 @@ public class SettingsPanel extends Table {
     addVolumeListener(musicVolumeSlider, musicVolumeValue);
     addVolumeListener(soundEffectsVolumeSlider, soundEffectsVolumeValue);
 
+    ChangeListener clearFeedback =
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            feedbackLabel.setText("");
+          }
+        };
+    for (Actor control :
+        new Actor[] {
+          fpsText,
+          fullScreenCheck,
+          vsyncCheck,
+          displayModeSelect,
+          muteCheck,
+          masterVolumeSlider,
+          musicVolumeSlider,
+          soundEffectsVolumeSlider
+        }) {
+      control.addListener(clearFeedback);
+    }
+
     resetButton.addListener(
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
             populate(new Settings());
+            showFeedback("Defaults restored. Click Apply to save.", MenuTheme.warmParchment());
           }
         });
     backButton.addListener(
@@ -201,7 +234,14 @@ public class SettingsPanel extends Table {
   }
 
   private void applyChanges() {
+    Integer parsedFps = FpsValidator.parse(fpsText.getText());
+    if (parsedFps == null) {
+      showFeedback("Invalid FPS. Enter a positive whole number.", Color.SALMON);
+      return;
+    }
+
     Settings updated = copyOf(appliedSettings);
+    updated.fps = parsedFps;
     updated.masterVolume = masterVolumeSlider.getValue();
     updated.musicVolume = musicVolumeSlider.getValue();
     updated.soundEffectsVolume = soundEffectsVolumeSlider.getValue();
@@ -209,18 +249,28 @@ public class SettingsPanel extends Table {
     updated.fullscreen = fullScreenCheck.isChecked();
     updated.vsync = vsyncCheck.isChecked();
 
-    Integer parsedFps = parsePositiveInt(fpsText.getText());
-    if (parsedFps != null) {
-      updated.fps = parsedFps;
-    }
     StringDecorator<DisplayMode> selectedMode = displayModeSelect.getSelected();
     if (selectedMode != null) {
       updated.displayMode = new DisplaySettings(selectedMode.object);
     }
 
-    settingsWriter.accept(updated);
+    try {
+      settingsWriter.accept(updated);
+    } catch (RuntimeException e) {
+      logger.error("Could not apply settings", e);
+      showFeedback("Could not apply settings. Please try again.", Color.SALMON);
+      return;
+    }
+
     appliedSettings = copyOf(updated);
     populate(appliedSettings);
+    showFeedback("Settings applied.", Color.GREEN);
+  }
+
+  private void showFeedback(String message, Color color) {
+    feedbackLabel.setText(message);
+    // Set the label's own font colour
+    feedbackLabel.getStyle().fontColor = new Color(color);
   }
 
   private void selectDisplayMode(DisplaySettings desired) {
@@ -266,15 +316,6 @@ public class SettingsPanel extends Table {
 
   private void updateVolumeLabel(Slider slider, Label label) {
     label.setText(Math.round(slider.getValue() * 100f) + "%");
-  }
-
-  private Integer parsePositiveInt(String value) {
-    try {
-      int parsed = Integer.parseInt(value, 10);
-      return parsed > 0 ? parsed : null;
-    } catch (NumberFormatException exception) {
-      return null;
-    }
   }
 
   private Label themedLabel(String text) {
