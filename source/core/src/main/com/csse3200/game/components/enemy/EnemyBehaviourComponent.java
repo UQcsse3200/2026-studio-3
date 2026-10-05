@@ -147,7 +147,7 @@ public class EnemyBehaviourComponent extends Component {
    * Deals damage equal to the telegraphed intent's value, not a freshly recomputed base attack.
    *
    * <p>Kept equal to {@code getBaseAttack()} for every current AI, so this is behaviour-preserving
-   * for them; it only starts to matter for an AI (such as an armor-to-damage trade) whose intent
+   * for them; it only starts to matter for an AI (such as an armour-to-damage trade) whose intent
    * value differs from the plain base attack, letting the damage actually dealt match what was
    * telegraphed to the player.
    *
