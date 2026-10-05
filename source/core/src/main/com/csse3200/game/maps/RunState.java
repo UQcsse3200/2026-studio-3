@@ -183,6 +183,17 @@ public class RunState {
   }
 
   /**
+   * Returns whether a final encounter in the current run has been completed.
+   *
+   * @return true when the run has a map with a completed FINAL node
+   */
+  public boolean isFinalEncounterCompleted() {
+    return mapGraph != null
+        && mapGraph.getNodesByType(RoomType.FINAL).stream()
+            .anyMatch(node -> node.getState() == NodeState.COMPLETED);
+  }
+
+  /**
    * Gets the seed that decides which encounter each node of this run holds.
    *
    * @return the run's encounter seed, or null if no run is in progress
