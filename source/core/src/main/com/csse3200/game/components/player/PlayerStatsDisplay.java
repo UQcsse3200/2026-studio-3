@@ -96,7 +96,7 @@ public class PlayerStatsDisplay extends UIComponent {
     Vector2 scale = entity.getScale();
 
     float enemyX = position.x + scale.x / 2f;
-    float enemyY = position.y - 0.5f;
+    float enemyY = position.y - 1.25f;
 
     Vector3 screenPosition = new Vector3(enemyX, enemyY, 0);
 
