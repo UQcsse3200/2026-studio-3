@@ -60,6 +60,14 @@ public class PopupDisplay extends UIComponent {
 
   /**
    * @param title text in the window's title bar
+   */
+  public PopupDisplay(String title) {
+    this.title = title;
+    this.styleName = "default";
+  }
+
+  /**
+   * @param title text in the window's title bar
    * @param styleName skin style used for the window and its close button (see class javadoc)
    */
   public PopupDisplay(String title, String styleName) {
@@ -300,6 +308,10 @@ public class PopupDisplay extends UIComponent {
   @Override
   public float getZIndex() {
     return Z_INDEX;
+  }
+
+  public boolean isShowing() {
+    return window.isVisible();
   }
 
   public void setHeaderColour(Color colour) {

@@ -16,7 +16,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Scaling;
-import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.configs.CardConfig;
@@ -24,6 +23,7 @@ import com.csse3200.game.cards.runtime.CardResolver;
 import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
+import com.csse3200.game.GdxGame;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rewards.ItemFormatting;
@@ -50,7 +50,6 @@ public class RewardDisplay extends Displaying {
   private static final Color SCRIM = new Color(0.015f, 0.01f, 0.025f, 0.58f);
   private static final Color GOLD = new Color(0.96f, 0.78f, 0.38f, 1f);
   private static final Color CREAM = new Color(0.93f, 0.87f, 0.73f, 1f);
-  private static final Color MUTED = new Color(0.72f, 0.66f, 0.58f, 1f);
   private static final Map<ItemType, String> ITEM_ICONS =
           Map.of(
                   ItemType.LUCKY_COIN, "images/ui/lucky-coin.png",
@@ -80,6 +79,7 @@ public class RewardDisplay extends Displaying {
   private CardWidgetAssets cardWidgetAssets;
   private final List<Button> cardChoiceButtons = new ArrayList<>();
   private final List<CardWidget> cardWidgets = new ArrayList<>();
+  private final List<Actor> rewardOptionCards = new ArrayList<>();
 
   public RewardDisplay(
           DisplayingRecord rec,
@@ -99,8 +99,8 @@ public class RewardDisplay extends Displaying {
           Runnable afterRewardApplied) {
     super(rec);
     this.rewardService = Objects.requireNonNull(rewardService, "rewardService cannot be null");
+    this.game = Objects.requireNonNull(game, "game cannot be null");
     this.runState = game.getRunState();
-    this.game = game;
     this.cardService = Objects.requireNonNull(cardService, "cardService cannot be null");
     this.cardDiscoveryService =
             Objects.requireNonNull(cardDiscoveryService, "cardDiscoveryService cannot be null");
@@ -187,12 +187,12 @@ public class RewardDisplay extends Displaying {
     cards.defaults().padLeft(panelWidth * 0.012f).padRight(panelWidth * 0.012f);
     float cardWidth = panelWidth * 0.27f;
     float cardHeight = panelHeight * 0.54f;
+    rewardOptionCards.clear();
     for (RewardOption option : options) {
       if (option != null) {
-        cards
-                .add(createRewardCard(option, cardWidth, cardHeight))
-                .width(cardWidth)
-                .height(cardHeight);
+        Stack rewardCard = createRewardCard(option, cardWidth, cardHeight);
+        rewardOptionCards.add(rewardCard);
+        cards.add(rewardCard).width(cardWidth).height(cardHeight);
       }
     }
     content.add(cards).expand().center();
@@ -360,7 +360,7 @@ public class RewardDisplay extends Displaying {
     return ServiceLocator.getResourceService().getAsset(path, Texture.class);
   }
 
-  private void selectOption(RewardOption option) {
+  public void selectOption(RewardOption option) {
     if (disposed || claimed || claimInProgress || cardRewardCommitted
             || option == null || option.type == null) return;
     if (option.type == RewardType.CARD) {
@@ -501,6 +501,10 @@ public class RewardDisplay extends Displaying {
     // Positioning is handled by the table layout.
   }
 
+  public List<Actor> getRewardOptionCards() {
+    return List.copyOf(rewardOptionCards);
+  }
+
   List<RewardOption> getOptions() {
     return options == null ? List.of() : List.copyOf(options);
   }
@@ -520,4 +524,5 @@ public class RewardDisplay extends Displaying {
   List<CardWidget> getCardWidgets() {
     return List.copyOf(cardWidgets);
   }
+
 }
