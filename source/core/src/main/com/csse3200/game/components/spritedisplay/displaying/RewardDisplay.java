@@ -172,10 +172,10 @@ public class RewardDisplay extends Displaying {
     scrim = dimmer;
     stage.addActor(dimmer);
 
-    float panelWidth = Math.min(stage.getWidth() * 0.82f, 1080f);
+    float panelWidth = Math.min(stage.getWidth() * 0.92f, 1180f);
     float panelHeight = panelWidth * 0.625f;
-    if (panelHeight > stage.getHeight() * 0.9f) {
-      panelHeight = stage.getHeight() * 0.9f;
+    if (panelHeight > stage.getHeight() * 0.96f) {
+      panelHeight = stage.getHeight() * 0.96f;
       panelWidth = panelHeight / 0.625f;
     }
 
@@ -195,22 +195,22 @@ public class RewardDisplay extends Displaying {
   private Table createPanelContent(float panelWidth, float panelHeight) {
     Table content = new Table();
     content.top();
-    content.pad(panelHeight * 0.13f, panelWidth * 0.1f, panelHeight * 0.15f, panelWidth * 0.1f);
+    content.pad(panelHeight * 0.11f, panelWidth * 0.115f, panelHeight * 0.13f, panelWidth * 0.115f);
 
     Image victory = image(VICTORY_TITLE_TEXTURE);
     victory.setScaling(Scaling.fit);
-    content.add(victory).size(panelWidth * 0.38f, panelHeight * 0.1f).center();
+    content.add(victory).size(panelWidth * 0.46f, panelHeight * 0.13f).center();
     content.row();
 
     Label subtitle = new Label("CHOOSE ONE REWARD", largeStyle(GOLD));
     subtitle.setFontScale(0.82f);
-    content.add(subtitle).center().padTop(2f).padBottom(panelHeight * 0.018f);
+    content.add(subtitle).center().padTop(2f).padBottom(panelHeight * 0.025f);
     content.row();
 
     Table cards = new Table();
     cards.defaults().padLeft(panelWidth * 0.008f).padRight(panelWidth * 0.008f);
-    float cardWidth = panelWidth * (options.size() > 2 ? 0.235f : 0.27f);
-    float cardHeight = panelHeight * 0.54f;
+    float cardWidth = panelWidth * (options.size() > 2 ? 0.21f : 0.25f);
+    float cardHeight = panelHeight * 0.49f;
     for (RewardOption option : options) {
       if (option != null) {
         cards
