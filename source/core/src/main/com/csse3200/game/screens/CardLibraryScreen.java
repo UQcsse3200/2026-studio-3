@@ -42,7 +42,6 @@ public class CardLibraryScreen extends ScreenAdapter {
 
     logger.debug("Initialising card library screen services");
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
     ServiceLocator.registerTimeSource(new GameTime());
@@ -84,8 +83,6 @@ public class CardLibraryScreen extends ScreenAdapter {
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getResourceService().unloadAssets(cardLibraryTextures);
-    ServiceLocator.getResourceService().dispose();
-    ServiceLocator.clear();
   }
 
   static String[] collectTexturePaths() {

@@ -51,7 +51,6 @@ public class EndBattleScreen extends ScreenAdapter {
 
     logger.debug("Initialising end-of-battle screen (won={})", won);
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
@@ -181,7 +180,5 @@ public class EndBattleScreen extends ScreenAdapter {
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getResourceService().unloadAssets(cardTextures);
-    ServiceLocator.getResourceService().dispose();
-    ServiceLocator.clear();
   }
 }

@@ -31,6 +31,8 @@ import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.maps.EncounterCallback;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.shop.PurchaseResult;
 import com.csse3200.game.shop.ShopEncounter;
 import com.csse3200.game.shop.ShopInventoryGenerator;
@@ -606,9 +608,11 @@ public class ShopDisplay extends UIComponent {
       purchasedItemIds.add(itemId);
       String itemName = result.getItem() == null ? "the offer" : result.getItem().getDisplayName();
       statusLabel.setStyle(createLabelStyle("small", AVAILABLE_COLOUR));
+      AudioService.playSound(SoundId.ITEM_PURCHASE, 0.5f);
       statusLabel.setText(String.format("Purchased %s. It was added to your deck.", itemName));
     } else {
       statusLabel.setStyle(createLabelStyle("small", UNAFFORDABLE_COLOUR));
+      AudioService.playSound(SoundId.ERROR, 0.5f);
       statusLabel.setText(result.getMessage());
     }
     refresh();
@@ -616,6 +620,7 @@ public class ShopDisplay extends UIComponent {
 
   private void leaveShop() {
     logger.debug("Shop encounter completed for node {}", shopEncounter.getNodeId());
+    AudioService.playSound(SoundId.LEAVE_SHOP, 0.3f);
     shopEncounter.leave();
     rootStack.addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
   }

@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.csse3200.game.extensions.GameExtension;
+import com.csse3200.game.services.ResourceService;
+import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +45,11 @@ class MapInputHandlerTest {
 
   @BeforeEach
   void setUp() {
+
+    ServiceLocator.registerResourceService(new ResourceService());
+    AudioService.load();
+    ServiceLocator.getResourceService().loadAll();
+
     //   0 (start) -- 1 (AVAILABLE)
     //            \-- 2 (LOCKED, not connected to start's unlock path directly)
     Map<Integer, MapNode> pool = new HashMap<>();

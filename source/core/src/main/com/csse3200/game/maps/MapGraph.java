@@ -190,6 +190,15 @@ public class MapGraph implements EncounterCallback {
           connected.setState(NodeState.AVAILABLE);
         }
       }
+
+      // Ensures the nodes adjacent to the completed node are set to locked
+      for (MapNode horizontalNode : getNodesByHeight(node.getHeight())) {
+        if (horizontalNode.getNodeId() != nodeId) {
+          if (horizontalNode.getState() == NodeState.AVAILABLE) {
+            horizontalNode.setState(NodeState.LOCKED);
+          }
+        }
+      }
     }
   }
 

@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -33,6 +35,8 @@ import com.csse3200.game.components.cards.UncommonCardLibraryWidget;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
 import java.util.Comparator;
@@ -170,7 +174,15 @@ public class CardLibraryDisplay extends UIComponent {
             game.setScreen(GdxGame.ScreenType.LIBRARY);
           }
         });
-
+    backButton.addListener(
+        new InputListener() {
+          @Override
+          public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+            if (pointer == -1) {
+              AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
+            }
+          }
+        });
     panel.add(titleBlock).left().expandX();
     panel.add(backButton).right().width(170f).height(58f);
   }
@@ -244,6 +256,15 @@ public class CardLibraryDisplay extends UIComponent {
             public void changed(ChangeEvent event, Actor actor) {
               if (cardButton.isChecked()) {
                 discovery.getEntry(cardId).ifPresent(CardLibraryDisplay.this::showCard);
+              }
+            }
+          });
+      cardButton.addListener(
+          new InputListener() {
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+              if (pointer == -1) {
+                AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
               }
             }
           });
