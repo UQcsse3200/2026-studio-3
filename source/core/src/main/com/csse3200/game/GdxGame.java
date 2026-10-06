@@ -255,7 +255,7 @@ public class GdxGame extends Game {
     setScreen(new EncounterScreen(this, eventId));
   }
 
-  /** Opens a temporary Event preview without entering or changing the run map. */
+  /** Temporary map-free Event preview; completion returns directly to the main menu. */
   public void openDemoEvent() {
     openDemoEvent(null);
   }
@@ -270,7 +270,7 @@ public class GdxGame extends Game {
     setScreen(new DemoEventScreen(this, previewEncounterId));
   }
 
-  /** Opens a temporary Campfire preview with no map node or persistent run changes. */
+  /** Temporary map-free shortcut; reuses Campfire UI and returns directly to the menu. */
   public void openDemoCampfire() {
     prepareScreenTransition();
     setScreen(new DemoCampfireScreen(this));

@@ -8,6 +8,15 @@ public interface BattleTutorialView {
   /** Shows text and highlights the named live actor, enabling Continue only when allowed. */
   void show(BattleTutorialPrompt prompt);
 
+  /**
+   * Optional local damage-number presentation from a real HP difference, never simulated damage.
+   */
+  default void showResolvedDamage(int amount) {}
+
+  default boolean areTransientEffectsFinished() {
+    return true;
+  }
+
   /** Removes tutorial text, highlights and input handlers. Safe to call more than once. */
   void clear();
 }

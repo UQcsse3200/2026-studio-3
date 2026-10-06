@@ -8,12 +8,55 @@ the New Game choice through `GdxGame.startTutorialBattle()` to a tutorial-only
 The tutorial does not complete a map node, grant a reward or request autosave.
 The existing normal battle path remains separate.
 
-The current `BattleTutorialTextView` displays actionable text while Jun's
-positioned battle highlights are in progress. **Team 1's tutorial-only safe
+The tutorial screen now uses `BattleTutorialGuidanceView` for positioned prompts,
+live highlights and tap-anywhere input. The original text view remains available
+for other integrations. **Team 1's tutorial-only safe
 enemy behaviour is still required** before the no-player-death acceptance
 criterion can be claimed. The fixed ordinary enemy alone is not that behaviour.
 
 ## Steps and UI
+
+### Opt-in reference presentation
+
+`BattleScreen(game, true)` supplies the exact instance ID of a guaranteed Strike
+to the four-argument `BattleTutorialComponent` constructor. Only this tutorial
+path retains every card in the real run deck, shuffles a temporary copy, and moves
+one existing Strike to the middle slot of the initial hand. Later inventory changes
+and normal battles retain their existing behavior. The player model remains visible.
+
+The reference sequence starts with a combined welcome/Hand lesson, Card Inventory, Energy, Card Cost,
+Play a Card, Enemy Health/Armour, Used Card, End Turn, and Player Health.
+Informational steps advance by tapping anywhere; only the opening Hand lesson displays the tap hint.
+Step six blocks other cards and unrelated controls and requires the actual
+successful play event for the designated Strike copy, actual enemy HP loss,
+the existing effect/hurt animations finishing, and the local damage number ending.
+No drag/drop/return event alone advances the tutorial. The Strike's existing
+two-round cooldown is described without changing it.
+
+End Turn is an optional explanatory step: tapping anywhere advances directly to
+Player Health without changing the turn or HP. If the player actually ends the
+turn, wait for its real animations to finish, then explain Health once, including
+when the enemy chooses to defend. Do not repeat the End Turn lesson.
+
+After Player Health is dismissed, dimming, highlights and prompts disappear while
+Exit Tutorial remains usable at the top right until screen exit/battle completion.
+The battle continues with the existing tutorial owner's outcome route;
+no victory lesson, completion announcement or immediate map transition is added.
+The legacy three-argument component still retains the original shared concepts.
+
+The view resolves targets from live Stage actors, including transformed card
+bounds and the actual card cost label. Hand uses one padded union outline.
+One full-screen quad dims the scene at alpha 0.52. Actual target actors (and the
+actual enemy renderer during the drag lesson) are redrawn above it, preserving
+their real disabled tint. No rectangular bright holes or additional card assets
+are used. The prompt and independent beige Exit button are drawn after Stage.draw
+so card hover/drag/zoom cannot occlude them. Preferred placements try alternatives
+and clamp to viewport bounds; the drag prompt stays at its fixed upper anchor.
+The original card z-index is restored when the cue changes or clears.
+`clear()` removes the overlay and capture listener without disposing the Stage.
+
+The table below describes the preserved three-argument controller integration,
+not the opt-in reference sequence.
 
 `BattleTutorialView` is the UI boundary for Jun:
 
@@ -128,6 +171,7 @@ The tutorial does not claim that five new cards are drawn automatically every
 turn; drawing and cooldowns must match the actual combat implementation.
 
 For the current integration, run `./gradlew test spotlessCheck` using JDK 21.
-The initial full automated suite passed on the tutorial task branch. A graphical
-playthrough, Team 1's safe enemy integration, and Jun's final highlights remain
-required before merging the complete tutorial into `main`.
+The automated suite and desktop compilation are checked locally. A local graphical
+playthrough verified invalid drops, real Strike damage, inactive-card guidance,
+End Turn and the health prompt after real enemy damage. Team 1's safe enemy integration remains required before claiming
+all tutorial acceptance criteria and merging the complete tutorial into `main`.

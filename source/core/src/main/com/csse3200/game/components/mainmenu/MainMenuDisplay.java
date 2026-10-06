@@ -35,6 +35,8 @@ public class MainMenuDisplay extends UIComponent {
   public static final String BESTIARY_EVENT = "bestiary";
   public static final String SETTINGS_EVENT = "settings";
   public static final String EXIT_EVENT = "exit";
+  public static final String DEMO_EVENT = "demoEvent";
+  public static final String DEMO_CAMPFIRE_EVENT = "demoCampfire";
 
   private Stack rootStack;
   private Table menuTable;

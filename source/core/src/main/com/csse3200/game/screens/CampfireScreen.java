@@ -124,19 +124,26 @@ public class CampfireScreen extends ScreenAdapter {
     addSceneImage(mainScene, extendedTexture, true);
     Image mainBackground = addSceneImage(mainScene, mainTexture, false);
     blendSceneEdges(mainScene, extendedTexture, mainBackground);
+    CampfireChoiceDecoration title = new CampfireChoiceDecoration(skin, true);
+    title.setPosition((UI_WIDTH - title.getWidth()) / 2, UI_HEIGHT - 180);
+    mainScene.addActor(title);
     addDiamond(
         mainScene,
         mainBackground,
         resources.getAsset(REST_ICON, Texture.class),
         515f,
         480f,
+        20f,
+        "Rest",
         this::beginRest);
     addDiamond(
         mainScene,
         mainBackground,
         resources.getAsset(UPGRADE_ICON, Texture.class),
-        1435f,
+        1450f,
         445f,
+        11f,
+        "Upgrade",
         this::beginUpgrade);
 
     restScene = newScene();
@@ -236,20 +243,27 @@ public class CampfireScreen extends ScreenAdapter {
       Texture iconTexture,
       float imageX,
       float imageY,
+      float verticalLift,
+      String title,
       Runnable onClick) {
     iconTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     // Coordinates come from the supplied 1672 x 941 main-scene reference.
     float scale = background.getWidth() / 1672f;
     float centerX = background.getX() + imageX * scale;
-    float centerY = background.getY() + (941f - imageY) * scale;
+    // Independent lifts align each bottom ornament with its own scene landmark.
+    float centerY = background.getY() + (941f - imageY) * scale + verticalLift;
+    CampfireChoiceDecoration decoration = new CampfireChoiceDecoration(skin, false);
+    decoration.optionText(skin, title);
+    decoration.setPosition(centerX - 140, centerY - 230);
+    scene.addActor(decoration);
     Image icon = new Image(iconTexture);
-    icon.setSize(200f, 200f);
-    icon.setPosition(centerX - 100f, centerY - 100f);
+    icon.setSize(125f, 125f);
+    icon.setPosition(centerX - 62.5f, centerY - 62.5f);
     icon.setTouchable(Touchable.disabled);
     scene.addActor(icon);
 
     Actor hotspot = new Actor();
-    hotspot.setBounds(centerX - 68f, centerY - 70f, 136f, 140f);
+    hotspot.setBounds(centerX - 54f, centerY - 82f, 108f, 138f);
     float restingY = icon.getY();
     hotspot.addListener(
         new ClickListener() {
@@ -259,6 +273,7 @@ public class CampfireScreen extends ScreenAdapter {
               return;
             }
             Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Hand);
+            decoration.setHovered(true);
             icon.clearActions();
             icon.addAction(
                 Actions.forever(
@@ -274,6 +289,7 @@ public class CampfireScreen extends ScreenAdapter {
               return;
             }
             Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+            decoration.setHovered(false);
             icon.clearActions();
             icon.setY(restingY);
           }

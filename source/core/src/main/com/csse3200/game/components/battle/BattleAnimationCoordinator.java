@@ -90,6 +90,16 @@ public class BattleAnimationCoordinator extends Component {
     }
   }
 
+  /** Read-only visual completion probe; does not delay or alter combat. */
+  public boolean hasActiveVisuals() {
+    return activeVisuals.stream()
+        .anyMatch(
+            visual -> {
+              EffectVisualComponent component = visual.getComponent(EffectVisualComponent.class);
+              return component != null && !component.isExpired();
+            });
+  }
+
   private static final float EFFECT_STAGGER_SECONDS = 0.15f;
 
   /** Fires before the controller applies the effects, so the targets are still alive to read. */

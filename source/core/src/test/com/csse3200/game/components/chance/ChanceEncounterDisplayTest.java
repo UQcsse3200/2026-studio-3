@@ -62,6 +62,57 @@ class ChanceEncounterDisplayTest {
   }
 
   @Test
+  void fountainWaitsForReleaseAndCompletesOnlyOnce() {
+    AtomicInteger completions = new AtomicInteger();
+    ChanceEncounterDisplay display = createFountain(completions);
+    assertEquals("Make a Wish", display.getChoiceButtons().get(0).getText().toString());
+    assertEquals("Leave >", display.getChoiceButtons().get(1).getText().toString());
+    display.getChoiceButtons().get(0).fire(new ChangeEvent());
+    assertTrue(display.getChoiceButtons().get(1).isDisabled());
+    stage.act(0.8f);
+    assertFalse(display.getContinueButton().isVisible());
+    display.getChoiceButtons().get(1).fire(new ChangeEvent());
+    display.getChoiceButtons().get(0).fire(new ChangeEvent());
+    stage.act(0.9f);
+    assertTrue(display.getContinueButton().isVisible());
+    assertFalse(display.getResultText().contains("OUTCOME"));
+    assertTrue(display.getResultText().contains("20"));
+    display.getContinueButton().fire(new ChangeEvent());
+    display.getContinueButton().fire(new ChangeEvent());
+    stage.act(0.5f);
+    stage.act(0.1f);
+    assertEquals(1, completions.get());
+  }
+
+  @Test
+  void fountainLeaveBypassesAnimation() {
+    ChanceEncounterDisplay display = createFountain(new AtomicInteger());
+    display.getChoiceButtons().get(1).fire(new ChangeEvent());
+    assertTrue(display.getContinueButton().isVisible());
+    assertFalse(display.getResultText().contains("OUTCOME"));
+  }
+
+  private ChanceEncounterDisplay createFountain(AtomicInteger completions) {
+    ChanceEncounter encounter =
+        new ChanceEncounter(
+            "wishing-fountain",
+            "An old wishing fountain shimmers beside the path.",
+            List.of(
+                new ChanceChoice(
+                    "make-wish", "Make a wish at the fountain.", new ChanceOutcome(20, 0)),
+                new ChanceChoice(
+                    "leave",
+                    "Leave the fountain without making a wish.",
+                    new ChanceOutcome(0, 0))));
+    ChanceEncounterDisplay display =
+        new ChanceEncounterDisplay(
+            encounter, (nodeId, success) -> completions.incrementAndGet(), 7);
+    entity = new Entity().addComponent(display);
+    ServiceLocator.getEntityService().register(entity);
+    return display;
+  }
+
+  @Test
   void abandonedMineSceneKeepsChoicesAndCompletionWorking() {
     Stage sceneStage = new Stage(new FitViewport(1280f, 800f), mock(Batch.class));
     RenderService renderService = new RenderService();

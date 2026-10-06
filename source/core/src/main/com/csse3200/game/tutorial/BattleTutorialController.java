@@ -13,6 +13,10 @@ import java.util.function.Consumer;
 /** Tracks tutorial guidance without changing the rules or state of the battle it observes. */
 public final class BattleTutorialController implements AutoCloseable {
   public enum Step {
+    INTRO,
+    CARD_INVENTORY,
+    USED_CARD,
+    ENEMY_STATS,
     HAND,
     CARD_COST,
     ENERGY,
@@ -21,6 +25,8 @@ public final class BattleTutorialController implements AutoCloseable {
     CARD_DRAW,
     BATTLE_OUTCOME_RULES,
     PLAY_A_CARD,
+    CARD_ANIMATION,
+    ENEMY_ANIMATION,
     END_TURN,
     FREE_PLAY,
     BATTLE_ENDED,
@@ -42,8 +48,52 @@ public final class BattleTutorialController implements AutoCloseable {
   private boolean bound;
   private boolean closed;
   private BattleController battle;
+  private final boolean referenceSequence;
+  private String demonstrationCardId;
+  private int enemyHealthBefore;
+  private int playerHealthBefore;
+
+  /** Initial snapshots are supplied only by the isolated tutorial owner. */
+  public void observeInitialHealth(int enemyHealth, int playerHealth) {
+    enemyHealthBefore = enemyHealth;
+    playerHealthBefore = playerHealth;
+  }
+
+  /** Polls real resolution and visual completion; never applies damage or advances a turn. */
+  public void observeResolution(
+      int enemyHealth, int playerHealth, boolean settled, BattlePhase phase) {
+    if (closed || !referenceSequence || !settled || phase != BattlePhase.PLAYER_TURN) return;
+    if (currentStep == Step.CARD_ANIMATION && enemyHealth < enemyHealthBefore) {
+      show(Step.ENEMY_STATS);
+    } else if (currentStep == Step.ENEMY_ANIMATION) {
+      show(Step.HEALTH);
+    }
+  }
+
+  public BattleTutorialController() {
+    this(false);
+  }
+
+  public BattleTutorialController(boolean referenceSequence) {
+    this.referenceSequence = referenceSequence;
+  }
+
+  /** Exact tutorial copy, not a definition ID shared by duplicate cards. */
+  public void setDemonstrationCardId(String instanceId) {
+    demonstrationCardId = instanceId;
+  }
+
   private final EventListener2<String, String> cardListener =
-      (instanceId, targetId) -> onSuccessfulCardPlay();
+      (instanceId, targetId) -> onSuccessfulCardPlay(instanceId);
+
+  public void onSuccessfulCardPlay(String instanceId) {
+    if (!referenceSequence
+        || demonstrationCardId == null
+        || demonstrationCardId.equals(instanceId)) {
+      onSuccessfulCardPlay();
+    }
+  }
+
   private final EventListener2<BattlePhase, BattlePhase> phaseListener =
       (previous, next) -> onPhaseChanged(next);
   private final EventListener1<Boolean> endListener = this::onBattleEnded;
@@ -95,16 +145,32 @@ public final class BattleTutorialController implements AutoCloseable {
       return false;
     }
     Step next =
-        switch (currentStep) {
-          case HAND -> Step.CARD_COST;
-          case CARD_COST -> Step.ENERGY;
-          case ENERGY -> Step.HEALTH;
-          case HEALTH -> Step.BUFFS;
-          case BUFFS -> Step.CARD_DRAW;
-          case CARD_DRAW -> Step.BATTLE_OUTCOME_RULES;
-          case BATTLE_OUTCOME_RULES -> Step.PLAY_A_CARD;
-          default -> null;
-        };
+        referenceSequence
+            ? switch (currentStep) {
+              case INTRO -> Step.HAND;
+              case HAND -> Step.CARD_INVENTORY;
+              case CARD_INVENTORY -> Step.ENERGY;
+              case ENERGY -> Step.CARD_COST;
+              case CARD_COST -> Step.PLAY_A_CARD;
+              case ENEMY_STATS -> Step.USED_CARD;
+              case USED_CARD -> Step.END_TURN;
+              case END_TURN -> Step.HEALTH;
+              case HEALTH -> Step.FREE_PLAY;
+              case BUFFS -> Step.CARD_DRAW;
+              case CARD_DRAW -> Step.BATTLE_OUTCOME_RULES;
+              case BATTLE_OUTCOME_RULES -> Step.FREE_PLAY;
+              default -> null;
+            }
+            : switch (currentStep) {
+              case HAND -> Step.CARD_COST;
+              case CARD_COST -> Step.ENERGY;
+              case ENERGY -> Step.HEALTH;
+              case HEALTH -> Step.BUFFS;
+              case BUFFS -> Step.CARD_DRAW;
+              case CARD_DRAW -> Step.BATTLE_OUTCOME_RULES;
+              case BATTLE_OUTCOME_RULES -> Step.PLAY_A_CARD;
+              default -> null;
+            };
     if (next == null) {
       return false;
     }
@@ -117,9 +183,10 @@ public final class BattleTutorialController implements AutoCloseable {
     if (closed || currentStep == null || outcome != null) {
       return;
     }
+    if (referenceSequence && currentStep != Step.PLAY_A_CARD) return;
     cardPlayed = true;
     if (currentStep == Step.PLAY_A_CARD) {
-      show(Step.END_TURN);
+      show(referenceSequence ? Step.CARD_ANIMATION : Step.END_TURN);
     }
   }
 
@@ -134,7 +201,7 @@ public final class BattleTutorialController implements AutoCloseable {
     }
     turnEnded = true;
     if (currentStep == Step.END_TURN) {
-      show(Step.FREE_PLAY);
+      show(referenceSequence ? Step.ENEMY_ANIMATION : Step.FREE_PLAY);
     }
   }
 
@@ -167,9 +234,9 @@ public final class BattleTutorialController implements AutoCloseable {
     if (closed || currentStep != next) {
       return;
     }
-    if (next == Step.PLAY_A_CARD && cardPlayed) {
+    if (!referenceSequence && next == Step.PLAY_A_CARD && cardPlayed) {
       show(Step.END_TURN);
-    } else if (next == Step.END_TURN && turnEnded) {
+    } else if (!referenceSequence && next == Step.END_TURN && turnEnded) {
       show(Step.FREE_PLAY);
     }
   }
