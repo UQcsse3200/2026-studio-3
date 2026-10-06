@@ -1,5 +1,6 @@
 # 把 <enemy>_{idle_0,idle_1,attack_0,hurt_0,death_0}.png 拼成 2048x1024 图集并写出 .atlas
-# 用法: python pack_enemy.py <enemy_id> <frames_dir> <out_dir>
+# 用法: python pack_enemy.py <enemy_id> <frames_dir> <out_dir> [--nearest]
+#   --nearest: 像素风图集用 Nearest 滤镜，游戏里缩放时像素块保持锐利
 import sys
 from PIL import Image
 
@@ -20,7 +21,7 @@ def region(name, x, y, index):
     )
 
 
-def main(enemy, frames_dir, out_dir):
+def main(enemy, frames_dir, out_dir, nearest=False):
     sheet = Image.new("RGBA", (2048, 1024), (0, 0, 0, 0))
     for _, _, suffix, cx, cy in LAYOUT:
         frame = Image.open(f"{frames_dir}/{enemy}_{suffix}.png").convert("RGBA")
@@ -28,7 +29,8 @@ def main(enemy, frames_dir, out_dir):
         sheet.alpha_composite(frame, (cx * S, cy * S))
     sheet.save(f"{out_dir}/{enemy}.png", optimize=True)
 
-    text = f"{enemy}.png\nsize: 2048, 1024\nformat: RGBA8888\nfilter: Linear,Linear\nrepeat: none\n"
+    filt = "Nearest,Nearest" if nearest else "Linear,Linear"
+    text = f"{enemy}.png\nsize: 2048, 1024\nformat: RGBA8888\nfilter: {filt}\nrepeat: none\n"
     text += region("default", 0, 0, -1)
     for name, index, _, cx, cy in LAYOUT:
         text += region(name, cx * S, cy * S, index)
@@ -38,4 +40,4 @@ def main(enemy, frames_dir, out_dir):
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:4])
+    main(*sys.argv[1:4], nearest="--nearest" in sys.argv[4:])

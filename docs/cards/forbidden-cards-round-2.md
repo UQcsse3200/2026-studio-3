@@ -215,22 +215,39 @@ or launch option remains pending; production code should not silently replace th
 - [ ] Confirm ordered resolution of both effects on `Sealed Pact` and `Doom Sigil`.
 - [ ] Confirm Strength modifies `Blood Price` damage.
 - [ ] Confirm Poison and Vulnerable durations update correctly.
-- [ ] Confirm `FORTIFY` increases armour and does not change Block.
+- [x] Confirm `FORTIFY` increases armour and does not change Block. See FORTIFY Test Result.
 - [ ] Confirm played cards move from hand to discard and replacement cards are drawn.
 - [ ] Confirm upgrade path applies when the combat/upgrade system is available.
 
 ### Acquisition
 
-- [ ] Agree with the reward/shop team how new cards enter the player's deck.
+- [x] Agree with the reward/shop team how new cards enter the player's deck. Shop, chance
+  encounters and victory rewards all draw from the shared `CardAcquisitionPool` (#348).
 - [ ] Verify acquisition modifies the same `PlayerDeck` used to begin combat.
 - [x] Provide `createForbiddenTestDeck()` while production acquisition is pending.
 - [ ] Replace or retain the test entry point according to the final integration decision.
+
+## FORTIFY Test Result
+
+Checked after the Sprint 3 Block/Armour fix, where `BLOCK` calls `addBlock`, `FORTIFY` calls
+`addArmour`, and `BattleController` calls `resetBlock()` at the start of each player turn. Iron
+Oath effects are read from `cards.json` and applied through the live `CardEffectHandler`.
+
+| Check | Expected | Test |
+| --- | --- | --- |
+| Iron Oath played with 3 Block | Armour 0 → 4, Block stays 3 | `FortifyIronOathTest.shouldAddArmourWithoutChangingBlockWhenPlayed` |
+| Iron Oath + Defend, then turn start | Block 5 → 0, Armour stays 4 | `FortifyIronOathTest.shouldKeepArmourWhenBlockResetsAtTurnStart` |
+| 7 damage into 5 Block + 4 Armour | Block 0, Armour 2, no health lost | `FortifyIronOathTest.shouldAbsorbDamageWithBlockBeforeArmour` |
+| Adapter path | FORTIFY 4 gives Armour 4, Block 0 | `Team7PlayerStateAdapterTest.shouldApplyFortifyAsArmourWithoutChangingBlock` |
+
+Result: FORTIFY behaves as designed. Armour from Iron Oath lasts across turns, while Block from
+`BLOCK` cards is cleared each turn. No value changes are needed.
 
 ## Tracked Issues and Dependencies
 
 | Item | Owner | Status / required action |
 | --- | --- | --- |
-| Reward/shop acquisition route | Reward/shop team + Member 5 | Pending agreement and end-to-end verification |
+| Reward/shop acquisition route | Reward/shop team + Member 5 | Agreed: shared `CardAcquisitionPool` (#348); end-to-end deck check pending |
 | Debug selection of Forbidden test deck | Member 5 / battle UI owner | Factory entry exists; UI/launch selection not connected |
 | Art specification | Member 5 (this set) | 1024×768 4:3 illustration-only per Team 6 shared prompt |
 | Effect support | Member 2 + Team 5/7 | Existing effects selected; verify actual combat behaviour |

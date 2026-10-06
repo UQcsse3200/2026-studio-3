@@ -4,6 +4,7 @@
         "id": "strike",
         "name": "Strike",
         "description": "Deal 6 damage.",
+        "lore": "Even a lesser angel must sometimes answer force with force. A measured blow opens the way forward without turning the mission into slaughter.",
         "cost": 1,
         "type": "ATTACK",
         "rarity": "COMMON",
@@ -21,7 +22,8 @@
       {
         "id": "warding_sweep",
         "name": "Warding Sweep",
-        "description": "Deal 4 damage to all enemies.",
+        "description": "The old guard's circle still holds. Deal 4 damage to all enemies.",
+        "lore": "A wide arc once taught to those who kept the threshold. It was meant to drive the fallen back from the sanctum, not to cut them down.",
         "cost": 2,
         "type": "ATTACK",
         "rarity": "COMMON",
@@ -33,6 +35,7 @@
         "id": "defend",
         "name": "Defend",
         "description": "Gain 5 block.",
+        "lore": "Before learning greater rites, the angel learns simply to endure. Protection leaves room for mercy when strength alone would end the fight.",
         "cost": 1,
         "type": "SKILL",
         "rarity": "COMMON",
@@ -44,6 +47,7 @@
         "id": "poison_dagger",
         "name": "Poison Dagger",
         "description": "Deal 4 damage. Apply 3 Poison for 3 turns.",
+        "lore": "A small blade carries only a measured trace of poison. The angel uses it to weaken resistance, never forgetting that the fallen are meant to be released.",
         "cost": 1,
         "type": "ATTACK",
         "rarity": "UNCOMMON",
@@ -58,6 +62,7 @@
         "id": "expose",
         "name": "Expose",
         "description": "Apply 2 Vulnerable to all enemies for 2 turns.",
+        "lore": "Corruption leaves fractures even when the fallen cannot see them. The angel learns to recognise those weaknesses and bring them into the light.",
         "cost": 1,
         "type": "SKILL",
         "rarity": "UNCOMMON",
@@ -69,9 +74,10 @@
         "id": "inner_focus",
         "name": "Inner Focus",
         "description": "Gain 2 Strength for the rest of combat.",
+        "lore": "The angel gathers strength by holding purpose steady against the corruption ahead. Resolve becomes a power that lasts as long as the struggle does.",
         "cost": 2,
         "type": "POWER",
-        "rarity": "RARE",
+        "rarity": "UNCOMMON",
         "target": "SELF",
         "effects": [{ "type": "STRENGTH", "value": 2, "duration": 0 }],
         "texturePath": "images/cards/inner_focus.png"
@@ -80,6 +86,7 @@
         "id": "bandage",
         "name": "Bandage",
         "description": "Heal 6 health.",
+        "lore": "Not every wound requires divine intervention. A simple binding is often enough to keep the angel moving toward the work still unfinished.",
         "cost": 1,
         "type": "SKILL",
         "rarity": "COMMON",
@@ -90,7 +97,8 @@
       {
         "id": "sentinels_rebuke",
         "name": "Sentinel's Rebuke",
-        "description": "Deal 4 damage. Apply 1 Feeble for 2 turns.",
+        "description": "A final admonition recalls the fallen to silence. Deal 4 damage. Apply 1 Feeble for 2 turns.",
+        "lore": "The sentinel strikes without hatred. Something buried in the fallen still remembers that voice, and its hand falters.",
         "cost": 1,
         "type": "ATTACK",
         "rarity": "UNCOMMON",
@@ -104,7 +112,8 @@
       {
         "id": "poison_flask",
         "name": "Poison Flask",
-        "description": "Apply 5 Poison for 3 turns.",
+        "description": "A measured dose draws corruption to the surface. Apply 5 Poison for 3 turns.",
+        "lore": "The flask was prepared for those whose corruption could not be seen. Its contents bring the hidden sickness into the open.",
         "cost": 1,
         "type": "SKILL",
         "rarity": "UNCOMMON",
@@ -117,7 +126,8 @@
       {
         "id": "poison_blade",
         "name": "Poison Blade",
-        "description": "Deal 10 piercing damage, ignoring Block and Armour. Apply 4 Poison for 2 turns.",
+        "description": "The blade reaches beneath the fallen's defences. Deal 10 piercing damage, ignoring Block and Armour. Apply 4 Poison for 2 turns.",
+        "lore": "This blade was kept for the fallen who hid behind corrupted armour. It finds the gap, and through it, the one still trapped inside.",
         "cost": 2,
         "type": "ATTACK",
         "rarity": "UNCOMMON",
@@ -131,7 +141,8 @@
       {
         "id": "poison_cloud",
         "name": "Poison Cloud",
-        "description": "Apply 3 Poison to all enemies for 3 turns.",
+        "description": "A bitter mist exposes the stain within. Apply 3 Poison to all enemies for 3 turns.",
+        "lore": "The vapour was made for corruption that spreads through a gathering. It draws the taint into the open, and those caught within are not yet lost.",
         "cost": 2,
         "type": "SKILL",
         "rarity": "UNCOMMON",
@@ -144,7 +155,8 @@
       {
         "id": "poison_mark",
         "name": "Poison Mark",
-        "description": "Apply 2 Vulnerable and 2 Poison to an enemy for 2 turns.",
+        "description": "A quiet sign reveals where the corruption has taken hold. Apply 2 Vulnerable and 2 Poison to an enemy for 2 turns.",
+        "lore": "Some corruption hides too deep to be seen at a glance. Where the mark glows, help is still owed.",
         "cost": 1,
         "type": "SKILL",
         "rarity": "RARE",
@@ -158,7 +170,8 @@
       {
         "id": "starfall",
         "name": "Starfall",
-        "description": "Deal 6 damage to all enemies.",
+        "description": "Heaven's light falls upon those still bound. Deal 6 damage to all enemies.",
+        "lore": "Falling stars carry a grave light into places burdened by corruption. Where they land, the fallen are given a chance at release.",
         "cost": 2,
         "type": "ATTACK",
         "rarity": "UNCOMMON",
@@ -169,7 +182,8 @@
       {
         "id": "rift_lance",
         "name": "Rift Lance",
-        "description": "Deal 4 damage. Apply 1 Vulnerable for 2 turns.",
+        "description": "A shaft of starlight loosens corruption's hold. Deal 4 damage. Apply 1 Vulnerable for 2 turns.",
+        "lore": "A narrow shaft of starlight opens a breach in corruption's hold. Through that wound, the fallen may yet be reached.",
         "cost": 1,
         "type": "ATTACK",
         "rarity": "UNCOMMON",
@@ -183,7 +197,8 @@
       {
         "id": "wardens_judgement",
         "name": "Warden's Judgement",
-        "description": "Deal 9 damage.",
+        "description": "Mercy is pronounced beneath a broken oath. Deal 9 damage.",
+        "lore": "The warden's blow falls once, heavy and certain, so that what was corrupted may finally be still. It is the last kindness a guardian can offer.",
         "cost": 2,
         "type": "ATTACK",
         "rarity": "UNCOMMON",
@@ -193,8 +208,9 @@
       },
       {
         "id": "unseal_the_breach",
-        "name": "Unseal the Breach",
-        "description": "Deal 2 damage. Reduce the enemy's armour by 3.",
+        "name": "Break the Seal",
+        "description": "No ward shall bar the way to absolution. Reduce the enemy's armour by 3, then deal 2 damage.",
+        "lore": "Corruption seals itself around what it has taken, hard as stone. This rite breaks that seal first, so that release can reach what lies beneath.",
         "cost": 1,
         "type": "ATTACK",
         "rarity": "UNCOMMON",
@@ -208,7 +224,8 @@
       {
         "id": "astral_ward",
         "name": "Astral Ward",
-        "description": "Gain 4 Block and 1 Strength for the rest of combat. Restore 1 Energy.",
+        "description": "The old star-readers' ward steadies the weary. Gain 4 Block and 1 Strength for the rest of combat. Restore 1 Energy.",
+        "lore": "Beneath a quiet veil of starlight, the weary gather the strength to endure. Each steady breath holds the line a little longer.",
         "cost": 2,
         "type": "SKILL",
         "rarity": "UNCOMMON",
@@ -222,8 +239,9 @@
       },
       {
         "id": "resurrection",
-        "name": "Resurrection",
-        "description": "Heal 6 HP at the start of your next 3 turns.",
+        "name": "Restoring Light",
+        "description": "A quiet celestial rite sustains the wounded. Heal 6 HP at the start of your next 3 turns.",
+        "lore": "A faint light lingers where hope has nearly departed. With patience and solemn care, the wounded are guided back toward life.",
         "cost": 5,
         "type": "SKILL",
         "rarity": "RARE",
@@ -233,8 +251,9 @@
       },
       {
         "id": "makeshift_shelter",
-        "name": "Makeshift Shelter",
-        "description": "Gain 7 Block. Heal 3.",
+        "name": "Humble Sanctuary",
+        "description": "Even a lesser blessing can become a refuge. Gain 7 Block. Heal 3.",
+        "lore": "Where corruption has left little untouched, the angel makes a small refuge from what grace remains. It offers only enough safety to continue the work ahead.",
         "cost": 2,
         "type": "SKILL",
         "rarity": "UNCOMMON",
@@ -247,8 +266,9 @@
       },
       {
         "id": "rubble_barricade",
-        "name": "Rubble Barricade",
-        "description": "Gain 12 Block.",
+        "name": "Consecrated Rampart",
+        "description": "Even broken stone can bear a sacred ward. Gain 12 Block.",
+        "lore": "Broken stone can still be given purpose. The angel raises a simple ward to endure the fallen without answering their corruption with destruction.",
         "cost": 2,
         "type": "SKILL",
         "rarity": "UNCOMMON",
@@ -258,8 +278,9 @@
       },
       {
         "id": "emergency_salve",
-        "name": "Emergency Salve",
-        "description": "Heal 10 health.",
+        "name": "Balm of Grace",
+        "description": "Grace settles into wounded flesh. Heal 10 health.",
+        "lore": "Not every wound calls for a miracle. A small measure of grace is enough to restore the angel and keep the journey moving.",
         "cost": 2,
         "type": "SKILL",
         "rarity": "UNCOMMON",
@@ -270,7 +291,8 @@
       {
         "id": "purify",
         "name": "Purify",
-        "description": "Remove all negative effects from yourself.",
+        "description": "The stain of corruption is washed away. Remove all negative effects from yourself.",
+        "lore": "Corruption can cling even to those sent to cleanse it. The angel turns that same discipline inward before continuing the work of release.",
         "cost": 1,
         "type": "SKILL",
         "rarity": "UNCOMMON",
@@ -281,7 +303,8 @@
       {
         "id": "sealed_pact",
         "name": "Sealed Pact",
-        "description": "Bind your fate to the archive. Gain 3 Strength and 6 Block.",
+        "description": "An oath no angel should bind. Gain 3 Strength and 6 Block.",
+        "lore": "When safer means fail, the angel binds a dangerous power close at hand. The pact is a burden, carried only as long as the task requires.",
         "cost": 3,
         "type": "POWER",
         "rarity": "RARE",
@@ -293,7 +316,7 @@
         "texturePath": "images/cards/sealed_pact.png",
         "upgrade": {
           "name": "Sealed Pact+",
-          "description": "Bind your fate to the archive. Gain 4 Strength and 9 Block.",
+          "description": "An oath no angel should bind. Gain 4 Strength and 9 Block.",
           "cost": 3,
           "rarity": "RARE",
           "effects": [
@@ -305,7 +328,8 @@
       {
         "id": "blood_price",
         "name": "Blood Price",
-        "description": "Release forbidden power. Deal 20 damage.",
+        "description": "The cost of release is paid in your own strength. Deal 20 damage.",
+        "lore": "Forbidden strength is spent in one costly blow. It is used to break corruption's hold, not to rule by fear.",
         "cost": 3,
         "type": "ATTACK",
         "rarity": "UNCOMMON",
@@ -314,7 +338,7 @@
         "texturePath": "images/cards/blood_price.png",
         "upgrade": {
           "name": "Blood Price+",
-          "description": "Release forbidden power. Deal 28 damage.",
+          "description": "The cost of release is paid in your own strength. Deal 28 damage.",
           "cost": 3,
           "rarity": "UNCOMMON",
           "effects": [{ "type": "DAMAGE", "value": 28, "duration": 0 }]
@@ -323,7 +347,8 @@
       {
         "id": "doom_sigil",
         "name": "Doom Sigil",
-        "description": "Mark an enemy with ruin. Apply 1 Vulnerable for 2 turns and 4 Poison for 3 turns.",
+        "description": "A mark that lays corruption bare. Apply 1 Vulnerable for 2 turns and 4 Poison for 3 turns.",
+        "lore": "A forbidden sign names the place where ruin has settled. It holds that taint in place, so it can spread no further unseen.",
         "cost": 2,
         "type": "SKILL",
         "rarity": "RARE",
@@ -335,7 +360,7 @@
         "texturePath": "images/cards/doom_sigil.png",
         "upgrade": {
           "name": "Doom Sigil+",
-          "description": "Mark an enemy with ruin. Apply 2 Vulnerable for 2 turns and 6 Poison for 3 turns.",
+          "description": "A mark that lays corruption bare. Apply 2 Vulnerable for 2 turns and 6 Poison for 3 turns.",
           "cost": 2,
           "rarity": "RARE",
           "effects": [
@@ -347,7 +372,8 @@
       {
         "id": "iron_oath",
         "name": "Iron Oath",
-        "description": "Swear a forbidden oath. Gain 4 Armour.",
+        "description": "You swear upon iron that the fallen shall be released. Gain 4 Armour.",
+        "lore": "An oath of iron is sworn when ordinary wards will not hold. The bond does not loosen, and neither does the angel's guard.",
         "cost": 1,
         "type": "SKILL",
         "rarity": "UNCOMMON",
@@ -356,7 +382,7 @@
         "texturePath": "images/cards/iron_oath.png",
         "upgrade": {
           "name": "Iron Oath+",
-          "description": "Swear a forbidden oath. Gain 6 Armour.",
+          "description": "You swear upon iron that the fallen shall be released. Gain 6 Armour.",
           "cost": 1,
           "rarity": "UNCOMMON",
           "effects": [{ "type": "FORTIFY", "value": 6, "duration": 0 }]

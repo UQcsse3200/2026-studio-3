@@ -7,7 +7,9 @@
       "baseAttack": 6,
       "armour": 0,
       "tier": "NORMAL",
-      "behaviour": "erratic"
+      "behaviour": "erratic",
+      "renderScale": 1.0,
+      "description": "Lesser Shades once carried messages between the halls of the sanctum. The corruption scattered the words they carried, and now they cannot tell which order is true. One moment they attack, the next they hide."
     },
     {
       "id": "bone_crawler",
@@ -16,7 +18,9 @@
       "baseAttack": 5,
       "armour": 2,
       "tier": "NORMAL",
-      "behaviour": "defensive_stance"
+      "behaviour": "defensive_stance",
+      "renderScale": 1.0,
+      "description": "Bone Crawlers were set to tend the sanctum's ossuary and keep the bones of the faithful safe. Fallen, they wear those bones as armour and guard them from everyone. A Bone Crawler stays behind its plates for as long as it can, and strikes only when the shell is thick enough."
     },
     {
       "id": "dark_acolyte",
@@ -25,7 +29,8 @@
       "baseAttack": 7,
       "armour": 1,
       "tier": "NORMAL",
-      "behaviour": "armour_scaling"
+      "behaviour": "armour_scaling",
+      "description": "The acolytes kept the sanctum's rites. This one still reads the old hymns from its book, but every word now feeds the corruption. It watches you closely, and each ward it raises is stored and poured into its next spell."
     },
     {
       "id": "tomb_guardian",
@@ -34,26 +39,30 @@
       "baseAttack": 10,
       "armour": 5,
       "tier": "ELITE",
-      "behaviour": "shield_break_retaliation"
+      "behaviour": "shield_break_retaliation",
+      "renderScale": 1.0,
+      "description": "The Tomb Guardian swore an oath to keep vigil over the sealed tombs. It still keeps that oath, long after it has forgotten why. It draws every attack towards itself, and when its shield breaks, it answers in kind."
     },
     {
       "id": "void_knight",
-      "name": "Void Knight",
+      "name": "Riven Knight",
       "health": 40,
       "baseAttack": 16,
       "armour": 0,
       "tier": "ELITE",
-      "behaviour": "enrage_low_health"
+      "behaviour": "enrage_low_health",
+      "description": "Once a knight of the god's host, sworn to bring wars to an end. The corruption turned that oath inside out: now the fight is all it wants, and it has cast off its armour to have more of it. Its plate is riven with cracks it will not mend, and the light in them turns red when it is badly wounded — that is when it is most dangerous."
     },
     {
       "id": "boss_knight",
-      "name": "Boss Knight",
+      "name": "Vitium",
       "health": 150,
       "baseAttack": 14,
       "armour": 8,
       "tier": "BOSS",
       "behaviour": "boss",
-      "sprite": "images/enemies/boss_knight.atlas"
+      "sprite": "images/enemies/boss_knight.atlas",
+      "description": "The god's last champion stands at the summit of the sanctum. It was told to let no one pass, and it is still following that order, still certain it is doing right. The corruption settled in it longest, and the sanctum came to call it by the corruption's name: Vitium. It fights in phases — steel, then walls of stone, then magic that silences your hand — and it never steps back. Breaking it is the only way to set it free. The name was never its own. It was only the first to be given it."
     }
   ]
 }

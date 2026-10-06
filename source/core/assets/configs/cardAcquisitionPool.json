@@ -1,0 +1,30 @@
+{
+  "eligibleCardIds": [
+    "strike",
+    "warding_sweep",
+    "defend",
+    "poison_dagger",
+    "expose",
+    "inner_focus",
+    "bandage",
+    "sentinels_rebuke",
+    "poison_flask",
+    "poison_blade",
+    "poison_cloud",
+    "poison_mark",
+    "starfall",
+    "rift_lance",
+    "wardens_judgement",
+    "unseal_the_breach",
+    "astral_ward",
+    "resurrection",
+    "makeshift_shelter",
+    "rubble_barricade",
+    "emergency_salve",
+    "purify",
+    "sealed_pact",
+    "blood_price",
+    "doom_sigil",
+    "iron_oath"
+  ]
+}
