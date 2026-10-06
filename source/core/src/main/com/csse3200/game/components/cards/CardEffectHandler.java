@@ -87,10 +87,6 @@ public class CardEffectHandler {
           AudioService.playSound(SoundId.SHIELD_GUARD, 0.3f);
           stats.addBlock(effect.value());
         }
-        case FORTIFY -> {
-          AudioService.playSound(SoundId.SHIELD_GUARD, 0.3f);
-          stats.addArmour(effect.value());
-        }
         case HEAL -> {
           AudioService.playSound(SoundId.BANDAGE, 0.4f);
           if (effect.duration() > 0) {
