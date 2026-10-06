@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.csse3200.game.cards.CardAcquisitionPool;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
@@ -75,6 +76,19 @@ class ShopInventoryGeneratorTest {
     assertThrows(IllegalArgumentException.class, () -> generator.createShop(0, 1, 2));
     assertThrows(IllegalArgumentException.class, () -> generator.createShop(2, 0, 2));
     assertThrows(IllegalArgumentException.class, () -> generator.createShop(2, 3, 2));
+  }
+
+  @Test
+  void shouldOnlyOfferCardsFromSharedAcquisitionPool() {
+    CardService cards = createCardService();
+    CardAcquisitionPool pool =
+        new CardAcquisitionPool(cards, List.of("strike", "defend", "bandage"));
+    ShopInventoryGenerator generator = new ShopInventoryGenerator(cards, pool, new Random(5));
+
+    ShopService shop = generator.createShop(10, 1, 1);
+
+    assertEquals(3, shop.getItems().size());
+    assertTrue(shop.getItems().stream().allMatch(item -> pool.isEligible(item.cardId)));
   }
 
   private CardService createCardService() {

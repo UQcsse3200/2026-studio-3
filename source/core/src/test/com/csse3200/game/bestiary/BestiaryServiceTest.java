@@ -59,7 +59,7 @@ class BestiaryServiceTest {
 
     assertTrue(service.recordEncountered("boss_knight"));
     BestiaryEntryView encounteredBoss = service.getEntry("boss_knight").orElseThrow();
-    assertEquals("Boss Knight", encounteredBoss.displayName());
+    assertEquals("Vitium", encounteredBoss.displayName());
     assertEquals("images/enemies/boss_knight.atlas", encounteredBoss.sprite().orElseThrow());
     assertTrue(encounteredBoss.health().isEmpty());
 

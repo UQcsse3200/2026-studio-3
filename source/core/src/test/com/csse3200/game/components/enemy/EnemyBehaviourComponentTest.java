@@ -10,6 +10,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import com.csse3200.game.cards.CardType;
+import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAI;
@@ -166,6 +167,45 @@ class EnemyBehaviourComponentTest {
     assertEquals(24, playerStats.getHealth());
   }
 
+  @Test
+  void shouldApplyStrengthFeebleAndTargetVulnerableToAttackDamageOnce() {
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent(EnemyAIFactory.CYCLE_ATTACK_DEFEND);
+    CombatStatsComponent attackerStats = enemyStats();
+    attackerStats.applyStatusEffect(EffectType.STRENGTH.name(), 2, 0);
+    attackerStats.applyStatusEffect(EffectType.FEEBLE.name(), 1, 2);
+    enemyWith(behaviour, attackerStats);
+
+    CombatStatsComponent playerStats = new CombatStatsComponent(30, 4);
+    playerStats.applyStatusEffect(EffectType.VULNERABLE.name(), 1, 2);
+    Entity player = new Entity().addComponent(playerStats);
+    player.create();
+
+    behaviour.rollIntent();
+    behaviour.executeIntent(player);
+
+    assertEquals(21, playerStats.getHealth());
+  }
+
+  @Test
+  void shouldApplyFeebleOnceAndRoundFinalDamageDownWithoutChangingIntent() {
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent("test_feeble", fixedAi(EnemyIntent.attack(7)));
+    CombatStatsComponent attackerStats = enemyStats();
+    attackerStats.applyStatusEffect(EffectType.FEEBLE.name(), 1, 2);
+    enemyWith(behaviour, attackerStats);
+
+    CombatStatsComponent playerStats = new CombatStatsComponent(30, 4);
+    Entity player = new Entity().addComponent(playerStats);
+    player.create();
+
+    behaviour.rollIntent();
+    behaviour.executeIntent(player);
+
+    assertEquals(25, playerStats.getHealth());
+    assertEquals(7, behaviour.getCurrentIntent().getValue());
+  }
+
   // 攻击伤害应该等于意图里广播出去的数值，而不是重新按自身 baseAttack 计算——
   // 这样"护甲换伤害"这类意图数值高于 baseAttack 的打法，命中时才会真的多造成伤害
   @Test
@@ -233,6 +273,25 @@ class EnemyBehaviourComponentTest {
     assertNotNull(applied);
     assertEquals("SILENCE", applied.getType());
     assertEquals(3, applied.getValue());
+    assertEquals(2, applied.getDuration());
+  }
+
+  @Test
+  void shouldStoreTauntUnderTheCasterIdWithTheCasterAsItsValue() {
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent(
+            "test_taunt", fixedAi(EnemyIntent.debuff(IntentEffectType.TAUNT, 0, 2)));
+    Entity enemy = enemyWith(behaviour, enemyStats());
+    CombatStatsComponent playerStats = new CombatStatsComponent(30, 4);
+    Entity player = new Entity().addComponent(playerStats);
+    player.create();
+
+    behaviour.rollIntent();
+    behaviour.executeIntent(player);
+
+    StatusEffect applied = playerStats.getStatusEffect("TAUNT:" + enemy.getId());
+    assertNotNull(applied);
+    assertEquals(enemy.getId(), applied.getValue());
     assertEquals(2, applied.getDuration());
   }
 
