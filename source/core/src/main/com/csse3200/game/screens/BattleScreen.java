@@ -2,7 +2,9 @@ package com.csse3200.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -57,6 +59,7 @@ import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.physics.PhysicsEngine;
 import com.csse3200.game.physics.PhysicsService;
+import com.csse3200.game.rendering.AnimationRenderComponent;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.DragNDropService;
@@ -66,7 +69,8 @@ import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.tutorial.BattleTutorialComponent;
 import com.csse3200.game.tutorial.BattleTutorialController;
-import com.csse3200.game.tutorial.BattleTutorialTextView;
+import com.csse3200.game.tutorial.BattleTutorialGuidanceView;
+import com.csse3200.game.tutorial.BattleTutorialObservation;
 import com.csse3200.game.ui.PopupDisplay;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
@@ -88,6 +92,8 @@ public class BattleScreen extends ScreenAdapter {
   private final GdxGame game;
   private final RunState runState;
   private final boolean tutorialBattle;
+  private BattleTutorialGuidanceView tutorialView;
+  private BattleActions battleActions;
   private static final Logger logger = LoggerFactory.getLogger(BattleScreen.class);
   private final Renderer renderer;
   private final ForestGameArea gameArea;
@@ -197,8 +203,22 @@ public class BattleScreen extends ScreenAdapter {
     cardInteractionSkin = createCardInteractionSkin();
 
     PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(library);
+    if (tutorialBattle) {
+      var openingOrder = new ArrayList<>(playerDeck.getCards());
+      java.util.Collections.shuffle(openingOrder);
+      for (int i = 0; i < openingOrder.size(); i++) {
+        if ("strike".equals(openingOrder.get(i).cardId())) {
+          java.util.Collections.swap(
+              openingOrder, Math.min(AMOUNT_OF_CARDS_IN_DECK, openingOrder.size()) / 2, i);
+          break;
+        }
+      }
+      playerDeck = PlayerDeck.fromInstances(library, openingOrder);
+    }
     battleDeck = new BattleDeck(playerDeck);
-    battleDeck.shuffleDrawPile();
+    if (!tutorialBattle) {
+      battleDeck.shuffleDrawPile();
+    }
     battleDeck.drawCards(AMOUNT_OF_CARDS_IN_DECK);
     handRowOrder = new ArrayList<>(battleDeck.getHandInstances());
 
@@ -275,15 +295,106 @@ public class BattleScreen extends ScreenAdapter {
         });
     createUI();
     if (tutorialBattle) {
+      String demonstrationId = handRowOrder.get(handRowOrder.size() / 2).instanceId();
+      tutorialView =
+          new BattleTutorialGuidanceView(
+              ServiceLocator.getRenderService().getStage(),
+              cardWidgetSkin,
+              () ->
+                  uiFactory.getByTrigger("playCard").stream()
+                      .map(Clickable::getBtn)
+                      .map(actor -> (com.badlogic.gdx.scenes.scene2d.Actor) actor)
+                      .toList(),
+              () ->
+                  uiFactory.getByTrigger("playCard").stream()
+                      .filter(c -> c.getArgs().length > 0 && demonstrationId.equals(c.getArgs()[0]))
+                      .map(Clickable::getBtn)
+                      .findFirst()
+                      .orElse(null),
+              () ->
+                  uiFactory.getByTrigger("openMenu").stream()
+                      .map(Clickable::getBtn)
+                      .findFirst()
+                      .orElse(null),
+              () ->
+                  uiFactory.getByTrigger("endTurn").stream()
+                      .map(Clickable::getBtn)
+                      .findFirst()
+                      .orElse(null));
+      tutorialView.setEnemyBounds(
+          () -> forestGameArea.getEnemies().stream().map(this::tutorialEnemyBounds).toList());
+      tutorialView.setDragActor(
+          () -> ServiceLocator.getDragAndDropService().getDragAndDrop().getDragActor());
+      tutorialView.setEnemyRenderer(
+          batch -> {
+            com.badlogic.gdx.math.Matrix4 previous =
+                new com.badlogic.gdx.math.Matrix4(batch.getProjectionMatrix());
+            batch.setProjectionMatrix(ServiceLocator.getCamera().combined);
+            batch.setColor(com.badlogic.gdx.graphics.Color.WHITE);
+            for (Entity enemy : forestGameArea.getEnemies()) {
+              AnimationRenderComponent spriteRenderer =
+                  enemy.getComponent(AnimationRenderComponent.class);
+              if (spriteRenderer != null)
+                spriteRenderer.render((com.badlogic.gdx.graphics.g2d.SpriteBatch) batch);
+            }
+            batch.setProjectionMatrix(previous);
+            batch.setColor(com.badlogic.gdx.graphics.Color.WHITE);
+          });
+      BattleAnimationCoordinator visuals =
+          animationCoordinatorEntity.getComponent(BattleAnimationCoordinator.class);
       BattleTutorialComponent guidance =
           new BattleTutorialComponent(
-              controller,
-              new BattleTutorialTextView(
-                  ServiceLocator.getRenderService().getStage(), cardWidgetSkin),
-              this::onTutorialFinished);
+              controller, tutorialView, this::onTutorialFinished, demonstrationId);
+      guidance.setObservation(
+          new BattleTutorialObservation(
+              () ->
+                  forestGameArea.getEnemies().stream()
+                      .mapToInt(e -> e.getComponent(CombatStatsComponent.class).getHealth())
+                      .sum(),
+              () -> player.getComponent(CombatStatsComponent.class).getHealth(),
+              () ->
+                  !visuals.hasActiveVisuals()
+                      && !battleActions.hasPendingEnemyReveals()
+                      && tutorialView.isPlayerHealthDisplayed(
+                          player.getComponent(CombatStatsComponent.class).getHealth())
+                      && forestGameArea.getEnemies().stream()
+                          .allMatch(
+                              e -> {
+                                AnimationRenderComponent animator =
+                                    e.getComponent(AnimationRenderComponent.class);
+                                return animator == null
+                                    || !"hurt".equals(animator.getCurrentAnimation())
+                                    || animator.isFinished();
+                              })));
       ServiceLocator.getEntityService().register(new Entity().addComponent(guidance));
+      // Remains after guidance cleans itself up: existing tutorial battle completion is unchanged.
+      controller.addBattleEndListener(
+          won ->
+              Gdx.app.postRunnable(
+                  () ->
+                      onTutorialFinished(
+                          Boolean.TRUE.equals(won)
+                              ? BattleTutorialController.Outcome.WON
+                              : BattleTutorialController.Outcome.LOST)));
     }
     controller.start();
+  }
+
+  private Rectangle tutorialEnemyBounds(Entity enemy) {
+    Stage stage = ServiceLocator.getRenderService().getStage();
+    Vector2 pos = enemy.getPosition(), scale = enemy.getScale();
+    Vector3 a = ServiceLocator.getCamera().project(new Vector3(pos.x, pos.y, 0));
+    Vector3 b =
+        ServiceLocator.getCamera().project(new Vector3(pos.x + scale.x, pos.y + scale.y, 0));
+    Vector2 lower =
+        stage.screenToStageCoordinates(new Vector2(a.x, Gdx.graphics.getHeight() - a.y));
+    Vector2 upper =
+        stage.screenToStageCoordinates(new Vector2(b.x, Gdx.graphics.getHeight() - b.y));
+    return new Rectangle(
+        Math.min(lower.x, upper.x) - 8,
+        Math.min(lower.y, upper.y) - 8,
+        Math.abs(upper.x - lower.x) + 16,
+        Math.abs(upper.y - lower.y) + 16);
   }
 
   private void onTutorialFinished(BattleTutorialController.Outcome outcome) {
@@ -317,12 +428,13 @@ public class BattleScreen extends ScreenAdapter {
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
     Stage stage = ServiceLocator.getRenderService().getStage();
+    battleActions = new BattleActions(controller, game, tutorialBattle);
     Entity battleUi =
         new Entity()
             .addComponent(new InputDecorator(stage, 10))
             .addComponent(uiFactory)
             .addComponent(displays)
-            .addComponent(new BattleActions(controller, game, tutorialBattle))
+            .addComponent(battleActions)
             .addComponent(new CardActions(controller, gameArea.getPlayer()))
             .addComponent(new Team3CardPlayAdapter(cardPlayService, controller))
             .addComponent(cardInventory)
@@ -438,7 +550,9 @@ public class BattleScreen extends ScreenAdapter {
   @Override
   public void render(float delta) {
     ServiceLocator.getEntityService().update();
+    if (tutorialView != null) tutorialView.alignWorldStatsToViewport();
     renderer.render();
+    if (tutorialView != null) tutorialView.renderAboveBattle();
   }
 
   @Override

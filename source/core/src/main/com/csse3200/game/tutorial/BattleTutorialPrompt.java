@@ -17,13 +17,32 @@ public record BattleTutorialPrompt(
     DRAW_PILE,
     END_TURN,
     ENEMIES,
-    NONE
+    NONE,
+    CARD_INVENTORY,
+    USED_CARD,
+    ENEMY_STATS
   }
 
   /** Uses the shared teaching content without choosing UI coordinates or changing battle rules. */
   public static BattleTutorialPrompt forStep(BattleTutorialController.Step step) {
     Objects.requireNonNull(step, "step cannot be null");
     return switch (step) {
+      case INTRO -> information(step, "Let's learn the basics of battle.", HighlightTarget.NONE);
+      case CARD_INVENTORY ->
+          information(
+              step,
+              "Use Card Inventory to view and manage your battle cards.",
+              HighlightTarget.CARD_INVENTORY);
+      case USED_CARD ->
+          information(
+              step,
+              "This card has been used and is now inactive. It returns when its cooldown expires.",
+              HighlightTarget.USED_CARD);
+      case ENEMY_STATS ->
+          information(
+              step,
+              "This is the enemy's Health. Armour reduces incoming damage.",
+              HighlightTarget.ENEMY_STATS);
       case HAND ->
           information(step, BattleTutorialPromptContent.OPENING_HAND, HighlightTarget.HAND);
       case CARD_COST ->
@@ -46,9 +65,35 @@ public record BattleTutorialPrompt(
       case FREE_PLAY ->
           new BattleTutorialPrompt(
               step, BattleTutorialPromptContent.WIN_OR_LOSE, HighlightTarget.NONE, false);
-      case BATTLE_ENDED, CANCELLED ->
+      case CARD_ANIMATION, ENEMY_ANIMATION, BATTLE_ENDED, CANCELLED ->
           new BattleTutorialPrompt(step, "", HighlightTarget.NONE, false);
     };
+  }
+
+  /** The reference flow has its own concise local prompts; legacy shared content is unchanged. */
+  public static BattleTutorialPrompt referenceStep(BattleTutorialController.Step step) {
+    BattleTutorialPrompt original = forStep(step);
+    String text =
+        switch (step) {
+          case HAND -> "Welcome to battle.\nThese are your cards.\nChoose one to play.";
+          case CARD_INVENTORY ->
+              "Use Card Inventory to view\nand choose the cards you want to use.";
+          case ENERGY -> "Energy is used to play cards.";
+          case CARD_COST -> "This number is the Energy\ncost of the card.";
+          case PLAY_A_CARD -> "Drag this Strike onto the enemy\nto play it.";
+          case ENEMY_STATS ->
+              "This is the enemy's Health.\nReduce it to zero.\n\nArmour reduces incoming damage.";
+          case USED_CARD ->
+              "This card has been used.\n\nIt cannot be used next turn.\n\nIt will be available again\non the following turn.";
+          case END_TURN -> "End your turn when you're\ndone playing cards.";
+          case HEALTH -> "Enemy attacks reduce your Health.\nDon't let it reach zero.";
+          default -> original.text();
+        };
+    return new BattleTutorialPrompt(
+        step,
+        text,
+        original.highlight(),
+        original.canContinue() || step == BattleTutorialController.Step.END_TURN);
   }
 
   private static BattleTutorialPrompt information(

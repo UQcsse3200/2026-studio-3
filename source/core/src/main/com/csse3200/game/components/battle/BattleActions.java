@@ -48,6 +48,13 @@ public class BattleActions extends Component {
   // ENEMY_TURN_DELAY. This is the one point the "enemy thinks" pause lives — see dispatch() and
   // flushDeferredReveals().
   private boolean deferringEnemyTurn = false;
+  private int pendingRevealBatches;
+
+  /** Read-only presentation timing probe for tutorial guidance. */
+  public boolean hasPendingEnemyReveals() {
+    return deferringEnemyTurn || pendingRevealBatches > 0;
+  }
+
   private final List<Runnable> queuedReveals = new ArrayList<>();
 
   public BattleActions(BattleController controller, GdxGame game) {
@@ -129,11 +136,16 @@ public class BattleActions extends Component {
     deferringEnemyTurn = false;
     List<Runnable> reveals = new ArrayList<>(queuedReveals);
     queuedReveals.clear();
+    pendingRevealBatches++;
     Timer.schedule(
         new Timer.Task() {
           @Override
           public void run() {
-            reveals.forEach(Runnable::run);
+            try {
+              reveals.forEach(Runnable::run);
+            } finally {
+              pendingRevealBatches--;
+            }
           }
         },
         ENEMY_TURN_DELAY);

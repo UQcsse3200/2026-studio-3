@@ -24,6 +24,46 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 class BattleTutorialComponentTest {
+  @Test
+  void referenceGuidanceFinishesWithoutNavigationAndRetainsExitUntilDisposal() {
+    var enemyHealth = new java.util.concurrent.atomic.AtomicInteger(32);
+    var playerHealth = new java.util.concurrent.atomic.AtomicInteger(100);
+    var settled = new java.util.concurrent.atomic.AtomicBoolean(false);
+    org.mockito.Mockito.when(battle.getCurrentPhase()).thenReturn(BattlePhase.PLAYER_TURN);
+    BattleTutorialComponent reference =
+        new BattleTutorialComponent(battle, view, outcomes::add, "strike-copy");
+    reference.setObservation(
+        new BattleTutorialObservation(enemyHealth::get, playerHealth::get, settled::get));
+    reference.create();
+    for (int i = 0; i < 4; i++) view.continueAction.run();
+    enemyHealth.set(28);
+    cardListener().handle("strike-copy", "enemy");
+    reference.update();
+    assertEquals(BattleTutorialController.Step.CARD_ANIMATION, view.last().step());
+    settled.set(true);
+    reference.update();
+    assertEquals(BattleTutorialController.Step.ENEMY_STATS, view.last().step());
+    view.continueAction.run();
+    assertEquals(BattleTutorialController.Step.USED_CARD, view.last().step());
+    view.continueAction.run();
+    assertTrue(view.last().canContinue());
+    assertEquals(BattleTutorialController.Step.END_TURN, view.last().step());
+    phaseListener().handle(BattlePhase.PLAYER_TURN, BattlePhase.PLAYER_END);
+    playerHealth.set(95);
+    reference.update();
+    assertEquals(BattleTutorialController.Step.HEALTH, view.last().step());
+    view.continueAction.run();
+    reference.update();
+    assertEquals(0, view.clearCount);
+    assertTrue(outcomes.isEmpty());
+    assertTrue(queued.isEmpty());
+    verify(battle, never()).removeCardPlayedListener(any());
+    verify(battle, never()).endPlayerTurn();
+    reference.dispose();
+    assertEquals(1, view.clearCount);
+    verify(battle).removeCardPlayedListener(any());
+  }
+
   private Application previousApp;
   private final List<Runnable> queued = new ArrayList<>();
   private final BattleController battle = mock(BattleController.class);

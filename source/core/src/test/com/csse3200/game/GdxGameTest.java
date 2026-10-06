@@ -29,6 +29,8 @@ import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.screens.BattleScreen;
+import com.csse3200.game.screens.DemoCampfireScreen;
+import com.csse3200.game.screens.DemoEventScreen;
 import com.csse3200.game.screens.MapScreen;
 import com.csse3200.game.screens.NarrationScreen;
 import java.util.Map;
@@ -58,6 +60,47 @@ class GdxGameTest {
       verify(oldScreen).dispose();
       assertEquals(7, game.getRunState().getActiveNodeId());
       verify(battles.constructed().get(0)).show();
+    }
+  }
+
+  @Test
+  void eventShortcutUsesIsolatedPreviewWithoutChangingMap() {
+    assertDemoNode(RoomType.EVENT);
+  }
+
+  @Test
+  void campfireShortcutUsesIsolatedPreviewWithoutChangingMap() {
+    assertDemoNode(RoomType.CAMPFIRE);
+  }
+
+  private void assertDemoNode(RoomType roomType) {
+    GdxGame game = gameWithActiveNode(RoomType.COMBAT);
+    game.getRunState().markCardFusionUsed();
+    MapGraph originalMap = game.getRunState().getMapGraph();
+    Integer originalNode = game.getRunState().getActiveNodeId();
+    Screen oldScreen = mock(Screen.class);
+    game.setScreen(oldScreen);
+    try (MockedConstruction<DemoEventScreen> encounters = mockConstruction(DemoEventScreen.class);
+        MockedConstruction<DemoCampfireScreen> campfires =
+            mockConstruction(DemoCampfireScreen.class);
+        MockedConstruction<MapScreen> maps = mockConstruction(MapScreen.class)) {
+      if (roomType == RoomType.EVENT) {
+        game.openDemoEvent();
+        assertSame(encounters.constructed().get(0), game.getScreen());
+        assertTrue(campfires.constructed().isEmpty());
+      } else {
+        game.openDemoCampfire();
+        assertSame(campfires.constructed().get(0), game.getScreen());
+        assertTrue(encounters.constructed().isEmpty());
+      }
+      verify(oldScreen).dispose();
+      RunState run = game.getRunState();
+      assertTrue(run.isRunActive());
+      assertTrue(run.hasUsedCardFusion());
+      assertSame(originalMap, run.getMapGraph());
+      assertEquals(originalNode, run.getActiveNodeId());
+      assertEquals(RoomType.COMBAT, originalMap.getNode(originalNode).getRoomType());
+      assertTrue(maps.constructed().isEmpty());
     }
   }
 

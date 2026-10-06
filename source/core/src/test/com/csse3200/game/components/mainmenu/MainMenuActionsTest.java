@@ -75,9 +75,7 @@ class MainMenuActionsTest {
     menu.getEvents().trigger("map");
     menu.getEvents().trigger("shop");
     menu.getEvents().trigger("battle");
-    menu.getEvents().trigger("demoEvent");
     menu.getEvents().trigger("demoShop");
-    menu.getEvents().trigger("demoCampfire");
     menu.getEvents().trigger("demoFusion");
 
     verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
@@ -87,5 +85,13 @@ class MainMenuActionsTest {
     verify(game, never()).openDemoCampfire();
     verify(game, never()).openDemoCardFusion();
     verify(game, never()).startNewRun();
+  }
+
+  @Test
+  void demoShortcutsOpenTheirRealNodes() {
+    menu.getEvents().trigger(MainMenuDisplay.DEMO_EVENT);
+    menu.getEvents().trigger(MainMenuDisplay.DEMO_CAMPFIRE_EVENT);
+    verify(game).openDemoEvent();
+    verify(game).openDemoCampfire();
   }
 }

@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
@@ -27,6 +28,7 @@ import com.csse3200.game.chance.ChanceEncounter;
 import com.csse3200.game.chance.ChanceOutcome;
 import com.csse3200.game.chance.DiceEncounterBehaviour;
 import com.csse3200.game.chance.DiceRoll;
+import com.csse3200.game.chance.WishingFountainEncounterBehaviour;
 import com.csse3200.game.components.shop.ShopDisplay;
 import com.csse3200.game.encounters.integration.CardFusionEncounterFlow;
 import com.csse3200.game.encounters.integration.ChanceEncounterSession;
@@ -54,6 +56,7 @@ public class ChanceEncounterDisplay extends UIComponent {
   public static final String ABANDONED_MINE_BACKGROUND_TEXTURE =
       "images/chance/abandoned_mine_scene_v1.png";
   public static final String FUSION_BACKGROUND_TEXTURE = "images/chance/card_fusion_forge_v1.png";
+  public static final String FOUNTAIN_BACKGROUND_TEXTURE = WishingFountainScene.BACKGROUND_TEXTURE;
   public static final String FUSION_CARD_BACK_TEXTURE =
       "images/chance/card_fusion_back_balanced.png";
 
@@ -82,6 +85,9 @@ public class ChanceEncounterDisplay extends UIComponent {
   private final boolean scenicDiceGame;
   private final boolean scenicAbandonedMine;
   private final boolean scenicCardFusion;
+  private final boolean scenicFountain;
+  private WishingFountainScene fountainScene;
+  private Group fusionIntroContent;
   private final EncounterCallback completionCallback;
   private final Integer nodeId;
   private final List<TextButton> choiceButtons = new ArrayList<>();
@@ -154,6 +160,7 @@ public class ChanceEncounterDisplay extends UIComponent {
     this.scenicDiceGame =
         encounterSession != null && DiceEncounterBehaviour.ENCOUNTER_ID.equals(encounter.getId());
     this.scenicAbandonedMine = "abandoned-mine".equals(encounter.getId());
+    this.scenicFountain = WishingFountainEncounterBehaviour.ENCOUNTER_ID.equals(encounter.getId());
     this.scenicCardFusion =
         cardFusionFlow != null
             && CardFusionEncounterBehaviour.ENCOUNTER_ID.equals(encounter.getId());
@@ -171,6 +178,10 @@ public class ChanceEncounterDisplay extends UIComponent {
   }
 
   private void addActors() {
+    if (scenicFountain) {
+      addFountainActors();
+      return;
+    }
     if (scenicDiceGame) {
       addDiceGameActors();
       return;
@@ -257,7 +268,91 @@ public class ChanceEncounterDisplay extends UIComponent {
     rootTable.addAction(Actions.fadeIn(0.25f));
   }
 
-  /** A dedicated forge scene; the Event choices and session still own all gameplay effects. */
+  /** Fountain visuals only; existing choices and session still own all gameplay effects. */
+  private void addFountainActors() {
+    rootTable = new Table();
+    rootTable.setFillParent(true);
+    Stack scene = new Stack();
+    fountainScene = new WishingFountainScene(skin);
+    scene.add(fountainScene);
+
+    Table information = new Table();
+    information.top().left().pad(40f, 48f, 0f, 0f);
+    information.defaults().left();
+    information
+        .add(new Label("CHANCE ENCOUNTER", createLabelStyle(SMALL, GOLD_COLOUR)))
+        .padBottom(14f);
+    information.row();
+    Label title = new Label("Wishing Fountain", createLabelStyle(LARGE, BODY_COLOUR));
+    title.setFontScale(1.1f);
+    information.add(title).padBottom(12f);
+    information.row();
+    Image rule = new Image(skin.newDrawable(WHITE, GOLD_COLOUR));
+    information.add(rule).width(380f).height(1f).padBottom(14f);
+    information.row();
+    Label description =
+        new Label(encounter.getDescription(), createLabelStyle(DEFAULT, BODY_COLOUR));
+    description.setWrap(true);
+    information.add(description).width(360f);
+    scene.add(information);
+
+    promptLabel = new Label("", createLabelStyle(SMALL, MUTED_COLOUR));
+    choiceStyle = fountainButtonStyle(true);
+    selectedChoiceStyle = new TextButtonStyle(choiceStyle);
+    choicesTable = new Table();
+    scene.add(choicesTable);
+    refreshChoices();
+
+    Table result = new Table();
+    result.setName("fountain-result-narration");
+    result.bottom().padBottom(34f);
+    resultLabel = new Label("", createLabelStyle(DEFAULT, BODY_COLOUR));
+    resultLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
+    resultLabel.setWrap(true);
+    result.add(resultLabel).width(850f).minHeight(50f).padBottom(22f);
+    result.row();
+    continueButton = new TextButton("Continue", fountainButtonStyle(true));
+    continueButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            fountainScene.complete();
+            completeEncounter();
+          }
+        });
+    continueButton.setVisible(false);
+    result.add(continueButton).width(276f).height(70f);
+    result.setVisible(false);
+    scene.add(result);
+    rootTable.add(scene).grow();
+    stage.addActor(rootTable);
+  }
+
+  private TextButtonStyle fountainButtonStyle(boolean primary) {
+    TextButtonStyle style = new TextButtonStyle(skin.get(TextButtonStyle.class));
+    Color edge = primary ? new Color(0.62f, 0.46f, 0.25f, 1) : new Color(0.38f, 0.34f, 0.27f, 1);
+    style.up =
+        FusionSceneAssets.pixelFrame(
+            skin,
+            primary
+                ? new Color(0.22f, 0.13f, 0.08f, 0.96f)
+                : new Color(0.075f, 0.08f, 0.09f, 0.96f),
+            edge,
+            FusionSceneAssets.FrameKind.BUTTON);
+    style.over =
+        FusionSceneAssets.pixelFrame(
+            skin,
+            new Color(0.29f, 0.20f, 0.11f, 0.98f),
+            GOLD_COLOUR,
+            FusionSceneAssets.FrameKind.BUTTON);
+    style.down = style.up;
+    style.disabled = style.up;
+    style.fontColor = BODY_COLOUR;
+    style.overFontColor = Color.WHITE;
+    style.disabledFontColor = MUTED_COLOUR;
+    return style;
+  }
+
   private void addFusionIntroActors() {
     rootTable = new Table();
     rootTable.setFillParent(true);
@@ -279,9 +374,12 @@ public class ChanceEncounterDisplay extends UIComponent {
     title.setBounds(68f, 657f, 660f, 57f);
     scene.addActor(title);
 
-    addFusionPreviewCard(scene, 395f, 354f, 12f, 0f);
-    addFusionPreviewCard(scene, 570f, 370f, 0f, 0.55f);
-    addFusionPreviewCard(scene, 745f, 354f, -12f, 1.1f);
+    fusionIntroContent = new Group();
+    fusionIntroContent.setName("fusion-intro-content");
+    scene.addActor(fusionIntroContent);
+    addFusionPreviewCard(fusionIntroContent, 395f, 354f, 12f, 0f);
+    addFusionPreviewCard(fusionIntroContent, 570f, 370f, 0f, 0.55f);
+    addFusionPreviewCard(fusionIntroContent, 745f, 354f, -12f, 1.1f);
 
     Label descriptionShadow =
         new Label(
@@ -290,13 +388,13 @@ public class ChanceEncounterDisplay extends UIComponent {
     descriptionShadow.setAlignment(com.badlogic.gdx.utils.Align.center);
     descriptionShadow.setWrap(true);
     descriptionShadow.setBounds(182f, 157f, 920f, 58f);
-    scene.addActor(descriptionShadow);
+    fusionIntroContent.addActor(descriptionShadow);
     Label description =
         new Label(encounter.getDescription(), createLabelStyle(DEFAULT, BODY_COLOUR));
     description.setAlignment(com.badlogic.gdx.utils.Align.center);
     description.setWrap(true);
     description.setBounds(180f, 159f, 920f, 58f);
-    scene.addActor(description);
+    fusionIntroContent.addActor(description);
 
     promptLabel = new Label("CHOOSE YOUR RESPONSE", createLabelStyle(SMALL, MUTED_COLOUR));
     promptLabel.setVisible(false);
@@ -309,18 +407,17 @@ public class ChanceEncounterDisplay extends UIComponent {
     refreshChoices();
 
     Table resultPanel = new Table();
-    resultPanel.setBackground(
-        FusionSceneAssets.plaque(skin, new Color(0.53f, 0.50f, 0.54f, 0.97f)));
-    resultPanel.pad(14f, 25f, 14f, 25f);
+    resultPanel.setName("fusion-result-narration");
     resultLabel = new Label("", createLabelStyle(DEFAULT, BODY_COLOUR));
     resultLabel.setWrap(true);
+    resultLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
     resultPanel.add(resultLabel).grow();
-    resultPanel.setBounds(200f, 157f, 880f, 112f);
+    resultPanel.setBounds(180f, 130f, 920f, 58f);
     resultPanel.setVisible(false);
     scene.addActor(resultPanel);
 
     continueButton = FusionSceneAssets.button("Continue", skin, true);
-    continueButton.setBounds(492f, 48f, 296f, 76f);
+    continueButton.setBounds(502f, 34f, 276f, 70f);
     continueButton.setVisible(false);
     continueButton.addListener(
         new ChangeListener() {
@@ -824,6 +921,13 @@ public class ChanceEncounterDisplay extends UIComponent {
 
   private void addChoiceButton(ChanceChoice choice, int choiceNumber) {
     String buttonText = String.format("%d.  %s", choiceNumber, choice.getDescription());
+    if (scenicFountain) {
+      buttonText =
+          WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID.equals(choice.getId())
+              ? "Make a Wish"
+              : "Leave >";
+    }
+    final String originalButtonText = buttonText;
     TextButton choiceButton = new TextButton(buttonText, choiceStyle);
     choiceButton
         .getLabel()
@@ -833,12 +937,41 @@ public class ChanceEncounterDisplay extends UIComponent {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent changeEvent, Actor actor) {
-            resolveChoice(choice, choiceButton, buttonText);
+            if (scenicFountain && fountainScene.isPlayingWish()) {
+              return;
+            }
+            if (scenicFountain
+                && WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID.equals(choice.getId())) {
+              if (fountainScene.isPlayingWish() || choiceResolved) {
+                return;
+              }
+              if (fountainScene.playWishAnimation(
+                  () -> resolveChoice(choice, choiceButton, originalButtonText))) {
+                for (TextButton button : choiceButtons) {
+                  button.setDisabled(true);
+                }
+              }
+            } else {
+              resolveChoice(choice, choiceButton, originalButtonText);
+            }
           }
         });
 
     choiceButtons.add(choiceButton);
-    if (scenicDiceGame) {
+    if (scenicFountain) {
+      boolean wish = WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID.equals(choice.getId());
+      choiceButton.setStyle(fountainButtonStyle(wish));
+      choiceButton.getLabel().setFontScale(1.02f);
+      Table anchor = new Table();
+      anchor.setFillParent(true);
+      if (wish) {
+        anchor.bottom().padBottom(38f);
+      } else {
+        anchor.bottom().right().pad(38f);
+      }
+      anchor.add(choiceButton).width(wish ? 320f : 170f).height(wish ? 74f : 58f);
+      choicesTable.addActor(anchor);
+    } else if (scenicDiceGame) {
       choicesTable.add(choiceButton).width(455f).height(76f).padRight(30f);
     } else if (scenicAbandonedMine) {
       if (choiceNumber == 2) {
@@ -906,8 +1039,9 @@ public class ChanceEncounterDisplay extends UIComponent {
         button.setDisabled(false);
       }
       resultLabel.setStyle(createLabelStyle(DEFAULT, new Color(0.9f, 0.35f, 0.3f, 1f)));
-      resultLabel.setText("OUTCOME\n" + resolution.getMessage());
-      if (scenicAbandonedMine || scenicCardFusion) {
+      resultLabel.setText(
+          (scenicCardFusion || scenicFountain ? "" : "OUTCOME\n") + resolution.getMessage());
+      if (scenicAbandonedMine || scenicCardFusion || scenicFountain) {
         resultLabel.getParent().setVisible(true);
       }
       return;
@@ -923,8 +1057,9 @@ public class ChanceEncounterDisplay extends UIComponent {
       }
       resultLabel.setStyle(createLabelStyle(DEFAULT, new Color(0.9f, 0.35f, 0.3f, 1f)));
       resultLabel.setText(
-          "OUTCOME\nThis choice could not be resolved. Please select another option.");
-      if (scenicAbandonedMine || scenicCardFusion) {
+          (scenicCardFusion || scenicFountain ? "" : "OUTCOME\n")
+              + "This choice could not be resolved. Please select another option.");
+      if (scenicAbandonedMine || scenicCardFusion || scenicFountain) {
         resultLabel.getParent().setVisible(true);
       }
       return;
@@ -938,9 +1073,17 @@ public class ChanceEncounterDisplay extends UIComponent {
     selectedButton.setText("SELECTED  -  " + originalButtonText);
 
     resultLabel.setStyle(createLabelStyle(DEFAULT, BODY_COLOUR));
-    resultLabel.setText("OUTCOME\n" + formatOutcome(outcome));
+    resultLabel.setText(
+        scenicCardFusion
+            ? (outcome.isNoEffect()
+                ? "You leave the forge without fusing any cards."
+                : formatOutcome(outcome))
+            : (scenicFountain ? "" : "OUTCOME\n") + formatOutcome(outcome));
+    if (scenicCardFusion && fusionIntroContent != null) {
+      fusionIntroContent.setVisible(false);
+    }
     recordVisibleCard(outcome);
-    if (scenicAbandonedMine || scenicCardFusion) {
+    if (scenicAbandonedMine || scenicCardFusion || scenicFountain) {
       resultLabel.getParent().setVisible(true);
       choicesTable.setVisible(false);
     }
@@ -1038,6 +1181,9 @@ public class ChanceEncounterDisplay extends UIComponent {
 
   @Override
   public void dispose() {
+    if (fountainScene != null) {
+      fountainScene.cancel();
+    }
     if (helpDialog != null) {
       helpDialog.remove();
     }
