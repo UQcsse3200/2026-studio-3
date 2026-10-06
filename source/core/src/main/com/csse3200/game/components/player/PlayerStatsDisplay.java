@@ -113,11 +113,7 @@ public class PlayerStatsDisplay extends UIComponent {
 
     // Add stacks and cell to table
     armourCell = table.add(armourStack).size(60f);
-    if (armour > 0) {
-      armourCell.size(60f);
-    } else {
-      armourCell.size(0f);
-    }
+    updateArmourVisibility(armour);
     table.add(healthStack).width(150).height(30);
 
     table.pack();

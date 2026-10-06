@@ -40,6 +40,8 @@ public class BattleActions extends Component {
   /** How long the enemy "thinks" before its action, log line and effects are revealed. */
   private static final float ENEMY_TURN_DELAY = 1.2f;
 
+  public static final String ENEMY_TURN_EVENT = "enemyTurn";
+
   private final BattleController controller;
   private final GdxGame game;
   private final List<Entity> enemies;
@@ -98,6 +100,8 @@ public class BattleActions extends Component {
     // holding back every reveal that follows until the whole enemy turn is done.
     if (nextPhase == BattlePhase.ENEMY_TURN && previousPhase == BattlePhase.PLAYER_END) {
       deferringEnemyTurn = true;
+      System.out.println("BattleActions entity = " + entity);
+      entity.getEvents().trigger(ENEMY_TURN_EVENT);
       entity.getEvents().trigger(PHASE_CHANGED_EVENT, nextPhase);
       return;
     }
