@@ -33,13 +33,13 @@ public record BattleTutorialPrompt(
       case BUFFS ->
           information(
               step, BattleTutorialPromptContent.BUFFS_AND_STATUS, HighlightTarget.STATUS_EFFECTS);
-      case DRAW_AND_TURNS ->
+      case CARD_DRAW ->
           information(step, BattleTutorialPromptContent.CARD_DRAW, HighlightTarget.DRAW_PILE);
       case BATTLE_OUTCOME_RULES ->
           information(step, BattleTutorialPromptContent.WIN_OR_LOSE, HighlightTarget.ENEMIES);
       case PLAY_A_CARD ->
           new BattleTutorialPrompt(
-              step, BattleTutorialPromptContent.CARD_COST, HighlightTarget.HAND, false);
+              step, BattleTutorialPromptContent.PLAY_A_CARD, HighlightTarget.HAND, false);
       case END_TURN ->
           new BattleTutorialPrompt(
               step, BattleTutorialPromptContent.END_TURN, HighlightTarget.END_TURN, false);

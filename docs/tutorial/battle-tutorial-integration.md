@@ -29,17 +29,25 @@ bounds after resizing or rebuilding the hand.
 | ENERGY | ENERGY | ENERGY | Continue |
 | HEALTH | HEALTH | HEALTH | Continue |
 | BUFFS | BUFFS_AND_STATUS | STATUS_EFFECTS | Continue |
-| DRAW_AND_TURNS | CARD_DRAW | DRAW_PILE | Continue |
+| CARD_DRAW | CARD_DRAW | DRAW_PILE | Continue |
 | BATTLE_OUTCOME_RULES | WIN_OR_LOSE | ENEMIES | Continue |
-| PLAY_A_CARD | CARD_COST | HAND | Successful card play |
+| PLAY_A_CARD | PLAY_A_CARD | HAND | Successful card play |
 | END_TURN | END_TURN | END_TURN | Actual PLAYER_END phase |
 | FREE_PLAY | WIN_OR_LOSE | NONE | Real battle end or Exit Tutorial |
 
-All eight categories from Yihan's `BattleTutorialPromptContent` are used directly;
-there is no second copy of the rule text. Rejected card plays do not advance the
+All eight concept categories from Yihan's `BattleTutorialPromptContent` are used
+directly. The separate `PLAY_A_CARD` action prompt says "Now play an affordable
+card from your hand." rather than repeating the cost explanation. There is no
+second copy of the rule text. Rejected card plays do not advance the
 lesson. Earlier successful actions count, but End Turn only counts after a
 successful play. A battle ending during explanations still reports its outcome
 once. Information prompts do not pause the battle or impose new input rules.
+
+Integration update after Yihan's review: `Step.DRAW_AND_TURNS` is now
+`Step.CARD_DRAW`. Update any UI step switches or mappings to the new key. It
+still highlights `DRAW_PILE` and advances with Continue; the separate `END_TURN`
+action step and its real-battle-event requirement are unchanged. No view method,
+highlight key, step order, or completion callback has changed.
 
 ## Tutorial battle owner (Guoqing)
 
