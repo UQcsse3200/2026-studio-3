@@ -177,15 +177,14 @@ public class PlayerStatsDisplay extends UIComponent {
       Texture icon =
           ServiceLocator.getResourceService()
               .getAsset(IntentIcons.pathForStatus(status.getKey()), Texture.class);
-      if (icon == null) {
-        continue;
+
+      if (icon != null) {
+        Label count = new Label(Integer.toString(status.getValue()), skin, STYLE_NAME_LARGE);
+        count.setFontScale(FONT_SCALE);
+
+        statusIcons.add(new Image(icon)).size(20f).padRight(2f);
+        statusIcons.add(count).padRight(8f);
       }
-
-      Label count = new Label(Integer.toString(status.getValue()), skin, STYLE_NAME_LARGE);
-      count.setFontScale(FONT_SCALE);
-
-      statusIcons.add(new Image(icon)).size(20f).padRight(2f);
-      statusIcons.add(count).padRight(8f);
     }
   }
 

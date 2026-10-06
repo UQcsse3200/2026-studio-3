@@ -48,6 +48,19 @@ class BestiaryServiceTest {
   }
 
   @Test
+  void shouldReadBestiaryDescriptionFromDefaultEnemyConfiguration() {
+    BestiaryService service = BestiaryService.loadDefault();
+
+    service.recordDefeated("lesser_shade");
+
+    assertEquals(
+        "Lesser Shades once carried messages between the halls of the sanctum. The corruption"
+            + " scattered the words they carried, and now they cannot tell which order is true."
+            + " One moment they attack, the next they hide.",
+        service.getEntry("lesser_shade").orElseThrow().description().orElseThrow());
+  }
+
+  @Test
   void shouldLoadTeamOneBossAsLockedBestiaryEntry() {
     BestiaryService service = BestiaryService.loadDefault();
 
@@ -240,7 +253,7 @@ class BestiaryServiceTest {
           enemy("knight", "Void Knight", EnemyTier.ELITE, 72, 10, 5),
           enemy("alpha", "Alpha Shade", EnemyTier.NORMAL, 30, 6, 1)
         };
-    return new BestiaryService(configs, Map.of("shade", "A creature made of living darkness."));
+    return new BestiaryService(configs);
   }
 
   private static EnemyConfig enemy(
@@ -254,6 +267,8 @@ class BestiaryServiceTest {
     config.armour = armour;
     config.behaviour = "cycle_attack_defend";
     config.sprite = "images/enemies/" + id + ".atlas";
+    config.description =
+        id.equals("shade") ? "A creature made of living darkness." : "Description for " + id + ".";
     return config;
   }
 

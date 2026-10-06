@@ -1,4 +1,5 @@
-# 白底 AI 图抠图：去白底/水印/被包围的白色空隙，光晕做半透明"去白"并保持明亮
+# Cuts out AI art on a white background: removes the backdrop, watermarks and enclosed white
+# gaps, while turning glow into semi-transparent pixels that stay bright.
 from collections import deque
 import colorsys
 from PIL import Image
@@ -32,12 +33,14 @@ def cutout(
     grey_sat=None,
     floor_y=None,
 ):
-    # grey_sat: 设置后，背景区域里饱和度低于它的灰色像素（影子、灰雾、灰色速度线）直接去掉，有颜色的光效保留
-    # floor_y: 这一行以下，较深的灰色（地面影子）也算背景；遇到角色的深色描边会停下，不会吃进灰白色的靴子
+    #     # grey_sat: when set, grey pixels in the background whose saturation falls below it (shadows,
+          # haze, grey speed lines) are dropped outright, while coloured glow is kept.
+        # floor_y: below this row, darker greys (ground shadow) count as background too. It stops at
+        # the character's dark outline, so pale boots are not eaten away.
     im = Image.open(path).convert("RGB")
     px = im.load()
     w, h = im.size
-    # 用四周边缘像素的中位数当作背景色
+        # Take the median of the border pixels as the background colour.
     edge = sorted(px[x, y] for x in range(0, w, 8) for y in (0, h - 1)) + sorted(
         px[x, y] for y in range(0, h, 8) for x in (0, w - 1)
     )
@@ -56,7 +59,8 @@ def cutout(
     border += [(0, y) for y in range(h)] + [(w - 1, y) for y in range(h)]
     reg = _flood(w, h, border, light)
 
-    # 被身体围住的大块背景色（与外部不连通）；只认和背景色几乎相同的像素，避免误删白色光芯
+        # Large patches of background colour enclosed by the body, not connected to the outside. Only
+        # pixels almost identical to the background count, so a white glow core is not removed.
     def pure_white(x, y):
         return all(abs(c - b) <= bg_tol for c, b in zip(px[x, y], bg))
 
@@ -74,7 +78,8 @@ def cutout(
                     done[j] = 1
                     if big:
                         gap_seeds.append((j % w, j // w))
-    # 从空隙往外扩展到相邻的浅色过渡像素，去掉空隙边缘的白色毛边
+       # Grow outwards from the gap into neighbouring light transition pixels, clearing the white
+       # fringe around its edge.
     if gap_seeds:
         grown = _flood(w, h, gap_seeds, lambda a, b: light(a, b) or pure_white(a, b))
         for j in range(w * h):
