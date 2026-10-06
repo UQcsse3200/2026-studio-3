@@ -3,6 +3,7 @@ package com.csse3200.game.components;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.entities.Entity;
@@ -237,8 +238,8 @@ class ArmourAndStatusEffectTest {
 
   @Test
   void callerCanStackByMutatingExistingEffect() {
-    // Demonstrates how a caller (e.g. the teammate implementing Poison) can achieve stacking
-    // using the mutable value, without CombatStatsComponent needing to know about stacking.
+    // Checks legacy value mutation for poison with a single duration group.
+    // Normal poison applications should use applyStatusEffect().
     CombatStatsComponent combat = new CombatStatsComponent(100, 20);
     combat.applyStatusEffect(new StatusEffect("POISON", 3, 3));
 
@@ -344,9 +345,9 @@ class ArmourAndStatusEffectTest {
     assertEquals(2, stats.getStatusEffect("POISON").getDuration());
   }
 
-  /** Verifies that a POISON effect replaced during damage handling is not immediately ticked. */
+  /** Verifies that poison added during damage handling retains its full duration. */
   @Test
-  void poisonShouldPreserveReplacementCreatedDuringDamageCallback() {
+  void poisonAppliedDuringDamageCallbackKeepsItsFullDuration() {
     CombatStatsComponent stats = new CombatStatsComponent(100, 10);
     stats.applyStatusEffect("POISON", 3, 1);
     stats.processPoisonTick(value -> stats.applyStatusEffect("POISON", 7, 4));
@@ -505,5 +506,117 @@ class ArmourAndStatusEffectTest {
 
     assertEquals(2, healthUpdates[0]);
     assertEquals(1, deathEvents[0]);
+  }
+
+  @Test
+  void feebleReapplicationUsesLongerDurationWithoutStackingStrength() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 0);
+    stats.applyStatusEffect("FEEBLE", 1, 3);
+    stats.applyStatusEffect("feeble", 4, 1);
+    assertEquals(3, stats.getStatusEffect("FEEBLE").getDuration());
+    assertEquals(1, stats.getStatusEffect("FEEBLE").getValue());
+    assertEquals(0.75f, StatusEffectCalculator.getOutgoingDamageModifier(stats));
+    stats.applyStatusEffect("FEEBLE", 2, 5);
+    assertEquals(5, stats.getStatusEffect("FEEBLE").getDuration());
+    assertEquals(1, stats.getStatusEffect("FEEBLE").getValue());
+  }
+
+  @Test
+  void permanentFeebleOutlastsFiniteReapplicationInEitherOrder() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 0);
+    stats.applyStatusEffect("FEEBLE", 1, 2);
+    stats.applyStatusEffect("FEEBLE", 1, 0);
+    stats.applyStatusEffect("FEEBLE", 1, 3);
+    assertEquals(0, stats.getStatusEffect("FEEBLE").getDuration());
+  }
+
+  @Test
+  void poisonQueriesAndRemovalAcceptMixedCase() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 0);
+    stats.applyStatusEffect("poison", 3, 2);
+    assertTrue(stats.hasStatusEffect("Poison"));
+    assertEquals(3, stats.getStatusEffect("poison").getValue());
+    stats.removeStatusEffect("pOiSoN");
+    assertFalse(stats.hasStatusEffect("POISON"));
+  }
+
+  @Test
+  void fortifyCannotOverflowAndEraseExistingArmor() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 0);
+    stats.setArmour(10);
+    stats.setBlock(4);
+
+    stats.addArmour(Integer.MAX_VALUE);
+
+    assertEquals(Integer.MAX_VALUE, stats.getArmour());
+    assertEquals(4, stats.getBlock());
+    assertEquals(100, stats.getHealth());
+  }
+
+  @Test
+  void namedFeebleTickExpiresOnceWithoutChangingOtherStatuses() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 0);
+    Entity entity = new Entity().addComponent(stats);
+    int[] removals = {0};
+
+    entity
+        .getEvents()
+        .addListener(
+            "statusEffectRemoved",
+            (String type) -> {
+              if ("FEEBLE".equals(type)) {
+                removals[0]++;
+              }
+            });
+
+    stats.applyStatusEffect("FEEBLE", 1, 2);
+    stats.applyStatusEffect("POISON", 3, 2);
+    stats.applyStatusEffect("VULNERABLE", 1, 2);
+
+    assertFalse(stats.tickStatusEffect("feeble"));
+    assertEquals(1, stats.getStatusEffect("FEEBLE").getDuration());
+    assertEquals(0.75f, StatusEffectCalculator.getOutgoingDamageModifier(stats));
+
+    assertTrue(stats.tickStatusEffect("FEEBLE"));
+    assertNull(stats.getStatusEffect("FEEBLE"));
+    assertEquals(1.0f, StatusEffectCalculator.getOutgoingDamageModifier(stats));
+
+    assertFalse(stats.tickStatusEffect("FEEBLE"));
+    assertEquals(1, removals[0]);
+
+    assertEquals(2, stats.getStatusEffect("POISON").getDuration());
+    assertEquals(2, stats.getStatusEffect("VULNERABLE").getDuration());
+    assertEquals(100, stats.getHealth());
+  }
+
+  @Test
+  void namedTickRejectsPoisonAndPreservesPermanentFeeble() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 0);
+    stats.applyStatusEffect("POISON", 3, 2);
+    stats.applyStatusEffect("FEEBLE", 1, 0);
+
+    assertThrows(IllegalArgumentException.class, () -> stats.tickStatusEffect("poison"));
+
+    assertEquals(2, stats.getStatusEffect("POISON").getDuration());
+    assertFalse(stats.tickStatusEffect("FEEBLE"));
+    assertEquals(0, stats.getStatusEffect("FEEBLE").getDuration());
+    assertFalse(stats.tickStatusEffect("MISSING"));
+  }
+
+  @Test
+  void feebleReapplicationAfterTickUsesRemainingDuration() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 0);
+    stats.applyStatusEffect("FEEBLE", 1, 3);
+
+    stats.tickStatusEffect("FEEBLE");
+    stats.applyStatusEffect("FEEBLE", 5, 1);
+
+    assertEquals(2, stats.getStatusEffect("FEEBLE").getDuration());
+    assertEquals(1, stats.getStatusEffect("FEEBLE").getValue());
+
+    stats.applyStatusEffect("FEEBLE", 9, 4);
+
+    assertEquals(4, stats.getStatusEffect("FEEBLE").getDuration());
+    assertEquals(0.75f, StatusEffectCalculator.getOutgoingDamageModifier(stats));
   }
 }

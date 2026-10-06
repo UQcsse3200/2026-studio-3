@@ -1,6 +1,7 @@
 package com.csse3200.game.components.mainmenu;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -13,6 +14,7 @@ import com.csse3200.game.maps.RunState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 
 @ExtendWith(GameExtension.class)
 class MainMenuActionsTest {
@@ -34,8 +36,10 @@ class MainMenuActionsTest {
   void startBeginsANewRunOnTheMap() {
     menu.getEvents().trigger(MainMenuDisplay.START_EVENT);
 
-    verify(runState).endRun();
-    verify(game).setScreen(GdxGame.ScreenType.MAP);
+    InOrder order = inOrder(runState, game);
+    order.verify(runState).endRun();
+    order.verify(game).showNarration("opening", GdxGame.ScreenType.MAP);
+    verify(game, never()).setScreen(GdxGame.ScreenType.MAP);
   }
 
   @Test
@@ -44,6 +48,7 @@ class MainMenuActionsTest {
 
     verify(game).setScreen(GdxGame.ScreenType.SAVE_LOAD);
     verify(runState, never()).endRun();
+    verify(game, never()).showNarration(any(), any());
   }
 
   @Test
