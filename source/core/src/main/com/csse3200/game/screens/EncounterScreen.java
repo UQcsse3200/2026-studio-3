@@ -173,10 +173,7 @@ public class EncounterScreen extends ScreenAdapter {
         effectiveSuccess,
         playerDefeated);
 
-    runState.completeEncounter(effectiveSuccess);
-    if (effectiveSuccess) {
-      game.requestAutosaveAfterEncounter();
-    }
+    completeEncounterAndRequestAutosave(game, runState, effectiveSuccess);
 
     GdxGame.ScreenType targetScreen =
         playerDefeated ? GdxGame.ScreenType.DEFEAT : GdxGame.ScreenType.MAP;
@@ -186,6 +183,15 @@ public class EncounterScreen extends ScreenAdapter {
       fusionResultSeconds = encounterGameArea.isCardFusionPresentationComplete() ? 0.2f : 0f;
     } else {
       Gdx.app.postRunnable(() -> game.setScreen(targetScreen));
+    }
+  }
+
+  /** Completes a non-battle encounter and queues an autosave only for successful outcomes. */
+  static void completeEncounterAndRequestAutosave(
+      GdxGame game, RunState runState, boolean effectiveSuccess) {
+    runState.completeEncounter(effectiveSuccess);
+    if (effectiveSuccess) {
+      game.requestAutosaveAfterEncounter();
     }
   }
 
