@@ -47,7 +47,16 @@ public class ForestGameArea extends GameArea {
     "images/iso_grass_1.png",
     "images/iso_grass_2.png",
     "images/iso_grass_3.png",
-    "images/battle_background.png"
+    "images/dungeon.png",
+    "images/stones_ruins.png",
+    "images/inside_castle.png",
+    "images/mystical_tree.png",
+    "images/forest.png",
+    "images/cemetery.png",
+    "images/underwater.png",
+    "images/temple.png",
+    "images/autumn_forest.png",
+    "images/forest_with_sun.png"
   };
   private static final String[] forestTextureAtlases = {
     "images/terrain_iso_grass.atlas",
@@ -136,7 +145,7 @@ public class ForestGameArea extends GameArea {
   }
 
   public void displayUI(Entity ui) {
-    ui.addComponent(new GameAreaDisplay("The Fall of Pantheons"));
+    ui.addComponent(new GameAreaDisplay(""));
     spawnEntity(ui);
   }
 

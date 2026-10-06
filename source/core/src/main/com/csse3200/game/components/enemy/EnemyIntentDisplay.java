@@ -43,6 +43,7 @@ public class EnemyIntentDisplay extends RenderComponent {
     durationFont.setColor(Color.WHITE);
 
     entity.getEvents().addListener("intentChanged", this::onIntentChanged);
+    entity.getEvents().addListener("enemyDefeated", this::onEnemyDefeated);
   }
 
   /**
@@ -52,6 +53,14 @@ public class EnemyIntentDisplay extends RenderComponent {
    */
   private void onIntentChanged(EnemyIntent intent) {
     this.currentIntent = intent;
+  }
+
+  private void onEnemyDefeated() {
+    this.currentIntent = null;
+  }
+
+  public EnemyIntent getCurrentIntent() {
+    return currentIntent;
   }
 
   @Override

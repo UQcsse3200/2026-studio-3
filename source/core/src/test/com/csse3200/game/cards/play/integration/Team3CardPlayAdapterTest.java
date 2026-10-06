@@ -448,7 +448,7 @@ class Team3CardPlayAdapterTest {
 
     battleFlow
         .getEvents()
-        .addListener(BattleActions.BATTLE_LOG_EVENT, (String message) -> logs.add(message));
+        .addListener(BattleActions.BATTLE_LOG_EVENT, (EventListener1<String>) logs::add);
 
     battleFlow
         .getEvents()
@@ -585,6 +585,7 @@ class Team3CardPlayAdapterTest {
     battleFlow
         .getEvents()
         .addListener(BattleActions.BATTLE_LOG_EVENT, (EventListener1<String>) logs::add);
+
     // The first attempt must be rejected while silence is active.
     battleFlow
         .getEvents()
@@ -665,7 +666,7 @@ class Team3CardPlayAdapterTest {
 
     battleFlow
         .getEvents()
-        .addListener(BattleActions.BATTLE_LOG_EVENT, (String message) -> logs.add(message));
+        .addListener(BattleActions.BATTLE_LOG_EVENT, (EventListener1<String>) logs::add);
 
     battleFlow
         .getEvents()
