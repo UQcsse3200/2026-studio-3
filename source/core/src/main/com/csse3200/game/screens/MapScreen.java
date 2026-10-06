@@ -181,7 +181,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
     float legendCentreX = stage.getWidth() * 0.90f;
     float legendBottomY = stage.getHeight() * 0.295f;
-    float gap = 56f;
+    float gap = 40f;
     inventoryButton.setPosition(
         legendCentreX - buttonWidth / 2f, legendBottomY - buttonHeight - gap);
 
