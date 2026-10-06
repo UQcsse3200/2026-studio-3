@@ -38,6 +38,7 @@ import com.csse3200.game.components.pausemenu.PauseMenuActions;
 import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.player.EnergyComponent;
+import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
 import com.csse3200.game.components.spritedisplay.clickable.CardAimController;
 import com.csse3200.game.components.spritedisplay.clickable.Clickable;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
@@ -453,7 +454,38 @@ public class BattleScreen extends ScreenAdapter {
 
   private List<ClickableRecord> buildAllRecords() {
     List<ClickableRecord> records = new ArrayList<>(buildHandRecords());
-    records.addAll(staticUiRecords);
+    records.addAll(buildBattleMenuRecords());
+    return records;
+  }
+
+  /** Applies the themed frame and matching icon without changing any button trigger or payload. */
+  private List<ClickableRecord> buildBattleMenuRecords() {
+    List<ClickableRecord> records = new ArrayList<>();
+    for (ClickableRecord record : staticUiRecords) {
+      BattleMenuSkins.Icon icon =
+          switch (record.trigger()) {
+            case "openMenu" -> BattleMenuSkins.Icon.CARD;
+            case "openInventory" -> BattleMenuSkins.Icon.INVENTORY;
+            case "endTurn" -> BattleMenuSkins.Icon.END_TURN;
+            default -> null;
+          };
+      if (icon == null) {
+        records.add(record);
+        continue;
+      }
+
+      records.add(
+          ClickableRecord.builder(record.trigger())
+              .text(record.text())
+              .skin(BattleMenuSkins.forIcon(icon))
+              .position(record.x(), record.y())
+              .size(record.width(), record.height())
+              .variant(record.variant())
+              .args(record.args())
+              .label(record.label())
+              .disabled(record.disabled())
+              .build());
+    }
     return records;
   }
 
