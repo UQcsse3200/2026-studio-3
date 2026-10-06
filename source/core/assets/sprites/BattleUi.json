@@ -32,6 +32,16 @@
       "colour": "DBBEA1",
       "trigger": "battleLog",
       "variant": "battleLog"
+    },
+    {
+      "text": "",
+      "x": 0,
+      "y": 300,
+      "size": [420, 150],
+      "scale": 1.4,
+      "colour": "F5DFA8",
+      "trigger": "playerTurn",
+      "variant": "playerTurn"
     }
   ]
 }
