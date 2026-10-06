@@ -45,7 +45,7 @@ public class MapDisplay extends UIComponent {
     "images/map/background.png",
     "images/heart.png",
     "images/energy.png",
-    "images/piety.png",
+    "images/level.png",
     "images/money.png",
     "images/map/cross.png",
     "images/map/legend.png",

@@ -29,7 +29,7 @@ public class AudioService {
   private static Music playing;
   private static SoundId lastSound = SoundId.MENU_HOVER;
   private static long cooldownTimestamp;
-  private static float musicVolume = 0.5f; // TODO: decide default music volume
+  private static float musicVolume = 0.5f;
   private static boolean soundEffectsOn = true;
   private static float soundEffectsVolume = 1f;
   private static Playlist nowPlaying;

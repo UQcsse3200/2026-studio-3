@@ -52,7 +52,12 @@ public class CardEffectHandler {
             AudioService.playSound(SoundId.ARMOUR_BREAK, 0.5f);
             stats.setArmour(stats.getArmour() - effect.value());
           }
-          case POISON, VULNERABLE, FEEBLE -> {
+          case VULNERABLE, FEEBLE -> {
+            AudioService.playSound(SoundId.ARMOUR_BREAK, 0.5f);
+            stats.applyStatusEffect(
+                    new StatusEffect(effect.type().name(), effect.value(), effect.duration()));
+          }
+          case POISON -> {
             AudioService.playSound(SoundId.BOTTLE_CORK, 0.5f);
             stats.applyStatusEffect(
                 new StatusEffect(effect.type().name(), effect.value(), effect.duration()));

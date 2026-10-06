@@ -53,7 +53,6 @@ public class NarrationScreen extends ScreenAdapter {
     // Validate before replacing any services.
     List<List<String>> passages = NarrationConfigLoader.loadSequence(sequenceId);
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
     renderer = RenderFactory.createRenderer();
@@ -163,7 +162,5 @@ public class NarrationScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
-    ServiceLocator.getResourceService().dispose();
-    ServiceLocator.clear();
   }
 }
