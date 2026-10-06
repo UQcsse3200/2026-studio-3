@@ -144,10 +144,18 @@ public class AudioService {
       return;
     }
 
+    // No resource service (as in tests) or the sound isn't loaded: skip rather than crash.
+    ResourceService resources = ServiceLocator.getResourceService();
+    if (resources == null) {
+      return;
+    }
+    Sound sound = resources.getAsset(soundPaths[soundID.ordinal()], Sound.class);
+    if (sound == null) {
+      return;
+    }
+
     if (System.currentTimeMillis() - cooldownTimestamp > SFX_COOLDOWN) {
 
-      Sound sound =
-          ServiceLocator.getResourceService().getAsset(soundPaths[soundID.ordinal()], Sound.class);
       sound.setPitch(
           sound.play(volume * soundEffectsVolume),
           pitchModifier.nextFloat(LOWER_PITCH_BOUND, UPPER_PITCH_BOUND));
@@ -156,8 +164,6 @@ public class AudioService {
 
     } else if (soundID != lastSound) { // allows for different sound effects to overlap
 
-      Sound sound =
-          ServiceLocator.getResourceService().getAsset(soundPaths[soundID.ordinal()], Sound.class);
       sound.setPitch(
           sound.play((volume - OVERLAP_DAMPING) * soundEffectsVolume),
           pitchModifier.nextFloat(LOWER_PITCH_BOUND, UPPER_PITCH_BOUND));
