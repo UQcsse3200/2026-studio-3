@@ -1,0 +1,27 @@
+{
+  "cards": [
+    {
+      "id": "lore_card",
+      "name": "Lore Card",
+      "description": "Deal 1 damage.",
+      "lore": "An old story follows this card.",
+      "cost": 1,
+      "type": "ATTACK",
+      "rarity": "COMMON",
+      "target": "SINGLE_ENEMY",
+      "effects": [{"type": "DAMAGE", "value": 1, "duration": 0}],
+      "texturePath": "images/cards/lore_card.png"
+    },
+    {
+      "id": "plain_card",
+      "name": "Plain Card",
+      "description": "Deal 1 damage.",
+      "cost": 1,
+      "type": "ATTACK",
+      "rarity": "COMMON",
+      "target": "SINGLE_ENEMY",
+      "effects": [{"type": "DAMAGE", "value": 1, "duration": 0}],
+      "texturePath": "images/cards/plain_card.png"
+    }
+  ]
+}

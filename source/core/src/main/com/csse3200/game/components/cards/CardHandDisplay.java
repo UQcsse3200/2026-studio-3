@@ -8,6 +8,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.cards.runtime.CardResolver;
+import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.UIComponent;
 import java.util.List;
 
@@ -120,7 +124,23 @@ public class CardHandDisplay extends UIComponent {
     return overlay;
   }
 
-  private Table createCard(DemoCard card) {
+  private Actor createCard(DemoCard card) {
+    CardService library = ServiceLocator.getCardLibrary();
+    if (library != null && ServiceLocator.getResourceService() != null) {
+      CardWidgetAssets assets =
+          CardWidgetAssets.fromManagedResources(skin, ServiceLocator.getResourceService());
+      CardConfig config =
+          library.getAllCards().stream()
+              .filter(
+                  candidate ->
+                      card.name.equals(candidate.name) && assets.hasAuthoredFrame(candidate.rarity))
+              .findFirst()
+              .orElse(null);
+      if (config != null) {
+        return new CardWidget(
+            new CardResolver().resolveBasePreview(config, "demo-preview-" + config.id), assets);
+      }
+    }
     Table cardTable = new Table();
     cardTable.top();
     cardTable.pad(8f);

@@ -100,7 +100,9 @@ class CardEffectHandlerTest {
 
     handler.applyPlayerEffects(List.of(block), player);
 
-    assertEquals(5, player.getComponent(CombatStatsComponent.class).getArmour());
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    assertEquals(5, stats.getBlock());
+    assertEquals(0, stats.getArmour());
   }
 
   @Test

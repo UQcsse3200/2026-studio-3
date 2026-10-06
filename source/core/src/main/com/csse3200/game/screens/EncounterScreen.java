@@ -13,6 +13,7 @@ import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.pausemenu.PauseMenuFactory;
 import com.csse3200.game.components.save.SaveLoadPanel;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -81,12 +82,7 @@ public class EncounterScreen extends ScreenAdapter {
     List<CardConfig> cards = CardConfigLoader.loadCards();
     CardLibrary cardLibrary = new CardLibrary(cards);
 
-    cardTexturePaths =
-        cards.stream()
-            .map(card -> card.texturePath)
-            .filter(path -> path != null && !path.isBlank())
-            .distinct()
-            .toArray(String[]::new);
+    cardTexturePaths = CardWidgetAssets.collectTexturePaths(cards);
 
     ServiceLocator.registerCardLibrary(cardLibrary);
     PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(cardLibrary);
@@ -178,10 +174,7 @@ public class EncounterScreen extends ScreenAdapter {
         effectiveSuccess,
         playerDefeated);
 
-    runState.completeEncounter(effectiveSuccess);
-    if (effectiveSuccess) {
-      game.requestAutosaveAfterEncounter();
-    }
+    completeEncounterAndRequestAutosave(game, runState, effectiveSuccess);
 
     GdxGame.ScreenType targetScreen =
         playerDefeated ? GdxGame.ScreenType.DEFEAT : GdxGame.ScreenType.MAP;
@@ -191,6 +184,15 @@ public class EncounterScreen extends ScreenAdapter {
       fusionResultSeconds = encounterGameArea.isCardFusionPresentationComplete() ? 0.2f : 0f;
     } else {
       Gdx.app.postRunnable(() -> game.setScreen(targetScreen));
+    }
+  }
+
+  /** Completes a non-battle encounter and queues an autosave only for successful outcomes. */
+  static void completeEncounterAndRequestAutosave(
+      GdxGame game, RunState runState, boolean effectiveSuccess) {
+    runState.completeEncounter(effectiveSuccess);
+    if (effectiveSuccess) {
+      game.requestAutosaveAfterEncounter();
     }
   }
 

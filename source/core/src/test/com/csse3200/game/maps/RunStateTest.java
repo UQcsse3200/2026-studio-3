@@ -3,10 +3,16 @@ package com.csse3200.game.maps;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.CardUnlockState;
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.extensions.GameExtension;
+import com.csse3200.game.services.ServiceLocator;
+import java.util.HashSet;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -53,6 +59,56 @@ public class RunStateTest {
     assertEquals(NodeState.CURRENT, graph.getNode(0).getState());
     assertEquals(NodeState.AVAILABLE, graph.getNode(1).getState());
     assertEquals(NodeState.AVAILABLE, graph.getNode(2).getState());
+  }
+
+  private MapGraph createFinalEncounterGraph() {
+    MapGraph graph =
+        new MapGraph(
+            Map.of(0, new MapNode(0, RoomType.COMBAT), 1, new MapNode(1, RoomType.FINAL)), false);
+    graph.connectNodes(0, 1);
+    return graph;
+  }
+
+  @Test
+  void finalEncounterIsNotCompletedWithoutMap() {
+    assertFalse(new RunState().isFinalEncounterCompleted());
+  }
+
+  @Test
+  void finalEncounterIsNotCompletedBeforeVictory() {
+    RunState runState = new RunState();
+    MapGraph graph = createFinalEncounterGraph();
+    assertTrue(runState.startRun(graph, 0));
+    assertTrue(graph.moveToNode(1));
+    runState.enterEncounter(1);
+
+    assertFalse(runState.isFinalEncounterCompleted());
+  }
+
+  @Test
+  void finalEncounterIsCompletedAfterVictory() {
+    RunState runState = new RunState();
+    MapGraph graph = createFinalEncounterGraph();
+    assertTrue(runState.startRun(graph, 0));
+    assertTrue(graph.moveToNode(1));
+    runState.enterEncounter(1);
+
+    runState.completeEncounter(true);
+
+    assertTrue(runState.isFinalEncounterCompleted());
+  }
+
+  @Test
+  void finalEncounterIsNotCompletedAfterLoss() {
+    RunState runState = new RunState();
+    MapGraph graph = createFinalEncounterGraph();
+    assertTrue(runState.startRun(graph, 0));
+    assertTrue(graph.moveToNode(1));
+    runState.enterEncounter(1);
+
+    runState.completeEncounter(false);
+
+    assertFalse(runState.isFinalEncounterCompleted());
   }
 
   @Test
@@ -187,6 +243,27 @@ public class RunStateTest {
     PlayerDeck second = runState.getOrCreatePlayerDeck(cardService);
 
     assertSame(first, second);
+  }
+
+  @Test
+  void creatingNewRunDeckMarksStarterCardIdsSeen() {
+    CardDiscoveryService discovery = CardDiscoveryService.loadDefault();
+    ServiceLocator.registerCardDiscoveryService(discovery);
+    RunState runState = new RunState();
+    CardService cardService = new CardLibrary(CardConfigLoader.loadCards());
+
+    runState.createStarterDeckForNewRun(cardService);
+
+    var starterIds = new HashSet<>(PlayerDeckFactory.getStarterDeckCardIds());
+    assertEquals(6, starterIds.size());
+    assertTrue(
+        starterIds.stream()
+            .allMatch(id -> discovery.getProgressSnapshot().get(id) == CardUnlockState.SEEN));
+    assertEquals(
+        6,
+        discovery.getProgressSnapshot().values().stream()
+            .filter(state -> state == CardUnlockState.SEEN)
+            .count());
   }
 
   @Test

@@ -10,6 +10,7 @@ import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -58,12 +59,7 @@ public final class DemoShopScreen extends ScreenAdapter {
     List<CardConfig> cards = CardConfigLoader.loadCards();
     CardLibrary cardLibrary = new CardLibrary(cards);
     ServiceLocator.registerCardLibrary(cardLibrary);
-    cardTexturePaths =
-        cards.stream()
-            .map(card -> card.texturePath)
-            .filter(path -> path != null && !path.isBlank())
-            .distinct()
-            .toArray(String[]::new);
+    cardTexturePaths = CardWidgetAssets.collectTexturePaths(cards);
 
     ResourceService resources = ServiceLocator.getResourceService();
     resources.loadTextures(cardTexturePaths);

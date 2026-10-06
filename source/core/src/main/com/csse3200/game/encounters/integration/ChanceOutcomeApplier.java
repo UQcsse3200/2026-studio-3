@@ -1,6 +1,8 @@
 package com.csse3200.game.encounters.integration;
 
+import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.chance.ChanceOutcome;
+import com.csse3200.game.services.ServiceLocator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -276,7 +278,12 @@ public final class ChanceOutcomeApplier {
 
   private void commitCardAdditions(List<String> cardRewardIds) {
     for (int index = cardRewardIds.size() - 1; index >= 0; index--) {
-      deck.commitCardAddition(cardRewardIds.get(index));
+      String cardRewardId = cardRewardIds.get(index);
+      deck.commitCardAddition(cardRewardId);
+      CardDiscoveryService discovery = ServiceLocator.getCardDiscoveryService();
+      if (discovery != null) {
+        discovery.recordSeen(cardRewardId);
+      }
     }
   }
 

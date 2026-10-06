@@ -14,6 +14,7 @@ import com.csse3200.game.cards.debug.CardEffectDebugDisplay;
 import com.csse3200.game.cards.debug.KeyboardCardEffectDebugInputComponent;
 import com.csse3200.game.cards.effects.CardEffectResolutionService;
 import com.csse3200.game.components.cards.CardHandDisplay;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.gamearea.PerformanceDisplay;
 import com.csse3200.game.components.maingame.DebugShortcutInputComponent;
 import com.csse3200.game.components.maingame.MainGameActions;
@@ -51,7 +52,7 @@ import org.slf4j.LoggerFactory;
 public class MainGameScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(MainGameScreen.class);
   private static final String[] mainGameTextures = {
-    "images/heart.png", "images/energy.png", "images/piety.png", "images/money.png"
+    "images/heart.png", "images/energy.png", "images/level.png", "images/money.png"
   };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
 
@@ -80,12 +81,7 @@ public class MainGameScreen extends ScreenAdapter {
 
     List<CardConfig> cards = CardConfigLoader.loadCards();
     cardLibrary = new CardLibrary(cards);
-    cardTexturePaths =
-        cards.stream()
-            .map(card -> card.texturePath)
-            .filter(path -> path != null && !path.isBlank())
-            .distinct()
-            .toArray(String[]::new);
+    cardTexturePaths = CardWidgetAssets.collectTexturePaths(cards);
     ServiceLocator.registerCardLibrary(cardLibrary);
 
     renderer = RenderFactory.createRenderer();

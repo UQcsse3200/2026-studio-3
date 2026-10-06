@@ -78,9 +78,9 @@ public class CardEffectHandler {
     }
     for (ResolvedCardEffect effect : effects) {
       switch (effect.type()) {
-        case BLOCK, FORTIFY -> {
+        case BLOCK -> {
           AudioService.playSound(SoundId.SHIELD_GUARD, 0.3f);
-          stats.addArmour(effect.value());
+          stats.addBlock(effect.value());
         }
         case HEAL -> {
           AudioService.playSound(SoundId.BANDAGE, 0.4f);
