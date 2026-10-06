@@ -41,6 +41,7 @@ public class BattleActions extends Component {
 
   private final BattleController controller;
   private final GdxGame game;
+  private final boolean tutorialBattle;
 
   // While true, reveals (log, effects, phase changes, the hand coming back up) are queued instead
   // of fired immediately, so the enemy's whole turn can be held back and replayed together after
@@ -50,8 +51,14 @@ public class BattleActions extends Component {
   private final List<Runnable> queuedReveals = new ArrayList<>();
 
   public BattleActions(BattleController controller, GdxGame game) {
+    this(controller, game, false);
+  }
+
+  /** Tutorial battles retain normal card/turn events but leave outcome routing to the tutorial. */
+  public BattleActions(BattleController controller, GdxGame game, boolean tutorialBattle) {
     this.controller = controller;
     this.game = game;
+    this.tutorialBattle = tutorialBattle;
   }
 
   /**
@@ -79,7 +86,9 @@ public class BattleActions extends Component {
         message -> dispatch(() -> entity.getEvents().trigger(BATTLE_LOG_EVENT, message)));
     controller.addEnemyEffectsListener(effects -> dispatch(() -> onEnemyEffects(effects)));
     controller.addPlayerEffectsListener(this::onPlayerEffects);
-    controller.addBattleEndListener(this::onBattleEnd);
+    if (!tutorialBattle) {
+      controller.addBattleEndListener(this::onBattleEnd);
+    }
     controller.addHandChangedListener(hand -> entity.getEvents().trigger(HAND_CHANGED_EVENT, hand));
   }
 
@@ -199,6 +208,7 @@ public class BattleActions extends Component {
   }
 
   private void onStart() {
-    game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
+    game.setScreen(
+        tutorialBattle ? GdxGame.ScreenType.TUTORIAL_BATTLE : GdxGame.ScreenType.BATTLE_SCREEN);
   }
 }

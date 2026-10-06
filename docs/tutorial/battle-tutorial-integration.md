@@ -1,10 +1,17 @@
 # Battle tutorial integration contract
 
-Base: `Feature-2-Sprint3-TutorialTooltips`, commit `50dad1a3`.
+Integration target: `Feature-2-Sprint3-TutorialTooltips`.
 
-This module observes an isolated teaching battle. It does not start that battle,
-change its AI or rules, create a normal run, or grant rewards. It is not installed
-in the normal `BattleScreen` or menu yet.
+This module observes an isolated teaching battle. The battle owner now routes
+the New Game choice through `GdxGame.startTutorialBattle()` to a tutorial-only
+`BattleScreen` with a disposable `RunState` and one ordinary Bone Crawler.
+The tutorial does not complete a map node, grant a reward or request autosave.
+The existing normal battle path remains separate.
+
+The current `BattleTutorialTextView` displays actionable text while Jun's
+positioned battle highlights are in progress. **Team 1's tutorial-only safe
+enemy behaviour is still required** before the no-player-death acceptance
+criterion can be claimed. The fixed ordinary enemy alone is not that behaviour.
 
 ## Steps and UI
 
@@ -71,17 +78,16 @@ BattleTutorialComponent guidance =
     new BattleTutorialComponent(
         battleController,
         tutorialView,
-        outcome -> game.startNewRun());
+        this::onTutorialFinished);
 Entity guideEntity = new Entity().addComponent(guidance);
 ServiceLocator.getEntityService().register(guideEntity);
-// The tutorial battle owner now starts its battle, using its own agreed API.
+// The tutorial battle owner starts the battle after registering the guide.
 ```
 
 Use the normal entity registration path; do not also call `guidance.create()`
-manually. `Outcome` is `WON`, `LOST`, or `CANCELLED`. The owner chooses whether to
-show a result/retry screen before continuing; the callback above illustrates
-continuing to a fresh run for every outcome. This policy must be agreed with the
-flow owner before final wiring.
+manually. `Outcome` is `WON`, `LOST`, or `CANCELLED`. At present, a win or voluntary
+Exit Tutorial calls Joel's `startNewRun()`; a loss returns to the main menu while
+Team 1's safety behaviour is pending. Agree the final loss/retry policy with Joel.
 
 The component queues completion from `update()` via `Gdx.app.postRunnable`, clears
 its UI and removes its three battle observers before calling the owner. Do not
@@ -91,8 +97,8 @@ a screen must not unexpectedly start a new run.
 
 ## Menu and fresh run owner (Joel)
 
-- Subscribe to `MainMenuDisplay.ENTER_TUTORIAL_EVENT` and invoke Guoqing's agreed
-  tutorial launch method. This method is still to be supplied.
+- `MainMenuActions` now subscribes to `MainMenuDisplay.ENTER_TUTORIAL_EVENT` and
+  invokes `GdxGame.startTutorialBattle()`.
 - Skip Tutorial already follows `game.startNewRun()`.
 - Tutorial completion uses that same method, not `setScreen(MAP)` directly.
   It disposes the current screen before resetting run state, plays the opening
@@ -120,3 +126,8 @@ exits, and a second tutorial visit. Confirm a fresh normal run has no tutorial
 health loss, cards, gold, rewards or hints, and that opening-story skip works.
 The tutorial does not claim that five new cards are drawn automatically every
 turn; drawing and cooldowns must match the actual combat implementation.
+
+For the current integration, run `./gradlew test spotlessCheck` using JDK 21.
+The initial full automated suite passed on the tutorial task branch. A graphical
+playthrough, Team 1's safe enemy integration, and Jun's final highlights remain
+required before merging the complete tutorial into `main`.

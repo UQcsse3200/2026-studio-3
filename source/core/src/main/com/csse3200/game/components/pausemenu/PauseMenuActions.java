@@ -11,9 +11,15 @@ import org.slf4j.LoggerFactory;
 public class PauseMenuActions extends Component {
   private static final Logger logger = LoggerFactory.getLogger(PauseMenuActions.class);
   private final GdxGame game;
+  private final boolean tutorialBattle;
 
   public PauseMenuActions(GdxGame game) {
+    this(game, false);
+  }
+
+  public PauseMenuActions(GdxGame game, boolean tutorialBattle) {
     this.game = game;
+    this.tutorialBattle = tutorialBattle;
   }
 
   @Override
@@ -38,7 +44,7 @@ public class PauseMenuActions extends Component {
   /** Leaves the current run for the main menu. Only fired after the display's confirm dialog. */
   private void onExitToMenu() {
     logger.info("Returning to main menu from pause menu");
-    if (game.getRunState() != null) {
+    if (!tutorialBattle && game.getRunState() != null) {
       game.getRunState().abandonEncounter();
     }
     getPauseService().resume();

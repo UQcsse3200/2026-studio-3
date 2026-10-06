@@ -109,6 +109,20 @@ class BattleActionsTest {
   }
 
   @Test
+  void tutorialKeepsTheBattleActionsButDoesNotInstallOrdinaryOutcomeNavigation() {
+    BattleController mockController = mock(BattleController.class);
+    GdxGame game = mock(GdxGame.class);
+    Entity battleUI = new Entity().addComponent(new BattleActions(mockController, game, true));
+    battleUI.create();
+
+    battleUI.getEvents().trigger("endTurn");
+
+    verify(mockController).endPlayerTurn();
+    verify(mockController, never()).addBattleEndListener(any());
+    verify(game, never()).requestAutosaveAfterEncounter();
+  }
+
+  @Test
   void shouldNotFireCardPlayedWhenCardSystemRejectsRequest() {
     CardConfig expensiveStrike =
         card(

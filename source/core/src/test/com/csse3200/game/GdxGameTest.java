@@ -28,6 +28,7 @@ import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.rewards.RewardOption;
+import com.csse3200.game.screens.BattleScreen;
 import com.csse3200.game.screens.MapScreen;
 import com.csse3200.game.screens.NarrationScreen;
 import java.util.Map;
@@ -38,6 +39,28 @@ import org.mockito.MockedConstruction;
 
 @ExtendWith(GameExtension.class)
 class GdxGameTest {
+  @Test
+  void tutorialLaunchUsesItsOwnScreenWithoutCompletingAMapNode() {
+    GdxGame game = gameWithActiveNode(RoomType.COMBAT);
+    Screen oldScreen = mock(Screen.class);
+    game.setScreen(oldScreen);
+
+    try (MockedConstruction<BattleScreen> battles =
+        mockConstruction(
+            BattleScreen.class,
+            (battle, context) -> {
+              assertSame(game, context.arguments().get(0));
+              assertEquals(true, context.arguments().get(1));
+            })) {
+      game.startTutorialBattle();
+
+      assertEquals(1, battles.constructed().size());
+      verify(oldScreen).dispose();
+      assertEquals(7, game.getRunState().getActiveNodeId());
+      verify(battles.constructed().get(0)).show();
+    }
+  }
+
   @Test
   void shouldRejectBlankEventIdBeforeChangingScreen() {
     GdxGame game = gameWithActiveNode(RoomType.EVENT);

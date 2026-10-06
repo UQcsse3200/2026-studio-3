@@ -268,6 +268,13 @@ public class RunStateTest {
   }
 
   @Test
+  void returnsZeroWhenMapIsMissing() {
+    RunState runState = new RunState();
+
+    assertEquals(0, runState.getMapProgression());
+  }
+
+  @Test
   void returnsZeroWhenActiveNodeIsMissing() {
     RunState runState = new RunState();
     MapGraph graph = createGraph();
