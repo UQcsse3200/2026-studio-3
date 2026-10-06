@@ -120,6 +120,16 @@ public class PlayerStatsDisplay extends UIComponent {
     healthLabel.setText(text);
     healthBar.setRange(0, maxHealth);
     healthBar.setValue(currentHealth);
+
+    if ((float) currentHealth / maxHealth <= 0.4f) {
+      healthBar.getStyle().knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.RED);
+      healthBar.getStyle().background.setMinHeight(20);
+      healthBar.getStyle().knobBefore.setMinHeight(20);
+    } else {
+      healthBar.getStyle().knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.GREEN);
+      healthBar.getStyle().background.setMinHeight(20);
+      healthBar.getStyle().knobBefore.setMinHeight(20);
+    }
   }
 
   @Override
