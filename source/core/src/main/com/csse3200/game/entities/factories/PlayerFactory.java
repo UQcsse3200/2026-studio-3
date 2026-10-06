@@ -1,5 +1,6 @@
 package com.csse3200.game.entities.factories;
 
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
@@ -41,6 +42,8 @@ public class PlayerFactory {
   private static final PlayerConfig stats =
       FileLoader.readClass(PlayerConfig.class, "configs/player.json");
 
+  private static final String PLAYER_ATLAS = "images/player/player.atlas";
+
   /**
    * Create a player entity.
    *
@@ -79,6 +82,8 @@ public class PlayerFactory {
     InputComponent inputComponent =
         ServiceLocator.getInputService().getInputFactory().createForPlayer();
 
+    TextureAtlas atlas =
+        ServiceLocator.getResourceService().getAsset(PLAYER_ATLAS, TextureAtlas.class);
     Entity player =
         new Entity()
             .addComponent(new TextureRenderComponent("images/star_player.png"))
