@@ -12,6 +12,7 @@ import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.cards.CardEffectHandler;
+import com.csse3200.game.components.enemy.EnemyAnimationController;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.enemy.IntentEffectType;
@@ -789,10 +790,9 @@ public class BattleController {
 
     if (skipEnemyTurnIfDead(enemy)) return;
 
-    // Resolve poison before the enemy acts. Poison uses normal damage, so block and armour absorb
-    // it.
+    // Poison uses piercing damage, skip block and armor
     CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
-    enemyStats.processPoisonTick(enemyStats::takeDamage);
+    enemyStats.processPoisonTick(enemyStats::takePiercingDamage);
 
     if (skipEnemyTurnIfDead(enemy)) return;
 
@@ -826,7 +826,19 @@ public class BattleController {
             + damage
             + (playerStats != null ? " (you have " + playerStats.getHealth() + " HP)" : "")
             + ".");
-    handle(BattleEvent.ENEMY_ACTION_RESOLVED);
+    // Keep each hit with its own action; advance only after this enemy returns.
+    Runnable resolved =
+        () -> {
+          if (currentPhase == BattlePhase.ENEMY_ATTACK && getActiveEnemy() == enemy) {
+            handle(BattleEvent.ENEMY_ACTION_RESOLVED);
+          }
+        };
+    EnemyAnimationController animation = enemy.getComponent(EnemyAnimationController.class);
+    if (animation == null) {
+      resolved.run();
+    } else {
+      animation.runAfterAttack(resolved);
+    }
   }
 
   private void enterEnemyDefend() {
@@ -856,6 +868,10 @@ public class BattleController {
     if (this.queueBattleOutcomeIfOver()) {
       return;
     }
+
+    Entity enemy = getActiveEnemy();
+    CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
+    enemyStats.tickStatusEffect("FEEBLE");
 
     // If another enemy is successfully targeted.
     if (this.advanceToNextLivingEnemy()) {

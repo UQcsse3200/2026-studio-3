@@ -537,9 +537,9 @@ class BattleControllerTest {
     return enemy;
   }
 
-  /** Verifies poison consumes defenses, ticks once per turn and expires. */
+  /** Verifies poison bypasses block and armor and expires after two enemy turns. */
   @Test
-  void poisonShouldUseDefensesAndExpireAfterTwoEnemyTurns() {
+  void poisonShouldBypassDefensesAndExpireAfterTwoEnemyTurns() {
     CombatStatsComponent stats = new CombatStatsComponent(20, 0);
     stats.setBlock(3);
     stats.setArmour(4);
@@ -558,26 +558,35 @@ class BattleControllerTest {
         .executeIntent(player);
 
     battle.start();
+
+    // First turn: poison deals 5 damage before the enemy acts.
     battle.endPlayerTurn();
 
-    assertEquals(20, stats.getHealth());
-    assertEquals(0, stats.getBlock());
-    assertEquals(2, stats.getArmour());
+    assertEquals(15, stats.getHealth());
+    assertEquals(3, stats.getBlock());
+    assertEquals(4, stats.getArmour());
+
     assertEquals(1, stats.getStatusEffect("POISON").getDuration());
-    assertEquals(List.of(20), healthAtAction);
+    assertEquals(List.of(15), healthAtAction);
     assertEquals(BattlePhase.PLAYER_TURN, battle.getCurrentPhase());
 
+    // Second turn: poison deals another 5 damage, then expires.
     battle.endPlayerTurn();
 
-    assertEquals(17, stats.getHealth());
-    assertEquals(0, stats.getArmour());
+    assertEquals(10, stats.getHealth());
+    assertEquals(3, stats.getBlock());
+    assertEquals(4, stats.getArmour());
+
     assertNull(stats.getStatusEffect("POISON"));
-    assertEquals(List.of(20, 17), healthAtAction);
+    assertEquals(List.of(15, 10), healthAtAction);
 
+    // Third turn: expired poison causes no further damage.
     battle.endPlayerTurn();
 
-    assertEquals(17, stats.getHealth());
-    assertEquals(List.of(20, 17, 17), healthAtAction);
+    assertEquals(10, stats.getHealth());
+    assertEquals(3, stats.getBlock());
+    assertEquals(4, stats.getArmour());
+    assertEquals(List.of(15, 10, 10), healthAtAction);
     verify(firstEnemyBehaviour, times(3)).executeIntent(player);
   }
 
