@@ -26,6 +26,7 @@ import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.rewards.RewardGenerator;
 import com.csse3200.game.rewards.RewardService;
+import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import java.nio.file.Path;
 import java.util.List;

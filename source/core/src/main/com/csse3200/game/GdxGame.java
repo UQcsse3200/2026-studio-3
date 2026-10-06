@@ -175,7 +175,7 @@ public class GdxGame extends Game {
    */
   public void setScreen(ScreenType screenType) {
     logger.info("Setting game screen to {}", screenType);
-    prepareScreenTransition();
+    prepareScreenTransition(screenType);
     setScreen(newScreen(screenType));
   }
 
@@ -194,11 +194,11 @@ public class GdxGame extends Game {
       setScreen(next);
       return;
     }
-    prepareScreenTransition();
+    prepareScreenTransition(next);
     super.setScreen(new NarrationScreen(sequenceId, () -> setScreen(next)));
   }
 
-  private void prepareScreenTransition() {
+  private void prepareScreenTransition(ScreenType screenType) {
     Screen currentScreen = getScreen();
     if (currentScreen != null) {
       currentScreen.dispose();
@@ -239,7 +239,7 @@ public class GdxGame extends Game {
     new ChanceEncounterSelector(ChanceEncounterFactory.createInitialEncounters(), new Random())
         .selectById(eventId);
 
-    prepareScreenTransition();
+    prepareScreenTransition(ScreenType.ENCOUNTER);
     setScreen(new EncounterScreen(this, eventId));
   }
 
@@ -254,19 +254,28 @@ public class GdxGame extends Game {
   }
 
   private void openDemoEvent(String previewEncounterId) {
-    prepareScreenTransition();
+    prepareScreenTransition(ScreenType.ENCOUNTER);
     setScreen(new DemoEventScreen(this, previewEncounterId));
   }
 
   /** Opens a temporary Campfire preview with no map node or persistent run changes. */
   public void openDemoCampfire() {
-    prepareScreenTransition();
+    Screen currentScreen = getScreen();
+    if (currentScreen != null) {
+      currentScreen.dispose();
+    }
+    ServiceLocator.registerBestiaryService(bestiaryService);
+    prepareScreenTransition(ScreenType.CAMPFIRE);
     setScreen(new DemoCampfireScreen(this));
   }
 
   /** Opens a temporary Shop preview using isolated player state and no map node. */
   public void openDemoShop() {
-    prepareScreenTransition();
+    Screen currentScreen = getScreen();
+    if (currentScreen != null) {
+      currentScreen.dispose();
+    }
+    ServiceLocator.registerBestiaryService(bestiaryService);
     setScreen(new DemoShopScreen(this));
   }
 
@@ -289,24 +298,42 @@ public class GdxGame extends Game {
    * @return new screen
    */
   private Screen newScreen(ScreenType screenType) {
-    return switch (screenType) {
-      case MAIN_MENU -> new MainMenuScreen(this);
-      case MAIN_GAME -> new MainGameScreen(this);
-      case SETTINGS -> new SettingsScreen(this);
-      case SAVE_LOAD -> new SaveLoadScreen(this);
-      case LIBRARY -> new LibraryScreen(this);
-      case CARD_LIBRARY -> new CardLibraryScreen(this);
-      case MAP -> new MapScreen(this);
-      case ENCOUNTER -> new EncounterScreen(this);
-      case CAMPFIRE -> new CampfireScreen(this);
-      case ELITE_PORTAL -> new ElitePortalScreen(this);
-      case ANCIENT_TEMPLE -> new AncientTempleScreen(this);
-      case TEMPLE_CARD_SELECTION -> new TempleCardSelectionScreen(this);
-      case BATTLE_SCREEN -> new BattleScreen(this);
-      case VICTORY -> new EndBattleScreen(this, true);
-      case DEFEAT -> new EndBattleScreen(this, false);
-      case BESTIARY -> new BestiaryScreen(this);
-    };
+    switch (screenType) {
+      case MAIN_MENU:
+        return new MainMenuScreen(this);
+      case MAIN_GAME:
+        return new MainGameScreen(this);
+      case SETTINGS:
+        return new SettingsScreen(this);
+      case SAVE_LOAD:
+        return new SaveLoadScreen(this);
+      case LIBRARY:
+        return new LibraryScreen(this);
+      case CARD_LIBRARY:
+        return new CardLibraryScreen(this);
+      case MAP:
+        return new MapScreen(this);
+      case ENCOUNTER:
+        return new EncounterScreen(this);
+      case CAMPFIRE:
+        return new CampfireScreen(this);
+      case BATTLE_SCREEN:
+        return new BattleScreen(this);
+      case VICTORY:
+        return new EndBattleScreen(this, true);
+      case ELITE_PORTAL:
+        return new ElitePortalScreen(this);
+      case ANCIENT_TEMPLE:
+        return new AncientTempleScreen(this);
+      case TEMPLE_CARD_SELECTION:
+        return new TempleCardSelectionScreen(this);
+      case DEFEAT:
+        return new EndBattleScreen(this, false);
+      case BESTIARY:
+        return new BestiaryScreen(this);
+      default:
+        return null;
+    }
   }
 
   public enum ScreenType {

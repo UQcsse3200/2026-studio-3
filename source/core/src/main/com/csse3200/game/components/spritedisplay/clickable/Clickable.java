@@ -16,10 +16,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.components.Component;
-import java.util.Objects;
-import java.util.function.Supplier;
 import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.services.audio.SoundId;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 public abstract class Clickable extends Component {
   // Shared default skin, only loaded if the record doesn't provide one.
