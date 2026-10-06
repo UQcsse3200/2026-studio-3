@@ -1,6 +1,7 @@
 package com.csse3200.game.components.battle;
 
 import com.badlogic.gdx.graphics.Color;
+import com.csse3200.game.cards.EffectType;
 
 /**
  * Describes how one effect's visual looks and behaves: which texture to draw (or null for a
