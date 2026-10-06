@@ -168,10 +168,20 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Exit the game.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="bestiary/BestiaryService.html" title="class in com.csse3200.game.bestiary">BestiaryService</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getBestiaryService()" class="member-name-link">getBestiaryService</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getBackgroundId()" class="member-name-link">getBackgroundId</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the background id of the current battle instance</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="bestiary/BestiaryService.html" title="class in com.csse3200.game.bestiary">BestiaryService</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getBestiaryService()" class="member-name-link">getBestiaryService</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Gets discovery progress shared by all screens in this game session.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="cards/CardDiscoveryService.html" title="class in com.csse3200.game.cards">CardDiscoveryService</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCardDiscoveryService()" class="member-name-link">getCardDiscoveryService</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Gets card discovery progress shared by all screens in this game session.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRunState()" class="member-name-link">getRunState</a>()</code></div>
@@ -207,18 +217,24 @@ loadScripts(document, 'script');</script>
 <div class="block">Sets the game's screen to a new screen of the provided type.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startBattle()" class="member-name-link">startBattle</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#showNarration(java.lang.String,com.csse3200.game.GdxGame.ScreenType)" class="member-name-link">showNarration</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;sequenceId,
+ <a href="GdxGame.ScreenType.html" title="enum class in com.csse3200.game">GdxGame.ScreenType</a>&nbsp;next)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Opens the battle screen.</div>
+<div class="block">Plays a story crawl, then continues to <code>next</code>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startElitePortalDebug()" class="member-name-link">startElitePortalDebug</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startBattle()" class="member-name-link">startBattle</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Temporary development shortcut for previewing the Elite portal flow.</div>
+<div class="block">Opens the battle screen.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startEvent(java.lang.String)" class="member-name-link">startEvent</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;eventId)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startElitePortalDebug()" class="member-name-link">startElitePortalDebug</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Temporary development shortcut for previewing the Elite portal flow.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startEvent(java.lang.String)" class="member-name-link">startEvent</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;eventId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Opens a specific configured Event for the active map node using the persistent run.</div>
 </div>
 </div>
@@ -267,6 +283,28 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="getCardDiscoveryService()">
+<h3>getCardDiscoveryService</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="cards/CardDiscoveryService.html" title="class in com.csse3200.game.cards">CardDiscoveryService</a></span>&nbsp;<span class="element-name">getCardDiscoveryService</span>()</div>
+<div class="block">Gets card discovery progress shared by all screens in this game session.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>process-lifetime card discovery service</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getBackgroundId()">
+<h3>getBackgroundId</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">getBackgroundId</span>()</div>
+<div class="block">Returns the background id of the current battle instance</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>String background id for the current battle</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="getRunState()">
 <h3>getRunState</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a></span>&nbsp;<span class="element-name">getRunState</span>()</div>
@@ -300,6 +338,20 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>screenType</code> - screen type</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="showNarration(java.lang.String,com.csse3200.game.GdxGame.ScreenType)">
+<h3>showNarration</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">showNarration</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;sequenceId,
+ <a href="GdxGame.ScreenType.html" title="enum class in com.csse3200.game">GdxGame.ScreenType</a>&nbsp;next)</span></div>
+<div class="block">Plays a story crawl, then continues to <code>next</code>. An unknown or empty sequence completes on
+ its first frame. Narration file errors skip the crawl and continue to <code>next</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>sequenceId</code> - story sequence to play</dd>
+<dd><code>next</code> - destination after completion or skipping</dd>
 </dl>
 </section>
 </li>

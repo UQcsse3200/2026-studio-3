@@ -193,7 +193,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyStatusEffect(com.csse3200.game.components.StatusEffect)" class="member-name-link">applyStatusEffect</a><wbr>(<a href="StatusEffect.html" title="class in com.csse3200.game.components">StatusEffect</a>&nbsp;effect)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Applies a status effect to this entity.</div>
+<div class="block">Applies a status effect.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyStatusEffect(java.lang.String,int,int)" class="member-name-link">applyStatusEffect</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;type,
@@ -237,10 +237,18 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the entity's max health.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="StatusEffect.html" title="class in com.csse3200.game.components">StatusEffect</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStatusEffect(java.lang.String)" class="member-name-link">getStatusEffect</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;type)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPoisonStacksByDuration()" class="member-name-link">getPoisonStacksByDuration</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="StatusEffect.html" title="class in com.csse3200.game.components">StatusEffect</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStatusEffect(java.lang.String)" class="member-name-link">getStatusEffect</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;type)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the active status effect with the given type, or null if not present.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStatusEffectDurations()" class="member-name-link">getStatusEffectDurations</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns an immutable snapshot of the active status effects and their remaining durations.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hasStatusEffect(java.lang.String)" class="member-name-link">hasStatusEffect</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;type)</code></div>
@@ -318,10 +326,15 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Damages the entity's health directly, ignoring block and armour.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateStatusEffects()" class="member-name-link">updateStatusEffects</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#tickStatusEffect(java.lang.String)" class="member-name-link">tickStatusEffect</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;type)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Ticks down the duration of all active status effects by one and removes any that have expired.</div>
+<div class="block">Decrements only the named status and removes it when expired.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateStatusEffects()" class="member-name-link">updateStatusEffects</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Decrements every active status and removes expired effects.</div>
 </div>
 </div>
 </div>
@@ -677,9 +690,11 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="applyStatusEffect(com.csse3200.game.components.StatusEffect)">
 <h3>applyStatusEffect</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">applyStatusEffect</span><wbr><span class="parameters">(<a href="StatusEffect.html" title="class in com.csse3200.game.components">StatusEffect</a>&nbsp;effect)</span></div>
-<div class="block">Applies a status effect to this entity. If an effect with the same id is already active, it is
- overwritten by the new one (design choice: overwrite, not stack. To be confirmed with Team 5/6
- if card design expects stacking behaviour instead).</div>
+<div class="block">Applies a status effect.
+
+ <p>Poison stacks are grouped by remaining duration. Feeble does not stack its damage reduction
+ and keeps the longer duration on reapplication; permanent duration takes precedence. Other
+ statuses retain their overwrite behaviour.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>effect</code> - status effect to apply</dd>
@@ -729,6 +744,24 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="getStatusEffectDurations()">
+<h3>getStatusEffectDurations</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&gt;</span>&nbsp;<span class="element-name">getStatusEffectDurations</span>()</div>
+<div class="block">Returns an immutable snapshot of the active status effects and their remaining durations.
+
+ <p>The returned map is detached from this component's internal status collection. Callers
+ cannot add, remove or replace entries, and later changes to this component do not alter an
+ earlier snapshot.
+
+ <p>A duration greater than zero is the number of turns remaining. A duration of zero or less
+ represents an effect without a finite duration.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>immutable mapping from status effect type to remaining duration</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="removeStatusEffect(java.lang.String)">
 <h3>removeStatusEffect</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">removeStatusEffect</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;type)</span></div>
@@ -737,6 +770,12 @@ loadScripts(document, 'script');</script>
 <dt>Parameters:</dt>
 <dd><code>type</code> - status effect type identifier</dd>
 </dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getPoisonStacksByDuration()">
+<h3>getPoisonStacksByDuration</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&gt;</span>&nbsp;<span class="element-name">getPoisonStacksByDuration</span>()</div>
 </section>
 </li>
 <li>
@@ -749,14 +788,32 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="tickStatusEffect(java.lang.String)">
+<h3>tickStatusEffect</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">tickStatusEffect</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;type)</span></div>
+<div class="block">Decrements only the named status and removes it when expired. Missing and permanent statuses
+ are left unchanged.
+
+ <p>Poison must use processPoisonTick instead. Do not also tick the same status through
+ updateStatusEffects.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>type</code> - status identifier</dd>
+<dt>Returns:</dt>
+<dd>true if the status expired and was removed</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if type identifies poison</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="updateStatusEffects()">
 <h3>updateStatusEffects</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">updateStatusEffects</span>()</div>
-<div class="block">Ticks down the duration of all active status effects by one and removes any that have expired.
- This method's internal logic (tick/expire/cleanup) is self-contained. IMPORTANT - external
- dependency: this method must be called exactly once per turn for durations to mean "number of
- turns". WHEN it gets called is not yet wired up - it depends on Team 3's turn/battle-sequence
- event, which is not confirmed yet.</div>
+<div class="block">Decrements every active status and removes expired effects.
+
+ <p>This includes Poison and Feeble. The caller must avoid ticking the same status twice through
+ this method and processPoisonTick or tickStatusEffect.</div>
 </section>
 </li>
 <li>

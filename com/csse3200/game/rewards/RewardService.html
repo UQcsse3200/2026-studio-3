@@ -107,6 +107,19 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.rewards.RewardGenerator)" class="member-name-link">RewardService</a><wbr>(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator)</code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,com.csse3200.game.cards.CardAcquisitionPool,java.util.Random)" class="member-name-link">RewardService</a><wbr>(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
+ <a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="../cards/CardAcquisitionPool.html" title="class in com.csse3200.game.cards">CardAcquisitionPool</a>&nbsp;acquisitionPool,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;cardRandom)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Creates a reward service with an explicit shared acquisition policy.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,java.util.Random)" class="member-name-link">RewardService</a><wbr>(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
+ <a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;cardRandom)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a reward service with deterministic injectable generation dependencies.</div>
+</div>
 </div>
 </section>
 </li>
@@ -127,15 +140,22 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Applies a generated reward to a live player entity.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generateRewardOptions()" class="member-name-link">generateRewardOptions</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#claimRunReward(com.csse3200.game.maps.RunState,com.csse3200.game.rewards.RewardOption,java.lang.String)" class="member-name-link">claimRunReward</a><wbr>(<a href="../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState,
+ <a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a>&nbsp;selected,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;selectedCardId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Generates rewards for a player without a gold bonus.</div>
+<div class="block">Applies one mutually exclusive reward to the persistent run state.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generateRewardOptions(float)" class="member-name-link">generateRewardOptions</a><wbr>(float&nbsp;goldBonusMultiplier)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generateRewardOptions()" class="member-name-link">generateRewardOptions</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Generates one final gold option and one item option.</div>
+<div class="block">Generates rewards for a player without a gold bonus.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generateRewardOptions(float)" class="member-name-link">generateRewardOptions</a><wbr>(float&nbsp;goldBonusMultiplier)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Generates mutually exclusive Gold, Item and (when eligible) Card options.</div>
 </div>
 </div>
 </div>
@@ -166,6 +186,25 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">RewardService</span><wbr><span class="parameters">(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator)</span></div>
 </section>
 </li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,java.util.Random)">
+<h3>RewardService</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">RewardService</span><wbr><span class="parameters">(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
+ <a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;cardRandom)</span></div>
+<div class="block">Creates a reward service with deterministic injectable generation dependencies.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,com.csse3200.game.cards.CardAcquisitionPool,java.util.Random)">
+<h3>RewardService</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">RewardService</span><wbr><span class="parameters">(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
+ <a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="../cards/CardAcquisitionPool.html" title="class in com.csse3200.game.cards">CardAcquisitionPool</a>&nbsp;acquisitionPool,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;cardRandom)</span></div>
+<div class="block">Creates a reward service with an explicit shared acquisition policy.</div>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -185,12 +224,27 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="generateRewardOptions(float)">
 <h3>generateRewardOptions</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a>&gt;</span>&nbsp;<span class="element-name">generateRewardOptions</span><wbr><span class="parameters">(float&nbsp;goldBonusMultiplier)</span></div>
-<div class="block">Generates one final gold option and one item option.</div>
+<div class="block">Generates mutually exclusive Gold, Item and (when eligible) Card options.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>goldBonusMultiplier</code> - current Lucky Coin multiplier</dd>
 <dt>Returns:</dt>
-<dd>one gold option and one item option</dd>
+<dd>Gold and Item options, followed by a Card option when the acquisition pool is non-empty</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="claimRunReward(com.csse3200.game.maps.RunState,com.csse3200.game.rewards.RewardOption,java.lang.String)">
+<h3>claimRunReward</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">claimRunReward</span><wbr><span class="parameters">(<a href="../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState,
+ <a href="RewardOption.html" title="class in com.csse3200.game.rewards">RewardOption</a>&nbsp;selected,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;selectedCardId)</span></div>
+<div class="block">Applies one mutually exclusive reward to the persistent run state.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>runState</code> - active run receiving the reward</dd>
+<dd><code>selected</code> - chosen top-level reward</dd>
+<dd><code>selectedCardId</code> - chosen card ID for CARD rewards; ignored for Gold and Item</dd>
 </dl>
 </section>
 </li>

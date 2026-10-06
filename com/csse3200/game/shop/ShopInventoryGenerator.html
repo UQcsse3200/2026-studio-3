@@ -129,9 +129,15 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Creates a generator with nondeterministic inventory selection.</div>
 </div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.cards.CardService,java.util.Random)" class="member-name-link">ShopInventoryGenerator</a><wbr>(<a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.cards.CardService,com.csse3200.game.cards.CardAcquisitionPool,java.util.Random)" class="member-name-link">ShopInventoryGenerator</a><wbr>(<a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="../cards/CardAcquisitionPool.html" title="class in com.csse3200.game.cards">CardAcquisitionPool</a>&nbsp;acquisitionPool,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;random)</code></div>
 <div class="col-last odd-row-color">
+<div class="block">Creates a generator that uses the supplied shared acquisition policy.</div>
+</div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.cards.CardService,java.util.Random)" class="member-name-link">ShopInventoryGenerator</a><wbr>(<a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;random)</code></div>
+<div class="col-last even-row-color">
 <div class="block">Creates a generator with an injectable random source for deterministic tests and seeded runs.</div>
 </div>
 </div>
@@ -245,6 +251,15 @@ loadScripts(document, 'script');</script>
 <dd><code>cardService</code> - Team 6 card data source</dd>
 <dd><code>random</code> - random source used for selection, price variation, and stock</dd>
 </dl>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.cards.CardService,com.csse3200.game.cards.CardAcquisitionPool,java.util.Random)">
+<h3>ShopInventoryGenerator</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ShopInventoryGenerator</span><wbr><span class="parameters">(<a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="../cards/CardAcquisitionPool.html" title="class in com.csse3200.game.cards">CardAcquisitionPool</a>&nbsp;acquisitionPool,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;random)</span></div>
+<div class="block">Creates a generator that uses the supplied shared acquisition policy.</div>
 </section>
 </li>
 </ul>

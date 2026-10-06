@@ -100,10 +100,11 @@ loadScripts(document, 'script');</script>
 
  <p>This is intentionally generic — it has no knowledge of cards, health, or any other game
  concept. <a href="DragNDrop.html" title="class in com.csse3200.game.components.spritedisplay.clickable"><code>DragNDrop</code></a> packs one of
- these into the drag payload from whatever <a href="ClickableRecord.html" title="class in com.csse3200.game.components.spritedisplay.clickable"><code>ClickableRecord</code></a> it was built from, and <a href="../reactive/EnemyDropTargetComponent.html" title="class in com.csse3200.game.components.spritedisplay.reactive"><code>EnemyDropTargetComponent</code></a> supplies the target
- ID. <a href="DragNDrop.html" title="class in com.csse3200.game.components.spritedisplay.clickable"><code>DragNDrop</code></a> then fires <code>trigger(instanceId, targetId)</code> on the source entity.
- Neither class needs to know *what* trigger/args mean — that's entirely up to whoever defined the
- card/button (e.g. via JSON) and whoever listens for the resulting event (e.g. PlayerActions).
+ these into the drag payload from whatever <a href="ClickableRecord.html" title="class in com.csse3200.game.components.spritedisplay.clickable"><code>ClickableRecord</code></a> it was built from, and <a href="../reactive/EnemyDropTargetComponent.html" title="class in com.csse3200.game.components.spritedisplay.reactive"><code>EnemyDropTargetComponent</code></a> or the battle's
+ aiming controller supplies the target ID. <a href="DragNDrop.html" title="class in com.csse3200.game.components.spritedisplay.clickable"><code>DragNDrop</code></a> then fires <code>trigger(instanceId,
+ targetId)</code> on the source entity. Neither class needs to know *what* trigger/args mean — that's
+ entirely up to whoever defined the card/button (e.g. via JSON) and whoever listens for the
+ resulting event (e.g. PlayerActions).
 
  <p><code>args</code> supports 0–3 elements, matching the arities EventHandler natively supports.</div>
 </section>

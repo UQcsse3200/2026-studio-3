@@ -126,6 +126,12 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Selects base or upgraded values without modifying either input.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolveBasePreview(com.csse3200.game.cards.configs.CardConfig,java.lang.String)" class="member-name-link">resolveBasePreview</a><wbr>(<a href="../configs/CardConfig.html" title="class in com.csse3200.game.cards.configs">CardConfig</a>&nbsp;config,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;presentationId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resolves the base values of a definition for a read-only offer or catalogue preview.</div>
+</div>
 </div>
 </div>
 </div>
@@ -157,6 +163,18 @@ loadScripts(document, 'script');</script>
 <section class="method-details" id="method-detail">
 <h2>Method Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="resolveBasePreview(com.csse3200.game.cards.configs.CardConfig,java.lang.String)">
+<h3>resolveBasePreview</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a></span>&nbsp;<span class="element-name">resolveBasePreview</span><wbr><span class="parameters">(<a href="../configs/CardConfig.html" title="class in com.csse3200.game.cards.configs">CardConfig</a>&nbsp;config,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;presentationId)</span></div>
+<div class="block">Resolves the base values of a definition for a read-only offer or catalogue preview.
+
+ <p>The presentation ID is deliberately not an owned instance ID and must never be persisted or
+ sent to gameplay. Acquisition creates a real <a href="CardInstance.html" title="class in com.csse3200.game.cards.runtime"><code>CardInstance</code></a> only after the offer is
+ accepted.</div>
+</section>
+</li>
 <li>
 <section class="detail" id="resolve(com.csse3200.game.cards.configs.CardConfig,com.csse3200.game.cards.runtime.CardInstance)">
 <h3>resolve</h3>

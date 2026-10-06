@@ -113,22 +113,25 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color">
 <div class="block">Whether this run has already used its one permitted card fusion.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a></code></div>
-<div class="col-second even-row-color"><code><a href="#encounterSeed" class="member-name-link">encounterSeed</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="CardProgressSaveData.html" title="class in com.csse3200.game.save">CardProgressSaveData</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#cards" class="member-name-link">cards</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#encounterSeed" class="member-name-link">encounterSeed</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Seed that fixes each node's encounter for this run; null in saves made before it existed.</div>
 </div>
-<div class="col-first odd-row-color"><code>boolean</code></div>
-<div class="col-second odd-row-color"><code><a href="#pendingEliteTempleReward" class="member-name-link">pendingEliteTempleReward</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>boolean</code></div>
+<div class="col-second even-row-color"><code><a href="#pendingEliteTempleReward" class="member-name-link">pendingEliteTempleReward</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Whether the hidden Elite temple reward is waiting to be entered.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#pendingRewardId" class="member-name-link">pendingRewardId</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#resumeScreen" class="member-name-link">resumeScreen</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#pendingRewardId" class="member-name-link">pendingRewardId</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#resumeScreen" class="member-name-link">resumeScreen</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -151,6 +154,11 @@ loadScripts(document, 'script');</script>
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;resumeScreen,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="BestiaryProgressSaveData.html" title="class in com.csse3200.game.save">BestiaryProgressSaveData</a>&gt;&nbsp;bestiary)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(java.lang.String,java.lang.String,java.util.List,java.util.List)" class="member-name-link">ProgressSaveData</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;pendingRewardId,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;resumeScreen,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="BestiaryProgressSaveData.html" title="class in com.csse3200.game.save">BestiaryProgressSaveData</a>&gt;&nbsp;bestiary,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="CardProgressSaveData.html" title="class in com.csse3200.game.save">CardProgressSaveData</a>&gt;&nbsp;cards)</code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -188,6 +196,12 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="bestiary">
 <h3>bestiary</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="BestiaryProgressSaveData.html" title="class in com.csse3200.game.save">BestiaryProgressSaveData</a>&gt;</span>&nbsp;<span class="element-name">bestiary</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="cards">
+<h3>cards</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="CardProgressSaveData.html" title="class in com.csse3200.game.save">CardProgressSaveData</a>&gt;</span>&nbsp;<span class="element-name">cards</span></div>
 </section>
 </li>
 <li>
@@ -239,6 +253,15 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ProgressSaveData</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;pendingRewardId,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;resumeScreen,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="BestiaryProgressSaveData.html" title="class in com.csse3200.game.save">BestiaryProgressSaveData</a>&gt;&nbsp;bestiary)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(java.lang.String,java.lang.String,java.util.List,java.util.List)">
+<h3>ProgressSaveData</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ProgressSaveData</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;pendingRewardId,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;resumeScreen,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="BestiaryProgressSaveData.html" title="class in com.csse3200.game.save">BestiaryProgressSaveData</a>&gt;&nbsp;bestiary,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="CardProgressSaveData.html" title="class in com.csse3200.game.save">CardProgressSaveData</a>&gt;&nbsp;cards)</span></div>
 </section>
 </li>
 </ul>

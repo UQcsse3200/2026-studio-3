@@ -158,20 +158,26 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Draw the renderable.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#registerInstanceVariant(java.lang.String,com.csse3200.game.components.spritedisplay.displaying.DisplayingSupplier)" class="member-name-link">registerInstanceVariant</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="DisplayingRecord.html" title="class in com.csse3200.game.components.spritedisplay.displaying">DisplayingRecord</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#loadRecordsFromJson(java.nio.file.Path)" class="member-name-link">loadRecordsFromJson</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a>&nbsp;file)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">NEW: Statically parse a JSON file and return the list of DisplayingRecords without creating a
+ factory.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#registerInstanceVariant(java.lang.String,com.csse3200.game.components.spritedisplay.displaying.DisplayingSupplier)" class="member-name-link">registerInstanceVariant</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
  <a href="DisplayingSupplier.html" title="interface in com.csse3200.game.components.spritedisplay.displaying">DisplayingSupplier</a>&nbsp;supplier)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#registerVariant(java.lang.String,com.csse3200.game.components.spritedisplay.displaying.DisplayingSupplier)" class="member-name-link">registerVariant</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#registerVariant(java.lang.String,com.csse3200.game.components.spritedisplay.displaying.DisplayingSupplier)" class="member-name-link">registerVariant</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
  <a href="DisplayingSupplier.html" title="interface in com.csse3200.game.components.spritedisplay.displaying">DisplayingSupplier</a>&nbsp;supplier)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-com.csse3200.game.ui.UIComponent">Methods inherited from class&nbsp;com.csse3200.game.ui.<a href="../../../ui/UIComponent.html" title="class in com.csse3200.game.ui">UIComponent</a></h3>
-<code><a href="../../../ui/UIComponent.html#getLayer()">getLayer</a>, <a href="../../../ui/UIComponent.html#getZIndex()">getZIndex</a></code></div>
+<code><a href="../../../ui/UIComponent.html#getLayer()">getLayer</a>, <a href="../../../ui/UIComponent.html#getSharedSkin()">getSharedSkin</a>, <a href="../../../ui/UIComponent.html#getZIndex()">getZIndex</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-com.csse3200.game.rendering.RenderComponent">Methods inherited from class&nbsp;com.csse3200.game.rendering.<a href="../../../rendering/RenderComponent.html" title="class in com.csse3200.game.rendering">RenderComponent</a></h3>
 <code><a href="../../../rendering/RenderComponent.html#compareTo(com.csse3200.game.rendering.Renderable)">compareTo</a>, <a href="../../../rendering/RenderComponent.html#render(com.badlogic.gdx.graphics.g2d.SpriteBatch)">render</a></code></div>
@@ -223,6 +229,15 @@ loadScripts(document, 'script');</script>
 <h3>registerVariant</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">registerVariant</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
  <a href="DisplayingSupplier.html" title="interface in com.csse3200.game.components.spritedisplay.displaying">DisplayingSupplier</a>&nbsp;supplier)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="loadRecordsFromJson(java.nio.file.Path)">
+<h3>loadRecordsFromJson</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="DisplayingRecord.html" title="class in com.csse3200.game.components.spritedisplay.displaying">DisplayingRecord</a>&gt;</span>&nbsp;<span class="element-name">loadRecordsFromJson</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a>&nbsp;file)</span></div>
+<div class="block">NEW: Statically parse a JSON file and return the list of DisplayingRecords without creating a
+ factory. Skins are left null; callers that need skins can load them separately. Use this when
+ you want to filter / re-inject the records before building the factory.</div>
 </section>
 </li>
 <li>

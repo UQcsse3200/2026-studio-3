@@ -92,7 +92,7 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public final class </span><span class="element-name type-name-label">IntentIcons</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Maps <a href="IntentType.html" title="enum class in com.csse3200.game.components.enemy"><code>IntentType</code></a> values to their HUD icon textures.
+<div class="block">Maps enemy intents to their HUD icon textures.
 
  <p>The textures live under <code>images/enemies/intents/</code> and are queued for loading by <code>
  EnemyFactory.loadAssets()</code>.</div>
@@ -115,14 +115,23 @@ loadScripts(document, 'script');</script>
 <div class="col-second odd-row-color"><code><a href="#BUFF" class="member-name-link">BUFF</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#DEBUFF" class="member-name-link">DEBUFF</a></code></div>
+<div class="col-second even-row-color"><code><a href="#DAMAGE_ON_CARD_PLAY" class="member-name-link">DAMAGE_ON_CARD_PLAY</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#DEFEND" class="member-name-link">DEFEND</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#DEBUFF" class="member-name-link">DEBUFF</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#UNKNOWN" class="member-name-link">UNKNOWN</a></code></div>
+<div class="col-second even-row-color"><code><a href="#DEFEND" class="member-name-link">DEFEND</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#SILENCE" class="member-name-link">SILENCE</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#TAUNT" class="member-name-link">TAUNT</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#UNKNOWN" class="member-name-link">UNKNOWN</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -139,11 +148,24 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#all()" class="member-name-link">all</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Returns every intent icon texture path.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#pathFor(com.csse3200.game.components.enemy.IntentType)" class="member-name-link">pathFor</a><wbr>(<a href="IntentType.html" title="enum class in com.csse3200.game.components.enemy">IntentType</a>&nbsp;type)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Returns the icon texture path for an intent type.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#pathFor(com.csse3200.game.components.enemy.IntentType,com.csse3200.game.components.enemy.IntentEffectType)" class="member-name-link">pathFor</a><wbr>(<a href="IntentType.html" title="enum class in com.csse3200.game.components.enemy">IntentType</a>&nbsp;type,
+ <a href="IntentEffectType.html" title="enum class in com.csse3200.game.components.enemy">IntentEffectType</a>&nbsp;effectType)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Returns the appropriate icon for an intent and its specific status effect.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#pathForStatus(java.lang.String)" class="member-name-link">pathForStatus</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;statusKey)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Maps a status effect key stored on an entity to its icon.</div>
 </div>
 </div>
 </div>
@@ -232,6 +254,48 @@ loadScripts(document, 'script');</script>
 </dl>
 </section>
 </li>
+<li>
+<section class="detail" id="SILENCE">
+<h3>SILENCE</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">SILENCE</span></div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../../constant-values.html#com.csse3200.game.components.enemy.IntentIcons.SILENCE">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="DAMAGE_ON_CARD_PLAY">
+<h3>DAMAGE_ON_CARD_PLAY</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">DAMAGE_ON_CARD_PLAY</span></div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../../constant-values.html#com.csse3200.game.components.enemy.IntentIcons.DAMAGE_ON_CARD_PLAY">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="TAUNT">
+<h3>TAUNT</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">TAUNT</span></div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../../constant-values.html#com.csse3200.game.components.enemy.IntentIcons.TAUNT">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -244,9 +308,10 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="all()">
 <h3>all</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]</span>&nbsp;<span class="element-name">all</span>()</div>
+<div class="block">Returns every intent icon texture path.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>every intent icon texture path</dd>
+<dd>a copy of all intent icon paths</dd>
 </dl>
 </section>
 </li>
@@ -254,10 +319,46 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="pathFor(com.csse3200.game.components.enemy.IntentType)">
 <h3>pathFor</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">pathFor</span><wbr><span class="parameters">(<a href="IntentType.html" title="enum class in com.csse3200.game.components.enemy">IntentType</a>&nbsp;type)</span></div>
-<div class="block">Returns the icon texture path for an intent type.</div>
+<div class="block">Returns the icon texture path for an intent type.
+
+ <p>This method is retained for backward compatibility. Debuffs queried through this method use
+ the generic debuff icon.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>type</code> - the intent type</dd>
+<dt>Returns:</dt>
+<dd>an internal texture path</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="pathFor(com.csse3200.game.components.enemy.IntentType,com.csse3200.game.components.enemy.IntentEffectType)">
+<h3>pathFor</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">pathFor</span><wbr><span class="parameters">(<a href="IntentType.html" title="enum class in com.csse3200.game.components.enemy">IntentType</a>&nbsp;type,
+ <a href="IntentEffectType.html" title="enum class in com.csse3200.game.components.enemy">IntentEffectType</a>&nbsp;effectType)</span></div>
+<div class="block">Returns the appropriate icon for an intent and its specific status effect.
+
+ <p>Only debuff intents are split by effect type. All other intent types use the existing
+ type-based icon mapping.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>type</code> - the general intent type</dd>
+<dd><code>effectType</code> - the status effect applied by the intent; may be null</dd>
+<dt>Returns:</dt>
+<dd>an internal texture path</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="pathForStatus(java.lang.String)">
+<h3>pathForStatus</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">pathForStatus</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;statusKey)</span></div>
+<div class="block">Maps a status effect key stored on an entity to its icon.
+
+ <p>Taunt keys carry the taunting enemy's id after a colon, so only the part before it is used.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>statusKey</code> - key the effect is stored under</dd>
 <dt>Returns:</dt>
 <dd>an internal texture path</dd>
 </dl>

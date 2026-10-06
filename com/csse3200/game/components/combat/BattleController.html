@@ -183,18 +183,28 @@ loadScripts(document, 'script');</script>
  a real killing blow) and lets the normal outcome check pick it up, so this reuses the real win
  path instead of faking a VICTORY transition directly.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../cards/play/CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCardPlayRequest()" class="member-name-link">getCardPlayRequest</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentEnemyIndex()" class="member-name-link">getCurrentEnemyIndex</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAliveTaunterTargetIds()" class="member-name-link">getAliveTaunterTargetIds</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Target IDs of living enemies whose taunt is active on the player.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../cards/play/CardPlayRequest.html" title="class in com.csse3200.game.cards.play">CardPlayRequest</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCardPlayRequest()" class="member-name-link">getCardPlayRequest</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentEnemyIndex()" class="member-name-link">getCurrentEnemyIndex</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the current targeted enemy.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="BattlePhase.html" title="enum class in com.csse3200.game.components.combat">BattlePhase</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentPhase()" class="member-name-link">getCurrentPhase</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="BattlePhase.html" title="enum class in com.csse3200.game.components.combat">BattlePhase</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentPhase()" class="member-name-link">getCurrentPhase</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Retrieves the current phase of the battle (e.g.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPlayerStatusEffectDurations()" class="member-name-link">getPlayerStatusEffectDurations</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns an immutable snapshot of the player's active status effects and remaining durations.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#handle(com.csse3200.game.components.combat.BattleEvent)" class="member-name-link">handle</a><wbr>(<a href="BattleEvent.html" title="enum class in com.csse3200.game.components.combat">BattleEvent</a>&nbsp;event)</code></div>
@@ -327,6 +337,29 @@ loadScripts(document, 'script');</script>
 <dt>Returns:</dt>
 <dd>true if the player carries an active effect with this identifier</dd>
 </dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getPlayerStatusEffectDurations()">
+<h3>getPlayerStatusEffectDurations</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&gt;</span>&nbsp;<span class="element-name">getPlayerStatusEffectDurations</span>()</div>
+<div class="block">Returns an immutable snapshot of the player's active status effects and remaining durations.
+
+ <p>The returned map is safe for UI and integration code to read. Modifying the result cannot
+ alter the player's combat state. A duration greater than zero is the number of turns remaining;
+ zero or less represents an effect without a finite duration.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>immutable mapping from status effect type to remaining duration, or an empty map when
+     the player has no combat stats</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getAliveTaunterTargetIds()">
+<h3>getAliveTaunterTargetIds</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">getAliveTaunterTargetIds</span>()</div>
+<div class="block">Target IDs of living enemies whose taunt is active on the player.</div>
 </section>
 </li>
 <li>

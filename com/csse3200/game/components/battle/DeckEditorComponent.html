@@ -106,16 +106,21 @@ loadScripts(document, 'script');</script>
  from their whole card pool — draw pile, hand and discard pile combined — by toggling cards on and
  off, then confirming with "Set Deck".
 
- <p>Every card the player owns is tracked as a distinct <a href="../../cards/runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime"><code>CardInstance</code></a> (see <a href="../../cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck"><code>PlayerDeck</code></a>), not just a card ID, so two copies of the same card
- (e.g. two "strike" cards) are selected, highlighted and submitted independently — selecting one
- never affects the other, even though they look identical.
+ <p>Layout (left to right): a scrollable grid of cards, a narrow gap containing the vertical
+ scroll up/down buttons, then a preview panel showing the hovered/last-clicked card enlarged with
+ its details underneath. "Set Deck" sits bottom-left. Cards currently in the hand are listed
+ first. Every selected card shows a numbered badge in its top-right corner; the number is its
+ position in the hand row (selection order). Each grid card renders through <a href="../cards/CardWidget.html" title="class in com.csse3200.game.components.cards"><code>CardWidget</code></a>, so its frame, name plate and badges match the
+ battle hand exactly.
 
- <p>The per-card toggle buttons are built with a dedicated <a href="../spritedisplay/clickable/ClickableFactory.html" title="class in com.csse3200.game.components.spritedisplay.clickable"><code>ClickableFactory</code></a> (per the
- project's declarative-widget convention), positioned in a grid anchored to the popup window's
- actual on-screen bounds. Because those buttons are stage-level actors outside the popup window's
- own actor hierarchy, they are torn down on close and rebuilt on open (see <code>onOpened()</code> /
- <code>onClosed()</code>) rather than living inside the window's content table like the summary label
- and "Set Deck" button do.</div>
+ <p>The scroll buttons' definitions come from a dedicated <code>DeckEditorUi.json</code> — separate
+ from <code>BattleUi.json</code> — and are created by this component's own <a href="../spritedisplay/clickable/ClickableFactory.html" title="class in com.csse3200.game.components.spritedisplay.clickable"><code>ClickableFactory</code></a>.
+ Their visibility and interactivity are toggled in place (never rebuilt) so the JSON-provided
+ coordinates are honoured.
+
+ <p>Everything display-only (preview panel, preview, summary, error, badges) is a <code>
+ Displaying</code> variant on this entity driven through <a href="DeckEditorEvents.html" title="class in com.csse3200.game.components.battle"><code>DeckEditorEvents</code></a>; this class only
+ pushes data to them.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -139,10 +144,12 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.cards.play.CardPlayService,com.csse3200.game.cards.CardLibrary,com.csse3200.game.ui.PopupDisplay,com.csse3200.game.components.spritedisplay.clickable.ClickableFactory,java.util.function.Consumer)" class="member-name-link">DeckEditorComponent</a><wbr>(<a href="../../cards/play/CardPlayService.html" title="class in com.csse3200.game.cards.play">CardPlayService</a>&nbsp;cardPlayService,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.cards.play.CardPlayService,com.csse3200.game.cards.CardLibrary,com.csse3200.game.ui.PopupDisplay,com.csse3200.game.components.spritedisplay.clickable.ClickableFactory,com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory,com.csse3200.game.components.cards.CardWidgetAssets,java.util.function.Consumer)" class="member-name-link">DeckEditorComponent</a><wbr>(<a href="../../cards/play/CardPlayService.html" title="class in com.csse3200.game.cards.play">CardPlayService</a>&nbsp;cardPlayService,
  <a href="../../cards/CardLibrary.html" title="class in com.csse3200.game.cards">CardLibrary</a>&nbsp;library,
  <a href="../../ui/PopupDisplay.html" title="class in com.csse3200.game.ui">PopupDisplay</a>&nbsp;popup,
  <a href="../spritedisplay/clickable/ClickableFactory.html" title="class in com.csse3200.game.components.spritedisplay.clickable">ClickableFactory</a>&nbsp;poolFactory,
+ <a href="../spritedisplay/displaying/DisplayingFactory.html" title="class in com.csse3200.game.components.spritedisplay.displaying">DisplayingFactory</a>&nbsp;displayFactory,
+ <a href="../cards/CardWidgetAssets.html" title="class in com.csse3200.game.components.cards">CardWidgetAssets</a>&nbsp;cardWidgetAssets,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Consumer.html" title="class or interface in java.util.function" class="external-link">Consumer</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../cards/runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;&gt;&nbsp;onDeckChanged)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
@@ -164,25 +171,28 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Called when the entity is created and registered.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw</a><wbr>(com.badlogic.gdx.graphics.g2d.SpriteBatch&nbsp;batch)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#dispose()" class="member-name-link">dispose</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Called when the component is disposed.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw</a><wbr>(com.badlogic.gdx.graphics.g2d.SpriteBatch&nbsp;batch)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Draw the renderable.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#open()" class="member-name-link">open</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Opens the popup with the pool/selection refreshed from the current battle deck state.</div>
-</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#open()" class="member-name-link">open</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-com.csse3200.game.ui.UIComponent">Methods inherited from class&nbsp;com.csse3200.game.ui.<a href="../../ui/UIComponent.html" title="class in com.csse3200.game.ui">UIComponent</a></h3>
-<code><a href="../../ui/UIComponent.html#getLayer()">getLayer</a>, <a href="../../ui/UIComponent.html#getZIndex()">getZIndex</a></code></div>
+<code><a href="../../ui/UIComponent.html#getLayer()">getLayer</a>, <a href="../../ui/UIComponent.html#getSharedSkin()">getSharedSkin</a>, <a href="../../ui/UIComponent.html#getZIndex()">getZIndex</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-com.csse3200.game.rendering.RenderComponent">Methods inherited from class&nbsp;com.csse3200.game.rendering.<a href="../../rendering/RenderComponent.html" title="class in com.csse3200.game.rendering">RenderComponent</a></h3>
-<code><a href="../../rendering/RenderComponent.html#compareTo(com.csse3200.game.rendering.Renderable)">compareTo</a>, <a href="../../rendering/RenderComponent.html#dispose()">dispose</a>, <a href="../../rendering/RenderComponent.html#render(com.badlogic.gdx.graphics.g2d.SpriteBatch)">render</a></code></div>
+<code><a href="../../rendering/RenderComponent.html#compareTo(com.csse3200.game.rendering.Renderable)">compareTo</a>, <a href="../../rendering/RenderComponent.html#render(com.badlogic.gdx.graphics.g2d.SpriteBatch)">render</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-com.csse3200.game.components.Component">Methods inherited from class&nbsp;com.csse3200.game.components.<a href="../Component.html" title="class in com.csse3200.game.components">Component</a></h3>
 <code><a href="../Component.html#earlyUpdate()">earlyUpdate</a>, <a href="../Component.html#getEntity()">getEntity</a>, <a href="../Component.html#setEnabled(boolean)">setEnabled</a>, <a href="../Component.html#setEntity(com.csse3200.game.entities.Entity)">setEntity</a>, <a href="../Component.html#toString()">toString</a>, <a href="../Component.html#triggerEarlyUpdate()">triggerEarlyUpdate</a>, <a href="../Component.html#triggerUpdate()">triggerUpdate</a>, <a href="../Component.html#update()">update</a></code></div>
@@ -207,25 +217,15 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(com.csse3200.game.cards.play.CardPlayService,com.csse3200.game.cards.CardLibrary,com.csse3200.game.ui.PopupDisplay,com.csse3200.game.components.spritedisplay.clickable.ClickableFactory,java.util.function.Consumer)">
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.cards.play.CardPlayService,com.csse3200.game.cards.CardLibrary,com.csse3200.game.ui.PopupDisplay,com.csse3200.game.components.spritedisplay.clickable.ClickableFactory,com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory,com.csse3200.game.components.cards.CardWidgetAssets,java.util.function.Consumer)">
 <h3>DeckEditorComponent</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">DeckEditorComponent</span><wbr><span class="parameters">(<a href="../../cards/play/CardPlayService.html" title="class in com.csse3200.game.cards.play">CardPlayService</a>&nbsp;cardPlayService,
  <a href="../../cards/CardLibrary.html" title="class in com.csse3200.game.cards">CardLibrary</a>&nbsp;library,
  <a href="../../ui/PopupDisplay.html" title="class in com.csse3200.game.ui">PopupDisplay</a>&nbsp;popup,
  <a href="../spritedisplay/clickable/ClickableFactory.html" title="class in com.csse3200.game.components.spritedisplay.clickable">ClickableFactory</a>&nbsp;poolFactory,
+ <a href="../spritedisplay/displaying/DisplayingFactory.html" title="class in com.csse3200.game.components.spritedisplay.displaying">DisplayingFactory</a>&nbsp;displayFactory,
+ <a href="../cards/CardWidgetAssets.html" title="class in com.csse3200.game.components.cards">CardWidgetAssets</a>&nbsp;cardWidgetAssets,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Consumer.html" title="class or interface in java.util.function" class="external-link">Consumer</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../cards/runtime/CardInstance.html" title="class in com.csse3200.game.cards.runtime">CardInstance</a>&gt;&gt;&nbsp;onDeckChanged)</span></div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>cardPlayService</code> - source of the player's card pool/hand and the rearrange operation</dd>
-<dd><code>library</code> - card definitions, for names/art</dd>
-<dd><code>popup</code> - the popup window this editor renders into</dd>
-<dd><code>poolFactory</code> - a <a href="../spritedisplay/clickable/ClickableFactory.html" title="class in com.csse3200.game.components.spritedisplay.clickable"><code>ClickableFactory</code></a> dedicated to this editor's toggle buttons (must
-     not be shared with any other widget group, e.g. the main hand row)</dd>
-<dd><code>onDeckChanged</code> - callback run after a successful "Set Deck", passed the full confirmed
-     selection (including any still-on-cooldown picks) — so the caller can refresh whatever else
-     displays the hand (e.g. the on-screen hand row), which needs the whole picture even though
-     <a href="../../cards/play/CardPlayService.html#rearrangeHand(java.util.List)"><code>CardPlayService.rearrangeHand(java.util.List&lt;com.csse3200.game.cards.runtime.CardInstance&gt;)</code></a> itself only moves the currently-playable subset</dd>
-</dl>
 </section>
 </li>
 </ul>
@@ -253,7 +253,20 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="open()">
 <h3>open</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">open</span>()</div>
-<div class="block">Opens the popup with the pool/selection refreshed from the current battle deck state.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="dispose()">
+<h3>dispose</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">dispose</span>()</div>
+<div class="block"><span class="description-from-type-label">Description copied from class:&nbsp;<code><a href="../Component.html#dispose()">Component</a></code></span></div>
+<div class="block">Called when the component is disposed. Dispose of any internal resources here.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code>dispose</code>&nbsp;in interface&nbsp;<code>com.badlogic.gdx.utils.Disposable</code></dd>
+<dt>Overrides:</dt>
+<dd><code><a href="../../rendering/RenderComponent.html#dispose()">dispose</a></code>&nbsp;in class&nbsp;<code><a href="../../rendering/RenderComponent.html" title="class in com.csse3200.game.rendering">RenderComponent</a></code></dd>
+</dl>
 </section>
 </li>
 <li>
