@@ -7,6 +7,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardDiscoveryService;
+import com.csse3200.game.cards.CardDiscoveryStore;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.chance.CardFusionEncounterBehaviour;
 import com.csse3200.game.chance.ChanceEncounterFactory;
@@ -15,6 +17,8 @@ import com.csse3200.game.files.UserSettings;
 import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.narration.NarrationConfigLoader;
+import com.csse3200.game.narration.NarrationLoadingException;
 import com.csse3200.game.save.AutosaveCoordinator;
 import com.csse3200.game.save.GameStateSnapshotProvider;
 import com.csse3200.game.save.JsonSaveGameRepository;
@@ -35,6 +39,7 @@ import com.csse3200.game.screens.LibraryScreen;
 import com.csse3200.game.screens.MainGameScreen;
 import com.csse3200.game.screens.MainMenuScreen;
 import com.csse3200.game.screens.MapScreen;
+import com.csse3200.game.screens.NarrationScreen;
 import com.csse3200.game.screens.SaveLoadScreen;
 import com.csse3200.game.screens.SettingsScreen;
 import com.csse3200.game.screens.TempleCardSelectionScreen;
@@ -50,7 +55,6 @@ import org.slf4j.LoggerFactory;
  */
 public class GdxGame extends Game {
   private static final Logger logger = LoggerFactory.getLogger(GdxGame.class);
-  private BestiaryService bestiaryService;
   private static final String[] BACKGROUND_IDS =
       new String[] {
         "dungeon",
@@ -64,6 +68,8 @@ public class GdxGame extends Game {
         "cemetery",
         "forest_with_sun"
       };
+  private BestiaryService bestiaryService;
+  private CardDiscoveryService cardDiscoveryService;
 
   /**
    * Gets discovery progress shared by all screens in this game session.
@@ -87,6 +93,15 @@ public class GdxGame extends Game {
     return backgroundId;
   }
 
+  /**
+   * Gets card discovery progress shared by all screens in this game session.
+   *
+   * @return process-lifetime card discovery service
+   */
+  public CardDiscoveryService getCardDiscoveryService() {
+    return cardDiscoveryService;
+  }
+
   // Lives here rather than on a screen, since setScreen() disposes the outgoing screen.
   private final RunState runState = new RunState();
   private final AutosaveCoordinator autosaveCoordinator =
@@ -106,6 +121,15 @@ public class GdxGame extends Game {
     autosaveCoordinator.saveIfPending();
   }
 
+  /**
+   * Flushes a victorious battle's autosave after its reward has been applied but before leaving the
+   * reward screen. The coordinator owns idempotency, so the following map transition cannot write a
+   * duplicate checkpoint.
+   */
+  public void autosaveAfterRewardClaimed() {
+    autosaveCoordinator.saveIfPending();
+  }
+
   private SaveGameService newAutosaveService() {
     CardLibrary cardLibrary = new CardLibrary(CardConfigLoader.loadCards());
     return new SaveGameService(
@@ -114,7 +138,8 @@ public class GdxGame extends Game {
             runState.getOrCreatePlayerState(),
             runState.getOrCreatePlayerDeck(cardLibrary),
             runState,
-            bestiaryService));
+            bestiaryService,
+            cardDiscoveryService));
   }
 
   @Override
@@ -122,6 +147,14 @@ public class GdxGame extends Game {
     logger.info("Creating game");
     loadSettings();
     bestiaryService = BestiaryService.loadDefault();
+    cardDiscoveryService = CardDiscoveryService.loadDefault();
+    CardDiscoveryStore cardDiscoveryStore = CardDiscoveryStore.defaultStore();
+    cardDiscoveryService.mergeProgress(cardDiscoveryStore.load());
+    cardDiscoveryService
+        .getEvents()
+        .addListener(
+            CardDiscoveryService.ENTRY_UPDATED_EVENT,
+            ignored -> cardDiscoveryStore.save(cardDiscoveryService.getProgressSnapshot()));
 
     // Sets background to light yellow
     Gdx.gl.glClearColor(162f / 255f, 73 / 255f, 54 / 255f, 1);
@@ -143,12 +176,36 @@ public class GdxGame extends Game {
    */
   public void setScreen(ScreenType screenType) {
     logger.info("Setting game screen to {}", screenType);
+    prepareScreenTransition();
+    setScreen(newScreen(screenType));
+  }
+
+  /**
+   * Plays a story crawl, then continues to {@code next}. An unknown or empty sequence completes on
+   * its first frame. Narration file errors skip the crawl and continue to {@code next}.
+   *
+   * @param sequenceId story sequence to play
+   * @param next destination after completion or skipping
+   */
+  public void showNarration(String sequenceId, ScreenType next) {
+    try {
+      NarrationConfigLoader.loadSequence(sequenceId);
+    } catch (NarrationLoadingException exception) {
+      logger.error("Unable to load narration sequence {}", sequenceId, exception);
+      setScreen(next);
+      return;
+    }
+    prepareScreenTransition();
+    super.setScreen(new NarrationScreen(sequenceId, () -> setScreen(next)));
+  }
+
+  private void prepareScreenTransition() {
     Screen currentScreen = getScreen();
     if (currentScreen != null) {
       currentScreen.dispose();
     }
     ServiceLocator.registerBestiaryService(bestiaryService);
-    setScreen(newScreen(screenType));
+    ServiceLocator.registerCardDiscoveryService(cardDiscoveryService);
   }
 
   /** Opens the battle screen. */
@@ -181,11 +238,7 @@ public class GdxGame extends Game {
     new ChanceEncounterSelector(ChanceEncounterFactory.createInitialEncounters(), new Random())
         .selectById(eventId);
 
-    Screen currentScreen = getScreen();
-    if (currentScreen != null) {
-      currentScreen.dispose();
-    }
-    ServiceLocator.registerBestiaryService(bestiaryService);
+    prepareScreenTransition();
     setScreen(new EncounterScreen(this, eventId));
   }
 
@@ -200,31 +253,19 @@ public class GdxGame extends Game {
   }
 
   private void openDemoEvent(String previewEncounterId) {
-    Screen currentScreen = getScreen();
-    if (currentScreen != null) {
-      currentScreen.dispose();
-    }
-    ServiceLocator.registerBestiaryService(bestiaryService);
+    prepareScreenTransition();
     setScreen(new DemoEventScreen(this, previewEncounterId));
   }
 
   /** Opens a temporary Campfire preview with no map node or persistent run changes. */
   public void openDemoCampfire() {
-    Screen currentScreen = getScreen();
-    if (currentScreen != null) {
-      currentScreen.dispose();
-    }
-    ServiceLocator.registerBestiaryService(bestiaryService);
+    prepareScreenTransition();
     setScreen(new DemoCampfireScreen(this));
   }
 
   /** Opens a temporary Shop preview using isolated player state and no map node. */
   public void openDemoShop() {
-    Screen currentScreen = getScreen();
-    if (currentScreen != null) {
-      currentScreen.dispose();
-    }
-    ServiceLocator.registerBestiaryService(bestiaryService);
+    prepareScreenTransition();
     setScreen(new DemoShopScreen(this));
   }
 

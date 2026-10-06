@@ -1,0 +1,22 @@
+{
+  "opening": [
+    ["Heaven sent a lesser angel", "to walk among the fallen gods."],
+    ["The pantheon was appointed to keep the world in order.", "A villain corrupted them, and still they do not know."],
+    ["They keep their duties. Their servants keep their posts.", "You were sent not to destroy them, but to set them free."]
+  ],
+  "pre_boss": [
+    ["Beyond this path, a fallen power", "still carries out its sacred duty."],
+    ["Corruption has twisted the command,", "but not the will to obey it."],
+    ["Go. Break the corruption,", "and release what Heaven once appointed."]
+  ],
+  "victory": [
+    ["The corruption breaks.", "The old duty is no longer twisted."],
+    ["They were never meant to be destroyed.", "Only freed from what had bound them."],
+    ["The work is done.", "They are free."]
+  ],
+  "defeat": [
+    ["The command still holds.", "The fallen still believe they serve."],
+    ["The angel's work is unfinished.", "Their duties continue unchanged."],
+    ["The corruption endures.", "They are not yet free."]
+  ]
+}

@@ -71,7 +71,7 @@ final class PoisonStatusEffect extends StatusEffect {
   @Override
   public void addValue(int amount) {
     long adjusted = (long) getValue() + amount;
-    setValue((int) Math.max(0, Math.min(Integer.MAX_VALUE, adjusted)));
+    setValue(Math.clamp(adjusted, 0, Integer.MAX_VALUE));
   }
 
   @Override

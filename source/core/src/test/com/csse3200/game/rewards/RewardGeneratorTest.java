@@ -1,5 +1,8 @@
 package com.csse3200.game.rewards;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.extensions.GameExtension;
@@ -29,7 +32,23 @@ class RewardGeneratorTest {
     int amountA = generatorA.generateGoldOption().getBaseAmount();
     int amountB = generatorB.generateGoldOption().getBaseAmount();
 
-    assertTrue(amountA == amountB);
+      assertEquals(amountA, amountB);
+  }
+
+  @Test
+  void shouldCreateConsistentTypedGoldAndItemOptions() {
+    RewardGenerator generator = new RewardGenerator(new Random(7));
+
+    RewardOption gold = generator.generateGoldRewardOption(0f);
+    RewardOption item = generator.generateItemRewardOption();
+
+    assertEquals(RewardType.GOLD, gold.type);
+    assertTrue(gold.goldAmount >= 20 && gold.goldAmount <= 30);
+    assertNull(gold.itemId);
+    assertNull(gold.cardSelection);
+    assertEquals(RewardType.ITEM, item.type);
+    assertNotNull(item.itemId);
+    assertNull(item.cardSelection);
   }
 
   @Test

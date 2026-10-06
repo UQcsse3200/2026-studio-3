@@ -12,9 +12,11 @@ class BestiaryEntryTest {
   void shouldCopyEnemyConfigurationIntoImmutableDefinition() {
     EnemyConfig config = enemyConfig();
 
-    BestiaryEntry entry = BestiaryEntry.fromEnemyConfig(config, "  A patient hunter.  ");
+    config.description = "  A patient hunter.  ";
+    BestiaryEntry entry = BestiaryEntry.fromEnemyConfig(config);
     config.name = "Changed later";
     config.health = 1;
+    config.description = "Changed later";
 
     assertEquals("shadow_stalker", entry.enemyId());
     assertEquals("Shadow Stalker", entry.name());
@@ -34,8 +36,9 @@ class BestiaryEntryTest {
     config.tier = null;
     config.behaviour = null;
     config.sprite = "   ";
+    config.description = null;
 
-    BestiaryEntry entry = BestiaryEntry.fromEnemyConfig(config, null);
+    BestiaryEntry entry = BestiaryEntry.fromEnemyConfig(config);
 
     assertEquals("Unknown Enemy", entry.name());
     assertEquals(EnemyTier.NORMAL, entry.tier());

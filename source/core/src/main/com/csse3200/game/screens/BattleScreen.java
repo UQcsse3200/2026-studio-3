@@ -1,9 +1,11 @@
 package com.csse3200.game.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.areas.ForestGameArea;
@@ -23,10 +25,13 @@ import com.csse3200.game.cards.play.integration.Team1EnemyStateAdapter;
 import com.csse3200.game.cards.play.integration.Team3CardPlayAdapter;
 import com.csse3200.game.cards.play.integration.Team7PlayerStateAdapter;
 import com.csse3200.game.cards.runtime.CardInstance;
+import com.csse3200.game.cards.runtime.CardResolver;
+import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
-import com.csse3200.game.components.battle.BattleEncounterSelector;
 import com.csse3200.game.components.cards.CardEffectHandler;
+import com.csse3200.game.components.cards.CardWidget;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
@@ -37,11 +42,15 @@ import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
 import com.csse3200.game.components.spritedisplay.clickable.CardAimController;
-import com.csse3200.game.components.spritedisplay.clickable.CardImageSkins;
+import com.csse3200.game.components.spritedisplay.clickable.Clickable;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.clickable.DragNDrop;
+import com.csse3200.game.components.spritedisplay.displaying.CardBadgesDisplay;
+import com.csse3200.game.components.spritedisplay.displaying.CardPreviewDisplay;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
+import com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord;
+import com.csse3200.game.components.spritedisplay.displaying.PopupTextDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -99,23 +108,28 @@ public class BattleScreen extends ScreenAdapter {
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
   private static final float HAND_Y = 1000f;
-  // Less than CARD_WIDTH on purpose: cards overlap like a fanned hand instead of sitting
-  // edge-to-edge, so a full hand still fits across the screen.
   private static final float HAND_SPACING = 90f;
-  // Fan-out: how far each card tilts and dips per slot away from the hand's middle card.
   private static final float HAND_ROTATION_STEP_DEGREES = 6f;
   private static final float HAND_ARC_DROP_PER_CARD = 18f;
-  private static final float CARD_WIDTH = 225;
-  private static final float CARD_HEIGHT = 456;
+  private static final float CARD_WIDTH = CardWidget.CARD_WIDTH;
+  private static final float CARD_HEIGHT = CardWidget.CARD_HEIGHT;
   private static final float CARD_INVENTORY_MIN_WIDTH = 800f;
   private static final float CARD_INVENTORY_MIN_HEIGHT = 600f;
   private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
+  private static final String CARD_WIDGET_SKIN = "flat-earth/skin/flat-earth-ui.json";
+
+  private static final String CARD_INVENTORY_STYLE = "popup";
+
+  private static final String BATTLE_UI_JSON = "sprites/BattleUi.json";
+  private static final String DECK_EDITOR_UI_JSON = "sprites/DeckEditorUi.json";
 
   private final BattleController controller;
   private final CardLibrary library;
   private final BattleDeck battleDeck;
-  // Shared with the debug dialog so it reflects real, live resolutions instead of a
-  // separate copy.
+  private final CardResolver cardResolver = new CardResolver();
+  private final Skin cardWidgetSkin;
+  private final Skin cardInteractionSkin;
+  private final CardWidgetAssets cardWidgetAssets;
   private final CardEffectResolutionService cardEffects;
   private final CardPlayService cardPlayService;
   private final CardAimController enemyCardAim;
@@ -125,11 +139,6 @@ public class BattleScreen extends ScreenAdapter {
   private final PlayerRunState playerState;
   private List<ClickableRecord> staticUiRecords;
 
-  // Fixed left-to-right slot order for the on-screen row: each entry is the exact physical card
-  // (see CardInstance) occupying that slot. Captured at deal time, and reset wholesale whenever the
-  // player deliberately rearranges their hand via the deck editor — otherwise left untouched, so a
-  // played card's slot just toggles disabled in place (its instance shows up in the discard pile)
-  // instead of the row reflowing and making it look like a new card was drawn.
   private List<CardInstance> handRowOrder = new ArrayList<>();
 
   public BattleScreen(GdxGame game) {
@@ -152,7 +161,7 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
-    loadAssets(); // <-- MOVED UP: load "images/heart.png" before anything uses it
+    loadAssets();
 
     renderer = RenderFactory.createRenderer();
     renderer.getCamera().getEntity().setPosition(CAMERA_POSITION);
@@ -160,7 +169,6 @@ public class BattleScreen extends ScreenAdapter {
 
     ServiceLocator.registerCamera(renderer.getCamera().getCamera());
 
-    // Integer for scaling difficulty level
     Integer mapProgression = game.getRunState().getMapProgression();
 
     logger.debug("Initialising main game screen entities");
@@ -179,11 +187,14 @@ public class BattleScreen extends ScreenAdapter {
     playerState = runState.getOrCreatePlayerState();
     Entity player = forestGameArea.getPlayer();
 
-    // Card + deck state has to exist before the controller so it can be handed the single
-    // card-play entry point and the deck it mutates.
-    List<CardConfig> configs = CardConfigLoader.loadCards(); // reads configs/cards.json
+    List<CardConfig> configs = CardConfigLoader.loadCards();
     library = new CardLibrary(configs);
     ServiceLocator.registerCardLibrary(library);
+    loadCardAssets(configs);
+    cardWidgetSkin = new Skin(Gdx.files.internal(CARD_WIDGET_SKIN));
+    cardWidgetAssets =
+        CardWidgetAssets.fromManagedResources(cardWidgetSkin, ServiceLocator.getResourceService());
+    cardInteractionSkin = createCardInteractionSkin();
 
     PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(library);
     battleDeck = new BattleDeck(playerDeck);
@@ -224,9 +235,7 @@ public class BattleScreen extends ScreenAdapter {
 
     controller =
         new BattleController(player, forestGameArea.getEnemies(), effectHandler, cardPlayService);
-
-    EffectVisualRegistry effectVisualRegistry = new EffectVisualRegistry();
-    OffensiveEffectVisuals.registerAll(effectVisualRegistry);
+    EffectVisualRegistry effectVisualRegistry = createEffectVisualRegistry();
     Entity animationCoordinatorEntity =
         new Entity()
             .addComponent(
@@ -277,11 +286,7 @@ public class BattleScreen extends ScreenAdapter {
   }
 
   public void createUI() {
-    // sprites/BattleUi.json holds both the static "Clickable" UI (exit/up/down/end turn) and the
-    // "Displaying" text overlays (the card-label prompt and the between-turns battle log). The card
-    // hand itself is dealt dynamically from the battle deck, so it is merged in below rather than
-    // living in JSON.
-    Path battleUiJson = Path.of("sprites/BattleUi.json");
+    Path battleUiJson = Path.of(BATTLE_UI_JSON);
 
     DisplayingFactory displays = new DisplayingFactory(battleUiJson);
 
@@ -293,16 +298,13 @@ public class BattleScreen extends ScreenAdapter {
     uiFactory.registerInstanceVariant(
         "allEnemiesAimDrag", rec -> new DragNDrop(rec, allEnemiesCardAim));
 
-    // PROPOSED: debug terminal for cheats/commands during battle (skip battle, give gold, etc.
-    // — commands added separately). Same Terminal/KeyboardTerminalInputComponent/TerminalDisplay
-    // trio MainGameScreen already wires up; F1 toggles it open/closed.
     Terminal terminal = new Terminal();
     terminal.addCommand("skipbattle", new SkipBattleCommand(controller));
     terminal.addCommand("givegold", new GiveGoldCommand(gameArea.getPlayer()));
     terminal.addCommand("sethealth", new SetHealthCommand(gameArea.getPlayer()));
     terminal.addCommand("giveitem", new GiveItemCommand(gameArea.getPlayer()));
 
-    PopupDisplay cardInventory = new PopupDisplay("Card Inventory");
+    PopupDisplay cardInventory = new PopupDisplay("Card Inventory", CARD_INVENTORY_STYLE);
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
     PopupDisplay itemInventory = new PopupDisplay("");
@@ -338,44 +340,101 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new KeyboardTerminalInputComponent())
             .addComponent(new TerminalDisplay());
 
-    // Keep the on-screen row in sync with the deck: whenever the hand changes (a card played, or
-    // one retrieved from the discard pile after its cooldown elapses) rebuild from the live deck,
-    // so the affected slot's disabled/shaded state updates in place.
     battleUi
         .getEvents()
         .addListener(
             BattleActions.HAND_CHANGED_EVENT,
-            (List<CardInstance> hand) -> uiFactory.rebuildHand(buildHandRecords()));
+            (List<CardInstance> hand) -> {
+              uiFactory.rebuildHand(buildHandRecords());
+              installHandCardWidgets();
+            });
 
-    // battleUi must be registered (and so cardInventory.create() must have run, giving it a
-    // content table) before the deck editor's create() tries to add widgets to that table below.
     gameArea.displayUI(battleUi);
+    installHandCardWidgets();
 
-    // The deck editor's own per-card toggle buttons need a ClickableFactory of their own — an
-    // entity can only hold one component of a given class, and battleUi already has uiFactory.
-    ClickableFactory deckPoolFactory = new ClickableFactory(new ArrayList<>());
+    Path deckEditorUiJson = Path.of(DECK_EDITOR_UI_JSON);
+    List<ClickableRecord> deckEditorClickables =
+        ClickableFactory.loadRecordsFromJson(deckEditorUiJson);
+    ClickableFactory deckPoolFactory = new ClickableFactory(deckEditorClickables);
+
+    List<DisplayingRecord> deckEditorDisplayRecords =
+        DisplayingFactory.loadRecordsFromJson(deckEditorUiJson);
+    DisplayingFactory deckEditorDisplays =
+        buildDeckEditorDisplays(cardInventory, deckEditorDisplayRecords);
+
     DeckEditorComponent deckEditor =
         new DeckEditorComponent(
-            cardPlayService, library, cardInventory, deckPoolFactory, this::onDeckRearranged);
-    Entity deckEditorEntity = new Entity().addComponent(deckPoolFactory).addComponent(deckEditor);
+            cardPlayService,
+            library,
+            cardInventory,
+            deckPoolFactory,
+            deckEditorDisplays,
+            cardWidgetAssets,
+            this::onDeckRearranged);
+
+    Entity deckEditorEntity =
+        new Entity()
+            .addComponent(deckPoolFactory)
+            .addComponent(deckEditorDisplays)
+            .addComponent(deckEditor);
     ServiceLocator.getEntityService().register(deckEditorEntity);
+
+    // Hide the deck editor's scroll buttons until the popup opens. DeckEditorComponent.create()
+    // tries to do this itself, but runs before the JSON-loaded clickables are registered in the
+    // factory, so nothing gets hidden. These two loops fix that.
+    for (Clickable c : deckPoolFactory.getByTrigger("deckScrollUp")) {
+      c.getBtn().setVisible(false);
+    }
+    for (Clickable c : deckPoolFactory.getByTrigger("deckScrollDown")) {
+      c.getBtn().setVisible(false);
+    }
 
     battleUi.getEvents().addListener("openMenu", deckEditor::open);
     battleUi.getEvents().addListener("openInventory", inventoryPopup::open);
   }
 
-  /**
-   * Called after the deck editor commits a hand rearrange, with the full confirmed selection —
-   * including any still-on-cooldown picks {@link CardPlayService#rearrangeHand} left in the discard
-   * pile untouched. Unlike a normal play/cooldown-retrieval hand change, the whole set of slots may
-   * now be different, so — unlike {@link #buildHandRecords()}'s usual in-place toggling — the row's
-   * slots themselves are reset to match. A slot holding a still-discarded pick simply renders
-   * disabled (same as any other discarded card) until its cooldown naturally elapses and it's
-   * retrieved into the real hand, at which point the normal HAND_CHANGED_EVENT listener un-dims it.
-   */
+  private DisplayingFactory buildDeckEditorDisplays(
+      PopupDisplay popup, List<DisplayingRecord> records) {
+
+    DisplayingRecord badgesRec =
+        DisplayingRecord.builder("").trigger(DeckEditorEvents.BADGES).variant("cardBadges").build();
+
+    List<DisplayingRecord> all = new ArrayList<>(records);
+    all.add(badgesRec);
+
+    DisplayingFactory factory = new DisplayingFactory(all);
+
+    factory.registerInstanceVariant(
+        "popupText",
+        rec -> {
+          PopupTextDisplay d = new PopupTextDisplay(rec);
+          d.addPopup(popup);
+          return d;
+        });
+    factory.registerInstanceVariant(
+        "cardPreview",
+        rec -> {
+          CardPreviewDisplay d = new CardPreviewDisplay(rec);
+          d.addPopup(popup);
+          return d;
+        });
+
+    factory.registerInstanceVariant("cardBadges", CardBadgesDisplay::new);
+    return factory;
+  }
+
   private void onDeckRearranged(List<CardInstance> newHandRow) {
     handRowOrder = new ArrayList<>(newHandRow);
     uiFactory.rebuildHand(buildHandRecords());
+    installHandCardWidgets();
+  }
+
+  /** Builds the same registered visual groups for every battle. */
+  static EffectVisualRegistry createEffectVisualRegistry() {
+    EffectVisualRegistry registry = new EffectVisualRegistry();
+    OffensiveEffectVisuals.registerAll(registry);
+    EnemyStatusEffectVisuals.registerAll(registry);
+    return registry;
   }
 
   @Override
@@ -400,6 +459,8 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getResourceService().unloadAssets(EnemyStatusEffectVisuals.texturePaths());
+    cardInteractionSkin.dispose();
+    cardWidgetSkin.dispose();
     ServiceLocator.clear();
   }
 
@@ -409,6 +470,19 @@ public class BattleScreen extends ScreenAdapter {
     resourceService.loadTextures(mainGameTextures);
     resourceService.loadTextures(EnemyStatusEffectVisuals.texturePaths());
     ServiceLocator.getResourceService().loadAll();
+  }
+
+  private void loadCardAssets(List<CardConfig> configs) {
+    String[] texturePaths = CardWidgetAssets.collectTexturePaths(configs);
+    ResourceService resources = ServiceLocator.getResourceService();
+    resources.loadTextures(texturePaths);
+    resources.loadAll();
+  }
+
+  private static Skin createCardInteractionSkin() {
+    Skin skin = new Skin();
+    skin.add("default", new ImageButton.ImageButtonStyle(), ImageButton.ImageButtonStyle.class);
+    return skin;
   }
 
   private List<ClickableRecord> buildAllRecords() {
@@ -471,34 +545,24 @@ public class BattleScreen extends ScreenAdapter {
     Set<CardInstance> discardedInstances = new HashSet<>(battleDeck.getDiscardPileInstances());
 
     List<ClickableRecord> records = new ArrayList<>();
-    // Centre the whole row horizontally rather than always starting at a fixed left edge, so a
-    // hand of 3 cards and a hand of 8 both sit in the middle of the screen instead of hugging
-    // the left side.
     float stageWidth = ServiceLocator.getRenderService().getStage().getViewport().getWorldWidth();
     float handWidth = CARD_WIDTH + Math.max(0, handRowOrder.size() - 1) * HAND_SPACING;
     float x = (stageWidth - handWidth) / 2f;
-    // Fan the hand out from its middle slot: cards further from center tilt outward and dip
-    // down a little, so the row reads as a hand of cards rather than a flat strip.
     float centerIndex = (handRowOrder.size() - 1) / 2f;
     for (int i = 0; i < handRowOrder.size(); i++) {
       CardInstance instance = handRowOrder.get(i);
-      String cardId = instance.cardId();
       boolean disabled = discardedInstances.contains(instance);
 
-      Optional<CardConfig> maybeCard = library.getCard(cardId);
-      if (maybeCard.isEmpty()) {
-        logger.warn("Card ID {} not found in library, skipping", cardId);
+      ResolvedCard card = resolveHandCard(instance);
+      if (card == null) {
         continue;
       }
-      CardConfig card = maybeCard.get();
       String variant =
-          switch (card.target) {
+          switch (card.target()) {
             case SELF -> "selfAimDrag";
             case SINGLE_ENEMY -> "aimDrag";
             case ALL_ENEMIES -> "allEnemiesAimDrag";
           };
-
-      Skin cardSkin = CardImageSkins.forTexturePath(card.texturePath);
 
       float offsetFromCenter = i - centerIndex;
       float rotation = -offsetFromCenter * HAND_ROTATION_STEP_DEGREES;
@@ -506,11 +570,11 @@ public class BattleScreen extends ScreenAdapter {
 
       ClickableRecord.Builder builder =
           ClickableRecord.builder("playCard")
-              .label(card.name)
+              .label(card.name())
               .variant(variant)
               .position(x, y)
               .size(CARD_WIDTH, CARD_HEIGHT)
-              .skin(cardSkin)
+              .skin(cardInteractionSkin)
               .rotation(rotation)
               .disabled(disabled);
 
@@ -521,5 +585,53 @@ public class BattleScreen extends ScreenAdapter {
       x += HAND_SPACING;
     }
     return records;
+  }
+
+  private ResolvedCard resolveHandCard(CardInstance instance) {
+    Optional<CardConfig> config = library.getCard(instance.cardId());
+    if (config.isEmpty()) {
+      logger.warn("Card ID {} not found in library, skipping", instance.cardId());
+      return null;
+    }
+    try {
+      return cardResolver.resolve(config.get(), instance);
+    } catch (IllegalArgumentException | IllegalStateException exception) {
+      logger.warn("Could not resolve card instance {}, skipping", instance.instanceId(), exception);
+      return null;
+    }
+  }
+
+  private void installHandCardWidgets() {
+    Map<String, CardInstance> instancesById = new HashMap<>();
+    for (CardInstance instance : handRowOrder) {
+      instancesById.put(instance.instanceId(), instance);
+    }
+
+    for (Clickable clickable : uiFactory.getByTrigger("playCard")) {
+      installHandCardWidget(clickable, instancesById);
+    }
+  }
+
+  private void installHandCardWidget(Clickable clickable, Map<String, CardInstance> instancesById) {
+    Object[] args = clickable.getArgs();
+    if (args.length == 0 || !(args[0] instanceof String instanceId)) {
+      logger.warn("Play-card clickable is missing an instanceId payload");
+      return;
+    }
+    CardInstance instance = instancesById.get(instanceId);
+    if (instance == null) {
+      logger.warn("No hand-row instance found for clickable payload {}", instanceId);
+      return;
+    }
+    Optional<CardConfig> config = library.getCard(instance.cardId());
+    if (config.isEmpty()) {
+      return;
+    }
+    try {
+      ResolvedCard resolved = cardResolver.resolve(config.get(), instance);
+      clickable.setVisualContent(() -> new CardWidget(resolved, cardWidgetAssets));
+    } catch (IllegalArgumentException | IllegalStateException exception) {
+      logger.warn("Could not install card widget for instance {}", instanceId, exception);
+    }
   }
 }

@@ -19,6 +19,9 @@ public class CardConfig {
   /** Rules text shown to the player. */
   public String description = "";
 
+  /** Background text shown in the Card Library, not on the card face; upgrades reuse base lore. */
+  public String lore = null;
+
   /** Energy required to play this card. */
   public int cost = 0;
 

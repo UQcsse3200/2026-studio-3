@@ -24,6 +24,9 @@ public class EnemyConfig extends BaseEntityConfig {
    */
   public float renderScale = 1f;
 
-  /** 图鉴里显示的敌人背景描述，以 enemies.json 为唯一来源，写法遵循 wiki《The Fall of the Pantheon》。 */
+  /**
+   * Backstory shown in the Bestiary. {@code enemies.json} is the single source for this copy, and
+   * it follows the setting described on the wiki's <em>The Fall of the Pantheon</em> page.
+   */
   public String description = "";
 }

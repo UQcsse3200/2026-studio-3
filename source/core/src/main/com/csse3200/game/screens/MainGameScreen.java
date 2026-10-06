@@ -14,6 +14,7 @@ import com.csse3200.game.cards.debug.CardEffectDebugDisplay;
 import com.csse3200.game.cards.debug.KeyboardCardEffectDebugInputComponent;
 import com.csse3200.game.cards.effects.CardEffectResolutionService;
 import com.csse3200.game.components.cards.CardHandDisplay;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.gamearea.PerformanceDisplay;
 import com.csse3200.game.components.maingame.DebugShortcutInputComponent;
 import com.csse3200.game.components.maingame.MainGameActions;
@@ -81,12 +82,7 @@ public class MainGameScreen extends ScreenAdapter {
 
     List<CardConfig> cards = CardConfigLoader.loadCards();
     cardLibrary = new CardLibrary(cards);
-    cardTexturePaths =
-        cards.stream()
-            .map(card -> card.texturePath)
-            .filter(path -> path != null && !path.isBlank())
-            .distinct()
-            .toArray(String[]::new);
+    cardTexturePaths = CardWidgetAssets.collectTexturePaths(cards);
     ServiceLocator.registerCardLibrary(cardLibrary);
 
     renderer = RenderFactory.createRenderer();

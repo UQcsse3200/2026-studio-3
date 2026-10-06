@@ -10,8 +10,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Align;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.StatusEffect;
+import com.csse3200.game.components.enemy.IntentIcons;
+import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.UIComponent;
+import java.util.HashMap;
+import java.util.Map;
 
 /** A ui component for displaying player stats, e.g. health. */
 public class PlayerStatsDisplay extends UIComponent {
@@ -23,8 +28,16 @@ public class PlayerStatsDisplay extends UIComponent {
   private Label armourLabel;
   private Cell<Stack> armourCell;
   private Stack healthStack;
-  private static final float FONT_SCALE = 1f;
   private static final String STYLE_NAME_WHITE = "white";
+  private Image statusImage;
+  private Table statusRow;
+  private Table statusIcons;
+  private Map<String, Integer> displayedStatusDurations;
+  private boolean statusRowDirty = true;
+  private boolean disposed;
+  private final EventListener1<String> statusChangeListener = this::onStatusChanged;
+  private static final float FONT_SCALE = 0.75f;
+  private static final String STYLE_NAME_LARGE = "large";
 
   /** Creates reusable ui styles and adds actors to the stage. */
   @Override
@@ -34,6 +47,9 @@ public class PlayerStatsDisplay extends UIComponent {
 
     entity.getEvents().addListener("updateHealth", this::updatePlayerHealthUI);
     entity.getEvents().addListener("updateArmour", this::updateArmourUI);
+    entity.getEvents().addListener("statusEffectApplied", statusChangeListener);
+    entity.getEvents().addListener("statusEffectRemoved", statusChangeListener);
+    updateStatusRow();
   }
 
   /**
@@ -43,6 +59,8 @@ public class PlayerStatsDisplay extends UIComponent {
    */
   private void addActors() {
     table = new Table(skin);
+
+    float imageSideLength = 20f;
 
     // Armour image
     armourImage =
@@ -104,6 +122,21 @@ public class PlayerStatsDisplay extends UIComponent {
 
     table.pack();
 
+    // Status effects: hidden until something is active, then one icon and count per effect.
+    statusImage =
+        new Image(ServiceLocator.getResourceService().getAsset(IntentIcons.DEBUFF, Texture.class));
+
+    Label statusLabel = new Label("Debuff:", skin, STYLE_NAME_LARGE);
+    statusLabel.setFontScale(FONT_SCALE);
+
+    statusIcons = new Table(skin);
+    statusRow = new Table(skin);
+    statusRow.add(statusLabel).padRight(8f);
+    statusRow.add(statusIcons).left();
+
+    table.add(statusImage).size(imageSideLength).pad(5);
+    table.add(statusRow).left();
+
     stage.addActor(table);
     updatePosition();
   }
@@ -115,7 +148,97 @@ public class PlayerStatsDisplay extends UIComponent {
 
   @Override
   public void update() {
+    if (disposed) {
+      return;
+    }
     updatePosition();
+    updateStatusRow();
+  }
+
+  private void onStatusChanged(String statusKey) {
+    if (isKnownDebuff(statusKey)) {
+      statusRowDirty = true;
+    }
+  }
+
+  private boolean hasStatusDurationChanged(CombatStatsComponent stats) {
+    for (Map.Entry<String, Integer> status : displayedStatusDurations.entrySet()) {
+      StatusEffect effect = stats.getStatusEffect(status.getKey());
+      if (effect == null || effect.getDuration() != status.getValue()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Rebuilds the status row from the player's active effects, one icon and turn count each.
+   *
+   * <p>Application/removal events mark the row dirty. Cached durations are checked separately
+   * because ticking a live status does not always emit an event. Unchanged frames neither fetch a
+   * new status snapshot nor rebuild actors. The whole row is hidden while no displayed debuff is
+   * active.
+   */
+  private void updateStatusRow() {
+    CombatStatsComponent stats = entity.getComponent(CombatStatsComponent.class);
+    if (statusIcons == null || stats == null) {
+      return;
+    }
+    if (!statusRowDirty && !hasStatusDurationChanged(stats)) {
+      return;
+    }
+
+    statusRowDirty = false;
+    Map<String, Integer> durations = new HashMap<>();
+    for (Map.Entry<String, Integer> status : stats.getStatusEffectDurations().entrySet()) {
+      if (isKnownDebuff(status.getKey())) {
+        durations.put(status.getKey(), status.getValue());
+      }
+    }
+    if (durations.equals(displayedStatusDurations)) {
+      return;
+    }
+    displayedStatusDurations = Map.copyOf(durations);
+
+    boolean hasStatus = !durations.isEmpty();
+    statusImage.setVisible(hasStatus);
+    statusRow.setVisible(hasStatus);
+
+    statusIcons.clear();
+    if (!hasStatus) {
+      return;
+    }
+
+    for (Map.Entry<String, Integer> status : durations.entrySet()) {
+      Texture icon =
+          ServiceLocator.getResourceService()
+              .getAsset(IntentIcons.pathForStatus(status.getKey()), Texture.class);
+
+      if (icon != null) {
+        Label count = new Label(Integer.toString(status.getValue()), skin, STYLE_NAME_LARGE);
+        count.setFontScale(FONT_SCALE);
+
+        statusIcons.add(new Image(icon)).size(20f).padRight(2f);
+        statusIcons.add(count).padRight(8f);
+      }
+    }
+  }
+
+  /**
+   * Whether this status is one of the debuffs the row is meant to show.
+   *
+   * <p>The underlying map carries every status effect, including buffs from the player's own cards,
+   * which would otherwise appear under a "Debuff" label.
+   *
+   * @param statusKey key the effect is stored under
+   * @return true if the row should show it
+   */
+  private static boolean isKnownDebuff(String statusKey) {
+    String effectName = statusKey.split(":")[0];
+
+    return effectName.equals("SILENCE")
+        || effectName.equals("DAMAGE_ON_CARD_PLAY")
+        || effectName.equals("TAUNT");
   }
 
   /** Updates the position of the player's stats, so they are displayed directly below the player */
@@ -203,7 +326,14 @@ public class PlayerStatsDisplay extends UIComponent {
 
   @Override
   public void dispose() {
+    if (disposed) {
+      return;
+    }
+    disposed = true;
+    entity.getEvents().removeListener("statusEffectApplied", statusChangeListener);
+    entity.getEvents().removeListener("statusEffectRemoved", statusChangeListener);
     super.dispose();
     healthBar.remove();
+    table.remove();
   }
 }

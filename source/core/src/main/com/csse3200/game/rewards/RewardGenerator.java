@@ -54,17 +54,13 @@ public class RewardGenerator {
     int baseAmount = generateGoldOption().getBaseAmount();
     int finalAmount = Math.round(baseAmount * (1f + goldBonusMultiplier));
 
-    RewardOption option = new RewardOption(RewardType.GOLD);
-    option.goldAmount = finalAmount;
-    return option;
+    return RewardOption.gold(finalAmount);
   }
 
   public RewardOption generateItemRewardOption() {
     ItemType picked = ITEM_REWARD_POOL[random.nextInt(ITEM_REWARD_POOL.length)];
 
-    RewardOption option = new RewardOption(RewardType.ITEM);
-    option.itemId = picked;
-    return option;
+    return RewardOption.item(picked);
   }
 
   public RewardOption generateRewardOption() {

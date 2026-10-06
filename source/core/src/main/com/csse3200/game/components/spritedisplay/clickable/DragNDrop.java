@@ -2,6 +2,7 @@ package com.csse3200.game.components.spritedisplay.clickable;
 
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
@@ -120,45 +121,55 @@ public class DragNDrop extends InOutOnTrigger {
               int pointer,
               DragAndDrop.Payload payload,
               DragAndDrop.Target target) {
-            if (actuallyHidden) {
-              Button btn = DragNDrop.this.getBtn();
-              btn.clearActions();
-              btn.setVisible(true);
-              btn.addAction(Actions.fadeIn(0.15f));
-              btn.addAction(Actions.moveTo(targetX, targetY, 0.3f, Interpolation.sineIn));
-            }
-
-            if (aimController != null) {
-              String selectedId = aimController.release(stagePointer(x, y));
-              if (selectedId != null
-                  && payload.getObject() instanceof TriggerPayload card
-                  && card.args().length == 1) {
-                entity.getEvents().trigger(card.trigger(), card.args()[0], selectedId);
-              }
-              return;
-            }
-
-            if (target != null
-                && payload.getObject() instanceof TriggerPayload card
-                && target.getActor().getUserObject() instanceof String targetId
-                && card.args().length == 1) {
-              entity.getEvents().trigger(card.trigger(), card.args()[0], targetId);
-            }
+            restoreAfterDrag(actuallyHidden);
+            dispatchDrop(x, y, payload, target);
           }
         };
 
     dragAndDrop.addSource(this.dragSource);
   }
 
-  private Button createDragVisual(Button original) {
-    if (original instanceof ImageButton ib) {
-      return new ImageButton(ib.getStyle());
-    } else if (original instanceof ImageTextButton itb) {
-      return new ImageTextButton(itb.getText().toString(), itb.getStyle());
-    } else if (original instanceof TextButton tb) {
-      return new TextButton(tb.getText().toString(), tb.getStyle());
+  private void restoreAfterDrag(boolean actuallyHidden) {
+    if (!actuallyHidden) {
+      return;
     }
-    return new Button(original.getStyle());
+    Button btn = getBtn();
+    btn.clearActions();
+    btn.setVisible(true);
+    btn.addAction(Actions.fadeIn(0.15f));
+    btn.addAction(Actions.moveTo(targetX, targetY, 0.3f, Interpolation.sineIn));
+  }
+
+  private void dispatchDrop(
+      float x, float y, DragAndDrop.Payload payload, DragAndDrop.Target target) {
+    String selectedId =
+        aimController == null ? dropTargetId(target) : aimController.release(stagePointer(x, y));
+    if (selectedId != null
+        && payload.getObject() instanceof TriggerPayload card
+        && card.args().length == 1) {
+      entity.getEvents().trigger(card.trigger(), card.args()[0], selectedId);
+    }
+  }
+
+  private static String dropTargetId(DragAndDrop.Target target) {
+    return target != null && target.getActor().getUserObject() instanceof String id ? id : null;
+  }
+
+  private Button createDragVisual(Button original) {
+    Button dragVisual =
+        switch (original) {
+          case ImageButton ib -> new ImageButton(ib.getStyle());
+          case ImageTextButton itb -> new ImageTextButton(itb.getText().toString(), itb.getStyle());
+          case TextButton tb -> new TextButton(tb.getText().toString(), tb.getStyle());
+          default -> new Button(original.getStyle());
+        };
+
+    Actor visualContent = createVisualContent();
+    if (visualContent != null) {
+      dragVisual.clearChildren();
+      dragVisual.add(visualContent).minSize(0f).expand().fill();
+    }
+    return dragVisual;
   }
 
   private Vector2 stagePointer(float x, float y) {
