@@ -1,5 +1,6 @@
 package com.csse3200.game.components.player;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -44,8 +45,12 @@ public class PlayerStatsTopDisplay extends UIComponent {
    * @see Table for positioning options
    */
   private void addActors() {
-    float stageWidth = stage.getViewport().getWorldWidth();
-    float stageHeight = stage.getViewport().getWorldHeight();
+    float stageWidth =
+        stage.getViewport() == null ? Gdx.graphics.getWidth() : stage.getViewport().getWorldWidth();
+    float stageHeight =
+        stage.getViewport() == null
+            ? Gdx.graphics.getHeight()
+            : stage.getViewport().getWorldHeight();
 
     table = new Table(skin);
     table.top().left();
