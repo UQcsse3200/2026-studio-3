@@ -12,6 +12,12 @@
       "y": 150,
       "trigger": "endTurn",
       "variant": "gated"
+    },
+    {
+      "text": "Item Inventory",
+      "x": 20,
+      "y": 200,
+      "trigger": "openInventory"
     }
   ],
   "Displaying": [

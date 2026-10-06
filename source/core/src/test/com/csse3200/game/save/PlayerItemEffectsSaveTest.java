@@ -1,6 +1,7 @@
 package com.csse3200.game.save;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.badlogic.gdx.files.FileHandle;
@@ -57,8 +58,10 @@ class PlayerItemEffectsSaveTest {
         restoredPlayer.getOwnedItems());
     assertEquals(
         0.1f, player.getComponent(InventoryComponent.class).getGoldBonusMultiplier(), 0.001f);
-    assertEquals(0.05f, player.getComponent(InventoryComponent.class).getShopDiscount(), 0.001f);
+    assertEquals(0.10f, player.getComponent(InventoryComponent.class).getShopDiscount(), 0.001f);
     assertEquals(4, player.getComponent(EnergyComponent.class).getMaxEnergy());
+    assertEquals(0, player.getComponent(CombatStatsComponent.class).getArmour());
+    assertNull(player.getComponent(CombatStatsComponent.class).getStatusEffect("STRENGTH"));
   }
 
   @Test
@@ -74,6 +77,18 @@ class PlayerItemEffectsSaveTest {
     assertEquals(0f, player.getComponent(InventoryComponent.class).getGoldBonusMultiplier());
     assertEquals(0f, player.getComponent(InventoryComponent.class).getShopDiscount());
     assertEquals(3, player.getComponent(EnergyComponent.class).getMaxEnergy());
+  }
+
+  @Test
+  void shouldPersistOnlyBattleConsumablesThatHaveNotBeenUsed() {
+    PlayerRunState originalPlayer = new PlayerRunState(50, 80, 25);
+    originalPlayer.addOwnedItem(ItemType.IRON_AEGIS);
+    originalPlayer.addOwnedItem(ItemType.WARRIORS_CREST);
+    assertTrue(originalPlayer.useBattleItem(ItemType.IRON_AEGIS, playerEntity()));
+
+    PlayerRunState restoredPlayer = restoreAfterRelaunch(saveAndLoad(originalPlayer));
+
+    assertEquals(List.of(ItemType.WARRIORS_CREST), restoredPlayer.getOwnedItems());
   }
 
   private SaveGameData saveAndLoad(PlayerRunState playerState) {

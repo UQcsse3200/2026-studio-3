@@ -92,7 +92,12 @@ public class BattleScreen extends ScreenAdapter {
     "images/money.png",
     "images/level.png",
     "images/enemy.png",
-    "images/armour.png"
+    "images/armour.png",
+    "images/ui/lucky-coin.png",
+    "images/ui/energy-crystal.png",
+    "images/ui/merchants-favor.png",
+    "images/ui/iron-aegis.png",
+    "images/ui/warriors-crest.png"
   };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
@@ -104,6 +109,8 @@ public class BattleScreen extends ScreenAdapter {
   private static final float CARD_HEIGHT = CardWidget.CARD_HEIGHT;
   private static final float CARD_INVENTORY_MIN_WIDTH = 800f;
   private static final float CARD_INVENTORY_MIN_HEIGHT = 600f;
+  private static final float ITEM_INVENTORY_MIN_WIDTH = 470f;
+  private static final float ITEM_INVENTORY_MIN_HEIGHT = 360f;
   private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
   private static final String CARD_WIDGET_SKIN = "flat-earth/skin/flat-earth-ui.json";
 
@@ -282,6 +289,14 @@ public class BattleScreen extends ScreenAdapter {
     PopupDisplay cardInventory = new PopupDisplay("Card Inventory", CARD_INVENTORY_STYLE);
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
+    PopupDisplay itemInventory = new PopupDisplay("Item Inventory", CARD_INVENTORY_STYLE);
+    itemInventory.setMinSize(ITEM_INVENTORY_MIN_WIDTH, ITEM_INVENTORY_MIN_HEIGHT);
+    InventoryPopupComponent inventoryPopup =
+        new InventoryPopupComponent(
+            game.getRunState(), itemInventory, gameArea.getPlayer(), controller::isPlayerTurn);
+    Entity itemInventoryEntity = new Entity().addComponent(itemInventory).addComponent(inventoryPopup);
+    ServiceLocator.getEntityService().register(itemInventoryEntity);
+
     Stage stage = ServiceLocator.getRenderService().getStage();
     Entity battleUi =
         new Entity()
@@ -355,6 +370,7 @@ public class BattleScreen extends ScreenAdapter {
     }
 
     battleUi.getEvents().addListener("openMenu", deckEditor::open);
+    battleUi.getEvents().addListener("openInventory", inventoryPopup::open);
   }
 
   private DisplayingFactory buildDeckEditorDisplays(

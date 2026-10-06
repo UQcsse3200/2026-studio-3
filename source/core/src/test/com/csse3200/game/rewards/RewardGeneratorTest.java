@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.extensions.GameExtension;
+import java.util.EnumSet;
 import java.util.Random;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -47,5 +49,17 @@ class RewardGeneratorTest {
     assertEquals(RewardType.ITEM, item.type);
     assertNotNull(item.itemId);
     assertNull(item.cardSelection);
+  }
+
+  @Test
+  void canOfferEveryConfiguredItemTypeAsAnItemReward() {
+    RewardGenerator generator = new RewardGenerator(new Random(17));
+    Set<ItemType> offeredItems = EnumSet.noneOf(ItemType.class);
+
+    for (int i = 0; i < 100; i++) {
+      offeredItems.add(generator.generateItemRewardOption().itemId);
+    }
+
+    assertEquals(EnumSet.allOf(ItemType.class), offeredItems);
   }
 }
