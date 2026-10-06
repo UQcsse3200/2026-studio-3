@@ -13,6 +13,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.csse3200.game.GdxGame;
+import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.components.battle.InventoryPopupComponent;
 import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
 import com.csse3200.game.entities.Entity;
@@ -31,6 +33,7 @@ import com.csse3200.game.ui.PopupInputComponent;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
+import com.csse3200.game.ui.terminal.commands.DiscoverAllCardsCommand;
 import com.csse3200.game.ui.terminal.commands.GotoCommand;
 import com.csse3200.game.ui.terminal.commands.ListNodesCommand;
 import com.csse3200.game.ui.terminal.commands.UnlockNodeCommand;
@@ -70,6 +73,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
       MapGenerationController mapGen = new MapGenerationController();
 
       startNewRun(runState, mapGen.getMap());
+      runState.createStarterDeckForNewRun(new CardLibrary(CardConfigLoader.loadCards()));
     }
 
     createUi(game, runState);
@@ -110,6 +114,8 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     terminal.addCommand("unlocknode", new UnlockNodeCommand(runState));
     terminal.addCommand("listnodes", new ListNodesCommand(runState));
     terminal.addCommand("goto", new GotoCommand(runState, mapDisplay.getMapSelectionController()));
+    terminal.addCommand(
+        "discoverallcards", new DiscoverAllCardsCommand(game.getCardDiscoveryService()));
 
     Entity ui = new Entity();
     ui.addComponent(new InputDecorator(ServiceLocator.getRenderService().getStage(), 10))
@@ -211,15 +217,17 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     MapNode node = runState.getMapGraph() == null ? null : runState.getMapGraph().getNode(nodeId);
     RoomType roomType = node == null ? null : node.getRoomType();
 
-    if (roomType == RoomType.COMBAT || roomType == RoomType.FINAL || roomType == RoomType.ELITE) {
-      logger.info("Node {} ({}) selected, entering battle", nodeId, roomType);
-      game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
-    } else if (roomType == RoomType.CAMPFIRE) {
-      logger.info("Node {} ({}) selected, entering campfire", nodeId, roomType);
-      game.setScreen(GdxGame.ScreenType.CAMPFIRE);
+    GdxGame.ScreenType destination =
+        switch (roomType) {
+          case FINAL, COMBAT, ELITE -> GdxGame.ScreenType.BATTLE_SCREEN;
+          case CAMPFIRE -> GdxGame.ScreenType.CAMPFIRE;
+          case null, default -> GdxGame.ScreenType.ENCOUNTER;
+        };
+    logger.info("Node {} ({}) selected, entering {}", nodeId, roomType, destination);
+    if (roomType == RoomType.FINAL) {
+      game.showNarration("pre_boss", GdxGame.ScreenType.BATTLE_SCREEN);
     } else {
-      logger.info("Node {} ({}) selected, entering encounter", nodeId, roomType);
-      game.setScreen(GdxGame.ScreenType.ENCOUNTER);
+      game.setScreen(destination);
     }
   }
 

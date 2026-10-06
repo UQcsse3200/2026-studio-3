@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.UIComponent;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,6 +28,8 @@ public class CardUpgradeDisplay extends UIComponent {
   private static final Color DISABLED_FACE = new Color(0.62f, 0.60f, 0.55f, 1f);
   private static final Color SCRIM = new Color(0.02f, 0.02f, 0.02f, 0.76f);
   private static final Color PANEL = new Color(0.10f, 0.08f, 0.06f, 0.95f);
+  private static final String WHITE = "white";
+  private static final String SMALL = "small";
   private final Map<String, Table> tilesByInstanceId = new LinkedHashMap<>();
   private final CardUpgradeCommitter committer;
   private final boolean launcherVisible;
@@ -37,6 +40,7 @@ public class CardUpgradeDisplay extends UIComponent {
   private TextButton confirmButton;
   private boolean libraryVisible;
   private final CardUpgradeSelection selection;
+  private CardWidgetAssets cardWidgetAssets;
 
   /**
    * A constructor for Card upgrade selection
@@ -70,6 +74,10 @@ public class CardUpgradeDisplay extends UIComponent {
   @Override
   public void create() {
     super.create();
+    if (ServiceLocator.getResourceService() != null) {
+      cardWidgetAssets =
+          CardWidgetAssets.fromManagedResources(skin, ServiceLocator.getResourceService());
+    }
     addActors();
   }
 
@@ -108,13 +116,13 @@ public class CardUpgradeDisplay extends UIComponent {
     Table overlay = new Table();
     overlay.setFillParent(true);
     overlay.setTouchable(Touchable.enabled);
-    overlay.setBackground(skin.newDrawable("white", SCRIM));
+    overlay.setBackground(skin.newDrawable(WHITE, SCRIM));
     overlay.pad(34f);
 
     Table libraryPanel = new Table();
     libraryPanel.top();
     libraryPanel.defaults().pad(6f);
-    libraryPanel.setBackground(skin.newDrawable("white", PANEL));
+    libraryPanel.setBackground(skin.newDrawable(WHITE, PANEL));
     libraryPanel.pad(18f);
 
     Table header = new Table();
@@ -229,7 +237,7 @@ public class CardUpgradeDisplay extends UIComponent {
     Table tile = new Table();
     tile.top();
     tile.pad(8f);
-    tile.setBackground(skin.newDrawable("white", CARD_FACE));
+    tile.setBackground(skin.newDrawable(WHITE, CARD_FACE));
     tile.setTouchable(Touchable.enabled);
     tile.addListener(
         new ClickListener() {
@@ -239,24 +247,37 @@ public class CardUpgradeDisplay extends UIComponent {
             refresh();
           }
         });
-    Label cost = new Label(String.valueOf(option.current().cost()), skin, "large");
+    if (cardWidgetAssets != null && cardWidgetAssets.hasAuthoredFrame(option.current().rarity())) {
+      CardWidget face = new CardWidget(option.current(), cardWidgetAssets);
+      Label preview =
+          new Label(
+              "-> " + option.preview().name() + "\n" + option.preview().description(), skin, SMALL);
+      preview.setColor(UPGRADE);
+      preview.setWrap(true);
+      preview.setFontScale(0.60f);
+      tile.add(face).size(CARD_WIDTH - 18f, 180f);
+      tile.row();
+      tile.add(preview).minSize(0f).width(CARD_WIDTH - 18f).height(58f).padTop(4f);
+      return tile;
+    }
+    Label cost = new Label(String.valueOf(option.current().cost()), skin, SMALL);
     cost.setColor(Color.WHITE);
     Table costBadge = new Table();
-    costBadge.setBackground(skin.newDrawable("white", ACCENT));
+    costBadge.setBackground(skin.newDrawable(WHITE, ACCENT));
     costBadge.add(cost).center();
 
-    Label name = new Label(option.current().name(), skin, "small");
+    Label name = new Label(option.current().name(), skin, SMALL);
     name.setColor(Color.BLACK);
     name.setWrap(true);
 
-    Label upgradedName = new Label("-> " + option.preview().name(), skin, "small");
+    Label upgradedName = new Label("-> " + option.preview().name(), skin, SMALL);
     upgradedName.setColor(UPGRADE);
 
-    Label current = new Label(option.current().description(), skin, "small");
+    Label current = new Label(option.current().description(), skin, SMALL);
     current.setColor(Color.BLACK);
     current.setWrap(true);
 
-    Label preview = new Label(option.preview().description(), skin, "small");
+    Label preview = new Label(option.preview().description(), skin, SMALL);
     preview.setColor(UPGRADE);
     preview.setWrap(true);
 
@@ -284,7 +305,7 @@ public class CardUpgradeDisplay extends UIComponent {
       } else {
         face = CARD_FACE;
       }
-      entry.getValue().setBackground(skin.newDrawable("white", face));
+      entry.getValue().setBackground(skin.newDrawable(WHITE, face));
     }
     confirmButton.setText("Upgrade (" + selection.getSelectedInstanceIds().size() + ")");
     confirmButton.setDisabled(!selection.canConfirm());

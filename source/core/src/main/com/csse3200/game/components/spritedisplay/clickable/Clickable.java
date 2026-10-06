@@ -4,6 +4,7 @@ package com.csse3200.game.components.spritedisplay.clickable;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -15,6 +16,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.components.Component;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 public abstract class Clickable extends Component {
   // Shared default skin, only loaded if the record doesn't provide one.
@@ -34,6 +37,8 @@ public abstract class Clickable extends Component {
   float height;
   Object[] args;
   String label;
+  private Supplier<? extends Actor> visualContentFactory;
+  float rotation;
 
   private static Skin getDefaultSkin() {
     if (defaultSkin == null) {
@@ -51,6 +56,7 @@ public abstract class Clickable extends Component {
     this.args = rec.args();
     this.label = rec.label();
     this.disabled = rec.disabled();
+    this.rotation = rec.rotation();
 
     String text = rec.text();
     String styleName = rec.styleName();
@@ -90,17 +96,53 @@ public abstract class Clickable extends Component {
   }
 
   /**
-   * Tints the button and every direct child (its {@code Image}/{@code Label}, depending on button
-   * type) so the shade is actually visible. {@code Button.setColor} alone only tints the button's
-   * own background drawable and propagates ALPHA (not RGB) to children per {@code Group.draw} — an
-   * {@link ImageButton} with only {@code imageUp} set has no background, so the nested {@code
-   * Image} would otherwise stay full-color white.
+   * Tints the button and its full actor subtree so the shade is visible on both the original simple
+   * image/label content and an embedded composite card face. {@code Button.setColor} alone only
+   * tints the button's own background drawable and propagates ALPHA (not RGB) to children per
+   * {@code Group.draw} — an {@link ImageButton} with only {@code imageUp} set has no background, so
+   * nested presentation actors would otherwise stay full-colour white.
    */
   private void applyDisabledShade() {
     Color shade = new Color(DISABLED_SHADE, DISABLED_SHADE, DISABLED_SHADE, 1f);
-    btn.setColor(shade);
-    for (Actor child : btn.getChildren()) {
-      child.setColor(shade);
+    applyTint(btn, shade);
+  }
+
+  /**
+   * Replaces the button's default label/image with caller-owned presentation content while keeping
+   * this clickable's input, animation and trigger behaviour on the outer button.
+   *
+   * <p>The factory must return a fresh actor each time because drag variants use it to build a
+   * separate drag ghost without re-parenting the live button's content.
+   *
+   * @param factory creates presentation actors to embed in this clickable
+   */
+  public void setVisualContent(Supplier<? extends Actor> factory) {
+    visualContentFactory = Objects.requireNonNull(factory, "visual content factory cannot be null");
+    Actor content = createVisualContent();
+    btn.clearChildren();
+    btn.add(content).minSize(0f).expand().fill();
+    if (disabled) {
+      applyDisabledShade();
+    }
+  }
+
+  /**
+   * Returns fresh presentation content for a drag ghost, or {@code null} when none was supplied.
+   */
+  protected Actor createVisualContent() {
+    if (visualContentFactory == null) {
+      return null;
+    }
+    return Objects.requireNonNull(
+        visualContentFactory.get(), "visual content factory cannot return null");
+  }
+
+  private static void applyTint(Actor actor, Color tint) {
+    actor.setColor(tint);
+    if (actor instanceof Group group) {
+      for (Actor child : group.getChildren()) {
+        applyTint(child, tint);
+      }
     }
   }
 
@@ -240,13 +282,36 @@ public abstract class Clickable extends Component {
   }
 
   public void draw() {
-    // int screenHeight = Gdx.graphics.getHeight();
     float stageHeight = btn.getStage().getViewport().getWorldHeight();
     btn.setPosition(this.getX(), stageHeight - this.getY());
 
+    applySizeAndRotation();
+  }
+
+  /**
+   * Applies the configured size (if set) and rotation to the button. Rotation is applied around the
+   * button's center rather than its default bottom-left origin, so a non-zero {@link #rotation}
+   * tilts the widget in place instead of swinging it around a corner. Shared by {@link #draw()} and
+   * {@link InOutOnTrigger#draw()}, which otherwise handle position differently.
+   *
+   * <p>{@code Button} extends {@code Table}/{@code WidgetGroup}, which disables group transforms
+   * ({@code setTransform(false)}) by default for performance — without turning it back on here,
+   * {@code setRotation} is silently a no-op, since {@code Group.draw()} skips applying its
+   * rotation/scale matrix entirely when transform is off.
+   */
+  protected void applySizeAndRotation() {
     if (this.getWidth() > 0 && this.getHeight() > 0) {
       btn.setSize(this.getWidth(), this.getHeight());
     }
+    if (rotation != 0f) {
+      btn.setTransform(true);
+      btn.setOrigin(btn.getWidth() / 2f, btn.getHeight() / 2f);
+      btn.setRotation(rotation);
+    }
+  }
+
+  public float getRotation() {
+    return rotation;
   }
 
   /**
@@ -256,5 +321,9 @@ public abstract class Clickable extends Component {
    */
   public void onAddedToStage(Stage stage) {
     // default does nothing
+  }
+
+  public void setContentTint(com.badlogic.gdx.graphics.Color tint) {
+    applyTint(btn, tint);
   }
 }

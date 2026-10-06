@@ -1,14 +1,14 @@
 package com.csse3200.game.components.battle;
 
 import com.badlogic.gdx.graphics.Color;
-import com.csse3200.game.cards.EffectType;
 
 /**
  * Describes how one effect's visual looks and behaves: which texture to draw (or null for a
  * generated glow), its tint, how long it lasts, and how it grows/drifts over its lifetime.
  *
  * <p>Purely data — no rendering or game logic here. Each teammate creates their own instances of
- * this and registers them against an {@link EffectType} in {@link EffectVisualRegistry}.
+ * this and registers them against an {@link com.csse3200.game.cards.EffectType} in {@link
+ * EffectVisualRegistry}.
  *
  * @param iconPath texture path to draw, or null to use a generated glow shape
  * @param color tint applied to the texture or glow

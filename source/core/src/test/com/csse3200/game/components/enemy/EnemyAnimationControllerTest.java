@@ -329,14 +329,18 @@ class EnemyAnimationControllerTest {
       Entity player = new Entity().addComponent(playerStats);
       SpriteBatch batch = mock(SpriteBatch.class);
       try {
-        assertEquals(!"boss_knight".equals(id) && !"default".equals(id), hasAttack, id);
+        assertEquals(!"default".equals(id), hasAttack, id);
         for (int attack = 1; attack <= 3; attack++) {
           behaviour.rollIntent();
           behaviour.executeIntent(player);
           assertEquals(hasAttack ? "attack" : "idle", actualAnimator.getCurrentAnimation(), id);
           actualEnemy.update();
           assertTrue(actualEnemy.getPosition().x < 10f, id);
-          for (int frame = 0; frame < 5; frame++) {
+          for (int frame = 0;
+              frame < 20
+                  && (!"idle".equals(actualAnimator.getCurrentAnimation())
+                      || actualEnemy.getPosition().x != 10f);
+              frame++) {
             actualAnimator.render(batch);
             actualEnemy.update();
           }
