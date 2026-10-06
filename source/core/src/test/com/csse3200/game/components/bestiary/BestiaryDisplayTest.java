@@ -1,6 +1,7 @@
 package com.csse3200.game.components.bestiary;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,7 +28,7 @@ class BestiaryDisplayTest {
   private final BestiaryEntryView defeated = createView(BestiaryUnlockState.DEFEATED);
 
   @Test
-  void shouldHideLockedEnemyName() {
+  void shouldKeepLockedEntryDataObscuredAsDefenceInDepth() {
     assertEquals("???", BestiaryDisplay.visibleName(locked));
     assertEquals(
         "Encounter this enemy to reveal its record.", BestiaryDisplay.descriptionFor(locked));
@@ -70,31 +71,76 @@ class BestiaryDisplayTest {
   }
 
   @Test
-  void shouldRefreshVisibleEntryAndUnsubscribeOnDispose() {
-    EnemyConfig config = new EnemyConfig();
-    config.id = "enemy";
-    config.name = "Enemy";
-    config.tier = EnemyTier.NORMAL;
-    config.health = 24;
+  void shouldHideUndiscoveredEntryThenRevealItOnEncounter() {
     EnemyConfigs configs = new EnemyConfigs();
-    configs.enemies = new EnemyConfig[] {config};
+    configs.enemies = new EnemyConfig[] {createConfig("enemy", "Enemy", EnemyTier.NORMAL)};
     BestiaryService service = new BestiaryService(configs);
-
-    RenderService renderService = mock(RenderService.class);
-    when(renderService.getStage()).thenReturn(mock(Stage.class));
-    ServiceLocator.registerRenderService(renderService);
-    ServiceLocator.registerResourceService(mock(ResourceService.class));
-
-    BestiaryDisplay display = new BestiaryDisplay(service, () -> {});
+    BestiaryDisplay display = createDisplay(service);
     display.create();
-    assertEquals(BestiaryUnlockState.LOCKED, display.getDisplayedEntry().unlockState());
+    assertNull(display.getDisplayedEntry());
+    assertEquals(BestiaryDisplay.EMPTY_STATE_MESSAGE, display.getEmptyStateText());
 
     service.recordEncountered("enemy");
     assertEquals(BestiaryUnlockState.ENCOUNTERED, display.getDisplayedEntry().unlockState());
+    assertNull(display.getEmptyStateText());
 
     display.dispose();
     service.recordDefeated("enemy");
     assertEquals(BestiaryUnlockState.ENCOUNTERED, display.getDisplayedEntry().unlockState());
+  }
+
+  @Test
+  void shouldSwitchTiersAndRefreshAnEmptyCategoryAfterDiscovery() {
+    EnemyConfigs configs = new EnemyConfigs();
+    configs.enemies =
+        new EnemyConfig[] {
+          createConfig("normal_enemy", "Normal Enemy", EnemyTier.NORMAL),
+          createConfig("elite_enemy", "Elite Enemy", EnemyTier.ELITE),
+          createConfig("boss_enemy", "Boss Enemy", EnemyTier.BOSS)
+        };
+    BestiaryService service = new BestiaryService(configs);
+    service.recordEncountered("elite_enemy");
+
+    BestiaryDisplay display = createDisplay(service);
+    display.create();
+
+    assertNull(display.getDisplayedEntry());
+    assertEquals(BestiaryDisplay.EMPTY_STATE_MESSAGE, display.getEmptyStateText());
+
+    display.applyFilter(EnemyTier.ELITE);
+    assertEquals("elite_enemy", display.getDisplayedEntry().enemyId());
+    assertNull(display.getEmptyStateText());
+
+    display.applyFilter(EnemyTier.BOSS);
+    assertNull(display.getDisplayedEntry());
+    assertEquals(BestiaryDisplay.EMPTY_STATE_MESSAGE, display.getEmptyStateText());
+
+    service.recordEncountered("boss_enemy");
+    assertEquals("boss_enemy", display.getDisplayedEntry().enemyId());
+    assertNull(display.getEmptyStateText());
+
+    display.applyFilter(EnemyTier.NORMAL);
+    assertNull(display.getDisplayedEntry());
+    assertEquals(BestiaryDisplay.EMPTY_STATE_MESSAGE, display.getEmptyStateText());
+
+    display.dispose();
+  }
+
+  private BestiaryDisplay createDisplay(BestiaryService service) {
+    RenderService renderService = mock(RenderService.class);
+    when(renderService.getStage()).thenReturn(mock(Stage.class));
+    ServiceLocator.registerRenderService(renderService);
+    ServiceLocator.registerResourceService(mock(ResourceService.class));
+    return new BestiaryDisplay(service, () -> {});
+  }
+
+  private EnemyConfig createConfig(String id, String name, EnemyTier tier) {
+    EnemyConfig config = new EnemyConfig();
+    config.id = id;
+    config.name = name;
+    config.tier = tier;
+    config.health = 24;
+    return config;
   }
 
   private BestiaryEntryView createView(BestiaryUnlockState state) {
