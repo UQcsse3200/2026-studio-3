@@ -16,13 +16,15 @@ import com.csse3200.game.ui.UIComponent;
 /** A ui component for displaying player stats, e.g. health. */
 public class PlayerStatsDisplay extends UIComponent {
   Table table;
-  private Image heartImage;
   private ProgressBar healthBar;
   private Label healthLabel;
-  private Stack stack;
+  private Stack armourStack;
+  private Image armourImage;
+  private Label armourLabel;
+  private Cell<Stack> armourCell;
+  private Stack healthStack;
   private static final float FONT_SCALE = 1f;
   private static final String STYLE_NAME_WHITE = "white";
-  private static final String STYLE_NAME_LARGE = "large";
 
   /** Creates reusable ui styles and adds actors to the stage. */
   @Override
@@ -31,6 +33,7 @@ public class PlayerStatsDisplay extends UIComponent {
     addActors();
 
     entity.getEvents().addListener("updateHealth", this::updatePlayerHealthUI);
+    entity.getEvents().addListener("updateArmour", this::updateArmourUI);
   }
 
   /**
@@ -41,12 +44,22 @@ public class PlayerStatsDisplay extends UIComponent {
   private void addActors() {
     table = new Table(skin);
 
-    // Image size
-    float imageSideLength = 20f;
+    // Armour image
+    armourImage =
+        new Image(ServiceLocator.getResourceService().getAsset("images/armour.png", Texture.class));
 
-    // Heart image
-    heartImage =
-        new Image(ServiceLocator.getResourceService().getAsset("images/heart.png", Texture.class));
+    // Armour text
+    int armour = entity.getComponent(CombatStatsComponent.class).getArmour();
+    CharSequence armourText = String.format("%d", armour);
+    armourLabel = new Label(armourText, skin);
+    armourLabel.setColor(Color.WHITE);
+    armourLabel.setFontScale(FONT_SCALE);
+    armourLabel.setAlignment(Align.center);
+
+    // Armour stack
+    armourStack = new Stack();
+    armourStack.add(armourImage);
+    armourStack.add(armourLabel);
 
     // Health label
     int currentHealth = entity.getComponent(CombatStatsComponent.class).getHealth();
@@ -60,7 +73,13 @@ public class PlayerStatsDisplay extends UIComponent {
     // Health bar
     ProgressBar.ProgressBarStyle healthBarStyle = new ProgressBar.ProgressBarStyle();
     healthBarStyle.background = skin.newDrawable(STYLE_NAME_WHITE, Color.DARK_GRAY);
-    healthBarStyle.knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.GREEN);
+
+    if (armour > 0) {
+      healthBarStyle.knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.SKY);
+    } else {
+      healthBarStyle.knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.GREEN);
+    }
+
     healthBarStyle.background.setMinHeight(20);
     healthBarStyle.knobBefore.setMinHeight(20);
 
@@ -69,15 +88,24 @@ public class PlayerStatsDisplay extends UIComponent {
     healthBar.setValue(currentHealth);
     healthBar.setAnimateDuration(0.2f);
 
-    // Stack
-    stack = new Stack();
-    stack.add(healthBar);
-    stack.add(healthLabel);
+    // Health stack
+    healthStack = new Stack();
+    healthStack.add(healthBar);
+    healthStack.add(healthLabel);
 
-    table.add(heartImage).size(imageSideLength).pad(5);
-    table.add(stack).width(150).height(30).pad(5).left();
+    // Add stacks and cell to table
+    armourCell = table.add(armourStack).size(60f);
+    if (armour > 0) {
+      armourCell.size(60f);
+    } else {
+      armourCell.size(0f);
+    }
+    table.add(healthStack).width(150).height(30);
+
+    table.pack();
 
     stage.addActor(table);
+    updatePosition();
   }
 
   @Override
@@ -95,10 +123,10 @@ public class PlayerStatsDisplay extends UIComponent {
     Vector2 position = entity.getPosition();
     Vector2 scale = entity.getScale();
 
-    float enemyX = position.x + scale.x / 2f;
-    float enemyY = position.y - 1.25f;
+    float playerX = position.x + scale.x / 2f;
+    float playerY = position.y - 1.25f;
 
-    Vector3 screenPosition = new Vector3(enemyX, enemyY, 0);
+    Vector3 screenPosition = new Vector3(playerX, playerY, 0);
 
     Camera camera = ServiceLocator.getCamera();
     if (camera == null) {
@@ -120,22 +148,62 @@ public class PlayerStatsDisplay extends UIComponent {
     healthLabel.setText(text);
     healthBar.setRange(0, maxHealth);
     healthBar.setValue(currentHealth);
+    updateHealthBarColour();
+  }
 
-    if ((float) currentHealth / maxHealth <= 0.4f) {
+  /**
+   * Updates the player's armour on the UI
+   *
+   * @param armour the player's armour
+   */
+  public void updateArmourUI(int armour) {
+    CharSequence text = String.format("%d", armour);
+    armourLabel.setText(text);
+    updateArmourVisibility(armour);
+    updateHealthBarColour();
+  }
+
+  /**
+   * Updates the colour of the health bar. If the entity has armour the colour turns blue. If the
+   * entity's health reaches 40% the colour turns red.
+   */
+  public void updateHealthBarColour() {
+    CombatStatsComponent stats = entity.getComponent(CombatStatsComponent.class);
+    int currentHealth = stats.getHealth();
+    int maxHealth = stats.getMaxHealth();
+    int armour = stats.getArmour();
+
+    if (armour > 0) {
+      healthBar.getStyle().knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.SKY);
+      healthBar.getStyle().knobBefore.setMinHeight(20);
+    } else if ((float) currentHealth / maxHealth <= 0.4f) {
       healthBar.getStyle().knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.RED);
-      healthBar.getStyle().background.setMinHeight(20);
       healthBar.getStyle().knobBefore.setMinHeight(20);
     } else {
       healthBar.getStyle().knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.GREEN);
-      healthBar.getStyle().background.setMinHeight(20);
       healthBar.getStyle().knobBefore.setMinHeight(20);
     }
+  }
+
+  /**
+   * Makes the armour cell visible if entity has armour
+   *
+   * @param armour the amount of armour the entity has
+   */
+  public void updateArmourVisibility(int armour) {
+    if (armour > 0) {
+      armourCell.setActor(armourStack);
+      armourCell.size(60f);
+    } else {
+      armourCell.setActor(null);
+      armourCell.size(0f);
+    }
+    table.pack();
   }
 
   @Override
   public void dispose() {
     super.dispose();
-    heartImage.remove();
     healthBar.remove();
   }
 }
