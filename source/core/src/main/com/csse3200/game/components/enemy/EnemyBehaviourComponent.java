@@ -2,7 +2,6 @@ package com.csse3200.game.components.enemy;
 
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.Component;
-import com.csse3200.game.components.StatusEffectCalculator;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAI;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIFactory;
@@ -160,30 +159,8 @@ public class EnemyBehaviourComponent extends Component {
 
     CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
     if (targetStats != null) {
-      targetStats.takeDamage(outgoingDamage(targetStats));
+      targetStats.takeDamage(currentIntent.getValue());
     }
-  }
-
-  /**
-   * Scales the telegraphed damage by this enemy's outgoing modifier and the target's incoming one,
-   * so Feeble on the attacker and Vulnerable on the target both apply, matching the player's attack
-   * path.
-   *
-   * <p>The intent keeps its original value, so what was telegraphed to the player is unchanged.
-   *
-   * @param targetStats combat stats of the entity being hit
-   * @return the damage this attack should deal
-   */
-  private int outgoingDamage(CombatStatsComponent targetStats) {
-    CombatStatsComponent stats = entity.getComponent(CombatStatsComponent.class);
-    if (stats == null) {
-      return currentIntent.getValue();
-    }
-
-    float outgoing = StatusEffectCalculator.getOutgoingDamageModifier(stats);
-    float incoming = StatusEffectCalculator.getIncomingDamageModifier(targetStats);
-
-    return Math.round(currentIntent.getValue() * outgoing * incoming);
   }
 
   private void defend() {
