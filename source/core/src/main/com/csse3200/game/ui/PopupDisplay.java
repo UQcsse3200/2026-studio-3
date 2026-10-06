@@ -24,16 +24,18 @@ import com.csse3200.game.services.ServiceLocator;
  * com.csse3200.game.components.spritedisplay.clickable.ClickableFactory}, anything — then call
  * {@link #show()} / {@link #hide()} to toggle it.
  *
- * <p>Look: by default the skin's {@code "default"} styles. Pass a style name (e.g. {@code "popup"})
- * to restyle the window and its close button; that name must exist in the skin as both a {@code
- * Window.WindowStyle} and a {@code TextButton.TextButtonStyle}.
+ * <p>Look: the skin's {@code "popup"} window and button styles, which callers can override with
+ * {@link #setBackgroundTexture}, {@link #setBackgroundColour}, {@link #setTitleStyle} and {@link
+ * #setDefaultCloseButtonVisible}.
  */
 public class PopupDisplay extends UIComponent {
   private static final float Z_INDEX = 20f;
   private static final Color BACKDROP_COLOUR = new Color(0f, 0f, 0f, 0.6f); // around the popup
 
+  // Skin style for the window and its close button; per-popup looks come from the setters below.
+  private static final String STYLE_NAME = "popup";
+
   private final String title;
-  private final String styleName;
   private float minWidth = 0f;
   private float minHeight = 0f;
   private String backgroundTexturePath;
@@ -63,16 +65,6 @@ public class PopupDisplay extends UIComponent {
    */
   public PopupDisplay(String title) {
     this.title = title;
-    this.styleName = "default";
-  }
-
-  /**
-   * @param title text in the window's title bar
-   * @param styleName skin style used for the window and its close button (see class javadoc)
-   */
-  public PopupDisplay(String title, String styleName) {
-    this.title = title;
-    this.styleName = styleName;
   }
 
   /** Sets a floor on the window's size — it will still grow beyond this to fit its content. */
@@ -163,12 +155,12 @@ public class PopupDisplay extends UIComponent {
     backdrop = new Image(skin.newDrawable("white", BACKDROP_COLOUR));
     backdrop.setFillParent(true);
 
-    window = new Window(title, skin, styleName);
+    window = new Window(title, skin, STYLE_NAME);
     window.pad(0f); // nothing between the window edge and the header
     window.padTop(HEADER_HEIGHT); // Window sizes the title table to this height
     window.top();
 
-    closeButton = new TextButton("X", skin, styleName);
+    closeButton = new TextButton("X", skin, STYLE_NAME);
     closeButton.addListener(
         new ChangeListener() {
           @Override
@@ -276,6 +268,11 @@ public class PopupDisplay extends UIComponent {
     return window.getHeight();
   }
 
+  /** Whether the popup is currently open; false before {@link #create()} has run. */
+  public boolean isShowing() {
+    return window != null && window.isVisible();
+  }
+
   /** Shows the popup, centred on the stage and in front of everything else. */
   public void show() {
     window.pack();
@@ -308,10 +305,6 @@ public class PopupDisplay extends UIComponent {
   @Override
   public float getZIndex() {
     return Z_INDEX;
-  }
-
-  public boolean isShowing() {
-    return window.isVisible();
   }
 
   public void setHeaderColour(Color colour) {
