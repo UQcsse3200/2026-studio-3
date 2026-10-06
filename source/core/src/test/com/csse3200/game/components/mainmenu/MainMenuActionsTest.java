@@ -33,6 +33,14 @@ class MainMenuActionsTest {
   }
 
   @Test
+  void enterTutorialStartsTheDedicatedBattleOnly() {
+    menu.getEvents().trigger(MainMenuDisplay.ENTER_TUTORIAL_EVENT);
+
+    verify(game).startTutorialBattle();
+    verify(game, never()).startNewRun();
+  }
+
+  @Test
   void loadOpensSaveLoadScreen() {
     menu.getEvents().trigger(MainMenuDisplay.LOAD_EVENT);
 

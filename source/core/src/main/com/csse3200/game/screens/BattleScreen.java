@@ -64,6 +64,9 @@ import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.tutorial.BattleTutorialComponent;
+import com.csse3200.game.tutorial.BattleTutorialController;
+import com.csse3200.game.tutorial.BattleTutorialTextView;
 import com.csse3200.game.ui.PopupDisplay;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
@@ -83,6 +86,8 @@ import org.slf4j.LoggerFactory;
  */
 public class BattleScreen extends ScreenAdapter {
   private final GdxGame game;
+  private final RunState runState;
+  private final boolean tutorialBattle;
   private static final Logger logger = LoggerFactory.getLogger(BattleScreen.class);
   private final Renderer renderer;
   private final ForestGameArea gameArea;
@@ -131,7 +136,14 @@ public class BattleScreen extends ScreenAdapter {
   private List<CardInstance> handRowOrder = new ArrayList<>();
 
   public BattleScreen(GdxGame game) {
+    this(game, false);
+  }
+
+  /** A tutorial has a disposable run and one fixed opponent instead of a map encounter. */
+  public BattleScreen(GdxGame game, boolean tutorialBattle) {
     this.game = game;
+    this.tutorialBattle = tutorialBattle;
+    this.runState = tutorialBattle ? new RunState() : game.getRunState();
 
     ServiceLocator.registerDragNDropService(new DragNDropService());
 
@@ -158,7 +170,7 @@ public class BattleScreen extends ScreenAdapter {
 
     ServiceLocator.registerCamera(renderer.getCamera().getCamera());
 
-    Integer mapProgression = game.getRunState().getMapProgression();
+    Integer mapProgression = tutorialBattle ? 1 : runState.getMapProgression();
 
     logger.debug("Initialising main game screen entities");
     TerrainFactory terrainFactory = new TerrainFactory(renderer.getCamera());
@@ -166,12 +178,13 @@ public class BattleScreen extends ScreenAdapter {
         new BattleGameArea(
             terrainFactory,
             mapProgression,
-            game.getRunState(),
-            game.getBackgroundId(),
-            BattleEncounterSelector.enemiesFor(game.getRunState()));
+            runState,
+            tutorialBattle ? "dungeon" : game.getBackgroundId(),
+            tutorialBattle
+                ? List.of("bone_crawler")
+                : BattleEncounterSelector.enemiesFor(runState));
     this.gameArea = forestGameArea;
     forestGameArea.create();
-    RunState runState = game.getRunState();
     playerState = runState.getOrCreatePlayerState();
 
     List<CardConfig> configs = CardConfigLoader.loadCards();
@@ -255,13 +268,32 @@ public class BattleScreen extends ScreenAdapter {
             int maxEnergy =
                 forestGameArea.getPlayer().getComponent(EnergyComponent.class).getMaxEnergy();
 
-            game.getRunState().setPlayerHealth(currentHealth);
-            game.getRunState().setPlayerMaxHealth(maxHealth);
-            game.getRunState().setPlayerMaxEnergy(maxEnergy);
+            runState.setPlayerHealth(currentHealth);
+            runState.setPlayerMaxHealth(maxHealth);
+            runState.setPlayerMaxEnergy(maxEnergy);
           }
         });
     createUI();
+    if (tutorialBattle) {
+      BattleTutorialComponent guidance =
+          new BattleTutorialComponent(
+              controller,
+              new BattleTutorialTextView(
+                  ServiceLocator.getRenderService().getStage(), cardWidgetSkin),
+              this::onTutorialFinished);
+      ServiceLocator.getEntityService().register(new Entity().addComponent(guidance));
+    }
     controller.start();
+  }
+
+  private void onTutorialFinished(BattleTutorialController.Outcome outcome) {
+    // All tutorial changes live in this screen's disposable run. Joel's shared new-run path resets
+    // the persistent run and opens the story/map on victory or voluntary exit.
+    if (outcome == BattleTutorialController.Outcome.LOST) {
+      game.setScreen(GdxGame.ScreenType.MAIN_MENU);
+    } else {
+      game.startNewRun();
+    }
   }
 
   public void createUI() {
@@ -290,13 +322,13 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new InputDecorator(stage, 10))
             .addComponent(uiFactory)
             .addComponent(displays)
-            .addComponent(new BattleActions(controller, game))
+            .addComponent(new BattleActions(controller, game, tutorialBattle))
             .addComponent(new CardActions(controller, gameArea.getPlayer()))
             .addComponent(new Team3CardPlayAdapter(cardPlayService, controller))
             .addComponent(cardInventory)
             .addComponent(new PauseMenuDisplay())
             .addComponent(new PauseMenuInput())
-            .addComponent(new PauseMenuActions(game))
+            .addComponent(new PauseMenuActions(game, tutorialBattle))
             .addComponent(
                 new DamageOnCardPlayComponent(
                     gameArea.getPlayer().getComponent(CombatStatsComponent.class)))

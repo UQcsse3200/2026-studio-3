@@ -221,6 +221,11 @@ public class GdxGame extends Game {
     setScreen(ScreenType.BATTLE_SCREEN);
   }
 
+  /** Opens an isolated teaching battle without entering or completing a map node. */
+  public void startTutorialBattle() {
+    setScreen(ScreenType.TUTORIAL_BATTLE);
+  }
+
   /**
    * Opens a specific configured Event for the active map node using the persistent run.
    *
@@ -310,6 +315,7 @@ public class GdxGame extends Game {
       case ANCIENT_TEMPLE -> new AncientTempleScreen(this);
       case TEMPLE_CARD_SELECTION -> new TempleCardSelectionScreen(this);
       case BATTLE_SCREEN -> new BattleScreen(this);
+      case TUTORIAL_BATTLE -> new BattleScreen(this, true);
       case VICTORY -> new EndBattleScreen(this, true);
       case DEFEAT -> new EndBattleScreen(this, false);
       case BESTIARY -> new BestiaryScreen(this);
@@ -327,6 +333,7 @@ public class GdxGame extends Game {
     ENCOUNTER,
     CAMPFIRE,
     BATTLE_SCREEN,
+    TUTORIAL_BATTLE,
     VICTORY,
     DEFEAT,
     ELITE_PORTAL,
