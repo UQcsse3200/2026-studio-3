@@ -331,14 +331,24 @@ class EnemyAnimationControllerTest {
       Entity player = new Entity().addComponent(playerStats);
       SpriteBatch batch = mock(SpriteBatch.class);
       try {
-        assertEquals(!"boss_knight".equals(id) && !"default".equals(id), hasAttack, id);
+        // boss_knight's swing frames are labelled "attack" (#378); only the default atlas lacks them.
+        assertEquals(!"default".equals(id), hasAttack, id);
         for (int attack = 1; attack <= 3; attack++) {
           behaviour.rollIntent();
           behaviour.executeIntent(player);
           assertEquals(hasAttack ? "attack" : "idle", actualAnimator.getCurrentAnimation(), id);
           actualEnemy.update();
           assertTrue(actualEnemy.getPosition().x < 10f, id);
-          for (int frame = 0; frame < 5; frame++) {
+          // Attack lengths vary by atlas (boss_knight's is ~2s), so step at least the original 5
+          // frames, then until the enemy is idle and back from its lunge. Capped at 6s so a stuck
+          // animation still fails the assertions below.
+          Vector2 start = new Vector2(10f, 3f);
+          for (int frame = 0;
+              frame < 60
+                  && (frame < 5
+                      || !"idle".equals(actualAnimator.getCurrentAnimation())
+                      || !start.equals(actualEnemy.getPosition()));
+              frame++) {
             actualAnimator.render(batch);
             actualEnemy.update();
           }

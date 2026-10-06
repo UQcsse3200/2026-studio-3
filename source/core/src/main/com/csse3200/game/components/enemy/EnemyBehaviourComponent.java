@@ -170,6 +170,8 @@ public class EnemyBehaviourComponent extends Component {
       int damage =
           new CardEffectResolutionContext(strength, feeble, vulnerable)
               .resolveDamage(currentIntent.getValue());
+      // Starts the attack animation (EnemyAnimationController) before the damage lands.
+      entity.getEvents().trigger("enemyAttack");
       targetStats.takeDamage(damage);
     }
   }

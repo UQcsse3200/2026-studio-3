@@ -138,7 +138,7 @@ class CardAimControllerTest {
   void emptyBattlefieldDropAppliesSelfEffectAndSpendsEnergyOnce() throws Exception {
     DropBattle battle = dropBattle(TargetType.SELF, 3);
     drop(battle.source(), -190, 270);
-    assertEquals(4, battle.player().getComponent(CombatStatsComponent.class).getArmour());
+    assertEquals(4, battle.player().getComponent(CombatStatsComponent.class).getBlock());
     assertEquals(2, battle.energy().getCurrentEnergy());
     assertEquals(0, battle.deck().getHand().size());
     assertEquals(1, battle.deck().getDiscardPile().size());
@@ -172,7 +172,7 @@ class CardAimControllerTest {
     drop(battle.source(), -190, 270);
     assertEquals(0, battle.energy().getCurrentEnergy());
     assertEquals(1, battle.deck().getHand().size());
-    assertEquals(0, battle.player().getComponent(CombatStatsComponent.class).getArmour());
+    assertEquals(0, battle.player().getComponent(CombatStatsComponent.class).getBlock());
   }
 
   @SuppressWarnings("unchecked")
