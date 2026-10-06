@@ -30,6 +30,7 @@ import com.csse3200.game.screens.DemoShopScreen;
 import com.csse3200.game.screens.ElitePortalScreen;
 import com.csse3200.game.screens.EncounterScreen;
 import com.csse3200.game.screens.EndBattleScreen;
+import com.csse3200.game.screens.ItemLibraryScreen;
 import com.csse3200.game.screens.LibraryScreen;
 import com.csse3200.game.screens.MainGameScreen;
 import com.csse3200.game.screens.MainMenuScreen;
@@ -263,6 +264,7 @@ public class GdxGame extends Game {
       case TEMPLE_CARD_SELECTION -> new TempleCardSelectionScreen(this);
       case DEFEAT -> new EndBattleScreen(this, false);
       case BESTIARY -> new BestiaryScreen(this);
+      case ITEM_LIBRARY -> new ItemLibraryScreen(this);
     };
   }
 
@@ -282,7 +284,8 @@ public class GdxGame extends Game {
     ELITE_PORTAL,
     ANCIENT_TEMPLE,
     TEMPLE_CARD_SELECTION,
-    BESTIARY
+    BESTIARY,
+    ITEM_LIBRARY
   }
 
   /** Exit the game. */

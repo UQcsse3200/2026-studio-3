@@ -75,9 +75,12 @@ public class DragNDrop extends InOutOnTrigger {
             payload.setObject(new TriggerPayload(trigger, getArgs(), getLabel()));
 
             Button original = DragNDrop.this.getBtn();
-            Button dragVisual = createDragVisual(original);
-            dragVisual.setSize(original.getWidth(), original.getHeight());
-            payload.setDragActor(dragVisual);
+            original.clearActions();
+            if (aimController == null || !aimController.usesTargetingArrow()) {
+              Button dragVisual = createDragVisual(original);
+              dragVisual.setSize(original.getWidth(), original.getHeight());
+              payload.setDragActor(dragVisual);
+            }
 
             dragAndDrop.setDragActorPosition(x, -y);
 
@@ -100,7 +103,9 @@ public class DragNDrop extends InOutOnTrigger {
             boolean outsideBounds =
                 x < 0 || y < 0 || x > original.getWidth() || y > original.getHeight();
 
-            if (outsideBounds && original.isVisible()) {
+            if (outsideBounds
+                && original.isVisible()
+                && (aimController == null || !aimController.usesTargetingArrow())) {
               original.clearActions();
               original.setVisible(false);
               actuallyHidden = true;
