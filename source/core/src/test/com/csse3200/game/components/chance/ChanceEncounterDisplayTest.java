@@ -1,5 +1,6 @@
 package com.csse3200.game.components.chance;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -7,11 +8,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardDiscoveryService;
+import com.csse3200.game.cards.CardUnlockState;
 import com.csse3200.game.cards.TestCardService;
 import com.csse3200.game.chance.ChanceChoice;
 import com.csse3200.game.chance.ChanceEncounter;
@@ -28,17 +34,38 @@ import com.csse3200.game.services.ServiceLocator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(GameExtension.class)
 class ChanceEncounterDisplayTest {
+  private Stage stage;
+  private Entity entity;
+
+  @BeforeEach
+  void setUp() {
+    RenderService renderService = new RenderService();
+    stage = new Stage(new ScreenViewport(), mock(SpriteBatch.class));
+    renderService.setStage(stage);
+    ServiceLocator.registerRenderService(renderService);
+    ServiceLocator.registerEntityService(new EntityService());
+  }
+
+  @AfterEach
+  void tearDown() {
+    if (entity != null) {
+      entity.dispose();
+    }
+    stage.dispose();
+  }
 
   @Test
   void abandonedMineSceneKeepsChoicesAndCompletionWorking() {
-    Stage stage = new Stage(new FitViewport(1280f, 800f), mock(Batch.class));
+    Stage sceneStage = new Stage(new FitViewport(1280f, 800f), mock(Batch.class));
     RenderService renderService = new RenderService();
-    renderService.setStage(stage);
+    renderService.setStage(sceneStage);
     ServiceLocator.registerRenderService(renderService);
     EntityService entities = new EntityService();
     ServiceLocator.registerEntityService(entities);
@@ -57,8 +84,8 @@ class ChanceEncounterDisplayTest {
     ChanceEncounterDisplay display =
         new ChanceEncounterDisplay(
             encounter, (nodeId, success) -> completions.incrementAndGet(), 7);
-    Entity entity = new Entity().addComponent(display);
-    entities.register(entity);
+    Entity sceneEntity = new Entity().addComponent(display);
+    entities.register(sceneEntity);
 
     try {
       assertEquals(2, display.getChoiceButtons().size());
@@ -80,20 +107,20 @@ class ChanceEncounterDisplayTest {
       assertEquals(0, completions.get());
 
       display.getContinueButton().fire(new ChangeEvent());
-      stage.act(0.3f);
-      stage.act(0.3f);
+      sceneStage.act(0.3f);
+      sceneStage.act(0.3f);
       assertEquals(1, completions.get());
     } finally {
-      entity.dispose();
-      stage.dispose();
+      sceneEntity.dispose();
+      sceneStage.dispose();
     }
   }
 
   @Test
   void shouldRefreshDiceButtonsAfterEachStagedChoice() {
-    Stage stage = new Stage(new FitViewport(1280f, 800f), mock(Batch.class));
+    Stage sceneStage = new Stage(new FitViewport(1280f, 800f), mock(Batch.class));
     RenderService renderService = new RenderService();
-    renderService.setStage(stage);
+    renderService.setStage(sceneStage);
     ServiceLocator.registerRenderService(renderService);
     EntityService entities = new EntityService();
     ServiceLocator.registerEntityService(entities);
@@ -127,8 +154,8 @@ class ChanceEncounterDisplayTest {
             new ChanceOutcomeApplier(new MockPlayerStateGateway(100, 50)),
             (nodeId, success) -> {});
     ChanceEncounterDisplay display = new ChanceEncounterDisplay(session);
-    Entity entity = new Entity().addComponent(display);
-    entities.register(entity);
+    Entity sceneEntity = new Entity().addComponent(display);
+    entities.register(sceneEntity);
 
     try {
       assertEquals(List.of("low", "high"), choiceIds(display));
@@ -137,12 +164,11 @@ class ChanceEncounterDisplayTest {
       assertEquals(
           "Dice Game Rules",
           display.getHelpDialog().getDialog().getTitleLabel().getText().toString());
-      assertTrue(
-          display.getHelpDialog().getBodyLabel().getText().toString().contains("Low (2-6)"));
+      assertTrue(display.getHelpDialog().getBodyLabel().getText().toString().contains("Low (2-6)"));
       display.getHelpButton().fire(new ChangeEvent());
-      assertEquals(stage, display.getHelpDialog().getDialog().getStage());
+      assertEquals(sceneStage, display.getHelpDialog().getDialog().getStage());
       display.getHelpDialog().getCloseButton().fire(new ChangeEvent());
-      finishDialogClose(stage);
+      finishDialogClose(sceneStage);
       assertNull(display.getHelpDialog().getDialog().getStage());
       assertEquals(List.of("low", "high"), choiceIds(display));
       assertFalse(session.isResolved());
@@ -156,14 +182,14 @@ class ChanceEncounterDisplayTest {
       assertEquals("ROLLING...", display.getResultText());
       display.getChoiceButtons().get(1).fire(new ChangeEvent());
       for (int frame = 0; frame < 42; frame++) {
-        stage.act(1f / 60f);
+        sceneStage.act(1f / 60f);
       }
       assertTrue(display.getDiceRollDisplay().isRolling());
       assertEquals(1, display.getDiceRollDisplay().getFirstValue());
       assertEquals(6, display.getDiceRollDisplay().getSecondValue());
       assertEquals("ROLLING...", display.getDiceRollDisplay().getTotalText());
       for (int frame = 0; frame < 18; frame++) {
-        stage.act(1f / 60f);
+        sceneStage.act(1f / 60f);
       }
       assertFalse(display.getDiceRollDisplay().isRolling());
       assertEquals(1, display.getDiceRollDisplay().getFirstValue());
@@ -175,11 +201,11 @@ class ChanceEncounterDisplayTest {
         assertNull(oldChoice.getStage());
       }
       assertEquals(persistentHelpButton, display.getHelpButton());
-      assertEquals(stage, persistentHelpButton.getStage());
+      assertEquals(sceneStage, persistentHelpButton.getStage());
       display.getHelpButton().fire(new ChangeEvent());
-      assertEquals(stage, display.getHelpDialog().getDialog().getStage());
+      assertEquals(sceneStage, display.getHelpDialog().getDialog().getStage());
       display.getHelpDialog().getCloseButton().fire(new ChangeEvent());
-      finishDialogClose(stage);
+      finishDialogClose(sceneStage);
       assertNull(display.getHelpDialog().getDialog().getStage());
       assertEquals(List.of("take", "double-down"), choiceIds(display));
       assertTrue(display.getResultText().contains("LUCKY SEVEN!"));
@@ -196,8 +222,8 @@ class ChanceEncounterDisplayTest {
       display.getChoiceButtons().get(0).fire(new ChangeEvent());
       assertTrue(session.isResolved());
     } finally {
-      entity.dispose();
-      stage.dispose();
+      sceneEntity.dispose();
+      sceneStage.dispose();
     }
   }
 
@@ -249,5 +275,70 @@ class ChanceEncounterDisplayTest {
   @Test
   void shouldDescribeUnresolvedChoice() {
     assertEquals("This choice could not be resolved.", ChanceEncounterDisplay.formatOutcome(null));
+  }
+
+  @Test
+  void shouldDescribeEveryCardInMultiCardRewardOutcome() {
+    assertEquals(
+        "You receive the Bandage card.\nYou receive the Strike card.",
+        ChanceEncounterDisplay.formatOutcome(
+            ChanceOutcome.withCardRewards(0, 0, List.of("bandage", "strike"))));
+  }
+
+  @Test
+  void shouldDiscoverEveryDisplayedCardInMultiCardPreview() {
+    CardDiscoveryService discovery = new CardDiscoveryService(CardConfigLoader.loadCards());
+    ServiceLocator.registerCardDiscoveryService(discovery);
+    ChanceEncounter encounter =
+        new ChanceEncounter(
+            "multi-card-preview",
+            "Two cards await.",
+            List.of(
+                new ChanceChoice(
+                    "take-cards",
+                    "Take the cards",
+                    ChanceOutcome.withCardRewards(0, 0, List.of("bandage", "strike")))));
+    ChanceEncounterDisplay display = new ChanceEncounterDisplay(encounter);
+    entity = new Entity().addComponent(display);
+    entity.create();
+    assertEquals(CardUnlockState.LOCKED, discovery.getProgressSnapshot().get("bandage"));
+    assertEquals(CardUnlockState.LOCKED, discovery.getProgressSnapshot().get("strike"));
+
+    display.getChoiceButtons().getFirst().fire(new ChangeEvent());
+
+    assertEquals(CardUnlockState.SEEN, discovery.getProgressSnapshot().get("bandage"));
+    assertEquals(CardUnlockState.SEEN, discovery.getProgressSnapshot().get("strike"));
+  }
+
+  @Test
+  void shouldAllowPreviewWithoutMapNode() {
+    ChanceEncounter preview =
+        new ChanceEncounter(
+            "preview",
+            "Preview encounter",
+            List.of(new ChanceChoice("continue", "Continue", new ChanceOutcome(0, 0))));
+
+    assertDoesNotThrow(() -> new ChanceEncounterDisplay(preview));
+  }
+
+  @Test
+  void shouldRecordEventCardSeenOnlyWhenSuccessfulOutcomeIsDisplayed() {
+    CardDiscoveryService discovery = new CardDiscoveryService(CardConfigLoader.loadCards());
+    ServiceLocator.registerCardDiscoveryService(discovery);
+    ChanceEncounter encounter =
+        new ChanceEncounter(
+            "event-card",
+            "A card waits in the archive.",
+            List.of(
+                new ChanceChoice(
+                    "take-card", "Take the card", new ChanceOutcome(0, 0, "bandage"))));
+    ChanceEncounterDisplay display = new ChanceEncounterDisplay(encounter, null, 1);
+    entity = new Entity().addComponent(display);
+    entity.create();
+    assertEquals(CardUnlockState.LOCKED, discovery.getProgressSnapshot().get("bandage"));
+
+    display.getChoiceButtons().getFirst().fire(new ChangeEvent());
+
+    assertEquals(CardUnlockState.SEEN, discovery.getProgressSnapshot().get("bandage"));
   }
 }

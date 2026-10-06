@@ -57,10 +57,13 @@ class ChanceEncounterFactoryTest {
   void shouldCreateMysteriousShrine() {
     ChanceEncounter encounter = ChanceEncounterFactory.createInitialEncounters().get(0);
 
-    assertEquals("An ancient shrine hums with an unsettling energy.", encounter.getDescription());
+    assertEquals(
+        "A cracked sanctum shrine still burns with a god's spoiled light. An angel might leave an offering here to learn what the fallen still demand.",
+        encounter.getDescription());
     assertEquals(2, encounter.getChoices().size());
-    assertChoice(encounter, 0, "make-offering", "Offer some of your vitality.", -10, 25);
-    assertChoice(encounter, 1, "leave", "Leave the shrine untouched.", 0, 0);
+    assertChoice(
+        encounter, 0, "make-offering", "Bleed a little of your light into the shrine.", -10, 25);
+    assertChoice(encounter, 1, "leave", "Pass without kneeling.", 0, 0);
   }
 
   @Test
@@ -87,10 +90,12 @@ class ChanceEncounterFactoryTest {
   void shouldCreateForcedCostFloodedCrossing() {
     ChanceEncounter encounter = ChanceEncounterFactory.createInitialEncounters().get(2);
 
-    assertEquals("A flooded crossing blocks the road ahead.", encounter.getDescription());
+    assertEquals(
+        "A flooded sanctum court bars the way upward. An angel must choose how to cross without abandoning the path.",
+        encounter.getDescription());
     assertEquals(2, encounter.getChoices().size());
-    assertChoice(encounter, 0, "hire-ferryman", "Pay a ferryman for safe passage.", 0, -8);
-    assertChoice(encounter, 1, "ford-river", "Attempt to ford the river alone.", -8, 0);
+    assertChoice(encounter, 0, "hire-ferryman", "Pay a silent ferryman for safe passage.", 0, -8);
+    assertChoice(encounter, 1, "ford-river", "Wade the flood alone.", -8, 0);
     assertNull(encounter.resolveChoice("wait"));
   }
 

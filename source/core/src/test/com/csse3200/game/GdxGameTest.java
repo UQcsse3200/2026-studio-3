@@ -28,9 +28,10 @@ import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.rewards.RewardOption;
-import com.csse3200.game.rewards.RewardType;
 import com.csse3200.game.screens.MapScreen;
+import com.csse3200.game.screens.NarrationScreen;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedConstruction;
@@ -96,7 +97,7 @@ class GdxGameTest {
     runState.initialisePlayerStats(1, 200, 8);
     runState.markCardFusionUsed();
     runState.setPendingEliteTempleReward(true);
-    runState.setPendingReward(new RewardOption(RewardType.GOLD));
+    runState.setPendingReward(RewardOption.gold(15));
 
     Screen oldScreen = mock(Screen.class);
     game.setScreen(oldScreen);
@@ -110,41 +111,60 @@ class GdxGameTest {
         .when(oldScreen)
         .dispose();
 
-    try (MockedConstruction<MapScreen> maps =
-        mockConstruction(
-            MapScreen.class,
-            (map, context) -> {
-              verify(oldScreen).dispose();
+    AtomicReference<Runnable> finishOpening = new AtomicReference<>();
 
-              assertFalse(runState.isRunActive());
-              assertNull(runState.getMapGraph());
-              assertNull(runState.getActiveNodeId());
-              assertNull(runState.getEncounterSeed());
-              assertEquals(0, runState.getPlayerHealth());
-              assertEquals(0, runState.getPlayerMaxHealth());
-              assertEquals(0, runState.getPlayerMaxEnergy());
-              assertFalse(runState.hasUsedCardFusion());
-              assertFalse(runState.hasPendingEliteTempleReward());
-              assertNull(runState.getPendingReward());
+    try (MockedConstruction<NarrationScreen> narrations =
+            mockConstruction(
+                NarrationScreen.class,
+                (narration, context) -> {
+                  assertEquals("opening", context.arguments().get(0));
+                  verify(oldScreen).dispose();
+                  assertFalse(runState.isRunActive());
+                  finishOpening.set((Runnable) context.arguments().get(1));
+                });
+        MockedConstruction<MapScreen> maps =
+            mockConstruction(
+                MapScreen.class,
+                (map, context) -> {
+                  verify(oldScreen).dispose();
 
-              PlayerRunState newPlayer = runState.getOrCreatePlayerState();
-              PlayerRunState defaults = PlayerFactory.createInitialRunState();
+                  assertFalse(runState.isRunActive());
+                  assertNull(runState.getMapGraph());
+                  assertNull(runState.getActiveNodeId());
+                  assertNull(runState.getEncounterSeed());
+                  assertEquals(0, runState.getPlayerHealth());
+                  assertEquals(0, runState.getPlayerMaxHealth());
+                  assertEquals(0, runState.getPlayerMaxEnergy());
+                  assertFalse(runState.hasUsedCardFusion());
+                  assertFalse(runState.hasPendingEliteTempleReward());
+                  assertNull(runState.getPendingReward());
 
-              assertNotSame(oldPlayer, newPlayer);
-              assertEquals(defaults.getCurrentHealth(), newPlayer.getCurrentHealth());
-              assertEquals(defaults.getMaxHealth(), newPlayer.getMaxHealth());
-              assertEquals(defaults.getGold(), newPlayer.getGold());
-              assertTrue(newPlayer.getOwnedItems().isEmpty());
+                  PlayerRunState newPlayer = runState.getOrCreatePlayerState();
+                  PlayerRunState defaults = PlayerFactory.createInitialRunState();
 
-              PlayerDeck newDeck = runState.getOrCreatePlayerDeck(cards);
-              assertNotSame(oldDeck, newDeck);
-              assertEquals(PlayerDeckFactory.getStarterDeckCardIds(), newDeck.getCardIds());
-            })) {
+                  assertNotSame(oldPlayer, newPlayer);
+                  assertEquals(defaults.getCurrentHealth(), newPlayer.getCurrentHealth());
+                  assertEquals(defaults.getMaxHealth(), newPlayer.getMaxHealth());
+                  assertEquals(defaults.getGold(), newPlayer.getGold());
+                  assertTrue(newPlayer.getOwnedItems().isEmpty());
+
+                  PlayerDeck newDeck = runState.getOrCreatePlayerDeck(cards);
+                  assertNotSame(oldDeck, newDeck);
+                  assertEquals(PlayerDeckFactory.getStarterDeckCardIds(), newDeck.getCardIds());
+                })) {
       game.startNewRun();
+
+      assertEquals(1, narrations.constructed().size());
+      assertSame(narrations.constructed().get(0), game.getScreen());
+      verify(narrations.constructed().get(0)).show();
+      assertEquals(0, maps.constructed().size());
+
+      finishOpening.get().run();
 
       assertEquals(1, maps.constructed().size());
       assertSame(maps.constructed().get(0), game.getScreen());
       verify(maps.constructed().get(0)).show();
+      verify(narrations.constructed().get(0)).dispose();
       verify(oldScreen).dispose();
     }
   }

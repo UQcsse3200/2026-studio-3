@@ -65,7 +65,7 @@ public class CardEffectHandler {
     }
     for (ResolvedCardEffect effect : effects) {
       switch (effect.type()) {
-        case BLOCK -> stats.addArmour(effect.value());
+        case BLOCK -> stats.addBlock(effect.value());
         case HEAL -> {
           if (effect.duration() > 0) {
             stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
