@@ -88,11 +88,12 @@ class RewardDisplayTest {
     assertEquals(3, display.getOptions().size());
     assertEquals(3, display.getRewardOptionCards().size());
     assertEquals(
-            List.of(RewardType.GOLD, RewardType.ITEM, RewardType.CARD),
-            display.getOptions().stream().map(option -> option.type).toList());
+        List.of(RewardType.GOLD, RewardType.ITEM, RewardType.CARD),
+        display.getOptions().stream().map(option -> option.type).toList());
 
     RewardOption cardOption = cardOption(display);
-    assertTrue(cardOption.cardSelection.cardIds().stream()
+    assertTrue(
+        cardOption.cardSelection.cardIds().stream()
             .allMatch(id -> discovery.getProgressSnapshot().get(id) == CardUnlockState.LOCKED));
     assertFalse(display.isCardRewardCommitted());
   }
@@ -104,7 +105,9 @@ class RewardDisplayTest {
     PlayerDeck deck = runState.getOrCreatePlayerDeck(cardService);
     int initialDeckSize = deck.size();
     AtomicInteger discoveryEvents = new AtomicInteger();
-    discovery.getEvents().addListener(
+    discovery
+        .getEvents()
+        .addListener(
             CardDiscoveryService.ENTRY_UPDATED_EVENT, ignored -> discoveryEvents.incrementAndGet());
 
     display.selectOption(option);
@@ -114,15 +117,16 @@ class RewardDisplayTest {
     assertEquals(initialDeckSize, deck.size());
     assertEquals(option.cardSelection.cardIds().size(), display.getCardChoiceButtons().size());
     assertEquals(option.cardSelection.cardIds().size(), display.getCardWidgets().size());
-    assertTrue(option.cardSelection.cardIds().stream()
+    assertTrue(
+        option.cardSelection.cardIds().stream()
             .allMatch(id -> discovery.getProgressSnapshot().get(id) == CardUnlockState.SEEN));
     assertEquals(option.cardSelection.cardIds().size(), discoveryEvents.get());
 
     for (CardWidget widget : display.getCardWidgets()) {
       assertFalse(widget.getCard().upgraded());
       assertEquals(
-              cardService.getCard(widget.getCard().cardId()).orElseThrow().name,
-              widget.getCard().name());
+          cardService.getCard(widget.getCard().cardId()).orElseThrow().name,
+          widget.getCard().name());
     }
   }
 
@@ -135,18 +139,25 @@ class RewardDisplayTest {
     AtomicInteger claimEvents = new AtomicInteger();
     AtomicInteger navigationEvents = new AtomicInteger();
 
-    RewardDisplay display = createDisplay(defaultService(), () -> {
-      assertEquals(initialDeckSize + 1, deck.size());
-      checkpointCalls.incrementAndGet();
-      checkpointComplete.set(true);
-    });
-    entity.getEvents().addListener(
+    RewardDisplay display =
+        createDisplay(
+            defaultService(),
+            () -> {
+              assertEquals(initialDeckSize + 1, deck.size());
+              checkpointCalls.incrementAndGet();
+              checkpointComplete.set(true);
+            });
+    entity
+        .getEvents()
+        .addListener(
             RewardDisplay.REWARD_CLAIMED_EVENT,
             () -> {
               assertTrue(checkpointComplete.get());
               claimEvents.incrementAndGet();
             });
-    entity.getEvents().addListener(
+    entity
+        .getEvents()
+        .addListener(
             EndBattleDisplay.RETURN_TO_MENU_EVENT,
             () -> {
               assertTrue(checkpointComplete.get());
@@ -173,7 +184,8 @@ class RewardDisplayTest {
     display.selectOption(display.getOptions().getFirst());
 
     assertTrue(display.isClaimed());
-    assertTrue(candidateIds.stream()
+    assertTrue(
+        candidateIds.stream()
             .allMatch(id -> discovery.getProgressSnapshot().get(id) == CardUnlockState.LOCKED));
   }
 
@@ -181,7 +193,7 @@ class RewardDisplayTest {
   void emptyCardPoolLeavesOnlyGoldAndItemPanelCards() {
     CardAcquisitionPool emptyPool = new CardAcquisitionPool(cardService, List.of());
     RewardService service =
-            new RewardService(fixedRewardGenerator(), cardService, emptyPool, new Random(7));
+        new RewardService(fixedRewardGenerator(), cardService, emptyPool, new Random(7));
     RewardDisplay display = createDisplay(service);
 
     assertEquals(2, display.getOptions().size());
@@ -193,18 +205,19 @@ class RewardDisplayTest {
   void cardClaimFailureCanBeRetriedWithoutMutatingDeck() {
     AtomicInteger attempts = new AtomicInteger();
     RewardService failingService =
-            new RewardService(fixedRewardGenerator(), cardService, new Random(11)) {
-              @Override
-              public void claimRunReward(RunState state, RewardOption selected, String selectedCardId) {
-                attempts.incrementAndGet();
-                throw new IllegalStateException("simulated card claim failure");
-              }
-            };
+        new RewardService(fixedRewardGenerator(), cardService, new Random(11)) {
+          @Override
+          public void claimRunReward(RunState state, RewardOption selected, String selectedCardId) {
+            attempts.incrementAndGet();
+            throw new IllegalStateException("simulated card claim failure");
+          }
+        };
     RewardDisplay display = createDisplay(failingService);
     int initialDeckSize = runState.getOrCreatePlayerDeck(cardService).size();
     AtomicInteger navigationEvents = new AtomicInteger();
-    entity.getEvents().addListener(
-            EndBattleDisplay.RETURN_TO_MENU_EVENT, navigationEvents::incrementAndGet);
+    entity
+        .getEvents()
+        .addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, navigationEvents::incrementAndGet);
 
     display.selectOption(cardOption(display));
     Button selectedCard = display.getCardChoiceButtons().getFirst();
@@ -222,14 +235,18 @@ class RewardDisplayTest {
     DisplayingRecord record = DisplayingRecord.builder("").variant("reward").build();
     RewardService service = defaultService();
 
-    assertThrows(NullPointerException.class,
-            () -> new RewardDisplay(record, null, game, cardService, discovery));
-    assertThrows(NullPointerException.class,
-            () -> new RewardDisplay(record, service, null, cardService, discovery));
-    assertThrows(NullPointerException.class,
-            () -> new RewardDisplay(record, service, game, null, discovery));
-    assertThrows(NullPointerException.class,
-            () -> new RewardDisplay(record, service, game, cardService, null));
+    assertThrows(
+        NullPointerException.class,
+        () -> new RewardDisplay(record, null, game, cardService, discovery));
+    assertThrows(
+        NullPointerException.class,
+        () -> new RewardDisplay(record, service, null, cardService, discovery));
+    assertThrows(
+        NullPointerException.class,
+        () -> new RewardDisplay(record, service, game, null, discovery));
+    assertThrows(
+        NullPointerException.class,
+        () -> new RewardDisplay(record, service, game, cardService, null));
   }
 
   private RewardDisplay createDisplay(RewardService service) {
@@ -237,7 +254,8 @@ class RewardDisplayTest {
   }
 
   private RewardDisplay createDisplay(RewardService service, Runnable afterRewardApplied) {
-    RewardDisplay display = new RewardDisplay(
+    RewardDisplay display =
+        new RewardDisplay(
             DisplayingRecord.builder("").variant("reward").build(),
             service,
             game,
@@ -269,8 +287,8 @@ class RewardDisplayTest {
 
   private static RewardOption cardOption(RewardDisplay display) {
     return display.getOptions().stream()
-            .filter(option -> option.type == RewardType.CARD)
-            .findFirst()
-            .orElseThrow();
+        .filter(option -> option.type == RewardType.CARD)
+        .findFirst()
+        .orElseThrow();
   }
 }

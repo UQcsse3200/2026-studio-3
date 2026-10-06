@@ -32,7 +32,7 @@ class RewardGeneratorTest {
     int amountA = generatorA.generateGoldOption().getBaseAmount();
     int amountB = generatorB.generateGoldOption().getBaseAmount();
 
-      assertEquals(amountA, amountB);
+    assertEquals(amountA, amountB);
   }
 
   @Test
