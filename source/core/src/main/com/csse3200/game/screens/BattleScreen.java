@@ -214,7 +214,8 @@ public class BattleScreen extends ScreenAdapter {
 
     controller =
         new BattleController(player, forestGameArea.getEnemies(), effectHandler, cardPlayService);
-    EffectVisualRegistry effectVisualRegistry = createEffectVisualRegistry();
+    EffectVisualRegistry effectVisualRegistry = new EffectVisualRegistry();
+    OffensiveEffectVisuals.registerAll(effectVisualRegistry);
     Entity animationCoordinatorEntity =
         new Entity()
             .addComponent(
@@ -393,14 +394,6 @@ public class BattleScreen extends ScreenAdapter {
     handRowOrder = new ArrayList<>(newHandRow);
     uiFactory.rebuildHand(buildHandRecords());
     installHandCardWidgets();
-  }
-
-  /** Builds the same registered visual groups for every battle. */
-  static EffectVisualRegistry createEffectVisualRegistry() {
-    EffectVisualRegistry registry = new EffectVisualRegistry();
-    OffensiveEffectVisuals.registerAll(registry);
-    EnemyStatusEffectVisuals.registerAll(registry);
-    return registry;
   }
 
   @Override

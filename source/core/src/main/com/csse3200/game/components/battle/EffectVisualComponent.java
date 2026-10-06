@@ -25,9 +25,7 @@ public class EffectVisualComponent extends RenderComponent {
   private float elapsed;
 
   /**
-   * @param texture externally owned texture to draw; the battle coordinator supplies a shared
-   *     generated glow for styles without an available icon. Null skips drawing while the lifetime
-   *     still elapses. This component never disposes the supplied texture.
+   * @param texture texture to draw, or null to skip drawing (the lifetime still elapses)
    * @param style the look and timing of this visual
    * @param baseSize size, in world units, that the style's start/end scales are relative to
    * @param startDelay seconds to wait, from creation, before this visual starts playing; use 0 for
