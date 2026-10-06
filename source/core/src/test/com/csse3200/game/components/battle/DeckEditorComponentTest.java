@@ -176,7 +176,12 @@ class DeckEditorComponentTest {
         NullPointerException.class,
         () ->
             new DeckEditorComponent(
-                cardPlayService, library, popup, poolFactory, mock(DisplayingFactory.class), null,
+                cardPlayService,
+                library,
+                popup,
+                poolFactory,
+                mock(DisplayingFactory.class),
+                null,
                 null));
   }
 
@@ -288,9 +293,7 @@ class DeckEditorComponentTest {
     // Sixth card: second column of the second row.
     assertEquals(GRID_ORIGIN_X + CARD_STEP_X, records.get(5).x(), 0.001f);
     assertEquals(
-        STAGE_HEIGHT - (GRID_TOP_Y - CARD_STEP_Y - CARD_HEIGHT) - 10f,
-        records.get(5).y(),
-        0.001f);
+        STAGE_HEIGHT - (GRID_TOP_Y - CARD_STEP_Y - CARD_HEIGHT) - 10f, records.get(5).y(), 0.001f);
   }
 
   @Test
@@ -415,8 +418,7 @@ class DeckEditorComponentTest {
     toggle(all.get(2));
     toggle(all.get(0));
     toggle(all.get(1));
-    assertEquals(
-        List.of(badge(1, 2), badge(2, 0), badge(3, 1)), sortedByNumber(last(badges)));
+    assertEquals(List.of(badge(1, 2), badge(2, 0), badge(3, 1)), sortedByNumber(last(badges)));
 
     toggle(all.get(2));
     assertEquals(List.of(badge(1, 0), badge(2, 1)), sortedByNumber(last(badges)));
@@ -733,7 +735,8 @@ class DeckEditorComponentTest {
     target
         .getEvents()
         .addListener(
-            DeckEditorEvents.PREVIEW, (CardPreviewDisplay.Content preview) -> previews.add(preview));
+            DeckEditorEvents.PREVIEW,
+            (CardPreviewDisplay.Content preview) -> previews.add(preview));
     target
         .getEvents()
         .addListener(
@@ -823,11 +826,8 @@ class DeckEditorComponentTest {
     return new CardBadgesDisplay.Badge(number, cardX + CARD_WIDTH, cardTopY);
   }
 
-  private static List<CardBadgesDisplay.Badge> sortedByNumber(
-      List<CardBadgesDisplay.Badge> shown) {
-    return shown.stream()
-        .sorted((a, b) -> Integer.compare(a.number(), b.number()))
-        .toList();
+  private static List<CardBadgesDisplay.Badge> sortedByNumber(List<CardBadgesDisplay.Badge> shown) {
+    return shown.stream().sorted((a, b) -> Integer.compare(a.number(), b.number())).toList();
   }
 
   private static void assertScrollButton(Button button, boolean enabled) {

@@ -118,7 +118,6 @@ public class BattleScreen extends ScreenAdapter {
   private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
   private static final String CARD_WIDGET_SKIN = "flat-earth/skin/flat-earth-ui.json";
 
-
   private static final String BATTLE_UI_JSON = "sprites/BattleUi.json";
   private static final String DECK_EDITOR_UI_JSON = "sprites/DeckEditorUi.json";
 

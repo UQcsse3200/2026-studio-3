@@ -331,7 +331,8 @@ class EnemyAnimationControllerTest {
       Entity player = new Entity().addComponent(playerStats);
       SpriteBatch batch = mock(SpriteBatch.class);
       try {
-        // boss_knight's swing frames are labelled "attack" (#378); only the default atlas lacks them.
+        // boss_knight's swing frames are labelled "attack" (#378); only the default atlas lacks
+        // them.
         assertEquals(!"default".equals(id), hasAttack, id);
         for (int attack = 1; attack <= 3; attack++) {
           behaviour.rollIntent();

@@ -264,9 +264,7 @@ public class DeckEditorComponent extends UIComponent {
     footer.add(new Image(skin.newDrawable("white", ROW_BORDER_COLOUR))).width(42f).height(1f);
     footer
         .add(
-            new Label(
-                "Pick " + HAND_SIZE + " cards",
-                labelStyle(DESCRIPTION_COLOUR, "font_small")))
+            new Label("Pick " + HAND_SIZE + " cards", labelStyle(DESCRIPTION_COLOUR, "font_small")))
         .padLeft(8f)
         .padRight(8f);
     footer.add(new Image(skin.newDrawable("white", ROW_BORDER_COLOUR))).width(42f).height(1f);

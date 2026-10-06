@@ -44,8 +44,8 @@ public abstract class Displaying extends UIComponent {
 
   /**
    * Uses the record's colour as the label's font colour rather than a tint. The default skin's font
-   * colour is black, and tinting black gives black, so subclasses that need coloured text on a
-   * dark background call this from their constructor.
+   * colour is black, and tinting black gives black, so subclasses that need coloured text on a dark
+   * background call this from their constructor.
    */
   protected final void useColourAsFontColour(DisplayingRecord rec) {
     if (rec.colour() == null) {
