@@ -1,6 +1,7 @@
 package com.csse3200.game.components.spritedisplay.clickable;
 
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
@@ -13,9 +14,15 @@ import com.csse3200.game.services.ServiceLocator;
 public class DragNDrop extends InOutOnTrigger {
 
   private DragAndDrop.Source dragSource;
+  private final AimSession aimController;
 
   public DragNDrop(ClickableRecord rec) {
+    this(rec, null);
+  }
+
+  public DragNDrop(ClickableRecord rec, AimSession aimController) {
     super(rec);
+    this.aimController = aimController;
   }
 
   /** Also unregister this card's drag source so a removed widget can't still start a drag. */
@@ -23,6 +30,9 @@ public class DragNDrop extends InOutOnTrigger {
   public void remove() {
     if (dragSource != null) {
       ServiceLocator.getDragAndDropService().getDragAndDrop().removeSource(dragSource);
+    }
+    if (aimController != null) {
+      aimController.cancel();
     }
     super.remove();
   }
@@ -71,11 +81,21 @@ public class DragNDrop extends InOutOnTrigger {
 
             dragAndDrop.setDragActorPosition(x, -y);
 
+            if (aimController != null) {
+              Vector2 cardCenter =
+                  original.localToStageCoordinates(
+                      new Vector2(original.getWidth() / 2f, original.getHeight() / 2f));
+              aimController.begin(cardCenter, stagePointer(x, y));
+            }
+
             return payload;
           }
 
           @Override
           public void drag(InputEvent event, float x, float y, int pointer) {
+            if (aimController != null) {
+              aimController.update(stagePointer(x, y));
+            }
             Button original = DragNDrop.this.getBtn();
             boolean outsideBounds =
                 x < 0 || y < 0 || x > original.getWidth() || y > original.getHeight();
@@ -103,6 +123,16 @@ public class DragNDrop extends InOutOnTrigger {
               btn.addAction(Actions.moveTo(targetX, targetY, 0.3f, Interpolation.sineIn));
             }
 
+            if (aimController != null) {
+              String selectedId = aimController.release(stagePointer(x, y));
+              if (selectedId != null
+                  && payload.getObject() instanceof TriggerPayload card
+                  && card.args().length == 1) {
+                entity.getEvents().trigger(card.trigger(), card.args()[0], selectedId);
+              }
+              return;
+            }
+
             if (target != null
                 && payload.getObject() instanceof TriggerPayload card
                 && target.getActor().getUserObject() instanceof String targetId
@@ -124,5 +154,9 @@ public class DragNDrop extends InOutOnTrigger {
       return new TextButton(tb.getText().toString(), tb.getStyle());
     }
     return new Button(original.getStyle());
+  }
+
+  private Vector2 stagePointer(float x, float y) {
+    return getBtn().localToStageCoordinates(new Vector2(x, y));
   }
 }

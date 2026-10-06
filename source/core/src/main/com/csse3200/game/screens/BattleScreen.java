@@ -35,9 +35,11 @@ import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
+import com.csse3200.game.components.spritedisplay.clickable.CardAimController;
 import com.csse3200.game.components.spritedisplay.clickable.CardImageSkins;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
+import com.csse3200.game.components.spritedisplay.clickable.DragNDrop;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
@@ -86,14 +88,18 @@ public class BattleScreen extends ScreenAdapter {
     "images/piety.png",
     "images/enemy.png",
     "images/armour.png",
+    "images/effects/shield.png",
+    "images/effects/fortify.png",
     "images/ui/inventory-panel.png",
     "images/ui/lucky-coin.png",
     "images/ui/energy-crystal.png",
     "images/ui/merchants-favor.png",
     "images/ui/iron-aegis.png",
-    "images/ui/warriors-crest.png"
+    "images/ui/warriors-crest.png",
+    "images/effects/heal.png",
+    "images/enemies/intents/buff.png"
   };
-  private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
+  private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
   private static final float HAND_START_X = 25f;
   private static final float HAND_Y = 1000f;
@@ -111,6 +117,8 @@ public class BattleScreen extends ScreenAdapter {
   // separate copy.
   private final CardEffectResolutionService cardEffects;
   private final CardPlayService cardPlayService;
+  private final CardAimController enemyCardAim;
+  private final CardAimController playerCardAim;
   private ClickableFactory uiFactory;
   private final PlayerRunState playerState;
   private List<ClickableRecord> staticUiRecords;
@@ -184,6 +192,14 @@ public class BattleScreen extends ScreenAdapter {
     EnergyComponent energy = player.getComponent(EnergyComponent.class);
 
     Map<String, Entity> enemyTargets = forestGameArea.getEnemyTargets();
+    enemyCardAim =
+        new CardAimController(
+            ServiceLocator.getRenderService().getStage(), ServiceLocator.getCamera(), enemyTargets);
+    playerCardAim =
+        new CardAimController(
+            ServiceLocator.getRenderService().getStage(),
+            ServiceLocator.getCamera(),
+            Map.of("player", player));
     cardEffects = new CardEffectResolutionService(library);
     cardPlayService =
         new CardPlayService(
@@ -218,6 +234,8 @@ public class BattleScreen extends ScreenAdapter {
 
     EffectVisualRegistry effectVisualRegistry = new EffectVisualRegistry();
     OffensiveEffectVisuals.registerAll(effectVisualRegistry);
+    PlayerEffectVisuals.registerAll(effectVisualRegistry);
+    EnemyStatusEffectVisuals.registerAll(effectVisualRegistry);
     Entity animationCoordinatorEntity =
         new Entity()
             .addComponent(
@@ -260,6 +278,8 @@ public class BattleScreen extends ScreenAdapter {
     staticUiRecords = ClickableFactory.loadRecordsFromJson(battleUiJson);
 
     uiFactory = new ClickableFactory(buildAllRecords());
+    uiFactory.registerInstanceVariant("aimDrag", rec -> new DragNDrop(rec, enemyCardAim));
+    uiFactory.registerInstanceVariant("selfAimDrag", rec -> new DragNDrop(rec, playerCardAim));
 
     Team3CardPlayAdapter cardPlayAdapter = new Team3CardPlayAdapter(cardPlayService, controller);
 
@@ -366,9 +386,12 @@ public class BattleScreen extends ScreenAdapter {
   @Override
   public void dispose() {
     playerState.captureFrom(gameArea.getPlayer());
+    enemyCardAim.dispose();
+    playerCardAim.dispose();
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
+    ServiceLocator.getResourceService().unloadAssets(EnemyStatusEffectVisuals.texturePaths());
     ServiceLocator.clear();
   }
 
@@ -376,6 +399,7 @@ public class BattleScreen extends ScreenAdapter {
     logger.debug("Loading assets");
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(mainGameTextures);
+    resourceService.loadTextures(EnemyStatusEffectVisuals.texturePaths());
     ServiceLocator.getResourceService().loadAll();
   }
 
@@ -441,8 +465,10 @@ public class BattleScreen extends ScreenAdapter {
         continue;
       }
       CardConfig card = maybeCard.get();
-      boolean selfTarget = card.target == TargetType.SELF;
-      String variant = selfTarget ? "inout" : "drag";
+      String variant =
+          card.target == TargetType.SELF
+              ? "selfAimDrag"
+              : card.target == TargetType.SINGLE_ENEMY ? "aimDrag" : "drag";
 
       Skin cardSkin = CardImageSkins.forTexturePath(card.texturePath);
 
@@ -455,13 +481,8 @@ public class BattleScreen extends ScreenAdapter {
               .skin(cardSkin)
               .disabled(disabled);
 
-      if (selfTarget) {
-        // No drop target involved — target is fixed at "player".
-        builder.args(instance.instanceId(), "player");
-      } else {
-        // Enemy id isn't known yet; EnemyDropTargetComponent appends it at drop-time.
-        builder.args(instance.instanceId());
-      }
+      // The drag source supplies the selected player or enemy ID on release.
+      builder.args(instance.instanceId());
 
       records.add(builder.build());
       x += HAND_SPACING;
