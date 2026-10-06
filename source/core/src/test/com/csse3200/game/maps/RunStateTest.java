@@ -402,4 +402,3 @@ public class RunStateTest {
     assertEquals(3, runState.getPlayerMaxEnergy());
   }
 }
-
