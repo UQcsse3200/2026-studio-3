@@ -50,6 +50,11 @@ public class MapProgressionEndToEndTest {
     graph.getNode(COMBAT).addConnection(graph.getNode(BOSS));
     graph.getNode(SHOP).addConnection(graph.getNode(BOSS));
 
+    graph.getNode(START).setHeight(0);
+    graph.getNode(COMBAT).setHeight(1);
+    graph.getNode(SHOP).setHeight(1);
+    graph.getNode(BOSS).setHeight(2);
+
     EventHandler events = new EventHandler();
     firedEvents = new ArrayList<>();
     for (String name :

@@ -77,6 +77,7 @@ public class BattleDeck {
       }
       drawnCards.add(card);
     }
+
     return List.copyOf(drawnCards);
   }
 

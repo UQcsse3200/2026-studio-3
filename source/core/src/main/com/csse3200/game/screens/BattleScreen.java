@@ -36,10 +36,9 @@ import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
-import com.csse3200.game.components.pausemenu.PauseMenuActions;
-import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
-import com.csse3200.game.components.pausemenu.PauseMenuInput;
+import com.csse3200.game.components.pausemenu.PauseMenuFactory;
 import com.csse3200.game.components.player.EnergyComponent;
+import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
 import com.csse3200.game.components.spritedisplay.clickable.CardAimController;
 import com.csse3200.game.components.spritedisplay.clickable.Clickable;
@@ -154,7 +153,6 @@ public class BattleScreen extends ScreenAdapter {
     PhysicsEngine physicsEngine = physicsService.getPhysics();
 
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
 
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
@@ -326,9 +324,6 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new CardActions(controller, gameArea.getPlayer()))
             .addComponent(new Team3CardPlayAdapter(cardPlayService, controller))
             .addComponent(cardInventory)
-            .addComponent(new PauseMenuDisplay())
-            .addComponent(new PauseMenuInput())
-            .addComponent(new PauseMenuActions(game))
             .addComponent(
                 new DamageOnCardPlayComponent(
                     gameArea.getPlayer().getComponent(CombatStatsComponent.class)))
@@ -347,6 +342,8 @@ public class BattleScreen extends ScreenAdapter {
               uiFactory.rebuildHand(buildHandRecords());
               installHandCardWidgets();
             });
+    // Pause menu + in-place save/load overlay (added before the entity is created).
+    SaveLoadPanel savePanel = PauseMenuFactory.attach(battleUi, game);
 
     gameArea.displayUI(battleUi);
     installHandCardWidgets();
@@ -355,6 +352,7 @@ public class BattleScreen extends ScreenAdapter {
     List<ClickableRecord> deckEditorClickables =
         ClickableFactory.loadRecordsFromJson(deckEditorUiJson);
     ClickableFactory deckPoolFactory = new ClickableFactory(deckEditorClickables);
+    savePanel.hide(); // save overlay starts hidden, opened by the Save & Load button
 
     List<DisplayingRecord> deckEditorDisplayRecords =
         DisplayingFactory.loadRecordsFromJson(deckEditorUiJson);
@@ -460,7 +458,7 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.getResourceService().unloadAssets(EnemyStatusEffectVisuals.texturePaths());
     cardInteractionSkin.dispose();
     cardWidgetSkin.dispose();
-    ServiceLocator.clear();
+    ServiceLocator.getResourceService().unloadAssets(mainGameTextures);
   }
 
   private void loadAssets() {

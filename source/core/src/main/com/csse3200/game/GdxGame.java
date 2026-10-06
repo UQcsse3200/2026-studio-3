@@ -44,6 +44,7 @@ import com.csse3200.game.screens.SaveLoadScreen;
 import com.csse3200.game.screens.SettingsScreen;
 import com.csse3200.game.screens.TempleCardSelectionScreen;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,7 +177,7 @@ public class GdxGame extends Game {
    */
   public void setScreen(ScreenType screenType) {
     logger.info("Setting game screen to {}", screenType);
-    prepareScreenTransition();
+    prepareScreenTransition(screenType);
     setScreen(newScreen(screenType));
   }
 
@@ -195,17 +196,19 @@ public class GdxGame extends Game {
       setScreen(next);
       return;
     }
-    prepareScreenTransition();
+    prepareScreenTransition(next);
     super.setScreen(new NarrationScreen(sequenceId, () -> setScreen(next)));
   }
 
-  private void prepareScreenTransition() {
+  private void prepareScreenTransition(ScreenType screenType) {
     Screen currentScreen = getScreen();
     if (currentScreen != null) {
       currentScreen.dispose();
     }
     ServiceLocator.registerBestiaryService(bestiaryService);
     ServiceLocator.registerCardDiscoveryService(cardDiscoveryService);
+    setScreen(newScreen(screenType));
+    AudioService.onScreenChanged(screenType, runState);
   }
 
   /** Opens the battle screen. */
@@ -238,7 +241,7 @@ public class GdxGame extends Game {
     new ChanceEncounterSelector(ChanceEncounterFactory.createInitialEncounters(), new Random())
         .selectById(eventId);
 
-    prepareScreenTransition();
+    prepareScreenTransition(ScreenType.ENCOUNTER);
     setScreen(new EncounterScreen(this, eventId));
   }
 
@@ -253,19 +256,28 @@ public class GdxGame extends Game {
   }
 
   private void openDemoEvent(String previewEncounterId) {
-    prepareScreenTransition();
+    prepareScreenTransition(ScreenType.ENCOUNTER);
     setScreen(new DemoEventScreen(this, previewEncounterId));
   }
 
   /** Opens a temporary Campfire preview with no map node or persistent run changes. */
   public void openDemoCampfire() {
-    prepareScreenTransition();
+    Screen currentScreen = getScreen();
+    if (currentScreen != null) {
+      currentScreen.dispose();
+    }
+    ServiceLocator.registerBestiaryService(bestiaryService);
+    prepareScreenTransition(ScreenType.CAMPFIRE);
     setScreen(new DemoCampfireScreen(this));
   }
 
   /** Opens a temporary Shop preview using isolated player state and no map node. */
   public void openDemoShop() {
-    prepareScreenTransition();
+    Screen currentScreen = getScreen();
+    if (currentScreen != null) {
+      currentScreen.dispose();
+    }
+    ServiceLocator.registerBestiaryService(bestiaryService);
     setScreen(new DemoShopScreen(this));
   }
 
