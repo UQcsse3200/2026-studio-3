@@ -26,8 +26,8 @@ public class PlayerTurnDisplay extends Displaying {
     style.font = skin.getFont("button");
     style.fontColor = Color.valueOf("E8C894");
     Texture panelTexture =
-            ServiceLocator.getResourceService()
-                    .getAsset("images/ui/inventory-panel.png", Texture.class);
+        ServiceLocator.getResourceService()
+            .getAsset("images/ui/inventory-panel.png", Texture.class);
     style.background = new TextureRegionDrawable(panelTexture);
 
     label.setStyle(style);
