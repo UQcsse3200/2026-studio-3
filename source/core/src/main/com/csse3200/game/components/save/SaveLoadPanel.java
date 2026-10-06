@@ -79,6 +79,25 @@ public class SaveLoadPanel extends UIComponent {
     refresh();
   }
 
+  /**
+   * Makes the panel visible (lifting it above other UI) and refreshes the slot list. Intended for
+   * when the panel is embedded as an in-place overlay, e.g. inside the pause menu.
+   */
+  public void show() {
+    if (rootStack != null) {
+      rootStack.setVisible(true);
+      rootStack.toFront();
+    }
+    refresh();
+  }
+
+  /** Hides the panel. Counterpart to {@link #show()} for embedded/overlay use. */
+  public void hide() {
+    if (rootStack != null) {
+      rootStack.setVisible(false);
+    }
+  }
+
   private void addActors() {
     rootStack = new Stack();
     rootStack.setFillParent(true);
@@ -87,7 +106,7 @@ public class SaveLoadPanel extends UIComponent {
         ServiceLocator.getResourceService().getAsset(BACKGROUND_TEXTURE, Texture.class);
     backgroundTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     Image background = new Image(backgroundTexture);
-    background.setScaling(Scaling.fill);
+    background.setScaling(Scaling.stretch);
     rootStack.add(background);
 
     Color overlayColour = MenuTheme.deepPlum();
