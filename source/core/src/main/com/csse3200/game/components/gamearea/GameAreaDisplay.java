@@ -46,7 +46,7 @@ public class GameAreaDisplay extends UIComponent {
   public void draw(SpriteBatch batch) {
     float stageHeight = stage.getViewport().getWorldHeight();
     float offsetX = 14f;
-    float offsetY = 72f;
+    float offsetY = 130f;
 
     title.setPosition(offsetX, stageHeight - offsetY);
   }

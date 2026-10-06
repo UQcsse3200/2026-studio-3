@@ -98,7 +98,7 @@ public class BattleScreen extends ScreenAdapter {
     "images/effects/heal.png",
     "images/enemies/intents/buff.png"
   };
-  private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
+  private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
   private static final float HAND_START_X = 25f;
   private static final float HAND_Y = 1000f;
@@ -234,6 +234,7 @@ public class BattleScreen extends ScreenAdapter {
     EffectVisualRegistry effectVisualRegistry = new EffectVisualRegistry();
     OffensiveEffectVisuals.registerAll(effectVisualRegistry);
     PlayerEffectVisuals.registerAll(effectVisualRegistry);
+    EnemyStatusEffectVisuals.registerAll(effectVisualRegistry);
     Entity animationCoordinatorEntity =
         new Entity()
             .addComponent(
@@ -385,6 +386,7 @@ public class BattleScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
+    ServiceLocator.getResourceService().unloadAssets(EnemyStatusEffectVisuals.texturePaths());
     ServiceLocator.clear();
   }
 
@@ -392,6 +394,7 @@ public class BattleScreen extends ScreenAdapter {
     logger.debug("Loading assets");
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(mainGameTextures);
+    resourceService.loadTextures(EnemyStatusEffectVisuals.texturePaths());
     ServiceLocator.getResourceService().loadAll();
   }
 

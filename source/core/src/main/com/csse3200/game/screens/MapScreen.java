@@ -150,7 +150,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
     Stage stage = ServiceLocator.getRenderService().getStage();
 
-    PopupDisplay itemInventory = new PopupDisplay("Item Inventory");
+    PopupDisplay itemInventory = new PopupDisplay("");
     itemInventory.setMinSize(400f, 400f);
 
     // Map screen has no live player entity (only battles do), and item USE actions only make
@@ -167,14 +167,23 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         new ImageTextButton(
             "Item Inventory", BattleMenuSkins.forIcon(BattleMenuSkins.Icon.INVENTORY));
     inventoryButton.pad(6f, 12f, 6f, 18f);
-    inventoryButton.getImageCell().size(48f);
     inventoryButton.getLabelCell().expandX().right();
 
     float buttonWidth = 247f;
     float buttonHeight = 48f;
     float offset = 24f;
+    float scale = 0.7f;
+    buttonWidth *= scale;
+    buttonHeight *= scale;
+    inventoryButton.getImageCell().size(48f * scale);
+    inventoryButton.getLabel().setFontScale(scale);
     inventoryButton.setSize(buttonWidth, buttonHeight);
-    inventoryButton.setPosition(offset, stage.getHeight() - buttonHeight - offset);
+
+    float legendCentreX = stage.getWidth() * 0.90f;
+    float legendBottomY = stage.getHeight() * 0.295f;
+    float gap = 40f;
+    inventoryButton.setPosition(
+        legendCentreX - buttonWidth / 2f, legendBottomY - buttonHeight - gap);
 
     inventoryButton.addListener(
         new ChangeListener() {
@@ -201,6 +210,9 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     if (roomType == RoomType.COMBAT || roomType == RoomType.FINAL || roomType == RoomType.ELITE) {
       logger.info("Node {} ({}) selected, entering battle", nodeId, roomType);
       game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
+    } else if (roomType == RoomType.CAMPFIRE) {
+      logger.info("Node {} ({}) selected, entering campfire", nodeId, roomType);
+      game.setScreen(GdxGame.ScreenType.CAMPFIRE);
     } else {
       logger.info("Node {} ({}) selected, entering encounter", nodeId, roomType);
       game.setScreen(GdxGame.ScreenType.ENCOUNTER);
@@ -273,7 +285,6 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getResourceService().dispose();
-    ScreenUtils.clear(new Color(248f / 255f, 249f / 255f, 178f / 255f, 1f));
     ServiceLocator.clear();
   }
 }

@@ -17,4 +17,7 @@ public class EnemyConfig extends BaseEntityConfig {
    * {@code images/enemies/<id>.atlas} by convention, falling back to a shared default atlas.
    */
   public String sprite = "";
+
+  /** Multiplier applied to the enemy sprite, matching the existing battle presentation. */
+  public float renderScale = 1f;
 }
