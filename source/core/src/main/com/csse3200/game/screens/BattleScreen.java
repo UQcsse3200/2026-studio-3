@@ -66,6 +66,7 @@ import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.PopupDisplay;
+import com.csse3200.game.ui.PopupInputComponent;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
@@ -94,7 +95,17 @@ public class BattleScreen extends ScreenAdapter {
     "images/money.png",
     "images/level.png",
     "images/enemy.png",
-    "images/armour.png"
+    "images/armour.png",
+    "images/effects/shield.png",
+    "images/effects/fortify.png",
+    "images/ui/inventory-panel.png",
+    "images/ui/lucky-coin.png",
+    "images/ui/energy-crystal.png",
+    "images/ui/merchants-favor.png",
+    "images/ui/iron-aegis.png",
+    "images/ui/warriors-crest.png",
+    "images/effects/heal.png",
+    "images/enemies/intents/buff.png"
   };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
@@ -285,6 +296,19 @@ public class BattleScreen extends ScreenAdapter {
     PopupDisplay cardInventory = new PopupDisplay("Card Inventory", CARD_INVENTORY_STYLE);
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
+    PopupDisplay itemInventory = new PopupDisplay("");
+    itemInventory.setMinSize(470f, 360f);
+    InventoryPopupComponent inventoryPopup =
+        new InventoryPopupComponent(
+            game.getRunState(), itemInventory, gameArea.getPlayer(), controller::isPlayerTurn);
+
+    Entity itemInventoryEntity =
+        new Entity()
+            .addComponent(itemInventory)
+            .addComponent(new PopupInputComponent(itemInventory))
+            .addComponent(inventoryPopup);
+    ServiceLocator.getEntityService().register(itemInventoryEntity);
+
     Stage stage = ServiceLocator.getRenderService().getStage();
     Entity battleUi =
         new Entity()
@@ -295,6 +319,7 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new CardActions(controller, gameArea.getPlayer()))
             .addComponent(new Team3CardPlayAdapter(cardPlayService, controller))
             .addComponent(cardInventory)
+            .addComponent(new PopupInputComponent(cardInventory))
             .addComponent(new PauseMenuDisplay())
             .addComponent(new PauseMenuInput())
             .addComponent(new PauseMenuActions(game))
@@ -358,6 +383,7 @@ public class BattleScreen extends ScreenAdapter {
     }
 
     battleUi.getEvents().addListener("openMenu", deckEditor::open);
+    battleUi.getEvents().addListener("openInventory", inventoryPopup::open);
   }
 
   private DisplayingFactory buildDeckEditorDisplays(
