@@ -43,6 +43,7 @@ public class EndBattleScreen extends ScreenAdapter {
   private final boolean won;
   private String[] cardTextures = new String[0];
   private boolean returning = false;
+  private boolean rewardClaimed = false;
 
   public EndBattleScreen(GdxGame game, boolean won) {
     this.game = game;
@@ -83,7 +84,8 @@ public class EndBattleScreen extends ScreenAdapter {
               rewardService,
               game.getRunState(),
               cardLibrary,
-              game.getCardDiscoveryService()));
+              game.getCardDiscoveryService(),
+              game::autosaveAfterRewardClaimed));
       RunState runState = game.getRunState();
       if (runState != null) {
         PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(cardLibrary);
@@ -97,6 +99,7 @@ public class EndBattleScreen extends ScreenAdapter {
       }
     }
 
+    ui.getEvents().addListener(RewardDisplay.REWARD_CLAIMED_EVENT, this::onRewardClaimed);
     ui.getEvents().addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, this::returnToMenu);
     ServiceLocator.getEntityService().register(ui);
 
@@ -117,6 +120,11 @@ public class EndBattleScreen extends ScreenAdapter {
    * discarded and the main menu opens directly.
    */
   private void returnToMenu() {
+    // A victory is not durable until its selected reward has been applied and autosaved.
+    if (won && !rewardClaimed) {
+      logger.debug("Ignoring victory-screen exit before a reward is claimed");
+      return;
+    }
     if (returning) {
       return;
     }
@@ -150,6 +158,10 @@ public class EndBattleScreen extends ScreenAdapter {
     } else {
       game.setScreen(GdxGame.ScreenType.MAIN_MENU);
     }
+  }
+
+  private void onRewardClaimed() {
+    rewardClaimed = true;
   }
 
   @Override

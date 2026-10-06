@@ -34,6 +34,7 @@ public class RewardDisplay extends Displaying {
   private final RewardService rewardService;
   private final CardService cardService;
   private final CardDiscoveryService cardDiscoveryService;
+  private final Runnable afterRewardApplied;
   private final CardResolver cardResolver = new CardResolver();
 
   private List<RewardOption> options;
@@ -55,12 +56,30 @@ public class RewardDisplay extends Displaying {
       RunState runState,
       CardService cardService,
       CardDiscoveryService cardDiscoveryService) {
+    this(rec, rewardService, runState, cardService, cardDiscoveryService, () -> {});
+  }
+
+  /**
+   * Creates the reward picker.
+   *
+   * @param afterRewardApplied callback run after the selected reward mutates persistent run state
+   *     and before any navigation event is fired
+   */
+  public RewardDisplay(
+      DisplayingRecord rec,
+      RewardService rewardService,
+      RunState runState,
+      CardService cardService,
+      CardDiscoveryService cardDiscoveryService,
+      Runnable afterRewardApplied) {
     super(rec);
     this.rewardService = Objects.requireNonNull(rewardService, "rewardService cannot be null");
     this.runState = runState;
     this.cardService = Objects.requireNonNull(cardService, "cardService cannot be null");
     this.cardDiscoveryService =
         Objects.requireNonNull(cardDiscoveryService, "cardDiscoveryService cannot be null");
+    this.afterRewardApplied =
+        Objects.requireNonNull(afterRewardApplied, "afterRewardApplied cannot be null");
   }
 
   @Override
@@ -277,6 +296,9 @@ public class RewardDisplay extends Displaying {
     if (cardSelectionTable != null) {
       cardSelectionTable.setTouchable(Touchable.disabled);
     }
+    // The reward has already mutated RunState at this point. Persist that updated state before
+    // firing either event, because both can cause the reward screen to be left immediately.
+    afterRewardApplied.run();
     entity.getEvents().trigger(REWARD_CLAIMED_EVENT);
     entity.getEvents().trigger(EndBattleDisplay.RETURN_TO_MENU_EVENT);
   }

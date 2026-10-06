@@ -44,6 +44,7 @@ import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -271,6 +272,42 @@ class RewardDisplayTest {
   }
 
   @Test
+  void cardClaimCheckpointsMutatedDeckBeforeNavigationAndOnlyOnce() {
+    PlayerDeck deck = runState.getOrCreatePlayerDeck(cardService);
+    int initialDeckSize = deck.size();
+    AtomicBoolean checkpointComplete = new AtomicBoolean();
+    AtomicInteger checkpointCalls = new AtomicInteger();
+    RewardDisplay display =
+        createDisplay(
+            defaultService(),
+            runState,
+            discovery,
+            () -> {
+              assertEquals(initialDeckSize + 1, deck.size());
+              checkpointCalls.incrementAndGet();
+              checkpointComplete.set(true);
+            });
+    entity
+        .getEvents()
+        .addListener(
+            RewardDisplay.REWARD_CLAIMED_EVENT,
+            () -> assertTrue(checkpointComplete.get(), "claim event preceded checkpoint"));
+    entity
+        .getEvents()
+        .addListener(
+            EndBattleDisplay.RETURN_TO_MENU_EVENT,
+            () -> assertTrue(checkpointComplete.get(), "navigation preceded checkpoint"));
+
+    cardButton(display).fire(new ChangeEvent());
+    Button selectedCard = display.getCardChoiceButtons().getFirst();
+    selectedCard.fire(new ChangeEvent());
+    selectedCard.fire(new ChangeEvent());
+
+    assertEquals(initialDeckSize + 1, deck.size());
+    assertEquals(1, checkpointCalls.get());
+  }
+
+  @Test
   void emptyPoolKeepsGoldAndItemAvailableWithoutCardChoice() {
     CardAcquisitionPool emptyPool = new CardAcquisitionPool(cardService, List.of());
     RewardService service =
@@ -421,13 +458,22 @@ class RewardDisplayTest {
 
   private RewardDisplay createDisplay(
       RewardService service, RunState displayRunState, CardDiscoveryService displayDiscovery) {
+    return createDisplay(service, displayRunState, displayDiscovery, () -> {});
+  }
+
+  private RewardDisplay createDisplay(
+      RewardService service,
+      RunState displayRunState,
+      CardDiscoveryService displayDiscovery,
+      Runnable afterRewardApplied) {
     RewardDisplay display =
         new RewardDisplay(
             DisplayingRecord.builder("").variant("reward").build(),
             service,
             displayRunState,
             cardService,
-            displayDiscovery);
+            displayDiscovery,
+            afterRewardApplied);
     entity = new Entity().addComponent(display);
     entity.create();
     return display;
