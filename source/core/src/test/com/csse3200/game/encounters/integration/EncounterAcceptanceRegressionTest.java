@@ -129,6 +129,8 @@ class EncounterAcceptanceRegressionTest {
     map.addNode(chance);
     map.addNode(shop);
     map.addNode(next);
+    shop.setHeight(1);
+    next.setHeight(2);
     map.connectNodes(1, 2);
     map.connectNodes(2, 3);
     map.startRun(1);

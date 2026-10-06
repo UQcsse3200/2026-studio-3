@@ -28,7 +28,6 @@ import com.csse3200.game.input.InputService;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
-import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 
 /**
@@ -54,7 +53,6 @@ public class ElitePortalScreen extends ScreenAdapter {
     }
 
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
@@ -209,7 +207,5 @@ public class ElitePortalScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
-    ServiceLocator.getResourceService().dispose();
-    ServiceLocator.clear();
   }
 }

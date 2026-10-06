@@ -20,6 +20,8 @@ import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.rewards.RewardService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -124,6 +126,11 @@ public class RewardDisplay extends Displaying {
           new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+              switch (option.type) {
+                case GOLD -> AudioService.playSound(SoundId.ITEM_PURCHASE, 0.5f);
+                case ITEM -> AudioService.playSound(SoundId.ITEM_PICKUP, 0.5f);
+                case CARD -> AudioService.playSound(SoundId.CARD_SHUFFLE, 0.5f);
+              }
               selectOption(option);
             }
           });

@@ -25,12 +25,24 @@ import com.csse3200.game.components.enemy.EnemyStatsComponent;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.events.listeners.EventListener1;
+import com.csse3200.game.services.ResourceService;
+import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class Team3CardPlayAdapterTest {
+
+  @BeforeEach
+  void setUp() {
+
+    ServiceLocator.registerResourceService(new ResourceService());
+    AudioService.load();
+    ServiceLocator.getResourceService().loadAll();
+  }
 
   @Test
   void shouldRejectOtherEnemyDuringTauntWithoutSpendingEnergyOrPlayingTheCard() {
