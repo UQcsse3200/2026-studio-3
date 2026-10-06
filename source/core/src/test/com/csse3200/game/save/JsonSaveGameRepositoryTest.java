@@ -83,6 +83,7 @@ class JsonSaveGameRepositoryTest {
     assertTrue(result.success());
     assertEquals("COMPLETED", result.data().map.nodes.get(0).state);
     assertEquals("MAP", result.data().progress.resumeScreen);
+    assertTrue(result.data().player.ownedItems.isEmpty());
     assertTrue(result.data().progress.bestiary.isEmpty());
   }
 

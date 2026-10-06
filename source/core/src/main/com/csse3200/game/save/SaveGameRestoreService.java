@@ -10,9 +10,12 @@ import com.csse3200.game.maps.NodeState;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.ItemType;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -146,6 +149,16 @@ public class SaveGameRestoreService {
       return RestoreResult.failure(
           RestoreError.INVALID_PLAYER_STATE, "Saved player resources cannot be negative");
     }
+    if (playerData.ownedItems != null) {
+      for (String itemId : playerData.ownedItems) {
+        try {
+          ItemType.valueOf(itemId);
+        } catch (RuntimeException exception) {
+          return RestoreResult.failure(
+              RestoreError.INVALID_PLAYER_STATE, "Saved player contains an unknown item");
+        }
+      }
+    }
     return RestoreResult.success("");
   }
 
@@ -249,6 +262,13 @@ public class SaveGameRestoreService {
 
   private void restorePlayer(PlayerSaveData playerData) {
     playerState.restore(playerData.currentHealth, playerData.maxHealth, playerData.gold);
+    List<ItemType> restoredItems = new ArrayList<>();
+    if (playerData.ownedItems != null) {
+      for (String itemId : playerData.ownedItems) {
+        restoredItems.add(ItemType.valueOf(itemId));
+      }
+    }
+    playerState.replaceOwnedItems(restoredItems);
   }
 
   private void restoreDeck(DeckSaveData deckData) {
