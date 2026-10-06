@@ -42,7 +42,19 @@ class BattleTutorialControllerTest {
     tutorial.onPhaseChanged(BattlePhase.PLAYER_END);
     assertEquals(BattleTutorialController.Step.FREE_PLAY, tutorial.getCurrentStep().orElseThrow());
     assertFalse(tutorial.continueInformation());
-    assertEquals(10, shown.size());
+    assertEquals(
+        List.of(
+            BattleTutorialController.Step.HAND,
+            BattleTutorialController.Step.CARD_COST,
+            BattleTutorialController.Step.ENERGY,
+            BattleTutorialController.Step.HEALTH,
+            BattleTutorialController.Step.BUFFS,
+            BattleTutorialController.Step.CARD_DRAW,
+            BattleTutorialController.Step.BATTLE_OUTCOME_RULES,
+            BattleTutorialController.Step.PLAY_A_CARD,
+            BattleTutorialController.Step.END_TURN,
+            BattleTutorialController.Step.FREE_PLAY),
+        shown);
   }
 
   @Test

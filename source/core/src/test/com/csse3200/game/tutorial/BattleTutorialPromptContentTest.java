@@ -27,4 +27,11 @@ class BattleTutorialPromptContentTest {
     assertTrue(BattleTutorialPromptContent.END_TURN.contains("Surviving enemies act"));
     assertTrue(BattleTutorialPromptContent.WIN_OR_LOSE.contains("every enemy"));
   }
+
+  @Test
+  void actionPromptExplicitlyRequestsAnAffordableCardFromTheHand() {
+    assertEquals(
+        "Now play an affordable card from your hand.", BattleTutorialPromptContent.PLAY_A_CARD);
+    assertTrue(BattleTutorialPromptContent.PLAY_A_CARD.length() <= 150);
+  }
 }

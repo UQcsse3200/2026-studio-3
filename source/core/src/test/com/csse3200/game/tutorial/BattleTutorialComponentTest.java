@@ -61,6 +61,7 @@ class BattleTutorialComponentTest {
       view.continueAction.run();
     }
     assertEquals(BattleTutorialController.Step.PLAY_A_CARD, view.last().step());
+    assertEquals(BattleTutorialPromptContent.PLAY_A_CARD, view.last().text());
     assertFalse(view.last().canContinue());
     view.continueAction.run();
     assertEquals(BattleTutorialController.Step.PLAY_A_CARD, view.last().step());

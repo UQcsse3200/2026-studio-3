@@ -18,7 +18,7 @@ public final class BattleTutorialController implements AutoCloseable {
     ENERGY,
     HEALTH,
     BUFFS,
-    DRAW_AND_TURNS,
+    CARD_DRAW,
     BATTLE_OUTCOME_RULES,
     PLAY_A_CARD,
     END_TURN,
@@ -100,8 +100,8 @@ public final class BattleTutorialController implements AutoCloseable {
           case CARD_COST -> Step.ENERGY;
           case ENERGY -> Step.HEALTH;
           case HEALTH -> Step.BUFFS;
-          case BUFFS -> Step.DRAW_AND_TURNS;
-          case DRAW_AND_TURNS -> Step.BATTLE_OUTCOME_RULES;
+          case BUFFS -> Step.CARD_DRAW;
+          case CARD_DRAW -> Step.BATTLE_OUTCOME_RULES;
           case BATTLE_OUTCOME_RULES -> Step.PLAY_A_CARD;
           default -> null;
         };

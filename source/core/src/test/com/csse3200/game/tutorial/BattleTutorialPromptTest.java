@@ -2,6 +2,7 @@ package com.csse3200.game.tutorial;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -18,7 +19,7 @@ class BattleTutorialPromptTest {
             BattleTutorialController.Step.ENERGY,
             BattleTutorialController.Step.HEALTH,
             BattleTutorialController.Step.BUFFS,
-            BattleTutorialController.Step.DRAW_AND_TURNS,
+            BattleTutorialController.Step.CARD_DRAW,
             BattleTutorialController.Step.BATTLE_OUTCOME_RULES);
     List<String> texts =
         List.of(
@@ -54,6 +55,9 @@ class BattleTutorialPromptTest {
     BattleTutorialPrompt end = BattleTutorialPrompt.forStep(BattleTutorialController.Step.END_TURN);
     assertFalse(play.canContinue());
     assertFalse(end.canContinue());
+    assertEquals(BattleTutorialPromptContent.PLAY_A_CARD, play.text());
+    assertNotEquals(BattleTutorialPromptContent.CARD_COST, play.text());
+    assertEquals(BattleTutorialPrompt.HighlightTarget.HAND, play.highlight());
     assertEquals(BattleTutorialPromptContent.END_TURN, end.text());
     assertEquals(BattleTutorialPrompt.HighlightTarget.END_TURN, end.highlight());
   }

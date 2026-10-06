@@ -15,6 +15,9 @@ public final class BattleTutorialPromptContent {
   public static final String CARD_COST =
       "A card's cost is the energy needed to play it. Choose a card you can afford.";
 
+  /** Requests the successful card play needed to advance the action step. */
+  public static final String PLAY_A_CARD = "Now play an affordable card from your hand.";
+
   /** Explains spending and start-of-turn replenishment. */
   public static final String ENERGY =
       "Playing cards spends energy. Your energy refills at the start of each of your turns.";
