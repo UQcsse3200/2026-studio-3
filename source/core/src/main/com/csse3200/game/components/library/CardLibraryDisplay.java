@@ -140,11 +140,11 @@ public class CardLibraryDisplay extends UIComponent {
 
   private void addHeader(Table panel) {
     Table titleBlock = new Table();
-    Label eyebrow = new Label("CARD ARCHIVE", labelStyle(SMALL, MenuTheme.softCoral()));
+    Label eyebrow = new Label("CARD LIBRARY", labelStyle(SMALL, MenuTheme.softCoral()));
     Label title = new Label("Card Library", labelStyle(LARGE, MenuTheme.warmParchment()));
     Label subtitle =
         new Label(
-            "Discover cards during a run to reveal their archive records.",
+            "Discover cards during a run to reveal their lore.",
             labelStyle(SMALL, MenuTheme.warmParchment()));
     eyebrow.setFontScale(1.15f);
     title.setFontScale(1.35f);
@@ -434,7 +434,7 @@ public class CardLibraryDisplay extends UIComponent {
 
   static String descriptionFor(CardEntryView card) {
     if (card.unlockState() == CardUnlockState.LOCKED) {
-      return "Find this card to reveal its record.";
+      return "Find this card to reveal its lore.";
     }
     return card.description().orElse("");
   }

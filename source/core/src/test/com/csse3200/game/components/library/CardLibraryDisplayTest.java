@@ -182,7 +182,7 @@ class CardLibraryDisplayTest {
 
     assertEquals(CardUnlockState.LOCKED, display.getDisplayedEntry().unlockState());
     assertEquals("UNDISCOVERED", display.getStateText());
-    assertEquals("Find this card to reveal its record.", display.getDescriptionText());
+    assertEquals("Find this card to reveal its lore.", display.getDescriptionText());
     assertEquals("Cost: ???", display.getCostText());
     assertEquals("???", CardLibraryDisplay.formatCardButton(display.getDisplayedEntry()));
     assertTrue(display.isLockedArtworkVisible());
