@@ -34,7 +34,9 @@ public class SaveLoadScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(SaveLoadScreen.class);
   private static final List<Integer> SLOT_IDS =
       List.of(1, 2, 3, AutosaveCoordinator.AUTOSAVE_SLOT_ID);
-  private static final String[] SAVE_LOAD_TEXTURES = {MainMenuDisplay.BACKGROUND_TEXTURE};
+  private static final String[] SAVE_LOAD_TEXTURES = {
+    MainMenuDisplay.BACKGROUND_TEXTURE, SaveLoadPanel.BUTTON_TEXTURE
+  };
 
   private final GdxGame game;
   private final Renderer renderer;

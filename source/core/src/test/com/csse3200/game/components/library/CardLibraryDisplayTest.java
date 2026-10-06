@@ -19,7 +19,6 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardConfigLoader;
@@ -68,7 +67,7 @@ class CardLibraryDisplayTest {
     for (int i = 0; i < expected.size(); i++) {
       TextButton button = assertInstanceOf(TextButton.class, cardList.getChildren().get(i));
       assertEquals("???", button.getText().toString());
-      button.fire(new ChangeEvent());
+      button.setChecked(true);
       assertEquals(expected.get(i).id, display.getDisplayedEntry().cardId());
       assertTrue(display.isLockedArtworkVisible());
       assertEquals(CardUnlockState.LOCKED, display.getDisplayedEntry().unlockState());
@@ -79,7 +78,7 @@ class CardLibraryDisplayTest {
       TextButton button = assertInstanceOf(TextButton.class, cardList.getChildren().get(i));
       CardConfig card = expected.get(i);
       assertEquals(card.cost + "  " + card.name, button.getText().toString());
-      button.fire(new ChangeEvent());
+      button.setChecked(true);
       assertEquals(card.id, display.getDisplayedEntry().cardId());
       assertFalse(display.isLockedArtworkVisible());
     }

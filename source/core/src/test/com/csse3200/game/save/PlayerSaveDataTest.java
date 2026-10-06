@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -33,18 +34,20 @@ class PlayerSaveDataTest {
   @Test
   void shouldWriteOnlyCurrentFieldsAndPreserveAllValues() {
     Json json = new Json();
-    PlayerSaveData original = new PlayerSaveData(43, 60, 120, 8);
+    PlayerSaveData original =
+        new PlayerSaveData(43, 60, 120, 8, List.of("LUCKY_COIN", "ENERGY_CRYSTAL"));
 
     String serialised = json.toJson(original);
     JsonValue fields = new JsonReader().parse(serialised);
     PlayerSaveData restored = json.fromJson(PlayerSaveData.class, serialised);
 
-    assertEquals(4, fields.size);
+    assertEquals(5, fields.size);
     assertEquals(8, fields.getInt("level"));
     assertFalse(fields.has("piety"));
     assertEquals(original.currentHealth, restored.currentHealth);
     assertEquals(original.maxHealth, restored.maxHealth);
     assertEquals(original.gold, restored.gold);
     assertEquals(original.level, restored.level);
+    assertEquals(original.ownedItems, restored.ownedItems);
   }
 }

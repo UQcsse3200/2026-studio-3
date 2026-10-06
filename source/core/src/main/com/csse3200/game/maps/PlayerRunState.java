@@ -11,7 +11,7 @@ import java.util.List;
 /** Run-scoped player values that must survive screen disposal. */
 public class PlayerRunState {
   private static final float LUCKY_COIN_BONUS = 0.1f;
-  private static final float MERCHANTS_FAVOR_DISCOUNT = 0.05f;
+  private static final float MERCHANTS_FAVOR_DISCOUNT = 0.10f;
   private static final float MAX_SHOP_DISCOUNT = 0.5f;
 
   private int currentHealth;
@@ -73,6 +73,43 @@ public class PlayerRunState {
     return List.copyOf(ownedItems);
   }
 
+  /** Returns the number of copies of an item currently owned by this run. */
+  public int getOwnedItemCount(ItemType itemId) {
+    if (itemId == null) {
+      throw new IllegalArgumentException("itemId must not be null");
+    }
+    return (int) ownedItems.stream().filter(item -> item == itemId).count();
+  }
+
+  /**
+   * Uses one owned battle consumable on the active player.
+   *
+   * <p>The item is removed only after its effect was applied successfully. Battle consumables are
+   * deliberately not replayed by {@link #applyTo(Entity)} when a new battle player is created.
+   *
+   * @param itemId item to use
+   * @param player current battle player
+   * @return true when an owned, usable battle item was consumed
+   */
+  public boolean useBattleItem(ItemType itemId, Entity player) {
+    if (itemId == null || !itemId.isBattleConsumable() || !ownedItems.contains(itemId)) {
+      return false;
+    }
+
+    requireStats(player);
+    ItemEffectApplier.applyItemEffect(itemId, player);
+    return ownedItems.remove(itemId);
+  }
+
+  /** Replaces the durable item list after all loaded values have been validated. */
+  public void replaceOwnedItems(List<ItemType> items) {
+    if (items == null || items.stream().anyMatch(item -> item == null)) {
+      throw new IllegalArgumentException("items must not be null or contain null");
+    }
+    ownedItems.clear();
+    ownedItems.addAll(items);
+  }
+
   /**
    * Applies durable state to a newly-created player entity.
    *
@@ -91,7 +128,9 @@ public class PlayerRunState {
     inventory.setShopDiscount(0f);
 
     for (ItemType itemId : ownedItems) {
-      ItemEffectApplier.applyItemEffect(itemId, player);
+      if (!itemId.isBattleConsumable()) {
+        ItemEffectApplier.applyItemEffect(itemId, player);
+      }
     }
   }
 

@@ -82,7 +82,11 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
     int level = currentNode == null ? 0 : currentNode.getHeight();
 
     return new PlayerSaveData(
-        playerState.getCurrentHealth(), playerState.getMaxHealth(), playerState.getGold(), level);
+        playerState.getCurrentHealth(),
+        playerState.getMaxHealth(),
+        playerState.getGold(),
+        level,
+        playerState.getOwnedItems().stream().map(Enum::name).toList());
   }
 
   private DeckSaveData captureDeck() {

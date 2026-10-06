@@ -86,7 +86,8 @@ class RewardDisplayTest {
     RewardDisplay display = createDisplay(defaultService());
 
     assertEquals(
-        List.of("25 Gold", "Energy Crystal (+1 Max Energy)", "Choose a Card"), labels(display));
+        List.of("25 Gold", "Ember of the Divine (+1 Max Energy)", "Choose a Card"),
+        labels(display));
     RewardOption cardOption = cardOption(display);
     assertTrue(
         cardOption.cardSelection.cardIds().stream()
@@ -314,7 +315,7 @@ class RewardDisplayTest {
         new RewardService(fixedRewardGenerator(), cardService, emptyPool, new Random(7));
     RewardDisplay display = createDisplay(service);
 
-    assertEquals(List.of("25 Gold", "Energy Crystal (+1 Max Energy)"), labels(display));
+    assertEquals(List.of("25 Gold", "Ember of the Divine (+1 Max Energy)"), labels(display));
     assertTrue(display.getOptions().stream().noneMatch(option -> option.type == RewardType.CARD));
   }
 
