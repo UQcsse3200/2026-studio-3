@@ -1,11 +1,15 @@
 package com.csse3200.game.components.enemy;
 
+import com.csse3200.game.cards.EffectType;
+import com.csse3200.game.cards.effects.CardEffectResolutionContext;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.Component;
-import com.csse3200.game.components.StatusEffectCalculator;
+import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAI;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIFactory;
+import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
+import com.csse3200.game.components.enemy.Memory.PlayerMemory;
 import com.csse3200.game.entities.Entity;
 
 /**
@@ -22,6 +26,7 @@ public class EnemyBehaviourComponent extends Component {
   private EnemyIntent currentIntent = EnemyIntent.unknown();
   private int turnNumber = 0;
   private CombatStatsComponent playerStats;
+  private EnemyMemoryComponent enemyMemory;
 
   /**
    * Creates a behaviour that resolves its AI from a behaviour identifier.
@@ -64,6 +69,19 @@ public class EnemyBehaviourComponent extends Component {
   }
 
   /**
+   * Supplies the shared enemy-memory component attached to the player.
+   *
+   * <p>All enemies may read the same memory component, but each enemy still owns an independent AI
+   * instance and makes its own decision.
+   *
+   * @param enemyMemory memory component attached to the player, or null to return to empty player
+   *     memory
+   */
+  public void setEnemyMemory(EnemyMemoryComponent enemyMemory) {
+    this.enemyMemory = enemyMemory;
+  }
+
+  /**
    * @return the intent telegraphed for the coming round
    */
   public EnemyIntent getCurrentIntent() {
@@ -98,6 +116,8 @@ public class EnemyBehaviourComponent extends Component {
    * @return a snapshot of the current battle state
    */
   private EnemyAIContext buildContext(CombatStatsComponent stats) {
+    PlayerMemory playerMemory = enemyMemory == null ? PlayerMemory.empty() : enemyMemory.snapshot();
+
     return new EnemyAIContext(
         playerStats == null ? UNKNOWN_PLAYER_HEALTH : playerStats.getHealth(),
         stats.getHealth(),
@@ -105,7 +125,8 @@ public class EnemyBehaviourComponent extends Component {
         stats.getBaseAttack(),
         stats.getArmour(),
         currentIntent,
-        turnNumber);
+        turnNumber,
+        playerMemory);
   }
 
   /**
@@ -142,13 +163,22 @@ public class EnemyBehaviourComponent extends Component {
     CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
     if (targetStats != null) {
       CombatStatsComponent attackerStats = entity.getComponent(CombatStatsComponent.class);
-      float outgoingModifier =
-          attackerStats == null
-              ? 1.0f
-              : StatusEffectCalculator.getOutgoingDamageModifier(attackerStats);
-      int damage = Math.round(currentIntent.getValue() * outgoingModifier);
+      int strength = statusValue(attackerStats, EffectType.STRENGTH);
+      int feeble = statusValue(attackerStats, EffectType.FEEBLE);
+      int vulnerable = statusValue(targetStats, EffectType.VULNERABLE);
+      int damage =
+          new CardEffectResolutionContext(strength, feeble, vulnerable)
+              .resolveDamage(currentIntent.getValue());
       targetStats.takeDamage(damage);
     }
+  }
+
+  private static int statusValue(CombatStatsComponent stats, EffectType type) {
+    if (stats == null) {
+      return 0;
+    }
+    StatusEffect status = stats.getStatusEffect(type.name());
+    return status == null ? 0 : Math.max(0, status.getValue());
   }
 
   private void defend() {
@@ -181,8 +211,15 @@ public class EnemyBehaviourComponent extends Component {
     CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
     if (targetStats != null) {
       entity.getEvents().trigger("enemyCast");
-      targetStats.applyStatusEffect(
-          effectType.name(), currentIntent.getValue(), currentIntent.getDuration());
+
+      String statusKey =
+          effectType == IntentEffectType.TAUNT
+              ? IntentEffectType.TAUNT.name() + ":" + entity.getId()
+              : effectType.name();
+      int statusValue =
+          effectType == IntentEffectType.TAUNT ? entity.getId() : currentIntent.getValue();
+
+      targetStats.applyStatusEffect(statusKey, statusValue, currentIntent.getDuration());
     }
   }
 }

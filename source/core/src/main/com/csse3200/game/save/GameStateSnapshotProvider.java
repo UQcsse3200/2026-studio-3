@@ -3,6 +3,8 @@ package com.csse3200.game.save;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryUnlockState;
+import com.csse3200.game.cards.CardDiscoveryService;
+import com.csse3200.game.cards.CardUnlockState;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.maps.MapGraph;
@@ -24,12 +26,14 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
   private final PlayerDeck playerDeck;
   private final RunState runState;
   private final BestiaryService bestiaryService;
+  private final CardDiscoveryService cardDiscoveryService;
 
   public GameStateSnapshotProvider(
       PlayerRunState playerState,
       PlayerDeck playerDeck,
       RunState runState,
-      BestiaryService bestiaryService) {
+      BestiaryService bestiaryService,
+      CardDiscoveryService cardDiscoveryService) {
     if (playerState == null) {
       throw new IllegalArgumentException("playerState must not be null");
     }
@@ -42,10 +46,14 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
     if (bestiaryService == null) {
       throw new IllegalArgumentException("bestiaryService must not be null");
     }
+    if (cardDiscoveryService == null) {
+      throw new IllegalArgumentException("cardDiscoveryService must not be null");
+    }
     this.playerState = playerState;
     this.playerDeck = playerDeck;
     this.runState = runState;
     this.bestiaryService = bestiaryService;
+    this.cardDiscoveryService = cardDiscoveryService;
   }
 
   @Override
@@ -59,7 +67,7 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
   }
 
   private PlayerSaveData capturePlayer() {
-    // PlayerSaveData.piety is a snapshot-only mirror of the player's map-progression "level" —
+    // PlayerSaveData.level is a snapshot-only mirror of the player's map-progression "level" —
     // see #Sprint 3 rename discussion with Josie/Aidan/Linh, 9/22 (flagged by Amber in review,
     // PR #303). MapGraph is the single authoritative source for level: it is restored directly
     // by SaveGameRestoreService (restoreCurrentNode), and PlayerStatsTopDisplay reads the live
@@ -135,9 +143,17 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
       }
     }
 
+    List<CardProgressSaveData> cardProgress =
+        cardDiscoveryService.getProgressSnapshot().entrySet().stream()
+            .filter(entry -> entry.getValue() != CardUnlockState.LOCKED)
+            .map(entry -> new CardProgressSaveData(entry.getKey(), entry.getValue().name()))
+            .toList();
+
     ProgressSaveData progress =
-        new ProgressSaveData(pendingRewardId, resumeScreen, bestiaryProgress);
+        new ProgressSaveData(pendingRewardId, resumeScreen, bestiaryProgress, cardProgress);
     progress.encounterSeed = runState.getEncounterSeed();
+    progress.pendingEliteTempleReward = runState.hasPendingEliteTempleReward();
+    progress.cardFusionUsed = runState.hasUsedCardFusion();
     return progress;
   }
 }

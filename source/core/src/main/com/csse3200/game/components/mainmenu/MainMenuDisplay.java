@@ -64,19 +64,18 @@ public class MainMenuDisplay extends UIComponent {
     overlay.setBackground(skin.newDrawable("white", overlayColour));
     rootStack.add(overlay);
 
-    rootStack.add(buildContent());
+    Texture buttonFrameTexture = getTexture(BUTTON_FRAME_TEXTURE);
+    buttonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    rootStack.add(buildContent(buttonFrameTexture));
     stage.addActor(rootStack);
   }
 
-  private Table buildContent() {
+  private Table buildContent(Texture buttonFrameTexture) {
     Texture titleTexture = getTexture(TITLE_LOGO_TEXTURE);
     titleTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     // Set the filter to Nearest to avoid blurring the pixel art
     Image titleLogo = new Image(titleTexture);
     titleLogo.setScaling(Scaling.fit);
-
-    Texture buttonFrameTexture = getTexture(BUTTON_FRAME_TEXTURE);
-    buttonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
     // Build the buttons and add them to the menu table
     newGameButton = createButton("New Game", START_EVENT, buttonFrameTexture);

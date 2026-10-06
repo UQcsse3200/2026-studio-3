@@ -17,4 +17,13 @@ public class EnemyConfig extends BaseEntityConfig {
    * {@code images/enemies/<id>.atlas} by convention, falling back to a shared default atlas.
    */
   public String sprite = "";
+
+  /**
+   * Multiplier on top of the factory's render scale, so sprites drawn at different sizes still read
+   * consistently on screen. 1.0 keeps the sprite's own proportions.
+   */
+  public float renderScale = 1f;
+
+  /** 图鉴里显示的敌人背景描述，以 enemies.json 为唯一来源，写法遵循 wiki《The Fall of the Pantheon》。 */
+  public String description = "";
 }
