@@ -39,7 +39,6 @@ public class EnemyTurnDisplay extends Displaying {
 
   /** Displays the enemy turn message with a fade-in and fade-out animation. */
   public void showEnemyTurn() {
-    System.out.println("SHOWING ENEMY TURN");
     label.clearActions();
 
     label.addAction(

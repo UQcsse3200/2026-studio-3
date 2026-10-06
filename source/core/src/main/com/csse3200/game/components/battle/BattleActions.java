@@ -100,7 +100,6 @@ public class BattleActions extends Component {
     // holding back every reveal that follows until the whole enemy turn is done.
     if (nextPhase == BattlePhase.ENEMY_TURN && previousPhase == BattlePhase.PLAYER_END) {
       deferringEnemyTurn = true;
-      System.out.println("BattleActions entity = " + entity);
       entity.getEvents().trigger(ENEMY_TURN_EVENT);
       entity.getEvents().trigger(PHASE_CHANGED_EVENT, nextPhase);
       return;
