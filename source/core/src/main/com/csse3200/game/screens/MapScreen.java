@@ -59,6 +59,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
   private final Renderer renderer;
   private ImageButton exitButton;
   private MapDisplay mapDisplay;
+  private ImageTextButton inventoryButton;
 
   public MapScreen(GdxGame game) {
     this.game = game;
@@ -186,7 +187,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
             .addComponent(inventoryPopup);
     ServiceLocator.getEntityService().register(itemInventoryEntity);
 
-    ImageTextButton inventoryButton =
+    inventoryButton =
         new ImageTextButton(
             "Item Inventory", BattleMenuSkins.forIcon(BattleMenuSkins.Icon.INVENTORY));
     inventoryButton.pad(6f, 12f, 6f, 18f);
@@ -194,7 +195,6 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
     float buttonWidth = 247f;
     float buttonHeight = 48f;
-    float offset = 24f;
     float scale = 0.7f;
     buttonWidth *= scale;
     buttonHeight *= scale;
@@ -202,11 +202,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     inventoryButton.getLabel().setFontScale(scale);
     inventoryButton.setSize(buttonWidth, buttonHeight);
 
-    float legendCentreX = stage.getWidth() * 0.90f;
-    float legendBottomY = stage.getHeight() * 0.295f;
-    float gap = 40f;
-    inventoryButton.setPosition(
-        legendCentreX - buttonWidth / 2f, legendBottomY - buttonHeight - gap);
+    positionInventoryButton();
 
     inventoryButton.addListener(
         new ChangeListener() {
@@ -217,6 +213,17 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         });
 
     stage.addActor(inventoryButton);
+  }
+
+  private void positionInventoryButton() {
+    Stage stage = ServiceLocator.getRenderService().getStage();
+    float legendCentreX = stage.getWidth() * 0.90f;
+    float legendBottomY = stage.getHeight() * 0.295f;
+    float gap = 40f;
+    float buttonWidth = inventoryButton.getWidth();
+    float buttonHeight = inventoryButton.getHeight();
+    inventoryButton.setPosition(
+        legendCentreX - buttonWidth / 2f, legendBottomY - buttonHeight - gap);
   }
 
   /**
@@ -305,6 +312,9 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
   @Override
   public void resize(int width, int height) {
     renderer.resize(width, height);
+    if (inventoryButton != null) {
+      positionInventoryButton();
+    }
 
     if (mapDisplay != null) {
       mapDisplay.resizeHud();
