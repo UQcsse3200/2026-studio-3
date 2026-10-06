@@ -78,14 +78,14 @@ class RewardIntegrationTest {
   }
 
   @Test
-  void merchantsFavorAddsFivePercentDiscount() {
+  void merchantsFavorAddsTenPercentDiscount() {
     PlayerRunState playerState = new PlayerRunState(100, 100, 50);
     playerState.addOwnedItem(ItemType.MERCHANTS_FAVOR);
 
     Entity player = createPlayer();
     playerState.applyTo(player);
 
-    assertEquals(0.05f, player.getComponent(InventoryComponent.class).getShopDiscount(), 0.001f);
+    assertEquals(0.10f, player.getComponent(InventoryComponent.class).getShopDiscount(), 0.001f);
   }
 
   private Entity createPlayer() {

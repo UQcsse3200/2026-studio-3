@@ -124,7 +124,8 @@ class PlayerRunStateTest {
     state.addOwnedItem(ItemType.IRON_AEGIS);
 
     assertThrows(
-        IllegalArgumentException.class, () -> state.useBattleItem(ItemType.IRON_AEGIS, new Entity()));
+        IllegalArgumentException.class,
+        () -> state.useBattleItem(ItemType.IRON_AEGIS, new Entity()));
 
     assertEquals(1, state.getOwnedItemCount(ItemType.IRON_AEGIS));
   }

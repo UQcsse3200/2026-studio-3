@@ -294,7 +294,8 @@ public class BattleScreen extends ScreenAdapter {
     InventoryPopupComponent inventoryPopup =
         new InventoryPopupComponent(
             game.getRunState(), itemInventory, gameArea.getPlayer(), controller::isPlayerTurn);
-    Entity itemInventoryEntity = new Entity().addComponent(itemInventory).addComponent(inventoryPopup);
+    Entity itemInventoryEntity =
+        new Entity().addComponent(itemInventory).addComponent(inventoryPopup);
     ServiceLocator.getEntityService().register(itemInventoryEntity);
 
     Stage stage = ServiceLocator.getRenderService().getStage();
