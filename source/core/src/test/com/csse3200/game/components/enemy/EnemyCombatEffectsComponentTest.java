@@ -1,8 +1,6 @@
 package com.csse3200.game.components.enemy;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -73,7 +71,8 @@ class EnemyCombatEffectsComponentTest {
     assertEquals(Color.CYAN, animator.getActiveTint());
   }
 
-  // updateArmour 在护甲减少（比如被伤害吸收）时也会触发，这种情况不应该播放防御闪烁
+  // updateArmour is also emitted when armour decreases, such as when it absorbs damage.
+  // A decrease should not trigger the defend flash.
   @Test
   void shouldNotFlashWhenArmourDecreases() {
     Entity enemy = newEnemy();
@@ -95,7 +94,18 @@ class EnemyCombatEffectsComponentTest {
     enemy.getEvents().trigger("enemyEnraged");
 
     assertTrue(animator.isTintPersistent());
-    assertTrue(animator.getActiveTint() != null);
+    assertNotNull(animator.getActiveTint());
+  }
+
+  @Test
+  void shouldSetPersistentTintOnDefeat() {
+    Entity enemy = newEnemy();
+    AnimationRenderComponent animator = enemy.getComponent(AnimationRenderComponent.class);
+
+    enemy.getEvents().trigger("enemyDefeated");
+
+    assertTrue(animator.isTintPersistent());
+    assertNotNull(animator.getActiveTint());
   }
 
   @Test
@@ -108,7 +118,7 @@ class EnemyCombatEffectsComponentTest {
     assertEquals(Color.YELLOW, animator.getActiveTint());
   }
 
-  // 防御意图不应该触发攻击预警的黄色闪烁
+  // A defend intent should not trigger the yellow attack-warning flash.
   @Test
   void shouldNotFlashOnDefendIntent() {
     Entity enemy = newEnemy();

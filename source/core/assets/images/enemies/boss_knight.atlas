@@ -117,74 +117,67 @@ hurt
   index: 0
 cast
   rotate: false
-  xy: 0, 512
+  xy: 1280, 0
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: 0
 cast
   rotate: false
-  xy: 256, 512
+  xy: 1536, 0
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: 1
 cast
   rotate: false
-  xy: 512, 512
+  xy: 1792, 0
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: 2
 cast
   rotate: false
-  xy: 768, 512
+  xy: 0, 256
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: 3
 cast
   rotate: false
-  xy: 1024, 512
+  xy: 256, 256
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: 4
 cast
   rotate: false
-  xy: 1280, 512
+  xy: 512, 256
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: 5
 cast
   rotate: false
-  xy: 1536, 512
+  xy: 768, 256
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: 6
 cast
   rotate: false
-  xy: 1792, 512
+  xy: 1024, 256
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: 7
 cast
   rotate: false
-  xy: 0, 768
+  xy: 1280, 256
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: 8
-cast
-  rotate: false
-  xy: 256, 768
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: 9
 defend
   rotate: false
   xy: 512, 768
@@ -311,3 +304,73 @@ death
   orig: 256, 256
   offset: 0, 0
   index: 5
+attack
+  rotate: false
+  xy: 0, 512
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: 0
+attack
+  rotate: false
+  xy: 256, 512
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: 1
+attack
+  rotate: false
+  xy: 512, 512
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: 2
+attack
+  rotate: false
+  xy: 768, 512
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: 3
+attack
+  rotate: false
+  xy: 1024, 512
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: 4
+attack
+  rotate: false
+  xy: 1280, 512
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: 5
+attack
+  rotate: false
+  xy: 1536, 512
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: 6
+attack
+  rotate: false
+  xy: 1792, 512
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: 7
+attack
+  rotate: false
+  xy: 0, 768
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: 8
+attack
+  rotate: false
+  xy: 256, 768
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: 9

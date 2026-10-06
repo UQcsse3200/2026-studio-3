@@ -184,7 +184,7 @@ class BattleLoopTest {
   }
 
   @Test
-  void shouldAddBlockWhenDefendCardIsPlayed() {
+  void shouldAddTemporaryBlockWhenDefendCardIsPlayed() {
     CardConfig defend =
         card("defend", CardType.SKILL, TargetType.SELF, 1, new EffectConfig(EffectType.BLOCK, 5));
     Entity player =

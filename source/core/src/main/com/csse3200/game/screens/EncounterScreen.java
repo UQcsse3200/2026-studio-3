@@ -11,6 +11,7 @@ import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -40,22 +41,21 @@ import org.slf4j.LoggerFactory;
 public class EncounterScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(EncounterScreen.class);
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
-  private static final String[] SHOP_CARD_TEXTURES = {
-    "images/shop/cards/bandage.png",
-    "images/shop/cards/defend.png",
-    "images/shop/cards/expose.png",
-    "images/shop/cards/inner_focus.png",
-    "images/shop/cards/poison_dagger.png",
-    "images/shop/cards/strike.png"
-  };
   private final String[] cardTexturePaths;
   private final GdxGame game;
   private final RunState runState;
   private final Renderer renderer;
   private final PhysicsEngine physicsEngine;
   private final EncounterGameArea encounterGameArea;
+  private GdxGame.ScreenType pendingFusionReturn;
+  private float fusionResultSeconds;
 
   public EncounterScreen(GdxGame game) {
+    this(game, null);
+  }
+
+  /** Opens the active map Event by ID, or selects randomly when no ID is supplied. */
+  public EncounterScreen(GdxGame game, String forcedEventId) {
     this.game = game;
     this.runState = game.getRunState();
 
@@ -65,6 +65,9 @@ public class EncounterScreen extends ScreenAdapter {
     if (roomType != RoomType.EVENT && roomType != RoomType.SHOP) {
       throw new IllegalStateException(
           "EncounterScreen only handles EVENT and SHOP nodes, but received " + roomType);
+    }
+    if (forcedEventId != null && roomType != RoomType.EVENT) {
+      throw new IllegalStateException("A forced Event requires an active EVENT node");
     }
 
     logger.info("Opening {} encounter for map node {}", roomType, activeNode.getNodeId());
@@ -78,19 +81,13 @@ public class EncounterScreen extends ScreenAdapter {
     List<CardConfig> cards = CardConfigLoader.loadCards();
     CardLibrary cardLibrary = new CardLibrary(cards);
 
-    cardTexturePaths =
-        cards.stream()
-            .map(card -> card.texturePath)
-            .filter(path -> path != null && !path.isBlank())
-            .distinct()
-            .toArray(String[]::new);
+    cardTexturePaths = CardWidgetAssets.collectTexturePaths(cards);
 
     ServiceLocator.registerCardLibrary(cardLibrary);
     PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(cardLibrary);
 
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(cardTexturePaths);
-    resourceService.loadTextures(SHOP_CARD_TEXTURES);
     resourceService.loadAll();
 
     PhysicsService physicsService = new PhysicsService();
@@ -109,8 +106,10 @@ public class EncounterScreen extends ScreenAdapter {
             activeNode.getNodeId(),
             roomType,
             this::onEncounterComplete,
+            runState.getOrCreatePlayerState(),
+            playerDeck,
             runState,
-            playerDeck);
+            forcedEventId);
     encounterGameArea.create();
   }
 
@@ -170,15 +169,26 @@ public class EncounterScreen extends ScreenAdapter {
         effectiveSuccess,
         playerDefeated);
 
-    runState.completeEncounter(effectiveSuccess);
-    if (effectiveSuccess) {
-      game.requestAutosaveAfterEncounter();
-    }
+    completeEncounterAndRequestAutosave(game, runState, effectiveSuccess);
 
     GdxGame.ScreenType targetScreen =
         playerDefeated ? GdxGame.ScreenType.DEFEAT : GdxGame.ScreenType.MAP;
 
-    Gdx.app.postRunnable(() -> game.setScreen(targetScreen));
+    if (encounterGameArea.getCardFusionEncounterFlow().isPresent()) {
+      pendingFusionReturn = targetScreen;
+      fusionResultSeconds = encounterGameArea.isCardFusionPresentationComplete() ? 0.2f : 0f;
+    } else {
+      Gdx.app.postRunnable(() -> game.setScreen(targetScreen));
+    }
+  }
+
+  /** Completes a non-battle encounter and queues an autosave only for successful outcomes. */
+  static void completeEncounterAndRequestAutosave(
+      GdxGame game, RunState runState, boolean effectiveSuccess) {
+    runState.completeEncounter(effectiveSuccess);
+    if (effectiveSuccess) {
+      game.requestAutosaveAfterEncounter();
+    }
   }
 
   static boolean isPlayerDefeated(Entity player) {
@@ -195,6 +205,17 @@ public class EncounterScreen extends ScreenAdapter {
     physicsEngine.update();
     ServiceLocator.getEntityService().update();
     renderer.render();
+    if (pendingFusionReturn != null) {
+      if (!encounterGameArea.isCardFusionPresentationComplete()) {
+        return;
+      }
+      fusionResultSeconds -= delta;
+      if (fusionResultSeconds <= 0f) {
+        GdxGame.ScreenType destination = pendingFusionReturn;
+        pendingFusionReturn = null;
+        game.setScreen(destination);
+      }
+    }
   }
 
   @Override
@@ -212,7 +233,6 @@ public class EncounterScreen extends ScreenAdapter {
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getResourceService().unloadAssets(cardTexturePaths);
-    ServiceLocator.getResourceService().unloadAssets(SHOP_CARD_TEXTURES);
     ServiceLocator.getResourceService().dispose();
 
     ServiceLocator.clear();

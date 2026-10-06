@@ -9,11 +9,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import com.csse3200.game.cards.CardType;
+import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAI;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIFactory;
+import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
+import com.csse3200.game.components.enemy.Memory.PlayerMemory;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.extensions.GameExtension;
@@ -164,22 +168,42 @@ class EnemyBehaviourComponentTest {
   }
 
   @Test
-  void shouldApplyFeebleReductionOnceWhenResolvingAttack() {
+  void shouldApplyStrengthFeebleAndTargetVulnerableToAttackDamageOnce() {
     EnemyBehaviourComponent behaviour =
-        new EnemyBehaviourComponent("test_attack", fixedAi(EnemyIntent.attack(8)));
+        new EnemyBehaviourComponent(EnemyAIFactory.CYCLE_ATTACK_DEFEND);
     CombatStatsComponent attackerStats = enemyStats();
-    attackerStats.applyStatusEffect("FEEBLE", 1, 2);
+    attackerStats.applyStatusEffect(EffectType.STRENGTH.name(), 2, 0);
+    attackerStats.applyStatusEffect(EffectType.FEEBLE.name(), 1, 2);
     enemyWith(behaviour, attackerStats);
 
-    Entity player = new Entity();
     CombatStatsComponent playerStats = new CombatStatsComponent(30, 4);
-    player.addComponent(playerStats);
+    playerStats.applyStatusEffect(EffectType.VULNERABLE.name(), 1, 2);
+    Entity player = new Entity().addComponent(playerStats);
     player.create();
 
     behaviour.rollIntent();
     behaviour.executeIntent(player);
 
-    assertEquals(24, playerStats.getHealth());
+    assertEquals(21, playerStats.getHealth());
+  }
+
+  @Test
+  void shouldApplyFeebleOnceAndRoundFinalDamageDownWithoutChangingIntent() {
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent("test_feeble", fixedAi(EnemyIntent.attack(7)));
+    CombatStatsComponent attackerStats = enemyStats();
+    attackerStats.applyStatusEffect(EffectType.FEEBLE.name(), 1, 2);
+    enemyWith(behaviour, attackerStats);
+
+    CombatStatsComponent playerStats = new CombatStatsComponent(30, 4);
+    Entity player = new Entity().addComponent(playerStats);
+    player.create();
+
+    behaviour.rollIntent();
+    behaviour.executeIntent(player);
+
+    assertEquals(25, playerStats.getHealth());
+    assertEquals(7, behaviour.getCurrentIntent().getValue());
   }
 
   // 攻击伤害应该等于意图里广播出去的数值，而不是重新按自身 baseAttack 计算——
@@ -249,6 +273,25 @@ class EnemyBehaviourComponentTest {
     assertNotNull(applied);
     assertEquals("SILENCE", applied.getType());
     assertEquals(3, applied.getValue());
+    assertEquals(2, applied.getDuration());
+  }
+
+  @Test
+  void shouldStoreTauntUnderTheCasterIdWithTheCasterAsItsValue() {
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent(
+            "test_taunt", fixedAi(EnemyIntent.debuff(IntentEffectType.TAUNT, 0, 2)));
+    Entity enemy = enemyWith(behaviour, enemyStats());
+    CombatStatsComponent playerStats = new CombatStatsComponent(30, 4);
+    Entity player = new Entity().addComponent(playerStats);
+    player.create();
+
+    behaviour.rollIntent();
+    behaviour.executeIntent(player);
+
+    StatusEffect applied = playerStats.getStatusEffect("TAUNT:" + enemy.getId());
+    assertNotNull(applied);
+    assertEquals(enemy.getId(), applied.getValue());
     assertEquals(2, applied.getDuration());
   }
 
@@ -333,5 +376,128 @@ class EnemyBehaviourComponentTest {
     behaviour.rollIntent();
 
     assertEquals(0, captured[0].getPlayerHealth());
+  }
+
+  @Test
+  void shouldUseEmptyPlayerMemoryWhenMemoryIsNotSupplied() {
+    EnemyAIContext[] captured = new EnemyAIContext[1];
+
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent(
+            "test_memory",
+            context -> {
+              captured[0] = context;
+              return EnemyIntent.attack(1);
+            });
+
+    enemyWith(behaviour, enemyStats());
+
+    behaviour.rollIntent();
+
+    assertEquals(PlayerMemory.empty(), captured[0].getPlayerMemory());
+  }
+
+  @Test
+  void shouldProvidePlayerMemoryToEnemyAI() {
+    EnemyAIContext[] captured = new EnemyAIContext[1];
+
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent(
+            "test_memory",
+            context -> {
+              captured[0] = context;
+              return EnemyIntent.attack(1);
+            });
+
+    enemyWith(behaviour, enemyStats());
+
+    EnemyMemoryComponent memory = new EnemyMemoryComponent();
+
+    memory.recordCardPlayed(CardType.ATTACK, false);
+
+    memory.recordCardPlayed(CardType.SKILL, true);
+
+    memory.settlePlayerTurn();
+
+    behaviour.setEnemyMemory(memory);
+    behaviour.rollIntent();
+
+    PlayerMemory received = captured[0].getPlayerMemory();
+
+    assertEquals(memory.snapshot(), received);
+    assertEquals(1, received.attackCardsPlayed());
+    assertEquals(1, received.skillCardsPlayed());
+    assertEquals(2, received.cardsPlayedLastTurn());
+    assertEquals(0, received.consecutiveTurnsWithoutBlock());
+  }
+
+  @Test
+  void shouldReadLatestMemoryForEveryDecision() {
+    EnemyAIContext[] captured = new EnemyAIContext[1];
+
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent(
+            "test_memory",
+            context -> {
+              captured[0] = context;
+              return EnemyIntent.attack(1);
+            });
+
+    enemyWith(behaviour, enemyStats());
+
+    EnemyMemoryComponent memory = new EnemyMemoryComponent();
+
+    behaviour.setEnemyMemory(memory);
+
+    memory.recordCardPlayed(CardType.ATTACK, false);
+
+    behaviour.rollIntent();
+
+    PlayerMemory firstDecisionMemory = captured[0].getPlayerMemory();
+
+    assertEquals(1, firstDecisionMemory.attackCardsPlayed());
+
+    assertEquals(0, firstDecisionMemory.skillCardsPlayed());
+
+    memory.recordCardPlayed(CardType.SKILL, true);
+
+    memory.settlePlayerTurn();
+
+    behaviour.rollIntent();
+
+    PlayerMemory secondDecisionMemory = captured[0].getPlayerMemory();
+
+    assertEquals(1, secondDecisionMemory.attackCardsPlayed());
+
+    assertEquals(1, secondDecisionMemory.skillCardsPlayed());
+
+    assertEquals(2, secondDecisionMemory.cardsPlayedLastTurn());
+
+    assertEquals(0, secondDecisionMemory.consecutiveTurnsWithoutBlock());
+  }
+
+  @Test
+  void shouldReturnToEmptyMemoryWhenMemoryIsCleared() {
+    EnemyAIContext[] captured = new EnemyAIContext[1];
+
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent(
+            "test_memory",
+            context -> {
+              captured[0] = context;
+              return EnemyIntent.attack(1);
+            });
+
+    enemyWith(behaviour, enemyStats());
+
+    EnemyMemoryComponent memory = new EnemyMemoryComponent();
+
+    memory.recordCardPlayed(CardType.ATTACK, false);
+
+    behaviour.setEnemyMemory(memory);
+    behaviour.setEnemyMemory(null);
+    behaviour.rollIntent();
+
+    assertEquals(PlayerMemory.empty(), captured[0].getPlayerMemory());
   }
 }

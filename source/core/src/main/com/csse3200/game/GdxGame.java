@@ -7,16 +7,31 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardDiscoveryService;
+import com.csse3200.game.cards.CardDiscoveryStore;
 import com.csse3200.game.cards.CardLibrary;
+import com.csse3200.game.chance.CardFusionEncounterBehaviour;
+import com.csse3200.game.chance.ChanceEncounterFactory;
+import com.csse3200.game.chance.ChanceEncounterSelector;
 import com.csse3200.game.files.UserSettings;
+import com.csse3200.game.maps.MapNode;
+import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.narration.NarrationConfigLoader;
+import com.csse3200.game.narration.NarrationLoadingException;
 import com.csse3200.game.save.AutosaveCoordinator;
 import com.csse3200.game.save.GameStateSnapshotProvider;
 import com.csse3200.game.save.JsonSaveGameRepository;
 import com.csse3200.game.save.SaveGameService;
+import com.csse3200.game.screens.AncientTempleScreen;
 import com.csse3200.game.screens.BattleScreen;
 import com.csse3200.game.screens.BestiaryScreen;
+import com.csse3200.game.screens.CampfireScreen;
 import com.csse3200.game.screens.CardLibraryScreen;
+import com.csse3200.game.screens.DemoCampfireScreen;
+import com.csse3200.game.screens.DemoEventScreen;
+import com.csse3200.game.screens.DemoShopScreen;
+import com.csse3200.game.screens.ElitePortalScreen;
 import com.csse3200.game.screens.EncounterScreen;
 import com.csse3200.game.screens.EndBattleScreen;
 import com.csse3200.game.screens.ItemLibraryScreen;
@@ -24,9 +39,12 @@ import com.csse3200.game.screens.LibraryScreen;
 import com.csse3200.game.screens.MainGameScreen;
 import com.csse3200.game.screens.MainMenuScreen;
 import com.csse3200.game.screens.MapScreen;
+import com.csse3200.game.screens.NarrationScreen;
 import com.csse3200.game.screens.SaveLoadScreen;
 import com.csse3200.game.screens.SettingsScreen;
+import com.csse3200.game.screens.TempleCardSelectionScreen;
 import com.csse3200.game.services.ServiceLocator;
+import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +55,21 @@ import org.slf4j.LoggerFactory;
  */
 public class GdxGame extends Game {
   private static final Logger logger = LoggerFactory.getLogger(GdxGame.class);
+  private static final String[] BACKGROUND_IDS =
+      new String[] {
+        "dungeon",
+        "forest",
+        "temple",
+        "stones_ruins",
+        "autumn_forest",
+        "inside_castle",
+        "mystical_tree",
+        "underwater",
+        "cemetery",
+        "forest_with_sun"
+      };
   private BestiaryService bestiaryService;
+  private CardDiscoveryService cardDiscoveryService;
 
   /**
    * Gets discovery progress shared by all screens in this game session.
@@ -46,6 +78,27 @@ public class GdxGame extends Game {
    */
   public BestiaryService getBestiaryService() {
     return bestiaryService;
+  }
+
+  /**
+   * Gets card discovery progress shared by all screens in this game session.
+   *
+   * @return process-lifetime card discovery service
+   */
+  public CardDiscoveryService getCardDiscoveryService() {
+    return cardDiscoveryService;
+  }
+
+  /**
+   * Returns the background id of the current battle instance
+   *
+   * @return String background id for the current battle
+   */
+  public String getBackgroundId() {
+    String backgroundId =
+        BACKGROUND_IDS[(getRunState().getMapProgression() - 1) % BACKGROUND_IDS.length];
+    logger.debug("Background Id: {}", backgroundId);
+    return backgroundId;
   }
 
   // Lives here rather than on a screen, since setScreen() disposes the outgoing screen.
@@ -67,6 +120,15 @@ public class GdxGame extends Game {
     autosaveCoordinator.saveIfPending();
   }
 
+  /**
+   * Flushes a victorious battle's autosave after its reward has been applied but before leaving the
+   * reward screen. The coordinator owns idempotency, so the following map transition cannot write a
+   * duplicate checkpoint.
+   */
+  public void autosaveAfterRewardClaimed() {
+    autosaveCoordinator.saveIfPending();
+  }
+
   private SaveGameService newAutosaveService() {
     CardLibrary cardLibrary = new CardLibrary(CardConfigLoader.loadCards());
     return new SaveGameService(
@@ -75,7 +137,8 @@ public class GdxGame extends Game {
             runState.getOrCreatePlayerState(),
             runState.getOrCreatePlayerDeck(cardLibrary),
             runState,
-            bestiaryService));
+            bestiaryService,
+            cardDiscoveryService));
   }
 
   @Override
@@ -83,6 +146,14 @@ public class GdxGame extends Game {
     logger.info("Creating game");
     loadSettings();
     bestiaryService = BestiaryService.loadDefault();
+    cardDiscoveryService = CardDiscoveryService.loadDefault();
+    CardDiscoveryStore cardDiscoveryStore = CardDiscoveryStore.defaultStore();
+    cardDiscoveryService.mergeProgress(cardDiscoveryStore.load());
+    cardDiscoveryService
+        .getEvents()
+        .addListener(
+            CardDiscoveryService.ENTRY_UPDATED_EVENT,
+            ignored -> cardDiscoveryStore.save(cardDiscoveryService.getProgressSnapshot()));
 
     // Sets background to light yellow
     Gdx.gl.glClearColor(162f / 255f, 73 / 255f, 54 / 255f, 1);
@@ -104,17 +175,103 @@ public class GdxGame extends Game {
    */
   public void setScreen(ScreenType screenType) {
     logger.info("Setting game screen to {}", screenType);
+    prepareScreenTransition();
+    setScreen(newScreen(screenType));
+  }
+
+  /**
+   * Plays a story crawl, then continues to {@code next}. An unknown or empty sequence completes on
+   * its first frame. Narration file errors skip the crawl and continue to {@code next}.
+   *
+   * @param sequenceId story sequence to play
+   * @param next destination after completion or skipping
+   */
+  public void showNarration(String sequenceId, ScreenType next) {
+    try {
+      NarrationConfigLoader.loadSequence(sequenceId);
+    } catch (NarrationLoadingException exception) {
+      logger.error("Unable to load narration sequence {}", sequenceId, exception);
+      setScreen(next);
+      return;
+    }
+    prepareScreenTransition();
+    super.setScreen(new NarrationScreen(sequenceId, () -> setScreen(next)));
+  }
+
+  private void prepareScreenTransition() {
     Screen currentScreen = getScreen();
     if (currentScreen != null) {
       currentScreen.dispose();
     }
     ServiceLocator.registerBestiaryService(bestiaryService);
-    setScreen(newScreen(screenType));
+    ServiceLocator.registerCardDiscoveryService(cardDiscoveryService);
   }
 
-  /** Opens the battle screen. Used by encounter navigation and the temporary debug shortcut. */
+  /** Opens the battle screen. */
   public void startBattle() {
     setScreen(ScreenType.BATTLE_SCREEN);
+  }
+
+  /**
+   * Opens a specific configured Event for the active map node using the persistent run.
+   *
+   * <p>The caller must first enter a real EVENT node. Validation happens before the current screen
+   * is disposed, so an invalid request leaves it in place.
+   *
+   * @param eventId stable ID from the Event catalogue
+   * @throws IllegalArgumentException if the ID is blank or unknown
+   * @throws IllegalStateException if no EVENT map node is active
+   */
+  public void startEvent(String eventId) {
+    if (eventId == null || eventId.isBlank()) {
+      throw new IllegalArgumentException("Event ID must not be null or blank");
+    }
+    Integer nodeId = runState.getActiveNodeId();
+    MapNode activeNode =
+        runState.getMapGraph() == null || nodeId == null
+            ? null
+            : runState.getMapGraph().getNode(nodeId);
+    if (activeNode == null || activeNode.getRoomType() != RoomType.EVENT) {
+      throw new IllegalStateException("startEvent requires an active EVENT node");
+    }
+    new ChanceEncounterSelector(ChanceEncounterFactory.createInitialEncounters(), new Random())
+        .selectById(eventId);
+
+    prepareScreenTransition();
+    setScreen(new EncounterScreen(this, eventId));
+  }
+
+  /** Opens a temporary Event preview without entering or changing the run map. */
+  public void openDemoEvent() {
+    openDemoEvent(null);
+  }
+
+  /** Opens the Card Fusion catalogue Event directly for UI work. */
+  public void openDemoCardFusion() {
+    openDemoEvent(CardFusionEncounterBehaviour.ENCOUNTER_ID);
+  }
+
+  private void openDemoEvent(String previewEncounterId) {
+    prepareScreenTransition();
+    setScreen(new DemoEventScreen(this, previewEncounterId));
+  }
+
+  /** Opens a temporary Campfire preview with no map node or persistent run changes. */
+  public void openDemoCampfire() {
+    prepareScreenTransition();
+    setScreen(new DemoCampfireScreen(this));
+  }
+
+  /** Opens a temporary Shop preview using isolated player state and no map node. */
+  public void openDemoShop() {
+    prepareScreenTransition();
+    setScreen(new DemoShopScreen(this));
+  }
+
+  /** Temporary development shortcut for previewing the Elite portal flow. */
+  public void startElitePortalDebug() {
+    runState.setPendingEliteTempleReward(true);
+    setScreen(ScreenType.ELITE_PORTAL);
   }
 
   @Override
@@ -130,36 +287,25 @@ public class GdxGame extends Game {
    * @return new screen
    */
   private Screen newScreen(ScreenType screenType) {
-    switch (screenType) {
-      case MAIN_MENU:
-        return new MainMenuScreen(this);
-      case MAIN_GAME:
-        return new MainGameScreen(this);
-      case SETTINGS:
-        return new SettingsScreen(this);
-      case SAVE_LOAD:
-        return new SaveLoadScreen(this);
-      case LIBRARY:
-        return new LibraryScreen(this);
-      case CARD_LIBRARY:
-        return new CardLibraryScreen(this);
-      case MAP:
-        return new MapScreen(this);
-      case ENCOUNTER:
-        return new EncounterScreen(this);
-      case BATTLE_SCREEN:
-        return new BattleScreen(this);
-      case VICTORY:
-        return new EndBattleScreen(this, true);
-      case DEFEAT:
-        return new EndBattleScreen(this, false);
-      case BESTIARY:
-        return new BestiaryScreen(this);
-      case ITEM_LIBRARY:
-        return new ItemLibraryScreen(this);
-      default:
-        return null;
-    }
+    return switch (screenType) {
+      case MAIN_MENU -> new MainMenuScreen(this);
+      case MAIN_GAME -> new MainGameScreen(this);
+      case SETTINGS -> new SettingsScreen(this);
+      case SAVE_LOAD -> new SaveLoadScreen(this);
+      case LIBRARY -> new LibraryScreen(this);
+      case CARD_LIBRARY -> new CardLibraryScreen(this);
+      case MAP -> new MapScreen(this);
+      case ENCOUNTER -> new EncounterScreen(this);
+      case CAMPFIRE -> new CampfireScreen(this);
+      case ELITE_PORTAL -> new ElitePortalScreen(this);
+      case ANCIENT_TEMPLE -> new AncientTempleScreen(this);
+      case TEMPLE_CARD_SELECTION -> new TempleCardSelectionScreen(this);
+      case BATTLE_SCREEN -> new BattleScreen(this);
+      case VICTORY -> new EndBattleScreen(this, true);
+      case DEFEAT -> new EndBattleScreen(this, false);
+      case BESTIARY -> new BestiaryScreen(this);
+      case ITEM_LIBRARY -> new ItemLibraryScreen(this);
+    };
   }
 
   public enum ScreenType {
@@ -171,9 +317,13 @@ public class GdxGame extends Game {
     CARD_LIBRARY,
     MAP,
     ENCOUNTER,
+    CAMPFIRE,
     BATTLE_SCREEN,
     VICTORY,
     DEFEAT,
+    ELITE_PORTAL,
+    ANCIENT_TEMPLE,
+    TEMPLE_CARD_SELECTION,
     BESTIARY,
     ITEM_LIBRARY
   }

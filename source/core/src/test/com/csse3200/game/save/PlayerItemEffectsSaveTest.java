@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.components.CombatStatsComponent;
@@ -85,7 +86,8 @@ class PlayerItemEffectsSaveTest {
                 playerState,
                 PlayerDeckFactory.createStarterDeck(),
                 runState,
-                BestiaryService.loadDefault()));
+                BestiaryService.loadDefault(),
+                CardDiscoveryService.loadDefault()));
 
     assertTrue(saveGameService.saveGame(1).success());
     LoadResult loaded = new SaveGameService(repository()).loadGame(1);
@@ -99,7 +101,11 @@ class PlayerItemEffectsSaveTest {
     restoredDeck.clear();
     RestoreResult result =
         new SaveGameRestoreService(
-                restoredPlayer, restoredDeck, new RunState(), BestiaryService.loadDefault())
+                restoredPlayer,
+                restoredDeck,
+                new RunState(),
+                BestiaryService.loadDefault(),
+                CardDiscoveryService.loadDefault())
             .restore(data);
 
     assertTrue(result.success());

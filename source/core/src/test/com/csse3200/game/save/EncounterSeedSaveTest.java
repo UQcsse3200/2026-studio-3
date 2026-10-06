@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.extensions.GameExtension;
@@ -43,7 +44,8 @@ class EncounterSeedSaveTest {
             new PlayerRunState(50, 80, 0),
             PlayerDeckFactory.createStarterDeck(),
             runState,
-            BestiaryService.loadDefault());
+            BestiaryService.loadDefault(),
+            CardDiscoveryService.loadDefault());
     saveGameService = new SaveGameService(repository(), provider);
   }
 
@@ -71,6 +73,28 @@ class EncounterSeedSaveTest {
     assertNotNull(restored.getEncounterSeed());
   }
 
+  @Test
+  void shouldWriteRunProgressFlagsIntoSave() {
+    runState.setPendingEliteTempleReward(true);
+    runState.markCardFusionUsed();
+
+    SaveGameData loaded = saveAndLoad();
+
+    assertTrue(loaded.progress.pendingEliteTempleReward);
+    assertTrue(loaded.progress.cardFusionUsed);
+  }
+
+  @Test
+  void shouldRestoreRunProgressFlagsAfterRelaunch() {
+    runState.setPendingEliteTempleReward(true);
+    runState.markCardFusionUsed();
+
+    RunState restored = relaunchAndRestore(saveAndLoad());
+
+    assertTrue(restored.hasPendingEliteTempleReward());
+    assertTrue(restored.hasUsedCardFusion());
+  }
+
   private JsonSaveGameRepository repository() {
     return new JsonSaveGameRepository(new FileHandle(temporaryDirectory.toFile()));
   }
@@ -89,7 +113,11 @@ class EncounterSeedSaveTest {
     deck.clear();
     RestoreResult result =
         new SaveGameRestoreService(
-                new PlayerRunState(1, 10, 0), deck, restored, BestiaryService.loadDefault())
+                new PlayerRunState(1, 10, 0),
+                deck,
+                restored,
+                BestiaryService.loadDefault(),
+                CardDiscoveryService.loadDefault())
             .restore(data);
     assertTrue(result.success());
     return restored;
