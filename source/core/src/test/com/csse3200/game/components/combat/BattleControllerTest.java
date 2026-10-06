@@ -487,6 +487,29 @@ class BattleControllerTest {
   }
 
   @Test
+  void shouldIncrementTurnNumberAfterEnemiesAct() {
+    controller.start();
+    assertEquals(1, controller.getPlayerTurnNumber());
+
+    controller.endPlayerTurn();
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+    assertEquals(2, controller.getPlayerTurnNumber());
+
+    controller.endPlayerTurn();
+    assertEquals(3, controller.getPlayerTurnNumber());
+  }
+
+  @Test
+  void shouldKeepSameTurnNumberAfterPlayingCard() {
+    controller.start();
+
+    controller.handle(BattleEvent.CARD_PLAY_REQUESTED);
+
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+    assertEquals(1, controller.getPlayerTurnNumber());
+  }
+
+  @Test
   void shouldClearPendingCardIfResolutionListenerThrows() {
     controller.start();
     controller.addPhaseChangeListener(
