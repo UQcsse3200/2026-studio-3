@@ -1,21 +1,21 @@
-# 把 512x512 的敌人帧像素化：缩小 -> 共用调色板 -> 硬边透明 -> 内描边 -> 最近邻放大
-# 用法: python pixelate.py <pixel_size> <colors> <out_dir> <frame.png> [<frame.png> ...]
-# 同一只怪的所有帧要一起传入，这样它们共用一套调色板
+# Pixelates 512x512 enemy frames: downscale -> shared palette -> hard-edged alpha -> inner
+# outline -> nearest-neighbour upscale.
+# Usage: python pixelate.py <pixel_size> <colors> <out_dir> <frame.png> [<frame.png> ...]
+# Pass every frame of the same enemy together, so they share one palette.
 import os
 import sys
 from PIL import Image
 
-FRAME = 512
-ALPHA_CUT = 110          # 低于这个透明度的像素直接去掉
-OUTLINE_DARKEN = 0.35    # 内描边：轮廓内侧像素压暗到原亮度的这个比例
-ACCENT_SHARE = 0.15      # 格子里高亮/鲜艳像素占比超过这个值，就保留它们的颜色
-GLOW_MIN_ALPHA = 60      # 半透明光效像素至少要有这个不透明度才算数
-VIVID_MIN = 2            # 格子里至少有这么多鲜艳像素，就保留鲜艳色
+ALPHA_CUT = 110          # pixels below this alpha are dropped outright
+OUTLINE_DARKEN = 0.35    # inner outline: pixels just inside the silhouette darken to this fraction
+ACCENT_SHARE = 0.15      # above this share of bright/vivid pixels in a cell, their colour is kept
+GLOW_MIN_ALPHA = 60      # semi-transparent glow pixels need at least this alpha to count
+VIVID_MIN = 2            # this many vivid pixels in a cell is enough to keep the vivid colour
 
 
 def _shrink(frame, size):
     n = round(FRAME / size)
-    # 预乘透明度后再平均，避免透明区域的颜色渗进边缘
+    # Average after premultiplying alpha, so colour from transparent areas doesn't bleed into edges.
     premul = Image.new("RGBA", frame.size)
     premul.paste(frame, mask=frame.getchannel("A"))
     small = frame.resize((n, n), Image.BOX)
@@ -26,8 +26,10 @@ def _shrink(frame, size):
     for y in range(n):
         for x in range(n):
             a = ax[x, y]
-            # 格子里发光/鲜艳的像素够多时，用它们的平均色：眼睛、宝珠这类小亮点不会被周围暗色抹掉，
-            # 半透明的光效（光束、刀光）也会变成实心亮色像素，而不是被透明度门槛直接切掉
+            # When a cell has enough glowing or vivid pixels, use their average colour: small
+            # highlights such as eyes and orbs are not washed out by the darker surroundings, and
+            # semi-transparent glow (beams, blade trails) becomes solid bright pixels instead of
+            # being cut away by the alpha threshold.
             accents = [
                 src[sx, sy][:3]
                 for sy in range(y * size, min((y + 1) * size, FRAME))
@@ -35,10 +37,12 @@ def _shrink(frame, size):
                 if _is_glow_pixel(src[sx, sy])
             ]
             vivid = [c for c in accents if _is_vivid(c)]
-            # 鲜艳像素只要有几个就保留，且只取鲜艳像素的平均色，避免被白色高光冲淡（眼睛往往只有两三个像素）
+              # A few vivid pixels are enough to keep them, and only vivid pixels are averaged, so
+              # white highlights don't dilute them — eyes are often just two or three pixels.
             keep = vivid if len(vivid) >= VIVID_MIN else accents
             if len(vivid) >= VIVID_MIN or len(accents) >= size * size * ACCENT_SHARE:
-                # 只取最亮的一半：小光点（眼睛）的亮芯不会被外圈较暗的光晕拉暗
+              # Only the brightest half: the core of a small highlight such as an eye is not
+              # dragged down by the dimmer glow around it.
                 keep = sorted(keep + [c for c in accents if _is_hot_core(c)], key=max, reverse=True)
                 keep = keep[: max(1, len(keep) // 2)]
                 px[x, y] = tuple(sum(c[i] for c in keep) // len(keep) for i in range(3)) + (255,)
@@ -61,8 +65,9 @@ def _median_cut(pixels, colors):
 
 
 def _shared_palette(smalls, colors, vivid_slots=6, glow_slots=3):
-    # 所有帧共用一套调色板。鲜艳色（眼睛、宝珠）和白色高光分别单独留名额，
-    # 互不挤占，也不会被大面积的主体颜色吞掉
+    # One palette shared by every frame. Vivid colours (eyes, orbs) and white highlights each get
+    # their own reserved slots, so they neither crowd each other out nor get swallowed by the
+    # large areas of body colour.
     pixels = [p[:3] for s in smalls for p in s.getdata() if p[3] == 255]
     vivid = [p for p in pixels if _is_vivid(p)]
     glow = [p for p in pixels if not _is_vivid(p) and _is_accent(p)]
@@ -80,8 +85,9 @@ def _shared_palette(smalls, colors, vivid_slots=6, glow_slots=3):
 
 
 def _vivid_entries(vivid, slots, hue_bins=12, min_pixels=3):
-    # 每种色相（绿、橙、红、青……）先保证至少一个名额，剩下的再按面积分，
-    # 这样少量但颜色独特的细节（比如绿眼睛）不会被大面积的同类色（比如琥珀色符文）吞掉
+    # Each hue (green, orange, red, cyan, ...) is guaranteed at least one slot, and the rest are
+    # shared by area, so a small but distinctive detail such as green eyes is not swallowed by a
+    # large area of a similar hue such as amber runes.
     import colorsys
 
     bins = {}
@@ -96,19 +102,20 @@ def _vivid_entries(vivid, slots, hue_bins=12, min_pixels=3):
 
 
 def _is_vivid(rgb):
-    # 鲜艳色：红眼睛、琥珀色宝珠、青色光
+    # Vivid colours: red eyes, amber orbs, cyan light.
     hi, lo = max(rgb), min(rgb)
     return hi > 140 and (hi - lo) / hi > 0.55
 
 
 def _is_hot_core(rgb):
-    # 发光的亮芯：很亮，而且带明显色彩（比如眼睛中心的淡黄白色），不是灰白
+    # Glowing cores: very bright and clearly tinted, such as the pale yellow-white centre of an
+    # eye, rather than plain grey-white.
     hi, lo = max(rgb), min(rgb)
     return hi > 230 and hi - lo > 60
 
 
 def _is_accent(rgb):
-    # 鲜艳色、发光亮芯，或接近白色的高光
+    # Vivid colours, glowing cores, or near-white highlights.
     return _is_vivid(rgb) or _is_hot_core(rgb) or min(rgb) > 200
 
 
@@ -118,7 +125,7 @@ def _is_glow_pixel(rgba):
         return False
     if _is_accent((r, g, b)):
         return True
-    # 半透明且明亮的像素：光束、刀光、拖尾的发光部分
+    # Semi-transparent but bright pixels: beams, blade trails and glowing tails.
     return a < 255 and max(r, g, b) > 200
 
 
@@ -146,7 +153,8 @@ def _inner_outline(img):
     for y in range(h):
         for x in range(w):
             r, g, b, a = src[x, y]
-            # 透明像素不描；发光的亮色像素也不描，否则细光效会整条被压暗
+            # Transparent pixels get no outline, and neither do glowing bright ones — otherwise a
+            # thin light effect would be darkened along its whole length.
             if a == 0 or _is_accent((r, g, b)) or max(r, g, b) > 200:
                 continue
             edge = any(

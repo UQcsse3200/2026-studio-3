@@ -1,11 +1,13 @@
-# 把 <enemy>_{idle_0,idle_1,attack_0,hurt_0,death_0}.png 拼成 2048x1024 图集并写出 .atlas
-# 用法: python pack_enemy.py <enemy_id> <frames_dir> <out_dir> [--nearest]
-#   --nearest: 像素风图集用 Nearest 滤镜，游戏里缩放时像素块保持锐利
+# Packs <enemy>_{idle_0,idle_1,attack_0,hurt_0,death_0}.png into a 2048x1024 sheet and writes
+# the matching .atlas.
+# Usage: python pack_enemy.py <enemy_id> <frames_dir> <out_dir> [--nearest]
+#   --nearest: use the Nearest filter for pixel-art sheets, so pixels stay sharp when the game
+#              scales them
 import sys
 from PIL import Image
 
 S = 512
-LAYOUT = [  # (区域名, 序号, 帧文件后缀, 列, 行)
+LAYOUT = [  # (region name, index, frame file suffix, column, row)
     ("idle", 0, "idle_0", 0, 0),
     ("idle", 1, "idle_1", 1, 0),
     ("attack", 0, "attack_0", 2, 0),
