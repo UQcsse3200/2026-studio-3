@@ -102,13 +102,13 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">PauseMenuDisplay</span>
 <span class="extends-implements">extends <a href="../../ui/UIComponent.html" title="class in com.csse3200.game.ui">UIComponent</a></span></div>
-<div class="block">A ui component for the in-game pause menu. Shows a full-screen dimmed overlay with Resume,
- Settings and Return to Main Menu buttons.
+<div class="block">An ui component for the in-game pause menu. Shows a full-screen dimmed overlay (styled to match
+ the main menu) with Resume, Save and Load, Settings and Return to Main Menu buttons.
 
- <p>The component only owns the view and the button wiring. It fires events that a separate
- actions component (owned by another team member) listens for; it does not change screens or game
- state itself. Returning to the main menu is guarded by a confirmation dialog so a run is not
- abandoned by a single click.</div>
+ <p>The component only owns the view and the button wiring. It fires events that separate
+ components listen for, it does not change screens or game state itself. The Save/Load and
+ Settings subviews are shown in place (no screen switch) so the current run is never lost.
+ Returning to the main menu is guarded by a confirmation dialog.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -127,19 +127,45 @@ loadScripts(document, 'script');</script>
 <div class="block">Fired only after the player confirms leaving the current run.</div>
 </div>
 <div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#NAV_BACK_EVENT" class="member-name-link">NAV_BACK_EVENT</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Backs out of the current view (settings subview / confirm dialog); no-op on the root menu.</div>
+</div>
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#NAV_DOWN_EVENT" class="member-name-link">NAV_DOWN_EVENT</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#NAV_SELECT_EVENT" class="member-name-link">NAV_SELECT_EVENT</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#NAV_UP_EVENT" class="member-name-link">NAV_UP_EVENT</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Keyboard navigation events, fired by <code>PauseMenuInput</code> while the menu is open.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#PAUSE_EVENT" class="member-name-link">PAUSE_EVENT</a></code></div>
 <div class="col-last odd-row-color">
 <div class="block">Received (not fired by the display) to open the pause menu.</div>
 </div>
 <div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#RESUME_EVENT" class="member-name-link">RESUME_EVENT</a></code></div>
+<div class="col-second even-row-color"><code><a href="#QUIT_EVENT" class="member-name-link">QUIT_EVENT</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Fired only after the player confirms quitting the game to the desktop.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#RESUME_EVENT" class="member-name-link">RESUME_EVENT</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Fired when the player chooses to resume the game.</div>
+</div>
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#SAVE_LOAD_EVENT" class="member-name-link">SAVE_LOAD_EVENT</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Fired when the player opens the save/load panel from the pause menu.</div>
 </div>
 <div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#SETTINGS_EVENT" class="member-name-link">SETTINGS_EVENT</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">Fired when the player opens the settings screen from the pause menu.</div>
+<div class="block">Fired when the player opens the settings view from the pause menu.</div>
 </div>
 </div>
 <div class="inherited-list">
@@ -159,7 +185,11 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">PauseMenuDisplay</a>()</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Creates a pause menu with the Save &amp; Load option enabled.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(boolean)" class="member-name-link">PauseMenuDisplay</a><wbr>(boolean&nbsp;saveEnabled)</code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -242,10 +272,25 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="SAVE_LOAD_EVENT">
+<h3>SAVE_LOAD_EVENT</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">SAVE_LOAD_EVENT</span></div>
+<div class="block">Fired when the player opens the save/load panel from the pause menu.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../../constant-values.html#com.csse3200.game.components.pausemenu.PauseMenuDisplay.SAVE_LOAD_EVENT">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="SETTINGS_EVENT">
 <h3>SETTINGS_EVENT</h3>
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">SETTINGS_EVENT</span></div>
-<div class="block">Fired when the player opens the settings screen from the pause menu.</div>
+<div class="block">Fired when the player opens the settings view from the pause menu.</div>
 <dl class="notes">
 <dt>See Also:</dt>
 <dd>
@@ -272,6 +317,21 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="QUIT_EVENT">
+<h3>QUIT_EVENT</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">QUIT_EVENT</span></div>
+<div class="block">Fired only after the player confirms quitting the game to the desktop.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../../constant-values.html#com.csse3200.game.components.pausemenu.PauseMenuDisplay.QUIT_EVENT">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="PAUSE_EVENT">
 <h3>PAUSE_EVENT</h3>
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">PAUSE_EVENT</span></div>
@@ -282,6 +342,64 @@ loadScripts(document, 'script');</script>
 <dd>
 <ul class="tag-list">
 <li><a href="../../../../../constant-values.html#com.csse3200.game.components.pausemenu.PauseMenuDisplay.PAUSE_EVENT">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="NAV_UP_EVENT">
+<h3>NAV_UP_EVENT</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">NAV_UP_EVENT</span></div>
+<div class="block">Keyboard navigation events, fired by <code>PauseMenuInput</code> while the menu is open.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../../constant-values.html#com.csse3200.game.components.pausemenu.PauseMenuDisplay.NAV_UP_EVENT">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="NAV_DOWN_EVENT">
+<h3>NAV_DOWN_EVENT</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">NAV_DOWN_EVENT</span></div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../../constant-values.html#com.csse3200.game.components.pausemenu.PauseMenuDisplay.NAV_DOWN_EVENT">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="NAV_SELECT_EVENT">
+<h3>NAV_SELECT_EVENT</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">NAV_SELECT_EVENT</span></div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../../constant-values.html#com.csse3200.game.components.pausemenu.PauseMenuDisplay.NAV_SELECT_EVENT">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="NAV_BACK_EVENT">
+<h3>NAV_BACK_EVENT</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">NAV_BACK_EVENT</span></div>
+<div class="block">Backs out of the current view (settings subview / confirm dialog); no-op on the root menu.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../../constant-values.html#com.csse3200.game.components.pausemenu.PauseMenuDisplay.NAV_BACK_EVENT">Constant Field Values</a></li>
 </ul>
 </dd>
 </dl>
@@ -299,6 +417,19 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="&lt;init&gt;()">
 <h3>PauseMenuDisplay</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">PauseMenuDisplay</span>()</div>
+<div class="block">Creates a pause menu with the Save &amp; Load option enabled.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(boolean)">
+<h3>PauseMenuDisplay</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">PauseMenuDisplay</span><wbr><span class="parameters">(boolean&nbsp;saveEnabled)</span></div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>saveEnabled</code> - whether to show the Save &amp; Load button. It is disabled on screens where
+     an encounter is active (battles/encounters), because a mid-encounter save can't be cleanly
+     restored — saving is meant to happen from the map.</dd>
+</dl>
 </section>
 </li>
 </ul>

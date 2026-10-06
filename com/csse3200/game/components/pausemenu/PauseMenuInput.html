@@ -100,8 +100,10 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">PauseMenuInput</span>
 <span class="extends-implements">extends <a href="../../input/InputComponent.html" title="class in com.csse3200.game.input">InputComponent</a></span></div>
-<div class="block">Listens for the Escape key and opens the pause menu by firing <a href="PauseMenuDisplay.html#PAUSE_EVENT"><code>PauseMenuDisplay.PAUSE_EVENT</code></a> on its entity's events. The display (and the actions component)
- decide what to do with that event.</div>
+<div class="block">Keyboard control for the pause menu. When the game isn't paused, Escape opens the menu. While
+ paused, it drives the menu by keyboard — Up/Down (or W/S) move the selection, Enter/Space
+ activates it, Escape backs out of a subview/dialog — and swallows all other input so gameplay
+ shortcuts don't leak through. The display and actions components handle the fired events.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">

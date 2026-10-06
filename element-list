@@ -57,6 +57,7 @@ com.csse3200.game.rewards
 com.csse3200.game.save
 com.csse3200.game.screens
 com.csse3200.game.services
+com.csse3200.game.services.audio
 com.csse3200.game.shop
 com.csse3200.game.ui
 com.csse3200.game.ui.terminal
