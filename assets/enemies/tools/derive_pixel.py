@@ -1,15 +1,16 @@
-# 从像素化后的 idle_0 派生 idle_1 / hurt_0 / death_0，所有变化都按整格进行，不破坏像素颗粒
-# 用法: python derive_pixel.py <pixel_size> <frames_dir> <enemy_id> [--floating]
+# Derives idle_1 / hurt_0 / death_0 from a pixelated idle_0. Every change moves by whole cells,
+# so the pixel grain stays intact.
+# Usage: python derive_pixel.py <pixel_size> <frames_dir> <enemy_id> [--floating]
 import os
 import sys
 from PIL import Image, ImageEnhance, ImageOps
 
 FRAME = 512
-BREATH_SHARE = 0.7       # 站立的怪：上面这个比例的身体在 idle_1 里下压 1 格
-FLOAT_LIFT = 2           # 悬浮的怪：idle_1 整体上浮的格数
-DEATH_SQUASH = 0.75      # 死亡帧纵向压扁到原高度的这个比例
+BREATH_SHARE = 0.7       # grounded enemies: this share of the body drops one cell in idle_1
+FLOAT_LIFT = 2           # floating enemies: cells the whole sprite rises by in idle_1
+DEATH_SQUASH = 0.75      # death frame is squashed to this fraction of its original height
 HURT_TINT = (255, 70, 60)
-GROUND_Y = 478           # 地面线（512 帧上的像素行），和 tomb_guardian 一致
+GROUND_Y = 478           # ground line, in pixel rows on a 512 frame, matching tomb_guardian
 
 
 def _to_grid(frame, size):
@@ -27,8 +28,8 @@ def _breathe(grid, floating):
         return out
     left, top, right, bottom = grid.getbbox()
     cut = top + round((bottom - top) * BREATH_SHARE)
-    out.paste(grid.crop((0, cut, grid.width, grid.height)), (0, cut))       # 下半身不动，脚不离地
-    out.alpha_composite(grid.crop((0, 0, grid.width, cut)), (0, 1))          # 上半身下压 1 格
+    out.paste(grid.crop((0, cut, grid.width, grid.height)), (0, cut))       # lower body stays put, feet on the ground
+    out.alpha_composite(grid.crop((0, 0, grid.width, cut)), (0, 1))          # upper body drops one cell
     return out
 
 
@@ -39,7 +40,7 @@ def _hurt(grid):
     tinted = Image.blend(grid.convert("RGB"), red, 0.75).convert("RGBA")
     tinted.putalpha(alpha)
     out = Image.new("RGBA", grid.size, (0, 0, 0, 0))
-    out.paste(tinted, (1, 0))                                                # 往右（远离玩家）后仰 1 格
+    out.paste(tinted, (1, 0))                                                # recoils one cell to the right, away from the player
     return out
 
 
@@ -51,7 +52,7 @@ def _death(grid, floating, size):
     left, top, right, bottom = gray.getbbox()
     body = gray.crop((left, top, right, bottom))
     body = body.resize((body.width, max(1, round(body.height * DEATH_SQUASH))), Image.NEAREST)
-    # 站立的怪塌到原来的最低点；悬浮的怪落到地面线上
+    # Grounded enemies collapse to their original lowest point; floating ones drop to the ground line.
     floor = round(GROUND_Y / size) if floating else bottom
     out = Image.new("RGBA", grid.size, (0, 0, 0, 0))
     out.paste(body, (left, floor - body.height))

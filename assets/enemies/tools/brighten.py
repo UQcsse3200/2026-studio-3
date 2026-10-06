@@ -1,15 +1,17 @@
-# 提亮过暗的敌人帧：暗部提亮并偏冷色，发光部分保持不变，再沿轮廓内侧加一圈冷色边缘光
-# 用法: python brighten.py <gamma> <rim_strength> <out_dir> <frame.png> [<frame.png> ...]
-#   gamma: 小于 1 越小越亮，比如 0.65；rim_strength: 边缘光强度 0~1，比如 0.45
+# Brightens enemy frames that came out too dark: lifts the shadows towards a cool tint, leaves
+# glowing areas untouched, then adds a cool rim light just inside the silhouette.
+# Usage: python brighten.py <gamma> <rim_strength> <out_dir> <frame.png> [<frame.png> ...]
+#   gamma: below 1, the smaller the brighter, e.g. 0.65
+#   rim_strength: rim light strength from 0 to 1, e.g. 0.45
 import colorsys
 import os
 import sys
 from PIL import Image, ImageFilter
 
-STEEL_HUE = 0.6          # 偏向的冷色色相（蓝灰）
-STEEL_MIN_SAT = 0.15     # 灰色部分至少带这么多冷色
+STEEL_HUE = 0.6          # cool hue to tint towards (blue-grey)
+STEEL_MIN_SAT = 0.15     # minimum cool tint carried by grey areas
 RIM_COLOR = (150, 185, 215)
-RIM_WIDTH = 5            # 边缘光宽度（512 帧上的像素）
+RIM_WIDTH = 5            # rim light width, in pixels on a 512 frame
 
 
 def _is_glow(r, g, b):
@@ -33,7 +35,7 @@ def brighten(frame, gamma, rim_strength):
             nr, ng, nb = colorsys.hsv_to_rgb(hh, s, v)
             px[x, y] = (round(nr * 255), round(ng * 255), round(nb * 255), a)
 
-    # 轮廓内侧的一圈：原 alpha 减去收缩后的 alpha
+    # The band just inside the silhouette: the original alpha minus the eroded alpha.
     alpha = out.getchannel("A").point(lambda v: 255 if v > 128 else 0)
     inner = alpha.filter(ImageFilter.MinFilter(RIM_WIDTH))
     rim = alpha.load(), inner.load()
