@@ -23,7 +23,6 @@ public class BestiaryService {
 
   private static final Logger logger = LoggerFactory.getLogger(BestiaryService.class);
   private static final String DEFAULT_ENEMY_CONFIG = "configs/enemies.json";
-  private static final String DEFAULT_BESTIARY_CONFIG = "configs/bestiary.json";
 
   private final Map<String, BestiaryEntry> entries = new LinkedHashMap<>();
   private final Map<String, BestiaryUnlockState> progress = new HashMap<>();
@@ -40,42 +39,24 @@ public class BestiaryService {
       logger.warn("Failed to load Bestiary enemy definitions from {}", DEFAULT_ENEMY_CONFIG);
       configs = new EnemyConfigs();
     }
-    BestiaryConfig bestiaryConfig =
-        FileLoader.readClass(BestiaryConfig.class, DEFAULT_BESTIARY_CONFIG);
-    if (bestiaryConfig == null) {
-      logger.warn("Failed to load Bestiary descriptions from {}", DEFAULT_BESTIARY_CONFIG);
-      bestiaryConfig = new BestiaryConfig();
-    }
-    return new BestiaryService(configs, bestiaryConfig.descriptionsByEnemyId());
+    return new BestiaryService(configs);
   }
 
   /**
-   * Creates a Bestiary from the given enemy roster.
+   * Creates a Bestiary from enemy definitions, including the description owned by each definition.
    *
    * @param configs enemy definitions owned by the Enemy System
    */
   public BestiaryService(EnemyConfigs configs) {
-    this(configs, Map.of());
-  }
-
-  /**
-   * Creates a Bestiary with optional descriptive text keyed by stable enemy ID.
-   *
-   * @param configs enemy definitions owned by the Enemy System
-   * @param descriptions Bestiary-specific descriptions keyed by enemy ID
-   */
-  public BestiaryService(EnemyConfigs configs, Map<String, String> descriptions) {
     if (configs == null) {
       throw new IllegalArgumentException("configs must not be null");
     }
-    Map<String, String> safeDescriptions = descriptions == null ? Map.of() : descriptions;
 
     List<BestiaryEntry> sortedEntries = new ArrayList<>();
     for (String id : configs.ids()) {
       EnemyConfig config = configs.get(id);
       if (config != null) {
-        sortedEntries.add(
-            BestiaryEntry.fromEnemyConfig(config, safeDescriptions.getOrDefault(id, "")));
+        sortedEntries.add(BestiaryEntry.fromEnemyConfig(config));
       }
     }
     sortedEntries.sort(
