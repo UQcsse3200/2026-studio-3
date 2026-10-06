@@ -121,7 +121,7 @@ class GuardianCardsIntegrationTest {
         () -> assertEquals("Break the Seal", card.name),
         () ->
             assertEquals(
-                "No ward shall bar the way to absolution. Deal 2 damage. Reduce the enemy's armour by 3.",
+                "No ward shall bar the way to absolution. Reduce the enemy's armour by 3, then deal 2 damage.",
                 card.description),
         () -> assertEquals(1, card.cost),
         () -> assertEquals(CardType.ATTACK, card.type),
