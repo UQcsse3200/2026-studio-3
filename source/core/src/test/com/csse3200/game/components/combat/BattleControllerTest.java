@@ -31,6 +31,8 @@ import com.csse3200.game.components.enemy.EnemyStatsComponent;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.PlayerActions;
 import com.csse3200.game.entities.Entity;
+import com.csse3200.game.events.listeners.EventListener1;
+import com.csse3200.game.events.listeners.EventListener2;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -97,6 +99,48 @@ class BattleControllerTest {
     controller.start();
 
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+  }
+
+  @Test
+  void shouldRemoveOnlyTheSpecifiedPhaseListener() {
+    List<BattlePhase> removed = new ArrayList<>();
+    EventListener2<BattlePhase, BattlePhase> listener = (previous, next) -> removed.add(next);
+    controller.addPhaseChangeListener(listener);
+    controller.removePhaseChangeListener(listener);
+    controller.removePhaseChangeListener(listener);
+    controller.start();
+    assertTrue(removed.isEmpty());
+    assertTrue(phaseHistory.contains(BattlePhase.PLAYER_TURN));
+  }
+
+  @Test
+  void shouldRemoveOnlyTheSpecifiedCardListener() {
+    List<String> removed = new ArrayList<>();
+    List<String> retained = new ArrayList<>();
+    EventListener2<String, String> listener = (card, target) -> removed.add(card);
+    controller.addCardPlayedListener(listener);
+    controller.addCardPlayedListener((card, target) -> retained.add(card));
+    controller.removeCardPlayedListener(listener);
+    controller.start();
+    assertTrue(controller.submitCardPlayRequest(CardPlayRequest.self("defend")));
+    assertTrue(removed.isEmpty());
+    assertEquals(List.of("defend"), retained);
+  }
+
+  @Test
+  void shouldRemoveOnlyTheSpecifiedBattleEndListener() {
+    List<Boolean> removed = new ArrayList<>();
+    List<Boolean> retained = new ArrayList<>();
+    EventListener1<Boolean> listener = removed::add;
+    controller.addBattleEndListener(listener);
+    controller.addBattleEndListener(retained::add);
+    controller.removeBattleEndListener(listener);
+    controller.start();
+    killEnemy(0);
+    killEnemy(1);
+    controller.endPlayerTurn();
+    assertTrue(removed.isEmpty());
+    assertEquals(List.of(true), retained);
   }
 
   @Test
