@@ -96,13 +96,12 @@ public class EndBattleScreen extends ScreenAdapter {
           new RewardDisplay(
               rewardRecord,
               rewardService,
-              game.getRunState(),
+              game,
               cardLibrary,
               game.getCardDiscoveryService(),
               game::autosaveAfterRewardClaimed));
       requiresPlayerChoice = true;
 
-      CardService cardLibrary = new CardLibrary(CardConfigLoader.loadCards());
       RunState runState = game.getRunState();
       if (runState != null) {
         PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(cardLibrary);

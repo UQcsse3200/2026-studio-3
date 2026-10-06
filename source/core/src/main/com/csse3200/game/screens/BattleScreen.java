@@ -118,7 +118,6 @@ public class BattleScreen extends ScreenAdapter {
   private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
   private static final String CARD_WIDGET_SKIN = "flat-earth/skin/flat-earth-ui.json";
 
-  private static final String CARD_INVENTORY_STYLE = "popup";
 
   private static final String BATTLE_UI_JSON = "sprites/BattleUi.json";
   private static final String DECK_EDITOR_UI_JSON = "sprites/DeckEditorUi.json";
@@ -304,7 +303,8 @@ public class BattleScreen extends ScreenAdapter {
     terminal.addCommand("sethealth", new SetHealthCommand(gameArea.getPlayer()));
     terminal.addCommand("giveitem", new GiveItemCommand(gameArea.getPlayer()));
 
-    PopupDisplay cardInventory = new PopupDisplay("Card Inventory", CARD_INVENTORY_STYLE);
+    // Untitled: DeckEditorComponent draws its own "CARD INVENTORY" header, like the item inventory.
+    PopupDisplay cardInventory = new PopupDisplay("");
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
     PopupDisplay itemInventory = new PopupDisplay("");

@@ -8,9 +8,13 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.configs.CardConfig;
@@ -70,7 +74,16 @@ public class DeckEditorComponent extends UIComponent {
   private static final String SELECT_TRIGGER = "toggleDeckCard";
   private static final String SCROLL_UP_TRIGGER = "deckScrollUp";
   private static final String SCROLL_DOWN_TRIGGER = "deckScrollDown";
-  private static final String POPUP_STYLE = "popup";
+
+  // Look shared with InventoryPopupComponent's item inventory popup.
+  private static final String PANEL_TEXTURE = "images/ui/inventory-panel.png";
+  private static final Color NAME_COLOUR = new Color(0.9f, 0.84f, 0.73f, 1f);
+  private static final Color DESCRIPTION_COLOUR = new Color(0.65f, 0.58f, 0.52f, 1f);
+  private static final Color GOLD_COLOUR = new Color(0.83f, 0.61f, 0.27f, 1f);
+  private static final Color ROW_BORDER_COLOUR = new Color(0.33f, 0.25f, 0.25f, 1f);
+  private static final Color ROW_BACKGROUND_COLOUR = new Color(0.055f, 0.05f, 0.065f, 0.96f);
+  private static final float HEADER_HEIGHT = 30f;
+  private static final float HEADER_GAP = 6f;
 
   private static final float CARD_WIDTH = 100f;
   private static final float CARD_HEIGHT = 145f;
@@ -150,7 +163,10 @@ public class DeckEditorComponent extends UIComponent {
   @Override
   public void create() {
     super.create();
-    popup.setHeaderColour(Color.valueOf("0f0a09"));
+    // Same panel look as the item inventory popup; the header and close button are drawn in
+    // buildFooter() instead of the window's title bar.
+    popup.setBackgroundTexture(PANEL_TEXTURE);
+    popup.setDefaultCloseButtonVisible(false);
     entity.getEvents().addListener(SELECT_TRIGGER, this::toggleSelection);
     entity.getEvents().addListener(SCROLL_UP_TRIGGER, () -> scrollBy(-1));
     entity.getEvents().addListener(SCROLL_DOWN_TRIGGER, () -> scrollBy(1));
@@ -172,12 +188,16 @@ public class DeckEditorComponent extends UIComponent {
 
   private void buildFooter() {
     Table content = popup.getContentTable();
+    content.top();
+
+    content.add(createHeader()).colspan(2).growX().height(HEADER_HEIGHT).padBottom(HEADER_GAP);
+    content.row();
 
     Actor gridSpacer = new Actor();
     gridSpacerCell = content.add(gridSpacer).colspan(2);
     content.row();
 
-    TextButton setDeckButton = new TextButton("Set Deck", skin, POPUP_STYLE);
+    TextButton setDeckButton = new TextButton("Set Deck", createSetDeckStyle());
     setDeckButton.addListener(
         new ChangeListener() {
           @Override
@@ -186,13 +206,78 @@ public class DeckEditorComponent extends UIComponent {
           }
         });
 
-    content.add(setDeckButton).size(140f, 48f).padTop(152f).padRight(20f);
+    // Sits just under the grid, level with the summary text (y = 400 from the window's top edge in
+    // DeckEditorUi.json).
+    content.add(setDeckButton).size(140f, 48f).padTop(8f).padRight(20f);
     Actor summarySpacer = new Actor();
     content.add(summarySpacer).width(520f).padTop(10f);
     content.row();
 
+    // Room for the error text (y = 472 in DeckEditorUi.json).
     Actor errorSpacer = new Actor();
-    content.add(errorSpacer).colspan(2).width(660f).padTop(6f);
+    content.add(errorSpacer).colspan(2).width(660f).height(40f).padTop(6f);
+    content.row();
+
+    // Takes any spare height so the footer hint sits at the bottom of the window.
+    content.add().colspan(2).expandY();
+    content.row();
+
+    // Centred under the grid only, so it stays clear of the preview panel on the right.
+    content.add(createFooterHint()).colspan(2).left().width(gridWidth()).padTop(8f);
+  }
+
+  /** "CARD INVENTORY" title with a close button, styled like the item inventory's header. */
+  private Table createHeader() {
+    Table header = new Table();
+    header.add().width(30f);
+    header.add(new Label("CARD INVENTORY", labelStyle(NAME_COLOUR, "font"))).expandX().center();
+
+    TextButtonStyle closeStyle = new TextButtonStyle(skin.get("default", TextButtonStyle.class));
+    closeStyle.fontColor = NAME_COLOUR;
+    closeStyle.up = skin.newDrawable("white", ROW_BACKGROUND_COLOUR);
+    closeStyle.over = skin.newDrawable("white", ROW_BORDER_COLOUR);
+    TextButton close = new TextButton("X", closeStyle);
+    close.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            popup.hide();
+          }
+        });
+    header.add(close).size(30f);
+    return header;
+  }
+
+  private TextButtonStyle createSetDeckStyle() {
+    TextButtonStyle style = new TextButtonStyle(skin.get("default", TextButtonStyle.class));
+    style.fontColor = GOLD_COLOUR;
+    style.overFontColor = NAME_COLOUR;
+    style.downFontColor = Color.WHITE;
+    style.up = skin.newDrawable("white", ROW_BACKGROUND_COLOUR);
+    style.over = skin.newDrawable("white", ROW_BORDER_COLOUR);
+    style.down = skin.newDrawable("white", ROW_BORDER_COLOUR);
+    return style;
+  }
+
+  private Table createFooterHint() {
+    Table footer = new Table();
+    footer.add(new Image(skin.newDrawable("white", ROW_BORDER_COLOUR))).width(42f).height(1f);
+    footer
+        .add(
+            new Label(
+                "Pick " + HAND_SIZE + " cards",
+                labelStyle(DESCRIPTION_COLOUR, "font_small")))
+        .padLeft(8f)
+        .padRight(8f);
+    footer.add(new Image(skin.newDrawable("white", ROW_BORDER_COLOUR))).width(42f).height(1f);
+    return footer;
+  }
+
+  private static LabelStyle labelStyle(Color colour, String fontName) {
+    LabelStyle style = new LabelStyle(skin.get("default", LabelStyle.class));
+    style.font = skin.getFont(fontName);
+    style.fontColor = colour;
+    return style;
   }
 
   private void refreshPoolAndSelection() {
