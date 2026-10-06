@@ -160,26 +160,30 @@ public class EnemyBehaviourComponent extends Component {
 
     CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
     if (targetStats != null) {
-      targetStats.takeDamage(outgoingDamage());
+      targetStats.takeDamage(outgoingDamage(targetStats));
     }
   }
 
   /**
-   * Scales the telegraphed damage by this enemy's outgoing modifier, so effects like Feeble
-   * actually reduce what it deals.
+   * Scales the telegraphed damage by this enemy's outgoing modifier and the target's incoming one,
+   * so Feeble on the attacker and Vulnerable on the target both apply, matching the player's attack
+   * path.
    *
    * <p>The intent keeps its original value, so what was telegraphed to the player is unchanged.
    *
+   * @param targetStats combat stats of the entity being hit
    * @return the damage this attack should deal
    */
-  private int outgoingDamage() {
+  private int outgoingDamage(CombatStatsComponent targetStats) {
     CombatStatsComponent stats = entity.getComponent(CombatStatsComponent.class);
     if (stats == null) {
       return currentIntent.getValue();
     }
 
-    float modifier = StatusEffectCalculator.getOutgoingDamageModifier(stats);
-    return Math.round(currentIntent.getValue() * modifier);
+    float outgoing = StatusEffectCalculator.getOutgoingDamageModifier(stats);
+    float incoming = StatusEffectCalculator.getIncomingDamageModifier(targetStats);
+
+    return Math.round(currentIntent.getValue() * outgoing * incoming);
   }
 
   private void defend() {
