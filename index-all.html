@@ -484,9 +484,14 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/save/AutosaveCoordinator.html#AUTOSAVE_SLOT_ID" class="member-name-link">AUTOSAVE_SLOT_ID</a> - Static variable in class com.csse3200.game.save.<a href="com/csse3200/game/save/AutosaveCoordinator.html" title="class in com.csse3200.game.save">AutosaveCoordinator</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/GdxGame.html#autosaveAfterRewardClaimed()" class="member-name-link">autosaveAfterRewardClaimed()</a> - Method in class com.csse3200.game.<a href="com/csse3200/game/GdxGame.html" title="class in com.csse3200.game">GdxGame</a></dt>
+<dd>
+<div class="block">Flushes a victorious battle's autosave after its reward has been applied but before leaving the
+ reward screen.</div>
+</dd>
 <dt><a href="com/csse3200/game/save/AutosaveCoordinator.html" class="type-name-link" title="class in com.csse3200.game.save">AutosaveCoordinator</a> - Class in <a href="com/csse3200/game/save/package-summary.html">com.csse3200.game.save</a></dt>
 <dd>
-<div class="block">Saves a completed encounter only after its screen has released the live player state.</div>
+<div class="block">Saves a completed encounter once its screen has released the live player state.</div>
 </dd>
 <dt><a href="com/csse3200/game/save/AutosaveCoordinator.html#%3Cinit%3E(com.csse3200.game.maps.RunState,java.util.function.Supplier)" class="member-name-link">AutosaveCoordinator(RunState, Supplier&lt;SaveGameService&gt;)</a> - Constructor for class com.csse3200.game.save.<a href="com/csse3200/game/save/AutosaveCoordinator.html" title="class in com.csse3200.game.save">AutosaveCoordinator</a></dt>
 <dd>&nbsp;</dd>
@@ -7863,6 +7868,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/RewardDisplay.html#%3Cinit%3E(com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord,com.csse3200.game.rewards.RewardService,com.csse3200.game.maps.RunState,com.csse3200.game.cards.CardService,com.csse3200.game.cards.CardDiscoveryService)" class="member-name-link">RewardDisplay(DisplayingRecord, RewardService, RunState, CardService, CardDiscoveryService)</a> - Constructor for class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/RewardDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">RewardDisplay</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/spritedisplay/displaying/RewardDisplay.html#%3Cinit%3E(com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord,com.csse3200.game.rewards.RewardService,com.csse3200.game.maps.RunState,com.csse3200.game.cards.CardService,com.csse3200.game.cards.CardDiscoveryService,java.lang.Runnable)" class="member-name-link">RewardDisplay(DisplayingRecord, RewardService, RunState, CardService, CardDiscoveryService, Runnable)</a> - Constructor for class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/RewardDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">RewardDisplay</a></dt>
+<dd>
+<div class="block">Creates the reward picker.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/fusion/CardFusionResult.html#rewardedCardId()" class="member-name-link">rewardedCardId()</a> - Method in record class com.csse3200.game.cards.fusion.<a href="com/csse3200/game/cards/fusion/CardFusionResult.html" title="class in com.csse3200.game.cards.fusion">CardFusionResult</a></dt>
 <dd>
 <div class="block">Returns the value of the <code>rewardedCardId</code> record component.</div>
@@ -8044,7 +8053,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/save/AutosaveCoordinator.html#saveIfPending()" class="member-name-link">saveIfPending()</a> - Method in class com.csse3200.game.save.<a href="com/csse3200/game/save/AutosaveCoordinator.html" title="class in com.csse3200.game.save">AutosaveCoordinator</a></dt>
 <dd>
-<div class="block">Called when the map is shown, after the outgoing encounter screen has been disposed.</div>
+<div class="block">Writes at the first safe checkpoint after the outgoing encounter screen has been disposed.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/save/SaveLoadPanel.html" class="type-name-link" title="class in com.csse3200.game.components.save">SaveLoadPanel</a> - Class in <a href="com/csse3200/game/components/save/package-summary.html">com.csse3200.game.components.save</a></dt>
 <dd>

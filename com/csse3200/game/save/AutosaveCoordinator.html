@@ -92,7 +92,7 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">AutosaveCoordinator</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Saves a completed encounter only after its screen has released the live player state.</div>
+<div class="block">Saves a completed encounter once its screen has released the live player state.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -144,7 +144,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#saveIfPending()" class="member-name-link">saveIfPending</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Called when the map is shown, after the outgoing encounter screen has been disposed.</div>
+<div class="block">Writes at the first safe checkpoint after the outgoing encounter screen has been disposed.</div>
 </div>
 </div>
 </div>
@@ -211,9 +211,11 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="saveIfPending()">
 <h3>saveIfPending</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">saveIfPending</span>()</div>
-<div class="block">Called when the map is shown, after the outgoing encounter screen has been disposed. A request
- belongs to one particular run, so starting or loading another run cannot accidentally save that
- run. A failed write is reported but is not retried on every map visit.</div>
+<div class="block">Writes at the first safe checkpoint after the outgoing encounter screen has been disposed. For
+ battles this may be immediately after the reward is applied; other encounters flush when the
+ map is shown. A request belongs to one particular run, so starting or loading another run
+ cannot accidentally save that run. A failed write is reported but is not retried on every map
+ visit.</div>
 </section>
 </li>
 </ul>

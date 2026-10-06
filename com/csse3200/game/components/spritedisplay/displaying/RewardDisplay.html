@@ -145,6 +145,15 @@ loadScripts(document, 'script');</script>
  <a href="../../../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
  <a href="../../../cards/CardDiscoveryService.html" title="class in com.csse3200.game.cards">CardDiscoveryService</a>&nbsp;cardDiscoveryService)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord,com.csse3200.game.rewards.RewardService,com.csse3200.game.maps.RunState,com.csse3200.game.cards.CardService,com.csse3200.game.cards.CardDiscoveryService,java.lang.Runnable)" class="member-name-link">RewardDisplay</a><wbr>(<a href="DisplayingRecord.html" title="class in com.csse3200.game.components.spritedisplay.displaying">DisplayingRecord</a>&nbsp;rec,
+ <a href="../../../rewards/RewardService.html" title="class in com.csse3200.game.rewards">RewardService</a>&nbsp;rewardService,
+ <a href="../../../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState,
+ <a href="../../../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="../../../cards/CardDiscoveryService.html" title="class in com.csse3200.game.cards">CardDiscoveryService</a>&nbsp;cardDiscoveryService,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Runnable.html" title="class or interface in java.lang" class="external-link">Runnable</a>&nbsp;afterRewardApplied)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Creates the reward picker.</div>
+</div>
 </div>
 </section>
 </li>
@@ -239,6 +248,23 @@ loadScripts(document, 'script');</script>
  <a href="../../../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState,
  <a href="../../../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
  <a href="../../../cards/CardDiscoveryService.html" title="class in com.csse3200.game.cards">CardDiscoveryService</a>&nbsp;cardDiscoveryService)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord,com.csse3200.game.rewards.RewardService,com.csse3200.game.maps.RunState,com.csse3200.game.cards.CardService,com.csse3200.game.cards.CardDiscoveryService,java.lang.Runnable)">
+<h3>RewardDisplay</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">RewardDisplay</span><wbr><span class="parameters">(<a href="DisplayingRecord.html" title="class in com.csse3200.game.components.spritedisplay.displaying">DisplayingRecord</a>&nbsp;rec,
+ <a href="../../../rewards/RewardService.html" title="class in com.csse3200.game.rewards">RewardService</a>&nbsp;rewardService,
+ <a href="../../../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState,
+ <a href="../../../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="../../../cards/CardDiscoveryService.html" title="class in com.csse3200.game.cards">CardDiscoveryService</a>&nbsp;cardDiscoveryService,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Runnable.html" title="class or interface in java.lang" class="external-link">Runnable</a>&nbsp;afterRewardApplied)</span></div>
+<div class="block">Creates the reward picker.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>afterRewardApplied</code> - callback run after the selected reward mutates persistent run state
+     and before any navigation event is fired</dd>
+</dl>
 </section>
 </li>
 </ul>
