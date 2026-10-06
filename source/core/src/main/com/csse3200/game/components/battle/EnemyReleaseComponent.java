@@ -21,7 +21,7 @@ public class EnemyReleaseComponent extends Component {
   // this is for the rising effect
   private static final float RISE_START_TIME = 0.4f;
   private static final float RISE_DURATION = 1.0f;
-  private static final float START_HEIGHT_RATIO = 0.3f;
+  private static final float START_HEIGHT_RATIO = 0.75f;
 
   private float originalScaleX;
   private float originalScaleY;

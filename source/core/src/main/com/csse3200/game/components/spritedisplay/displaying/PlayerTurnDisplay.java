@@ -1,10 +1,13 @@
 package com.csse3200.game.components.spritedisplay.displaying;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.csse3200.game.services.ServiceLocator;
 
 public class PlayerTurnDisplay extends Displaying {
   private static final float FADE_IN = 0.3f;
@@ -20,8 +23,12 @@ public class PlayerTurnDisplay extends Displaying {
     super.create();
 
     Label.LabelStyle style = new Label.LabelStyle(label.getStyle());
-    style.fontColor = Color.valueOf("DBBEA1");
-    style.background = skin.newDrawable("white", new Color(0.05f, 0.04f, 0.08f, 0.75f));
+    style.font = skin.getFont("button");
+    style.fontColor = Color.valueOf("E8C894");
+    Texture panelTexture =
+            ServiceLocator.getResourceService()
+                    .getAsset("images/ui/inventory-panel.png", Texture.class);
+    style.background = new TextureRegionDrawable(panelTexture);
 
     label.setStyle(style);
     label.setAlignment(Align.center);
@@ -32,7 +39,7 @@ public class PlayerTurnDisplay extends Displaying {
 
   private void onPlayerTurnStarted(int turnNumber) {
     label.setText("PLAYER TURN\n\nTurn " + turnNumber);
-    label.setFontScale(1.25f);
+    label.setFontScale(1f);
     label.clearActions();
     label.addAction(
         Actions.sequence(
