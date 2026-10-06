@@ -10,8 +10,8 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
  * continue" hint). Registered as the {@link DisplayingFactory} {@code "endBattle"} variant.
  *
  * <p>The heading text is filled in when the screen fires {@link #RESULT_EVENT}. {@link Displaying}
- * has no button, so any click or key press fires {@link #RETURN_TO_MENU_EVENT} on this component's
- * entity; the screen listens for it and navigates back to the main menu.
+ * has no button. A defeat may be dismissed with any click or key press; a victory is dismissed by
+ * the reward component only after one reward has been claimed.
  */
 public class EndBattleDisplay extends Displaying {
   /** Event the screen fires to fill in the heading text ("VICTORY" / "DEFEAT"). */
@@ -21,46 +21,50 @@ public class EndBattleDisplay extends Displaying {
   public static final String RETURN_TO_MENU_EVENT = "returnToMenu";
 
   private boolean fired = false;
-  private boolean clickToReturnEnabled = true;
+  private boolean returnEnabled;
+  private InputListener returnInputListener;
 
   public EndBattleDisplay(DisplayingRecord rec) {
     super(rec);
   }
 
-  /**
-   * Controls whether clicking/pressing a key anywhere on this screen triggers {@link
-   * #RETURN_TO_MENU_EVENT}. Disabled on victory screens that show a reward the player must pick
-   * first — otherwise an accidental click before choosing a reward returns to the menu without the
-   * reward ever being claimed.
-   */
-  public void setClickToReturnEnabled(boolean enabled) {
-    this.clickToReturnEnabled = enabled;
-  }
-
   @Override
   public void create() {
     super.create();
-    stage.addListener(
-        new InputListener() {
-          @Override
-          public boolean keyDown(InputEvent event, int keycode) {
-            return requestReturn();
-          }
+    entity.getEvents().addListener(RESULT_EVENT, this::configureForResult);
+    // EndBattle.json contains both a heading and a continue hint. Only the hint owns the stage
+    // listener, otherwise one input would dispatch the return event twice.
+    if (getTrigger() == null) {
+      returnInputListener =
+          new InputListener() {
+            @Override
+            public boolean keyDown(InputEvent event, int keycode) {
+              return requestReturn();
+            }
 
-          @Override
-          public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-            return requestReturn();
-          }
-        });
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+              return requestReturn();
+            }
+          };
+      stage.addListener(returnInputListener);
+    }
   }
 
   private boolean requestReturn() {
-    if (fired || !clickToReturnEnabled) {
+    if (!returnEnabled || fired) {
       return false;
     }
     fired = true;
     entity.getEvents().trigger(RETURN_TO_MENU_EVENT);
     return true;
+  }
+
+  private void configureForResult(Object result) {
+    returnEnabled = "DEFEAT".equals(String.valueOf(result));
+    if (label.getText().toString().startsWith("Click anywhere")) {
+      label.setVisible(returnEnabled);
+    }
   }
 
   @Override
@@ -70,10 +74,12 @@ public class EndBattleDisplay extends Displaying {
         (Gdx.graphics.getWidth() - label.getPrefWidth()) / 2f, Gdx.graphics.getHeight() - getY());
   }
 
-  private boolean visible = true;
-
-  public void setVisible(boolean visible) {
-    this.visible = visible;
-    label.setVisible(visible);
+  @Override
+  public void dispose() {
+    if (returnInputListener != null) {
+      stage.removeListener(returnInputListener);
+      returnInputListener = null;
+    }
+    super.dispose();
   }
 }

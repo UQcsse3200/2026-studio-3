@@ -134,6 +134,11 @@ public class PlayerRunState {
     return itemInventory.getItems();
   }
 
+  /** Restores the complete owned-item snapshot from a save file. */
+  public void restoreOwnedItems(List<ItemType> items) {
+    itemInventory.replaceItems(items);
+  }
+
   /**
    * Uses one owned battle consumable on the current player entity.
    *

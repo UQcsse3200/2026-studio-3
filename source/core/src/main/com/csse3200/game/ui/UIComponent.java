@@ -14,6 +14,11 @@ public abstract class UIComponent extends RenderComponent implements Renderable 
       new Skin(Gdx.files.internal("flat-earth/skin/flat-earth-ui.json"));
   protected Stage stage;
 
+  /** Returns the shared UI skin. Borrowers must not dispose it or mutate its styles. */
+  public static Skin getSharedSkin() {
+    return skin;
+  }
+
   @Override
   public void create() {
     super.create();

@@ -2,12 +2,12 @@
   "encounters": [
     {
       "id": "mysterious-shrine",
-      "description": "An ancient shrine hums with an unsettling energy.",
+      "description": "A cracked sanctum shrine still burns with a god's spoiled light. An angel might leave an offering here to learn what the fallen still demand.",
       "weight": 1,
       "choices": [
         {
           "id": "make-offering",
-          "description": "Offer some of your vitality.",
+          "description": "Bleed a little of your light into the shrine.",
           "outcome": {
             "healthDelta": -10,
             "currencyDelta": 25
@@ -15,7 +15,7 @@
         },
         {
           "id": "leave",
-          "description": "Leave the shrine untouched.",
+          "description": "Pass without kneeling.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0
@@ -25,12 +25,12 @@
     },
     {
       "id": "wandering-healer",
-      "description": "A wandering healer offers a restorative draught for a modest fee.",
+      "description": "A faded attendant still tends the hurt along the sanctum road, following orders that once meant mercy. An angel could accept that help without asking who gives it.",
       "weight": 1,
       "choices": [
         {
           "id": "purchase-remedy",
-          "description": "Buy the healer's restorative draught.",
+          "description": "Buy the attendant's restorative draught.",
           "outcome": {
             "healthDelta": 20,
             "currencyDelta": -10
@@ -47,7 +47,7 @@
         },
         {
           "id": "decline",
-          "description": "Politely decline the healer's offer.",
+          "description": "Decline and continue the climb.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0
@@ -57,12 +57,12 @@
     },
     {
       "id": "flooded-crossing",
-      "description": "A flooded crossing blocks the road ahead.",
+      "description": "A flooded sanctum court bars the way upward. An angel must choose how to cross without abandoning the path.",
       "weight": 1,
       "choices": [
         {
           "id": "hire-ferryman",
-          "description": "Pay a ferryman for safe passage.",
+          "description": "Pay a silent ferryman for safe passage.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": -8
@@ -70,7 +70,7 @@
         },
         {
           "id": "ford-river",
-          "description": "Attempt to ford the river alone.",
+          "description": "Wade the flood alone.",
           "outcome": {
             "healthDelta": -8,
             "currencyDelta": 0
@@ -80,7 +80,7 @@
     },
     {
       "id": "abandoned-mine",
-      "description": "The mouth of an abandoned mine promises danger and forgotten riches.",
+      "description": "Beneath the sanctum, old workings still hold relics of the fallen. An angel might risk the dark for tools of release.",
       "weight": 1,
       "choices": [
         {
@@ -93,7 +93,7 @@
         },
         {
           "id": "leave",
-          "description": "Leave the mine undisturbed.",
+          "description": "Leave the workings closed.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0

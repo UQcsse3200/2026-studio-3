@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,6 +40,7 @@ class JsonSaveGameRepositoryTest {
     assertEquals(2, loadResult.data().metadata.slotId);
     assertEquals("Second run", loadResult.data().metadata.runLabel);
     assertEquals(43, loadResult.data().player.currentHealth);
+    assertEquals(8, loadResult.data().player.level);
     assertEquals(
         List.of("strike", "defend", "strike"),
         loadResult.data().deck.cards.stream().map(card -> card.cardId).toList());
@@ -62,7 +65,7 @@ class JsonSaveGameRepositoryTest {
         {
           "schemaVersion": 1,
           "metadata": {"slotId": 1, "savedAtEpochMillis": 123456, "runLabel": "Legacy run"},
-          "player": {"currentHealth": 43, "maxHealth": 60, "gold": 120, "piety": 0},
+          "player": {"currentHealth": 43, "maxHealth": 60, "gold": 120, "level": 0},
           "deck": {"cardIds": ["strike"]},
           "map": {
             "nodes": [
@@ -84,6 +87,50 @@ class JsonSaveGameRepositoryTest {
     assertEquals("COMPLETED", result.data().map.nodes.get(0).state);
     assertEquals("MAP", result.data().progress.resumeScreen);
     assertTrue(result.data().progress.bestiary.isEmpty());
+    assertTrue(result.data().progress.cards.isEmpty());
+  }
+
+  @Test
+  void loadsOldSaveWithoutCardProgress() throws IOException {
+    Files.writeString(
+        temporaryDirectory.resolve("slot-1.json"),
+        """
+        {
+          "schemaVersion": 1,
+          "metadata": {"slotId": 1, "savedAtEpochMillis": 123456, "runLabel": "Old run"},
+          "player": {"currentHealth": 43, "maxHealth": 60, "gold": 120, "piety": 8},
+          "deck": {"cardIds": ["strike"]},
+          "map": {
+            "nodes": [
+              {"nodeId": 7, "roomType": "COMBAT", "state": "CURRENT", "connectionIds": []}
+            ],
+            "currentNodeId": 7
+          },
+          "progress": {
+            "bestiary": [
+              {"enemyId": "lesser_shade", "unlockState": "ENCOUNTERED"}
+            ]
+          }
+        }
+        """);
+
+    LoadResult result = repository.load(1);
+
+    assertTrue(result.success());
+    assertTrue(result.data().progress.cards.isEmpty());
+    assertEquals(8, result.data().player.level);
+
+    assertTrue(repository.save(1, result.data()).success());
+    JsonValue savedPlayer =
+        new JsonReader()
+            .parse(Files.readString(temporaryDirectory.resolve("slot-1.json")))
+            .get("player");
+    assertEquals(8, savedPlayer.getInt("level"));
+    assertFalse(savedPlayer.has("piety"));
+
+    LoadResult migrated = repository.load(1);
+    assertTrue(migrated.success());
+    assertEquals(8, migrated.data().player.level);
   }
 
   @Test
