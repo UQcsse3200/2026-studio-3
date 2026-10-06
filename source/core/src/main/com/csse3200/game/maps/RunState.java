@@ -406,4 +406,3 @@ public class RunState {
     this.pendingReward = null;
   }
 }
-
