@@ -169,9 +169,10 @@ class EnemyStatusEffectVisualComponentTest {
   @Test
   void realTallAndCrawlerAssetsUseCenteredSinglesAndUniformForegroundOrbits() {
     String[] enemies = {"tomb_guardian", "bone_crawler"};
+    // Inclusive alpha bounds of the current idle artwork, before world scaling.
     int[][][] pixels = {
-      {{136, 34, 369, 477}, {136, 28, 369, 471}},
-      {{46, 312, 465, 477}, {46, 309, 465, 477}}
+      {{116, 20, 415, 479}, {116, 24, 415, 479}},
+      {{48, 312, 463, 475}, {48, 316, 463, 475}}
     };
     EffectType[] types = {EffectType.POISON, EffectType.VULNERABLE, EffectType.FEEBLE};
     for (int enemy = 0; enemy < enemies.length; enemy++) {
@@ -465,10 +466,10 @@ class EnemyStatusEffectVisualComponentTest {
             sizes.capture(),
             heights.capture());
     return new float[] {
-      xs.getAllValues().get(0),
-      ys.getAllValues().get(0),
-      sizes.getAllValues().get(0),
-      heights.getAllValues().get(0)
+      xs.getAllValues().getFirst(),
+      ys.getAllValues().getFirst(),
+      sizes.getAllValues().getFirst(),
+      heights.getAllValues().getFirst()
     };
   }
 
