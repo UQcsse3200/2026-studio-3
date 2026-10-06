@@ -22,7 +22,6 @@ import com.csse3200.game.input.InputService;
 import com.csse3200.game.narration.NarrationConfigLoader;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
-import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
@@ -53,7 +52,6 @@ public class NarrationScreen extends ScreenAdapter {
     // Validate before replacing any services.
     List<List<String>> passages = NarrationConfigLoader.loadSequence(sequenceId);
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
     renderer = RenderFactory.createRenderer();
@@ -163,7 +161,5 @@ public class NarrationScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
-    ServiceLocator.getResourceService().dispose();
-    ServiceLocator.clear();
   }
 }
