@@ -23,6 +23,8 @@ import com.csse3200.game.entities.Entity;
 import com.csse3200.game.events.EventHandler;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.events.listeners.EventListener2;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
@@ -716,6 +718,7 @@ public class BattleController {
       // No effects produced; the card stays in hand and the player keeps their turn.
       lastCardPlaySucceeded = false;
       narrate("Couldn't play " + cardName + ": " + result.failureReason());
+      AudioService.playSound(SoundId.ERROR, 0.8f);
       finishPlayerCardAction();
       return;
     }

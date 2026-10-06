@@ -3,6 +3,8 @@ package com.csse3200.game.files;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics.DisplayMode;
 import com.csse3200.game.files.FileLoader.Location;
+import com.csse3200.game.services.AudioSettingsApplier;
+import com.csse3200.game.services.ServiceLocator;
 import java.io.File;
 
 /** Reading, Writing, and applying user settings in the game. */
@@ -12,6 +14,7 @@ public class UserSettings {
 
   private static final int WINDOW_WIDTH = 1280;
   private static final int WINDOW_HEIGHT = 800;
+  private static final float DEFAULT_VOLUME = 1f;
 
   /**
    * Get the stored user settings
@@ -22,7 +25,7 @@ public class UserSettings {
     String path = ROOT_DIR + File.separator + SETTINGS_FILE;
     Settings fileSettings = FileLoader.readClass(Settings.class, path, Location.EXTERNAL);
     // Use default values if file doesn't exist
-    return fileSettings != null ? fileSettings : new Settings();
+    return normalise(fileSettings != null ? fileSettings : new Settings());
   }
 
   /**
@@ -32,6 +35,10 @@ public class UserSettings {
    * @param applyImmediate true to immediately apply new settings.
    */
   public static void set(Settings settings, boolean applyImmediate) {
+    if (settings == null) {
+      throw new IllegalArgumentException("settings must not be null");
+    }
+    normalise(settings);
     String path = ROOT_DIR + File.separator + SETTINGS_FILE;
     FileLoader.writeClass(settings, path, Location.EXTERNAL);
 
@@ -46,6 +53,10 @@ public class UserSettings {
    * @param settings Settings to apply
    */
   public static void applySettings(Settings settings) {
+    if (settings == null) {
+      throw new IllegalArgumentException("settings must not be null");
+    }
+    normalise(settings);
     Gdx.graphics.setForegroundFPS(settings.fps);
     Gdx.graphics.setVSync(settings.vsync);
 
@@ -58,6 +69,35 @@ public class UserSettings {
     } else {
       Gdx.graphics.setWindowedMode(WINDOW_WIDTH, WINDOW_HEIGHT);
     }
+
+    applyAudioSettings(settings);
+  }
+
+  /** Applies only the audio portion of the supplied settings to a registered audio system. */
+  public static void applyAudioSettings(Settings settings) {
+    if (settings == null) {
+      throw new IllegalArgumentException("settings must not be null");
+    }
+    normalise(settings);
+    AudioSettingsApplier audioSettingsApplier = ServiceLocator.getAudioSettingsApplier();
+    if (audioSettingsApplier != null) {
+      audioSettingsApplier.applyVolumes(
+          settings.getEffectiveMusicVolume(), settings.getEffectiveSoundEffectsVolume());
+    }
+  }
+
+  private static Settings normalise(Settings settings) {
+    settings.masterVolume = normaliseVolume(settings.masterVolume);
+    settings.musicVolume = normaliseVolume(settings.musicVolume);
+    settings.soundEffectsVolume = normaliseVolume(settings.soundEffectsVolume);
+    return settings;
+  }
+
+  private static float normaliseVolume(float volume) {
+    if (!Float.isFinite(volume)) {
+      return DEFAULT_VOLUME;
+    }
+    return Math.max(0f, Math.min(1f, volume));
   }
 
   private static DisplayMode findMatching(DisplaySettings desiredSettings) {
@@ -83,10 +123,30 @@ public class UserSettings {
     public boolean fullscreen = false;
     public boolean vsync = true;
 
+    /** Overall output volume, in the inclusive range {@code [0, 1]}. */
+    public float masterVolume = DEFAULT_VOLUME;
+
+    /** Music volume before the master volume is applied. */
+    public float musicVolume = DEFAULT_VOLUME;
+
+    /** Sound-effects volume before the master volume is applied. */
+    public float soundEffectsVolume = DEFAULT_VOLUME;
+
+    /** Mutes all output without overwriting the stored slider values. */
+    public boolean muted = false;
+
     /** ui Scale. Currently unused, but can be implemented. */
     public float uiScale = 1f;
 
     public DisplaySettings displayMode = null;
+
+    public float getEffectiveMusicVolume() {
+      return muted ? 0f : normaliseVolume(masterVolume) * normaliseVolume(musicVolume);
+    }
+
+    public float getEffectiveSoundEffectsVolume() {
+      return muted ? 0f : normaliseVolume(masterVolume) * normaliseVolume(soundEffectsVolume);
+    }
   }
 
   /** Stores chosen display settings. Can be serialised/deserialised. */

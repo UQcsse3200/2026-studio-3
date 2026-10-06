@@ -40,7 +40,6 @@ public class BestiaryScreen extends ScreenAdapter {
 
     logger.debug("Initialising bestiary screen services");
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
@@ -66,7 +65,6 @@ public class BestiaryScreen extends ScreenAdapter {
     ServiceLocator.getResourceService().unloadAssets(atlasPaths);
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
-    ServiceLocator.clear();
   }
 
   private void loadAssets() {
