@@ -284,7 +284,7 @@ public class PopupDisplay extends UIComponent {
   }
 
   public boolean isShowing() {
-    return window.isVisible();
+    return window != null && window.isVisible();
   }
 
   @Override
