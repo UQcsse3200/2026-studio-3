@@ -79,11 +79,7 @@ public class EndBattleScreen extends ScreenAdapter {
   private void createUI(boolean won, CardService cardLibrary) {
     Stage stage = ServiceLocator.getRenderService().getStage();
 
-    // Heading + "click to continue" hint live in sprites/EndBattle.json; the heading's text is
-    // filled in below once the components are listening.
-    DisplayingFactory displays = new DisplayingFactory(Path.of("sprites/EndBattle.json"));
-
-    Entity ui = new Entity().addComponent(new InputDecorator(stage, 10)).addComponent(displays);
+    Entity ui = new Entity().addComponent(new InputDecorator(stage, 10));
 
     if (won) {
       RewardService rewardService =
@@ -109,13 +105,19 @@ public class EndBattleScreen extends ScreenAdapter {
                   upgradeSelection, new PlayerDeckCardUpgradeCommitter(playerDeck)));
         }
       }
+    } else {
+      // The themed reward screen already supplies its own victory title. The legacy end-battle
+      // display is only needed for defeat, where it provides the heading and return input.
+      ui.addComponent(new DisplayingFactory(Path.of("sprites/EndBattle.json")));
     }
 
     ui.getEvents().addListener(RewardDisplay.REWARD_CLAIMED_EVENT, this::onRewardClaimed);
     ui.getEvents().addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, this::returnToMenu);
     ServiceLocator.getEntityService().register(ui);
 
-    ui.getEvents().trigger(EndBattleDisplay.RESULT_EVENT, won ? "VICTORY" : "DEFEAT");
+    if (!won) {
+      ui.getEvents().trigger(EndBattleDisplay.RESULT_EVENT, "DEFEAT");
+    }
   }
 
   private void loadCardAssets(List<CardConfig> cardConfigs) {
