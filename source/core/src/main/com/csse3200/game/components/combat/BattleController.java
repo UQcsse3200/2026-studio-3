@@ -12,7 +12,11 @@ import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.cards.CardEffectHandler;
-import com.csse3200.game.components.enemy.*;
+import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
+import com.csse3200.game.components.enemy.EnemyIntent;
+import com.csse3200.game.components.enemy.EnemyStatsComponent;
+import com.csse3200.game.components.enemy.IntentEffectType;
+import com.csse3200.game.components.enemy.IntentType;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.events.EventHandler;
@@ -56,6 +60,7 @@ public class BattleController {
   private static final String PLAYER_EFFECTS_EVENT = "playerEffects";
   private static final String HAND_CHANGED_EVENT = "handChanged";
   private static final String LISTENER_NOT_NULL = "Listener must not be null.";
+  private static final String TURNS_SUFFIX = " turns.";
 
   public BattleController(Entity player, List<Entity> enemies) throws IllegalArgumentException {
     this(player, enemies, null, null);
@@ -413,11 +418,14 @@ public class BattleController {
     String name = stats == null ? "The enemy" : stats.getDisplayName();
     int turns = intent.getDuration();
 
-    switch (intent.getEffectType()) {
-      case TAUNT -> narrate(name + " will taunt you for " + turns + " turns.");
-      case SILENCE -> narrate(name + " will silence you for " + turns + " turns.");
-      case DAMAGE_ON_CARD_PLAY -> narrate(name + " will curse your cards for " + turns + " turns.");
-    }
+    String message =
+        switch (intent.getEffectType()) {
+          case TAUNT -> name + " will taunt you for " + turns + TURNS_SUFFIX;
+          case SILENCE -> name + " will silence you for " + turns + TURNS_SUFFIX;
+          case DAMAGE_ON_CARD_PLAY -> name + " will curse your cards for " + turns + TURNS_SUFFIX;
+        };
+
+    narrate(message);
   }
 
   /**

@@ -24,6 +24,7 @@ import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyStatsComponent;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
+import com.csse3200.game.events.listeners.EventListener1;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +73,7 @@ class Team3CardPlayAdapterTest {
     List<String> played = new ArrayList<>();
     battleFlow
         .getEvents()
-        .addListener(BattleActions.BATTLE_LOG_EVENT, (String message) -> logs.add(message));
+        .addListener(BattleActions.BATTLE_LOG_EVENT, (EventListener1<String>) logs::add);
     battleFlow
         .getEvents()
         .addListener(
@@ -583,8 +584,7 @@ class Team3CardPlayAdapterTest {
 
     battleFlow
         .getEvents()
-        .addListener(BattleActions.BATTLE_LOG_EVENT, (String message) -> logs.add(message));
-
+        .addListener(BattleActions.BATTLE_LOG_EVENT, (EventListener1<String>) logs::add);
     // The first attempt must be rejected while silence is active.
     battleFlow
         .getEvents()
