@@ -30,6 +30,7 @@ import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,8 @@ class EnemyStatusVisualIntegrationTest {
     resources = new ResourceService();
     ServiceLocator.registerResourceService(resources);
     resources.loadTextures(EnemyStatusEffectVisuals.texturePaths());
+    // Card effects now play sounds through AudioService, which needs them loaded.
+    AudioService.load();
     resources.loadAll();
     for (String path : EnemyStatusEffectVisuals.texturePaths()) {
       assertTrue(resources.containsAsset(path, Texture.class), path);
