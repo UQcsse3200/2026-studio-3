@@ -170,7 +170,7 @@
       {
         "id": "starfall",
         "name": "Starfall",
-        "description": "Deal 6 damage to all enemies.",
+        "description": "Heaven's light falls upon those still bound. Deal 6 damage to all enemies.",
         "lore": "Falling stars carry a grave light into places burdened by corruption. Where they land, the fallen are given a chance at release.",
         "cost": 2,
         "type": "ATTACK",
@@ -182,7 +182,7 @@
       {
         "id": "rift_lance",
         "name": "Rift Lance",
-        "description": "Deal 4 damage. Apply 1 Vulnerable for 2 turns.",
+        "description": "A shaft of starlight loosens corruption's hold. Deal 4 damage. Apply 1 Vulnerable for 2 turns.",
         "lore": "A narrow shaft of starlight opens a breach in corruption's hold. Through that wound, the fallen may yet be reached.",
         "cost": 1,
         "type": "ATTACK",
@@ -224,7 +224,7 @@
       {
         "id": "astral_ward",
         "name": "Astral Ward",
-        "description": "Gain 4 Block and 1 Strength for the rest of combat. Restore 1 Energy.",
+        "description": "The old star-readers' ward steadies the weary. Gain 4 Block and 1 Strength for the rest of combat. Restore 1 Energy.",
         "lore": "Beneath a quiet veil of starlight, the weary gather the strength to endure. Each steady breath holds the line a little longer.",
         "cost": 2,
         "type": "SKILL",
@@ -239,8 +239,8 @@
       },
       {
         "id": "resurrection",
-        "name": "Resurrection",
-        "description": "Heal 6 HP at the start of your next 3 turns.",
+        "name": "Restoring Light",
+        "description": "A quiet celestial rite sustains the wounded. Heal 6 HP at the start of your next 3 turns.",
         "lore": "A faint light lingers where hope has nearly departed. With patience and solemn care, the wounded are guided back toward life.",
         "cost": 5,
         "type": "SKILL",
