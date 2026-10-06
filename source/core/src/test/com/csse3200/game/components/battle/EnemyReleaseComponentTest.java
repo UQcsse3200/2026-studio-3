@@ -64,12 +64,12 @@ class EnemyReleaseComponentTest {
     EnemyReleaseComponent release = enemy.getComponent(EnemyReleaseComponent.class);
     release.startRelease();
 
-    enemy.update(); // Rise begins: 30% height.
-    assertEquals(1.2f, enemy.getScale().y, 0.01f);
+    enemy.update(); // Rise begins at 75% height.
+    assertEquals(3f, enemy.getScale().y, 0.01f);
     verify(animator).startAnimation("idle");
 
     enemy.update(); // Halfway upright.
-    assertEquals(2.6f, enemy.getScale().y, 0.01f);
+    assertEquals(3.5f, enemy.getScale().y, 0.01f);
 
     enemy.update(); // Back to its captured height.
     assertEquals(4f, enemy.getScale().y, 0.01f);
