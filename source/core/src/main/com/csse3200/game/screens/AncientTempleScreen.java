@@ -78,7 +78,6 @@ public class AncientTempleScreen extends ScreenAdapter {
     }
 
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
@@ -386,7 +385,6 @@ public class AncientTempleScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
-    ServiceLocator.getResourceService().dispose();
-    ServiceLocator.clear();
+
   }
 }
