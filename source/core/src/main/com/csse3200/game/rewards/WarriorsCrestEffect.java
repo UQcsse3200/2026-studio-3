@@ -12,11 +12,15 @@ public class WarriorsCrestEffect implements ItemEffect {
   @Override
   public void apply(Entity player) {
     CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    if (stats == null) {
+      throw new IllegalArgumentException("player must have CombatStatsComponent");
+    }
+
     StatusEffect existingStrength = stats.getStatusEffect(STRENGTH);
     if (existingStrength == null) {
       stats.applyStatusEffect(STRENGTH, STRENGTH_BONUS, 0);
-      return;
+    } else {
+      existingStrength.addValue(STRENGTH_BONUS);
     }
-    existingStrength.addValue(STRENGTH_BONUS);
   }
 }

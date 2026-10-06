@@ -140,6 +140,16 @@ public class PlayerRunState {
   }
 
   /**
+   * Replaces the durable inventory with a validated save snapshot.
+   *
+   * <p>This name is used by the save/restore integration on main; it delegates to the shared
+   * inventory structure so reward and battle item behaviour continue to use one source of truth.
+   */
+  public void replaceOwnedItems(List<ItemType> items) {
+    restoreOwnedItems(items);
+  }
+
+  /**
    * Uses one owned battle consumable on the current player entity.
    *
    * <p>The item is removed only after its effect is applied successfully.

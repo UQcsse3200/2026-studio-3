@@ -20,6 +20,7 @@ import com.csse3200.game.cards.configs.CardUpgradeConfig;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.cards.runtime.CardInstance;
+import com.csse3200.game.entities.configs.EnemyTier;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.maps.MapGraph;
 import com.csse3200.game.maps.MapNode;
@@ -121,6 +122,12 @@ class SaveGameRestoreServiceTest {
     assertEquals(
         BestiaryUnlockState.ENCOUNTERED, bestiary.getProgressSnapshot().get("boss_knight"));
     assertFalse(bestiary.getProgressSnapshot().containsKey("retired_enemy"));
+    assertEquals(
+        List.of("boss_knight"),
+        bestiary.getDiscoveredEntriesByTier(EnemyTier.BOSS).stream()
+            .map(entry -> entry.enemyId())
+            .toList());
+    assertTrue(bestiary.getDiscoveredEntriesByTier(EnemyTier.NORMAL).isEmpty());
   }
 
   @Test

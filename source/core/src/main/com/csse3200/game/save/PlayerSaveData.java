@@ -13,6 +13,7 @@ import java.util.List;
  */
 public class PlayerSaveData implements Json.Serializable {
   private static final String LEVEL_KEY = "level";
+  private static final String OWNED_ITEMS_KEY = "ownedItems";
 
   public int currentHealth;
   public int maxHealth;
@@ -33,7 +34,9 @@ public class PlayerSaveData implements Json.Serializable {
     this.maxHealth = maxHealth;
     this.gold = gold;
     this.level = level;
-    this.ownedItems = new ArrayList<>(ownedItems);
+    if (ownedItems != null) {
+      this.ownedItems.addAll(ownedItems);
+    }
   }
 
   @Override
@@ -42,19 +45,23 @@ public class PlayerSaveData implements Json.Serializable {
     json.writeValue("maxHealth", maxHealth);
     json.writeValue("gold", gold);
     json.writeValue(LEVEL_KEY, level);
-    json.writeValue("ownedItems", ownedItems, ArrayList.class, String.class);
+    json.writeValue(OWNED_ITEMS_KEY, ownedItems);
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public void read(Json json, JsonValue jsonData) {
     currentHealth = jsonData.getInt("currentHealth", 0);
     maxHealth = jsonData.getInt("maxHealth", 0);
     gold = jsonData.getInt("gold", 0);
     level = jsonData.has(LEVEL_KEY) ? jsonData.getInt(LEVEL_KEY) : jsonData.getInt("piety", 0);
-    ownedItems =
-        jsonData.has("ownedItems")
-            ? json.readValue("ownedItems", ArrayList.class, String.class, jsonData)
-            : new ArrayList<>();
+
+    ownedItems = new ArrayList<>();
+    if (jsonData.has(OWNED_ITEMS_KEY)) {
+      List<String> loadedItems =
+          json.readValue(OWNED_ITEMS_KEY, ArrayList.class, String.class, jsonData);
+      if (loadedItems != null) {
+        ownedItems.addAll(loadedItems);
+      }
+    }
   }
 }
