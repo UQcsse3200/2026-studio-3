@@ -51,6 +51,9 @@ public class CardLibrary implements CardService {
    *     surrounding whitespace, or the ID is already registered
    */
   public void register(CardConfig config) {
+    if (config == null) {
+      throw new IllegalArgumentException("Card config is invalid: card config must not be null");
+    }
     List<String> errors = CardValidator.validate(config);
     if (!errors.isEmpty()) {
       throw new IllegalArgumentException("Card config is invalid: " + String.join("; ", errors));

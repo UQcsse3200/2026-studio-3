@@ -23,26 +23,26 @@
     {
       "trigger": "deckPreview",
       "variant": "cardPreview",
-      "colour": "3E2723",
+      "colour": "D49C45",
       "text": "",
-      "x": 600, "y": 70,
+      "x": 600, "y": 40,
       "size": [190, 304]
     },
     {
       "trigger": "deckSummary",
       "variant": "popupText",
-      "colour": "E5D6BA",
+      "colour": "D49C45",
       "text": "",
-      "x": 200, "y": 509,
-      "size": [390, 36]
+      "x": 230, "y": 400,
+      "size": [340, 66]
     },
     {
       "trigger": "deckError",
       "variant": "popupText",
-      "colour": "FA8072",
+      "colour": "DB4646",
       "text": "",
-      "x": 40, "y": 449,
-      "size": [600, 36]
+      "x": 40, "y": 472,
+      "size": [550, 36]
     }
   ]
 }

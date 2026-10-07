@@ -2,7 +2,6 @@ package com.csse3200.game.components.combat;
 
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.TargetType;
-import com.csse3200.game.cards.effects.*;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.cards.play.CardPlayResult;
@@ -53,6 +52,7 @@ public class BattleController {
   private final CardPlayService cardPlayService;
   private CardPlayRequest pendingCard;
   private boolean lastCardPlaySucceeded;
+  private int playerTurnNumber;
 
   /** Logging Strings & Error messages */
   private static final String PHASE_CHANGED_EVENT = "battlePhaseChanged";
@@ -102,6 +102,7 @@ public class BattleController {
     this.currentPhase = BattlePhase.SETUP;
     this.currentEnemyIndex = -1;
     this.currentEnemyIntent = null;
+    this.playerTurnNumber = 0;
     this.eventHandler = new EventHandler();
     this.eventQueue = new ArrayDeque<>();
     for (Entity enemy : this.enemies) {
@@ -296,6 +297,7 @@ public class BattleController {
     // Normal housekeeping for resetting the state machine.
     this.eventQueue.clear();
     this.resetEnemyCursor();
+    this.playerTurnNumber = 0;
     this.setEnemyIntent(null);
     this.setCurrentPhase(BattlePhase.SETUP);
     this.notifyPhaseChange(previousPhase, BattlePhase.SETUP);
@@ -318,6 +320,10 @@ public class BattleController {
    */
   public boolean isPlayerTurn() {
     return this.currentPhase == BattlePhase.PLAYER_TURN;
+  }
+
+  public int getPlayerTurnNumber() {
+    return this.playerTurnNumber;
   }
 
   /**
@@ -522,7 +528,7 @@ public class BattleController {
     CombatStatsComponent playerStats = this.player.getComponent(CombatStatsComponent.class);
     boolean allEnemiesDead = this.enemies.stream().noneMatch(this::isEnemyAlive);
 
-    if (playerStats.isDead()) {
+    if (Boolean.TRUE.equals(playerStats.isDead())) {
       handle(BattleEvent.PLAYER_DEFEATED);
       return true;
     }
@@ -804,6 +810,8 @@ public class BattleController {
     if (this.queueBattleOutcomeIfOver()) {
       return;
     }
+
+    this.playerTurnNumber++;
     // Start-of-turn operations: refill energy for the new player turn.
     EnergyComponent energy = playerEnergy();
     if (energy != null) {

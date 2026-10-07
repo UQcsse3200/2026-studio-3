@@ -28,7 +28,9 @@ import java.util.Map;
 
 /**
  * Read-only catalogue of every {@link ItemType}, mirroring {@link CardLibraryDisplay}'s
- * list-plus-detail layout.
+ * list-plus-detail layout. Unlike {@link
+ * com.csse3200.game.components.battle.InventoryPopupComponent}, this shows all item types
+ * regardless of what the player currently owns — it's a reference library, not a live inventory.
  */
 public class ItemLibraryDisplay extends UIComponent {
   private static final float PANEL_WIDTH = 1120f;

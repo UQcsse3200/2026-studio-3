@@ -56,7 +56,9 @@ class PoisonStackingTest {
   }
 
   @Test
-  void totalHitUsesDefensesAndTicksEvenWhenFullyBlocked() {
+  void suppliedDamageCallbackControlsMitigationAndPoisonStillExpires() {
+    // This exercises the callback contract, not the live poison rule. BattleController supplies
+    // takePiercingDamage; a caller deliberately supplying takeDamage requests normal mitigation.
     CombatStatsComponent stats = new CombatStatsComponent(100, 0);
     stats.setBlock(3);
     stats.setArmour(9);
@@ -75,6 +77,27 @@ class PoisonStackingTest {
     assertEquals(Map.of(1, 5), stats.getPoisonStacksByDuration());
     stats.processPoisonTick(stats::takeDamage);
     assertEquals(95, stats.getHealth());
+  }
+
+  @Test
+  void piercingCallbackBypassesBothDefensesAndRecursiveTickDoesNotHitTwice() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 0);
+    stats.setBlock(3);
+    stats.setArmour(9);
+    stats.applyStatusEffect("POISON", 7, 1);
+    stats.applyStatusEffect("POISON", 5, 2);
+    List<Integer> hits = new ArrayList<>();
+    stats.processPoisonTick(
+        damage -> {
+          hits.add(damage);
+          stats.takePiercingDamage(damage);
+          stats.processPoisonTick(hits::add);
+        });
+    assertEquals(List.of(12), hits);
+    assertEquals(88, stats.getHealth());
+    assertEquals(3, stats.getBlock());
+    assertEquals(9, stats.getArmour());
+    assertEquals(Map.of(1, 5), stats.getPoisonStacksByDuration());
   }
 
   @Test

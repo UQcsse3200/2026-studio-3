@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 public class EndBattleScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(EndBattleScreen.class);
   private static final String[] REWARD_TEXTURES = {
-    "images/dungeon.png",
     "images/ui/reward-panel.png",
     "images/ui/reward-card.png",
     "images/ui/gold-reward.png",
@@ -66,6 +65,9 @@ public class EndBattleScreen extends ScreenAdapter {
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
+    ServiceLocator.getResourceService().loadTextures(REWARD_TEXTURES);
+    ServiceLocator.getResourceService().loadAll();
+
     renderer = RenderFactory.createRenderer();
     List<CardConfig> cardConfigs = CardConfigLoader.loadCards();
     CardService cardLibrary = new CardLibrary(cardConfigs);
@@ -79,7 +81,11 @@ public class EndBattleScreen extends ScreenAdapter {
   private void createUI(boolean won, CardService cardLibrary) {
     Stage stage = ServiceLocator.getRenderService().getStage();
 
-    Entity ui = new Entity().addComponent(new InputDecorator(stage, 10));
+    DisplayingFactory displays = new DisplayingFactory(Path.of("sprites/EndBattle.json"));
+
+    Entity ui = new Entity().addComponent(new InputDecorator(stage, 10)).addComponent(displays);
+
+    boolean requiresPlayerChoice = false;
 
     if (won) {
       RewardService rewardService =
@@ -90,10 +96,12 @@ public class EndBattleScreen extends ScreenAdapter {
           new RewardDisplay(
               rewardRecord,
               rewardService,
-              game.getRunState(),
+              game,
               cardLibrary,
               game.getCardDiscoveryService(),
               game::autosaveAfterRewardClaimed));
+      requiresPlayerChoice = true;
+
       RunState runState = game.getRunState();
       if (runState != null) {
         PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(cardLibrary);
@@ -111,12 +119,26 @@ public class EndBattleScreen extends ScreenAdapter {
       ui.addComponent(new DisplayingFactory(Path.of("sprites/EndBattle.json")));
     }
 
+    if (requiresPlayerChoice) {
+      for (EndBattleDisplay endBattleDisplay : displays.getDisplayings(EndBattleDisplay.class)) {
+        endBattleDisplay.setClickToReturnEnabled(false);
+        endBattleDisplay.setVisible(false);
+      }
+    }
+
     ui.getEvents().addListener(RewardDisplay.REWARD_CLAIMED_EVENT, this::onRewardClaimed);
     ui.getEvents().addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, this::returnToMenu);
     ServiceLocator.getEntityService().register(ui);
 
     if (!won) {
       ui.getEvents().trigger(EndBattleDisplay.RESULT_EVENT, "DEFEAT");
+    }
+
+    if (requiresPlayerChoice) {
+      for (EndBattleDisplay endBattleDisplay : displays.getDisplayings(EndBattleDisplay.class)) {
+        endBattleDisplay.setClickToReturnEnabled(false);
+        endBattleDisplay.setVisible(false);
+      }
     }
   }
 

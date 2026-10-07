@@ -23,6 +23,10 @@ import com.csse3200.game.services.ServiceLocator;
  * label, a form, widgets built by a {@link
  * com.csse3200.game.components.spritedisplay.clickable.ClickableFactory}, anything — then call
  * {@link #show()} / {@link #hide()} to toggle it.
+ *
+ * <p>Look: the skin's {@code "popup"} window and button styles, which callers can override with
+ * {@link #setBackgroundTexture}, {@link #setBackgroundColour}, {@link #setTitleStyle} and {@link
+ * #setDefaultCloseButtonVisible}.
  */
 public class PopupDisplay extends UIComponent {
   private static final float Z_INDEX = 20f;

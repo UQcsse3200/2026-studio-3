@@ -6,27 +6,53 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.entities.Entity;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
 
 /** Owns the visible aim preview for a battle and resolves its target on release. */
 public final class CardAimController implements AimSession {
   private static final float SNAP_DISTANCE = 90f;
-  private static final float TARGET_PADDING = 12f;
+  private static final float TARGET_PADDING = 4f;
 
   private final Stage stage;
   private final Camera worldCamera;
   private final Map<String, Entity> targets;
   private final AimArrowActor arrow;
+  private final TargetType targetType;
+  private final Supplier<Rectangle> battlefieldBounds;
   private final Vector2 source = new Vector2();
   private boolean active;
 
   public CardAimController(Stage stage, Camera worldCamera, Map<String, Entity> targets) {
+    this(
+        stage,
+        worldCamera,
+        targets,
+        TargetType.SINGLE_ENEMY,
+        () -> new Rectangle(0, 0, stage.getWidth(), stage.getHeight()));
+  }
+
+  /**
+   * Creates a preview for one card target type. Battlefield bounds use stage coordinates and are
+   * read on every update/release so they remain correct after resizing. Self and all-enemy cards
+   * need only a battlefield drop; single-enemy cards additionally require a living selected enemy.
+   */
+  public CardAimController(
+      Stage stage,
+      Camera worldCamera,
+      Map<String, Entity> targets,
+      TargetType targetType,
+      Supplier<Rectangle> battlefieldBounds) {
     this.stage = stage;
     this.worldCamera = worldCamera;
     this.targets = targets;
+    this.targetType = targetType;
+    this.battlefieldBounds = battlefieldBounds;
     arrow = new AimArrowActor();
     stage.addActor(arrow);
   }
@@ -44,11 +70,22 @@ public final class CardAimController implements AimSession {
       return;
     }
     Map<String, Rectangle> bounds = currentBounds();
-    String selected = EnemyTargetSelector.select(bounds, pointer, this::isAlive, SNAP_DISTANCE);
-    Rectangle box = selected == null ? null : bounds.get(selected);
+    String selected = select(bounds, pointer);
+    Rectangle box = targetType == TargetType.SINGLE_ENEMY ? bounds.get(selected) : null;
     Vector2 destination =
         box == null ? pointer : new Vector2(box.x + box.width / 2f, box.y + box.height / 2f);
-    arrow.show(source, destination, box);
+    Set<String> highlighted =
+        selected == null
+            ? Set.of()
+            : targetType == TargetType.ALL_ENEMIES ? bounds.keySet() : Set.of(selected);
+    arrow.show(
+        source,
+        destination,
+        bounds,
+        highlighted,
+        targetType == TargetType.SINGLE_ENEMY,
+        targetType == TargetType.SINGLE_ENEMY ? null : battlefieldBounds.get(),
+        selected != null);
   }
 
   @Override
@@ -57,7 +94,7 @@ public final class CardAimController implements AimSession {
       return null;
     }
     Map<String, Rectangle> bounds = currentBounds();
-    String selected = EnemyTargetSelector.select(bounds, pointer, this::isAlive, SNAP_DISTANCE);
+    String selected = select(bounds, pointer);
     cancel();
     return selected;
   }
@@ -73,6 +110,11 @@ public final class CardAimController implements AimSession {
     arrow.dispose();
   }
 
+  @Override
+  public boolean usesTargetingArrow() {
+    return targetType == TargetType.SINGLE_ENEMY;
+  }
+
   private boolean isAlive(String id) {
     Entity target = targets.get(id);
     CombatStatsComponent stats =
@@ -82,8 +124,22 @@ public final class CardAimController implements AimSession {
 
   private Map<String, Rectangle> currentBounds() {
     Map<String, Rectangle> bounds = new LinkedHashMap<>();
-    targets.forEach((id, target) -> bounds.put(id, stageBounds(target)));
+    targets.forEach(
+        (id, target) -> {
+          if (isAlive(id)) bounds.put(id, stageBounds(target));
+        });
     return bounds;
+  }
+
+  private String select(Map<String, Rectangle> bounds, Vector2 pointer) {
+    if (!battlefieldBounds.get().contains(pointer)) return null;
+    return switch (targetType) {
+      case SELF -> bounds.containsKey("player") ? "player" : null;
+        // This ID is a UI marker. CardPlayRequest.fromUi resolves ALL_ENEMIES without an entity ID.
+      case ALL_ENEMIES -> bounds.isEmpty() ? null : "allEnemies";
+      case SINGLE_ENEMY ->
+          EnemyTargetSelector.select(bounds, pointer, this::isAlive, SNAP_DISTANCE);
+    };
   }
 
   private Rectangle stageBounds(Entity target) {

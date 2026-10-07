@@ -14,6 +14,7 @@ import com.csse3200.game.ui.UIComponent;
 
 public class PlayerStatsTopDisplay extends UIComponent {
   Table table;
+  Table levelTable;
   private Image heartImage;
   private Label healthLabel;
   private Image levelImage;
@@ -73,15 +74,6 @@ public class PlayerStatsTopDisplay extends UIComponent {
     healthLabel = new Label(healthText, skin, STYLE_NAME_LARGE);
     healthLabel.setFontScale(FONT_SCALE);
 
-    // Level image
-    levelImage =
-        new Image(ServiceLocator.getResourceService().getAsset("images/level.png", Texture.class));
-
-    // Level text
-    String levelText = String.format("%d", runState.getMapProgression());
-    levelLabel = new Label(levelText, skin, STYLE_NAME_LARGE);
-    levelLabel.setFontScale(FONT_SCALE);
-
     // Money image
     moneyImage =
         new Image(ServiceLocator.getResourceService().getAsset("images/money.png", Texture.class));
@@ -93,16 +85,32 @@ public class PlayerStatsTopDisplay extends UIComponent {
     moneyLabel = new Label(moneyText, skin, STYLE_NAME_LARGE);
     moneyLabel.setFontScale(FONT_SCALE);
 
-    // adds stats to the table
+    // level table
+    levelTable = new Table(skin);
+
+    // Level image
+    levelImage =
+        new Image(ServiceLocator.getResourceService().getAsset("images/level.png", Texture.class));
+
+    // Level text
+    String levelText = String.format("%d", runState.getMapProgression());
+    levelLabel = new Label(levelText, skin, STYLE_NAME_LARGE);
+    levelLabel.setFontScale(FONT_SCALE);
+
+    // add stats to the gold and health table
     table.add(heartImage).size(imageSideLength).pad(5);
     table.add(healthLabel).left().pad(10);
 
-    table.add(levelImage).size(imageSideLength).pad(5);
-    table.add(levelLabel).left().pad(10);
-
     table.add(moneyImage).size(imageSideLength).pad(5);
-    table.add(moneyLabel).left();
+    table.add(moneyLabel).left().pad(10);
     stage.addActor(table);
+
+    // add stats to level table
+    levelTable.add(levelImage).size(imageSideLength).pad(5);
+    levelTable.add(levelLabel).left().pad(10);
+    levelTable.pack();
+    levelTable.setPosition((stageWidth - levelTable.getWidth()) / 2f, stageHeight - 45);
+    stage.addActor(levelTable);
   }
 
   @Override
@@ -144,6 +152,9 @@ public class PlayerStatsTopDisplay extends UIComponent {
   @Override
   public void dispose() {
     super.dispose();
+
+    table.remove();
+    levelTable.remove();
     heartImage.remove();
     healthLabel.remove();
     levelImage.remove();

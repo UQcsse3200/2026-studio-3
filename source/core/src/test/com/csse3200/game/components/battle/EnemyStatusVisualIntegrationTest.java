@@ -30,6 +30,7 @@ import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,8 @@ class EnemyStatusVisualIntegrationTest {
     resources = new ResourceService();
     ServiceLocator.registerResourceService(resources);
     resources.loadTextures(EnemyStatusEffectVisuals.texturePaths());
+    // Card effects now play sounds through AudioService, which needs them loaded.
+    AudioService.load();
     resources.loadAll();
     for (String path : EnemyStatusEffectVisuals.texturePaths()) {
       assertTrue(resources.containsAsset(path, Texture.class), path);
@@ -208,6 +211,79 @@ class EnemyStatusVisualIntegrationTest {
   }
 
   @Test
+  void poisonMarkKeepsBothStatusVisualsAndReusesThemWithoutDirectDamage() {
+    start("poison_mark", 2);
+    play(TargetType.SINGLE_ENEMY);
+    List<Entity> visuals = spawned(2);
+    CombatStatsComponent stats = target.getComponent(CombatStatsComponent.class);
+    for (Entity visual : visuals) {
+      assertNotNull(visual.getComponent(EnemyStatusEffectVisualComponent.class));
+      assertNull(visual.getComponent(EffectBurstComponent.class));
+      assertNull(visual.getComponent(EffectProjectileComponent.class));
+    }
+    EnemyStatusEffectVisualComponent vulnerable =
+        visuals.get(0).getComponent(EnemyStatusEffectVisualComponent.class);
+    EnemyStatusEffectVisualComponent poison =
+        visuals.get(1).getComponent(EnemyStatusEffectVisualComponent.class);
+    SpriteBatch vulnerableBatch = mock(SpriteBatch.class);
+    SpriteBatch poisonBatch = mock(SpriteBatch.class);
+    vulnerable.render(vulnerableBatch);
+    poison.render(poisonBatch);
+    verify(vulnerableBatch)
+        .draw(any(TextureRegion.class), anyFloat(), anyFloat(), anyFloat(), anyFloat());
+    verifyNoInteractions(poisonBatch);
+
+    when(time.getDeltaTime()).thenReturn(1f);
+    for (Entity visual : visuals) visual.update();
+    coordinator.update();
+    assertFalse(vulnerable.isExpired());
+    assertFalse(poison.isExpired());
+    assertEquals(30, stats.getHealth());
+    assertEquals(2, stats.getStatusEffect("VULNERABLE").getDuration());
+    assertEquals(2, stats.getStatusEffect("POISON").getDuration());
+    play(TargetType.SINGLE_ENEMY);
+    spawned(2);
+    assertEquals(30, stats.getHealth());
+    assertEquals(4, stats.getStatusEffect("POISON").getValue());
+    assertFalse(other.getComponent(CombatStatsComponent.class).hasStatusEffect("POISON"));
+    assertFalse(other.getComponent(CombatStatsComponent.class).hasStatusEffect("VULNERABLE"));
+    stats.clearNegativeStatusEffects();
+    coordinator.update();
+    for (Entity visual : visuals) verify(entities).unregister(visual);
+  }
+
+  @Test
+  void repeatedCardsReuseTheSameMarkerAndDeathCleansItUp() {
+    start("poison_dagger", 2);
+    play(TargetType.SINGLE_ENEMY);
+    Entity marker = spawned(2).get(1);
+    EnemyStatusEffectVisualComponent visual =
+        marker.getComponent(EnemyStatusEffectVisualComponent.class);
+    when(time.getDeltaTime()).thenReturn(1.1f);
+    visual.update();
+    coordinator.update();
+    play(TargetType.SINGLE_ENEMY);
+    List<Entity> visuals = spawned(3);
+    assertSame(marker, visuals.get(1));
+    assertNotNull(visuals.get(2).getComponent(EffectBurstComponent.class));
+    SpriteBatch waitingBatch = mock(SpriteBatch.class);
+    visual.render(waitingBatch);
+    verify(waitingBatch, times(1))
+        .draw(any(TextureRegion.class), anyFloat(), anyFloat(), anyFloat(), anyFloat());
+    CombatStatsComponent stats = target.getComponent(CombatStatsComponent.class);
+    assertEquals(22, stats.getHealth());
+    assertEquals(6, stats.getStatusEffect("POISON").getValue());
+    verify(stats, times(2)).applyStatusEffect(any(StatusEffect.class));
+    stats.setHealth(0);
+    coordinator.update();
+    assertTrue(visual.isExpired());
+    verify(entities, times(1)).unregister(marker);
+    SpriteBatch batch = mock(SpriteBatch.class);
+    visual.render(batch);
+    verifyNoInteractions(batch);
+  }
+
+  @Test
   void externallyAppliedStatusesGetOneMarkerEachAndCleanseRemovesThem() {
     start("poison_dagger", 1);
     CombatStatsComponent stats = target.getComponent(CombatStatsComponent.class);
@@ -234,6 +310,44 @@ class EnemyStatusVisualIntegrationTest {
     coordinator.update();
     for (Entity marker : markers) verify(entities, times(1)).unregister(marker);
     spawned(3);
+  }
+
+  @Test
+  void poisonMarkerSurvivesUntilTheLastDurationGroupExpires() {
+    start("poison_dagger", 1);
+    CombatStatsComponent stats = target.getComponent(CombatStatsComponent.class);
+    stats.applyStatusEffect("POISON", 2, 1);
+    stats.applyStatusEffect("POISON", 3, 2);
+    coordinator.update();
+    Entity marker = spawned(1).get(0);
+    stats.processPoisonTick(stats::takePiercingDamage);
+    coordinator.update();
+    verify(entities, never()).unregister(marker);
+    assertEquals(25, stats.getHealth());
+    stats.processPoisonTick(stats::takePiercingDamage);
+    coordinator.update();
+    verify(entities, times(1)).unregister(marker);
+    assertEquals(22, stats.getHealth());
+    spawned(1);
+  }
+
+  @Test
+  void feebleAndVulnerableMarkersFollowExplicitStatusExpiry() {
+    start("expose", 1);
+    CombatStatsComponent stats = target.getComponent(CombatStatsComponent.class);
+    stats.applyStatusEffect("FEEBLE", 1, 2);
+    stats.applyStatusEffect("VULNERABLE", 2, 1);
+    coordinator.update();
+    List<Entity> markers = spawned(2);
+    assertTrue(stats.tickStatusEffect("VULNERABLE"));
+    assertFalse(stats.tickStatusEffect("FEEBLE"));
+    coordinator.update();
+    verify(entities, times(1)).unregister(markers.get(0));
+    verify(entities, never()).unregister(markers.get(1));
+    assertTrue(stats.tickStatusEffect("FEEBLE"));
+    coordinator.update();
+    verify(entities, times(1)).unregister(markers.get(1));
+    spawned(2);
   }
 
   @Test

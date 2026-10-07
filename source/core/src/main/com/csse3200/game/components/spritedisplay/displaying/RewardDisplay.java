@@ -7,16 +7,12 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
-import com.badlogic.gdx.scenes.scene2d.ui.Stack;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Scaling;
+import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.configs.CardConfig;
@@ -44,9 +40,9 @@ import org.slf4j.LoggerFactory;
 
 public class RewardDisplay extends Displaying {
   public static final String REWARD_CLAIMED_EVENT = "rewardClaimed";
+
   private static final Logger logger = LoggerFactory.getLogger(RewardDisplay.class);
 
-  private static final String BACKGROUND_TEXTURE = "images/dungeon.png";
   private static final String PANEL_TEXTURE = "images/ui/reward-panel.png";
   private static final String CARD_TEXTURE = "images/ui/reward-card.png";
   private static final String GOLD_TEXTURE = "images/ui/gold-reward.png";
@@ -64,6 +60,7 @@ public class RewardDisplay extends Displaying {
           ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png");
 
   private final RunState runState;
+  private final GdxGame game;
   private final RewardService rewardService;
   private final CardService cardService;
   private final CardDiscoveryService cardDiscoveryService;
@@ -74,36 +71,38 @@ public class RewardDisplay extends Displaying {
   private final List<CardWidget> cardWidgets = new ArrayList<>();
   private List<RewardOption> options;
   private boolean claimed;
+  private boolean goldRewardUsesLuckyCoin;
   private boolean cardRewardCommitted;
   private boolean claimInProgress;
   private boolean created;
   private boolean disposed;
-  private boolean goldRewardUsesLuckyCoin;
   private Actor background;
-  private Actor scrim;
+  private Actor scrimActor;
   private Actor rewardUi;
   private Table cardSelectionTable;
   private CardWidgetAssets cardWidgetAssets;
+  private final List<Actor> rewardOptionCards = new ArrayList<>();
 
   public RewardDisplay(
       DisplayingRecord rec,
       RewardService rewardService,
-      RunState runState,
+      GdxGame game,
       CardService cardService,
       CardDiscoveryService cardDiscoveryService) {
-    this(rec, rewardService, runState, cardService, cardDiscoveryService, () -> {});
+    this(rec, rewardService, game, cardService, cardDiscoveryService, () -> {});
   }
 
   public RewardDisplay(
       DisplayingRecord rec,
       RewardService rewardService,
-      RunState runState,
+      GdxGame game,
       CardService cardService,
       CardDiscoveryService cardDiscoveryService,
       Runnable afterRewardApplied) {
     super(rec);
     this.rewardService = Objects.requireNonNull(rewardService, "rewardService cannot be null");
-    this.runState = runState;
+    this.game = Objects.requireNonNull(game, "game cannot be null");
+    this.runState = game.getRunState();
     this.cardService = Objects.requireNonNull(cardService, "cardService cannot be null");
     this.cardDiscoveryService =
         Objects.requireNonNull(cardDiscoveryService, "cardDiscoveryService cannot be null");
@@ -160,7 +159,11 @@ public class RewardDisplay extends Displaying {
       return;
     }
 
-    Image scene = image(BACKGROUND_TEXTURE);
+    Image scene =
+        new Image(
+            ServiceLocator.getResourceService()
+                .getAsset("images/" + game.getBackgroundId() + ".png", Texture.class));
+
     scene.setScaling(Scaling.fill);
     scene.setFillParent(true);
     background = scene;
@@ -169,7 +172,7 @@ public class RewardDisplay extends Displaying {
 
     Image dimmer = new Image(skin.newDrawable("white", SCRIM));
     dimmer.setFillParent(true);
-    scrim = dimmer;
+    scrimActor = dimmer;
     stage.addActor(dimmer);
 
     float panelWidth = Math.min(stage.getWidth() * 0.92f, 1180f);
@@ -209,14 +212,18 @@ public class RewardDisplay extends Displaying {
 
     Table cards = new Table();
     cards.defaults().padLeft(panelWidth * 0.008f).padRight(panelWidth * 0.008f);
+
     float cardWidth = panelWidth * (options.size() > 2 ? 0.21f : 0.25f);
     float cardHeight = panelHeight * 0.49f;
+
+    rewardOptionCards.clear();
+
     for (RewardOption option : options) {
       if (option != null) {
-        cards
-            .add(createRewardCard(option, cardWidth, cardHeight))
-            .width(cardWidth)
-            .height(cardHeight);
+        Stack rewardCard = createRewardCard(option, cardWidth, cardHeight);
+        rewardOptionCards.add(rewardCard);
+
+        cards.add(rewardCard).width(cardWidth).height(cardHeight);
       }
     }
     content.add(cards).expand().center();
@@ -416,7 +423,7 @@ public class RewardDisplay extends Displaying {
         : new Image(texture);
   }
 
-  private void selectOption(RewardOption option) {
+  void selectOption(RewardOption option) {
     if (disposed
         || claimed
         || claimInProgress
@@ -535,14 +542,18 @@ public class RewardDisplay extends Displaying {
     entity.getEvents().trigger(EndBattleDisplay.RETURN_TO_MENU_EVENT);
   }
 
+  List<Actor> getRewardOptionCards() {
+    return List.copyOf(rewardOptionCards);
+  }
+
   @Override
   public void dispose() {
     disposed = true;
     if (background != null) {
       background.remove();
     }
-    if (scrim != null) {
-      scrim.remove();
+    if (scrimActor != null) {
+      scrimActor.remove();
     }
     if (rewardUi != null) {
       rewardUi.remove();
@@ -568,10 +579,6 @@ public class RewardDisplay extends Displaying {
 
   boolean isClaimed() {
     return claimed;
-  }
-
-  List<TextButton> getOptionButtons() {
-    return List.copyOf(optionButtons);
   }
 
   List<Button> getCardChoiceButtons() {
