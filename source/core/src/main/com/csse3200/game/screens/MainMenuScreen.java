@@ -3,8 +3,9 @@ package com.csse3200.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.csse3200.game.GdxGame;
+import com.csse3200.game.components.maingame.DebugShortcutInputComponent;
 import com.csse3200.game.components.mainmenu.MainMenuActions;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.entities.Entity;
@@ -16,6 +17,7 @@ import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,13 +46,14 @@ public class MainMenuScreen extends ScreenAdapter {
 
     renderer = RenderFactory.createRenderer();
     configureViewport();
+    AudioService.load();
     loadAssets();
 
     createUI();
   }
 
   private void configureViewport() {
-    FitViewport viewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+    ExtendViewport viewport = new ExtendViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
     renderer.getStage().setViewport(viewport);
     viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
   }
@@ -91,9 +94,6 @@ public class MainMenuScreen extends ScreenAdapter {
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getResourceService().unloadAssets(MAIN_MENU_TEXTURES);
-    ServiceLocator.getResourceService().dispose();
-
-    ServiceLocator.clear();
   }
 
   /**
@@ -106,7 +106,8 @@ public class MainMenuScreen extends ScreenAdapter {
     Entity ui = new Entity();
     ui.addComponent(new InputDecorator(stage, 10))
         .addComponent(new MainMenuActions(game))
-        .addComponent(new MainMenuDisplay());
+        .addComponent(new MainMenuDisplay())
+        .addComponent(new DebugShortcutInputComponent(game));
     ServiceLocator.getEntityService().register(ui);
   }
 }

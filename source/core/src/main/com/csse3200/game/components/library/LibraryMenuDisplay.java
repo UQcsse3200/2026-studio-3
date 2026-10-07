@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
@@ -14,6 +16,8 @@ import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
 import org.slf4j.Logger;
@@ -46,7 +50,7 @@ public class LibraryMenuDisplay extends UIComponent {
             .getAsset(MainMenuDisplay.BACKGROUND_TEXTURE, Texture.class);
     backgroundTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     Image background = new Image(backgroundTexture);
-    background.setScaling(Scaling.fill);
+    background.setScaling(Scaling.stretch);
     rootStack.add(background);
 
     Color overlayColour = MenuTheme.deepPlum();
@@ -71,6 +75,7 @@ public class LibraryMenuDisplay extends UIComponent {
     TextButton.TextButtonStyle buttonStyle = MenuTheme.createButtonStyle(skin, buttonFrameTexture);
     TextButton cardLibraryButton = new TextButton("Card Library", buttonStyle);
     TextButton enemyLibraryButton = new TextButton("Enemy Library", buttonStyle);
+    TextButton itemLibraryButton = new TextButton("Item Library", buttonStyle);
     TextButton backButton = new TextButton("Back", buttonStyle);
 
     cardLibraryButton.addListener(
@@ -79,6 +84,17 @@ public class LibraryMenuDisplay extends UIComponent {
           public void changed(ChangeEvent event, Actor actor) {
             logger.debug("Card Library button clicked");
             game.setScreen(GdxGame.ScreenType.CARD_LIBRARY);
+          }
+        });
+
+    cardLibraryButton.addListener(
+        new InputListener() {
+          @Override
+          public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+            super.enter(event, x, y, pointer, fromActor);
+            if (pointer == -1) {
+              AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
+            }
           }
         });
 
@@ -91,6 +107,37 @@ public class LibraryMenuDisplay extends UIComponent {
           }
         });
 
+    itemLibraryButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            logger.debug("Item Library button clicked");
+            game.setScreen(GdxGame.ScreenType.ITEM_LIBRARY);
+          }
+        });
+
+    enemyLibraryButton.addListener(
+        new InputListener() {
+          @Override
+          public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+            super.enter(event, x, y, pointer, fromActor);
+            if (pointer == -1) {
+              AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
+            }
+          }
+        });
+
+    itemLibraryButton.addListener(
+        new InputListener() {
+          @Override
+          public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+            super.enter(event, x, y, pointer, fromActor);
+            if (pointer == -1) {
+              AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
+            }
+          }
+        });
+
     backButton.addListener(
         new ChangeListener() {
           @Override
@@ -99,10 +146,21 @@ public class LibraryMenuDisplay extends UIComponent {
           }
         });
 
+    backButton.addListener(
+        new InputListener() {
+          @Override
+          public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+            if (pointer == -1) {
+              AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
+            }
+          }
+        });
+
     rootTable.add(title).padBottom(12f).row();
     rootTable.defaults().width(MenuTheme.BUTTON_WIDTH).height(MenuTheme.BUTTON_HEIGHT);
     rootTable.add(cardLibraryButton).row();
     rootTable.add(enemyLibraryButton).row();
+    rootTable.add(itemLibraryButton).row();
     rootTable.add(backButton);
 
     rootStack.add(rootTable);

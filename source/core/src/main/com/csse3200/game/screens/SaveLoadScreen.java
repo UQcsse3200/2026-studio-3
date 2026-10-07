@@ -34,7 +34,9 @@ public class SaveLoadScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(SaveLoadScreen.class);
   private static final List<Integer> SLOT_IDS =
       List.of(1, 2, 3, AutosaveCoordinator.AUTOSAVE_SLOT_ID);
-  private static final String[] SAVE_LOAD_TEXTURES = {MainMenuDisplay.BACKGROUND_TEXTURE};
+  private static final String[] SAVE_LOAD_TEXTURES = {
+    MainMenuDisplay.BACKGROUND_TEXTURE, SaveLoadPanel.BUTTON_TEXTURE
+  };
 
   private final GdxGame game;
   private final Renderer renderer;
@@ -72,9 +74,18 @@ public class SaveLoadScreen extends ScreenAdapter {
         new SaveGameService(
             new JsonSaveGameRepository(),
             new GameStateSnapshotProvider(
-                playerState, playerDeck, runState, game.getBestiaryService()));
+                playerState,
+                playerDeck,
+                runState,
+                game.getBestiaryService(),
+                game.getCardDiscoveryService()));
     SaveGameRestoreService restoreService =
-        new SaveGameRestoreService(playerState, playerDeck, runState, game.getBestiaryService());
+        new SaveGameRestoreService(
+            playerState,
+            playerDeck,
+            runState,
+            game.getBestiaryService(),
+            game.getCardDiscoveryService());
 
     Entity ui = new Entity();
     ui.addComponent(new InputDecorator(stage, 10))
@@ -109,7 +120,5 @@ public class SaveLoadScreen extends ScreenAdapter {
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getResourceService().unloadAssets(SAVE_LOAD_TEXTURES);
-    ServiceLocator.getResourceService().dispose();
-    ServiceLocator.clear();
   }
 }

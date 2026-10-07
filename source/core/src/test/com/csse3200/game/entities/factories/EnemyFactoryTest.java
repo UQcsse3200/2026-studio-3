@@ -13,6 +13,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -27,8 +28,10 @@ import com.csse3200.game.components.enemy.IntentIcons;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.configs.EnemyConfig;
 import com.csse3200.game.entities.configs.EnemyConfigs;
+import com.csse3200.game.entities.configs.EnemyScaling;
 import com.csse3200.game.entities.configs.EnemyTier;
 import com.csse3200.game.extensions.GameExtension;
+import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.rendering.AnimationRenderComponent;
 import com.csse3200.game.rendering.DebugRenderer;
 import com.csse3200.game.rendering.RenderService;
@@ -239,5 +242,29 @@ class EnemyFactoryTest {
     List<String[]> calls = released.getAllValues();
     assertTrue(calls.stream().anyMatch(a -> Arrays.equals(a, EnemyFactory.getAtlasPaths())));
     assertTrue(calls.stream().anyMatch(a -> Arrays.equals(a, IntentIcons.all())));
+  }
+
+  @Test
+  void tallAndCrawlerBattleSizesMatchLinhPresentationWithoutChangingStats() {
+    EnemyConfigs roster = FileLoader.readClass(EnemyConfigs.class, "configs/enemies.json");
+    for (String id : List.of("tomb_guardian", "bone_crawler")) {
+      String path = "images/enemies/" + id + ".atlas";
+      TextureAtlas atlas = new TextureAtlas(Gdx.files.internal(path));
+      when(resourceService.getAsset(path, TextureAtlas.class)).thenReturn(atlas);
+      try {
+        EnemyConfig config = EnemyScaling.scale(roster.get(id), 0);
+        config.sprite = path;
+        Entity enemy = EnemyFactory.create(config);
+        // Recorded world bounds in Linh's 50e1cf6b battle configuration.
+        assertEquals(3.5f, enemy.getScale().x, 0.0001f, id);
+        assertEquals(3.5f, enemy.getScale().y, 0.0001f, id);
+        CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
+        assertEquals(config.health, stats.getHealth());
+        assertEquals(config.baseAttack, stats.getBaseAttack());
+        assertEquals(config.armour, stats.getArmour());
+      } finally {
+        atlas.dispose();
+      }
+    }
   }
 }

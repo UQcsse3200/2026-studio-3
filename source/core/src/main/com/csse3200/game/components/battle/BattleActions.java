@@ -7,6 +7,8 @@ import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattlePhase;
+import com.csse3200.game.maps.MapNode;
+import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import java.util.ArrayList;
 import java.util.List;
@@ -87,14 +89,10 @@ public class BattleActions extends Component {
     if (nextPhase == BattlePhase.ENEMY_TURN && previousPhase == BattlePhase.PLAYER_END) {
       deferringEnemyTurn = true;
       entity.getEvents().trigger(PHASE_CHANGED_EVENT, nextPhase);
-      entity.getEvents().trigger("down");
       return;
     }
 
     dispatch(() -> entity.getEvents().trigger(PHASE_CHANGED_EVENT, nextPhase));
-    if (nextPhase == BattlePhase.PLAYER_TURN) {
-      dispatch(() -> entity.getEvents().trigger("up"));
-    }
 
     boolean enemyTurnOver =
         (nextPhase == BattlePhase.PLAYER_TURN && previousPhase == BattlePhase.PLAYER_START)
@@ -154,6 +152,9 @@ public class BattleActions extends Component {
     RunState runState = game.getRunState();
     if (runState != null) {
       boolean hadActiveEncounter = runState.getActiveNodeId() != null;
+      if (win && isEligibleEliteVictory(runState)) {
+        runState.setPendingEliteTempleReward(true);
+      }
       runState.completeEncounter(win);
       if (win && hadActiveEncounter) {
         game.requestAutosaveAfterEncounter();
@@ -166,6 +167,31 @@ public class BattleActions extends Component {
     } else {
       game.setScreen(target);
     }
+  }
+
+  private boolean isEligibleEliteVictory(RunState runState) {
+    Integer activeNodeId = runState.getActiveNodeId();
+
+    if (activeNodeId == null || runState.getMapGraph() == null) {
+      return false;
+    }
+
+    MapNode activeNode = runState.getMapGraph().getNode(activeNodeId);
+
+    if (activeNode == null || activeNode.getRoomType() != RoomType.ELITE) {
+      return false;
+    }
+
+    int currentHealth = runState.getPlayerHealth();
+    int maxHealth = runState.getPlayerMaxHealth();
+
+    if (maxHealth <= 0) {
+      return false;
+    }
+
+    float healthRatio = (float) currentHealth / maxHealth;
+
+    return healthRatio >= 0.8f;
   }
 
   private void triggerEndTurn() {

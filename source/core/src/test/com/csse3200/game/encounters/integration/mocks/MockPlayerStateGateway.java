@@ -14,6 +14,7 @@ public final class MockPlayerStateGateway implements PlayerStateGateway {
   private boolean failCurrencyUpdates;
   private boolean rejectNextHealthUpdate;
   private final List<String> mutations = new ArrayList<>();
+  private float shopDiscount;
 
   public MockPlayerStateGateway(int health, int currency) {
     this(health, Math.max(health, 100), currency);
@@ -71,6 +72,15 @@ public final class MockPlayerStateGateway implements PlayerStateGateway {
       throw new IllegalStateException("Simulated currency update failure");
     }
     this.currency = Math.max(0, currency);
+  }
+
+  @Override
+  public float getShopDiscount() {
+    return shopDiscount;
+  }
+
+  public void setShopDiscount(float shopDiscount) {
+    this.shopDiscount = shopDiscount;
   }
 
   public void failNextCurrencyUpdate() {

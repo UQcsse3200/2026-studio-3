@@ -25,7 +25,10 @@ class CorruptionCardsTest {
 
     assertAll(
         () -> assertEquals("Poison Flask", card.name),
-        () -> assertEquals("Apply 5 Poison for 3 turns.", card.description),
+        () ->
+            assertEquals(
+                "A measured dose draws corruption to the surface. Apply 5 Poison for 3 turns.",
+                card.description),
         () -> assertEquals(1, card.cost),
         () -> assertEquals(CardType.SKILL, card.type),
         () -> assertEquals(Rarity.UNCOMMON, card.rarity),
@@ -43,7 +46,7 @@ class CorruptionCardsTest {
         () -> assertEquals("Poison Blade", card.name),
         () ->
             assertEquals(
-                "Deal 10 piercing damage, ignoring Block and Armour. Apply 4 Poison for 2 turns.",
+                "The blade reaches beneath the fallen's defences. Deal 10 piercing damage, ignoring Block and Armour. Apply 4 Poison for 2 turns.",
                 card.description),
         () -> assertEquals(2, card.cost),
         () -> assertEquals(CardType.ATTACK, card.type),
@@ -61,7 +64,10 @@ class CorruptionCardsTest {
 
     assertAll(
         () -> assertEquals("Poison Cloud", card.name),
-        () -> assertEquals("Apply 3 Poison to all enemies for 3 turns.", card.description),
+        () ->
+            assertEquals(
+                "A bitter mist exposes the stain within. Apply 3 Poison to all enemies for 3 turns.",
+                card.description),
         () -> assertEquals(2, card.cost),
         () -> assertEquals(CardType.SKILL, card.type),
         () -> assertEquals(Rarity.UNCOMMON, card.rarity),
@@ -79,7 +85,8 @@ class CorruptionCardsTest {
         () -> assertEquals("Poison Mark", card.name),
         () ->
             assertEquals(
-                "Apply 2 Vulnerable and 2 Poison to an enemy for 2 turns.", card.description),
+                "A quiet sign reveals where the corruption has taken hold. Apply 2 Vulnerable and 2 Poison to an enemy for 2 turns.",
+                card.description),
         () -> assertEquals(1, card.cost),
         () -> assertEquals(CardType.SKILL, card.type),
         () -> assertEquals(Rarity.RARE, card.rarity),

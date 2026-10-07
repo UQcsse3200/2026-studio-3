@@ -16,9 +16,13 @@ import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyStatsComponent;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
+import com.csse3200.game.services.ResourceService;
+import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /** Exercises card resolution and complete rounds against independently targetable enemies. */
@@ -79,6 +83,14 @@ class MultiEnemyBattleTest {
 
   private List<String> handCardIds() {
     return deck.getHand().stream().map(CardInstance::cardId).toList();
+  }
+
+  @BeforeEach
+  void setUp() {
+
+    ServiceLocator.registerResourceService(new ResourceService());
+    AudioService.load();
+    ServiceLocator.getResourceService().loadAll();
   }
 
   @Test
