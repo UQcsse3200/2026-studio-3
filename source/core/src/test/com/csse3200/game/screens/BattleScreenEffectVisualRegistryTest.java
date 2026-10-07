@@ -1,12 +1,12 @@
 package com.csse3200.game.screens;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.badlogic.gdx.graphics.Color;
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.components.battle.EffectVisualRegistry;
 import com.csse3200.game.components.battle.EffectVisualStyle;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class BattleScreenEffectVisualRegistryTest {
   @Test

@@ -109,7 +109,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
     levelTable.add(levelImage).size(imageSideLength).pad(5);
     levelTable.add(levelLabel).left().pad(10);
     levelTable.pack();
-    levelTable.setPosition((stageWidth - levelTable.getWidth()) / 2f, mapHeight - 45);
+    levelTable.setPosition((stageWidth - levelTable.getWidth()) / 2f, stageHeight - 45);
     stage.addActor(levelTable);
   }
 

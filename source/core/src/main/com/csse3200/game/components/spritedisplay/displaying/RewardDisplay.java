@@ -159,10 +159,10 @@ public class RewardDisplay extends Displaying {
       return;
     }
 
-      Image scene =
-              new Image(
-                      ServiceLocator.getResourceService()
-                              .getAsset("images/" + game.getBackgroundId() + ".png", Texture.class));
+    Image scene =
+        new Image(
+            ServiceLocator.getResourceService()
+                .getAsset("images/" + game.getBackgroundId() + ".png", Texture.class));
 
     scene.setScaling(Scaling.fill);
     scene.setFillParent(true);
@@ -212,14 +212,18 @@ public class RewardDisplay extends Displaying {
 
     Table cards = new Table();
     cards.defaults().padLeft(panelWidth * 0.008f).padRight(panelWidth * 0.008f);
+
     float cardWidth = panelWidth * (options.size() > 2 ? 0.21f : 0.25f);
     float cardHeight = panelHeight * 0.49f;
+
+    rewardOptionCards.clear();
+
     for (RewardOption option : options) {
       if (option != null) {
-        cards
-            .add(createRewardCard(option, cardWidth, cardHeight))
-            .width(cardWidth)
-            .height(cardHeight);
+        Stack rewardCard = createRewardCard(option, cardWidth, cardHeight);
+        rewardOptionCards.add(rewardCard);
+
+        cards.add(rewardCard).width(cardWidth).height(cardHeight);
       }
     }
     content.add(cards).expand().center();
@@ -419,7 +423,7 @@ public class RewardDisplay extends Displaying {
         : new Image(texture);
   }
 
-  private void selectOption(RewardOption option) {
+  void selectOption(RewardOption option) {
     if (disposed
         || claimed
         || claimInProgress
@@ -536,6 +540,10 @@ public class RewardDisplay extends Displaying {
     afterRewardApplied.run();
     entity.getEvents().trigger(REWARD_CLAIMED_EVENT);
     entity.getEvents().trigger(EndBattleDisplay.RETURN_TO_MENU_EVENT);
+  }
+
+  List<Actor> getRewardOptionCards() {
+    return List.copyOf(rewardOptionCards);
   }
 
   @Override

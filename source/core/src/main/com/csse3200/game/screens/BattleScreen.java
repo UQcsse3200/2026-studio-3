@@ -119,6 +119,8 @@ public class BattleScreen extends ScreenAdapter {
   private static final float CARD_HEIGHT = CardWidget.CARD_HEIGHT;
   private static final float CARD_INVENTORY_MIN_WIDTH = 800f;
   private static final float CARD_INVENTORY_MIN_HEIGHT = 600f;
+  private static final float ITEM_INVENTORY_MIN_WIDTH = 470f;
+  private static final float ITEM_INVENTORY_MIN_HEIGHT = 360f;
   private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
   private static final String CARD_WIDGET_SKIN = "flat-earth/skin/flat-earth-ui.json";
 
@@ -529,14 +531,14 @@ public class BattleScreen extends ScreenAdapter {
     return records;
   }
 
-    /** The battle play area above the raised hand and below the top controls/battle log. */
-    private Rectangle battlefieldBounds() {
-        Stage stage = ServiceLocator.getRenderService().getStage();
-        // Cards rise by 120 on hover; leave another 24 pixels before accepting a battlefield drop.
-        float bottom = Math.max(0f, stage.getHeight() - HAND_Y + CARD_HEIGHT + 144f);
-        float top = stage.getHeight() - 180f;
-        return new Rectangle(0f, bottom, stage.getWidth(), Math.max(0f, top - bottom));
-    }
+  /** The battle play area above the raised hand and below the top controls/battle log. */
+  private Rectangle battlefieldBounds() {
+    Stage stage = ServiceLocator.getRenderService().getStage();
+    // Cards rise by 120 on hover; leave another 24 pixels before accepting a battlefield drop.
+    float bottom = Math.max(0f, stage.getHeight() - HAND_Y + CARD_HEIGHT + 144f);
+    float top = stage.getHeight() - 180f;
+    return new Rectangle(0f, bottom, stage.getWidth(), Math.max(0f, top - bottom));
+  }
 
   private List<ClickableRecord> buildHandRecords() {
     Set<CardInstance> discardedInstances = new HashSet<>(battleDeck.getDiscardPileInstances());

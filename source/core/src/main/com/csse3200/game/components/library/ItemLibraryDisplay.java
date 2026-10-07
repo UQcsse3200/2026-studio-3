@@ -68,7 +68,7 @@ public class ItemLibraryDisplay extends UIComponent {
   private Label descriptionLabel;
   private TextButton.TextButtonStyle buttonStyle;
 
-  private static String resolveArtworkPath(ItemType item) {
+  public static String resolveArtworkPath(ItemType item) {
     String fileName = item.name().toLowerCase().replace('_', '-') + ".png";
     return ITEM_ART_DIRECTORY + fileName;
   }
