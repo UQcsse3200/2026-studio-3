@@ -14,8 +14,8 @@ public class PlayerTurnDisplay extends Displaying {
   private static final float HOLD = 1.5f;
   private static final float FADE_OUT = 0.6f;
 
-  public PlayerTurnDisplay(DisplayingRecord record) {
-    super(record);
+  public PlayerTurnDisplay(DisplayingRecord displayingRecord) {
+    super(displayingRecord);
   }
 
   @Override

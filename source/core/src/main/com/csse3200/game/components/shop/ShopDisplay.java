@@ -70,6 +70,8 @@ public class ShopDisplay extends UIComponent {
   public static final String PANEL_FRAME_TEXTURE = "images/shop/shop_panel_worn.png";
   public static final String CARD_FRAME_TEXTURE = "images/shop/shop_card_worn.png";
   public static final String PLAQUE_FRAME_TEXTURE = "images/shop/shop_plaque_worn.png";
+  private static final String SMALL = "small";
+  private static final String WHITE = "white";
   private static final float Z_INDEX = 2f;
   private static final float PANEL_WIDTH = 936f;
   private static final float CARD_WIDTH = 282f;
@@ -280,7 +282,7 @@ public class ShopDisplay extends UIComponent {
 
   private Drawable createCardDrawable(Color tint) {
     return createPatchDrawable(
-        CARD_FRAME_TEXTURE, 70, 64, 887, 1401, 92, 92, 92, 92, 0.17f, tint, "white");
+        CARD_FRAME_TEXTURE, 70, 64, 887, 1401, 92, 92, 92, 92, 0.17f, tint, WHITE);
   }
 
   private Drawable createPatchDrawable(
@@ -326,7 +328,7 @@ public class ShopDisplay extends UIComponent {
     }
 
     Table backdrop = new Table();
-    backdrop.setBackground(skin.newDrawable("white", BACKDROP_COLOUR));
+    backdrop.setBackground(skin.newDrawable(WHITE, BACKDROP_COLOUR));
     rootStack.add(backdrop);
 
     Table screenLayout = new Table();
@@ -386,9 +388,9 @@ public class ShopDisplay extends UIComponent {
     speechLayer.bottom().right();
 
     Table greeting = new Table();
-    greeting.setBackground(skin.newDrawable("white", new Color(0.105f, 0.052f, 0.052f, 0.78f)));
+    greeting.setBackground(skin.newDrawable(WHITE, new Color(0.105f, 0.052f, 0.052f, 0.78f)));
     Label greetingLabel =
-        new Label("\"Looking for something rare?\"", createLabelStyle("small", BODY_COLOUR));
+        new Label("\"Looking for something rare?\"", createLabelStyle(SMALL, BODY_COLOUR));
     greetingLabel.setFontScale(0.86f);
     greetingLabel.setAlignment(Align.center);
     greeting.add(greetingLabel).center().pad(12f, 6f, 12f, 6f);
@@ -402,7 +404,7 @@ public class ShopDisplay extends UIComponent {
     Label subtitle =
         new Label(
             "Choose carefully. Each offer may be purchased once.",
-            createLabelStyle("small", MUTED_COLOUR));
+            createLabelStyle(SMALL, MUTED_COLOUR));
     title.setFontScale(1.16f);
     title.setWrap(false);
     subtitle.setFontScale(0.92f);
@@ -427,7 +429,7 @@ public class ShopDisplay extends UIComponent {
 
   private void addDivider(Table shopPanel) {
     Table divider = new Table();
-    divider.setBackground(skin.newDrawable("white", new Color(0.34f, 0.25f, 0.17f, 0.92f)));
+    divider.setBackground(skin.newDrawable(WHITE, new Color(0.34f, 0.25f, 0.17f, 0.92f)));
     shopPanel.add(divider).height(2f).expandX().fillX().colspan(3).padTop(14f).padBottom(16f);
   }
 
@@ -542,8 +544,8 @@ public class ShopDisplay extends UIComponent {
 
   private Table createUnavailablePlaceholder() {
     Table placeholder = new Table();
-    placeholder.setBackground(skin.newDrawable("white", ART_COLOUR));
-    Label label = new Label("CARD ART\nUNAVAILABLE", createLabelStyle("small", MUTED_COLOUR));
+    placeholder.setBackground(skin.newDrawable(WHITE, ART_COLOUR));
+    Label label = new Label("CARD ART\nUNAVAILABLE", createLabelStyle(SMALL, MUTED_COLOUR));
     label.setFontScale(1.3f);
     label.setAlignment(Align.center);
     placeholder.add(label).center();
@@ -594,7 +596,7 @@ public class ShopDisplay extends UIComponent {
   private void addFooter(Table shopPanel) {
     statusLabel =
         new Label(
-            "The world is broken. Still trade goes on.", createLabelStyle("small", MUTED_COLOUR));
+            "The world is broken. Still trade goes on.", createLabelStyle(SMALL, MUTED_COLOUR));
     statusLabel.setFontScale(0.88f);
     statusLabel.setWrap(true);
 
@@ -631,11 +633,11 @@ public class ShopDisplay extends UIComponent {
     if (result.isSuccess()) {
       purchasedItemIds.add(itemId);
       String itemName = result.getItem() == null ? "the offer" : result.getItem().getDisplayName();
-      statusLabel.setStyle(createLabelStyle("small", AVAILABLE_COLOUR));
+      statusLabel.setStyle(createLabelStyle(SMALL, AVAILABLE_COLOUR));
       AudioService.playSound(SoundId.ITEM_PURCHASE, 0.5f);
       statusLabel.setText(String.format("Purchased %s. It was added to your deck.", itemName));
     } else {
-      statusLabel.setStyle(createLabelStyle("small", UNAFFORDABLE_COLOUR));
+      statusLabel.setStyle(createLabelStyle(SMALL, UNAFFORDABLE_COLOUR));
       AudioService.playSound(SoundId.ERROR, 0.5f);
       statusLabel.setText(result.getMessage());
     }
@@ -684,7 +686,7 @@ public class ShopDisplay extends UIComponent {
     switch (state) {
       case AVAILABLE:
         widgets.card.setBackground(availableCardBackground);
-        widgets.stateLabel.setStyle(createLabelStyle("small", AVAILABLE_COLOUR));
+        widgets.stateLabel.setStyle(createLabelStyle(SMALL, AVAILABLE_COLOUR));
         widgets.stateLabel.setText("AVAILABLE");
         widgets.buyButton.setStyle(availableButtonStyle);
         widgets.buyButton.setText("Purchase");
@@ -692,7 +694,7 @@ public class ShopDisplay extends UIComponent {
         break;
       case UNAFFORDABLE:
         widgets.card.setBackground(unaffordableCardBackground);
-        widgets.stateLabel.setStyle(createLabelStyle("small", UNAFFORDABLE_COLOUR));
+        widgets.stateLabel.setStyle(createLabelStyle(SMALL, UNAFFORDABLE_COLOUR));
         widgets.stateLabel.setText("UNAFFORDABLE");
         widgets.buyButton.setStyle(unaffordableButtonStyle);
         widgets.buyButton.setText("Not enough gold");
@@ -700,7 +702,7 @@ public class ShopDisplay extends UIComponent {
         break;
       case SOLD:
         widgets.card.setBackground(soldCardBackground);
-        widgets.stateLabel.setStyle(createLabelStyle("small", SOLD_COLOUR));
+        widgets.stateLabel.setStyle(createLabelStyle(SMALL, SOLD_COLOUR));
         widgets.stateLabel.setText("SOLD");
         widgets.buyButton.setStyle(soldButtonStyle);
         widgets.buyButton.setText("Sold");
@@ -709,7 +711,7 @@ public class ShopDisplay extends UIComponent {
       case UNAVAILABLE:
       default:
         widgets.card.setBackground(unavailableCardBackground);
-        widgets.stateLabel.setStyle(createLabelStyle("small", UNAFFORDABLE_COLOUR));
+        widgets.stateLabel.setStyle(createLabelStyle(SMALL, UNAFFORDABLE_COLOUR));
         widgets.stateLabel.setText("UNAVAILABLE");
         widgets.buyButton.setStyle(unaffordableButtonStyle);
         widgets.buyButton.setText("Unavailable");

@@ -84,10 +84,7 @@ public class EndBattleDisplay extends Displaying {
         label.getStage().getViewport().getWorldHeight() - getY());
   }
 
-  private boolean visible = true;
-
   public void setVisible(boolean visible) {
-    this.visible = visible;
     label.setVisible(visible);
   }
 

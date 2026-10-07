@@ -259,7 +259,11 @@ public class EnemyStatusEffectVisualComponent extends RenderComponent {
       int height = frame.getRegionHeight();
       int originX = Math.round(Math.min(frame.getU(), frame.getU2()) * pixels.getWidth());
       int originY = Math.round(Math.min(frame.getV(), frame.getV2()) * pixels.getHeight());
-      int left = width, top = height, right = -1, bottom = -1;
+      int left = width;
+      int top = height;
+      int right = -1;
+      int bottom = -1;
+
       for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
           if ((pixels.getPixel(originX + x, originY + y) & 0xff) == 0) continue;

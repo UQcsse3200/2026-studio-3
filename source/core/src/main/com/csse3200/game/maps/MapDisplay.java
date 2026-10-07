@@ -69,6 +69,7 @@ public class MapDisplay extends UIComponent {
   // Node-id labels, shown only while debug rendering is active — same toggle 'debug on'
   // already controls elsewhere, so this reuses it instead of adding a new one.
   private final java.util.List<Label> nodeIdLabels = new java.util.ArrayList<>();
+  private static final String PLAYER_CONFIG_ERROR = "Unable to load player config";
 
   /**
    * Constructer method to initialize mapGraph
@@ -271,6 +272,9 @@ public class MapDisplay extends UIComponent {
       maxHealth = playerState.getMaxHealth();
     } else {
       PlayerConfig stats = FileLoader.readClass(PlayerConfig.class, "configs/player.json");
+      if (stats == null) {
+        throw new IllegalStateException(PLAYER_CONFIG_ERROR);
+      }
       currentHealth = stats.health;
       maxHealth = stats.maxHealth;
     }
@@ -293,6 +297,9 @@ public class MapDisplay extends UIComponent {
       money = playerState.getGold();
     } else {
       PlayerConfig stats = FileLoader.readClass(PlayerConfig.class, "configs/player.json");
+      if (stats == null) {
+        throw new IllegalStateException(PLAYER_CONFIG_ERROR);
+      }
       money = stats.gold;
     }
 

@@ -92,6 +92,11 @@ public class InventoryPopupComponent extends UIComponent {
 
   private boolean useActionInProgress;
   private Actor useFeedback;
+  private static final String STYLE_NAME_WHITE = "white";
+  private static final String STYLE_NAME_DEFAULT = "default";
+  private static final String STYLE_NAME_SMALL = "small";
+  private static final String STYLE_NAME_LARGE = "large";
+  private static final String FONT_SMALL = "font_small";
 
   public InventoryPopupComponent(
       RunState runState, PopupDisplay popup, Entity player, BooleanSupplier canUseBattleItems) {
@@ -122,7 +127,7 @@ public class InventoryPopupComponent extends UIComponent {
     Table content = popup.getContentTable();
     content.clear();
     content.top().pad(8f);
-    content.setBackground(skin.newDrawable("white", PANEL_COLOUR));
+    content.setBackground(skin.newDrawable(STYLE_NAME_WHITE, PANEL_COLOUR));
 
     PlayerRunState playerState = runState.getOrCreatePlayerState();
     List<ItemType> ownedItems = playerState.getOwnedItems();
@@ -173,11 +178,11 @@ public class InventoryPopupComponent extends UIComponent {
     int count = playerState.getOwnedItemCount(item);
 
     Table frame = new Table();
-    frame.setBackground(skin.newDrawable("white", BORDER_COLOUR));
+    frame.setBackground(skin.newDrawable(STYLE_NAME_WHITE, BORDER_COLOUR));
     frame.pad(1f);
 
     Table row = new Table();
-    row.setBackground(skin.newDrawable("white", ROW_COLOUR));
+    row.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_COLOUR));
     row.pad(7f, 9f, 7f, 9f);
 
     String iconPath = ITEM_ICONS.get(item);
@@ -224,9 +229,9 @@ public class InventoryPopupComponent extends UIComponent {
   }
 
   private TextButton createUseButton(ItemType item) {
-    TextButtonStyle style = new TextButtonStyle(skin.get("default", TextButtonStyle.class));
+    TextButtonStyle style = new TextButtonStyle(skin.get(STYLE_NAME_DEFAULT, TextButtonStyle.class));
 
-    style.font = skin.getFont("font_small");
+    style.font = skin.getFont(FONT_SMALL);
     style.fontColor = GOLD_COLOUR;
     style.overFontColor = NAME_COLOUR;
     style.downFontColor = Color.WHITE;
@@ -273,11 +278,11 @@ public class InventoryPopupComponent extends UIComponent {
     Table border = new Table();
     border.setTransform(true);
     border.setOrigin(Align.center);
-    border.setBackground(skin.newDrawable("white", effectColour));
+    border.setBackground(skin.newDrawable(STYLE_NAME_WHITE, effectColour));
     border.pad(3f);
 
     Table message = new Table();
-    message.setBackground(skin.newDrawable("white", ROW_BACKGROUND_COLOUR));
+    message.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_BACKGROUND_COLOUR));
 
     String iconPath = ITEM_ICONS.get(itemId);
     ResourceService resources = ServiceLocator.getResourceService();
@@ -351,19 +356,19 @@ public class InventoryPopupComponent extends UIComponent {
   }
 
   private LabelStyle labelStyle(Color colour) {
-    LabelStyle style = new LabelStyle(skin.get("default", LabelStyle.class));
+    LabelStyle style = new LabelStyle(skin.get(STYLE_NAME_DEFAULT, LabelStyle.class));
     style.fontColor = colour;
     return style;
   }
 
   private LabelStyle titleStyle() {
-    LabelStyle style = new LabelStyle(skin.get("large", LabelStyle.class));
+    LabelStyle style = new LabelStyle(skin.get(STYLE_NAME_LARGE, LabelStyle.class));
     style.fontColor = TEXT_COLOUR;
     return style;
   }
 
   private LabelStyle nameStyle() {
-    LabelStyle style = new LabelStyle(skin.get("default", LabelStyle.class));
+    LabelStyle style = new LabelStyle(skin.get(STYLE_NAME_DEFAULT, LabelStyle.class));
     style.fontColor = TEXT_COLOUR;
     return style;
   }
@@ -373,17 +378,17 @@ public class InventoryPopupComponent extends UIComponent {
   }
 
   private LabelStyle smallLabelStyle(Color colour) {
-    LabelStyle style = new LabelStyle(skin.get("small", LabelStyle.class));
+    LabelStyle style = new LabelStyle(skin.get(STYLE_NAME_SMALL, LabelStyle.class));
     style.fontColor = colour;
     return style;
   }
 
   private TextButton createCloseButton() {
-    TextButtonStyle style = new TextButtonStyle(skin.get("default", TextButtonStyle.class));
+    TextButtonStyle style = new TextButtonStyle(skin.get(STYLE_NAME_DEFAULT, TextButtonStyle.class));
 
     style.fontColor = NAME_COLOUR;
-    style.up = skin.newDrawable("white", ROW_BACKGROUND_COLOUR);
-    style.over = skin.newDrawable("white", ROW_BORDER_COLOUR);
+    style.up = skin.newDrawable(STYLE_NAME_WHITE, ROW_BACKGROUND_COLOUR);
+    style.over = skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR);
 
     TextButton close = new TextButton("X", style);
 
@@ -399,7 +404,7 @@ public class InventoryPopupComponent extends UIComponent {
   }
 
   private Image divider() {
-    return new Image(skin.newDrawable("white", ROW_BORDER_COLOUR));
+    return new Image(skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR));
   }
 
   /** Returns each distinct item type once, preserving acquisition order. */

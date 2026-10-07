@@ -130,6 +130,7 @@ public class DeckEditorComponent extends UIComponent {
   private float gridOriginX;
   private float gridTopY;
   private float stageHeight;
+  private static final String STYLE_NAME_WHITE = "white";
 
   private final InputListener wheelListener =
       new InputListener() {
@@ -234,8 +235,8 @@ public class DeckEditorComponent extends UIComponent {
 
     TextButtonStyle closeStyle = new TextButtonStyle(skin.get("default", TextButtonStyle.class));
     closeStyle.fontColor = NAME_COLOUR;
-    closeStyle.up = skin.newDrawable("white", ROW_BACKGROUND_COLOUR);
-    closeStyle.over = skin.newDrawable("white", ROW_BORDER_COLOUR);
+    closeStyle.up = skin.newDrawable(STYLE_NAME_WHITE, ROW_BACKGROUND_COLOUR);
+    closeStyle.over = skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR);
     TextButton close = new TextButton("X", closeStyle);
     close.addListener(
         new ChangeListener() {
@@ -253,21 +254,27 @@ public class DeckEditorComponent extends UIComponent {
     style.fontColor = GOLD_COLOUR;
     style.overFontColor = NAME_COLOUR;
     style.downFontColor = Color.WHITE;
-    style.up = skin.newDrawable("white", ROW_BACKGROUND_COLOUR);
-    style.over = skin.newDrawable("white", ROW_BORDER_COLOUR);
-    style.down = skin.newDrawable("white", ROW_BORDER_COLOUR);
+    style.up = skin.newDrawable(STYLE_NAME_WHITE, ROW_BACKGROUND_COLOUR);
+    style.over = skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR);
+    style.down = skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR);
     return style;
   }
 
   private Table createFooterHint() {
     Table footer = new Table();
-    footer.add(new Image(skin.newDrawable("white", ROW_BORDER_COLOUR))).width(42f).height(1f);
+    footer
+        .add(new Image(skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR)))
+        .width(42f)
+        .height(1f);
     footer
         .add(
             new Label("Pick " + HAND_SIZE + " cards", labelStyle(DESCRIPTION_COLOUR, "font_small")))
         .padLeft(8f)
         .padRight(8f);
-    footer.add(new Image(skin.newDrawable("white", ROW_BORDER_COLOUR))).width(42f).height(1f);
+    footer
+        .add(new Image(skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR)))
+        .width(42f)
+        .height(1f);
     return footer;
   }
 

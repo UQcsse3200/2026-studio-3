@@ -19,7 +19,6 @@ public class EnemyStatsDisplay extends UIComponent {
   private ProgressBar healthBar;
   private Stack healthStack;
   private Stack armourStack;
-  private Image armourImage;
   private Label armourLabel;
   private Cell<Stack> armourCell;
   private static final float FONT_SCALE = 1f;
@@ -43,7 +42,7 @@ public class EnemyStatsDisplay extends UIComponent {
     table = new Table(skin);
 
     // Armour image
-    armourImage =
+    Image armourImage =
         new Image(ServiceLocator.getResourceService().getAsset("images/armour.png", Texture.class));
 
     // Armour text
@@ -80,9 +79,9 @@ public class EnemyStatsDisplay extends UIComponent {
     healthBarStyle.background.setMinHeight(20);
     healthBarStyle.knobBefore.setMinHeight(20);
 
-    healthBar = new ProgressBar(0, maxHealth, 1, false, healthBarStyle);
+    healthBar = new ProgressBar(0, (float) maxHealth, 1, false, healthBarStyle);
     healthBar.setSize(150, 20);
-    healthBar.setValue(currentHealth);
+    healthBar.setValue((float) currentHealth);
     healthBar.setAnimateDuration(0.2f);
 
     // Health stack
@@ -139,8 +138,8 @@ public class EnemyStatsDisplay extends UIComponent {
   public void updateEnemyHealthUI(int currentHealth, int maxHealth) {
     CharSequence text = String.format("%d / %d", currentHealth, maxHealth);
     healthLabel.setText(text);
-    healthBar.setRange(0, maxHealth);
-    healthBar.setValue(currentHealth);
+    healthBar.setRange(0, (float) maxHealth);
+    healthBar.setValue((float) currentHealth);
     updateHealthBarColour();
   }
 
