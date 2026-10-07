@@ -3,16 +3,24 @@ package com.csse3200.game.components.mainmenu;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window.WindowStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
+import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.MenuTheme;
+import com.csse3200.game.ui.PixelButtonStyles;
 import com.csse3200.game.ui.UIComponent;
 import java.util.List;
 import org.slf4j.Logger;
@@ -161,7 +169,8 @@ public class MainMenuDisplay extends UIComponent {
     tutorialChoiceDialog.setModal(true);
     tutorialChoiceDialog.setMovable(false);
     tutorialChoiceDialog.getContentTable().pad(20f);
-    tutorialChoiceDialog.text("Would you like to start the battle tutorial?");
+    Label prompt = new Label("Would you like to start the battle tutorial?", skin);
+    tutorialChoiceDialog.getContentTable().add(prompt);
     tutorialChoiceDialog.getButtonTable().defaults().width(220f).height(60f).pad(10f);
 
     TextButton enterButton = new TextButton("Enter Tutorial", skin);
@@ -172,7 +181,71 @@ public class MainMenuDisplay extends UIComponent {
     skipButton.setName("skipTutorial");
     tutorialChoiceDialog.button(skipButton, Boolean.FALSE);
 
+    ResourceService resources = ServiceLocator.getResourceService();
+    boolean styledTutorialDialog =
+        resources != null
+            && resources.containsAsset("images/tutorial_choice_frame.png", Texture.class)
+            && resources.containsAsset("images/ancient_temple_choice_button.png", Texture.class);
+    if (styledTutorialDialog) {
+      Texture frameTexture = getTexture("images/tutorial_choice_frame.png");
+      frameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+      TextureRegionDrawable frame = new TextureRegionDrawable(new TextureRegion(frameTexture));
+      frame.setMinWidth(0f);
+      frame.setMinHeight(0f);
+
+      WindowStyle windowStyle = new WindowStyle(tutorialChoiceDialog.getStyle());
+      windowStyle.background = frame;
+      windowStyle.stageBackground = skin.newDrawable("white", new Color(0f, 0f, 0f, 0.55f));
+      tutorialChoiceDialog.setStyle(windowStyle);
+      tutorialChoiceDialog.pad(104f, 64f, 64f, 64f);
+
+      Label titleLabel = tutorialChoiceDialog.getTitleLabel();
+      LabelStyle titleStyle = new LabelStyle(skin.get("large", LabelStyle.class));
+      titleStyle.fontColor = Color.valueOf("EFC26C");
+      titleLabel.setStyle(titleStyle);
+      titleLabel.setAlignment(Align.center);
+      tutorialChoiceDialog.getTitleTable().clear();
+      tutorialChoiceDialog.getContentTable().clear();
+      tutorialChoiceDialog.getContentTable().pad(0f).top();
+      tutorialChoiceDialog.getContentTable().add(titleLabel).growX().height(30f).padBottom(20f);
+      tutorialChoiceDialog.getContentTable().row();
+
+      LabelStyle promptStyle = new LabelStyle(skin.get(LabelStyle.class));
+      promptStyle.fontColor = Color.valueOf("E8DCC4");
+      prompt.setStyle(promptStyle);
+      prompt.setWrap(true);
+      prompt.setAlignment(Align.center);
+      tutorialChoiceDialog.getContentTable().add(prompt).growX();
+
+      Texture buttonTexture = getTexture("images/ancient_temple_choice_button.png");
+      enterButton.setStyle(PixelButtonStyles.create(skin, buttonTexture));
+      skipButton.setStyle(PixelButtonStyles.create(skin, buttonTexture));
+      tutorialChoiceDialog
+          .getButtonTable()
+          .getCell(enterButton)
+          .width(260f)
+          .height(60f)
+          .pad(0f)
+          .space(0f)
+          .padRight(18f);
+      tutorialChoiceDialog
+          .getButtonTable()
+          .getCell(skipButton)
+          .width(260f)
+          .height(60f)
+          .pad(0f)
+          .space(0f)
+          .padLeft(18f);
+      tutorialChoiceDialog.getButtonTable().padTop(24f);
+    }
+
     tutorialChoiceDialog.show(stage);
+    if (styledTutorialDialog) {
+      tutorialChoiceDialog.setSize(800f, 349f);
+      tutorialChoiceDialog.setPosition(
+          (stage.getWidth() - 800f) / 2f, (stage.getHeight() - 349f) / 2f);
+      tutorialChoiceDialog.validate();
+    }
   }
 
   private Texture getTexture(String path) {
