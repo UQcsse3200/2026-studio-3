@@ -892,7 +892,7 @@ public class BattleController {
 
     if (skipEnemyTurnIfDead(enemy)) return;
 
-    // Poison uses piercing damage, skip block and armor
+    // Resolve poison before the enemy acts. Status damage bypasses block and armour.
     CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
     enemyStats.processPoisonTick(enemyStats::takePiercingDamage);
 

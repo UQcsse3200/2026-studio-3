@@ -114,6 +114,8 @@ public class BattleScreen extends ScreenAdapter {
   private static final float CARD_HEIGHT = CardWidget.CARD_HEIGHT;
   private static final float CARD_INVENTORY_MIN_WIDTH = 800f;
   private static final float CARD_INVENTORY_MIN_HEIGHT = 600f;
+  private static final float ITEM_INVENTORY_MIN_WIDTH = 470f;
+  private static final float ITEM_INVENTORY_MIN_HEIGHT = 360f;
   private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
   private static final String CARD_WIDGET_SKIN = "flat-earth/skin/flat-earth-ui.json";
 
@@ -304,12 +306,11 @@ public class BattleScreen extends ScreenAdapter {
     PopupDisplay cardInventory = new PopupDisplay("");
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
-    PopupDisplay itemInventory = new PopupDisplay("");
-    itemInventory.setMinSize(470f, 360f);
+    PopupDisplay itemInventory = new PopupDisplay("Item Inventory");
+    itemInventory.setMinSize(ITEM_INVENTORY_MIN_WIDTH, ITEM_INVENTORY_MIN_HEIGHT);
     InventoryPopupComponent inventoryPopup =
         new InventoryPopupComponent(
             game.getRunState(), itemInventory, gameArea.getPlayer(), controller::isPlayerTurn);
-
     Entity itemInventoryEntity =
         new Entity().addComponent(itemInventory).addComponent(inventoryPopup);
     ServiceLocator.getEntityService().register(itemInventoryEntity);

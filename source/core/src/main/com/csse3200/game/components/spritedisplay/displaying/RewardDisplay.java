@@ -314,13 +314,13 @@ public class RewardDisplay extends Displaying {
           option.itemId == null
               ? ""
               : switch (option.itemId) {
-                case LUCKY_COIN -> "+10% Total Gold\nMaximum +20";
+                case LUCKY_COIN -> "+10% Total Gold, max +20";
                 case ENERGY_CRYSTAL -> "+1 Max Energy";
-                case MERCHANTS_FAVOR -> "+10% Shop Discount\nMaximum 50%";
+                case MERCHANTS_FAVOR -> "+10% Shop Discount";
                 case IRON_AEGIS -> "+5 Armour when used";
                 case WARRIORS_CREST -> "+1 Strength when used";
               };
-      case CARD -> "Choose one card to add to your deck";
+      case CARD -> "Choose one card";
     };
   }
 

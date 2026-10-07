@@ -749,6 +749,27 @@ class BattleControllerTest {
     assertEquals(List.of(true), outcomes);
   }
 
+  @Test
+  void enemyDebuffsShouldTickAfterTheAffectedEnemyActs() {
+    CombatStatsComponent stats = new CombatStatsComponent(20, 0);
+    stats.applyStatusEffect("FEEBLE", 1, 2);
+    stats.applyStatusEffect("VULNERABLE", 1, 2);
+    Entity enemy = createPoisonTestEnemy(stats, firstEnemyBehaviour);
+    BattleController battle = new BattleController(player, List.of(enemy));
+
+    battle.start();
+    battle.endPlayerTurn();
+
+    assertEquals(1, stats.getStatusEffect("FEEBLE").getDuration());
+    assertEquals(1, stats.getStatusEffect("VULNERABLE").getDuration());
+
+    battle.endPlayerTurn();
+
+    assertNull(stats.getStatusEffect("FEEBLE"));
+    assertNull(stats.getStatusEffect("VULNERABLE"));
+    verify(firstEnemyBehaviour, times(2)).executeIntent(player);
+  }
+
   /**
    * Creates an enemy with real combat stats and a controlled defending intent.
    *

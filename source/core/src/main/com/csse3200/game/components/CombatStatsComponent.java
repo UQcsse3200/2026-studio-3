@@ -20,9 +20,8 @@ import org.slf4j.LoggerFactory;
  * distinct mechanics, not two names for the same thing. Armour is a permanent damage-reduction
  * pool. It persists until consumed by incoming damage or explicitly cleared via clearArmour() - it
  * does not reset automatically at any point in the turn cycle. Block is a per-turn damage-reduction
- * pool, matching the "Slay the Spire" style block mechanic (Team 6). It is intended to reset to 0
- * once per turn via resetBlock(), regardless of whether it was consumed. TODO: exact reset timing
- * (start vs end of turn) is not yet wired up - depends on Team 3's turn/battle-sequence event.
+ * pool, matching the "Slay the Spire" style block mechanic (Team 6). The battle controller resets
+ * it at the start of the player's next turn, regardless of whether it was consumed.
  */
 public class CombatStatsComponent extends Component {
 
@@ -359,11 +358,7 @@ public class CombatStatsComponent extends Component {
     setBlock((int) Math.min(Integer.MAX_VALUE, (long) this.block + amount));
   }
 
-  /**
-   * Resets block to 0. Intended to be called once per turn, regardless of whether the block was
-   * consumed. TODO: wire this up to Team 3's turn event, same as updateStatusEffects() - timing
-   * (start vs end of turn) still needs confirmation.
-   */
+  /** Resets block to 0 at the start of the owning entity's next turn. */
   public void resetBlock() {
     setBlock(0);
   }

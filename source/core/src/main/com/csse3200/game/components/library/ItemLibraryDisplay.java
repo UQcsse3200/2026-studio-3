@@ -3,6 +3,7 @@ package com.csse3200.game.components.library;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -11,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
@@ -55,10 +57,8 @@ public class ItemLibraryDisplay extends UIComponent {
         ItemType.LUCKY_COIN,
         "Consumed when claiming a GOLD reward: adds 10% of your gold (current + reward), capped"
             + " at +20. Only one copy used per claim.");
-    ITEM_DESCRIPTIONS.put(ItemType.IRON_AEGIS, "+5 Armour at the start of each battle, stacks.");
-    ITEM_DESCRIPTIONS.put(
-        ItemType.WARRIORS_CREST,
-        "+1 Strength at the start of each battle. Each stack adds +1 damage to damaging cards.");
+    ITEM_DESCRIPTIONS.put(ItemType.IRON_AEGIS, "Consume during battle to gain +5 Armour.");
+    ITEM_DESCRIPTIONS.put(ItemType.WARRIORS_CREST, "Consume during battle to gain +1 Strength.");
   }
 
   private final GdxGame game;
@@ -88,9 +88,7 @@ public class ItemLibraryDisplay extends UIComponent {
     rootStack.setFillParent(true);
     addBackground(rootStack);
 
-    Texture buttonFrameTexture = getTexture(MainMenuDisplay.BUTTON_FRAME_TEXTURE);
-    buttonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-    buttonStyle = MenuTheme.createButtonStyle(skin, buttonFrameTexture);
+    buttonStyle = createButtonStyle();
 
     Table panel = new Table();
     panel.setBackground(skin.newDrawable(WHITE, PANEL_COLOUR));
@@ -173,11 +171,10 @@ public class ItemLibraryDisplay extends UIComponent {
   private void addItemList(ItemType[] items, Table panel) {
     Table itemList = new Table();
     itemList.top();
-    itemList.defaults().width(290f).height(58f).padBottom(8f).left();
-
+    itemList.defaults().width(290f).height(76f).padBottom(8f).left();
     for (ItemType item : items) {
       TextButton itemButton = new TextButton(ItemFormatting.formatItemName(item), buttonStyle);
-      itemButton.getLabel().setFontScale(0.75f);
+      itemButton.getLabel().setFontScale(0.6f);
       itemButton.addListener(
           new ChangeListener() {
             @Override
@@ -264,6 +261,31 @@ public class ItemLibraryDisplay extends UIComponent {
 
   private Texture getTexture(String path) {
     return ServiceLocator.getResourceService().getAsset(path, Texture.class);
+  }
+
+  private TextButton.TextButtonStyle createButtonStyle() {
+    TextButton.TextButtonStyle style =
+        new TextButton.TextButtonStyle(skin.get(TextButton.TextButtonStyle.class));
+    style.font = skin.getFont("font_large");
+    style.up = buttonDrawable(null);
+    style.over = buttonDrawable(new Color(1f, 0.88f, 0.68f, 1f));
+    style.down = buttonDrawable(new Color(0.7f, 0.48f, 0.58f, 1f));
+    style.checked = buttonDrawable(new Color(1f, 0.72f, 0.34f, 1f));
+    style.checkedOver = buttonDrawable(new Color(1f, 0.86f, 0.55f, 1f));
+    style.fontColor = MenuTheme.warmParchment();
+    style.overFontColor = Color.WHITE;
+    style.downFontColor = Color.WHITE;
+    style.checkedFontColor = Color.WHITE;
+    return style;
+  }
+
+  private Drawable buttonDrawable(Color tint) {
+    Texture texture = getTexture(CardLibraryDisplay.BUTTON_TEXTURE);
+    texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    TextureRegionDrawable drawable = new TextureRegionDrawable(new TextureRegion(texture));
+    drawable.setMinWidth(0f);
+    drawable.setMinHeight(0f);
+    return tint == null ? drawable : drawable.tint(tint);
   }
 
   @Override

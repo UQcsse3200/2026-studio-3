@@ -88,6 +88,7 @@ public class CardLibraryScreen extends ScreenAdapter {
   static String[] collectTexturePaths() {
     Set<String> paths = new LinkedHashSet<>();
     paths.add(MainMenuDisplay.BACKGROUND_TEXTURE);
+    paths.add(CardLibraryDisplay.BUTTON_TEXTURE);
     paths.add(MainMenuDisplay.BUTTON_FRAME_TEXTURE);
     paths.add(UncommonCardLibraryWidget.FRAME_TEXTURE);
     paths.add(CardWidgetAssets.COMMON_FRAME_TEXTURE);

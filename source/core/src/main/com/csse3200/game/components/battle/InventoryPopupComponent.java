@@ -13,13 +13,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
-import com.badlogic.gdx.scenes.scene2d.ui.TextTooltip;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 import com.csse3200.game.entities.Entity;
+import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
+import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.PopupDisplay;
 import com.csse3200.game.ui.UIComponent;
@@ -68,14 +69,18 @@ public class InventoryPopupComponent extends UIComponent {
     ITEM_DESCRIPTIONS.put(ItemType.ENERGY_CRYSTAL, count -> "+" + count + " Max Energy");
     ITEM_DESCRIPTIONS.put(
         ItemType.MERCHANTS_FAVOR,
-        count -> {
-          float discount = Math.min(count * 0.10f, 0.5f);
-          return String.format("+%.0f%% Shop Discount  |  Max 50%%", discount * 100);
-        });
-    ITEM_DESCRIPTIONS.put(ItemType.LUCKY_COIN, count -> "+10% Total Gold on claim  |  Max +20");
-    ITEM_DESCRIPTIONS.put(ItemType.IRON_AEGIS, count -> "+5 Armour when used");
-    ITEM_DESCRIPTIONS.put(ItemType.WARRIORS_CREST, count -> "+1 Strength when used");
+        count ->
+            String.format("+%.0f%% Shop Discount | Max 50%%", Math.min(count * 0.10f, 0.5f) * 100));
+    ITEM_DESCRIPTIONS.put(ItemType.LUCKY_COIN, count -> "+" + (count * 10) + "% Gold Reward bonus");
+    ITEM_DESCRIPTIONS.put(ItemType.IRON_AEGIS, count -> "Use in battle: +5 Armour");
+    ITEM_DESCRIPTIONS.put(ItemType.WARRIORS_CREST, count -> "Use in battle: +1 Strength");
   }
+
+  private static final Color PANEL_COLOUR = new Color(0.09f, 0.07f, 0.09f, 0.96f);
+  private static final Color ROW_COLOUR = new Color(0.15f, 0.11f, 0.13f, 1f);
+  private static final Color BORDER_COLOUR = new Color(0.55f, 0.35f, 0.28f, 1f);
+  private static final Color TEXT_COLOUR = new Color(0.9f, 0.84f, 0.73f, 1f);
+  private static final Color DETAIL_COLOUR = new Color(0.72f, 0.65f, 0.58f, 1f);
 
   private final RunState runState;
   private final PopupDisplay popup;
@@ -111,129 +116,105 @@ public class InventoryPopupComponent extends UIComponent {
   private void refresh() {
     Table content = popup.getContentTable();
     content.clear();
-    content.top().pad(2f, 5f, 5f, 5f);
+    content.top().pad(8f);
+    content.setBackground(skin.newDrawable("white", PANEL_COLOUR));
 
-    var playerState = runState.getOrCreatePlayerState();
+    PlayerRunState playerState = runState.getOrCreatePlayerState();
     List<ItemType> ownedItems = playerState.getOwnedItems();
 
     List<ItemType> itemTypes = distinctInOrder(ownedItems);
     Table header = new Table();
     header.add().width(30f);
-    header.add(new Label("INVENTORY", createTitleStyle())).expandX().center();
+    header.add(new Label("INVENTORY", titleStyle())).expandX().center();
     header.add(createCloseButton()).size(30f);
     content.add(header).growX().padBottom(1f);
     content.row();
     Label summary =
         new Label(
             ownedItems.size() + " Items  |  " + itemTypes.size() + " Types",
-            createSmallLabelStyle(DESCRIPTION_COLOUR));
+            detailStyle());
     content.add(summary).center().padBottom(5f).growX();
     content.row();
     content.add(divider()).height(1f).growX().padBottom(5f);
     content.row();
 
+    content.add(new Label("ITEM INVENTORY", titleStyle())).center().padBottom(10f).row();
     if (ownedItems.isEmpty()) {
-      Label emptyLabel = new Label("No items yet", createLabelStyle(DESCRIPTION_COLOUR));
-      content.add(emptyLabel).expand().center().pad(60f);
+      content.add(new Label("No items collected yet.", detailStyle())).pad(40f).row();
       return;
     }
 
     Table itemList = new Table();
     itemList.top();
-    for (ItemType itemId : itemTypes) {
-      int count = playerState.getOwnedItemCount(itemId);
-      itemList.add(createItemRow(itemId, count)).growX().padBottom(4f);
-      itemList.row();
+    for (ItemType item : ownedItems.stream().distinct().toList()) {
+      itemList.add(createItemRow(playerState, item)).growX().padBottom(6f).row();
     }
 
     ScrollPane scrollPane = new ScrollPane(itemList, skin);
     scrollPane.setFadeScrollBars(false);
     scrollPane.setScrollingDisabled(true, false);
-    content.add(scrollPane).grow().minHeight(190f);
-    content.row();
-
-    content.add(createFooter()).center().padTop(4f);
+    content.add(scrollPane).width(410f).height(230f).row();
+    String turnHint =
+        canUseBattleItems.getAsBoolean()
+            ? "Consumable items can be used this turn."
+            : "Consumable items can only be used on your turn.";
+    content.add(new Label(turnHint, detailStyle())).padTop(8f).padBottom(4f);
   }
 
-  private Table createItemRow(ItemType itemId, int count) {
-    Table frame = new Table();
-    frame.setBackground(skin.newDrawable("white", ROW_BORDER_COLOUR));
-    frame.pad(2f);
-
+  private Table createItemRow(PlayerRunState playerState, ItemType item) {
     Table row = new Table();
-    row.setBackground(skin.newDrawable("white", ROW_BACKGROUND_COLOUR));
-    row.pad(6f, 10f, 6f, 10f);
+    row.setBackground(skin.newDrawable("white", ROW_COLOUR));
+    row.pad(7f, 9f, 7f, 9f);
 
-    String iconPath = ITEM_ICONS.get(itemId);
-    if (iconPath != null) {
-      Texture texture = ServiceLocator.getResourceService().getAsset(iconPath, Texture.class);
-      row.add(new Image(texture)).size(46f).padRight(12f);
+    String iconPath = ITEM_ICONS.get(item);
+    ResourceService resources = ServiceLocator.getResourceService();
+    if (iconPath != null && resources.containsAsset(iconPath, Texture.class)) {
+      row.add(new Image(resources.getAsset(iconPath, Texture.class))).size(38f).padRight(10f);
     }
 
     Table text = new Table();
     text.left();
-    Label name =
-        new Label(
-            ItemFormatting.formatItemName(itemId) + "  x" + count, createLabelStyle(NAME_COLOUR));
-    Label description =
-        new Label(
-            ITEM_DESCRIPTIONS.containsKey(itemId) ? ITEM_DESCRIPTIONS.get(itemId).apply(count) : "",
-            createSmallLabelStyle(DESCRIPTION_COLOUR));
-    text.add(name).left();
+    text.add(new Label(ItemFormatting.formatItemName(item), nameStyle())).left();
     text.row();
-    text.add(description).left().padTop(2f);
+    String description =
+        ITEM_DESCRIPTIONS
+            .getOrDefault(item, ignored -> "")
+            .apply(playerState.getOwnedItemCount(item));
+    text.add(new Label(description, detailStyle())).left().padTop(2f);
     row.add(text).left().growX();
 
-    if (itemId.isBattleConsumable()) {
-      row.add(createUseButton(itemId)).width(66f).height(32f).padLeft(12f);
+    if (item.isBattleConsumable()) {
+      row.add(createUseButton(item)).width(64f).height(34f).padLeft(8f);
     } else {
-      row.add(createStatusBadge(itemId)).right().padLeft(12f);
+      row.add(new Label("x" + playerState.getOwnedItemCount(item), detailStyle())).padLeft(10f);
     }
 
-    frame.add(row).grow();
-    return frame;
+    Table border = new Table();
+    border.setBackground(skin.newDrawable("white", BORDER_COLOUR));
+    border.pad(1f);
+    border.add(row).grow();
+    return border;
   }
 
-  private TextButton createUseButton(ItemType itemId) {
-    TextButtonStyle style = new TextButtonStyle(skin.get("default", TextButtonStyle.class));
-    style.font = skin.getFont("font_small");
-    style.fontColor = GOLD_COLOUR;
-    style.overFontColor = NAME_COLOUR;
-    style.downFontColor = Color.WHITE;
-    style.disabledFontColor = DESCRIPTION_COLOUR;
-
-    TextButton useButton = new TextButton("USE", style);
-    useButton.setDisabled(useActionInProgress || !canUseBattleItems.getAsBoolean());
-    useButton.addListener(new TextTooltip("Use during your turn", skin));
-    useButton.addListener(
+  private TextButton createUseButton(ItemType item) {
+    TextButton.TextButtonStyle style =
+        new TextButton.TextButtonStyle(skin.get("default", TextButton.TextButtonStyle.class));
+    style.fontColor = TEXT_COLOUR;
+    style.overFontColor = Color.WHITE;
+    style.disabledFontColor = DETAIL_COLOUR;
+    TextButton button = new TextButton("USE", style);
+    button.setDisabled(!canUseBattleItems.getAsBoolean());
+    button.addListener(
         new ChangeListener() {
           @Override
-          public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-            if (useActionInProgress || !canUseBattleItems.getAsBoolean()) {
-              return;
-            }
-
-            if (runState.getOrCreatePlayerState().useBattleItem(itemId, player)) {
-              useActionInProgress = true;
-              useButton.setDisabled(true);
-              showUseFeedback(itemId);
+          public void changed(ChangeEvent event, Actor actor) {
+            if (canUseBattleItems.getAsBoolean()
+                && runState.getOrCreatePlayerState().useBattleItem(item, player)) {
+              refresh();
             }
           }
         });
-    return useButton;
-  }
-
-  private Table createStatusBadge(ItemType itemId) {
-    String status = itemId == ItemType.LUCKY_COIN ? "ON GOLD" : "PASSIVE";
-    Table border = new Table();
-    border.setBackground(skin.newDrawable("white", ROW_BORDER_COLOUR));
-    border.pad(2f);
-
-    Table badge = new Table();
-    badge.setBackground(skin.newDrawable("white", ROW_BACKGROUND_COLOUR));
-    badge.add(new Label(status, createSmallLabelStyle(DESCRIPTION_COLOUR))).pad(5f, 8f, 5f, 8f);
-    border.add(badge);
-    return border;
+    return button;
   }
 
   private void showUseFeedback(ItemType itemId) {
@@ -261,7 +242,7 @@ public class InventoryPopupComponent extends UIComponent {
 
     Table text = new Table();
     Label titleLabel = new Label(title, createLabelStyle(NAME_COLOUR));
-    Label detailLabel = new Label(detail, createSmallLabelStyle(effectColour));
+    Label detailLabel = new Label(detail, detailStyle());
     text.add(titleLabel).left();
     text.row();
     text.add(detailLabel).left().padTop(2f);
@@ -313,15 +294,21 @@ public class InventoryPopupComponent extends UIComponent {
     useActionInProgress = false;
   }
 
-  private LabelStyle createTitleStyle() {
-    LabelStyle style = createLabelStyle(NAME_COLOUR);
-    style.font = skin.getFont("font");
+  private Label.LabelStyle titleStyle() {
+    Label.LabelStyle style = new Label.LabelStyle(skin.get("large", Label.LabelStyle.class));
+    style.fontColor = TEXT_COLOUR;
     return style;
   }
 
-  private LabelStyle createSmallLabelStyle(Color colour) {
-    LabelStyle style = createLabelStyle(colour);
-    style.font = skin.getFont("font_small");
+  private Label.LabelStyle nameStyle() {
+    Label.LabelStyle style = new Label.LabelStyle(skin.get("default", Label.LabelStyle.class));
+    style.fontColor = TEXT_COLOUR;
+    return style;
+  }
+
+  private Label.LabelStyle detailStyle() {
+    Label.LabelStyle style = new Label.LabelStyle(skin.get("small", Label.LabelStyle.class));
+    style.fontColor = DETAIL_COLOUR;
     return style;
   }
 
@@ -349,7 +336,7 @@ public class InventoryPopupComponent extends UIComponent {
             ? "Combat items ready  |  ESC  Close"
             : "Wait for your turn  |  ESC  Close";
     footer
-        .add(new Label(instruction, createSmallLabelStyle(DESCRIPTION_COLOUR)))
+        .add(new Label(instruction, detailStyle()))
         .padLeft(8f)
         .padRight(8f);
     footer.add(new Image(skin.newDrawable("white", ROW_BORDER_COLOUR))).width(42f).height(1f);
@@ -367,6 +354,6 @@ public class InventoryPopupComponent extends UIComponent {
 
   @Override
   protected void draw(SpriteBatch batch) {
-    // Actors are drawn by the stage; nothing to do per-frame here.
+    // Actors are drawn by the stage.
   }
 }
