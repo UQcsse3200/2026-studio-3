@@ -15,10 +15,8 @@ public final class BattleTutorialController implements AutoCloseable {
   public enum Step {
     INTRO,
     CARD_INVENTORY,
-    ITEM_INVENTORY,
     USED_CARD,
     ENEMY_STATS,
-    ENEMY_ARMOUR,
     HAND,
     CARD_COST,
     ENERGY,
@@ -68,7 +66,7 @@ public final class BattleTutorialController implements AutoCloseable {
     if (currentStep == Step.CARD_ANIMATION && enemyHealth < enemyHealthBefore) {
       show(Step.ENEMY_STATS);
     } else if (currentStep == Step.ENEMY_ANIMATION) {
-      show(Step.FREE_PLAY);
+      show(Step.HEALTH);
     }
   }
 
@@ -151,15 +149,13 @@ public final class BattleTutorialController implements AutoCloseable {
             ? switch (currentStep) {
               case INTRO -> Step.HAND;
               case HAND -> Step.CARD_INVENTORY;
-              case CARD_INVENTORY -> Step.ITEM_INVENTORY;
-              case ITEM_INVENTORY -> Step.ENERGY;
+              case CARD_INVENTORY -> Step.ENERGY;
               case ENERGY -> Step.CARD_COST;
               case CARD_COST -> Step.PLAY_A_CARD;
-              case ENEMY_STATS -> Step.ENEMY_ARMOUR;
-              case ENEMY_ARMOUR -> Step.HEALTH;
-              case END_TURN -> Step.FREE_PLAY;
+              case ENEMY_STATS -> Step.USED_CARD;
               case USED_CARD -> Step.END_TURN;
-              case HEALTH -> Step.END_TURN;
+              case END_TURN -> Step.HEALTH;
+              case HEALTH -> Step.FREE_PLAY;
               case BUFFS -> Step.CARD_DRAW;
               case CARD_DRAW -> Step.BATTLE_OUTCOME_RULES;
               case BATTLE_OUTCOME_RULES -> Step.FREE_PLAY;

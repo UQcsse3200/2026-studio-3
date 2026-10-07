@@ -20,11 +20,6 @@ import java.util.Map;
 
 /** A ui component for displaying player stats, e.g. health. */
 public class PlayerStatsDisplay extends UIComponent {
-  /** Read-only live health display for tutorial anchoring and resolution observation. */
-  public Label getHealthLabel() {
-    return healthLabel;
-  }
-
   Table table;
   private ProgressBar healthBar;
   private Label healthLabel;

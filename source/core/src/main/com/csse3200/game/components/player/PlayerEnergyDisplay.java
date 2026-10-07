@@ -13,50 +13,7 @@ import com.csse3200.game.ui.UIComponent;
 
 /** A ui component for displaying player's energy */
 public class PlayerEnergyDisplay extends UIComponent {
-  /** Live visual target; does not expose or change energy rules. */
-  public com.badlogic.gdx.scenes.scene2d.Actor getEnergyActor() {
-    return stack;
-  }
-
   Stack stack;
-  private com.badlogic.gdx.math.Rectangle opaquePixels;
-
-  /** Bounds of visible icon pixels, excluding transparent texture padding. */
-  public com.badlogic.gdx.math.Rectangle getEnergyVisualBounds() {
-    energyImage.validate();
-    if (opaquePixels == null) {
-      com.badlogic.gdx.graphics.Pixmap source =
-          new com.badlogic.gdx.graphics.Pixmap(
-              com.badlogic.gdx.Gdx.files.internal("images/energy.png"));
-      int left = source.getWidth(), top = source.getHeight(), right = 0, bottom = 0;
-      for (int y = 0; y < source.getHeight(); y++)
-        for (int x = 0; x < source.getWidth(); x++)
-          if ((source.getPixel(x, y) & 255) > 16) {
-            left = Math.min(left, x);
-            top = Math.min(top, y);
-            right = Math.max(right, x + 1);
-            bottom = Math.max(bottom, y + 1);
-          }
-      opaquePixels =
-          new com.badlogic.gdx.math.Rectangle(
-              (float) left / source.getWidth(),
-              1f - (float) bottom / source.getHeight(),
-              (float) (right - left) / source.getWidth(),
-              (float) (bottom - top) / source.getHeight());
-      source.dispose();
-    }
-    com.badlogic.gdx.math.Vector2 origin =
-        energyImage.localToStageCoordinates(
-            new com.badlogic.gdx.math.Vector2(
-                energyImage.getImageX() + opaquePixels.x * energyImage.getImageWidth(),
-                energyImage.getImageY() + opaquePixels.y * energyImage.getImageHeight()));
-    return new com.badlogic.gdx.math.Rectangle(
-        origin.x - 3,
-        origin.y - 3,
-        opaquePixels.width * energyImage.getImageWidth() + 6,
-        opaquePixels.height * energyImage.getImageHeight() + 6);
-  }
-
   Table table;
   Label energyLabel;
   Image energyImage;
