@@ -195,7 +195,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#openDemoCampfire()" class="member-name-link">openDemoCampfire</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Opens a temporary Campfire preview with no map node or persistent run changes.</div>
+<div class="block">Temporary map-free shortcut; reuses Campfire UI and returns directly to the menu.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#openDemoCardFusion()" class="member-name-link">openDemoCardFusion</a>()</code></div>
@@ -205,7 +205,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#openDemoEvent()" class="member-name-link">openDemoEvent</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Opens a temporary Event preview without entering or changing the run map.</div>
+<div class="block">Temporary map-free Event preview; completion returns directly to the main menu.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#openDemoShop()" class="member-name-link">openDemoShop</a>()</code></div>
@@ -242,6 +242,16 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startEvent(java.lang.String)" class="member-name-link">startEvent</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;eventId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Opens a specific configured Event for the active map node using the persistent run.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startNewRun()" class="member-name-link">startNewRun</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Discards the previous run, plays the opening story, and opens a fresh normal map.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startTutorialBattle()" class="member-name-link">startTutorialBattle</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Opens an isolated teaching battle without entering or completing a map node.</div>
 </div>
 </div>
 </div>
@@ -371,10 +381,27 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="startNewRun()">
+<h3>startNewRun</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">startNewRun</span>()</div>
+<div class="block">Discards the previous run, plays the opening story, and opens a fresh normal map.
+
+ <p>The outgoing screen is disposed before resetting run state, so its final state capture
+ cannot carry tutorial progress into the new run.</div>
+</section>
+</li>
+<li>
 <section class="detail" id="startBattle()">
 <h3>startBattle</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">startBattle</span>()</div>
 <div class="block">Opens the battle screen.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="startTutorialBattle()">
+<h3>startTutorialBattle</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">startTutorialBattle</span>()</div>
+<div class="block">Opens an isolated teaching battle without entering or completing a map node.</div>
 </section>
 </li>
 <li>
@@ -398,7 +425,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="openDemoEvent()">
 <h3>openDemoEvent</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">openDemoEvent</span>()</div>
-<div class="block">Opens a temporary Event preview without entering or changing the run map.</div>
+<div class="block">Temporary map-free Event preview; completion returns directly to the main menu.</div>
 </section>
 </li>
 <li>
@@ -412,7 +439,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="openDemoCampfire()">
 <h3>openDemoCampfire</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">openDemoCampfire</span>()</div>
-<div class="block">Opens a temporary Campfire preview with no map node or persistent run changes.</div>
+<div class="block">Temporary map-free shortcut; reuses Campfire UI and returns directly to the menu.</div>
 </section>
 </li>
 <li>

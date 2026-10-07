@@ -157,9 +157,18 @@ loadScripts(document, 'script');</script>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.components.combat.BattleController,com.csse3200.game.GdxGame)" class="member-name-link">BattleActions</a><wbr>(<a href="../combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a>&nbsp;controller,
  <a href="../../GdxGame.html" title="class in com.csse3200.game">GdxGame</a>&nbsp;game)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.components.combat.BattleController,com.csse3200.game.GdxGame,java.util.List)" class="member-name-link">BattleActions</a><wbr>(<a href="../combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a>&nbsp;controller,
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.components.combat.BattleController,com.csse3200.game.GdxGame,boolean)" class="member-name-link">BattleActions</a><wbr>(<a href="../combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a>&nbsp;controller,
+ <a href="../../GdxGame.html" title="class in com.csse3200.game">GdxGame</a>&nbsp;game,
+ boolean&nbsp;tutorialBattle)</code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.components.combat.BattleController,com.csse3200.game.GdxGame,java.util.List)" class="member-name-link">BattleActions</a><wbr>(<a href="../combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a>&nbsp;controller,
  <a href="../../GdxGame.html" title="class in com.csse3200.game">GdxGame</a>&nbsp;game,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&gt;&nbsp;enemies)</code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.components.combat.BattleController,com.csse3200.game.GdxGame,java.util.List,boolean)" class="member-name-link">BattleActions</a><wbr>(<a href="../combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a>&nbsp;controller,
+ <a href="../../GdxGame.html" title="class in com.csse3200.game">GdxGame</a>&nbsp;game,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&gt;&nbsp;enemies,
+ boolean&nbsp;tutorialBattle)</code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 </div>
 </section>
@@ -186,13 +195,18 @@ loadScripts(document, 'script');</script>
 <div class="block">Called when the component is disposed.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isPlayerTurn()" class="member-name-link">isPlayerTurn</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hasPendingEnemyReveals()" class="member-name-link">hasPendingEnemyReveals</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Read-only presentation timing probe for tutorial guidance.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isPlayerTurn()" class="member-name-link">isPlayerTurn</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns whether the battle is waiting for player input.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#update()" class="member-name-link">update</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#update()" class="member-name-link">update</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Called once per frame of the game, and should be used for most component logic.</div>
 </div>
 </div>
@@ -335,11 +349,28 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.components.combat.BattleController,com.csse3200.game.GdxGame,boolean)">
+<h3>BattleActions</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">BattleActions</span><wbr><span class="parameters">(<a href="../combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a>&nbsp;controller,
+ <a href="../../GdxGame.html" title="class in com.csse3200.game">GdxGame</a>&nbsp;game,
+ boolean&nbsp;tutorialBattle)</span></div>
+</section>
+</li>
+<li>
 <section class="detail" id="&lt;init&gt;(com.csse3200.game.components.combat.BattleController,com.csse3200.game.GdxGame,java.util.List)">
 <h3>BattleActions</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">BattleActions</span><wbr><span class="parameters">(<a href="../combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a>&nbsp;controller,
  <a href="../../GdxGame.html" title="class in com.csse3200.game">GdxGame</a>&nbsp;game,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&gt;&nbsp;enemies)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.components.combat.BattleController,com.csse3200.game.GdxGame,java.util.List,boolean)">
+<h3>BattleActions</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">BattleActions</span><wbr><span class="parameters">(<a href="../combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a>&nbsp;controller,
+ <a href="../../GdxGame.html" title="class in com.csse3200.game">GdxGame</a>&nbsp;game,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&gt;&nbsp;enemies,
+ boolean&nbsp;tutorialBattle)</span></div>
 </section>
 </li>
 </ul>
@@ -350,6 +381,13 @@ loadScripts(document, 'script');</script>
 <section class="method-details" id="method-detail">
 <h2>Method Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="hasPendingEnemyReveals()">
+<h3>hasPendingEnemyReveals</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">hasPendingEnemyReveals</span>()</div>
+<div class="block">Read-only presentation timing probe for tutorial guidance.</div>
+</section>
+</li>
 <li>
 <section class="detail" id="isPlayerTurn()">
 <h3>isPlayerTurn</h3>
