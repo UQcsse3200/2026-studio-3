@@ -31,6 +31,9 @@ import com.csse3200.game.components.enemy.EnemyStatsComponent;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.PlayerActions;
 import com.csse3200.game.entities.Entity;
+import com.csse3200.game.services.ResourceService;
+import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -61,6 +64,9 @@ class BattleControllerTest {
     controller = new BattleController(player, enemies);
     phaseHistory.clear();
     controller.addPhaseChangeListener((previous, next) -> phaseHistory.add(next));
+    ServiceLocator.registerResourceService(new ResourceService());
+    AudioService.load();
+    ServiceLocator.getResourceService().loadAll();
   }
 
   @Test
@@ -572,6 +578,29 @@ class BattleControllerTest {
   }
 
   @Test
+  void shouldIncrementTurnNumberAfterEnemiesAct() {
+    controller.start();
+    assertEquals(1, controller.getPlayerTurnNumber());
+
+    controller.endPlayerTurn();
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+    assertEquals(2, controller.getPlayerTurnNumber());
+
+    controller.endPlayerTurn();
+    assertEquals(3, controller.getPlayerTurnNumber());
+  }
+
+  @Test
+  void shouldKeepSameTurnNumberAfterPlayingCard() {
+    controller.start();
+
+    controller.handle(BattleEvent.CARD_PLAY_REQUESTED);
+
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+    assertEquals(1, controller.getPlayerTurnNumber());
+  }
+
+  @Test
   void shouldClearPendingCardIfResolutionListenerThrows() {
     controller.start();
     controller.addPhaseChangeListener(
@@ -718,6 +747,27 @@ class BattleControllerTest {
     verify(firstEnemyBehaviour, never()).executeIntent(player);
     assertEquals(BattlePhase.VICTORY, battle.getCurrentPhase());
     assertEquals(List.of(true), outcomes);
+  }
+
+  @Test
+  void enemyDebuffsShouldTickAfterTheAffectedEnemyActs() {
+    CombatStatsComponent stats = new CombatStatsComponent(20, 0);
+    stats.applyStatusEffect("FEEBLE", 1, 2);
+    stats.applyStatusEffect("VULNERABLE", 1, 2);
+    Entity enemy = createPoisonTestEnemy(stats, firstEnemyBehaviour);
+    BattleController battle = new BattleController(player, List.of(enemy));
+
+    battle.start();
+    battle.endPlayerTurn();
+
+    assertEquals(1, stats.getStatusEffect("FEEBLE").getDuration());
+    assertEquals(1, stats.getStatusEffect("VULNERABLE").getDuration());
+
+    battle.endPlayerTurn();
+
+    assertNull(stats.getStatusEffect("FEEBLE"));
+    assertNull(stats.getStatusEffect("VULNERABLE"));
+    verify(firstEnemyBehaviour, times(2)).executeIntent(player);
   }
 
   /**

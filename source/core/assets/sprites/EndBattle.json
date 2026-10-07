@@ -13,6 +13,7 @@
       "text": "Click anywhere or press any key to return to the menu",
       "x": 0,
       "y": 380,
+      "fontName": "large",
       "scale": 1,
       "variant": "endBattle"
     }

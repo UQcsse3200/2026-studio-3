@@ -1,13 +1,14 @@
 package com.csse3200.game.components.player;
 
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.Align;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.enemy.IntentIcons;
@@ -20,8 +21,12 @@ import java.util.Map;
 /** A ui component for displaying player stats, e.g. health. */
 public class PlayerStatsDisplay extends UIComponent {
   Table table;
+  private ProgressBar healthBar;
   private Label healthLabel;
-  private Label energyLabel;
+  private Stack armourStack;
+  private Label armourLabel;
+  private Cell<Stack> armourCell;
+  private static final String STYLE_NAME_WHITE = "white";
   private Image statusImage;
   private Table statusRow;
   private Table statusIcons;
@@ -39,7 +44,7 @@ public class PlayerStatsDisplay extends UIComponent {
     addActors();
 
     entity.getEvents().addListener("updateHealth", this::updatePlayerHealthUI);
-    entity.getEvents().addListener("updateEnergy", this::updatePlayerEnergyUI);
+    entity.getEvents().addListener("updateArmour", this::updateArmourUI);
     entity.getEvents().addListener("statusEffectApplied", statusChangeListener);
     entity.getEvents().addListener("statusEffectRemoved", statusChangeListener);
     updateStatusRow();
@@ -53,39 +58,63 @@ public class PlayerStatsDisplay extends UIComponent {
   private void addActors() {
     table = new Table(skin);
 
-    // Image size
     float imageSideLength = 20f;
 
-    // Heart image
-    Image heartImage =
-        new Image(ServiceLocator.getResourceService().getAsset("images/heart.png", Texture.class));
+    // Armour image
+    Image armourImage =
+        new Image(ServiceLocator.getResourceService().getAsset("images/armour.png", Texture.class));
 
-    // Health text
+    // Armour text
+    int armour = entity.getComponent(CombatStatsComponent.class).getArmour();
+    CharSequence armourText = String.format("%d", armour);
+    armourLabel = new Label(armourText, skin);
+    armourLabel.setColor(Color.WHITE);
+    armourLabel.setFontScale(FONT_SCALE);
+    armourLabel.setAlignment(Align.center);
+
+    // Armour stack
+    armourStack = new Stack();
+    armourStack.add(armourImage);
+    armourStack.add(armourLabel);
+
+    // Health label
     int currentHealth = entity.getComponent(CombatStatsComponent.class).getHealth();
     int maxHealth = entity.getComponent(CombatStatsComponent.class).getMaxHealth();
-    CharSequence healthText = String.format("Health: %d / %d", currentHealth, maxHealth);
-    healthLabel = new Label(healthText, skin, STYLE_NAME_LARGE);
+    CharSequence healthText = String.format("%d / %d", currentHealth, maxHealth);
+    healthLabel = new Label(healthText, skin);
+    healthLabel.setColor(Color.WHITE);
     healthLabel.setFontScale(FONT_SCALE);
+    healthLabel.setAlignment(Align.center);
 
-    // Energy image
-    Image energyImage =
-        new Image(ServiceLocator.getResourceService().getAsset("images/energy.png", Texture.class));
+    // Health bar
+    ProgressBar.ProgressBarStyle healthBarStyle = new ProgressBar.ProgressBarStyle();
+    healthBarStyle.background = skin.newDrawable(STYLE_NAME_WHITE, Color.DARK_GRAY);
 
-    // Energy text
-    EnergyComponent energyComponent = entity.getComponent(EnergyComponent.class);
-    int currentEnergy = energyComponent.getCurrentEnergy();
-    int maxEnergy = energyComponent.getMaxEnergy();
-    CharSequence energyText = String.format("Energy: %d / %d", currentEnergy, maxEnergy);
-    energyLabel = new Label(energyText, skin, STYLE_NAME_LARGE);
-    energyLabel.setFontScale(FONT_SCALE);
+    if (armour > 0) {
+      healthBarStyle.knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.SKY);
+    } else {
+      healthBarStyle.knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.GREEN);
+    }
 
-    table.add(heartImage).size(imageSideLength).pad(5);
-    table.add(healthLabel);
-    table.row();
+    healthBarStyle.background.setMinHeight(20);
+    healthBarStyle.knobBefore.setMinHeight(20);
 
-    table.add(energyImage).size(imageSideLength).pad(5);
-    table.add(energyLabel).left();
-    table.row();
+    healthBar = new ProgressBar(0, (float) maxHealth, 1, false, healthBarStyle);
+    healthBar.setSize(150, 20);
+    healthBar.setValue((float) currentHealth);
+    healthBar.setAnimateDuration(0.2f);
+
+    // Health stack
+    Stack healthStack = new Stack();
+    healthStack.add(healthBar);
+    healthStack.add(healthLabel);
+
+    // Add stacks and cell to table
+    armourCell = table.add(armourStack).size(60f);
+    updateArmourVisibility(armour);
+    table.add(healthStack).width(150).height(30);
+
+    table.pack();
 
     // Status effects: hidden until something is active, then one icon and count per effect.
     statusImage =
@@ -103,6 +132,7 @@ public class PlayerStatsDisplay extends UIComponent {
     table.add(statusRow).left();
 
     stage.addActor(table);
+    updatePosition();
   }
 
   @Override
@@ -205,15 +235,15 @@ public class PlayerStatsDisplay extends UIComponent {
         || effectName.equals("TAUNT");
   }
 
-  /** Updates the position of the enemy's stats, so they are displayed directly below the enemy */
+  /** Updates the position of the player's stats, so they are displayed directly below the player */
   public void updatePosition() {
     Vector2 position = entity.getPosition();
     Vector2 scale = entity.getScale();
 
-    float enemyX = position.x + scale.x / 2f;
-    float enemyY = position.y - 0.5f;
+    float playerX = position.x + scale.x / 2f;
+    float playerY = position.y - 1.25f;
 
-    Vector3 screenPosition = new Vector3(enemyX, enemyY, 0);
+    Vector3 screenPosition = new Vector3(playerX, playerY, 0);
 
     Camera camera = ServiceLocator.getCamera();
     if (camera == null) {
@@ -231,19 +261,61 @@ public class PlayerStatsDisplay extends UIComponent {
    * @param maxHealth player's max health
    */
   public void updatePlayerHealthUI(int currentHealth, int maxHealth) {
-    CharSequence text = String.format("Health: %d / %d", currentHealth, maxHealth);
+    CharSequence text = String.format("%d / %d", currentHealth, maxHealth);
     healthLabel.setText(text);
+    healthBar.setRange(0, (float) maxHealth);
+    healthBar.setValue((float) currentHealth);
+    updateHealthBarColour();
   }
 
   /**
-   * Updates the player's energy on the ui.
+   * Updates the player's armour on the UI
    *
-   * @param currentEnergy player's current energy
-   * @param maxEnergy player's max energy
+   * @param armour the player's armour
    */
-  public void updatePlayerEnergyUI(int currentEnergy, int maxEnergy) {
-    CharSequence text = String.format("Energy: %d / %d", currentEnergy, maxEnergy);
-    energyLabel.setText(text);
+  public void updateArmourUI(int armour) {
+    CharSequence text = String.format("%d", armour);
+    armourLabel.setText(text);
+    updateArmourVisibility(armour);
+    updateHealthBarColour();
+  }
+
+  /**
+   * Updates the colour of the health bar. If the entity has armour the colour turns blue. If the
+   * entity's health reaches 40% the colour turns red.
+   */
+  public void updateHealthBarColour() {
+    CombatStatsComponent stats = entity.getComponent(CombatStatsComponent.class);
+    int currentHealth = stats.getHealth();
+    int maxHealth = stats.getMaxHealth();
+    int armour = stats.getArmour();
+
+    if (armour > 0) {
+      healthBar.getStyle().knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.SKY);
+      healthBar.getStyle().knobBefore.setMinHeight(20);
+    } else if ((float) currentHealth / maxHealth <= 0.4f) {
+      healthBar.getStyle().knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.RED);
+      healthBar.getStyle().knobBefore.setMinHeight(20);
+    } else {
+      healthBar.getStyle().knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.GREEN);
+      healthBar.getStyle().knobBefore.setMinHeight(20);
+    }
+  }
+
+  /**
+   * Makes the armour cell visible if entity has armour
+   *
+   * @param armour the amount of armour the entity has
+   */
+  public void updateArmourVisibility(int armour) {
+    if (armour > 0) {
+      armourCell.setActor(armourStack);
+      armourCell.size(60f);
+    } else {
+      armourCell.setActor(null);
+      armourCell.size(0f);
+    }
+    table.pack();
   }
 
   @Override
@@ -255,6 +327,7 @@ public class PlayerStatsDisplay extends UIComponent {
     entity.getEvents().removeListener("statusEffectApplied", statusChangeListener);
     entity.getEvents().removeListener("statusEffectRemoved", statusChangeListener);
     super.dispose();
+    healthBar.remove();
     table.remove();
   }
 }

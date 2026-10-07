@@ -7,6 +7,8 @@ import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,12 +40,28 @@ public class CardEffectHandler {
       }
       for (ResolvedCardEffect effect : effects) {
         switch (effect.type()) {
-          case DAMAGE -> stats.takeDamage(effect.value());
-          case PIERCE -> stats.takePiercingDamage(effect.value());
-          case SUNDER -> stats.setArmour(stats.getArmour() - effect.value());
-          case POISON, VULNERABLE, FEEBLE ->
-              stats.applyStatusEffect(
-                  new StatusEffect(effect.type().name(), effect.value(), effect.duration()));
+          case DAMAGE -> {
+            AudioService.playSound(SoundId.SWORD_SWING, 0.6f);
+            stats.takeDamage(effect.value());
+          }
+          case PIERCE -> {
+            AudioService.playSound(SoundId.ARMOUR_BREAK, 0.5f);
+            stats.takePiercingDamage(effect.value());
+          }
+          case SUNDER -> {
+            AudioService.playSound(SoundId.ARMOUR_BREAK, 0.5f);
+            stats.setArmour(stats.getArmour() - effect.value());
+          }
+          case VULNERABLE, FEEBLE -> {
+            AudioService.playSound(SoundId.ARMOUR_BREAK, 0.5f);
+            stats.applyStatusEffect(
+                new StatusEffect(effect.type().name(), effect.value(), effect.duration()));
+          }
+          case POISON -> {
+            AudioService.playSound(SoundId.BOTTLE_CORK, 0.5f);
+            stats.applyStatusEffect(
+                new StatusEffect(effect.type().name(), effect.value(), effect.duration()));
+          }
           default -> {
             // BLOCK / HEAL / STRENGTH are not enemy-facing.
           }
@@ -65,24 +83,37 @@ public class CardEffectHandler {
     }
     for (ResolvedCardEffect effect : effects) {
       switch (effect.type()) {
-        case BLOCK -> stats.addBlock(effect.value());
+        case BLOCK -> {
+          AudioService.playSound(SoundId.SHIELD_GUARD, 0.3f);
+          stats.addBlock(effect.value());
+        }
+        case FORTIFY -> {
+          AudioService.playSound(SoundId.SHIELD_GUARD, 0.3f);
+          stats.addArmour(effect.value());
+        }
         case HEAL -> {
+          AudioService.playSound(SoundId.BANDAGE, 0.4f);
           if (effect.duration() > 0) {
             stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
           } else {
             stats.heal(effect.value());
           }
         }
-        case STRENGTH ->
-            stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
+        case STRENGTH -> {
+          AudioService.playSound(SoundId.MAGIC_CHIME, 0.5f);
+          stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
+        }
         case ENERGY_GAIN -> {
+          AudioService.playSound(SoundId.MAGIC_CHIME, 0.5f);
           EnergyComponent energy = player.getComponent(EnergyComponent.class);
           if (energy != null) {
             energy.restoreEnergy(effect.value());
           }
         }
-        case CLEANSE -> stats.clearNegativeStatusEffects();
-        case FORTIFY -> stats.addArmour(effect.value());
+        case CLEANSE -> {
+          AudioService.playSound(SoundId.MAGIC_CHIME, 0.5f);
+          stats.clearNegativeStatusEffects();
+        }
         default -> {
           // Enemy-facing effects are handled separately.
         }

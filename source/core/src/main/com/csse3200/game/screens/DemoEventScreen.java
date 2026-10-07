@@ -56,7 +56,6 @@ public class DemoEventScreen extends ScreenAdapter {
 
     ServiceLocator.registerTimeSource(new GameTime());
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
@@ -141,7 +140,5 @@ public class DemoEventScreen extends ScreenAdapter {
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getResourceService().unloadAssets(cardTexturePaths);
-    ServiceLocator.getResourceService().dispose();
-    ServiceLocator.clear();
   }
 }

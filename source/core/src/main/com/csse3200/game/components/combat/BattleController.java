@@ -2,7 +2,6 @@ package com.csse3200.game.components.combat;
 
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.TargetType;
-import com.csse3200.game.cards.effects.*;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.cards.play.CardPlayResult;
@@ -12,6 +11,7 @@ import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.cards.CardEffectHandler;
+import com.csse3200.game.components.enemy.EnemyAnimationController;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.enemy.EnemyStatsComponent;
@@ -22,6 +22,8 @@ import com.csse3200.game.entities.Entity;
 import com.csse3200.game.events.EventHandler;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.events.listeners.EventListener2;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
@@ -50,6 +52,7 @@ public class BattleController {
   private final CardPlayService cardPlayService;
   private CardPlayRequest pendingCard;
   private boolean lastCardPlaySucceeded;
+  private int playerTurnNumber;
 
   /** Logging Strings & Error messages */
   private static final String PHASE_CHANGED_EVENT = "battlePhaseChanged";
@@ -99,6 +102,7 @@ public class BattleController {
     this.currentPhase = BattlePhase.SETUP;
     this.currentEnemyIndex = -1;
     this.currentEnemyIntent = null;
+    this.playerTurnNumber = 0;
     this.eventHandler = new EventHandler();
     this.eventQueue = new ArrayDeque<>();
     for (Entity enemy : this.enemies) {
@@ -293,6 +297,7 @@ public class BattleController {
     // Normal housekeeping for resetting the state machine.
     this.eventQueue.clear();
     this.resetEnemyCursor();
+    this.playerTurnNumber = 0;
     this.setEnemyIntent(null);
     this.setCurrentPhase(BattlePhase.SETUP);
     this.notifyPhaseChange(previousPhase, BattlePhase.SETUP);
@@ -315,6 +320,10 @@ public class BattleController {
    */
   public boolean isPlayerTurn() {
     return this.currentPhase == BattlePhase.PLAYER_TURN;
+  }
+
+  public int getPlayerTurnNumber() {
+    return this.playerTurnNumber;
   }
 
   /**
@@ -519,7 +528,7 @@ public class BattleController {
     CombatStatsComponent playerStats = this.player.getComponent(CombatStatsComponent.class);
     boolean allEnemiesDead = this.enemies.stream().noneMatch(this::isEnemyAlive);
 
-    if (playerStats.isDead()) {
+    if (Boolean.TRUE.equals(playerStats.isDead())) {
       handle(BattleEvent.PLAYER_DEFEATED);
       return true;
     }
@@ -715,6 +724,7 @@ public class BattleController {
       // No effects produced; the card stays in hand and the player keeps their turn.
       lastCardPlaySucceeded = false;
       narrate("Couldn't play " + cardName + ": " + result.failureReason());
+      AudioService.playSound(SoundId.ERROR, 0.8f);
       finishPlayerCardAction();
       return;
     }
@@ -800,6 +810,8 @@ public class BattleController {
     if (this.queueBattleOutcomeIfOver()) {
       return;
     }
+
+    this.playerTurnNumber++;
     // Start-of-turn operations: refill energy for the new player turn.
     EnergyComponent energy = playerEnergy();
     if (energy != null) {
@@ -879,7 +891,7 @@ public class BattleController {
 
     if (skipEnemyTurnIfDead(enemy)) return;
 
-    // Poison uses piercing damage, skip block and armor
+    // Resolve poison before the enemy acts. Status damage bypasses block and armour.
     CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
     enemyStats.processPoisonTick(enemyStats::takePiercingDamage);
 
@@ -915,7 +927,19 @@ public class BattleController {
             + damage
             + (playerStats != null ? " (you have " + playerStats.getHealth() + " HP)" : "")
             + ".");
-    handle(BattleEvent.ENEMY_ACTION_RESOLVED);
+    // Keep each hit with its own action; advance only after this enemy returns.
+    Runnable resolved =
+        () -> {
+          if (currentPhase == BattlePhase.ENEMY_ATTACK && getActiveEnemy() == enemy) {
+            handle(BattleEvent.ENEMY_ACTION_RESOLVED);
+          }
+        };
+    EnemyAnimationController animation = enemy.getComponent(EnemyAnimationController.class);
+    if (animation == null) {
+      resolved.run();
+    } else {
+      animation.runAfterAttack(resolved);
+    }
   }
 
   private void enterEnemyDefend() {

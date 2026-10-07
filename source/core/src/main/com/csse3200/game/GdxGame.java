@@ -34,6 +34,7 @@ import com.csse3200.game.screens.DemoShopScreen;
 import com.csse3200.game.screens.ElitePortalScreen;
 import com.csse3200.game.screens.EncounterScreen;
 import com.csse3200.game.screens.EndBattleScreen;
+import com.csse3200.game.screens.ItemLibraryScreen;
 import com.csse3200.game.screens.LibraryScreen;
 import com.csse3200.game.screens.MainGameScreen;
 import com.csse3200.game.screens.MainMenuScreen;
@@ -43,6 +44,7 @@ import com.csse3200.game.screens.SaveLoadScreen;
 import com.csse3200.game.screens.SettingsScreen;
 import com.csse3200.game.screens.TempleCardSelectionScreen;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,24 +82,25 @@ public class GdxGame extends Game {
   }
 
   /**
-   * Gets card discovery progress shared by all screens in this game session.
-   *
-   * @return process-lifetime card discovery service
-   */
-  public CardDiscoveryService getCardDiscoveryService() {
-    return cardDiscoveryService;
-  }
-
-  /**
    * Returns the background id of the current battle instance
    *
    * @return String background id for the current battle
    */
   public String getBackgroundId() {
     String backgroundId =
-        BACKGROUND_IDS[(getRunState().getMapProgression() - 1) % BACKGROUND_IDS.length];
+        BACKGROUND_IDS[
+            (getRunState().getMapGraph().getCurrentNode().getHeight() - 1) % BACKGROUND_IDS.length];
     logger.debug("Background Id: {}", backgroundId);
     return backgroundId;
+  }
+
+  /**
+   * Gets card discovery progress shared by all screens in this game session.
+   *
+   * @return process-lifetime card discovery service
+   */
+  public CardDiscoveryService getCardDiscoveryService() {
+    return cardDiscoveryService;
   }
 
   // Lives here rather than on a screen, since setScreen() disposes the outgoing screen.
@@ -116,6 +119,15 @@ public class GdxGame extends Game {
 
   /** Flushes a scheduled autosave once the completed encounter's screen has been disposed. */
   public void autosaveOnMapReady() {
+    autosaveCoordinator.saveIfPending();
+  }
+
+  /**
+   * Flushes a victorious battle's autosave after its reward has been applied but before leaving the
+   * reward screen. The coordinator owns idempotency, so the following map transition cannot write a
+   * duplicate checkpoint.
+   */
+  public void autosaveAfterRewardClaimed() {
     autosaveCoordinator.saveIfPending();
   }
 
@@ -165,7 +177,7 @@ public class GdxGame extends Game {
    */
   public void setScreen(ScreenType screenType) {
     logger.info("Setting game screen to {}", screenType);
-    prepareScreenTransition();
+    prepareScreenTransition(screenType);
     setScreen(newScreen(screenType));
   }
 
@@ -184,17 +196,18 @@ public class GdxGame extends Game {
       setScreen(next);
       return;
     }
-    prepareScreenTransition();
+    prepareScreenTransition(next);
     super.setScreen(new NarrationScreen(sequenceId, () -> setScreen(next)));
   }
 
-  private void prepareScreenTransition() {
+  private void prepareScreenTransition(ScreenType screenType) {
     Screen currentScreen = getScreen();
     if (currentScreen != null) {
       currentScreen.dispose();
     }
     ServiceLocator.registerBestiaryService(bestiaryService);
     ServiceLocator.registerCardDiscoveryService(cardDiscoveryService);
+    AudioService.onScreenChanged(screenType, runState);
   }
 
   /** Opens the battle screen. */
@@ -227,7 +240,7 @@ public class GdxGame extends Game {
     new ChanceEncounterSelector(ChanceEncounterFactory.createInitialEncounters(), new Random())
         .selectById(eventId);
 
-    prepareScreenTransition();
+    prepareScreenTransition(ScreenType.ENCOUNTER);
     setScreen(new EncounterScreen(this, eventId));
   }
 
@@ -242,19 +255,28 @@ public class GdxGame extends Game {
   }
 
   private void openDemoEvent(String previewEncounterId) {
-    prepareScreenTransition();
+    prepareScreenTransition(ScreenType.ENCOUNTER);
     setScreen(new DemoEventScreen(this, previewEncounterId));
   }
 
   /** Opens a temporary Campfire preview with no map node or persistent run changes. */
   public void openDemoCampfire() {
-    prepareScreenTransition();
+    Screen currentScreen = getScreen();
+    if (currentScreen != null) {
+      currentScreen.dispose();
+    }
+    ServiceLocator.registerBestiaryService(bestiaryService);
+    prepareScreenTransition(ScreenType.CAMPFIRE);
     setScreen(new DemoCampfireScreen(this));
   }
 
   /** Opens a temporary Shop preview using isolated player state and no map node. */
   public void openDemoShop() {
-    prepareScreenTransition();
+    Screen currentScreen = getScreen();
+    if (currentScreen != null) {
+      currentScreen.dispose();
+    }
+    ServiceLocator.registerBestiaryService(bestiaryService);
     setScreen(new DemoShopScreen(this));
   }
 
@@ -287,13 +309,14 @@ public class GdxGame extends Game {
       case MAP -> new MapScreen(this);
       case ENCOUNTER -> new EncounterScreen(this);
       case CAMPFIRE -> new CampfireScreen(this);
+      case BATTLE_SCREEN -> new BattleScreen(this);
+      case VICTORY -> new EndBattleScreen(this, true);
       case ELITE_PORTAL -> new ElitePortalScreen(this);
       case ANCIENT_TEMPLE -> new AncientTempleScreen(this);
       case TEMPLE_CARD_SELECTION -> new TempleCardSelectionScreen(this);
-      case BATTLE_SCREEN -> new BattleScreen(this);
-      case VICTORY -> new EndBattleScreen(this, true);
       case DEFEAT -> new EndBattleScreen(this, false);
       case BESTIARY -> new BestiaryScreen(this);
+      case ITEM_LIBRARY -> new ItemLibraryScreen(this);
     };
   }
 
@@ -313,7 +336,8 @@ public class GdxGame extends Game {
     ELITE_PORTAL,
     ANCIENT_TEMPLE,
     TEMPLE_CARD_SELECTION,
-    BESTIARY
+    BESTIARY,
+    ITEM_LIBRARY
   }
 
   /** Exit the game. */

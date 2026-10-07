@@ -5,6 +5,17 @@ import java.util.Random;
 public class RewardGenerator {
   private static final int MIN_GOLD = 20;
   private static final int MAX_GOLD = 30;
+  private static final ItemType[] ITEM_REWARD_POOL = {
+    ItemType.LUCKY_COIN,
+    ItemType.LUCKY_COIN,
+    ItemType.ENERGY_CRYSTAL,
+    ItemType.MERCHANTS_FAVOR,
+    ItemType.MERCHANTS_FAVOR,
+    ItemType.IRON_AEGIS,
+    ItemType.IRON_AEGIS,
+    ItemType.WARRIORS_CREST,
+    ItemType.WARRIORS_CREST
+  };
 
   private final Random random;
 
@@ -47,8 +58,7 @@ public class RewardGenerator {
   }
 
   public RewardOption generateItemRewardOption() {
-    ItemType[] items = ItemType.values();
-    ItemType picked = items[random.nextInt(items.length)];
+    ItemType picked = ITEM_REWARD_POOL[random.nextInt(ITEM_REWARD_POOL.length)];
 
     return RewardOption.item(picked);
   }
