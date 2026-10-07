@@ -490,29 +490,29 @@ public class BattleScreen extends ScreenAdapter {
 
   private List<ClickableRecord> buildBattleMenuRecords() {
     List<ClickableRecord> records = new ArrayList<>();
-    for (ClickableRecord record : staticUiRecords) {
+    for (ClickableRecord clickableRecord : staticUiRecords) {
       BattleMenuSkins.Icon icon =
-          switch (record.trigger()) {
+          switch (clickableRecord.trigger()) {
             case "openMenu" -> BattleMenuSkins.Icon.CARD;
             case "openInventory" -> BattleMenuSkins.Icon.INVENTORY;
             case "endTurn" -> BattleMenuSkins.Icon.END_TURN;
             default -> null;
           };
       if (icon == null) {
-        records.add(record);
+        records.add(clickableRecord);
         continue;
       }
 
       records.add(
-          ClickableRecord.builder(record.trigger())
-              .text(record.text())
+          ClickableRecord.builder(clickableRecord.trigger())
+              .text(clickableRecord.text())
               .skin(BattleMenuSkins.forIcon(icon))
-              .position(record.x(), record.y())
-              .size(record.width(), record.height())
-              .variant(record.variant())
-              .args(record.args())
-              .label(record.label())
-              .disabled(record.disabled())
+              .position(clickableRecord.x(), clickableRecord.y())
+              .size(clickableRecord.width(), clickableRecord.height())
+              .variant(clickableRecord.variant())
+              .args(clickableRecord.args())
+              .label(clickableRecord.label())
+              .disabled(clickableRecord.disabled())
               .build());
     }
     return records;

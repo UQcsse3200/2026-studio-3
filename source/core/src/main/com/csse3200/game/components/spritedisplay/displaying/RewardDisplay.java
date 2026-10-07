@@ -75,7 +75,7 @@ public class RewardDisplay extends Displaying {
   private boolean created;
   private boolean disposed;
   private Actor background;
-  private Actor scrim;
+  private Actor scrimActor;
   private Actor rewardUi;
   private Table cardSelectionUi;
   private CardWidgetAssets cardWidgetAssets;
@@ -146,7 +146,7 @@ public class RewardDisplay extends Displaying {
 
     Image dimmer = new Image(skin.newDrawable("white", SCRIM));
     dimmer.setFillParent(true);
-    scrim = dimmer;
+    scrimActor = dimmer;
     stage.addActor(dimmer);
 
     float panelWidth = Math.min(stage.getWidth() * 0.7f, 900f);
@@ -507,8 +507,8 @@ public class RewardDisplay extends Displaying {
     if (background != null) {
       background.remove();
     }
-    if (scrim != null) {
-      scrim.remove();
+    if (scrimActor != null) {
+      scrimActor.remove();
     }
     if (rewardUi != null) rewardUi.remove();
     if (cardSelectionUi != null) cardSelectionUi.remove();

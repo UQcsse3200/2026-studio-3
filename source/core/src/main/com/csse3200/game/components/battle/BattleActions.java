@@ -207,6 +207,7 @@ public class BattleActions extends Component {
     controller.endPlayerTurn();
   }
 
+  @Override
   public void update() {
     if (!awaitingRelease) {
       return;

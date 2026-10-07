@@ -24,10 +24,8 @@ public class PlayerStatsDisplay extends UIComponent {
   private ProgressBar healthBar;
   private Label healthLabel;
   private Stack armourStack;
-  private Image armourImage;
   private Label armourLabel;
   private Cell<Stack> armourCell;
-  private Stack healthStack;
   private static final String STYLE_NAME_WHITE = "white";
   private Image statusImage;
   private Table statusRow;
@@ -63,7 +61,7 @@ public class PlayerStatsDisplay extends UIComponent {
     float imageSideLength = 20f;
 
     // Armour image
-    armourImage =
+    Image armourImage =
         new Image(ServiceLocator.getResourceService().getAsset("images/armour.png", Texture.class));
 
     // Armour text
@@ -101,13 +99,13 @@ public class PlayerStatsDisplay extends UIComponent {
     healthBarStyle.background.setMinHeight(20);
     healthBarStyle.knobBefore.setMinHeight(20);
 
-    healthBar = new ProgressBar(0, maxHealth, 1, false, healthBarStyle);
+    healthBar = new ProgressBar(0, (float) maxHealth, 1, false, healthBarStyle);
     healthBar.setSize(150, 20);
-    healthBar.setValue(currentHealth);
+    healthBar.setValue((float) currentHealth);
     healthBar.setAnimateDuration(0.2f);
 
     // Health stack
-    healthStack = new Stack();
+    Stack healthStack = new Stack();
     healthStack.add(healthBar);
     healthStack.add(healthLabel);
 
@@ -265,8 +263,8 @@ public class PlayerStatsDisplay extends UIComponent {
   public void updatePlayerHealthUI(int currentHealth, int maxHealth) {
     CharSequence text = String.format("%d / %d", currentHealth, maxHealth);
     healthLabel.setText(text);
-    healthBar.setRange(0, maxHealth);
-    healthBar.setValue(currentHealth);
+    healthBar.setRange(0, (float) maxHealth);
+    healthBar.setValue((float) currentHealth);
     updateHealthBarColour();
   }
 

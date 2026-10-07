@@ -232,21 +232,21 @@ class RewardDisplayTest {
 
   @Test
   void constructorRequiresGameAndRewardDependencies() {
-    DisplayingRecord record = DisplayingRecord.builder("").variant("reward").build();
+    DisplayingRecord displayingRecord = DisplayingRecord.builder("").variant("reward").build();
     RewardService service = defaultService();
 
     assertThrows(
         NullPointerException.class,
-        () -> new RewardDisplay(record, null, game, cardService, discovery));
+        () -> new RewardDisplay(displayingRecord, null, game, cardService, discovery));
     assertThrows(
         NullPointerException.class,
-        () -> new RewardDisplay(record, service, null, cardService, discovery));
+        () -> new RewardDisplay(displayingRecord, service, null, cardService, discovery));
     assertThrows(
         NullPointerException.class,
-        () -> new RewardDisplay(record, service, game, null, discovery));
+        () -> new RewardDisplay(displayingRecord, service, game, null, discovery));
     assertThrows(
         NullPointerException.class,
-        () -> new RewardDisplay(record, service, game, cardService, null));
+        () -> new RewardDisplay(displayingRecord, service, game, cardService, null));
   }
 
   private RewardDisplay createDisplay(RewardService service) {
