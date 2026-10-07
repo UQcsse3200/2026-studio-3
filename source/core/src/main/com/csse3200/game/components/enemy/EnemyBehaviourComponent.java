@@ -163,7 +163,6 @@ public class EnemyBehaviourComponent extends Component {
 
     CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
     if (targetStats != null) {
-      entity.getEvents().trigger("enemyAttack");
       CombatStatsComponent attackerStats = entity.getComponent(CombatStatsComponent.class);
       int strength = statusValue(attackerStats, EffectType.STRENGTH);
       int feeble = statusValue(attackerStats, EffectType.FEEBLE);
