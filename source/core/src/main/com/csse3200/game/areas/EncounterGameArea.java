@@ -67,7 +67,10 @@ public class EncounterGameArea extends GameArea {
     ChanceEncounterDisplay.ABANDONED_MINE_BACKGROUND_TEXTURE,
     ChanceEncounterDisplay.FUSION_BACKGROUND_TEXTURE,
     ChanceEncounterDisplay.FOUNTAIN_BACKGROUND_TEXTURE,
-    ChanceEncounterDisplay.FUSION_CARD_BACK_TEXTURE
+    ChanceEncounterDisplay.FUSION_CARD_BACK_TEXTURE,
+    "images/context_help_icon.png",
+    "images/context_help_rules_frame.png",
+    "images/ancient_temple_choice_button.png"
   };
 
   private final Integer nodeId;
