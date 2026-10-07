@@ -67,6 +67,8 @@ public class EncounterGameArea extends GameArea {
     ChanceEncounterDisplay.ABANDONED_MINE_BACKGROUND_TEXTURE,
     ChanceEncounterDisplay.FUSION_BACKGROUND_TEXTURE,
     ChanceEncounterDisplay.FOUNTAIN_BACKGROUND_TEXTURE,
+    ChanceEncounterDisplay.SHRINE_BACKGROUND_TEXTURE,
+    ChanceEncounterDisplay.SHRINE_FLAME_TEXTURE,
     ChanceEncounterDisplay.FUSION_CARD_BACK_TEXTURE
   };
 

@@ -85,6 +85,65 @@ class ChanceEncounterDisplayTest {
   }
 
   @Test
+  void shrineOfferingWaitsForResponseAndRetainsOriginalOutcomeAndContinue() {
+    AtomicInteger completions = new AtomicInteger();
+    ChanceEncounterDisplay display = createShrine(completions);
+    assertEquals(
+        "Bleed a little of your light into the shrine.",
+        display.getChoiceButtons().get(0).getText().toString());
+    display.getChoiceButtons().get(0).fire(new ChangeEvent());
+    display.getChoiceButtons().get(1).fire(new ChangeEvent());
+    stage.act(.5f);
+    assertFalse(display.getContinueButton().isVisible());
+    display.getChoiceButtons().get(0).fire(new ChangeEvent());
+    stage.act(.41f);
+    assertTrue(display.getContinueButton().isVisible());
+    assertTrue(display.getResultText().contains("lose 10 health"));
+    assertTrue(display.getResultText().contains("gain 25 gold"));
+    assertTrue(display.getResultText().contains("OUTCOME"));
+    assertFalse(display.getChoiceButtons().get(0).getParent().isVisible());
+    display.getContinueButton().fire(new ChangeEvent());
+    display.getContinueButton().fire(new ChangeEvent());
+    stage.act(.5f);
+    stage.act(.1f);
+    assertEquals(1, completions.get());
+  }
+
+  @Test
+  void shrineLeaveDoesNotWaitForOfferingAndDisposeCancelsPendingResponse() {
+    ChanceEncounterDisplay display = createShrine(new AtomicInteger());
+    display.getChoiceButtons().get(1).fire(new ChangeEvent());
+    assertTrue(display.getContinueButton().isVisible());
+    assertTrue(display.getResultText().contains("Nothing happens."));
+    entity.dispose();
+    entity = null;
+    display = createShrine(new AtomicInteger());
+    display.getChoiceButtons().get(0).fire(new ChangeEvent());
+    entity.dispose();
+    entity = null;
+    stage.act(2);
+    assertFalse(display.getContinueButton().isVisible());
+  }
+
+  private ChanceEncounterDisplay createShrine(AtomicInteger completions) {
+    var encounter =
+        new ChanceEncounter(
+            "mysterious-shrine",
+            "A cracked sanctum shrine still burns with a god's spoiled light.",
+            List.of(
+                new ChanceChoice(
+                    "make-offering",
+                    "Bleed a little of your light into the shrine.",
+                    new ChanceOutcome(-10, 25)),
+                new ChanceChoice("leave", "Pass without kneeling.", new ChanceOutcome(0, 0))));
+    var display =
+        new ChanceEncounterDisplay(encounter, (node, success) -> completions.incrementAndGet(), 7);
+    entity = new Entity().addComponent(display);
+    entity.create();
+    return display;
+  }
+
+  @Test
   void fountainLeaveBypassesAnimation() {
     ChanceEncounterDisplay display = createFountain(new AtomicInteger());
     display.getChoiceButtons().get(1).fire(new ChangeEvent());
