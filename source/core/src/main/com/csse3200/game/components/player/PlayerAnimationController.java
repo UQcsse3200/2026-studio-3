@@ -4,6 +4,12 @@ import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.rendering.AnimationRenderComponent;
 
+/**
+ * Drives player's {@link AnimationRenderComponent} from combat events.
+ *
+ * <p>The player loops {@code idle}, flashes {@code hurt} when it takes damage, and plays attack
+ * animation when attacking
+ */
 public class PlayerAnimationController extends Component {
   private AnimationRenderComponent animator;
   private int lastKnownHealth;
