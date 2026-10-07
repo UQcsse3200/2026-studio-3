@@ -33,10 +33,9 @@ public class PlayerAnimationController extends Component {
   @Override
   public void update() {
     String currentAnimation = animator.getCurrentAnimation();
-    // Switching to idle resets the renderer's completion state.
     boolean animationFinished = animator.isFinished();
-    if (("hurt".equals(currentAnimation)
-        || "attack".equals(currentAnimation) && animationFinished)) {
+    if (("hurt".equals(currentAnimation) || "attack".equals(currentAnimation))
+        && animationFinished) {
       animator.startAnimation("idle");
     }
   }

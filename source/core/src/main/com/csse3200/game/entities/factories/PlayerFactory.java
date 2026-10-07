@@ -49,6 +49,7 @@ public class PlayerFactory {
   private static final float IDLE_FRAME_DURATION = 0.12f;
   private static final float HURT_FRAME_DURATION = 0.08f;
   private static final float ATTACK_FRAME_DURATION = 0.06f;
+  private static final float PLAYER_RENDER_SCALE = 2f;
 
   /**
    * Create a player entity.
@@ -120,6 +121,7 @@ public class PlayerFactory {
     PhysicsUtils.setScaledCollider(player, 0.6f, 0.3f);
     player.getComponent(ColliderComponent.class).setDensity(1.5f);
     animator.scaleEntity();
+    player.setScale(player.getScale().scl(PLAYER_RENDER_SCALE));
     return player;
   }
 
