@@ -222,7 +222,7 @@ public class ForestGameArea extends GameArea {
     Entity cloud = new Entity().addComponent(new CloudRenderComponent("images/cloud.png"));
     cloud.getComponent(CloudRenderComponent.class).scaleEntity();
     cloud.setScale(cloud.getScale().scl(3.5f)); // scaling cloud to be bigger
-    spawnEntityAt(cloud, new GridPoint2(PLAYER_SPAWN).add(0, -1), true, true);
+    spawnEntityAt(cloud, new GridPoint2(PLAYER_SPAWN).add(0, -2), true, true);
   }
 
   /**
