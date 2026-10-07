@@ -229,7 +229,8 @@ public class InventoryPopupComponent extends UIComponent {
   }
 
   private TextButton createUseButton(ItemType item) {
-    TextButtonStyle style = new TextButtonStyle(skin.get(STYLE_NAME_DEFAULT, TextButtonStyle.class));
+    TextButtonStyle style =
+        new TextButtonStyle(skin.get(STYLE_NAME_DEFAULT, TextButtonStyle.class));
 
     style.font = skin.getFont(FONT_SMALL);
     style.fontColor = GOLD_COLOUR;
@@ -384,7 +385,8 @@ public class InventoryPopupComponent extends UIComponent {
   }
 
   private TextButton createCloseButton() {
-    TextButtonStyle style = new TextButtonStyle(skin.get(STYLE_NAME_DEFAULT, TextButtonStyle.class));
+    TextButtonStyle style =
+        new TextButtonStyle(skin.get(STYLE_NAME_DEFAULT, TextButtonStyle.class));
 
     style.fontColor = NAME_COLOUR;
     style.up = skin.newDrawable(STYLE_NAME_WHITE, ROW_BACKGROUND_COLOUR);
