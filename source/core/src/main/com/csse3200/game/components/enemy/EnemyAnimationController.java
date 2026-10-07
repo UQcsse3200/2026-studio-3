@@ -28,6 +28,7 @@ public class EnemyAnimationController extends Component {
   private Runnable afterAttack;
   private boolean defeated;
   private boolean disposed;
+  private static final String ATTACK = "attack";
 
   @Override
   public void create() {
@@ -62,7 +63,7 @@ public class EnemyAnimationController extends Component {
     }
     String currentAnimation = animator.getCurrentAnimation();
     if (("hurt".equals(currentAnimation)
-            || "attack".equals(currentAnimation)
+            || ATTACK.equals(currentAnimation)
             || "cast".equals(currentAnimation)
             || "defend".equals(currentAnimation))
         && animator.isFinished()) {
@@ -70,7 +71,7 @@ public class EnemyAnimationController extends Component {
     }
     if (attackInProgress
         && attackOrigin == null
-        && (!"attack".equals(currentAnimation) || animator.isFinished())) {
+        && (!ATTACK.equals(currentAnimation) || animator.isFinished())) {
       finishAttack();
     }
   }
@@ -130,7 +131,7 @@ public class EnemyAnimationController extends Component {
       return;
     }
     resetAttackMotion();
-    startIfAvailable("attack", "idle");
+    startIfAvailable(ATTACK, "idle");
     // Move with the attack frames; idle remains the fallback for missing frames.
     attackOrigin = entity.getPosition();
     attackElapsed = 0f;

@@ -83,6 +83,9 @@ public class InventoryPopupComponent extends UIComponent {
   private final BooleanSupplier canUseBattleItems;
   private boolean useActionInProgress;
   private Actor useFeedback;
+  private static final String STYLE_NAME_WHITE = "white";
+  private static final String STYLE_NAME_DEFAULT = "default";
+  private static final String FONT_SMALL = "font_small";
 
   public InventoryPopupComponent(
       RunState runState, PopupDisplay popup, Entity player, BooleanSupplier canUseBattleItems) {
@@ -157,11 +160,11 @@ public class InventoryPopupComponent extends UIComponent {
 
   private Table createItemRow(ItemType itemId, int count) {
     Table frame = new Table();
-    frame.setBackground(skin.newDrawable("white", ROW_BORDER_COLOUR));
+    frame.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR));
     frame.pad(2f);
 
     Table row = new Table();
-    row.setBackground(skin.newDrawable("white", ROW_BACKGROUND_COLOUR));
+    row.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_BACKGROUND_COLOUR));
     row.pad(6f, 10f, 6f, 10f);
 
     String iconPath = ITEM_ICONS.get(itemId);
@@ -195,8 +198,9 @@ public class InventoryPopupComponent extends UIComponent {
   }
 
   private TextButton createUseButton(ItemType itemId) {
-    TextButtonStyle style = new TextButtonStyle(skin.get("default", TextButtonStyle.class));
-    style.font = skin.getFont("font_small");
+    TextButtonStyle style =
+        new TextButtonStyle(skin.get(STYLE_NAME_DEFAULT, TextButtonStyle.class));
+    style.font = skin.getFont(FONT_SMALL);
     style.fontColor = GOLD_COLOUR;
     style.overFontColor = NAME_COLOUR;
     style.downFontColor = Color.WHITE;
@@ -226,11 +230,11 @@ public class InventoryPopupComponent extends UIComponent {
   private Table createStatusBadge(ItemType itemId) {
     String status = itemId == ItemType.LUCKY_COIN ? "ON GOLD" : "PASSIVE";
     Table border = new Table();
-    border.setBackground(skin.newDrawable("white", ROW_BORDER_COLOUR));
+    border.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR));
     border.pad(2f);
 
     Table badge = new Table();
-    badge.setBackground(skin.newDrawable("white", ROW_BACKGROUND_COLOUR));
+    badge.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_BACKGROUND_COLOUR));
     badge.add(new Label(status, createSmallLabelStyle(DESCRIPTION_COLOUR))).pad(5f, 8f, 5f, 8f);
     border.add(badge);
     return border;
@@ -248,11 +252,11 @@ public class InventoryPopupComponent extends UIComponent {
     Table border = new Table();
     border.setTransform(true);
     border.setOrigin(Align.center);
-    border.setBackground(skin.newDrawable("white", effectColour));
+    border.setBackground(skin.newDrawable(STYLE_NAME_WHITE, effectColour));
     border.pad(3f);
 
     Table message = new Table();
-    message.setBackground(skin.newDrawable("white", ROW_BACKGROUND_COLOUR));
+    message.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_BACKGROUND_COLOUR));
     String iconPath = ITEM_ICONS.get(itemId);
     if (iconPath != null) {
       Texture texture = ServiceLocator.getResourceService().getAsset(iconPath, Texture.class);
@@ -321,15 +325,16 @@ public class InventoryPopupComponent extends UIComponent {
 
   private LabelStyle createSmallLabelStyle(Color colour) {
     LabelStyle style = createLabelStyle(colour);
-    style.font = skin.getFont("font_small");
+    style.font = skin.getFont(FONT_SMALL);
     return style;
   }
 
   private TextButton createCloseButton() {
-    TextButtonStyle style = new TextButtonStyle(skin.get("default", TextButtonStyle.class));
+    TextButtonStyle style =
+        new TextButtonStyle(skin.get(STYLE_NAME_DEFAULT, TextButtonStyle.class));
     style.fontColor = NAME_COLOUR;
-    style.up = skin.newDrawable("white", ROW_BACKGROUND_COLOUR);
-    style.over = skin.newDrawable("white", ROW_BORDER_COLOUR);
+    style.up = skin.newDrawable(STYLE_NAME_WHITE, ROW_BACKGROUND_COLOUR);
+    style.over = skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR);
     TextButton close = new TextButton("X", style);
     close.addListener(
         new ChangeListener() {
@@ -343,7 +348,10 @@ public class InventoryPopupComponent extends UIComponent {
 
   private Table createFooter() {
     Table footer = new Table();
-    footer.add(new Image(skin.newDrawable("white", ROW_BORDER_COLOUR))).width(42f).height(1f);
+    footer
+        .add(new Image(skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR)))
+        .width(42f)
+        .height(1f);
     String instruction =
         canUseBattleItems.getAsBoolean()
             ? "Combat items ready  |  ESC  Close"
@@ -352,12 +360,15 @@ public class InventoryPopupComponent extends UIComponent {
         .add(new Label(instruction, createSmallLabelStyle(DESCRIPTION_COLOUR)))
         .padLeft(8f)
         .padRight(8f);
-    footer.add(new Image(skin.newDrawable("white", ROW_BORDER_COLOUR))).width(42f).height(1f);
+    footer
+        .add(new Image(skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR)))
+        .width(42f)
+        .height(1f);
     return footer;
   }
 
   private Image divider() {
-    return new Image(skin.newDrawable("white", ROW_BORDER_COLOUR));
+    return new Image(skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR));
   }
 
   /** Returns each distinct item type once, in the order it was first acquired. */
