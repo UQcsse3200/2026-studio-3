@@ -72,20 +72,6 @@ public class MainMenuDisplay extends UIComponent {
     Texture buttonFrameTexture = getTexture(BUTTON_FRAME_TEXTURE);
     buttonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     rootStack.add(buildContent(buttonFrameTexture));
-    Table demoButtons = new Table();
-    demoButtons.setName("demo-shortcuts");
-    demoButtons.top().right().pad(24f);
-    demoButtons
-        .add(createButton("Demo Event", DEMO_EVENT, buttonFrameTexture))
-        .width(220f)
-        .height(64f)
-        .padBottom(12f);
-    demoButtons.row();
-    demoButtons
-        .add(createButton("Demo Campfire", DEMO_CAMPFIRE_EVENT, buttonFrameTexture))
-        .width(220f)
-        .height(64f);
-    rootStack.add(demoButtons);
     stage.addActor(rootStack);
   }
 
