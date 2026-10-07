@@ -30,6 +30,7 @@ import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.components.cards.CardUpgradeDisplay;
 import com.csse3200.game.components.cards.CardUpgradeSelection;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.cards.PlayerDeckCardUpgradeCommitter;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
@@ -93,8 +94,14 @@ public class CampfireScreen extends ScreenAdapter {
     skin = new Skin(Gdx.files.internal("flat-earth/skin/flat-earth-ui.json"));
     ResourceService resources = ServiceLocator.getResourceService();
     resources.loadTextures(TEXTURES);
+    resources.loadTextures(upgradeCardTexturePaths());
     resources.loadAll();
     createUI();
+  }
+
+  /** Preload the shared card-library presentation before registering the upgrade display. */
+  static String[] upgradeCardTexturePaths() {
+    return CardWidgetAssets.collectTexturePaths(CardConfigLoader.loadCards());
   }
 
   private void createUI() {
