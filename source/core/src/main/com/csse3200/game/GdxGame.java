@@ -210,9 +210,33 @@ public class GdxGame extends Game {
     AudioService.onScreenChanged(screenType, runState);
   }
 
+  /**
+   * Discards the previous run, plays the opening story, and opens a fresh normal map.
+   *
+   * <p>The outgoing screen is disposed before resetting run state, so its final state capture
+   * cannot carry tutorial progress into the new run.
+   */
+  public void startNewRun() {
+    logger.info("Starting a fresh run");
+
+    Screen currentScreen = getScreen();
+    if (currentScreen != null) {
+      currentScreen.dispose();
+    }
+    super.setScreen(null);
+
+    runState.endRun();
+    showNarration("opening", ScreenType.MAP);
+  }
+
   /** Opens the battle screen. */
   public void startBattle() {
     setScreen(ScreenType.BATTLE_SCREEN);
+  }
+
+  /** Opens an isolated teaching battle without entering or completing a map node. */
+  public void startTutorialBattle() {
+    setScreen(ScreenType.TUTORIAL_BATTLE);
   }
 
   /**
@@ -244,7 +268,7 @@ public class GdxGame extends Game {
     setScreen(new EncounterScreen(this, eventId));
   }
 
-  /** Opens a temporary Event preview without entering or changing the run map. */
+  /** Temporary map-free Event preview; completion returns directly to the main menu. */
   public void openDemoEvent() {
     openDemoEvent(null);
   }
@@ -259,13 +283,8 @@ public class GdxGame extends Game {
     setScreen(new DemoEventScreen(this, previewEncounterId));
   }
 
-  /** Opens a temporary Campfire preview with no map node or persistent run changes. */
+  /** Temporary map-free shortcut; reuses Campfire UI and returns directly to the menu. */
   public void openDemoCampfire() {
-    Screen currentScreen = getScreen();
-    if (currentScreen != null) {
-      currentScreen.dispose();
-    }
-    ServiceLocator.registerBestiaryService(bestiaryService);
     prepareScreenTransition(ScreenType.CAMPFIRE);
     setScreen(new DemoCampfireScreen(this));
   }
@@ -314,6 +333,7 @@ public class GdxGame extends Game {
       case ELITE_PORTAL -> new ElitePortalScreen(this);
       case ANCIENT_TEMPLE -> new AncientTempleScreen(this);
       case TEMPLE_CARD_SELECTION -> new TempleCardSelectionScreen(this);
+      case TUTORIAL_BATTLE -> new BattleScreen(this, true);
       case DEFEAT -> new EndBattleScreen(this, false);
       case BESTIARY -> new BestiaryScreen(this);
       case ITEM_LIBRARY -> new ItemLibraryScreen(this);
@@ -331,6 +351,7 @@ public class GdxGame extends Game {
     ENCOUNTER,
     CAMPFIRE,
     BATTLE_SCREEN,
+    TUTORIAL_BATTLE,
     VICTORY,
     DEFEAT,
     ELITE_PORTAL,

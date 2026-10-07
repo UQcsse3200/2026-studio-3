@@ -108,6 +108,16 @@ public class BattleAnimationCoordinator extends Component {
     safely("enemy status markers", this::syncEnemyStatusVisuals);
   }
 
+  /** Read-only visual completion probe; does not delay or alter combat. */
+  public boolean hasActiveVisuals() {
+    return activeVisuals.stream()
+        .anyMatch(
+            visual -> {
+              EffectVisualComponent component = visual.getComponent(EffectVisualComponent.class);
+              return component != null && !component.isExpired();
+            });
+  }
+
   private void syncEnemyStatusVisuals() {
     for (Entity enemy : enemies) {
       CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);

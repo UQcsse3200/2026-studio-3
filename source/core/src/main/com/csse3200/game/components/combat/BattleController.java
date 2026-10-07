@@ -346,6 +346,11 @@ public class BattleController {
     eventHandler.addListener(PHASE_CHANGED_EVENT, listener);
   }
 
+  /** Removes the exact phase listener registered by a screen-scoped observer. */
+  public void removePhaseChangeListener(EventListener2<BattlePhase, BattlePhase> listener) {
+    eventHandler.removeListener(PHASE_CHANGED_EVENT, listener);
+  }
+
   /**
    * Adds a listener for short, human-readable descriptions of what just happened in the battle.
    * Used by the UI to pop up "you did X" / "the enemy did Y" messages between turns.
@@ -367,6 +372,11 @@ public class BattleController {
   public void addBattleEndListener(EventListener1<Boolean> listener) {
     Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(BATTLE_ENDED_EVENT, listener);
+  }
+
+  /** Removes the exact battle-end listener registered by a screen-scoped observer. */
+  public void removeBattleEndListener(EventListener1<Boolean> listener) {
+    eventHandler.removeListener(BATTLE_ENDED_EVENT, listener);
   }
 
   /**
@@ -405,6 +415,11 @@ public class BattleController {
   public void addCardPlayedListener(EventListener2<String, String> listener) {
     Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener("cardPlayed", listener);
+  }
+
+  /** Removes the exact card-play listener registered by a screen-scoped observer. */
+  public void removeCardPlayedListener(EventListener2<String, String> listener) {
+    eventHandler.removeListener("cardPlayed", listener);
   }
 
   /** Sends a one-line description of the latest battle action to any log listeners. */

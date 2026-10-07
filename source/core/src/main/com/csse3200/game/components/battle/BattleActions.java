@@ -44,6 +44,7 @@ public class BattleActions extends Component {
 
   private final BattleController controller;
   private final GdxGame game;
+  private final boolean tutorialBattle;
   private final List<Entity> enemies;
 
   // While true, reveals (log, effects, phase changes, the hand coming back up) are queued instead
@@ -51,19 +52,36 @@ public class BattleActions extends Component {
   // ENEMY_TURN_DELAY. This is the one point the "enemy thinks" pause lives — see dispatch() and
   // flushDeferredReveals().
   private boolean deferringEnemyTurn = false;
+  private int pendingRevealBatches;
+
+  /** Read-only presentation timing probe for tutorial guidance. */
+  public boolean hasPendingEnemyReveals() {
+    return deferringEnemyTurn || pendingRevealBatches > 0;
+  }
+
   private final List<Runnable> queuedReveals = new ArrayList<>();
   private final List<EnemyReleaseComponent> releaseAnimations = new ArrayList<>();
   private boolean awaitingRelease;
   private boolean released;
 
   public BattleActions(BattleController controller, GdxGame game) {
-    this(controller, game, List.of());
+    this(controller, game, List.of(), false);
+  }
+
+  public BattleActions(BattleController controller, GdxGame game, boolean tutorialBattle) {
+    this(controller, game, List.of(), tutorialBattle);
   }
 
   public BattleActions(BattleController controller, GdxGame game, List<Entity> enemies) {
+    this(controller, game, enemies, false);
+  }
+
+  public BattleActions(
+      BattleController controller, GdxGame game, List<Entity> enemies, boolean tutorialBattle) {
     this.controller = controller;
     this.game = game;
     this.enemies = List.copyOf(enemies);
+    this.tutorialBattle = tutorialBattle;
   }
 
   /**
@@ -91,7 +109,9 @@ public class BattleActions extends Component {
         message -> dispatch(() -> entity.getEvents().trigger(BATTLE_LOG_EVENT, message)));
     controller.addEnemyEffectsListener(effects -> dispatch(() -> onEnemyEffects(effects)));
     controller.addPlayerEffectsListener(this::onPlayerEffects);
-    controller.addBattleEndListener(this::onBattleEnd);
+    if (!tutorialBattle) {
+      controller.addBattleEndListener(this::onBattleEnd);
+    }
     controller.addHandChangedListener(hand -> entity.getEvents().trigger(HAND_CHANGED_EVENT, hand));
   }
 
@@ -140,11 +160,16 @@ public class BattleActions extends Component {
     deferringEnemyTurn = false;
     List<Runnable> reveals = new ArrayList<>(queuedReveals);
     queuedReveals.clear();
+    pendingRevealBatches++;
     Timer.schedule(
         new Timer.Task() {
           @Override
           public void run() {
-            reveals.forEach(Runnable::run);
+            try {
+              reveals.forEach(Runnable::run);
+            } finally {
+              pendingRevealBatches--;
+            }
           }
         },
         ENEMY_TURN_DELAY);
@@ -271,6 +296,7 @@ public class BattleActions extends Component {
   }
 
   private void onStart() {
-    game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
+    game.setScreen(
+        tutorialBattle ? GdxGame.ScreenType.TUTORIAL_BATTLE : GdxGame.ScreenType.BATTLE_SCREEN);
   }
 }

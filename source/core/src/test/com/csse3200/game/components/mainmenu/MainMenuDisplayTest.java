@@ -2,6 +2,7 @@ package com.csse3200.game.components.mainmenu;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.when;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
@@ -79,16 +81,16 @@ class MainMenuDisplayTest {
         display.getMenuButtons().stream().map(TextButton::getName).toList());
     assertInstanceOf(Image.class, display.getRootStack().getChild(0));
     assertEquals(3, display.getRootStack().getChildren().size);
+    assertNull(display.getRootStack().findActor("demo-shortcuts"));
     verify(resourceService).getAsset(MainMenuDisplay.BACKGROUND_TEXTURE, Texture.class);
     verify(resourceService).getAsset(MainMenuDisplay.TITLE_LOGO_TEXTURE, Texture.class);
     verify(resourceService).getAsset(MainMenuDisplay.BUTTON_FRAME_TEXTURE, Texture.class);
   }
 
   @Test
-  void buttonsEmitTheirNamedEvents() {
+  void otherButtonsEmitTheirNamedEvents() {
     List<String> events =
         List.of(
-            MainMenuDisplay.START_EVENT,
             MainMenuDisplay.LOAD_EVENT,
             MainMenuDisplay.BESTIARY_EVENT,
             MainMenuDisplay.SETTINGS_EVENT,
@@ -97,9 +99,61 @@ class MainMenuDisplayTest {
     for (int i = 0; i < events.size(); i++) {
       AtomicInteger eventCount = new AtomicInteger();
       menu.getEvents().addListener(events.get(i), eventCount::incrementAndGet);
-      display.getMenuButtons().get(i).fire(new ChangeEvent());
+      display.getMenuButtons().get(i + 1).fire(new ChangeEvent());
       assertEquals(1, eventCount.get());
     }
+  }
+
+  @Test
+  void newGameShowsChoiceWithoutStartingEitherPath() {
+    AtomicInteger startCount = new AtomicInteger();
+    AtomicInteger tutorialCount = new AtomicInteger();
+    menu.getEvents().addListener(MainMenuDisplay.START_EVENT, startCount::incrementAndGet);
+    menu.getEvents()
+        .addListener(MainMenuDisplay.ENTER_TUTORIAL_EVENT, tutorialCount::incrementAndGet);
+
+    display.getMenuButtons().get(0).fire(new ChangeEvent());
+
+    Dialog dialog = stage.getRoot().findActor("tutorial-choice");
+    assertNotNull(dialog);
+    assertNotNull(dialog.getButtonTable().findActor(MainMenuDisplay.ENTER_TUTORIAL_EVENT));
+    assertNotNull(dialog.getButtonTable().findActor("skipTutorial"));
+    assertEquals(0, startCount.get());
+    assertEquals(0, tutorialCount.get());
+  }
+
+  @Test
+  void skipTutorialStartsNormalRunAndRemovesDialog() {
+    AtomicInteger startCount = new AtomicInteger();
+    AtomicInteger tutorialCount = new AtomicInteger();
+    menu.getEvents().addListener(MainMenuDisplay.START_EVENT, startCount::incrementAndGet);
+    menu.getEvents()
+        .addListener(MainMenuDisplay.ENTER_TUTORIAL_EVENT, tutorialCount::incrementAndGet);
+
+    display.getMenuButtons().get(0).fire(new ChangeEvent());
+    Dialog dialog = stage.getRoot().findActor("tutorial-choice");
+    dialog.getButtonTable().findActor("skipTutorial").fire(new ChangeEvent());
+
+    assertEquals(1, startCount.get());
+    assertEquals(0, tutorialCount.get());
+    assertNull(stage.getRoot().findActor("tutorial-choice"));
+  }
+
+  @Test
+  void enterTutorialEmitsTutorialEventWithoutStartingNormalRun() {
+    AtomicInteger startCount = new AtomicInteger();
+    AtomicInteger tutorialCount = new AtomicInteger();
+    menu.getEvents().addListener(MainMenuDisplay.START_EVENT, startCount::incrementAndGet);
+    menu.getEvents()
+        .addListener(MainMenuDisplay.ENTER_TUTORIAL_EVENT, tutorialCount::incrementAndGet);
+
+    display.getMenuButtons().get(0).fire(new ChangeEvent());
+    Dialog dialog = stage.getRoot().findActor("tutorial-choice");
+    dialog.getButtonTable().findActor(MainMenuDisplay.ENTER_TUTORIAL_EVENT).fire(new ChangeEvent());
+
+    assertEquals(0, startCount.get());
+    assertEquals(1, tutorialCount.get());
+    assertNull(stage.getRoot().findActor("tutorial-choice"));
   }
 
   @Test
@@ -117,11 +171,14 @@ class MainMenuDisplayTest {
 
   @Test
   void disposalRemovesMenuActors() {
+    display.getMenuButtons().get(0).fire(new ChangeEvent());
+
     menu.dispose();
     menuDisposed = true;
 
     assertNull(display.getRootStack().getParent());
     assertEquals(0, display.getRootStack().getChildren().size);
+    assertNull(stage.getRoot().findActor("tutorial-choice"));
   }
 
   private static Texture texture(int width, int height) {
