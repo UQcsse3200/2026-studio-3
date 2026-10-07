@@ -2,7 +2,6 @@ package com.csse3200.game.components.combat;
 
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.TargetType;
-import com.csse3200.game.cards.effects.*;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.cards.play.CardPlayResult;
@@ -529,7 +528,7 @@ public class BattleController {
     CombatStatsComponent playerStats = this.player.getComponent(CombatStatsComponent.class);
     boolean allEnemiesDead = this.enemies.stream().noneMatch(this::isEnemyAlive);
 
-    if (playerStats.isDead()) {
+    if (Boolean.TRUE.equals(playerStats.isDead())) {
       handle(BattleEvent.PLAYER_DEFEATED);
       return true;
     }
