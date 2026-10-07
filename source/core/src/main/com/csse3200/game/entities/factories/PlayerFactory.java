@@ -1,5 +1,6 @@
 package com.csse3200.game.entities.factories;
 
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
@@ -16,6 +17,7 @@ import com.csse3200.game.physics.PhysicsUtils;
 import com.csse3200.game.physics.components.ColliderComponent;
 import com.csse3200.game.physics.components.HitboxComponent;
 import com.csse3200.game.physics.components.PhysicsComponent;
+import com.csse3200.game.rendering.AnimationRenderComponent;
 import com.csse3200.game.rendering.TextureRenderComponent;
 import com.csse3200.game.services.ServiceLocator;
 
@@ -43,6 +45,10 @@ public class PlayerFactory {
       FileLoader.readClass(PlayerConfig.class, "configs/player.json");
 
   private static final String PLAYER_ATLAS = "images/player/player.atlas";
+
+  private static final float IDLE_FRAME_DURATION = 0.12f;
+  private static final float HURT_FRAME_DURATION = 0.08f;
+  private static final float ATTACK_FRAME_DURATION = 0.06f;
 
   /**
    * Create a player entity.
@@ -84,9 +90,15 @@ public class PlayerFactory {
 
     TextureAtlas atlas =
         ServiceLocator.getResourceService().getAsset(PLAYER_ATLAS, TextureAtlas.class);
+
+    AnimationRenderComponent animator = new AnimationRenderComponent(atlas);
+    animator.addAnimation("idle", IDLE_FRAME_DURATION, Animation.PlayMode.LOOP);
+    animator.addAnimation("hurt", HURT_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    animator.addAnimation("attack", ATTACK_FRAME_DURATION, Animation.PlayMode.NORMAL);
+
     Entity player =
         new Entity()
-            .addComponent(new TextureRenderComponent("images/star_player.png"))
+            .addComponent(animator)
             .addComponent(new PhysicsComponent())
             .addComponent(new ColliderComponent())
             .addComponent(new HitboxComponent().setLayer(PhysicsLayer.PLAYER))
@@ -106,7 +118,7 @@ public class PlayerFactory {
 
     PhysicsUtils.setScaledCollider(player, 0.6f, 0.3f);
     player.getComponent(ColliderComponent.class).setDensity(1.5f);
-    player.getComponent(TextureRenderComponent.class).scaleEntity();
+    animator.scaleEntity();
     return player;
   }
 
