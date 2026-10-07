@@ -73,7 +73,7 @@ public class EnemyAnimationController extends Component {
     }
     if (attackInProgress
         && attackOrigin == null
-        && (!ATTACK.equals(currentAnimation) || animator.isFinished())) {
+        && (!ATTACK.equals(currentAnimation) || animationFinished)) {
       finishAttack();
     }
   }
