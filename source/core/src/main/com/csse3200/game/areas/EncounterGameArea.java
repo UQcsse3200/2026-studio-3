@@ -68,6 +68,8 @@ public class EncounterGameArea extends GameArea {
     ChanceEncounterDisplay.FUSION_BACKGROUND_TEXTURE,
     ChanceEncounterDisplay.FOUNTAIN_BACKGROUND_TEXTURE,
     ChanceEncounterDisplay.SHRINE_BACKGROUND_TEXTURE,
+    ChanceEncounterDisplay.FLOODED_BACKGROUND_TEXTURE,
+    ChanceEncounterDisplay.HEALER_BACKGROUND_TEXTURE,
     ChanceEncounterDisplay.SHRINE_FLAME_TEXTURE,
     ChanceEncounterDisplay.FUSION_CARD_BACK_TEXTURE,
     "images/context_help_icon.png",
