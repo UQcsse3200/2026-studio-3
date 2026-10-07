@@ -22,6 +22,57 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(GameExtension.class)
 class BattleTutorialGuidanceViewTest {
   @Test
+  void currentNumericStatsAndItemButtonAreBoundWithoutLegacyPrefixes() {
+    Skin skin = new Skin(Gdx.files.internal("flat-earth/skin/flat-earth-ui.json"));
+    Stage stage = new Stage(new FitViewport(1280, 800), mock(Batch.class));
+    try {
+      Actor energy = new Actor();
+      energy.setBounds(60, 150, 90, 90);
+      Actor item = new Actor();
+      item.setBounds(30, 560, 200, 40);
+      com.badlogic.gdx.scenes.scene2d.ui.Label health =
+          new com.badlogic.gdx.scenes.scene2d.ui.Label("100 / 100", skin);
+      Group healthGroup = new Group();
+      healthGroup.setBounds(250, 380, 150, 30);
+      healthGroup.addActor(health);
+      Actor enemyStats = new Actor();
+      enemyStats.setBounds(780, 380, 180, 40);
+      stage.addActor(energy);
+      stage.addActor(item);
+      stage.addActor(healthGroup);
+      stage.addActor(enemyStats);
+      var view =
+          new BattleTutorialGuidanceView(stage, skin, List::of, () -> null, () -> item, () -> item);
+      view.setStatTargets(() -> item, () -> energy, () -> health, () -> enemyStats);
+      view.bindActions(() -> {}, () -> {});
+      for (var step :
+          List.of(
+              BattleTutorialController.Step.ITEM_INVENTORY,
+              BattleTutorialController.Step.ENERGY,
+              BattleTutorialController.Step.HEALTH,
+              BattleTutorialController.Step.ENEMY_STATS)) {
+        view.show(BattleTutorialPrompt.referenceStep(step));
+        assertEquals(1, view.highlightBounds().size());
+        assertFalse(view.promptBounds().overlaps(view.highlightBounds().get(0)));
+      }
+      assertTrue(view.isPlayerHealthDisplayed(100));
+      health.setText("96 / 100");
+      assertFalse(view.isPlayerHealthDisplayed(100));
+      assertTrue(view.isPlayerHealthDisplayed(96));
+      view.show(BattleTutorialPrompt.referenceStep(BattleTutorialController.Step.ENERGY));
+      Rectangle before = view.highlightBounds().get(0);
+      energy.moveBy(20, 30);
+      Rectangle after = view.highlightBounds().get(0);
+      assertEquals(before.x + 20, after.x, 0.01);
+      assertEquals(before.y + 30, after.y, 0.01);
+      view.clear();
+    } finally {
+      stage.dispose();
+      skin.dispose();
+    }
+  }
+
+  @Test
   void informationalTapConsumesBattleInputAndActionStepCannotBeSkipped() {
     Skin skin = new Skin(Gdx.files.internal("flat-earth/skin/flat-earth-ui.json"));
     try {
