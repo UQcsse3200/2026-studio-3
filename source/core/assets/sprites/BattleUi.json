@@ -25,14 +25,6 @@
   ],
   "Displaying": [
     {
-      "text": "Drag a card to yourself or your opponent",
-      "x": 300,
-      "y": 650,
-      "fontName": "large",
-      "scale": 1,
-      "variant": "cardDisplay"
-    },
-    {
       "text": "",
       "x": 0,
       "y": 90,
@@ -40,6 +32,25 @@
       "colour": "DBBEA1",
       "trigger": "battleLog",
       "variant": "battleLog"
+    },
+    {
+      "text": "",
+      "x": 0,
+      "y": 300,
+      "size": [210, 136],
+      "scale": 1,
+      "colour": "F5DFA8",
+      "trigger": "playerTurn",
+      "variant": "playerTurn"
+    },
+    {
+      "text": "",
+      "x": 0,
+      "y": 300,
+      "size": [210, 136],
+      "scale": 1,
+      "colour": "F5DFA8",
+      "variant": "enemyTurn"
     }
   ]
 }

@@ -1,9 +1,6 @@
 package com.csse3200.game.maps;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /** Represents the map graph containing all map nodes. */
 public class MapGraph implements EncounterCallback {
@@ -193,8 +190,8 @@ public class MapGraph implements EncounterCallback {
 
       // Ensures the nodes adjacent to the completed node are set to locked
       for (MapNode horizontalNode : getNodesByHeight(node.getHeight())) {
-        if (horizontalNode.getNodeId() != nodeId) {
-          if (horizontalNode.getState() == NodeState.AVAILABLE) {
+        if (!Objects.equals(horizontalNode.getNodeId(), nodeId)) {
+          if (Objects.equals(horizontalNode.getState(), NodeState.AVAILABLE)) {
             horizontalNode.setState(NodeState.LOCKED);
           }
         }

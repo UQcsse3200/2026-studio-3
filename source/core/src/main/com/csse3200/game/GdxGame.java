@@ -82,24 +82,25 @@ public class GdxGame extends Game {
   }
 
   /**
-   * Gets card discovery progress shared by all screens in this game session.
-   *
-   * @return process-lifetime card discovery service
-   */
-  public CardDiscoveryService getCardDiscoveryService() {
-    return cardDiscoveryService;
-  }
-
-  /**
    * Returns the background id of the current battle instance
    *
    * @return String background id for the current battle
    */
   public String getBackgroundId() {
     String backgroundId =
-        BACKGROUND_IDS[(getRunState().getMapProgression() - 1) % BACKGROUND_IDS.length];
+        BACKGROUND_IDS[
+            (getRunState().getMapGraph().getCurrentNode().getHeight() - 1) % BACKGROUND_IDS.length];
     logger.debug("Background Id: {}", backgroundId);
     return backgroundId;
+  }
+
+  /**
+   * Gets card discovery progress shared by all screens in this game session.
+   *
+   * @return process-lifetime card discovery service
+   */
+  public CardDiscoveryService getCardDiscoveryService() {
+    return cardDiscoveryService;
   }
 
   // Lives here rather than on a screen, since setScreen() disposes the outgoing screen.
@@ -308,11 +309,11 @@ public class GdxGame extends Game {
       case MAP -> new MapScreen(this);
       case ENCOUNTER -> new EncounterScreen(this);
       case CAMPFIRE -> new CampfireScreen(this);
+      case BATTLE_SCREEN -> new BattleScreen(this);
+      case VICTORY -> new EndBattleScreen(this, true);
       case ELITE_PORTAL -> new ElitePortalScreen(this);
       case ANCIENT_TEMPLE -> new AncientTempleScreen(this);
       case TEMPLE_CARD_SELECTION -> new TempleCardSelectionScreen(this);
-      case BATTLE_SCREEN -> new BattleScreen(this);
-      case VICTORY -> new EndBattleScreen(this, true);
       case DEFEAT -> new EndBattleScreen(this, false);
       case BESTIARY -> new BestiaryScreen(this);
       case ITEM_LIBRARY -> new ItemLibraryScreen(this);

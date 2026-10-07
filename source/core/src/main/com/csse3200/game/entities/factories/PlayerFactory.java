@@ -64,6 +64,7 @@ public class PlayerFactory {
             .addComponent(new EnergyComponent(resolveMaxEnergy(runState)))
             .addComponent(new PlayerStatsDisplay())
             .addComponent(new PlayerStatsTopDisplay(runState))
+            .addComponent(new PlayerEnergyDisplay())
             .addComponent(new EnemyMemoryComponent())
             .addComponent(new PlayerTrackerComponent());
 
@@ -94,6 +95,7 @@ public class PlayerFactory {
             .addComponent(new EnergyComponent(resolveMaxEnergy(runState)))
             .addComponent(new PlayerStatsDisplay())
             .addComponent(new PlayerStatsTopDisplay(runState))
+            .addComponent(new PlayerEnergyDisplay())
             .addComponent(new EnemyMemoryComponent())
             .addComponent(new PlayerTrackerComponent());
 

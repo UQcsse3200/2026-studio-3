@@ -50,9 +50,9 @@ public class PlayerRunState {
   }
 
   /**
-   * Calculates the discount from the durable owned-item list.
+   * Calculates the accumulated shop discount, capped at 50%.
    *
-   * @return accumulated shop discount, capped at 50%
+   * @return the current shop discount
    */
   public float getShopDiscount() {
     return Math.min(

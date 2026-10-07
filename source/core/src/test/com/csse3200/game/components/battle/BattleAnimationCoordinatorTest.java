@@ -116,6 +116,7 @@ class BattleAnimationCoordinatorTest {
       verify(entities, times(2)).register(visuals.capture());
       SpriteBatch batch = mock(SpriteBatch.class);
       when(batch.getPackedColor()).thenReturn(123f);
+      // Multiple effects are staggered (0.3s apart), so advance 0.4s before both are drawable.
       for (Entity visual : visuals.getAllValues()) {
         EffectVisualComponent component = visual.getComponent(EffectVisualComponent.class);
         component.update();
@@ -169,6 +170,7 @@ class BattleAnimationCoordinatorTest {
 
   @Test
   void shouldBorrowManagedIconsWithoutGeneratingOrDisposingThem() {
+    // Damage now plays a particle burst instead of an icon, so use an effect that draws one.
     EffectVisualRegistry registry = new EffectVisualRegistry();
     PlayerEffectVisuals.registerAll(registry);
     createCoordinator(registry);

@@ -2,6 +2,7 @@ package com.csse3200.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
@@ -11,6 +12,7 @@ import com.csse3200.game.areas.ForestGameArea;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
+import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.debug.CardEffectDebugComponent;
 import com.csse3200.game.cards.debug.CardEffectDebugDisplay;
@@ -95,9 +97,10 @@ public class BattleScreen extends ScreenAdapter {
     "images/level.png",
     "images/enemy.png",
     "images/armour.png",
+    "images/enemy_release/heavens_grace.png",
+    "images/ui/inventory-panel.png",
     "images/effects/shield.png",
     "images/effects/fortify.png",
-    "images/ui/inventory-panel.png",
     "images/ui/lucky-coin.png",
     "images/ui/energy-crystal.png",
     "images/ui/merchants-favor.png",
@@ -116,10 +119,10 @@ public class BattleScreen extends ScreenAdapter {
   private static final float CARD_HEIGHT = CardWidget.CARD_HEIGHT;
   private static final float CARD_INVENTORY_MIN_WIDTH = 800f;
   private static final float CARD_INVENTORY_MIN_HEIGHT = 600f;
+  private static final float ITEM_INVENTORY_MIN_WIDTH = 470f;
+  private static final float ITEM_INVENTORY_MIN_HEIGHT = 360f;
   private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
   private static final String CARD_WIDGET_SKIN = "flat-earth/skin/flat-earth-ui.json";
-
-  private static final String CARD_INVENTORY_STYLE = "popup";
 
   private static final String BATTLE_UI_JSON = "sprites/BattleUi.json";
   private static final String DECK_EDITOR_UI_JSON = "sprites/DeckEditorUi.json";
@@ -135,6 +138,7 @@ public class BattleScreen extends ScreenAdapter {
   private final CardPlayService cardPlayService;
   private final CardAimController enemyCardAim;
   private final CardAimController playerCardAim;
+  private final CardAimController allEnemiesCardAim;
   private ClickableFactory uiFactory;
   private final PlayerRunState playerState;
   private List<ClickableRecord> staticUiRecords;
@@ -181,8 +185,10 @@ public class BattleScreen extends ScreenAdapter {
             BattleEncounterSelector.enemiesFor(game.getRunState()));
     this.gameArea = forestGameArea;
     forestGameArea.create();
+
     RunState runState = game.getRunState();
     playerState = runState.getOrCreatePlayerState();
+    Entity player = forestGameArea.getPlayer();
 
     List<CardConfig> configs = CardConfigLoader.loadCards();
     library = new CardLibrary(configs);
@@ -199,7 +205,6 @@ public class BattleScreen extends ScreenAdapter {
     battleDeck.drawCards(AMOUNT_OF_CARDS_IN_DECK);
     handRowOrder = new ArrayList<>(battleDeck.getHandInstances());
 
-    Entity player = forestGameArea.getPlayer();
     EnergyComponent energy = player.getComponent(EnergyComponent.class);
 
     Map<String, Entity> enemyTargets = forestGameArea.getEnemyTargets();
@@ -210,7 +215,16 @@ public class BattleScreen extends ScreenAdapter {
         new CardAimController(
             ServiceLocator.getRenderService().getStage(),
             ServiceLocator.getCamera(),
-            Map.of("player", player));
+            Map.of("player", player),
+            TargetType.SELF,
+            this::battlefieldBounds);
+    allEnemiesCardAim =
+        new CardAimController(
+            ServiceLocator.getRenderService().getStage(),
+            ServiceLocator.getCamera(),
+            enemyTargets,
+            TargetType.ALL_ENEMIES,
+            this::battlefieldBounds);
     cardEffects = new CardEffectResolutionService(library);
     cardPlayService =
         new CardPlayService(
@@ -284,6 +298,8 @@ public class BattleScreen extends ScreenAdapter {
     uiFactory = new ClickableFactory(buildAllRecords());
     uiFactory.registerInstanceVariant("aimDrag", rec -> new DragNDrop(rec, enemyCardAim));
     uiFactory.registerInstanceVariant("selfAimDrag", rec -> new DragNDrop(rec, playerCardAim));
+    uiFactory.registerInstanceVariant(
+        "allEnemiesAimDrag", rec -> new DragNDrop(rec, allEnemiesCardAim));
 
     Terminal terminal = new Terminal();
     terminal.addCommand("skipbattle", new SkipBattleCommand(controller));
@@ -291,11 +307,12 @@ public class BattleScreen extends ScreenAdapter {
     terminal.addCommand("sethealth", new SetHealthCommand(gameArea.getPlayer()));
     terminal.addCommand("giveitem", new GiveItemCommand(gameArea.getPlayer()));
 
-    PopupDisplay cardInventory = new PopupDisplay("Card Inventory", CARD_INVENTORY_STYLE);
+    // Untitled: DeckEditorComponent draws its own "CARD INVENTORY" header, like the item inventory.
+    PopupDisplay cardInventory = new PopupDisplay("");
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
-    PopupDisplay itemInventory = new PopupDisplay("");
-    itemInventory.setMinSize(470f, 360f);
+    PopupDisplay itemInventory = new PopupDisplay("Item Inventory");
+    itemInventory.setMinSize(ITEM_INVENTORY_MIN_WIDTH, ITEM_INVENTORY_MIN_HEIGHT);
     InventoryPopupComponent inventoryPopup =
         new InventoryPopupComponent(
             game.getRunState(), itemInventory, gameArea.getPlayer(), controller::isPlayerTurn);
@@ -313,7 +330,7 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new InputDecorator(stage, 10))
             .addComponent(uiFactory)
             .addComponent(displays)
-            .addComponent(new BattleActions(controller, game))
+            .addComponent(new BattleActions(controller, game, gameArea.getEnemies()))
             .addComponent(new CardActions(controller, gameArea.getPlayer()))
             .addComponent(new Team3CardPlayAdapter(cardPlayService, controller))
             .addComponent(cardInventory)
@@ -446,6 +463,7 @@ public class BattleScreen extends ScreenAdapter {
     playerState.captureFrom(gameArea.getPlayer());
     enemyCardAim.dispose();
     playerCardAim.dispose();
+    allEnemiesCardAim.dispose();
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
@@ -485,32 +503,41 @@ public class BattleScreen extends ScreenAdapter {
   /** Applies the themed frame and matching icon without changing any button trigger or payload. */
   private List<ClickableRecord> buildBattleMenuRecords() {
     List<ClickableRecord> records = new ArrayList<>();
-    for (ClickableRecord record : staticUiRecords) {
+    for (ClickableRecord clickableRecord : staticUiRecords) {
       BattleMenuSkins.Icon icon =
-          switch (record.trigger()) {
+          switch (clickableRecord.trigger()) {
             case "openMenu" -> BattleMenuSkins.Icon.CARD;
             case "openInventory" -> BattleMenuSkins.Icon.INVENTORY;
             case "endTurn" -> BattleMenuSkins.Icon.END_TURN;
             default -> null;
           };
       if (icon == null) {
-        records.add(record);
+        records.add(clickableRecord);
         continue;
       }
 
       records.add(
-          ClickableRecord.builder(record.trigger())
-              .text(record.text())
+          ClickableRecord.builder(clickableRecord.trigger())
+              .text(clickableRecord.text())
               .skin(BattleMenuSkins.forIcon(icon))
-              .position(record.x(), record.y())
-              .size(record.width(), record.height())
-              .variant(record.variant())
-              .args(record.args())
-              .label(record.label())
-              .disabled(record.disabled())
+              .position(clickableRecord.x(), clickableRecord.y())
+              .size(clickableRecord.width(), clickableRecord.height())
+              .variant(clickableRecord.variant())
+              .args(clickableRecord.args())
+              .label(clickableRecord.label())
+              .disabled(clickableRecord.disabled())
               .build());
     }
     return records;
+  }
+
+  /** The battle play area above the raised hand and below the top controls/battle log. */
+  private Rectangle battlefieldBounds() {
+    Stage stage = ServiceLocator.getRenderService().getStage();
+    // Cards rise by 120 on hover; leave another 24 pixels before accepting a battlefield drop.
+    float bottom = Math.max(0f, stage.getHeight() - HAND_Y + CARD_HEIGHT + 144f);
+    float top = stage.getHeight() - 180f;
+    return new Rectangle(0f, bottom, stage.getWidth(), Math.max(0f, top - bottom));
   }
 
   private List<ClickableRecord> buildHandRecords() {
@@ -533,7 +560,7 @@ public class BattleScreen extends ScreenAdapter {
           switch (card.target()) {
             case SELF -> "selfAimDrag";
             case SINGLE_ENEMY -> "aimDrag";
-            case ALL_ENEMIES -> "drag";
+            case ALL_ENEMIES -> "allEnemiesAimDrag";
           };
 
       float offsetFromCenter = i - centerIndex;
@@ -550,6 +577,7 @@ public class BattleScreen extends ScreenAdapter {
               .rotation(rotation)
               .disabled(disabled);
 
+      // The drag source supplies a player/enemy ID or an all-enemies marker on a valid drop.
       builder.args(instance.instanceId());
 
       records.add(builder.build());

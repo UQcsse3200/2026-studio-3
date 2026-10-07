@@ -1,8 +1,6 @@
 package com.csse3200.game.screens;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.badlogic.gdx.graphics.Color;
 import com.csse3200.game.cards.EffectType;

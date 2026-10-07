@@ -1,6 +1,5 @@
 package com.csse3200.game.components.spritedisplay.displaying;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -21,11 +20,21 @@ public class EndBattleDisplay extends Displaying {
   public static final String RETURN_TO_MENU_EVENT = "returnToMenu";
 
   private boolean fired = false;
-  private boolean returnEnabled;
+  private boolean clickToReturnEnabled = true;
   private InputListener returnInputListener;
 
   public EndBattleDisplay(DisplayingRecord rec) {
     super(rec);
+  }
+
+  /**
+   * Controls whether clicking/pressing a key anywhere on this screen triggers {@link
+   * #RETURN_TO_MENU_EVENT}. Disabled on victory screens that show a reward the player must pick
+   * first — otherwise an accidental click before choosing a reward returns to the menu without the
+   * reward ever being claimed.
+   */
+  public void setClickToReturnEnabled(boolean enabled) {
+    this.clickToReturnEnabled = enabled;
   }
 
   @Override
@@ -52,7 +61,7 @@ public class EndBattleDisplay extends Displaying {
   }
 
   private boolean requestReturn() {
-    if (!returnEnabled || fired) {
+    if (fired || !clickToReturnEnabled) {
       return false;
     }
     fired = true;
@@ -61,9 +70,9 @@ public class EndBattleDisplay extends Displaying {
   }
 
   private void configureForResult(Object result) {
-    returnEnabled = "DEFEAT".equals(String.valueOf(result));
+    clickToReturnEnabled = "DEFEAT".equals(String.valueOf(result));
     if (label.getText().toString().startsWith("Click anywhere")) {
-      label.setVisible(returnEnabled);
+      label.setVisible(clickToReturnEnabled);
     }
   }
 
@@ -71,7 +80,12 @@ public class EndBattleDisplay extends Displaying {
   protected void draw(SpriteBatch batch) {
     // Centre horizontally; use the record's y as an offset down from the top of the screen.
     label.setPosition(
-        (Gdx.graphics.getWidth() - label.getPrefWidth()) / 2f, Gdx.graphics.getHeight() - getY());
+        (label.getStage().getViewport().getWorldWidth() - label.getPrefWidth()) / 2f,
+        label.getStage().getViewport().getWorldHeight() - getY());
+  }
+
+  public void setVisible(boolean visible) {
+    label.setVisible(visible);
   }
 
   @Override

@@ -63,7 +63,7 @@ class PlayerStatsDisplayTest {
   }
 
   private Table statusRow() {
-    return (Table) display.table.getChildren().get(5);
+    return (Table) display.table.getChildren().get(2);
   }
 
   private Table statusIcons() {

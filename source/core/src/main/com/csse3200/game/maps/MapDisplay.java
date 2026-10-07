@@ -69,6 +69,7 @@ public class MapDisplay extends UIComponent {
   // Node-id labels, shown only while debug rendering is active — same toggle 'debug on'
   // already controls elsewhere, so this reuses it instead of adding a new one.
   private final java.util.List<Label> nodeIdLabels = new java.util.ArrayList<>();
+  private static final String PLAYER_CONFIG_ERROR = "Unable to load player config";
 
   /**
    * Constructer method to initialize mapGraph
@@ -248,12 +249,13 @@ public class MapDisplay extends UIComponent {
 
     Table table = new Table();
     table.left();
-    table.setFillParent(true);
-    table.padLeft(15f);
-    table.padTop(25);
+    table.padLeft(10f);
+    table.padTop(5f);
+
+    Table levelTable = new Table();
 
     // Image size
-    float imageSideLength = 48f;
+    float imageSideLength = 20f;
 
     PlayerRunState playerState = runState == null ? null : runState.getOrCreatePlayerState();
 
@@ -270,11 +272,14 @@ public class MapDisplay extends UIComponent {
       maxHealth = playerState.getMaxHealth();
     } else {
       PlayerConfig stats = FileLoader.readClass(PlayerConfig.class, "configs/player.json");
+      if (stats == null) {
+        throw new IllegalStateException(PLAYER_CONFIG_ERROR);
+      }
       currentHealth = stats.health;
       maxHealth = stats.maxHealth;
     }
 
-    String healthText = String.format("Health: %d / %d", currentHealth, maxHealth);
+    String healthText = String.format("%d / %d", currentHealth, maxHealth);
     Label.LabelStyle healthStyle = new Label.LabelStyle(skin.get(LARGE, Label.LabelStyle.class));
     healthStyle.fontColor = new Color(0.75f, 0.18f, 0.16f, 1f);
 
@@ -292,12 +297,15 @@ public class MapDisplay extends UIComponent {
       money = playerState.getGold();
     } else {
       PlayerConfig stats = FileLoader.readClass(PlayerConfig.class, "configs/player.json");
+      if (stats == null) {
+        throw new IllegalStateException(PLAYER_CONFIG_ERROR);
+      }
       money = stats.gold;
     }
 
     Label.LabelStyle moneyStyle = new Label.LabelStyle(skin.get(LARGE, Label.LabelStyle.class));
     moneyStyle.fontColor = new Color(0.95f, 0.73f, 0.28f, 1f);
-    String moneyText = String.format("Gold: $%d", money);
+    String moneyText = String.format("$%d", money);
     Label moneyLabel = new Label(moneyText, moneyStyle);
     moneyLabel.setFontScale(0.75f);
 
@@ -308,7 +316,7 @@ public class MapDisplay extends UIComponent {
     // Level text
     Label.LabelStyle levelStyle = new Label.LabelStyle(skin.get(LARGE, Label.LabelStyle.class));
     levelStyle.fontColor = new Color(0.95f, 0.73f, 0.28f, 1f);
-    String levelText = String.format("Level: %d", mapGraph.getCurrentNode().getHeight());
+    String levelText = String.format("%d", mapGraph.getCurrentNode().getHeight());
     Label levelLabel = new Label(levelText, levelStyle);
     levelLabel.setFontScale(0.75f);
 
@@ -321,6 +329,13 @@ public class MapDisplay extends UIComponent {
 
     table.add(levelImage).size(imageSideLength).padRight(5f).center();
     table.add(levelLabel).padRight(25f).center();
+
+    levelTable.add(levelImage).size(imageSideLength).pad(5);
+    levelTable.add(levelLabel).left().pad(10);
+    levelTable.pack();
+    levelTable.setPosition(
+        (mapWidth - levelTable.getWidth()) / 2f, (50f - levelTable.getHeight()) / 2f);
+    playerTable.addActor(levelTable);
 
     playerTable.add(table);
   }
