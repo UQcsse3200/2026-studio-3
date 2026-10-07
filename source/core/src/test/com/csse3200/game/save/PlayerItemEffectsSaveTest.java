@@ -56,8 +56,9 @@ class PlayerItemEffectsSaveTest {
             ItemType.IRON_AEGIS,
             ItemType.WARRIORS_CREST),
         restoredPlayer.getOwnedItems());
+    assertEquals(0.1f, restoredPlayer.getGoldBonusMultiplier(), 0.001f);
     assertEquals(
-        0.1f, player.getComponent(InventoryComponent.class).getGoldBonusMultiplier(), 0.001f);
+        0f, player.getComponent(InventoryComponent.class).getGoldBonusMultiplier(), 0.001f);
     assertEquals(0.10f, player.getComponent(InventoryComponent.class).getShopDiscount(), 0.001f);
     assertEquals(4, player.getComponent(EnergyComponent.class).getMaxEnergy());
     assertEquals(0, player.getComponent(CombatStatsComponent.class).getArmour());

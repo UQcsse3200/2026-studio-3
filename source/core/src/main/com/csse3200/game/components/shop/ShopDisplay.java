@@ -29,6 +29,9 @@ import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.maps.EncounterCallback;
+import com.csse3200.game.maps.PlayerRunState;
+import com.csse3200.game.rewards.ItemFormatting;
+import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
@@ -106,7 +109,9 @@ public class ShopDisplay extends UIComponent {
 
   private final ShopEncounter shopEncounter;
   private final CardService cardService;
+  private final PlayerRunState playerRunState;
   private final CardResolver cardResolver = new CardResolver();
+  private Label merchantsFavorLabel;
   private final Map<String, ItemWidgets> itemWidgets = new HashMap<>();
   private final Set<String> purchasedItemIds = new HashSet<>();
   private CardWidgetAssets cardWidgetAssets;
@@ -160,14 +165,18 @@ public class ShopDisplay extends UIComponent {
    * @param shopEncounter encounter session receiving purchase and completion actions
    */
   public ShopDisplay(InventoryComponent inventory, ShopEncounter shopEncounter) {
-    this(inventory, shopEncounter, null);
+    this(inventory, shopEncounter, null, null);
   }
 
   private ShopDisplay(
-      InventoryComponent inventory, ShopEncounter shopEncounter, CardService cardService) {
+      InventoryComponent inventory,
+      ShopEncounter shopEncounter,
+      CardService cardService,
+      PlayerRunState playerRunState) {
     this.shopEncounter =
         shopEncounter == null ? new ShopEncounter(inventory, createGeneratedShop()) : shopEncounter;
     this.cardService = cardService == null ? ServiceLocator.getCardLibrary() : cardService;
+    this.playerRunState = playerRunState;
   }
 
   /**
@@ -186,7 +195,13 @@ public class ShopDisplay extends UIComponent {
    * @param cardService read-only source of card definitions and texture paths
    */
   public ShopDisplay(ShopEncounter shopEncounter, CardService cardService) {
-    this(null, shopEncounter, cardService);
+    this(null, shopEncounter, cardService, null);
+  }
+
+  /** Creates an integrated shop that also displays durable item discounts. */
+  public ShopDisplay(
+      ShopEncounter shopEncounter, CardService cardService, PlayerRunState playerRunState) {
+    this(null, shopEncounter, cardService, playerRunState);
   }
 
   /**
@@ -394,6 +409,10 @@ public class ShopDisplay extends UIComponent {
     titleBlock.add(title).left();
     titleBlock.row();
     titleBlock.add(subtitle).left().padTop(6f);
+    titleBlock.row();
+    merchantsFavorLabel = new Label("", createLabelStyle("small", GOLD_COLOUR));
+    merchantsFavorLabel.setFontScale(0.92f);
+    titleBlock.add(merchantsFavorLabel).left().padTop(6f);
 
     Table purse = new Table();
     purse.setBackground(createPlaqueDrawable(new Color(0.76f, 0.63f, 0.45f, 1f)));
@@ -435,8 +454,13 @@ public class ShopDisplay extends UIComponent {
 
     Actor artwork = createArtwork(item);
 
-    Label priceLabel =
-        new Label(String.format("%d GOLD", item.price), createLabelStyle(DEFAULT, GOLD_COLOUR));
+    float discount = playerRunState == null ? 0f : playerRunState.getShopDiscount();
+    int shownPrice = Math.round(item.price * (1f - discount));
+    String priceText =
+        discount > 0f
+            ? String.format("%d GOLD (-%.0f%%)", shownPrice, discount * 100f)
+            : String.format("%d GOLD", item.price);
+    Label priceLabel = new Label(priceText, createLabelStyle(DEFAULT, GOLD_COLOUR));
     Label stockLabel = new Label("", createLabelStyle("small", MUTED_COLOUR));
     Label stateLabel = new Label("", createLabelStyle("small", AVAILABLE_COLOUR));
     priceLabel.setFontScale(0.98f);
@@ -628,6 +652,19 @@ public class ShopDisplay extends UIComponent {
   private void refresh() {
     Integer currency = shopEncounter.getCurrency();
     goldLabel.setText(currency == null ? "GOLD  --" : String.format("GOLD  %d", currency));
+
+    if (merchantsFavorLabel != null) {
+      int favorCount =
+          playerRunState == null ? 0 : playerRunState.getOwnedItemCount(ItemType.MERCHANTS_FAVOR);
+      merchantsFavorLabel.setText(
+          favorCount == 0
+              ? ""
+              : String.format(
+                  "%s x%d  |  %.0f%% off all offers",
+                  ItemFormatting.formatItemName(ItemType.MERCHANTS_FAVOR),
+                  favorCount,
+                  playerRunState.getShopDiscount() * 100f));
+    }
 
     for (ShopItem item : shopEncounter.getItems()) {
       ItemWidgets widgets = itemWidgets.get(item.id);

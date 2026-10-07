@@ -1,15 +1,20 @@
 package com.csse3200.game.ui;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.csse3200.game.services.ServiceLocator;
 
 /**
  * Generic reusable popup: a dimmed backdrop behind a centred, closable window.
@@ -18,35 +23,43 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
  * label, a form, widgets built by a {@link
  * com.csse3200.game.components.spritedisplay.clickable.ClickableFactory}, anything — then call
  * {@link #show()} / {@link #hide()} to toggle it.
- *
- * <p>Look: by default the skin's {@code "default"} styles. Pass a style name (e.g. {@code "popup"})
- * to restyle the window and its close button; that name must exist in the skin as both a {@code
- * Window.WindowStyle} and a {@code TextButton.TextButtonStyle}.
  */
 public class PopupDisplay extends UIComponent {
   private static final float Z_INDEX = 20f;
-  private static final Color BACKDROP_COLOUR = new Color(0f, 0f, 0f, 0.6f); // around the popup
+  private static final Color BACKDROP_COLOUR = new Color(0f, 0f, 0f, 0.6f);
 
   private final String title;
   private final String styleName;
   private float minWidth = 0f;
   private float minHeight = 0f;
+  private String backgroundTexturePath;
+  private Color backgroundColour;
+  private float paddingTop = 20f;
+  private float paddingLeft = 20f;
+  private float paddingBottom = 20f;
+  private float paddingRight = 20f;
+  private boolean defaultCloseButtonVisible = true;
+  private Color titleColour;
+  private String titleFontName;
 
   private Image backdrop;
   private Window window;
   private Table content;
+  private TextButton closeButton;
 
   private Runnable onShow;
   private Runnable onHide;
   private Runnable onWindowClicked;
 
-  private static final float HEADER_HEIGHT = 35f; // title bar height = the window's top padding
-  private static final float SIDE_PADDING = 20f;
+  public PopupDisplay() {
+    this("");
+  }
 
-  /**
-   * @param title text in the window's title bar
-   * @param styleName skin style used for the window and its close button (see class javadoc)
-   */
+  public PopupDisplay(String title) {
+    this(title, "default");
+  }
+
+  /** Creates a popup using matching Window and TextButton styles from the shared skin. */
   public PopupDisplay(String title, String styleName) {
     this.title = title;
     this.styleName = styleName;
@@ -56,6 +69,77 @@ public class PopupDisplay extends UIComponent {
   public void setMinSize(float minWidth, float minHeight) {
     this.minWidth = minWidth;
     this.minHeight = minHeight;
+  }
+
+  /**
+   * Overrides this popup's window background colour, letting callers match their content's visual
+   * theme instead of using the skin's default window style.
+   *
+   * @param colour solid background colour for the window
+   */
+  public void setBackgroundColour(Color colour) {
+    backgroundColour = colour.cpy();
+    backgroundTexturePath = null;
+    if (window != null) {
+      applyBackgroundColour();
+    }
+  }
+
+  /** Uses a loaded texture as this popup's complete window background. */
+  public void setBackgroundTexture(String texturePath) {
+    backgroundTexturePath = texturePath;
+    backgroundColour = null;
+    if (window != null) {
+      applyBackgroundTexture();
+    }
+  }
+
+  private void applyBackgroundTexture() {
+    Texture texture =
+        ServiceLocator.getResourceService().getAsset(backgroundTexturePath, Texture.class);
+    TextureRegionDrawable background = new TextureRegionDrawable(texture);
+    background.setMinWidth(0f);
+    background.setMinHeight(0f);
+    window.setBackground(background);
+  }
+
+  private void applyBackgroundColour() {
+    window.setBackground(skin.newDrawable("white", backgroundColour));
+  }
+
+  /** Sets the inset between the window frame and its title/content. */
+  public void setPadding(float top, float left, float bottom, float right) {
+    paddingTop = top;
+    paddingLeft = left;
+    paddingBottom = bottom;
+    paddingRight = right;
+    if (window != null) {
+      window.pad(top, left, bottom, right);
+    }
+  }
+
+  /** Shows or hides the generic title-bar close button. */
+  public void setDefaultCloseButtonVisible(boolean visible) {
+    defaultCloseButtonVisible = visible;
+    if (closeButton != null) {
+      closeButton.setVisible(visible);
+    }
+  }
+
+  /** Applies a colour and skin font to the popup title without changing other popups. */
+  public void setTitleStyle(Color colour, String fontName) {
+    titleColour = colour.cpy();
+    titleFontName = fontName;
+    if (window != null) {
+      applyTitleStyle();
+    }
+  }
+
+  private void applyTitleStyle() {
+    LabelStyle style = new LabelStyle(window.getTitleLabel().getStyle());
+    style.font = skin.getFont(titleFontName);
+    style.fontColor = titleColour;
+    window.getTitleLabel().setStyle(style);
   }
 
   @Override
@@ -70,11 +154,10 @@ public class PopupDisplay extends UIComponent {
     backdrop.setFillParent(true);
 
     window = new Window(title, skin, styleName);
-    window.pad(0f); // nothing between the window edge and the header
-    window.padTop(HEADER_HEIGHT); // Window sizes the title table to this height
+    window.pad(20f);
     window.top();
 
-    TextButton closeButton = new TextButton("X", skin, styleName);
+    closeButton = new TextButton("X", skin, styleName);
     closeButton.addListener(
         new ChangeListener() {
           @Override
@@ -82,13 +165,12 @@ public class PopupDisplay extends UIComponent {
             hide();
           }
         });
-
-    window.getTitleTable().padLeft(SIDE_PADDING); // keep the title text off the edge
-    window.getTitleTable().add(closeButton).size(28f).padRight(SIDE_PADDING).padTop(-4f);
+    window.getTitleTable().add(closeButton).size(28f).padRight(4f).padTop(-4f);
 
     content = new Table();
-    content.pad(0f, SIDE_PADDING, SIDE_PADDING, SIDE_PADDING); // top, left, bottom, right
     window.add(content).expand().fill().padTop(10f);
+
+    applyPendingConfiguration();
 
     // Window unconditionally toFront()s itself on every touch down inside it (baked into its
     // constructor's own captureListener, unrelated to setMovable) — which, for callers with
@@ -108,8 +190,35 @@ public class PopupDisplay extends UIComponent {
           }
         });
 
+    window.addListener(
+        new com.badlogic.gdx.scenes.scene2d.InputListener() {
+          @Override
+          public boolean keyDown(InputEvent event, int keycode) {
+            if (keycode == Input.Keys.ESCAPE) {
+              hide();
+              return true;
+            }
+            return false;
+          }
+        });
+
     stage.addActor(backdrop);
     stage.addActor(window);
+  }
+
+  private void applyPendingConfiguration() {
+    window.pad(paddingTop, paddingLeft, paddingBottom, paddingRight);
+    closeButton.setVisible(defaultCloseButtonVisible);
+
+    if (backgroundTexturePath != null) {
+      applyBackgroundTexture();
+    } else if (backgroundColour != null) {
+      applyBackgroundColour();
+    }
+
+    if (titleColour != null && titleFontName != null) {
+      applyTitleStyle();
+    }
   }
 
   /** The table callers add their own widgets to. */
@@ -149,6 +258,10 @@ public class PopupDisplay extends UIComponent {
     return window.getY();
   }
 
+  public float getWindowWidth() {
+    return window.getWidth();
+  }
+
   public float getWindowHeight() {
     return window.getHeight();
   }
@@ -163,6 +276,7 @@ public class PopupDisplay extends UIComponent {
     window.setVisible(true);
     backdrop.toFront();
     window.toFront();
+    stage.setKeyboardFocus(window);
     if (onShow != null) {
       onShow.run();
     }
@@ -176,6 +290,16 @@ public class PopupDisplay extends UIComponent {
     }
   }
 
+  public boolean isShowing() {
+    return window != null && window.isVisible();
+  }
+
+  public void setHeaderColour(Color colour) {
+    if (window != null) {
+      window.getTitleTable().setBackground(skin.newDrawable("white", colour));
+    }
+  }
+
   @Override
   protected void draw(SpriteBatch batch) {
     // Actors are drawn by the stage; nothing to do per-frame here.
@@ -184,9 +308,5 @@ public class PopupDisplay extends UIComponent {
   @Override
   public float getZIndex() {
     return Z_INDEX;
-  }
-
-  public void setHeaderColour(Color colour) {
-    window.getTitleTable().setBackground(skin.newDrawable("white", colour));
   }
 }

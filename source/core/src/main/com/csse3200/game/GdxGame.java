@@ -206,7 +206,6 @@ public class GdxGame extends Game {
     }
     ServiceLocator.registerBestiaryService(bestiaryService);
     ServiceLocator.registerCardDiscoveryService(cardDiscoveryService);
-    setScreen(newScreen(screenType));
     AudioService.onScreenChanged(screenType, runState);
   }
 

@@ -99,6 +99,16 @@ public class ShopEncounter {
     return transactions == null ? null : transactions.getCurrency();
   }
 
+  /**
+   * Returns the player's current shop discount, as a fraction (e.g. 0.05f for 5% off), or null when
+   * no Player integration is available.
+   *
+   * @return current shop discount, or null
+   */
+  public Float getShopDiscount() {
+    return transactions == null ? null : transactions.getShopDiscount();
+  }
+
   public boolean isCompleted() {
     return completed;
   }

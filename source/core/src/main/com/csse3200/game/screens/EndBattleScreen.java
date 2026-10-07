@@ -37,6 +37,18 @@ import org.slf4j.LoggerFactory;
 /** Terminal screen shown when a battle ends, for either a win or a loss. */
 public class EndBattleScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(EndBattleScreen.class);
+  private static final String[] REWARD_TEXTURES = {
+    "images/dungeon.png",
+    "images/ui/reward-panel.png",
+    "images/ui/reward-card.png",
+    "images/ui/gold-reward.png",
+    "images/ui/victory-title.png",
+    "images/ui/lucky-coin.png",
+    "images/ui/energy-crystal.png",
+    "images/ui/merchants-favor.png",
+    "images/ui/iron-aegis.png",
+    "images/ui/warriors-crest.png"
+  };
 
   private final GdxGame game;
   private final Renderer renderer;
@@ -58,6 +70,7 @@ public class EndBattleScreen extends ScreenAdapter {
     List<CardConfig> cardConfigs = CardConfigLoader.loadCards();
     CardService cardLibrary = new CardLibrary(cardConfigs);
     if (won) {
+      loadRewardAssets();
       loadCardAssets(cardConfigs);
     }
     createUI(won, cardLibrary);
@@ -66,11 +79,7 @@ public class EndBattleScreen extends ScreenAdapter {
   private void createUI(boolean won, CardService cardLibrary) {
     Stage stage = ServiceLocator.getRenderService().getStage();
 
-    // Heading + "click to continue" hint live in sprites/EndBattle.json; the heading's text is
-    // filled in below once the components are listening.
-    DisplayingFactory displays = new DisplayingFactory(Path.of("sprites/EndBattle.json"));
-
-    Entity ui = new Entity().addComponent(new InputDecorator(stage, 10)).addComponent(displays);
+    Entity ui = new Entity().addComponent(new InputDecorator(stage, 10));
 
     if (won) {
       RewardService rewardService =
@@ -96,19 +105,31 @@ public class EndBattleScreen extends ScreenAdapter {
                   upgradeSelection, new PlayerDeckCardUpgradeCommitter(playerDeck)));
         }
       }
+    } else {
+      // The themed reward screen already supplies its own victory title. The legacy end-battle
+      // display is only needed for defeat, where it provides the heading and return input.
+      ui.addComponent(new DisplayingFactory(Path.of("sprites/EndBattle.json")));
     }
 
     ui.getEvents().addListener(RewardDisplay.REWARD_CLAIMED_EVENT, this::onRewardClaimed);
     ui.getEvents().addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, this::returnToMenu);
     ServiceLocator.getEntityService().register(ui);
 
-    ui.getEvents().trigger(EndBattleDisplay.RESULT_EVENT, won ? "VICTORY" : "DEFEAT");
+    if (!won) {
+      ui.getEvents().trigger(EndBattleDisplay.RESULT_EVENT, "DEFEAT");
+    }
   }
 
   private void loadCardAssets(List<CardConfig> cardConfigs) {
     cardTextures = CardWidgetAssets.collectTexturePaths(cardConfigs);
     ResourceService resources = ServiceLocator.getResourceService();
     resources.loadTextures(cardTextures);
+    resources.loadAll();
+  }
+
+  private void loadRewardAssets() {
+    ResourceService resources = ServiceLocator.getResourceService();
+    resources.loadTextures(REWARD_TEXTURES);
     resources.loadAll();
   }
 
@@ -179,6 +200,7 @@ public class EndBattleScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
+    ServiceLocator.getResourceService().unloadAssets(REWARD_TEXTURES);
     ServiceLocator.getResourceService().unloadAssets(cardTextures);
   }
 }

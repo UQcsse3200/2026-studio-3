@@ -34,6 +34,7 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
 
   @Override
   public ShopTransactionStatus validatePurchase(String cardId, int price) {
+
     if (cardId == null || cardId.isBlank()) {
       return ShopTransactionStatus.INVALID_CARD;
     }
@@ -115,12 +116,8 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
         : ShopTransactionStatus.ROLLBACK_FAILED;
   }
 
-  /**
-   * Returns 0 for now — the Player/Card/Deck boundary does not yet expose a discount getter. TODO:
-   * wire this up once PlayerStateGateway supports shop discount.
-   */
   @Override
   public float getShopDiscount() {
-    return 0f;
+    return player.getShopDiscount();
   }
 }

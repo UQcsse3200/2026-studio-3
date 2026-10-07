@@ -119,6 +119,7 @@ class BattleAnimationCoordinatorTest {
       for (Entity visual : visuals.getAllValues()) {
         EffectVisualComponent component = visual.getComponent(EffectVisualComponent.class);
         component.update();
+        component.update();
         component.render(batch);
       }
       verify(batch, times(2)).draw(eq(glow), anyFloat(), anyFloat(), anyFloat(), anyFloat());
@@ -169,13 +170,13 @@ class BattleAnimationCoordinatorTest {
   @Test
   void shouldBorrowManagedIconsWithoutGeneratingOrDisposingThem() {
     EffectVisualRegistry registry = new EffectVisualRegistry();
-    OffensiveEffectVisuals.registerAll(registry);
+    PlayerEffectVisuals.registerAll(registry);
     createCoordinator(registry);
     Texture icon = mock(Texture.class);
     when(resources.getAsset(anyString(), eq(Texture.class))).thenReturn(icon);
 
     try (MockedConstruction<Texture> textures = mockConstruction(Texture.class)) {
-      playerEffects.handle(List.of(effect(EffectType.DAMAGE)));
+      playerEffects.handle(List.of(effect(EffectType.HEAL)));
 
       assertTrue(textures.constructed().isEmpty());
       SpriteBatch batch = mock(SpriteBatch.class);

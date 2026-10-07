@@ -1,14 +1,22 @@
 package com.csse3200.game.components.spritedisplay.displaying;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.configs.CardConfig;
@@ -16,15 +24,20 @@ import com.csse3200.game.cards.runtime.CardResolver;
 import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
+import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rewards.ItemFormatting;
+import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.rewards.RewardService;
+import com.csse3200.game.rewards.RewardType;
+import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.services.audio.SoundId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,25 +46,44 @@ public class RewardDisplay extends Displaying {
   public static final String REWARD_CLAIMED_EVENT = "rewardClaimed";
   private static final Logger logger = LoggerFactory.getLogger(RewardDisplay.class);
 
+  private static final String BACKGROUND_TEXTURE = "images/dungeon.png";
+  private static final String PANEL_TEXTURE = "images/ui/reward-panel.png";
+  private static final String CARD_TEXTURE = "images/ui/reward-card.png";
+  private static final String GOLD_TEXTURE = "images/ui/gold-reward.png";
+  private static final String VICTORY_TITLE_TEXTURE = "images/ui/victory-title.png";
+  private static final Color SCRIM = new Color(0.015f, 0.01f, 0.025f, 0.58f);
+  private static final Color GOLD = new Color(0.96f, 0.78f, 0.38f, 1f);
+  private static final Color CREAM = new Color(0.93f, 0.87f, 0.73f, 1f);
+  private static final Color MUTED = new Color(0.72f, 0.66f, 0.58f, 1f);
+  private static final Map<ItemType, String> ITEM_ICONS =
+      Map.of(
+          ItemType.LUCKY_COIN, "images/ui/lucky-coin.png",
+          ItemType.ENERGY_CRYSTAL, "images/ui/energy-crystal.png",
+          ItemType.MERCHANTS_FAVOR, "images/ui/merchants-favor.png",
+          ItemType.IRON_AEGIS, "images/ui/iron-aegis.png",
+          ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png");
+
   private final RunState runState;
   private final RewardService rewardService;
   private final CardService cardService;
   private final CardDiscoveryService cardDiscoveryService;
   private final Runnable afterRewardApplied;
   private final CardResolver cardResolver = new CardResolver();
-
+  private final List<TextButton> optionButtons = new ArrayList<>();
+  private final List<Button> cardChoiceButtons = new ArrayList<>();
+  private final List<CardWidget> cardWidgets = new ArrayList<>();
   private List<RewardOption> options;
   private boolean claimed;
   private boolean cardRewardCommitted;
   private boolean claimInProgress;
   private boolean created;
   private boolean disposed;
-  private Table optionsTable;
+  private boolean goldRewardUsesLuckyCoin;
+  private Actor background;
+  private Actor scrim;
+  private Actor rewardUi;
   private Table cardSelectionTable;
   private CardWidgetAssets cardWidgetAssets;
-  private final List<TextButton> optionButtons = new ArrayList<>();
-  private final List<Button> cardChoiceButtons = new ArrayList<>();
-  private final List<CardWidget> cardWidgets = new ArrayList<>();
 
   public RewardDisplay(
       DisplayingRecord rec,
@@ -62,12 +94,6 @@ public class RewardDisplay extends Displaying {
     this(rec, rewardService, runState, cardService, cardDiscoveryService, () -> {});
   }
 
-  /**
-   * Creates the reward picker.
-   *
-   * @param afterRewardApplied callback run after the selected reward mutates persistent run state
-   *     and before any navigation event is fired
-   */
   public RewardDisplay(
       DisplayingRecord rec,
       RewardService rewardService,
@@ -93,40 +119,30 @@ public class RewardDisplay extends Displaying {
     created = true;
     super.create();
 
-    float multiplier = 0f;
     if (runState != null) {
-      multiplier = runState.getOrCreatePlayerState().getGoldBonusMultiplier();
+      PlayerRunState playerState = runState.getOrCreatePlayerState();
+      goldRewardUsesLuckyCoin = playerState.hasOwnedItem(ItemType.LUCKY_COIN);
     }
 
-    options = rewardService.generateRewardOptions(multiplier);
+    options = rewardService.generateRewardOptions();
     cardWidgetAssets =
         CardWidgetAssets.fromManagedResources(skin, ServiceLocator.getResourceService());
-    buildOptionButtons();
+    createCompatibilityButtons();
+    buildRewardScreen();
   }
 
-  private void buildOptionButtons() {
-    if (options == null || options.isEmpty()) {
-      return;
-    }
-
-    optionsTable = new Table();
-    optionsTable.setFillParent(true);
-    optionsTable.top();
-    optionsTable.padTop(400f);
+  /** Keeps the interaction API used by card reward tests while the visible UI remains themed. */
+  private void createCompatibilityButtons() {
     optionButtons.clear();
-
     for (RewardOption option : options) {
       if (option == null) {
         continue;
       }
-
       TextButton button = new TextButton(describeOption(option), skin);
-      optionButtons.add(button);
-
       button.addListener(
           new ChangeListener() {
             @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
               switch (option.type) {
                 case GOLD -> AudioService.playSound(SoundId.ITEM_PURCHASE, 0.5f);
                 case ITEM -> AudioService.playSound(SoundId.ITEM_PICKUP, 0.5f);
@@ -135,54 +151,269 @@ public class RewardDisplay extends Displaying {
               selectOption(option);
             }
           });
+      optionButtons.add(button);
+    }
+  }
 
-      button.addListener(
-          new InputListener() {
-            @Override
-            public boolean touchDown(
-                com.badlogic.gdx.scenes.scene2d.InputEvent event,
-                float x,
-                float y,
-                int pointer,
-                int buttonCode) {
-              event.stop();
-              return true;
-            }
-          });
-
-      optionsTable.add(button).pad(10f).width(320f).height(80f);
-      optionsTable.row();
+  private void buildRewardScreen() {
+    if (options == null || options.isEmpty()) {
+      return;
     }
 
-    stage.addActor(optionsTable);
+    Image scene = image(BACKGROUND_TEXTURE);
+    scene.setScaling(Scaling.fill);
+    scene.setFillParent(true);
+    background = scene;
+    stage.addActor(scene);
+    scene.toBack();
+
+    Image dimmer = new Image(skin.newDrawable("white", SCRIM));
+    dimmer.setFillParent(true);
+    scrim = dimmer;
+    stage.addActor(dimmer);
+
+    float panelWidth = Math.min(stage.getWidth() * 0.92f, 1180f);
+    float panelHeight = panelWidth * 0.625f;
+    if (panelHeight > stage.getHeight() * 0.96f) {
+      panelHeight = stage.getHeight() * 0.96f;
+      panelWidth = panelHeight / 0.625f;
+    }
+
+    Stack panel = new Stack();
+    Image panelFrame = image(PANEL_TEXTURE);
+    panelFrame.setScaling(Scaling.stretch);
+    panel.add(panelFrame);
+    panel.add(createPanelContent(panelWidth, panelHeight));
+
+    Table root = new Table();
+    root.setFillParent(true);
+    root.add(panel).width(panelWidth).height(panelHeight);
+    rewardUi = root;
+    stage.addActor(root);
+  }
+
+  private Table createPanelContent(float panelWidth, float panelHeight) {
+    Table content = new Table();
+    content.top();
+    content.pad(panelHeight * 0.11f, panelWidth * 0.115f, panelHeight * 0.13f, panelWidth * 0.115f);
+
+    Image victory = image(VICTORY_TITLE_TEXTURE);
+    victory.setScaling(Scaling.fit);
+    content.add(victory).size(panelWidth * 0.46f, panelHeight * 0.13f).center();
+    content.row();
+
+    Label subtitle = new Label("CHOOSE ONE REWARD", largeStyle(GOLD));
+    subtitle.setFontScale(0.82f);
+    content.add(subtitle).center().padTop(2f).padBottom(panelHeight * 0.025f);
+    content.row();
+
+    Table cards = new Table();
+    cards.defaults().padLeft(panelWidth * 0.008f).padRight(panelWidth * 0.008f);
+    float cardWidth = panelWidth * (options.size() > 2 ? 0.21f : 0.25f);
+    float cardHeight = panelHeight * 0.49f;
+    for (RewardOption option : options) {
+      if (option != null) {
+        cards
+            .add(createRewardCard(option, cardWidth, cardHeight))
+            .width(cardWidth)
+            .height(cardHeight);
+      }
+    }
+    content.add(cards).expand().center();
+    content.row();
+    return content;
+  }
+
+  private Stack createRewardCard(RewardOption option, float cardWidth, float cardHeight) {
+    Stack card = new Stack();
+    Image frame = image(CARD_TEXTURE);
+    frame.setScaling(Scaling.stretch);
+    frame.setTouchable(Touchable.disabled);
+    card.add(frame);
+
+    Table details = new Table();
+    details.top();
+    details.setTouchable(Touchable.disabled);
+    details.pad(cardHeight * 0.115f, cardWidth * 0.075f, cardHeight * 0.055f, cardWidth * 0.075f);
+
+    Label name = new Label(rewardTitle(option), largeStyle(GOLD));
+    name.setFontScale(isLongRewardName(option) ? 0.58f : 0.76f);
+    name.setAlignment(com.badlogic.gdx.utils.Align.center);
+    details.add(name).width(cardWidth * 0.86f).center();
+    details.row();
+
+    Image icon = image(rewardIcon(option));
+    icon.setScaling(Scaling.fit);
+    details
+        .add(icon)
+        .size(cardWidth * 0.44f, cardHeight * 0.34f)
+        .center()
+        .padTop(cardHeight * 0.025f);
+    details.row();
+
+    Label description = new Label(rewardDescription(option), smallStyle(CREAM));
+    description.setWrap(true);
+    description.setAlignment(com.badlogic.gdx.utils.Align.center);
+    details
+        .add(description)
+        .width(cardWidth * 0.88f)
+        .height(cardHeight * 0.13f)
+        .center()
+        .padTop(cardHeight * 0.008f);
+    details.row();
+
+    details.add().expandY();
+    details.row();
+    Label select = new Label("SELECT", largeStyle(GOLD));
+    select.setFontScale(0.82f);
+    select.setAlignment(com.badlogic.gdx.utils.Align.center);
+    details
+        .add(select)
+        .width(cardWidth * 0.78f)
+        .height(cardHeight * 0.12f)
+        .center()
+        .padBottom(cardHeight * 0.055f);
+    card.add(details);
+
+    card.setTouchable(Touchable.enabled);
+    card.addListener(
+        new ClickListener() {
+          @Override
+          public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+            event.stop();
+            return super.touchDown(event, x, y, pointer, button);
+          }
+
+          @Override
+          public void clicked(InputEvent event, float x, float y) {
+            selectOption(option);
+          }
+
+          @Override
+          public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+            frame.setColor(1f, 0.88f, 0.58f, 1f);
+          }
+
+          @Override
+          public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+            frame.setColor(Color.WHITE);
+          }
+        });
+    return card;
   }
 
   private String describeOption(RewardOption option) {
     if (option == null || option.type == null) {
       return "";
     }
-
     return switch (option.type) {
       case GOLD -> option.goldAmount + " Gold";
-
-      case ITEM -> {
-        if (option.itemId == null) {
-          yield "Item";
-        }
-
-        yield ItemFormatting.formatItemName(option.itemId)
-            + " ("
-            + switch (option.itemId) {
-              case LUCKY_COIN -> "+10% Total Gold, max +20";
-              case ENERGY_CRYSTAL -> "+1 Max Energy";
-              case MERCHANTS_FAVOR -> "+10% Shop Discount";
-              case IRON_AEGIS -> "+5 Armour when used";
-              case WARRIORS_CREST -> "+1 Strength when used";
-            }
-            + ")";
-      }
+      case ITEM ->
+          option.itemId == null
+              ? "Item"
+              : ItemFormatting.formatItemName(option.itemId)
+                  + switch (option.itemId) {
+                    case LUCKY_COIN -> " (+10% Gold)";
+                    case ENERGY_CRYSTAL -> " (+1 Max Energy)";
+                    case MERCHANTS_FAVOR -> " (+10% Shop Discount)";
+                    case IRON_AEGIS -> " (+5 Armour when used)";
+                    case WARRIORS_CREST -> " (+1 Strength when used)";
+                  };
       case CARD -> "Choose a Card";
     };
+  }
+
+  private String rewardTitle(RewardOption option) {
+    if (option == null || option.type == null) {
+      return "";
+    }
+    return switch (option.type) {
+      case GOLD -> option.goldAmount + luckyCoinBonus(option) + " GOLD";
+      case ITEM -> option.itemId == null ? "ITEM" : ItemFormatting.formatItemName(option.itemId);
+      case CARD -> "CARD REWARD";
+    };
+  }
+
+  private String rewardDescription(RewardOption option) {
+    if (option == null || option.type == null) {
+      return "";
+    }
+    return switch (option.type) {
+      case GOLD -> goldRewardDescription(option);
+      case CARD -> "Choose one card\nto add to your deck";
+      case ITEM ->
+          option.itemId == null
+              ? ""
+              : switch (option.itemId) {
+                case LUCKY_COIN -> "+10% Total Gold\nMaximum +20";
+                case ENERGY_CRYSTAL -> "+1 Max Energy";
+                case MERCHANTS_FAVOR -> "+10% Shop Discount\nMaximum 50%";
+                case IRON_AEGIS -> "+5 Armour when used";
+                case WARRIORS_CREST -> "+1 Strength when used";
+              };
+    };
+  }
+
+  private String goldRewardDescription(RewardOption option) {
+    int luckyBonus = luckyCoinBonus(option);
+    if (luckyBonus == 0 || runState == null) {
+      return "Added to your run";
+    }
+
+    int totalAfterClaim =
+        runState.getOrCreatePlayerState().getGold() + option.goldAmount + luckyBonus;
+    return option.goldAmount + " Base + " + luckyBonus + " Shard\nTotal Gold: " + totalAfterClaim;
+  }
+
+  private int luckyCoinBonus(RewardOption option) {
+    if (!goldRewardUsesLuckyCoin || runState == null || option == null) {
+      return 0;
+    }
+    return runState.getOrCreatePlayerState().calculateLuckyCoinBonus(option.goldAmount);
+  }
+
+  private boolean isLongRewardName(RewardOption option) {
+    return option != null
+        && (option.type == RewardType.CARD
+            || option.itemId == ItemType.MERCHANTS_FAVOR
+            || option.itemId == ItemType.WARRIORS_CREST);
+  }
+
+  private String rewardIcon(RewardOption option) {
+    if (option != null && option.type == RewardType.ITEM) {
+      return ITEM_ICONS.getOrDefault(option.itemId, GOLD_TEXTURE);
+    }
+    if (option != null
+        && option.type == RewardType.CARD
+        && option.cardSelection != null
+        && !option.cardSelection.cardIds().isEmpty()) {
+      return cardService
+          .getCard(option.cardSelection.cardIds().getFirst())
+          .map(card -> card.texturePath)
+          .filter(path -> path != null && !path.isBlank())
+          .orElse(GOLD_TEXTURE);
+    }
+    return GOLD_TEXTURE;
+  }
+
+  private LabelStyle largeStyle(Color colour) {
+    LabelStyle style = new LabelStyle(skin.get("large", LabelStyle.class));
+    style.fontColor = colour;
+    return style;
+  }
+
+  private LabelStyle smallStyle(Color colour) {
+    LabelStyle style = new LabelStyle(skin.get("small", LabelStyle.class));
+    style.fontColor = colour;
+    return style;
+  }
+
+  private Image image(String path) {
+    ResourceService resources = ServiceLocator.getResourceService();
+    Texture texture = resources == null ? null : resources.getAsset(path, Texture.class);
+    return texture == null
+        ? new Image(skin.newDrawable("white", new Color(0.08f, 0.06f, 0.08f, 1f)))
+        : new Image(texture);
   }
 
   private void selectOption(RewardOption option) {
@@ -194,19 +425,19 @@ public class RewardDisplay extends Displaying {
         || option.type == null) {
       return;
     }
-
-    if (option.type == com.csse3200.game.rewards.RewardType.CARD) {
+    if (option.type == RewardType.CARD) {
       openCardSelection(option);
       return;
     }
-
     if (runState == null) {
       logger.error("Cannot claim {} reward without an active RunState", option.type);
       return;
     }
+
     claimInProgress = true;
     try {
       rewardService.claimRunReward(runState, option, null);
+      goldRewardUsesLuckyCoin = false;
       completeReward();
     } catch (RuntimeException exception) {
       claimInProgress = false;
@@ -215,12 +446,10 @@ public class RewardDisplay extends Displaying {
   }
 
   private void openCardSelection(RewardOption option) {
-    if (runState == null) {
-      logger.error("Cannot open a Card reward without an active RunState");
-      return;
-    }
-    if (option.cardSelection == null || option.cardSelection.cardIds().isEmpty()) {
-      logger.error("Cannot open a Card reward without choices");
+    if (runState == null
+        || option.cardSelection == null
+        || option.cardSelection.cardIds().isEmpty()) {
+      logger.error("Cannot open a Card reward without an active run and choices");
       return;
     }
 
@@ -235,13 +464,13 @@ public class RewardDisplay extends Displaying {
     }
 
     cardRewardCommitted = true;
-    if (optionsTable != null) {
-      optionsTable.remove();
+    if (rewardUi != null) {
+      rewardUi.remove();
     }
 
     cardSelectionTable = new Table();
     cardSelectionTable.setFillParent(true);
-    cardSelectionTable.bottom().padBottom(40f);
+    cardSelectionTable.center();
     cardChoiceButtons.clear();
     cardWidgets.clear();
     for (CardConfig config : offeredConfigs) {
@@ -272,8 +501,6 @@ public class RewardDisplay extends Displaying {
       cardSelectionTable.add(cardButton).pad(12f);
     }
 
-    // Hidden generation must not reveal cards. Advance discovery only once every face is ready to
-    // be shown.
     cardDiscoveryService.recordSeenAll(option.cardSelection.cardIds());
     stage.addActor(cardSelectionTable);
   }
@@ -303,14 +530,6 @@ public class RewardDisplay extends Displaying {
       return;
     }
     claimed = true;
-    if (optionsTable != null) {
-      optionsTable.setTouchable(Touchable.disabled);
-    }
-    if (cardSelectionTable != null) {
-      cardSelectionTable.setTouchable(Touchable.disabled);
-    }
-    // The reward has already mutated RunState at this point. Persist that updated state before
-    // firing either event, because both can cause the reward screen to be left immediately.
     afterRewardApplied.run();
     entity.getEvents().trigger(REWARD_CLAIMED_EVENT);
     entity.getEvents().trigger(EndBattleDisplay.RETURN_TO_MENU_EVENT);
@@ -319,8 +538,14 @@ public class RewardDisplay extends Displaying {
   @Override
   public void dispose() {
     disposed = true;
-    if (optionsTable != null) {
-      optionsTable.remove();
+    if (background != null) {
+      background.remove();
+    }
+    if (scrim != null) {
+      scrim.remove();
+    }
+    if (rewardUi != null) {
+      rewardUi.remove();
     }
     if (cardSelectionTable != null) {
       cardSelectionTable.remove();

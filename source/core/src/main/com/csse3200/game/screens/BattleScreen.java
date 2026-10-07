@@ -37,6 +37,7 @@ import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
 import com.csse3200.game.components.pausemenu.PauseMenuFactory;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.save.SaveLoadPanel;
+import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
 import com.csse3200.game.components.spritedisplay.clickable.CardAimController;
 import com.csse3200.game.components.spritedisplay.clickable.Clickable;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
@@ -64,6 +65,7 @@ import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.PopupDisplay;
+import com.csse3200.game.ui.PopupInputComponent;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
@@ -93,11 +95,16 @@ public class BattleScreen extends ScreenAdapter {
     "images/level.png",
     "images/enemy.png",
     "images/armour.png",
+    "images/effects/shield.png",
+    "images/effects/fortify.png",
+    "images/ui/inventory-panel.png",
     "images/ui/lucky-coin.png",
     "images/ui/energy-crystal.png",
     "images/ui/merchants-favor.png",
     "images/ui/iron-aegis.png",
-    "images/ui/warriors-crest.png"
+    "images/ui/warriors-crest.png",
+    "images/effects/heal.png",
+    "images/enemies/intents/buff.png"
   };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
@@ -109,8 +116,6 @@ public class BattleScreen extends ScreenAdapter {
   private static final float CARD_HEIGHT = CardWidget.CARD_HEIGHT;
   private static final float CARD_INVENTORY_MIN_WIDTH = 800f;
   private static final float CARD_INVENTORY_MIN_HEIGHT = 600f;
-  private static final float ITEM_INVENTORY_MIN_WIDTH = 470f;
-  private static final float ITEM_INVENTORY_MIN_HEIGHT = 360f;
   private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
   private static final String CARD_WIDGET_SKIN = "flat-earth/skin/flat-earth-ui.json";
 
@@ -289,13 +294,17 @@ public class BattleScreen extends ScreenAdapter {
     PopupDisplay cardInventory = new PopupDisplay("Card Inventory", CARD_INVENTORY_STYLE);
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
-    PopupDisplay itemInventory = new PopupDisplay("Item Inventory", CARD_INVENTORY_STYLE);
-    itemInventory.setMinSize(ITEM_INVENTORY_MIN_WIDTH, ITEM_INVENTORY_MIN_HEIGHT);
+    PopupDisplay itemInventory = new PopupDisplay("");
+    itemInventory.setMinSize(470f, 360f);
     InventoryPopupComponent inventoryPopup =
         new InventoryPopupComponent(
             game.getRunState(), itemInventory, gameArea.getPlayer(), controller::isPlayerTurn);
+
     Entity itemInventoryEntity =
-        new Entity().addComponent(itemInventory).addComponent(inventoryPopup);
+        new Entity()
+            .addComponent(itemInventory)
+            .addComponent(new PopupInputComponent(itemInventory))
+            .addComponent(inventoryPopup);
     ServiceLocator.getEntityService().register(itemInventoryEntity);
 
     Stage stage = ServiceLocator.getRenderService().getStage();
@@ -308,6 +317,7 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new CardActions(controller, gameArea.getPlayer()))
             .addComponent(new Team3CardPlayAdapter(cardPlayService, controller))
             .addComponent(cardInventory)
+            .addComponent(new PopupInputComponent(cardInventory))
             .addComponent(
                 new DamageOnCardPlayComponent(
                     gameArea.getPlayer().getComponent(CombatStatsComponent.class)))
@@ -414,6 +424,7 @@ public class BattleScreen extends ScreenAdapter {
   static EffectVisualRegistry createEffectVisualRegistry() {
     EffectVisualRegistry registry = new EffectVisualRegistry();
     OffensiveEffectVisuals.registerAll(registry);
+    PlayerEffectVisuals.registerAll(registry);
     EnemyStatusEffectVisuals.registerAll(registry);
     return registry;
   }
@@ -438,6 +449,7 @@ public class BattleScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
+    ServiceLocator.getResourceService().unloadAssets(EnemyStatusEffectVisuals.texturePaths());
     cardInteractionSkin.dispose();
     cardWidgetSkin.dispose();
     ServiceLocator.getResourceService().unloadAssets(mainGameTextures);
@@ -447,6 +459,7 @@ public class BattleScreen extends ScreenAdapter {
     logger.debug("Loading assets");
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(mainGameTextures);
+    resourceService.loadTextures(EnemyStatusEffectVisuals.texturePaths());
     ServiceLocator.getResourceService().loadAll();
   }
 
@@ -465,7 +478,38 @@ public class BattleScreen extends ScreenAdapter {
 
   private List<ClickableRecord> buildAllRecords() {
     List<ClickableRecord> records = new ArrayList<>(buildHandRecords());
-    records.addAll(staticUiRecords);
+    records.addAll(buildBattleMenuRecords());
+    return records;
+  }
+
+  /** Applies the themed frame and matching icon without changing any button trigger or payload. */
+  private List<ClickableRecord> buildBattleMenuRecords() {
+    List<ClickableRecord> records = new ArrayList<>();
+    for (ClickableRecord record : staticUiRecords) {
+      BattleMenuSkins.Icon icon =
+          switch (record.trigger()) {
+            case "openMenu" -> BattleMenuSkins.Icon.CARD;
+            case "openInventory" -> BattleMenuSkins.Icon.INVENTORY;
+            case "endTurn" -> BattleMenuSkins.Icon.END_TURN;
+            default -> null;
+          };
+      if (icon == null) {
+        records.add(record);
+        continue;
+      }
+
+      records.add(
+          ClickableRecord.builder(record.trigger())
+              .text(record.text())
+              .skin(BattleMenuSkins.forIcon(icon))
+              .position(record.x(), record.y())
+              .size(record.width(), record.height())
+              .variant(record.variant())
+              .args(record.args())
+              .label(record.label())
+              .disabled(record.disabled())
+              .build());
+    }
     return records;
   }
 
