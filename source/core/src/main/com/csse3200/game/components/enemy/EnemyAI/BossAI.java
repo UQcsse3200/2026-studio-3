@@ -8,11 +8,17 @@ import java.util.Objects;
 import java.util.Random;
 
 /**
- * Boss AI controlled by a phase state machine, per-phase action weights and a global pressure
- * level.
+ * Boss AI controlled by a phase state machine, per-phase action weights, a global pressure level
+ * and the player's observed combat behaviour.
  */
 public class BossAI implements EnemyAI {
   private static final int HIGH_ARMOUR_THRESHOLD = 8;
+
+  /**
+   * Number of cards played during the previous player turn that causes the Boss to prioritise
+   * SILENCE.
+   */
+  private static final int SILENCE_CARD_THRESHOLD = 4;
 
   /** Magnitude passed with a SILENCE effect; the effect itself is a simple on/off block. */
   private static final int SILENCE_VALUE = 1;
@@ -30,9 +36,9 @@ public class BossAI implements EnemyAI {
    * Turns the Boss must wait between debuffs.
    *
    * <p>{@code CombatStatsComponent.applyStatusEffect} overwrites an effect of the same type, so
-   * re-applying every turn would refresh the duration indefinitely and lock the player out of
-   * playing cards for the rest of the fight. The Boss cannot read the player's active effects from
-   * {@link EnemyAIContext}, so the cooldown is tracked here instead.
+   * re-applying every turn would refresh the duration indefinitely. The Boss cannot directly read
+   * the player's active effects from {@link EnemyAIContext}, so the cooldown is tracked by this AI
+   * instance.
    */
   private static final int DEBUFF_COOLDOWN_TURNS = 3;
 
@@ -51,7 +57,7 @@ public class BossAI implements EnemyAI {
   /**
    * Creates a Boss AI with an injected random source.
    *
-   * <p>This constructor allows unit tests to use a fixed random seed.
+   * <p>This constructor allows unit tests to provide deterministic random values.
    *
    * @param random random source used for weighted decisions
    */
@@ -72,10 +78,31 @@ public class BossAI implements EnemyAI {
     applyPressure(weights, pressure);
     applyConstraints(weights, context);
 
-    BossMove selectedMove = selectWeightedMove(weights);
-    recordMove(selectedMove);
+    BossMove selectedMove;
 
+    if (shouldPrioritiseSilence(context)) {
+      selectedMove = BossMove.SILENCE;
+    } else {
+      selectedMove = selectWeightedMove(weights);
+    }
+
+    recordMove(selectedMove);
     return createIntent(selectedMove, context);
+  }
+
+  /**
+   * Checks whether the player's recent behaviour should trigger an immediate SILENCE response.
+   *
+   * <p>The Boss reacts when the player used at least four cards during the previous turn. This
+   * reaction is only allowed when the shared debuff cooldown has expired, so the memory response
+   * cannot repeatedly refresh SILENCE or bypass the cooldown used by other debuff actions.
+   *
+   * @param context current battle and player-memory snapshot
+   * @return true when SILENCE should be selected before weighted action selection
+   */
+  private boolean shouldPrioritiseSilence(EnemyAIContext context) {
+    return debuffCooldownRemaining == 0
+            && context.getPlayerMemory().cardsPlayedLastTurn() >= SILENCE_CARD_THRESHOLD;
   }
 
   /**
@@ -139,7 +166,7 @@ public class BossAI implements EnemyAI {
     return PressureLevel.LOW;
   }
 
-  /** Returns a fresh attack/defend weight table for the given Boss phase. */
+  /** Returns a fresh action-weight table for the given Boss phase. */
   private EnumMap<BossMove, Integer> getBaseWeights(BossPhase phase) {
     EnumMap<BossMove, Integer> weights = new EnumMap<>(BossMove.class);
 
@@ -172,9 +199,8 @@ public class BossAI implements EnemyAI {
   /**
    * Modifies the current phase table according to the global pressure level.
    *
-   * <p>Pressure moves weight between attacking and defending only. Debuff weights are set by the
-   * phase and by {@link #applyConstraints}, so that rising pressure cannot turn the Boss into a
-   * permanent debuff machine.
+   * <p>Pressure moves weight between attacking and defending only. Debuff weights are controlled by
+   * the current phase and the debuff cooldown.
    */
   private void applyPressure(EnumMap<BossMove, Integer> weights, PressureLevel pressure) {
     switch (pressure) {
@@ -200,7 +226,8 @@ public class BossAI implements EnemyAI {
   }
 
   /** Applies restrictions that override undesirable random behaviour. */
-  private void applyConstraints(EnumMap<BossMove, Integer> weights, EnemyAIContext context) {
+  private void applyConstraints(
+          EnumMap<BossMove, Integer> weights, EnemyAIContext context) {
     // Do not keep defending when the Boss already has substantial armour.
     if (context.getEnemyArmour() >= HIGH_ARMOUR_THRESHOLD) {
       weights.put(BossMove.DEFEND, 0);
@@ -212,12 +239,13 @@ public class BossAI implements EnemyAI {
       weights.put(BossMove.DEFEND, defendWeight / 4);
     }
 
-    // After repeated attacks, slightly encourage the Boss to vary its action.
+    // After repeated attacks, encourage the Boss to vary its action.
     if (consecutiveAttacks >= 2) {
       adjustWeight(weights, BossMove.ATTACK, -20);
       adjustWeight(weights, BossMove.DEFEND, 20);
     }
-    // Hold off on a second debuff until the first has had time to expire.
+
+    // Hold off on another debuff until the current cooldown expires.
     if (debuffCooldownRemaining > 0) {
       for (BossMove move : BossMove.values()) {
         if (move.isDebuff()) {
@@ -225,6 +253,7 @@ public class BossAI implements EnemyAI {
         }
       }
     }
+
     ensureAvailableMove(weights);
   }
 
@@ -249,15 +278,19 @@ public class BossAI implements EnemyAI {
     return BossMove.ATTACK;
   }
 
-  /** Converts an internal Boss move into an intent understood by the existing battle system. */
+  /** Converts an internal Boss move into an intent understood by the battle system. */
   private EnemyIntent createIntent(BossMove move, EnemyAIContext context) {
     return switch (move) {
       case ATTACK -> EnemyIntent.attack(context.getEnemyAttack());
       case DEFEND -> EnemyIntent.defend(getDefendAmount(currentPhase));
-      case SILENCE -> EnemyIntent.debuff(IntentEffectType.SILENCE, SILENCE_VALUE, SILENCE_DURATION);
+      case SILENCE ->
+              EnemyIntent.debuff(
+                      IntentEffectType.SILENCE, SILENCE_VALUE, SILENCE_DURATION);
       case DAMAGE_ON_CARD_PLAY ->
-          EnemyIntent.debuff(
-              IntentEffectType.DAMAGE_ON_CARD_PLAY, CARD_PLAY_DAMAGE, CARD_PLAY_DAMAGE_DURATION);
+              EnemyIntent.debuff(
+                      IntentEffectType.DAMAGE_ON_CARD_PLAY,
+                      CARD_PLAY_DAMAGE,
+                      CARD_PLAY_DAMAGE_DURATION);
     };
   }
 
@@ -279,20 +312,23 @@ public class BossAI implements EnemyAI {
     } else {
       consecutiveAttacks = 0;
     }
+
     if (selectedMove.isDebuff()) {
       debuffCooldownRemaining = DEBUFF_COOLDOWN_TURNS;
     }
   }
 
   /** Safely increases or decreases one action's weight. */
-  private void adjustWeight(EnumMap<BossMove, Integer> weights, BossMove move, int adjustment) {
+  private void adjustWeight(
+          EnumMap<BossMove, Integer> weights, BossMove move, int adjustment) {
     int currentWeight = weights.getOrDefault(move, 0);
     weights.put(move, Math.max(0, currentWeight + adjustment));
   }
 
   /** Guarantees that malformed weights cannot leave the Boss without an action. */
   private void ensureAvailableMove(EnumMap<BossMove, Integer> weights) {
-    boolean hasAvailableMove = weights.values().stream().anyMatch(weight -> weight > 0);
+    boolean hasAvailableMove =
+            weights.values().stream().anyMatch(weight -> weight > 0);
 
     if (!hasAvailableMove) {
       weights.put(BossMove.ATTACK, 1);
@@ -348,3 +384,4 @@ public class BossAI implements EnemyAI {
     CRITICAL
   }
 }
+
