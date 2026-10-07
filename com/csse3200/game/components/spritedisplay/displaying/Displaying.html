@@ -101,7 +101,7 @@ loadScripts(document, 'script');</script>
 </dl>
 <dl class="notes">
 <dt>Direct Known Subclasses:</dt>
-<dd><code><a href="BattleLogDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">BattleLogDisplay</a></code>, <code><a href="CardBadgesDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">CardBadgesDisplay</a></code>, <code><a href="CardDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">CardDisplay</a></code>, <code><a href="CardFramesDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">CardFramesDisplay</a></code>, <code><a href="CardPreviewDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">CardPreviewDisplay</a></code>, <code><a href="EndBattleDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">EndBattleDisplay</a></code>, <code><a href="PopupPanelDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">PopupPanelDisplay</a></code>, <code><a href="PopupTextDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">PopupTextDisplay</a></code>, <code><a href="RewardDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">RewardDisplay</a></code></dd>
+<dd><code><a href="BattleLogDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">BattleLogDisplay</a></code>, <code><a href="CardBadgesDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">CardBadgesDisplay</a></code>, <code><a href="CardDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">CardDisplay</a></code>, <code><a href="CardFramesDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">CardFramesDisplay</a></code>, <code><a href="CardPreviewDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">CardPreviewDisplay</a></code>, <code><a href="EndBattleDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">EndBattleDisplay</a></code>, <code><a href="EnemyTurnDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">EnemyTurnDisplay</a></code>, <code><a href="PlayerTurnDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">PlayerTurnDisplay</a></code>, <code><a href="PopupPanelDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">PopupPanelDisplay</a></code>, <code><a href="PopupTextDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">PopupTextDisplay</a></code>, <code><a href="RewardDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">RewardDisplay</a></code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public abstract class </span><span class="element-name type-name-label">Displaying</span>
@@ -192,6 +192,11 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onTrigger(java.lang.Object)" class="member-name-link">onTrigger</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;payload)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected final void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#useColourAsFontColour(com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord)" class="member-name-link">useColourAsFontColour</a><wbr>(<a href="DisplayingRecord.html" title="class in com.csse3200.game.components.spritedisplay.displaying">DisplayingRecord</a>&nbsp;rec)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Uses the record's colour as the label's font colour rather than a tint.</div>
+</div>
 </div>
 </div>
 </div>
@@ -252,6 +257,15 @@ loadScripts(document, 'script');</script>
 <section class="method-details" id="method-detail">
 <h2>Method Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="useColourAsFontColour(com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord)">
+<h3>useColourAsFontColour</h3>
+<div class="member-signature"><span class="modifiers">protected final</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">useColourAsFontColour</span><wbr><span class="parameters">(<a href="DisplayingRecord.html" title="class in com.csse3200.game.components.spritedisplay.displaying">DisplayingRecord</a>&nbsp;rec)</span></div>
+<div class="block">Uses the record's colour as the label's font colour rather than a tint. The default skin's font
+ colour is black, and tinting black gives black, so subclasses that need coloured text on a dark
+ background call this from their constructor.</div>
+</section>
+</li>
 <li>
 <section class="detail" id="create()">
 <h3>create</h3>

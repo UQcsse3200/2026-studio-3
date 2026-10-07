@@ -174,7 +174,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>float</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getShopDiscount()" class="member-name-link">getShopDiscount</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Calculates the discount from the durable owned-item list.</div>
+<div class="block">Calculates the accumulated shop discount, capped at 50%.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hasOwnedItem(com.csse3200.game.rewards.ItemType)" class="member-name-link">hasOwnedItem</a><wbr>(<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&nbsp;itemId)</code></div>
@@ -279,10 +279,10 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getShopDiscount()">
 <h3>getShopDiscount</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">float</span>&nbsp;<span class="element-name">getShopDiscount</span>()</div>
-<div class="block">Calculates the discount from the durable owned-item list.</div>
+<div class="block">Calculates the accumulated shop discount, capped at 50%.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>accumulated shop discount, capped at 50%</dd>
+<dd>the current shop discount</dd>
 </dl>
 </section>
 </li>

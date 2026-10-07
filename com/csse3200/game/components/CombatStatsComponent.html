@@ -810,7 +810,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Decrements every active status and removes expired effects.
 
  <p>This includes Poison and Feeble. The caller must avoid ticking the same status twice through
- this method and processPoisonTick or tickStatusEffect.</div>
+ this method and processPoisonTick or tickStatusEffect.
+
+ <p>All expired entries are removed before notifications. Statuses applied by a removal listener
+ retain their full duration and are not removed by this update.</div>
 </section>
 </li>
 <li>

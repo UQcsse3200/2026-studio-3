@@ -163,15 +163,25 @@ loadScripts(document, 'script');</script>
 <div class="block">Called once per frame of the game, and should be used for most component logic.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateEnemyArmourUI(int)" class="member-name-link">updateEnemyArmourUI</a><wbr>(int&nbsp;armour)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateArmourVisibility(int)" class="member-name-link">updateArmourVisibility</a><wbr>(int&nbsp;armour)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Updates the enemy's armour on the UI</div>
+<div class="block">Makes the armour cell visible if entity has armour</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateEnemyHealthUI(int,int)" class="member-name-link">updateEnemyHealthUI</a><wbr>(int&nbsp;currentHealth,
- int&nbsp;maxHealth)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateEnemyArmourUI(int)" class="member-name-link">updateEnemyArmourUI</a><wbr>(int&nbsp;armour)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Updates the enemy's armour on the UI</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateEnemyHealthUI(int,int)" class="member-name-link">updateEnemyHealthUI</a><wbr>(int&nbsp;currentHealth,
+ int&nbsp;maxHealth)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Updates the enemy's health on the ui.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateHealthBarColour()" class="member-name-link">updateHealthBarColour</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Updates the colour of the health bar.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updatePosition()" class="member-name-link">updatePosition</a>()</code></div>
@@ -292,6 +302,25 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>armour</code> - the enemy's armour</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="updateHealthBarColour()">
+<h3>updateHealthBarColour</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">updateHealthBarColour</span>()</div>
+<div class="block">Updates the colour of the health bar. If the entity has armour the colour turns blue. If the
+ entity's health reaches 40% the colour turns red.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="updateArmourVisibility(int)">
+<h3>updateArmourVisibility</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">updateArmourVisibility</span><wbr><span class="parameters">(int&nbsp;armour)</span></div>
+<div class="block">Makes the armour cell visible if entity has armour</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>armour</code> - the amount of armour the entity has</dd>
 </dl>
 </section>
 </li>

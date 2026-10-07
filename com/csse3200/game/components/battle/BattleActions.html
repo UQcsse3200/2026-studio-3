@@ -128,13 +128,16 @@ loadScripts(document, 'script');</script>
 <div class="block">Fired on the battle UI entity with the resolved enemy-facing effects, for Team 1.</div>
 </div>
 <div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#HAND_CHANGED_EVENT" class="member-name-link">HAND_CHANGED_EVENT</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-second even-row-color"><code><a href="#ENEMY_TURN_EVENT" class="member-name-link">ENEMY_TURN_EVENT</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#HAND_CHANGED_EVENT" class="member-name-link">HAND_CHANGED_EVENT</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Fired on the battle UI entity with the player's hand after it changes (e.g.</div>
 </div>
-<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#PLAYER_EFFECTS_EVENT" class="member-name-link">PLAYER_EFFECTS_EVENT</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#PLAYER_EFFECTS_EVENT" class="member-name-link">PLAYER_EFFECTS_EVENT</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Fired on the battle UI entity with the resolved player-facing effects, for Team 7.</div>
 </div>
 </div>
@@ -154,6 +157,10 @@ loadScripts(document, 'script');</script>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.components.combat.BattleController,com.csse3200.game.GdxGame)" class="member-name-link">BattleActions</a><wbr>(<a href="../combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a>&nbsp;controller,
  <a href="../../GdxGame.html" title="class in com.csse3200.game">GdxGame</a>&nbsp;game)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.components.combat.BattleController,com.csse3200.game.GdxGame,java.util.List)" class="member-name-link">BattleActions</a><wbr>(<a href="../combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a>&nbsp;controller,
+ <a href="../../GdxGame.html" title="class in com.csse3200.game">GdxGame</a>&nbsp;game,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&gt;&nbsp;enemies)</code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -173,17 +180,27 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Called when the entity is created and registered.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isPlayerTurn()" class="member-name-link">isPlayerTurn</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#dispose()" class="member-name-link">dispose</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Called when the component is disposed.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isPlayerTurn()" class="member-name-link">isPlayerTurn</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns whether the battle is waiting for player input.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#update()" class="member-name-link">update</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Called once per frame of the game, and should be used for most component logic.</div>
 </div>
 </div>
 </div>
 </div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-com.csse3200.game.components.Component">Methods inherited from class&nbsp;com.csse3200.game.components.<a href="../Component.html" title="class in com.csse3200.game.components">Component</a></h3>
-<code><a href="../Component.html#dispose()">dispose</a>, <a href="../Component.html#earlyUpdate()">earlyUpdate</a>, <a href="../Component.html#getEntity()">getEntity</a>, <a href="../Component.html#setEnabled(boolean)">setEnabled</a>, <a href="../Component.html#setEntity(com.csse3200.game.entities.Entity)">setEntity</a>, <a href="../Component.html#toString()">toString</a>, <a href="../Component.html#triggerEarlyUpdate()">triggerEarlyUpdate</a>, <a href="../Component.html#triggerUpdate()">triggerUpdate</a>, <a href="../Component.html#update()">update</a></code></div>
+<code><a href="../Component.html#earlyUpdate()">earlyUpdate</a>, <a href="../Component.html#getEntity()">getEntity</a>, <a href="../Component.html#setEnabled(boolean)">setEnabled</a>, <a href="../Component.html#setEntity(com.csse3200.game.entities.Entity)">setEntity</a>, <a href="../Component.html#toString()">toString</a>, <a href="../Component.html#triggerEarlyUpdate()">triggerEarlyUpdate</a>, <a href="../Component.html#triggerUpdate()">triggerUpdate</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-java.lang.Object">Methods inherited from class&nbsp;java.lang.<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></h3>
 <code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a>, <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" title="class or interface in java.lang" class="external-link">equals</a>, <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html#finalize()" title="class or interface in java.lang" class="external-link">finalize</a>, <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html#getClass()" title="class or interface in java.lang" class="external-link">getClass</a>, <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html#hashCode()" title="class or interface in java.lang" class="external-link">hashCode</a>, <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html#notify()" title="class or interface in java.lang" class="external-link">notify</a>, <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html#notifyAll()" title="class or interface in java.lang" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html#wait()" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html#wait(long)" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html#wait(long,int)" title="class or interface in java.lang" class="external-link">wait</a></code></div>
@@ -288,6 +305,20 @@ loadScripts(document, 'script');</script>
 </dl>
 </section>
 </li>
+<li>
+<section class="detail" id="ENEMY_TURN_EVENT">
+<h3>ENEMY_TURN_EVENT</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">ENEMY_TURN_EVENT</span></div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../../constant-values.html#com.csse3200.game.components.battle.BattleActions.ENEMY_TURN_EVENT">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -301,6 +332,14 @@ loadScripts(document, 'script');</script>
 <h3>BattleActions</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">BattleActions</span><wbr><span class="parameters">(<a href="../combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a>&nbsp;controller,
  <a href="../../GdxGame.html" title="class in com.csse3200.game">GdxGame</a>&nbsp;game)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.components.combat.BattleController,com.csse3200.game.GdxGame,java.util.List)">
+<h3>BattleActions</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">BattleActions</span><wbr><span class="parameters">(<a href="../combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a>&nbsp;controller,
+ <a href="../../GdxGame.html" title="class in com.csse3200.game">GdxGame</a>&nbsp;game,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&gt;&nbsp;enemies)</span></div>
 </section>
 </li>
 </ul>
@@ -332,6 +371,31 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Overrides:</dt>
 <dd><code><a href="../Component.html#create()">create</a></code>&nbsp;in class&nbsp;<code><a href="../Component.html" title="class in com.csse3200.game.components">Component</a></code></dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="update()">
+<h3>update</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">update</span>()</div>
+<div class="block"><span class="description-from-type-label">Description copied from class:&nbsp;<code><a href="../Component.html#update()">Component</a></code></span></div>
+<div class="block">Called once per frame of the game, and should be used for most component logic. Not called if
+ component is disabled.</div>
+<dl class="notes">
+<dt>Overrides:</dt>
+<dd><code><a href="../Component.html#update()">update</a></code>&nbsp;in class&nbsp;<code><a href="../Component.html" title="class in com.csse3200.game.components">Component</a></code></dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="dispose()">
+<h3>dispose</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">dispose</span>()</div>
+<div class="block"><span class="description-from-type-label">Description copied from class:&nbsp;<code><a href="../Component.html#dispose()">Component</a></code></span></div>
+<div class="block">Called when the component is disposed. Dispose of any internal resources here.</div>
+<dl class="notes">
+<dt>Overrides:</dt>
+<dd><code><a href="../Component.html#dispose()">dispose</a></code>&nbsp;in class&nbsp;<code><a href="../Component.html" title="class in com.csse3200.game.components">Component</a></code></dd>
 </dl>
 </section>
 </li>
