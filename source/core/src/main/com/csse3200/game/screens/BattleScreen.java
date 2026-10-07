@@ -347,6 +347,50 @@ public class BattleScreen extends ScreenAdapter {
                       .map(Clickable::getBtn)
                       .findFirst()
                       .orElse(null));
+      tutorialView.setExitStyle(
+          com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins.forIcon(
+                  com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins.Icon
+                      .END_TURN)
+              .get(com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton.ImageTextButtonStyle.class));
+      tutorialView.setStatTargets(
+          () ->
+              uiFactory.getByTrigger("openInventory").stream()
+                  .map(Clickable::getBtn)
+                  .findFirst()
+                  .orElse(null),
+          () ->
+              player
+                  .getComponent(com.csse3200.game.components.player.PlayerEnergyDisplay.class)
+                  .getEnergyActor(),
+          () ->
+              player
+                  .getComponent(com.csse3200.game.components.player.PlayerStatsDisplay.class)
+                  .getHealthLabel(),
+          () ->
+              forestGameArea.getEnemies().stream()
+                  .map(
+                      e ->
+                          e.getComponent(
+                              com.csse3200.game.components.enemy.EnemyStatsDisplay.class))
+                  .filter(java.util.Objects::nonNull)
+                  .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getHealthActor)
+                  .findFirst()
+                  .orElse(null));
+      tutorialView.setDetailedTargets(
+          () ->
+              player
+                  .getComponent(com.csse3200.game.components.player.PlayerEnergyDisplay.class)
+                  .getEnergyVisualBounds(),
+          () ->
+              forestGameArea.getEnemies().stream()
+                  .map(
+                      e ->
+                          e.getComponent(
+                              com.csse3200.game.components.enemy.EnemyStatsDisplay.class))
+                  .filter(java.util.Objects::nonNull)
+                  .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getTutorialArmourActor)
+                  .findFirst()
+                  .orElse(null));
       tutorialView.setEnemyBounds(
           () -> forestGameArea.getEnemies().stream().map(this::tutorialEnemyBounds).toList());
       tutorialView.setDragActor(
