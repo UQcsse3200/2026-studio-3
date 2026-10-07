@@ -102,7 +102,7 @@ public class BossAI implements EnemyAI {
    */
   private boolean shouldPrioritiseSilence(EnemyAIContext context) {
     return debuffCooldownRemaining == 0
-            && context.getPlayerMemory().cardsPlayedLastTurn() >= SILENCE_CARD_THRESHOLD;
+        && context.getPlayerMemory().cardsPlayedLastTurn() >= SILENCE_CARD_THRESHOLD;
   }
 
   /**
@@ -226,8 +226,7 @@ public class BossAI implements EnemyAI {
   }
 
   /** Applies restrictions that override undesirable random behaviour. */
-  private void applyConstraints(
-          EnumMap<BossMove, Integer> weights, EnemyAIContext context) {
+  private void applyConstraints(EnumMap<BossMove, Integer> weights, EnemyAIContext context) {
     // Do not keep defending when the Boss already has substantial armour.
     if (context.getEnemyArmour() >= HIGH_ARMOUR_THRESHOLD) {
       weights.put(BossMove.DEFEND, 0);
@@ -283,14 +282,10 @@ public class BossAI implements EnemyAI {
     return switch (move) {
       case ATTACK -> EnemyIntent.attack(context.getEnemyAttack());
       case DEFEND -> EnemyIntent.defend(getDefendAmount(currentPhase));
-      case SILENCE ->
-              EnemyIntent.debuff(
-                      IntentEffectType.SILENCE, SILENCE_VALUE, SILENCE_DURATION);
+      case SILENCE -> EnemyIntent.debuff(IntentEffectType.SILENCE, SILENCE_VALUE, SILENCE_DURATION);
       case DAMAGE_ON_CARD_PLAY ->
-              EnemyIntent.debuff(
-                      IntentEffectType.DAMAGE_ON_CARD_PLAY,
-                      CARD_PLAY_DAMAGE,
-                      CARD_PLAY_DAMAGE_DURATION);
+          EnemyIntent.debuff(
+              IntentEffectType.DAMAGE_ON_CARD_PLAY, CARD_PLAY_DAMAGE, CARD_PLAY_DAMAGE_DURATION);
     };
   }
 
@@ -319,16 +314,14 @@ public class BossAI implements EnemyAI {
   }
 
   /** Safely increases or decreases one action's weight. */
-  private void adjustWeight(
-          EnumMap<BossMove, Integer> weights, BossMove move, int adjustment) {
+  private void adjustWeight(EnumMap<BossMove, Integer> weights, BossMove move, int adjustment) {
     int currentWeight = weights.getOrDefault(move, 0);
     weights.put(move, Math.max(0, currentWeight + adjustment));
   }
 
   /** Guarantees that malformed weights cannot leave the Boss without an action. */
   private void ensureAvailableMove(EnumMap<BossMove, Integer> weights) {
-    boolean hasAvailableMove =
-            weights.values().stream().anyMatch(weight -> weight > 0);
+    boolean hasAvailableMove = weights.values().stream().anyMatch(weight -> weight > 0);
 
     if (!hasAvailableMove) {
       weights.put(BossMove.ATTACK, 1);
@@ -384,4 +377,3 @@ public class BossAI implements EnemyAI {
     CRITICAL
   }
 }
-

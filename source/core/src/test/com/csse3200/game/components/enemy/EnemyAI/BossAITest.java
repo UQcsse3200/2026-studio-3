@@ -108,11 +108,9 @@ class BossAITest {
     BossAI lowPressureAI = new BossAI(new FixedRollRandom(40));
     BossAI highPressureAI = new BossAI(new FixedRollRandom(40));
 
-    EnemyIntent lowPressureIntent =
-            lowPressureAI.decide(createContext(100, 100, 0, 1));
+    EnemyIntent lowPressureIntent = lowPressureAI.decide(createContext(100, 100, 0, 1));
 
-    EnemyIntent highPressureIntent =
-            highPressureAI.decide(createContext(10, 70, 0, 5));
+    EnemyIntent highPressureIntent = highPressureAI.decide(createContext(10, 70, 0, 5));
 
     assertEquals(IntentType.DEFEND, lowPressureIntent.getType());
     assertEquals(IntentType.ATTACK, highPressureIntent.getType());
@@ -229,8 +227,7 @@ class BossAITest {
     BossAI ai = new BossAI(new FixedRollRandom(0));
     PlayerMemory memory = new PlayerMemory(2, 2, 0, 4);
 
-    EnemyIntent intent =
-            ai.decide(createContext(100, 0, 1, memory));
+    EnemyIntent intent = ai.decide(createContext(100, 0, 1, memory));
 
     assertEquals(IntentType.DEBUFF, intent.getType());
     assertEquals(IntentEffectType.SILENCE, intent.getEffectType());
@@ -245,8 +242,7 @@ class BossAITest {
     BossAI ai = new BossAI(new FixedRollRandom(0));
     PlayerMemory memory = new PlayerMemory(2, 1, 0, 3);
 
-    EnemyIntent intent =
-            ai.decide(createContext(100, 0, 1, memory));
+    EnemyIntent intent = ai.decide(createContext(100, 0, 1, memory));
 
     assertEquals(IntentType.ATTACK, intent.getType());
     assertEquals(BossAI.BossMove.ATTACK, ai.getPreviousMove());
@@ -258,11 +254,9 @@ class BossAITest {
     BossAI ai = new BossAI(new FixedRollRandom(0));
     PlayerMemory highCardMemory = new PlayerMemory(2, 2, 0, 4);
 
-    EnemyIntent first =
-            ai.decide(createContext(100, 0, 1, highCardMemory));
+    EnemyIntent first = ai.decide(createContext(100, 0, 1, highCardMemory));
 
-    EnemyIntent second =
-            ai.decide(createContext(100, 0, 2, highCardMemory));
+    EnemyIntent second = ai.decide(createContext(100, 0, 2, highCardMemory));
 
     assertEquals(IntentEffectType.SILENCE, first.getEffectType());
     assertNotEquals(IntentType.DEBUFF, second.getType());
@@ -278,8 +272,7 @@ class BossAITest {
     ai.decide(createContext(100, 0, 2, highCardMemory));
     ai.decide(createContext(100, 0, 3, highCardMemory));
 
-    EnemyIntent fourth =
-            ai.decide(createContext(100, 0, 4, highCardMemory));
+    EnemyIntent fourth = ai.decide(createContext(100, 0, 4, highCardMemory));
 
     assertEquals(IntentType.DEBUFF, fourth.getType());
     assertEquals(IntentEffectType.SILENCE, fourth.getEffectType());
@@ -292,72 +285,42 @@ class BossAITest {
     BossAI ai = new BossAI(new FixedRollRandom(CARD_PLAY_DAMAGE_ROLL));
     PlayerMemory highCardMemory = new PlayerMemory(2, 2, 0, 4);
 
-    EnemyIntent first =
-            ai.decide(createContext(20, 0, 1, PlayerMemory.empty()));
+    EnemyIntent first = ai.decide(createContext(20, 0, 1, PlayerMemory.empty()));
 
-    EnemyIntent second =
-            ai.decide(createContext(20, 0, 2, highCardMemory));
+    EnemyIntent second = ai.decide(createContext(20, 0, 2, highCardMemory));
 
     assertEquals(IntentType.DEBUFF, first.getType());
-    assertEquals(
-            IntentEffectType.DAMAGE_ON_CARD_PLAY,
-            first.getEffectType());
+    assertEquals(IntentEffectType.DAMAGE_ON_CARD_PLAY, first.getEffectType());
 
     assertNotEquals(IntentType.DEBUFF, second.getType());
     assertEquals(2, ai.getDebuffCooldownRemaining());
   }
 
-  private EnemyAIContext createContext(
-          int bossHealth, int bossArmour, int turnNumber) {
-    return createContext(
-            PLAYER_HEALTH,
-            bossHealth,
-            bossArmour,
-            turnNumber,
-            PlayerMemory.empty());
+  private EnemyAIContext createContext(int bossHealth, int bossArmour, int turnNumber) {
+    return createContext(PLAYER_HEALTH, bossHealth, bossArmour, turnNumber, PlayerMemory.empty());
   }
 
   private EnemyAIContext createContext(
-          int bossHealth,
-          int bossArmour,
-          int turnNumber,
-          PlayerMemory playerMemory) {
-    return createContext(
-            PLAYER_HEALTH,
-            bossHealth,
-            bossArmour,
-            turnNumber,
-            playerMemory);
+      int bossHealth, int bossArmour, int turnNumber, PlayerMemory playerMemory) {
+    return createContext(PLAYER_HEALTH, bossHealth, bossArmour, turnNumber, playerMemory);
   }
 
   private EnemyAIContext createContext(
-          int playerHealth,
-          int bossHealth,
-          int bossArmour,
-          int turnNumber) {
-    return createContext(
-            playerHealth,
-            bossHealth,
-            bossArmour,
-            turnNumber,
-            PlayerMemory.empty());
+      int playerHealth, int bossHealth, int bossArmour, int turnNumber) {
+    return createContext(playerHealth, bossHealth, bossArmour, turnNumber, PlayerMemory.empty());
   }
 
   private EnemyAIContext createContext(
-          int playerHealth,
-          int bossHealth,
-          int bossArmour,
-          int turnNumber,
-          PlayerMemory playerMemory) {
+      int playerHealth, int bossHealth, int bossArmour, int turnNumber, PlayerMemory playerMemory) {
     return new EnemyAIContext(
-            playerHealth,
-            bossHealth,
-            BOSS_MAX_HEALTH,
-            BOSS_ATTACK,
-            bossArmour,
-            EnemyIntent.unknown(),
-            turnNumber,
-            playerMemory);
+        playerHealth,
+        bossHealth,
+        BOSS_MAX_HEALTH,
+        BOSS_ATTACK,
+        bossArmour,
+        EnemyIntent.unknown(),
+        turnNumber,
+        playerMemory);
   }
 
   /**

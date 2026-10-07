@@ -12,7 +12,7 @@ import com.csse3200.game.input.InputComponent;
  * the keyboard.
  */
 public class KeyboardTerminalInputComponent extends InputComponent {
-  private static final int TOGGLE_OPEN_KEY = Input.Keys.BACKSLASH;
+  private static final int TOGGLE_OPEN_KEY = Input.Keys.F1;
   private Terminal terminal;
 
   public KeyboardTerminalInputComponent() {
