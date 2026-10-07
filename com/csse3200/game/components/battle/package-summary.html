@@ -84,7 +84,7 @@ loadScripts(document, 'script');</script>
 </li>
 <li>
 <div id="class-summary">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="class-summary-tab0" role="tab" aria-selected="true" aria-controls="class-summary.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary', 2)" class="active-table-tab">All Classes and Interfaces</button><button id="class-summary-tab2" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab2', 2)" class="table-tab">Classes</button><button id="class-summary-tab4" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab4', 2)" class="table-tab">Record Classes</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="class-summary-tab0" role="tab" aria-selected="true" aria-controls="class-summary.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary', 2)" class="active-table-tab">All Classes and Interfaces</button><button id="class-summary-tab2" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab2', 2)" class="table-tab">Classes</button><button id="class-summary-tab3" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab3', 2)" class="table-tab">Enum Classes</button><button id="class-summary-tab4" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab4', 2)" class="table-tab">Record Classes</button></div>
 <div id="class-summary.tabpanel" role="tabpanel" aria-labelledby="class-summary-tab0">
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Class</div>
@@ -126,23 +126,40 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="DeckEditorEvents.html" title="class in com.csse3200.game.components.battle">DeckEditorEvents</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">&nbsp;</div>
-<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="EffectVisualComponent.html" title="class in com.csse3200.game.components.battle">EffectVisualComponent</a></div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="EffectBurstComponent.html" title="class in com.csse3200.game.components.battle">EffectBurstComponent</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Renders an impact burst: several small particles fly outward from the target and fade out.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab3"><a href="EffectBurstComponent.ParticleShape.html" title="enum class in com.csse3200.game.components.battle">EffectBurstComponent.ParticleShape</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab3">
+<div class="block">Particle appearance: a round dot, or a jagged triangular shard that spins as it flies.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="EffectProjectileComponent.html" title="class in com.csse3200.game.components.battle">EffectProjectileComponent</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Renders a slim blade shape that slashes from an offset starting point, through the target, to an
+ offset end point, fading out as it goes.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="EffectVisualComponent.html" title="class in com.csse3200.game.components.battle">EffectVisualComponent</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
 <div class="block">Renders one short-lived effect visual: it grows, optionally drifts upward, and fades out over its
  style's duration, centred on its own entity's position.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab2"><a href="EffectVisualRegistry.html" title="class in com.csse3200.game.components.battle">EffectVisualRegistry</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="EffectVisualRegistry.html" title="class in com.csse3200.game.components.battle">EffectVisualRegistry</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Maps an <a href="../../cards/EffectType.html" title="enum class in com.csse3200.game.cards"><code>EffectType</code></a> to the <a href="EffectVisualStyle.html" title="class in com.csse3200.game.components.battle"><code>EffectVisualStyle</code></a> used to represent it on screen.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="EffectVisualStyle.html" title="class in com.csse3200.game.components.battle">EffectVisualStyle</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab4">
+<div class="col-first even-row-color class-summary class-summary-tab4"><a href="EffectVisualStyle.html" title="class in com.csse3200.game.components.battle">EffectVisualStyle</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab4">
 <div class="block">Describes how one effect's visual looks and behaves: which texture to draw (or null for a
  generated glow), its tint, how long it lasts, and how it grows/drifts over its lifetime.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab2"><a href="EncounterComposer.html" title="class in com.csse3200.game.components.battle">EncounterComposer</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="EncounterComposer.html" title="class in com.csse3200.game.components.battle">EncounterComposer</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Chooses the enemy line-up for a battle from the encounter table.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="EnemyStatusEffectVisualComponent.html" title="class in com.csse3200.game.components.battle">EnemyStatusEffectVisualComponent</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Plays an enemy status sheet, then keeps a visual while the specified status is active.</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="EnemyStatusEffectVisuals.html" title="class in com.csse3200.game.components.battle">EnemyStatusEffectVisuals</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
@@ -150,12 +167,14 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="InventoryPopupComponent.html" title="class in com.csse3200.game.components.battle">InventoryPopupComponent</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
-<div class="block">Battle inventory popup for durable rewards.</div>
+<div class="block">A popup UI (hosted in a <a href="../../ui/PopupDisplay.html" title="class in com.csse3200.game.ui"><code>PopupDisplay</code></a>) that shows the items the player currently owns,
+ sourced from <a href="../../maps/PlayerRunState.html#getOwnedItems()"><code>PlayerRunState.getOwnedItems()</code></a> so it always reflects
+ items that persist across battles.</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="OffensiveEffectVisuals.html" title="class in com.csse3200.game.components.battle">OffensiveEffectVisuals</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab2">
-<div class="block">Registers the visuals for offensive (damage-related) card effects.</div>
-</div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">&nbsp;</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="PlayerEffectVisuals.html" title="class in com.csse3200.game.components.battle">PlayerEffectVisuals</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">&nbsp;</div>
 </div>
 </div>
 </div>

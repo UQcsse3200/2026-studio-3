@@ -102,8 +102,12 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">InventoryPopupComponent</span>
 <span class="extends-implements">extends <a href="../../ui/UIComponent.html" title="class in com.csse3200.game.ui">UIComponent</a></span></div>
-<div class="block">Battle inventory popup for durable rewards. Passive items are displayed as owned, while battle
- consumables can be used only during the player's turn.</div>
+<div class="block">A popup UI (hosted in a <a href="../../ui/PopupDisplay.html" title="class in com.csse3200.game.ui"><code>PopupDisplay</code></a>) that shows the items the player currently owns,
+ sourced from <a href="../../maps/PlayerRunState.html#getOwnedItems()"><code>PlayerRunState.getOwnedItems()</code></a> so it always reflects
+ items that persist across battles. Mirrors <a href="DeckEditorComponent.html" title="class in com.csse3200.game.components.battle"><code>DeckEditorComponent</code></a>'s popup-hosted pattern,
+ but — unlike the deck editor's draggable card grid — item rows have no drag/drop interaction, so
+ they're built directly as simple widgets inside the popup's own content table rather than as
+ stage-level actors positioned against the window's bounds.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -159,7 +163,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#open()" class="member-name-link">open</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Opens the popup with the latest persistent item state.</div>
+<div class="block">Opens the popup with the item list refreshed from the current run state.</div>
 </div>
 </div>
 </div>
@@ -227,7 +231,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="open()">
 <h3>open</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">open</span>()</div>
-<div class="block">Opens the popup with the latest persistent item state.</div>
+<div class="block">Opens the popup with the item list refreshed from the current run state.</div>
 </section>
 </li>
 <li>

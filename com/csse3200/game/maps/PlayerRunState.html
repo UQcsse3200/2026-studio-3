@@ -133,10 +133,21 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Applies durable state to a newly-created player entity.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#captureFrom(com.csse3200.game.entities.Entity)" class="member-name-link">captureFrom</a><wbr>(<a href="../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#calculateLuckyCoinBonus(int)" class="member-name-link">calculateLuckyCoinBonus</a><wbr>(int&nbsp;amount)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Calculates the extra gold one Lucky Coin would add to a generated reward.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#captureFrom(com.csse3200.game.entities.Entity)" class="member-name-link">captureFrom</a><wbr>(<a href="../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Captures mutable base values before a gameplay entity is disposed.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#claimGoldReward(int,boolean)" class="member-name-link">claimGoldReward</a><wbr>(int&nbsp;amount,
+ boolean&nbsp;useLuckyCoin)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Claims a generated gold reward and optionally consumes the Lucky Coin used to boost it.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentHealth()" class="member-name-link">getCurrentHealth</a>()</code></div>
@@ -147,7 +158,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>float</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getGoldBonusMultiplier()" class="member-name-link">getGoldBonusMultiplier</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Calculates the bonus from the durable owned-item list.</div>
+<div class="block">Returns the bonus available for the next claimed gold reward.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaxHealth()" class="member-name-link">getMaxHealth</a>()</code></div>
@@ -155,7 +166,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getOwnedItemCount(com.csse3200.game.rewards.ItemType)" class="member-name-link">getOwnedItemCount</a><wbr>(<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&nbsp;itemId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the number of copies of an item currently owned by this run.</div>
+<div class="block">Returns the number of copies owned for an item.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getOwnedItems()" class="member-name-link">getOwnedItems</a>()</code></div>
@@ -165,10 +176,20 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Calculates the discount from the durable owned-item list.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hasOwnedItem(com.csse3200.game.rewards.ItemType)" class="member-name-link">hasOwnedItem</a><wbr>(<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&nbsp;itemId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns whether the player owns at least one copy of an item.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeOwnedItem(com.csse3200.game.rewards.ItemType)" class="member-name-link">removeOwnedItem</a><wbr>(<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&nbsp;itemId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Removes one copy of an owned item.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#replaceOwnedItems(java.util.List)" class="member-name-link">replaceOwnedItems</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&gt;&nbsp;items)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Replaces the durable item list after all loaded values have been validated.</div>
+<div class="block">Replaces the durable inventory with a validated save snapshot.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#restore(int,int,int)" class="member-name-link">restore</a><wbr>(int&nbsp;currentHealth,
@@ -177,11 +198,16 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Replaces health and gold while retaining the current owned-item list.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#useBattleItem(com.csse3200.game.rewards.ItemType,com.csse3200.game.entities.Entity)" class="member-name-link">useBattleItem</a><wbr>(<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&nbsp;itemId,
- <a href="../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#restoreOwnedItems(java.util.List)" class="member-name-link">restoreOwnedItems</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&gt;&nbsp;items)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Uses one owned battle consumable on the active player.</div>
+<div class="block">Restores the complete owned-item snapshot from a save file.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#useBattleItem(com.csse3200.game.rewards.ItemType,com.csse3200.game.entities.Entity)" class="member-name-link">useBattleItem</a><wbr>(<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&nbsp;itemId,
+ <a href="../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Uses one owned battle consumable on the current player entity.</div>
 </div>
 </div>
 </div>
@@ -238,10 +264,14 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getGoldBonusMultiplier()">
 <h3>getGoldBonusMultiplier</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">float</span>&nbsp;<span class="element-name">getGoldBonusMultiplier</span>()</div>
-<div class="block">Calculates the bonus from the durable owned-item list.</div>
+<div class="block">Returns the bonus available for the next claimed gold reward.
+
+ <p>Lucky Coins are consumable reward items. Owning one or more coins makes a single 10% bonus
+ available; additional copies are retained for later gold rewards instead of stacking on the
+ same reward.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>accumulated Lucky Coin multiplier</dd>
+<dd>the single-coin multiplier, or zero when no Lucky Coin is owned</dd>
 </dl>
 </section>
 </li>
@@ -263,9 +293,60 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="calculateLuckyCoinBonus(int)">
+<h3>calculateLuckyCoinBonus</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">calculateLuckyCoinBonus</span><wbr><span class="parameters">(int&nbsp;amount)</span></div>
+<div class="block">Calculates the extra gold one Lucky Coin would add to a generated reward.
+
+ <p>The bonus is 10% of the player's balance after adding the base reward, capped at 20. This
+ method does not mutate the balance or consume the coin, so reward UI can preview the exact
+ amount that <a href="#claimGoldReward(int,boolean)"><code>claimGoldReward(int, boolean)</code></a> will grant.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>amount</code> - generated base reward</dd>
+<dt>Returns:</dt>
+<dd>Lucky Coin bonus, or zero when no Lucky Coin is owned</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="claimGoldReward(int,boolean)">
+<h3>claimGoldReward</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">claimGoldReward</span><wbr><span class="parameters">(int&nbsp;amount,
+ boolean&nbsp;useLuckyCoin)</span></div>
+<div class="block">Claims a generated gold reward and optionally consumes the Lucky Coin used to boost it.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>amount</code> - final generated gold amount</dd>
+<dd><code>useLuckyCoin</code> - whether this option was generated with a Lucky Coin bonus</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="addOwnedItem(com.csse3200.game.rewards.ItemType)">
 <h3>addOwnedItem</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addOwnedItem</span><wbr><span class="parameters">(<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&nbsp;itemId)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="removeOwnedItem(com.csse3200.game.rewards.ItemType)">
+<h3>removeOwnedItem</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">removeOwnedItem</span><wbr><span class="parameters">(<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&nbsp;itemId)</span></div>
+<div class="block">Removes one copy of an owned item.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="hasOwnedItem(com.csse3200.game.rewards.ItemType)">
+<h3>hasOwnedItem</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">hasOwnedItem</span><wbr><span class="parameters">(<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&nbsp;itemId)</span></div>
+<div class="block">Returns whether the player owns at least one copy of an item.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getOwnedItemCount(com.csse3200.game.rewards.ItemType)">
+<h3>getOwnedItemCount</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getOwnedItemCount</span><wbr><span class="parameters">(<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&nbsp;itemId)</span></div>
+<div class="block">Returns the number of copies owned for an item.</div>
 </section>
 </li>
 <li>
@@ -275,10 +356,20 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="getOwnedItemCount(com.csse3200.game.rewards.ItemType)">
-<h3>getOwnedItemCount</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getOwnedItemCount</span><wbr><span class="parameters">(<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&nbsp;itemId)</span></div>
-<div class="block">Returns the number of copies of an item currently owned by this run.</div>
+<section class="detail" id="restoreOwnedItems(java.util.List)">
+<h3>restoreOwnedItems</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">restoreOwnedItems</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&gt;&nbsp;items)</span></div>
+<div class="block">Restores the complete owned-item snapshot from a save file.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="replaceOwnedItems(java.util.List)">
+<h3>replaceOwnedItems</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">replaceOwnedItems</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&gt;&nbsp;items)</span></div>
+<div class="block">Replaces the durable inventory with a validated save snapshot.
+
+ <p>This name is used by the save/restore integration on main; it delegates to the shared
+ inventory structure so reward and battle item behaviour continue to use one source of truth.</div>
 </section>
 </li>
 <li>
@@ -286,24 +377,16 @@ loadScripts(document, 'script');</script>
 <h3>useBattleItem</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">useBattleItem</span><wbr><span class="parameters">(<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&nbsp;itemId,
  <a href="../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player)</span></div>
-<div class="block">Uses one owned battle consumable on the active player.
+<div class="block">Uses one owned battle consumable on the current player entity.
 
- <p>The item is removed only after its effect was applied successfully. Battle consumables are
- deliberately not replayed by <a href="#applyTo(com.csse3200.game.entities.Entity)"><code>applyTo(Entity)</code></a> when a new battle player is created.</div>
+ <p>The item is removed only after its effect is applied successfully.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>itemId</code> - item to use</dd>
+<dd><code>itemId</code> - battle item to use</dd>
 <dd><code>player</code> - current battle player</dd>
 <dt>Returns:</dt>
-<dd>true when an owned, usable battle item was consumed</dd>
+<dd>true when one copy was used; false when the item is not usable or not owned</dd>
 </dl>
-</section>
-</li>
-<li>
-<section class="detail" id="replaceOwnedItems(java.util.List)">
-<h3>replaceOwnedItems</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">replaceOwnedItems</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../rewards/ItemType.html" title="enum class in com.csse3200.game.rewards">ItemType</a>&gt;&nbsp;items)</span></div>
-<div class="block">Replaces the durable item list after all loaded values have been validated.</div>
 </section>
 </li>
 <li>

@@ -196,6 +196,16 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the name of the animation currently being played.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>com.badlogic.gdx.graphics.g2d.TextureRegion</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentFrame()" class="member-name-link">getCurrentFrame</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Frame for the next draw; querying does not advance animation.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>com.badlogic.gdx.graphics.g2d.TextureRegion</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRenderedFrame()" class="member-name-link">getRenderedFrame</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Last drawn frame, or the initial frame before the first draw; does not advance playback.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hasAnimation(java.lang.String)" class="member-name-link">hasAnimation</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -374,6 +384,20 @@ loadScripts(document, 'script');</script>
 <dt>Returns:</dt>
 <dd>current animation name, or null if not playing.</dd>
 </dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getRenderedFrame()">
+<h3>getRenderedFrame</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">com.badlogic.gdx.graphics.g2d.TextureRegion</span>&nbsp;<span class="element-name">getRenderedFrame</span>()</div>
+<div class="block">Last drawn frame, or the initial frame before the first draw; does not advance playback.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getCurrentFrame()">
+<h3>getCurrentFrame</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">com.badlogic.gdx.graphics.g2d.TextureRegion</span>&nbsp;<span class="element-name">getCurrentFrame</span>()</div>
+<div class="block">Frame for the next draw; querying does not advance animation.</div>
 </section>
 </li>
 <li>

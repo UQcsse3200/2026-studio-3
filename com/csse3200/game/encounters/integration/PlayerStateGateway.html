@@ -131,14 +131,19 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns the player's maximum health.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setCurrency(int)" class="member-name-link">setCurrency</a><wbr>(int&nbsp;currency)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>float</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getShopDiscount()" class="member-name-link">getShopDiscount</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Updates the player's currency.</div>
+<div class="block">Returns the player's current shop discount, as a fraction (e.g.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setHealth(int)" class="member-name-link">setHealth</a><wbr>(int&nbsp;health)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setCurrency(int)" class="member-name-link">setCurrency</a><wbr>(int&nbsp;currency)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Updates the player's currency.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setHealth(int)" class="member-name-link">setHealth</a><wbr>(int&nbsp;health)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Updates the player's health.</div>
 </div>
 </div>
@@ -218,6 +223,17 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>currency</code> - non-negative currency value</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getShopDiscount()">
+<h3>getShopDiscount</h3>
+<div class="member-signature"><span class="return-type">float</span>&nbsp;<span class="element-name">getShopDiscount</span>()</div>
+<div class="block">Returns the player's current shop discount, as a fraction (e.g. 0.05f for 5% off).</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>the player's current shop discount</dd>
 </dl>
 </section>
 </li>
