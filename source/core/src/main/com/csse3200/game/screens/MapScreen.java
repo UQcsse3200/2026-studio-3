@@ -32,6 +32,7 @@ import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.ui.PopupDisplay;
+import com.csse3200.game.ui.PopupInputComponent;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
@@ -58,6 +59,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
   private final Renderer renderer;
   private ImageButton exitButton;
   private MapDisplay mapDisplay;
+  private ImageTextButton inventoryButton;
 
   public MapScreen(GdxGame game) {
     this.game = game;
@@ -169,7 +171,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
     Stage stage = ServiceLocator.getRenderService().getStage();
 
-    PopupDisplay itemInventory = new PopupDisplay("Item Inventory");
+    PopupDisplay itemInventory = new PopupDisplay("");
     itemInventory.setMinSize(400f, 400f);
 
     // Map screen has no live player entity (only battles do), and item USE actions only make
@@ -179,21 +181,28 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         new InventoryPopupComponent(runState, itemInventory, null, () -> false);
 
     Entity itemInventoryEntity =
-        new Entity().addComponent(itemInventory).addComponent(inventoryPopup);
+        new Entity()
+            .addComponent(itemInventory)
+            .addComponent(new PopupInputComponent(itemInventory))
+            .addComponent(inventoryPopup);
     ServiceLocator.getEntityService().register(itemInventoryEntity);
 
-    ImageTextButton inventoryButton =
+    inventoryButton =
         new ImageTextButton(
             "Item Inventory", BattleMenuSkins.forIcon(BattleMenuSkins.Icon.INVENTORY));
     inventoryButton.pad(6f, 12f, 6f, 18f);
-    inventoryButton.getImageCell().size(48f);
     inventoryButton.getLabelCell().expandX().right();
 
     float buttonWidth = 247f;
     float buttonHeight = 48f;
-    float offset = 24f;
+    float scale = 0.7f;
+    buttonWidth *= scale;
+    buttonHeight *= scale;
+    inventoryButton.getImageCell().size(48f * scale);
+    inventoryButton.getLabel().setFontScale(scale);
     inventoryButton.setSize(buttonWidth, buttonHeight);
-    inventoryButton.setPosition(offset, stage.getHeight() - buttonHeight - offset);
+
+    positionInventoryButton();
 
     inventoryButton.addListener(
         new ChangeListener() {
@@ -204,6 +213,17 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         });
 
     stage.addActor(inventoryButton);
+  }
+
+  private void positionInventoryButton() {
+    Stage stage = ServiceLocator.getRenderService().getStage();
+    float legendCentreX = stage.getWidth() * 0.90f;
+    float legendBottomY = stage.getHeight() * 0.295f;
+    float gap = 40f;
+    float buttonWidth = inventoryButton.getWidth();
+    float buttonHeight = inventoryButton.getHeight();
+    inventoryButton.setPosition(
+        legendCentreX - buttonWidth / 2f, legendBottomY - buttonHeight - gap);
   }
 
   /**
@@ -292,6 +312,9 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
   @Override
   public void resize(int width, int height) {
     renderer.resize(width, height);
+    if (inventoryButton != null) {
+      positionInventoryButton();
+    }
 
     if (mapDisplay != null) {
       mapDisplay.resizeHud();

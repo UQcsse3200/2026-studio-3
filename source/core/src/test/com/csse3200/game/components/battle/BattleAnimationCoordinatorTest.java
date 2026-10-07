@@ -172,8 +172,7 @@ class BattleAnimationCoordinatorTest {
   void shouldBorrowManagedIconsWithoutGeneratingOrDisposingThem() {
     // Damage now plays a particle burst instead of an icon, so use an effect that draws one.
     EffectVisualRegistry registry = new EffectVisualRegistry();
-    registry.register(
-        EffectType.HEAL, new EffectVisualStyle("loaded-icon.png", Color.WHITE, 0.4f, 1f, 1f, 0f));
+    PlayerEffectVisuals.registerAll(registry);
     createCoordinator(registry);
     Texture icon = mock(Texture.class);
     when(resources.getAsset(anyString(), eq(Texture.class))).thenReturn(icon);

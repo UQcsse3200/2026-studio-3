@@ -67,6 +67,7 @@ import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.PopupDisplay;
+import com.csse3200.game.ui.PopupInputComponent;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
@@ -98,11 +99,15 @@ public class BattleScreen extends ScreenAdapter {
     "images/armour.png",
     "images/enemy_release/heavens_grace.png",
     "images/ui/inventory-panel.png",
+    "images/effects/shield.png",
+    "images/effects/fortify.png",
     "images/ui/lucky-coin.png",
     "images/ui/energy-crystal.png",
     "images/ui/merchants-favor.png",
     "images/ui/iron-aegis.png",
-    "images/ui/warriors-crest.png"
+    "images/ui/warriors-crest.png",
+    "images/effects/heal.png",
+    "images/enemies/intents/buff.png"
   };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
@@ -114,8 +119,6 @@ public class BattleScreen extends ScreenAdapter {
   private static final float CARD_HEIGHT = CardWidget.CARD_HEIGHT;
   private static final float CARD_INVENTORY_MIN_WIDTH = 800f;
   private static final float CARD_INVENTORY_MIN_HEIGHT = 600f;
-  private static final float ITEM_INVENTORY_MIN_WIDTH = 470f;
-  private static final float ITEM_INVENTORY_MIN_HEIGHT = 360f;
   private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
   private static final String CARD_WIDGET_SKIN = "flat-earth/skin/flat-earth-ui.json";
 
@@ -311,8 +314,12 @@ public class BattleScreen extends ScreenAdapter {
     InventoryPopupComponent inventoryPopup =
         new InventoryPopupComponent(
             game.getRunState(), itemInventory, gameArea.getPlayer(), controller::isPlayerTurn);
+
     Entity itemInventoryEntity =
-        new Entity().addComponent(itemInventory).addComponent(inventoryPopup);
+        new Entity()
+            .addComponent(itemInventory)
+            .addComponent(new PopupInputComponent(itemInventory))
+            .addComponent(inventoryPopup);
     ServiceLocator.getEntityService().register(itemInventoryEntity);
 
     Stage stage = ServiceLocator.getRenderService().getStage();
@@ -325,6 +332,7 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new CardActions(controller, gameArea.getPlayer()))
             .addComponent(new Team3CardPlayAdapter(cardPlayService, controller))
             .addComponent(cardInventory)
+            .addComponent(new PopupInputComponent(cardInventory))
             .addComponent(
                 new DamageOnCardPlayComponent(
                     gameArea.getPlayer().getComponent(CombatStatsComponent.class)))
@@ -431,6 +439,7 @@ public class BattleScreen extends ScreenAdapter {
   static EffectVisualRegistry createEffectVisualRegistry() {
     EffectVisualRegistry registry = new EffectVisualRegistry();
     OffensiveEffectVisuals.registerAll(registry);
+    PlayerEffectVisuals.registerAll(registry);
     EnemyStatusEffectVisuals.registerAll(registry);
     return registry;
   }
@@ -489,6 +498,7 @@ public class BattleScreen extends ScreenAdapter {
     return records;
   }
 
+  /** Applies the themed frame and matching icon without changing any button trigger or payload. */
   private List<ClickableRecord> buildBattleMenuRecords() {
     List<ClickableRecord> records = new ArrayList<>();
     for (ClickableRecord record : staticUiRecords) {
@@ -519,26 +529,15 @@ public class BattleScreen extends ScreenAdapter {
     return records;
   }
 
-  /** The battle play area above the raised hand and below the top controls/battle log. */
-  private Rectangle battlefieldBounds() {
-    Stage stage = ServiceLocator.getRenderService().getStage();
-    // Cards rise by 120 on hover; leave another 24 pixels before accepting a battlefield drop.
-    float bottom = Math.max(0f, stage.getHeight() - HAND_Y + CARD_HEIGHT + 144f);
-    float top = stage.getHeight() - 180f;
-    return new Rectangle(0f, bottom, stage.getWidth(), Math.max(0f, top - bottom));
-  }
+    /** The battle play area above the raised hand and below the top controls/battle log. */
+    private Rectangle battlefieldBounds() {
+        Stage stage = ServiceLocator.getRenderService().getStage();
+        // Cards rise by 120 on hover; leave another 24 pixels before accepting a battlefield drop.
+        float bottom = Math.max(0f, stage.getHeight() - HAND_Y + CARD_HEIGHT + 144f);
+        float top = stage.getHeight() - 180f;
+        return new Rectangle(0f, bottom, stage.getWidth(), Math.max(0f, top - bottom));
+    }
 
-  /**
-   * Builds one widget per card slot in {@link #handRowOrder} — a fixed left-to-right layout that
-   * only changes wholesale via {@link #onDeckRearranged}. Each slot renders the exact {@link
-   * CardInstance} dealt to it: still in hand, it's normal and playable; currently sitting in the
-   * discard pile (played, or on cooldown), it renders {@code disabled(true)} (shaded, inert to
-   * clicks/drags — see {@link com.csse3200.game.components.spritedisplay.clickable.Clickable}) in
-   * that SAME slot. Checking discard-pile membership by exact instance — not by card ID — is what
-   * lets duplicate copies of the same card (e.g. two "strike"s) be dimmed independently of each
-   * other. Positions never reflow and the row never grows/shrinks, so playing a card reads as "this
-   * slot went dull", not as a new card being dealt.
-   */
   private List<ClickableRecord> buildHandRecords() {
     Set<CardInstance> discardedInstances = new HashSet<>(battleDeck.getDiscardPileInstances());
 

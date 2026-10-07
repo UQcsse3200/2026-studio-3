@@ -180,6 +180,9 @@ public class BattleAnimationCoordinator extends Component {
     } else if (OffensiveEffectVisuals.usesProjectile(type)) {
       visual.addComponent(
           OffensiveEffectVisuals.createPierceComponent(style, baseSize, startDelay));
+    } else if (PlayerEffectVisuals.usesBurst(type)) {
+      visual.addComponent(
+          PlayerEffectVisuals.createBurstComponent(type, style, baseSize, startDelay));
     } else if (target != player && EnemyStatusEffectVisuals.supports(type)) {
       EnemyStatusEffectVisualComponent status =
           new EnemyStatusEffectVisualComponent(textureFor(style), style, target, startDelay, type);

@@ -35,7 +35,7 @@ class PlayerSaveDataTest {
   void shouldWriteOnlyCurrentFieldsAndPreserveAllValues() {
     Json json = new Json();
     PlayerSaveData original =
-        new PlayerSaveData(43, 60, 120, 8, List.of("LUCKY_COIN", "ENERGY_CRYSTAL"));
+        new PlayerSaveData(43, 60, 120, 8, List.of("LUCKY_COIN", "IRON_AEGIS"));
 
     String serialised = json.toJson(original);
     JsonValue fields = new JsonReader().parse(serialised);
@@ -49,5 +49,16 @@ class PlayerSaveDataTest {
     assertEquals(original.gold, restored.gold);
     assertEquals(original.level, restored.level);
     assertEquals(original.ownedItems, restored.ownedItems);
+  }
+
+  @Test
+  void shouldReadLegacySaveWithoutInventoryAsEmpty() {
+    PlayerSaveData restored =
+        new Json()
+            .fromJson(
+                PlayerSaveData.class,
+                "{\"currentHealth\":43,\"maxHealth\":60,\"gold\":120,\"level\":8}");
+
+    assertEquals(List.of(), restored.ownedItems);
   }
 }

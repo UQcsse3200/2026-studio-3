@@ -72,6 +72,7 @@ public class EndBattleScreen extends ScreenAdapter {
     List<CardConfig> cardConfigs = CardConfigLoader.loadCards();
     CardService cardLibrary = new CardLibrary(cardConfigs);
     if (won) {
+      loadRewardAssets();
       loadCardAssets(cardConfigs);
     }
     createUI(won, cardLibrary);
@@ -112,6 +113,10 @@ public class EndBattleScreen extends ScreenAdapter {
                   upgradeSelection, new PlayerDeckCardUpgradeCommitter(playerDeck)));
         }
       }
+    } else {
+      // The themed reward screen already supplies its own victory title. The legacy end-battle
+      // display is only needed for defeat, where it provides the heading and return input.
+      ui.addComponent(new DisplayingFactory(Path.of("sprites/EndBattle.json")));
     }
 
     if (requiresPlayerChoice) {
@@ -125,7 +130,9 @@ public class EndBattleScreen extends ScreenAdapter {
     ui.getEvents().addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, this::returnToMenu);
     ServiceLocator.getEntityService().register(ui);
 
-    ui.getEvents().trigger(EndBattleDisplay.RESULT_EVENT, won ? "VICTORY" : "DEFEAT");
+    if (!won) {
+      ui.getEvents().trigger(EndBattleDisplay.RESULT_EVENT, "DEFEAT");
+    }
 
     if (requiresPlayerChoice) {
       for (EndBattleDisplay endBattleDisplay : displays.getDisplayings(EndBattleDisplay.class)) {
@@ -139,6 +146,12 @@ public class EndBattleScreen extends ScreenAdapter {
     cardTextures = CardWidgetAssets.collectTexturePaths(cardConfigs);
     ResourceService resources = ServiceLocator.getResourceService();
     resources.loadTextures(cardTextures);
+    resources.loadAll();
+  }
+
+  private void loadRewardAssets() {
+    ResourceService resources = ServiceLocator.getResourceService();
+    resources.loadTextures(REWARD_TEXTURES);
     resources.loadAll();
   }
 
@@ -209,6 +222,7 @@ public class EndBattleScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
+    ServiceLocator.getResourceService().unloadAssets(REWARD_TEXTURES);
     ServiceLocator.getResourceService().unloadAssets(cardTextures);
   }
 }

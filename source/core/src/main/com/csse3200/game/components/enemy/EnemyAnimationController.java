@@ -61,16 +61,18 @@ public class EnemyAnimationController extends Component {
       }
     }
     String currentAnimation = animator.getCurrentAnimation();
+    // Switching to idle resets the renderer's completion state.
+    boolean animationFinished = animator.isFinished();
     if (("hurt".equals(currentAnimation)
             || "attack".equals(currentAnimation)
             || "cast".equals(currentAnimation)
             || "defend".equals(currentAnimation))
-        && animator.isFinished()) {
+        && animationFinished) {
       animator.startAnimation("idle");
     }
     if (attackInProgress
         && attackOrigin == null
-        && (!"attack".equals(currentAnimation) || animator.isFinished())) {
+        && (!"attack".equals(currentAnimation) || animationFinished)) {
       finishAttack();
     }
   }
