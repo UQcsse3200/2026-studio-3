@@ -158,22 +158,39 @@ implements <a href="BattleTutorialView.html" title="interface in com.csse3200.ga
 <div class="block">Called after Stage.draw; card hover/drag toFront cannot obscure the prompt or Exit.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setDragActor(java.util.function.Supplier)" class="member-name-link">setDragActor</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.Actor&gt;&nbsp;dragActor)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setDetailedTargets(java.util.function.Supplier,java.util.function.Supplier)" class="member-name-link">setDetailedTargets</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.math.Rectangle&gt;&nbsp;energyBounds,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.Actor&gt;&nbsp;enemyArmour)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setEnemyBounds(java.util.function.Supplier)" class="member-name-link">setEnemyBounds</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;com.badlogic.gdx.math.Rectangle&gt;&gt;&nbsp;enemies)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setDragActor(java.util.function.Supplier)" class="member-name-link">setDragActor</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.Actor&gt;&nbsp;dragActor)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setEnemyRenderer(java.util.function.Consumer)" class="member-name-link">setEnemyRenderer</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Consumer.html" title="class or interface in java.util.function" class="external-link">Consumer</a>&lt;com.badlogic.gdx.graphics.g2d.Batch&gt;&nbsp;renderer)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setEnemyBounds(java.util.function.Supplier)" class="member-name-link">setEnemyBounds</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;com.badlogic.gdx.math.Rectangle&gt;&gt;&nbsp;enemies)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#show(com.csse3200.game.tutorial.BattleTutorialPrompt)" class="member-name-link">show</a><wbr>(<a href="BattleTutorialPrompt.html" title="class in com.csse3200.game.tutorial">BattleTutorialPrompt</a>&nbsp;prompt)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setEnemyRenderer(java.util.function.Consumer)" class="member-name-link">setEnemyRenderer</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Consumer.html" title="class or interface in java.util.function" class="external-link">Consumer</a>&lt;com.badlogic.gdx.graphics.g2d.Batch&gt;&nbsp;renderer)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setExitStyle(com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle)" class="member-name-link">setExitStyle</a><wbr>(com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle&nbsp;style)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Share battle-menu drawables without owning or disposing their skin.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setStatTargets(java.util.function.Supplier,java.util.function.Supplier,java.util.function.Supplier,java.util.function.Supplier)" class="member-name-link">setStatTargets</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.Actor&gt;&nbsp;itemInventory,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.Actor&gt;&nbsp;energy,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.ui.Label&gt;&nbsp;health,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.Actor&gt;&nbsp;enemyStats)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Shows text and highlights the named live actor, enabling Continue only when allowed.</div>
+<div class="block">Bind current UI components, not presentation strings or screenshot coordinates.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#showResolvedDamage(int)" class="member-name-link">showResolvedDamage</a><wbr>(int&nbsp;amount)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#show(com.csse3200.game.tutorial.BattleTutorialPrompt)" class="member-name-link">show</a><wbr>(<a href="BattleTutorialPrompt.html" title="class in com.csse3200.game.tutorial">BattleTutorialPrompt</a>&nbsp;prompt)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Shows text and highlights the named live actor, enabling Continue only when allowed.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#showResolvedDamage(int)" class="member-name-link">showResolvedDamage</a><wbr>(int&nbsp;amount)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Optional local damage-number presentation from a real HP difference, never simulated damage.</div>
 </div>
 </div>
@@ -213,9 +230,33 @@ implements <a href="BattleTutorialView.html" title="interface in com.csse3200.ga
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
+<section class="detail" id="setDetailedTargets(java.util.function.Supplier,java.util.function.Supplier)">
+<h3>setDetailedTargets</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setDetailedTargets</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.math.Rectangle&gt;&nbsp;energyBounds,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.Actor&gt;&nbsp;enemyArmour)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="setStatTargets(java.util.function.Supplier,java.util.function.Supplier,java.util.function.Supplier,java.util.function.Supplier)">
+<h3>setStatTargets</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setStatTargets</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.Actor&gt;&nbsp;itemInventory,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.Actor&gt;&nbsp;energy,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.ui.Label&gt;&nbsp;health,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.Actor&gt;&nbsp;enemyStats)</span></div>
+<div class="block">Bind current UI components, not presentation strings or screenshot coordinates.</div>
+</section>
+</li>
+<li>
 <section class="detail" id="setEnemyBounds(java.util.function.Supplier)">
 <h3>setEnemyBounds</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setEnemyBounds</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;com.badlogic.gdx.math.Rectangle&gt;&gt;&nbsp;enemies)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="setExitStyle(com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle)">
+<h3>setExitStyle</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setExitStyle</span><wbr><span class="parameters">(com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle&nbsp;style)</span></div>
+<div class="block">Share battle-menu drawables without owning or disposing their skin.</div>
 </section>
 </li>
 <li>
