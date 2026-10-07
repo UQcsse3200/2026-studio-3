@@ -54,7 +54,7 @@ public class CampfireScreen extends ScreenAdapter {
   private static final String MAIN_SCENE = "images/campfire/main_scene_dusk.png";
   private static final String MAIN_SCENE_EXTENDED = "images/campfire/main_scene_extended.png";
   private static final String REST_SCENE = "images/campfire/rest_scene_wide.png";
-  private static final String UPGRADE_SCENE = "images/campfire/upgrade_table_wide.png";
+  private static final String UPGRADE_SCENE = "images/campfire/upgrade_rune_altar_v2.png";
   private static final String REST_ICON = "images/campfire/rest_icon.png";
   private static final String UPGRADE_ICON = "images/campfire/upgrade_icon.png";
   private static final String[] TEXTURES = {
@@ -73,6 +73,7 @@ public class CampfireScreen extends ScreenAdapter {
   private Label restResult;
   private Table restOutcome;
   private boolean transitioning;
+  private CampfireUpgradeEntrance upgradeEntrance;
 
   public CampfireScreen(GdxGame game) {
     this(game, game.getRunState());
@@ -161,7 +162,16 @@ public class CampfireScreen extends ScreenAdapter {
     upgradeScene = newScene();
     Image tableBackground =
         addSceneImage(upgradeScene, resources.getAsset(UPGRADE_SCENE, Texture.class), true);
-    addUpgradeTableHotspot(tableBackground, upgradeDisplay, upgradeSelection);
+    CampfireUpgradeEntrance entrance =
+        new CampfireUpgradeEntrance(
+            skin,
+            () -> openCardUpgrade(upgradeDisplay),
+            () -> transitioning,
+            resources.getAsset(UPGRADE_SCENE, Texture.class));
+    upgradeEntrance = entrance;
+    entrance.setScale(tableBackground.getHeight() / 992f);
+    entrance.setPosition(tableBackground.getX(), tableBackground.getY());
+    upgradeScene.addActor(entrance);
     upgradeScene.addListener(
         new InputListener() {
           @Override
@@ -311,40 +321,9 @@ public class CampfireScreen extends ScreenAdapter {
     scene.addActor(hotspot);
   }
 
-  private void addUpgradeTableHotspot(
-      Image background, CardUpgradeDisplay upgradeDisplay, CardUpgradeSelection selection) {
-    float scale = background.getHeight() / 992f;
-    Actor hotspot = new Actor();
-    // The Upgrade button is painted into the wide table scene, near its lower-right corner.
-    hotspot.setBounds(
-        background.getX() + 1005f * scale,
-        background.getY() + 117f * scale,
-        250f * scale,
-        90f * scale);
-    hotspot.addListener(
-        new ClickListener() {
-          @Override
-          public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-            if (pointer == -1 && !selection.getCardUpgradeOption().isEmpty()) {
-              Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Hand);
-            }
-          }
-
-          @Override
-          public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
-            if (pointer == -1) {
-              Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
-            }
-          }
-
-          @Override
-          public void clicked(InputEvent event, float x, float y) {
-            if (!transitioning) {
-              upgradeDisplay.showLibrary();
-            }
-          }
-        });
-    upgradeScene.addActor(hotspot);
+  /** Both workbench entrances delegate to the existing team card-upgrade flow. */
+  private void openCardUpgrade(CardUpgradeDisplay display) {
+    if (!transitioning) display.showLibrary();
   }
 
   private void createRestOutcome() {
@@ -456,6 +435,7 @@ public class CampfireScreen extends ScreenAdapter {
 
   @Override
   public void dispose() {
+    if (upgradeEntrance != null) upgradeEntrance.dispose();
     Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
     skin.dispose();
     renderer.dispose();
