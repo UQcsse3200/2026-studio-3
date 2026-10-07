@@ -1,6 +1,5 @@
 package com.csse3200.game.components.spritedisplay.displaying;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -137,7 +136,10 @@ public class RewardDisplay extends Displaying {
     }
 
     Image scene =
-        new Image(new Texture(Gdx.files.internal("images/" + game.getBackgroundId() + ".png")));
+        new Image(
+            ServiceLocator.getResourceService()
+                .getAsset("images/" + game.getBackgroundId() + ".png", Texture.class));
+
     scene.setScaling(Scaling.fill);
     scene.setFillParent(true);
     background = scene;

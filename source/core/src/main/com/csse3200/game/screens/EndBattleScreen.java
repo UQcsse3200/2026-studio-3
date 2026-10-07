@@ -125,6 +125,8 @@ public class EndBattleScreen extends ScreenAdapter {
     ui.getEvents().addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, this::returnToMenu);
     ServiceLocator.getEntityService().register(ui);
 
+    ui.getEvents().trigger(EndBattleDisplay.RESULT_EVENT, won ? "VICTORY" : "DEFEAT");
+
     if (requiresPlayerChoice) {
       for (EndBattleDisplay endBattleDisplay : displays.getDisplayings(EndBattleDisplay.class)) {
         endBattleDisplay.setClickToReturnEnabled(false);
