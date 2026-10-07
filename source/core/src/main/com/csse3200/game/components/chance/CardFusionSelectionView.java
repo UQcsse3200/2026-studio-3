@@ -232,9 +232,9 @@ final class CardFusionSelectionView {
     helpDialog =
         new ContextualHelpDialog(
             skin, EventHelpContent.FUSION_TITLE, EventHelpContent.FUSION_RULES);
-    helpButton = new TextButton("?", FusionSceneAssets.buttonStyle(skin, false));
+    helpButton = ContextualHelpDialog.createHelpButton(skin);
     helpButton.setName("fusion-selection-help-button");
-    helpButton.setBounds(1150f, 685f, 68f, 58f);
+    helpButton.setBounds(1152f, 682f, 64f, 64f);
     helpButton.addListener(
         new ChangeListener() {
           @Override

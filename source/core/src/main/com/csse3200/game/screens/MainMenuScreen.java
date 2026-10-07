@@ -28,7 +28,9 @@ public class MainMenuScreen extends ScreenAdapter {
   private static final String[] MAIN_MENU_TEXTURES = {
     MainMenuDisplay.BACKGROUND_TEXTURE,
     MainMenuDisplay.BUTTON_FRAME_TEXTURE,
-    MainMenuDisplay.TITLE_LOGO_TEXTURE
+    MainMenuDisplay.TITLE_LOGO_TEXTURE,
+    "images/tutorial_choice_frame.png",
+    "images/ancient_temple_choice_button.png"
   };
 
   private final GdxGame game;
