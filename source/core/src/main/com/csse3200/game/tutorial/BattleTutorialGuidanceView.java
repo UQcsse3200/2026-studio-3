@@ -30,30 +30,6 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
   private final Stage stage;
   private final Supplier<List<Actor>> hand;
   private final Supplier<Actor> demonstration, inventory, endTurn;
-  private Supplier<Actor> itemInventory = () -> null;
-  private Supplier<Actor> energy = () -> null;
-  private Supplier<Label> health = () -> null;
-  private Supplier<Actor> enemyStats = () -> null;
-  private Supplier<Actor> enemyArmour = () -> null;
-  private Supplier<Rectangle> energyBounds;
-
-  public void setDetailedTargets(Supplier<Rectangle> energyBounds, Supplier<Actor> enemyArmour) {
-    this.energyBounds = energyBounds;
-    this.enemyArmour = enemyArmour;
-  }
-
-  /** Bind current UI components, not presentation strings or screenshot coordinates. */
-  public void setStatTargets(
-      Supplier<Actor> itemInventory,
-      Supplier<Actor> energy,
-      Supplier<Label> health,
-      Supplier<Actor> enemyStats) {
-    this.itemInventory = Objects.requireNonNull(itemInventory);
-    this.energy = Objects.requireNonNull(energy);
-    this.health = Objects.requireNonNull(health);
-    this.enemyStats = Objects.requireNonNull(enemyStats);
-  }
-
   private Supplier<List<Rectangle>> enemies = List::of;
   private Consumer<Batch> enemyRenderer = batch -> {};
   private Supplier<Actor> dragActor = () -> null;
@@ -162,13 +138,6 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
             "Exit Tutorial",
             new TextButton.TextButtonStyle(skin.get(TextButton.TextButtonStyle.class)));
     exit.setName("tutorial-exit");
-    TextButton.TextButtonStyle exitStyle = exit.getStyle();
-    exitStyle.up = new PixelFrame();
-    exitStyle.over = new PixelFrame();
-    exitStyle.down = new PixelFrame();
-    exitStyle.fontColor = new Color(0.96f, 0.91f, 0.78f, 1);
-    exitStyle.overFontColor = new Color(1, 0.82f, 0.38f, 1);
-    exitStyle.downFontColor = Color.WHITE;
     exit.getLabel().setFontScale(0.78f);
     exit.addListener(
         new ChangeListener() {
@@ -182,12 +151,6 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
 
   public void setEnemyBounds(Supplier<List<Rectangle>> enemies) {
     this.enemies = Objects.requireNonNull(enemies);
-  }
-
-  /** Share battle-menu drawables without owning or disposing their skin. */
-  public void setExitStyle(TextButton.TextButtonStyle style) {
-    exit.setStyle(new TextButton.TextButtonStyle(style));
-    exit.getLabel().setFontScale(0.78f);
   }
 
   public void setEnemyRenderer(Consumer<Batch> renderer) {
@@ -334,15 +297,10 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
         }
       }
       case CARD_INVENTORY, DRAW_PILE -> add(inventory.get());
-      case ITEM_INVENTORY -> add(itemInventory.get());
       case END_TURN -> add(endTurn.get());
-      case ENERGY -> {
-        add(energy.get());
-        if (energyBounds != null && !highlights.isEmpty()) highlights.set(0, energyBounds.get());
-      }
-      case HEALTH -> add(health.get() == null ? null : health.get().getParent());
-      case ENEMIES, ENEMY_STATS -> add(enemyStats.get());
-      case ENEMY_ARMOUR -> add(enemyArmour.get());
+      case ENERGY -> add(findStat("Energy:", false));
+      case HEALTH -> add(findStat("Health:", false));
+      case ENEMIES, ENEMY_STATS -> add(findEnemyStats());
       case STATUS_EFFECTS -> add(findStat("Energy:", true));
       case NONE -> {}
     }
@@ -371,8 +329,8 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
         highlights.isEmpty() ? new Rectangle(w / 2, h * 0.6f, 0, 0) : highlights.get(0);
     Placement preferred =
         switch (prompt.highlight()) {
-          case CARD_INVENTORY, ITEM_INVENTORY, END_TURN, ENERGY, HEALTH -> Placement.RIGHT;
-          case ENEMY_STATS, ENEMY_ARMOUR, ENEMIES -> Placement.LEFT;
+          case CARD_INVENTORY, END_TURN, ENERGY, HEALTH -> Placement.RIGHT;
+          case ENEMY_STATS, ENEMIES -> Placement.LEFT;
           default -> Placement.ABOVE;
         };
     Rectangle box;
@@ -381,16 +339,7 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
       box = clamp(new Rectangle(dragPrompt), w, h);
     } else if (prompt.step() == BattleTutorialController.Step.INTRO) {
       box = clamp(new Rectangle((w - width) / 2, h * 0.6f, width, height), w, h);
-    } else {
-      box = place(target, width, height, w, h, preferred);
-      if (prompt.highlight() == BattleTutorialPrompt.HighlightTarget.CARD_INVENTORY
-          || prompt.highlight() == BattleTutorialPrompt.HighlightTarget.ITEM_INVENTORY
-          || prompt.highlight() == BattleTutorialPrompt.HighlightTarget.END_TURN) {
-        // Keep the prompt below the button's top edge, away from the game title.
-        box.y = Math.min(box.y, target.y + target.height - box.height);
-        box = clamp(box, w, h);
-      }
-    }
+    } else box = place(target, width, height, w, h, preferred);
     narration.setBounds(box.x, box.y, box.width, box.height);
     narration.validate();
   }
@@ -451,21 +400,20 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
   }
 
   public boolean isPlayerHealthDisplayed(int health) {
-    Actor actor = this.health.get();
+    Actor actor = findStat("Health:", false);
     if (!(actor instanceof Label label)) return false;
-    String[] values = label.getText().toString().trim().split("\\D+");
+    String[] values = label.getText().toString().substring("Health:".length()).trim().split("\\D+");
     return values.length > 0 && values[0].equals(Integer.toString(health));
   }
 
   /** Convert world-stat screen anchors to stage coordinates only in the tutorial battle. */
   public void alignWorldStatsToViewport() {
     java.util.Set<Group> adjusted = new java.util.HashSet<>();
-    List<Group> groups = new ArrayList<>();
-    Label healthLabel = health.get();
-    if (healthLabel != null && healthLabel.getParent() != null)
-      groups.add(healthLabel.getParent().getParent());
-    if (enemyStats.get() instanceof Group stats) groups.add(stats.getParent());
-    for (Group group : groups) {
+    for (Actor actor : descendants(stage.getRoot())) {
+      if (!(actor instanceof Label label) || isWithin(actor, overlay)) continue;
+      String text = label.getText().toString();
+      if (!text.startsWith("Health:") && !text.startsWith("Armour:")) continue;
+      Group group = actor.getParent();
       if (group == null || !adjusted.add(group)) continue;
       Vector2 anchor =
           new Vector2(

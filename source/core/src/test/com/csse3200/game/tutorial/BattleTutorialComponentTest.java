@@ -35,7 +35,7 @@ class BattleTutorialComponentTest {
     reference.setObservation(
         new BattleTutorialObservation(enemyHealth::get, playerHealth::get, settled::get));
     reference.create();
-    for (int i = 0; i < 5; i++) view.continueAction.run();
+    for (int i = 0; i < 4; i++) view.continueAction.run();
     enemyHealth.set(28);
     cardListener().handle("strike-copy", "enemy");
     reference.update();
@@ -44,16 +44,15 @@ class BattleTutorialComponentTest {
     reference.update();
     assertEquals(BattleTutorialController.Step.ENEMY_STATS, view.last().step());
     view.continueAction.run();
-    assertEquals(BattleTutorialController.Step.ENEMY_ARMOUR, view.last().step());
-    view.continueAction.run();
-    assertEquals(BattleTutorialController.Step.HEALTH, view.last().step());
+    assertEquals(BattleTutorialController.Step.USED_CARD, view.last().step());
     view.continueAction.run();
     assertTrue(view.last().canContinue());
     assertEquals(BattleTutorialController.Step.END_TURN, view.last().step());
     phaseListener().handle(BattlePhase.PLAYER_TURN, BattlePhase.PLAYER_END);
     playerHealth.set(95);
     reference.update();
-    assertEquals(BattleTutorialController.Step.FREE_PLAY, view.last().step());
+    assertEquals(BattleTutorialController.Step.HEALTH, view.last().step());
+    view.continueAction.run();
     reference.update();
     assertEquals(0, view.clearCount);
     assertTrue(outcomes.isEmpty());

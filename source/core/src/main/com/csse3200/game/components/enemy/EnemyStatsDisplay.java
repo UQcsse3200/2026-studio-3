@@ -14,23 +14,6 @@ import com.csse3200.game.ui.UIComponent;
 
 /** A UI component for displaying enemy stats */
 public class EnemyStatsDisplay extends UIComponent {
-  /** Live health/armour group; combat remains owned by the existing systems. */
-  public Table getStatsActor() {
-    return table;
-  }
-
-  public Stack getHealthActor() {
-    return healthStack;
-  }
-
-  /** Show zero armour during teaching without changing combat state. */
-  public Stack getTutorialArmourActor() {
-    armourCell.setActor(armourStack);
-    armourCell.size(60f);
-    table.pack();
-    return armourStack;
-  }
-
   Table table;
   private Label healthLabel;
   private ProgressBar healthBar;

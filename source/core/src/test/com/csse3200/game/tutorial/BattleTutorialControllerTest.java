@@ -20,23 +20,6 @@ import org.mockito.ArgumentCaptor;
 
 class BattleTutorialControllerTest {
   @Test
-  void referenceOpeningIncludesItemInventoryInTheRequestedOrder() {
-    var tutorial = new BattleTutorialController(true);
-    tutorial.start();
-    for (var expected :
-        List.of(
-            BattleTutorialController.Step.CARD_INVENTORY,
-            BattleTutorialController.Step.ITEM_INVENTORY,
-            BattleTutorialController.Step.ENERGY,
-            BattleTutorialController.Step.CARD_COST,
-            BattleTutorialController.Step.PLAY_A_CARD)) {
-      assertTrue(tutorial.continueInformation());
-      assertEquals(expected, tutorial.getCurrentStep().orElseThrow());
-    }
-    assertFalse(tutorial.continueInformation());
-  }
-
-  @Test
   void referenceSequenceRequiresTheExactDemonstrationCopyAtStepSix() {
     BattleTutorialController tutorial = new BattleTutorialController(true);
     tutorial.setDemonstrationCardId("demo-strike");
@@ -44,7 +27,7 @@ class BattleTutorialControllerTest {
     tutorial.start();
     assertEquals(BattleTutorialController.Step.HAND, tutorial.getCurrentStep().orElseThrow());
     tutorial.onSuccessfulCardPlay("demo-strike");
-    for (int i = 0; i < 5; i++) assertTrue(tutorial.continueInformation());
+    for (int i = 0; i < 4; i++) assertTrue(tutorial.continueInformation());
     assertEquals(
         BattleTutorialController.Step.PLAY_A_CARD, tutorial.getCurrentStep().orElseThrow());
     assertFalse(tutorial.continueInformation());
@@ -67,39 +50,32 @@ class BattleTutorialControllerTest {
     assertEquals(
         BattleTutorialController.Step.ENEMY_STATS, tutorial.getCurrentStep().orElseThrow());
     assertTrue(tutorial.continueInformation());
-    assertEquals(
-        BattleTutorialController.Step.ENEMY_ARMOUR, tutorial.getCurrentStep().orElseThrow());
-    assertTrue(tutorial.continueInformation());
-    assertEquals(BattleTutorialController.Step.HEALTH, tutorial.getCurrentStep().orElseThrow());
+    assertEquals(BattleTutorialController.Step.USED_CARD, tutorial.getCurrentStep().orElseThrow());
     assertTrue(tutorial.continueInformation());
     assertEquals(BattleTutorialController.Step.END_TURN, tutorial.getCurrentStep().orElseThrow());
     tutorial.onPhaseChanged(BattlePhase.PLAYER_END);
     assertEquals(
         BattleTutorialController.Step.ENEMY_ANIMATION, tutorial.getCurrentStep().orElseThrow());
     tutorial.observeResolution(26, 100, true, BattlePhase.PLAYER_TURN);
+    assertEquals(BattleTutorialController.Step.HEALTH, tutorial.getCurrentStep().orElseThrow());
+    assertTrue(tutorial.continueInformation());
     assertEquals(BattleTutorialController.Step.FREE_PLAY, tutorial.getCurrentStep().orElseThrow());
     assertTrue(tutorial.getOutcome().isEmpty());
   }
 
   @Test
-  void endTurnRequiresTheRealTurnAndSettledReturn() {
+  void endTurnExplanationCanBeSkippedWithoutEndingARealTurn() {
     var tutorial = new BattleTutorialController(true);
     tutorial.setDemonstrationCardId("strike");
     tutorial.observeInitialHealth(32, 100);
     tutorial.start();
-    for (int i = 0; i < 5; i++) tutorial.continueInformation();
+    for (int i = 0; i < 4; i++) tutorial.continueInformation();
     tutorial.onSuccessfulCardPlay("strike");
     tutorial.observeResolution(28, 100, true, BattlePhase.PLAYER_TURN);
     tutorial.continueInformation();
     tutorial.continueInformation();
-    tutorial.continueInformation();
-    assertEquals(BattleTutorialController.Step.END_TURN, tutorial.getCurrentStep().orElseThrow());
-    tutorial.onPhaseChanged(BattlePhase.PLAYER_END);
-    tutorial.observeResolution(28, 100, false, BattlePhase.PLAYER_TURN);
-    assertEquals(
-        BattleTutorialController.Step.ENEMY_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(28, 100, true, BattlePhase.PLAYER_TURN);
-    assertEquals(BattleTutorialController.Step.FREE_PLAY, tutorial.getCurrentStep().orElseThrow());
+    assertTrue(tutorial.continueInformation());
+    assertEquals(BattleTutorialController.Step.HEALTH, tutorial.getCurrentStep().orElseThrow());
   }
 
   @Test
