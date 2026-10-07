@@ -151,6 +151,7 @@ public class BattleAnimationCoordinator extends Component {
     if (request == null || effects == null || effects.isEmpty()) {
       return;
     }
+    player.getEvents().trigger("playerAttack");
     List<EffectType> orderedTypes = distinctTypesInOrder(effects);
     for (Entity target : effectHandler.getLivingEnemyTargets(request, enemies)) {
       for (int i = 0; i < orderedTypes.size(); i++) {
