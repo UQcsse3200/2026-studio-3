@@ -13,7 +13,11 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.csse3200.game.GdxGame;
+import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.components.battle.InventoryPopupComponent;
+import com.csse3200.game.components.pausemenu.PauseMenuFactory;
+import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
@@ -26,10 +30,13 @@ import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.ui.PopupDisplay;
+import com.csse3200.game.ui.PopupInputComponent;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
+import com.csse3200.game.ui.terminal.commands.DiscoverAllCardsCommand;
 import com.csse3200.game.ui.terminal.commands.GotoCommand;
 import com.csse3200.game.ui.terminal.commands.ListNodesCommand;
 import com.csse3200.game.ui.terminal.commands.UnlockNodeCommand;
@@ -50,25 +57,29 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
   private final GdxGame game;
   private final Renderer renderer;
+  private ImageButton exitButton;
+  private MapDisplay mapDisplay;
+  private ImageTextButton inventoryButton;
 
   public MapScreen(GdxGame game) {
     this.game = game;
     logger.debug("Initialising map screen services");
     ServiceLocator.registerTimeSource(new GameTime());
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
     renderer = RenderFactory.createRenderer();
 
     RunState runState = game.getRunState();
+    AudioService.load();
 
     if (!runState.isRunActive()) {
       logger.info("No run in progress, generating a new map");
       MapGenerationController mapGen = new MapGenerationController();
 
       startNewRun(runState, mapGen.getMap());
+      runState.createStarterDeckForNewRun(new CardLibrary(CardConfigLoader.loadCards()));
     }
 
     createUi(game, runState);
@@ -96,12 +107,16 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
   /** Puts the map display on a UI entity so it is rendered and receives input. */
   private void createUi(GdxGame game, RunState runState) {
-    MapDisplay mapDisplay = new MapDisplay(runState.getMapGraph(), runState);
+    mapDisplay = new MapDisplay(runState.getMapGraph(), runState);
 
     mapDisplay
         .getMapSelectionController()
         .getEvents()
-        .addListener("nodeSelected", (Integer nodeId) -> enterEncounter(game, runState, nodeId));
+        .addListener(
+            "nodeSelected",
+            (Integer nodeId) -> {
+              enterEncounter(game, runState, nodeId);
+            });
 
     // PROPOSED: debug terminal for cheats/commands on the map (unlock nodes, etc.). Same
     // Terminal/KeyboardTerminalInputComponent/TerminalDisplay trio used elsewhere; F1 toggles it.
@@ -109,6 +124,8 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     terminal.addCommand("unlocknode", new UnlockNodeCommand(runState));
     terminal.addCommand("listnodes", new ListNodesCommand(runState));
     terminal.addCommand("goto", new GotoCommand(runState, mapDisplay.getMapSelectionController()));
+    terminal.addCommand(
+        "discoverallcards", new DiscoverAllCardsCommand(game.getCardDiscoveryService()));
 
     Entity ui = new Entity();
     ui.addComponent(new InputDecorator(ServiceLocator.getRenderService().getStage(), 10))
@@ -117,7 +134,11 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         .addComponent(new KeyboardTerminalInputComponent())
         .addComponent(new TerminalDisplay());
 
+    // Pause menu + in-place save/load overlay (the map is the natural place to save a run).
+    // No on-screen pause button here (it didn't fit the map HUD); Escape still opens the menu.
+    SaveLoadPanel savePanel = PauseMenuFactory.attachWithoutButton(ui, game);
     ServiceLocator.getEntityService().register(ui);
+    savePanel.hide(); // save overlay starts hidden, opened by the Save & Load button
 
     createExitButton(game);
     createInventoryButton(runState);
@@ -160,10 +181,13 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         new InventoryPopupComponent(runState, itemInventory, null, () -> false);
 
     Entity itemInventoryEntity =
-        new Entity().addComponent(itemInventory).addComponent(inventoryPopup);
+        new Entity()
+            .addComponent(itemInventory)
+            .addComponent(new PopupInputComponent(itemInventory))
+            .addComponent(inventoryPopup);
     ServiceLocator.getEntityService().register(itemInventoryEntity);
 
-    ImageTextButton inventoryButton =
+    inventoryButton =
         new ImageTextButton(
             "Item Inventory", BattleMenuSkins.forIcon(BattleMenuSkins.Icon.INVENTORY));
     inventoryButton.pad(6f, 12f, 6f, 18f);
@@ -171,7 +195,6 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
     float buttonWidth = 247f;
     float buttonHeight = 48f;
-    float offset = 24f;
     float scale = 0.7f;
     buttonWidth *= scale;
     buttonHeight *= scale;
@@ -179,11 +202,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     inventoryButton.getLabel().setFontScale(scale);
     inventoryButton.setSize(buttonWidth, buttonHeight);
 
-    float legendCentreX = stage.getWidth() * 0.90f;
-    float legendBottomY = stage.getHeight() * 0.295f;
-    float gap = 40f;
-    inventoryButton.setPosition(
-        legendCentreX - buttonWidth / 2f, legendBottomY - buttonHeight - gap);
+    positionInventoryButton();
 
     inventoryButton.addListener(
         new ChangeListener() {
@@ -194,6 +213,17 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         });
 
     stage.addActor(inventoryButton);
+  }
+
+  private void positionInventoryButton() {
+    Stage stage = ServiceLocator.getRenderService().getStage();
+    float legendCentreX = stage.getWidth() * 0.90f;
+    float legendBottomY = stage.getHeight() * 0.295f;
+    float gap = 40f;
+    float buttonWidth = inventoryButton.getWidth();
+    float buttonHeight = inventoryButton.getHeight();
+    inventoryButton.setPosition(
+        legendCentreX - buttonWidth / 2f, legendBottomY - buttonHeight - gap);
   }
 
   /**
@@ -207,15 +237,17 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     MapNode node = runState.getMapGraph() == null ? null : runState.getMapGraph().getNode(nodeId);
     RoomType roomType = node == null ? null : node.getRoomType();
 
-    if (roomType == RoomType.COMBAT || roomType == RoomType.FINAL || roomType == RoomType.ELITE) {
-      logger.info("Node {} ({}) selected, entering battle", nodeId, roomType);
-      game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
-    } else if (roomType == RoomType.CAMPFIRE) {
-      logger.info("Node {} ({}) selected, entering campfire", nodeId, roomType);
-      game.setScreen(GdxGame.ScreenType.CAMPFIRE);
+    GdxGame.ScreenType destination =
+        switch (roomType) {
+          case FINAL, COMBAT, ELITE -> GdxGame.ScreenType.BATTLE_SCREEN;
+          case CAMPFIRE -> GdxGame.ScreenType.CAMPFIRE;
+          case null, default -> GdxGame.ScreenType.ENCOUNTER;
+        };
+    logger.info("Node {} ({}) selected, entering {}", nodeId, roomType, destination);
+    if (roomType == RoomType.FINAL) {
+      game.showNarration("pre_boss", GdxGame.ScreenType.BATTLE_SCREEN);
     } else {
-      logger.info("Node {} ({}) selected, entering encounter", nodeId, roomType);
-      game.setScreen(GdxGame.ScreenType.ENCOUNTER);
+      game.setScreen(destination);
     }
   }
 
@@ -239,16 +271,10 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     style.imageUp = buttonDrawable;
     style.imageOver = buttonDrawableHover;
 
-    ImageButton exitButton = new ImageButton(style);
+    exitButton = new ImageButton(style);
 
-    float buttonWidth = 150f;
-    float buttonHeight = 50f;
-    float offset = 52f;
-
-    exitButton.setSize(buttonWidth, buttonHeight);
-
-    exitButton.setPosition(
-        stage.getWidth() - buttonWidth - offset, stage.getHeight() - offset * 1.5f);
+    exitButton.setSize(150f, 50f);
+    positionExitButton();
 
     exitButton.addListener(
         new ChangeListener() {
@@ -259,6 +285,16 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         });
 
     stage.addActor(exitButton);
+  }
+
+  private void positionExitButton() {
+    Stage stage = ServiceLocator.getRenderService().getStage();
+
+    float offset = 52f;
+
+    exitButton.setPosition(
+        stage.getWidth() - exitButton.getWidth() - offset,
+        stage.getHeight() - exitButton.getHeight() - offset / 2f);
   }
 
   @Override
@@ -276,15 +312,24 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
   @Override
   public void resize(int width, int height) {
     renderer.resize(width, height);
+    if (inventoryButton != null) {
+      positionInventoryButton();
+    }
+
+    if (mapDisplay != null) {
+      mapDisplay.resizeHud();
+    }
+
+    positionExitButton();
   }
 
   @Override
   public void dispose() {
     logger.debug("Disposing map screen");
     renderer.dispose();
+    mapDisplay.dispose();
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getRenderService().dispose();
-    ServiceLocator.getResourceService().dispose();
-    ServiceLocator.clear();
+    ScreenUtils.clear(new Color(248f / 255f, 249f / 255f, 178f / 255f, 1f));
   }
 }

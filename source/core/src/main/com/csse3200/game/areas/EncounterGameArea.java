@@ -1,6 +1,7 @@
 package com.csse3200.game.areas;
 
 import com.csse3200.game.areas.terrain.TerrainFactory;
+import com.csse3200.game.cards.CardAcquisitionPoolLoader;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.fusion.CardFusionService;
@@ -12,6 +13,7 @@ import com.csse3200.game.chance.ChanceEncounterFactory;
 import com.csse3200.game.chance.ChanceEncounterSelector;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.chance.ChanceEncounterDisplay;
+import com.csse3200.game.components.enemy.IntentIcons;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.components.shop.ShopDisplay;
 import com.csse3200.game.encounters.integration.CardCatalogGateway;
@@ -52,6 +54,10 @@ public class EncounterGameArea extends GameArea {
   private static final Logger logger = LoggerFactory.getLogger(EncounterGameArea.class);
   private static final String[] encounterTextures = {
     "images/star_player.png",
+    "images/heart.png",
+    "images/energy.png",
+    "images/level.png",
+    "images/money.png",
     ShopDisplay.BACKGROUND_TEXTURE,
     ShopDisplay.MERCHANT_TEXTURE,
     ShopDisplay.PANEL_FRAME_TEXTURE,
@@ -312,7 +318,10 @@ public class EncounterGameArea extends GameArea {
     ComponentPlayerStateAdapter playerState =
         new ComponentPlayerStateAdapter(combatStats, inventory);
 
-    cardCatalog = new CardServiceCatalogAdapter(ServiceLocator.getCardLibrary());
+    CardService cardService = ServiceLocator.getCardLibrary();
+    cardCatalog =
+        new CardServiceCatalogAdapter(
+            cardService, CardAcquisitionPoolLoader.loadDefault(cardService));
 
     DeckGateway deck =
         sharedPlayerDeck != null
@@ -333,6 +342,7 @@ public class EncounterGameArea extends GameArea {
     ResourceService resourceService = ServiceLocator.getResourceService();
 
     resourceService.loadTextures(encounterTextures);
+    resourceService.loadTextures(IntentIcons.all());
 
     while (!resourceService.loadForMillis(10)) {
       logger.info("Loading... {}%", resourceService.getProgress());
@@ -343,6 +353,7 @@ public class EncounterGameArea extends GameArea {
     logger.debug("Unloading assets");
 
     ServiceLocator.getResourceService().unloadAssets(encounterTextures);
+    ServiceLocator.getResourceService().unloadAssets(IntentIcons.all());
   }
 
   /**

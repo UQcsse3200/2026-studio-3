@@ -27,12 +27,17 @@ import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
+import com.csse3200.game.components.enemy.EnemyStatsComponent;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.PlayerActions;
 import com.csse3200.game.entities.Entity;
+import com.csse3200.game.services.ResourceService;
+import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,6 +64,9 @@ class BattleControllerTest {
     controller = new BattleController(player, enemies);
     phaseHistory.clear();
     controller.addPhaseChangeListener((previous, next) -> phaseHistory.add(next));
+    ServiceLocator.registerResourceService(new ResourceService());
+    AudioService.load();
+    ServiceLocator.getResourceService().loadAll();
   }
 
   @Test
@@ -95,6 +103,89 @@ class BattleControllerTest {
     controller.start();
 
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+  }
+
+  @Test
+  void shouldReportWhetherThePlayerCanAct() {
+    assertFalse(controller.isPlayerTurn());
+
+    controller.start();
+
+    assertTrue(controller.isPlayerTurn());
+  }
+
+  @Test
+  void shouldResetToSetupAfterTheBattleHasStarted() {
+    controller.start();
+
+    controller.resetBattle();
+
+    assertEquals(BattlePhase.SETUP, controller.getCurrentPhase());
+  }
+
+  @Test
+  void shouldAllowAnyLivingTaunterAndRemoveTheDefeatedOne() {
+    Entity first =
+        new Entity()
+            .addComponent(new CombatStatsComponent(10, 1))
+            .addComponent(new EnemyStatsComponent("First"));
+    Entity second =
+        new Entity()
+            .addComponent(new CombatStatsComponent(10, 1))
+            .addComponent(new EnemyStatsComponent("Second"));
+    first.create();
+    second.create();
+
+    BattleController battle = new BattleController(player, List.of(first, second));
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+    String firstId = Integer.toString(first.getId());
+    String secondId = Integer.toString(second.getId());
+    assertEquals(List.of(), battle.getAliveTaunterTargetIds());
+    playerStats.applyStatusEffect("TAUNT:" + firstId, second.getId(), 2);
+    assertEquals(List.of(), battle.getAliveTaunterTargetIds());
+    playerStats.applyStatusEffect("TAUNT:" + firstId, first.getId(), 2);
+    playerStats.applyStatusEffect("TAUNT:" + secondId, second.getId(), 2);
+
+    assertEquals(List.of(firstId, secondId), battle.getAliveTaunterTargetIds());
+
+    first.getComponent(CombatStatsComponent.class).takePiercingDamage(10);
+
+    assertFalse(playerStats.hasStatusEffect("TAUNT:" + firstId));
+    assertEquals(List.of(secondId), battle.getAliveTaunterTargetIds());
+  }
+
+  @Test
+  void shouldHandleTaunterDeathWhenPlayerHasNoCombatStats() {
+    Entity playerWithoutStats = new Entity();
+    Entity taunter =
+        new Entity()
+            .addComponent(new CombatStatsComponent(10, 1))
+            .addComponent(new EnemyStatsComponent("Taunter"));
+    taunter.create();
+    BattleController battle = new BattleController(playerWithoutStats, List.of(taunter));
+
+    assertEquals(List.of(), battle.getAliveTaunterTargetIds());
+
+    taunter.getComponent(CombatStatsComponent.class).takePiercingDamage(10);
+
+    assertEquals(List.of(), battle.getAliveTaunterTargetIds());
+  }
+
+  @Test
+  void shouldExpireTauntAfterTwoPlayerTurns() {
+    Entity taunter = createPoisonTestEnemy(new CombatStatsComponent(10, 1), firstEnemyBehaviour);
+    BattleController battle = new BattleController(player, List.of(taunter));
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+    String key = "TAUNT:" + taunter.getId();
+
+    battle.start();
+    playerStats.applyStatusEffect(key, taunter.getId(), 2);
+
+    battle.endPlayerTurn();
+    assertEquals(1, playerStats.getStatusEffect(key).getDuration());
+
+    battle.endPlayerTurn();
+    assertNull(playerStats.getStatusEffect(key));
   }
 
   @Test
@@ -635,6 +726,27 @@ class BattleControllerTest {
     assertEquals(List.of(true), outcomes);
   }
 
+  @Test
+  void enemyDebuffsShouldTickAfterTheAffectedEnemyActs() {
+    CombatStatsComponent stats = new CombatStatsComponent(20, 0);
+    stats.applyStatusEffect("FEEBLE", 1, 2);
+    stats.applyStatusEffect("VULNERABLE", 1, 2);
+    Entity enemy = createPoisonTestEnemy(stats, firstEnemyBehaviour);
+    BattleController battle = new BattleController(player, List.of(enemy));
+
+    battle.start();
+    battle.endPlayerTurn();
+
+    assertEquals(1, stats.getStatusEffect("FEEBLE").getDuration());
+    assertEquals(1, stats.getStatusEffect("VULNERABLE").getDuration());
+
+    battle.endPlayerTurn();
+
+    assertNull(stats.getStatusEffect("FEEBLE"));
+    assertNull(stats.getStatusEffect("VULNERABLE"));
+    verify(firstEnemyBehaviour, times(2)).executeIntent(player);
+  }
+
   /**
    * Creates an enemy with real combat stats and a controlled defending intent.
    *
@@ -648,5 +760,69 @@ class BattleControllerTest {
     when(behaviour.rollIntent()).thenReturn(EnemyIntent.defend(1));
 
     return new Entity().addComponent(stats).addComponent(behaviour);
+  }
+
+  @Test
+  void shouldReturnEmptyPlayerStatusDurationsWhenNoStatusesAreActive() {
+    Map<String, Integer> durations = controller.getPlayerStatusEffectDurations();
+
+    assertTrue(durations.isEmpty());
+  }
+
+  @Test
+  void shouldReturnPlayerStatusDurations() {
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+
+    playerStats.applyStatusEffect("SILENCE", 1, 2);
+    playerStats.applyStatusEffect("DAMAGE_ON_CARD_PLAY", 3, 4);
+
+    Map<String, Integer> durations = controller.getPlayerStatusEffectDurations();
+
+    assertEquals(2, durations.size());
+    assertEquals(2, durations.get("SILENCE"));
+    assertEquals(4, durations.get("DAMAGE_ON_CARD_PLAY"));
+  }
+
+  @Test
+  void shouldReturnUnmodifiablePlayerStatusDurations() {
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+
+    playerStats.applyStatusEffect("SILENCE", 1, 2);
+
+    Map<String, Integer> durations = controller.getPlayerStatusEffectDurations();
+
+    assertThrows(
+        UnsupportedOperationException.class, () -> durations.put("DAMAGE_ON_CARD_PLAY", 3));
+
+    assertThrows(UnsupportedOperationException.class, () -> durations.remove("SILENCE"));
+
+    assertTrue(playerStats.hasStatusEffect("SILENCE"));
+    assertFalse(playerStats.hasStatusEffect("DAMAGE_ON_CARD_PLAY"));
+  }
+
+  @Test
+  void shouldReturnEmptyPlayerStatusDurationsWhenCombatStatsAreMissing() {
+    Entity playerWithoutStats = new Entity();
+    BattleController controllerWithoutStats = new BattleController(playerWithoutStats, enemies);
+
+    Map<String, Integer> durations = controllerWithoutStats.getPlayerStatusEffectDurations();
+
+    assertTrue(durations.isEmpty());
+  }
+
+  @Test
+  void shouldReturnUpdatedPlayerStatusDurationsAfterRemoval() {
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+
+    playerStats.applyStatusEffect("SILENCE", 1, 2);
+
+    Map<String, Integer> beforeRemoval = controller.getPlayerStatusEffectDurations();
+
+    playerStats.removeStatusEffect("SILENCE");
+
+    Map<String, Integer> afterRemoval = controller.getPlayerStatusEffectDurations();
+
+    assertEquals(Map.of("SILENCE", 2), beforeRemoval);
+    assertTrue(afterRemoval.isEmpty());
   }
 }

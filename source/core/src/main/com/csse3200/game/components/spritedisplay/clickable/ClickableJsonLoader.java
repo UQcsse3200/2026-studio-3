@@ -48,7 +48,8 @@ final class ClickableJsonLoader {
               .position(entry.getFloat("x"), entry.getFloat("y"))
               .styleName(entry.getString("styleName", null))
               .variant(entry.getString("variant", DEFAULT_VARIANT))
-              .label(entry.getString("label", null));
+              .label(entry.getString("label", null))
+              .rotation(entry.getFloat("rotation", 0f));
 
       JsonValue sizeArray = entry.get("size");
       if (sizeArray != null) {

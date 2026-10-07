@@ -29,6 +29,7 @@ public class PopupDisplay extends UIComponent {
   private static final Color BACKDROP_COLOUR = new Color(0f, 0f, 0f, 0.6f);
 
   private final String title;
+  private final String styleName;
   private float minWidth = 0f;
   private float minHeight = 0f;
   private String backgroundTexturePath;
@@ -55,7 +56,13 @@ public class PopupDisplay extends UIComponent {
   }
 
   public PopupDisplay(String title) {
+    this(title, "default");
+  }
+
+  /** Creates a popup using matching Window and TextButton styles from the shared skin. */
+  public PopupDisplay(String title, String styleName) {
     this.title = title;
+    this.styleName = styleName;
   }
 
   /** Sets a floor on the window's size — it will still grow beyond this to fit its content. */
@@ -146,11 +153,11 @@ public class PopupDisplay extends UIComponent {
     backdrop = new Image(skin.newDrawable("white", BACKDROP_COLOUR));
     backdrop.setFillParent(true);
 
-    window = new Window(title, skin);
+    window = new Window(title, skin, styleName);
     window.pad(20f);
     window.top();
 
-    closeButton = new TextButton("X", skin);
+    closeButton = new TextButton("X", skin, styleName);
     closeButton.addListener(
         new ChangeListener() {
           @Override
@@ -284,7 +291,13 @@ public class PopupDisplay extends UIComponent {
   }
 
   public boolean isShowing() {
-    return window.isVisible();
+    return window != null && window.isVisible();
+  }
+
+  public void setHeaderColour(Color colour) {
+    if (window != null) {
+      window.getTitleTable().setBackground(skin.newDrawable("white", colour));
+    }
   }
 
   @Override

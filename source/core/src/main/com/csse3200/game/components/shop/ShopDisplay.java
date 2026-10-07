@@ -2,7 +2,6 @@ package com.csse3200.game.components.shop;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -21,19 +20,25 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
+import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.cards.runtime.CardResolver;
+import com.csse3200.game.cards.runtime.ResolvedCard;
+import com.csse3200.game.components.cards.CardWidget;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.player.InventoryComponent;
-import com.csse3200.game.files.FileLoader;
 import com.csse3200.game.maps.EncounterCallback;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.shop.PurchaseResult;
-import com.csse3200.game.shop.ShopConfig;
 import com.csse3200.game.shop.ShopEncounter;
+import com.csse3200.game.shop.ShopInventoryGenerator;
 import com.csse3200.game.shop.ShopItem;
 import com.csse3200.game.shop.ShopService;
 import com.csse3200.game.ui.UIComponent;
@@ -52,24 +57,24 @@ import org.slf4j.LoggerFactory;
  * states. Purchase validation and inventory changes are handled by the underlying Shop Encounter
  * and Shop Service rather than this display component.
  *
- * <p>Card artwork is resolved through the Cards/Library system. A placeholder is retained when a
- * card or its texture is unavailable.
+ * <p>Offered cards use the same {@link CardWidget} face as the Card Library and post-battle
+ * rewards, so name, cost, type, rarity and rules text stay readable even when the artwork has no
+ * baked-in labels. A placeholder is retained when a card cannot be resolved.
  */
 public class ShopDisplay extends UIComponent {
   private static final Logger logger = LoggerFactory.getLogger(ShopDisplay.class);
+  private static final String LARGE = "large";
+  private static final String DEFAULT = "default";
   public static final String BACKGROUND_TEXTURE = "images/shop/shop_outpost_background_v3.png";
   public static final String MERCHANT_TEXTURE = "images/shop/wandering_merchant_v3.png";
   public static final String PANEL_FRAME_TEXTURE = "images/shop/shop_panel_worn.png";
   public static final String CARD_FRAME_TEXTURE = "images/shop/shop_card_worn.png";
   public static final String PLAQUE_FRAME_TEXTURE = "images/shop/shop_plaque_worn.png";
-  private static final String SHOP_CONFIG = "configs/shopItems.json";
   private static final float Z_INDEX = 2f;
   private static final float PANEL_WIDTH = 936f;
   private static final float CARD_WIDTH = 282f;
   private static final float CARD_PADDING = 10f;
   private static final float CARD_CONTENT_WIDTH = CARD_WIDTH - (CARD_PADDING * 2f);
-  private static final float CARD_NAME_WIDTH = 166f;
-  private static final float CARD_IDENTITY_GAP = 12f;
 
   private static final Color BACKDROP_COLOUR = new Color(0.025f, 0.012f, 0.018f, 0.34f);
   private static final Color CARD_COLOUR = new Color(0.86f, 0.78f, 0.72f, 1f);
@@ -105,9 +110,11 @@ public class ShopDisplay extends UIComponent {
   private final ShopEncounter shopEncounter;
   private final CardService cardService;
   private final PlayerRunState playerRunState;
+  private final CardResolver cardResolver = new CardResolver();
   private Label merchantsFavorLabel;
   private final Map<String, ItemWidgets> itemWidgets = new HashMap<>();
   private final Set<String> purchasedItemIds = new HashSet<>();
+  private CardWidgetAssets cardWidgetAssets;
 
   private Stack rootStack;
   private Label goldLabel;
@@ -126,17 +133,8 @@ public class ShopDisplay extends UIComponent {
    *
    * @param inventory player inventory used for displaying gold and completing purchases
    */
-  private ShopDisplay(
-      InventoryComponent inventory,
-      ShopEncounter shopEncounter,
-      CardService cardService,
-      PlayerRunState playerRunState) {
-    this.shopEncounter =
-        shopEncounter == null
-            ? new ShopEncounter(inventory, new ShopService((ShopConfig) null))
-            : shopEncounter;
-    this.cardService = cardService;
-    this.playerRunState = playerRunState;
+  public ShopDisplay(InventoryComponent inventory) {
+    this(inventory, null, ShopEncounter.DEFAULT_NODE_ID);
   }
 
   /**
@@ -147,13 +145,7 @@ public class ShopDisplay extends UIComponent {
    * @param nodeId identifier of the associated map node
    */
   public ShopDisplay(InventoryComponent inventory, EncounterCallback callback, Integer nodeId) {
-    this(
-        inventory,
-        new ShopEncounter(
-            nodeId,
-            inventory,
-            new ShopService(FileLoader.readClass(ShopConfig.class, SHOP_CONFIG)),
-            callback));
+    this(inventory, new ShopEncounter(nodeId, inventory, createGeneratedShop(), callback));
   }
 
   /**
@@ -176,6 +168,17 @@ public class ShopDisplay extends UIComponent {
     this(inventory, shopEncounter, null, null);
   }
 
+  private ShopDisplay(
+      InventoryComponent inventory,
+      ShopEncounter shopEncounter,
+      CardService cardService,
+      PlayerRunState playerRunState) {
+    this.shopEncounter =
+        shopEncounter == null ? new ShopEncounter(inventory, createGeneratedShop()) : shopEncounter;
+    this.cardService = cardService == null ? ServiceLocator.getCardLibrary() : cardService;
+    this.playerRunState = playerRunState;
+  }
+
   /**
    * Creates a display for an encounter already connected through the integration gateways.
    *
@@ -195,9 +198,26 @@ public class ShopDisplay extends UIComponent {
     this(null, shopEncounter, cardService, null);
   }
 
+  /** Creates an integrated shop that also displays durable item discounts. */
   public ShopDisplay(
       ShopEncounter shopEncounter, CardService cardService, PlayerRunState playerRunState) {
     this(null, shopEncounter, cardService, playerRunState);
+  }
+
+  /**
+   * Builds a live shop inventory from the registered card library using {@link
+   * ShopInventoryGenerator} and the shared acquisition pool.
+   *
+   * <p>Requires {@link ServiceLocator#getCardLibrary()} to be registered. A missing library is a
+   * setup error, not something to paper over by re-reading {@code cards.json}.
+   */
+  static ShopService createGeneratedShop() {
+    CardService cards = ServiceLocator.getCardLibrary();
+    if (cards == null) {
+      throw new IllegalStateException(
+          "Card library must be registered with ServiceLocator before opening the shop");
+    }
+    return new ShopInventoryGenerator(cards).createShop();
   }
 
   @Override
@@ -325,7 +345,7 @@ public class ShopDisplay extends UIComponent {
 
     if (shopEncounter.getItems().isEmpty()) {
       Label emptyLabel =
-          new Label("The merchant has nothing to sell.", createLabelStyle("default", MUTED_COLOUR));
+          new Label("No relics remain for sale.", createLabelStyle(DEFAULT, MUTED_COLOUR));
       shopPanel.add(emptyLabel).center().pad(80f).colspan(3);
     } else {
       addShopItems(shopPanel);
@@ -378,8 +398,7 @@ public class ShopDisplay extends UIComponent {
 
   private void addHeader(Table shopPanel) {
     Table titleBlock = new Table();
-    Label title =
-        new Label("The wandering merchant's shop", createLabelStyle("large", BODY_COLOUR));
+    Label title = new Label("Wayside Reliquary", createLabelStyle(LARGE, BODY_COLOUR));
     Label subtitle =
         new Label(
             "Choose carefully. Each offer may be purchased once.",
@@ -398,7 +417,7 @@ public class ShopDisplay extends UIComponent {
     Table purse = new Table();
     purse.setBackground(createPlaqueDrawable(new Color(0.76f, 0.63f, 0.45f, 1f)));
     purse.pad(12f, 18f, 12f, 18f);
-    goldLabel = new Label("", createLabelStyle("default", GOLD_COLOUR));
+    goldLabel = new Label("", createLabelStyle(DEFAULT, GOLD_COLOUR));
     goldLabel.setFontScale(1.22f);
     purse.add(goldLabel);
 
@@ -413,12 +432,17 @@ public class ShopDisplay extends UIComponent {
   }
 
   private void addShopItems(Table shopPanel) {
+    CardDiscoveryService discovery = ServiceLocator.getCardDiscoveryService();
+    if (discovery != null) {
+      discovery.recordSeenAll(shopEncounter.getItems().stream().map(item -> item.cardId).toList());
+    }
+
     int itemNumber = 0;
     int itemCount = shopEncounter.getItems().size();
     for (ShopItem item : shopEncounter.getItems()) {
       Table card = createItemCard(item);
       float rightPadding = itemNumber < itemCount - 1 ? 20f : 0f;
-      shopPanel.add(card).top().width(CARD_WIDTH).height(384f).padRight(rightPadding);
+      shopPanel.add(card).top().width(CARD_WIDTH).height(410f).padRight(rightPadding);
       itemNumber++;
     }
   }
@@ -430,34 +454,13 @@ public class ShopDisplay extends UIComponent {
 
     Actor artwork = createArtwork(item);
 
-    String cardName = resolveCardName(item);
-    Label nameLabel = new Label(cardName, createLabelStyle("default", BODY_COLOUR));
-    Label energyLabel = new Label(resolveEnergyText(item), createLabelStyle("small", GOLD_COLOUR));
-    String cardDescription = resolveCardDescription(item);
-    Label descriptionLabel = new Label(cardDescription, createLabelStyle("small", MUTED_COLOUR));
-    float nameWidth = new GlyphLayout(nameLabel.getStyle().font, cardName).width;
-    nameLabel.setFontScale(Math.min(0.95f, CARD_NAME_WIDTH / Math.max(nameWidth, 1f)));
-    energyLabel.setFontScale(0.76f);
-    energyLabel.setAlignment(Align.right);
-    descriptionLabel.setFontScale(cardDescription.length() > 65 ? 0.68f : 0.78f);
-    descriptionLabel.setWrap(true);
-    descriptionLabel.setAlignment(Align.topLeft, Align.left);
-
-    Table cardIdentity = new Table();
-    cardIdentity.add(nameLabel).width(CARD_NAME_WIDTH).left();
-    cardIdentity
-        .add(energyLabel)
-        .width(CARD_CONTENT_WIDTH - CARD_NAME_WIDTH - CARD_IDENTITY_GAP)
-        .padLeft(CARD_IDENTITY_GAP)
-        .right();
-
-    float discount = playerRunState != null ? playerRunState.getShopDiscount() : 0f;
+    float discount = playerRunState == null ? 0f : playerRunState.getShopDiscount();
     int shownPrice = Math.round(item.price * (1f - discount));
     String priceText =
         discount > 0f
-            ? String.format("%d GOLD (-%.0f%%)", shownPrice, discount * 100)
+            ? String.format("%d GOLD (-%.0f%%)", shownPrice, discount * 100f)
             : String.format("%d GOLD", item.price);
-    Label priceLabel = new Label(priceText, createLabelStyle("default", GOLD_COLOUR));
+    Label priceLabel = new Label(priceText, createLabelStyle(DEFAULT, GOLD_COLOUR));
     Label stockLabel = new Label("", createLabelStyle("small", MUTED_COLOUR));
     Label stateLabel = new Label("", createLabelStyle("small", AVAILABLE_COLOUR));
     priceLabel.setFontScale(0.98f);
@@ -480,11 +483,8 @@ public class ShopDisplay extends UIComponent {
           }
         });
 
-    card.add(artwork).width(CARD_CONTENT_WIDTH).height(198f).top();
-    card.row();
-    card.add(cardIdentity).width(CARD_CONTENT_WIDTH).height(25f).fillX().padTop(6f);
-    card.row();
-    card.add(descriptionLabel).width(CARD_CONTENT_WIDTH).height(36f).left().top();
+    card.add(artwork).size(CardWidget.CARD_WIDTH, 280f).top();
+
     card.row();
     card.add(detailsRow).width(CARD_CONTENT_WIDTH).fillX().padTop(6f);
     card.row();
@@ -497,16 +497,50 @@ public class ShopDisplay extends UIComponent {
   }
 
   private Actor createArtwork(ShopItem item) {
-    String texturePath = resolveArtworkPath(item);
+    CardWidget widget = createCardWidget(item);
+    if (widget != null) {
+      return widget;
+    }
+    return createUnavailablePlaceholder();
+  }
+
+  private CardWidget createCardWidget(ShopItem item) {
+    CardService cards = resolveCardService();
     ResourceService resources = ServiceLocator.getResourceService();
-    if (resources != null && isLoadedTexture(resources, texturePath)) {
-      Texture texture = resources.getAsset(texturePath, Texture.class);
-      texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-      Image artwork = new Image(texture);
-      artwork.setScaling(Scaling.stretch);
-      return artwork;
+    if (cards == null || resources == null || item == null || item.cardId == null) {
+      return null;
     }
 
+    CardConfig config = cards.getCard(item.cardId).orElse(null);
+    if (config == null) {
+      return null;
+    }
+
+    try {
+      ResolvedCard resolved = cardResolver.resolveBasePreview(config, "shop-preview-" + item.id);
+      return new CardWidget(resolved, cardWidgetAssets());
+    } catch (RuntimeException exception) {
+      logger.warn("Could not resolve shop card {} for offer {}", item.cardId, item.id, exception);
+      return null;
+    }
+  }
+
+  private CardService resolveCardService() {
+    if (cardService != null) {
+      return cardService;
+    }
+    return ServiceLocator.getCardLibrary();
+  }
+
+  private CardWidgetAssets cardWidgetAssets() {
+    if (cardWidgetAssets == null) {
+      cardWidgetAssets =
+          CardWidgetAssets.fromManagedResources(skin, ServiceLocator.getResourceService());
+    }
+    return cardWidgetAssets;
+  }
+
+  private Table createUnavailablePlaceholder() {
     Table placeholder = new Table();
     placeholder.setBackground(skin.newDrawable("white", ART_COLOUR));
     Label label = new Label("CARD ART\nUNAVAILABLE", createLabelStyle("small", MUTED_COLOUR));
@@ -546,10 +580,11 @@ public class ShopDisplay extends UIComponent {
   }
 
   private Optional<CardConfig> resolveCard(ShopItem item) {
-    if (cardService == null || item == null || item.cardId == null || item.cardId.isBlank()) {
+    CardService cards = resolveCardService();
+    if (cards == null || item == null || item.cardId == null || item.cardId.isBlank()) {
       return Optional.empty();
     }
-    return cardService.getCard(item.cardId);
+    return cards.getCard(item.cardId);
   }
 
   private static boolean isLoadedTexture(ResourceService resources, String texturePath) {
@@ -565,7 +600,7 @@ public class ShopDisplay extends UIComponent {
 
     TextButton leaveButton =
         new TextButton(
-            "Leave Shop",
+            "Leave Reliquary",
             createButtonStyle(
                 new Color(0.55f, 0.52f, 0.5f, 1f),
                 new Color(0.68f, 0.63f, 0.58f, 1f),
@@ -597,9 +632,11 @@ public class ShopDisplay extends UIComponent {
       purchasedItemIds.add(itemId);
       String itemName = result.getItem() == null ? "the offer" : result.getItem().getDisplayName();
       statusLabel.setStyle(createLabelStyle("small", AVAILABLE_COLOUR));
+      AudioService.playSound(SoundId.ITEM_PURCHASE, 0.5f);
       statusLabel.setText(String.format("Purchased %s. It was added to your deck.", itemName));
     } else {
       statusLabel.setStyle(createLabelStyle("small", UNAFFORDABLE_COLOUR));
+      AudioService.playSound(SoundId.ERROR, 0.5f);
       statusLabel.setText(result.getMessage());
     }
     refresh();
@@ -607,6 +644,7 @@ public class ShopDisplay extends UIComponent {
 
   private void leaveShop() {
     logger.debug("Shop encounter completed for node {}", shopEncounter.getNodeId());
+    AudioService.playSound(SoundId.LEAVE_SHOP, 0.3f);
     shopEncounter.leave();
     rootStack.addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
   }
@@ -615,20 +653,18 @@ public class ShopDisplay extends UIComponent {
     Integer currency = shopEncounter.getCurrency();
     goldLabel.setText(currency == null ? "GOLD  --" : String.format("GOLD  %d", currency));
 
-    long favorCount =
-        playerRunState == null
-            ? 0
-            : playerRunState.getOwnedItems().stream()
-                .filter(itemId -> itemId == ItemType.MERCHANTS_FAVOR)
-                .count();
-    merchantsFavorLabel.setText(
-        favorCount == 0
-            ? ""
-            : String.format(
-                "%s x%d  |  %.0f%% off all offers",
-                ItemFormatting.formatItemName(ItemType.MERCHANTS_FAVOR),
-                favorCount,
-                playerRunState.getShopDiscount() * 100));
+    if (merchantsFavorLabel != null) {
+      int favorCount =
+          playerRunState == null ? 0 : playerRunState.getOwnedItemCount(ItemType.MERCHANTS_FAVOR);
+      merchantsFavorLabel.setText(
+          favorCount == 0
+              ? ""
+              : String.format(
+                  "%s x%d  |  %.0f%% off all offers",
+                  ItemFormatting.formatItemName(ItemType.MERCHANTS_FAVOR),
+                  favorCount,
+                  playerRunState.getShopDiscount() * 100f));
+    }
 
     for (ShopItem item : shopEncounter.getItems()) {
       ItemWidgets widgets = itemWidgets.get(item.id);

@@ -40,6 +40,16 @@ public class ItemInventory {
     return List.copyOf(items);
   }
 
+  /** Replaces the inventory with a validated snapshot, preserving its item order. */
+  public void replaceItems(List<ItemType> replacement) {
+    if (replacement == null) {
+      throw new IllegalArgumentException("replacement must not be null");
+    }
+    replacement.forEach(this::requireItem);
+    items.clear();
+    items.addAll(replacement);
+  }
+
   public int size() {
     return items.size();
   }

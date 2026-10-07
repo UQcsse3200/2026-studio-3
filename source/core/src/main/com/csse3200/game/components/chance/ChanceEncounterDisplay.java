@@ -20,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.chance.CardFusionEncounterBehaviour;
 import com.csse3200.game.chance.ChanceChoice;
 import com.csse3200.game.chance.ChanceEncounter;
@@ -155,7 +156,10 @@ public class ChanceEncounterDisplay extends UIComponent {
         cardFusionFlow != null
             && CardFusionEncounterBehaviour.ENCOUNTER_ID.equals(encounter.getId());
     this.completionCallback = completionCallback;
-    this.nodeId = Objects.requireNonNull(nodeId, "nodeId cannot be null");
+    if ((completionCallback != null || encounterSession != null) && nodeId == null) {
+      throw new IllegalArgumentException("nodeId cannot be null for an integrated encounter");
+    }
+    this.nodeId = nodeId;
   }
 
   @Override
@@ -896,11 +900,19 @@ public class ChanceEncounterDisplay extends UIComponent {
 
     resultLabel.setStyle(createLabelStyle(DEFAULT, BODY_COLOUR));
     resultLabel.setText("OUTCOME\n" + formatOutcome(outcome));
+    recordVisibleCard(outcome);
     if (scenicAbandonedMine || scenicCardFusion) {
       resultLabel.getParent().setVisible(true);
       choicesTable.setVisible(false);
     }
     continueButton.setVisible(true);
+  }
+
+  private void recordVisibleCard(ChanceOutcome outcome) {
+    CardDiscoveryService discovery = ServiceLocator.getCardDiscoveryService();
+    if (discovery != null) {
+      discovery.recordSeenAll(outcome.getCardRewardIds());
+    }
   }
 
   private void completeEncounter() {
@@ -947,10 +959,10 @@ public class ChanceEncounterDisplay extends UIComponent {
     } else if (outcome.getCurrencyDelta() < 0) {
       changes.add(String.format("You lose %d gold.", -outcome.getCurrencyDelta()));
     }
-    if (outcome.getCardRewardId() != null) {
-      changes.add(
-          String.format("You receive the %s card.", formatTitle(outcome.getCardRewardId())));
-    }
+    changes.addAll(
+        outcome.getCardRewardIds().stream()
+            .map(cardId -> String.format("You receive the %s card.", formatTitle(cardId)))
+            .toList());
     return String.join("\n", changes);
   }
 

@@ -27,7 +27,10 @@ class GuardianCardsIntegrationTest {
     assertAll(
         () -> assertEquals("warding_sweep", card.id),
         () -> assertEquals("Warding Sweep", card.name),
-        () -> assertEquals("Deal 4 damage to all enemies.", card.description),
+        () ->
+            assertEquals(
+                "The old guard's circle still holds. Deal 4 damage to all enemies.",
+                card.description),
         () -> assertEquals(2, card.cost),
         () -> assertEquals(CardType.ATTACK, card.type),
         () -> assertEquals(Rarity.COMMON, card.rarity),
@@ -54,7 +57,10 @@ class GuardianCardsIntegrationTest {
     assertAll(
         () -> assertEquals("sentinels_rebuke", card.id),
         () -> assertEquals("Sentinel's Rebuke", card.name),
-        () -> assertEquals("Deal 4 damage. Apply 1 Feeble for 2 turns.", card.description),
+        () ->
+            assertEquals(
+                "A final admonition recalls the fallen to silence. Deal 4 damage. Apply 1 Feeble for 2 turns.",
+                card.description),
         () -> assertEquals(1, card.cost),
         () -> assertEquals(CardType.ATTACK, card.type),
         () -> assertEquals(Rarity.UNCOMMON, card.rarity),
@@ -84,7 +90,9 @@ class GuardianCardsIntegrationTest {
     assertAll(
         () -> assertEquals("wardens_judgement", card.id),
         () -> assertEquals("Warden's Judgement", card.name),
-        () -> assertEquals("Deal 9 damage.", card.description),
+        () ->
+            assertEquals(
+                "Mercy is pronounced beneath a broken oath. Deal 9 damage.", card.description),
         () -> assertEquals(2, card.cost),
         () -> assertEquals(CardType.ATTACK, card.type),
         () -> assertEquals(Rarity.UNCOMMON, card.rarity),
@@ -110,8 +118,11 @@ class GuardianCardsIntegrationTest {
 
     assertAll(
         () -> assertEquals("unseal_the_breach", card.id),
-        () -> assertEquals("Unseal the Breach", card.name),
-        () -> assertEquals("Deal 2 damage. Reduce the enemy's armour by 3.", card.description),
+        () -> assertEquals("Break the Seal", card.name),
+        () ->
+            assertEquals(
+                "No ward shall bar the way to absolution. Reduce the enemy's armour by 3, then deal 2 damage.",
+                card.description),
         () -> assertEquals(1, card.cost),
         () -> assertEquals(CardType.ATTACK, card.type),
         () -> assertEquals(Rarity.UNCOMMON, card.rarity),

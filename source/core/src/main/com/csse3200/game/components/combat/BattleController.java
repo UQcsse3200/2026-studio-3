@@ -15,6 +15,7 @@ import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.enemy.EnemyAnimationController;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
+import com.csse3200.game.components.enemy.EnemyStatsComponent;
 import com.csse3200.game.components.enemy.IntentEffectType;
 import com.csse3200.game.components.enemy.IntentType;
 import com.csse3200.game.components.player.EnergyComponent;
@@ -22,9 +23,12 @@ import com.csse3200.game.entities.Entity;
 import com.csse3200.game.events.EventHandler;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.events.listeners.EventListener2;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -59,6 +63,7 @@ public class BattleController {
   private static final String PLAYER_EFFECTS_EVENT = "playerEffects";
   private static final String HAND_CHANGED_EVENT = "handChanged";
   private static final String LISTENER_NOT_NULL = "Listener must not be null.";
+  private static final String TURNS_SUFFIX = " turns.";
 
   public BattleController(Entity player, List<Entity> enemies) throws IllegalArgumentException {
     this(player, enemies, null, null);
@@ -99,6 +104,20 @@ public class BattleController {
     this.currentEnemyIntent = null;
     this.eventHandler = new EventHandler();
     this.eventQueue = new ArrayDeque<>();
+    for (Entity enemy : this.enemies) {
+      EventHandler enemyEvents = enemy.getEvents();
+      if (enemyEvents != null) {
+        enemyEvents.addListener(
+            "enemyDefeated",
+            () -> {
+              CombatStatsComponent playerStats =
+                  this.player.getComponent(CombatStatsComponent.class);
+              if (playerStats != null) {
+                playerStats.removeStatusEffect(IntentEffectType.TAUNT.name() + ":" + enemy.getId());
+              }
+            });
+      }
+    }
   }
 
   /**
@@ -214,6 +233,45 @@ public class BattleController {
   public boolean playerHasStatusEffect(String effectType) {
     CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
     return stats != null && stats.hasStatusEffect(effectType);
+  }
+
+  /**
+   * Returns an immutable snapshot of the player's active status effects and remaining durations.
+   *
+   * <p>The returned map is safe for UI and integration code to read. Modifying the result cannot
+   * alter the player's combat state. A duration greater than zero is the number of turns remaining;
+   * zero or less represents an effect without a finite duration.
+   *
+   * @return immutable mapping from status effect type to remaining duration, or an empty map when
+   *     the player has no combat stats
+   */
+  public Map<String, Integer> getPlayerStatusEffectDurations() {
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+
+    if (stats == null) {
+      return Map.of();
+    }
+
+    return stats.getStatusEffectDurations();
+  }
+
+  /** Target IDs of living enemies whose taunt is active on the player. */
+  public List<String> getAliveTaunterTargetIds() {
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+    if (playerStats == null) {
+      return List.of();
+    }
+
+    return enemies.stream()
+        .filter(this::isEnemyAlive)
+        .filter(
+            enemy -> {
+              StatusEffect effect =
+                  playerStats.getStatusEffect(IntentEffectType.TAUNT.name() + ":" + enemy.getId());
+              return effect != null && effect.getValue() == enemy.getId();
+            })
+        .map(enemy -> Integer.toString(enemy.getId()))
+        .toList();
   }
 
   /** Player decides to end their turn */
@@ -346,6 +404,31 @@ public class BattleController {
   /** Sends a one-line description of the latest battle action to any log listeners. */
   private void narrate(String message) {
     eventHandler.trigger(BATTLE_LOG_EVENT, message);
+  }
+
+  /**
+   * Announces a telegraphed status effect, so the player can plan around it before it lands.
+   *
+   * @param enemy the enemy whose intent was just rolled
+   * @param intent the intent it will carry out next turn
+   */
+  private void narrateDebuffIntent(Entity enemy, EnemyIntent intent) {
+    if (intent == null || intent.getEffectType() == null) {
+      return;
+    }
+
+    EnemyStatsComponent stats = enemy.getComponent(EnemyStatsComponent.class);
+    String name = stats == null ? "The enemy" : stats.getDisplayName();
+    int turns = intent.getDuration();
+
+    String message =
+        switch (intent.getEffectType()) {
+          case TAUNT -> name + " will taunt you for " + turns + TURNS_SUFFIX;
+          case SILENCE -> name + " will silence you for " + turns + TURNS_SUFFIX;
+          case DAMAGE_ON_CARD_PLAY -> name + " will curse your cards for " + turns + TURNS_SUFFIX;
+        };
+
+    narrate(message);
   }
 
   /**
@@ -635,6 +718,7 @@ public class BattleController {
       // No effects produced; the card stays in hand and the player keeps their turn.
       lastCardPlaySucceeded = false;
       narrate("Couldn't play " + cardName + ": " + result.failureReason());
+      AudioService.playSound(SoundId.ERROR, 0.8f);
       finishPlayerCardAction();
       return;
     }
@@ -701,7 +785,7 @@ public class BattleController {
         // Enemies live on their own entity and cannot reach the player, so hand the player's stats
         // over each round. Refreshing here keeps the AI reading the player's current condition.
         behaviour.setPlayerStats(player.getComponent(CombatStatsComponent.class));
-        behaviour.rollIntent();
+        narrateDebuffIntent(enemy, behaviour.rollIntent());
       }
     }
 
@@ -724,6 +808,10 @@ public class BattleController {
     EnergyComponent energy = playerEnergy();
     if (energy != null) {
       energy.onTurnStart();
+    }
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+    if (playerStats != null) {
+      playerStats.resetBlock();
     }
     applyHealingAtTurnStart();
     retrieveCooledDownCards();
@@ -772,6 +860,11 @@ public class BattleController {
     if (playerStats != null) {
       tickPlayerStatusEffect(playerStats, IntentEffectType.SILENCE.name());
       tickPlayerStatusEffect(playerStats, IntentEffectType.DAMAGE_ON_CARD_PLAY.name());
+      tickPlayerStatusEffect(playerStats, EffectType.VULNERABLE.name());
+      tickPlayerStatusEffect(playerStats, EffectType.FEEBLE.name());
+      for (Entity enemy : enemies) {
+        tickPlayerStatusEffect(playerStats, IntentEffectType.TAUNT.name() + ":" + enemy.getId());
+      }
     }
 
     handle(BattleEvent.PLAYER_TURN_ENDED);
@@ -790,7 +883,7 @@ public class BattleController {
 
     if (skipEnemyTurnIfDead(enemy)) return;
 
-    // Poison uses piercing damage, skip block and armor
+    // Resolve poison before the enemy acts. Status damage bypasses block and armour.
     CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
     enemyStats.processPoisonTick(enemyStats::takePiercingDamage);
 
@@ -872,6 +965,7 @@ public class BattleController {
     Entity enemy = getActiveEnemy();
     CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
     enemyStats.tickStatusEffect("FEEBLE");
+    enemyStats.tickStatusEffect("VULNERABLE");
 
     // If another enemy is successfully targeted.
     if (this.advanceToNextLivingEnemy()) {

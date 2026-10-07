@@ -6,9 +6,11 @@ import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.components.cards.CardUpgradeDisplay;
 import com.csse3200.game.components.cards.CardUpgradeSelection;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.cards.PlayerDeckCardUpgradeCommitter;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord;
@@ -22,10 +24,13 @@ import com.csse3200.game.input.InputService;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
+import com.csse3200.game.rewards.RewardGenerator;
 import com.csse3200.game.rewards.RewardService;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +38,7 @@ import org.slf4j.LoggerFactory;
 public class EndBattleScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(EndBattleScreen.class);
   private static final String[] REWARD_TEXTURES = {
-    "images/battle_background.png",
+    "images/dungeon.png",
     "images/ui/reward-panel.png",
     "images/ui/reward-card.png",
     "images/ui/gold-reward.png",
@@ -48,7 +53,9 @@ public class EndBattleScreen extends ScreenAdapter {
   private final GdxGame game;
   private final Renderer renderer;
   private final boolean won;
+  private String[] cardTextures = new String[0];
   private boolean returning = false;
+  private boolean rewardClaimed = false;
 
   public EndBattleScreen(GdxGame game, boolean won) {
     this.game = game;
@@ -56,34 +63,37 @@ public class EndBattleScreen extends ScreenAdapter {
 
     logger.debug("Initialising end-of-battle screen (won={})", won);
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
-    ServiceLocator.getResourceService().loadTextures(REWARD_TEXTURES);
-    ServiceLocator.getResourceService().loadAll();
-
     renderer = RenderFactory.createRenderer();
-    createUI(won);
+    List<CardConfig> cardConfigs = CardConfigLoader.loadCards();
+    CardService cardLibrary = new CardLibrary(cardConfigs);
+    if (won) {
+      loadRewardAssets();
+      loadCardAssets(cardConfigs);
+    }
+    createUI(won, cardLibrary);
   }
 
-  private void createUI(boolean won) {
+  private void createUI(boolean won, CardService cardLibrary) {
     Stage stage = ServiceLocator.getRenderService().getStage();
 
-    DisplayingFactory displays = new DisplayingFactory(Path.of("sprites/EndBattle.json"));
-
-    Entity ui = new Entity().addComponent(new InputDecorator(stage, 10)).addComponent(displays);
-
-    boolean requiresPlayerChoice = false;
+    Entity ui = new Entity().addComponent(new InputDecorator(stage, 10));
 
     if (won) {
-      RewardService rewardService = new RewardService();
+      RewardService rewardService =
+          new RewardService(new RewardGenerator(), cardLibrary, new Random());
       DisplayingRecord rewardRecord =
           DisplayingRecord.builder("").position(0, 500).variant("reward").build();
-      ui.addComponent(new RewardDisplay(rewardRecord, rewardService, game.getRunState()));
-      requiresPlayerChoice = true;
-
-      CardService cardLibrary = new CardLibrary(CardConfigLoader.loadCards());
+      ui.addComponent(
+          new RewardDisplay(
+              rewardRecord,
+              rewardService,
+              game.getRunState(),
+              cardLibrary,
+              game.getCardDiscoveryService(),
+              game::autosaveAfterRewardClaimed));
       RunState runState = game.getRunState();
       if (runState != null) {
         PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(cardLibrary);
@@ -95,38 +105,58 @@ public class EndBattleScreen extends ScreenAdapter {
                   upgradeSelection, new PlayerDeckCardUpgradeCommitter(playerDeck)));
         }
       }
+    } else {
+      // The themed reward screen already supplies its own victory title. The legacy end-battle
+      // display is only needed for defeat, where it provides the heading and return input.
+      ui.addComponent(new DisplayingFactory(Path.of("sprites/EndBattle.json")));
     }
 
-    if (requiresPlayerChoice) {
-      for (EndBattleDisplay endBattleDisplay : displays.getDisplayings(EndBattleDisplay.class)) {
-        endBattleDisplay.setClickToReturnEnabled(false);
-        endBattleDisplay.setVisible(false);
-      }
-    }
-
+    ui.getEvents().addListener(RewardDisplay.REWARD_CLAIMED_EVENT, this::onRewardClaimed);
     ui.getEvents().addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, this::returnToMenu);
     ServiceLocator.getEntityService().register(ui);
 
-    if (requiresPlayerChoice) {
-      for (EndBattleDisplay endBattleDisplay : displays.getDisplayings(EndBattleDisplay.class)) {
-        endBattleDisplay.setClickToReturnEnabled(false);
-        endBattleDisplay.setVisible(false);
-      }
+    if (!won) {
+      ui.getEvents().trigger(EndBattleDisplay.RESULT_EVENT, "DEFEAT");
     }
   }
 
+  private void loadCardAssets(List<CardConfig> cardConfigs) {
+    cardTextures = CardWidgetAssets.collectTexturePaths(cardConfigs);
+    ResourceService resources = ServiceLocator.getResourceService();
+    resources.loadTextures(cardTextures);
+    resources.loadAll();
+  }
+
+  private void loadRewardAssets() {
+    ResourceService resources = ServiceLocator.getResourceService();
+    resources.loadTextures(REWARD_TEXTURES);
+    resources.loadAll();
+  }
+
   /**
-   * Leaves the end screen. After a win the run continues, so it goes back to the map to pick the
-   * next node; after a loss (or once the run is over) the run is discarded and it returns to the
-   * main menu.
+   * Leaves the end screen. A final victory ends the run and plays the victory crawl before the main
+   * menu. Other active-run wins continue to the Elite portal when eligible, or to the map. A loss
+   * in an active run ends it and plays the defeat crawl before the main menu; otherwise, the run is
+   * discarded and the main menu opens directly.
    */
   private void returnToMenu() {
+    // A victory is not durable until its selected reward has been applied and autosaved.
+    if (won && !rewardClaimed) {
+      logger.debug("Ignoring victory-screen exit before a reward is claimed");
+      return;
+    }
     if (returning) {
       return;
     }
     returning = true;
 
     RunState runState = game.getRunState();
+
+    if (won && runState != null && runState.isFinalEncounterCompleted()) {
+      runState.endRun();
+      game.showNarration("victory", GdxGame.ScreenType.MAIN_MENU);
+      return;
+    }
 
     if (won && runState != null && runState.isRunActive()) {
       if (runState.hasPendingEliteTempleReward()) {
@@ -139,10 +169,19 @@ public class EndBattleScreen extends ScreenAdapter {
       return;
     }
 
+    boolean lostRun = !won && runState != null && runState.isRunActive();
     if (runState != null) {
       runState.endRun();
     }
-    game.setScreen(GdxGame.ScreenType.MAIN_MENU);
+    if (lostRun) {
+      game.showNarration("defeat", GdxGame.ScreenType.MAIN_MENU);
+    } else {
+      game.setScreen(GdxGame.ScreenType.MAIN_MENU);
+    }
+  }
+
+  private void onRewardClaimed() {
+    rewardClaimed = true;
   }
 
   @Override
@@ -161,6 +200,7 @@ public class EndBattleScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
-    ServiceLocator.clear();
+    ServiceLocator.getResourceService().unloadAssets(REWARD_TEXTURES);
+    ServiceLocator.getResourceService().unloadAssets(cardTextures);
   }
 }

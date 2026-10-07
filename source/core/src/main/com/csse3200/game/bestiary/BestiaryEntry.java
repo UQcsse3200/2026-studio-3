@@ -17,7 +17,7 @@ import com.csse3200.game.entities.configs.EnemyTier;
  * @param armour base armour before run scaling
  * @param behaviour enemy behaviour identifier
  * @param sprite optional explicit sprite atlas path
- * @param description optional Bestiary-specific description
+ * @param description optional enemy backstory from its source configuration
  */
 public record BestiaryEntry(
     String enemyId,
@@ -61,17 +61,6 @@ public record BestiaryEntry(
    * @return immutable Bestiary definition
    */
   public static BestiaryEntry fromEnemyConfig(EnemyConfig config) {
-    return fromEnemyConfig(config, "");
-  }
-
-  /**
-   * Creates a Bestiary definition with additional Bestiary-specific descriptive text.
-   *
-   * @param config source enemy configuration
-   * @param description optional Bestiary description
-   * @return immutable Bestiary definition
-   */
-  public static BestiaryEntry fromEnemyConfig(EnemyConfig config, String description) {
     if (config == null) {
       throw new IllegalArgumentException("config must not be null");
     }
@@ -84,7 +73,7 @@ public record BestiaryEntry(
         config.armour,
         config.behaviour,
         config.sprite,
-        description);
+        config.description);
   }
 
   private static String normaliseOptionalText(String value) {

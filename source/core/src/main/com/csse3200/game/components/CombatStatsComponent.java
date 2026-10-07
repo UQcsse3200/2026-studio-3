@@ -20,16 +20,15 @@ import org.slf4j.LoggerFactory;
  * distinct mechanics, not two names for the same thing. Armour is a permanent damage-reduction
  * pool. It persists until consumed by incoming damage or explicitly cleared via clearArmour() - it
  * does not reset automatically at any point in the turn cycle. Block is a per-turn damage-reduction
- * pool, matching the "Slay the Spire" style block mechanic (Team 6). It is intended to reset to 0
- * once per turn via resetBlock(), regardless of whether it was consumed. TODO: exact reset timing
- * (start vs end of turn) is not yet wired up - depends on Team 3's turn/battle-sequence event.
+ * pool, matching the "Slay the Spire" style block mechanic (Team 6). The battle controller resets
+ * it at the start of the player's next turn, regardless of whether it was consumed.
  */
 public class CombatStatsComponent extends Component {
 
   private static final Logger logger = LoggerFactory.getLogger(CombatStatsComponent.class);
-  private static final String EVT_IS_DEAD = "entityIsDead";
   private static final String EVT_MAX_HEALTH = "updateMaxHealth";
   private static final String POISON = "POISON";
+  private static final String FEEBLE = "FEEBLE";
   private int health;
   private int baseAttack;
   private int maxHealth;
@@ -359,11 +358,7 @@ public class CombatStatsComponent extends Component {
     setBlock(this.block + amount);
   }
 
-  /**
-   * Resets block to 0. Intended to be called once per turn, regardless of whether the block was
-   * consumed. TODO: wire this up to Team 3's turn event, same as updateStatusEffects() - timing
-   * (start vs end of turn) still needs confirmation.
-   */
+  /** Resets block to 0 at the start of the owning entity's next turn. */
   public void resetBlock() {
     setBlock(0);
   }
@@ -402,55 +397,10 @@ public class CombatStatsComponent extends Component {
 
     String type = statusKey(effect.getType());
 
-    if ("POISON".equals(type)) {
-      StatusEffect existingEffect = statusEffects.get(type);
-
-      // Do not add an existing live object's stacks to itself.
-      if (existingEffect != effect) {
-        PoisonStatusEffect targetPoison;
-
-        if (existingEffect instanceof PoisonStatusEffect) {
-          targetPoison = (PoisonStatusEffect) existingEffect;
-        } else {
-          targetPoison = new PoisonStatusEffect();
-        }
-
-        if (effect instanceof PoisonStatusEffect) {
-          // Incoming poison may already contain several duration groups.
-          PoisonStatusEffect incomingPoison = (PoisonStatusEffect) effect;
-
-          Map<Integer, Integer> incomingGroups = incomingPoison.getStacksByDuration();
-
-          for (Map.Entry<Integer, Integer> group : incomingGroups.entrySet()) {
-            int duration = group.getKey();
-            int stacks = group.getValue();
-
-            targetPoison.addApplication(stacks, duration);
-          }
-        } else {
-          // An ordinary StatusEffect represents one incoming duration group.
-          int stacks = effect.getValue();
-          int duration = effect.getDuration();
-
-          targetPoison.addApplication(stacks, duration);
-        }
-
-        statusEffects.put(type, targetPoison);
-      }
-    } else if ("FEEBLE".equals(type)) {
-      StatusEffect existing = statusEffects.get(type);
-      int duration = effect.getDuration();
-
-      if (existing != null) {
-        if (existing.getDuration() <= 0 || duration <= 0) {
-          duration = 0;
-        } else {
-          duration = Math.max(existing.getDuration(), duration);
-        }
-      }
-
-      // Feeble does not stack its damage reduction.
-      statusEffects.put(type, new StatusEffect(type, 1, duration));
+    if (POISON.equals(type)) {
+      applyPoison(effect);
+    } else if (FEEBLE.equals(type)) {
+      applyFeeble(effect);
     } else {
       // Preserve the existing behaviour for other statuses.
       statusEffects.put(type, effect);
@@ -458,6 +408,38 @@ public class CombatStatsComponent extends Component {
     if (entity != null) {
       entity.getEvents().trigger("statusEffectApplied", type);
     }
+  }
+
+  private void applyPoison(StatusEffect effect) {
+    StatusEffect existing = statusEffects.get(POISON);
+    // Do not add an existing live object's stacks to itself.
+    if (existing == effect) {
+      return;
+    }
+    PoisonStatusEffect target =
+        existing instanceof PoisonStatusEffect poison ? poison : new PoisonStatusEffect();
+    if (effect instanceof PoisonStatusEffect incomingPoison) {
+      // Incoming poison may already contain several independent duration groups.
+      incomingPoison
+          .getStacksByDuration()
+          .forEach((duration, stacks) -> target.addApplication(stacks, duration));
+    } else {
+      target.addApplication(effect.getValue(), effect.getDuration());
+    }
+    statusEffects.put(POISON, target);
+  }
+
+  private void applyFeeble(StatusEffect effect) {
+    StatusEffect existing = statusEffects.get(FEEBLE);
+    int duration = effect.getDuration();
+    if (existing != null) {
+      duration =
+          existing.getDuration() <= 0 || duration <= 0
+              ? 0
+              : Math.max(existing.getDuration(), duration);
+    }
+    // Feeble does not stack its damage reduction; permanent duration takes precedence.
+    statusEffects.put(FEEBLE, new StatusEffect(FEEBLE, 1, duration));
   }
 
   /**
@@ -493,6 +475,28 @@ public class CombatStatsComponent extends Component {
   }
 
   /**
+   * Returns an immutable snapshot of the active status effects and their remaining durations.
+   *
+   * <p>The returned map is detached from this component's internal status collection. Callers
+   * cannot add, remove or replace entries, and later changes to this component do not alter an
+   * earlier snapshot.
+   *
+   * <p>A duration greater than zero is the number of turns remaining. A duration of zero or less
+   * represents an effect without a finite duration.
+   *
+   * @return immutable mapping from status effect type to remaining duration
+   */
+  public Map<String, Integer> getStatusEffectDurations() {
+    Map<String, Integer> durations = new HashMap<>();
+
+    for (Map.Entry<String, StatusEffect> entry : statusEffects.entrySet()) {
+      durations.put(entry.getKey(), entry.getValue().getDuration());
+    }
+
+    return Map.copyOf(durations);
+  }
+
+  /**
    * Explicitly removes a status effect from this entity, if present.
    *
    * @param type status effect type identifier
@@ -505,20 +509,19 @@ public class CombatStatsComponent extends Component {
   }
 
   private static String statusKey(String type) {
-    if ("POISON".equalsIgnoreCase(type)) {
-      return "POISON";
+    if (POISON.equalsIgnoreCase(type)) {
+      return POISON;
     }
-    if ("FEEBLE".equalsIgnoreCase(type)) {
-      return "FEEBLE";
+    if (FEEBLE.equalsIgnoreCase(type)) {
+      return FEEBLE;
     }
     return type;
   }
 
   public Map<Integer, Integer> getPoisonStacksByDuration() {
-    StatusEffect effect = getStatusEffect("POISON");
+    StatusEffect effect = getStatusEffect(POISON);
 
-    if (effect instanceof PoisonStatusEffect) {
-      PoisonStatusEffect poison = (PoisonStatusEffect) effect;
+    if (effect instanceof PoisonStatusEffect poison) {
       return poison.getStacksByDuration();
     }
 
@@ -547,7 +550,7 @@ public class CombatStatsComponent extends Component {
       return false;
     }
     return switch (type.toUpperCase(Locale.ROOT)) {
-      case POISON, "VULNERABLE", "FEEBLE" -> true;
+      case POISON, "VULNERABLE", FEEBLE -> true;
       default -> false;
     };
   }
@@ -566,7 +569,7 @@ public class CombatStatsComponent extends Component {
   public boolean tickStatusEffect(String type) {
     String key = statusKey(type);
 
-    if ("POISON".equals(key)) {
+    if (POISON.equals(key)) {
       throw new IllegalArgumentException(
           "Use processPoisonTick to process poison damage and expiry");
     }

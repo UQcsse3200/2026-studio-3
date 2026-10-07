@@ -2,6 +2,8 @@ package com.csse3200.game.save;
 
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryUnlockState;
+import com.csse3200.game.cards.CardDiscoveryService;
+import com.csse3200.game.cards.CardUnlockState;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.maps.MapGraph;
@@ -10,9 +12,12 @@ import com.csse3200.game.maps.NodeState;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.ItemType;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,12 +33,14 @@ public class SaveGameRestoreService {
   private final PlayerDeck playerDeck;
   private final RunState runState;
   private final BestiaryService bestiaryService;
+  private final CardDiscoveryService cardDiscoveryService;
 
   public SaveGameRestoreService(
       PlayerRunState playerState,
       PlayerDeck playerDeck,
       RunState runState,
-      BestiaryService bestiaryService) {
+      BestiaryService bestiaryService,
+      CardDiscoveryService cardDiscoveryService) {
     if (playerState == null) {
       throw new IllegalArgumentException("playerState must not be null");
     }
@@ -46,10 +53,14 @@ public class SaveGameRestoreService {
     if (bestiaryService == null) {
       throw new IllegalArgumentException("bestiaryService must not be null");
     }
+    if (cardDiscoveryService == null) {
+      throw new IllegalArgumentException("cardDiscoveryService must not be null");
+    }
     this.playerState = playerState;
     this.playerDeck = playerDeck;
     this.runState = runState;
     this.bestiaryService = bestiaryService;
+    this.cardDiscoveryService = cardDiscoveryService;
   }
 
   /**
@@ -82,6 +93,7 @@ public class SaveGameRestoreService {
       runState.restoreCardFusionUsed(cardFusionUsed);
 
       restoreBestiaryProgress(data.progress);
+      restoreCardProgress(data.progress);
       return RestoreResult.success(resolveResumeScreen(data));
     } catch (RuntimeException exception) {
       return RestoreResult.failure(RestoreError.APPLY_FAILED, "Unable to apply loaded save data");
@@ -104,7 +116,11 @@ public class SaveGameRestoreService {
     if (!mapResult.success()) {
       return mapResult;
     }
-    return validateBestiaryProgress(data.progress);
+    RestoreResult bestiaryResult = validateBestiaryProgress(data.progress);
+    if (!bestiaryResult.success()) {
+      return bestiaryResult;
+    }
+    return validateCardProgress(data.progress);
   }
 
   private RestoreResult validateBestiaryProgress(ProgressSaveData progressData) {
@@ -138,6 +154,36 @@ public class SaveGameRestoreService {
     return RestoreResult.success("");
   }
 
+  private RestoreResult validateCardProgress(ProgressSaveData progressData) {
+    if (progressData == null || progressData.cards == null) {
+      return RestoreResult.success("");
+    }
+
+    Set<String> cardIds = new HashSet<>();
+    for (CardProgressSaveData entry : progressData.cards) {
+      if (entry == null
+          || entry.cardId == null
+          || entry.cardId.isBlank()
+          || !entry.cardId.equals(entry.cardId.trim())) {
+        return RestoreResult.failure(
+            RestoreError.INVALID_PROGRESS_STATE, "Saved card progress contains an invalid card ID");
+      }
+      if (!cardIds.add(entry.cardId)) {
+        return RestoreResult.failure(
+            RestoreError.INVALID_PROGRESS_STATE,
+            "Saved card progress contains a duplicate card ID: " + entry.cardId);
+      }
+      try {
+        CardUnlockState.valueOf(entry.unlockState);
+      } catch (RuntimeException exception) {
+        return RestoreResult.failure(
+            RestoreError.INVALID_PROGRESS_STATE,
+            "Saved card progress contains an invalid unlock state");
+      }
+    }
+    return RestoreResult.success("");
+  }
+
   private RestoreResult validatePlayer(PlayerSaveData playerData) {
     if (playerData == null) {
       return RestoreResult.failure(RestoreError.MISSING_PLAYER_DATA, "Save is missing player data");
@@ -150,9 +196,19 @@ public class SaveGameRestoreService {
       return RestoreResult.failure(
           RestoreError.INVALID_PLAYER_STATE, "Saved current health is outside the valid range");
     }
-    if (playerData.gold < 0 || playerData.piety < 0) {
+    if (playerData.gold < 0 || playerData.level < 0) {
       return RestoreResult.failure(
           RestoreError.INVALID_PLAYER_STATE, "Saved player resources cannot be negative");
+    }
+    if (playerData.ownedItems != null) {
+      for (String itemId : playerData.ownedItems) {
+        try {
+          ItemType.valueOf(itemId);
+        } catch (RuntimeException exception) {
+          return RestoreResult.failure(
+              RestoreError.INVALID_PLAYER_STATE, "Saved player contains an unknown item");
+        }
+      }
     }
     return RestoreResult.success("");
   }
@@ -257,6 +313,13 @@ public class SaveGameRestoreService {
 
   private void restorePlayer(PlayerSaveData playerData) {
     playerState.restore(playerData.currentHealth, playerData.maxHealth, playerData.gold);
+    List<ItemType> restoredItems = new ArrayList<>();
+    if (playerData.ownedItems != null) {
+      for (String itemId : playerData.ownedItems) {
+        restoredItems.add(ItemType.valueOf(itemId));
+      }
+    }
+    playerState.replaceOwnedItems(restoredItems);
   }
 
   private void restoreDeck(DeckSaveData deckData) {
@@ -280,6 +343,18 @@ public class SaveGameRestoreService {
       }
     }
     bestiaryService.replaceProgress(restoredProgress);
+  }
+
+  private void restoreCardProgress(ProgressSaveData progressData) {
+    Map<String, CardUnlockState> restoredProgress = new LinkedHashMap<>();
+    if (progressData != null && progressData.cards != null) {
+      for (CardProgressSaveData entry : progressData.cards) {
+        if (cardDiscoveryService.contains(entry.cardId)) {
+          restoredProgress.put(entry.cardId, CardUnlockState.valueOf(entry.unlockState));
+        }
+      }
+    }
+    cardDiscoveryService.mergeProgress(restoredProgress);
   }
 
   private MapGraph buildMapGraph(MapSaveData mapData) {

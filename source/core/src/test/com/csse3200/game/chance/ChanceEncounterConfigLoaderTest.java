@@ -50,30 +50,31 @@ class ChanceEncounterConfigLoaderTest {
     assertEncounter(
         encounters.get(0),
         "mysterious-shrine",
-        "An ancient shrine hums with an unsettling energy.",
-        new ExpectedChoice("make-offering", "Offer some of your vitality.", -10, 25),
-        new ExpectedChoice("leave", "Leave the shrine untouched.", 0, 0));
+        "A cracked sanctum shrine still burns with a god's spoiled light. An angel might leave an offering here to learn what the fallen still demand.",
+        new ExpectedChoice(
+            "make-offering", "Bleed a little of your light into the shrine.", -10, 25),
+        new ExpectedChoice("leave", "Pass without kneeling.", 0, 0));
     assertEncounter(
         encounters.get(1),
         "wandering-healer",
-        "A wandering healer offers a restorative draught for a modest fee.",
-        new ExpectedChoice("purchase-remedy", "Buy the healer's restorative draught.", 20, -10),
+        "A faded attendant still tends the hurt along the sanctum road, following orders that once meant mercy. An angel could accept that help without asking who gives it.",
+        new ExpectedChoice("purchase-remedy", "Buy the attendant's restorative draught.", 20, -10),
         new ExpectedChoice(
             "accept-bandage", "Accept a spare bandage for the road.", 0, 0, "bandage"),
-        new ExpectedChoice("decline", "Politely decline the healer's offer.", 0, 0));
+        new ExpectedChoice("decline", "Decline and continue the climb.", 0, 0));
     assertEncounter(
         encounters.get(2),
         "flooded-crossing",
-        "A flooded crossing blocks the road ahead.",
-        new ExpectedChoice("hire-ferryman", "Pay a ferryman for safe passage.", 0, -8),
-        new ExpectedChoice("ford-river", "Attempt to ford the river alone.", -8, 0));
+        "A flooded sanctum court bars the way upward. An angel must choose how to cross without abandoning the path.",
+        new ExpectedChoice("hire-ferryman", "Pay a silent ferryman for safe passage.", 0, -8),
+        new ExpectedChoice("ford-river", "Wade the flood alone.", -8, 0));
     assertNull(encounters.get(2).resolveChoice("wait"));
     assertEncounter(
         encounters.get(3),
         "abandoned-mine",
-        "The mouth of an abandoned mine promises danger and forgotten riches.",
+        "Beneath the sanctum, old workings still hold relics of the fallen. An angel might risk the dark for tools of release.",
         new ExpectedChoice("search-tunnels", "Search the unstable tunnels for valuables.", -12, 30),
-        new ExpectedChoice("leave", "Leave the mine undisturbed.", 0, 0));
+        new ExpectedChoice("leave", "Leave the workings closed.", 0, 0));
     assertEncounter(
         encounters.get(4),
         "wishing-fountain",

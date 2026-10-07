@@ -153,8 +153,9 @@ class PoisonStackingTest {
     stats.applyStatusEffect("POISON", 4, 3);
     assertEquals(9, stats.getStatusEffect("POISON").getValue());
     assertEquals(3, stats.getStatusEffect("POISON").getDuration());
-    assertThrows(
-        UnsupportedOperationException.class, () -> stats.getPoisonStacksByDuration().put(2, 99));
-    assertThrows(IllegalStateException.class, () -> stats.getStatusEffect("POISON").addValue(1));
+    Map<Integer, Integer> groups = stats.getPoisonStacksByDuration();
+    StatusEffect poison = stats.getStatusEffect("POISON");
+    assertThrows(UnsupportedOperationException.class, () -> groups.put(2, 99));
+    assertThrows(IllegalStateException.class, () -> poison.addValue(1));
   }
 }

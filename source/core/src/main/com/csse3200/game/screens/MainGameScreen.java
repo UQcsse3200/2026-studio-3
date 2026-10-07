@@ -14,13 +14,13 @@ import com.csse3200.game.cards.debug.CardEffectDebugDisplay;
 import com.csse3200.game.cards.debug.KeyboardCardEffectDebugInputComponent;
 import com.csse3200.game.cards.effects.CardEffectResolutionService;
 import com.csse3200.game.components.cards.CardHandDisplay;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.gamearea.PerformanceDisplay;
 import com.csse3200.game.components.maingame.DebugShortcutInputComponent;
 import com.csse3200.game.components.maingame.MainGameActions;
 import com.csse3200.game.components.maingame.MainGameExitDisplay;
-import com.csse3200.game.components.pausemenu.PauseMenuActions;
-import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
-import com.csse3200.game.components.pausemenu.PauseMenuInput;
+import com.csse3200.game.components.pausemenu.PauseMenuFactory;
+import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -36,6 +36,7 @@ import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
 import java.util.List;
@@ -51,7 +52,7 @@ import org.slf4j.LoggerFactory;
 public class MainGameScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(MainGameScreen.class);
   private static final String[] mainGameTextures = {
-    "images/heart.png", "images/energy.png", "images/piety.png", "images/money.png"
+    "images/heart.png", "images/energy.png", "images/level.png", "images/money.png"
   };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
 
@@ -74,19 +75,13 @@ public class MainGameScreen extends ScreenAdapter {
     physicsEngine = physicsService.getPhysics();
 
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
 
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
     List<CardConfig> cards = CardConfigLoader.loadCards();
     cardLibrary = new CardLibrary(cards);
-    cardTexturePaths =
-        cards.stream()
-            .map(card -> card.texturePath)
-            .filter(path -> path != null && !path.isBlank())
-            .distinct()
-            .toArray(String[]::new);
+    cardTexturePaths = CardWidgetAssets.collectTexturePaths(cards);
     ServiceLocator.registerCardLibrary(cardLibrary);
 
     renderer = RenderFactory.createRenderer();
@@ -134,14 +129,12 @@ public class MainGameScreen extends ScreenAdapter {
 
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getRenderService().dispose();
-    ServiceLocator.getResourceService().dispose();
-
-    ServiceLocator.clear();
   }
 
   private void loadAssets() {
     logger.debug("Loading assets");
     ResourceService resourceService = ServiceLocator.getResourceService();
+    AudioService.load();
     resourceService.loadTextures(mainGameTextures);
     resourceService.loadTextures(cardTexturePaths);
     ServiceLocator.getResourceService().loadAll();
@@ -171,9 +164,6 @@ public class MainGameScreen extends ScreenAdapter {
         .addComponent(new PerformanceDisplay())
         .addComponent(new MainGameActions(this.game))
         .addComponent(new MainGameExitDisplay())
-        .addComponent(new PauseMenuDisplay())
-        .addComponent(new PauseMenuInput())
-        .addComponent(new PauseMenuActions(this.game))
         .addComponent(new CardHandDisplay())
         .addComponent(new Terminal())
         .addComponent(inputComponent)
@@ -184,6 +174,11 @@ public class MainGameScreen extends ScreenAdapter {
         .addComponent(new TerminalDisplay())
         .addComponent(new DebugShortcutInputComponent(this.game));
 
+    // Pause menu + in-place save/load overlay (added before the entity is created).
+    // Top-left, since this screen's Exit button sits top-right.
+    SaveLoadPanel savePanel =
+        PauseMenuFactory.attach(ui, this.game, com.badlogic.gdx.utils.Align.topLeft);
     ServiceLocator.getEntityService().register(ui);
+    savePanel.hide(); // save overlay starts hidden, opened by the Save & Load button
   }
 }
