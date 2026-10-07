@@ -58,6 +58,8 @@ public class EncounterGameArea extends GameArea {
     "images/energy.png",
     "images/level.png",
     "images/money.png",
+    // PlayerStatsDisplay's armour icon; the player HUD is also shown in shops and events.
+    "images/armour.png",
     ShopDisplay.BACKGROUND_TEXTURE,
     ShopDisplay.MERCHANT_TEXTURE,
     ShopDisplay.PANEL_FRAME_TEXTURE,
@@ -271,8 +273,9 @@ public class EncounterGameArea extends GameArea {
     ShopEncounter shopEncounter = encounterFlow.startShop(nodeId, shopService);
 
     Entity shopUi = new Entity();
-    shopUi.addComponent(new ShopDisplay(shopEncounter, ServiceLocator.getCardLibrary()));
-
+    shopUi.addComponent(
+        new ShopDisplay(
+            shopEncounter, ServiceLocator.getCardLibrary(), runState.getOrCreatePlayerState()));
     spawnEntity(shopUi);
   }
 

@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 public class BestiaryScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(BestiaryScreen.class);
   private static final String FALLBACK_ATLAS = "images/enemies/default.atlas";
+  private static final String[] BESTIARY_TEXTURES = {BestiaryDisplay.BUTTON_TEXTURE};
 
   private final GdxGame game;
   private final Renderer renderer;
@@ -40,7 +41,6 @@ public class BestiaryScreen extends ScreenAdapter {
 
     logger.debug("Initialising bestiary screen services");
     ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerResourceService(new ResourceService());
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
@@ -64,13 +64,14 @@ public class BestiaryScreen extends ScreenAdapter {
   public void dispose() {
     renderer.dispose();
     ServiceLocator.getResourceService().unloadAssets(atlasPaths);
+    ServiceLocator.getResourceService().unloadAssets(BESTIARY_TEXTURES);
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
-    ServiceLocator.clear();
   }
 
   private void loadAssets() {
     ResourceService resourceService = ServiceLocator.getResourceService();
+    resourceService.loadTextures(BESTIARY_TEXTURES);
     resourceService.loadTextureAtlases(atlasPaths);
     resourceService.loadAll();
   }

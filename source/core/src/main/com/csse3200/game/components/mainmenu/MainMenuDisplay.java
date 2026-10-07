@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -19,6 +21,8 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.PixelButtonStyles;
 import com.csse3200.game.ui.UIComponent;
@@ -68,7 +72,7 @@ public class MainMenuDisplay extends UIComponent {
     Texture backgroundTexture = getTexture(BACKGROUND_TEXTURE);
     backgroundTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     Image background = new Image(backgroundTexture);
-    background.setScaling(Scaling.fill);
+    background.setScaling(Scaling.stretch);
     rootStack.add(background);
 
     Color overlayColour = MenuTheme.deepPlum();
@@ -137,6 +141,16 @@ public class MainMenuDisplay extends UIComponent {
               showTutorialChoice();
             } else {
               entity.getEvents().trigger(eventName);
+            }
+          }
+        });
+    button.addListener(
+        new InputListener() {
+          @Override
+          public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+            super.enter(event, x, y, pointer, fromActor);
+            if (pointer == -1 && !button.isDisabled()) {
+              AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
             }
           }
         });

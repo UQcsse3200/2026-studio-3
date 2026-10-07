@@ -32,6 +32,7 @@ public class RunState {
   private PlayerRunState playerState;
   private boolean pendingEliteTempleReward;
   private Long encounterSeed;
+  private Random random = new Random();
 
   /**
    * Returns the durable player values for this run, initialising them from the player config on
@@ -162,7 +163,7 @@ public class RunState {
 
     this.mapGraph = mapGraph;
     this.activeNodeId = null;
-    this.encounterSeed = new Random().nextLong();
+    this.encounterSeed = random.nextLong();
     return true;
   }
 
@@ -271,7 +272,7 @@ public class RunState {
 
     // A fresh seed covers saves made before the seed was recorded; restoreEncounterSeed puts
     // back the saved one when there is one.
-    this.encounterSeed = new Random().nextLong();
+    this.encounterSeed = random.nextLong();
     return true;
   }
 

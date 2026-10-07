@@ -1,6 +1,5 @@
 package com.csse3200.game.maps;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -28,8 +27,8 @@ public class MapNodeActor extends Group {
    */
   public MapNodeActor(MapNode node) {
     this.node = node;
-    float mapWidth = Gdx.graphics.getWidth();
-    this.size = (mapWidth - 512) / 13f;
+    float mapWidth = ServiceLocator.getRenderService().getStage().getWidth();
+    this.size = (mapWidth - 512f) / 13f;
     nodeIcon =
         new Image(ServiceLocator.getResourceService().getAsset(getNodeIcon(), Texture.class));
 
@@ -70,8 +69,8 @@ public class MapNodeActor extends Group {
    */
   public MapNodeActor(MapNode node, boolean test) {
     this.node = node;
-    float mapWidth = Gdx.graphics.getWidth();
-    this.size = mapWidth / 13f;
+    float mapWidth = 1280f;
+    this.size = (mapWidth - 512f) / 13f;
     nodeIcon = new Image();
     nodeIcon.setSize(size, size);
   }
@@ -113,6 +112,15 @@ public class MapNodeActor extends Group {
    */
   public float getNodeSize() {
     return this.size;
+  }
+
+  /**
+   * Scale factor on the image
+   *
+   * @return the scale factor applied on the image
+   */
+  public float getNodeScale() {
+    return nodeIcon.getScaleX();
   }
 
   /**

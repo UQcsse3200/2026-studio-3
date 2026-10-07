@@ -16,6 +16,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.components.Component;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -74,6 +76,17 @@ public abstract class Clickable extends Component {
                   ? new ImageTextButton(text, btnSkin, styleName)
                   : new ImageTextButton(text, btnSkin);
         };
+
+    if (btn instanceof ImageTextButton imageTextButton) {
+      boolean isEndTurn = "endTurn".equals(rec.trigger());
+      imageTextButton.pad(6f, 12f, 6f, isEndTurn ? 25f : 18f);
+      if (isEndTurn) {
+        imageTextButton.getImageCell().size(48f).padLeft(6f).padRight(-6f);
+      } else {
+        imageTextButton.getImageCell().size(48f);
+      }
+      imageTextButton.getLabelCell().expandX().right();
+    }
 
     if (this.disabled) {
       // Blocks clicks/drags and hover hit-testing (so onEnter/onExit never fire) in one go.
@@ -142,6 +155,7 @@ public abstract class Clickable extends Component {
           @Override
           public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
             onEnter();
+            AudioService.playSound(SoundId.CARD_HOVER, 0.5f);
           }
 
           @Override

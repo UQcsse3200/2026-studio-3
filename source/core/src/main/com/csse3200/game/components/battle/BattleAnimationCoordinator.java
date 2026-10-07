@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.cards.play.CardPlayRequest;
+import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.combat.BattleController;
@@ -35,6 +36,8 @@ public class BattleAnimationCoordinator extends Component {
   private static final Logger logger = LoggerFactory.getLogger(BattleAnimationCoordinator.class);
   private static final float SIZE_FACTOR = 0.8f;
   private static final float MIN_SIZE = 0.6f;
+  private static final List<EffectType> ENEMY_STATUS_TYPES =
+      List.of(EffectType.POISON, EffectType.VULNERABLE, EffectType.FEEBLE);
 
   private final BattleController controller;
   private final CardEffectHandler effectHandler;
@@ -82,12 +85,27 @@ public class BattleAnimationCoordinator extends Component {
     Iterator<Entity> iterator = activeVisuals.iterator();
     while (iterator.hasNext()) {
       Entity visual = iterator.next();
-      EffectVisualComponent component = visual.getComponent(EffectVisualComponent.class);
-      if (component == null || component.isExpired()) {
+      boolean expired = true;
+      EffectVisualComponent icon = visual.getComponent(EffectVisualComponent.class);
+      EffectBurstComponent burst = visual.getComponent(EffectBurstComponent.class);
+      EffectProjectileComponent projectile = visual.getComponent(EffectProjectileComponent.class);
+      EnemyStatusEffectVisualComponent status =
+          visual.getComponent(EnemyStatusEffectVisualComponent.class);
+      if (icon != null) {
+        expired = icon.isExpired();
+      } else if (burst != null) {
+        expired = burst.isExpired();
+      } else if (projectile != null) {
+        expired = projectile.isExpired();
+      } else if (status != null) {
+        expired = status.isExpired();
+      }
+      if (expired) {
         iterator.remove();
         visual.dispose();
       }
     }
+    safely("enemy status markers", this::syncEnemyStatusVisuals);
   }
 
   /** Read-only visual completion probe; does not delay or alter combat. */
@@ -100,7 +118,32 @@ public class BattleAnimationCoordinator extends Component {
             });
   }
 
-  private static final float EFFECT_STAGGER_SECONDS = 0.15f;
+  private void syncEnemyStatusVisuals() {
+    for (Entity enemy : enemies) {
+      CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
+      if (stats == null || stats.isDead()) continue;
+      for (EffectType type : ENEMY_STATUS_TYPES) {
+        String path = registry.lookup(type).iconPath();
+        if (stats.hasStatusEffect(type.name())
+            && findStatusVisual(enemy, type) == null
+            && path != null
+            && ServiceLocator.getResourceService().containsAsset(path, Texture.class)) {
+          spawnVisual(type, enemy, 0f, false);
+        }
+      }
+    }
+  }
+
+  private EnemyStatusEffectVisualComponent findStatusVisual(Entity target, EffectType type) {
+    for (Entity visual : activeVisuals) {
+      EnemyStatusEffectVisualComponent status =
+          visual.getComponent(EnemyStatusEffectVisualComponent.class);
+      if (status != null && status.represents(target, type)) return status;
+    }
+    return null;
+  }
+
+  private static final float EFFECT_STAGGER_SECONDS = 0.3f;
 
   /** Fires before the controller applies the effects, so the targets are still alive to read. */
   private void onEnemyEffects(List<ResolvedCardEffect> effects) {
@@ -124,14 +167,41 @@ public class BattleAnimationCoordinator extends Component {
   }
 
   private void spawnVisual(EffectType type, Entity target, float startDelay) {
+    spawnVisual(type, target, startDelay, true);
+  }
+
+  private void spawnVisual(
+      EffectType type, Entity target, float startDelay, boolean playApplication) {
+    if (target != player && EnemyStatusEffectVisuals.supports(type)) {
+      EnemyStatusEffectVisualComponent existing = findStatusVisual(target, type);
+      if (existing != null) {
+        if (playApplication) existing.replay(startDelay);
+        return;
+      }
+    }
     EffectVisualStyle style = registry.lookup(type);
     Vector2 scale = target.getScale();
     float baseSize = Math.max(MIN_SIZE, Math.max(scale.x, scale.y) * SIZE_FACTOR);
 
-    Entity visual =
-        new Entity()
-            .addComponent(
-                new EffectVisualComponent(textureFor(style), style, baseSize, startDelay));
+    Entity visual = new Entity();
+    if (OffensiveEffectVisuals.usesBurst(type)) {
+      visual.addComponent(
+          OffensiveEffectVisuals.createBurstComponent(type, style, baseSize, startDelay));
+    } else if (OffensiveEffectVisuals.usesProjectile(type)) {
+      visual.addComponent(
+          OffensiveEffectVisuals.createPierceComponent(style, baseSize, startDelay));
+    } else if (PlayerEffectVisuals.usesBurst(type)) {
+      visual.addComponent(
+          PlayerEffectVisuals.createBurstComponent(type, style, baseSize, startDelay));
+    } else if (target != player && EnemyStatusEffectVisuals.supports(type)) {
+      EnemyStatusEffectVisualComponent status =
+          new EnemyStatusEffectVisualComponent(textureFor(style), style, target, startDelay, type);
+      if (!playApplication) status.showPersistent();
+      visual.addComponent(status);
+    } else {
+      visual.addComponent(
+          new EffectVisualComponent(textureFor(style), style, baseSize, startDelay));
+    }
     visual.setPosition(target.getCenterPosition());
     ServiceLocator.getEntityService().register(visual);
     activeVisuals.add(visual);

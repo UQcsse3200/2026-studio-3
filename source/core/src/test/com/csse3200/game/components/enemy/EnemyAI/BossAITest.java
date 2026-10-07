@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.enemy.IntentEffectType;
 import com.csse3200.game.components.enemy.IntentType;
+import com.csse3200.game.components.enemy.Memory.PlayerMemory;
 import java.util.Random;
 import org.junit.jupiter.api.Test;
 
@@ -112,7 +113,6 @@ class BossAITest {
     EnemyIntent highPressureIntent = highPressureAI.decide(createContext(10, 70, 0, 5));
 
     assertEquals(IntentType.DEFEND, lowPressureIntent.getType());
-
     assertEquals(IntentType.ATTACK, highPressureIntent.getType());
   }
 
@@ -155,9 +155,7 @@ class BossAITest {
   }
 
   @Test
-  void shouldNotDebuffInPhaseOne() {
-    // A roll larger than any possible weight total lands on the last available action, so a phase
-    // one Boss that still refuses to debuff proves the debuff weights really are zero.
+  void shouldNotDebuffInPhaseOneWithoutMemoryTrigger() {
     BossAI ai = new BossAI(new FixedRollRandom(Integer.MAX_VALUE));
 
     EnemyIntent intent = ai.decide(createContext(100, 0, 1));
@@ -174,6 +172,7 @@ class BossAITest {
 
     assertEquals(IntentType.DEBUFF, intent.getType());
     assertEquals(IntentEffectType.SILENCE, intent.getEffectType());
+    assertEquals(1, intent.getValue());
     assertEquals(2, intent.getDuration());
   }
 
@@ -223,12 +222,96 @@ class BossAITest {
     assertEquals(0, ai.getConsecutiveAttacks());
   }
 
+  @Test
+  void shouldPrioritiseSilenceAfterFourCardsWerePlayed() {
+    BossAI ai = new BossAI(new FixedRollRandom(0));
+    PlayerMemory memory = new PlayerMemory(2, 2, 0, 4);
+
+    EnemyIntent intent = ai.decide(createContext(100, 0, 1, memory));
+
+    assertEquals(IntentType.DEBUFF, intent.getType());
+    assertEquals(IntentEffectType.SILENCE, intent.getEffectType());
+    assertEquals(1, intent.getValue());
+    assertEquals(2, intent.getDuration());
+    assertEquals(BossAI.BossMove.SILENCE, ai.getPreviousMove());
+    assertEquals(3, ai.getDebuffCooldownRemaining());
+  }
+
+  @Test
+  void shouldNotPrioritiseSilenceBelowCardThreshold() {
+    BossAI ai = new BossAI(new FixedRollRandom(0));
+    PlayerMemory memory = new PlayerMemory(2, 1, 0, 3);
+
+    EnemyIntent intent = ai.decide(createContext(100, 0, 1, memory));
+
+    assertEquals(IntentType.ATTACK, intent.getType());
+    assertEquals(BossAI.BossMove.ATTACK, ai.getPreviousMove());
+    assertEquals(0, ai.getDebuffCooldownRemaining());
+  }
+
+  @Test
+  void shouldNotBypassDebuffCooldownForMemorySilence() {
+    BossAI ai = new BossAI(new FixedRollRandom(0));
+    PlayerMemory highCardMemory = new PlayerMemory(2, 2, 0, 4);
+
+    EnemyIntent first = ai.decide(createContext(100, 0, 1, highCardMemory));
+
+    EnemyIntent second = ai.decide(createContext(100, 0, 2, highCardMemory));
+
+    assertEquals(IntentEffectType.SILENCE, first.getEffectType());
+    assertNotEquals(IntentType.DEBUFF, second.getType());
+    assertEquals(2, ai.getDebuffCooldownRemaining());
+  }
+
+  @Test
+  void shouldPrioritiseMemorySilenceAfterCooldownExpires() {
+    BossAI ai = new BossAI(new FixedRollRandom(0));
+    PlayerMemory highCardMemory = new PlayerMemory(2, 2, 0, 4);
+
+    ai.decide(createContext(100, 0, 1, highCardMemory));
+    ai.decide(createContext(100, 0, 2, highCardMemory));
+    ai.decide(createContext(100, 0, 3, highCardMemory));
+
+    EnemyIntent fourth = ai.decide(createContext(100, 0, 4, highCardMemory));
+
+    assertEquals(IntentType.DEBUFF, fourth.getType());
+    assertEquals(IntentEffectType.SILENCE, fourth.getEffectType());
+    assertEquals(BossAI.BossMove.SILENCE, ai.getPreviousMove());
+    assertEquals(3, ai.getDebuffCooldownRemaining());
+  }
+
+  @Test
+  void shouldShareCooldownBetweenCardPlayDamageAndMemorySilence() {
+    BossAI ai = new BossAI(new FixedRollRandom(CARD_PLAY_DAMAGE_ROLL));
+    PlayerMemory highCardMemory = new PlayerMemory(2, 2, 0, 4);
+
+    EnemyIntent first = ai.decide(createContext(20, 0, 1, PlayerMemory.empty()));
+
+    EnemyIntent second = ai.decide(createContext(20, 0, 2, highCardMemory));
+
+    assertEquals(IntentType.DEBUFF, first.getType());
+    assertEquals(IntentEffectType.DAMAGE_ON_CARD_PLAY, first.getEffectType());
+
+    assertNotEquals(IntentType.DEBUFF, second.getType());
+    assertEquals(2, ai.getDebuffCooldownRemaining());
+  }
+
   private EnemyAIContext createContext(int bossHealth, int bossArmour, int turnNumber) {
-    return createContext(PLAYER_HEALTH, bossHealth, bossArmour, turnNumber);
+    return createContext(PLAYER_HEALTH, bossHealth, bossArmour, turnNumber, PlayerMemory.empty());
+  }
+
+  private EnemyAIContext createContext(
+      int bossHealth, int bossArmour, int turnNumber, PlayerMemory playerMemory) {
+    return createContext(PLAYER_HEALTH, bossHealth, bossArmour, turnNumber, playerMemory);
   }
 
   private EnemyAIContext createContext(
       int playerHealth, int bossHealth, int bossArmour, int turnNumber) {
+    return createContext(playerHealth, bossHealth, bossArmour, turnNumber, PlayerMemory.empty());
+  }
+
+  private EnemyAIContext createContext(
+      int playerHealth, int bossHealth, int bossArmour, int turnNumber, PlayerMemory playerMemory) {
     return new EnemyAIContext(
         playerHealth,
         bossHealth,
@@ -236,7 +319,8 @@ class BossAITest {
         BOSS_ATTACK,
         bossArmour,
         EnemyIntent.unknown(),
-        turnNumber);
+        turnNumber,
+        playerMemory);
   }
 
   /**

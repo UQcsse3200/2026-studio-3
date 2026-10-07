@@ -2,27 +2,28 @@
   "Clickable": [
     {
       "text": "Card Inventory",
-      "x": 20,
-      "y": 100,
+      "x": 24,
+      "y": 180,
+      "size": [247, 48],
       "trigger": "openMenu"
     },
     {
+      "text": "Item Inventory",
+      "x": 24,
+      "y": 239,
+      "size": [247, 48],
+      "trigger": "openInventory"
+    },
+    {
       "text": "End Turn",
-      "x": 20,
-      "y": 150,
+      "x": 24,
+      "y": 299,
+      "size": [154, 48],
       "trigger": "endTurn",
       "variant": "gated"
     }
   ],
   "Displaying": [
-    {
-      "text": "Drag a card to yourself or your opponent",
-      "x": 300,
-      "y": 650,
-      "fontName": "large",
-      "scale": 1,
-      "variant": "cardDisplay"
-    },
     {
       "text": "",
       "x": 0,
@@ -31,6 +32,25 @@
       "colour": "DBBEA1",
       "trigger": "battleLog",
       "variant": "battleLog"
+    },
+    {
+      "text": "",
+      "x": 0,
+      "y": 300,
+      "size": [210, 136],
+      "scale": 1,
+      "colour": "F5DFA8",
+      "trigger": "playerTurn",
+      "variant": "playerTurn"
+    },
+    {
+      "text": "",
+      "x": 0,
+      "y": 300,
+      "size": [210, 136],
+      "scale": 1,
+      "colour": "F5DFA8",
+      "variant": "enemyTurn"
     }
   ]
 }
