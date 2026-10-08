@@ -150,8 +150,10 @@ public class ItemLibraryDisplay extends UIComponent {
           }
         });
 
-    panel.add(titleBlock).left().expandX();
-    panel.add(backButton).right().width(170f).height(58f);
+    Table header = new Table();
+    header.add(titleBlock).left().expandX();
+    header.add(backButton).right().width(170f).height(58f);
+    panel.add(header).colspan(2).expandX().fillX();
   }
 
   private void addDivider(Table panel) {
@@ -226,7 +228,7 @@ public class ItemLibraryDisplay extends UIComponent {
     detailPanel.row();
     detailPanel.add(artwork).width(200f).height(200f).padTop(8f).padBottom(16f);
     detailPanel.row();
-    detailPanel.add(descriptionLabel).width(650f).left().padTop(12f);
+    detailPanel.add(descriptionLabel).expandX().fillX().left().padTop(12f);
     return detailPanel;
   }
 

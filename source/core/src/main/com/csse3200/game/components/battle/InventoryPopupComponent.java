@@ -146,8 +146,6 @@ public class InventoryPopupComponent extends UIComponent {
     content.add(summary).center().padBottom(5f).growX().row();
     content.add(divider()).height(1f).growX().padBottom(5f).row();
 
-    content.add(new Label("ITEM INVENTORY", titleStyle())).center().padBottom(10f).row();
-
     if (ownedItems.isEmpty()) {
       content.add(new Label("No items collected yet.", detailStyle())).pad(40f).row();
       return;
@@ -164,7 +162,7 @@ public class InventoryPopupComponent extends UIComponent {
     scrollPane.setFadeScrollBars(false);
     scrollPane.setScrollingDisabled(true, false);
 
-    content.add(scrollPane).width(410f).height(230f).row();
+    content.add(scrollPane).grow().row();
 
     String turnHint =
         canUseBattleItems.getAsBoolean()
