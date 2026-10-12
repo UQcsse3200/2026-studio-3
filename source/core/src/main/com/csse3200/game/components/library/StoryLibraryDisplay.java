@@ -98,8 +98,10 @@ public class StoryLibraryDisplay extends UIComponent {
     addDivider(panel);
     panel.row();
     Table detailPanel = createDetailPanel();
-    panel.add(createEntryList()).width(LIST_WIDTH).expandY().fillY().padRight(22f);
-    panel.add(detailPanel).expand().fill();
+    Table content = new Table();
+    content.add(createEntryList()).width(LIST_WIDTH).expandY().fillY().padRight(22f);
+    content.add(detailPanel).expand().fill();
+    panel.add(content).colspan(2).expand().fill();
 
     Table wrapper = new Table();
     wrapper.setFillParent(true);
@@ -222,11 +224,11 @@ public class StoryLibraryDisplay extends UIComponent {
 
   private Table createDetailPanel() {
     titleLabel = new Label("", labelStyle(LARGE, MenuTheme.warmParchment()));
-    titleLabel.setFontScale(1.25f);
+    titleLabel.setFontScale(1.0f);
     titleLabel.setWrap(true);
 
     bodyLabel = new Label("", labelStyle(DEFAULT, MenuTheme.warmParchment()));
-    bodyLabel.setFontScale(1.1f);
+    bodyLabel.setFontScale(0.85f);
     bodyLabel.setWrap(true);
     bodyLabel.setAlignment(Align.topLeft);
 
