@@ -36,6 +36,7 @@ import com.csse3200.game.screens.EncounterScreen;
 import com.csse3200.game.screens.EndBattleScreen;
 import com.csse3200.game.screens.ItemLibraryScreen;
 import com.csse3200.game.screens.LibraryScreen;
+import com.csse3200.game.screens.LoadedSaveTransitionAware;
 import com.csse3200.game.screens.MainGameScreen;
 import com.csse3200.game.screens.MainMenuScreen;
 import com.csse3200.game.screens.MapScreen;
@@ -179,6 +180,20 @@ public class GdxGame extends Game {
     logger.info("Setting game screen to {}", screenType);
     prepareScreenTransition(screenType);
     setScreen(newScreen(screenType));
+  }
+
+  /**
+   * Leaves the current activity after a save has been restored and opens the restored map.
+   *
+   * <p>Battle and encounter screens normally capture their live player while being disposed. They
+   * are notified first so that stale pre-load values cannot overwrite the restored player state.
+   */
+  public void resumeLoadedRun() {
+    Screen currentScreen = getScreen();
+    if (currentScreen instanceof LoadedSaveTransitionAware transitionAware) {
+      transitionAware.prepareForLoadedSaveTransition();
+    }
+    setScreen(ScreenType.MAP);
   }
 
   /**

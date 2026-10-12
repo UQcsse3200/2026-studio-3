@@ -3,11 +3,13 @@ package com.csse3200.game.components.save;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
@@ -44,6 +46,9 @@ public class SaveLoadPanel extends UIComponent {
   private final SaveGameRestoreService restoreService;
   private final List<Integer> slotIds;
   private final Runnable backAction;
+  private final SaveLoadMode mode;
+  private final boolean confirmBeforeLoad;
+  private final Runnable loadSuccessAction;
 
   private static final String BACKGROUND_TEXTURE = "images/main_menu_background.png";
   public static final String BUTTON_TEXTURE = "images/save_load_button_frame.png";
@@ -56,9 +61,13 @@ public class SaveLoadPanel extends UIComponent {
   private Table rootTable;
   private Label statusLabel;
   private TextButton.TextButtonStyle archiveButtonStyle;
+  private Dialog loadConfirmDialog;
+  private TextButton confirmLoadButton;
+  private TextButton cancelLoadButton;
+  private boolean loadInProgress;
 
   public SaveLoadPanel(SaveGameService saveGameService, List<Integer> slotIds) {
-    this(saveGameService, slotIds, null, null);
+    this(saveGameService, slotIds, null, null, SaveLoadMode.SAVE_AND_LOAD, false, null);
   }
 
   public SaveLoadPanel(
@@ -66,10 +75,47 @@ public class SaveLoadPanel extends UIComponent {
       List<Integer> slotIds,
       SaveGameRestoreService restoreService,
       Runnable backAction) {
+    this(
+        saveGameService,
+        slotIds,
+        restoreService,
+        backAction,
+        SaveLoadMode.SAVE_AND_LOAD,
+        false,
+        null);
+  }
+
+  /**
+   * Creates a panel with explicit operation permissions and post-load behaviour.
+   *
+   * @param mode operations exposed by this panel
+   * @param confirmBeforeLoad whether loading must be confirmed before the current activity is lost
+   * @param loadSuccessAction action run only after the save has been fully restored
+   */
+  public SaveLoadPanel(
+      SaveGameService saveGameService,
+      List<Integer> slotIds,
+      SaveGameRestoreService restoreService,
+      Runnable backAction,
+      SaveLoadMode mode,
+      boolean confirmBeforeLoad,
+      Runnable loadSuccessAction) {
+    if (saveGameService == null) {
+      throw new IllegalArgumentException("saveGameService must not be null");
+    }
+    if (slotIds == null) {
+      throw new IllegalArgumentException("slotIds must not be null");
+    }
+    if (mode == null) {
+      throw new IllegalArgumentException("mode must not be null");
+    }
     this.saveGameService = saveGameService;
     this.restoreService = restoreService;
     this.slotIds = List.copyOf(slotIds);
     this.backAction = backAction;
+    this.mode = mode;
+    this.confirmBeforeLoad = confirmBeforeLoad;
+    this.loadSuccessAction = loadSuccessAction;
   }
 
   @Override
@@ -130,6 +176,7 @@ public class SaveLoadPanel extends UIComponent {
     wrapper.add(rootTable).width(PANEL_WIDTH).height(PANEL_HEIGHT);
     rootStack.add(wrapper);
     stage.addActor(rootStack);
+    buildLoadConfirmDialog();
   }
 
   private Label.LabelStyle themedLabelStyle() {
@@ -163,7 +210,8 @@ public class SaveLoadPanel extends UIComponent {
   private void addHeader() {
     Label.LabelStyle titleStyle = new Label.LabelStyle(skin.get("title", Label.LabelStyle.class));
     titleStyle.fontColor = MenuTheme.warmParchment();
-    rootTable.add(new Label("Save / Load", titleStyle)).colspan(3).padBottom(20f);
+    String title = mode == SaveLoadMode.LOAD_ONLY ? "Load Game" : "Save / Load";
+    rootTable.add(new Label(title, titleStyle)).colspan(3).padBottom(20f);
     if (backAction != null) {
       TextButton backButton = new TextButton("Back", themedButtonStyle());
       backButton.addListener(
@@ -219,7 +267,9 @@ public class SaveLoadPanel extends UIComponent {
             : slotName + " — empty";
     rootTable.add(new Label(label, themedLabelStyle())).left().padRight(20f);
 
-    if (isAutosave) {
+    if (!mode.isSaveAllowed()) {
+      rootTable.add().width(ACTION_BUTTON_WIDTH).padRight(10f);
+    } else if (isAutosave) {
       rootTable
           .add(new Label("Auto", themedLabelStyle()))
           .width(ACTION_BUTTON_WIDTH)
@@ -252,40 +302,116 @@ public class SaveLoadPanel extends UIComponent {
         });
     rootTable.add(loadButton).width(ACTION_BUTTON_WIDTH).height(ACTION_BUTTON_HEIGHT).padRight(10f);
 
-    TextButton deleteButton = new TextButton("Delete", themedButtonStyle());
-    deleteButton.setDisabled(!hasSave);
-    deleteButton.addListener(
-        new ChangeListener() {
-          @Override
-          public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-            onDelete(slotId);
-          }
-        });
-    rootTable
-        .add(deleteButton)
-        .width(ACTION_BUTTON_WIDTH)
-        .height(ACTION_BUTTON_HEIGHT)
-        .padBottom(12f)
-        .row();
+    if (mode.isDeleteAllowed()) {
+      TextButton deleteButton = new TextButton("Delete", themedButtonStyle());
+      deleteButton.setDisabled(!hasSave);
+      deleteButton.addListener(
+          new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+              onDelete(slotId);
+            }
+          });
+      rootTable
+          .add(deleteButton)
+          .width(ACTION_BUTTON_WIDTH)
+          .height(ACTION_BUTTON_HEIGHT)
+          .padBottom(12f)
+          .row();
+    } else {
+      rootTable.add().width(ACTION_BUTTON_WIDTH).padBottom(12f).row();
+    }
   }
 
   private void onSave(int slotId) {
+    if (!mode.isSaveAllowed()) {
+      return;
+    }
     SaveResult result = saveGameService.saveGame(slotId);
     statusLabel.setText(SaveErrorMessages.forSave(result));
     refresh();
   }
 
   private void onLoad(int slotId) {
+    if (loadInProgress || (loadConfirmDialog != null && loadConfirmDialog.getStage() != null)) {
+      return;
+    }
+    if (confirmBeforeLoad) {
+      showLoadConfirmation(slotId);
+      return;
+    }
+    performLoad(slotId);
+  }
+
+  private void performLoad(int slotId) {
+    loadInProgress = true;
     LoadResult result = saveGameService.loadGame(slotId);
     if (!result.success() || restoreService == null) {
       statusLabel.setText(SaveErrorMessages.forLoad(result));
+      loadInProgress = false;
       refresh();
       return;
     }
 
     RestoreResult restoreResult = restoreService.restore(result.data());
     statusLabel.setText(formatRestoreMessage(restoreResult));
+    if (restoreResult.success() && loadSuccessAction != null) {
+      loadSuccessAction.run();
+      return;
+    }
+    loadInProgress = false;
     refresh();
+  }
+
+  private void buildLoadConfirmDialog() {
+    Window.WindowStyle windowStyle = new Window.WindowStyle(skin.get(Window.WindowStyle.class));
+    Color panel = MenuTheme.deepPlum();
+    panel.a = 0.96f;
+    windowStyle.background = skin.newDrawable("white", panel);
+    loadConfirmDialog = new Dialog("", windowStyle);
+
+    Label.LabelStyle messageStyle =
+        new Label.LabelStyle(skin.getFont("font_large"), MenuTheme.warmParchment());
+    Label loadConfirmMessage =
+        new Label("Loading will discard progress since your last save. Continue?", messageStyle);
+    loadConfirmMessage.setWrap(true);
+    loadConfirmDialog.getContentTable().add(loadConfirmMessage).width(620f).pad(24f);
+
+    confirmLoadButton = new TextButton("Load", themedButtonStyle());
+    cancelLoadButton = new TextButton("Cancel", themedButtonStyle());
+    loadConfirmDialog
+        .getButtonTable()
+        .add(confirmLoadButton)
+        .width(ACTION_BUTTON_WIDTH)
+        .height(ACTION_BUTTON_HEIGHT)
+        .pad(10f);
+    loadConfirmDialog
+        .getButtonTable()
+        .add(cancelLoadButton)
+        .width(ACTION_BUTTON_WIDTH)
+        .height(ACTION_BUTTON_HEIGHT)
+        .pad(10f);
+  }
+
+  private void showLoadConfirmation(int slotId) {
+    confirmLoadButton.clearListeners();
+    cancelLoadButton.clearListeners();
+    confirmLoadButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+            loadConfirmDialog.hide(null);
+            performLoad(slotId);
+          }
+        });
+    cancelLoadButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+            loadConfirmDialog.hide(null);
+          }
+        });
+    loadConfirmDialog.show(stage);
   }
 
   private String formatRestoreMessage(RestoreResult result) {
@@ -312,6 +438,9 @@ public class SaveLoadPanel extends UIComponent {
   }
 
   private void onDelete(int slotId) {
+    if (!mode.isDeleteAllowed()) {
+      return;
+    }
     DeleteSaveResult result = saveGameService.deleteSave(slotId);
     statusLabel.setText(SaveErrorMessages.forDelete(result));
     refresh();
@@ -331,6 +460,9 @@ public class SaveLoadPanel extends UIComponent {
     if (rootStack != null) {
       rootStack.remove();
       rootStack.clear();
+    }
+    if (loadConfirmDialog != null) {
+      loadConfirmDialog.remove();
     }
     super.dispose();
   }

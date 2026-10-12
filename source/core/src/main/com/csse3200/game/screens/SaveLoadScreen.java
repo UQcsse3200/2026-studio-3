@@ -1,5 +1,6 @@
 package com.csse3200.game.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.GdxGame;
@@ -7,6 +8,7 @@ import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
+import com.csse3200.game.components.save.SaveLoadMode;
 import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
@@ -18,7 +20,6 @@ import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.save.AutosaveCoordinator;
-import com.csse3200.game.save.GameStateSnapshotProvider;
 import com.csse3200.game.save.JsonSaveGameRepository;
 import com.csse3200.game.save.SaveGameRestoreService;
 import com.csse3200.game.save.SaveGameService;
@@ -70,15 +71,7 @@ public class SaveLoadScreen extends ScreenAdapter {
     PlayerRunState playerState = runState.getOrCreatePlayerState();
     PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(cardLibrary);
 
-    SaveGameService saveGameService =
-        new SaveGameService(
-            new JsonSaveGameRepository(),
-            new GameStateSnapshotProvider(
-                playerState,
-                playerDeck,
-                runState,
-                game.getBestiaryService(),
-                game.getCardDiscoveryService()));
+    SaveGameService saveGameService = new SaveGameService(new JsonSaveGameRepository());
     SaveGameRestoreService restoreService =
         new SaveGameRestoreService(
             playerState,
@@ -94,11 +87,10 @@ public class SaveLoadScreen extends ScreenAdapter {
                 saveGameService,
                 SLOT_IDS,
                 restoreService,
-                () ->
-                    game.setScreen(
-                        runState.isRunActive()
-                            ? GdxGame.ScreenType.MAP
-                            : GdxGame.ScreenType.MAIN_MENU)));
+                () -> game.setScreen(GdxGame.ScreenType.MAIN_MENU),
+                SaveLoadMode.LOAD_ONLY,
+                false,
+                () -> Gdx.app.postRunnable(game::resumeLoadedRun)));
     ServiceLocator.getEntityService().register(ui);
   }
 

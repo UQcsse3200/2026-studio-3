@@ -31,6 +31,7 @@ import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.screens.BattleScreen;
 import com.csse3200.game.screens.DemoCampfireScreen;
 import com.csse3200.game.screens.DemoEventScreen;
+import com.csse3200.game.screens.LoadedSaveTransitionAware;
 import com.csse3200.game.screens.MapScreen;
 import com.csse3200.game.screens.NarrationScreen;
 import java.util.Map;
@@ -60,6 +61,25 @@ class GdxGameTest {
       verify(oldScreen).dispose();
       assertEquals(7, game.getRunState().getActiveNodeId());
       verify(battles.constructed().get(0)).show();
+    }
+  }
+
+  @Test
+  void resumingLoadedRunProtectsRestoredStateBeforeDisposingCurrentScreen() {
+    GdxGame game = new GdxGame();
+    LoadedSaveTransitionAware current =
+        mock(
+            LoadedSaveTransitionAware.class,
+            org.mockito.Mockito.withSettings().extraInterfaces(Screen.class));
+    game.setScreen((Screen) current);
+
+    try (MockedConstruction<MapScreen> maps = mockConstruction(MapScreen.class)) {
+      game.resumeLoadedRun();
+
+      verify(current).prepareForLoadedSaveTransition();
+      verify((Screen) current).dispose();
+      assertEquals(1, maps.constructed().size());
+      assertSame(maps.constructed().get(0), game.getScreen());
     }
   }
 

@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
+import com.csse3200.game.components.save.SaveLoadMode;
 import com.csse3200.game.components.settingsmenu.SettingsPanel;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
@@ -72,6 +73,7 @@ public class PauseMenuDisplay extends UIComponent {
   private static final float OVERLAY_OPACITY = 0.7f;
 
   private final boolean saveEnabled;
+  private final SaveLoadMode saveLoadMode;
   private Table table;
   private Table menuTable;
   private Table settingsTable;
@@ -94,7 +96,7 @@ public class PauseMenuDisplay extends UIComponent {
 
   /** Creates a pause menu with the Save &amp; Load option enabled. */
   public PauseMenuDisplay() {
-    this(true);
+    this(SaveLoadMode.SAVE_AND_LOAD);
   }
 
   /**
@@ -104,6 +106,16 @@ public class PauseMenuDisplay extends UIComponent {
    */
   public PauseMenuDisplay(boolean saveEnabled) {
     this.saveEnabled = saveEnabled;
+    this.saveLoadMode = SaveLoadMode.SAVE_AND_LOAD;
+  }
+
+  /** Creates a pause menu whose save/load label matches the permitted operations. */
+  public PauseMenuDisplay(SaveLoadMode saveLoadMode) {
+    if (saveLoadMode == null) {
+      throw new IllegalArgumentException("saveLoadMode must not be null");
+    }
+    this.saveEnabled = true;
+    this.saveLoadMode = saveLoadMode;
   }
 
   @Override
@@ -151,7 +163,8 @@ public class PauseMenuDisplay extends UIComponent {
 
     resumeButton = menuButton("Resume", RESUME_EVENT);
     if (saveEnabled) {
-      saveLoadButton = menuButton("Save & Load", SAVE_LOAD_EVENT);
+      String saveLoadLabel = saveLoadMode == SaveLoadMode.LOAD_ONLY ? "Load Game" : "Save & Load";
+      saveLoadButton = menuButton(saveLoadLabel, SAVE_LOAD_EVENT);
     }
     settingsButton = menuButton("Settings", SETTINGS_EVENT);
     returnButton = menuButton("Main Menu", null); // opens a confirm dialog instead
