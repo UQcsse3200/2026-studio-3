@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -42,6 +43,7 @@ import com.csse3200.game.ui.UIComponent;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -66,10 +68,19 @@ public class CardLibraryDisplay extends UIComponent {
   private final CardDiscoveryService discovery;
   private final EventListener1<CardEntryView> entryUpdatedListener = this::onEntryUpdated;
   private final Map<String, TextButton> cardButtons = new HashMap<>();
+  private List<String> cardOrder = List.of();
   private CardEntryView displayedEntry;
 
   private Stack rootStack;
   private Table cardList;
+  private ScrollPane cardScroll;
+  private TextField searchField;
+  private ChangeListener searchChangedListener;
+  private Label resultCountLabel;
+  private Label noResultsLabel;
+  private Table detailContent;
+  private Table selectionPrompt;
+  private Label selectionMessage;
   private Stack cardPreview;
   private Table lockedPreview;
   private Label lockedArtLabel;
@@ -230,6 +241,7 @@ public class CardLibraryDisplay extends UIComponent {
   }
 
   private void addCards(List<CardEntryView> cards, Table panel) {
+    cardOrder = cards.stream().map(CardEntryView::cardId).toList();
     cardList = new Table();
     cardList.setName("card-library-list");
     cardButtons.clear();
@@ -254,7 +266,7 @@ public class CardLibraryDisplay extends UIComponent {
           new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-              if (cardButton.isChecked()) {
+              if (cardButton.isChecked() && cardButton.getParent() == cardList) {
                 discovery.getEntry(cardId).ifPresent(CardLibraryDisplay.this::showCard);
               }
             }
@@ -272,16 +284,18 @@ public class CardLibraryDisplay extends UIComponent {
       cardButtons.put(cardId, cardButton);
     }
 
-    ScrollPane scrollPane = new ScrollPane(cardList, skin);
-    scrollPane.setFadeScrollBars(false);
-    scrollPane.setScrollingDisabled(true, false);
+    cardScroll = new ScrollPane(cardList, skin);
+    cardScroll.setFadeScrollBars(false);
+    cardScroll.setScrollingDisabled(true, false);
 
     Table listPanel = new Table();
     listPanel.setBackground(skin.newDrawable(WHITE, LIST_COLOUR));
     listPanel.pad(18f);
     listPanel.add(new Label("CARDS", labelStyle(SMALL, MenuTheme.softCoral()))).left().expandX();
     listPanel.row();
-    listPanel.add(scrollPane).expand().fill().padTop(12f);
+    addSearchControls(listPanel);
+    listPanel.row();
+    listPanel.add(cardScroll).expand().fill().padTop(12f);
 
     if (!cards.isEmpty()) {
       widgetAssets =
@@ -291,10 +305,122 @@ public class CardLibraryDisplay extends UIComponent {
     panel.add(listPanel).width(350f).expandY().fillY().padRight(22f);
     panel.add(createDetailPanel(cards.isEmpty())).expand().fill();
 
-    cardGroup.setMinCheckCount(cards.isEmpty() ? 0 : 1);
+    // Filtering may leave no selected card; retain single-selection without choosing a hidden one.
+    cardGroup.setMinCheckCount(0);
     if (firstButton != null) {
       firstButton.setChecked(true);
     }
+    refreshCards(false);
+  }
+
+  private void addSearchControls(Table listPanel) {
+    listPanel
+        .add(new Label("Search discovered cards", labelStyle(SMALL, MenuTheme.warmParchment())))
+        .left()
+        .padTop(10f);
+    listPanel.row();
+    searchField = new TextField("", skin);
+    searchField.setProgrammaticChangeEvents(true);
+    searchField.setName("card-library-search");
+    searchField.setMessageText("Card name...");
+    searchChangedListener =
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            refreshCards(true);
+          }
+        };
+    searchField.addListener(searchChangedListener);
+    TextButton clear = new TextButton("Clear", skin);
+    clear.setName("card-library-search-clear");
+    clear.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            searchField.setText("");
+            stage.setKeyboardFocus(searchField);
+          }
+        });
+    Table searchRow = new Table();
+    searchRow.add(searchField).growX().minWidth(0f).height(42f);
+    searchRow.add(clear).width(76f).height(42f).padLeft(8f);
+    listPanel.add(searchRow).growX().padTop(5f);
+    listPanel.row();
+    resultCountLabel = new Label("", labelStyle(SMALL, MenuTheme.softCoral()));
+    resultCountLabel.setName("card-library-result-count");
+    listPanel.add(resultCountLabel).left().padTop(8f);
+    noResultsLabel = new Label("No matches", bodyLabelStyle());
+    noResultsLabel.setName("card-library-no-results");
+  }
+
+  static boolean matchesSearch(CardEntryView card, String query) {
+    String normalized = query.trim().toLowerCase(Locale.ROOT);
+    return normalized.isEmpty()
+        || (card.unlockState().isAtLeast(CardUnlockState.SEEN)
+            && card.displayName().toLowerCase(Locale.ROOT).contains(normalized));
+  }
+
+  private void refreshCards(boolean resetScroll) {
+    if (searchField == null) return;
+    List<CardEntryView> visible =
+        cardOrder.stream()
+            .flatMap(id -> discovery.getEntry(id).stream())
+            .filter(card -> matchesSearch(card, searchField.getText()))
+            .toList();
+    Actor focus = stage.getKeyboardFocus();
+    cardList.clearChildren();
+    for (CardEntryView card : visible) {
+      TextButton button = cardButtons.get(card.cardId());
+      button.setText(formatCardButton(card));
+      cardList.add(button).row();
+    }
+    if (focus != null && focus.isDescendantOf(cardList)) stage.setKeyboardFocus(focus);
+    boolean searching = !searchField.getText().trim().isEmpty();
+    resultCountLabel.setText(
+        visible.size() + (searching ? (visible.size() == 1 ? " result" : " results") : " cards"));
+    if (visible.isEmpty()) cardList.add(noResultsLabel).padTop(16f);
+    if (displayedEntry != null) {
+      CardEntryView current =
+          visible.stream()
+              .filter(card -> card.cardId().equals(displayedEntry.cardId()))
+              .findFirst()
+              .orElse(null);
+      if (current != null) showCard(current);
+      else {
+        cardButtons.get(displayedEntry.cardId()).setChecked(false);
+        clearDetails();
+      }
+    }
+    if (selectionMessage != null)
+      selectionMessage.setText(
+          visible.isEmpty()
+              ? "No discovered cards match your search."
+              : "Select a card to view its details.");
+    if (resetScroll) {
+      cardScroll.setScrollY(0f);
+      cardScroll.updateVisualScroll();
+    }
+  }
+
+  private void clearDetails() {
+    displayedEntry = null;
+    detailContent.setVisible(false);
+    selectionPrompt.setVisible(true);
+    for (Label label :
+        new Label[] {
+          stateLabel,
+          nameLabel,
+          descriptionLabel,
+          loreLabel,
+          costLabel,
+          typeLabel,
+          targetLabel,
+          rarityLabel,
+          effectsLabel
+        }) label.setText("");
+    lockedPreview.setVisible(false);
+    if (cardWidget != null) cardWidget.setVisible(false);
+    if (uncommonCardWidget != null) uncommonCardWidget.setVisible(false);
   }
 
   private Table createDetailPanel(boolean empty) {
@@ -344,11 +470,19 @@ public class CardLibraryDisplay extends UIComponent {
     archiveDetails.add(rarityLabel).row();
     archiveDetails.add(effectsLabel).width(330f).padTop(8f).row();
 
-    detailPanel.top();
-    detailPanel.add(stateLabel).colspan(2).left().expandX().padBottom(8f);
-    detailPanel.row();
-    detailPanel.add(cardPreview).size(CardWidget.CARD_WIDTH, CardWidget.CARD_HEIGHT).top();
-    detailPanel.add(archiveDetails).width(330f).expandY().fillY().top().padLeft(18f);
+    detailContent = new Table();
+    detailContent.top();
+    detailContent.add(stateLabel).colspan(2).left().expandX().padBottom(8f);
+    detailContent.row();
+    detailContent.add(cardPreview).size(CardWidget.CARD_WIDTH, CardWidget.CARD_HEIGHT).top();
+    detailContent.add(archiveDetails).width(330f).expandY().fillY().top().padLeft(18f);
+    selectionMessage = new Label("Select a card to view its details.", bodyLabelStyle());
+    selectionMessage.setName("card-library-selection-message");
+    selectionMessage.setWrap(true);
+    selectionPrompt = new Table();
+    selectionPrompt.add(selectionMessage).growX();
+    selectionPrompt.setVisible(false);
+    detailPanel.add(new Stack(detailContent, selectionPrompt)).grow();
     return detailPanel;
   }
 
@@ -368,11 +502,13 @@ public class CardLibraryDisplay extends UIComponent {
     if (card.unlockState() == CardUnlockState.LOCKED) {
       return "???";
     }
-    return card.cost().orElseThrow() + "  " + card.displayName();
+    return card.displayName();
   }
 
   void showCard(CardEntryView card) {
     displayedEntry = Objects.requireNonNull(card, "card cannot be null");
+    detailContent.setVisible(true);
+    selectionPrompt.setVisible(false);
     nameLabel.setText(card.displayName());
     descriptionLabel.setText(descriptionFor(card));
     String lore = card.lore().orElse("");
@@ -498,13 +634,7 @@ public class CardLibraryDisplay extends UIComponent {
   }
 
   private void onEntryUpdated(CardEntryView entry) {
-    TextButton button = cardButtons.get(entry.cardId());
-    if (button != null) {
-      button.setText(formatCardButton(entry));
-    }
-    if (displayedEntry != null && displayedEntry.cardId().equals(entry.cardId())) {
-      showCard(entry);
-    }
+    refreshCards(false);
     updateDiscoveryCounter();
   }
 
@@ -607,10 +737,19 @@ public class CardLibraryDisplay extends UIComponent {
     discovery
         .getEvents()
         .removeListener(CardDiscoveryService.ENTRY_UPDATED_EVENT, entryUpdatedListener);
+    if (searchField != null) searchField.removeListener(searchChangedListener);
     if (rootStack != null) {
+      Actor focus = stage.getKeyboardFocus();
+      if (focus != null && focus.isDescendantOf(rootStack)) stage.setKeyboardFocus(null);
+      Actor scrollFocus = stage.getScrollFocus();
+      if (scrollFocus != null && scrollFocus.isDescendantOf(rootStack)) stage.setScrollFocus(null);
       rootStack.remove();
       rootStack.clear();
     }
+    cardButtons.clear();
+    cardOrder = List.of();
+    searchField = null;
+    searchChangedListener = null;
     super.dispose();
   }
 }
