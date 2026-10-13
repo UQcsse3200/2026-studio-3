@@ -300,7 +300,17 @@
           { "type": "BLOCK", "value": 7, "duration": 0 },
           { "type": "HEAL", "value": 3, "duration": 0 }
         ],
-        "texturePath": "images/cards/makeshift_shelter.png"
+        "texturePath": "images/cards/makeshift_shelter.png",
+        "upgrade": {
+          "name": "Humble Sanctuary+",
+          "description": "Even a lesser blessing can become a refuge. Gain 10 Block. Heal 4.",
+          "cost": 2,
+          "rarity": "UNCOMMON",
+          "effects": [
+            { "type": "BLOCK", "value": 10, "duration": 0 },
+            { "type": "HEAL", "value": 4, "duration": 0 }
+          ]
+        }
       },
       {
         "id": "rubble_barricade",
@@ -312,7 +322,14 @@
         "rarity": "UNCOMMON",
         "target": "SELF",
         "effects": [{ "type": "BLOCK", "value": 12, "duration": 0 }],
-        "texturePath": "images/cards/rubble_barricade.png"
+        "texturePath": "images/cards/rubble_barricade.png",
+        "upgrade": {
+          "name": "Consecrated Rampart+",
+          "description": "Even broken stone can bear a sacred ward. Gain 18 Block.",
+          "cost": 2,
+          "rarity": "UNCOMMON",
+          "effects": [{ "type": "BLOCK", "value": 18, "duration": 0 }]
+        }
       },
       {
         "id": "emergency_salve",
@@ -324,7 +341,14 @@
         "rarity": "UNCOMMON",
         "target": "SELF",
         "effects": [{ "type": "HEAL", "value": 10, "duration": 0 }],
-        "texturePath": "images/cards/emergency_salve.png"
+        "texturePath": "images/cards/emergency_salve.png",
+        "upgrade": {
+          "name": "Balm of Grace+",
+          "description": "Grace settles into wounded flesh. Heal 15 health.",
+          "cost": 2,
+          "rarity": "UNCOMMON",
+          "effects": [{ "type": "HEAL", "value": 15, "duration": 0 }]
+        }
       },
       {
         "id": "purify",
@@ -336,7 +360,14 @@
         "rarity": "UNCOMMON",
         "target": "SELF",
         "effects": [{ "type": "CLEANSE", "value": 1, "duration": 0 }],
-        "texturePath": "images/cards/purify.png"
+        "texturePath": "images/cards/purify.png",
+        "upgrade": {
+          "name": "Purify+",
+          "description": "The stain of corruption is washed away by grace. Remove all negative effects from yourself.",
+          "cost": 0,
+          "rarity": "UNCOMMON",
+          "effects": [{ "type": "CLEANSE", "value": 1, "duration": 0 }]
+        }
       },
       {
         "id": "sealed_pact",
