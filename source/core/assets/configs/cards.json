@@ -398,11 +398,11 @@
         "texturePath": "images/cards/doom_sigil.png",
         "upgrade": {
           "name": "Doom Sigil+",
-          "description": "A mark that lays corruption bare. Apply 2 Vulnerable for 2 turns and 6 Poison for 3 turns.",
+          "description": "A mark that lays corruption bare. Apply 1 Vulnerable for 3 turns and 6 Poison for 3 turns.",
           "cost": 2,
           "rarity": "RARE",
           "effects": [
-            { "type": "VULNERABLE", "value": 2, "duration": 2 },
+            { "type": "VULNERABLE", "value": 1, "duration": 3 },
             { "type": "POISON", "value": 6, "duration": 3 }
           ]
         }

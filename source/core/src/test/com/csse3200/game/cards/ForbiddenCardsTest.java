@@ -7,7 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.CardUpgradeConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
+import com.csse3200.game.cards.runtime.CardInstance;
+import com.csse3200.game.cards.runtime.CardResolver;
+import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.extensions.GameExtension;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
@@ -92,7 +96,68 @@ class ForbiddenCardsTest {
         () -> assertEquals("Doom Sigil+", upgrade.name),
         () -> assertEquals(2, upgrade.cost),
         () -> assertEquals(Rarity.RARE, upgrade.rarity),
-        () -> assertEffects(upgrade.effects, EffectType.VULNERABLE, 2, 2, EffectType.POISON, 6, 3));
+        // Vulnerable is a fixed 1.5x multiplier; upgrade duration, not value.
+        () -> assertEffects(upgrade.effects, EffectType.VULNERABLE, 1, 3, EffectType.POISON, 6, 3));
+  }
+
+  @Test
+  void shouldConfigureIronOath() {
+    CardConfig card = library.getCard("iron_oath").orElseThrow();
+    CardUpgradeConfig upgrade = card.upgrade;
+
+    assertAll(
+        () -> assertEquals("Iron Oath", card.name),
+        () -> assertEquals(1, card.cost),
+        () -> assertEquals(CardType.SKILL, card.type),
+        () -> assertEquals(Rarity.UNCOMMON, card.rarity),
+        () -> assertEquals(TargetType.SELF, card.target),
+        () -> assertEffect(card.effects, EffectType.FORTIFY, 4, 0),
+        () -> assertEquals("images/cards/iron_oath.png", card.texturePath),
+        () -> assertEquals("Iron Oath+", upgrade.name),
+        () -> assertEquals(1, upgrade.cost),
+        () -> assertEquals(Rarity.UNCOMMON, upgrade.rarity),
+        () -> assertEffect(upgrade.effects, EffectType.FORTIFY, 6, 0));
+  }
+
+  @Test
+  void forbiddenUpgradesResolveToUpgradedValues() {
+    CardResolver resolver = new CardResolver();
+
+    assertAll(
+        () ->
+            assertUpgraded(
+                resolver, "sealed_pact", "Sealed Pact+", 3, List.of(effect(4, 0), effect(9, 0))),
+        () -> assertUpgraded(resolver, "blood_price", "Blood Price+", 3, List.of(effect(28, 0))),
+        () ->
+            assertUpgraded(
+                resolver, "doom_sigil", "Doom Sigil+", 2, List.of(effect(1, 3), effect(6, 3))),
+        () -> assertUpgraded(resolver, "iron_oath", "Iron Oath+", 1, List.of(effect(6, 0))));
+  }
+
+  private void assertUpgraded(
+      CardResolver resolver,
+      String cardId,
+      String expectedName,
+      int expectedCost,
+      List<int[]> expectedEffects) {
+    CardConfig config = library.getCard(cardId).orElseThrow();
+    ResolvedCard upgraded =
+        resolver.resolve(
+            config, new CardInstance("forbidden-" + cardId, cardId, CardInstance.UPGRADED_LEVEL));
+
+    assertTrue(upgraded.upgraded(), cardId);
+    assertEquals(expectedName, upgraded.name(), cardId);
+    assertEquals(expectedCost, upgraded.cost(), cardId);
+    assertEquals(expectedEffects.size(), upgraded.effects().size(), cardId);
+    for (int i = 0; i < expectedEffects.size(); i++) {
+      assertEquals(expectedEffects.get(i)[0], upgraded.effects().get(i).value, cardId + " value");
+      assertEquals(
+          expectedEffects.get(i)[1], upgraded.effects().get(i).duration, cardId + " duration");
+    }
+  }
+
+  private static int[] effect(int value, int duration) {
+    return new int[] {value, duration};
   }
 
   private static void assertEffect(
