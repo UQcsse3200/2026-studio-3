@@ -445,7 +445,9 @@ class CommonCardWidgetTest {
   private static int countLabels(Group group, String text) {
     int count = 0;
     for (Actor actor : group.getChildren()) {
-      if (actor instanceof Label label && text.contentEquals(label.getText())) {
+      if (actor instanceof Label label
+          && (text.contentEquals(label.getText())
+              || CardWidgetAssets.formatDescription(text).contentEquals(label.getText()))) {
         count++;
       } else if (actor instanceof Group child) {
         count += countLabels(child, text);
@@ -483,7 +485,9 @@ class CommonCardWidgetTest {
 
   private static Label findLabel(Group group, String text) {
     for (Actor actor : group.getChildren()) {
-      if (actor instanceof Label label && text.contentEquals(label.getText())) {
+      if (actor instanceof Label label
+          && (text.contentEquals(label.getText())
+              || CardWidgetAssets.formatDescription(text).contentEquals(label.getText()))) {
         label.validate();
         return label;
       }

@@ -271,7 +271,8 @@ class CardWidgetTest {
     widget.validate();
 
     assertEquals(1f, description.getFontScaleY());
-    assertEquals("Deal 6 damage.", description.getText().toString());
+    assertEquals(
+        CardWidgetAssets.formatDescription("Deal 6 damage."), description.getText().toString());
   }
 
   private void assertFixedLayout(ResolvedCard resolved) {
@@ -286,7 +287,9 @@ class CardWidgetTest {
     assertTrue(widget.getMinHeight() <= CardWidget.CARD_HEIGHT, resolved.cardId());
     assertChildrenInside(widget, resolved.cardId());
     Label description = findDescription(widget, resolved.description());
-    assertEquals(resolved.description(), description.getText().toString());
+    assertEquals(
+        CardWidgetAssets.formatDescription(resolved.description()),
+        description.getText().toString());
     assertTrue(description.getPrefHeight() <= description.getHeight() + 1f, resolved.cardId());
     assertTrue(
         description.getGlyphLayout().width <= description.getWidth() + 1f, resolved.cardId());
@@ -308,7 +311,8 @@ class CardWidgetTest {
 
   private static Label findDescription(Group parent, String description) {
     for (Actor child : parent.getChildren()) {
-      if (child instanceof Label label && description.contentEquals(label.getText())) {
+      if (child instanceof Label label
+          && CardWidgetAssets.formatDescription(description).contentEquals(label.getText())) {
         return label;
       }
       if (child instanceof Group group) {

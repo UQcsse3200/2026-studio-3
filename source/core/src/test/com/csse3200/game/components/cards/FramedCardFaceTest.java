@@ -84,6 +84,55 @@ class FramedCardFaceTest {
   }
 
   @Test
+  void keywordGlyphsAreYellowWithoutChangingSharedSkinFontOrRawDescription() {
+    ResolvedCard card =
+        new CardResolver().resolveBasePreview(library.getCard("defend").orElseThrow(), "highlight");
+    boolean originalMarkup = skin.get("small", Label.LabelStyle.class).font.getData().markupEnabled;
+    FramedCardFace face =
+        new FramedCardFace(assets, assets.authoredFrameFor(Rarity.COMMON), CardFrameLayout.COMMON);
+    face.setCard(card);
+    face.setSize(225f, 456f);
+    face.validate();
+
+    Label description = null;
+    for (Actor actor : face.getChildren()) {
+      if (actor instanceof Label label && label.getText().toString().contains("[YELLOW]")) {
+        description = label;
+      }
+    }
+    assertNotNull(description);
+    assertEquals(
+        CardWidgetAssets.formatDescription("Gain 5 block."), description.getText().toString());
+    assertEquals("Gain 5 block.", face.displayedDescription());
+    assertEquals("Gain 5 block.", card.description());
+    assertEquals(
+        originalMarkup, skin.get("small", Label.LabelStyle.class).font.getData().markupEnabled);
+    assertNotSame(
+        skin.get("small", Label.LabelStyle.class).font.getData(),
+        description.getStyle().font.getData());
+    Batch batch = mock(Batch.class);
+    List<Float> colours = new ArrayList<>();
+    doAnswer(
+            invocation -> {
+              float[] vertices = invocation.getArgument(1);
+              int offset = invocation.getArgument(2);
+              int count = invocation.getArgument(3);
+              for (int index = offset + 2; index < offset + count; index += 20) {
+                colours.add(vertices[index]);
+              }
+              return null;
+            })
+        .when(batch)
+        .draw(any(Texture.class), any(float[].class), anyInt(), anyInt());
+    description.draw(batch, 1f);
+    assertTrue(
+        colours.contains(Color.YELLOW.toFloatBits()), "keyword glyphs must emit yellow vertices");
+    assertTrue(
+        colours.contains(new Color(0.10f, 0.065f, 0.045f, 1f).toFloatBits()),
+        "surrounding text must retain its normal colour");
+  }
+
+  @Test
   void lastDescriptionLineEmitsExactlySameGlyphSizeAsEarlierLinesAtEveryCardScale() {
     ResolvedCard base =
         new CardResolver().resolveBasePreview(library.getCard("strike").orElseThrow(), "text");
@@ -110,12 +159,13 @@ class FramedCardFaceTest {
       face.validate();
       Label description = null;
       for (Actor child : face.getChildren()) {
-        if (child instanceof Label label && paragraph.contentEquals(label.getText())) {
+        if (child instanceof Label label
+            && CardWidgetAssets.formatDescription(paragraph).contentEquals(label.getText())) {
           description = label;
         }
       }
       assertNotNull(description);
-      assertEquals(paragraph, description.getText().toString());
+      assertEquals(CardWidgetAssets.formatDescription(paragraph), description.getText().toString());
       assertTrue(description.getGlyphLayout().runs.size >= 3);
       Batch batch = mock(Batch.class);
       List<Float> heights = new ArrayList<>();
