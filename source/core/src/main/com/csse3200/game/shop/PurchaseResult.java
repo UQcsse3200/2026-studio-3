@@ -11,6 +11,9 @@ public class PurchaseResult {
     INVALID_ITEM,
     INVALID_INVENTORY,
     SHOP_CLOSED,
+    STALE_STOCK,
+    INVALID_REQUEST,
+    BUSY,
     TRANSACTION_FAILED
   }
 
@@ -79,6 +82,12 @@ public class PurchaseResult {
         return "Player inventory is unavailable.";
       case SHOP_CLOSED:
         return "Shop encounter has already ended.";
+      case STALE_STOCK:
+        return "Shop stock changed. Select from the current offers.";
+      case INVALID_REQUEST:
+        return "Invalid or reused shop action.";
+      case BUSY:
+        return "Shop transaction is unavailable.";
       case TRANSACTION_FAILED:
         return "Purchase failed.";
       case SUCCESS:
