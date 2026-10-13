@@ -126,6 +126,7 @@ public class BattleScreen extends ScreenAdapter {
     "images/ui/ashen-ember.png",
     "images/ui/brand-of-the-damned.png",
     "images/ui/shattered-aegis.png",
+    "images/ui/ambrosia-flask.png",
     "images/effects/heal.png",
     "images/enemies/intents/buff.png"
   };

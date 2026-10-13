@@ -163,7 +163,10 @@ public class PlayerRunState {
       return false;
     }
 
-    requireStats(player);
+    CombatStatsComponent stats = requireStats(player);
+    if (itemId == ItemType.AMBROSIA_FLASK && stats.getHealth() >= stats.getMaxHealth()) {
+      return false;
+    }
     ItemEffectApplier.applyItemEffect(itemId, player);
     return itemInventory.removeItem(itemId);
   }

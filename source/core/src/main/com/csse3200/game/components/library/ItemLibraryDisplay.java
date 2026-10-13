@@ -67,6 +67,8 @@ public class ItemLibraryDisplay extends UIComponent {
     ITEM_DESCRIPTIONS.put(
         ItemType.SHATTERED_AEGIS,
         "Curse: every Block gain is reduced by 1 per copy, to a minimum of 0.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.AMBROSIA_FLASK, "Consume during battle to restore 20 Health, up to max health.");
   }
 
   private final GdxGame game;

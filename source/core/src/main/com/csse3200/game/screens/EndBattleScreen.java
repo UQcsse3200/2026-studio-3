@@ -7,11 +7,7 @@ import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.configs.CardConfig;
-import com.csse3200.game.cards.deck.PlayerDeck;
-import com.csse3200.game.components.cards.CardUpgradeDisplay;
-import com.csse3200.game.components.cards.CardUpgradeSelection;
 import com.csse3200.game.components.cards.CardWidgetAssets;
-import com.csse3200.game.components.cards.PlayerDeckCardUpgradeCommitter;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord;
 import com.csse3200.game.components.spritedisplay.displaying.EndBattleDisplay;
@@ -38,10 +34,11 @@ import org.slf4j.LoggerFactory;
 public class EndBattleScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(EndBattleScreen.class);
   private static final String[] REWARD_TEXTURES = {
-    "images/ui/reward-panel.png",
-    "images/ui/reward-card.png",
+    "images/ui/victory-background-approved.png",
+    "images/ui/reward-panel-mythic-cords-aged.png",
+    "images/ui/reward-card-mythic-aged.png",
     "images/ui/gold-reward.png",
-    "images/ui/victory-title.png",
+    "images/ui/victory-title-mythic.png",
     "images/ui/lucky-coin.png",
     "images/ui/energy-crystal.png",
     "images/ui/merchants-favor.png",
@@ -105,17 +102,6 @@ public class EndBattleScreen extends ScreenAdapter {
               game::autosaveAfterRewardClaimed));
       requiresPlayerChoice = true;
 
-      RunState runState = game.getRunState();
-      if (runState != null) {
-        PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(cardLibrary);
-        CardUpgradeSelection upgradeSelection =
-            CardUpgradeSelection.forPlayerDeck(playerDeck, cardLibrary, 2);
-        if (!upgradeSelection.getCardUpgradeOption().isEmpty()) {
-          ui.addComponent(
-              new CardUpgradeDisplay(
-                  upgradeSelection, new PlayerDeckCardUpgradeCommitter(playerDeck)));
-        }
-      }
     } else {
       // The themed reward screen already supplies its own victory title. The legacy end-battle
       // display is only needed for defeat, where it provides the heading and return input.

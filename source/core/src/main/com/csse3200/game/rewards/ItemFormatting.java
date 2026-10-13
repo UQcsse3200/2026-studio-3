@@ -21,6 +21,7 @@ public final class ItemFormatting {
     DISPLAY_NAMES.put(ItemType.ASHEN_EMBER, "Ashen Ember");
     DISPLAY_NAMES.put(ItemType.BRAND_OF_THE_DAMNED, "Brand of the Damned");
     DISPLAY_NAMES.put(ItemType.SHATTERED_AEGIS, "Shattered Aegis");
+    DISPLAY_NAMES.put(ItemType.AMBROSIA_FLASK, "Draught of Ambrosia");
   }
 
   private ItemFormatting() {
