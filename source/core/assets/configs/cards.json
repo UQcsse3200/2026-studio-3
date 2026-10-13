@@ -177,7 +177,14 @@
         "rarity": "UNCOMMON",
         "target": "ALL_ENEMIES",
         "effects": [{ "type": "DAMAGE", "value": 6, "duration": 0 }],
-        "texturePath": "images/cards/starfall.png"
+        "texturePath": "images/cards/starfall.png",
+        "upgrade": {
+          "name": "Starfall+",
+          "description": "Heaven's light falls upon those still bound. Deal 9 damage to all enemies.",
+          "cost": 2,
+          "rarity": "UNCOMMON",
+          "effects": [{ "type": "DAMAGE", "value": 9, "duration": 0 }]
+        }
       },
       {
         "id": "rift_lance",
@@ -192,7 +199,17 @@
           { "type": "DAMAGE", "value": 4, "duration": 0 },
           { "type": "VULNERABLE", "value": 1, "duration": 2 }
         ],
-        "texturePath": "images/cards/rift_lance.png"
+        "texturePath": "images/cards/rift_lance.png",
+        "upgrade": {
+          "name": "Rift Lance+",
+          "description": "A shaft of starlight loosens corruption's hold. Deal 6 damage. Apply 2 Vulnerable for 2 turns.",
+          "cost": 1,
+          "rarity": "UNCOMMON",
+          "effects": [
+            { "type": "DAMAGE", "value": 6, "duration": 0 },
+            { "type": "VULNERABLE", "value": 2, "duration": 2 }
+          ]
+        }
       },
       {
         "id": "wardens_judgement",
@@ -235,7 +252,18 @@
           { "type": "STRENGTH", "value": 1, "duration": 0 },
           { "type": "ENERGY_GAIN", "value": 1, "duration": 0 }
         ],
-        "texturePath": "images/cards/astral_ward.png"
+        "texturePath": "images/cards/astral_ward.png",
+        "upgrade": {
+          "name": "Astral Ward+",
+          "description": "The old star-readers' ward steadies the weary. Gain 6 Block. Gain 2 Strength for the rest of combat. Restore 1 Energy.",
+          "cost": 2,
+          "rarity": "UNCOMMON",
+          "effects": [
+            { "type": "BLOCK", "value": 6, "duration": 0 },
+            { "type": "STRENGTH", "value": 2, "duration": 0 },
+            { "type": "ENERGY_GAIN", "value": 1, "duration": 0 }
+          ]
+        }
       },
       {
         "id": "resurrection",
@@ -247,7 +275,14 @@
         "rarity": "RARE",
         "target": "SELF",
         "effects": [{ "type": "HEAL", "value": 6, "duration": 3 }],
-        "texturePath": "images/cards/resurrection.png"
+        "texturePath": "images/cards/resurrection.png",
+        "upgrade": {
+          "name": "Restoring Light+",
+          "description": "A quiet celestial rite sustains the wounded. Heal 9 HP at the start of your next 3 turns.",
+          "cost": 5,
+          "rarity": "RARE",
+          "effects": [{ "type": "HEAL", "value": 9, "duration": 3 }]
+        }
       },
       {
         "id": "makeshift_shelter",
