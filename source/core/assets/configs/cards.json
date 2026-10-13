@@ -29,7 +29,14 @@
         "rarity": "COMMON",
         "target": "ALL_ENEMIES",
         "effects": [{ "type": "DAMAGE", "value": 4, "duration": 0 }],
-        "texturePath": "images/cards/warding_sweep.png"
+        "texturePath": "images/cards/warding_sweep.png",
+        "upgrade": {
+          "name": "Warding Sweep+",
+          "description": "The old guard's circle still holds. Deal 6 damage to all enemies.",
+          "cost": 2,
+          "rarity": "COMMON",
+          "effects": [{ "type": "DAMAGE", "value": 6, "duration": 0 }]
+        }
       },
       {
         "id": "defend",
@@ -41,7 +48,14 @@
         "rarity": "COMMON",
         "target": "SELF",
         "effects": [{ "type": "BLOCK", "value": 5, "duration": 0 }],
-        "texturePath": "images/cards/defend.png"
+        "texturePath": "images/cards/defend.png",
+        "upgrade": {
+          "name": "Defend+",
+          "description": "Gain 8 block.",
+          "cost": 1,
+          "rarity": "COMMON",
+          "effects": [{ "type": "BLOCK", "value": 8, "duration": 0 }]
+        }
       },
       {
         "id": "poison_dagger",
@@ -56,19 +70,36 @@
           { "type": "DAMAGE", "value": 4, "duration": 0 },
           { "type": "POISON", "value": 3, "duration": 3 }
         ],
-        "texturePath": "images/cards/poison_dagger.png"
+        "texturePath": "images/cards/poison_dagger.png",
+        "upgrade": {
+          "name": "Poison Dagger+",
+          "description": "Deal 6 damage. Apply 4 Poison for 3 turns.",
+          "cost": 1,
+          "rarity": "UNCOMMON",
+          "effects": [
+            { "type": "DAMAGE", "value": 6, "duration": 0 },
+            { "type": "POISON", "value": 4, "duration": 3 }
+          ]
+        }
       },
       {
         "id": "expose",
         "name": "Expose",
-        "description": "Apply 2 Vulnerable to all enemies for 2 turns.",
+        "description": "Apply Vulnerable to all enemies for 2 turns.",
         "lore": "Corruption leaves fractures even when the fallen cannot see them. The angel learns to recognise those weaknesses and bring them into the light.",
         "cost": 1,
         "type": "SKILL",
         "rarity": "UNCOMMON",
         "target": "ALL_ENEMIES",
-        "effects": [{ "type": "VULNERABLE", "value": 2, "duration": 2 }],
-        "texturePath": "images/cards/expose.png"
+        "effects": [{ "type": "VULNERABLE", "value": 1, "duration": 2 }],
+        "texturePath": "images/cards/expose.png",
+        "upgrade": {
+          "name": "Expose+",
+          "description": "Apply Vulnerable to all enemies for 3 turns.",
+          "cost": 1,
+          "rarity": "UNCOMMON",
+          "effects": [{ "type": "VULNERABLE", "value": 1, "duration": 3 }]
+        }
       },
       {
         "id": "inner_focus",
@@ -80,7 +111,14 @@
         "rarity": "UNCOMMON",
         "target": "SELF",
         "effects": [{ "type": "STRENGTH", "value": 2, "duration": 0 }],
-        "texturePath": "images/cards/inner_focus.png"
+        "texturePath": "images/cards/inner_focus.png",
+        "upgrade": {
+          "name": "Inner Focus+",
+          "description": "Gain 3 Strength for the rest of combat.",
+          "cost": 2,
+          "rarity": "UNCOMMON",
+          "effects": [{ "type": "STRENGTH", "value": 3, "duration": 0 }]
+        }
       },
       {
         "id": "bandage",
@@ -92,7 +130,14 @@
         "rarity": "COMMON",
         "target": "SELF",
         "effects": [{ "type": "HEAL", "value": 6, "duration": 0 }],
-        "texturePath": "images/cards/bandage.png"
+        "texturePath": "images/cards/bandage.png",
+        "upgrade": {
+          "name": "Bandage+",
+          "description": "Heal 9 health.",
+          "cost": 1,
+          "rarity": "COMMON",
+          "effects": [{ "type": "HEAL", "value": 9, "duration": 0 }]
+        }
       },
       {
         "id": "sentinels_rebuke",
@@ -107,7 +152,17 @@
           { "type": "DAMAGE", "value": 4, "duration": 0 },
           { "type": "FEEBLE", "value": 1, "duration": 2 }
         ],
-        "texturePath": "images/cards/sentinels_rebuke.png"
+        "texturePath": "images/cards/sentinels_rebuke.png",
+        "upgrade": {
+          "name": "Sentinel's Rebuke+",
+          "description": "A final admonition recalls the fallen to silence. Deal 6 damage. Apply 1 Feeble for 3 turns.",
+          "cost": 1,
+          "rarity": "UNCOMMON",
+          "effects": [
+            { "type": "DAMAGE", "value": 6, "duration": 0 },
+            { "type": "FEEBLE", "value": 1, "duration": 3 }
+          ]
+        }
       },
       {
         "id": "poison_flask",
@@ -221,7 +276,14 @@
         "rarity": "UNCOMMON",
         "target": "SINGLE_ENEMY",
         "effects": [{ "type": "DAMAGE", "value": 9, "duration": 0 }],
-        "texturePath": "images/cards/wardens_judgement.png"
+        "texturePath": "images/cards/wardens_judgement.png",
+        "upgrade": {
+          "name": "Warden's Judgement+",
+          "description": "Mercy is pronounced beneath a broken oath. Deal 13 damage.",
+          "cost": 2,
+          "rarity": "UNCOMMON",
+          "effects": [{ "type": "DAMAGE", "value": 13, "duration": 0 }]
+        }
       },
       {
         "id": "unseal_the_breach",
@@ -236,7 +298,17 @@
           { "type": "SUNDER", "value": 3, "duration": 0 },
           { "type": "DAMAGE", "value": 2, "duration": 0 }
         ],
-        "texturePath": "images/cards/unseal_the_breach.png"
+        "texturePath": "images/cards/unseal_the_breach.png",
+        "upgrade": {
+          "name": "Break the Seal+",
+          "description": "No ward shall bar the way to absolution. Reduce the enemy's armour by 5, then deal 4 damage.",
+          "cost": 1,
+          "rarity": "UNCOMMON",
+          "effects": [
+            { "type": "SUNDER", "value": 5, "duration": 0 },
+            { "type": "DAMAGE", "value": 4, "duration": 0 }
+          ]
+        }
       },
       {
         "id": "astral_ward",
@@ -297,7 +369,17 @@
           { "type": "BLOCK", "value": 7, "duration": 0 },
           { "type": "HEAL", "value": 3, "duration": 0 }
         ],
-        "texturePath": "images/cards/makeshift_shelter.png"
+        "texturePath": "images/cards/makeshift_shelter.png",
+        "upgrade": {
+          "name": "Humble Sanctuary+",
+          "description": "Even a lesser blessing can become a refuge. Gain 10 Block. Heal 4.",
+          "cost": 2,
+          "rarity": "UNCOMMON",
+          "effects": [
+            { "type": "BLOCK", "value": 10, "duration": 0 },
+            { "type": "HEAL", "value": 4, "duration": 0 }
+          ]
+        }
       },
       {
         "id": "rubble_barricade",
@@ -309,7 +391,14 @@
         "rarity": "UNCOMMON",
         "target": "SELF",
         "effects": [{ "type": "BLOCK", "value": 12, "duration": 0 }],
-        "texturePath": "images/cards/rubble_barricade.png"
+        "texturePath": "images/cards/rubble_barricade.png",
+        "upgrade": {
+          "name": "Consecrated Rampart+",
+          "description": "Even broken stone can bear a sacred ward. Gain 18 Block.",
+          "cost": 2,
+          "rarity": "UNCOMMON",
+          "effects": [{ "type": "BLOCK", "value": 18, "duration": 0 }]
+        }
       },
       {
         "id": "emergency_salve",
@@ -321,7 +410,14 @@
         "rarity": "UNCOMMON",
         "target": "SELF",
         "effects": [{ "type": "HEAL", "value": 10, "duration": 0 }],
-        "texturePath": "images/cards/emergency_salve.png"
+        "texturePath": "images/cards/emergency_salve.png",
+        "upgrade": {
+          "name": "Balm of Grace+",
+          "description": "Grace settles into wounded flesh. Heal 15 health.",
+          "cost": 2,
+          "rarity": "UNCOMMON",
+          "effects": [{ "type": "HEAL", "value": 15, "duration": 0 }]
+        }
       },
       {
         "id": "purify",
@@ -333,7 +429,14 @@
         "rarity": "UNCOMMON",
         "target": "SELF",
         "effects": [{ "type": "CLEANSE", "value": 1, "duration": 0 }],
-        "texturePath": "images/cards/purify.png"
+        "texturePath": "images/cards/purify.png",
+        "upgrade": {
+          "name": "Purify+",
+          "description": "The stain of corruption is washed away by grace. Remove all negative effects from yourself.",
+          "cost": 0,
+          "rarity": "UNCOMMON",
+          "effects": [{ "type": "CLEANSE", "value": 1, "duration": 0 }]
+        }
       },
       {
         "id": "sealed_pact",
