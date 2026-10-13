@@ -31,6 +31,7 @@ public class RunState {
   private boolean cardFusionUsed;
   private PlayerRunState playerState;
   private boolean pendingEliteTempleReward;
+  private boolean mapIntroductionPending;
   private Long encounterSeed;
   private Random random = new Random();
 
@@ -164,7 +165,15 @@ public class RunState {
     this.mapGraph = mapGraph;
     this.activeNodeId = null;
     this.encounterSeed = random.nextLong();
+    this.mapIntroductionPending = true;
     return true;
+  }
+
+  /** Returns true only for the first introduction shown after starting a fresh run. */
+  public boolean consumeMapIntroduction() {
+    boolean pending = mapIntroductionPending;
+    mapIntroductionPending = false;
+    return pending;
   }
 
   /**
@@ -236,6 +245,7 @@ public class RunState {
 
     this.mapGraph = mapGraph;
     this.activeNodeId = activeNodeId;
+    this.mapIntroductionPending = false;
 
     // A mid-battle save leaves that node's state as CURRENT, since only a completed encounter
     // flips it to COMPLETED (see enterEncounter()/completeEncounter()). On restore, a save is
@@ -349,6 +359,7 @@ public class RunState {
     cardFusionUsed = false;
     playerState = null;
     pendingEliteTempleReward = false;
+    mapIntroductionPending = false;
     pendingReward = null;
   }
 
