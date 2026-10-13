@@ -18,6 +18,7 @@ public final class ItemFormatting {
     DISPLAY_NAMES.put(ItemType.MERCHANTS_FAVOR, "Relic of Commerce");
     DISPLAY_NAMES.put(ItemType.IRON_AEGIS, "Aegis Fragment");
     DISPLAY_NAMES.put(ItemType.WARRIORS_CREST, "Blessed Crest");
+    DISPLAY_NAMES.put(ItemType.AMBROSIA_FLASK, "Draught of Ambrosia");
   }
 
   private ItemFormatting() {

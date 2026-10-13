@@ -254,6 +254,30 @@ class PlayerRunStateTest {
   }
 
   @Test
+  void ambrosiaFlaskRestoresTwentyHealthAndConsumesOneCopy() {
+    PlayerRunState state = new PlayerRunState(55, 100, 50);
+    state.addOwnedItem(ItemType.AMBROSIA_FLASK);
+    Entity player = player(55, 100, 50);
+
+    assertTrue(state.useBattleItem(ItemType.AMBROSIA_FLASK, player));
+
+    assertEquals(75, player.getComponent(CombatStatsComponent.class).getHealth());
+    assertEquals(0, state.getOwnedItemCount(ItemType.AMBROSIA_FLASK));
+  }
+
+  @Test
+  void ambrosiaFlaskCannotBeConsumedAtFullHealth() {
+    PlayerRunState state = new PlayerRunState(100, 100, 50);
+    state.addOwnedItem(ItemType.AMBROSIA_FLASK);
+    Entity player = player(100, 100, 50);
+
+    assertFalse(state.useBattleItem(ItemType.AMBROSIA_FLASK, player));
+
+    assertEquals(100, player.getComponent(CombatStatsComponent.class).getHealth());
+    assertEquals(1, state.getOwnedItemCount(ItemType.AMBROSIA_FLASK));
+  }
+
+  @Test
   void doesNotRemoveBattleConsumableWhenItCannotBeApplied() {
     PlayerRunState state = new PlayerRunState(100, 100, 50);
     state.addOwnedItem(ItemType.IRON_AEGIS);

@@ -160,7 +160,8 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
       "images/ui/energy-crystal.png",
       "images/ui/merchants-favor.png",
       "images/ui/iron-aegis.png",
-      "images/ui/warriors-crest.png"
+      "images/ui/warriors-crest.png",
+      "images/ui/ambrosia-flask.png"
     };
     for (String texturePath : inventoryTextures) {
       if (!resourceService.containsAsset(texturePath, Texture.class)) {

@@ -34,10 +34,11 @@ import org.slf4j.LoggerFactory;
 public class EndBattleScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(EndBattleScreen.class);
   private static final String[] REWARD_TEXTURES = {
-    "images/ui/reward-panel.png",
-    "images/ui/reward-card.png",
+    "images/ui/victory-background-approved.png",
+    "images/ui/reward-panel-mythic-cords-aged.png",
+    "images/ui/reward-card-mythic-aged.png",
     "images/ui/gold-reward.png",
-    "images/ui/victory-title.png",
+    "images/ui/victory-title-mythic.png",
     "images/ui/lucky-coin.png",
     "images/ui/energy-crystal.png",
     "images/ui/merchants-favor.png",

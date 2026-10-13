@@ -119,6 +119,7 @@ public class BattleScreen extends ScreenAdapter {
     "images/ui/merchants-favor.png",
     "images/ui/iron-aegis.png",
     "images/ui/warriors-crest.png",
+    "images/ui/ambrosia-flask.png",
     "images/effects/heal.png",
     "images/enemies/intents/buff.png"
   };

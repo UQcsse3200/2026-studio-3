@@ -59,6 +59,8 @@ public class ItemLibraryDisplay extends UIComponent {
             + " at +20. Only one copy used per claim.");
     ITEM_DESCRIPTIONS.put(ItemType.IRON_AEGIS, "Consume during battle to gain +5 Armour.");
     ITEM_DESCRIPTIONS.put(ItemType.WARRIORS_CREST, "Consume during battle to gain +1 Strength.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.AMBROSIA_FLASK, "Consume during battle to restore 20 Health, up to max health.");
   }
 
   private final GdxGame game;
