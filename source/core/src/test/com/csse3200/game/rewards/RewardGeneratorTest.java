@@ -60,7 +60,10 @@ class RewardGeneratorTest {
       generated.add(generator.generateItemRewardOption().itemId);
     }
 
-    assertTrue(generated.containsAll(EnumSet.allOf(ItemType.class)));
+    EnumSet<ItemType> gameplayItems = EnumSet.allOf(ItemType.class);
+    gameplayItems.removeIf(ItemType::isCurse);
+    assertTrue(generated.containsAll(gameplayItems));
+    assertTrue(generated.stream().noneMatch(ItemType::isCurse));
   }
 
   @Test
@@ -81,7 +84,7 @@ class RewardGeneratorTest {
     // which should each land close to 2/9.
     int energyCrystalCount = counts.get(ItemType.ENERGY_CRYSTAL);
     for (ItemType type : ItemType.values()) {
-      if (type == ItemType.ENERGY_CRYSTAL) {
+      if (type == ItemType.ENERGY_CRYSTAL || type.isCurse()) {
         continue;
       }
       assertTrue(

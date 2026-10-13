@@ -18,6 +18,9 @@ public final class ItemFormatting {
     DISPLAY_NAMES.put(ItemType.MERCHANTS_FAVOR, "Relic of Commerce");
     DISPLAY_NAMES.put(ItemType.IRON_AEGIS, "Aegis Fragment");
     DISPLAY_NAMES.put(ItemType.WARRIORS_CREST, "Blessed Crest");
+    DISPLAY_NAMES.put(ItemType.ASHEN_EMBER, "Ashen Ember");
+    DISPLAY_NAMES.put(ItemType.BRAND_OF_THE_DAMNED, "Brand of the Damned");
+    DISPLAY_NAMES.put(ItemType.SHATTERED_AEGIS, "Shattered Aegis");
   }
 
   private ItemFormatting() {

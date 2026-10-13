@@ -14,6 +14,9 @@ public class EnergyComponent extends Component {
   private int currentEnergy;
   private int maxEnergy;
 
+  /** Highest max energy the player can reach from any source. */
+  public static final int MAX_ENERGY_CAP = 5;
+
   public EnergyComponent(int maxEnergy) {
     this.maxEnergy = maxEnergy;
     this.currentEnergy = maxEnergy;
@@ -44,7 +47,7 @@ public class EnergyComponent extends Component {
   }
 
   public void setMaxEnergy(int maxEnergy) {
-    this.maxEnergy = Math.max(maxEnergy, 1);
+    this.maxEnergy = Math.min(Math.max(maxEnergy, 1), MAX_ENERGY_CAP);
     this.currentEnergy = Math.min(this.currentEnergy, this.maxEnergy);
     notifyEnergyChange();
   }

@@ -325,6 +325,9 @@ public class RewardDisplay extends Displaying {
                     case MERCHANTS_FAVOR -> " (+10% Shop Discount)";
                     case IRON_AEGIS -> " (+5 Armour when used)";
                     case WARRIORS_CREST -> " (+1 Strength when used)";
+                    case ASHEN_EMBER -> " (-1 Max Energy)";
+                    case BRAND_OF_THE_DAMNED -> " (-1 Strength each battle)";
+                    case SHATTERED_AEGIS -> " (-1 Block from cards)";
                   };
       case CARD -> "Choose a Card";
     };
@@ -357,6 +360,9 @@ public class RewardDisplay extends Displaying {
                 case MERCHANTS_FAVOR -> "+10% Shop Discount\nMaximum 50%";
                 case IRON_AEGIS -> "+5 Armour when used";
                 case WARRIORS_CREST -> "+1 Strength when used";
+                case ASHEN_EMBER -> "-1 Max Energy\nMinimum 1";
+                case BRAND_OF_THE_DAMNED -> "-1 Strength at the\nstart of each battle";
+                case SHATTERED_AEGIS -> "Cards grant\n1 less Block";
               };
     };
   }

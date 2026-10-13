@@ -66,6 +66,8 @@ import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.AnimationRenderComponent;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
+import com.csse3200.game.rewards.BrandOfTheDamnedEffect;
+import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.DragNDropService;
 import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
@@ -210,6 +212,9 @@ public class BattleScreen extends ScreenAdapter {
 
     playerState = runState.getOrCreatePlayerState();
     Entity player = forestGameArea.getPlayer();
+    if (!tutorialBattle) {
+      applyBattleStartCurses(player);
+    }
 
     List<CardConfig> configs = CardConfigLoader.loadCards();
     library = new CardLibrary(configs);
@@ -831,6 +836,14 @@ public class BattleScreen extends ScreenAdapter {
       clickable.setVisualContent(() -> new CardWidget(resolved, cardWidgetAssets));
     } catch (IllegalArgumentException | IllegalStateException exception) {
       logger.warn("Could not install card widget for instance {}", instanceId, exception);
+    }
+  }
+
+  /** Applies curse items that take effect at the start of every battle. */
+  private void applyBattleStartCurses(Entity player) {
+    int brandCount = playerState.getOwnedItemCount(ItemType.BRAND_OF_THE_DAMNED);
+    for (int i = 0; i < brandCount; i++) {
+      new BrandOfTheDamnedEffect().apply(player);
     }
   }
 }
