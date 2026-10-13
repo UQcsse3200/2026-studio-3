@@ -36,10 +36,6 @@ class CardUpgradeStandardTest {
   /** Card owners remove their IDs from this set in the same commit that adds their upgrades. */
   private static final Set<String> PENDING_UPGRADES =
       Set.of(
-          "warding_sweep",
-          "sentinels_rebuke",
-          "wardens_judgement",
-          "unseal_the_breach",
           "poison_flask",
           "poison_blade",
           "poison_cloud",

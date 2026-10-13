@@ -29,7 +29,14 @@
         "rarity": "COMMON",
         "target": "ALL_ENEMIES",
         "effects": [{ "type": "DAMAGE", "value": 4, "duration": 0 }],
-        "texturePath": "images/cards/warding_sweep.png"
+        "texturePath": "images/cards/warding_sweep.png",
+        "upgrade": {
+          "name": "Warding Sweep+",
+          "description": "The old guard's circle still holds. Deal 6 damage to all enemies.",
+          "cost": 2,
+          "rarity": "COMMON",
+          "effects": [{ "type": "DAMAGE", "value": 6, "duration": 0 }]
+        }
       },
       {
         "id": "defend",
@@ -145,7 +152,17 @@
           { "type": "DAMAGE", "value": 4, "duration": 0 },
           { "type": "FEEBLE", "value": 1, "duration": 2 }
         ],
-        "texturePath": "images/cards/sentinels_rebuke.png"
+        "texturePath": "images/cards/sentinels_rebuke.png",
+        "upgrade": {
+          "name": "Sentinel's Rebuke+",
+          "description": "A final admonition recalls the fallen to silence. Deal 6 damage. Apply 1 Feeble for 3 turns.",
+          "cost": 1,
+          "rarity": "UNCOMMON",
+          "effects": [
+            { "type": "DAMAGE", "value": 6, "duration": 0 },
+            { "type": "FEEBLE", "value": 1, "duration": 3 }
+          ]
+        }
       },
       {
         "id": "poison_flask",
@@ -242,7 +259,14 @@
         "rarity": "UNCOMMON",
         "target": "SINGLE_ENEMY",
         "effects": [{ "type": "DAMAGE", "value": 9, "duration": 0 }],
-        "texturePath": "images/cards/wardens_judgement.png"
+        "texturePath": "images/cards/wardens_judgement.png",
+        "upgrade": {
+          "name": "Warden's Judgement+",
+          "description": "Mercy is pronounced beneath a broken oath. Deal 13 damage.",
+          "cost": 2,
+          "rarity": "UNCOMMON",
+          "effects": [{ "type": "DAMAGE", "value": 13, "duration": 0 }]
+        }
       },
       {
         "id": "unseal_the_breach",
@@ -257,7 +281,17 @@
           { "type": "SUNDER", "value": 3, "duration": 0 },
           { "type": "DAMAGE", "value": 2, "duration": 0 }
         ],
-        "texturePath": "images/cards/unseal_the_breach.png"
+        "texturePath": "images/cards/unseal_the_breach.png",
+        "upgrade": {
+          "name": "Break the Seal+",
+          "description": "No ward shall bar the way to absolution. Reduce the enemy's armour by 5, then deal 4 damage.",
+          "cost": 1,
+          "rarity": "UNCOMMON",
+          "effects": [
+            { "type": "SUNDER", "value": 5, "duration": 0 },
+            { "type": "DAMAGE", "value": 4, "duration": 0 }
+          ]
+        }
       },
       {
         "id": "astral_ward",
