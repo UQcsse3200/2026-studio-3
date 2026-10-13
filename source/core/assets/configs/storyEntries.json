@@ -4,24 +4,24 @@
       "id": "the_pantheon",
       "title": "The Pantheon",
       "paragraphs": [
-        "Long ago, Heaven appointed a pantheon to keep the world in order. Each god was given a duty, and each duty was given servants to carry it out.",
-        "For an age the order held. The gods kept their charges, and the creatures who served them kept their posts."
+        "Long ago, Heaven appointed a pantheon to keep the world in order. Each god was entrusted with a duty, and servants carried out that duty.",
+        "For an age, the order held. The gods kept their charges, and their servants kept their posts."
       ]
     },
     {
       "id": "the_corruption",
       "title": "The Corruption",
       "paragraphs": [
-        "A villain reached the pantheon and corrupted it from within. The gods did not fall silent. They kept working, but the commands they followed were twisted.",
-        "The corrupted do not know what has been done to them. They still believe they serve, and their servants still defend them."
+        "A villain corrupted the pantheon. The gods did not cease their work; the duties they carried on became twisted under corruption.",
+        "They do not know what has been done to them. Believing they still serve as before, they continue their duties while their servants remain at their posts."
       ]
     },
     {
       "id": "the_lesser_angel",
       "title": "The Lesser Angel",
       "paragraphs": [
-        "Heaven did not send an army. It sent a lesser angel to walk among the fallen gods.",
-        "The angel carries no great rank and no crown of light, only the skills it has learned and the task it has been given."
+        "Heaven sent a lesser angel to walk among the fallen gods.",
+        "The angel carries no great rank, only the skills it has learned and the task it has been given: to confront the corruption and carry the work of release forward."
       ]
     },
     {
@@ -29,15 +29,15 @@
       "title": "Release, Not Ruin",
       "paragraphs": [
         "The angel was not sent to destroy the gods, but to set them free.",
-        "Every battle is fought to break the corruption's hold. When it breaks, the old duty is no longer twisted, and what Heaven once appointed is released."
+        "Each battle is fought to break corruption's hold. When that hold is broken, the fallen are released from the commands that corruption twisted."
       ]
     },
     {
       "id": "the_five_schools",
       "title": "The Five Schools",
       "paragraphs": [
-        "The angel's techniques come from five schools: Guardian Arts, Astral Magic, Corrupted Alchemy, Ruin Survival and Forbidden Rituals.",
-        "Some were taught by those who once kept the threshold. Some were learned from starlight, from the ruins, or from the corruption itself. A few are dangerous, and are used only when safer means fail."
+        "The angel's learned techniques are grouped into five schools: Guardian Arts, Astral Magic, Corrupted Alchemy, Ruin Survival and Forbidden Rituals. The six baseline cards remain basic techniques rather than a sixth school.",
+        "Guardian Arts protects without needless destruction. Astral Magic draws on celestial forces. Corrupted Alchemy turns traces of corruption against what spreads it. Ruin Survival endures damaged places through shelter, healing and purification. Forbidden Rituals bind dangerous power through pacts, blood, sigils and oaths when safer means are not enough."
       ]
     }
   ]
