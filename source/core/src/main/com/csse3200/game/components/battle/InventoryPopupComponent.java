@@ -217,11 +217,11 @@ public class InventoryPopupComponent extends UIComponent {
     String status = item == ItemType.LUCKY_COIN ? "ON GOLD" : "PASSIVE";
 
     Table border = new Table();
-    border.setBackground(skin.newDrawable("white", ROW_BORDER_COLOUR));
+    border.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR));
     border.pad(2f);
 
     Table badge = new Table();
-    badge.setBackground(skin.newDrawable("white", ROW_BACKGROUND_COLOUR));
+    badge.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_BACKGROUND_COLOUR));
     badge.add(new Label(status, smallLabelStyle(DESCRIPTION_COLOUR))).pad(5f, 8f, 5f, 8f);
 
     border.add(badge);

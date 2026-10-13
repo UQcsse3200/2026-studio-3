@@ -157,6 +157,10 @@ public class BattleScreen extends ScreenAdapter {
   private List<ClickableRecord> staticUiRecords;
 
   private List<CardInstance> handRowOrder = new ArrayList<>();
+  private static final String PLAY_CARD_TRIGGER = "playCard";
+  private static final String OPEN_MENU_TRIGGER = "openMenu";
+  private static final String OPEN_INVENTORY_TRIGGER = "openInventory";
+  private static final String END_TURN_TRIGGER = "endTurn";
 
   public BattleScreen(GdxGame game) {
     this(game, false);
@@ -327,23 +331,23 @@ public class BattleScreen extends ScreenAdapter {
               ServiceLocator.getRenderService().getStage(),
               cardWidgetSkin,
               () ->
-                  uiFactory.getByTrigger("playCard").stream()
+                  uiFactory.getByTrigger(PLAY_CARD_TRIGGER).stream()
                       .map(Clickable::getBtn)
                       .map(actor -> (com.badlogic.gdx.scenes.scene2d.Actor) actor)
                       .toList(),
               () ->
-                  uiFactory.getByTrigger("playCard").stream()
+                  uiFactory.getByTrigger(PLAY_CARD_TRIGGER).stream()
                       .filter(c -> c.getArgs().length > 0 && demonstrationId.equals(c.getArgs()[0]))
                       .map(Clickable::getBtn)
                       .findFirst()
                       .orElse(null),
               () ->
-                  uiFactory.getByTrigger("openMenu").stream()
+                  uiFactory.getByTrigger(OPEN_MENU_TRIGGER).stream()
                       .map(Clickable::getBtn)
                       .findFirst()
                       .orElse(null),
               () ->
-                  uiFactory.getByTrigger("endTurn").stream()
+                  uiFactory.getByTrigger(END_TURN_TRIGGER).stream()
                       .map(Clickable::getBtn)
                       .findFirst()
                       .orElse(null));
@@ -551,8 +555,8 @@ public class BattleScreen extends ScreenAdapter {
       c.getBtn().setVisible(false);
     }
 
-    battleUi.getEvents().addListener("openMenu", deckEditor::open);
-    battleUi.getEvents().addListener("openInventory", inventoryPopup::open);
+    battleUi.getEvents().addListener(OPEN_MENU_TRIGGER, deckEditor::open);
+    battleUi.getEvents().addListener(OPEN_INVENTORY_TRIGGER, inventoryPopup::open);
   }
 
   private DisplayingFactory buildDeckEditorDisplays(
@@ -662,9 +666,9 @@ public class BattleScreen extends ScreenAdapter {
     for (ClickableRecord clickableRecord : staticUiRecords) {
       BattleMenuSkins.Icon icon =
           switch (clickableRecord.trigger()) {
-            case "openMenu" -> BattleMenuSkins.Icon.CARD;
-            case "openInventory" -> BattleMenuSkins.Icon.INVENTORY;
-            case "endTurn" -> BattleMenuSkins.Icon.END_TURN;
+            case OPEN_MENU_TRIGGER -> BattleMenuSkins.Icon.CARD;
+            case OPEN_INVENTORY_TRIGGER -> BattleMenuSkins.Icon.INVENTORY;
+            case END_TURN_TRIGGER -> BattleMenuSkins.Icon.END_TURN;
             default -> null;
           };
       if (icon == null) {
@@ -724,7 +728,7 @@ public class BattleScreen extends ScreenAdapter {
       float y = HAND_Y + Math.abs(offsetFromCenter) * HAND_ARC_DROP_PER_CARD;
 
       ClickableRecord.Builder builder =
-          ClickableRecord.builder("playCard")
+          ClickableRecord.builder(PLAY_CARD_TRIGGER)
               .label(card.name())
               .variant(variant)
               .position(x, y)
@@ -762,7 +766,7 @@ public class BattleScreen extends ScreenAdapter {
       instancesById.put(instance.instanceId(), instance);
     }
 
-    for (Clickable clickable : uiFactory.getByTrigger("playCard")) {
+    for (Clickable clickable : uiFactory.getByTrigger(PLAY_CARD_TRIGGER)) {
       installHandCardWidget(clickable, instancesById);
     }
   }

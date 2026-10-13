@@ -35,6 +35,7 @@ public class CombatStatsComponent extends Component {
   private int armour = 0;
   private int block = 0;
   private final Map<String, StatusEffect> statusEffects = new HashMap<>();
+  private static final String EVT_ENTITY_DEAD = "entityIsDead";
 
   /**
    * Entity's base constructor
@@ -137,7 +138,7 @@ public class CombatStatsComponent extends Component {
       int remainingDamage = absorbDamageWithArmour(afterBlock);
       setHealth(Math.max(this.health - remainingDamage, 0));
       if (entity != null && isDead()) {
-        entity.getEvents().trigger("entityIsDead");
+        entity.getEvents().trigger(EVT_ENTITY_DEAD);
       }
     }
   }
@@ -160,7 +161,7 @@ public class CombatStatsComponent extends Component {
     } else if (amount < 0 && !isDead()) {
       setHealth(Math.max(this.health + amount, 0));
       if (entity != null && isDead()) {
-        entity.getEvents().trigger("entityIsDead");
+        entity.getEvents().trigger(EVT_ENTITY_DEAD);
       }
     }
   }
@@ -175,7 +176,7 @@ public class CombatStatsComponent extends Component {
     if (damage >= 0 && !isDead()) {
       setHealth(Math.max(this.health - damage, 0));
       if (entity != null && isDead()) {
-        entity.getEvents().trigger("entityIsDead");
+        entity.getEvents().trigger(EVT_ENTITY_DEAD);
       }
     }
   }
@@ -193,7 +194,7 @@ public class CombatStatsComponent extends Component {
       entity
           .getEvents()
           .trigger(
-              "updateMaxHealth",
+              EVT_MAX_HEALTH,
               this.maxHealth); // this line (basically tells other that is listening to this that
       // the value is changed)
     }
