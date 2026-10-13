@@ -6,9 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.input.InputComponent;
@@ -37,7 +35,6 @@ public final class CardInspectionController extends InputComponent {
   private Actor previousScrollFocus;
   private boolean fHeld;
   private boolean pointerPreferred = true;
-  private Table hint;
 
   /**
    * @param stage screen's existing UI stage
@@ -59,21 +56,6 @@ public final class CardInspectionController extends InputComponent {
     this.assets = Objects.requireNonNull(assets);
     this.blocked = Objects.requireNonNull(blocked);
     this.dragging = Objects.requireNonNull(dragging);
-  }
-
-  @Override
-  public void create() {
-    super.create();
-    Label.LabelStyle style = new Label.LabelStyle(skin.get("small", Label.LabelStyle.class));
-    style.fontColor = new com.badlogic.gdx.graphics.Color(0.96f, 0.88f, 0.72f, 1f);
-    hint = new Table();
-    hint.setName("card-inspection-hint");
-    hint.setFillParent(true);
-    hint.setTouchable(Touchable.disabled);
-    hint.bottom().left().pad(24f);
-    hint.add(new Label("Point at a card\nF: Inspect", style));
-    hint.setVisible(false);
-    stage.addActor(hint);
   }
 
   /** Register an outer card actor and a resolver for its current exact owned copy. */
@@ -217,7 +199,6 @@ public final class CardInspectionController extends InputComponent {
     previousKeyboardFocus = stage.getKeyboardFocus();
     previousScrollFocus = stage.getScrollFocus();
     source = actor;
-    hint.setVisible(false);
     if (panel == null) panel = new CardInspectionPanel(skin, assets, card, this::close);
     else panel.setCard(card);
     stage.addActor(panel);
@@ -248,13 +229,6 @@ public final class CardInspectionController extends InputComponent {
 
   @Override
   public void update() {
-    if (hint != null) {
-      hint.setVisible(
-          !isOpen()
-              && !blocked.getAsBoolean()
-              && !dragging.getAsBoolean()
-              && sources.keySet().stream().anyMatch(this::eligible));
-    }
     if (fHeld && !Gdx.input.isKeyPressed(Keys.F)) fHeld = false;
     if (!isOpen()) return;
     if (blocked.getAsBoolean() || dragging.getAsBoolean() || !eligible(source)) {
@@ -292,7 +266,6 @@ public final class CardInspectionController extends InputComponent {
     reset();
     sources.clear();
     panel = null;
-    if (hint != null) hint.remove();
     super.dispose();
   }
 }

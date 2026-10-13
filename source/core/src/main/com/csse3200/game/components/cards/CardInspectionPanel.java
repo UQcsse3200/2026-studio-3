@@ -59,7 +59,7 @@ final class CardInspectionPanel extends Table {
     scroll.setScrollingDisabled(true, false);
     scroll.setFadeScrollBars(false);
 
-    close = new TextButton("F: Close inspection", skin);
+    close = new TextButton("Close", skin);
     close.addListener(
         new ChangeListener() {
           @Override
