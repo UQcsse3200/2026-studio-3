@@ -31,6 +31,7 @@ import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.cards.CardEffectHandler;
+import com.csse3200.game.components.cards.CardKeywordTooltip;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.combat.BattleController;
@@ -147,6 +148,7 @@ public class BattleScreen extends ScreenAdapter {
   private final Skin cardWidgetSkin;
   private final Skin cardInteractionSkin;
   private final CardWidgetAssets cardWidgetAssets;
+  private final CardKeywordTooltip cardKeywordTooltip;
   private final CardEffectResolutionService cardEffects;
   private final CardPlayService cardPlayService;
   private final CardAimController enemyCardAim;
@@ -218,6 +220,7 @@ public class BattleScreen extends ScreenAdapter {
     cardWidgetSkin = new Skin(Gdx.files.internal(CARD_WIDGET_SKIN));
     cardWidgetAssets =
         CardWidgetAssets.fromManagedResources(cardWidgetSkin, ServiceLocator.getResourceService());
+    cardKeywordTooltip = new CardKeywordTooltip(cardWidgetSkin);
     cardInteractionSkin = createCardInteractionSkin();
 
     PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(library);
@@ -659,7 +662,13 @@ public class BattleScreen extends ScreenAdapter {
   }
 
   @Override
+  public void hide() {
+    cardKeywordTooltip.hide();
+  }
+
+  @Override
   public void dispose() {
+    cardKeywordTooltip.hide();
     playerState.captureFrom(gameArea.getPlayer());
     enemyCardAim.dispose();
     playerCardAim.dispose();
@@ -801,6 +810,7 @@ public class BattleScreen extends ScreenAdapter {
   }
 
   private void installHandCardWidgets() {
+    cardKeywordTooltip.hide();
     Map<String, CardInstance> instancesById = new HashMap<>();
     for (CardInstance instance : handRowOrder) {
       instancesById.put(instance.instanceId(), instance);
@@ -829,6 +839,7 @@ public class BattleScreen extends ScreenAdapter {
     try {
       ResolvedCard resolved = cardResolver.resolve(config.get(), instance);
       clickable.setVisualContent(() -> new CardWidget(resolved, cardWidgetAssets));
+      cardKeywordTooltip.attachTo(clickable.getBtn(), resolved.description());
     } catch (IllegalArgumentException | IllegalStateException exception) {
       logger.warn("Could not install card widget for instance {}", instanceId, exception);
     }
