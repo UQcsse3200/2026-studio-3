@@ -42,6 +42,7 @@ import com.csse3200.game.screens.MapScreen;
 import com.csse3200.game.screens.NarrationScreen;
 import com.csse3200.game.screens.SaveLoadScreen;
 import com.csse3200.game.screens.SettingsScreen;
+import com.csse3200.game.screens.StoryLibraryScreen;
 import com.csse3200.game.screens.TempleCardSelectionScreen;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
@@ -337,6 +338,7 @@ public class GdxGame extends Game {
       case DEFEAT -> new EndBattleScreen(this, false);
       case BESTIARY -> new BestiaryScreen(this);
       case ITEM_LIBRARY -> new ItemLibraryScreen(this);
+      case STORY_LIBRARY -> new StoryLibraryScreen(this);
     };
   }
 
@@ -358,7 +360,8 @@ public class GdxGame extends Game {
     ANCIENT_TEMPLE,
     TEMPLE_CARD_SELECTION,
     BESTIARY,
-    ITEM_LIBRARY
+    ITEM_LIBRARY,
+    STORY_LIBRARY
   }
 
   /** Exit the game. */
