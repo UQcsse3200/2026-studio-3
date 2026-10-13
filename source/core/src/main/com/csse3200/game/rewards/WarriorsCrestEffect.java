@@ -16,11 +16,16 @@ public class WarriorsCrestEffect implements ItemEffect {
       throw new IllegalArgumentException("player must have CombatStatsComponent");
     }
 
+    int bonus = CursePenalties.reduce(stats, CursePenalties.STRENGTH_PENALTY, STRENGTH_BONUS);
+    if (bonus == 0) {
+      return;
+    }
+
     StatusEffect existingStrength = stats.getStatusEffect(STRENGTH);
     if (existingStrength == null) {
-      stats.applyStatusEffect(STRENGTH, STRENGTH_BONUS, 0);
+      stats.applyStatusEffect(STRENGTH, bonus, 0);
     } else {
-      existingStrength.addValue(STRENGTH_BONUS);
+      existingStrength.addValue(bonus);
     }
   }
 }

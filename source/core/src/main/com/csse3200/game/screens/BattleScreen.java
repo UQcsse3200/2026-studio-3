@@ -68,6 +68,7 @@ import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.rewards.BrandOfTheDamnedEffect;
 import com.csse3200.game.rewards.ItemType;
+import com.csse3200.game.rewards.ShatteredAegisEffect;
 import com.csse3200.game.services.DragNDropService;
 import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
@@ -844,6 +845,10 @@ public class BattleScreen extends ScreenAdapter {
     int brandCount = playerState.getOwnedItemCount(ItemType.BRAND_OF_THE_DAMNED);
     for (int i = 0; i < brandCount; i++) {
       new BrandOfTheDamnedEffect().apply(player);
+    }
+    int aegisCount = playerState.getOwnedItemCount(ItemType.SHATTERED_AEGIS);
+    for (int i = 0; i < aegisCount; i++) {
+      new ShatteredAegisEffect().apply(player);
     }
   }
 }
