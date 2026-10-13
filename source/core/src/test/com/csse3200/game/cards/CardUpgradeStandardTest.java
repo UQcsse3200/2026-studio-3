@@ -47,11 +47,7 @@ class CardUpgradeStandardTest {
           "starfall",
           "rift_lance",
           "astral_ward",
-          "resurrection",
-          "makeshift_shelter",
-          "rubble_barricade",
-          "emergency_salve",
-          "purify");
+          "resurrection");
 
   private List<CardConfig> cards;
 
