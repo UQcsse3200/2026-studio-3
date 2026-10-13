@@ -38,12 +38,12 @@ import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.services.audio.SoundId;
+import com.csse3200.game.ui.LibraryNameSearch;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -354,10 +354,10 @@ public class CardLibraryDisplay extends UIComponent {
   }
 
   static boolean matchesSearch(CardEntryView card, String query) {
-    String normalized = query.trim().toLowerCase(Locale.ROOT);
+    String normalized = LibraryNameSearch.normalize(query);
     return normalized.isEmpty()
         || (card.unlockState().isAtLeast(CardUnlockState.SEEN)
-            && card.displayName().toLowerCase(Locale.ROOT).contains(normalized));
+            && LibraryNameSearch.matches(card.displayName(), normalized));
   }
 
   private void refreshCards(boolean resetScroll) {
