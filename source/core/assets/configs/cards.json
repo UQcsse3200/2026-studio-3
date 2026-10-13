@@ -121,7 +121,20 @@
         "effects": [
           { "type": "POISON", "value": 5, "duration": 3 }
         ],
-        "texturePath": "images/cards/poison_flask.png"
+        "texturePath": "images/cards/poison_flask.png",
+        "upgrade": {
+          "name": "Poison Flask+",
+          "description": "A measured dose draws corruption to the surface. Apply 7 Poison for 3 turns.",
+          "cost": 1,
+          "rarity": "UNCOMMON",
+          "effects": [
+            {
+              "type": "POISON",
+              "value": 7,
+              "duration": 3
+            }
+          ]
+        }
       },
       {
         "id": "poison_blade",
@@ -136,7 +149,25 @@
           { "type": "PIERCE", "value": 10, "duration": 0 },
           { "type": "POISON", "value": 4, "duration": 2 }
         ],
-        "texturePath": "images/cards/poison_blade.png"
+        "texturePath": "images/cards/poison_blade.png",
+        "upgrade": {
+          "name": "Poison Blade+",
+          "description": "The blade reaches beneath the fallen's defences. Deal 12 piercing damage, ignoring Block and Armour. Apply 5 Poison for 2 turns.",
+          "cost": 2,
+          "rarity": "UNCOMMON",
+          "effects": [
+            {
+              "type": "PIERCE",
+              "value": 12,
+              "duration": 0
+            },
+            {
+              "type": "POISON",
+              "value": 5,
+              "duration": 2
+            }
+          ]
+        }
       },
       {
         "id": "poison_cloud",
@@ -150,7 +181,20 @@
         "effects": [
           { "type": "POISON", "value": 3, "duration": 3 }
         ],
-        "texturePath": "images/cards/poison_cloud.png"
+        "texturePath": "images/cards/poison_cloud.png",
+        "upgrade": {
+          "name": "Poison Cloud+",
+          "description": "A bitter mist exposes the stain within. Apply 4 Poison to all enemies for 3 turns.",
+          "cost": 2,
+          "rarity": "UNCOMMON",
+          "effects": [
+            {
+              "type": "POISON",
+              "value": 4,
+              "duration": 3
+            }
+          ]
+        }
       },
       {
         "id": "poison_mark",
@@ -165,7 +209,25 @@
           { "type": "VULNERABLE", "value": 2, "duration": 2 },
           { "type": "POISON", "value": 2, "duration": 2 }
         ],
-        "texturePath": "images/cards/poison_mark.png"
+        "texturePath": "images/cards/poison_mark.png",
+        "upgrade": {
+          "name": "Poison Mark+",
+          "description": "A quiet sign reveals where the corruption has taken hold. Apply 2 Vulnerable and 3 Poison to an enemy for 2 turns.",
+          "cost": 1,
+          "rarity": "RARE",
+          "effects": [
+            {
+              "type": "VULNERABLE",
+              "value": 2,
+              "duration": 2
+            },
+            {
+              "type": "POISON",
+              "value": 3,
+              "duration": 2
+            }
+          ]
+        }
       },
       {
         "id": "starfall",
