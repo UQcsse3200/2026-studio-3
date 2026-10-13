@@ -103,7 +103,7 @@ class CardUpgradeStandardTest {
                 "Poison Dagger+",
                 1,
                 List.of(effect(6, 0), effect(4, 3))),
-        () -> assertUpgraded(library, resolver, "expose", "Expose+", 1, List.of(effect(2, 3))),
+        () -> assertUpgraded(library, resolver, "expose", "Expose+", 1, List.of(effect(1, 3))),
         () ->
             assertUpgraded(
                 library, resolver, "inner_focus", "Inner Focus+", 2, List.of(effect(3, 0))),
