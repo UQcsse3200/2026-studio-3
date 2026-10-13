@@ -3,7 +3,9 @@ package com.csse3200.game.components.spritedisplay.displaying;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -43,10 +45,18 @@ public class RewardDisplay extends Displaying {
 
   private static final Logger logger = LoggerFactory.getLogger(RewardDisplay.class);
 
-  private static final String PANEL_TEXTURE = "images/ui/reward-panel.png";
-  private static final String CARD_TEXTURE = "images/ui/reward-card.png";
+  private static final String BACKGROUND_TEXTURE = "images/ui/victory-background-approved.png";
+  private static final String PANEL_TEXTURE = "images/ui/reward-panel-mythic-cords-aged.png";
+  private static final String CARD_TEXTURE = "images/ui/reward-card-mythic-aged.png";
   private static final String GOLD_TEXTURE = "images/ui/gold-reward.png";
-  private static final String VICTORY_TITLE_TEXTURE = "images/ui/victory-title.png";
+  private static final String VICTORY_TITLE_TEXTURE = "images/ui/victory-title-mythic.png";
+  private static final float REFERENCE_WIDTH = 1672f;
+  private static final float REFERENCE_HEIGHT = 941f;
+  private static final float REFERENCE_PANEL_WIDTH = 1222f;
+  private static final float REFERENCE_PANEL_HEIGHT = 876f;
+  private static final int[] VICTORY_LETTER_X = {0, 252, 526, 817, 1120, 1390, 1730, 2170};
+  private static final float PANEL_TEXTURE_WIDTH = 1584f;
+  private static final float PANEL_TEXTURE_HEIGHT = 993f;
   private static final Color SCRIM = new Color(0.015f, 0.01f, 0.025f, 0.58f);
   private static final Color GOLD = new Color(0.96f, 0.78f, 0.38f, 1f);
   private static final Color CREAM = new Color(0.93f, 0.87f, 0.73f, 1f);
@@ -57,7 +67,10 @@ public class RewardDisplay extends Displaying {
           ItemType.ENERGY_CRYSTAL, "images/ui/energy-crystal.png",
           ItemType.MERCHANTS_FAVOR, "images/ui/merchants-favor.png",
           ItemType.IRON_AEGIS, "images/ui/iron-aegis.png",
-          ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png");
+          ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png",
+          ItemType.ASHEN_EMBER, "images/ui/ashen-ember.png",
+          ItemType.BRAND_OF_THE_DAMNED, "images/ui/brand-of-the-damned.png",
+          ItemType.SHATTERED_AEGIS, "images/ui/shattered-aegis.png");
 
   private final RunState runState;
   private final GdxGame game;
@@ -79,9 +92,15 @@ public class RewardDisplay extends Displaying {
   private Actor background;
   private Actor scrimActor;
   private Actor rewardUi;
+  private Actor victoryTitle;
+  private Actor victorySubtitle;
+  private Actor sunPulse;
   private Table cardSelectionTable;
   private CardWidgetAssets cardWidgetAssets;
   private final List<Actor> rewardOptionCards = new ArrayList<>();
+  private final List<Actor> victoryTitleLetters = new ArrayList<>();
+  private final List<Actor> victoryParticles = new ArrayList<>();
+  private VictoryAnimationController victoryAnimationController;
 
   public RewardDisplay(
       DisplayingRecord rec,
@@ -160,9 +179,7 @@ public class RewardDisplay extends Displaying {
     }
 
     Image scene =
-        new Image(
-            ServiceLocator.getResourceService()
-                .getAsset("images/" + game.getBackgroundId() + ".png", Texture.class));
+        new Image(ServiceLocator.getResourceService().getAsset(BACKGROUND_TEXTURE, Texture.class));
 
     scene.setScaling(Scaling.fill);
     scene.setFillParent(true);
@@ -175,17 +192,18 @@ public class RewardDisplay extends Displaying {
     scrimActor = dimmer;
     stage.addActor(dimmer);
 
-    float panelWidth = Math.min(stage.getWidth() * 0.92f, 1180f);
-    float panelHeight = panelWidth * 0.625f;
-    if (panelHeight > stage.getHeight() * 0.96f) {
-      panelHeight = stage.getHeight() * 0.96f;
-      panelWidth = panelHeight / 0.625f;
-    }
+    // The approved mock-up is 1672 x 941. Scale both axes from that single reference scale so the
+    // frame keeps the exact 1222 x 876 design proportion on every viewport.
+    float referenceScale =
+        Math.min(stage.getWidth() / REFERENCE_WIDTH, stage.getHeight() / REFERENCE_HEIGHT);
+    float panelWidth = REFERENCE_PANEL_WIDTH * referenceScale;
+    float panelHeight = REFERENCE_PANEL_HEIGHT * referenceScale;
 
     Stack panel = new Stack();
     Image panelFrame = image(PANEL_TEXTURE);
     panelFrame.setScaling(Scaling.stretch);
     panel.add(panelFrame);
+    panel.add(createVictoryEffects(panelWidth, panelHeight));
     panel.add(createPanelContent(panelWidth, panelHeight));
 
     Table root = new Table();
@@ -193,28 +211,89 @@ public class RewardDisplay extends Displaying {
     root.add(panel).width(panelWidth).height(panelHeight);
     rewardUi = root;
     stage.addActor(root);
+
+    victoryAnimationController =
+        new VictoryAnimationController(
+            background,
+            scrimActor,
+            rewardUi,
+            victoryTitle,
+            victoryTitleLetters,
+            victorySubtitle,
+            sunPulse,
+            victoryParticles,
+            rewardOptionCards);
+    victoryAnimationController.playEntrance();
+  }
+
+  private Group createVictoryEffects(float panelWidth, float panelHeight) {
+    Group effects = new Group();
+    effects.setSize(panelWidth, panelHeight);
+    effects.setTouchable(Touchable.disabled);
+
+    Texture panelTexture =
+        ServiceLocator.getResourceService().getAsset(PANEL_TEXTURE, Texture.class);
+    TextureRegion crestRegion = new TextureRegion(panelTexture, 620, 0, 344, 245);
+    Image crestGlow = new Image(crestRegion);
+    crestGlow.setBounds(
+        panelWidth * 620f / PANEL_TEXTURE_WIDTH,
+        panelHeight * (PANEL_TEXTURE_HEIGHT - 245f) / PANEL_TEXTURE_HEIGHT,
+        panelWidth * 344f / PANEL_TEXTURE_WIDTH,
+        panelHeight * 245f / PANEL_TEXTURE_HEIGHT);
+    crestGlow.setTouchable(Touchable.disabled);
+    sunPulse = crestGlow;
+    effects.addActor(crestGlow);
+
+    float[][] particlePositions = {
+      {0.39f, 0.72f},
+      {0.43f, 0.68f},
+      {0.47f, 0.74f},
+      {0.53f, 0.70f},
+      {0.57f, 0.75f},
+      {0.61f, 0.69f},
+      {0.45f, 0.64f},
+      {0.55f, 0.65f}
+    };
+    victoryParticles.clear();
+    for (int index = 0; index < particlePositions.length; index++) {
+      float size = index % 3 == 0 ? 4f : 3f;
+      Image particle = new Image(skin.newDrawable("white", new Color(0.75f, 0.5f, 0.22f, 1f)));
+      particle.setBounds(
+          panelWidth * particlePositions[index][0],
+          panelHeight * particlePositions[index][1],
+          size,
+          size);
+      particle.setTouchable(Touchable.disabled);
+      victoryParticles.add(particle);
+      effects.addActor(particle);
+    }
+    return effects;
   }
 
   private Table createPanelContent(float panelWidth, float panelHeight) {
     Table content = new Table();
     content.top();
-    content.pad(panelHeight * 0.11f, panelWidth * 0.115f, panelHeight * 0.13f, panelWidth * 0.115f);
+    content.pad(
+        panelHeight * 0.215f, panelWidth * 0.115f, panelHeight * 0.16f, panelWidth * 0.115f);
 
-    Image victory = image(VICTORY_TITLE_TEXTURE);
-    victory.setScaling(Scaling.fit);
-    content.add(victory).size(panelWidth * 0.46f, panelHeight * 0.13f).center();
+    float titleWidth = panelWidth * 0.506f;
+    float titleHeight = panelHeight * 0.114f;
+    Group victory = createVictoryTitle(titleWidth, titleHeight);
+    victoryTitle = victory;
+    content.add(victory).size(titleWidth, titleHeight).center();
     content.row();
 
     Label subtitle = new Label("CHOOSE ONE REWARD", largeStyle(GOLD));
     subtitle.setFontScale(0.82f);
-    content.add(subtitle).center().padTop(2f).padBottom(panelHeight * 0.025f);
+    victorySubtitle = subtitle;
+    content.add(subtitle).center().padTop(2f).padBottom(panelHeight * 0.015f);
     content.row();
 
     Table cards = new Table();
-    cards.defaults().padLeft(panelWidth * 0.008f).padRight(panelWidth * 0.008f);
+    cards.defaults().padLeft(panelWidth * 0.011f).padRight(panelWidth * 0.011f);
 
-    float cardWidth = panelWidth * (options.size() > 2 ? 0.21f : 0.25f);
-    float cardHeight = panelHeight * 0.49f;
+    float cardWidth = panelWidth * (options.size() > 2 ? 0.215f : 0.25f);
+    float cardHeight = panelHeight * 0.395f;
 
     rewardOptionCards.clear();
 
@@ -229,6 +308,31 @@ public class RewardDisplay extends Displaying {
     content.add(cards).expand().center();
     content.row();
     return content;
+  }
+
+  private Group createVictoryTitle(float titleWidth, float titleHeight) {
+    Texture texture =
+        ServiceLocator.getResourceService().getAsset(VICTORY_TITLE_TEXTURE, Texture.class);
+    Group title = new Group();
+    title.setSize(titleWidth, titleHeight);
+    title.setTouchable(Touchable.disabled);
+    victoryTitleLetters.clear();
+
+    for (int index = 0; index < VICTORY_LETTER_X.length - 1; index++) {
+      int sourceX = VICTORY_LETTER_X[index];
+      int sourceWidth = VICTORY_LETTER_X[index + 1] - sourceX;
+      Image letter =
+          new Image(new TextureRegion(texture, sourceX, 0, sourceWidth, texture.getHeight()));
+      letter.setBounds(
+          titleWidth * sourceX / texture.getWidth(),
+          0f,
+          titleWidth * sourceWidth / texture.getWidth(),
+          titleHeight);
+      letter.setTouchable(Touchable.disabled);
+      victoryTitleLetters.add(letter);
+      title.addActor(letter);
+    }
+    return title;
   }
 
   private Stack createRewardCard(RewardOption option, float cardWidth, float cardHeight) {
@@ -299,11 +403,17 @@ public class RewardDisplay extends Displaying {
           @Override
           public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
             frame.setColor(1f, 0.88f, 0.58f, 1f);
+            if (victoryAnimationController != null) {
+              victoryAnimationController.showHover(card);
+            }
           }
 
           @Override
           public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
             frame.setColor(Color.WHITE);
+            if (victoryAnimationController != null) {
+              victoryAnimationController.clearHover(card);
+            }
           }
         });
     return card;
@@ -326,8 +436,9 @@ public class RewardDisplay extends Displaying {
                     case IRON_AEGIS -> " (+5 Armour when used)";
                     case WARRIORS_CREST -> " (+1 Strength when used)";
                     case ASHEN_EMBER -> " (-1 Max Energy)";
-                    case BRAND_OF_THE_DAMNED -> " (-1 Strength each battle)";
-                    case SHATTERED_AEGIS -> " (-1 Block from cards)";
+                    case BRAND_OF_THE_DAMNED -> " (-1 from every Strength gain)";
+                    case SHATTERED_AEGIS -> " (-1 from every Block gain)";
+                    default -> "";
                   };
       case CARD -> "Choose a Card";
     };
@@ -361,8 +472,9 @@ public class RewardDisplay extends Displaying {
                 case IRON_AEGIS -> "+5 Armour when used";
                 case WARRIORS_CREST -> "+1 Strength when used";
                 case ASHEN_EMBER -> "-1 Max Energy\nMinimum 1";
-                case BRAND_OF_THE_DAMNED -> "-1 Strength at the\nstart of each battle";
-                case SHATTERED_AEGIS -> "Cards grant\n1 less Block";
+                case BRAND_OF_THE_DAMNED -> "Strength gains -1\nper copy | Minimum 0";
+                case SHATTERED_AEGIS -> "Block gains -1\nper copy | Minimum 0";
+                default -> "";
               };
     };
   }
@@ -555,6 +667,9 @@ public class RewardDisplay extends Displaying {
   @Override
   public void dispose() {
     disposed = true;
+    if (victoryAnimationController != null) {
+      victoryAnimationController.dispose();
+    }
     if (background != null) {
       background.remove();
     }

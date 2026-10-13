@@ -30,4 +30,9 @@ class ItemFormattingTest {
   void formatsWarriorsCrest() {
     assertEquals("Blessed Crest", ItemFormatting.formatItemName(ItemType.WARRIORS_CREST));
   }
+
+  @Test
+  void formatsAmbrosiaFlask() {
+    assertEquals("Draught of Ambrosia", ItemFormatting.formatItemName(ItemType.AMBROSIA_FLASK));
+  }
 }

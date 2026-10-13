@@ -8,11 +8,12 @@ public enum ItemType {
   WARRIORS_CREST,
   ASHEN_EMBER,
   BRAND_OF_THE_DAMNED,
-  SHATTERED_AEGIS;
+  SHATTERED_AEGIS,
+  AMBROSIA_FLASK;
 
   /** Returns whether this item is consumed to apply an effect during the player's turn. */
   public boolean isBattleConsumable() {
-    return this == IRON_AEGIS || this == WARRIORS_CREST;
+    return this == IRON_AEGIS || this == WARRIORS_CREST || this == AMBROSIA_FLASK;
   }
 
   /** Returns whether this item is a curse with a negative passive effect. */
