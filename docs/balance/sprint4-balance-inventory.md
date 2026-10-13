@@ -18,12 +18,12 @@ Paths are relative to `source/core/`.
 | Post-battle gold | 20–30 | hardcoded `RewardGenerator.MIN_GOLD` / `MAX_GOLD` | `RewardService` | Team 6 | Lucky Coin multiplies. |
 | Card reward choices | up to 3 | `CardRewardSelection.MAX_CHOICES` + `assets/configs/cardAcquisitionPool.json` | `CardRewardSelectionGenerator` | Team 6 | Weights (normal/elite) owned by Ray + Yu Zhu this sprint. |
 | Shop prices (live) | COMMON 20±5, UNCOMMON 35±5, RARE 50±5 | hardcoded `ShopInventoryGenerator` | shop screens | Team 2 | `shopItems.json` is **not** the production path. |
-| Shop offers / stock | 3 offers, stock 1–3 | hardcoded in `ShopInventoryGenerator` | Team 2 | — |
+| Shop offers / stock | 3 offers, stock 1–3 | hardcoded `ShopInventoryGenerator` (`DEFAULT_OFFER_COUNT` / `MIN`/`MAX_STOCK`) | `ShopInventoryGenerator.createShop` | Team 2 | Live shop path; not from `shopItems.json`. |
 | Chance HP / gold deltas | e.g. shrine −10/+25, healer +20/−10 | `assets/configs/chanceEncounters.json` | `ChanceOutcomeApplier` | Team 2 | Fountain / dice use behaviour hardcodes (JSON zeros). |
 | Enemy base HP / ATK / armour | see `enemies.json` | `assets/configs/enemies.json` | `EnemyFactory` / `BattleGameArea` | Team 1 | Armour unscaled. |
 | Enemy progression scaling | NORMAL/BOSS +8% HP / +5% ATK per step; ELITE +10% / +7% | hardcoded `EnemyScaling` | `BattleGameArea` | Team 1 | Overrides JSON bases at runtime. |
 | Encounter line-ups | COMBAT / ELITE / FINAL | `assets/configs/encounters.json` | `BattleEncounterSelector` | Team 1 | Weights + progression gates. |
-| Map room mix | combat 60 / event 20 / elite 10 / shop 10 | hardcoded `MapGenerationConfig` / `NodePoolGenerator` | Team 2 | Campfire forced near top. |
+| Map room mix | combat 60 / event 20 / elite 10 / shop 10 | hardcoded `MapGenerationConfig` / `NodePoolGenerator` | `NodePoolGenerator` (campfire at `MAP_HEIGHT - 1`) | Team 2 | Campfire forced near top; drives encounter density. |
 | Save player fields | HP, max HP, gold | save schema | `GameStateSnapshotProvider` / `SaveGameRestoreService` | Team 5 | Gaps: max energy, owned items (Lucky Coin, Merchant’s Favor, Energy Crystal). |
 
 ## Forbidden card upgrade values (own cards — for Yu Zhu)
@@ -37,6 +37,7 @@ Paths are relative to `source/core/`.
 
 ## Evidence
 
-- Inventory locked by this document + `EncounterPressureBaselineTest`.
+- Inventory: this document (config snapshot; owning teams update their values).
+- Encounter pressure numbers: `docs/balance/sprint4-baselines.md` (doc snapshot only — not hard-locked in tests).
 - Forbidden upgrades: `ForbiddenCardsTest` + `CardUpgradeStandardTest` (already on team branch).
-- Full journey: `ForbiddenRewardPersistenceTest`.
+- Full journey: `ForbiddenRewardPersistenceTest` (base + upgraded copies).

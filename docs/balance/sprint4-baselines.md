@@ -1,12 +1,14 @@
 # Sprint 4 — Encounter baselines (Zeyu Wang / M5)
 
-Recorded against `origin/feature/sprint4-cards-game` @ `bff411f3` (13 Oct 2026).
+Snapshot against `origin/feature/sprint4-cards-game` @ `bff411f3` (13 Oct 2026).
+
+**Ownership:** Team 1 owns enemy / encounter numbers in `enemies.json`, `encounters.json`, and `EnemyScaling`. This file is a **read-only snapshot for Team 6 balance review**, not a CI lock. When Team 1 changes those values, **Zeyu (Team 6 M5)** updates this doc; do not hard-fail tests on these figures.
 
 Player baseline from `configs/player.json`: **100 / 100 HP**, **3 energy**, opening hand **5**. Campfire rest restores **30%** max HP between fights when taken.
 
-## Config pressure (authoritative before live targets)
+## Config pressure (snapshot before live targets)
 
-Scaled with `EnemyScaling`. Armour is never scaled. Automated lock: `EncounterPressureBaselineTest`.
+Scaled with `EnemyScaling`. Armour is never scaled.
 
 ### Progression 0
 

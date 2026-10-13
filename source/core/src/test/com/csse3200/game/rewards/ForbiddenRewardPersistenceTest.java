@@ -51,6 +51,31 @@ class ForbiddenRewardPersistenceTest {
     }
   }
 
+  @Test
+  void upgradedForbiddenCopySurvivesSaveRestoreAndEntersNextBattleDeck() {
+    CardService cards = new CardLibrary(CardConfigLoader.loadCards());
+    RunState run = activeRun();
+    PlayerDeck persistentDeck = run.getOrCreatePlayerDeck(cards);
+
+    CardInstance upgraded =
+        new CardInstance("forbidden-iron-oath-plus", "iron_oath", CardInstance.UPGRADED_LEVEL);
+    persistentDeck.addCard(upgraded);
+
+    PlayerDeck restoredDeck = saveLoadRestore(run, persistentDeck, cards, "iron_oath-upgraded");
+    CardInstance restored = restoredDeck.getCard(upgraded.instanceId()).orElseThrow();
+
+    assertEquals("iron_oath", restored.cardId());
+    assertEquals(CardInstance.UPGRADED_LEVEL, restored.upgradeLevel());
+    assertTrue(
+        new BattleDeck(restoredDeck)
+            .getDrawPileInstances().stream()
+                .anyMatch(
+                    card ->
+                        card.instanceId().equals(upgraded.instanceId())
+                            && card.upgradeLevel() == CardInstance.UPGRADED_LEVEL),
+        "upgraded iron_oath missing from next battle draw pile");
+  }
+
   private void assertRewardJourney(String cardId) {
     CardService cards = new CardLibrary(CardConfigLoader.loadCards());
     RunState run = activeRun();
@@ -63,16 +88,30 @@ class ForbiddenRewardPersistenceTest {
     CardInstance acquired = persistentDeck.getCards().get(persistentDeck.size() - 1);
     assertEquals(cardId, acquired.cardId());
 
+    PlayerDeck restoredDeck = saveLoadRestore(run, persistentDeck, cards, cardId);
+    CardInstance restoredCard = restoredDeck.getCard(acquired.instanceId()).orElseThrow();
+    assertEquals(cardId, restoredCard.cardId());
+    assertEquals(CardInstance.BASE_LEVEL, restoredCard.upgradeLevel());
+
+    BattleDeck nextBattleDeck = new BattleDeck(restoredDeck);
+    assertTrue(
+        nextBattleDeck.getDrawPileInstances().stream()
+            .anyMatch(card -> card.instanceId().equals(acquired.instanceId())),
+        cardId + " missing from next battle draw pile");
+  }
+
+  private PlayerDeck saveLoadRestore(
+      RunState run, PlayerDeck persistentDeck, CardService cards, String slotLabel) {
     CardDiscoveryService discovery = CardDiscoveryService.loadDefault();
     BestiaryService bestiary = BestiaryService.loadDefault();
     SaveGameService saves =
         new SaveGameService(
-            new JsonSaveGameRepository(new FileHandle(saveDirectory.resolve(cardId).toFile())),
+            new JsonSaveGameRepository(new FileHandle(saveDirectory.resolve(slotLabel).toFile())),
             new GameStateSnapshotProvider(
                 run.getOrCreatePlayerState(), persistentDeck, run, bestiary, discovery));
-    assertTrue(saves.saveGame(1).success(), cardId + " save");
+    assertTrue(saves.saveGame(1).success(), slotLabel + " save");
     LoadResult loaded = saves.loadGame(1);
-    assertTrue(loaded.success(), cardId + " load");
+    assertTrue(loaded.success(), slotLabel + " load");
 
     PlayerRunState restoredPlayer = new PlayerRunState(1, 1, 0);
     PlayerDeck restoredDeck = new PlayerDeck(cards);
@@ -86,16 +125,8 @@ class ForbiddenRewardPersistenceTest {
                 CardDiscoveryService.loadDefault())
             .restore(loaded.data());
 
-    assertTrue(restored.success(), cardId + " restore");
-    CardInstance restoredCard = restoredDeck.getCard(acquired.instanceId()).orElseThrow();
-    assertEquals(cardId, restoredCard.cardId());
-    assertEquals(CardInstance.BASE_LEVEL, restoredCard.upgradeLevel());
-
-    BattleDeck nextBattleDeck = new BattleDeck(restoredDeck);
-    assertTrue(
-        nextBattleDeck.getDrawPileInstances().stream()
-            .anyMatch(card -> card.instanceId().equals(acquired.instanceId())),
-        cardId + " missing from next battle draw pile");
+    assertTrue(restored.success(), slotLabel + " restore");
+    return restoredDeck;
   }
 
   private static RunState activeRun() {

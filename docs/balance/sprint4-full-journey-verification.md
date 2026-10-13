@@ -11,6 +11,7 @@ Scope: production combat path for **claim Forbidden reward → save → load →
 | Load / restore | `SaveGameRestoreService.restore` restores same `instanceId` / `cardId` | same |
 | Next battle | `BattleDeck` draw pile contains that instance | same |
 | Covers all 4 Forbidden IDs | `sealed_pact`, `blood_price`, `doom_sigil`, `iron_oath` | same |
+| Upgraded copy | `iron_oath` at `UPGRADED_LEVEL` survives save/load and enters next battle deck | `upgradedForbiddenCopySurvivesSaveRestoreAndEntersNextBattleDeck` |
 | Upgrades meet standard | name+, rarity, cost, effect order, no weaken, description rewrite | `CardUpgradeStandardTest` + `ForbiddenCardsTest` |
 | Vulnerable tip | `doom_sigil+` upgrades duration not value | `ForbiddenCardsTest.shouldConfigureDoomSigil` |
 | Resolve upgraded copy | resolver returns upgraded numbers | `ForbiddenCardsTest.forbiddenUpgradesResolveToUpgradedValues` |
@@ -28,4 +29,6 @@ Ray owns inspect UI. When available, confirm once:
 
 ## Result
 
-Automated journey for all four Forbidden cards: **pass** when `./gradlew :core:test --tests …ForbiddenRewardPersistenceTest` and Forbidden/upgrade standard tests are green on this branch.
+Automated journey for all four Forbidden cards (base + one upgraded copy): **pass** when `./gradlew :core:test --tests …ForbiddenRewardPersistenceTest` and Forbidden/upgrade standard tests are green on this branch.
+
+Encounter pressure numbers stay in `docs/balance/sprint4-baselines.md` only (Team 1 owns the values; no CI hard-lock).
