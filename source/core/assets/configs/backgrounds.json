@@ -1,11 +1,6 @@
 {
   "backgrounds": [
     {
-      "id": "forest",
-      "name": "Forest",
-      "texture": "images/grass_1.png"
-    },
-    {
       "id": "mud_test",
       "name": "Mud Test",
       "texture": "images/mud.png"
@@ -13,7 +8,52 @@
     {
       "id": "dungeon",
       "name": "Dungeon",
-      "texture": "images/battle_background.png"
+      "texture": "images/dungeon.png"
+    },
+    {
+      "id": "forest",
+      "name": "Forest",
+      "texture": "images/forest.png"
+    },
+    {
+      "id": "inside_castle",
+      "name": "Inside Castle",
+      "texture": "images/inside_castle.png"
+    },
+    {
+      "id": "cemetery",
+      "name": "Cemetery",
+      "texture": "images/cemetery.png"
+    },
+    {
+      "id": "mystical_tree",
+      "name": "Mystical Tree",
+      "texture": "images/mystical_tree.png"
+    },
+    {
+      "id": "stones_ruins",
+      "name": "Stones Ruins",
+      "texture": "images/stones_ruins.png"
+    },
+    {
+      "id": "underwater",
+      "name": "Underwater",
+      "texture": "images/underwater.png"
+    },
+    {
+      "id": "temple",
+      "name": "Temple",
+      "texture": "images/temple.png"
+    },
+    {
+      "id": "autumn_forest",
+      "name": "Autumn Forest",
+      "texture": "images/autumn_forest.png"
+    },
+    {
+      "id": "forest_with_sun",
+      "name": "Forest With Sun",
+      "texture": "images/forest_with_sun.png"
     }
   ]
 }

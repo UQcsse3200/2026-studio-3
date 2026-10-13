@@ -70,6 +70,7 @@ class EnemyScalingTest {
     base.behaviour = "custom_behaviour";
     base.sprite = "images/enemies/custom.atlas";
     base.description = "A test enemy.";
+    base.renderScale = 0.5f;
 
     EnemyConfig scaled = EnemyScaling.scale(base, 5);
 
@@ -80,6 +81,8 @@ class EnemyScalingTest {
     assertEquals(EnemyTier.ELITE, scaled.tier);
     assertEquals("custom_behaviour", scaled.behaviour);
     assertEquals("images/enemies/custom.atlas", scaled.sprite);
+    assertEquals(0.5f, scaled.renderScale);
+    assertEquals(0.5f, base.renderScale);
   }
 
   @Test

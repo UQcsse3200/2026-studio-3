@@ -90,8 +90,10 @@ public class MapSelectionController {
     boolean accepted = mapGraph.moveToNode(nodeId);
 
     if (accepted) {
+
       events.trigger("nodeSelected", nodeId);
     } else {
+
       events.trigger("nodeSelectionRejected", nodeId);
     }
 

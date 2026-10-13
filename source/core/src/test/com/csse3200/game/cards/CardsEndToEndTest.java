@@ -136,7 +136,7 @@ class CardsEndToEndTest {
         () -> assertEquals("Inner Focus", innerFocus.name),
         () -> assertEquals(2, innerFocus.cost),
         () -> assertEquals(CardType.POWER, innerFocus.type),
-        () -> assertEquals(Rarity.RARE, innerFocus.rarity),
+        () -> assertEquals(Rarity.UNCOMMON, innerFocus.rarity),
         () -> assertEquals(TargetType.SELF, innerFocus.target),
         () -> assertEquals(1, innerFocus.effects.length),
         () -> assertEffect(innerFocus.effects[0], EffectType.STRENGTH, 2, 0),

@@ -202,7 +202,7 @@ public class InventoryComponent extends Component {
   /**
    * Increases the shop discount by a given amount, capped at 50%.
    *
-   * @param amount discount to add, as a fraction (e.g. 0.05f for 5%)
+   * @param amount discount to add, as a fraction (e.g. 0.10f for 10%)
    */
   public void addShopDiscount(float amount) {
     this.shopDiscount = Math.min(this.shopDiscount + amount, 0.5f);

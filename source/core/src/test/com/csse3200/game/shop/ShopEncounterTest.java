@@ -19,6 +19,8 @@ class ShopEncounterTest {
     MapNode shopNode = new MapNode(1, RoomType.SHOP);
     MapNode nextNode = new MapNode(2, RoomType.EVENT);
     shopNode.setState(NodeState.CURRENT);
+    nextNode.setHeight(1);
+    nextNode.setHeight(2);
     graph.addNode(shopNode);
     graph.addNode(nextNode);
     graph.connectNodes(1, 2);

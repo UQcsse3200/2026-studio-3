@@ -4,13 +4,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.csse3200.game.cards.CardDiscoveryService;
+import com.csse3200.game.cards.CardUnlockState;
+import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.chance.ChanceOutcome;
 import com.csse3200.game.encounters.integration.mocks.MockCardCatalogGateway;
 import com.csse3200.game.encounters.integration.mocks.MockDeckGateway;
 import com.csse3200.game.encounters.integration.mocks.MockPlayerStateGateway;
+import com.csse3200.game.extensions.GameExtension;
+import com.csse3200.game.services.ServiceLocator;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(GameExtension.class)
 class ChanceOutcomeApplierTest {
   @Test
   void shouldApplyCombinedHealthAndCurrencyOutcome() {
@@ -129,12 +136,14 @@ class ChanceOutcomeApplierTest {
   void shouldApplyCardOnlyReward() {
     MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
     MockDeckGateway deck = new MockDeckGateway();
+    CardDiscoveryService discovery = registerDiscovery();
 
     ChanceResolution result =
         createCardApplier(player, deck).apply(new ChanceOutcome(0, 0, "bandage"));
 
     assertTrue(result.isSuccess());
     assertEquals(List.of("bandage"), deck.getCardIds());
+    assertEquals(CardUnlockState.SEEN, discovery.getProgressSnapshot().get("bandage"));
     assertEquals(100, player.getHealth());
     assertEquals(40, player.getCurrency());
   }
@@ -150,6 +159,52 @@ class ChanceOutcomeApplierTest {
 
     assertTrue(result.isSuccess());
     assertEquals(List.of("bandage", "bandage"), deck.getCardIds());
+  }
+
+  @Test
+  void shouldDiscoverEveryCommittedCardInMultiCardReward() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
+    MockDeckGateway deck = new MockDeckGateway();
+    CardDiscoveryService discovery = registerDiscovery();
+
+    ChanceResolution result =
+        createCardApplier(player, deck)
+            .apply(ChanceOutcome.withCardRewards(0, 0, List.of("bandage", "strike")));
+
+    assertTrue(result.isSuccess());
+    assertEquals(List.of("bandage", "strike"), deck.getCardIds());
+    assertEquals(CardUnlockState.SEEN, discovery.getProgressSnapshot().get("bandage"));
+    assertEquals(CardUnlockState.SEEN, discovery.getProgressSnapshot().get("strike"));
+  }
+
+  @Test
+  void shouldApplyTwoCardRewardsIncludingDuplicateIds() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
+    MockDeckGateway deck = new MockDeckGateway();
+
+    ChanceResolution result =
+        createCardApplier(player, deck)
+            .apply(ChanceOutcome.withCardRewards(0, 15, List.of("bandage", "bandage")));
+
+    assertTrue(result.isSuccess());
+    assertEquals(55, player.getCurrency());
+    assertEquals(List.of("bandage", "bandage"), deck.getCardIds());
+  }
+
+  @Test
+  void shouldRollbackEveryNewCardWithoutRemovingExistingDuplicatesWhenCurrencyFails() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(100, 40);
+    player.failNextCurrencyUpdate();
+    MockDeckGateway deck = new MockDeckGateway();
+    deck.addExistingCard("bandage");
+
+    ChanceResolution result =
+        createCardApplier(player, deck)
+            .apply(ChanceOutcome.withCardRewards(0, 15, List.of("bandage", "bandage")));
+
+    assertEquals(ChanceResolution.Status.PLAYER_UPDATE_FAILED, result.getStatus());
+    assertEquals(40, player.getCurrency());
+    assertEquals(List.of("bandage"), deck.getCardIds());
   }
 
   @Test
@@ -227,12 +282,14 @@ class ChanceOutcomeApplierTest {
     MockPlayerStateGateway player = new MockPlayerStateGateway(70, 100, 40);
     player.rejectNextHealthUpdate();
     MockDeckGateway deck = new MockDeckGateway();
+    CardDiscoveryService discovery = registerDiscovery();
 
     ChanceResolution result =
         createCardApplier(player, deck).apply(new ChanceOutcome(20, 0, "bandage"));
 
     assertEquals(ChanceResolution.Status.PLAYER_UPDATE_FAILED, result.getStatus());
     assertTrue(deck.getCardIds().isEmpty());
+    assertEquals(CardUnlockState.LOCKED, discovery.getProgressSnapshot().get("bandage"));
     assertEquals(70, player.getHealth());
     assertEquals(40, player.getCurrency());
   }
@@ -303,5 +360,15 @@ class ChanceOutcomeApplierTest {
   private ChanceOutcomeApplier createCardApplier(
       MockPlayerStateGateway player, MockDeckGateway deck) {
     return new ChanceOutcomeApplier(player, new MockCardCatalogGateway("bandage", "strike"), deck);
+  }
+
+  private CardDiscoveryService registerDiscovery() {
+    CardConfig bandage = new CardConfig();
+    bandage.id = "bandage";
+    CardConfig strike = new CardConfig();
+    strike.id = "strike";
+    CardDiscoveryService discovery = new CardDiscoveryService(List.of(bandage, strike));
+    ServiceLocator.registerCardDiscoveryService(discovery);
+    return discovery;
   }
 }

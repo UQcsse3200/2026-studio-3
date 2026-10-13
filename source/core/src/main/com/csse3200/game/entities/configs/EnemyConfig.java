@@ -18,6 +18,15 @@ public class EnemyConfig extends BaseEntityConfig {
    */
   public String sprite = "";
 
-  /** 图鉴里显示的敌人背景描述，以 enemies.json 为唯一来源，写法遵循 wiki《The Fall of the Pantheon》。 */
+  /**
+   * Multiplier on top of the factory's render scale, so sprites drawn at different sizes still read
+   * consistently on screen. 1.0 keeps the sprite's own proportions.
+   */
+  public float renderScale = 1f;
+
+  /**
+   * Backstory shown in the Bestiary. {@code enemies.json} is the single source for this copy, and
+   * it follows the setting described on the wiki's <em>The Fall of the Pantheon</em> page.
+   */
   public String description = "";
 }

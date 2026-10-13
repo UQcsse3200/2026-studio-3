@@ -42,6 +42,16 @@ class CardValidatorTest {
   }
 
   @Test
+  void shouldAcceptNullLoreAndRejectBlankLore() {
+    CardConfig card = validCard();
+
+    assertTrue(CardValidator.isValid(card));
+
+    card.lore = " ";
+    assertTrue(CardValidator.validate(card).contains("lore must not be blank"));
+  }
+
+  @Test
   void shouldAcceptImmediateAndTimedHealingButRejectNegativeDuration() {
     CardConfig card = validCard();
     card.target = TargetType.SELF;

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 /** Loads and validates card definitions from a JSON configuration file. */
 public final class CardConfigLoader {
   public static final String DEFAULT_CARD_FILE = "configs/cards.json";
+  private static final String START_CARD_LABEL = "card[";
 
   private static final Logger logger = LoggerFactory.getLogger(CardConfigLoader.class);
 
@@ -67,7 +68,7 @@ public final class CardConfigLoader {
     for (JsonValue cardData = cardArray.child;
         cardData != null;
         cardData = cardData.next, index++) {
-      String position = "card[" + index + "]";
+      String position = START_CARD_LABEL + index + "]";
 
       if (!cardData.isObject()) {
         errors.add(position + " must be a JSON object");
@@ -134,9 +135,9 @@ public final class CardConfigLoader {
 
   private static String getCardLabel(CardConfig card, int index) {
     if (card == null || card.id == null || card.id.isBlank()) {
-      return "card[" + index + "]";
+      return START_CARD_LABEL + index + "]";
     }
-    return "card[" + index + "] (" + card.id + ")";
+    return START_CARD_LABEL + index + "] (" + card.id + ")";
   }
 
   private static String getErrorMessage(Exception exception) {

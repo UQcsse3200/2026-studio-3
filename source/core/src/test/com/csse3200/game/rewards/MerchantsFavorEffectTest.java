@@ -25,10 +25,10 @@ class MerchantsFavorEffectTest {
   }
 
   @Test
-  void appliesFivePercentDiscountOnFirstUse() {
+  void appliesTenPercentDiscountOnFirstUse() {
     effect.apply(player);
 
-    assertEquals(0.05f, inventory.getShopDiscount(), 0.0001f);
+    assertEquals(0.10f, inventory.getShopDiscount(), 0.0001f);
   }
 
   @Test
@@ -36,12 +36,12 @@ class MerchantsFavorEffectTest {
     effect.apply(player);
     effect.apply(player);
 
-    assertEquals(0.10f, inventory.getShopDiscount(), 0.0001f);
+    assertEquals(0.20f, inventory.getShopDiscount(), 0.0001f);
   }
 
   @Test
   void discountIsCappedAtFiftyPercent() {
-    // 20 applications * 0.05 = 1.0, well past the cap, to confirm it holds at 0.5.
+    // 20 applications * 0.10 = 2.0, well past the cap, to confirm it holds at 0.5.
     for (int i = 0; i < 20; i++) {
       effect.apply(player);
     }

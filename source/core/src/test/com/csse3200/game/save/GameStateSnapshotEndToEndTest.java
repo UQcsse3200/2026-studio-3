@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.badlogic.gdx.files.FileHandle;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryUnlockState;
+import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.extensions.GameExtension;
@@ -15,8 +16,10 @@ import com.csse3200.game.maps.NodeState;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.ItemType;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -39,10 +42,13 @@ class GameStateSnapshotEndToEndTest {
 
   private SaveGameService saveGameService;
   private BestiaryService bestiary;
+  private PlayerRunState playerState;
 
   @BeforeEach
   void setUp() {
-    PlayerRunState playerState = new PlayerRunState(65, 100, 120);
+    playerState = new PlayerRunState(65, 100, 120);
+    playerState.addOwnedItem(ItemType.LUCKY_COIN);
+    playerState.addOwnedItem(ItemType.IRON_AEGIS);
     PlayerDeck deck = PlayerDeckFactory.createStarterDeck();
     RunState runState = buildRunStateWithConnectedNodes();
     bestiary = BestiaryService.loadDefault();
@@ -50,7 +56,8 @@ class GameStateSnapshotEndToEndTest {
     bestiary.recordEncountered("boss_knight");
 
     GameStateSnapshotProvider provider =
-        new GameStateSnapshotProvider(playerState, deck, runState, bestiary);
+        new GameStateSnapshotProvider(
+            playerState, deck, runState, bestiary, CardDiscoveryService.loadDefault());
     JsonSaveGameRepository repository =
         new JsonSaveGameRepository(new FileHandle(temporaryDirectory.toFile()));
     saveGameService = new SaveGameService(repository, provider);
@@ -68,6 +75,7 @@ class GameStateSnapshotEndToEndTest {
     assertEquals(65, loaded.player.currentHealth);
     assertEquals(100, loaded.player.maxHealth);
     assertEquals(120, loaded.player.gold);
+    assertEquals(List.of("LUCKY_COIN", "IRON_AEGIS"), loaded.player.ownedItems);
   }
 
   @Test
@@ -127,7 +135,11 @@ class GameStateSnapshotEndToEndTest {
 
     RestoreResult restoreResult =
         new SaveGameRestoreService(
-                restoredPlayerState, restoredDeck, restoredRunState, restoredBestiary)
+                restoredPlayerState,
+                restoredDeck,
+                restoredRunState,
+                restoredBestiary,
+                CardDiscoveryService.loadDefault())
             .restore(loadResult.data());
 
     assertTrue(restoreResult.success());
@@ -135,6 +147,8 @@ class GameStateSnapshotEndToEndTest {
     assertEquals(65, restoredPlayerState.getCurrentHealth());
     assertEquals(100, restoredPlayerState.getMaxHealth());
     assertEquals(120, restoredPlayerState.getGold());
+    assertEquals(
+        List.of(ItemType.LUCKY_COIN, ItemType.IRON_AEGIS), restoredPlayerState.getOwnedItems());
     assertEquals(
         PlayerDeckFactory.getStarterDeckCardIds(),
         restoredDeck.getCards().stream()
@@ -164,7 +178,8 @@ class GameStateSnapshotEndToEndTest {
     SaveGameService generatedSaveGameService =
         new SaveGameService(
             new JsonSaveGameRepository(new FileHandle(temporaryDirectory.toFile())),
-            new GameStateSnapshotProvider(playerState, deck, runState, bestiaryService));
+            new GameStateSnapshotProvider(
+                playerState, deck, runState, bestiaryService, CardDiscoveryService.loadDefault()));
     assertTrue(generatedSaveGameService.saveGame(2).success());
 
     LoadResult loadResult =
@@ -178,7 +193,8 @@ class GameStateSnapshotEndToEndTest {
                 new PlayerRunState(1, 10, 0),
                 PlayerDeckFactory.createStarterDeck(),
                 restoredRunState,
-                BestiaryService.loadDefault())
+                BestiaryService.loadDefault(),
+                CardDiscoveryService.loadDefault())
             .restore(loadResult.data());
 
     assertTrue(restoreResult.success());

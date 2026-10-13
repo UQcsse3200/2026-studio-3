@@ -36,14 +36,14 @@ class ItemEffectTest {
   }
 
   @Test
-  void merchantsFavorShouldIncreaseShopDiscount() {
+  void merchantsFavorShouldIncreaseShopDiscountByTenPercent() {
     Entity player = new Entity();
     InventoryComponent inventory = new InventoryComponent(100);
     player.addComponent(inventory);
 
     new MerchantsFavorEffect().apply(player);
 
-    assertEquals(0.05f, inventory.getShopDiscount(), 0.001f);
+    assertEquals(0.10f, inventory.getShopDiscount(), 0.001f);
   }
 
   @Test

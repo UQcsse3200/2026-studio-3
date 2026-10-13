@@ -136,6 +136,18 @@ class CombatStatsComponentTest {
   }
 
   @Test
+  void shouldKeepLongerDurationWhenFeebleIsReapplied() {
+    CombatStatsComponent combat = new CombatStatsComponent(100, 20);
+
+    combat.applyStatusEffect("FEEBLE", 1, 4);
+    combat.applyStatusEffect("FEEBLE", 1, 2);
+    assertEquals(4, combat.getStatusEffect("FEEBLE").getDuration());
+
+    combat.applyStatusEffect("FEEBLE", 1, 6);
+    assertEquals(6, combat.getStatusEffect("FEEBLE").getDuration());
+  }
+
+  @Test
   void shouldSetGetBaseAttack() {
     CombatStatsComponent combat = new CombatStatsComponent(100, 20);
     assertEquals(20, combat.getBaseAttack());

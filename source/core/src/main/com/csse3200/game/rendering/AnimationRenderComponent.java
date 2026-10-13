@@ -42,6 +42,7 @@ public class AnimationRenderComponent extends RenderComponent {
   private Animation<TextureRegion> currentAnimation;
   private String currentAnimationName;
   private float animationPlayTime;
+  private TextureRegion renderedFrame;
 
   // 战斗特效用的整体染色：flashTint 会在 tintTimeRemaining 用完后自动清除，
   // setPersistentTint 则要显式调用 clearTint 才会消失（比如激怒状态要一直红到死亡）
@@ -141,6 +142,7 @@ public class AnimationRenderComponent extends RenderComponent {
     }
 
     currentAnimation = animation;
+    renderedFrame = null;
     currentAnimationName = name;
     animationPlayTime = 0f;
     logger.debug("Starting animation {}", name);
@@ -158,6 +160,7 @@ public class AnimationRenderComponent extends RenderComponent {
 
     logger.debug("Stopping animation {}", currentAnimationName);
     currentAnimation = null;
+    renderedFrame = null;
     currentAnimationName = null;
     animationPlayTime = 0f;
     return true;
@@ -170,6 +173,18 @@ public class AnimationRenderComponent extends RenderComponent {
    */
   public String getCurrentAnimation() {
     return currentAnimationName;
+  }
+
+  /** Last drawn frame, or the initial frame before the first draw; does not advance playback. */
+  public TextureRegion getRenderedFrame() {
+    return renderedFrame != null
+        ? renderedFrame
+        : currentAnimation == null ? null : currentAnimation.getKeyFrame(animationPlayTime);
+  }
+
+  /** Frame for the next draw; querying does not advance animation. */
+  public TextureRegion getCurrentFrame() {
+    return currentAnimation == null ? null : currentAnimation.getKeyFrame(animationPlayTime);
   }
 
   /**
@@ -231,6 +246,7 @@ public class AnimationRenderComponent extends RenderComponent {
       return;
     }
     TextureRegion region = currentAnimation.getKeyFrame(animationPlayTime);
+    renderedFrame = region;
     Vector2 pos = entity.getPosition();
     Vector2 scale = entity.getScale();
 

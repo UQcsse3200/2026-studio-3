@@ -1,7 +1,11 @@
 package com.csse3200.game.components.enemy;
 
+import com.csse3200.game.cards.EffectType;
+import com.csse3200.game.cards.effects.CardEffectResolutionContext;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.Component;
+import com.csse3200.game.components.StatusEffect;
+import com.csse3200.game.components.StatusEffectCalculator;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAI;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIFactory;
@@ -159,8 +163,43 @@ public class EnemyBehaviourComponent extends Component {
 
     CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
     if (targetStats != null) {
-      targetStats.takeDamage(currentIntent.getValue());
+      CombatStatsComponent attackerStats = entity.getComponent(CombatStatsComponent.class);
+      int strength = statusValue(attackerStats, EffectType.STRENGTH);
+      int feeble = statusValue(attackerStats, EffectType.FEEBLE);
+      int vulnerable = statusValue(targetStats, EffectType.VULNERABLE);
+      int damage =
+          new CardEffectResolutionContext(strength, feeble, vulnerable)
+              .resolveDamage(currentIntent.getValue());
+      // Starts the attack animation (EnemyAnimationController) before the damage lands.
+      entity.getEvents().trigger("enemyAttack");
+      targetStats.takeDamage(damage);
     }
+  }
+
+  /**
+   * Scales the telegraphed damage by this enemy's outgoing modifier, so effects like Feeble
+   * actually reduce what it deals.
+   *
+   * <p>The intent keeps its original value, so what was telegraphed to the player is unchanged.
+   *
+   * @return the damage this attack should deal
+   */
+  private int outgoingDamage() {
+    CombatStatsComponent stats = entity.getComponent(CombatStatsComponent.class);
+    if (stats == null) {
+      return currentIntent.getValue();
+    }
+
+    float modifier = StatusEffectCalculator.getOutgoingDamageModifier(stats);
+    return Math.round(currentIntent.getValue() * modifier);
+  }
+
+  private static int statusValue(CombatStatsComponent stats, EffectType type) {
+    if (stats == null) {
+      return 0;
+    }
+    StatusEffect status = stats.getStatusEffect(type.name());
+    return status == null ? 0 : Math.max(0, status.getValue());
   }
 
   private void defend() {
@@ -193,8 +232,15 @@ public class EnemyBehaviourComponent extends Component {
     CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
     if (targetStats != null) {
       entity.getEvents().trigger("enemyCast");
-      targetStats.applyStatusEffect(
-          effectType.name(), currentIntent.getValue(), currentIntent.getDuration());
+
+      String statusKey =
+          effectType == IntentEffectType.TAUNT
+              ? IntentEffectType.TAUNT.name() + ":" + entity.getId()
+              : effectType.name();
+      int statusValue =
+          effectType == IntentEffectType.TAUNT ? entity.getId() : currentIntent.getValue();
+
+      targetStats.applyStatusEffect(statusKey, statusValue, currentIntent.getDuration());
     }
   }
 }

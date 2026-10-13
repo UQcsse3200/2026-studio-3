@@ -2,8 +2,10 @@ package com.csse3200.game.services;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.entities.EntityService;
+import com.csse3200.game.files.UserSettings;
 import com.csse3200.game.input.InputService;
 import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.RenderService;
@@ -31,6 +33,8 @@ public class ServiceLocator {
   private static Camera camera;
   private static CardLibrary cardLibrary;
   private static BestiaryService bestiaryService;
+  private static CardDiscoveryService cardDiscoveryService;
+  private static AudioSettingsApplier audioSettingsApplier;
 
   public static EntityService getEntityService() {
     return entityService;
@@ -70,6 +74,14 @@ public class ServiceLocator {
 
   public static BestiaryService getBestiaryService() {
     return bestiaryService;
+  }
+
+  public static CardDiscoveryService getCardDiscoveryService() {
+    return cardDiscoveryService;
+  }
+
+  public static AudioSettingsApplier getAudioSettingsApplier() {
+    return audioSettingsApplier;
   }
 
   public static void registerEntityService(EntityService service) {
@@ -130,6 +142,24 @@ public class ServiceLocator {
     bestiaryService = service;
   }
 
+  /**
+   * Registers the audio settings boundary and immediately synchronises persisted output volumes.
+   */
+  public static void registerAudioSettingsApplier(AudioSettingsApplier applier) {
+    logger.debug("Registering audio settings applier {}", applier);
+    audioSettingsApplier = applier;
+    if (applier != null) {
+      UserSettings.Settings settings = UserSettings.get();
+      applier.applyVolumes(
+          settings.getEffectiveMusicVolume(), settings.getEffectiveSoundEffectsVolume());
+    }
+  }
+
+  public static void registerCardDiscoveryService(CardDiscoveryService service) {
+    logger.debug("Registering card discovery service {}", service);
+    cardDiscoveryService = service;
+  }
+
   public static void clear() {
     entityService = null;
     renderService = null;
@@ -142,6 +172,8 @@ public class ServiceLocator {
     camera = null;
     cardLibrary = null;
     bestiaryService = null;
+    cardDiscoveryService = null;
+    audioSettingsApplier = null;
   }
 
   private ServiceLocator() {

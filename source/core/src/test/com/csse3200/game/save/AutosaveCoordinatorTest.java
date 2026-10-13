@@ -1,5 +1,6 @@
 package com.csse3200.game.save;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -9,7 +10,12 @@ import static org.mockito.Mockito.when;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.csse3200.game.bestiary.BestiaryService;
+import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardDiscoveryService;
+import com.csse3200.game.cards.CardLibrary;
+import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeckFactory;
+import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.maps.MapGraph;
 import com.csse3200.game.maps.MapNode;
@@ -17,8 +23,14 @@ import com.csse3200.game.maps.NodeState;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.CardRewardSelection;
+import com.csse3200.game.rewards.RewardGenerator;
+import com.csse3200.game.rewards.RewardOption;
+import com.csse3200.game.rewards.RewardService;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -28,7 +40,7 @@ class AutosaveCoordinatorTest {
   @TempDir Path temporaryDirectory;
 
   @Test
-  void writesOnceOnlyAfterMapIsReady() {
+  void writesOnceAtTheFirstSafeCheckpoint() {
     RunState runState = activeRun();
     SaveGameService service = mock(SaveGameService.class);
     when(service.saveGame(AutosaveCoordinator.AUTOSAVE_SLOT_ID))
@@ -98,7 +110,59 @@ class AutosaveCoordinatorTest {
   }
 
   @Test
-  void autosaveRestoresAfterRelaunchWithoutOverwritingManualSlot() {
+  void unexpectedSaveExceptionDoesNotBlockNavigationOrRetry() {
+    RunState runState = activeRun();
+    AutosaveCoordinator coordinator =
+        new AutosaveCoordinator(
+            runState,
+            () -> {
+              throw new IllegalStateException("Repository unavailable");
+            });
+
+    runState.enterEncounter(1);
+    runState.completeEncounter(true);
+    coordinator.requestAfterSuccessfulEncounter();
+
+    assertDoesNotThrow(coordinator::saveIfPending);
+    assertDoesNotThrow(coordinator::saveIfPending);
+  }
+
+  @Test
+  void quittingBeforeRewardClaimKeepsPreviousValidCheckpoint() {
+    RunState runState = activeRun();
+    PlayerRunState player = new PlayerRunState(75, 100, 10);
+    SaveGameService service =
+        new SaveGameService(
+            new JsonSaveGameRepository(new FileHandle(temporaryDirectory.toFile())),
+            new GameStateSnapshotProvider(
+                player,
+                PlayerDeckFactory.createStarterDeck(),
+                runState,
+                BestiaryService.loadDefault(),
+                CardDiscoveryService.loadDefault()));
+    assertTrue(service.saveGame(AutosaveCoordinator.AUTOSAVE_SLOT_ID).success());
+
+    assertTrue(runState.getMapGraph().moveToNode(1));
+    runState.enterEncounter(1);
+    runState.completeEncounter(true);
+    player.restore(43, 100, 99);
+    AutosaveCoordinator coordinator = new AutosaveCoordinator(runState, () -> service);
+    coordinator.requestAfterSuccessfulEncounter();
+
+    // Relaunching before a reward is claimed loses the in-memory request by design. The prior
+    // durable checkpoint must remain intact rather than recording a consumed or replayable reward.
+    SaveGameService relaunchedService =
+        new SaveGameService(
+            new JsonSaveGameRepository(new FileHandle(temporaryDirectory.toFile())));
+    LoadResult autosave = relaunchedService.loadGame(AutosaveCoordinator.AUTOSAVE_SLOT_ID);
+    assertTrue(autosave.success());
+    assertEquals(75, autosave.data().player.currentHealth);
+    assertEquals(10, autosave.data().player.gold);
+    assertEquals(0, autosave.data().map.currentNodeId);
+  }
+
+  @Test
+  void rewardedBattleAutosaveRestoresAfterRelaunchWithoutOverwritingManualSlot() {
     RunState runState = activeRun();
 
     PlayerRunState player = new PlayerRunState(75, 100, 50);
@@ -109,15 +173,21 @@ class AutosaveCoordinatorTest {
                 player,
                 PlayerDeckFactory.createStarterDeck(),
                 runState,
-                BestiaryService.loadDefault()));
+                BestiaryService.loadDefault(),
+                CardDiscoveryService.loadDefault()));
     assertTrue(service.saveGame(1).success());
 
     assertTrue(runState.getMapGraph().moveToNode(1));
     runState.enterEncounter(1);
     runState.completeEncounter(true);
-    player.restore(43, 100, 28);
+    player.restore(43, 100, 3);
     AutosaveCoordinator coordinator = new AutosaveCoordinator(runState, () -> service);
     coordinator.requestAfterSuccessfulEncounter();
+
+    // The reward is applied on the victory screen, then the checkpoint is written before the map
+    // is created. This is the durable post-battle path used by RewardDisplay.
+    player.addGold(25);
+    coordinator.saveIfPending();
     coordinator.saveIfPending();
 
     // New service and run-scoped objects simulate quitting and launching the game again.
@@ -144,12 +214,58 @@ class AutosaveCoordinatorTest {
                 restoredPlayer,
                 PlayerDeckFactory.createStarterDeck(),
                 restoredRun,
-                BestiaryService.loadDefault())
+                BestiaryService.loadDefault(),
+                CardDiscoveryService.loadDefault())
             .restore(autosave.data());
     assertTrue(restored.success());
     assertEquals(43, restoredPlayer.getCurrentHealth());
     assertEquals(28, restoredPlayer.getGold());
     assertEquals(1, restoredRun.getMapGraph().getCurrentNode().getNodeId());
+  }
+
+  @Test
+  void pendingPostBattleAutosaveIncludesCardClaimedBeforeReturningToMap() {
+    RunState runState = activeRun();
+    CardService cards = new CardLibrary(CardConfigLoader.loadCards());
+    CardDiscoveryService discovery = CardDiscoveryService.loadDefault();
+    BestiaryService bestiary = BestiaryService.loadDefault();
+    JsonSaveGameRepository repository =
+        new JsonSaveGameRepository(new FileHandle(temporaryDirectory.toFile()));
+    AutosaveCoordinator coordinator =
+        new AutosaveCoordinator(
+            runState,
+            () ->
+                new SaveGameService(
+                    repository,
+                    new GameStateSnapshotProvider(
+                        runState.getOrCreatePlayerState(),
+                        runState.getOrCreatePlayerDeck(cards),
+                        runState,
+                        bestiary,
+                        discovery)));
+
+    assertTrue(runState.getMapGraph().moveToNode(1));
+    runState.enterEncounter(1);
+    runState.completeEncounter(true);
+    coordinator.requestAfterSuccessfulEncounter();
+
+    RewardService rewards =
+        new RewardService(new RewardGenerator(new Random(1)), cards, new Random(2));
+    rewards.claimRunReward(
+        runState, RewardOption.cards(new CardRewardSelection(List.of("starfall"))), "starfall");
+    CardInstance acquired = runState.getOrCreatePlayerDeck(cards).getCards().getLast();
+
+    coordinator.saveIfPending();
+
+    LoadResult autosave = repository.load(AutosaveCoordinator.AUTOSAVE_SLOT_ID);
+    assertTrue(autosave.success());
+    CardInstanceSaveData saved =
+        autosave.data().deck.cards.stream()
+            .filter(card -> acquired.instanceId().equals(card.instanceId))
+            .findFirst()
+            .orElseThrow();
+    assertEquals("starfall", saved.cardId);
+    assertEquals(CardInstance.BASE_LEVEL, saved.upgradeLevel);
   }
 
   private RunState activeRun() {

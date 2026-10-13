@@ -94,6 +94,9 @@ public final class CardValidator {
     if (card.name == null || card.name.isBlank()) {
       errors.add("name must not be blank");
     }
+    if (card.lore != null && card.lore.isBlank()) {
+      errors.add("lore must not be blank");
+    }
     if (card.cost < 0) {
       errors.add("cost must not be negative, was " + card.cost);
     }

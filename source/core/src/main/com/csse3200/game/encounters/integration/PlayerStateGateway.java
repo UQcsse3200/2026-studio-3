@@ -49,4 +49,11 @@ public interface PlayerStateGateway {
    * @param currency non-negative currency value
    */
   void setCurrency(int currency);
+
+  /**
+   * Returns the player's current shop discount, as a fraction (e.g. 0.05f for 5% off).
+   *
+   * @return the player's current shop discount
+   */
+  float getShopDiscount();
 }

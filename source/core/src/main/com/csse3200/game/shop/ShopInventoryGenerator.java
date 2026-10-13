@@ -1,5 +1,7 @@
 package com.csse3200.game.shop;
 
+import com.csse3200.game.cards.CardAcquisitionPool;
+import com.csse3200.game.cards.CardAcquisitionPoolLoader;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.Rarity;
 import com.csse3200.game.cards.configs.CardConfig;
@@ -21,11 +23,12 @@ public final class ShopInventoryGenerator {
   private static final int PRICE_VARIANCE = 5;
 
   private final CardService cardService;
+  private final CardAcquisitionPool acquisitionPool;
   private final Random random;
 
   /** Creates a generator with nondeterministic inventory selection. */
   public ShopInventoryGenerator(CardService cardService) {
-    this(cardService, new Random());
+    this(cardService, CardAcquisitionPoolLoader.loadDefault(cardService), new Random());
   }
 
   /**
@@ -35,7 +38,15 @@ public final class ShopInventoryGenerator {
    * @param random random source used for selection, price variation, and stock
    */
   public ShopInventoryGenerator(CardService cardService, Random random) {
+    this(cardService, CardAcquisitionPoolLoader.loadDefault(cardService), random);
+  }
+
+  /** Creates a generator that uses the supplied shared acquisition policy. */
+  public ShopInventoryGenerator(
+      CardService cardService, CardAcquisitionPool acquisitionPool, Random random) {
     this.cardService = Objects.requireNonNull(cardService, "cardService cannot be null");
+    this.acquisitionPool =
+        Objects.requireNonNull(acquisitionPool, "acquisitionPool cannot be null");
     this.random = Objects.requireNonNull(random, "random cannot be null");
   }
 
@@ -77,7 +88,7 @@ public final class ShopInventoryGenerator {
 
   private List<CardConfig> getValidCandidates() {
     List<CardConfig> candidates = new ArrayList<>();
-    List<CardConfig> cards = cardService.getAllCards();
+    List<CardConfig> cards = acquisitionPool.getEligibleCards();
     if (cards == null) {
       return candidates;
     }

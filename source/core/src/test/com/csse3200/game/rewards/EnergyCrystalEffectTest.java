@@ -38,9 +38,17 @@ class EnergyCrystalEffectTest {
   void stacksAcrossMultipleApplications() {
     effect.apply(player);
     effect.apply(player);
-    effect.apply(player);
 
-    assertEquals(STARTING_MAX_ENERGY + 3, energy.getMaxEnergy());
+    assertEquals(STARTING_MAX_ENERGY + 2, energy.getMaxEnergy());
+  }
+
+  @Test
+  void cappedAtFiveMaxEnergy() {
+    for (int i = 0; i < 10; i++) {
+      effect.apply(player);
+    }
+
+    assertEquals(5, energy.getMaxEnergy());
   }
 
   @Test

@@ -84,7 +84,10 @@ class AnimationRenderComponentTest {
 
     for (int i = 0; i < 5; i++) {
       // Each draw advances 1 frame, check that it matches for each
+      assertSame(regions.get(i), animator.getCurrentFrame());
       animator.draw(batch);
+      assertSame(regions.get(i), animator.getRenderedFrame());
+      assertSame(regions.get(i), animator.getRenderedFrame());
       verify(batch)
           .draw(
               regions.get(i),
@@ -127,6 +130,7 @@ class AnimationRenderComponentTest {
     animator.startAnimation("test_name");
     assertTrue(animator.stopAnimation());
     assertNull(animator.getCurrentAnimation());
+    assertNull(animator.getRenderedFrame());
   }
 
   // flashTint 应该在指定时长后自动清除

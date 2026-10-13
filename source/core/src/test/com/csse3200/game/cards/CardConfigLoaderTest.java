@@ -3,6 +3,7 @@ package com.csse3200.game.cards;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -49,7 +50,19 @@ class CardConfigLoaderTest {
         () -> assertEquals(1, strike.upgrade.cost),
         () -> assertEquals(Rarity.COMMON, strike.upgrade.rarity),
         () -> assertEquals(12, strike.upgrade.effects[0].value),
-        () -> assertTrue(defend.upgrade == null));
+        () -> assertNull(defend.upgrade));
+  }
+
+  @Test
+  void shouldLoadCardsWithAndWithoutOptionalLore() {
+    List<CardConfig> cards = CardConfigLoader.loadCards(TEST_DIRECTORY + "optional_lore.json");
+    CardConfig withLore =
+        cards.stream().filter(card -> "lore_card".equals(card.id)).findFirst().orElseThrow();
+    CardConfig withoutLore =
+        cards.stream().filter(card -> "plain_card".equals(card.id)).findFirst().orElseThrow();
+
+    assertEquals("An old story follows this card.", withLore.lore);
+    assertNull(withoutLore.lore);
   }
 
   @Test

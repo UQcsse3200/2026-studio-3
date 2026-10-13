@@ -4,7 +4,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.input.InputComponent;
 
-/** Provides a temporary Ctrl+Shift+B shortcut for opening the battle screen during development. */
+/** Provides temporary keyboard shortcuts for development screens. */
 public class DebugShortcutInputComponent extends InputComponent {
   private final GdxGame game;
   private boolean controlPressed;
@@ -27,6 +27,12 @@ public class DebugShortcutInputComponent extends InputComponent {
       case Keys.B:
         if (controlPressed && shiftPressed) {
           game.startBattle();
+          return true;
+        }
+        return false;
+      case Keys.P:
+        if (controlPressed && shiftPressed) {
+          game.startElitePortalDebug();
           return true;
         }
         return false;
