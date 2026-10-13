@@ -57,7 +57,10 @@ public class RewardDisplay extends Displaying {
           ItemType.ENERGY_CRYSTAL, "images/ui/energy-crystal.png",
           ItemType.MERCHANTS_FAVOR, "images/ui/merchants-favor.png",
           ItemType.IRON_AEGIS, "images/ui/iron-aegis.png",
-          ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png");
+          ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png",
+          ItemType.ASHEN_EMBER, "images/ui/ashen-ember.png",
+          ItemType.BRAND_OF_THE_DAMNED, "images/ui/brand-of-the-damned.png",
+          ItemType.SHATTERED_AEGIS, "images/ui/shattered-aegis.png");
 
   private final RunState runState;
   private final GdxGame game;
@@ -326,8 +329,8 @@ public class RewardDisplay extends Displaying {
                     case IRON_AEGIS -> " (+5 Armour when used)";
                     case WARRIORS_CREST -> " (+1 Strength when used)";
                     case ASHEN_EMBER -> " (-1 Max Energy)";
-                    case BRAND_OF_THE_DAMNED -> " (-1 Strength each battle)";
-                    case SHATTERED_AEGIS -> " (-1 Block from cards)";
+                    case BRAND_OF_THE_DAMNED -> " (-1 from every Strength gain)";
+                    case SHATTERED_AEGIS -> " (-1 from every Block gain)";
                   };
       case CARD -> "Choose a Card";
     };
@@ -361,8 +364,8 @@ public class RewardDisplay extends Displaying {
                 case IRON_AEGIS -> "+5 Armour when used";
                 case WARRIORS_CREST -> "+1 Strength when used";
                 case ASHEN_EMBER -> "-1 Max Energy\nMinimum 1";
-                case BRAND_OF_THE_DAMNED -> "-1 Strength at the\nstart of each battle";
-                case SHATTERED_AEGIS -> "Cards grant\n1 less Block";
+                case BRAND_OF_THE_DAMNED -> "Strength gains -1\nper copy | Minimum 0";
+                case SHATTERED_AEGIS -> "Block gains -1\nper copy | Minimum 0";
               };
     };
   }

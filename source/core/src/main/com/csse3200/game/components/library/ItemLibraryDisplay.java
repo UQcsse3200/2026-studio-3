@@ -59,6 +59,14 @@ public class ItemLibraryDisplay extends UIComponent {
             + " at +20. Only one copy used per claim.");
     ITEM_DESCRIPTIONS.put(ItemType.IRON_AEGIS, "Consume during battle to gain +5 Armour.");
     ITEM_DESCRIPTIONS.put(ItemType.WARRIORS_CREST, "Consume during battle to gain +1 Strength.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.ASHEN_EMBER, "Curse: reduces maximum energy by 1 per copy, to a minimum of 1.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.BRAND_OF_THE_DAMNED,
+        "Curse: every Strength gain is reduced by 1 per copy, to a minimum of 0.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.SHATTERED_AEGIS,
+        "Curse: every Block gain is reduced by 1 per copy, to a minimum of 0.");
   }
 
   private final GdxGame game;

@@ -60,7 +60,10 @@ public class InventoryPopupComponent extends UIComponent {
           ItemType.ENERGY_CRYSTAL, "images/ui/energy-crystal.png",
           ItemType.MERCHANTS_FAVOR, "images/ui/merchants-favor.png",
           ItemType.IRON_AEGIS, "images/ui/iron-aegis.png",
-          ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png");
+          ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png",
+          ItemType.ASHEN_EMBER, "images/ui/ashen-ember.png",
+          ItemType.BRAND_OF_THE_DAMNED, "images/ui/brand-of-the-damned.png",
+          ItemType.SHATTERED_AEGIS, "images/ui/shattered-aegis.png");
 
   private static final Map<ItemType, IntFunction<String>> ITEM_DESCRIPTIONS =
       new EnumMap<>(ItemType.class);
@@ -83,6 +86,14 @@ public class InventoryPopupComponent extends UIComponent {
     ITEM_DESCRIPTIONS.put(ItemType.IRON_AEGIS, count -> "Use in battle: +5 Armour");
 
     ITEM_DESCRIPTIONS.put(ItemType.WARRIORS_CREST, count -> "Use in battle: +1 Strength");
+
+    ITEM_DESCRIPTIONS.put(ItemType.ASHEN_EMBER, count -> "-" + count + " Max Energy | Minimum 1");
+
+    ITEM_DESCRIPTIONS.put(
+        ItemType.BRAND_OF_THE_DAMNED, count -> "Strength gains -" + count + " | Minimum 0");
+
+    ITEM_DESCRIPTIONS.put(
+        ItemType.SHATTERED_AEGIS, count -> "Block gains -" + count + " | Minimum 0");
   }
 
   private final RunState runState;
@@ -212,7 +223,8 @@ public class InventoryPopupComponent extends UIComponent {
   }
 
   private Table createStatusBadge(ItemType item) {
-    String status = item == ItemType.LUCKY_COIN ? "ON GOLD" : "PASSIVE";
+    String status = item.isCurse() ? "CURSE" : item == ItemType.LUCKY_COIN ? "ON GOLD" : "PASSIVE";
+    Color statusColour = item.isCurse() ? CREST_EFFECT_COLOUR : DESCRIPTION_COLOUR;
 
     Table border = new Table();
     border.setBackground(skin.newDrawable("white", ROW_BORDER_COLOUR));
@@ -220,7 +232,7 @@ public class InventoryPopupComponent extends UIComponent {
 
     Table badge = new Table();
     badge.setBackground(skin.newDrawable("white", ROW_BACKGROUND_COLOUR));
-    badge.add(new Label(status, smallLabelStyle(DESCRIPTION_COLOUR))).pad(5f, 8f, 5f, 8f);
+    badge.add(new Label(status, smallLabelStyle(statusColour))).pad(5f, 8f, 5f, 8f);
 
     border.add(badge);
     return border;
