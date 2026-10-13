@@ -8,7 +8,7 @@ class CardKeywordHighlighterTest {
   @Test
   void highlightsAllSixKeywordsAndPreservesCasingAndPunctuation() {
     assertEquals(
-        "[YELLOW]Block[], [YELLOW]Armour[], [YELLOW]Strength[], [YELLOW]Vulnerable[], [YELLOW]Poison[], [YELLOW]Feeble[]. [YELLOW]poison[]!",
+        "[#8B4513]Block[], [#8B4513]Armour[], [#8B4513]Strength[], [#8B4513]Vulnerable[], [#8B4513]Poison[], [#8B4513]Feeble[]. [#8B4513]poison[]!",
         CardKeywordHighlighter.highlight(
             "Block, Armour, Strength, Vulnerable, Poison, Feeble. poison!"));
   }
@@ -24,7 +24,7 @@ class CardKeywordHighlighterTest {
   @Test
   void escapesLiteralMarkupAndRestoresNormalColourAfterEachKeyword() {
     assertEquals(
-        "[[RED]Gain 6 [YELLOW]Block[]. [[] Then 2 [YELLOW]Strength[].",
+        "[[RED]Gain 6 [#8B4513]Block[]. [[] Then 2 [#8B4513]Strength[].",
         CardKeywordHighlighter.highlight("[RED]Gain 6 Block. [] Then 2 Strength."));
     assertEquals("", CardKeywordHighlighter.highlight(""));
   }

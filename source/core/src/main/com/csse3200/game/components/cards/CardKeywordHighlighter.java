@@ -13,8 +13,8 @@ public final class CardKeywordHighlighter {
   private CardKeywordHighlighter() {}
 
   /**
-   * Adds yellow libGDX markup to whole keywords, preserving casing and escaping literal brackets.
-   * The original description and gameplay configuration remain plain text.
+   * Adds dark brown libGDX markup to whole keywords, preserving casing and escaping literal
+   * brackets. The original description and gameplay configuration remain plain text.
    *
    * @param description plain card rules text
    * @return rules text with presentation markup
@@ -25,7 +25,7 @@ public final class CardKeywordHighlighter {
     int previous = 0;
     while (matcher.find()) {
       result.append(escape(description.substring(previous, matcher.start())));
-      result.append("[YELLOW]").append(matcher.group()).append("[]");
+      result.append("[#8B4513]").append(matcher.group()).append("[]");
       previous = matcher.end();
     }
     return result.append(escape(description.substring(previous))).toString();

@@ -84,7 +84,7 @@ class FramedCardFaceTest {
   }
 
   @Test
-  void keywordGlyphsAreYellowWithoutChangingSharedSkinFontOrRawDescription() {
+  void keywordGlyphsAreBrownWithoutChangingSharedSkinFontOrRawDescription() {
     ResolvedCard card =
         new CardResolver().resolveBasePreview(library.getCard("defend").orElseThrow(), "highlight");
     boolean originalMarkup = skin.get("small", Label.LabelStyle.class).font.getData().markupEnabled;
@@ -96,7 +96,7 @@ class FramedCardFaceTest {
 
     Label description = null;
     for (Actor actor : face.getChildren()) {
-      if (actor instanceof Label label && label.getText().toString().contains("[YELLOW]")) {
+      if (actor instanceof Label label && label.getText().toString().contains("[#8B4513]")) {
         description = label;
       }
     }
@@ -126,7 +126,8 @@ class FramedCardFaceTest {
         .draw(any(Texture.class), any(float[].class), anyInt(), anyInt());
     description.draw(batch, 1f);
     assertTrue(
-        colours.contains(Color.YELLOW.toFloatBits()), "keyword glyphs must emit yellow vertices");
+        colours.contains(Color.valueOf("8B4513").toFloatBits()),
+        "keyword glyphs must emit brown vertices");
     assertTrue(
         colours.contains(new Color(0.10f, 0.065f, 0.045f, 1f).toFloatBits()),
         "surrounding text must retain its normal colour");

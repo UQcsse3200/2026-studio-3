@@ -101,7 +101,7 @@ public final class CardWidgetAssets {
     costStyle = copyLabelStyle(skin, "default", Color.WHITE);
     targetStyle = copyLabelStyle(skin, SMALL, LIGHT_TEXT);
     // Label multiplies its font colour into every markup run at draw time. Use a white tint
-    // and put the normal rules-text colour in markup so keywords remain actual yellow.
+    // and put the normal rules-text colour in markup so keywords retain their brown colour.
     descriptionStyle = copyLabelStyle(skin, SMALL, Color.WHITE);
     // Markup must not change the skin font used by names, menus or other UI labels. Reuse the
     // screen-owned texture regions, but keep description font data and caches independent.
