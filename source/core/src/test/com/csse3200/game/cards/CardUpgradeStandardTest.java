@@ -35,15 +35,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 class CardUpgradeStandardTest {
   /** Card owners remove their IDs from this set in the same commit that adds their upgrades. */
   private static final Set<String> PENDING_UPGRADES =
-      Set.of(
-          "poison_flask",
-          "poison_blade",
-          "poison_cloud",
-          "poison_mark",
-          "starfall",
-          "rift_lance",
-          "astral_ward",
-          "resurrection");
+      Set.of("poison_flask", "poison_blade", "poison_cloud", "poison_mark");
 
   private List<CardConfig> cards;
 
