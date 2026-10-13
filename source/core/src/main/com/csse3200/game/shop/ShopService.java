@@ -15,6 +15,7 @@ import java.util.Map;
 public class ShopService {
   private final Map<String, ShopItem> items = new LinkedHashMap<>();
   private final List<String> validationErrors = new ArrayList<>();
+  private boolean discountEnabled = true;
 
   public ShopService(ShopConfig config) {
     this(config == null ? new ShopItem[0] : config.getItems());
@@ -169,6 +170,24 @@ public class ShopService {
   }
 
   private int applyDiscount(int originalPrice, ShopTransactionGateway transactions) {
-    return Math.round(originalPrice * (1 - transactions.getShopDiscount()));
+    return Math.round(originalPrice * (1 - getEffectiveDiscount(transactions)));
+  }
+
+  /** Pricing policy belongs to this stock batch, not to the player's permanent item effects. */
+  public void disableDiscount() {
+    discountEnabled = false;
+  }
+
+  public float getEffectiveDiscount(ShopTransactionGateway transactions) {
+    return discountEnabled && transactions != null ? transactions.getShopDiscount() : 0f;
+  }
+
+  /** Returns the same final price used by purchase validation and charging. */
+  public int getPrice(String itemId, ShopTransactionGateway transactions) {
+    ShopItem item = items.get(itemId);
+    if (item == null) {
+      throw new IllegalArgumentException("Unknown shop item: " + itemId);
+    }
+    return applyDiscount(item.price, transactions);
   }
 }

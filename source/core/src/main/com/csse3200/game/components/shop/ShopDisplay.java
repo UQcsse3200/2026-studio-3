@@ -456,7 +456,8 @@ public class ShopDisplay extends UIComponent {
 
     Actor artwork = createArtwork(item);
 
-    float discount = playerRunState == null ? 0f : playerRunState.getShopDiscount();
+    Float currentDiscount = shopEncounter.getShopDiscount();
+    float discount = currentDiscount == null ? 0f : currentDiscount;
     int shownPrice = Math.round(item.price * (1f - discount));
     String priceText =
         discount > 0f
@@ -665,7 +666,8 @@ public class ShopDisplay extends UIComponent {
                   "%s x%d  |  %.0f%% off all offers",
                   ItemFormatting.formatItemName(ItemType.MERCHANTS_FAVOR),
                   favorCount,
-                  playerRunState.getShopDiscount() * 100f));
+                  (shopEncounter.getShopDiscount() == null ? 0f : shopEncounter.getShopDiscount())
+                      * 100f));
     }
 
     for (ShopItem item : shopEncounter.getItems()) {
