@@ -18,7 +18,7 @@ class ClickableSubscriptionTest {
   @Test
   void inOutReactsToDownWhileLive() {
     Entity entity = new Entity();
-    InOutOnTrigger card = created(new InOutOnTrigger(record()), entity);
+    InOutOnTrigger card = created(new InOutOnTrigger(handCardRecord()), entity);
 
     entity.getEvents().trigger("down");
 
@@ -28,7 +28,7 @@ class ClickableSubscriptionTest {
   @Test
   void inOutIgnoresDownAfterRemove() {
     Entity entity = new Entity();
-    InOutOnTrigger card = created(new InOutOnTrigger(record()), entity);
+    InOutOnTrigger card = created(new InOutOnTrigger(handCardRecord()), entity);
 
     card.remove();
     entity.getEvents().trigger("down");
@@ -39,7 +39,7 @@ class ClickableSubscriptionTest {
   @Test
   void gatedReactsToDownWhileLive() {
     Entity entity = new Entity();
-    GatedClickable button = created(new GatedClickable(record()), entity);
+    GatedClickable button = created(new GatedClickable(handCardRecord()), entity);
 
     entity.getEvents().trigger("down");
 
@@ -49,7 +49,7 @@ class ClickableSubscriptionTest {
   @Test
   void gatedIgnoresDownAfterRemove() {
     Entity entity = new Entity();
-    GatedClickable button = created(new GatedClickable(record()), entity);
+    GatedClickable button = created(new GatedClickable(handCardRecord()), entity);
 
     button.remove();
     entity.getEvents().trigger("down");
@@ -57,7 +57,7 @@ class ClickableSubscriptionTest {
     assertEquals(Touchable.enabled, button.getBtn().getTouchable());
   }
 
-  private static ClickableRecord record() {
+  private static ClickableRecord handCardRecord() {
     return ClickableRecord.builder("playCard").text("card").build();
   }
 
