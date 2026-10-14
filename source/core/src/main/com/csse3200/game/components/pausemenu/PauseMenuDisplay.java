@@ -436,13 +436,18 @@ public class PauseMenuDisplay extends UIComponent {
     }
   }
 
-  /** Backs out of the settings subview or confirm dialog; does nothing on the root menu. */
+  /**
+   * Backs out one level: closes an open confirm dialog or settings subview, or, when already on the
+   * root menu, closes the whole pause menu (fires {@link #RESUME_EVENT}) so Escape toggles the menu.
+   */
   private void navigateBack() {
     if (confirmDialog.getStage() != null) {
       confirmDialog.hide(null);
       setFocus(pauseFocusables());
     } else if (settingsTable != null) {
       settingsPanel.requestBack();
+    } else {
+      entity.getEvents().trigger(RESUME_EVENT);
     }
   }
 
