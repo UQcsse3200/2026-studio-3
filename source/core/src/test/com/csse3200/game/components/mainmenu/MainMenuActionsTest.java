@@ -95,6 +95,13 @@ class MainMenuActionsTest {
   }
 
   @Test
+  void selectedDemoEventOpensOnlyTheChosenPreview() {
+    menu.getEvents().trigger(MainMenuDisplay.DEMO_EVENT_SELECTED, "mysterious-shrine");
+    verify(game).openDemoEvent("mysterious-shrine");
+    verify(game, never()).openDemoEvent();
+  }
+
+  @Test
   void demoShopOnlyOpensTheIndependentPreview() {
     menu.getEvents().trigger(MainMenuDisplay.DEMO_SHOP_EVENT);
     verify(game).openDemoShop();
