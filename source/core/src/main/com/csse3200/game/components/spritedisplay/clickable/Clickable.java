@@ -266,8 +266,8 @@ public abstract class Clickable extends Component {
   /**
    * Put this widget straight into its hidden resting state (off-screen/invisible, not
    * interactable), skipping any outro animation. Called by the owning screen (e.g. BattleScreen)
-   * when a widget is (re)built while the hand is currently supposed to be hidden — e.g. a cooldown
-   * retrieval rebuilding the row mid-enemy-turn, before the delayed "up" animation has fired — so
+   * when a widget is (re)built while the hand is currently supposed to be hidden (e.g. a cooldown
+   * retrieval rebuilding the row mid-enemy-turn, before the delayed "up" animation has fired), so
    * it doesn't pop into view early. Default: nothing, mirroring {@link #showNow()}.
    */
   public void hideNow() {
