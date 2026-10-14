@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
@@ -55,29 +56,28 @@ public class ItemLibraryDisplay extends UIComponent {
         ItemType.MERCHANTS_FAVOR, "+10% shop discount per copy, stacks up to a 50% cap.");
     ITEM_DESCRIPTIONS.put(
         ItemType.LUCKY_COIN,
-        "Consumed when claiming a GOLD reward: adds 10% of your gold (current + reward), capped"
-            + " at +20. Only one copy used per claim.");
-    ITEM_DESCRIPTIONS.put(ItemType.IRON_AEGIS, "Consume during battle to gain +5 Armour.");
-    ITEM_DESCRIPTIONS.put(ItemType.WARRIORS_CREST, "Consume during battle to gain +1 Strength.");
+        "+10% gold on a GOLD reward claim (current + reward), capped at +20. One copy is used"
+            + " per claim.");
+    ITEM_DESCRIPTIONS.put(ItemType.IRON_AEGIS, "+5 Armour when used in battle. Single use.");
+    ITEM_DESCRIPTIONS.put(ItemType.WARRIORS_CREST, "+1 Strength when used in battle. Single use.");
     ITEM_DESCRIPTIONS.put(
-        ItemType.ASHEN_EMBER, "Curse: reduces maximum energy by 1 per copy, to a minimum of 1.");
+        ItemType.AMBROSIA_FLASK,
+        "Restore 20 Health when used in battle, up to max Health. Single use.");
     ITEM_DESCRIPTIONS.put(
         ItemType.BRAND_OF_THE_DAMNED,
-        "Curse: every Strength gain is reduced by 1 per copy, to a minimum of 0.");
+        "Every Strength gain is reduced by 1 per copy, to a minimum of 0.");
     ITEM_DESCRIPTIONS.put(
-        ItemType.SHATTERED_AEGIS,
-        "Curse: every Block gain is reduced by 1 per copy, to a minimum of 0.");
+        ItemType.SHATTERED_AEGIS, "Every Block gain is reduced by 1 per copy, to a minimum of 0.");
     ITEM_DESCRIPTIONS.put(
         ItemType.AMBROSIA_FLASK, "Consume during battle to restore 20 Health, up to max health.");
     ITEM_DESCRIPTIONS.put(
-            ItemType.BLOOD_OATH_SIGIL,
-            "Curse: lose 2 Health at the start of each of your turns per copy. Bypasses Block and"
-                    + " Armour. Cannot reduce Health below 1.");
-      ITEM_DESCRIPTIONS.put(
-              ItemType.ETERNAL_VITALITY,
-              "Elite Portal reward: gain +20 maximum Health and fully heal when obtained."
-                      + " Each copy stacks; this item is not consumed.");
-
+        ItemType.ASHEN_EMBER, "Reduces maximum energy by 1 per copy, to a minimum of 1.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.BLOOD_OATH_SIGIL,
+        "Lose 2 Health at the start of each of your turns per copy. Bypasses Block and"
+            + " Armour. Cannot reduce Health below 1.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.ETERNAL_VITALITY, "+20 max Health per copy, and fully heal when obtained.");
   }
 
   private final GdxGame game;
@@ -86,6 +86,8 @@ public class ItemLibraryDisplay extends UIComponent {
   private Label nameLabel;
   private Label descriptionLabel;
   private Label sourceLabel;
+  private Table itemListTable;
+  private boolean showingCurses;
   private TextButton.TextButtonStyle buttonStyle;
 
   public static String resolveArtworkPath(ItemType item) {
@@ -118,7 +120,11 @@ public class ItemLibraryDisplay extends UIComponent {
     panel.row();
     addDivider(panel);
     panel.row();
+    TextButton relicsButton = addFilters(panel);
+    panel.row();
     addItemContent(panel);
+    relicsButton.setChecked(true);
+    applyFilter(false);
 
     Table wrapper = new Table();
     wrapper.setFillParent(true);
@@ -183,31 +189,15 @@ public class ItemLibraryDisplay extends UIComponent {
   }
 
   private void addItemContent(Table panel) {
-    ItemType[] items = ItemType.values();
-    addItemList(items, panel);
-    if (items.length > 0) {
-      showItem(items[0]);
-    }
+    addItemList(panel);
   }
 
-  private void addItemList(ItemType[] items, Table panel) {
-    Table itemList = new Table();
-    itemList.top();
-    itemList.defaults().width(290f).height(76f).padBottom(8f).left();
-    for (ItemType item : items) {
-      TextButton itemButton = new TextButton(ItemFormatting.formatItemName(item), buttonStyle);
-      itemButton.getLabel().setFontScale(0.6f);
-      itemButton.addListener(
-          new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-              showItem(item);
-            }
-          });
-      itemList.add(itemButton).row();
-    }
+  private void addItemList(Table panel) {
+    itemListTable = new Table();
+    itemListTable.top();
+    itemListTable.defaults().width(290f).height(76f).padBottom(8f).left();
 
-    ScrollPane scrollPane = new ScrollPane(itemList, skin);
+    ScrollPane scrollPane = new ScrollPane(itemListTable, skin);
     scrollPane.setFadeScrollBars(false);
     scrollPane.setScrollingDisabled(true, false);
 
@@ -220,6 +210,73 @@ public class ItemLibraryDisplay extends UIComponent {
 
     panel.add(listPanel).width(350f).expandY().fillY().padRight(22f);
     panel.add(createDetailPanel()).expand().fill();
+  }
+
+  private TextButton addFilters(Table panel) {
+    Table filters = new Table();
+    filters.defaults().width(185f).height(62f).padRight(12f);
+    ButtonGroup<TextButton> filterGroup = new ButtonGroup<>();
+    filterGroup.setMinCheckCount(1);
+    filterGroup.setMaxCheckCount(1);
+    filterGroup.setUncheckLast(true);
+
+    TextButton relicsButton = createFilterButton("Relics", false, filterGroup);
+    filters.add(relicsButton);
+    filters.add(createFilterButton("Curses", true, filterGroup));
+
+    panel.add(filters).left().colspan(2).padBottom(16f);
+    return relicsButton;
+  }
+
+  private TextButton createFilterButton(
+      String text, boolean curses, ButtonGroup<TextButton> group) {
+    TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(buttonStyle);
+    style.checked = style.over != null ? style.over : style.down;
+    style.checkedFontColor = Color.WHITE;
+    TextButton button = new TextButton(text, style);
+    button.getLabel().setFontScale(0.85f);
+    group.add(button);
+    button.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            if (button.isChecked()) {
+              applyFilter(curses);
+            }
+          }
+        });
+    return button;
+  }
+
+  private void applyFilter(boolean curses) {
+    showingCurses = curses;
+    rebuildItemList();
+  }
+
+  private void rebuildItemList() {
+    itemListTable.clearChildren();
+    ItemType firstItem = null;
+    for (ItemType item : ItemType.values()) {
+      if (item.isCurse() != showingCurses) {
+        continue;
+      }
+      if (firstItem == null) {
+        firstItem = item;
+      }
+      TextButton itemButton = new TextButton(ItemFormatting.formatItemName(item), buttonStyle);
+      itemButton.getLabel().setFontScale(0.6f);
+      itemButton.addListener(
+          new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+              showItem(item);
+            }
+          });
+      itemListTable.add(itemButton).row();
+    }
+    if (firstItem != null) {
+      showItem(firstItem);
+    }
   }
 
   private Table createDetailPanel() {

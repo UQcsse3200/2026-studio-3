@@ -20,7 +20,6 @@ import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
-import com.csse3200.game.rewards.CursePenalties;
 import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.ResourceService;
