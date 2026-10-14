@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Align;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
@@ -245,8 +244,8 @@ public class PlayerStatsDisplay extends UIComponent {
     Vector2 position = entity.getPosition();
     Vector2 scale = entity.getScale();
 
-    float playerX = position.x + scale.x / 2f;
-    float playerY = position.y - 1.25f;
+    float playerX = position.x + scale.x;
+    float playerY = position.y;
 
     Vector3 screenPosition = new Vector3(playerX, playerY, 0);
 
@@ -255,8 +254,11 @@ public class PlayerStatsDisplay extends UIComponent {
       return;
     }
     camera.project(screenPosition); // converts coordinates
+    // use stage position instead so the window size changes it remains in the same coordinate 
+    Vector2 stagePosition = stage.screenToStageCoordinates(
+      new Vector2 (screenPosition.x, screenPosition.y));
 
-    table.setPosition(screenPosition.x - table.getWidth() / 2f, screenPosition.y);
+    table.setPosition(stagePosition.x - table.getWidth() / 2f, stagePosition.y);
   }
 
   /**

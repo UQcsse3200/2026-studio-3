@@ -46,17 +46,8 @@ public class PlayerStatsTopDisplay extends UIComponent {
    * @see Table for positioning options
    */
   private void addActors() {
-    float stageWidth =
-        stage.getViewport() == null ? Gdx.graphics.getWidth() : stage.getViewport().getWorldWidth();
-    float stageHeight =
-        stage.getViewport() == null
-            ? Gdx.graphics.getHeight()
-            : stage.getViewport().getWorldHeight();
-
     table = new Table(skin);
     table.top().left();
-    table.setSize(stageWidth, 50);
-    table.setPosition(0, stageHeight - 50);
     table.setBackground(skin.newDrawable("color", new Color(0.105f, 0.070f, 0.065f, 0.98f)));
     table.padTop(5f).padLeft(10f);
 
@@ -109,8 +100,29 @@ public class PlayerStatsTopDisplay extends UIComponent {
     levelTable.add(levelImage).size(imageSideLength).pad(5);
     levelTable.add(levelLabel).left().pad(10);
     levelTable.pack();
-    levelTable.setPosition((stageWidth - levelTable.getWidth()) / 2f, stageHeight - 45);
+    positionTopDisplay();
     stage.addActor(levelTable);
+  }
+
+ /**
+  * Positions the top display based on the stage wdith and stage height.
+  * Function only for positioning allows it to be called on update(), if resize
+  * Occurs this will adjust the position and width of the top display 
+  */
+  private void positionTopDisplay() {
+    float stageWidth = 
+    stage.getViewport() == null ? Gdx.graphics.getWidth()
+     : stage.getViewport().getWorldWidth();
+    float stageHeight = stage.getViewport() == null ? Gdx.graphics.getHeight()
+     : stage.getViewport().getWorldHeight();
+    table.setSize(stageWidth, 75);
+    table.setPosition(0, stageHeight - 75);
+    levelTable.setPosition((stageWidth - levelTable.getWidth()) / 2f, stageHeight - 45);
+  }
+
+  @Override
+  public void update() {
+    positionTopDisplay();
   }
 
   @Override
