@@ -68,6 +68,21 @@ class PlayerItemEffectsSaveTest {
   }
 
   @Test
+  void eternalVitalityPersistsWithoutDoublingMaxHealthAfterRelaunch() {
+    PlayerRunState originalPlayer = new PlayerRunState(35, 80, 25);
+    originalPlayer.grantEternalVitality();
+
+    PlayerRunState restoredPlayer = restoreAfterRelaunch(saveAndLoad(originalPlayer));
+    Entity player = playerEntity();
+    restoredPlayer.applyTo(player);
+
+    assertEquals(1, restoredPlayer.getOwnedItemCount(ItemType.ETERNAL_VITALITY));
+    assertEquals(100, restoredPlayer.getMaxHealth());
+    assertEquals(100, player.getComponent(CombatStatsComponent.class).getMaxHealth());
+    assertEquals(100, player.getComponent(CombatStatsComponent.class).getHealth());
+  }
+
+  @Test
   void shouldTreatMissingOwnedItemsAsEmptyForOldSaves() {
     SaveGameData loaded = saveAndLoad(new PlayerRunState(50, 80, 25));
     loaded.player.ownedItems = null;

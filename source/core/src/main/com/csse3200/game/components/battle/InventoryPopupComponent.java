@@ -58,17 +58,18 @@ public class InventoryPopupComponent extends UIComponent {
   private static final Color DETAIL_COLOUR = new Color(0.72f, 0.65f, 0.58f, 1f);
 
   private static final Map<ItemType, String> ITEM_ICONS =
-          Map.ofEntries(
-                  Map.entry(ItemType.LUCKY_COIN, "images/ui/lucky-coin.png"),
-                  Map.entry(ItemType.ENERGY_CRYSTAL, "images/ui/energy-crystal.png"),
-                  Map.entry(ItemType.MERCHANTS_FAVOR, "images/ui/merchants-favor.png"),
-                  Map.entry(ItemType.IRON_AEGIS, "images/ui/iron-aegis.png"),
-                  Map.entry(ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png"),
-                  Map.entry(ItemType.ASHEN_EMBER, "images/ui/ashen-ember.png"),
-                  Map.entry(ItemType.BRAND_OF_THE_DAMNED, "images/ui/brand-of-the-damned.png"),
-                  Map.entry(ItemType.SHATTERED_AEGIS, "images/ui/shattered-aegis.png"),
-                  Map.entry(ItemType.AMBROSIA_FLASK, "images/ui/ambrosia-flask.png"),
-                  Map.entry(ItemType.BLOOD_OATH_SIGIL, "images/ui/blood-oath-sigil.png"));
+      Map.ofEntries(
+          Map.entry(ItemType.LUCKY_COIN, "images/ui/lucky-coin.png"),
+          Map.entry(ItemType.ENERGY_CRYSTAL, "images/ui/energy-crystal.png"),
+          Map.entry(ItemType.MERCHANTS_FAVOR, "images/ui/merchants-favor.png"),
+          Map.entry(ItemType.IRON_AEGIS, "images/ui/iron-aegis.png"),
+          Map.entry(ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png"),
+          Map.entry(ItemType.ASHEN_EMBER, "images/ui/ashen-ember.png"),
+          Map.entry(ItemType.BRAND_OF_THE_DAMNED, "images/ui/brand-of-the-damned.png"),
+          Map.entry(ItemType.SHATTERED_AEGIS, "images/ui/shattered-aegis.png"),
+          Map.entry(ItemType.AMBROSIA_FLASK, "images/ui/ambrosia-flask.png"),
+          Map.entry(ItemType.BLOOD_OATH_SIGIL, "images/ui/blood-oath-sigil.png"),
+          Map.entry(ItemType.ETERNAL_VITALITY, "images/ui/eternal-vitality.png"));
 
   private static final Map<ItemType, IntFunction<String>> ITEM_DESCRIPTIONS =
       new EnumMap<>(ItemType.class);
@@ -101,13 +102,13 @@ public class InventoryPopupComponent extends UIComponent {
         ItemType.SHATTERED_AEGIS, count -> "Block gains -" + count + " | Minimum 0");
 
     ITEM_DESCRIPTIONS.put(ItemType.AMBROSIA_FLASK, count -> "Use in battle: Restore 20 Health");
-
     ITEM_DESCRIPTIONS.put(
-            ItemType.BLOOD_OATH_SIGIL,
-            count ->
-                    "-"
-                            + count * CursePenalties.BLOOD_OATH_DAMAGE_PER_COPY
-                            + " Health each turn | Minimum 1");
+        ItemType.BLOOD_OATH_SIGIL,
+        count ->
+            "Turn start: -" + (count * 2) + " Health | Ignores Block/Armour | Minimum 1 Health");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.ETERNAL_VITALITY,
+        count -> "+" + (count * 20) + " Max Health | Fully healed when obtained");
   }
 
   private final RunState runState;

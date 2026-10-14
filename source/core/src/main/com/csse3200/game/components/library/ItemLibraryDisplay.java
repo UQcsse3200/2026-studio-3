@@ -73,6 +73,11 @@ public class ItemLibraryDisplay extends UIComponent {
             ItemType.BLOOD_OATH_SIGIL,
             "Curse: lose 2 Health at the start of each of your turns per copy. Bypasses Block and"
                     + " Armour. Cannot reduce Health below 1.");
+      ITEM_DESCRIPTIONS.put(
+              ItemType.ETERNAL_VITALITY,
+              "Elite Portal reward: gain +20 maximum Health and fully heal when obtained."
+                      + " Each copy stacks; this item is not consumed.");
+
   }
 
   private final GdxGame game;
