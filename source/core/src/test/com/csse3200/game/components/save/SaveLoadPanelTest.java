@@ -49,10 +49,11 @@ class SaveLoadPanelTest {
     ServiceLocator.registerRenderService(renderService);
 
     ResourceService resources = mock(ResourceService.class);
+    Texture texture = mock(Texture.class);
     when(resources.getAsset(
             org.mockito.ArgumentMatchers.anyString(),
             org.mockito.ArgumentMatchers.eq(Texture.class)))
-        .thenReturn(mock(Texture.class));
+        .thenReturn(texture);
     ServiceLocator.registerResourceService(resources);
 
     saveGameService = mock(SaveGameService.class);
