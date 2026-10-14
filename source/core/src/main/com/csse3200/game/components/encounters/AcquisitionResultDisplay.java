@@ -103,8 +103,7 @@ public final class AcquisitionResultDisplay implements AcquisitionView {
       row.add(card).width(92f).height(186f).padRight(14f);
     }
 
-    Color accent =
-        entry.kind() == AcquisitionResult.Kind.NEGATIVE_EFFECT ? LOSS : GOLD;
+    Color accent = entry.kind() == AcquisitionResult.Kind.NEGATIVE_EFFECT ? LOSS : GOLD;
     Table text = new Table();
     text.top().left();
     String kind = entry.kind().name().replace('_', ' ');
@@ -122,10 +121,7 @@ public final class AcquisitionResultDisplay implements AcquisitionView {
       text.row();
     }
     if (entry.durationTurns() != null) {
-      text
-          .add(
-              new Label(
-                  entry.durationTurns() + " turn(s)", labelStyle("small", accent)))
+      text.add(new Label(entry.durationTurns() + " turn(s)", labelStyle("small", accent)))
           .left()
           .padTop(5f);
     }
