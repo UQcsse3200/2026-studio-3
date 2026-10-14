@@ -20,6 +20,24 @@
             "healthDelta": 0,
             "currencyDelta": 0
           }
+        },
+        {
+          "id": "accept-brand",
+          "description": "Accept the Brand: gain 50 Gold and Brand of the Damned. In future battles, every Strength gain is reduced by 1 per copy (minimum 0).",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 50,
+            "itemRewardIds": ["BRAND_OF_THE_DAMNED"]
+          }
+        },
+        {
+          "id": "swear-blood-oath",
+          "description": "Swear the Blood Oath: gain 70 Gold and Blood-Oath Sigil. In future battles, lose 2 HP per copy at the start of each player turn, bypassing Block and Armour (minimum 1 HP).",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 70,
+            "itemRewardIds": ["BLOOD_OATH_SIGIL"]
+          }
         }
       ]
     },
@@ -97,6 +115,24 @@
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0
+          }
+        },
+        {
+          "id": "claim-shattered-aegis",
+          "description": "Claim the Shattered Aegis: gain 50 Gold and Shattered Aegis. In future battles, every Block gain is reduced by 1 per copy (minimum 0).",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 50,
+            "itemRewardIds": ["SHATTERED_AEGIS"]
+          }
+        },
+        {
+          "id": "take-ashen-ember",
+          "description": "Take the Ashen Ember: gain 80 Gold and Ashen Ember. In future battles, maximum Energy is reduced by 1 per copy (minimum 1).",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 80,
+            "itemRewardIds": ["ASHEN_EMBER"]
           }
         }
       ]

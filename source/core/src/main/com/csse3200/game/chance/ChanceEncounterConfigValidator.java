@@ -120,6 +120,14 @@ final class ChanceEncounterConfigValidator {
       errors.add(label + ".outcome: currencyDelta must be present");
     }
 
+    if (choice.outcome.itemRewardIds != null) {
+      for (String itemId : choice.outcome.itemRewardIds) {
+        if (itemId == null || !itemId.matches("[A-Z][A-Z0-9_]*")) {
+          errors.add(label + ".outcome: invalid itemRewardId '" + itemId + "'");
+        }
+      }
+    }
+
     String cardRewardId = choice.outcome.cardRewardId;
     if (cardRewardId != null && cardRewardId.isBlank()) {
       errors.add(label + ".outcome: cardRewardId must not be blank when present");

@@ -22,6 +22,36 @@ class ChanceEncounterConfigLoaderTest {
   private static final String TEST_DIRECTORY = "test/chance/";
 
   @Test
+  void shouldRejectInvalidItemRewardShapesAndEntries() {
+    assertMessageContains(
+        loadInvalid("invalid_item_reward_shapes.json"),
+        "choice[0].outcome.itemRewardIds must be an array",
+        "choice[1].outcome.itemRewardIds must be an array",
+        "choice[2].outcome.itemRewardIds[0] must not be null",
+        "choice[3].outcome.itemRewardIds[0] must be a string",
+        "choice[4].outcome.itemRewardIds[0] must not be blank");
+    assertMessageContains(
+        loadInvalid("invalid_item_reward_ids.json"),
+        "invalid itemRewardId 'ashen-ember'",
+        "invalid itemRewardId 'LUCKY COIN'",
+        "invalid itemRewardId '1_ITEM'");
+  }
+
+  @Test
+  void shouldLoadCombinedRewardsPreservingDuplicateItemCopies() {
+    ChanceEncounter encounter =
+        ChanceEncounterConfigLoader.loadEncounters(TEST_DIRECTORY + "combined_item_rewards.json")
+            .getFirst();
+    ChanceOutcome outcome = encounter.resolveChoice("accept");
+    assertEquals(10, outcome.getHealthDelta());
+    assertEquals(5, outcome.getCurrencyDelta());
+    assertEquals(List.of("bandage"), outcome.getCardRewardIds());
+    assertEquals(List.of("ENERGY_CRYSTAL", "ENERGY_CRYSTAL"), outcome.getItemRewardIds());
+    assertThrows(UnsupportedOperationException.class, outcome.getItemRewardIds()::clear);
+    assertTrue(encounter.resolveChoice("empty").isNoEffect());
+  }
+
+  @Test
   void shouldLoadAllConfiguredEncountersFromDefaultFile() {
     List<ChanceEncounter> encounters = ChanceEncounterConfigLoader.loadEncounters();
     List<String> encounterIds = encounters.stream().map(ChanceEncounter::getId).toList();
@@ -312,7 +342,8 @@ class ChanceEncounterConfigLoaderTest {
       ExpectedChoice... expectedChoices) {
     assertEquals(expectedId, encounter.getId());
     assertEquals(expectedDescription, encounter.getDescription());
-    assertEquals(expectedChoices.length, encounter.getChoices().size());
+    int addedChoices = Set.of("mysterious-shrine", "abandoned-mine").contains(expectedId) ? 2 : 0;
+    assertEquals(expectedChoices.length + addedChoices, encounter.getChoices().size());
 
     for (int i = 0; i < expectedChoices.length; i++) {
       ExpectedChoice expected = expectedChoices[i];
@@ -324,6 +355,7 @@ class ChanceEncounterConfigLoaderTest {
       assertEquals(expected.healthDelta(), outcome.getHealthDelta());
       assertEquals(expected.currencyDelta(), outcome.getCurrencyDelta());
       assertEquals(expected.cardRewardId(), outcome.getCardRewardId());
+      assertTrue(outcome.getItemRewardIds().isEmpty());
       assertSame(outcome, encounter.resolveChoice(expected.id()));
     }
   }

@@ -19,7 +19,8 @@ import org.slf4j.LoggerFactory;
  * Loads and validates Chance Encounter definitions from a JSON configuration file.
  *
  * <p>Catalog-less entry points validate JSON structure and reward-ID syntax. Use a catalog-aware
- * entry point when reward IDs must also be checked against registered card definitions.
+ * entry point when reward IDs must also be checked against registered card definitions. Item IDs
+ * are checked for enum-name syntax here and against the authoritative item API before settlement.
  */
 public final class ChanceEncounterConfigLoader {
   public static final String DEFAULT_ENCOUNTER_FILE = "configs/chanceEncounters.json";
@@ -144,10 +145,15 @@ public final class ChanceEncounterConfigLoader {
     List<ChanceChoice> choices = new ArrayList<>();
     for (ChanceChoiceConfig choiceConfig : encounterConfig.choices) {
       ChanceOutcome outcome =
-          new ChanceOutcome(
+          ChanceOutcome.withRewards(
               choiceConfig.outcome.healthDelta,
               choiceConfig.outcome.currencyDelta,
-              choiceConfig.outcome.cardRewardId);
+              choiceConfig.outcome.cardRewardId == null
+                  ? List.of()
+                  : List.of(choiceConfig.outcome.cardRewardId),
+              choiceConfig.outcome.itemRewardIds == null
+                  ? List.of()
+                  : List.of(choiceConfig.outcome.itemRewardIds));
       choices.add(new ChanceChoice(choiceConfig.id, choiceConfig.description, outcome));
     }
 
@@ -191,6 +197,17 @@ public final class ChanceEncounterConfigLoader {
         validateInteger(outcome.get("healthDelta"), label + ".healthDelta", errors);
         validateInteger(outcome.get("currencyDelta"), label + ".currencyDelta", errors);
         validateOptionalString(outcome.get("cardRewardId"), label + ".cardRewardId", errors);
+        JsonValue items = outcome.get("itemRewardIds");
+        if (items != null) {
+          if (!items.isArray()) {
+            errors.add(label + ".itemRewardIds must be an array when present");
+          } else {
+            int itemIndex = 0;
+            for (JsonValue item = items.child; item != null; item = item.next, itemIndex++) {
+              validateOptionalString(item, label + ".itemRewardIds[" + itemIndex + "]", errors);
+            }
+          }
+        }
       }
     }
   }
