@@ -244,6 +244,7 @@ class ChanceEncounterDisplayTest {
     assertEquals(0, completions.get());
     display.getContinueButton().fire(new ChangeEvent());
     stage.act(.3f);
+    stage.act(.3f);
     assertEquals(1, completions.get());
     assertEquals(90, player.getHealth());
     assertEquals(45, player.getCurrency());
