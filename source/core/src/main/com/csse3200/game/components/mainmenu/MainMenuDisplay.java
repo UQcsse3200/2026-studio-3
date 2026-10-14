@@ -19,6 +19,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
+import com.csse3200.game.chance.ChanceEncounter;
+import com.csse3200.game.chance.ChanceEncounterFactory;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
@@ -48,6 +50,7 @@ public class MainMenuDisplay extends UIComponent {
   public static final String SETTINGS_EVENT = "settings";
   public static final String EXIT_EVENT = "exit";
   public static final String DEMO_EVENT = "demoEvent";
+  public static final String DEMO_EVENT_SELECTED = "demoEventSelected";
   public static final String DEMO_CAMPFIRE_EVENT = "demoCampfire";
   public static final String DEMO_SHOP_EVENT = "demoShop";
 
@@ -59,6 +62,7 @@ public class MainMenuDisplay extends UIComponent {
   private TextButton settingsButton;
   private TextButton exitButton;
   private Dialog tutorialChoiceDialog;
+  private Dialog demoEventDialog;
 
   @Override
   public void create() {
@@ -154,6 +158,8 @@ public class MainMenuDisplay extends UIComponent {
             logger.debug("{} button clicked", text);
             if (START_EVENT.equals(eventName)) {
               showTutorialChoice();
+            } else if (DEMO_EVENT.equals(eventName)) {
+              showDemoEventChoice();
             } else {
               entity.getEvents().trigger(eventName);
             }
@@ -170,6 +176,55 @@ public class MainMenuDisplay extends UIComponent {
           }
         });
     return button;
+  }
+
+  /** Opens a map-free preview of any configured Event without changing normal Event selection. */
+  private void showDemoEventChoice() {
+    if (demoEventDialog != null) {
+      return;
+    }
+    List<ChanceEncounter> encounters = ChanceEncounterFactory.createInitialEncounters();
+    demoEventDialog =
+        new Dialog("Preview Event", skin) {
+          @Override
+          protected void result(Object choice) {
+            remove();
+            demoEventDialog = null;
+            if (choice == null) {
+              return;
+            }
+            if ("random".equals(choice)) {
+              entity.getEvents().trigger(DEMO_EVENT);
+            } else {
+              entity.getEvents().trigger(DEMO_EVENT_SELECTED, (String) choice);
+            }
+          }
+        };
+    demoEventDialog.setName("demo-event-picker");
+    demoEventDialog.setModal(true);
+    demoEventDialog.setMovable(false);
+    demoEventDialog.getContentTable().pad(12f);
+    demoEventDialog
+        .getContentTable()
+        .add(new Label("Choose an Event to inspect", skin))
+        .padBottom(10f);
+    demoEventDialog.getButtonTable().defaults().width(280f).height(42f).pad(3f);
+    addDemoEventButton("Random Event", "random", "demo-event-random");
+    for (ChanceEncounter encounter : encounters) {
+      String id = encounter.getId();
+      String label = id.replace('-', ' ');
+      addDemoEventButton(
+          Character.toUpperCase(label.charAt(0)) + label.substring(1), id, "demo-event-" + id);
+    }
+    addDemoEventButton("Cancel", null, "demo-event-cancel");
+    demoEventDialog.show(stage);
+  }
+
+  private void addDemoEventButton(String label, String id, String name) {
+    TextButton button = new TextButton(label, skin);
+    button.setName(name);
+    demoEventDialog.button(button, id);
+    demoEventDialog.getButtonTable().row();
   }
 
   /** Shows the choice between the battle tutorial and a normal new run. */
@@ -293,6 +348,10 @@ public class MainMenuDisplay extends UIComponent {
 
   @Override
   public void dispose() {
+    if (demoEventDialog != null) {
+      demoEventDialog.remove();
+      demoEventDialog = null;
+    }
     if (tutorialChoiceDialog != null) {
       tutorialChoiceDialog.remove();
       tutorialChoiceDialog = null;
