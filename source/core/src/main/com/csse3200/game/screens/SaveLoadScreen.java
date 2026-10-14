@@ -78,14 +78,16 @@ public class SaveLoadScreen extends ScreenAdapter {
                 playerDeck,
                 runState,
                 game.getBestiaryService(),
-                game.getCardDiscoveryService()));
+                game.getCardDiscoveryService(),
+                game.getItemDiscoveryService()));
     SaveGameRestoreService restoreService =
         new SaveGameRestoreService(
             playerState,
             playerDeck,
             runState,
             game.getBestiaryService(),
-            game.getCardDiscoveryService());
+            game.getCardDiscoveryService(),
+            game.getItemDiscoveryService());
 
     Entity ui = new Entity();
     ui.addComponent(new InputDecorator(stage, 10))

@@ -9,6 +9,7 @@ public class ProgressSaveData {
   public String resumeScreen = "";
   public List<BestiaryProgressSaveData> bestiary = new ArrayList<>();
   public List<CardProgressSaveData> cards = new ArrayList<>();
+  public List<ItemProgressSaveData> items = new ArrayList<>();
 
   /** Seed that fixes each node's encounter for this run; null in saves made before it existed. */
   public Long encounterSeed = null;
@@ -36,9 +37,19 @@ public class ProgressSaveData {
       String resumeScreen,
       List<BestiaryProgressSaveData> bestiary,
       List<CardProgressSaveData> cards) {
+    this(pendingRewardId, resumeScreen, bestiary, cards, List.of());
+  }
+
+  public ProgressSaveData(
+      String pendingRewardId,
+      String resumeScreen,
+      List<BestiaryProgressSaveData> bestiary,
+      List<CardProgressSaveData> cards,
+      List<ItemProgressSaveData> items) {
     this.pendingRewardId = pendingRewardId == null ? "" : pendingRewardId;
     this.resumeScreen = resumeScreen == null ? "" : resumeScreen;
     this.bestiary = bestiary == null ? new ArrayList<>() : new ArrayList<>(bestiary);
     this.cards = cards == null ? new ArrayList<>() : new ArrayList<>(cards);
+    this.items = items == null ? new ArrayList<>() : new ArrayList<>(items);
   }
 }

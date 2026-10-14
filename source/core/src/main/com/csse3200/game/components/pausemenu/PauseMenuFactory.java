@@ -135,14 +135,16 @@ public final class PauseMenuFactory {
                 playerDeck,
                 runState,
                 game.getBestiaryService(),
-                game.getCardDiscoveryService()));
+                game.getCardDiscoveryService(),
+                game.getItemDiscoveryService()));
     SaveGameRestoreService restoreService =
         new SaveGameRestoreService(
             playerState,
             playerDeck,
             runState,
             game.getBestiaryService(),
-            game.getCardDiscoveryService());
+            game.getCardDiscoveryService(),
+            game.getItemDiscoveryService());
 
     // The Back button hides the overlay (returns to the pause menu). Held via a one-element array
     // so the lambda can reference the panel that is being constructed.

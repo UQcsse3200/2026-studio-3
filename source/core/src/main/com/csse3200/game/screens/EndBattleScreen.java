@@ -85,7 +85,8 @@ public class EndBattleScreen extends ScreenAdapter {
 
     if (won) {
       RewardService rewardService =
-          new RewardService(new RewardGenerator(), cardLibrary, new Random());
+          new RewardService(
+              new RewardGenerator(), cardLibrary, new Random(), game.getItemDiscoveryService());
       DisplayingRecord rewardRecord =
           DisplayingRecord.builder("").position(0, 500).variant("reward").build();
       ui.addComponent(

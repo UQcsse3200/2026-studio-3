@@ -1,8 +1,10 @@
 package com.csse3200.game.rewards;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.cards.CardAcquisitionPool;
 import com.csse3200.game.cards.CardConfigLoader;
@@ -135,6 +137,19 @@ class RewardServiceTest {
     assertEquals(List.of(), goldRun.getOrCreatePlayerState().getOwnedItems());
     assertEquals(
         List.of(ItemType.ENERGY_CRYSTAL), itemRun.getOrCreatePlayerState().getOwnedItems());
+  }
+
+  @Test
+  void claimingAnItemRunRewardDiscoversItWithoutChangingDirectEffectClaims() {
+    CardService cards = new CardLibrary(CardConfigLoader.loadCards());
+    ItemDiscoveryService discovery = new ItemDiscoveryService();
+    RewardService service =
+        new RewardService(new RewardGenerator(new Random(1)), cards, new Random(2), discovery);
+
+    service.claimRunReward(new RunState(), RewardOption.item(ItemType.ENERGY_CRYSTAL), null);
+
+    assertTrue(discovery.isDiscovered(ItemType.ENERGY_CRYSTAL));
+    assertFalse(discovery.isDiscovered(ItemType.IRON_AEGIS));
   }
 
   @Test
