@@ -102,7 +102,7 @@ class StatusIconDisplayTest {
     stats.applyStatusEffect("POISON", 3, 4);
     display.update();
 
-    assertEquals("3", count(0));
+    assertEquals("4", count(0));
     assertEquals("2", count(1));
   }
 

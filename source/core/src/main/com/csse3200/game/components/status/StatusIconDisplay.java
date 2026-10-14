@@ -175,12 +175,15 @@ public class StatusIconDisplay extends UIComponent {
         title, info.describe(effect.getValue()), StatusInfo.durationText(effect.getDuration()));
   }
 
-  /** Stacks or points for value statuses, turns remaining for the rest, blank if permanent. */
+  /**
+   * Turns remaining for statuses that expire. Permanent statuses show their value instead if it
+   * matters (such as Strength points), and nothing otherwise.
+   */
   private static String countText(StatusInfo info, Shown status) {
-    if (SHOWS_VALUE.contains(info)) {
-      return Integer.toString(status.value());
+    if (status.duration() > 0) {
+      return Integer.toString(status.duration());
     }
-    return status.duration() > 0 ? Integer.toString(status.duration()) : "";
+    return SHOWS_VALUE.contains(info) ? Integer.toString(status.value()) : "";
   }
 
   /** Keeps the row centred on the entity, just above or below the anchor point. */

@@ -8,6 +8,7 @@ import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.EnemyReleaseComponent;
 import com.csse3200.game.components.enemy.*;
 import com.csse3200.game.components.spritedisplay.reactive.EnemyDropTargetComponent;
+import com.csse3200.game.components.status.StatusIconDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.configs.EnemyConfig;
 import com.csse3200.game.entities.configs.EnemyConfigs;
@@ -116,6 +117,8 @@ public class EnemyFactory {
             .addComponent(animator)
             .addComponent(new EnemyAnimationController())
             .addComponent(new EnemyStatsDisplay())
+            // Status icons sit just under the health bar, which is anchored 0.6 units below.
+            .addComponent(new StatusIconDisplay(-0.6f, false))
             .addComponent(new EnemyCombatEffectsComponent())
             .addComponent(new EnemyReleaseComponent());
 
