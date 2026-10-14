@@ -166,8 +166,7 @@ class MainMenuDisplayTest {
     AtomicInteger randomCount = new AtomicInteger();
     java.util.List<String> selected = new java.util.ArrayList<>();
     menu.getEvents().addListener(MainMenuDisplay.DEMO_EVENT, randomCount::incrementAndGet);
-    menu
-        .getEvents()
+    menu.getEvents()
         .addListener(MainMenuDisplay.DEMO_EVENT_SELECTED, (String id) -> selected.add(id));
 
     display.getRootStack().findActor(MainMenuDisplay.DEMO_EVENT).fire(new ChangeEvent());
