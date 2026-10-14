@@ -23,7 +23,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
   private Label levelLabel;
   private Image moneyImage;
   private Label moneyLabel;
-  private RunState runState;
+  private final RunState runState;
   private static final float FONT_SCALE = 0.75f;
   private static final String STYLE_NAME_LARGE = "large";
 

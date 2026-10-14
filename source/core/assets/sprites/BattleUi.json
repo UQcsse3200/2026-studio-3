@@ -3,21 +3,21 @@
     {
       "text": "Card Inventory",
       "x": 24,
-      "y": 180,
+      "y": 190,
       "size": [247, 48],
       "trigger": "openMenu"
     },
     {
       "text": "Item Inventory",
       "x": 24,
-      "y": 239,
+      "y": 250,
       "size": [247, 48],
       "trigger": "openInventory"
     },
     {
       "text": "End Turn",
       "x": 24,
-      "y": 299,
+      "y": 310,
       "size": [154, 48],
       "trigger": "endTurn",
       "variant": "gated"
@@ -29,7 +29,7 @@
       "x": 0,
       "y": 90,
       "scale": 1.3,
-      "colour": "DBBEA1",
+      "colour": "F5DFA8",
       "trigger": "battleLog",
       "variant": "battleLog"
     },
