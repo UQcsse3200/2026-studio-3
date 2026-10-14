@@ -72,7 +72,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
 
     playerImage = new Image(atlas.findRegions("idle").first());
     playerImage.setSize(playerImageSize, playerImageSize);
-    playerImage.setPosition(10f, stageHeight - playerImageSize + 25);
+    playerImage.setPosition(10f, stageHeight - playerImageSize + 30);
 
     // Heart image
     heartImage =
