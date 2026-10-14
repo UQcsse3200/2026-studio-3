@@ -23,6 +23,8 @@ public final class ChanceEncounterSession {
   private ChanceResolution resolution;
   private boolean awaitingDelegatedCompletion;
   private boolean completed;
+  private boolean resolving;
+  private ChanceResolution blockedItemResolution;
 
   /**
    * Creates one Chance Encounter lifecycle session.
@@ -85,6 +87,13 @@ public final class ChanceEncounterSession {
       return outcomeApplier.failure(
           ChanceResolution.Status.ENCOUNTER_CLOSED, null, "This encounter has already ended.");
     }
+    if (resolving) {
+      return outcomeApplier.failure(
+          ChanceResolution.Status.RESOLUTION_IN_PROGRESS, null, "A choice is being applied.");
+    }
+    if (blockedItemResolution != null) {
+      return blockedItemResolution;
+    }
     if (resolution != null && resolution.isSuccess()) {
       return outcomeApplier.failure(
           ChanceResolution.Status.ALREADY_RESOLVED,
@@ -124,11 +133,21 @@ public final class ChanceEncounterSession {
     }
 
     ChanceOutcome outcome = behaviourResult.getOutcome();
-    ChanceResolution attempt = outcomeApplier.apply(outcome);
-    if (attempt.isSuccess()) {
-      resolution = attempt;
+    resolving = true;
+    try {
+      ChanceResolution attempt = outcomeApplier.apply(outcome);
+      if (attempt.isSuccess()) {
+        resolution = attempt;
+      } else if (attempt.getStatus() == ChanceResolution.Status.ROLLBACK_FAILED
+          && outcome != null
+          && !outcome.getItemRewardIds().isEmpty()) {
+        // Retrying a partially applied item outcome could grant the same ownership again.
+        blockedItemResolution = attempt;
+      }
+      return attempt;
+    } finally {
+      resolving = false;
     }
-    return attempt;
   }
 
   /**

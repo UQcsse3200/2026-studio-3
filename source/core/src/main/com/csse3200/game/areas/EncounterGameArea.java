@@ -26,6 +26,7 @@ import com.csse3200.game.encounters.integration.EncounterFlowController;
 import com.csse3200.game.encounters.integration.IntegratedShopTransactionGateway;
 import com.csse3200.game.encounters.integration.InventoryDeckAdapter;
 import com.csse3200.game.encounters.integration.PlayerDeckAdapter;
+import com.csse3200.game.encounters.integration.PlayerRunStateItemAdapter;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.factories.PlayerFactory;
 import com.csse3200.game.maps.EncounterCallback;
@@ -348,7 +349,12 @@ public class EncounterGameArea extends GameArea {
 
     encounterFlow =
         new EncounterFlowController(
-            playerState, cardCatalog, deck, shopTransactions, completionCallback);
+            playerState,
+            cardCatalog,
+            deck,
+            shopTransactions,
+            new PlayerRunStateItemAdapter(runState.getOrCreatePlayerState()),
+            completionCallback);
   }
 
   private void loadAssets() {

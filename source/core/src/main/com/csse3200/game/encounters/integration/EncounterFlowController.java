@@ -61,7 +61,27 @@ public final class EncounterFlowController implements EncounterCallback {
       DeckGateway deck,
       ShopTransactionGateway shopTransactions,
       EncounterCallback mapCallback) {
-    this.chanceOutcomeApplier = new ChanceOutcomeApplier(player, cardCatalog, deck);
+    this(player, cardCatalog, deck, shopTransactions, null, mapCallback);
+  }
+
+  /**
+   * Creates a controller with persistent card and ownership-only item acquisition support.
+   *
+   * @param player live player boundary
+   * @param cardCatalog authoritative card catalogue
+   * @param deck persistent card deck
+   * @param shopTransactions shop transaction boundary
+   * @param items item ownership boundary, or null for legacy encounters without item rewards
+   * @param mapCallback map completion callback
+   */
+  public EncounterFlowController(
+      PlayerStateGateway player,
+      CardCatalogGateway cardCatalog,
+      DeckGateway deck,
+      ShopTransactionGateway shopTransactions,
+      ItemRewardGateway items,
+      EncounterCallback mapCallback) {
+    this.chanceOutcomeApplier = new ChanceOutcomeApplier(player, cardCatalog, deck, items);
     this.shopTransactions =
         Objects.requireNonNull(shopTransactions, "shopTransactions cannot be null");
     this.mapCallback = Objects.requireNonNull(mapCallback, "mapCallback cannot be null");
