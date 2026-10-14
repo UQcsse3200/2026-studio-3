@@ -28,6 +28,40 @@ class PlayerRunStateTest {
   }
 
   @Test
+  void eternalVitalityImmediatelyRaisesMaxHealthHealsAndIsNotReappliedOnNewScreens() {
+    PlayerRunState state = new PlayerRunState(35, 100, 42);
+
+    state.grantEternalVitality();
+
+    assertEquals(120, state.getMaxHealth());
+    assertEquals(120, state.getCurrentHealth());
+    assertEquals(1, state.getOwnedItemCount(ItemType.ETERNAL_VITALITY));
+
+    Entity firstScreen = player(1, 1, 0);
+    state.applyTo(firstScreen);
+    assertEquals(120, firstScreen.getComponent(CombatStatsComponent.class).getMaxHealth());
+    assertEquals(120, firstScreen.getComponent(CombatStatsComponent.class).getHealth());
+
+    state.captureFrom(firstScreen);
+    Entity nextScreen = player(1, 1, 0);
+    state.applyTo(nextScreen);
+    assertEquals(120, nextScreen.getComponent(CombatStatsComponent.class).getMaxHealth());
+  }
+
+  @Test
+  void eachEternalVitalityCopyGrantsAnotherTwentyMaxHealthAndFullHeal() {
+    PlayerRunState state = new PlayerRunState(35, 100, 42);
+
+    state.grantEternalVitality();
+    state.restore(40, 120, 42);
+    state.grantEternalVitality();
+
+    assertEquals(140, state.getMaxHealth());
+    assertEquals(140, state.getCurrentHealth());
+    assertEquals(2, state.getOwnedItemCount(ItemType.ETERNAL_VITALITY));
+  }
+
+  @Test
   void capturesValuesBeforeTheScreenPlayerIsDisposed() {
     PlayerRunState state = new PlayerRunState(65, 100, 42);
     Entity player = player(30, 120, 77);

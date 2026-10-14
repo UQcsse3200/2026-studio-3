@@ -128,6 +128,8 @@ public class BattleScreen extends ScreenAdapter {
     "images/ui/brand-of-the-damned.png",
     "images/ui/shattered-aegis.png",
     "images/ui/ambrosia-flask.png",
+    "images/ui/blood-oath-sigil.png",
+    "images/ui/eternal-vitality.png",
     "images/effects/heal.png",
     "images/enemies/intents/buff.png"
   };

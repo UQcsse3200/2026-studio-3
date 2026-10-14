@@ -69,6 +69,14 @@ public class ItemLibraryDisplay extends UIComponent {
         "Curse: every Block gain is reduced by 1 per copy, to a minimum of 0.");
     ITEM_DESCRIPTIONS.put(
         ItemType.AMBROSIA_FLASK, "Consume during battle to restore 20 Health, up to max health.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.BLOOD_OATH_SIGIL,
+        "Curse: at the start of each of your turns, lose 2 Health per copy."
+            + " This bypasses Block and Armour but cannot reduce Health below 1.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.ETERNAL_VITALITY,
+        "Elite Portal reward: gain +20 maximum Health and fully heal when obtained."
+            + " Each copy stacks; this item is not consumed.");
   }
 
   private final GdxGame game;

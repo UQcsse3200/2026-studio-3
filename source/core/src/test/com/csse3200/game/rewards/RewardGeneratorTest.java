@@ -92,7 +92,10 @@ class RewardGeneratorTest {
     // post-battle items, which should each land close to 2/9.
     int energyCrystalCount = counts.get(ItemType.ENERGY_CRYSTAL);
     for (ItemType type : ItemType.values()) {
-      if (type == ItemType.ENERGY_CRYSTAL || type == ItemType.AMBROSIA_FLASK || type.isCurse()) {
+      if (type == ItemType.ENERGY_CRYSTAL
+          || type == ItemType.AMBROSIA_FLASK
+          || type == ItemType.ETERNAL_VITALITY
+          || type.isCurse()) {
         continue;
       }
       assertTrue(

@@ -10,7 +10,8 @@ public enum ItemType {
   BRAND_OF_THE_DAMNED,
   SHATTERED_AEGIS,
   AMBROSIA_FLASK,
-  BLOOD_OATH_SIGIL;
+  BLOOD_OATH_SIGIL,
+  ETERNAL_VITALITY;
 
   /** Returns whether this item is consumed to apply an effect during the player's turn. */
   public boolean isBattleConsumable() {
