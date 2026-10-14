@@ -19,8 +19,10 @@ public record BattleTutorialPrompt(
     ENEMIES,
     NONE,
     CARD_INVENTORY,
+    ITEM_INVENTORY,
     USED_CARD,
-    ENEMY_STATS
+    ENEMY_STATS,
+    ENEMY_ARMOUR
   }
 
   /** Uses the shared teaching content without choosing UI coordinates or changing battle rules. */
@@ -33,6 +35,11 @@ public record BattleTutorialPrompt(
               step,
               "Use Card Inventory to view and manage your battle cards.",
               HighlightTarget.CARD_INVENTORY);
+      case ITEM_INVENTORY ->
+          information(
+              step,
+              "Use Item Inventory to view\nand use the items you have collected.",
+              HighlightTarget.ITEM_INVENTORY);
       case USED_CARD ->
           information(
               step,
@@ -45,6 +52,8 @@ public record BattleTutorialPrompt(
               HighlightTarget.ENEMY_STATS);
       case HAND ->
           information(step, BattleTutorialPromptContent.OPENING_HAND, HighlightTarget.HAND);
+      case ENEMY_ARMOUR ->
+          information(step, "Armour reduces incoming damage.", HighlightTarget.ENEMY_ARMOUR);
       case CARD_COST ->
           information(step, BattleTutorialPromptContent.CARD_COST, HighlightTarget.CARD_COST);
       case ENERGY -> information(step, BattleTutorialPromptContent.ENERGY, HighlightTarget.ENERGY);
@@ -81,8 +90,7 @@ public record BattleTutorialPrompt(
           case ENERGY -> "Energy is used to play cards.";
           case CARD_COST -> "This number is the Energy\ncost of the card.";
           case PLAY_A_CARD -> "Drag this Strike onto the enemy\nto play it.";
-          case ENEMY_STATS ->
-              "This is the enemy's Health.\nReduce it to zero.\n\nArmour reduces incoming damage.";
+          case ENEMY_STATS -> "This is the enemy's Health.\nReduce it to zero.";
           case USED_CARD ->
               "This card has been used.\n\nIt cannot be used next turn.\n\nIt will be available again\non the following turn.";
           case END_TURN -> "End your turn when you're\ndone playing cards.";

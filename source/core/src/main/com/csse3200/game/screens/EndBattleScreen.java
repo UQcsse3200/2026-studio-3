@@ -7,11 +7,7 @@ import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.configs.CardConfig;
-import com.csse3200.game.cards.deck.PlayerDeck;
-import com.csse3200.game.components.cards.CardUpgradeDisplay;
-import com.csse3200.game.components.cards.CardUpgradeSelection;
 import com.csse3200.game.components.cards.CardWidgetAssets;
-import com.csse3200.game.components.cards.PlayerDeckCardUpgradeCommitter;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord;
 import com.csse3200.game.components.spritedisplay.displaying.EndBattleDisplay;
@@ -102,17 +98,6 @@ public class EndBattleScreen extends ScreenAdapter {
               game::autosaveAfterRewardClaimed));
       requiresPlayerChoice = true;
 
-      RunState runState = game.getRunState();
-      if (runState != null) {
-        PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(cardLibrary);
-        CardUpgradeSelection upgradeSelection =
-            CardUpgradeSelection.forPlayerDeck(playerDeck, cardLibrary, 2);
-        if (!upgradeSelection.getCardUpgradeOption().isEmpty()) {
-          ui.addComponent(
-              new CardUpgradeDisplay(
-                  upgradeSelection, new PlayerDeckCardUpgradeCommitter(playerDeck)));
-        }
-      }
     } else {
       // The themed reward screen already supplies its own victory title. The legacy end-battle
       // display is only needed for defeat, where it provides the heading and return input.
