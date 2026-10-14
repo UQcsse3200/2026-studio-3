@@ -33,7 +33,8 @@ final class ClickableJsonLoader {
     List<ClickableRecord> records = new ArrayList<>();
     Map<String, Skin> skinCache = new HashMap<>();
 
-    JsonValue root = new JsonReader().parse(Gdx.files.internal(file.toString()));
+    // libGDX expects '/' separators; Path.toString() gives '\' on Windows.
+    JsonValue root = new JsonReader().parse(Gdx.files.internal(file.toString().replace('\\', '/')));
     JsonValue clickableArray = root.get(DEFAULT_VARIANT);
 
     for (JsonValue entry : clickableArray) {
