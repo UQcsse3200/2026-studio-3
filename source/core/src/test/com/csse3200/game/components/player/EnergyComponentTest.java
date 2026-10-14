@@ -33,9 +33,12 @@ class EnergyComponentTest {
 
   @Test
   void shouldSetGetMaxEnergy() {
-    EnergyComponent energy = new EnergyComponent(10);
+    EnergyComponent energy = new EnergyComponent(3);
+    energy.setMaxEnergy(4);
+    assertEquals(4, energy.getMaxEnergy());
+
     energy.setMaxEnergy(20);
-    assertEquals(20, energy.getMaxEnergy());
+    assertEquals(EnergyComponent.MAX_ENERGY_CAP, energy.getMaxEnergy()); // capped at 5
 
     energy.setMaxEnergy(-5);
     assertEquals(1, energy.getMaxEnergy()); // forced to at least 1

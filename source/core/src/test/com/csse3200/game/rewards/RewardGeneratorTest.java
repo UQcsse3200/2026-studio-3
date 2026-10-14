@@ -1,6 +1,7 @@
 package com.csse3200.game.rewards;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -52,7 +53,7 @@ class RewardGeneratorTest {
   }
 
   @Test
-  void itemRewardPoolIncludesEveryGameplayItem() {
+  void itemRewardPoolIncludesOnlyPostBattleItems() {
     RewardGenerator generator = new RewardGenerator(new Random(42));
     EnumSet<ItemType> generated = EnumSet.noneOf(ItemType.class);
 
@@ -60,7 +61,17 @@ class RewardGeneratorTest {
       generated.add(generator.generateItemRewardOption().itemId);
     }
 
-    assertTrue(generated.containsAll(EnumSet.allOf(ItemType.class)));
+    EnumSet<ItemType> expected =
+        EnumSet.of(
+            ItemType.LUCKY_COIN,
+            ItemType.ENERGY_CRYSTAL,
+            ItemType.MERCHANTS_FAVOR,
+            ItemType.IRON_AEGIS,
+            ItemType.WARRIORS_CREST);
+
+    assertEquals(expected, generated);
+    assertFalse(generated.contains(ItemType.AMBROSIA_FLASK));
+    assertTrue(generated.stream().noneMatch(ItemType::isCurse));
   }
 
   @Test
@@ -77,11 +88,11 @@ class RewardGeneratorTest {
       counts.merge(picked, 1, Integer::sum);
     }
 
-    // Energy Crystal should land close to 1/9 of trials, noticeably less than the other items
-    // which should each land close to 2/9.
+    // Energy Crystal should land close to 1/9 of trials, noticeably less than the other
+    // post-battle items, which should each land close to 2/9.
     int energyCrystalCount = counts.get(ItemType.ENERGY_CRYSTAL);
     for (ItemType type : ItemType.values()) {
-      if (type == ItemType.ENERGY_CRYSTAL) {
+      if (type == ItemType.ENERGY_CRYSTAL || type == ItemType.AMBROSIA_FLASK || type.isCurse()) {
         continue;
       }
       assertTrue(

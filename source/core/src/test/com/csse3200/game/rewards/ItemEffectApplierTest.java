@@ -35,4 +35,15 @@ class ItemEffectApplierTest {
     assertEquals(5, stats.getArmour());
     assertEquals(1, stats.getStatusEffect("STRENGTH").getValue());
   }
+
+  @Test
+  void shouldRestoreTwentyHealthWithoutExceedingMaxHealth() {
+    Entity player = new Entity();
+    CombatStatsComponent stats = new CombatStatsComponent(85, 5, 100);
+    player.addComponent(stats);
+
+    ItemEffectApplier.applyItemEffect(ItemType.AMBROSIA_FLASK, player);
+
+    assertEquals(100, stats.getHealth());
+  }
 }

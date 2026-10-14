@@ -30,4 +30,24 @@ class ItemFormattingTest {
   void formatsWarriorsCrest() {
     assertEquals("Blessed Crest", ItemFormatting.formatItemName(ItemType.WARRIORS_CREST));
   }
+
+  @Test
+  void formatsAmbrosiaFlask() {
+    assertEquals("Draught of Ambrosia", ItemFormatting.formatItemName(ItemType.AMBROSIA_FLASK));
+  }
+
+  @Test
+  void battleRewardItemsShowBattleRewardsAsSource() {
+    assertEquals("Battle rewards", ItemFormatting.formatItemSource(ItemType.LUCKY_COIN));
+    assertEquals("Battle rewards", ItemFormatting.formatItemSource(ItemType.WARRIORS_CREST));
+  }
+
+  @Test
+  void curseItemsShowChanceEventsAsSource() {
+    for (ItemType item : ItemType.values()) {
+      if (item.isCurse()) {
+        assertEquals("Chance Events", ItemFormatting.formatItemSource(item));
+      }
+    }
+  }
 }

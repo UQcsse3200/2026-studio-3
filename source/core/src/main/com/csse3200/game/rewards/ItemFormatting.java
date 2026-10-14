@@ -18,6 +18,11 @@ public final class ItemFormatting {
     DISPLAY_NAMES.put(ItemType.MERCHANTS_FAVOR, "Relic of Commerce");
     DISPLAY_NAMES.put(ItemType.IRON_AEGIS, "Aegis Fragment");
     DISPLAY_NAMES.put(ItemType.WARRIORS_CREST, "Blessed Crest");
+    DISPLAY_NAMES.put(ItemType.ASHEN_EMBER, "Ashen Ember");
+    DISPLAY_NAMES.put(ItemType.BRAND_OF_THE_DAMNED, "Brand of the Damned");
+    DISPLAY_NAMES.put(ItemType.SHATTERED_AEGIS, "Shattered Aegis");
+    DISPLAY_NAMES.put(ItemType.AMBROSIA_FLASK, "Draught of Ambrosia");
+    DISPLAY_NAMES.put(ItemType.BLOOD_OATH_SIGIL, "Blood-Oath Sigil");
   }
 
   private ItemFormatting() {
@@ -32,6 +37,26 @@ public final class ItemFormatting {
    */
   public static String formatItemName(ItemType itemId) {
     return DISPLAY_NAMES.getOrDefault(itemId, fallbackName(itemId));
+  }
+
+  private static final Map<ItemType, String> SOURCES = new EnumMap<>(ItemType.class);
+
+  static {
+    SOURCES.put(ItemType.LUCKY_COIN, "Battle rewards");
+    SOURCES.put(ItemType.ENERGY_CRYSTAL, "Battle rewards");
+    SOURCES.put(ItemType.MERCHANTS_FAVOR, "Battle rewards");
+    SOURCES.put(ItemType.IRON_AEGIS, "Battle rewards");
+    SOURCES.put(ItemType.WARRIORS_CREST, "Battle rewards");
+    SOURCES.put(ItemType.ASHEN_EMBER, "Chance Events");
+    SOURCES.put(ItemType.BRAND_OF_THE_DAMNED, "Chance Events");
+    SOURCES.put(ItemType.SHATTERED_AEGIS, "Chance Events");
+    SOURCES.put(ItemType.AMBROSIA_FLASK, "Chance Events");
+    SOURCES.put(ItemType.BLOOD_OATH_SIGIL, "Chance Events");
+  }
+
+  /** Returns where the player can obtain the given item, for display in the Item Library. */
+  public static String formatItemSource(ItemType item) {
+    return SOURCES.getOrDefault(item, "Unknown");
   }
 
   /** Falls back to the old enum-splitting behaviour if a new item type is added without a name. */

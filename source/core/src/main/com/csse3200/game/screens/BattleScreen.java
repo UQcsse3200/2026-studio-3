@@ -67,6 +67,10 @@ import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.AnimationRenderComponent;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
+import com.csse3200.game.rewards.BloodOathSigilEffect;
+import com.csse3200.game.rewards.BrandOfTheDamnedEffect;
+import com.csse3200.game.rewards.ItemType;
+import com.csse3200.game.rewards.ShatteredAegisEffect;
 import com.csse3200.game.services.DragNDropService;
 import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
@@ -83,6 +87,7 @@ import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
 import com.csse3200.game.ui.terminal.commands.GiveGoldCommand;
 import com.csse3200.game.ui.terminal.commands.GiveItemCommand;
+import com.csse3200.game.ui.terminal.commands.GiveOwnedItemCommand;
 import com.csse3200.game.ui.terminal.commands.SetHealthCommand;
 import com.csse3200.game.ui.terminal.commands.SkipBattleCommand;
 import java.nio.file.Path;
@@ -120,6 +125,10 @@ public class BattleScreen extends ScreenAdapter {
     "images/ui/merchants-favor.png",
     "images/ui/iron-aegis.png",
     "images/ui/warriors-crest.png",
+    "images/ui/ashen-ember.png",
+    "images/ui/brand-of-the-damned.png",
+    "images/ui/shattered-aegis.png",
+    "images/ui/ambrosia-flask.png",
     "images/effects/heal.png",
     "images/enemies/intents/buff.png"
   };
@@ -212,6 +221,9 @@ public class BattleScreen extends ScreenAdapter {
 
     playerState = runState.getOrCreatePlayerState();
     Entity player = forestGameArea.getPlayer();
+    if (!tutorialBattle) {
+      applyBattleStartCurses(player);
+    }
 
     List<CardConfig> configs = CardConfigLoader.loadCards();
     library = new CardLibrary(configs);
@@ -486,12 +498,14 @@ public class BattleScreen extends ScreenAdapter {
     terminal.addCommand("givegold", new GiveGoldCommand(gameArea.getPlayer()));
     terminal.addCommand("sethealth", new SetHealthCommand(gameArea.getPlayer()));
     terminal.addCommand("giveitem", new GiveItemCommand(gameArea.getPlayer()));
+    terminal.addCommand(
+        "giveowneditem", new GiveOwnedItemCommand(game.getRunState().getOrCreatePlayerState()));
 
     // Untitled: DeckEditorComponent draws its own "CARD INVENTORY" header, like the item inventory.
     PopupDisplay cardInventory = new PopupDisplay("");
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
-    PopupDisplay itemInventory = new PopupDisplay("Item Inventory");
+    PopupDisplay itemInventory = new PopupDisplay("");
     itemInventory.setMinSize(ITEM_INVENTORY_MIN_WIDTH, ITEM_INVENTORY_MIN_HEIGHT);
     InventoryPopupComponent inventoryPopup =
         new InventoryPopupComponent(
@@ -830,6 +844,22 @@ public class BattleScreen extends ScreenAdapter {
       cardKeywordTooltip.attachTo(clickable.getBtn(), resolved.description());
     } catch (IllegalArgumentException | IllegalStateException exception) {
       logger.warn("Could not install card widget for instance {}", instanceId, exception);
+    }
+  }
+
+  /** Applies curse items that take effect at the start of every battle. */
+  private void applyBattleStartCurses(Entity player) {
+    int brandCount = playerState.getOwnedItemCount(ItemType.BRAND_OF_THE_DAMNED);
+    for (int i = 0; i < brandCount; i++) {
+      new BrandOfTheDamnedEffect().apply(player);
+    }
+    int aegisCount = playerState.getOwnedItemCount(ItemType.SHATTERED_AEGIS);
+    for (int i = 0; i < aegisCount; i++) {
+      new ShatteredAegisEffect().apply(player);
+    }
+    int sigilCount = playerState.getOwnedItemCount(ItemType.BLOOD_OATH_SIGIL);
+    for (int i = 0; i < sigilCount; i++) {
+      new BloodOathSigilEffect().apply(player);
     }
   }
 }

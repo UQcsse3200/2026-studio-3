@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextTooltip;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
+import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
@@ -46,6 +47,7 @@ public class InventoryPopupComponent extends UIComponent {
   private static final Color GOLD_COLOUR = new Color(0.83f, 0.61f, 0.27f, 1f);
   private static final Color AEGIS_EFFECT_COLOUR = new Color(0.32f, 0.73f, 0.91f, 1f);
   private static final Color CREST_EFFECT_COLOUR = new Color(0.9f, 0.32f, 0.18f, 1f);
+  private static final Color AMBROSIA_EFFECT_COLOUR = new Color(0.8f, 0.25f, 0.24f, 1f);
   private static final Color PANEL_COLOUR = new Color(0.09f, 0.07f, 0.09f, 0.96f);
   private static final Color ROW_BORDER_COLOUR = new Color(0.33f, 0.25f, 0.25f, 1f);
   private static final Color ROW_BACKGROUND_COLOUR = new Color(0.055f, 0.05f, 0.065f, 0.96f);
@@ -60,7 +62,11 @@ public class InventoryPopupComponent extends UIComponent {
           ItemType.ENERGY_CRYSTAL, "images/ui/energy-crystal.png",
           ItemType.MERCHANTS_FAVOR, "images/ui/merchants-favor.png",
           ItemType.IRON_AEGIS, "images/ui/iron-aegis.png",
-          ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png");
+          ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png",
+          ItemType.ASHEN_EMBER, "images/ui/ashen-ember.png",
+          ItemType.BRAND_OF_THE_DAMNED, "images/ui/brand-of-the-damned.png",
+          ItemType.SHATTERED_AEGIS, "images/ui/shattered-aegis.png",
+          ItemType.AMBROSIA_FLASK, "images/ui/ambrosia-flask.png");
 
   private static final Map<ItemType, IntFunction<String>> ITEM_DESCRIPTIONS =
       new EnumMap<>(ItemType.class);
@@ -83,6 +89,16 @@ public class InventoryPopupComponent extends UIComponent {
     ITEM_DESCRIPTIONS.put(ItemType.IRON_AEGIS, count -> "Use in battle: +5 Armour");
 
     ITEM_DESCRIPTIONS.put(ItemType.WARRIORS_CREST, count -> "Use in battle: +1 Strength");
+
+    ITEM_DESCRIPTIONS.put(ItemType.ASHEN_EMBER, count -> "-" + count + " Max Energy | Minimum 1");
+
+    ITEM_DESCRIPTIONS.put(
+        ItemType.BRAND_OF_THE_DAMNED, count -> "Strength gains -" + count + " | Minimum 0");
+
+    ITEM_DESCRIPTIONS.put(
+        ItemType.SHATTERED_AEGIS, count -> "Block gains -" + count + " | Minimum 0");
+
+    ITEM_DESCRIPTIONS.put(ItemType.AMBROSIA_FLASK, count -> "Use in battle: Restore 20 Health");
   }
 
   private final RunState runState;
@@ -146,8 +162,6 @@ public class InventoryPopupComponent extends UIComponent {
     content.add(summary).center().padBottom(5f).growX().row();
     content.add(divider()).height(1f).growX().padBottom(5f).row();
 
-    content.add(new Label("ITEM INVENTORY", titleStyle())).center().padBottom(10f).row();
-
     if (ownedItems.isEmpty()) {
       content.add(new Label("No items collected yet.", detailStyle())).pad(40f).row();
       return;
@@ -164,7 +178,7 @@ public class InventoryPopupComponent extends UIComponent {
     scrollPane.setFadeScrollBars(false);
     scrollPane.setScrollingDisabled(true, false);
 
-    content.add(scrollPane).width(410f).height(230f).row();
+    content.add(scrollPane).grow().row();
 
     String turnHint =
         canUseBattleItems.getAsBoolean()
@@ -214,7 +228,8 @@ public class InventoryPopupComponent extends UIComponent {
   }
 
   private Table createStatusBadge(ItemType item) {
-    String status = item == ItemType.LUCKY_COIN ? "ON GOLD" : "PASSIVE";
+    String status = item.isCurse() ? "CURSE" : item == ItemType.LUCKY_COIN ? "ON GOLD" : "PASSIVE";
+    Color statusColour = item.isCurse() ? CREST_EFFECT_COLOUR : DESCRIPTION_COLOUR;
 
     Table border = new Table();
     border.setBackground(skin.newDrawable("white", ROW_BORDER_COLOUR));
@@ -222,7 +237,7 @@ public class InventoryPopupComponent extends UIComponent {
 
     Table badge = new Table();
     badge.setBackground(skin.newDrawable("white", ROW_BACKGROUND_COLOUR));
-    badge.add(new Label(status, smallLabelStyle(DESCRIPTION_COLOUR))).pad(5f, 8f, 5f, 8f);
+    badge.add(new Label(status, smallLabelStyle(statusColour))).pad(5f, 8f, 5f, 8f);
 
     border.add(badge);
     return border;
@@ -239,15 +254,20 @@ public class InventoryPopupComponent extends UIComponent {
     style.disabledFontColor = DESCRIPTION_COLOUR;
 
     TextButton button = new TextButton("USE", style);
-    button.setDisabled(useActionInProgress || !canUseBattleItems.getAsBoolean());
+    button.setDisabled(!canUseItemNow(item));
 
-    button.addListener(new TextTooltip("Use during your turn", skin));
+    String tooltip =
+        item == ItemType.AMBROSIA_FLASK
+            ? "Use during your turn while below max health"
+            : "Use during your turn";
+    button.addListener(new TextTooltip(tooltip, skin));
 
     button.addListener(
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
-            if (useActionInProgress || !canUseBattleItems.getAsBoolean()) {
+            if (!canUseItemNow(item)) {
+              button.setDisabled(true);
               return;
             }
 
@@ -264,17 +284,42 @@ public class InventoryPopupComponent extends UIComponent {
     return button;
   }
 
+  private boolean canUseItemNow(ItemType item) {
+    if (useActionInProgress || !canUseBattleItems.getAsBoolean()) {
+      return false;
+    }
+    if (item != ItemType.AMBROSIA_FLASK) {
+      return true;
+    }
+    if (player == null) {
+      return false;
+    }
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    return stats != null && stats.getHealth() < stats.getMaxHealth();
+  }
+
   private void showUseFeedback(ItemType itemId) {
     if (useFeedback != null) {
       useFeedback.remove();
       useFeedback = null;
     }
 
-    Color effectColour = itemId == ItemType.IRON_AEGIS ? AEGIS_EFFECT_COLOUR : CREST_EFFECT_COLOUR;
-
-    String title = itemId == ItemType.IRON_AEGIS ? "IRON AEGIS USED" : "WARRIOR'S CREST USED";
-
-    String detail = itemId == ItemType.IRON_AEGIS ? "+5 ARMOUR" : "+1 STRENGTH";
+    Color effectColour;
+    String title;
+    String detail;
+    if (itemId == ItemType.IRON_AEGIS) {
+      effectColour = AEGIS_EFFECT_COLOUR;
+      title = "IRON AEGIS USED";
+      detail = "+5 ARMOUR";
+    } else if (itemId == ItemType.WARRIORS_CREST) {
+      effectColour = CREST_EFFECT_COLOUR;
+      title = "WARRIOR'S CREST USED";
+      detail = "+1 STRENGTH";
+    } else {
+      effectColour = AMBROSIA_EFFECT_COLOUR;
+      title = "AMBROSIA USED";
+      detail = "+20 HEALTH";
+    }
 
     Table border = new Table();
     border.setTransform(true);

@@ -59,6 +59,16 @@ public class ItemLibraryDisplay extends UIComponent {
             + " at +20. Only one copy used per claim.");
     ITEM_DESCRIPTIONS.put(ItemType.IRON_AEGIS, "Consume during battle to gain +5 Armour.");
     ITEM_DESCRIPTIONS.put(ItemType.WARRIORS_CREST, "Consume during battle to gain +1 Strength.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.ASHEN_EMBER, "Curse: reduces maximum energy by 1 per copy, to a minimum of 1.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.BRAND_OF_THE_DAMNED,
+        "Curse: every Strength gain is reduced by 1 per copy, to a minimum of 0.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.SHATTERED_AEGIS,
+        "Curse: every Block gain is reduced by 1 per copy, to a minimum of 0.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.AMBROSIA_FLASK, "Consume during battle to restore 20 Health, up to max health.");
   }
 
   private final GdxGame game;
@@ -66,6 +76,7 @@ public class ItemLibraryDisplay extends UIComponent {
   private Stack rootStack;
   private Label nameLabel;
   private Label descriptionLabel;
+  private Label sourceLabel;
   private TextButton.TextButtonStyle buttonStyle;
 
   public static String resolveArtworkPath(ItemType item) {
@@ -150,8 +161,10 @@ public class ItemLibraryDisplay extends UIComponent {
           }
         });
 
-    panel.add(titleBlock).left().expandX();
-    panel.add(backButton).right().width(170f).height(58f);
+    Table header = new Table();
+    header.add(titleBlock).left().expandX();
+    header.add(backButton).right().width(170f).height(58f);
+    panel.add(header).colspan(2).expandX().fillX();
   }
 
   private void addDivider(Table panel) {
@@ -221,18 +234,23 @@ public class ItemLibraryDisplay extends UIComponent {
     nameLabel.setFontScale(1.25f);
     descriptionLabel.setFontScale(1.1f);
     descriptionLabel.setWrap(true);
+    sourceLabel = new Label("", bodyLabelStyle());
+    sourceLabel.setWrap(true);
 
     detailPanel.add(nameLabel).left().expandX();
     detailPanel.row();
     detailPanel.add(artwork).width(200f).height(200f).padTop(8f).padBottom(16f);
     detailPanel.row();
-    detailPanel.add(descriptionLabel).width(650f).left().padTop(12f);
+    detailPanel.add(descriptionLabel).expandX().fillX().left().padTop(12f);
+    detailPanel.row();
+    detailPanel.add(sourceLabel).expandX().fillX().left().padTop(12f);
     return detailPanel;
   }
 
   private void showItem(ItemType item) {
     nameLabel.setText(ItemFormatting.formatItemName(item));
     descriptionLabel.setText(ITEM_DESCRIPTIONS.getOrDefault(item, "No description available."));
+    sourceLabel.setText("Obtained from: " + ItemFormatting.formatItemSource(item));
     setItemImage(resolveArtworkPath(item));
   }
 

@@ -42,6 +42,7 @@ class PlayerItemEffectsSaveTest {
     originalPlayer.addOwnedItem(ItemType.MERCHANTS_FAVOR);
     originalPlayer.addOwnedItem(ItemType.IRON_AEGIS);
     originalPlayer.addOwnedItem(ItemType.WARRIORS_CREST);
+    originalPlayer.addOwnedItem(ItemType.AMBROSIA_FLASK);
 
     SaveGameData loaded = saveAndLoad(originalPlayer);
     PlayerRunState restoredPlayer = restoreAfterRelaunch(loaded);
@@ -54,7 +55,8 @@ class PlayerItemEffectsSaveTest {
             ItemType.ENERGY_CRYSTAL,
             ItemType.MERCHANTS_FAVOR,
             ItemType.IRON_AEGIS,
-            ItemType.WARRIORS_CREST),
+            ItemType.WARRIORS_CREST,
+            ItemType.AMBROSIA_FLASK),
         restoredPlayer.getOwnedItems());
     assertEquals(0.1f, restoredPlayer.getGoldBonusMultiplier(), 0.001f);
     assertEquals(
@@ -85,11 +87,13 @@ class PlayerItemEffectsSaveTest {
     PlayerRunState originalPlayer = new PlayerRunState(50, 80, 25);
     originalPlayer.addOwnedItem(ItemType.IRON_AEGIS);
     originalPlayer.addOwnedItem(ItemType.WARRIORS_CREST);
+    originalPlayer.addOwnedItem(ItemType.AMBROSIA_FLASK);
     assertTrue(originalPlayer.useBattleItem(ItemType.IRON_AEGIS, playerEntity()));
 
     PlayerRunState restoredPlayer = restoreAfterRelaunch(saveAndLoad(originalPlayer));
 
-    assertEquals(List.of(ItemType.WARRIORS_CREST), restoredPlayer.getOwnedItems());
+    assertEquals(
+        List.of(ItemType.WARRIORS_CREST, ItemType.AMBROSIA_FLASK), restoredPlayer.getOwnedItems());
   }
 
   private SaveGameData saveAndLoad(PlayerRunState playerState) {
