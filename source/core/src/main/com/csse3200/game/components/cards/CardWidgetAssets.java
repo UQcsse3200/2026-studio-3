@@ -2,6 +2,7 @@ package com.csse3200.game.components.cards;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -99,7 +100,18 @@ public final class CardWidgetAssets {
     nameStyle = copyLabelStyle(skin, SMALL, LIGHT_TEXT);
     costStyle = copyLabelStyle(skin, "default", Color.WHITE);
     targetStyle = copyLabelStyle(skin, SMALL, LIGHT_TEXT);
-    descriptionStyle = copyLabelStyle(skin, SMALL, DARK_TEXT);
+    // Label multiplies its font colour into every markup run at draw time. Use a white tint
+    // and put the normal rules-text colour in markup so keywords retain their brown colour.
+    descriptionStyle = copyLabelStyle(skin, SMALL, Color.WHITE);
+    // Markup must not change the skin font used by names, menus or other UI labels. Reuse the
+    // screen-owned texture regions, but keep description font data and caches independent.
+    BitmapFont sourceFont = descriptionStyle.font;
+    BitmapFont.BitmapFontData descriptionData =
+        new BitmapFont.BitmapFontData(sourceFont.getData().fontFile, sourceFont.isFlipped());
+    descriptionData.setScale(sourceFont.getScaleX(), sourceFont.getScaleY());
+    descriptionData.markupEnabled = true;
+    descriptionStyle.font =
+        new BitmapFont(descriptionData, sourceFont.getRegions(), sourceFont.usesIntegerPositions());
     upgradeStyle = copyLabelStyle(skin, "default", Color.WHITE);
   }
 
@@ -212,6 +224,10 @@ public final class CardWidgetAssets {
 
   Label.LabelStyle descriptionStyle() {
     return descriptionStyle;
+  }
+
+  static String formatDescription(String description) {
+    return "[#" + DARK_TEXT + "]" + CardKeywordHighlighter.highlight(description) + "[]";
   }
 
   Label.LabelStyle upgradeStyle() {

@@ -31,6 +31,7 @@ import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.cards.CardEffectHandler;
+import com.csse3200.game.components.cards.CardInspectionController;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.combat.BattleController;
@@ -153,6 +154,7 @@ public class BattleScreen extends ScreenAdapter {
   private final CardAimController playerCardAim;
   private final CardAimController allEnemiesCardAim;
   private ClickableFactory uiFactory;
+  private CardInspectionController cardInspection;
   private final PlayerRunState playerState;
   private List<ClickableRecord> staticUiRecords;
 
@@ -514,10 +516,23 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.getEntityService().register(itemInventoryEntity);
 
     Stage stage = ServiceLocator.getRenderService().getStage();
+    cardInspection =
+        new CardInspectionController(
+            stage,
+            cardWidgetSkin,
+            cardWidgetAssets,
+            () ->
+                cardInventory.isShowing()
+                    || itemInventory.isShowing()
+                    || terminal.isOpen()
+                    || ServiceLocator.getPauseService().isPaused()
+                    || (tutorialView != null && tutorialView.isBlockingInput()),
+            () -> ServiceLocator.getDragAndDropService().getDragAndDrop().isDragging());
     battleActions = new BattleActions(controller, game, gameArea.getEnemies(), tutorialBattle);
     Entity battleUi =
         new Entity()
             .addComponent(new InputDecorator(stage, 10))
+            .addComponent(cardInspection)
             .addComponent(uiFactory)
             .addComponent(displays)
             .addComponent(battleActions)
@@ -540,6 +555,7 @@ public class BattleScreen extends ScreenAdapter {
         .addListener(
             BattleActions.HAND_CHANGED_EVENT,
             (List<CardInstance> hand) -> {
+              cardInspection.clearSources();
               uiFactory.rebuildHand(buildHandRecords());
               installHandCardWidgets();
             });
@@ -631,6 +647,7 @@ public class BattleScreen extends ScreenAdapter {
 
   private void onDeckRearranged(List<CardInstance> newHandRow) {
     handRowOrder = new ArrayList<>(newHandRow);
+    cardInspection.clearSources();
     uiFactory.rebuildHand(buildHandRecords());
     installHandCardWidgets();
   }
@@ -659,7 +676,18 @@ public class BattleScreen extends ScreenAdapter {
   }
 
   @Override
+  public void pause() {
+    cardInspection.reset();
+  }
+
+  @Override
+  public void hide() {
+    cardInspection.reset();
+  }
+
+  @Override
   public void dispose() {
+    cardInspection.reset();
     playerState.captureFrom(gameArea.getPlayer());
     enemyCardAim.dispose();
     playerCardAim.dispose();
@@ -829,8 +857,19 @@ public class BattleScreen extends ScreenAdapter {
     try {
       ResolvedCard resolved = cardResolver.resolve(config.get(), instance);
       clickable.setVisualContent(() -> new CardWidget(resolved, cardWidgetAssets));
+      cardInspection.registerSource(clickable.getBtn(), () -> resolveInspectionCard(instanceId));
     } catch (IllegalArgumentException | IllegalStateException exception) {
       logger.warn("Could not install card widget for instance {}", instanceId, exception);
     }
+  }
+
+  private ResolvedCard resolveInspectionCard(String instanceId) {
+    return battleDeck.getHand().stream()
+        .filter(card -> instanceId.equals(card.instanceId()))
+        .findFirst()
+        .flatMap(
+            card ->
+                library.getCard(card.cardId()).map(config -> cardResolver.resolve(config, card)))
+        .orElse(null);
   }
 }

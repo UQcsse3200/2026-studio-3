@@ -230,7 +230,7 @@ class CommonCardWidgetTest {
       Label typeLabel = findLabel(widget, "Attack");
       assertCenteredSlot(cost, 34.5f, 423.5f);
       assertCenteredSlot(name, 131.5f, 428f);
-      assertCenteredSlot(typeLabel, 112.5f, 158.5f);
+      assertCenteredSlot(typeLabel, 112.5f, 235.5f);
       assertCenteredSlot(targetLabel, 112.5f, 23f);
       assertTrue(cost.getX() + cost.getWidth() <= name.getX());
       assertNull(findLabel(widget, "Attack  |  Common"));
@@ -364,6 +364,36 @@ class CommonCardWidgetTest {
   }
 
   @Test
+  void landscapeArtworkFillsWindowWithoutLargeLetterboxingAtEveryConsumerSize() {
+    for (CardConfig config : configs) {
+      CardFrameLayout layout = assets.frameLayoutFor(config.rarity);
+      assertEquals(new CardFrameLayout.Bounds(16f, 251f, 193f, 145f), layout.artwork());
+      assertEquals(193f / 145f, 4f / 3f, 0.003f);
+      assertTrue(layout.description().height() >= 182f);
+      Texture texture = resources.getAsset(config.texturePath, Texture.class);
+      assertEquals(1024, texture.getWidth(), config.id);
+      assertEquals(768, texture.getHeight(), config.id);
+      ResolvedCard card = resolver.resolveBasePreview(config, "landscape-" + config.id);
+      CardWidget widget = new CardWidget(card, assets);
+      for (float[] size : new float[][] {{225f, 456f}, {90f, 130f}, {150f, 214f}}) {
+        widget.setSize(size[0], size[1]);
+        widget.validate();
+        Group face = (Group) widget.getChildren().first();
+        Image artwork = face.findActor("card-artwork");
+        artwork.validate();
+        Label type = face.findActor("card-type");
+        Label description = findLabel(widget, card.description());
+        // Rounded source pixels differ from exact 4:3 by less than one logical pixel.
+        assertTrue(artwork.getHeight() - artwork.getImageHeight() < 1f, config.id);
+        assertTrue(artwork.getWidth() - artwork.getImageWidth() < 1f, config.id);
+        assertEquals(4f / 3f, artwork.getImageWidth() / artwork.getImageHeight(), 0.0001f);
+        assertTrue(artwork.getY() >= type.getY() + type.getHeight(), config.id);
+        assertTrue(type.getY() >= description.getY() + description.getHeight(), config.id);
+      }
+    }
+  }
+
+  @Test
   void overlaidArtworkBoundsStayInsideBlackWindowWithoutCoveringOrnaments() {
     for (Rarity rarity : Rarity.values()) {
       CardFrameLayout layout = assets.frameLayoutFor(rarity);
@@ -415,7 +445,9 @@ class CommonCardWidgetTest {
   private static int countLabels(Group group, String text) {
     int count = 0;
     for (Actor actor : group.getChildren()) {
-      if (actor instanceof Label label && text.contentEquals(label.getText())) {
+      if (actor instanceof Label label
+          && (text.contentEquals(label.getText())
+              || CardWidgetAssets.formatDescription(text).contentEquals(label.getText()))) {
         count++;
       } else if (actor instanceof Group child) {
         count += countLabels(child, text);
@@ -453,7 +485,9 @@ class CommonCardWidgetTest {
 
   private static Label findLabel(Group group, String text) {
     for (Actor actor : group.getChildren()) {
-      if (actor instanceof Label label && text.contentEquals(label.getText())) {
+      if (actor instanceof Label label
+          && (text.contentEquals(label.getText())
+              || CardWidgetAssets.formatDescription(text).contentEquals(label.getText()))) {
         label.validate();
         return label;
       }

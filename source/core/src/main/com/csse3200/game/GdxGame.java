@@ -19,6 +19,7 @@ import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.narration.NarrationConfigLoader;
 import com.csse3200.game.narration.NarrationLoadingException;
+import com.csse3200.game.rewards.CardRewardProfile;
 import com.csse3200.game.save.AutosaveCoordinator;
 import com.csse3200.game.save.GameStateSnapshotProvider;
 import com.csse3200.game.save.JsonSaveGameRepository;
@@ -180,6 +181,12 @@ public class GdxGame extends Game {
     logger.info("Setting game screen to {}", screenType);
     prepareScreenTransition(screenType);
     setScreen(newScreen(screenType));
+  }
+
+  /** Opens a battle result with explicit reward context, without retaining it across encounters. */
+  public void showBattleResult(boolean won, CardRewardProfile profile) {
+    prepareScreenTransition(won ? ScreenType.VICTORY : ScreenType.DEFEAT);
+    setScreen(new EndBattleScreen(this, won, profile));
   }
 
   /**

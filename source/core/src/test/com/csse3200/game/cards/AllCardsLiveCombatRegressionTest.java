@@ -320,6 +320,86 @@ class AllCardsLiveCombatRegressionTest {
   }
 
   @Test
+  void upgradedRestoringLightShouldHealNineAtEachOfThreeFuturePlayerStartsThenExpire() {
+    Harness battle = createUpgradedHarness(List.of("resurrection"), 50, 0);
+
+    assertTrue(
+        battle.controller.submitCardPlayRequest(
+            CardPlayRequest.self(battle.instanceId("resurrection"))));
+    assertEquals(
+        50, battle.playerStats.getHealth(), "healing must wait until the next player turn");
+    assertEquals(5, battle.energy.getCurrentEnergy());
+    assertStatus(battle.playerStats, EffectType.HEAL, 9, 3);
+
+    battle.controller.endPlayerTurn();
+    assertEquals(59, battle.playerStats.getHealth());
+    assertStatus(battle.playerStats, EffectType.HEAL, 9, 2);
+
+    battle.controller.endPlayerTurn();
+    assertEquals(68, battle.playerStats.getHealth());
+    assertStatus(battle.playerStats, EffectType.HEAL, 9, 1);
+
+    battle.controller.endPlayerTurn();
+    assertEquals(77, battle.playerStats.getHealth());
+    assertNull(battle.playerStats.getStatusEffect(EffectType.HEAL.name()));
+
+    battle.controller.endPlayerTurn();
+    assertEquals(77, battle.playerStats.getHealth(), "healing must stop after three ticks");
+  }
+
+  @Test
+  void upgradedRiftLanceShouldDealSixBeforeApplyingTwoVulnerable() {
+    Harness battle = createUpgradedHarness(List.of("rift_lance", "strike"), 100, 0);
+
+    assertTrue(
+        battle.controller.submitCardPlayRequest(
+            CardPlayRequest.singleEnemy(battle.instanceId("rift_lance"), FIRST_TARGET)));
+    assertEnemyHealth(battle, 494, 500);
+    assertEquals(9, battle.energy.getCurrentEnergy());
+    assertStatus(battle.firstEnemyStats, EffectType.VULNERABLE, 2, 2);
+    assertNull(battle.secondEnemyStats.getStatusEffect(EffectType.VULNERABLE.name()));
+
+    assertTrue(
+        battle.controller.submitCardPlayRequest(
+            CardPlayRequest.singleEnemy(battle.instanceId("strike"), FIRST_TARGET)));
+    assertEnemyHealth(battle, 485, 500);
+  }
+
+  @Test
+  void upgradedAstralWardShouldGrantSixBlockTwoPersistentStrengthAndOneEnergy() {
+    Harness battle = createUpgradedHarness(List.of("astral_ward", "strike"), 100, 0);
+
+    assertTrue(
+        battle.controller.submitCardPlayRequest(
+            CardPlayRequest.self(battle.instanceId("astral_ward"))));
+    assertEquals(6, battle.playerStats.getBlock());
+    assertStatus(battle.playerStats, EffectType.STRENGTH, 2, 0);
+    assertEquals(9, battle.energy.getCurrentEnergy(), "pay 2 Energy, then restore 1");
+
+    assertTrue(
+        battle.controller.submitCardPlayRequest(
+            CardPlayRequest.singleEnemy(battle.instanceId("strike"), FIRST_TARGET)));
+    assertEnemyHealth(battle, 492, 500);
+    battle.controller.endPlayerTurn();
+    assertEquals(0, battle.playerStats.getBlock());
+    assertStatus(battle.playerStats, EffectType.STRENGTH, 2, 0);
+  }
+
+  @Test
+  void upgradedStarfallShouldDealNineToEveryEnemyAndDiscardTheUpgradedInstance() {
+    Harness battle = createUpgradedHarness(List.of("starfall"), 100, 0);
+    CardInstance selected = battle.deck.getHand().get(0);
+
+    assertTrue(
+        battle.controller.submitCardPlayRequest(CardPlayRequest.allEnemies(selected.instanceId())));
+    assertEnemyHealth(battle, 491, 491);
+    assertEquals(8, battle.energy.getCurrentEnergy());
+    assertTrue(battle.deck.getHand().isEmpty());
+    assertEquals(List.of(selected), battle.deck.getDiscardPileInstances());
+    assertTrue(selected.isUpgraded());
+  }
+
+  @Test
   void resurrectionShouldNotHealOrRemainAfterDefeat() {
     Harness battle = createHarness(List.of("resurrection"), 50, 0);
 
@@ -385,6 +465,17 @@ class AllCardsLiveCombatRegressionTest {
   }
 
   private Harness createHarness(List<String> cardIds, int playerHealth, int enemyAttack) {
+    return createHarness(new PlayerDeck(library, cardIds), playerHealth, enemyAttack);
+  }
+
+  /** Upgrades only the first owned card; any following cards remain base copies. */
+  private Harness createUpgradedHarness(List<String> cardIds, int playerHealth, int enemyAttack) {
+    PlayerDeck playerDeck = new PlayerDeck(library, cardIds);
+    playerDeck.upgradeCard(playerDeck.getCards().get(0).instanceId());
+    return createHarness(playerDeck, playerHealth, enemyAttack);
+  }
+
+  private Harness createHarness(PlayerDeck playerDeck, int playerHealth, int enemyAttack) {
     CombatStatsComponent playerStats = new CombatStatsComponent(playerHealth, 0, 200);
     EnergyComponent energy = new EnergyComponent(10);
     Entity player = new Entity().addComponent(playerStats).addComponent(energy);
@@ -397,9 +488,8 @@ class AllCardsLiveCombatRegressionTest {
     enemies.put(FIRST_TARGET, firstEnemy);
     enemies.put(SECOND_TARGET, secondEnemy);
 
-    PlayerDeck playerDeck = new PlayerDeck(library, cardIds);
     BattleDeck deck = new BattleDeck(playerDeck);
-    deck.drawCards(cardIds.size());
+    deck.drawCards(playerDeck.getCards().size());
     Team7PlayerStateAdapter playerState = new Team7PlayerStateAdapter(energy, playerStats);
     Team1EnemyStateAdapter enemyState = new Team1EnemyStateAdapter(enemies);
     CardPlayService playService =

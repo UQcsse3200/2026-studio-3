@@ -26,11 +26,13 @@ import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.CardRewardProfile;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.screens.BattleScreen;
 import com.csse3200.game.screens.DemoCampfireScreen;
 import com.csse3200.game.screens.DemoEventScreen;
+import com.csse3200.game.screens.EndBattleScreen;
 import com.csse3200.game.screens.MapScreen;
 import com.csse3200.game.screens.NarrationScreen;
 import java.util.Map;
@@ -41,6 +43,33 @@ import org.mockito.MockedConstruction;
 
 @ExtendWith(GameExtension.class)
 class GdxGameTest {
+  @Test
+  void battleResultPassesExplicitProfilesWithoutLeakingAnEliteContextIntoTheNextScreen() {
+    GdxGame game = new GdxGame();
+    java.util.List<CardRewardProfile> profiles = new java.util.ArrayList<>();
+    try (MockedConstruction<EndBattleScreen> screens =
+        mockConstruction(
+            EndBattleScreen.class,
+            (screen, context) -> {
+              assertSame(game, context.arguments().get(0));
+              profiles.add((CardRewardProfile) context.arguments().get(2));
+            })) {
+      game.showBattleResult(true, CardRewardProfile.NORMAL);
+      game.showBattleResult(true, CardRewardProfile.ELITE);
+      game.showBattleResult(true, CardRewardProfile.NORMAL);
+      game.showBattleResult(false, CardRewardProfile.NORMAL);
+      assertEquals(
+          java.util.List.of(
+              CardRewardProfile.NORMAL,
+              CardRewardProfile.ELITE,
+              CardRewardProfile.NORMAL,
+              CardRewardProfile.NORMAL),
+          profiles);
+      assertSame(screens.constructed().get(3), game.getScreen());
+      verify(screens.constructed().get(0)).dispose();
+    }
+  }
+
   @Test
   void tutorialLaunchUsesItsOwnScreenWithoutCompletingAMapNode() {
     GdxGame game = gameWithActiveNode(RoomType.COMBAT);
