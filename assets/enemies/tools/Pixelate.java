@@ -14,10 +14,15 @@ import javax.imageio.ImageIO;
  *
  * <p>加 --flatten 时改为把已经像素化的帧"压平"成更 2D 的平涂风格：合并细碎杂色为大色块、减少颜色层次、重新描边。
  *
- * <p>用法: java Pixelate.java [--flatten] &lt;pixel_size&gt; &lt;colors&gt; &lt;out_dir&gt; &lt;frame.png&gt;
- * [&lt;frame.png&gt; ...]
+ * <p>用法: java Pixelate.java [--flatten] [--palette a.png,b.png] &lt;pixel_size&gt; &lt;colors&gt;
+ * &lt;out_dir&gt; &lt;frame.png&gt; [&lt;frame.png&gt; ...]
  *
  * <p>同一只怪的所有帧要一起传入，这样它们共用一套调色板。缩放、取色的整数运算和 Pillow 一致，结果和原来的 Python 版逐像素相同。
+ *
+ * <p>--palette：给已有的怪补新帧时用。不重新算调色板，直接用这些已经像素化的帧里出现过的颜色，新帧和原有帧色调一致，原有帧也不用重做（此时 colors
+ * 不起作用）。
+ *
+ * <p>--soft-alpha：保留半透明（护罩、光晕这类效果），透明度分成几档而不是只有全透明/全不透明；内描边只描不透明的身体。
  */
 public class Pixelate {
   static final int FRAME = 512;
@@ -27,10 +32,29 @@ public class Pixelate {
   static final int GLOW_MIN_ALPHA = 60; // 半透明光效像素至少要有这个不透明度才算数
   static final int VIVID_MIN = 2; // 格子里至少有这么多鲜艳像素，就保留鲜艳色
   static final int SMOOTH_PASSES = 2; // --flatten：众数滤波次数，越多色块越大越平
+  static final int[] SOFT_LEVELS = {24, 96, 176}; // --soft-alpha：透明度分档的分界
+  static final int[] SOFT_ALPHAS = {0, 80, 150, 255}; // --soft-alpha：每一档实际用的透明度
+
+  static boolean softAlpha; // --soft-alpha 开关，整次运行只设一次
 
   public static void main(String[] args) throws IOException {
-    boolean flatten = args[0].equals("--flatten");
-    int first = flatten ? 1 : 0;
+    boolean flatten = false;
+    List<int[]> fixedPalette = null;
+    int first = 0;
+    while (args[first].startsWith("--")) {
+      if (args[first].equals("--flatten")) {
+        flatten = true;
+        first++;
+      } else if (args[first].equals("--soft-alpha")) {
+        softAlpha = true;
+        first++;
+      } else if (args[first].equals("--palette")) {
+        fixedPalette = paletteOf(args[first + 1].split(","));
+        first += 2;
+      } else {
+        throw new IllegalArgumentException("unknown option " + args[first]);
+      }
+    }
     int size = Integer.parseInt(args[first]);
     int colors = Integer.parseInt(args[first + 1]);
     File outDir = new File(args[first + 2]);
@@ -41,19 +65,21 @@ public class Pixelate {
       paths.add(new File(args[i]));
       frames.add(Img.read(paths.get(paths.size() - 1)));
     }
-    List<Img> results = flatten ? flatten(frames, size, colors) : pixelate(frames, size, colors);
+    List<Img> results =
+        flatten ? flatten(frames, size, colors) : pixelate(frames, size, colors, fixedPalette);
     for (int i = 0; i < paths.size(); i++) {
       results.get(i).write(new File(outDir, paths.get(i).getName()));
       System.out.println((flatten ? "flattened " : "pixelated ") + paths.get(i).getName());
     }
   }
 
-  static List<Img> pixelate(List<Img> frames, int size, int colors) {
+  static List<Img> pixelate(List<Img> frames, int size, int colors, List<int[]> fixedPalette) {
     List<Img> smalls = new ArrayList<>();
     for (Img f : frames) {
       smalls.add(saturate(shrink(f, size), 1.2f));
     }
-    List<int[]> palette = sharedPalette(smalls, colors, 6, 3);
+    List<int[]> palette =
+        fixedPalette != null ? fixedPalette : sharedPalette(smalls, colors, 6, 3);
     List<Img> results = new ArrayList<>();
     for (Img small : smalls) {
       Img img = innerOutline(applyPalette(small, palette));
@@ -173,10 +199,13 @@ public class Pixelate {
           // 只取最亮的一半：小光点（眼睛）的亮芯不会被外圈较暗的光晕拉暗
           keep.sort((p, q) -> Integer.compare(max(q), max(p)));
           keep = keep.subList(0, Math.max(1, keep.size() / 2));
-          small.set(x, y, 0xFF000000 | average(keep));
+          // 半透明光晕在 --soft-alpha 下保持半透明，眼睛这类长在身体上的亮点仍然不透明
+          int glowAlpha = softAlpha ? Math.max(softLevel(a), SOFT_ALPHAS[1]) : 255;
+          small.set(x, y, glowAlpha << 24 | average(keep));
           continue;
         }
-        if (a < ALPHA_CUT) {
+        int level = softAlpha ? softLevel(a) : a < ALPHA_CUT ? 0 : 255;
+        if (level == 0 || a == 0) {
           small.set(x, y, 0);
           continue;
         }
@@ -184,10 +213,20 @@ public class Pixelate {
         int r = Math.min(255, (int) (cr[y * n + x] * k));
         int g = Math.min(255, (int) (cg[y * n + x] * k));
         int b = Math.min(255, (int) (cb[y * n + x] * k));
-        small.set(x, y, 0xFF000000 | r << 16 | g << 8 | b);
+        small.set(x, y, level << 24 | r << 16 | g << 8 | b);
       }
     }
     return small;
+  }
+
+  /** --soft-alpha：把格子的平均透明度归到某一档。 */
+  static int softLevel(int a) {
+    for (int i = 0; i < SOFT_LEVELS.length; i++) {
+      if (a < SOFT_LEVELS[i]) {
+        return SOFT_ALPHAS[i];
+      }
+    }
+    return 255;
   }
 
   /** 所有帧共用一套调色板。鲜艳色（眼睛、宝珠）和白色高光分别单独留名额，互不挤占，也不会被大面积的主体颜色吞掉。 */
@@ -225,6 +264,19 @@ public class Pixelate {
       entries.addAll(medianCut(glow, glowSlots));
     }
     return entries;
+  }
+
+  /** 已经像素化的帧里出现过的所有不透明颜色，按第一次出现的顺序排列。 */
+  static List<int[]> paletteOf(String[] paths) throws IOException {
+    Map<Integer, int[]> colors = new LinkedHashMap<>();
+    for (String path : paths) {
+      for (int c : Img.read(new File(path)).p) {
+        if (c >>> 24 == 255) {
+          colors.putIfAbsent(c & 0xFFFFFF, rgb(c));
+        }
+      }
+    }
+    return new ArrayList<>(colors.values());
   }
 
   /** 每种色相（绿、橙、红、青……）先保证至少一个名额，剩下的再按面积分，少量但颜色独特的细节（比如绿眼睛）不会被大面积的同类色吞掉。 */
@@ -319,13 +371,16 @@ public class Pixelate {
         int c = img.get(x, y);
         int[] v = rgb(c);
         // 透明像素不描；发光的亮色像素也不描，否则细光效会整条被压暗
-        if (c >>> 24 == 0 || isAccent(v) || max(v) > 200) {
+        // --soft-alpha 下只描不透明的身体，挨着半透明护罩的地方也算轮廓
+        int a = c >>> 24;
+        if (a == 0 || (softAlpha && a < 255) || isAccent(v) || max(v) > 200) {
           continue;
         }
         boolean edge = false;
         int[][] around = {{x + 1, y}, {x - 1, y}, {x, y + 1}, {x, y - 1}};
         for (int[] n : around) {
-          edge |= !img.inside(n[0], n[1]) || img.get(n[0], n[1]) >>> 24 == 0;
+          int na = img.inside(n[0], n[1]) ? img.get(n[0], n[1]) >>> 24 : 0;
+          edge |= softAlpha ? na < 255 : na == 0;
         }
         if (edge) {
           out.set(

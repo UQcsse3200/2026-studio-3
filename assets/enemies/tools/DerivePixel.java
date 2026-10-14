@@ -6,7 +6,10 @@ import javax.imageio.ImageIO;
 /**
  * 从像素化后的 idle_0 派生 idle_1 / hurt_0 / death_0，所有变化都按整格进行，不破坏像素颗粒。
  *
- * <p>用法: java DerivePixel.java &lt;pixel_size&gt; &lt;frames_dir&gt; &lt;enemy_id&gt; [--floating]
+ * <p>用法: java DerivePixel.java &lt;pixel_size&gt; &lt;frames_dir&gt; &lt;enemy_id&gt; [--floating] [--form
+ * &lt;name&gt;]
+ *
+ * <p>--form：给某个形态派生，例如 --form taunt 从 idle_taunt_0 派生 idle_taunt_1 和 hurt_taunt_0（形态没有死亡帧）。
  */
 public class DerivePixel {
   static final int FRAME = 512;
@@ -20,11 +23,31 @@ public class DerivePixel {
     int size = Integer.parseInt(args[0]);
     File dir = new File(args[1]);
     String enemy = args[2];
-    boolean floating = args.length > 3 && args[3].equals("--floating");
+    boolean floating = false;
+    String form = null;
+    for (int i = 3; i < args.length; i++) {
+      if (args[i].equals("--floating")) {
+        floating = true;
+      } else if (args[i].equals("--form")) {
+        form = args[++i];
+      } else {
+        throw new IllegalArgumentException("unknown option " + args[i]);
+      }
+    }
+    // 形态的帧名带后缀，比如 idle_taunt_0、hurt_taunt_0
+    String suffix = form == null ? "" : "_" + form;
 
-    Img grid = Img.read(new File(dir, enemy + "_idle_0.png")).resizeNearest(FRAME / size, FRAME / size);
-    String[] names = {"idle_1", "hurt_0", "death_0"};
-    Img[] derived = {breathe(grid, floating), hurt(grid), death(grid, floating, size)};
+    Img grid =
+        Img.read(new File(dir, enemy + "_idle" + suffix + "_0.png"))
+            .resizeNearest(FRAME / size, FRAME / size);
+    String[] names =
+        form == null
+            ? new String[] {"idle_1", "hurt_0", "death_0"}
+            : new String[] {"idle" + suffix + "_1", "hurt" + suffix + "_0"};
+    Img[] derived =
+        form == null
+            ? new Img[] {breathe(grid, floating), hurt(grid), death(grid, floating, size)}
+            : new Img[] {breathe(grid, floating), hurt(grid)};
     for (int i = 0; i < names.length; i++) {
       Img frame = derived[i].resizeNearest(derived[i].w * size, derived[i].h * size);
       frame.write(new File(dir, enemy + "_" + names[i] + ".png"));
