@@ -10,14 +10,18 @@ import java.util.List;
 /**
  * Builds and manages the live {@link Displaying} widgets for a set of {@link DisplayingRecord}s.
  * JSON parsing lives separately in {@link DisplayingJsonLoader}.
+ *
+ * <p>Uses the GoF Factory Method pattern: every widget is made by {@link
+ * #createDisplaying(DisplayingRecord)}, which a screen-specific subclass overrides to build
+ * variants that need that screen's dependencies (see {@code DeckEditorDisplayingFactory}).
  */
 public class DisplayingFactory extends UIComponent {
 
   private static final String DEFAULT_VARIANT = "Displaying";
 
-  // Read-only defaults; every factory gets its own copy so per-screen registrations stay local.
-  // Variants that need a popup ("popupText", "cardPreview", "popupPanel") are deliberately absent:
-  // the screen that owns the popup registers them with registerInstanceVariant.
+  // Variants that need nothing but their record. Read-only after class initialisation. Variants
+  // that need a popup ("popupText", "cardPreview") are deliberately absent: the subclass for the
+  // screen that owns the popup creates them.
   private static final VariantRegistry<DisplayingRecord, Displaying> DEFAULT_VARIANTS =
       new VariantRegistry<DisplayingRecord, Displaying>("displaying")
           .register(DEFAULT_VARIANT, rec -> new Displaying(rec) {})
@@ -39,8 +43,6 @@ public class DisplayingFactory extends UIComponent {
 
   private final List<DisplayingRecord> records = new ArrayList<>();
   private final List<Displaying> displayings = new ArrayList<>();
-  private final VariantRegistry<DisplayingRecord, Displaying> variants =
-      VariantRegistry.copyOf(DEFAULT_VARIANTS);
 
   public DisplayingFactory(Path file) {
     this(loadRecordsFromJson(file));
@@ -51,11 +53,14 @@ public class DisplayingFactory extends UIComponent {
   }
 
   /**
-   * Registers a variant for THIS factory instance only, overriding a default variant of the same
-   * name if present. Use it for variants that need screen-specific dependencies (e.g. a popup).
+   * Factory method: creates the widget for one record. The default looks the record's variant up in
+   * {@link #DEFAULT_VARIANTS}. Subclasses override this to handle variants that need extra
+   * dependencies, and call {@code super.createDisplaying(rec)} for everything else.
+   *
+   * @throws IllegalArgumentException if the variant is not known
    */
-  public void registerInstanceVariant(String name, DisplayingSupplier supplier) {
-    variants.register(name, supplier::create);
+  protected Displaying createDisplaying(DisplayingRecord rec) {
+    return DEFAULT_VARIANTS.create(rec.variant(), rec);
   }
 
   @Override
@@ -63,7 +68,7 @@ public class DisplayingFactory extends UIComponent {
     super.create();
 
     for (DisplayingRecord rec : records) {
-      Displaying displaying = variants.create(rec.variant(), rec);
+      Displaying displaying = createDisplaying(rec);
       displaying.setEntity(this.entity);
       displaying.create();
       displayings.add(displaying);

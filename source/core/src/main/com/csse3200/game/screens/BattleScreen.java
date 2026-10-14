@@ -48,11 +48,8 @@ import com.csse3200.game.components.spritedisplay.clickable.CardAimController;
 import com.csse3200.game.components.spritedisplay.clickable.Clickable;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
-import com.csse3200.game.components.spritedisplay.clickable.DragNDrop;
-import com.csse3200.game.components.spritedisplay.displaying.CardPreviewDisplay;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord;
-import com.csse3200.game.components.spritedisplay.displaying.PopupTextDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -491,11 +488,9 @@ public class BattleScreen extends ScreenAdapter {
 
     staticUiRecords = ClickableFactory.loadRecordsFromJson(battleUiJson);
 
-    uiFactory = new ClickableFactory(buildAllRecords());
-    uiFactory.registerInstanceVariant("aimDrag", rec -> new DragNDrop(rec, enemyCardAim));
-    uiFactory.registerInstanceVariant("selfAimDrag", rec -> new DragNDrop(rec, playerCardAim));
-    uiFactory.registerInstanceVariant(
-        "allEnemiesAimDrag", rec -> new DragNDrop(rec, allEnemiesCardAim));
+    uiFactory =
+        new BattleClickableFactory(
+            buildAllRecords(), enemyCardAim, playerCardAim, allEnemiesCardAim);
 
     Terminal terminal = new Terminal();
     terminal.addCommand("skipbattle", new SkipBattleCommand(controller));
@@ -614,23 +609,7 @@ public class BattleScreen extends ScreenAdapter {
     List<DisplayingRecord> all = new ArrayList<>(records);
     all.add(badgesRec);
 
-    DisplayingFactory factory = new DisplayingFactory(all);
-
-    factory.registerInstanceVariant(
-        "popupText",
-        rec -> {
-          PopupTextDisplay d = new PopupTextDisplay(rec);
-          d.addPopup(popup);
-          return d;
-        });
-    factory.registerInstanceVariant(
-        "cardPreview",
-        rec -> {
-          CardPreviewDisplay d = new CardPreviewDisplay(rec);
-          d.addPopup(popup);
-          return d;
-        });
-    return factory;
+    return new DeckEditorDisplayingFactory(all, popup);
   }
 
   private void onDeckRearranged(List<CardInstance> newHandRow) {
@@ -779,9 +758,9 @@ public class BattleScreen extends ScreenAdapter {
       }
       String variant =
           switch (card.target()) {
-            case SELF -> "selfAimDrag";
-            case SINGLE_ENEMY -> "aimDrag";
-            case ALL_ENEMIES -> "allEnemiesAimDrag";
+            case SELF -> BattleClickableFactory.SELF_AIM_DRAG;
+            case SINGLE_ENEMY -> BattleClickableFactory.AIM_DRAG;
+            case ALL_ENEMIES -> BattleClickableFactory.ALL_ENEMIES_AIM_DRAG;
           };
 
       float offsetFromCenter = i - centerIndex;

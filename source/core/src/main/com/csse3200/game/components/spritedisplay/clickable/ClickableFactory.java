@@ -14,12 +14,16 @@ import java.util.List;
  * resolves each record's variant, constructs and draws the widget, and disposes it. JSON parsing
  * lives separately in {@link ClickableJsonLoader} — this class only cares about the runtime widget
  * lifecycle, not where the records came from.
+ *
+ * <p>Uses the GoF Factory Method pattern: every widget is made by {@link
+ * #createClickable(ClickableRecord)}, which a screen-specific subclass overrides to build variants
+ * that need that screen's dependencies (see {@code BattleClickableFactory}).
  */
 public class ClickableFactory extends UIComponent {
 
   private static final String DEFAULT_VARIANT = "Clickable";
 
-  // Read-only defaults; every factory gets its own copy so per-screen registrations stay local.
+  // Variants that need nothing but their record. Read-only after class initialisation.
   private static final VariantRegistry<ClickableRecord, Clickable> DEFAULT_VARIANTS =
       new VariantRegistry<ClickableRecord, Clickable>("clickable")
           .register(DEFAULT_VARIANT, rec -> new Clickable(rec) {})
@@ -36,8 +40,6 @@ public class ClickableFactory extends UIComponent {
 
   private final List<ClickableRecord> records = new ArrayList<>();
   private final List<Clickable> clickables = new ArrayList<>();
-  private final VariantRegistry<ClickableRecord, Clickable> variants =
-      VariantRegistry.copyOf(DEFAULT_VARIANTS);
 
   public ClickableFactory(Path file) {
     this(loadRecordsFromJson(file));
@@ -48,12 +50,14 @@ public class ClickableFactory extends UIComponent {
   }
 
   /**
-   * Registers a variant for THIS factory instance only, overriding a default variant of the same
-   * name if present. Use it for variants that need screen-specific dependencies (e.g. an aim
-   * controller); variants with no dependencies belong in {@link #DEFAULT_VARIANTS}.
+   * Factory method: creates the widget for one record. The default looks the record's variant up in
+   * {@link #DEFAULT_VARIANTS}. Subclasses override this to handle variants that need extra
+   * dependencies, and call {@code super.createClickable(rec)} for everything else.
+   *
+   * @throws IllegalArgumentException if the variant is not known
    */
-  public void registerInstanceVariant(String name, ClickableSupplier supplier) {
-    variants.register(name, supplier::create);
+  protected Clickable createClickable(ClickableRecord rec) {
+    return DEFAULT_VARIANTS.create(rec.variant(), rec);
   }
 
   @Override
@@ -65,7 +69,7 @@ public class ClickableFactory extends UIComponent {
   }
 
   private Clickable buildClickable(ClickableRecord rec) {
-    Clickable clickable = variants.create(rec.variant(), rec);
+    Clickable clickable = createClickable(rec);
     clickable.setEntity(this.entity);
     clickable.create();
     stage.addActor(clickable.getBtn());

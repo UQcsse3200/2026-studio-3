@@ -10,9 +10,8 @@ import java.util.function.Function;
  * widget. Shared by {@link com.csse3200.game.components.spritedisplay.clickable.ClickableFactory}
  * and {@link com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory}.
  *
- * <p>Each factory owns its own registry, seeded from a fixed set of defaults via {@link
- * #copyOf(VariantRegistry)}, so a screen registering a variant never leaks into another screen or
- * test.
+ * <p>Each factory keeps a private, fixed set of default variants here. Variants that need a
+ * screen's dependencies are not registered; a factory subclass creates them in its factory method.
  *
  * @param <R> record type (the parsed JSON entry)
  * @param <W> widget type built from a record
@@ -27,13 +26,6 @@ public final class VariantRegistry<R, W> {
    */
   public VariantRegistry(String kind) {
     this.kind = kind;
-  }
-
-  /** Returns a new registry holding the same variants as {@code source}. */
-  public static <R, W> VariantRegistry<R, W> copyOf(VariantRegistry<R, W> source) {
-    VariantRegistry<R, W> copy = new VariantRegistry<>(source.kind);
-    copy.variants.putAll(source.variants);
-    return copy;
   }
 
   /** Registers {@code name}, replacing any existing variant of the same name. */
