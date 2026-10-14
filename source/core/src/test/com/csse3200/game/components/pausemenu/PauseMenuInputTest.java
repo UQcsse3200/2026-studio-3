@@ -4,9 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.badlogic.gdx.Input.Keys;
+import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.services.GamePauseService;
@@ -102,5 +105,48 @@ class PauseMenuInputTest {
   @Test
   void hasPriorityAboveGameplayAndDebugInputs() {
     assertTrue(input.getPriority() > 20);
+  }
+
+  @Test
+  void confirmationConsumesKeysBeforeUnderlyingPauseMenu() {
+    pauseGame();
+    SaveLoadPanel panel = mock(SaveLoadPanel.class);
+    when(panel.isLoadConfirmationVisible()).thenReturn(true);
+    PauseMenuInput confirmationInput = new PauseMenuInput(panel);
+    Entity entity = new Entity().addComponent(confirmationInput);
+    entity
+        .getEvents()
+        .addListener(PauseMenuDisplay.NAV_SELECT_EVENT, navSelectCount::incrementAndGet);
+    entity.getEvents().addListener(PauseMenuDisplay.NAV_BACK_EVENT, navBackCount::incrementAndGet);
+
+    assertTrue(confirmationInput.keyDown(Keys.ENTER));
+    assertTrue(confirmationInput.keyDown(Keys.ESCAPE));
+
+    verify(panel).confirmPendingLoad();
+    verify(panel).cancelPendingLoad();
+    assertEquals(0, navSelectCount.get());
+    assertEquals(0, navBackCount.get());
+  }
+
+  @Test
+  void saveLoadPanelConsumesHiddenMenuNavigation() {
+    pauseGame();
+    SaveLoadPanel panel = mock(SaveLoadPanel.class);
+    when(panel.isLoadConfirmationVisible()).thenReturn(false);
+    when(panel.isVisible()).thenReturn(true);
+    PauseMenuInput panelInput = new PauseMenuInput(panel);
+    Entity entity = new Entity().addComponent(panelInput);
+    entity
+        .getEvents()
+        .addListener(PauseMenuDisplay.NAV_SELECT_EVENT, navSelectCount::incrementAndGet);
+    entity.getEvents().addListener(PauseMenuDisplay.NAV_BACK_EVENT, navBackCount::incrementAndGet);
+
+    assertTrue(panelInput.keyDown(Keys.ENTER));
+    assertTrue(panelInput.keyDown(Keys.ESCAPE));
+
+    verify(panel).navigateBack();
+    verify(panel, never()).confirmPendingLoad();
+    assertEquals(0, navSelectCount.get());
+    assertEquals(0, navBackCount.get());
   }
 }

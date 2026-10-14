@@ -65,6 +65,7 @@ public class SaveLoadPanel extends UIComponent {
   private Dialog loadConfirmDialog;
   private TextButton confirmLoadButton;
   private TextButton cancelLoadButton;
+  private Integer pendingLoadSlotId;
   private boolean loadInProgress;
 
   public SaveLoadPanel(SaveGameService saveGameService, List<Integer> slotIds) {
@@ -142,6 +143,44 @@ public class SaveLoadPanel extends UIComponent {
   public void hide() {
     if (rootStack != null) {
       rootStack.setVisible(false);
+    }
+  }
+
+  /** Returns whether this in-place panel is currently covering its host screen. */
+  public boolean isVisible() {
+    return rootStack != null && rootStack.isVisible();
+  }
+
+  /** Returns whether a load confirmation is currently waiting for the player's decision. */
+  public boolean isLoadConfirmationVisible() {
+    return loadConfirmDialog != null && loadConfirmDialog.getStage() != null;
+  }
+
+  /** Confirms the pending load, if any. Intended for both button and keyboard activation. */
+  public void confirmPendingLoad() {
+    Integer slotId = pendingLoadSlotId;
+    pendingLoadSlotId = null;
+    if (loadConfirmDialog != null) {
+      loadConfirmDialog.hide(null);
+    }
+    if (slotId != null) {
+      performLoad(slotId);
+    }
+  }
+
+  /** Cancels the pending load without changing the current run. */
+  public void cancelPendingLoad() {
+    pendingLoadSlotId = null;
+    if (loadConfirmDialog != null) {
+      loadConfirmDialog.hide(null);
+    }
+  }
+
+  /** Returns from the in-place save/load panel to its host pause menu. */
+  public void navigateBack() {
+    cancelPendingLoad();
+    if (backAction != null) {
+      backAction.run();
     }
   }
 
@@ -381,6 +420,20 @@ public class SaveLoadPanel extends UIComponent {
 
     confirmLoadButton = new TextButton("Load", themedButtonStyle());
     cancelLoadButton = new TextButton("Cancel", themedButtonStyle());
+    confirmLoadButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+            confirmPendingLoad();
+          }
+        });
+    cancelLoadButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+            cancelPendingLoad();
+          }
+        });
     loadConfirmDialog
         .getButtonTable()
         .add(confirmLoadButton)
@@ -396,24 +449,23 @@ public class SaveLoadPanel extends UIComponent {
   }
 
   private void showLoadConfirmation(int slotId) {
-    confirmLoadButton.clearListeners();
-    cancelLoadButton.clearListeners();
-    confirmLoadButton.addListener(
-        new ChangeListener() {
-          @Override
-          public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-            loadConfirmDialog.hide(null);
-            performLoad(slotId);
-          }
-        });
-    cancelLoadButton.addListener(
-        new ChangeListener() {
-          @Override
-          public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-            loadConfirmDialog.hide(null);
-          }
-        });
+    pendingLoadSlotId = slotId;
+    stage.cancelTouchFocus();
     loadConfirmDialog.show(stage);
+    loadConfirmDialog.toFront();
+    stage.setKeyboardFocus(cancelLoadButton);
+  }
+
+  TextButton getConfirmLoadButton() {
+    return confirmLoadButton;
+  }
+
+  TextButton getCancelLoadButton() {
+    return cancelLoadButton;
+  }
+
+  void requestLoad(int slotId) {
+    onLoad(slotId);
   }
 
   private String formatRestoreMessage(RestoreResult result) {
@@ -459,6 +511,7 @@ public class SaveLoadPanel extends UIComponent {
 
   @Override
   public void dispose() {
+    pendingLoadSlotId = null;
     if (rootStack != null) {
       rootStack.remove();
       rootStack.clear();
