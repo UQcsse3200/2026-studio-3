@@ -28,17 +28,9 @@ public final class ChanceAcquisitionResults {
     }
     List<AcquisitionResult.Entry> entries = new ArrayList<>();
     appendChange(
-        entries,
-        "health",
-        "Health",
-        resolution.getHealthBefore(),
-        resolution.getHealthAfter());
+        entries, "health", "Health", resolution.getHealthBefore(), resolution.getHealthAfter());
     appendChange(
-        entries,
-        "gold",
-        "Gold",
-        resolution.getCurrencyBefore(),
-        resolution.getCurrencyAfter());
+        entries, "gold", "Gold", resolution.getCurrencyBefore(), resolution.getCurrencyAfter());
 
     Map<String, Integer> cardCounts = new LinkedHashMap<>();
     resolution.getOutcome().getCardRewardIds().forEach(id -> cardCounts.merge(id, 1, Integer::sum));
