@@ -76,6 +76,7 @@ public class ItemLibraryDisplay extends UIComponent {
   private Stack rootStack;
   private Label nameLabel;
   private Label descriptionLabel;
+  private Label sourceLabel;
   private TextButton.TextButtonStyle buttonStyle;
 
   public static String resolveArtworkPath(ItemType item) {
@@ -233,18 +234,23 @@ public class ItemLibraryDisplay extends UIComponent {
     nameLabel.setFontScale(1.25f);
     descriptionLabel.setFontScale(1.1f);
     descriptionLabel.setWrap(true);
+    sourceLabel = new Label("", bodyLabelStyle());
+    sourceLabel.setWrap(true);
 
     detailPanel.add(nameLabel).left().expandX();
     detailPanel.row();
     detailPanel.add(artwork).width(200f).height(200f).padTop(8f).padBottom(16f);
     detailPanel.row();
     detailPanel.add(descriptionLabel).expandX().fillX().left().padTop(12f);
+    detailPanel.row();
+    detailPanel.add(sourceLabel).expandX().fillX().left().padTop(12f);
     return detailPanel;
   }
 
   private void showItem(ItemType item) {
     nameLabel.setText(ItemFormatting.formatItemName(item));
     descriptionLabel.setText(ITEM_DESCRIPTIONS.getOrDefault(item, "No description available."));
+    sourceLabel.setText("Obtained from: " + ItemFormatting.formatItemSource(item));
     setItemImage(resolveArtworkPath(item));
   }
 

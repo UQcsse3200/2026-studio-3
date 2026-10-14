@@ -38,6 +38,25 @@ public final class ItemFormatting {
     return DISPLAY_NAMES.getOrDefault(itemId, fallbackName(itemId));
   }
 
+  private static final Map<ItemType, String> SOURCES = new EnumMap<>(ItemType.class);
+
+  static {
+    SOURCES.put(ItemType.LUCKY_COIN, "Battle rewards");
+    SOURCES.put(ItemType.ENERGY_CRYSTAL, "Battle rewards");
+    SOURCES.put(ItemType.MERCHANTS_FAVOR, "Battle rewards");
+    SOURCES.put(ItemType.IRON_AEGIS, "Battle rewards");
+    SOURCES.put(ItemType.WARRIORS_CREST, "Battle rewards");
+    SOURCES.put(ItemType.ASHEN_EMBER, "Chance Events");
+    SOURCES.put(ItemType.BRAND_OF_THE_DAMNED, "Chance Events");
+    SOURCES.put(ItemType.SHATTERED_AEGIS, "Chance Events");
+    SOURCES.put(ItemType.AMBROSIA_FLASK, "Chance Events");
+  }
+
+  /** Returns where the player can obtain the given item, for display in the Item Library. */
+  public static String formatItemSource(ItemType item) {
+    return SOURCES.getOrDefault(item, "Unknown");
+  }
+
   /** Falls back to the old enum-splitting behaviour if a new item type is added without a name. */
   private static String fallbackName(ItemType itemId) {
     String[] words = itemId.name().split("_");
