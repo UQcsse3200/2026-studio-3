@@ -69,6 +69,10 @@ public class ItemLibraryDisplay extends UIComponent {
         "Curse: every Block gain is reduced by 1 per copy, to a minimum of 0.");
     ITEM_DESCRIPTIONS.put(
         ItemType.AMBROSIA_FLASK, "Consume during battle to restore 20 Health, up to max health.");
+    ITEM_DESCRIPTIONS.put(
+            ItemType.BLOOD_OATH_SIGIL,
+            "Curse: lose 2 Health at the start of each of your turns per copy. Bypasses Block and"
+                    + " Armour. Cannot reduce Health below 1.");
   }
 
   private final GdxGame game;

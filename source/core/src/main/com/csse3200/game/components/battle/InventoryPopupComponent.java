@@ -20,6 +20,7 @@ import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.CursePenalties;
 import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.ResourceService;
@@ -57,16 +58,17 @@ public class InventoryPopupComponent extends UIComponent {
   private static final Color DETAIL_COLOUR = new Color(0.72f, 0.65f, 0.58f, 1f);
 
   private static final Map<ItemType, String> ITEM_ICONS =
-      Map.of(
-          ItemType.LUCKY_COIN, "images/ui/lucky-coin.png",
-          ItemType.ENERGY_CRYSTAL, "images/ui/energy-crystal.png",
-          ItemType.MERCHANTS_FAVOR, "images/ui/merchants-favor.png",
-          ItemType.IRON_AEGIS, "images/ui/iron-aegis.png",
-          ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png",
-          ItemType.ASHEN_EMBER, "images/ui/ashen-ember.png",
-          ItemType.BRAND_OF_THE_DAMNED, "images/ui/brand-of-the-damned.png",
-          ItemType.SHATTERED_AEGIS, "images/ui/shattered-aegis.png",
-          ItemType.AMBROSIA_FLASK, "images/ui/ambrosia-flask.png");
+          Map.ofEntries(
+                  Map.entry(ItemType.LUCKY_COIN, "images/ui/lucky-coin.png"),
+                  Map.entry(ItemType.ENERGY_CRYSTAL, "images/ui/energy-crystal.png"),
+                  Map.entry(ItemType.MERCHANTS_FAVOR, "images/ui/merchants-favor.png"),
+                  Map.entry(ItemType.IRON_AEGIS, "images/ui/iron-aegis.png"),
+                  Map.entry(ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png"),
+                  Map.entry(ItemType.ASHEN_EMBER, "images/ui/ashen-ember.png"),
+                  Map.entry(ItemType.BRAND_OF_THE_DAMNED, "images/ui/brand-of-the-damned.png"),
+                  Map.entry(ItemType.SHATTERED_AEGIS, "images/ui/shattered-aegis.png"),
+                  Map.entry(ItemType.AMBROSIA_FLASK, "images/ui/ambrosia-flask.png"),
+                  Map.entry(ItemType.BLOOD_OATH_SIGIL, "images/ui/blood-oath-sigil.png"));
 
   private static final Map<ItemType, IntFunction<String>> ITEM_DESCRIPTIONS =
       new EnumMap<>(ItemType.class);
@@ -99,6 +101,13 @@ public class InventoryPopupComponent extends UIComponent {
         ItemType.SHATTERED_AEGIS, count -> "Block gains -" + count + " | Minimum 0");
 
     ITEM_DESCRIPTIONS.put(ItemType.AMBROSIA_FLASK, count -> "Use in battle: Restore 20 Health");
+
+    ITEM_DESCRIPTIONS.put(
+            ItemType.BLOOD_OATH_SIGIL,
+            count ->
+                    "-"
+                            + count * CursePenalties.BLOOD_OATH_DAMAGE_PER_COPY
+                            + " Health each turn | Minimum 1");
   }
 
   private final RunState runState;
