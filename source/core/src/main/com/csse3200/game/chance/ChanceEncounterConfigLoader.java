@@ -7,10 +7,12 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.csse3200.game.chance.configs.ChanceChoiceConfig;
 import com.csse3200.game.chance.configs.ChanceConfig;
+import com.csse3200.game.chance.configs.ChanceCurseRiskConfig;
 import com.csse3200.game.chance.configs.ChanceEncounterConfig;
 import com.csse3200.game.encounters.integration.CardCatalogGateway;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,7 +156,16 @@ public final class ChanceEncounterConfigLoader {
               choiceConfig.outcome.itemRewardIds == null
                   ? List.of()
                   : List.of(choiceConfig.outcome.itemRewardIds));
-      choices.add(new ChanceChoice(choiceConfig.id, choiceConfig.description, outcome));
+      ChanceCurseRiskConfig risk = choiceConfig.curseRisk;
+      ChanceCurseRisk curseRisk =
+          risk == null
+              ? null
+              : new ChanceCurseRisk(
+                  risk.triggerChance,
+                  Arrays.stream(risk.items)
+                      .map(item -> new ChanceCurseRisk.WeightedItem(item.id, item.weight))
+                      .toList());
+      choices.add(new ChanceChoice(choiceConfig.id, choiceConfig.description, outcome, curseRisk));
     }
 
     return new ChanceEncounter(
@@ -184,6 +195,7 @@ public final class ChanceEncounterConfigLoader {
         }
 
         String choiceLabel = "encounter[" + encounterIndex + "].choice[" + choiceIndex + "]";
+        validateCurseRisk(choice.get("curseRisk"), choiceLabel + ".curseRisk", errors);
         JsonValue outcome = choice.get("outcome");
         if (outcome == null || outcome.isNull()) {
           continue;
@@ -222,6 +234,37 @@ public final class ChanceEncounterConfigLoader {
       errors.add(label + " must be a string when present");
     } else if (value.asString().isBlank()) {
       errors.add(label + " must not be blank when present");
+    }
+  }
+
+  private static void validateCurseRisk(JsonValue risk, String label, List<String> errors) {
+    if (risk == null) return;
+    if (!risk.isObject()) {
+      errors.add(label + " must be an object when present");
+      return;
+    }
+    JsonValue chance = risk.get("triggerChance");
+    if (chance == null
+        || !chance.isNumber()
+        || !Double.isFinite(chance.asDouble())
+        || chance.asDouble() < 0
+        || chance.asDouble() > 1) {
+      errors.add(label + ".triggerChance must be a number between 0 and 1");
+    }
+    JsonValue items = risk.get("items");
+    if (items == null || !items.isArray() || items.size == 0) {
+      errors.add(label + ".items must be a nonempty array");
+      return;
+    }
+    int index = 0;
+    for (JsonValue item = items.child; item != null; item = item.next, index++) {
+      String itemLabel = label + ".items[" + index + "]";
+      if (!item.isObject()) {
+        errors.add(itemLabel + " must be an object");
+      } else {
+        validateOptionalString(item.get("id"), itemLabel + ".id", errors);
+        validateInteger(item.get("weight"), itemLabel + ".weight", errors);
+      }
     }
   }
 

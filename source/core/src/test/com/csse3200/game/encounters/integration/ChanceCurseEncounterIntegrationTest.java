@@ -2,9 +2,12 @@ package com.csse3200.game.encounters.integration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.csse3200.game.cards.TestCardService;
 import com.csse3200.game.chance.ChanceEncounter;
+import com.csse3200.game.chance.ChanceEncounterBehaviourFactory;
 import com.csse3200.game.chance.ChanceEncounterConfigLoader;
 import com.csse3200.game.chance.ChanceOutcome;
+import com.csse3200.game.chance.TestMineRandom;
 import com.csse3200.game.encounters.integration.mocks.MockCardCatalogGateway;
 import com.csse3200.game.encounters.integration.mocks.MockDeckGateway;
 import com.csse3200.game.encounters.integration.mocks.MockPlayerStateGateway;
@@ -34,6 +37,17 @@ class ChanceCurseEncounterIntegrationTest {
         .orElseThrow();
   }
 
+  private com.csse3200.game.chance.ChanceEncounterBehaviour behaviour(
+      ChanceEncounter event, String itemId) {
+    return ChanceEncounterBehaviourFactory.create(
+        event,
+        new TestMineRandom(
+            0,
+            List.of("BRAND_OF_THE_DAMNED", "BLOOD_OATH_SIGIL", "SHATTERED_AEGIS", "ASHEN_EMBER")
+                .indexOf(itemId)),
+        TestCardService.withCards("bandage"));
+  }
+
   private ChanceOutcomeApplier applier() {
     return new ChanceOutcomeApplier(player, new MockCardCatalogGateway("bandage"), deck, items);
   }
@@ -61,30 +75,35 @@ class ChanceCurseEncounterIntegrationTest {
   @Test
   void shouldGrantShatteredAegis() {
     shouldGrantConfiguredCurseOnceOrRejectMissingDependency(
-        "abandoned-mine", "claim-shattered-aegis", "SHATTERED_AEGIS", 50);
+        "abandoned-mine", "search-tunnels", "SHATTERED_AEGIS", 60);
   }
 
   @Test
   void shouldGrantAshenEmber() {
     shouldGrantConfiguredCurseOnceOrRejectMissingDependency(
-        "abandoned-mine", "take-ashen-ember", "ASHEN_EMBER", 80);
+        "abandoned-mine", "search-tunnels", "ASHEN_EMBER", 60);
   }
 
   private void shouldGrantConfiguredCurseOnceOrRejectMissingDependency(
       String eventId, String choiceId, String itemId, int gold) {
     ChanceEncounter event = encounter(eventId);
-    ChanceOutcome outcome = event.resolveChoice(choiceId);
-    assertEquals(4, event.getChoices().size());
+    AtomicInteger completions = new AtomicInteger();
+    ChanceEncounterSession session =
+        new ChanceEncounterSession(
+            1,
+            event,
+            behaviour(event, itemId),
+            applier(),
+            (node, success) -> completions.incrementAndGet());
+    boolean available = available(itemId);
+    ChanceResolution result = session.resolveChoice(choiceId);
+    ChanceOutcome outcome = result.getOutcome();
+    assertEquals(eventId.equals("abandoned-mine") ? 2 : 4, event.getChoices().size());
     assertEquals(0, outcome.getHealthDelta());
     assertEquals(gold, outcome.getCurrencyDelta());
     assertEquals(List.of(itemId), outcome.getItemRewardIds());
     assertTrue(outcome.getCardRewardIds().isEmpty());
-    AtomicInteger completions = new AtomicInteger();
-    ChanceEncounterSession session =
-        new ChanceEncounterSession(
-            1, event, applier(), (node, success) -> completions.incrementAndGet());
-    boolean available = available(itemId);
-    ChanceResolution result = session.resolveChoice(choiceId);
+
     if (!available) {
       assertEquals(ChanceResolution.Status.ITEM_NOT_FOUND, result.getStatus());
       assertEquals(35, player.getCurrency());
@@ -123,13 +142,13 @@ class ChanceCurseEncounterIntegrationTest {
   @Test
   void shouldAllowAnotherCopyOfShatteredAegis() {
     shouldAllowAnotherCopyAcrossSessionsSharingDurableState(
-        "abandoned-mine", "claim-shattered-aegis", "SHATTERED_AEGIS", 50);
+        "abandoned-mine", "search-tunnels", "SHATTERED_AEGIS", 60);
   }
 
   @Test
   void shouldAllowAnotherCopyOfAshenEmber() {
     shouldAllowAnotherCopyAcrossSessionsSharingDurableState(
-        "abandoned-mine", "take-ashen-ember", "ASHEN_EMBER", 80);
+        "abandoned-mine", "search-tunnels", "ASHEN_EMBER", 60);
   }
 
   private void shouldAllowAnotherCopyAcrossSessionsSharingDurableState(
@@ -138,12 +157,15 @@ class ChanceCurseEncounterIntegrationTest {
     if (!available(itemId)) {
       assertEquals(
           ChanceResolution.Status.ITEM_NOT_FOUND,
-          applier().apply(event.resolveChoice(choiceId)).getStatus());
+          applier()
+              .apply(behaviour(event, itemId).resolveChoice(choiceId).getOutcome())
+              .getStatus());
       return;
     }
     for (int node = 1; node <= 2; node++) {
-      ChanceEncounterSession session = new ChanceEncounterSession(node, event, applier(), null);
-      assertEquals(4, session.getAvailableChoices().size());
+      ChanceEncounterSession session =
+          new ChanceEncounterSession(node, event, behaviour(event, itemId), applier(), null);
+      assertEquals(event.getChoices().size(), session.getAvailableChoices().size());
       assertTrue(session.resolveChoice(choiceId).isSuccess());
       assertTrue(session.complete());
     }
@@ -167,13 +189,13 @@ class ChanceCurseEncounterIntegrationTest {
   @Test
   void shouldRollbackOnlyNewCopyOfShatteredAegis() {
     shouldRollbackOnlyNewCurseCopyWhenGoldUpdateFails(
-        "abandoned-mine", "claim-shattered-aegis", "SHATTERED_AEGIS", 50);
+        "abandoned-mine", "search-tunnels", "SHATTERED_AEGIS", 60);
   }
 
   @Test
   void shouldRollbackOnlyNewCopyOfAshenEmber() {
     shouldRollbackOnlyNewCurseCopyWhenGoldUpdateFails(
-        "abandoned-mine", "take-ashen-ember", "ASHEN_EMBER", 80);
+        "abandoned-mine", "search-tunnels", "ASHEN_EMBER", 60);
   }
 
   private void shouldRollbackOnlyNewCurseCopyWhenGoldUpdateFails(
@@ -182,14 +204,17 @@ class ChanceCurseEncounterIntegrationTest {
     if (!available(itemId)) {
       assertEquals(
           ChanceResolution.Status.ITEM_NOT_FOUND,
-          applier().apply(event.resolveChoice(choiceId)).getStatus());
+          applier()
+              .apply(behaviour(event, itemId).resolveChoice(choiceId).getOutcome())
+              .getStatus());
       return;
     }
     state.addOwnedItem(ItemType.valueOf(itemId));
     state.addOwnedItem(ItemType.ENERGY_CRYSTAL);
     List<ItemType> before = state.getOwnedItems();
     player.failNextCurrencyUpdate();
-    ChanceEncounterSession session = new ChanceEncounterSession(1, event, applier(), null);
+    ChanceEncounterSession session =
+        new ChanceEncounterSession(1, event, behaviour(event, itemId), applier(), null);
     assertEquals(
         ChanceResolution.Status.PLAYER_UPDATE_FAILED, session.resolveChoice(choiceId).getStatus());
     assertEquals(before, state.getOwnedItems());
@@ -238,20 +263,20 @@ class ChanceCurseEncounterIntegrationTest {
   }
 
   @Test
-  void shouldPreserveOriginalTradesAndLeaveChoices() {
+  void shouldPreserveShrineTradeMineBaseRewardAndLeaveChoices() {
     assertTrue(
         applier().apply(encounter("mysterious-shrine").resolveChoice("make-offering")).isSuccess());
     assertEquals(30, player.getHealth());
     assertEquals(60, player.getCurrency());
     assertTrue(
         applier().apply(encounter("abandoned-mine").resolveChoice("search-tunnels")).isSuccess());
-    assertEquals(18, player.getHealth());
-    assertEquals(90, player.getCurrency());
+    assertEquals(30, player.getHealth());
+    assertEquals(120, player.getCurrency());
     for (String id : List.of("mysterious-shrine", "abandoned-mine")) {
       assertTrue(applier().apply(encounter(id).resolveChoice("leave")).isSuccess());
     }
-    assertEquals(18, player.getHealth());
-    assertEquals(90, player.getCurrency());
+    assertEquals(30, player.getHealth());
+    assertEquals(120, player.getCurrency());
     assertTrue(state.getOwnedItems().isEmpty());
   }
 }

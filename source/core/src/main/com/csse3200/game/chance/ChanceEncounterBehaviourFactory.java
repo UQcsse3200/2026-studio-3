@@ -20,6 +20,11 @@ public final class ChanceEncounterBehaviourFactory {
     Objects.requireNonNull(random, "random cannot be null");
     Objects.requireNonNull(cardService, "cardService cannot be null");
 
+    if (AbandonedMineEncounterBehaviour.ENCOUNTER_ID.equals(encounter.getId())
+        && encounter.getChoices().stream().anyMatch(choice -> choice.getCurseRisk().isPresent())) {
+      return new AbandonedMineEncounterBehaviour(encounter, random);
+    }
+
     if (WishingFountainEncounterBehaviour.ENCOUNTER_ID.equals(encounter.getId())) {
       return new WishingFountainEncounterBehaviour(random, cardService);
     }

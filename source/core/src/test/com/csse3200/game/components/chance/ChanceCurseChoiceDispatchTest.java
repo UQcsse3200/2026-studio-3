@@ -7,7 +7,10 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.csse3200.game.cards.TestCardService;
+import com.csse3200.game.chance.ChanceEncounterBehaviourFactory;
 import com.csse3200.game.chance.ChanceEncounterConfigLoader;
+import com.csse3200.game.chance.TestMineRandom;
 import com.csse3200.game.encounters.integration.CardCatalogGateway;
 import com.csse3200.game.encounters.integration.ChanceEncounterSession;
 import com.csse3200.game.encounters.integration.ChanceOutcomeApplier;
@@ -19,6 +22,7 @@ import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.services.ServiceLocator;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -40,13 +44,13 @@ class ChanceCurseChoiceDispatchTest {
   @Test
   void shouldDispatchShatteredAegisChoice() {
     shouldDispatchNewScenicChoiceWithoutChangingUi(
-        "abandoned-mine", "claim-shattered-aegis", "SHATTERED_AEGIS", 50);
+        "abandoned-mine", "search-tunnels", "SHATTERED_AEGIS", 60);
   }
 
   @Test
   void shouldDispatchAshenEmberChoice() {
     shouldDispatchNewScenicChoiceWithoutChangingUi(
-        "abandoned-mine", "take-ashen-ember", "ASHEN_EMBER", 80);
+        "abandoned-mine", "search-tunnels", "ASHEN_EMBER", 60);
   }
 
   private void shouldDispatchNewScenicChoiceWithoutChangingUi(
@@ -69,6 +73,17 @@ class ChanceCurseChoiceDispatchTest {
         new ChanceEncounterSession(
             1,
             encounter,
+            ChanceEncounterBehaviourFactory.create(
+                encounter,
+                new TestMineRandom(
+                    0,
+                    List.of(
+                            "BRAND_OF_THE_DAMNED",
+                            "BLOOD_OATH_SIGIL",
+                            "SHATTERED_AEGIS",
+                            "ASHEN_EMBER")
+                        .indexOf(itemId)),
+                TestCardService.withCards("bandage")),
             new ChanceOutcomeApplier(
                 player, mock(CardCatalogGateway.class), mock(DeckGateway.class), items),
             null);
@@ -76,7 +91,7 @@ class ChanceCurseChoiceDispatchTest {
     Entity entity = new Entity().addComponent(display);
     try {
       entity.create();
-      assertEquals(4, display.getChoiceButtons().size());
+      assertEquals(encounter.getChoices().size(), display.getChoiceButtons().size());
       int choiceIndex =
           encounter.getChoices().stream().map(choice -> choice.getId()).toList().indexOf(choiceId);
       display.getChoiceButtons().get(choiceIndex).fire(new ChangeEvent());

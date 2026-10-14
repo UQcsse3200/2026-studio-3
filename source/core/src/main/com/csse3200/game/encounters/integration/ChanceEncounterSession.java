@@ -137,34 +137,34 @@ public final class ChanceEncounterSession {
           "This encounter is awaiting completion from a delegated flow.");
     }
 
-    ChanceBehaviourResult behaviourResult = behaviour.resolveChoice(choiceId);
-    if (behaviourResult == null) {
-      return outcomeApplier.failure(
-          ChanceResolution.Status.INVALID_OUTCOME,
-          null,
-          "The encounter behaviour did not provide a resolution result.");
-    }
-    if (behaviourResult.getType() == ChanceBehaviourResult.Type.INVALID_CHOICE) {
-      return outcomeApplier.failure(
-          ChanceResolution.Status.INVALID_CHOICE, null, "The selected choice does not exist.");
-    }
-    if (behaviourResult.getType() == ChanceBehaviourResult.Type.AWAITING_CHOICE) {
-      return outcomeApplier.failure(
-          ChanceResolution.Status.AWAITING_CHOICE,
-          null,
-          "The encounter advanced and is awaiting another choice.");
-    }
-    if (behaviourResult.getType() == ChanceBehaviourResult.Type.DELEGATED) {
-      awaitingDelegatedCompletion = true;
-      return outcomeApplier.failure(
-          ChanceResolution.Status.DELEGATED,
-          null,
-          "The selected choice is continuing in a delegated flow.");
-    }
-
-    ChanceOutcome outcome = behaviourResult.getOutcome();
     resolving = true;
     try {
+      ChanceBehaviourResult behaviourResult = behaviour.resolveChoice(choiceId);
+      if (behaviourResult == null) {
+        return outcomeApplier.failure(
+            ChanceResolution.Status.INVALID_OUTCOME,
+            null,
+            "The encounter behaviour did not provide a resolution result.");
+      }
+      if (behaviourResult.getType() == ChanceBehaviourResult.Type.INVALID_CHOICE) {
+        return outcomeApplier.failure(
+            ChanceResolution.Status.INVALID_CHOICE, null, "The selected choice does not exist.");
+      }
+      if (behaviourResult.getType() == ChanceBehaviourResult.Type.AWAITING_CHOICE) {
+        return outcomeApplier.failure(
+            ChanceResolution.Status.AWAITING_CHOICE,
+            null,
+            "The encounter advanced and is awaiting another choice.");
+      }
+      if (behaviourResult.getType() == ChanceBehaviourResult.Type.DELEGATED) {
+        awaitingDelegatedCompletion = true;
+        return outcomeApplier.failure(
+            ChanceResolution.Status.DELEGATED,
+            null,
+            "The selected choice is continuing in a delegated flow.");
+      }
+
+      ChanceOutcome outcome = behaviourResult.getOutcome();
       ChanceResolution attempt = outcomeApplier.apply(outcome);
       if (attempt.isSuccess()) {
         resolution = attempt;

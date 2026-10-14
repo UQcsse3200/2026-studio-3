@@ -98,41 +98,44 @@
     },
     {
       "id": "abandoned-mine",
-      "description": "Beneath the sanctum, old workings still hold relics of the fallen. An angel might risk the dark for tools of release.",
+      "description": "Beneath the sanctum, old workings still hold relics of the fallen. Lasting penalties in future battles, per copy: Brand of the Damned (Strength gains -1, min 0); Blood-Oath Sigil (player turn-start -2 HP, bypasses Block/Armour, min 1 HP); Shattered Aegis (Block gains -1, min 0); Ashen Ember (max Energy -1 in subsequent battles, min 1).",
       "weight": 1,
       "choices": [
         {
           "id": "search-tunnels",
-          "description": "Search the unstable tunnels for valuables.",
+          "description": "Explore the Mine: gain 60 Gold; 50% chance of one random, lasting Curse.",
           "outcome": {
-            "healthDelta": -12,
-            "currencyDelta": 30
+            "healthDelta": 0,
+            "currencyDelta": 60
+          },
+          "curseRisk": {
+            "triggerChance": 0.5,
+            "items": [
+              {
+                "id": "BRAND_OF_THE_DAMNED",
+                "weight": 1
+              },
+              {
+                "id": "BLOOD_OATH_SIGIL",
+                "weight": 1
+              },
+              {
+                "id": "SHATTERED_AEGIS",
+                "weight": 1
+              },
+              {
+                "id": "ASHEN_EMBER",
+                "weight": 1
+              }
+            ]
           }
         },
         {
           "id": "leave",
-          "description": "Leave the workings closed.",
+          "description": "Leave",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0
-          }
-        },
-        {
-          "id": "claim-shattered-aegis",
-          "description": "Claim the Shattered Aegis: gain 50 Gold and Shattered Aegis. In future battles, every Block gain is reduced by 1 per copy (minimum 0).",
-          "outcome": {
-            "healthDelta": 0,
-            "currencyDelta": 50,
-            "itemRewardIds": ["SHATTERED_AEGIS"]
-          }
-        },
-        {
-          "id": "take-ashen-ember",
-          "description": "Take the Ashen Ember: gain 80 Gold and Ashen Ember. In future battles, maximum Energy is reduced by 1 per copy (minimum 1).",
-          "outcome": {
-            "healthDelta": 0,
-            "currencyDelta": 80,
-            "itemRewardIds": ["ASHEN_EMBER"]
           }
         }
       ]

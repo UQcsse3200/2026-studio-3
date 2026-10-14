@@ -4,11 +4,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.csse3200.game.cards.CardService;
+import com.csse3200.game.cards.TestCardService;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.chance.ChanceChoice;
 import com.csse3200.game.chance.ChanceEncounter;
+import com.csse3200.game.chance.ChanceEncounterBehaviourFactory;
 import com.csse3200.game.chance.ChanceEncounterConfigLoader;
 import com.csse3200.game.chance.ChanceOutcome;
+import com.csse3200.game.chance.TestMineRandom;
 import com.csse3200.game.encounters.integration.*;
 import com.csse3200.game.encounters.integration.mocks.MockCardCatalogGateway;
 import com.csse3200.game.encounters.integration.mocks.MockDeckGateway;
@@ -71,22 +74,17 @@ class ChanceAcquisitionResultsTest {
   @Test
   void shouldMapShatteredAegisTrade() {
     assertCurse(
-        "abandoned-mine",
-        "claim-shattered-aegis",
-        "SHATTERED_AEGIS",
-        "Shattered Aegis",
-        50,
-        "Block gain");
+        "abandoned-mine", "search-tunnels", "SHATTERED_AEGIS", "Shattered Aegis", 60, "Block gain");
   }
 
   @Test
   void shouldMapAshenEmberTrade() {
     assertCurse(
         "abandoned-mine",
-        "take-ashen-ember",
+        "search-tunnels",
         "ASHEN_EMBER",
         "Ashen Ember",
-        80,
+        60,
         "player is recreated");
   }
 
@@ -105,6 +103,17 @@ class ChanceAcquisitionResultsTest {
         new ChanceEncounterSession(
             1,
             event,
+            ChanceEncounterBehaviourFactory.create(
+                event,
+                new TestMineRandom(
+                    0,
+                    List.of(
+                            "BRAND_OF_THE_DAMNED",
+                            "BLOOD_OATH_SIGIL",
+                            "SHATTERED_AEGIS",
+                            "ASHEN_EMBER")
+                        .indexOf(itemId)),
+                TestCardService.withCards("bandage")),
             new ChanceOutcomeApplier(player, new MockCardCatalogGateway(), deck, items),
             null);
     assertTrue(session.resolveChoice(choiceId).isSuccess());

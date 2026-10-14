@@ -102,9 +102,13 @@ class ChanceEncounterConfigLoaderTest {
     assertEncounter(
         encounters.get(3),
         "abandoned-mine",
-        "Beneath the sanctum, old workings still hold relics of the fallen. An angel might risk the dark for tools of release.",
-        new ExpectedChoice("search-tunnels", "Search the unstable tunnels for valuables.", -12, 30),
-        new ExpectedChoice("leave", "Leave the workings closed.", 0, 0));
+        "Beneath the sanctum, old workings still hold relics of the fallen. Lasting penalties in future battles, per copy: Brand of the Damned (Strength gains -1, min 0); Blood-Oath Sigil (player turn-start -2 HP, bypasses Block/Armour, min 1 HP); Shattered Aegis (Block gains -1, min 0); Ashen Ember (max Energy -1 in subsequent battles, min 1).",
+        new ExpectedChoice(
+            "search-tunnels",
+            "Explore the Mine: gain 60 Gold; 50% chance of one random, lasting Curse.",
+            0,
+            60),
+        new ExpectedChoice("leave", "Leave", 0, 0));
     assertEncounter(
         encounters.get(4),
         "wishing-fountain",
@@ -342,7 +346,7 @@ class ChanceEncounterConfigLoaderTest {
       ExpectedChoice... expectedChoices) {
     assertEquals(expectedId, encounter.getId());
     assertEquals(expectedDescription, encounter.getDescription());
-    int addedChoices = Set.of("mysterious-shrine", "abandoned-mine").contains(expectedId) ? 2 : 0;
+    int addedChoices = "mysterious-shrine".equals(expectedId) ? 2 : 0;
     assertEquals(expectedChoices.length + addedChoices, encounter.getChoices().size());
 
     for (int i = 0; i < expectedChoices.length; i++) {
