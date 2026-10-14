@@ -1380,7 +1380,8 @@ public class ChanceEncounterDisplay extends UIComponent {
       }
     }
 
-    handleSessionResolution(resolution, selectedButton, originalButtonText, choice.getDescription());
+    handleSessionResolution(
+        resolution, selectedButton, originalButtonText, choice.getDescription());
   }
 
   private void handleSessionResolution(
