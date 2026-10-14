@@ -325,12 +325,9 @@ public class BattleScreen extends ScreenAdapter {
                 forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getHealth();
             int maxHealth =
                 forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getMaxHealth();
-            int maxEnergy =
-                forestGameArea.getPlayer().getComponent(EnergyComponent.class).getMaxEnergy();
 
             runState.setPlayerHealth(currentHealth);
             runState.setPlayerMaxHealth(maxHealth);
-            runState.setPlayerMaxEnergy(maxEnergy);
           }
         });
     createUI();
