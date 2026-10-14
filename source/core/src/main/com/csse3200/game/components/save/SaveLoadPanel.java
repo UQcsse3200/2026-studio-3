@@ -52,6 +52,7 @@ public class SaveLoadPanel extends UIComponent {
 
   private static final String BACKGROUND_TEXTURE = "images/main_menu_background.png";
   public static final String BUTTON_TEXTURE = "images/save_load_button_frame.png";
+  private static final String WHITE_DRAWABLE = "white";
   private static final float ACTION_BUTTON_WIDTH = 168f;
   private static final float ACTION_BUTTON_HEIGHT = 56f;
   private static final float PANEL_WIDTH = 880f;
@@ -158,7 +159,7 @@ public class SaveLoadPanel extends UIComponent {
     Color overlayColour = MenuTheme.deepPlum();
     overlayColour.a = 0.6f; // Darker than the main menu overlay so slot text stays readable
     Table overlay = new Table();
-    overlay.setBackground(skin.newDrawable("white", overlayColour));
+    overlay.setBackground(skin.newDrawable(WHITE_DRAWABLE, overlayColour));
     rootStack.add(overlay);
 
     Table wrapper = new Table();
@@ -166,7 +167,8 @@ public class SaveLoadPanel extends UIComponent {
     wrapper.center().pad(MenuTheme.SCREEN_PADDING);
 
     rootTable = new Table();
-    rootTable.setBackground(skin.newDrawable("white", new Color(0.105f, 0.07f, 0.065f, 0.92f)));
+    rootTable.setBackground(
+        skin.newDrawable(WHITE_DRAWABLE, new Color(0.105f, 0.07f, 0.065f, 0.92f)));
     rootTable.pad(28f, 34f, 30f, 34f);
     addHeader();
 
@@ -367,7 +369,7 @@ public class SaveLoadPanel extends UIComponent {
     Window.WindowStyle windowStyle = new Window.WindowStyle(skin.get(Window.WindowStyle.class));
     Color panel = MenuTheme.deepPlum();
     panel.a = 0.96f;
-    windowStyle.background = skin.newDrawable("white", panel);
+    windowStyle.background = skin.newDrawable(WHITE_DRAWABLE, panel);
     loadConfirmDialog = new Dialog("", windowStyle);
 
     Label.LabelStyle messageStyle =

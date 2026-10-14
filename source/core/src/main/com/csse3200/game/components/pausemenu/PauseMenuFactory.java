@@ -189,9 +189,9 @@ public final class PauseMenuFactory {
             game.getBestiaryService(),
             game.getCardDiscoveryService());
 
-    // The Back button hides the overlay (returns to the pause menu). Held via a one-element array
-    // so the lambda can reference the panel that is being constructed.
-    SaveLoadPanel[] holder = new SaveLoadPanel[1];
+    // The Back button hides the overlay (returns to the pause menu). A holder is needed because the
+    // panel supplies its own Back action while it is being constructed.
+    PanelHolder holder = new PanelHolder();
     Runnable loadSuccessAction =
         () -> {
           GamePauseService pauseService = ServiceLocator.getPauseService();
@@ -206,11 +206,19 @@ public final class PauseMenuFactory {
             saveGameService,
             slotIds,
             restoreService,
-            () -> holder[0].hide(),
+            holder::hide,
             mode,
             mode == SaveLoadMode.LOAD_ONLY,
             loadSuccessAction);
-    holder[0] = panel;
+    holder.panel = panel;
     return panel;
+  }
+
+  private static final class PanelHolder {
+    private SaveLoadPanel panel;
+
+    private void hide() {
+      panel.hide();
+    }
   }
 }
