@@ -1,0 +1,48 @@
+{
+  "Clickable": [
+    {
+      "trigger": "deckScrollUp",
+      "text": "^",
+      "styleName": "popup",
+      "x": 742,
+      "y": 260,
+      "width": 40,
+      "height": 40
+    },
+    {
+      "trigger": "deckScrollDown",
+      "text": "v",
+      "styleName": "popup",
+      "x": 742,
+      "y": 310,
+      "width": 40,
+      "height": 40
+    }
+  ],
+  "Displaying": [
+    {
+      "trigger": "deckPreview",
+      "variant": "cardPreview",
+      "colour": "D49C45",
+      "text": "",
+      "x": 600, "y": 40,
+      "size": [190, 304]
+    },
+    {
+      "trigger": "deckSummary",
+      "variant": "popupText",
+      "colour": "D49C45",
+      "text": "",
+      "x": 230, "y": 400,
+      "size": [340, 66]
+    },
+    {
+      "trigger": "deckError",
+      "variant": "popupText",
+      "colour": "DB4646",
+      "text": "",
+      "x": 40, "y": 472,
+      "size": [550, 36]
+    }
+  ]
+}

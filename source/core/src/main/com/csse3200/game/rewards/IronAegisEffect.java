@@ -10,6 +10,9 @@ public class IronAegisEffect implements ItemEffect {
   @Override
   public void apply(Entity player) {
     CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    if (stats == null) {
+      throw new IllegalArgumentException("player must have CombatStatsComponent");
+    }
     stats.addArmour(ARMOUR_BONUS);
   }
 }

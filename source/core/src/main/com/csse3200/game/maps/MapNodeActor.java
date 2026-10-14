@@ -1,6 +1,5 @@
 package com.csse3200.game.maps;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -28,13 +27,15 @@ public class MapNodeActor extends Group {
    */
   public MapNodeActor(MapNode node) {
     this.node = node;
-    float mapWidth = Gdx.graphics.getWidth();
-    this.size = (mapWidth - 512) / 13f;
+    float mapWidth = ServiceLocator.getRenderService().getStage().getWidth();
+    this.size = (mapWidth - 512f) / 13f;
     nodeIcon =
         new Image(ServiceLocator.getResourceService().getAsset(getNodeIcon(), Texture.class));
 
     if (node.getRoomType() == RoomType.FINAL) {
       this.size *= 2f;
+    } else if (node.getRoomType() == RoomType.CAMPFIRE) {
+      this.size *= 1.5f;
     }
 
     nodeIcon.setSize(size, size);
@@ -68,8 +69,8 @@ public class MapNodeActor extends Group {
    */
   public MapNodeActor(MapNode node, boolean test) {
     this.node = node;
-    float mapWidth = Gdx.graphics.getWidth();
-    this.size = mapWidth / 13f;
+    float mapWidth = 1280f;
+    this.size = (mapWidth - 512f) / 13f;
     nodeIcon = new Image();
     nodeIcon.setSize(size, size);
   }
@@ -111,6 +112,15 @@ public class MapNodeActor extends Group {
    */
   public float getNodeSize() {
     return this.size;
+  }
+
+  /**
+   * Scale factor on the image
+   *
+   * @return the scale factor applied on the image
+   */
+  public float getNodeScale() {
+    return nodeIcon.getScaleX();
   }
 
   /**
@@ -164,6 +174,8 @@ public class MapNodeActor extends Group {
         return "images/map/shop.png";
       case EVENT:
         return "images/map/event.png";
+      case CAMPFIRE:
+        return "images/map/campfire.png";
       case FINAL:
         return "images/map/boss.png";
       case START:

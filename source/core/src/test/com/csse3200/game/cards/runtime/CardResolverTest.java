@@ -93,6 +93,21 @@ class CardResolverTest {
   }
 
   @Test
+  void shouldResolveAReadOnlyBasePreviewWithoutChangingTheDefinition() {
+    CardConfig strike = strike();
+
+    ResolvedCard preview = resolver.resolveBasePreview(strike, "reward-preview-strike");
+
+    assertEquals("reward-preview-strike", preview.instanceId());
+    assertEquals("strike", preview.cardId());
+    assertEquals("Strike", preview.name());
+    assertEquals(1, preview.cost());
+    assertFalse(preview.upgraded());
+    assertEquals("Strike", strike.name);
+    assertEquals(6, strike.effects[0].value);
+  }
+
+  @Test
   void shouldRejectUpgradedInstanceWhenUpgradeDefinitionIsMissing() {
     CardConfig card = strike();
     card.upgrade = null;

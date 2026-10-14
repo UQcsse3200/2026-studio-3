@@ -3,6 +3,7 @@ package com.csse3200.game.components.enemy.EnemyAI;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.csse3200.game.components.enemy.EnemyIntent;
+import com.csse3200.game.components.enemy.IntentEffectType;
 import com.csse3200.game.components.enemy.IntentType;
 import org.junit.jupiter.api.Test;
 
@@ -80,6 +81,25 @@ class ShieldBreakRetaliationAITest {
 
     // Shield restored again.
     assertEquals(EnemyIntent.defend(RESTORED_ARMOUR), ai.decide(createContext(72, 72, 0, 5)));
+  }
+
+  @Test
+  void shouldTauntPeriodicallyWithoutInterruptingShieldBreak() {
+    ShieldBreakRetaliationAI ai = new ShieldBreakRetaliationAI();
+
+    assertEquals(EnemyIntent.attack(BASE_ATTACK), ai.decide(createContext(72, 72, 5, 1)));
+    assertEquals(EnemyIntent.attack(BASE_ATTACK), ai.decide(createContext(72, 72, 5, 2)));
+
+    EnemyIntent taunt = ai.decide(createContext(72, 72, 5, 3));
+    assertEquals(IntentType.DEBUFF, taunt.getType());
+    assertEquals(IntentEffectType.TAUNT, taunt.getEffectType());
+    assertEquals(2, taunt.getDuration());
+
+    assertEquals(EnemyIntent.attack(BASE_ATTACK * 2), ai.decide(createContext(72, 72, 0, 4)));
+    assertEquals(EnemyIntent.defend(RESTORED_ARMOUR), ai.decide(createContext(72, 72, 0, 5)));
+    assertEquals(EnemyIntent.attack(BASE_ATTACK), ai.decide(createContext(72, 72, 5, 6)));
+    assertEquals(EnemyIntent.attack(BASE_ATTACK), ai.decide(createContext(72, 72, 5, 7)));
+    assertEquals(IntentEffectType.TAUNT, ai.decide(createContext(72, 72, 5, 8)).getEffectType());
   }
 
   private EnemyAIContext createContext(int health, int maxHealth, int armour, int turnNumber) {

@@ -1,5 +1,6 @@
 package com.csse3200.game.components.battle;
 
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.csse3200.game.cards.EffectType;
@@ -44,6 +45,8 @@ public class BattleAnimationCoordinator extends Component {
   private final Entity player;
   private final EffectVisualRegistry registry;
   private final List<Entity> activeVisuals = new ArrayList<>();
+  private Texture fallbackGlow;
+  private boolean disposed;
 
   /**
    * @param controller the battle controller to listen to
@@ -76,6 +79,9 @@ public class BattleAnimationCoordinator extends Component {
 
   @Override
   public void update() {
+    if (disposed) {
+      return;
+    }
     Iterator<Entity> iterator = activeVisuals.iterator();
     while (iterator.hasNext()) {
       Entity visual = iterator.next();
@@ -100,6 +106,16 @@ public class BattleAnimationCoordinator extends Component {
       }
     }
     safely("enemy status markers", this::syncEnemyStatusVisuals);
+  }
+
+  /** Read-only visual completion probe; does not delay or alter combat. */
+  public boolean hasActiveVisuals() {
+    return activeVisuals.stream()
+        .anyMatch(
+            visual -> {
+              EffectVisualComponent component = visual.getComponent(EffectVisualComponent.class);
+              return component != null && !component.isExpired();
+            });
   }
 
   private void syncEnemyStatusVisuals() {
@@ -135,6 +151,7 @@ public class BattleAnimationCoordinator extends Component {
     if (request == null || effects == null || effects.isEmpty()) {
       return;
     }
+    player.getEvents().trigger("playerAttack");
     List<EffectType> orderedTypes = distinctTypesInOrder(effects);
     for (Entity target : effectHandler.getLivingEnemyTargets(request, enemies)) {
       for (int i = 0; i < orderedTypes.size(); i++) {
@@ -174,6 +191,9 @@ public class BattleAnimationCoordinator extends Component {
     } else if (OffensiveEffectVisuals.usesProjectile(type)) {
       visual.addComponent(
           OffensiveEffectVisuals.createPierceComponent(style, baseSize, startDelay));
+    } else if (PlayerEffectVisuals.usesBurst(type)) {
+      visual.addComponent(
+          PlayerEffectVisuals.createBurstComponent(type, style, baseSize, startDelay));
     } else if (target != player && EnemyStatusEffectVisuals.supports(type)) {
       EnemyStatusEffectVisualComponent status =
           new EnemyStatusEffectVisualComponent(textureFor(style), style, target, startDelay, type);
@@ -190,14 +210,63 @@ public class BattleAnimationCoordinator extends Component {
 
   private Texture textureFor(EffectVisualStyle style) {
     if (style.iconPath() == null) {
-      return null;
+      return fallbackGlow();
     }
     try {
-      return ServiceLocator.getResourceService().getAsset(style.iconPath(), Texture.class);
+      Texture icon = ServiceLocator.getResourceService().getAsset(style.iconPath(), Texture.class);
+      return icon == null ? fallbackGlow() : icon;
     } catch (RuntimeException e) {
-      logger.warn("Effect icon {} is not loaded, skipping the texture", style.iconPath());
-      return null;
+      logger.warn("Effect icon {} is not loaded, using the fallback glow", style.iconPath());
+      return fallbackGlow();
     }
+  }
+
+  /** Creates one shared soft glow per battle, rather than a texture for every spawned effect. */
+  private Texture fallbackGlow() {
+    if (fallbackGlow == null) {
+      fallbackGlow = createGlowTexture();
+    }
+    return fallbackGlow;
+  }
+
+  private static Texture createGlowTexture() {
+    int side = 64;
+    float radius = (side - 1) / 2f;
+    Pixmap pixels = new Pixmap(side, side, Pixmap.Format.RGBA8888);
+    try {
+      pixels.setBlending(Pixmap.Blending.None);
+      for (int y = 0; y < side; y++) {
+        for (int x = 0; x < side; x++) {
+          float dx = (x - radius) / radius;
+          float dy = (y - radius) / radius;
+          float opacity = Math.max(0f, 1f - dx * dx - dy * dy);
+          pixels.setColor(1f, 1f, 1f, opacity * opacity);
+          pixels.drawPixel(x, y);
+        }
+      }
+      Texture glow = new Texture(pixels);
+      glow.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+      return glow;
+    } finally {
+      pixels.dispose();
+    }
+  }
+
+  @Override
+  public void dispose() {
+    if (disposed) {
+      return;
+    }
+    disposed = true;
+    for (Entity visual : activeVisuals) {
+      visual.dispose();
+    }
+    activeVisuals.clear();
+    if (fallbackGlow != null) {
+      fallbackGlow.dispose();
+      fallbackGlow = null;
+    }
+    super.dispose();
   }
 
   /** Preserves each effect's first appearance order, dropping later duplicates of the same type. */
@@ -211,7 +280,10 @@ public class BattleAnimationCoordinator extends Component {
     return new ArrayList<>(seen);
   }
 
-  private static void safely(String what, Runnable action) {
+  private void safely(String what, Runnable action) {
+    if (disposed) {
+      return;
+    }
     try {
       action.run();
     } catch (RuntimeException e) {

@@ -1,11 +1,14 @@
 package com.csse3200.game.components.spritedisplay.clickable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
@@ -33,17 +36,29 @@ import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.services.DragNDropService;
+import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(GameExtension.class)
 class DragNDropTest {
   private static final String STRIKE_INSTANCE_ID = "strike-instance-1";
+
+  @BeforeEach
+  void setUp() {
+
+    ServiceLocator.registerResourceService(new ResourceService());
+    AudioService.load();
+    ServiceLocator.getResourceService().loadAll();
+  }
 
   @Test
   void selfTargetCardStillPlaysByClick() {
@@ -174,6 +189,36 @@ class DragNDropTest {
   }
 
   @Test
+  void shouldBuildIndependentDragVisualFromEmbeddedContentFactory() throws Exception {
+    DragNDropService dragService = new DragNDropService();
+    ServiceLocator.registerDragNDropService(dragService);
+    AtomicInteger created = new AtomicInteger();
+    DragNDrop card =
+        new DragNDrop(
+            ClickableRecord.builder("playCard")
+                .text("Strike")
+                .args(STRIKE_INSTANCE_ID)
+                .variant("drag")
+                .build());
+    card.setVisualContent(
+        () -> {
+          Actor content = new Actor();
+          content.setUserObject(created.incrementAndGet());
+          return content;
+        });
+    Actor liveContent = card.getBtn().getChildren().first();
+
+    DragAndDrop.Source source = getOnlySource(dragService.getDragAndDrop());
+    DragAndDrop.Payload payload = source.dragStart(new InputEvent(), 0f, 0f, 0);
+
+    Button dragVisual = assertInstanceOf(Button.class, payload.getDragActor());
+    Actor dragContent = dragVisual.getChildren().first();
+    assertNotSame(liveContent, dragContent);
+    assertEquals(1, liveContent.getUserObject());
+    assertEquals(2, dragContent.getUserObject());
+  }
+
+  @Test
   void shouldPlayOnlyDraggedUpgradedDuplicateThroughBattleAdapter() throws Exception {
     DragNDropService dragService = new DragNDropService();
     ServiceLocator.registerDragNDropService(dragService);
@@ -254,16 +299,22 @@ class DragNDropTest {
 
       @Override
       public void drop(
-          DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {}
+          DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+        // DragNDrop dispatches the source event; this target only supplies an identity.
+      }
     };
   }
 
   private record RecordingAim(String targetId) implements AimSession {
     @Override
-    public void begin(Vector2 cardPosition, Vector2 pointer) {}
+    public void begin(Vector2 cardPosition, Vector2 pointer) {
+      // This fake only supplies the target chosen on release; no preview needs rendering.
+    }
 
     @Override
-    public void update(Vector2 pointer) {}
+    public void update(Vector2 pointer) {
+      // Pointer movement does not change this fake's predetermined target.
+    }
 
     @Override
     public String release(Vector2 pointer) {
@@ -271,7 +322,9 @@ class DragNDropTest {
     }
 
     @Override
-    public void cancel() {}
+    public void cancel() {
+      // This fake owns no actors or active-session state to clean up.
+    }
   }
 
   @SuppressWarnings("unchecked")

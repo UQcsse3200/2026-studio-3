@@ -1,6 +1,5 @@
 package com.csse3200.game.components.spritedisplay.displaying;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -10,8 +9,8 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
  * continue" hint). Registered as the {@link DisplayingFactory} {@code "endBattle"} variant.
  *
  * <p>The heading text is filled in when the screen fires {@link #RESULT_EVENT}. {@link Displaying}
- * has no button, so any click or key press fires {@link #RETURN_TO_MENU_EVENT} on this component's
- * entity; the screen listens for it and navigates back to the main menu.
+ * has no button. A defeat may be dismissed with any click or key press; a victory is dismissed by
+ * the reward component only after one reward has been claimed.
  */
 public class EndBattleDisplay extends Displaying {
   /** Event the screen fires to fill in the heading text ("VICTORY" / "DEFEAT"). */
@@ -22,6 +21,7 @@ public class EndBattleDisplay extends Displaying {
 
   private boolean fired = false;
   private boolean clickToReturnEnabled = true;
+  private InputListener returnInputListener;
 
   public EndBattleDisplay(DisplayingRecord rec) {
     super(rec);
@@ -40,18 +40,24 @@ public class EndBattleDisplay extends Displaying {
   @Override
   public void create() {
     super.create();
-    stage.addListener(
-        new InputListener() {
-          @Override
-          public boolean keyDown(InputEvent event, int keycode) {
-            return requestReturn();
-          }
+    entity.getEvents().addListener(RESULT_EVENT, this::configureForResult);
+    // EndBattle.json contains both a heading and a continue hint. Only the hint owns the stage
+    // listener, otherwise one input would dispatch the return event twice.
+    if (getTrigger() == null) {
+      returnInputListener =
+          new InputListener() {
+            @Override
+            public boolean keyDown(InputEvent event, int keycode) {
+              return requestReturn();
+            }
 
-          @Override
-          public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-            return requestReturn();
-          }
-        });
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+              return requestReturn();
+            }
+          };
+      stage.addListener(returnInputListener);
+    }
   }
 
   private boolean requestReturn() {
@@ -63,17 +69,31 @@ public class EndBattleDisplay extends Displaying {
     return true;
   }
 
+  private void configureForResult(Object result) {
+    clickToReturnEnabled = "DEFEAT".equals(String.valueOf(result));
+    if (label.getText().toString().startsWith("Click anywhere")) {
+      label.setVisible(clickToReturnEnabled);
+    }
+  }
+
   @Override
   protected void draw(SpriteBatch batch) {
     // Centre horizontally; use the record's y as an offset down from the top of the screen.
     label.setPosition(
-        (Gdx.graphics.getWidth() - label.getPrefWidth()) / 2f, Gdx.graphics.getHeight() - getY());
+        (label.getStage().getViewport().getWorldWidth() - label.getPrefWidth()) / 2f,
+        label.getStage().getViewport().getWorldHeight() - getY());
   }
 
-  private boolean visible = true;
-
   public void setVisible(boolean visible) {
-    this.visible = visible;
     label.setVisible(visible);
+  }
+
+  @Override
+  public void dispose() {
+    if (returnInputListener != null) {
+      stage.removeListener(returnInputListener);
+      returnInputListener = null;
+    }
+    super.dispose();
   }
 }

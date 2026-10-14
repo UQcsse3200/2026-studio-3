@@ -9,6 +9,24 @@ import java.util.List;
 /** Resolves one card instance to the exact values used by both UI and gameplay. */
 public final class CardResolver {
   /**
+   * Resolves the base values of a definition for a read-only offer or catalogue preview.
+   *
+   * <p>The presentation ID is deliberately not an owned instance ID and must never be persisted or
+   * sent to gameplay. Acquisition creates a real {@link CardInstance} only after the offer is
+   * accepted.
+   */
+  public ResolvedCard resolveBasePreview(CardConfig config, String presentationId) {
+    if (config == null) {
+      throw new IllegalArgumentException("config must not be null");
+    }
+    if (presentationId == null || presentationId.isBlank()) {
+      throw new IllegalArgumentException("presentationId must not be null or blank");
+    }
+    CardInstance preview = new CardInstance(presentationId, config.id, CardInstance.BASE_LEVEL);
+    return resolve(config, preview);
+  }
+
+  /**
    * Selects base or upgraded values without modifying either input.
    *
    * @param config shared card definition

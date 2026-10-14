@@ -2,7 +2,7 @@ package com.csse3200.game.components.battle;
 
 import com.badlogic.gdx.graphics.Color;
 import com.csse3200.game.cards.EffectType;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 /**
@@ -16,7 +16,7 @@ public class EffectVisualRegistry {
   private static final EffectVisualStyle DEFAULT_STYLE =
       new EffectVisualStyle(null, Color.WHITE, 0.4f, 0.4f, 1.2f, 0f);
 
-  private final Map<EffectType, EffectVisualStyle> styles = new HashMap<>();
+  private final Map<EffectType, EffectVisualStyle> styles = new EnumMap<>(EffectType.class);
 
   /**
    * Registers (or replaces) the visual style for an effect type.

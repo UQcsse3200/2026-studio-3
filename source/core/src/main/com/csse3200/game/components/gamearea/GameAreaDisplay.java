@@ -16,7 +16,6 @@ public class GameAreaDisplay extends UIComponent {
   private static final int TITLE_CROP_HEIGHT = 270;
   private static final float TITLE_WIDTH = 450f;
   private static final float TITLE_HEIGHT = 57f;
-
   private String gameAreaName = "";
   private Texture titleTexture;
   private Image title;
@@ -46,7 +45,7 @@ public class GameAreaDisplay extends UIComponent {
   public void draw(SpriteBatch batch) {
     float stageHeight = stage.getViewport().getWorldHeight();
     float offsetX = 14f;
-    float offsetY = 72f;
+    float offsetY = 130f;
 
     title.setPosition(offsetX, stageHeight - offsetY);
   }

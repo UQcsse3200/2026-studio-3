@@ -229,4 +229,53 @@ class PlayerRunStateTest {
     assertEquals(1, state.getOwnedItemCount(ItemType.MERCHANTS_FAVOR));
     assertEquals(0.1f, state.getShopDiscount(), 1e-6f);
   }
+
+  @Test
+  void battleConsumablesApplyOnlyWhenExplicitlyUsedAndRemoveOneOwnedCopy() {
+    PlayerRunState state = new PlayerRunState(100, 100, 50);
+    state.addOwnedItem(ItemType.IRON_AEGIS);
+    state.addOwnedItem(ItemType.WARRIORS_CREST);
+    Entity player = player(100, 100, 50);
+
+    state.applyTo(player);
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    assertEquals(0, stats.getArmour());
+    assertNull(stats.getStatusEffect("STRENGTH"));
+
+    assertTrue(state.useBattleItem(ItemType.IRON_AEGIS, player));
+    assertEquals(5, stats.getArmour());
+    assertEquals(0, state.getOwnedItemCount(ItemType.IRON_AEGIS));
+
+    assertTrue(state.useBattleItem(ItemType.WARRIORS_CREST, player));
+    assertEquals(1, stats.getStatusEffect("STRENGTH").getValue());
+    assertEquals(0, state.getOwnedItemCount(ItemType.WARRIORS_CREST));
+    assertFalse(state.useBattleItem(ItemType.IRON_AEGIS, player));
+    assertFalse(state.useBattleItem(ItemType.MERCHANTS_FAVOR, player));
+  }
+
+  @Test
+  void doesNotRemoveBattleConsumableWhenItCannotBeApplied() {
+    PlayerRunState state = new PlayerRunState(100, 100, 50);
+    state.addOwnedItem(ItemType.IRON_AEGIS);
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> state.useBattleItem(ItemType.IRON_AEGIS, new Entity()));
+
+    assertEquals(1, state.getOwnedItemCount(ItemType.IRON_AEGIS));
+  }
+
+  @Test
+  void merchantsFavorGivesTenPercentPerCopyAndCapsAtFiftyPercent() {
+    PlayerRunState state = new PlayerRunState(100, 100, 50);
+    for (int i = 0; i < 6; i++) {
+      state.addOwnedItem(ItemType.MERCHANTS_FAVOR);
+    }
+
+    Entity player = player(100, 100, 50);
+    state.applyTo(player);
+
+    assertEquals(0.5f, state.getShopDiscount(), 0.001f);
+    assertEquals(0.5f, player.getComponent(InventoryComponent.class).getShopDiscount(), 0.001f);
+  }
 }

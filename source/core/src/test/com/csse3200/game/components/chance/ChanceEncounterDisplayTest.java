@@ -1,14 +1,470 @@
 package com.csse3200.game.components.chance;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.csse3200.game.cards.CardConfigLoader;
+import com.csse3200.game.cards.CardDiscoveryService;
+import com.csse3200.game.cards.CardUnlockState;
+import com.csse3200.game.cards.TestCardService;
+import com.csse3200.game.chance.ChanceChoice;
+import com.csse3200.game.chance.ChanceEncounter;
 import com.csse3200.game.chance.ChanceOutcome;
+import com.csse3200.game.chance.DiceEncounterBehaviour;
+import com.csse3200.game.encounters.integration.ChanceEncounterSession;
+import com.csse3200.game.encounters.integration.ChanceOutcomeApplier;
+import com.csse3200.game.encounters.integration.mocks.MockPlayerStateGateway;
+import com.csse3200.game.entities.Entity;
+import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.extensions.GameExtension;
+import com.csse3200.game.rendering.RenderService;
+import com.csse3200.game.services.ServiceLocator;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(GameExtension.class)
 class ChanceEncounterDisplayTest {
+  private Stage stage;
+  private Entity entity;
+
+  @BeforeEach
+  void setUp() {
+    RenderService renderService = new RenderService();
+    stage = new Stage(new ScreenViewport(), mock(SpriteBatch.class));
+    renderService.setStage(stage);
+    ServiceLocator.registerRenderService(renderService);
+    ServiceLocator.registerEntityService(new EntityService());
+  }
+
+  @AfterEach
+  void tearDown() {
+    if (entity != null) {
+      entity.dispose();
+    }
+    stage.dispose();
+  }
+
+  @Test
+  void fountainWaitsForReleaseAndCompletesOnlyOnce() {
+    AtomicInteger completions = new AtomicInteger();
+    ChanceEncounterDisplay display = createFountain(completions);
+    assertEquals("Make a Wish", display.getChoiceButtons().get(0).getText().toString());
+    assertEquals("Leave >", display.getChoiceButtons().get(1).getText().toString());
+    display.getChoiceButtons().get(0).fire(new ChangeEvent());
+    assertTrue(display.getChoiceButtons().get(1).isDisabled());
+    stage.act(0.8f);
+    assertFalse(display.getContinueButton().isVisible());
+    display.getChoiceButtons().get(1).fire(new ChangeEvent());
+    display.getChoiceButtons().get(0).fire(new ChangeEvent());
+    stage.act(0.9f);
+    assertTrue(display.getContinueButton().isVisible());
+    assertFalse(display.getResultText().contains("OUTCOME"));
+    assertTrue(display.getResultText().contains("20"));
+    display.getContinueButton().fire(new ChangeEvent());
+    display.getContinueButton().fire(new ChangeEvent());
+    stage.act(0.5f);
+    stage.act(0.1f);
+    assertEquals(1, completions.get());
+  }
+
+  @Test
+  void shrineOfferingWaitsForResponseAndRetainsOriginalOutcomeAndContinue() {
+    AtomicInteger completions = new AtomicInteger();
+    ChanceEncounterDisplay display = createShrine(completions);
+    assertEquals(
+        "Bleed a little of your light into the shrine.",
+        display.getChoiceButtons().get(0).getText().toString());
+    display.getChoiceButtons().get(0).fire(new ChangeEvent());
+    display.getChoiceButtons().get(1).fire(new ChangeEvent());
+    stage.act(.5f);
+    assertFalse(display.getContinueButton().isVisible());
+    display.getChoiceButtons().get(0).fire(new ChangeEvent());
+    stage.act(.41f);
+    assertTrue(display.getContinueButton().isVisible());
+    assertTrue(display.getResultText().contains("lose 10 health"));
+    assertTrue(display.getResultText().contains("gain 25 gold"));
+    assertTrue(display.getResultText().contains("OUTCOME"));
+    assertFalse(display.getChoiceButtons().get(0).getParent().isVisible());
+    display.getContinueButton().fire(new ChangeEvent());
+    display.getContinueButton().fire(new ChangeEvent());
+    stage.act(.5f);
+    stage.act(.1f);
+    assertEquals(1, completions.get());
+  }
+
+  @Test
+  void shrineLeaveDoesNotWaitForOfferingAndDisposeCancelsPendingResponse() {
+    ChanceEncounterDisplay display = createShrine(new AtomicInteger());
+    display.getChoiceButtons().get(1).fire(new ChangeEvent());
+    assertTrue(display.getContinueButton().isVisible());
+    assertTrue(display.getResultText().contains("Nothing happens."));
+    entity.dispose();
+    entity = null;
+    display = createShrine(new AtomicInteger());
+    display.getChoiceButtons().get(0).fire(new ChangeEvent());
+    entity.dispose();
+    entity = null;
+    stage.act(2);
+    assertFalse(display.getContinueButton().isVisible());
+  }
+
+  private ChanceEncounterDisplay createShrine(AtomicInteger completions) {
+    var encounter =
+        new ChanceEncounter(
+            "mysterious-shrine",
+            "A cracked sanctum shrine still burns with a god's spoiled light.",
+            List.of(
+                new ChanceChoice(
+                    "make-offering",
+                    "Bleed a little of your light into the shrine.",
+                    new ChanceOutcome(-10, 25)),
+                new ChanceChoice("leave", "Pass without kneeling.", new ChanceOutcome(0, 0))));
+    var display =
+        new ChanceEncounterDisplay(encounter, (node, success) -> completions.incrementAndGet(), 7);
+    entity = new Entity().addComponent(display);
+    entity.create();
+    return display;
+  }
+
+  @Test
+  void floodedCrossingResolvesImmediatelyAndContinueHasNoFade() {
+    AtomicInteger completions = new AtomicInteger();
+    ChanceEncounterDisplay display = createFlooded(completions);
+    stage.getViewport().update(1280, 800, true);
+    stage.act(0);
+    ((Table) stage.getActors().get(0)).validate();
+    TextButton left = display.getChoiceButtons().get(0);
+    TextButton right = display.getChoiceButtons().get(1);
+    assertEquals("Pay a silent ferryman for safe passage.", left.getText().toString());
+    assertEquals("Wade the flood alone.", right.getText().toString());
+    assertEquals(left.getY(), right.getY(), .01f);
+    assertTrue(left.getX() < right.getX());
+    left.fire(new ChangeEvent());
+    assertTrue(display.getContinueButton().isVisible());
+    assertEquals("OUTCOME\nYou lose 8 gold.", display.getResultText());
+    assertFalse(left.getParent().isVisible());
+    right.fire(new ChangeEvent());
+    assertEquals("OUTCOME\nYou lose 8 gold.", display.getResultText());
+    display.getContinueButton().fire(new ChangeEvent());
+    assertEquals(1, completions.get());
+    assertNull(display.getContinueButton().getStage());
+    display.getContinueButton().fire(new ChangeEvent());
+    assertEquals(1, completions.get());
+  }
+
+  @Test
+  void floodedWadingRetainsHealthPenaltyWithoutWaitingForAnimation() {
+    ChanceEncounterDisplay display = createFlooded(new AtomicInteger());
+    display.getChoiceButtons().get(1).fire(new ChangeEvent());
+    assertTrue(display.getContinueButton().isVisible());
+    assertEquals("OUTCOME\nYou lose 8 health.", display.getResultText());
+  }
+
+  private ChanceEncounterDisplay createFlooded(AtomicInteger completions) {
+    ChanceEncounter encounter =
+        new ChanceEncounter(
+            "flooded-crossing",
+            "A flooded sanctum court bars the way upward. An angel must choose how to cross without abandoning the path.",
+            List.of(
+                new ChanceChoice(
+                    "hire-ferryman",
+                    "Pay a silent ferryman for safe passage.",
+                    new ChanceOutcome(0, -8)),
+                new ChanceChoice("ford-river", "Wade the flood alone.", new ChanceOutcome(-8, 0))));
+    ChanceEncounterDisplay display =
+        new ChanceEncounterDisplay(encounter, (node, success) -> completions.incrementAndGet(), 7);
+    entity = new Entity().addComponent(display);
+    entity.create();
+    return display;
+  }
+
+  @Test
+  void healerKeepsThreeChoicesOnLeftAndCompletesImmediatelyOnce() {
+    AtomicInteger completions = new AtomicInteger();
+    ChanceEncounterDisplay display = createHealer(completions);
+    stage.getViewport().update(1280, 800, true);
+    stage.act(0);
+    ((Table) stage.getActors().get(0)).validate();
+    assertEquals(3, display.getChoiceButtons().size());
+    TextButton first = display.getChoiceButtons().get(0);
+    TextButton second = display.getChoiceButtons().get(1);
+    assertTrue(first.getY() > second.getY());
+    assertEquals(first.getX(), second.getX(), .01f);
+    assertTrue(first.getWidth() < 1280 * .55f);
+    assertTrue(first.getText().toString().startsWith("1."));
+    first.fire(new ChangeEvent());
+    assertEquals("OUTCOME\nYou recover 20 health.\nYou lose 10 gold.", display.getResultText());
+    assertTrue(display.getContinueButton().isVisible());
+    assertFalse(first.getParent().isVisible());
+    display.getContinueButton().fire(new ChangeEvent());
+    display.getContinueButton().fire(new ChangeEvent());
+    assertEquals(1, completions.get());
+    assertNull(display.getContinueButton().getStage());
+  }
+
+  @Test
+  void healerBandageAndDeclineKeepTheirOriginalOutcomes() {
+    ChanceEncounterDisplay display = createHealer(new AtomicInteger());
+    display.getChoiceButtons().get(1).fire(new ChangeEvent());
+    assertEquals("OUTCOME\nYou receive the Bandage card.", display.getResultText());
+    entity.dispose();
+    entity = null;
+    display = createHealer(new AtomicInteger());
+    display.getChoiceButtons().get(2).fire(new ChangeEvent());
+    assertEquals("OUTCOME\nNothing happens. You continue on your way.", display.getResultText());
+  }
+
+  private ChanceEncounterDisplay createHealer(AtomicInteger completions) {
+    ChanceEncounter encounter =
+        new ChanceEncounter(
+            "wandering-healer",
+            "A faded attendant still tends the hurt along the sanctum road, following orders that once meant mercy. An angel could accept that help without asking who gives it.",
+            List.of(
+                new ChanceChoice(
+                    "purchase-remedy",
+                    "Buy the attendant's restorative draught.",
+                    new ChanceOutcome(20, -10)),
+                new ChanceChoice(
+                    "accept-bandage",
+                    "Accept a spare bandage for the road.",
+                    new ChanceOutcome(0, 0, "bandage")),
+                new ChanceChoice(
+                    "decline", "Decline and continue the climb.", new ChanceOutcome(0, 0))));
+    ChanceEncounterDisplay display =
+        new ChanceEncounterDisplay(encounter, (node, success) -> completions.incrementAndGet(), 7);
+    entity = new Entity().addComponent(display);
+    entity.create();
+    return display;
+  }
+
+  @Test
+  void fountainLeaveBypassesAnimation() {
+    ChanceEncounterDisplay display = createFountain(new AtomicInteger());
+    display.getChoiceButtons().get(1).fire(new ChangeEvent());
+    assertTrue(display.getContinueButton().isVisible());
+    assertFalse(display.getResultText().contains("OUTCOME"));
+  }
+
+  private ChanceEncounterDisplay createFountain(AtomicInteger completions) {
+    ChanceEncounter encounter =
+        new ChanceEncounter(
+            "wishing-fountain",
+            "An old wishing fountain shimmers beside the path.",
+            List.of(
+                new ChanceChoice(
+                    "make-wish", "Make a wish at the fountain.", new ChanceOutcome(20, 0)),
+                new ChanceChoice(
+                    "leave",
+                    "Leave the fountain without making a wish.",
+                    new ChanceOutcome(0, 0))));
+    ChanceEncounterDisplay display =
+        new ChanceEncounterDisplay(
+            encounter, (nodeId, success) -> completions.incrementAndGet(), 7);
+    entity = new Entity().addComponent(display);
+    ServiceLocator.getEntityService().register(entity);
+    return display;
+  }
+
+  @Test
+  void abandonedMineSceneKeepsChoicesAndCompletionWorking() {
+    Stage sceneStage = new Stage(new FitViewport(1280f, 800f), mock(Batch.class));
+    RenderService renderService = new RenderService();
+    renderService.setStage(sceneStage);
+    ServiceLocator.registerRenderService(renderService);
+    EntityService entities = new EntityService();
+    ServiceLocator.registerEntityService(entities);
+
+    ChanceEncounter encounter =
+        new ChanceEncounter(
+            "abandoned-mine",
+            "The mouth of an abandoned mine promises danger and forgotten riches.",
+            List.of(
+                new ChanceChoice(
+                    "search-tunnels",
+                    "Search the unstable tunnels for valuables.",
+                    new ChanceOutcome(-12, 30)),
+                new ChanceChoice("leave", "Leave the mine undisturbed.", new ChanceOutcome(0, 0))));
+    AtomicInteger completions = new AtomicInteger();
+    ChanceEncounterDisplay display =
+        new ChanceEncounterDisplay(
+            encounter, (nodeId, success) -> completions.incrementAndGet(), 7);
+    Entity sceneEntity = new Entity().addComponent(display);
+    entities.register(sceneEntity);
+
+    try {
+      assertEquals(2, display.getChoiceButtons().size());
+      assertNull(display.getHelpButton());
+      assertEquals(
+          "1.  Search the unstable tunnels for valuables.",
+          display.getChoiceButtons().get(0).getText().toString());
+      assertEquals(
+          "2.  Leave the mine undisturbed.",
+          display.getChoiceButtons().get(1).getText().toString());
+      ((Table) display.getChoiceButtons().get(0).getParent()).layout();
+      assertTrue(
+          display.getChoiceButtons().get(0).getX() < display.getChoiceButtons().get(1).getX());
+
+      display.getChoiceButtons().get(0).fire(new ChangeEvent());
+      assertEquals("OUTCOME\nYou lose 12 health.\nYou gain 30 gold.", display.getResultText());
+      assertTrue(display.getContinueButton().isVisible());
+      assertTrue(display.getChoiceButtons().get(0).isDisabled());
+      assertEquals(0, completions.get());
+
+      display.getContinueButton().fire(new ChangeEvent());
+      sceneStage.act(0.3f);
+      sceneStage.act(0.3f);
+      assertEquals(1, completions.get());
+    } finally {
+      sceneEntity.dispose();
+      sceneStage.dispose();
+    }
+  }
+
+  @Test
+  void shouldRefreshDiceButtonsAfterEachStagedChoice() {
+    Stage sceneStage = new Stage(new FitViewport(1280f, 800f), mock(Batch.class));
+    RenderService renderService = new RenderService();
+    renderService.setStage(sceneStage);
+    ServiceLocator.registerRenderService(renderService);
+    EntityService entities = new EntityService();
+    ServiceLocator.registerEntityService(entities);
+
+    ChanceEncounter encounter =
+        new ChanceEncounter(
+            "dice-game",
+            "A dice keeper offers a wager.",
+            List.of(
+                diceChoice("low"),
+                diceChoice("high"),
+                diceChoice("take"),
+                diceChoice("double-down"),
+                diceChoice("cash-out"),
+                diceChoice("continue")));
+    Random luckySeven =
+        new Random() {
+          private int next;
+          private final int[] rolls = {0, 5};
+
+          @Override
+          public int nextInt(int bound) {
+            return rolls[next++];
+          }
+        };
+    ChanceEncounterSession session =
+        new ChanceEncounterSession(
+            -1,
+            encounter,
+            new DiceEncounterBehaviour(luckySeven, TestCardService.withCards("bandage")),
+            new ChanceOutcomeApplier(new MockPlayerStateGateway(100, 50)),
+            (nodeId, success) -> {});
+    ChanceEncounterDisplay display = new ChanceEncounterDisplay(session);
+    Entity sceneEntity = new Entity().addComponent(display);
+    entities.register(sceneEntity);
+
+    try {
+      assertEquals(List.of("low", "high"), choiceIds(display));
+      List<TextButton> initialChoiceButtons = display.getChoiceButtons();
+      TextButton persistentHelpButton = display.getHelpButton();
+      assertEquals(
+          "Dice Game Rules",
+          display.getHelpDialog().getDialog().getTitleLabel().getText().toString());
+      assertTrue(display.getHelpDialog().getBodyLabel().getText().toString().contains("Low (2-6)"));
+      display.getHelpButton().fire(new ChangeEvent());
+      assertEquals(sceneStage, display.getHelpDialog().getDialog().getStage());
+      display.getHelpDialog().getCloseButton().fire(new ChangeEvent());
+      finishDialogClose(sceneStage);
+      assertNull(display.getHelpDialog().getDialog().getStage());
+      assertEquals(List.of("low", "high"), choiceIds(display));
+      assertFalse(session.isResolved());
+      assertEquals("TOTAL  ?", display.getDiceRollDisplay().getTotalText());
+      assertEquals("?", display.getDiceRollDisplay().getDisplayedTotalValue());
+      ((Table) display.getChoiceButtons().get(0).getParent()).layout();
+      assertTrue(
+          display.getChoiceButtons().get(0).getX() < display.getChoiceButtons().get(1).getX());
+      display.getChoiceButtons().get(0).fire(new ChangeEvent());
+      assertTrue(display.getDiceRollDisplay().isRolling());
+      assertEquals("ROLLING...", display.getResultText());
+      display.getChoiceButtons().get(1).fire(new ChangeEvent());
+      for (int frame = 0; frame < 42; frame++) {
+        sceneStage.act(1f / 60f);
+      }
+      assertTrue(display.getDiceRollDisplay().isRolling());
+      assertEquals(1, display.getDiceRollDisplay().getFirstValue());
+      assertEquals(6, display.getDiceRollDisplay().getSecondValue());
+      assertEquals("ROLLING...", display.getDiceRollDisplay().getTotalText());
+      for (int frame = 0; frame < 18; frame++) {
+        sceneStage.act(1f / 60f);
+      }
+      assertFalse(display.getDiceRollDisplay().isRolling());
+      assertEquals(1, display.getDiceRollDisplay().getFirstValue());
+      assertEquals(6, display.getDiceRollDisplay().getSecondValue());
+      assertEquals("TOTAL  7", display.getDiceRollDisplay().getTotalText());
+      assertEquals("7", display.getDiceRollDisplay().getDisplayedTotalValue());
+      assertEquals(List.of("take", "double-down"), choiceIds(display));
+      for (TextButton oldChoice : initialChoiceButtons) {
+        assertNull(oldChoice.getStage());
+      }
+      assertEquals(persistentHelpButton, display.getHelpButton());
+      assertEquals(sceneStage, persistentHelpButton.getStage());
+      display.getHelpButton().fire(new ChangeEvent());
+      assertEquals(sceneStage, display.getHelpDialog().getDialog().getStage());
+      display.getHelpDialog().getCloseButton().fire(new ChangeEvent());
+      finishDialogClose(sceneStage);
+      assertNull(display.getHelpDialog().getDialog().getStage());
+      assertEquals(List.of("take", "double-down"), choiceIds(display));
+      assertTrue(display.getResultText().contains("LUCKY SEVEN!"));
+      assertTrue(display.getResultText().contains("dice total is 7"));
+      assertFalse(session.isResolved());
+
+      display.getChoiceButtons().get(0).fire(new ChangeEvent());
+      assertFalse(display.getDiceRollDisplay().isRolling());
+      assertEquals("TOTAL  7", display.getDiceRollDisplay().getTotalText());
+      assertEquals(List.of("cash-out", "continue"), choiceIds(display));
+      assertTrue(display.getResultText().contains("10 gold"));
+      assertFalse(session.isResolved());
+
+      display.getChoiceButtons().get(0).fire(new ChangeEvent());
+      assertTrue(session.isResolved());
+    } finally {
+      sceneEntity.dispose();
+      sceneStage.dispose();
+    }
+  }
+
+  private static ChanceChoice diceChoice(String id) {
+    return new ChanceChoice(id, id, new ChanceOutcome(0, 0));
+  }
+
+  private static void finishDialogClose(Stage stage) {
+    // Dialog.hide() runs its fade, listener removal, and actor removal on separate stage ticks.
+    for (int tick = 0; tick < 3; tick++) {
+      stage.act(1f);
+    }
+  }
+
+  private static List<String> choiceIds(ChanceEncounterDisplay display) {
+    return display.getChoiceButtons().stream()
+        .map(TextButton::getText)
+        .map(text -> text.toString().substring(4))
+        .toList();
+  }
 
   @Test
   void shouldFormatEncounterIdAsTitle() {
@@ -40,5 +496,70 @@ class ChanceEncounterDisplayTest {
   @Test
   void shouldDescribeUnresolvedChoice() {
     assertEquals("This choice could not be resolved.", ChanceEncounterDisplay.formatOutcome(null));
+  }
+
+  @Test
+  void shouldDescribeEveryCardInMultiCardRewardOutcome() {
+    assertEquals(
+        "You receive the Bandage card.\nYou receive the Strike card.",
+        ChanceEncounterDisplay.formatOutcome(
+            ChanceOutcome.withCardRewards(0, 0, List.of("bandage", "strike"))));
+  }
+
+  @Test
+  void shouldDiscoverEveryDisplayedCardInMultiCardPreview() {
+    CardDiscoveryService discovery = new CardDiscoveryService(CardConfigLoader.loadCards());
+    ServiceLocator.registerCardDiscoveryService(discovery);
+    ChanceEncounter encounter =
+        new ChanceEncounter(
+            "multi-card-preview",
+            "Two cards await.",
+            List.of(
+                new ChanceChoice(
+                    "take-cards",
+                    "Take the cards",
+                    ChanceOutcome.withCardRewards(0, 0, List.of("bandage", "strike")))));
+    ChanceEncounterDisplay display = new ChanceEncounterDisplay(encounter);
+    entity = new Entity().addComponent(display);
+    entity.create();
+    assertEquals(CardUnlockState.LOCKED, discovery.getProgressSnapshot().get("bandage"));
+    assertEquals(CardUnlockState.LOCKED, discovery.getProgressSnapshot().get("strike"));
+
+    display.getChoiceButtons().getFirst().fire(new ChangeEvent());
+
+    assertEquals(CardUnlockState.SEEN, discovery.getProgressSnapshot().get("bandage"));
+    assertEquals(CardUnlockState.SEEN, discovery.getProgressSnapshot().get("strike"));
+  }
+
+  @Test
+  void shouldAllowPreviewWithoutMapNode() {
+    ChanceEncounter preview =
+        new ChanceEncounter(
+            "preview",
+            "Preview encounter",
+            List.of(new ChanceChoice("continue", "Continue", new ChanceOutcome(0, 0))));
+
+    assertDoesNotThrow(() -> new ChanceEncounterDisplay(preview));
+  }
+
+  @Test
+  void shouldRecordEventCardSeenOnlyWhenSuccessfulOutcomeIsDisplayed() {
+    CardDiscoveryService discovery = new CardDiscoveryService(CardConfigLoader.loadCards());
+    ServiceLocator.registerCardDiscoveryService(discovery);
+    ChanceEncounter encounter =
+        new ChanceEncounter(
+            "event-card",
+            "A card waits in the archive.",
+            List.of(
+                new ChanceChoice(
+                    "take-card", "Take the card", new ChanceOutcome(0, 0, "bandage"))));
+    ChanceEncounterDisplay display = new ChanceEncounterDisplay(encounter, null, 1);
+    entity = new Entity().addComponent(display);
+    entity.create();
+    assertEquals(CardUnlockState.LOCKED, discovery.getProgressSnapshot().get("bandage"));
+
+    display.getChoiceButtons().getFirst().fire(new ChangeEvent());
+
+    assertEquals(CardUnlockState.SEEN, discovery.getProgressSnapshot().get("bandage"));
   }
 }

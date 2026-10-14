@@ -42,6 +42,21 @@ public abstract class Displaying extends UIComponent {
     label.setFontScale(rec.scale());
   }
 
+  /**
+   * Uses the record's colour as the label's font colour rather than a tint. The default skin's font
+   * colour is black, and tinting black gives black, so subclasses that need coloured text on a dark
+   * background call this from their constructor.
+   */
+  protected final void useColourAsFontColour(DisplayingRecord rec) {
+    if (rec.colour() == null) {
+      return;
+    }
+    Label.LabelStyle style = new Label.LabelStyle(label.getStyle());
+    style.fontColor = Color.valueOf(rec.colour());
+    label.setStyle(style);
+    label.setColor(Color.WHITE);
+  }
+
   private static Skin getDefaultSkin() {
     if (defaultSkin == null) {
       defaultSkin = new Skin(Gdx.files.internal("flat-earth/skin/flat-earth-ui.json"));

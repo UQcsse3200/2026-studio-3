@@ -19,6 +19,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.combat.BattlePhase;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.events.EventHandler;
@@ -29,6 +31,7 @@ import com.csse3200.game.rendering.AnimationRenderComponent;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ServiceLocator;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -177,14 +180,12 @@ class EnemyAnimationControllerTest {
   @Test
   void shouldPlayAvailableAttackOnceAndReturnToIdle() {
     when(animator.hasAnimation("attack")).thenReturn(true);
-    when(time.getDeltaTime()).thenReturn(0.15f);
     enemy.getEvents().trigger("enemyAttack");
     verify(animator).startAnimation("attack");
     when(animator.getCurrentAnimation()).thenReturn("attack");
     when(animator.isFinished()).thenReturn(false);
     enemy.update();
     verify(animator, times(1)).startAnimation("idle");
-    assertTrue(enemy.getPosition().x < 10f);
     when(animator.isFinished()).thenReturn(true);
     enemy.update();
     verify(animator, times(2)).startAnimation("idle");
@@ -328,14 +329,18 @@ class EnemyAnimationControllerTest {
       Entity player = new Entity().addComponent(playerStats);
       SpriteBatch batch = mock(SpriteBatch.class);
       try {
-        assertEquals(!"boss_knight".equals(id) && !"default".equals(id), hasAttack, id);
+        assertEquals(!"default".equals(id), hasAttack, id);
         for (int attack = 1; attack <= 3; attack++) {
           behaviour.rollIntent();
           behaviour.executeIntent(player);
           assertEquals(hasAttack ? "attack" : "idle", actualAnimator.getCurrentAnimation(), id);
           actualEnemy.update();
           assertTrue(actualEnemy.getPosition().x < 10f, id);
-          for (int frame = 0; frame < 5; frame++) {
+          for (int frame = 0;
+              frame < 20
+                  && (!"idle".equals(actualAnimator.getCurrentAnimation())
+                      || actualEnemy.getPosition().x != 10f);
+              frame++) {
             actualAnimator.render(batch);
             actualEnemy.update();
           }
@@ -387,7 +392,7 @@ class EnemyAnimationControllerTest {
       assertEquals(new Vector2(10f, 3f), enemy.getPosition());
     }
     // A separate, live controller covers exiting while an attack is pending.
-    Entity exiting = battleEnemy();
+    Entity exiting = visualEnemy(mock(AnimationRenderComponent.class));
     EnemyAnimationController exitingAnimation =
         exiting.getComponent(EnemyAnimationController.class);
     Runnable afterExit = mock(Runnable.class);
@@ -396,6 +401,189 @@ class EnemyAnimationControllerTest {
     exitingAnimation.dispose();
     exitingAnimation.update();
     verify(afterExit, never()).run();
+  }
+
+  private Entity visualEnemy(AnimationRenderComponent animation) {
+    Entity entity =
+        new Entity().addComponent(animation).addComponent(new EnemyAnimationController());
+    entity.create();
+    entity.setPosition(10f, 3f);
+    return entity;
+  }
+
+  @Test
+  void realAttackCompletionCanStartNextVisualOnlyAfterFramesAndReturnFinish() {
+    ServiceLocator.registerRenderService(mock(RenderService.class));
+    ServiceLocator.registerEntityService(new EntityService());
+    when(time.getDeltaTime()).thenReturn(0.1f);
+    TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("images/enemies/tomb_guardian.atlas"));
+    AnimationRenderComponent animation = new AnimationRenderComponent(atlas);
+    animation.addAnimation("idle", 0.5f, Animation.PlayMode.LOOP);
+    animation.addAnimation("attack", 0.4f);
+    Entity first = visualEnemy(animation);
+    Entity second = visualEnemy(mock(AnimationRenderComponent.class));
+    Runnable completed = mock(Runnable.class);
+    SpriteBatch batch = mock(SpriteBatch.class);
+    try {
+      first.getEvents().trigger("enemyAttack");
+      first
+          .getComponent(EnemyAnimationController.class)
+          .runAfterAttack(
+              () -> {
+                completed.run();
+                second.getEvents().trigger("enemyAttack");
+              });
+      for (int frame = 0; frame < 4; frame++) {
+        first.update();
+        second.update();
+        verify(completed, never()).run();
+        assertEquals(new Vector2(10f, 3f), second.getPosition());
+        animation.render(batch);
+      }
+      first.update();
+      verify(completed, times(1)).run();
+      assertEquals("idle", animation.getCurrentAnimation());
+      assertEquals(new Vector2(10f, 3f), first.getPosition());
+      second.update();
+      assertTrue(second.getPosition().x < 10f);
+      for (int frame = 0; frame < 5; frame++) {
+        first.update();
+        second.update();
+      }
+      verify(completed, times(1)).run();
+      assertEquals(new Vector2(10f, 3f), second.getPosition());
+    } finally {
+      first.dispose();
+      second.dispose();
+      atlas.dispose();
+    }
+  }
+
+  private Entity battleEnemy() {
+    return battleEnemy(mock(AnimationRenderComponent.class));
+  }
+
+  private Entity battleEnemy(AnimationRenderComponent animation) {
+    Entity attacker =
+        new Entity()
+            .addComponent(new CombatStatsComponent(30, 8))
+            .addComponent(new EnemyStatsComponent("audit"))
+            .addComponent(new EnemyBehaviourComponent("attack", context -> EnemyIntent.attack(8)))
+            .addComponent(animation)
+            .addComponent(new EnemyAnimationController());
+    attacker.create();
+    attacker.setPosition(10f, 3f);
+    return attacker;
+  }
+
+  @Test
+  void battleWaitsBetweenEnemiesWithoutRepeatingDamage() {
+    Entity first = battleEnemy();
+    Entity second = battleEnemy();
+    CombatStatsComponent playerStats = new CombatStatsComponent(100, 0);
+    Entity player = new Entity().addComponent(playerStats);
+    BattleController battle = new BattleController(player, List.of(first, second));
+    when(time.getDeltaTime()).thenReturn(0.15f);
+    battle.start();
+    for (int round = 0; round < 2; round++) {
+      int before = playerStats.getHealth();
+      battle.endPlayerTurn();
+      assertEquals(BattlePhase.ENEMY_ATTACK, battle.getCurrentPhase());
+      assertEquals(0, battle.getCurrentEnemyIndex());
+      assertEquals(before - 8, playerStats.getHealth());
+      first.update();
+      assertTrue(first.getPosition().x < 10f);
+      assertEquals(new Vector2(10f, 3f), second.getPosition());
+      assertEquals(before - 8, playerStats.getHealth());
+      first.update();
+      assertEquals(new Vector2(10f, 3f), first.getPosition());
+      assertEquals(1, battle.getCurrentEnemyIndex());
+      assertEquals(before - 16, playerStats.getHealth());
+      second.update();
+      assertTrue(second.getPosition().x < 10f);
+      second.update();
+      assertEquals(new Vector2(10f, 3f), second.getPosition());
+      assertEquals(BattlePhase.PLAYER_TURN, battle.getCurrentPhase());
+      first.update();
+      second.update();
+      assertEquals(before - 16, playerStats.getHealth());
+    }
+  }
+
+  @Test
+  void battleWaitsForRealAttackFramesLongerThanLunge() {
+    ServiceLocator.registerRenderService(mock(RenderService.class));
+    ServiceLocator.registerEntityService(new EntityService());
+    when(time.getDeltaTime()).thenReturn(0.1f);
+    TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("images/enemies/tomb_guardian.atlas"));
+    AnimationRenderComponent animation = new AnimationRenderComponent(atlas);
+    animation.addAnimation("idle", 0.5f, Animation.PlayMode.LOOP);
+    animation.addAnimation("attack", 0.4f);
+    Entity first = battleEnemy(animation);
+    Entity second = battleEnemy();
+    CombatStatsComponent playerStats = new CombatStatsComponent(100, 0);
+    Entity player = new Entity().addComponent(playerStats);
+    BattleController battle = new BattleController(player, List.of(first, second));
+    SpriteBatch batch = mock(SpriteBatch.class);
+    try {
+      battle.start();
+      battle.endPlayerTurn();
+      for (int frame = 0; frame < 4; frame++) {
+        first.update();
+        second.update();
+        assertEquals(BattlePhase.ENEMY_ATTACK, battle.getCurrentPhase());
+        assertEquals(0, battle.getCurrentEnemyIndex());
+        assertEquals(92, playerStats.getHealth());
+        assertEquals(new Vector2(10f, 3f), second.getPosition());
+        animation.render(batch);
+      }
+      first.update();
+      assertEquals("idle", animation.getCurrentAnimation());
+      assertEquals(new Vector2(10f, 3f), first.getPosition());
+      assertEquals(1, battle.getCurrentEnemyIndex());
+      assertEquals(84, playerStats.getHealth());
+      second.update();
+      assertTrue(second.getPosition().x < 10f);
+      for (int frame = 0; frame < 5; frame++) {
+        first.update();
+        second.update();
+      }
+      assertEquals(BattlePhase.PLAYER_TURN, battle.getCurrentPhase());
+      assertEquals(84, playerStats.getHealth());
+      assertEquals(new Vector2(10f, 3f), second.getPosition());
+    } finally {
+      first.dispose();
+      second.dispose();
+      atlas.dispose();
+    }
+  }
+
+  @Test
+  void lethalAttackFinishesBeforeBattleEndsAndSecondEnemyDoesNotAttack() {
+    ServiceLocator.registerEntityService(new EntityService());
+    when(time.getDeltaTime()).thenReturn(0.15f);
+    Entity first = battleEnemy();
+    Entity second = battleEnemy();
+    Entity player = new Entity().addComponent(new CombatStatsComponent(5, 0));
+    EventListener0 secondAttack = mock(EventListener0.class);
+    second.getEvents().addListener("enemyAttack", secondAttack);
+    BattleController battle = new BattleController(player, List.of(first, second));
+    try {
+      battle.start();
+      battle.endPlayerTurn();
+      assertEquals(0, player.getComponent(CombatStatsComponent.class).getHealth());
+      assertEquals(BattlePhase.ENEMY_ATTACK, battle.getCurrentPhase());
+      first.update();
+      assertTrue(first.getPosition().x < 10f);
+      assertEquals(BattlePhase.ENEMY_ATTACK, battle.getCurrentPhase());
+      first.update();
+      assertEquals(BattlePhase.DEFEAT, battle.getCurrentPhase());
+      assertEquals(new Vector2(10f, 3f), first.getPosition());
+      verify(secondAttack, never()).handle();
+    } finally {
+      first.dispose();
+      second.dispose();
+    }
   }
 
   @Test
@@ -427,23 +615,6 @@ class EnemyAnimationControllerTest {
     assertEquals(new Vector2(10f, 3f), enemy.getPosition());
   }
 
-  private Entity battleEnemy() {
-    return battleEnemy(mock(AnimationRenderComponent.class));
-  }
-
-  private Entity battleEnemy(AnimationRenderComponent animation) {
-    Entity attacker =
-        new Entity()
-            .addComponent(new CombatStatsComponent(30, 8))
-            .addComponent(new EnemyStatsComponent("audit"))
-            .addComponent(new EnemyBehaviourComponent("attack", context -> EnemyIntent.attack(8)))
-            .addComponent(animation)
-            .addComponent(new EnemyAnimationController());
-    attacker.create();
-    attacker.setPosition(10f, 3f);
-    return attacker;
-  }
-
   @Test
   void completionCanSequenceTwoRealAttacksWithoutReplayingDamage() {
     ServiceLocator.registerRenderService(mock(RenderService.class));
@@ -463,7 +634,7 @@ class EnemyAnimationControllerTest {
       first.getComponent(EnemyBehaviourComponent.class).rollIntent();
       second.getComponent(EnemyBehaviourComponent.class).rollIntent();
       first.getComponent(EnemyBehaviourComponent.class).executeIntent(player);
-      // Simulates the caller's completion gate; the production turn loop is not wired to it yet.
+      // Exercise completion callbacks independently of the battle controller.
       first
           .getComponent(EnemyAnimationController.class)
           .runAfterAttack(

@@ -58,8 +58,7 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
     } catch (RuntimeException exception) {
       return ShopTransactionStatus.CARD_ADD_FAILED;
     }
-    int finalPrice = applyDiscount(price);
-    if (player.getCurrency() < finalPrice) {
+    if (player.getCurrency() < price) {
       return ShopTransactionStatus.INSUFFICIENT_CURRENCY;
     }
     return ShopTransactionStatus.READY;
@@ -72,7 +71,6 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
       return validation;
     }
 
-    int finalPrice = applyDiscount(price);
     int currencyBefore = player.getCurrency();
     boolean cardAdded;
     try {
@@ -85,8 +83,8 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
     }
 
     try {
-      player.setCurrency(currencyBefore - finalPrice);
-      if (player.getCurrency() != currencyBefore - finalPrice) {
+      player.setCurrency(currencyBefore - price);
+      if (player.getCurrency() != currencyBefore - price) {
         throw new IllegalStateException("Player currency update was not accepted");
       }
       deck.commitCardAddition(cardId);
@@ -121,10 +119,5 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
   @Override
   public float getShopDiscount() {
     return player.getShopDiscount();
-  }
-
-  private int applyDiscount(int price) {
-    float discount = getShopDiscount();
-    return Math.round(price * (1f - discount));
   }
 }

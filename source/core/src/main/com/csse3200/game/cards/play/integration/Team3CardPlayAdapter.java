@@ -2,11 +2,13 @@ package com.csse3200.game.cards.play.integration;
 
 import static com.csse3200.game.components.battle.BattleActions.BATTLE_LOG_EVENT;
 
+import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.enemy.IntentEffectType;
+import java.util.List;
 
 /**
  * Connects Team 3's existing {@code playCard(instanceId, targetId)} event to Team 5's unified API.
@@ -47,8 +49,30 @@ public final class Team3CardPlayAdapter extends Component {
     if (playerIsBlockedFromPlayingCards()) {
       return;
     }
+    if (targetIsBlockedByTaunt(instanceId, targetId)) {
+      return;
+    }
     CardPlayRequest request = toRequest(instanceId, targetId);
     battleController.submitCardPlayRequest(request);
+  }
+
+  private boolean targetIsBlockedByTaunt(String instanceId, String targetId) {
+    List<String> taunterIds = battleController.getAliveTaunterTargetIds();
+    if (taunterIds.isEmpty()) {
+      return false;
+    }
+
+    var card = cardPlayService.resolveInHand(instanceId);
+    if (card.isEmpty() || card.get().target() != TargetType.SINGLE_ENEMY) {
+      return false;
+    }
+
+    if (taunterIds.contains(targetId)) {
+      return false;
+    }
+
+    entity.getEvents().trigger(BATTLE_LOG_EVENT, "A taunting enemy must be targeted.");
+    return true;
   }
 
   private CardPlayRequest toRequest(String instanceId, String targetId) {

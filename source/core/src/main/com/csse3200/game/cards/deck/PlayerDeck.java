@@ -160,6 +160,26 @@ public class PlayerDeck {
   }
 
   /**
+   * Removes one exact owned card copy identified by its runtime instance ID.
+   *
+   * <p>This is used by systems such as card fusion that must consume the exact copies a player
+   * selected, including when the deck contains duplicate card IDs.
+   *
+   * @param instanceId unique runtime ID of the owned card copy
+   * @return true if that exact copy was removed, otherwise false
+   */
+  public boolean removeCardInstance(String instanceId) {
+    String validInstanceId = validateId(instanceId, "instanceId");
+    for (int i = 0; i < cards.size(); i++) {
+      if (cards.get(i).instanceId().equals(validInstanceId)) {
+        cards.remove(i);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Removes the card at a specific deck position.
    *
    * @param index card position

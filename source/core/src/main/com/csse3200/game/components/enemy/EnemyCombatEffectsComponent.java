@@ -24,6 +24,7 @@ public class EnemyCombatEffectsComponent extends Component {
   private static final Color DEFEND_COLOR = Color.CYAN;
   private static final Color ATTACK_TELEGRAPH_COLOR = Color.YELLOW;
   private static final Color ENRAGE_COLOR = new Color(1f, 0.3f, 0.3f, 1f);
+  private static final Color DEFEATED_COLOR = new Color(0.35f, 0.35f, 0.35f, 1f);
 
   private AnimationRenderComponent animator;
   private int lastArmour;
@@ -40,6 +41,7 @@ public class EnemyCombatEffectsComponent extends Component {
     entity.getEvents().addListener("updateArmour", this::onArmourUpdated);
     entity.getEvents().addListener("enemyEnraged", this::onEnraged);
     entity.getEvents().addListener("intentChanged", this::onIntentChanged);
+    entity.getEvents().addListener("enemyDefeated", this::onDefeated);
   }
 
   private void onDamaged(int amount) {
@@ -57,8 +59,11 @@ public class EnemyCombatEffectsComponent extends Component {
     animator.setPersistentTint(ENRAGE_COLOR);
   }
 
-  // Flash when an attack intent is selected to warn the player before the attack resolves.
+  private void onDefeated() {
+    animator.setPersistentTint(DEFEATED_COLOR);
+  }
 
+  // Flash when an attack intent is selected to warn the player before the attack resolves.
   private void onIntentChanged(EnemyIntent intent) {
     if (intent.getType() == IntentType.ATTACK) {
       animator.flashTint(ATTACK_TELEGRAPH_COLOR, ATTACK_TELEGRAPH_FLASH_SECONDS);

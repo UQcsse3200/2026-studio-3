@@ -48,6 +48,19 @@ class BestiaryServiceTest {
   }
 
   @Test
+  void shouldReadBestiaryDescriptionFromDefaultEnemyConfiguration() {
+    BestiaryService service = BestiaryService.loadDefault();
+
+    service.recordDefeated("lesser_shade");
+
+    assertEquals(
+        "Lesser Shades once carried messages between the halls of the sanctum. The corruption"
+            + " scattered the words they carried, and now they cannot tell which order is true."
+            + " One moment they attack, the next they hide.",
+        service.getEntry("lesser_shade").orElseThrow().description().orElseThrow());
+  }
+
+  @Test
   void shouldLoadTeamOneBossAsLockedBestiaryEntry() {
     BestiaryService service = BestiaryService.loadDefault();
 
@@ -59,7 +72,7 @@ class BestiaryServiceTest {
 
     assertTrue(service.recordEncountered("boss_knight"));
     BestiaryEntryView encounteredBoss = service.getEntry("boss_knight").orElseThrow();
-    assertEquals("Boss Knight", encounteredBoss.displayName());
+    assertEquals("Vitium", encounteredBoss.displayName());
     assertEquals("images/enemies/boss_knight.atlas", encounteredBoss.sprite().orElseThrow());
     assertTrue(encounteredBoss.health().isEmpty());
 
@@ -210,6 +223,23 @@ class BestiaryServiceTest {
   }
 
   @Test
+  void shouldReturnOnlyDiscoveredEntriesByTier() {
+    BestiaryService service = createService();
+
+    assertTrue(service.getDiscoveredEntriesByTier(EnemyTier.NORMAL).isEmpty());
+    assertTrue(service.getDiscoveredEntriesByTier(EnemyTier.ELITE).isEmpty());
+    assertTrue(service.getDiscoveredEntriesByTier(EnemyTier.BOSS).isEmpty());
+    assertTrue(service.getDiscoveredEntriesByTier(null).isEmpty());
+
+    service.recordEncountered("shade");
+    service.recordDefeated("guardian");
+
+    assertEquals(List.of("shade"), ids(service.getDiscoveredEntriesByTier(EnemyTier.NORMAL)));
+    assertTrue(service.getDiscoveredEntriesByTier(EnemyTier.ELITE).isEmpty());
+    assertEquals(List.of("guardian"), ids(service.getDiscoveredEntriesByTier(EnemyTier.BOSS)));
+  }
+
+  @Test
   void shouldRejectNullRoster() {
     assertThrows(IllegalArgumentException.class, () -> new BestiaryService(null));
   }
@@ -223,7 +253,7 @@ class BestiaryServiceTest {
           enemy("knight", "Void Knight", EnemyTier.ELITE, 72, 10, 5),
           enemy("alpha", "Alpha Shade", EnemyTier.NORMAL, 30, 6, 1)
         };
-    return new BestiaryService(configs, Map.of("shade", "A creature made of living darkness."));
+    return new BestiaryService(configs);
   }
 
   private static EnemyConfig enemy(
@@ -237,6 +267,8 @@ class BestiaryServiceTest {
     config.armour = armour;
     config.behaviour = "cycle_attack_defend";
     config.sprite = "images/enemies/" + id + ".atlas";
+    config.description =
+        id.equals("shade") ? "A creature made of living darkness." : "Description for " + id + ".";
     return config;
   }
 

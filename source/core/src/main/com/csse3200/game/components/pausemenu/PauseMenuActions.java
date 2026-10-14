@@ -11,9 +11,15 @@ import org.slf4j.LoggerFactory;
 public class PauseMenuActions extends Component {
   private static final Logger logger = LoggerFactory.getLogger(PauseMenuActions.class);
   private final GdxGame game;
+  private final boolean tutorialBattle;
 
   public PauseMenuActions(GdxGame game) {
+    this(game, false);
+  }
+
+  public PauseMenuActions(GdxGame game, boolean tutorialBattle) {
     this.game = game;
+    this.tutorialBattle = tutorialBattle;
   }
 
   @Override
@@ -21,6 +27,7 @@ public class PauseMenuActions extends Component {
     entity.getEvents().addListener(PauseMenuDisplay.RESUME_EVENT, this::onResume);
     entity.getEvents().addListener(PauseMenuDisplay.SETTINGS_EVENT, this::onSettings);
     entity.getEvents().addListener(PauseMenuDisplay.EXIT_TO_MENU_EVENT, this::onExitToMenu);
+    entity.getEvents().addListener(PauseMenuDisplay.QUIT_EVENT, this::onQuit);
     entity.getEvents().addListener(PauseMenuDisplay.PAUSE_EVENT, this::onPause);
   }
 
@@ -38,11 +45,17 @@ public class PauseMenuActions extends Component {
   /** Leaves the current run for the main menu. Only fired after the display's confirm dialog. */
   private void onExitToMenu() {
     logger.info("Returning to main menu from pause menu");
-    if (game.getRunState() != null) {
+    if (!tutorialBattle && game.getRunState() != null) {
       game.getRunState().abandonEncounter();
     }
     getPauseService().resume();
     game.setScreen(GdxGame.ScreenType.MAIN_MENU);
+  }
+
+  /** Quits the game to the desktop. Only fired after the display's confirm dialog. */
+  private void onQuit() {
+    logger.info("Quitting game from pause menu");
+    game.exit();
   }
 
   /** Fired on Escape to open the menu. The display shows itself. */

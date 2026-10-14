@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.csse3200.game.components.CameraComponent;
 import com.csse3200.game.services.ServiceLocator;
 import org.slf4j.Logger;
@@ -44,7 +44,7 @@ public class Renderer implements Disposable {
         camera,
         GAME_SCREEN_WIDTH,
         spriteBatch,
-        new Stage(new FitViewport(UI_WIDTH, UI_HEIGHT), spriteBatch),
+        new Stage(new ExtendViewport(UI_WIDTH, UI_HEIGHT), spriteBatch),
         ServiceLocator.getRenderService(),
         debugRenderer);
   }

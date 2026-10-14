@@ -30,6 +30,7 @@ import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,8 @@ class EnemyStatusVisualIntegrationTest {
     resources = new ResourceService();
     ServiceLocator.registerResourceService(resources);
     resources.loadTextures(EnemyStatusEffectVisuals.texturePaths());
+    // Card effects now play sounds through AudioService, which needs them loaded.
+    AudioService.load();
     resources.loadAll();
     for (String path : EnemyStatusEffectVisuals.texturePaths()) {
       assertTrue(resources.containsAsset(path, Texture.class), path);
@@ -402,5 +405,26 @@ class EnemyStatusVisualIntegrationTest {
     for (String path : EnemyStatusEffectVisuals.texturePaths()) {
       assertFalse(resources.containsAsset(path, Texture.class));
     }
+  }
+
+  @Test
+  void repeatedCardKeepsOneStatusVisualAndDeathStopsDrawing() {
+    start("poison_dagger", 2);
+    play(TargetType.SINGLE_ENEMY);
+    Entity marker = spawned(2).get(1);
+    EnemyStatusEffectVisualComponent visual =
+        marker.getComponent(EnemyStatusEffectVisualComponent.class);
+    when(time.getDeltaTime()).thenReturn(1.1f);
+    visual.update();
+    coordinator.update();
+    play(TargetType.SINGLE_ENEMY);
+    assertSame(marker, spawned(3).get(1));
+    target.getComponent(CombatStatsComponent.class).setHealth(0);
+    coordinator.update();
+    assertTrue(visual.isExpired());
+    verify(entities, times(1)).unregister(marker);
+    SpriteBatch batch = mock(SpriteBatch.class);
+    visual.render(batch);
+    verifyNoInteractions(batch);
   }
 }
