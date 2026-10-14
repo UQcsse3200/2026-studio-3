@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -15,6 +16,7 @@ import com.csse3200.game.ui.UIComponent;
 public class PlayerStatsTopDisplay extends UIComponent {
   Table table;
   Table levelTable;
+  private Image playerImage;
   private Image heartImage;
   private Label healthLabel;
   private Image levelImage;
@@ -58,10 +60,19 @@ public class PlayerStatsTopDisplay extends UIComponent {
     table.setSize(stageWidth, 50);
     table.setPosition(0, stageHeight - 50);
     table.setBackground(skin.newDrawable("color", new Color(0.105f, 0.070f, 0.065f, 0.98f)));
-    table.padTop(5f).padLeft(10f);
+    table.padLeft(90f);
 
     // Image size
     float imageSideLength = 20f;
+    float playerImageSize = imageSideLength + 50;
+
+    TextureAtlas atlas =
+        ServiceLocator.getResourceService()
+            .getAsset("images/player/player.atlas", TextureAtlas.class);
+
+    playerImage = new Image(atlas.findRegions("idle").first());
+    playerImage.setSize(playerImageSize, playerImageSize);
+    playerImage.setPosition(10f, stageHeight - playerImageSize + 25);
 
     // Heart image
     heartImage =
@@ -98,11 +109,11 @@ public class PlayerStatsTopDisplay extends UIComponent {
     levelLabel.setFontScale(FONT_SCALE);
 
     // add stats to the gold and health table
-    table.add(heartImage).size(imageSideLength).pad(5);
-    table.add(healthLabel).left().pad(10);
+    table.add(heartImage).size(imageSideLength).pad(5).center();
+    table.add(healthLabel).left().pad(10).center();
 
-    table.add(moneyImage).size(imageSideLength).pad(5);
-    table.add(moneyLabel).left().pad(10);
+    table.add(moneyImage).size(imageSideLength).pad(5).center();
+    table.add(moneyLabel).left().pad(10).center();
     stage.addActor(table);
 
     // add stats to level table
@@ -111,6 +122,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
     levelTable.pack();
     levelTable.setPosition((stageWidth - levelTable.getWidth()) / 2f, stageHeight - 45);
     stage.addActor(levelTable);
+    stage.addActor(playerImage);
   }
 
   @Override
@@ -155,6 +167,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
 
     table.remove();
     levelTable.remove();
+    playerImage.remove();
     heartImage.remove();
     healthLabel.remove();
     levelImage.remove();
