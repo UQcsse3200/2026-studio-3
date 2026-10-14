@@ -65,13 +65,16 @@ ShopSnapshot current = shopEncounter.snapshot();
 - Keep disabled/busy/error feedback and rebuild from the returned current snapshot. A failed attempt is retryable with a new action ID after the cause is resolved.
 - The legacy `purchase(itemId)` remains compatible, but new UI must use the versioned command to receive duplicate/stale protection and acquisition receipts.
 
-## Yihan and Guoqing: result contract draft
+## Yihan and Guoqing: result contract
 
 `AcquisitionResult` is immutable, already-applied result data. It has one stable result ID and
-a list of entries. Entry kinds are `CARD`, `ITEM`, `POSITIVE_EFFECT`, `NEGATIVE_EFFECT`.
-Each includes a stable ID, positive quantity/absolute magnitude, name, description and optional
-effect duration in turns. Null duration means no turn duration is being declared; it does not
-automatically mean permanent. Descriptions must explain the real effect, target and duration.
+a list of entries. Entry kinds are `CARD`, `ITEM`, `POSITIVE_EFFECT`, `NEGATIVE_EFFECT`,
+`GOLD` and `HP`. The existing six-argument `Entry` constructor is unchanged.
+Each includes a stable ID, quantity, name, description and optional effect duration in turns.
+For goods, quantity is a positive count; for effects, it is a positive absolute magnitude and
+the effect kind carries the sign. For `GOLD` and `HP`, quantity is the nonzero signed actual
+change and duration must be null. Null effect duration means no turn duration is being declared;
+it does not automatically mean permanent. Descriptions must explain the real effect, target and duration.
 Zero-effect/no-reward Events can retain their existing Outcome view instead of inventing a gain.
 
 For successful Shop purchases, `ShopPurchaseReceipt.acquisition()` is prepared only AFTER the
@@ -81,6 +84,42 @@ The receipt also contains the actual charged price and stock revision.
 Yihan continues owning Event reward/effect execution. After applying the result exactly once,
 create this data with a stable Event-result ID. Do not generate a new ID each time the UI rebuilds.
 Actual effect lists, targets and duration semantics still require Yihan's confirmation.
+
+### Mixed resource and item results
+
+Use `Entry.gold(actualGoldDelta)` and `Entry.hp(actualHpDelta)` for settled resource changes.
+The factories supply stable resource IDs (`gold` and `hp`), not Event-result IDs.
+Calculate each delta from the resource balance after settlement minus its balance before
+settlement. Report actual changes after health caps or other game rules, not the requested
+reward/damage. Positive deltas mean a gain/heal; negative deltas mean a loss/damage.
+Omit zero changes: the factories reject zero. If every change is zero, use the existing Outcome view.
+
+For a choice that has already granted 50 gold and one Curse Item:
+
+```java
+AcquisitionResult result = new AcquisitionResult(
+    eventResultId,
+    List.of(
+        AcquisitionResult.Entry.gold(50),
+        new AcquisitionResult.Entry(
+            AcquisitionResult.Kind.ITEM, curseItemId, 1, curseItemName, curseDescription, null)));
+presentation.show(result, dismissal -> {
+  // Resume/finish the Event; settlement already happened before show().
+});
+```
+
+Use the actual Team 7 item ID, name and description supplied by Yihan. A Curse Item acquisition
+is an `ITEM`; add a `NEGATIVE_EFFECT` only when a separate effect was actually applied.
+Do not duplicate the same gold/health change as both a resource entry and a generic effect.
+One settled choice has one stable result ID and one display containing all its entries.
+Retries and view rebuilds reuse that result ID; a later intentional choice gets a new result ID.
+
+Guoqing's view needs to handle both new kinds. Check `entry.isResourceChange()` and read
+`entry.delta()` to display a signed gold/HP amount. Calling `delta()` on goods/effects throws
+`IllegalStateException`; their existing `quantity()` and duration semantics are unchanged.
+The result model and presentation controller do not change gold, HP, items or statuses.
+Yihan owns settlement and Event adaptation; Guoqing owns the resource visuals and mixed-result layout.
+This extension does not implement those adapters or claim completed in-game integration.
 
 Guoqing implements the small presentation boundary:
 
@@ -137,3 +176,14 @@ effects, different window sizes and the complete Map -> Shop/Event -> Map flow.
 - Desktop compilation and `spotlessCheck` passed.
 - Command: `gradlew.bat :core:test :desktop:compileJava spotlessCheck --offline --console plain --max-workers=2 --rerun-tasks`.
 - Verification covers this implementation branch based on main `d06674fb`; final UI/Event integration and in-game acceptance remain pending.
+
+### Local resource-result verification - 14 October 2026
+
+- Synced the local personal branch to Team 2 branch `Feature-2-Sprint4` at `316f88ea` before extending the result model.
+- Added `GOLD` and `HP`, signed settled deltas, resource factories and validation without changing the existing constructor or goods/effect rules.
+- Added 10 tests for signed/extreme amounts, invalid zero/duration values, legacy compatibility, immutable mixed results and one-shot presentation callbacks.
+- Java 21 fresh run: 2,138 core tests, zero failures/errors/skips. The result model and presentation test classes contain 20 passing tests in total.
+- Desktop compilation, `spotlessCheck` and `git diff --check` passed.
+- Command: `gradlew.bat spotlessApply :core:test :desktop:compileJava spotlessCheck --offline --console plain --max-workers=2 --rerun-tasks`.
+- Verification was performed locally before publication. Publication to `Feature-2-Sprint4` does not imply teammate review or completed UI/Event acceptance.
+- Yihan's real Event adapter and Guoqing's mixed-resource display are not implemented here. No interactive acceptance of that flow is claimed.

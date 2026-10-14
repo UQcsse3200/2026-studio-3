@@ -20,10 +20,15 @@ public record AcquisitionResult(String resultId, List<Entry> entries) {
     CARD,
     ITEM,
     POSITIVE_EFFECT,
-    NEGATIVE_EFFECT
+    NEGATIVE_EFFECT,
+    GOLD,
+    HP
   }
 
-  /** Quantity is a count for goods or an absolute magnitude for effects; kind carries the sign. */
+  /**
+   * Quantity is a positive count for goods or absolute magnitude for effects. For GOLD and HP,
+   * quantity is the signed, already-applied change, not the requested amount or final balance.
+   */
   public record Entry(
       Kind kind, String id, int quantity, String name, String description, Integer durationTurns) {
     public Entry {
@@ -31,12 +36,41 @@ public record AcquisitionResult(String resultId, List<Entry> entries) {
       requireText(id, "id");
       requireText(name, "name");
       description = Objects.requireNonNull(description, "description");
-      if (quantity <= 0 || (durationTurns != null && durationTurns <= 0)) {
-        throw new IllegalArgumentException("Quantity and explicit duration must be positive");
+      if (kind == Kind.GOLD || kind == Kind.HP) {
+        if (quantity == 0 || durationTurns != null) {
+          throw new IllegalArgumentException(
+              "Resource changes must be nonzero and have no duration");
+        }
+      } else {
+        if (quantity <= 0 || (durationTurns != null && durationTurns <= 0)) {
+          throw new IllegalArgumentException("Quantity and explicit duration must be positive");
+        }
+        if ((kind == Kind.CARD || kind == Kind.ITEM) && durationTurns != null) {
+          throw new IllegalArgumentException("Goods do not have an effect duration");
+        }
       }
-      if ((kind == Kind.CARD || kind == Kind.ITEM) && durationTurns != null) {
-        throw new IllegalArgumentException("Goods do not have an effect duration");
+    }
+
+    public static Entry gold(int delta) {
+      return new Entry(Kind.GOLD, "gold", delta, "Gold", "Change in gold", null);
+    }
+
+    public static Entry hp(int delta) {
+      return new Entry(Kind.HP, "hp", delta, "HP", "Change in health", null);
+    }
+
+    public boolean isResourceChange() {
+      return kind == Kind.GOLD || kind == Kind.HP;
+    }
+
+    /**
+     * Returns the actual signed resource change; goods and effects do not have a resource delta.
+     */
+    public int delta() {
+      if (!isResourceChange()) {
+        throw new IllegalStateException("Only GOLD and HP entries have a resource delta");
       }
+      return quantity;
     }
   }
 
