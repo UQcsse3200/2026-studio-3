@@ -1,10 +1,13 @@
 package com.csse3200.game.components.spritedisplay.reactive;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
@@ -17,13 +20,16 @@ public class EnemyDropTargetComponent extends Component {
   private final DragAndDrop dragAndDrop; // shared instance, passed in
   private final Camera worldCamera; // camera used to render the game world
   private Actor hitboxActor;
+  private DragAndDrop.Target target;
   private Image debugOverlay;
   private Texture debugTexture;
-  private String id;
+  private final String id;
+  private final Vector3 worldPos = new Vector3(); // reused every frame by syncBounds
+  private final Vector2 stagePos = new Vector2();
 
-  // Tune these to roughly match the entity's on-screen sprite size.
-  private static final float HITBOX_WIDTH_PX = 100f;
-  private static final float HITBOX_HEIGHT_PX = 100f;
+  // Tune these to roughly match the entity's on-screen sprite size, in stage units.
+  private static final float HITBOX_WIDTH = 100f;
+  private static final float HITBOX_HEIGHT = 100f;
 
   public EnemyDropTargetComponent(DragAndDrop dragAndDrop, Camera worldCamera, String id) {
     this.dragAndDrop = dragAndDrop;
@@ -58,7 +64,7 @@ public class EnemyDropTargetComponent extends Component {
     // even though it's invisible and only used for hit-testing.
     ServiceLocator.getRenderService().getStage().addActor(hitboxActor);
 
-    dragAndDrop.addTarget(
+    target =
         new DragAndDrop.Target(hitboxActor) {
           @Override
           public boolean drag(
@@ -79,7 +85,8 @@ public class EnemyDropTargetComponent extends Component {
               int pointer) {
             // DragNDrop.dragStop dispatches the event on the source entity.
           }
-        });
+        };
+    dragAndDrop.addTarget(target);
   }
 
   @Override
@@ -90,6 +97,11 @@ public class EnemyDropTargetComponent extends Component {
   @Override
   public void dispose() {
     super.dispose();
+    // The shared DragAndDrop outlives this enemy; without this it keeps the target (and through it
+    // this component and its entity) for the rest of the battle.
+    if (target != null) {
+      dragAndDrop.removeTarget(target);
+    }
     if (hitboxActor != null) {
       hitboxActor.remove();
     }
@@ -105,24 +117,27 @@ public class EnemyDropTargetComponent extends Component {
    * Projects the entity's world position into stage coordinates and sizes the hitbox actor
    * accordingly.
    *
-   * <p>IMPORTANT: Camera.project(Vector3) does NOT flip Y to screen-down convention — it's a pure
-   * NDC-to-viewport-pixel mapping, so its output is already Y-up, bottom-left origin. Since this
-   * Stage uses a plain ScreenViewport spanning the whole window 1:1 (see Renderer), that output is
-   * already directly usable as stage coordinates. Do NOT run it through screenToStageCoordinates()
-   * — that applies an extra unwanted flip.
+   * <p>Camera.project(Vector3) maps to window pixels with a bottom-left origin. The stage uses an
+   * ExtendViewport (see Renderer), so window pixels only equal stage units at exactly 1280x800.
+   * screenToStageCoordinates expects a top-left origin, hence the Y flip before converting.
    */
   private void syncBounds() {
-    Vector3 worldPos = new Vector3(entity.getCenterPosition().x, entity.getCenterPosition().y, 0);
+    Vector2 centre = entity.getCenterPosition();
+    worldCamera.project(worldPos.set(centre.x, centre.y, 0f));
 
-    worldCamera.project(worldPos); // already Y-up, bottom-left origin pixels
+    Stage stage = hitboxActor.getStage();
+    if (stage == null) {
+      stage = ServiceLocator.getRenderService().getStage();
+    }
+    stage.screenToStageCoordinates(stagePos.set(worldPos.x, Gdx.graphics.getHeight() - worldPos.y));
 
-    float stageX = worldPos.x - HITBOX_WIDTH_PX / 2f;
-    float stageY = worldPos.y - HITBOX_HEIGHT_PX / 2f;
+    float stageX = stagePos.x - HITBOX_WIDTH / 2f;
+    float stageY = stagePos.y - HITBOX_HEIGHT / 2f;
 
-    hitboxActor.setBounds(stageX, stageY, HITBOX_WIDTH_PX, HITBOX_HEIGHT_PX);
+    hitboxActor.setBounds(stageX, stageY, HITBOX_WIDTH, HITBOX_HEIGHT);
 
     if (DEBUG_VISUAL && debugOverlay != null) {
-      debugOverlay.setBounds(stageX, stageY, HITBOX_WIDTH_PX, HITBOX_HEIGHT_PX);
+      debugOverlay.setBounds(stageX, stageY, HITBOX_WIDTH, HITBOX_HEIGHT);
     }
   }
 }

@@ -49,12 +49,12 @@ public class InOutOnTrigger extends Clickable {
     offScreenY = -btn.getHeight() - 50; // 50px extra padding
 
     // Listen for events that trigger the animation
-    entity.getEvents().addListener("up", this::slideUp);
-    entity.getEvents().addListener("down", this::slideDown);
+    subscribe("up", this::slideUp);
+    subscribe("down", this::slideDown);
 
     // Every widget of this type listens for every other one's hover state, so the group can
     // spread apart around whichever one is currently hovered.
-    entity.getEvents().addListener(HOVER_EVENT, this::onSiblingHoverChanged);
+    subscribe(HOVER_EVENT, this::onSiblingHoverChanged);
   }
 
   /** Snap straight to the visible resting position, e.g. for a card drawn mid-turn. */

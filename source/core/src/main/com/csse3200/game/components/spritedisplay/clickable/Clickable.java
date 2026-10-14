@@ -16,8 +16,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.components.Component;
+import com.csse3200.game.events.listeners.EventListener;
+import com.csse3200.game.events.listeners.EventListener0;
+import com.csse3200.game.events.listeners.EventListener2;
 import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.services.audio.SoundId;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -41,6 +46,11 @@ public abstract class Clickable extends Component {
   String label;
   private Supplier<? extends Actor> visualContentFactory;
   float rotation;
+
+  // Entity-event listeners added through subscribe(), unregistered again in remove().
+  private final List<Subscription> subscriptions = new ArrayList<>();
+
+  private record Subscription(String eventName, EventListener listener) {}
 
   private static Skin getDefaultSkin() {
     if (defaultSkin == null) {
@@ -215,11 +225,32 @@ public abstract class Clickable extends Component {
   /**
    * Detach this clickable's widget from the stage and release anything it registered elsewhere.
    * Called by {@link ClickableFactory} when a widget is removed at runtime (e.g. a played card
-   * leaving the hand) or the factory is disposed. Subclasses that register drag sources or
-   * listeners override this to also undo those.
+   * leaving the hand) or the factory is disposed. Entity listeners added through {@link #subscribe}
+   * are unregistered here; subclasses that register anything else (e.g. a drag source) override
+   * this to also undo that.
    */
   public void remove() {
     btn.remove();
+    for (Subscription subscription : subscriptions) {
+      entity.getEvents().removeListener(subscription.eventName(), subscription.listener());
+    }
+    subscriptions.clear();
+  }
+
+  /**
+   * Listens for an event on the shared UI entity until this widget is {@link #remove() removed}.
+   * Use this instead of {@code entity.getEvents().addListener} so a rebuilt widget does not leave
+   * its old listener behind (which would keep the removed button alive and still reacting).
+   */
+  protected void subscribe(String eventName, EventListener0 listener) {
+    entity.getEvents().addListener(eventName, listener);
+    subscriptions.add(new Subscription(eventName, listener));
+  }
+
+  /** Two-argument form of {@link #subscribe(String, EventListener0)}. */
+  protected <T0, T1> void subscribe(String eventName, EventListener2<T0, T1> listener) {
+    entity.getEvents().addListener(eventName, listener);
+    subscriptions.add(new Subscription(eventName, listener));
   }
 
   /**
