@@ -162,6 +162,35 @@ class AcquisitionPresentationTest {
   }
 
   @Test
+  void mixedResourceAndItemResultsUseOneDisplayAndOneCompletion() {
+    AcquisitionResult result =
+        new AcquisitionResult(
+            "event-choice-1",
+            List.of(
+                AcquisitionResult.Entry.gold(50),
+                new AcquisitionResult.Entry(
+                    AcquisitionResult.Kind.ITEM,
+                    "test-curse-item",
+                    1,
+                    "Curse Item",
+                    "Test item",
+                    null),
+                AcquisitionResult.Entry.hp(-10)));
+    AtomicInteger completed = new AtomicInteger();
+    assertTrue(presentation.show(result, reason -> completed.incrementAndGet()));
+    assertSame(result, view.result);
+    assertEquals(3, view.result.entries().size());
+    assertEquals(50, view.result.entries().getFirst().delta());
+    assertEquals(-10, view.result.entries().getLast().delta());
+    view.onContinue.run();
+    view.onClose.run();
+    assertEquals(1, completed.get());
+    assertEquals(1, view.hidden);
+    assertFalse(presentation.show(result, reason -> fail("Repeated settled result")));
+    assertEquals(1, view.shown);
+  }
+
+  @Test
   void rejectsMalformedPresentationDataBeforeShowingAnything() {
     assertThrows(IllegalArgumentException.class, () -> result(" "));
     assertThrows(IllegalArgumentException.class, () -> new AcquisitionResult("empty", List.of()));
