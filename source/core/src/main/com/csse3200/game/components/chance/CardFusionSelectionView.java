@@ -353,34 +353,7 @@ final class CardFusionSelectionView {
   }
 
   private TextButtonStyle createActionStyle(boolean primary) {
-    TextButtonStyle style = new TextButtonStyle(skin.get(TextButtonStyle.class));
-    Color fill =
-        primary ? new Color(0.19f, 0.12f, 0.09f, 0.97f) : new Color(0.075f, 0.09f, 0.13f, 0.97f);
-    Color edge = primary ? new Color(0.68f, 0.44f, 0.22f, 1f) : DARK_GOLD;
-    style.up = FusionSceneAssets.pixelFrame(skin, fill, edge, FusionSceneAssets.FrameKind.BUTTON);
-    style.over =
-        FusionSceneAssets.pixelFrame(
-            skin,
-            fill,
-            new Color(edge).mul(1.18f, 1.18f, 1.18f, 1f),
-            FusionSceneAssets.FrameKind.BUTTON);
-    style.down =
-        FusionSceneAssets.pixelFrame(
-            skin,
-            fill,
-            new Color(edge).mul(0.82f, 0.82f, 0.82f, 1f),
-            FusionSceneAssets.FrameKind.BUTTON);
-    style.disabled =
-        FusionSceneAssets.pixelFrame(
-            skin,
-            new Color(0.08f, 0.075f, 0.09f, 0.97f),
-            new Color(0.39f, 0.30f, 0.20f, 0.95f),
-            FusionSceneAssets.FrameKind.BUTTON);
-    style.fontColor = CREAM;
-    style.overFontColor = Color.WHITE;
-    style.downFontColor = CREAM;
-    style.disabledFontColor = new Color(0.53f, 0.49f, 0.44f, 1f);
-    return style;
+    return FusionSceneAssets.buttonStyle(skin, primary);
   }
 
   private void updateCardSelection(TextButton button, String instanceId) {
@@ -748,7 +721,7 @@ final class CardFusionSelectionView {
       result.setBounds(220f, messageY, 840f, 58f);
       sequenceLayer.addActor(result);
     }
-    continueButton = FusionSceneAssets.button("Continue", skin, true);
+    continueButton = FusionSceneAssets.button("Continue", skin, false);
     continueButton.setBounds(501f, 34f, 278f, 72f);
     continueButton.addListener(
         new ChangeListener() {
