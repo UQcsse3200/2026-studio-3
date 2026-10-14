@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.rendering.RenderService;
+import com.csse3200.game.save.DeleteSaveResult;
 import com.csse3200.game.save.LoadResult;
 import com.csse3200.game.save.RestoreResult;
 import com.csse3200.game.save.SaveGameData;
@@ -135,5 +136,54 @@ class SaveLoadPanelTest {
 
     verify(saveGameService, never()).loadGame(1);
     verify(saveGameService).loadGame(4);
+  }
+
+  @Test
+  void unreadableSlotShowsReasonAndCanBeDeletedFromSafeScreen() {
+    SaveSlotMetadata unreadable = SaveSlotMetadata.unreadable(2, "Save file contains invalid JSON");
+    when(saveGameService.listSaveSlots())
+        .thenReturn(SaveSlotListResult.success(List.of(unreadable)));
+    when(saveGameService.deleteSave(2)).thenReturn(DeleteSaveResult.succeeded());
+    SaveLoadPanel safePanel = createPanel(List.of(1, 2, 3), SaveLoadMode.SAVE_AND_LOAD);
+
+    assertEquals(
+        "Slot 2 — unavailable\nSave file contains invalid JSON",
+        safePanel.getSlotLabel(2).getText().toString());
+    assertTrue(safePanel.getLoadButton(2).isDisabled());
+    assertFalse(safePanel.getDeleteButton(2).isDisabled());
+
+    safePanel.getDeleteButton(2).fire(new ChangeListener.ChangeEvent());
+
+    verify(saveGameService).deleteSave(2);
+  }
+
+  @Test
+  void emptySlotRemainsDistinctAndCannotBeDeleted() {
+    when(saveGameService.listSaveSlots()).thenReturn(SaveSlotListResult.success(List.of()));
+    SaveLoadPanel safePanel = createPanel(List.of(1), SaveLoadMode.SAVE_AND_LOAD);
+
+    assertEquals("Slot 1 — empty", safePanel.getSlotLabel(1).getText().toString());
+    assertTrue(safePanel.getLoadButton(1).isDisabled());
+    assertTrue(safePanel.getDeleteButton(1).isDisabled());
+  }
+
+  @Test
+  void loadOnlyScreenDoesNotExposeDeleteForUnreadableSlot() {
+    SaveSlotMetadata unreadable = SaveSlotMetadata.unreadable(1, "Unsupported save version 99");
+    when(saveGameService.listSaveSlots())
+        .thenReturn(SaveSlotListResult.success(List.of(unreadable)));
+    SaveLoadPanel loadOnlyPanel = createPanel(List.of(1), SaveLoadMode.LOAD_ONLY);
+
+    assertTrue(loadOnlyPanel.getLoadButton(1).isDisabled());
+    assertNull(loadOnlyPanel.getDeleteButton(1));
+    verify(saveGameService, never()).deleteSave(1);
+  }
+
+  private SaveLoadPanel createPanel(List<Integer> slotIds, SaveLoadMode mode) {
+    SaveLoadPanel createdPanel =
+        new SaveLoadPanel(
+            saveGameService, slotIds, restoreService, () -> {}, mode, false, () -> {});
+    new Entity().addComponent(createdPanel).create();
+    return createdPanel;
   }
 }
