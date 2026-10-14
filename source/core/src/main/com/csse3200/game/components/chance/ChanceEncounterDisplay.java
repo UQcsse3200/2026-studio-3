@@ -29,10 +29,13 @@ import com.csse3200.game.chance.ChanceOutcome;
 import com.csse3200.game.chance.DiceEncounterBehaviour;
 import com.csse3200.game.chance.DiceRoll;
 import com.csse3200.game.chance.WishingFountainEncounterBehaviour;
+import com.csse3200.game.components.encounters.AcquisitionResultDisplay;
 import com.csse3200.game.components.shop.ShopDisplay;
 import com.csse3200.game.encounters.integration.CardFusionEncounterFlow;
 import com.csse3200.game.encounters.integration.ChanceEncounterSession;
 import com.csse3200.game.encounters.integration.ChanceResolution;
+import com.csse3200.game.encounters.results.AcquisitionPresentation;
+import com.csse3200.game.encounters.results.ChanceAcquisitionResults;
 import com.csse3200.game.maps.EncounterCallback;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
@@ -101,6 +104,7 @@ public class ChanceEncounterDisplay extends UIComponent {
   private final EncounterCallback completionCallback;
   private final Integer nodeId;
   private final List<TextButton> choiceButtons = new ArrayList<>();
+  private int visibleChoiceCount;
 
   private Table rootTable;
   private Table choicesTable;
@@ -116,6 +120,7 @@ public class ChanceEncounterDisplay extends UIComponent {
   private int lastDisplayedRollSequence;
   private boolean choiceResolved;
   private boolean completionSent;
+  private AcquisitionPresentation acquisitionPresentation;
 
   /**
    * Creates a display without a map-completion callback, suitable for UI previews.
@@ -187,6 +192,10 @@ public class ChanceEncounterDisplay extends UIComponent {
   @Override
   public void create() {
     super.create();
+    acquisitionPresentation =
+        new AcquisitionPresentation(
+            new AcquisitionResultDisplay(
+                stage, skin, ServiceLocator.getCardLibrary(), ServiceLocator.getResourceService()));
     addActors();
   }
 
@@ -1021,7 +1030,7 @@ public class ChanceEncounterDisplay extends UIComponent {
     choiceStyle = createMineChoiceStyle(new Color(0.83f, 0.65f, 0.48f, 1f));
     selectedChoiceStyle = new TextButtonStyle(choiceStyle);
     choicesTable = new Table();
-    choicesTable.setBounds(55f, 23f, 1170f, 105f);
+    choicesTable.setBounds(55f, 23f, 1170f, encounter.getChoices().size() >= 4 ? 220f : 105f);
     scene.addActor(choicesTable);
     refreshChoices();
 
@@ -1148,6 +1157,7 @@ public class ChanceEncounterDisplay extends UIComponent {
 
     List<ChanceChoice> availableChoices =
         encounterSession == null ? encounter.getChoices() : encounterSession.getAvailableChoices();
+    visibleChoiceCount = availableChoices.size();
     int choiceNumber = 1;
     for (ChanceChoice choice : availableChoices) {
       addChoiceButton(choice, choiceNumber);
@@ -1291,8 +1301,16 @@ public class ChanceEncounterDisplay extends UIComponent {
                 if (pointer == -1) shrineScene.setOfferingHovered(false);
               }
             });
-      choicesTable.add(choiceButton).width(650).height(64).padBottom(12);
-      choicesTable.row();
+      if (visibleChoiceCount >= 4) {
+        choiceButton.getLabel().setFontScale(.82f);
+        choicesTable.add(choiceButton).width(540f).height(92f).pad(0f, 6f, 10f, 6f);
+        if (choiceNumber % 2 == 0) {
+          choicesTable.row();
+        }
+      } else {
+        choicesTable.add(choiceButton).width(650f).height(64f).padBottom(12f);
+        choicesTable.row();
+      }
     } else if (scenicFountain) {
       boolean wish = WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID.equals(choice.getId());
       choiceButton.setStyle(fountainButtonStyle(wish));
@@ -1312,7 +1330,15 @@ public class ChanceEncounterDisplay extends UIComponent {
       if (choiceNumber == 2) {
         choiceButton.setStyle(createMineChoiceStyle(new Color(0.48f, 0.50f, 0.57f, 1f)));
       }
-      choicesTable.add(choiceButton).width(560f).height(100f).padRight(25f);
+      if (visibleChoiceCount >= 4) {
+        choiceButton.getLabel().setFontScale(.82f);
+        choicesTable.add(choiceButton).width(550f).height(96f).pad(0f, 10f, 8f, 10f);
+        if (choiceNumber % 2 == 0) {
+          choicesTable.row();
+        }
+      } else {
+        choicesTable.add(choiceButton).width(560f).height(100f).padRight(25f);
+      }
     } else if (scenicCardFusion) {
       if (choiceNumber == 2) {
         choiceButton.setStyle(FusionSceneAssets.buttonStyle(skin, false));
@@ -1346,16 +1372,22 @@ public class ChanceEncounterDisplay extends UIComponent {
         resultLabel.setStyle(createLabelStyle(DEFAULT, BODY_COLOUR));
         resultLabel.setText("ROLLING...");
         diceRollDisplay.play(
-            roll, () -> handleSessionResolution(resolution, selectedButton, originalButtonText));
+            roll,
+            () ->
+                handleSessionResolution(
+                    resolution, selectedButton, originalButtonText, choice.getDescription()));
         return;
       }
     }
 
-    handleSessionResolution(resolution, selectedButton, originalButtonText);
+    handleSessionResolution(resolution, selectedButton, originalButtonText, choice.getDescription());
   }
 
   private void handleSessionResolution(
-      ChanceResolution resolution, TextButton selectedButton, String originalButtonText) {
+      ChanceResolution resolution,
+      TextButton selectedButton,
+      String originalButtonText,
+      String choiceDescription) {
     if (resolution.getStatus() == ChanceResolution.Status.DELEGATED && cardFusionFlow != null) {
       rootTable.setVisible(false);
       cardFusionView =
@@ -1388,6 +1420,25 @@ public class ChanceEncounterDisplay extends UIComponent {
       return;
     }
     showOutcome(resolution.getOutcome(), selectedButton, originalButtonText);
+    ChanceAcquisitionResults.fromApplied(
+            resolution,
+            "event:" + encounterSession.getNodeId() + ":" + encounter.getId(),
+            ServiceLocator.getCardLibrary(),
+            choiceDescription)
+        .ifPresent(
+            result -> {
+              if (acquisitionPresentation.show(
+                  result,
+                  dismissal -> {
+                    if (dismissal == AcquisitionPresentation.Dismissal.CONTINUE) {
+                      completeEncounter();
+                    } else {
+                      continueButton.setVisible(true);
+                    }
+                  })) {
+                continueButton.setVisible(false);
+              }
+            });
   }
 
   private void showOutcome(
@@ -1539,6 +1590,9 @@ public class ChanceEncounterDisplay extends UIComponent {
 
   @Override
   public void dispose() {
+    if (acquisitionPresentation != null) {
+      acquisitionPresentation.close();
+    }
     if (shrineScene != null) shrineScene.cancel();
     if (fountainScene != null) {
       fountainScene.cancel();
