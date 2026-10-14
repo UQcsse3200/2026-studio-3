@@ -19,21 +19,37 @@ import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.services.ServiceLocator;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 
 /** Checks choice dispatch through existing scenic UI; does not assert visual layout acceptance. */
 @ExtendWith(GameExtension.class)
 class ChanceCurseChoiceDispatchTest {
-  @ParameterizedTest
-  @CsvSource({
-    "mysterious-shrine,accept-brand,BRAND_OF_THE_DAMNED,50",
-    "mysterious-shrine,swear-blood-oath,BLOOD_OATH_SIGIL,70",
-    "abandoned-mine,claim-shattered-aegis,SHATTERED_AEGIS,50",
-    "abandoned-mine,take-ashen-ember,ASHEN_EMBER,80"
-  })
-  void shouldDispatchNewScenicChoiceWithoutChangingUi(
+  @Test
+  void shouldDispatchBrandChoice() {
+    shouldDispatchNewScenicChoiceWithoutChangingUi(
+        "mysterious-shrine", "accept-brand", "BRAND_OF_THE_DAMNED", 50);
+  }
+
+  @Test
+  void shouldDispatchBloodOathChoice() {
+    shouldDispatchNewScenicChoiceWithoutChangingUi(
+        "mysterious-shrine", "swear-blood-oath", "BLOOD_OATH_SIGIL", 70);
+  }
+
+  @Test
+  void shouldDispatchShatteredAegisChoice() {
+    shouldDispatchNewScenicChoiceWithoutChangingUi(
+        "abandoned-mine", "claim-shattered-aegis", "SHATTERED_AEGIS", 50);
+  }
+
+  @Test
+  void shouldDispatchAshenEmberChoice() {
+    shouldDispatchNewScenicChoiceWithoutChangingUi(
+        "abandoned-mine", "take-ashen-ember", "ASHEN_EMBER", 80);
+  }
+
+  private void shouldDispatchNewScenicChoiceWithoutChangingUi(
       String eventId, String choiceId, String itemId, int gold) {
     Stage stage = new Stage(new ScreenViewport(), mock(SpriteBatch.class));
     RenderService renderService = new RenderService();

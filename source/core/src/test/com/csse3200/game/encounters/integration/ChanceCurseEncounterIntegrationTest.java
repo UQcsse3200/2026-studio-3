@@ -13,12 +13,8 @@ import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.rewards.ItemType;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Tests configured transactions against the real ownership adapter. Without the unmerged Team 7
@@ -30,14 +26,6 @@ class ChanceCurseEncounterIntegrationTest {
   private final PlayerRunState state = new PlayerRunState(40, 100, 35);
   private final MockDeckGateway deck = new MockDeckGateway();
   private final PlayerRunStateItemAdapter items = new PlayerRunStateItemAdapter(state);
-
-  static Stream<Arguments> curses() {
-    return Stream.of(
-        Arguments.of("mysterious-shrine", "accept-brand", "BRAND_OF_THE_DAMNED", 50),
-        Arguments.of("mysterious-shrine", "swear-blood-oath", "BLOOD_OATH_SIGIL", 70),
-        Arguments.of("abandoned-mine", "claim-shattered-aegis", "SHATTERED_AEGIS", 50),
-        Arguments.of("abandoned-mine", "take-ashen-ember", "ASHEN_EMBER", 80));
-  }
 
   private ChanceEncounter encounter(String id) {
     return ChanceEncounterConfigLoader.loadEncounters().stream()
@@ -58,9 +46,31 @@ class ChanceCurseEncounterIntegrationTest {
     return available;
   }
 
-  @ParameterizedTest
-  @MethodSource("curses")
-  void shouldGrantConfiguredCurseOnceOrRejectMissingDependency(
+  @Test
+  void shouldGrantBrand() {
+    shouldGrantConfiguredCurseOnceOrRejectMissingDependency(
+        "mysterious-shrine", "accept-brand", "BRAND_OF_THE_DAMNED", 50);
+  }
+
+  @Test
+  void shouldGrantBloodOath() {
+    shouldGrantConfiguredCurseOnceOrRejectMissingDependency(
+        "mysterious-shrine", "swear-blood-oath", "BLOOD_OATH_SIGIL", 70);
+  }
+
+  @Test
+  void shouldGrantShatteredAegis() {
+    shouldGrantConfiguredCurseOnceOrRejectMissingDependency(
+        "abandoned-mine", "claim-shattered-aegis", "SHATTERED_AEGIS", 50);
+  }
+
+  @Test
+  void shouldGrantAshenEmber() {
+    shouldGrantConfiguredCurseOnceOrRejectMissingDependency(
+        "abandoned-mine", "take-ashen-ember", "ASHEN_EMBER", 80);
+  }
+
+  private void shouldGrantConfiguredCurseOnceOrRejectMissingDependency(
       String eventId, String choiceId, String itemId, int gold) {
     ChanceEncounter event = encounter(eventId);
     ChanceOutcome outcome = event.resolveChoice(choiceId);
@@ -98,9 +108,31 @@ class ChanceCurseEncounterIntegrationTest {
     assertTrue(deck.getCardIds().isEmpty());
   }
 
-  @ParameterizedTest
-  @MethodSource("curses")
-  void shouldAllowAnotherCopyAcrossSessionsSharingDurableState(
+  @Test
+  void shouldAllowAnotherCopyOfBrand() {
+    shouldAllowAnotherCopyAcrossSessionsSharingDurableState(
+        "mysterious-shrine", "accept-brand", "BRAND_OF_THE_DAMNED", 50);
+  }
+
+  @Test
+  void shouldAllowAnotherCopyOfBloodOath() {
+    shouldAllowAnotherCopyAcrossSessionsSharingDurableState(
+        "mysterious-shrine", "swear-blood-oath", "BLOOD_OATH_SIGIL", 70);
+  }
+
+  @Test
+  void shouldAllowAnotherCopyOfShatteredAegis() {
+    shouldAllowAnotherCopyAcrossSessionsSharingDurableState(
+        "abandoned-mine", "claim-shattered-aegis", "SHATTERED_AEGIS", 50);
+  }
+
+  @Test
+  void shouldAllowAnotherCopyOfAshenEmber() {
+    shouldAllowAnotherCopyAcrossSessionsSharingDurableState(
+        "abandoned-mine", "take-ashen-ember", "ASHEN_EMBER", 80);
+  }
+
+  private void shouldAllowAnotherCopyAcrossSessionsSharingDurableState(
       String eventId, String choiceId, String itemId, int gold) {
     ChanceEncounter event = encounter(eventId);
     if (!available(itemId)) {
@@ -120,9 +152,31 @@ class ChanceCurseEncounterIntegrationTest {
     assertEquals(40, player.getHealth());
   }
 
-  @ParameterizedTest
-  @MethodSource("curses")
-  void shouldRollbackOnlyNewCurseCopyWhenGoldUpdateFails(
+  @Test
+  void shouldRollbackOnlyNewCopyOfBrand() {
+    shouldRollbackOnlyNewCurseCopyWhenGoldUpdateFails(
+        "mysterious-shrine", "accept-brand", "BRAND_OF_THE_DAMNED", 50);
+  }
+
+  @Test
+  void shouldRollbackOnlyNewCopyOfBloodOath() {
+    shouldRollbackOnlyNewCurseCopyWhenGoldUpdateFails(
+        "mysterious-shrine", "swear-blood-oath", "BLOOD_OATH_SIGIL", 70);
+  }
+
+  @Test
+  void shouldRollbackOnlyNewCopyOfShatteredAegis() {
+    shouldRollbackOnlyNewCurseCopyWhenGoldUpdateFails(
+        "abandoned-mine", "claim-shattered-aegis", "SHATTERED_AEGIS", 50);
+  }
+
+  @Test
+  void shouldRollbackOnlyNewCopyOfAshenEmber() {
+    shouldRollbackOnlyNewCurseCopyWhenGoldUpdateFails(
+        "abandoned-mine", "take-ashen-ember", "ASHEN_EMBER", 80);
+  }
+
+  private void shouldRollbackOnlyNewCurseCopyWhenGoldUpdateFails(
       String eventId, String choiceId, String itemId, int gold) {
     ChanceEncounter event = encounter(eventId);
     if (!available(itemId)) {
