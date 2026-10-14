@@ -34,16 +34,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(GameExtension.class)
 class CardUpgradeStandardTest {
   /** Card owners remove their IDs from this set in the same commit that adds their upgrades. */
-  private static final Set<String> PENDING_UPGRADES =
-      Set.of(
-          "warding_sweep",
-          "sentinels_rebuke",
-          "wardens_judgement",
-          "unseal_the_breach",
-          "starfall",
-          "rift_lance",
-          "astral_ward",
-          "resurrection");
+  private static final Set<String> PENDING_UPGRADES = Set.of();
 
   private List<CardConfig> cards;
 
@@ -103,7 +94,7 @@ class CardUpgradeStandardTest {
                 "Poison Dagger+",
                 1,
                 List.of(effect(6, 0), effect(4, 3))),
-        () -> assertUpgraded(library, resolver, "expose", "Expose+", 1, List.of(effect(2, 3))),
+        () -> assertUpgraded(library, resolver, "expose", "Expose+", 1, List.of(effect(1, 3))),
         () ->
             assertUpgraded(
                 library, resolver, "inner_focus", "Inner Focus+", 2, List.of(effect(3, 0))),

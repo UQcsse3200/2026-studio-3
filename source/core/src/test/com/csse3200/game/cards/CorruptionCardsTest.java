@@ -85,14 +85,14 @@ class CorruptionCardsTest {
         () -> assertEquals("Poison Mark", card.name),
         () ->
             assertEquals(
-                "A quiet sign reveals where the corruption has taken hold. Apply 2 Vulnerable and 2 Poison to an enemy for 2 turns.",
+                "A quiet sign reveals where the corruption has taken hold. Apply Vulnerable for 2 turns and 2 Poison for 2 turns to an enemy.",
                 card.description),
         () -> assertEquals(1, card.cost),
         () -> assertEquals(CardType.SKILL, card.type),
         () -> assertEquals(Rarity.RARE, card.rarity),
         () -> assertEquals(TargetType.SINGLE_ENEMY, card.target),
         () -> assertEquals(2, card.effects.length),
-        () -> assertEffect(card.effects[0], EffectType.VULNERABLE, 2, 2),
+        () -> assertEffect(card.effects[0], EffectType.VULNERABLE, 1, 2),
         () -> assertEffect(card.effects[1], EffectType.POISON, 2, 2),
         () -> assertEquals("images/cards/poison_mark.png", card.texturePath));
   }

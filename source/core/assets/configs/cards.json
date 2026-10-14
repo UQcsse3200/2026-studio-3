@@ -29,7 +29,14 @@
         "rarity": "COMMON",
         "target": "ALL_ENEMIES",
         "effects": [{ "type": "DAMAGE", "value": 4, "duration": 0 }],
-        "texturePath": "images/cards/warding_sweep.png"
+        "texturePath": "images/cards/warding_sweep.png",
+        "upgrade": {
+          "name": "Warding Sweep+",
+          "description": "The old guard's circle still holds. Deal 6 damage to all enemies.",
+          "cost": 2,
+          "rarity": "COMMON",
+          "effects": [{ "type": "DAMAGE", "value": 6, "duration": 0 }]
+        }
       },
       {
         "id": "defend",
@@ -78,20 +85,20 @@
       {
         "id": "expose",
         "name": "Expose",
-        "description": "Apply 2 Vulnerable to all enemies for 2 turns.",
+        "description": "Apply Vulnerable to all enemies for 2 turns.",
         "lore": "Corruption leaves fractures even when the fallen cannot see them. The angel learns to recognise those weaknesses and bring them into the light.",
         "cost": 1,
         "type": "SKILL",
         "rarity": "UNCOMMON",
         "target": "ALL_ENEMIES",
-        "effects": [{ "type": "VULNERABLE", "value": 2, "duration": 2 }],
+        "effects": [{ "type": "VULNERABLE", "value": 1, "duration": 2 }],
         "texturePath": "images/cards/expose.png",
         "upgrade": {
           "name": "Expose+",
-          "description": "Apply 2 Vulnerable to all enemies for 3 turns.",
+          "description": "Apply Vulnerable to all enemies for 3 turns.",
           "cost": 1,
           "rarity": "UNCOMMON",
-          "effects": [{ "type": "VULNERABLE", "value": 2, "duration": 3 }]
+          "effects": [{ "type": "VULNERABLE", "value": 1, "duration": 3 }]
         }
       },
       {
@@ -145,7 +152,17 @@
           { "type": "DAMAGE", "value": 4, "duration": 0 },
           { "type": "FEEBLE", "value": 1, "duration": 2 }
         ],
-        "texturePath": "images/cards/sentinels_rebuke.png"
+        "texturePath": "images/cards/sentinels_rebuke.png",
+        "upgrade": {
+          "name": "Sentinel's Rebuke+",
+          "description": "A final admonition recalls the fallen to silence. Deal 6 damage. Apply 1 Feeble for 3 turns.",
+          "cost": 1,
+          "rarity": "UNCOMMON",
+          "effects": [
+            { "type": "DAMAGE", "value": 6, "duration": 0 },
+            { "type": "FEEBLE", "value": 1, "duration": 3 }
+          ]
+        }
       },
       {
         "id": "poison_flask",
@@ -237,26 +254,26 @@
       {
         "id": "poison_mark",
         "name": "Poison Mark",
-        "description": "A quiet sign reveals where the corruption has taken hold. Apply 2 Vulnerable and 2 Poison to an enemy for 2 turns.",
+        "description": "A quiet sign reveals where the corruption has taken hold. Apply Vulnerable for 2 turns and 2 Poison for 2 turns to an enemy.",
         "lore": "Some corruption hides too deep to be seen at a glance. Where the mark glows, help is still owed.",
         "cost": 1,
         "type": "SKILL",
         "rarity": "RARE",
         "target": "SINGLE_ENEMY",
         "effects": [
-          { "type": "VULNERABLE", "value": 2, "duration": 2 },
+          { "type": "VULNERABLE", "value": 1, "duration": 2 },
           { "type": "POISON", "value": 2, "duration": 2 }
         ],
         "texturePath": "images/cards/poison_mark.png",
         "upgrade": {
           "name": "Poison Mark+",
-          "description": "A quiet sign reveals where the corruption has taken hold. Apply 2 Vulnerable and 3 Poison to an enemy for 2 turns.",
+          "description": "A quiet sign reveals where the corruption has taken hold. Apply Vulnerable for 2 turns and 3 Poison for 2 turns to an enemy.",
           "cost": 1,
           "rarity": "RARE",
           "effects": [
             {
               "type": "VULNERABLE",
-              "value": 2,
+              "value": 1,
               "duration": 2
             },
             {
@@ -277,7 +294,14 @@
         "rarity": "UNCOMMON",
         "target": "ALL_ENEMIES",
         "effects": [{ "type": "DAMAGE", "value": 6, "duration": 0 }],
-        "texturePath": "images/cards/starfall.png"
+        "texturePath": "images/cards/starfall.png",
+        "upgrade": {
+          "name": "Starfall+",
+          "description": "Heaven's light falls upon those still bound. Deal 9 damage to all enemies.",
+          "cost": 2,
+          "rarity": "UNCOMMON",
+          "effects": [{ "type": "DAMAGE", "value": 9, "duration": 0 }]
+        }
       },
       {
         "id": "rift_lance",
@@ -292,7 +316,17 @@
           { "type": "DAMAGE", "value": 4, "duration": 0 },
           { "type": "VULNERABLE", "value": 1, "duration": 2 }
         ],
-        "texturePath": "images/cards/rift_lance.png"
+        "texturePath": "images/cards/rift_lance.png",
+        "upgrade": {
+          "name": "Rift Lance+",
+          "description": "A shaft of starlight loosens corruption's hold. Deal 6 damage. Apply 2 Vulnerable for 2 turns.",
+          "cost": 1,
+          "rarity": "UNCOMMON",
+          "effects": [
+            { "type": "DAMAGE", "value": 6, "duration": 0 },
+            { "type": "VULNERABLE", "value": 2, "duration": 2 }
+          ]
+        }
       },
       {
         "id": "wardens_judgement",
@@ -304,7 +338,14 @@
         "rarity": "UNCOMMON",
         "target": "SINGLE_ENEMY",
         "effects": [{ "type": "DAMAGE", "value": 9, "duration": 0 }],
-        "texturePath": "images/cards/wardens_judgement.png"
+        "texturePath": "images/cards/wardens_judgement.png",
+        "upgrade": {
+          "name": "Warden's Judgement+",
+          "description": "Mercy is pronounced beneath a broken oath. Deal 13 damage.",
+          "cost": 2,
+          "rarity": "UNCOMMON",
+          "effects": [{ "type": "DAMAGE", "value": 13, "duration": 0 }]
+        }
       },
       {
         "id": "unseal_the_breach",
@@ -319,7 +360,17 @@
           { "type": "SUNDER", "value": 3, "duration": 0 },
           { "type": "DAMAGE", "value": 2, "duration": 0 }
         ],
-        "texturePath": "images/cards/unseal_the_breach.png"
+        "texturePath": "images/cards/unseal_the_breach.png",
+        "upgrade": {
+          "name": "Break the Seal+",
+          "description": "No ward shall bar the way to absolution. Reduce the enemy's armour by 5, then deal 4 damage.",
+          "cost": 1,
+          "rarity": "UNCOMMON",
+          "effects": [
+            { "type": "SUNDER", "value": 5, "duration": 0 },
+            { "type": "DAMAGE", "value": 4, "duration": 0 }
+          ]
+        }
       },
       {
         "id": "astral_ward",
@@ -335,7 +386,18 @@
           { "type": "STRENGTH", "value": 1, "duration": 0 },
           { "type": "ENERGY_GAIN", "value": 1, "duration": 0 }
         ],
-        "texturePath": "images/cards/astral_ward.png"
+        "texturePath": "images/cards/astral_ward.png",
+        "upgrade": {
+          "name": "Astral Ward+",
+          "description": "The old star-readers' ward steadies the weary. Gain 6 Block. Gain 2 Strength for the rest of combat. Restore 1 Energy.",
+          "cost": 2,
+          "rarity": "UNCOMMON",
+          "effects": [
+            { "type": "BLOCK", "value": 6, "duration": 0 },
+            { "type": "STRENGTH", "value": 2, "duration": 0 },
+            { "type": "ENERGY_GAIN", "value": 1, "duration": 0 }
+          ]
+        }
       },
       {
         "id": "resurrection",
@@ -347,7 +409,14 @@
         "rarity": "RARE",
         "target": "SELF",
         "effects": [{ "type": "HEAL", "value": 6, "duration": 3 }],
-        "texturePath": "images/cards/resurrection.png"
+        "texturePath": "images/cards/resurrection.png",
+        "upgrade": {
+          "name": "Restoring Light+",
+          "description": "A quiet celestial rite sustains the wounded. Heal 9 HP at the start of your next 3 turns.",
+          "cost": 5,
+          "rarity": "RARE",
+          "effects": [{ "type": "HEAL", "value": 9, "duration": 3 }]
+        }
       },
       {
         "id": "makeshift_shelter",
@@ -491,11 +560,11 @@
         "texturePath": "images/cards/doom_sigil.png",
         "upgrade": {
           "name": "Doom Sigil+",
-          "description": "A mark that lays corruption bare. Apply 2 Vulnerable for 2 turns and 6 Poison for 3 turns.",
+          "description": "A mark that lays corruption bare. Apply 1 Vulnerable for 3 turns and 6 Poison for 3 turns.",
           "cost": 2,
           "rarity": "RARE",
           "effects": [
-            { "type": "VULNERABLE", "value": 2, "duration": 2 },
+            { "type": "VULNERABLE", "value": 1, "duration": 3 },
             { "type": "POISON", "value": 6, "duration": 3 }
           ]
         }
