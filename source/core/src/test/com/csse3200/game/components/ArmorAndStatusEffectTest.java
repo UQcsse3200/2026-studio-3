@@ -289,7 +289,9 @@ class ArmourAndStatusEffectTest {
     combat.applyStatusEffect(vulnerable);
 
     assertTrue(combat.hasStatusEffect("VULNERABLE"));
-    assertEquals(vulnerable, combat.getStatusEffect("VULNERABLE"));
+    assertEquals(1, combat.getStatusEffect("VULNERABLE").getValue());
+    assertEquals(2, combat.getStatusEffect("VULNERABLE").getDuration());
+    assertEquals(2, vulnerable.getValue());
   }
 
   @Test
@@ -298,21 +300,68 @@ class ArmourAndStatusEffectTest {
     combat.applyStatusEffect("VULNERABLE", 2, 2);
 
     assertTrue(combat.hasStatusEffect("VULNERABLE"));
-    assertEquals(2, combat.getStatusEffect("VULNERABLE").getValue());
+    assertEquals(1, combat.getStatusEffect("VULNERABLE").getValue());
     assertEquals(2, combat.getStatusEffect("VULNERABLE").getDuration());
   }
 
   @Test
-  void applyingSameTypeShouldOverwritePrevious() {
-    // Design decision: applyStatusEffect() itself overwrites, not stacks, by default.
-    // Callers that want stacking behaviour (e.g. Poison) should read the existing effect via
-    // getStatusEffect() and call addValue() on it themselves before re-applying, or call
-    // addValue() directly on the existing instance.
+  void otherStatusTypesStillOverwritePrevious() {
     CombatStatsComponent combat = new CombatStatsComponent(100, 20);
-    combat.applyStatusEffect(new StatusEffect("VULNERABLE", 2, 2));
-    combat.applyStatusEffect(new StatusEffect("VULNERABLE", 2, 5));
+    combat.applyStatusEffect(new StatusEffect("STRENGTH", 2, 5));
+    StatusEffect replacement = new StatusEffect("STRENGTH", 3, 2);
+    combat.applyStatusEffect(replacement);
+    assertEquals(replacement, combat.getStatusEffect("STRENGTH"));
+    assertEquals(2, combat.getStatusEffect("STRENGTH").getDuration());
+  }
 
-    assertEquals(5, combat.getStatusEffect("VULNERABLE").getDuration());
+  @Test
+  void vulnerableReapplicationKeepsLongestDurationAndUnitStrength() {
+    int[][] cases = {{3, 2, 3}, {2, 3, 3}, {3, 3, 3}, {0, 3, 0}, {3, 0, 0}, {-1, 3, 0}, {3, -1, 0}};
+    for (int[] testCase : cases) {
+      int remaining = testCase[0];
+      int incoming = testCase[1];
+      int expected = testCase[2];
+      CombatStatsComponent stats = new CombatStatsComponent(100, 0);
+      stats.applyStatusEffect("VULNERABLE", 2, remaining);
+      stats.applyStatusEffect(new StatusEffect("VULNERABLE", 5, incoming));
+      assertEquals(expected, stats.getStatusEffect("VULNERABLE").getDuration());
+      assertEquals(1, stats.getStatusEffect("VULNERABLE").getValue());
+      if (expected == 0) {
+        for (int i = 0; i < 5; i++) assertFalse(stats.tickStatusEffect("VULNERABLE"));
+        assertTrue(stats.hasStatusEffect("VULNERABLE"));
+      }
+    }
+  }
+
+  @Test
+  void vulnerableFirstApplicationNormalisesStrengthAndPreservesDuration() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 0);
+    stats.applyStatusEffect("VULNERABLE", 7, 3);
+    assertEquals(1, stats.getStatusEffect("VULNERABLE").getValue());
+    assertEquals(3, stats.getStatusEffect("VULNERABLE").getDuration());
+  }
+
+  @Test
+  void vulnerableMergeUsesRemainingDurationAndNotifiesOncePerApplicationAndExpiry() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 0);
+    Entity entity = new Entity().addComponent(stats);
+    List<String> applied = new ArrayList<>();
+    List<String> removed = new ArrayList<>();
+    entity.getEvents().addListener("statusEffectApplied", (String type) -> applied.add(type));
+    entity.getEvents().addListener("statusEffectRemoved", (String type) -> removed.add(type));
+    stats.applyStatusEffect("VULNERABLE", 2, 4);
+    assertFalse(stats.tickStatusEffect("VULNERABLE"));
+    stats.applyStatusEffect("VULNERABLE", 1, 2);
+    assertEquals(3, stats.getStatusEffect("VULNERABLE").getDuration());
+    assertEquals(List.of("VULNERABLE", "VULNERABLE"), applied);
+    assertFalse(stats.tickStatusEffect("VULNERABLE"));
+    assertEquals(2, stats.getStatusEffect("VULNERABLE").getDuration());
+    assertFalse(stats.tickStatusEffect("VULNERABLE"));
+    assertEquals(1, stats.getStatusEffect("VULNERABLE").getDuration());
+    assertTrue(stats.tickStatusEffect("VULNERABLE"));
+    assertFalse(stats.hasStatusEffect("VULNERABLE"));
+    assertFalse(stats.tickStatusEffect("VULNERABLE"));
+    assertEquals(List.of("VULNERABLE"), removed);
   }
 
   @Test

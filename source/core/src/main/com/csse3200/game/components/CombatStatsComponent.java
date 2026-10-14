@@ -384,9 +384,9 @@ public class CombatStatsComponent extends Component {
   /**
    * Applies a status effect.
    *
-   * <p>Poison stacks are grouped by remaining duration. Feeble does not stack its damage reduction
-   * and keeps the longer duration on reapplication; permanent duration takes precedence. Other
-   * statuses retain their overwrite behaviour.
+   * <p>Poison stacks are grouped by remaining duration. Feeble and Vulnerable do not stack their
+   * strength and keep the longer duration on reapplication; permanent duration takes precedence.
+   * Other statuses retain their overwrite behaviour.
    *
    * @param effect status effect to apply
    */
@@ -399,8 +399,8 @@ public class CombatStatsComponent extends Component {
 
     if (POISON.equals(type)) {
       applyPoison(effect);
-    } else if (FEEBLE.equals(type)) {
-      applyFeeble(effect);
+    } else if (FEEBLE.equals(type) || "VULNERABLE".equals(type)) {
+      applyNonStackingStatus(type, effect);
     } else {
       // Preserve the existing behaviour for other statuses.
       statusEffects.put(type, effect);
@@ -429,8 +429,8 @@ public class CombatStatsComponent extends Component {
     statusEffects.put(POISON, target);
   }
 
-  private void applyFeeble(StatusEffect effect) {
-    StatusEffect existing = statusEffects.get(FEEBLE);
+  private void applyNonStackingStatus(String type, StatusEffect effect) {
+    StatusEffect existing = statusEffects.get(type);
     int duration = effect.getDuration();
     if (existing != null) {
       duration =
@@ -438,8 +438,8 @@ public class CombatStatsComponent extends Component {
               ? 0
               : Math.max(existing.getDuration(), duration);
     }
-    // Feeble does not stack its damage reduction; permanent duration takes precedence.
-    statusEffects.put(FEEBLE, new StatusEffect(FEEBLE, 1, duration));
+    // Fixed-strength statuses keep the longer duration; permanent takes precedence.
+    statusEffects.put(type, new StatusEffect(type, 1, duration));
   }
 
   /**
