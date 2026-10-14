@@ -1,5 +1,6 @@
 package com.csse3200.game.encounters.integration;
 
+import com.csse3200.game.cards.CardService;
 import com.csse3200.game.chance.ChanceBehaviourResult;
 import com.csse3200.game.chance.ChanceChoice;
 import com.csse3200.game.chance.ChanceEncounter;
@@ -7,10 +8,13 @@ import com.csse3200.game.chance.ChanceEncounterBehaviour;
 import com.csse3200.game.chance.ChanceOutcome;
 import com.csse3200.game.chance.DiceRoll;
 import com.csse3200.game.chance.FixedChanceEncounterBehaviour;
+import com.csse3200.game.encounters.results.AcquisitionResult;
+import com.csse3200.game.encounters.results.ChanceAcquisitionResults;
 import com.csse3200.game.maps.EncounterCallback;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 /** Coordinates choice resolution, player updates, and map completion for one Chance Encounter. */
 public final class ChanceEncounterSession {
@@ -25,6 +29,32 @@ public final class ChanceEncounterSession {
   private boolean completed;
   private boolean resolving;
   private ChanceResolution blockedItemResolution;
+  private final String acquisitionResultId = "event:" + UUID.randomUUID();
+  private Optional<AcquisitionResult> acquisitionResult;
+  private ChanceAcquisitionSession acquisitionSession;
+
+  /**
+   * Maps only the saved successful resolution and caches its immutable result, including an empty
+   * result for a no-effect choice. Metadata failures leave settlement untouched and may be retried.
+   */
+  public Optional<AcquisitionResult> getAcquisitionResult(CardService cards) {
+    if (resolution == null) return Optional.empty();
+    if (acquisitionResult == null) {
+      acquisitionResult =
+          ChanceAcquisitionResults.fromApplied(resolution, acquisitionResultId, cards);
+    }
+    return acquisitionResult;
+  }
+
+  /** Returns the single optional display adapter retained across UI rebuilds for this session. */
+  public ChanceAcquisitionSession getAcquisitionSession(CardService cards) {
+    if (acquisitionSession == null) acquisitionSession = new ChanceAcquisitionSession(this, cards);
+    return acquisitionSession;
+  }
+
+  private void closeAcquisition() {
+    if (acquisitionSession != null) acquisitionSession.close();
+  }
 
   /**
    * Creates one Chance Encounter lifecycle session.
@@ -160,6 +190,7 @@ public final class ChanceEncounterSession {
       return false;
     }
     completed = true;
+    closeAcquisition();
     if (completionCallback != null) {
       completionCallback.onEncounterComplete(nodeId, true);
     }
@@ -181,6 +212,7 @@ public final class ChanceEncounterSession {
     }
     awaitingDelegatedCompletion = false;
     completed = true;
+    closeAcquisition();
     if (completionCallback != null) {
       completionCallback.onEncounterComplete(nodeId, true);
     }
@@ -197,6 +229,7 @@ public final class ChanceEncounterSession {
       return false;
     }
     completed = true;
+    closeAcquisition();
     if (completionCallback != null) {
       completionCallback.onEncounterComplete(nodeId, false);
     }

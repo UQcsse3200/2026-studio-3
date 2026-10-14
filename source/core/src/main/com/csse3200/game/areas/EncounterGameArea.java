@@ -19,6 +19,7 @@ import com.csse3200.game.components.shop.ShopDisplay;
 import com.csse3200.game.encounters.integration.CardCatalogGateway;
 import com.csse3200.game.encounters.integration.CardFusionEncounterFlow;
 import com.csse3200.game.encounters.integration.CardServiceCatalogAdapter;
+import com.csse3200.game.encounters.integration.ChanceAcquisitionSession;
 import com.csse3200.game.encounters.integration.ChanceEncounterSession;
 import com.csse3200.game.encounters.integration.ComponentPlayerStateAdapter;
 import com.csse3200.game.encounters.integration.DeckGateway;
@@ -103,6 +104,7 @@ public class EncounterGameArea extends GameArea {
   private final String forcedEventId;
   private CardFusionEncounterFlow cardFusionEncounterFlow;
   private ChanceEncounterDisplay chanceDisplay;
+  private ChanceAcquisitionSession chanceAcquisitions;
 
   /**
    * Creates the standalone Shop preview used by the legacy MainGameScreen shortcut.
@@ -305,6 +307,7 @@ public class EncounterGameArea extends GameArea {
     ChanceEncounterBehaviour behaviour =
         ChanceEncounterBehaviourFactory.create(encounter, new Random(), cardService);
     ChanceEncounterSession session = encounterFlow.startChance(nodeId, encounter, behaviour);
+    chanceAcquisitions = session.getAcquisitionSession(cardService);
     cardFusionEncounterFlow =
         createCardFusionEncounterFlow(encounter, session, runState, cardService);
 
@@ -390,6 +393,7 @@ public class EncounterGameArea extends GameArea {
    */
   @Override
   public void dispose() {
+    if (chanceAcquisitions != null) chanceAcquisitions.close();
     if (player != null) {
       runState.getOrCreatePlayerState().captureFrom(player);
     }
