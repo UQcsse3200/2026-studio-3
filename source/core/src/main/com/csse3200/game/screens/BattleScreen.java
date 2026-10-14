@@ -440,15 +440,6 @@ public class BattleScreen extends ScreenAdapter {
                                     || animator.isFinished();
                               })));
       ServiceLocator.getEntityService().register(new Entity().addComponent(guidance));
-      // Remains after guidance cleans itself up: existing tutorial battle completion is unchanged.
-      controller.addBattleEndListener(
-          won ->
-              Gdx.app.postRunnable(
-                  () ->
-                      onTutorialFinished(
-                          Boolean.TRUE.equals(won)
-                              ? BattleTutorialController.Outcome.WON
-                              : BattleTutorialController.Outcome.LOST)));
     }
     controller.start();
   }
@@ -471,11 +462,8 @@ public class BattleScreen extends ScreenAdapter {
   }
 
   private void onTutorialFinished(BattleTutorialController.Outcome outcome) {
-    // All tutorial changes live in this screen's disposable run. Joel's shared new-run path resets
-    // the persistent run and opens the story/map on victory or voluntary exit.
-    if (outcome == BattleTutorialController.Outcome.LOST) {
-      game.setScreen(GdxGame.ScreenType.MAIN_MENU);
-    } else {
+    // BattleActions handles real outcomes after the release animation; voluntary exit skips it.
+    if (outcome == BattleTutorialController.Outcome.CANCELLED) {
       game.startNewRun();
     }
   }
