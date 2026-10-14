@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.csse3200.game.chance.ChanceEncounterFactory;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.extensions.GameExtension;
@@ -158,6 +159,44 @@ class MainMenuDisplayTest {
     assertEquals(0, startCount.get());
     assertEquals(1, tutorialCount.get());
     assertNull(stage.getRoot().findActor("tutorial-choice"));
+  }
+
+  @Test
+  void demoPickerOffersEveryConfiguredEventAndOnlyOpensTheSelectedPreview() {
+    AtomicInteger randomCount = new AtomicInteger();
+    java.util.List<String> selected = new java.util.ArrayList<>();
+    menu.getEvents().addListener(MainMenuDisplay.DEMO_EVENT, randomCount::incrementAndGet);
+    menu.getEvents().addListener(MainMenuDisplay.DEMO_EVENT_SELECTED, selected::add);
+
+    display.getRootStack().findActor(MainMenuDisplay.DEMO_EVENT).fire(new ChangeEvent());
+    Dialog dialog = stage.getRoot().findActor("demo-event-picker");
+    assertNotNull(dialog);
+    for (var encounter : ChanceEncounterFactory.createInitialEncounters()) {
+      assertNotNull(dialog.getButtonTable().findActor("demo-event-" + encounter.getId()));
+    }
+    assertEquals(0, randomCount.get());
+    assertEquals(List.of(), selected);
+
+    dialog.getButtonTable().findActor("demo-event-mysterious-shrine").fire(new ChangeEvent());
+    assertEquals(List.of("mysterious-shrine"), selected);
+    assertEquals(0, randomCount.get());
+  }
+
+  @Test
+  void demoPickerKeepsRandomOptionAndCancelDoesNotLaunchAnEvent() {
+    AtomicInteger randomCount = new AtomicInteger();
+    menu.getEvents().addListener(MainMenuDisplay.DEMO_EVENT, randomCount::incrementAndGet);
+    display.getRootStack().findActor(MainMenuDisplay.DEMO_EVENT).fire(new ChangeEvent());
+    Dialog dialog = stage.getRoot().findActor("demo-event-picker");
+    dialog.getButtonTable().findActor("demo-event-cancel").fire(new ChangeEvent());
+    assertEquals(0, randomCount.get());
+
+    display.getRootStack().findActor(MainMenuDisplay.DEMO_EVENT).fire(new ChangeEvent());
+    stage.getRoot()
+        .findActor("demo-event-picker")
+        .findActor("demo-event-random")
+        .fire(new ChangeEvent());
+    assertEquals(1, randomCount.get());
   }
 
   @Test
