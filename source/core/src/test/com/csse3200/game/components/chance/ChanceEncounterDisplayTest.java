@@ -62,6 +62,42 @@ class ChanceEncounterDisplayTest {
   }
 
   @Test
+  void fourShrineAndMineChoicesFitInTwoRows() {
+    stage.getViewport().update(1280, 800, true);
+    for (String id : List.of("mysterious-shrine", "abandoned-mine")) {
+      ChanceEncounter encounter =
+          new ChanceEncounter(
+              id,
+              "Choose one outcome.",
+              List.of(
+                  new ChanceChoice("first", "First choice", new ChanceOutcome(0, 0)),
+                  new ChanceChoice("second", "Second choice", new ChanceOutcome(0, 0)),
+                  new ChanceChoice("third", "Third choice", new ChanceOutcome(0, 0)),
+                  new ChanceChoice("fourth", "Fourth choice", new ChanceOutcome(0, 0))));
+      ChanceEncounterDisplay display = new ChanceEncounterDisplay(encounter);
+      entity = new Entity().addComponent(display);
+      entity.create();
+      stage.act(0.3f);
+      Table choices = (Table) display.getChoiceButtons().get(0).getParent();
+      Table root = (Table) choices.getParent().getParent();
+      root.setSize(1280f, 800f);
+      root.validate();
+      choices.layout();
+
+      List<TextButton> buttons = display.getChoiceButtons();
+      assertEquals(4, buttons.size());
+      assertTrue(buttons.get(0).getX() < buttons.get(1).getX());
+      assertTrue(buttons.get(2).getX() < buttons.get(3).getX());
+      assertTrue(buttons.get(0).getY() > buttons.get(2).getY());
+      assertTrue(buttons.get(1).getX() + buttons.get(1).getWidth() <= choices.getWidth());
+      assertTrue(buttons.get(3).getX() + buttons.get(3).getWidth() <= choices.getWidth());
+
+      entity.dispose();
+      entity = null;
+    }
+  }
+
+  @Test
   void fountainWaitsForReleaseAndCompletesOnlyOnce() {
     AtomicInteger completions = new AtomicInteger();
     ChanceEncounterDisplay display = createFountain(completions);
@@ -175,6 +211,42 @@ class ChanceEncounterDisplayTest {
     display.getChoiceButtons().get(1).fire(new ChangeEvent());
     assertTrue(display.getContinueButton().isVisible());
     assertEquals("OUTCOME\nYou lose 8 health.", display.getResultText());
+  }
+
+  @Test
+  void integratedResultShowsOnlyCommittedChangesAndClosingKeepsContinueAvailable() {
+    MockPlayerStateGateway player = new MockPlayerStateGateway(80, 50);
+    AtomicInteger completions = new AtomicInteger();
+    ChanceEncounter encounter =
+        new ChanceEncounter(
+            "test-encounter",
+            "Choose an outcome.",
+            List.of(new ChanceChoice("trade", "Pay for healing", new ChanceOutcome(10, -5))));
+    ChanceEncounterSession session =
+        new ChanceEncounterSession(
+            7,
+            encounter,
+            new ChanceOutcomeApplier(player),
+            (node, success) -> completions.incrementAndGet());
+    ChanceEncounterDisplay display = new ChanceEncounterDisplay(session);
+    entity = new Entity().addComponent(display);
+    entity.create();
+
+    display.getChoiceButtons().get(0).fire(new ChangeEvent());
+    assertEquals(90, player.getHealth());
+    assertEquals(45, player.getCurrency());
+    assertFalse(display.getContinueButton().isVisible());
+    assertTrue(session.isResolved());
+    assertTrue(stage.getRoot().findActor("acquisition-result-overlay") != null);
+
+    stage.getRoot().findActor("acquisition-close").fire(new ChangeEvent());
+    assertTrue(display.getContinueButton().isVisible());
+    assertEquals(0, completions.get());
+    display.getContinueButton().fire(new ChangeEvent());
+    stage.act(.3f);
+    assertEquals(1, completions.get());
+    assertEquals(90, player.getHealth());
+    assertEquals(45, player.getCurrency());
   }
 
   private ChanceEncounterDisplay createFlooded(AtomicInteger completions) {
