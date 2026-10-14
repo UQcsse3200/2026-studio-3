@@ -36,6 +36,7 @@ import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.shop.ShopEncounter;
 import com.csse3200.game.shop.ShopInventoryGenerator;
+import com.csse3200.game.shop.ShopRefreshPolicy;
 import com.csse3200.game.shop.ShopService;
 import java.util.List;
 import java.util.Objects;
@@ -271,6 +272,8 @@ public class EncounterGameArea extends GameArea {
   private void displayShop() {
     ShopService shopService = createMapShop(ServiceLocator.getCardLibrary());
     ShopEncounter shopEncounter = encounterFlow.startShop(nodeId, shopService);
+    shopEncounter.enableRefresh(
+        ShopRefreshPolicy.standard(), () -> createMapShop(ServiceLocator.getCardLibrary()));
 
     Entity shopUi = new Entity();
     shopUi.addComponent(

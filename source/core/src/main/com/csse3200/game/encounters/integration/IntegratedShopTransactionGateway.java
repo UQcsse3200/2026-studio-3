@@ -120,4 +120,34 @@ public final class IntegratedShopTransactionGateway implements ShopTransactionGa
   public float getShopDiscount() {
     return player.getShopDiscount();
   }
+
+  @Override
+  public ShopTransactionStatus chargeServiceFee(int amount) {
+    if (amount < 0) {
+      return ShopTransactionStatus.INVALID_PRICE;
+    }
+    int before = player.getCurrency();
+    if (before < amount) {
+      return ShopTransactionStatus.INSUFFICIENT_CURRENCY;
+    }
+    if (amount == 0) {
+      return ShopTransactionStatus.SUCCESS;
+    }
+    try {
+      player.setCurrency(before - amount);
+      if (player.getCurrency() != before - amount) {
+        throw new IllegalStateException("Service fee was not accepted");
+      }
+      return ShopTransactionStatus.SUCCESS;
+    } catch (RuntimeException exception) {
+      try {
+        player.setCurrency(before);
+        return player.getCurrency() == before
+            ? ShopTransactionStatus.CURRENCY_UPDATE_FAILED
+            : ShopTransactionStatus.ROLLBACK_FAILED;
+      } catch (RuntimeException rollbackException) {
+        return ShopTransactionStatus.ROLLBACK_FAILED;
+      }
+    }
+  }
 }

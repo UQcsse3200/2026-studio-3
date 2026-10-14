@@ -50,4 +50,16 @@ public final class InventoryShopTransactionAdapter implements ShopTransactionGat
   public float getShopDiscount() {
     return inventory.getShopDiscount();
   }
+
+  @Override
+  public ShopTransactionStatus chargeServiceFee(int amount) {
+    if (amount < 0) {
+      return ShopTransactionStatus.INVALID_PRICE;
+    }
+    if (!inventory.hasGold(amount)) {
+      return ShopTransactionStatus.INSUFFICIENT_CURRENCY;
+    }
+    inventory.setGold(inventory.getGold() - amount);
+    return ShopTransactionStatus.SUCCESS;
+  }
 }
