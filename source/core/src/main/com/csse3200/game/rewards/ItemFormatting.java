@@ -22,6 +22,7 @@ public final class ItemFormatting {
     DISPLAY_NAMES.put(ItemType.BRAND_OF_THE_DAMNED, "Brand of the Damned");
     DISPLAY_NAMES.put(ItemType.SHATTERED_AEGIS, "Shattered Aegis");
     DISPLAY_NAMES.put(ItemType.AMBROSIA_FLASK, "Draught of Ambrosia");
+    DISPLAY_NAMES.put(ItemType.BLOOD_OATH_SIGIL, "Blood-Oath Sigil");
   }
 
   private ItemFormatting() {
@@ -50,6 +51,7 @@ public final class ItemFormatting {
     SOURCES.put(ItemType.BRAND_OF_THE_DAMNED, "Chance Events");
     SOURCES.put(ItemType.SHATTERED_AEGIS, "Chance Events");
     SOURCES.put(ItemType.AMBROSIA_FLASK, "Chance Events");
+    SOURCES.put(ItemType.BLOOD_OATH_SIGIL, "Chance Events");
   }
 
   /** Returns where the player can obtain the given item, for display in the Item Library. */

@@ -7,6 +7,8 @@ import com.csse3200.game.components.StatusEffect;
 public final class CursePenalties {
   public static final String STRENGTH_PENALTY = "STRENGTH_PENALTY";
   public static final String BLOCK_PENALTY = "BLOCK_PENALTY";
+  public static final String BLOOD_OATH = "BLOOD_OATH";
+  public static final int BLOOD_OATH_DAMAGE_PER_COPY = 2;
 
   private CursePenalties() {}
 
@@ -25,5 +27,11 @@ public final class CursePenalties {
     StatusEffect existing = stats.getStatusEffect(penalty);
     int value = existing == null ? 0 : existing.getValue();
     return Math.max(0, amount - value);
+  }
+
+  /** Returns the number of stacks of the given penalty, or 0 if none. */
+  public static int getPenalty(CombatStatsComponent stats, String penalty) {
+    StatusEffect existing = stats.getStatusEffect(penalty);
+    return existing == null ? 0 : existing.getValue();
   }
 }

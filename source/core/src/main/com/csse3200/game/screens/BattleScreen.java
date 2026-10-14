@@ -66,6 +66,7 @@ import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.AnimationRenderComponent;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
+import com.csse3200.game.rewards.BloodOathSigilEffect;
 import com.csse3200.game.rewards.BrandOfTheDamnedEffect;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.rewards.ShatteredAegisEffect;
@@ -856,6 +857,10 @@ public class BattleScreen extends ScreenAdapter {
     int aegisCount = playerState.getOwnedItemCount(ItemType.SHATTERED_AEGIS);
     for (int i = 0; i < aegisCount; i++) {
       new ShatteredAegisEffect().apply(player);
+    }
+    int sigilCount = playerState.getOwnedItemCount(ItemType.BLOOD_OATH_SIGIL);
+    for (int i = 0; i < sigilCount; i++) {
+      new BloodOathSigilEffect().apply(player);
     }
   }
 }
