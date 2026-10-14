@@ -2,9 +2,7 @@ package com.csse3200.game.components.shop;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -17,9 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
-import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.configs.CardConfig;
@@ -66,6 +62,8 @@ public class ShopDisplay extends UIComponent {
   private static final String LARGE = "large";
   private static final String DEFAULT = "default";
   public static final String BACKGROUND_TEXTURE = "images/shop/shop_outpost_background_v3.png";
+  public static final String ENCOUNTER_TEXTURE = "images/shop/merchant_encounter_v2.png";
+  public static final String CLOSE_SHOP_TEXTURE = "images/shop/merchant_table_extra_thin_frame.png";
   public static final String MERCHANT_TEXTURE = "images/shop/wandering_merchant_v3.png";
   public static final String PANEL_FRAME_TEXTURE = "images/shop/shop_panel_worn.png";
   public static final String CARD_FRAME_TEXTURE = "images/shop/shop_card_worn.png";
@@ -73,20 +71,12 @@ public class ShopDisplay extends UIComponent {
   private static final String SMALL = "small";
   private static final String WHITE = "white";
   private static final float Z_INDEX = 2f;
-  private static final float PANEL_WIDTH = 936f;
-  private static final float CARD_WIDTH = 282f;
-  private static final float CARD_PADDING = 10f;
-  private static final float CARD_CONTENT_WIDTH = CARD_WIDTH - (CARD_PADDING * 2f);
-
-  private static final Color BACKDROP_COLOUR = new Color(0.025f, 0.012f, 0.018f, 0.34f);
-  private static final Color CARD_COLOUR = new Color(0.86f, 0.78f, 0.72f, 1f);
   private static final Color ART_COLOUR = new Color(0.075f, 0.055f, 0.065f, 1f);
   private static final Color GOLD_COLOUR = new Color(0.95f, 0.73f, 0.28f, 1f);
   private static final Color BODY_COLOUR = new Color(0.9f, 0.84f, 0.73f, 1f);
   private static final Color MUTED_COLOUR = new Color(0.65f, 0.58f, 0.52f, 1f);
-  private static final Color AVAILABLE_COLOUR = new Color(0.45f, 0.78f, 0.47f, 1f);
+  private static final Color AVAILABLE_COLOUR = new Color(0.82f, 0.73f, 0.56f, 1f);
   private static final Color UNAFFORDABLE_COLOUR = new Color(0.88f, 0.4f, 0.34f, 1f);
-  private static final Color SOLD_COLOUR = new Color(0.48f, 0.46f, 0.47f, 1f);
 
   enum ShopItemState {
     AVAILABLE,
@@ -95,19 +85,7 @@ public class ShopDisplay extends UIComponent {
     UNAVAILABLE
   }
 
-  private static class ItemWidgets {
-    private final Table card;
-    private final Label stateLabel;
-    private final Label stockLabel;
-    private final TextButton buyButton;
-
-    private ItemWidgets(Table card, Label stateLabel, Label stockLabel, TextButton buyButton) {
-      this.card = card;
-      this.stateLabel = stateLabel;
-      this.stockLabel = stockLabel;
-      this.buyButton = buyButton;
-    }
-  }
+  private record ItemWidgets(TextButton buyButton) {}
 
   private final ShopEncounter shopEncounter;
   private final CardService cardService;
@@ -116,19 +94,23 @@ public class ShopDisplay extends UIComponent {
   private Label merchantsFavorLabel;
   private final Map<String, ItemWidgets> itemWidgets = new HashMap<>();
   private final Set<String> purchasedItemIds = new HashSet<>();
+  private final java.util.List<CardDisplaySlot> displaySlots = new java.util.ArrayList<>();
+  private TextButton refreshButton;
+  private boolean shopOpen;
+  private Image sceneBackground;
+  private Label sceneSubtitle;
+  private Label merchantDialogue;
+  private MerchantDisplayCounter products;
+  private com.badlogic.gdx.scenes.scene2d.Group shopControls;
+  private com.badlogic.gdx.scenes.scene2d.Group approachControls;
+  private long displayedRevision;
   private CardWidgetAssets cardWidgetAssets;
 
   private Stack rootStack;
+  private Table titleFrame;
   private Label goldLabel;
   private Label statusLabel;
   private TextButtonStyle availableButtonStyle;
-  private TextButtonStyle unaffordableButtonStyle;
-  private TextButtonStyle soldButtonStyle;
-  private Drawable panelBackground;
-  private Drawable availableCardBackground;
-  private Drawable unaffordableCardBackground;
-  private Drawable soldCardBackground;
-  private Drawable unavailableCardBackground;
 
   /**
    * Creates a Shop display using the default shop configuration without a map callback.
@@ -230,273 +212,227 @@ public class ShopDisplay extends UIComponent {
   }
 
   private void createStyles() {
-    panelBackground =
-        createPatchDrawable(
-            PANEL_FRAME_TEXTURE,
-            54,
-            80,
-            1509,
-            809,
-            76,
-            76,
-            60,
-            60,
-            0.38f,
-            new Color(0.82f, 0.72f, 0.67f, 0.96f),
-            "window-w");
-    availableCardBackground = createCardDrawable(CARD_COLOUR);
-    unaffordableCardBackground = createCardDrawable(new Color(0.72f, 0.46f, 0.43f, 1f));
-    soldCardBackground = createCardDrawable(new Color(0.55f, 0.53f, 0.53f, 1f));
-    unavailableCardBackground = createCardDrawable(new Color(0.62f, 0.5f, 0.48f, 1f));
-
-    availableButtonStyle =
-        createButtonStyle(
-            new Color(0.62f, 0.28f, 0.29f, 1f),
-            new Color(0.78f, 0.38f, 0.36f, 1f),
-            new Color(0.46f, 0.18f, 0.2f, 1f));
-
-    unaffordableButtonStyle = new TextButtonStyle(availableButtonStyle);
-    unaffordableButtonStyle.disabled = createPlaqueDrawable(new Color(0.38f, 0.19f, 0.2f, 1f));
-    unaffordableButtonStyle.disabledFontColor = new Color(0.72f, 0.4f, 0.37f, 1f);
-
-    soldButtonStyle = new TextButtonStyle(availableButtonStyle);
-    soldButtonStyle.disabled = createPlaqueDrawable(new Color(0.36f, 0.34f, 0.35f, 1f));
-    soldButtonStyle.disabledFontColor = SOLD_COLOUR;
-  }
-
-  private TextButtonStyle createButtonStyle(Color upColour, Color overColour, Color downColour) {
-    TextButtonStyle style = new TextButtonStyle(skin.get(TextButtonStyle.class));
-    style.up = createPlaqueDrawable(upColour);
-    style.over = createPlaqueDrawable(overColour);
-    style.down = createPlaqueDrawable(downColour);
-    style.fontColor = Color.WHITE;
-    style.overFontColor = Color.WHITE;
-    style.downFontColor = Color.WHITE;
-    return style;
-  }
-
-  private Drawable createPlaqueDrawable(Color tint) {
-    return createPatchDrawable(
-        PLAQUE_FRAME_TEXTURE, 72, 152, 2031, 409, 105, 105, 78, 78, 0.13f, tint, "button");
-  }
-
-  private Drawable createCardDrawable(Color tint) {
-    return createPatchDrawable(
-        CARD_FRAME_TEXTURE, 70, 64, 887, 1401, 92, 92, 92, 92, 0.17f, tint, WHITE);
-  }
-
-  private Drawable createPatchDrawable(
-      String texturePath,
-      int regionX,
-      int regionY,
-      int regionWidth,
-      int regionHeight,
-      int left,
-      int right,
-      int top,
-      int bottom,
-      float scale,
-      Color tint,
-      String fallbackDrawable) {
-    ResourceService resources = ServiceLocator.getResourceService();
-    if (resources == null || !isLoadedTexture(resources, texturePath)) {
-      return skin.newDrawable(fallbackDrawable, tint);
-    }
-
-    Texture texture = resources.getAsset(texturePath, Texture.class);
-    texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-    TextureRegion region = new TextureRegion(texture, regionX, regionY, regionWidth, regionHeight);
-    NinePatch patch = new NinePatch(region, left, right, top, bottom);
-    patch.scale(scale, scale);
-    patch.setColor(tint);
-    return new NinePatchDrawable(patch);
+    availableButtonStyle = new TextButtonStyle(skin.get(TextButtonStyle.class));
   }
 
   private void addActors() {
     rootStack = new Stack();
     rootStack.setFillParent(true);
-    rootStack.setTouchable(Touchable.enabled);
-    rootStack.getColor().a = 0f;
+    rootStack.setName("merchant-scene");
+    MerchantSceneLayout layout = new MerchantSceneLayout();
+    rootStack.add(layout);
+    var scene = layout.scene;
+    sceneBackground = new Image();
+    sceneBackground.setBounds(0, 0, 1280, 800);
+    sceneBackground.setTouchable(Touchable.disabled);
+    scene.addActor(sceneBackground);
+    titleFrame = new Table();
+    titleFrame.setName("merchant-title");
+    titleFrame.setBackground(sceneFrame());
+    titleFrame.left();
+    titleFrame.pad(15f, 18f, 15f, 18f);
+    Label title = new Label("Wayside Merchant", createLabelStyle(LARGE, BODY_COLOUR));
+    title.setFontScale(1.12f);
+    sceneSubtitle = new Label("", createLabelStyle(SMALL, BODY_COLOUR));
+    sceneSubtitle.setFontScale(0.8f);
+    titleFrame.add(title).left();
+    titleFrame.row();
+    titleFrame.add(sceneSubtitle).left().padTop(8f);
+    titleFrame.setBounds(36, 650, 470, 106);
+    scene.addActor(titleFrame);
+    approachControls = new com.badlogic.gdx.scenes.scene2d.Group();
+    approachControls.setTouchable(Touchable.childrenOnly);
+    scene.addActor(approachControls);
+    Actor stallHover =
+        new Actor() {
+          private boolean hovered;
 
-    ResourceService resources = ServiceLocator.getResourceService();
-    if (resources != null && isLoadedTexture(resources, BACKGROUND_TEXTURE)) {
-      Texture backgroundTexture = resources.getAsset(BACKGROUND_TEXTURE, Texture.class);
-      backgroundTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-      Image background = new Image(backgroundTexture);
-      background.setScaling(Scaling.fill);
-      rootStack.add(background);
-    }
+          {
+            setName("merchant-stall-hover");
+            setBounds(820, 160, 365, 335);
+            addListener(
+                new com.badlogic.gdx.scenes.scene2d.InputListener() {
+                  @Override
+                  public void enter(
+                      com.badlogic.gdx.scenes.scene2d.InputEvent event,
+                      float x,
+                      float y,
+                      int pointer,
+                      Actor from) {
+                    if (pointer == -1) hovered = true;
+                  }
 
-    Table backdrop = new Table();
-    backdrop.setBackground(skin.newDrawable(WHITE, BACKDROP_COLOUR));
-    rootStack.add(backdrop);
+                  @Override
+                  public void exit(
+                      com.badlogic.gdx.scenes.scene2d.InputEvent event,
+                      float x,
+                      float y,
+                      int pointer,
+                      Actor to) {
+                    if (pointer == -1) hovered = false;
+                  }
+                });
+          }
 
-    Table screenLayout = new Table();
-    screenLayout.setFillParent(true);
-    screenLayout.left();
-    screenLayout.pad(20f, 18f, 20f, 306f);
-
-    Table shopPanel = new Table();
-    shopPanel.setBackground(panelBackground);
-    shopPanel.pad(30f, 28f, 28f, 28f);
-
-    addHeader(shopPanel);
-    shopPanel.row();
-    addDivider(shopPanel);
-    shopPanel.row();
-
-    if (shopEncounter.getItems().isEmpty()) {
-      Label emptyLabel =
-          new Label("No relics remain for sale.", createLabelStyle(DEFAULT, MUTED_COLOUR));
-      shopPanel.add(emptyLabel).center().pad(80f).colspan(3);
-    } else {
-      addShopItems(shopPanel);
-    }
-
-    shopPanel.row();
-    addFooter(shopPanel);
-
-    screenLayout.add(shopPanel).width(PANEL_WIDTH).height(650f);
-    rootStack.add(screenLayout);
-    rootStack.add(createMerchantLayer());
-    rootStack.add(createMerchantSpeechLayer());
-
-    stage.addActor(rootStack);
-    refresh();
-    rootStack.addAction(Actions.fadeIn(0.25f));
-  }
-
-  private Table createMerchantLayer() {
-    Table merchantLayer = new Table();
-    merchantLayer.setFillParent(true);
-    merchantLayer.bottom().right();
-
-    ResourceService resources = ServiceLocator.getResourceService();
-    if (resources != null && isLoadedTexture(resources, MERCHANT_TEXTURE)) {
-      Texture merchantTexture = resources.getAsset(MERCHANT_TEXTURE, Texture.class);
-      merchantTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-      Image merchant = new Image(merchantTexture);
-      merchant.setScaling(Scaling.fit);
-      merchantLayer.add(merchant).width(310f).height(465f).padRight(14f).padBottom(145f);
-    }
-    return merchantLayer;
-  }
-
-  private Table createMerchantSpeechLayer() {
-    Table speechLayer = new Table();
-    speechLayer.setFillParent(true);
-    speechLayer.bottom().right();
-
-    Table greeting = new Table();
-    greeting.setBackground(skin.newDrawable(WHITE, new Color(0.105f, 0.052f, 0.052f, 0.78f)));
-    Label greetingLabel =
-        new Label("\"Looking for something rare?\"", createLabelStyle(SMALL, BODY_COLOUR));
-    greetingLabel.setFontScale(0.86f);
-    greetingLabel.setAlignment(Align.center);
-    greeting.add(greetingLabel).center().pad(12f, 6f, 12f, 6f);
-    speechLayer.add(greeting).width(295f).height(56f).padRight(20f).padBottom(42f);
-    return speechLayer;
-  }
-
-  private void addHeader(Table shopPanel) {
-    Table titleBlock = new Table();
-    Label title = new Label("Wayside Reliquary", createLabelStyle(LARGE, BODY_COLOUR));
-    Label subtitle =
-        new Label(
-            "Choose carefully. Each offer may be purchased once.",
-            createLabelStyle(SMALL, MUTED_COLOUR));
-    title.setFontScale(1.16f);
-    title.setWrap(false);
-    subtitle.setFontScale(0.92f);
-    titleBlock.add(title).left();
-    titleBlock.row();
-    titleBlock.add(subtitle).left().padTop(6f);
-    titleBlock.row();
-    merchantsFavorLabel = new Label("", createLabelStyle("small", GOLD_COLOUR));
-    merchantsFavorLabel.setFontScale(0.92f);
-    titleBlock.add(merchantsFavorLabel).left().padTop(6f);
-
+          @Override
+          public void draw(com.badlogic.gdx.graphics.g2d.Batch batch, float alpha) {
+            if (!hovered) return;
+            Color old = new Color(batch.getColor());
+            batch.setColor(0.8f, 0.6f, 0.3f, alpha * 0.18f);
+            skin.getDrawable(WHITE).draw(batch, getX() + 50, getY() + 132, 235, 2);
+            batch.setColor(old);
+          }
+        };
+    approachControls.addActor(stallHover);
+    Actor marker = new MerchantInteractionMarker(skin.getDrawable(WHITE), this::openMerchant);
+    marker.setBounds(935, 443, 56, 64);
+    approachControls.addActor(marker);
+    TextButton approachLeave = sceneButton("Leave", this::leaveShop);
+    approachLeave.setBounds(1040, 36, 190, 48);
+    approachControls.addActor(approachLeave);
+    shopControls = new com.badlogic.gdx.scenes.scene2d.Group();
+    shopControls.setTouchable(Touchable.childrenOnly);
+    scene.addActor(shopControls);
+    products = new MerchantDisplayCounter();
+    shopControls.addActor(products);
     Table purse = new Table();
-    purse.setBackground(createPlaqueDrawable(new Color(0.76f, 0.63f, 0.45f, 1f)));
-    purse.pad(12f, 18f, 12f, 18f);
+    purse.setBackground(formalShopFrame());
+    ResourceService coinResources = ServiceLocator.getResourceService();
+    if (coinResources != null && isLoadedTexture(coinResources, "images/money.png")) {
+      Image coin = new Image(coinResources.getAsset("images/money.png", Texture.class));
+      coin.setScaling(com.badlogic.gdx.utils.Scaling.fit);
+      purse.add(coin).size(24).padRight(8);
+    }
     goldLabel = new Label("", createLabelStyle(DEFAULT, GOLD_COLOUR));
-    goldLabel.setFontScale(1.22f);
-    purse.add(goldLabel);
-
-    shopPanel.add(titleBlock).left().expandX().colspan(2);
-    shopPanel.add(purse).right().width(155f);
+    purse.add(goldLabel).pad(10);
+    purse.setBounds(1020, 684, 220, 56);
+    shopControls.addActor(purse);
+    Table dialogue = new Table();
+    dialogue.setBackground(formalShopFrame());
+    merchantDialogue = new Label("Take a look.", createLabelStyle(DEFAULT, BODY_COLOUR));
+    merchantDialogue.setFontScale(0.86f);
+    merchantDialogue.setWrap(true);
+    dialogue.add(merchantDialogue).width(214).pad(12);
+    dialogue.setBounds(1005, 595, 250, 70);
+    shopControls.addActor(dialogue);
+    refreshButton = formalShopButton("Refresh (Free)", this::refreshStock);
+    refreshButton.setName("shop-refresh");
+    refreshButton.setBounds(385, 24, 325, 44);
+    shopControls.addActor(refreshButton);
+    TextButton leave = formalShopButton("Leave", this::leaveShop);
+    leave.setName("merchant-leave");
+    leave.setBounds(735, 24, 220, 44);
+    shopControls.addActor(leave);
+    statusLabel = new Label("", createLabelStyle(SMALL, BODY_COLOUR));
+    statusLabel.setFontScale(0.7f);
+    statusLabel.setAlignment(Align.center);
+    statusLabel.setBounds(210, 63, 860, 16);
+    // Retain transaction feedback internally, without the retired bottom text actor.
+    stage.addActor(rootStack);
+    showMerchantState();
   }
 
-  private void addDivider(Table shopPanel) {
-    Table divider = new Table();
-    divider.setBackground(skin.newDrawable(WHITE, new Color(0.34f, 0.25f, 0.17f, 0.92f)));
-    shopPanel.add(divider).height(2f).expandX().fillX().colspan(3).padTop(14f).padBottom(16f);
+  private Drawable sceneFrame() {
+    return MerchantSceneLayout.frame(
+        skin.getDrawable(WHITE), new Color(0.13f, 0.068f, 0.035f, 0.98f));
   }
 
-  private void addShopItems(Table shopPanel) {
-    CardDiscoveryService discovery = ServiceLocator.getCardDiscoveryService();
-    if (discovery != null) {
-      discovery.recordSeenAll(shopEncounter.getItems().stream().map(item -> item.cardId).toList());
-    }
-
-    int itemNumber = 0;
-    int itemCount = shopEncounter.getItems().size();
-    for (ShopItem item : shopEncounter.getItems()) {
-      Table card = createItemCard(item);
-      float rightPadding = itemNumber < itemCount - 1 ? 20f : 0f;
-      shopPanel.add(card).top().width(CARD_WIDTH).height(410f).padRight(rightPadding);
-      itemNumber++;
-    }
+  private TextButtonStyle sceneButtonStyle() {
+    TextButtonStyle style = new TextButtonStyle(availableButtonStyle);
+    style.up = sceneFrame();
+    style.over =
+        MerchantSceneLayout.frame(skin.getDrawable(WHITE), new Color(0.22f, 0.125f, 0.065f, 0.98f));
+    style.down = sceneFrame();
+    style.disabled = sceneFrame();
+    style.fontColor = BODY_COLOUR;
+    style.disabledFontColor = MUTED_COLOUR;
+    return style;
   }
 
-  private Table createItemCard(ShopItem item) {
-    Table card = new Table();
-    card.setBackground(availableCardBackground);
-    card.pad(CARD_PADDING);
+  private Drawable formalShopFrame() {
+    return new MerchantShopFrame(skin.getDrawable(WHITE), new Color(0.11f, 0.055f, 0.03f, 1));
+  }
 
-    Actor artwork = createArtwork(item);
+  private TextButton formalShopButton(String text, Runnable action) {
+    TextButton button = sceneButton(text, action);
+    TextButtonStyle style = new TextButtonStyle(button.getStyle());
+    style.up = formalShopFrame();
+    style.down = formalShopFrame();
+    style.disabled = formalShopFrame();
+    style.over = new MerchantShopFrame(skin.getDrawable(WHITE), new Color(0.20f, 0.09f, 0.04f, 1));
+    button.setStyle(style);
+    return button;
+  }
 
-    Float currentDiscount = shopEncounter.getShopDiscount();
-    float discount = currentDiscount == null ? 0f : currentDiscount;
-    int shownPrice = Math.round(item.price * (1f - discount));
-    String priceText =
-        discount > 0f
-            ? String.format("%d GOLD (-%.0f%%)", shownPrice, discount * 100f)
-            : String.format("%d GOLD", item.price);
-    Label priceLabel = new Label(priceText, createLabelStyle(DEFAULT, GOLD_COLOUR));
-    Label stockLabel = new Label("", createLabelStyle("small", MUTED_COLOUR));
-    Label stateLabel = new Label("", createLabelStyle("small", AVAILABLE_COLOUR));
-    priceLabel.setFontScale(0.98f);
-    stockLabel.setFontScale(0.8f);
-    stateLabel.setFontScale(0.82f);
-
-    Table detailsRow = new Table();
-    detailsRow.add(priceLabel).left().expandX();
-    detailsRow.add(stockLabel).right();
-
-    TextButton buyButton = new TextButton("Purchase", availableButtonStyle);
-    buyButton.getLabel().setFontScale(1f);
-    buyButton.getLabel().setWrap(true);
-    buyButton.getLabel().setAlignment(Align.center);
-    buyButton.addListener(
+  private TextButton sceneButton(String text, Runnable action) {
+    TextButton button = new TextButton(text, sceneButtonStyle());
+    button.getLabel().setFontScale(1f);
+    button.addListener(
         new ChangeListener() {
           @Override
-          public void changed(ChangeEvent changeEvent, Actor actor) {
-            buyItem(item.id);
+          public void changed(ChangeEvent event, Actor actor) {
+            action.run();
           }
         });
+    return button;
+  }
 
-    card.add(artwork).size(CardWidget.CARD_WIDTH, 280f).top();
+  void openMerchant() {
+    if (shopOpen || shopEncounter.snapshot().completed()) return;
+    shopOpen = true;
+    showMerchantState();
+  }
 
-    card.row();
-    card.add(detailsRow).width(CARD_CONTENT_WIDTH).fillX().padTop(6f);
-    card.row();
-    card.add(stateLabel).left().padTop(3f);
-    card.row();
-    card.add(buyButton).bottom().width(CARD_CONTENT_WIDTH).height(46f).padTop(6f);
+  private void showMerchantState() {
+    ResourceService resources = ServiceLocator.getResourceService();
+    String path = shopOpen ? CLOSE_SHOP_TEXTURE : ENCOUNTER_TEXTURE;
+    if (resources != null && isLoadedTexture(resources, path)) {
+      Texture texture = resources.getAsset(path, Texture.class);
+      texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+      sceneBackground.setDrawable(
+          new com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable(texture));
+    }
+    sceneSubtitle.setText(
+        shopOpen
+            ? "Choose carefully. Each offer may be purchased once."
+            : "The world is broken, still trade goes on.");
+    approachControls.setVisible(!shopOpen);
+    shopControls.setVisible(shopOpen);
+    if (shopOpen) titleFrame.setBackground(formalShopFrame());
+    if (shopOpen) rebuildProducts();
+  }
 
-    itemWidgets.put(item.id, new ItemWidgets(card, stateLabel, stockLabel, buyButton));
-    return card;
+  private void rebuildProducts() {
+    if (!displaySlots.isEmpty()) stage.cancelTouchFocus();
+    itemWidgets.clear();
+    var quote = shopEncounter.snapshot();
+    displayedRevision = quote.revision();
+    CardDiscoveryService discovery = ServiceLocator.getCardDiscoveryService();
+    if (discovery != null)
+      discovery.recordSeenAll(shopEncounter.getItems().stream().map(item -> item.cardId).toList());
+    int i = 0;
+    for (ShopItem item : shopEncounter.getItems()) {
+      if (i == displaySlots.size()) {
+        CardDisplaySlot slot =
+            new CardDisplaySlot(
+                skin.getDrawable(WHITE),
+                createLabelStyle(DEFAULT, GOLD_COLOUR),
+                sceneButtonStyle(),
+                this::buyItem);
+        slot.setName("shop-slot-" + i);
+        products.addSlot(slot, i);
+        displaySlots.add(slot);
+      }
+      CardDisplaySlot slot = displaySlots.get(i);
+      var offer =
+          quote.offers().stream().filter(o -> o.id().equals(item.id)).findFirst().orElseThrow();
+      slot.bind(createArtwork(item), offer.price(), item.id, displayedRevision);
+      slot.setVisible(true);
+      itemWidgets.put(item.id, new ItemWidgets(slot.purchaseButton()));
+      i++;
+    }
+    for (; i < displaySlots.size(); i++) displaySlots.get(i).setVisible(false);
+    refresh();
   }
 
   private Actor createArtwork(ShopItem item) {
@@ -594,41 +530,15 @@ public class ShopDisplay extends UIComponent {
     return texturePath != null && resources.containsAsset(texturePath, Texture.class);
   }
 
-  private void addFooter(Table shopPanel) {
-    statusLabel =
-        new Label(
-            "The world is broken. Still trade goes on.", createLabelStyle(SMALL, MUTED_COLOUR));
-    statusLabel.setFontScale(0.88f);
-    statusLabel.setWrap(true);
-
-    TextButton leaveButton =
-        new TextButton(
-            "Leave Reliquary",
-            createButtonStyle(
-                new Color(0.55f, 0.52f, 0.5f, 1f),
-                new Color(0.68f, 0.63f, 0.58f, 1f),
-                new Color(0.4f, 0.38f, 0.38f, 1f)));
-    leaveButton.getLabel().setFontScale(1.12f);
-    leaveButton.addListener(
-        new ChangeListener() {
-          @Override
-          public void changed(ChangeEvent changeEvent, Actor actor) {
-            leaveShop();
-          }
-        });
-
-    shopPanel.add(statusLabel).left().expandX().fillX().colspan(2).padTop(18f).padRight(20f);
-    shopPanel.add(leaveButton).right().width(250f).height(60f).padTop(18f);
-  }
-
   private LabelStyle createLabelStyle(String baseStyle, Color colour) {
     LabelStyle style = new LabelStyle(skin.get(baseStyle, LabelStyle.class));
     style.fontColor = colour;
     return style;
   }
 
-  private void buyItem(String itemId) {
-    PurchaseResult result = shopEncounter.purchase(itemId);
+  private void buyItem(String itemId, long revision) {
+    PurchaseResult result =
+        shopEncounter.purchase(itemId, revision, java.util.UUID.randomUUID().toString()).result();
     logger.debug("Purchase result for {}: {}", itemId, result.getStatus());
 
     if (result.isSuccess()) {
@@ -642,7 +552,27 @@ public class ShopDisplay extends UIComponent {
       AudioService.playSound(SoundId.ERROR, 0.5f);
       statusLabel.setText(result.getMessage());
     }
-    refresh();
+    if (result.isSuccess()) {
+      String message = statusLabel.getText().toString();
+      rebuildProducts();
+      statusLabel.setText(message);
+      merchantDialogue.setText("A fine choice.");
+    } else {
+      refresh();
+    }
+  }
+
+  private void refreshStock() {
+    var result = shopEncounter.refresh(displayedRevision, java.util.UUID.randomUUID().toString());
+    if (result.isSuccess()) {
+      purchasedItemIds.clear();
+      rebuildProducts();
+      statusLabel.setText("Stock refreshed. New offers have no discount.");
+      merchantDialogue.setText("Nothing catch your eye?\nLet me look again.");
+    } else {
+      statusLabel.setText("Refresh failed: " + result.status().name().replace('_', ' '));
+      refresh();
+    }
   }
 
   private void leaveShop() {
@@ -653,6 +583,19 @@ public class ShopDisplay extends UIComponent {
   }
 
   private void refresh() {
+    var quote = shopEncounter.snapshot();
+    if (refreshButton != null) {
+      var fee = quote.nextRefreshCost();
+      refreshButton.setText(
+          fee.isPresent()
+              ? (fee.getAsInt() == 0 ? "Refresh (Free)" : "Refresh (" + fee.getAsInt() + " GOLD)")
+              : "Refresh unavailable");
+      refreshButton.setDisabled(
+          quote.completed()
+              || fee.isEmpty()
+              || quote.gold() == null
+              || (fee.isPresent() && quote.gold() < fee.getAsInt()));
+    }
     Integer currency = shopEncounter.getCurrency();
     goldLabel.setText(currency == null ? "GOLD  --" : String.format("GOLD  %d", currency));
 
@@ -683,43 +626,14 @@ public class ShopDisplay extends UIComponent {
   }
 
   private void applyItemState(ItemWidgets widgets, ShopItem item, ShopItemState state) {
-    widgets.stockLabel.setText(String.format("Stock: %d", Math.max(item.stock, 0)));
-
-    switch (state) {
-      case AVAILABLE:
-        widgets.card.setBackground(availableCardBackground);
-        widgets.stateLabel.setStyle(createLabelStyle(SMALL, AVAILABLE_COLOUR));
-        widgets.stateLabel.setText("AVAILABLE");
-        widgets.buyButton.setStyle(availableButtonStyle);
-        widgets.buyButton.setText("Purchase");
-        widgets.buyButton.setDisabled(false);
-        break;
-      case UNAFFORDABLE:
-        widgets.card.setBackground(unaffordableCardBackground);
-        widgets.stateLabel.setStyle(createLabelStyle(SMALL, UNAFFORDABLE_COLOUR));
-        widgets.stateLabel.setText("UNAFFORDABLE");
-        widgets.buyButton.setStyle(unaffordableButtonStyle);
-        widgets.buyButton.setText("Not enough gold");
-        widgets.buyButton.setDisabled(true);
-        break;
-      case SOLD:
-        widgets.card.setBackground(soldCardBackground);
-        widgets.stateLabel.setStyle(createLabelStyle(SMALL, SOLD_COLOUR));
-        widgets.stateLabel.setText("SOLD");
-        widgets.buyButton.setStyle(soldButtonStyle);
-        widgets.buyButton.setText("Sold");
-        widgets.buyButton.setDisabled(true);
-        break;
-      case UNAVAILABLE:
-      default:
-        widgets.card.setBackground(unavailableCardBackground);
-        widgets.stateLabel.setStyle(createLabelStyle(SMALL, UNAFFORDABLE_COLOUR));
-        widgets.stateLabel.setText("UNAVAILABLE");
-        widgets.buyButton.setStyle(unaffordableButtonStyle);
-        widgets.buyButton.setText("Unavailable");
-        widgets.buyButton.setDisabled(true);
-        break;
-    }
+    widgets.buyButton.setText(
+        switch (state) {
+          case AVAILABLE -> "Purchase";
+          case UNAFFORDABLE -> "Not enough gold";
+          case SOLD -> "Sold";
+          case UNAVAILABLE -> "Unavailable";
+        });
+    widgets.buyButton.setDisabled(state != ShopItemState.AVAILABLE);
   }
 
   /**

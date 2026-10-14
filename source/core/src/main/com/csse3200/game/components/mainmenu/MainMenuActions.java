@@ -28,6 +28,7 @@ public class MainMenuActions extends Component {
     entity.getEvents().addListener("library", this::onLibrary);
     entity.getEvents().addListener(MainMenuDisplay.DEMO_EVENT, game::openDemoEvent);
     entity.getEvents().addListener(MainMenuDisplay.DEMO_CAMPFIRE_EVENT, game::openDemoCampfire);
+    entity.getEvents().addListener(MainMenuDisplay.DEMO_SHOP_EVENT, game::openDemoShop);
   }
 
   /** Discards any run in progress and opens a fresh map. */
