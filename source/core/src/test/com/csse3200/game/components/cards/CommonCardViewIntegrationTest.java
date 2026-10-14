@@ -94,6 +94,7 @@ class CommonCardViewIntegrationTest {
             .addComponent(
                 new ShopDisplay(new ShopEncounter(new InventoryComponent(100), shop), library));
     entity.create();
+    approachMerchant();
     assertEquals(3, widgets().size());
     for (CardWidget widget : widgets()) {
       assertRarityFrame(widget);
@@ -108,12 +109,22 @@ class CommonCardViewIntegrationTest {
         new ShopDisplay(new ShopEncounter(new InventoryComponent(100), shop), library);
     entity = new Entity().addComponent(display);
     entity.create();
+    approachMerchant();
 
     List<CardWidget> widgets = widgets();
     assertEquals(1, widgets.size());
     assertCommonFrame(widgets.getFirst());
     assertEquals("Strike", widgets.getFirst().displayedName());
     assertEquals("Deal 6 damage.", widgets.getFirst().displayedDescription());
+  }
+
+  private void approachMerchant() {
+    Actor target = stage.getRoot().findActor("merchant-approach");
+    for (var listener : target.getListeners()) {
+      if (listener instanceof com.badlogic.gdx.scenes.scene2d.utils.ClickListener click) {
+        click.clicked(new InputEvent(), 20, 20);
+      }
+    }
   }
 
   @Test

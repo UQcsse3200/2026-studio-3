@@ -49,6 +49,7 @@ public class MainMenuDisplay extends UIComponent {
   public static final String EXIT_EVENT = "exit";
   public static final String DEMO_EVENT = "demoEvent";
   public static final String DEMO_CAMPFIRE_EVENT = "demoCampfire";
+  public static final String DEMO_SHOP_EVENT = "demoShop";
 
   private Stack rootStack;
   private Table menuTable;
@@ -84,6 +85,20 @@ public class MainMenuDisplay extends UIComponent {
     Texture buttonFrameTexture = getTexture(BUTTON_FRAME_TEXTURE);
     buttonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     rootStack.add(buildContent(buttonFrameTexture));
+    Table demoControls = new Table();
+    demoControls.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.childrenOnly);
+    demoControls.top().right().pad(18f);
+    demoControls
+        .add(createButton("Demo Shop", DEMO_SHOP_EVENT, buttonFrameTexture))
+        .width(200f)
+        .height(50f);
+    demoControls.row();
+    demoControls
+        .add(createButton("Demo Event", DEMO_EVENT, buttonFrameTexture))
+        .width(200f)
+        .height(50f)
+        .padTop(8f);
+    rootStack.add(demoControls);
     stage.addActor(rootStack);
   }
 
