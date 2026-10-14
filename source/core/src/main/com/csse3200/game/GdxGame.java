@@ -279,7 +279,7 @@ public class GdxGame extends Game {
     openDemoEvent(CardFusionEncounterBehaviour.ENCOUNTER_ID);
   }
 
-  private void openDemoEvent(String previewEncounterId) {
+  public void openDemoEvent(String previewEncounterId) {
     prepareScreenTransition(ScreenType.ENCOUNTER);
     setScreen(new DemoEventScreen(this, previewEncounterId));
   }

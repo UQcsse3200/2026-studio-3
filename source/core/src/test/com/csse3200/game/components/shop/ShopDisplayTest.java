@@ -154,6 +154,30 @@ class ShopDisplayTest {
     assertEquals(CardUnlockState.SEEN, discovery.getProgressSnapshot().get("bandage"));
   }
 
+  @Test
+  void successfulPurchaseShowsConfirmedResultAndDoesNotGrantTwiceOnContinue() {
+    ServiceLocator.registerResourceService(mock(ResourceService.class));
+    ShopEncounter encounter = openShop();
+    CardService cards = mock(CardService.class);
+    when(cards.getCard("card")).thenReturn(Optional.empty());
+    ShopDisplay display = new ShopDisplay(encounter, cards);
+    entity = new Entity().addComponent(display);
+    entity.create();
+    display.openMerchant();
+
+    Actor purchase = stage.getRoot().findActor("purchase-offer");
+    purchase.fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    assertEquals(80, encounter.getCurrency());
+    assertNotNull(stage.getRoot().findActor("acquisition-result-overlay"));
+
+    stage
+        .getRoot()
+        .findActor("acquisition-continue")
+        .fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    assertNull(stage.getRoot().findActor("acquisition-result-overlay"));
+    assertEquals(80, encounter.getCurrency());
+  }
+
   private ShopEncounter openShop() {
     InventoryComponent inventory = new InventoryComponent(100);
     ShopService shopService = new ShopService(new ShopItem[] {item});

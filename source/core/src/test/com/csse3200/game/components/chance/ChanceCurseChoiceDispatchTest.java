@@ -22,34 +22,34 @@ import com.csse3200.game.services.ServiceLocator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-/** Checks choice dispatch through existing scenic UI; does not assert visual layout acceptance. */
+/** Checks choice dispatch and the confirmed-result handoff in the scenic UI. */
 @ExtendWith(GameExtension.class)
 class ChanceCurseChoiceDispatchTest {
   @Test
   void shouldDispatchBrandChoice() {
-    shouldDispatchNewScenicChoiceWithoutChangingUi(
+    shouldDispatchNewScenicChoiceWithResultUi(
         "mysterious-shrine", "accept-brand", "BRAND_OF_THE_DAMNED", 50);
   }
 
   @Test
   void shouldDispatchBloodOathChoice() {
-    shouldDispatchNewScenicChoiceWithoutChangingUi(
+    shouldDispatchNewScenicChoiceWithResultUi(
         "mysterious-shrine", "swear-blood-oath", "BLOOD_OATH_SIGIL", 70);
   }
 
   @Test
   void shouldDispatchShatteredAegisChoice() {
-    shouldDispatchNewScenicChoiceWithoutChangingUi(
+    shouldDispatchNewScenicChoiceWithResultUi(
         "abandoned-mine", "claim-shattered-aegis", "SHATTERED_AEGIS", 50);
   }
 
   @Test
   void shouldDispatchAshenEmberChoice() {
-    shouldDispatchNewScenicChoiceWithoutChangingUi(
+    shouldDispatchNewScenicChoiceWithResultUi(
         "abandoned-mine", "take-ashen-ember", "ASHEN_EMBER", 80);
   }
 
-  private void shouldDispatchNewScenicChoiceWithoutChangingUi(
+  private void shouldDispatchNewScenicChoiceWithResultUi(
       String eventId, String choiceId, String itemId, int gold) {
     Stage stage = new Stage(new ScreenViewport(), mock(SpriteBatch.class));
     RenderService renderService = new RenderService();
@@ -83,6 +83,9 @@ class ChanceCurseChoiceDispatchTest {
       assertTrue(session.isResolved());
       assertEquals(35 + gold, player.getCurrency());
       assertEquals(40, player.getHealth());
+      assertNotNull(stage.getRoot().findActor("acquisition-result-overlay"));
+      assertFalse(display.getContinueButton().isVisible());
+      stage.getRoot().findActor("acquisition-close").fire(new ChangeEvent());
       assertTrue(display.getContinueButton().isVisible());
       display.getChoiceButtons().get(choiceIndex).fire(new ChangeEvent());
       verify(items, times(1)).addItem(itemId);
