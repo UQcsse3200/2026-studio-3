@@ -109,9 +109,7 @@ public class BattleActions extends Component {
         message -> dispatch(() -> entity.getEvents().trigger(BATTLE_LOG_EVENT, message)));
     controller.addEnemyEffectsListener(effects -> dispatch(() -> onEnemyEffects(effects)));
     controller.addPlayerEffectsListener(this::onPlayerEffects);
-    if (!tutorialBattle) {
-      controller.addBattleEndListener(this::onBattleEnd);
-    }
+    controller.addBattleEndListener(this::onBattleEnd);
     controller.addHandChangedListener(hand -> entity.getEvents().trigger(HAND_CHANGED_EVENT, hand));
   }
 
@@ -194,15 +192,17 @@ public class BattleActions extends Component {
 
     // Report the result to the run so the map node is marked done (win) or the run stays put
     // (loss). The end screen reads this to decide whether to go back to the map or the menu.
-    RunState runState = game.getRunState();
-    if (runState != null) {
-      boolean hadActiveEncounter = runState.getActiveNodeId() != null;
-      if (win && isEligibleEliteVictory(runState)) {
-        runState.setPendingEliteTempleReward(true);
-      }
-      runState.completeEncounter(win);
-      if (win && hadActiveEncounter) {
-        game.requestAutosaveAfterEncounter();
+    if (!tutorialBattle) {
+      RunState runState = game.getRunState();
+      if (runState != null) {
+        boolean hadActiveEncounter = runState.getActiveNodeId() != null;
+        if (win && isEligibleEliteVictory(runState)) {
+          runState.setPendingEliteTempleReward(true);
+        }
+        runState.completeEncounter(win);
+        if (win && hadActiveEncounter) {
+          game.requestAutosaveAfterEncounter();
+        }
       }
     }
 
@@ -248,7 +248,12 @@ public class BattleActions extends Component {
   }
 
   private void openResultScreen(boolean won) {
-    GdxGame.ScreenType target = won ? GdxGame.ScreenType.VICTORY : GdxGame.ScreenType.DEFEAT;
+    GdxGame.ScreenType target;
+    if (tutorialBattle) {
+      target = won ? GdxGame.ScreenType.TUTORIAL_VICTORY : GdxGame.ScreenType.MAIN_MENU;
+    } else {
+      target = won ? GdxGame.ScreenType.VICTORY : GdxGame.ScreenType.DEFEAT;
+    }
 
     if (Gdx.app != null) {
       Gdx.app.postRunnable(
