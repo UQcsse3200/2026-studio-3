@@ -63,9 +63,11 @@ public final class StatusTooltip extends Table {
     durationStyle.fontColor = new Color(DURATION_COLOUR);
 
     titleLabel = new Label("", titleStyle);
+    titleLabel.setWrap(true);
     descriptionLabel = new Label("", descriptionStyle);
     descriptionLabel.setWrap(true);
     durationLabel = new Label("", durationStyle);
+    durationLabel.setWrap(true);
 
     setBackground(skin.newDrawable("white", BACKGROUND));
     pad(PADDING);

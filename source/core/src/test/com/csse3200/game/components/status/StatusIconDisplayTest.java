@@ -258,9 +258,10 @@ class StatusIconDisplayTest {
   }
 
   private String count(int iconIndex) {
-    Stack icon = (Stack) row().getChildren().get(iconIndex);
-    Table corner = (Table) icon.getChildren().get(1);
-    return ((Label) corner.getChildren().first()).getText().toString();
+    Table icon = (Table) row().getChildren().get(iconIndex);
+    Stack outlined = (Stack) icon.getChildren().get(1);
+    Table front = (Table) outlined.getChildren().peek();
+    return ((Label) front.getChildren().first()).getText().toString();
   }
 
   private static String tooltipText(StatusTooltip tooltip, int line) {

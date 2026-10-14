@@ -1,6 +1,7 @@
 package com.csse3200.game.components.status;
 
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -23,8 +24,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Shows a row of status icons beside a combatant. Each icon carries a small count and explains the
- * status in a tooltip when hovered.
+ * Shows a row of status icons beside a combatant. Each icon has an outlined count beside it and
+ * explains the status in a tooltip when hovered.
  *
  * <p>The row is a separate component from the health display, so layout changes there never
  * conflict with it. It is anchored to a point relative to the entity and grows either upwards or
@@ -36,11 +37,15 @@ import java.util.Set;
  */
 public class StatusIconDisplay extends UIComponent {
   private static final float ICON_SIZE = 28f;
-  private static final float ICON_GAP = 4f;
+  private static final float ICON_GAP = 8f;
+  private static final float COUNT_GAP = 3f;
+  private static final float OUTLINE_WIDTH = 1f;
   private static final float ROW_GAP = 4f;
-  private static final float COUNT_FONT_SCALE = 0.8f;
 
-  /** Statuses whose count shows their value (stacks or points) rather than turns remaining. */
+  /** Offsets of the dark copies drawn behind the count, forming a one-pixel outline. */
+  private static final int[][] OUTLINE_OFFSETS = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+
+  /** Statuses whose value (stacks or points) matters enough to show in the tooltip title. */
   private static final Set<StatusInfo> SHOWS_VALUE =
       EnumSet.of(StatusInfo.POISON, StatusInfo.STRENGTH);
 
@@ -53,6 +58,8 @@ public class StatusIconDisplay extends UIComponent {
   private Map<String, Shown> shown = Map.of();
   private Table row;
   private StatusTooltip tooltip;
+  private Label.LabelStyle countStyle;
+  private Label.LabelStyle outlineStyle;
 
   /**
    * @param worldOffsetY vertical offset of the anchor point from the entity's position, in world
@@ -70,6 +77,10 @@ public class StatusIconDisplay extends UIComponent {
     row = new Table();
     row.setVisible(false);
     tooltip = new StatusTooltip(skin);
+    countStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+    countStyle.fontColor = new Color(Color.WHITE);
+    outlineStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+    outlineStyle.fontColor = new Color(Color.BLACK);
     stage.addActor(row);
     refresh();
   }
@@ -145,16 +156,36 @@ public class StatusIconDisplay extends UIComponent {
       return;
     }
 
-    Label count = new Label(countText(info, status), skin);
-    count.setFontScale(COUNT_FONT_SCALE);
-    Table countCorner = new Table();
-    countCorner.add(count).expand().bottom().right();
-
-    Stack icon = new Stack();
-    icon.add(new Image(resources.getAsset(info.iconPath(), Texture.class)));
-    icon.add(countCorner);
-    row.add(icon).size(ICON_SIZE).space(ICON_GAP);
+    Table icon = new Table();
+    icon.add(new Image(resources.getAsset(info.iconPath(), Texture.class))).size(ICON_SIZE);
+    icon.add(outlinedCount(countText(info, status))).padLeft(COUNT_GAP).bottom();
+    row.add(icon).space(ICON_GAP);
     tooltip.attachTo(icon, () -> content(key));
+  }
+
+  /**
+   * White text with a thin black outline, so the count stays readable over both light and dark
+   * backgrounds without a box behind it. The outline is four black copies of the text, each nudged
+   * one pixel in a different direction, with the white text drawn on top.
+   */
+  private Stack outlinedCount(String text) {
+    Stack outlined = new Stack();
+    for (int[] offset : OUTLINE_OFFSETS) {
+      outlined.add(shifted(new Label(text, outlineStyle), offset[0], offset[1]));
+    }
+    outlined.add(shifted(new Label(text, countStyle), 0, 0));
+    return outlined;
+  }
+
+  /** Wraps a label in padding that moves it dx pixels right and dy pixels up. */
+  private static Table shifted(Label label, int dx, int dy) {
+    Table cell = new Table();
+    cell.add(label)
+        .padLeft(OUTLINE_WIDTH + dx)
+        .padRight(OUTLINE_WIDTH - dx)
+        .padTop(OUTLINE_WIDTH - dy)
+        .padBottom(OUTLINE_WIDTH + dy);
+    return cell;
   }
 
   /**
