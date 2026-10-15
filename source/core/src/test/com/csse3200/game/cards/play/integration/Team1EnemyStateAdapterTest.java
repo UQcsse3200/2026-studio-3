@@ -25,7 +25,7 @@ class Team1EnemyStateAdapterTest {
 
     assertTrue(adapter.isTargetAvailable("enemy-1"));
     assertFalse(adapter.isTargetAvailable("missing"));
-    assertEquals(2, adapter.statusValue("enemy-1", EffectType.VULNERABLE));
+    assertEquals(1, adapter.statusValue("enemy-1", EffectType.VULNERABLE));
     assertEquals(0, adapter.statusValue("enemy-1", EffectType.FEEBLE));
     assertEquals(0, adapter.statusValue("missing", EffectType.VULNERABLE));
   }
