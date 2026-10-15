@@ -100,6 +100,26 @@ class BestiaryServiceTest {
   }
 
   @Test
+  void shouldExposeCompleteCatalogueWithoutUnlockingSavedProgress() {
+    BestiaryService service = createService();
+    Map<String, BestiaryUnlockState> originalProgress = service.getProgressSnapshot();
+
+    List<BestiaryEntryView> catalogue = service.getCatalogueEntries();
+    BestiaryEntryView shade =
+        service.getCatalogueEntriesByTier(EnemyTier.NORMAL).stream()
+            .filter(entry -> entry.enemyId().equals("shade"))
+            .findFirst()
+            .orElseThrow();
+
+    assertEquals(List.of("alpha", "shade", "knight", "guardian"), ids(catalogue));
+    assertEquals("Lesser Shade", shade.displayName());
+    assertEquals("images/enemies/shade.atlas", shade.sprite().orElseThrow());
+    assertEquals(24, shade.health().orElseThrow());
+    assertEquals(originalProgress, service.getProgressSnapshot());
+    assertEquals(BestiaryUnlockState.LOCKED, service.getEntry("shade").orElseThrow().unlockState());
+  }
+
+  @Test
   void shouldRevealIdentityOnEncounterButKeepDetailsHidden() {
     BestiaryService service = createService();
 
