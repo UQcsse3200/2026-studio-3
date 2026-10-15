@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
+import com.csse3200.game.components.bestiary.BestiaryDisplay;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 /** Displays the library category chooser. */
 public class LibraryMenuDisplay extends UIComponent {
+  public static final String ITEM_BUTTON_TEXTURE = "images/item_library_button_frame.png";
   private static final Logger logger = LoggerFactory.getLogger(LibraryMenuDisplay.class);
   private final GdxGame game;
 
@@ -63,6 +65,16 @@ public class LibraryMenuDisplay extends UIComponent {
         ServiceLocator.getResourceService()
             .getAsset(MainMenuDisplay.BUTTON_FRAME_TEXTURE, Texture.class);
     buttonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    Texture cardButtonFrameTexture =
+        ServiceLocator.getResourceService()
+            .getAsset(CardLibraryDisplay.BUTTON_TEXTURE, Texture.class);
+    cardButtonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    Texture enemyButtonFrameTexture =
+        ServiceLocator.getResourceService().getAsset(BestiaryDisplay.BUTTON_TEXTURE, Texture.class);
+    enemyButtonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    Texture itemButtonFrameTexture =
+        ServiceLocator.getResourceService().getAsset(ITEM_BUTTON_TEXTURE, Texture.class);
+    itemButtonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
     rootTable = new Table();
     rootTable.setFillParent(true);
@@ -72,11 +84,18 @@ public class LibraryMenuDisplay extends UIComponent {
     titleStyle.fontColor = MenuTheme.warmParchment();
     Label title = new Label("Library", titleStyle);
 
-    TextButton.TextButtonStyle buttonStyle = MenuTheme.createButtonStyle(skin, buttonFrameTexture);
-    TextButton cardLibraryButton = new TextButton("Card Library", buttonStyle);
-    TextButton enemyLibraryButton = new TextButton("Enemy Library", buttonStyle);
-    TextButton itemLibraryButton = new TextButton("Item Library", buttonStyle);
-    TextButton backButton = new TextButton("Back", buttonStyle);
+    TextButton.TextButtonStyle backButtonStyle =
+        MenuTheme.createButtonStyle(skin, buttonFrameTexture);
+    TextButton.TextButtonStyle cardButtonStyle =
+        MenuTheme.createButtonStyle(skin, cardButtonFrameTexture);
+    TextButton.TextButtonStyle enemyButtonStyle =
+        MenuTheme.createButtonStyle(skin, enemyButtonFrameTexture);
+    TextButton.TextButtonStyle itemButtonStyle =
+        MenuTheme.createButtonStyle(skin, itemButtonFrameTexture);
+    TextButton cardLibraryButton = new TextButton("Card Library", cardButtonStyle);
+    TextButton enemyLibraryButton = new TextButton("Enemy Library", enemyButtonStyle);
+    TextButton itemLibraryButton = new TextButton("Item Library", itemButtonStyle);
+    TextButton backButton = new TextButton("Back", backButtonStyle);
 
     cardLibraryButton.addListener(
         new ChangeListener() {
