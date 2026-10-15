@@ -32,14 +32,21 @@ public class LibraryScreen extends ScreenAdapter {
     this.game = game;
 
     logger.debug("Initialising library screen services");
-    ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerEntityService(new EntityService());
-    ServiceLocator.registerRenderService(new RenderService());
-    ServiceLocator.registerTimeSource(new GameTime());
+    initialiseServices();
 
     renderer = RenderFactory.createRenderer();
     loadAssets();
     createUI();
+  }
+
+  static void initialiseServices() {
+    ServiceLocator.registerInputService(new InputService());
+    // A library sub-screen (for example ItemLibraryScreen) may clear its own resources on
+    // disposal. Recreate them here before LibraryMenuDisplay asks for its textures.
+    ServiceLocator.registerResourceService(new ResourceService());
+    ServiceLocator.registerEntityService(new EntityService());
+    ServiceLocator.registerRenderService(new RenderService());
+    ServiceLocator.registerTimeSource(new GameTime());
   }
 
   private void loadAssets() {
