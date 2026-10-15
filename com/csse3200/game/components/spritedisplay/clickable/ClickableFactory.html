@@ -99,13 +99,20 @@ loadScripts(document, 'script');</script>
 <dt>All Implemented Interfaces:</dt>
 <dd><code>com.badlogic.gdx.utils.Disposable</code>, <code><a href="../../../rendering/Renderable.html" title="interface in com.csse3200.game.rendering">Renderable</a></code>, <code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Comparable.html" title="class or interface in java.lang" class="external-link">Comparable</a>&lt;<a href="../../../rendering/Renderable.html" title="interface in com.csse3200.game.rendering">Renderable</a>&gt;</code></dd>
 </dl>
+<dl class="notes">
+<dt>Direct Known Subclasses:</dt>
+<dd><code><a href="../../battle/BattleClickableFactory.html" title="class in com.csse3200.game.components.battle">BattleClickableFactory</a></code></dd>
+</dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">ClickableFactory</span>
 <span class="extends-implements">extends <a href="../../../ui/UIComponent.html" title="class in com.csse3200.game.ui">UIComponent</a></span></div>
 <div class="block">Builds and manages the live <a href="Clickable.html" title="class in com.csse3200.game.components.spritedisplay.clickable"><code>Clickable</code></a> widgets for a set of <a href="ClickableRecord.html" title="class in com.csse3200.game.components.spritedisplay.clickable"><code>ClickableRecord</code></a>s:
  resolves each record's variant, constructs and draws the widget, and disposes it. JSON parsing
  lives separately in <code>ClickableJsonLoader</code> — this class only cares about the runtime widget
- lifecycle, not where the records came from.</div>
+ lifecycle, not where the records came from.
+
+ <p>Uses the GoF Factory Method pattern: every widget is made by <a href="#createClickable(com.csse3200.game.components.spritedisplay.clickable.ClickableRecord)"><code>createClickable(ClickableRecord)</code></a>, which a screen-specific subclass overrides to build variants
+ that need that screen's dependencies (see <code>BattleClickableFactory</code>).</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -157,46 +164,34 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Called when the entity is created and registered.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#dispose()" class="member-name-link">dispose</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected <a href="Clickable.html" title="class in com.csse3200.game.components.spritedisplay.clickable">Clickable</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#createClickable(com.csse3200.game.components.spritedisplay.clickable.ClickableRecord)" class="member-name-link">createClickable</a><wbr>(<a href="ClickableRecord.html" title="class in com.csse3200.game.components.spritedisplay.clickable">ClickableRecord</a>&nbsp;rec)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Factory method: creates the widget for one record.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#dispose()" class="member-name-link">dispose</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Called when the component is disposed.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw</a><wbr>(com.badlogic.gdx.graphics.g2d.SpriteBatch&nbsp;batch)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw</a><wbr>(com.badlogic.gdx.graphics.g2d.SpriteBatch&nbsp;batch)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Draw the renderable.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="Clickable.html" title="class in com.csse3200.game.components.spritedisplay.clickable">Clickable</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getByTrigger(java.lang.String)" class="member-name-link">getByTrigger</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;trigger)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="ClickableRecord.html" title="class in com.csse3200.game.components.spritedisplay.clickable">ClickableRecord</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#loadRecordsFromJson(java.nio.file.Path)" class="member-name-link">loadRecordsFromJson</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a>&nbsp;file)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#rebuildByTrigger(java.lang.String,java.util.List)" class="member-name-link">rebuildByTrigger</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;trigger,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="Clickable.html" title="class in com.csse3200.game.components.spritedisplay.clickable">Clickable</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getByTrigger(java.lang.String)" class="member-name-link">getByTrigger</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;trigger)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="ClickableRecord.html" title="class in com.csse3200.game.components.spritedisplay.clickable">ClickableRecord</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#loadRecordsFromJson(java.nio.file.Path)" class="member-name-link">loadRecordsFromJson</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a>&nbsp;file)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#rebuildByTrigger(java.lang.String,java.util.List)" class="member-name-link">rebuildByTrigger</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;trigger,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="ClickableRecord.html" title="class in com.csse3200.game.components.spritedisplay.clickable">ClickableRecord</a>&gt;&nbsp;records)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Rebuilds every widget with the given trigger name: drops the old ones and builds fresh ones
  from <code>records</code>, leaving every other widget this factory owns untouched.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#rebuildHand(java.util.List)" class="member-name-link">rebuildHand</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="ClickableRecord.html" title="class in com.csse3200.game.components.spritedisplay.clickable">ClickableRecord</a>&gt;&nbsp;handRecords)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Rebuilds the on-screen hand: drops every <code>"playCard"</code> widget and builds fresh ones from
- <code>handRecords</code>, leaving the static UI widgets untouched.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#registerInstanceVariant(java.lang.String,com.csse3200.game.components.spritedisplay.clickable.ClickableSupplier)" class="member-name-link">registerInstanceVariant</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
- <a href="ClickableSupplier.html" title="interface in com.csse3200.game.components.spritedisplay.clickable">ClickableSupplier</a>&nbsp;supplier)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Registers a variant for THIS factory instance only, overriding a static variant of the same
- name if present.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#registerVariant(java.lang.String,com.csse3200.game.components.spritedisplay.clickable.ClickableSupplier)" class="member-name-link">registerVariant</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
- <a href="ClickableSupplier.html" title="interface in com.csse3200.game.components.spritedisplay.clickable">ClickableSupplier</a>&nbsp;supplier)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -250,13 +245,6 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="registerVariant(java.lang.String,com.csse3200.game.components.spritedisplay.clickable.ClickableSupplier)">
-<h3>registerVariant</h3>
-<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">registerVariant</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
- <a href="ClickableSupplier.html" title="interface in com.csse3200.game.components.spritedisplay.clickable">ClickableSupplier</a>&nbsp;supplier)</span></div>
-</section>
-</li>
-<li>
 <section class="detail" id="loadRecordsFromJson(java.nio.file.Path)">
 <h3>loadRecordsFromJson</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="ClickableRecord.html" title="class in com.csse3200.game.components.spritedisplay.clickable">ClickableRecord</a>&gt;</span>&nbsp;<span class="element-name">loadRecordsFromJson</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a>&nbsp;file)</span></div>
@@ -271,12 +259,16 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="registerInstanceVariant(java.lang.String,com.csse3200.game.components.spritedisplay.clickable.ClickableSupplier)">
-<h3>registerInstanceVariant</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">registerInstanceVariant</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
- <a href="ClickableSupplier.html" title="interface in com.csse3200.game.components.spritedisplay.clickable">ClickableSupplier</a>&nbsp;supplier)</span></div>
-<div class="block">Registers a variant for THIS factory instance only, overriding a static variant of the same
- name if present. Optional — most variants should go in the static block above instead.</div>
+<section class="detail" id="createClickable(com.csse3200.game.components.spritedisplay.clickable.ClickableRecord)">
+<h3>createClickable</h3>
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="Clickable.html" title="class in com.csse3200.game.components.spritedisplay.clickable">Clickable</a></span>&nbsp;<span class="element-name">createClickable</span><wbr><span class="parameters">(<a href="ClickableRecord.html" title="class in com.csse3200.game.components.spritedisplay.clickable">ClickableRecord</a>&nbsp;rec)</span></div>
+<div class="block">Factory method: creates the widget for one record. The default looks the record's variant up in
+ <code>DEFAULT_VARIANTS</code>. Subclasses override this to handle variants that need extra
+ dependencies, and call <code>super.createClickable(rec)</code> for everything else.</div>
+<dl class="notes">
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the variant is not known</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -293,28 +285,13 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="rebuildHand(java.util.List)">
-<h3>rebuildHand</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">rebuildHand</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="ClickableRecord.html" title="class in com.csse3200.game.components.spritedisplay.clickable">ClickableRecord</a>&gt;&nbsp;handRecords)</span></div>
-<div class="block">Rebuilds the on-screen hand: drops every <code>"playCard"</code> widget and builds fresh ones from
- <code>handRecords</code>, leaving the static UI widgets untouched. Called when the hand changes (a
- card played and a replacement drawn), so the new hand — including the drawn card — shows
- immediately.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>handRecords</code> - one record per card currently in the player's hand</dd>
-</dl>
-</section>
-</li>
-<li>
 <section class="detail" id="rebuildByTrigger(java.lang.String,java.util.List)">
 <h3>rebuildByTrigger</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">rebuildByTrigger</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;trigger,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="ClickableRecord.html" title="class in com.csse3200.game.components.spritedisplay.clickable">ClickableRecord</a>&gt;&nbsp;records)</span></div>
 <div class="block">Rebuilds every widget with the given trigger name: drops the old ones and builds fresh ones
- from <code>records</code>, leaving every other widget this factory owns untouched. Generalization of
- <a href="#rebuildHand(java.util.List)"><code>rebuildHand(java.util.List&lt;com.csse3200.game.components.spritedisplay.clickable.ClickableRecord&gt;)</code></a> for other dynamically-rebuilt widget groups (e.g. a popup's per-card
- toggle buttons).</div>
+ from <code>records</code>, leaving every other widget this factory owns untouched. Used for
+ dynamically rebuilt widget groups such as the battle hand or a popup's per-card toggle buttons.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>trigger</code> - trigger name identifying which widgets to replace</dd>

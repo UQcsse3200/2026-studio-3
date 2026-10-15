@@ -242,6 +242,19 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Put this widget straight into its visible resting state, skipping any intro animation.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#subscribe(java.lang.String,com.csse3200.game.events.listeners.EventListener0)" class="member-name-link">subscribe</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;eventName,
+ <a href="../../../events/listeners/EventListener0.html" title="interface in com.csse3200.game.events.listeners">EventListener0</a>&nbsp;listener)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Listens for an event on the shared UI entity until this widget is <a href="#remove()"><code>removed</code></a>.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected &lt;T0,<wbr>
+T1&gt;&nbsp;void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#subscribe(java.lang.String,com.csse3200.game.events.listeners.EventListener2)" class="member-name-link">subscribe</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;eventName,
+ <a href="../../../events/listeners/EventListener2.html" title="interface in com.csse3200.game.events.listeners">EventListener2</a>&lt;T0,<wbr>T1&gt;&nbsp;listener)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Two-argument form of <a href="#subscribe(java.lang.String,com.csse3200.game.events.listeners.EventListener0)"><code>subscribe(String, EventListener0)</code></a>.</div>
+</div>
 </div>
 </div>
 </div>
@@ -360,8 +373,28 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">remove</span>()</div>
 <div class="block">Detach this clickable's widget from the stage and release anything it registered elsewhere.
  Called by <a href="ClickableFactory.html" title="class in com.csse3200.game.components.spritedisplay.clickable"><code>ClickableFactory</code></a> when a widget is removed at runtime (e.g. a played card
- leaving the hand) or the factory is disposed. Subclasses that register drag sources or
- listeners override this to also undo those.</div>
+ leaving the hand) or the factory is disposed. Entity listeners added through <a href="#subscribe(java.lang.String,com.csse3200.game.events.listeners.EventListener0)"><code>subscribe(java.lang.String, com.csse3200.game.events.listeners.EventListener0)</code></a>
+ are unregistered here; subclasses that register anything else (e.g. a drag source) override
+ this to also undo that.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="subscribe(java.lang.String,com.csse3200.game.events.listeners.EventListener0)">
+<h3>subscribe</h3>
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">subscribe</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;eventName,
+ <a href="../../../events/listeners/EventListener0.html" title="interface in com.csse3200.game.events.listeners">EventListener0</a>&nbsp;listener)</span></div>
+<div class="block">Listens for an event on the shared UI entity until this widget is <a href="#remove()"><code>removed</code></a>.
+ Use this instead of <code>entity.getEvents().addListener</code> so a rebuilt widget does not leave
+ its old listener behind (which would keep the removed button alive and still reacting).</div>
+</section>
+</li>
+<li>
+<section class="detail" id="subscribe(java.lang.String,com.csse3200.game.events.listeners.EventListener2)">
+<h3>subscribe</h3>
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="type-parameters">&lt;T0,<wbr>
+T1&gt;</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">subscribe</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;eventName,
+ <a href="../../../events/listeners/EventListener2.html" title="interface in com.csse3200.game.events.listeners">EventListener2</a>&lt;T0,<wbr>T1&gt;&nbsp;listener)</span></div>
+<div class="block">Two-argument form of <a href="#subscribe(java.lang.String,com.csse3200.game.events.listeners.EventListener0)"><code>subscribe(String, EventListener0)</code></a>.</div>
 </section>
 </li>
 <li>
@@ -369,9 +402,9 @@ loadScripts(document, 'script');</script>
 <h3>showNow</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">showNow</span>()</div>
 <div class="block">Put this widget straight into its visible resting state, skipping any intro animation. Called
- by <a href="ClickableFactory.html" title="class in com.csse3200.game.components.spritedisplay.clickable"><code>ClickableFactory</code></a> when a widget is added to an already-live UI (e.g. a card drawn to
- replace one that was just played). Default: nothing, since the base widget is always drawn at
- its position anyway.</div>
+ by the owning screen (e.g. BattleScreen) when a widget is added to an already-live UI (e.g. a
+ card drawn to replace one that was just played). Default: nothing, since the base widget is
+ always drawn at its position anyway.</div>
 </section>
 </li>
 <li>
@@ -379,10 +412,10 @@ loadScripts(document, 'script');</script>
 <h3>hideNow</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">hideNow</span>()</div>
 <div class="block">Put this widget straight into its hidden resting state (off-screen/invisible, not
- interactable), skipping any outro animation. Called by <a href="ClickableFactory.html" title="class in com.csse3200.game.components.spritedisplay.clickable"><code>ClickableFactory</code></a> when a widget
- is (re)built while the hand is currently supposed to be hidden — e.g. a cooldown retrieval
- rebuilding the row mid-enemy-turn, before the delayed "up" animation has fired — so it doesn't
- pop into view early. Default: nothing, mirroring <a href="#showNow()"><code>showNow()</code></a>.</div>
+ interactable), skipping any outro animation. Called by the owning screen (e.g. BattleScreen)
+ when a widget is (re)built while the hand is currently supposed to be hidden (e.g. a cooldown
+ retrieval rebuilding the row mid-enemy-turn, before the delayed "up" animation has fired), so
+ it doesn't pop into view early. Default: nothing, mirroring <a href="#showNow()"><code>showNow()</code></a>.</div>
 </section>
 </li>
 <li>

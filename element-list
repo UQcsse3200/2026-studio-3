@@ -34,6 +34,7 @@ com.csse3200.game.components.player
 com.csse3200.game.components.save
 com.csse3200.game.components.settingsmenu
 com.csse3200.game.components.shop
+com.csse3200.game.components.spritedisplay
 com.csse3200.game.components.spritedisplay.clickable
 com.csse3200.game.components.spritedisplay.displaying
 com.csse3200.game.components.spritedisplay.reactive

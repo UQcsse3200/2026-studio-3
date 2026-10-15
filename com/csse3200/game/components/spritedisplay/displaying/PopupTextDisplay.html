@@ -117,8 +117,8 @@ loadScripts(document, 'script');</script>
  </ul>
 
  Text is set the usual way: the entity fires the record's <code>trigger</code> with a String payload.
- Register it per-screen (it needs the popup): <code>displays.registerInstanceVariant("popupText",
- rec -&gt; new PopupTextDisplay(rec, popup))</code>.</div>
+ It needs the popup, so it is created by a screen's <a href="DisplayingFactory.html" title="class in com.csse3200.game.components.spritedisplay.displaying"><code>DisplayingFactory</code></a> subclass (e.g.
+ <code>DeckEditorDisplayingFactory</code>), which calls <a href="#addPopup(com.csse3200.game.ui.PopupDisplay)"><code>addPopup(com.csse3200.game.ui.PopupDisplay)</code></a> before returning it.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
