@@ -84,6 +84,7 @@ import com.csse3200.game.ui.terminal.commands.GiveGoldCommand;
 import com.csse3200.game.ui.terminal.commands.GiveItemCommand;
 import com.csse3200.game.ui.terminal.commands.SetHealthCommand;
 import com.csse3200.game.ui.terminal.commands.SkipBattleCommand;
+import com.csse3200.game.components.enemy.EnemyAI.TutorialEnemyAI;
 import java.nio.file.Path;
 import java.util.*;
 import org.slf4j.Logger;
@@ -207,6 +208,17 @@ public class BattleScreen extends ScreenAdapter {
                 : BattleEncounterSelector.enemiesFor(runState));
     this.gameArea = forestGameArea;
     forestGameArea.create();
+
+    if (tutorialBattle) {
+      for (Entity enemy : forestGameArea.getEnemies()) {
+        EnemyBehaviourComponent behaviour =
+                enemy.getComponent(EnemyBehaviourComponent.class);
+
+        if (behaviour != null) {
+          behaviour.setAI(new TutorialEnemyAI());
+        }
+      }
+    }
 
     playerState = runState.getOrCreatePlayerState();
     Entity player = forestGameArea.getPlayer();
