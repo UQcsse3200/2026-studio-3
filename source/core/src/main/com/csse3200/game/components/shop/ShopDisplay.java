@@ -99,7 +99,9 @@ public class ShopDisplay extends UIComponent {
   private boolean shopOpen;
   private Image sceneBackground;
   private Label sceneSubtitle;
+  private Label sceneTitle;
   private Label merchantDialogue;
+  private Table merchantDialoguePanel;
   private MerchantDisplayCounter products;
   private com.badlogic.gdx.scenes.scene2d.Group shopControls;
   private com.badlogic.gdx.scenes.scene2d.Group approachControls;
@@ -232,8 +234,11 @@ public class ShopDisplay extends UIComponent {
     titleFrame.left();
     titleFrame.pad(15f, 18f, 15f, 18f);
     Label title = new Label("Wayside Merchant", createLabelStyle(LARGE, BODY_COLOUR));
+    sceneTitle = title;
+    title.setName("merchant-title-text");
     title.setFontScale(1.12f);
     sceneSubtitle = new Label("", createLabelStyle(SMALL, BODY_COLOUR));
+    sceneSubtitle.setName("merchant-subtitle-text");
     sceneSubtitle.setFontScale(0.8f);
     titleFrame.add(title).left();
     titleFrame.row();
@@ -287,9 +292,30 @@ public class ShopDisplay extends UIComponent {
     Actor marker = new MerchantInteractionMarker(skin.getDrawable(WHITE), this::openMerchant);
     marker.setBounds(935, 443, 56, 64);
     approachControls.addActor(marker);
-    TextButton approachLeave = sceneButton("Leave", this::leaveShop);
+    TextButton approachLeave = formalShopButton("Leave", this::leaveShop);
+    approachLeave.setName("merchant-encounter-leave");
     approachLeave.setBounds(1040, 36, 190, 48);
     approachControls.addActor(approachLeave);
+    com.badlogic.gdx.scenes.scene2d.Group narration = new com.badlogic.gdx.scenes.scene2d.Group();
+    narration.setName("merchant-encounter-narration");
+    narration.setTouchable(Touchable.disabled);
+    narration.setBounds(260, 42, 740, 38);
+    Label narrationShadow =
+        new Label(
+            "There is a wandering merchant...",
+            createLabelStyle(DEFAULT, new Color(0f, 0f, 0f, 0.85f)));
+    narrationShadow.setAlignment(Align.center);
+    narrationShadow.setFontScale(0.9f);
+    narrationShadow.setBounds(2, -2, 740, 38);
+    narration.addActor(narrationShadow);
+    Label narrationText =
+        new Label("There is a wandering merchant...", createLabelStyle(DEFAULT, Color.WHITE));
+    narrationText.setName("merchant-narration-text");
+    narrationText.setAlignment(Align.center);
+    narrationText.setFontScale(0.9f);
+    narrationText.setBounds(0, 0, 740, 38);
+    narration.addActor(narrationText);
+    approachControls.addActor(narration);
     shopControls = new com.badlogic.gdx.scenes.scene2d.Group();
     shopControls.setTouchable(Touchable.childrenOnly);
     scene.addActor(shopControls);
@@ -308,20 +334,22 @@ public class ShopDisplay extends UIComponent {
     purse.setBounds(1020, 684, 220, 56);
     shopControls.addActor(purse);
     Table dialogue = new Table();
-    dialogue.setBackground(formalShopFrame());
+    merchantDialoguePanel = dialogue;
+    dialogue.setBackground(new MerchantDialogueFrame(skin.getDrawable(WHITE)));
     merchantDialogue = new Label("Take a look.", createLabelStyle(DEFAULT, BODY_COLOUR));
-    merchantDialogue.setFontScale(0.86f);
+    merchantDialogue.setName("merchant-dialogue-text");
+    merchantDialogue.setFontScale(0.78f);
     merchantDialogue.setWrap(true);
-    dialogue.add(merchantDialogue).width(214).pad(12);
-    dialogue.setBounds(1005, 595, 250, 70);
+    dialogue.add(merchantDialogue).width(249).pad(12);
+    setMerchantDialogue("Take a look.");
     shopControls.addActor(dialogue);
     refreshButton = formalShopButton("Refresh (Free)", this::refreshStock);
     refreshButton.setName("shop-refresh");
-    refreshButton.setBounds(385, 24, 325, 44);
+    refreshButton.setBounds(372, 18, 350, 54);
     shopControls.addActor(refreshButton);
     TextButton leave = formalShopButton("Leave", this::leaveShop);
     leave.setName("merchant-leave");
-    leave.setBounds(735, 24, 220, 44);
+    leave.setBounds(748, 18, 220, 54);
     shopControls.addActor(leave);
     statusLabel = new Label("", createLabelStyle(SMALL, BODY_COLOUR));
     statusLabel.setFontScale(0.7f);
@@ -355,12 +383,10 @@ public class ShopDisplay extends UIComponent {
 
   private TextButton formalShopButton(String text, Runnable action) {
     TextButton button = sceneButton(text, action);
-    TextButtonStyle style = new TextButtonStyle(button.getStyle());
-    style.up = formalShopFrame();
-    style.down = formalShopFrame();
-    style.disabled = formalShopFrame();
-    style.over = new MerchantShopFrame(skin.getDrawable(WHITE), new Color(0.20f, 0.09f, 0.04f, 1));
-    button.setStyle(style);
+    button.getLabel().setAlignment(Align.center);
+    button.setStyle(
+        MerchantShopFrame.buttonStyle(
+            skin.getDrawable(WHITE), button.getStyle(), MerchantShopFrame.Tone.NORMAL));
     return button;
   }
 
@@ -398,7 +424,14 @@ public class ShopDisplay extends UIComponent {
             : "The world is broken, still trade goes on.");
     approachControls.setVisible(!shopOpen);
     shopControls.setVisible(shopOpen);
-    if (shopOpen) titleFrame.setBackground(formalShopFrame());
+    titleFrame.setBackground(formalShopFrame());
+    titleFrame.center();
+    titleFrame.getCell(sceneTitle).growX().center();
+    titleFrame.getCell(sceneSubtitle).growX().center();
+    sceneTitle.setAlignment(Align.center);
+    sceneSubtitle.setAlignment(Align.center);
+    sceneTitle.setStyle(createLabelStyle(LARGE, Color.valueOf("F5E6C5")));
+    sceneSubtitle.setStyle(createLabelStyle(SMALL, Color.valueOf("C9BDA7")));
     if (shopOpen) rebuildProducts();
   }
 
@@ -556,7 +589,7 @@ public class ShopDisplay extends UIComponent {
       String message = statusLabel.getText().toString();
       rebuildProducts();
       statusLabel.setText(message);
-      merchantDialogue.setText("A fine choice.");
+      setMerchantDialogue("A fine choice.");
     } else {
       refresh();
     }
@@ -568,11 +601,17 @@ public class ShopDisplay extends UIComponent {
       purchasedItemIds.clear();
       rebuildProducts();
       statusLabel.setText("Stock refreshed. New offers have no discount.");
-      merchantDialogue.setText("Nothing catch your eye?\nLet me look again.");
+      setMerchantDialogue("Nothing catch your eye?\nLet me look again.");
     } else {
       statusLabel.setText("Refresh failed: " + result.status().name().replace('_', ' '));
       refresh();
     }
+  }
+
+  private void setMerchantDialogue(String text) {
+    merchantDialogue.setText(text);
+    float height = text.contains("\n") ? 64f : 46f;
+    merchantDialoguePanel.setBounds(970, 665f - height, 285, height);
   }
 
   private void leaveShop() {
@@ -595,6 +634,13 @@ public class ShopDisplay extends UIComponent {
               || fee.isEmpty()
               || quote.gold() == null
               || (fee.isPresent() && quote.gold() < fee.getAsInt()));
+      MerchantShopFrame.Tone refreshTone =
+          fee.isEmpty() || quote.completed()
+              ? MerchantShopFrame.Tone.MUTED
+              : fee.getAsInt() == 0 ? MerchantShopFrame.Tone.FREE : MerchantShopFrame.Tone.PRIMARY;
+      refreshButton.setStyle(
+          MerchantShopFrame.buttonStyle(
+              skin.getDrawable(WHITE), refreshButton.getStyle(), refreshTone));
     }
     Integer currency = shopEncounter.getCurrency();
     goldLabel.setText(currency == null ? "GOLD  --" : String.format("GOLD  %d", currency));
@@ -626,6 +672,14 @@ public class ShopDisplay extends UIComponent {
   }
 
   private void applyItemState(ItemWidgets widgets, ShopItem item, ShopItemState state) {
+    MerchantShopFrame.Tone tone =
+        switch (state) {
+          case AVAILABLE -> MerchantShopFrame.Tone.NORMAL;
+          case UNAFFORDABLE -> MerchantShopFrame.Tone.DANGER;
+          case SOLD, UNAVAILABLE -> MerchantShopFrame.Tone.MUTED;
+        };
+    widgets.buyButton.setStyle(
+        MerchantShopFrame.buttonStyle(skin.getDrawable(WHITE), widgets.buyButton.getStyle(), tone));
     widgets.buyButton.setText(
         switch (state) {
           case AVAILABLE -> "Purchase";

@@ -279,7 +279,8 @@ public class GdxGame extends Game {
     openDemoEvent(CardFusionEncounterBehaviour.ENCOUNTER_ID);
   }
 
-  private void openDemoEvent(String previewEncounterId) {
+  /** Opens an isolated demo only; null retains the existing weighted random selection. */
+  public void openDemoEvent(String previewEncounterId) {
     prepareScreenTransition(ScreenType.ENCOUNTER);
     setScreen(new DemoEventScreen(this, previewEncounterId));
   }

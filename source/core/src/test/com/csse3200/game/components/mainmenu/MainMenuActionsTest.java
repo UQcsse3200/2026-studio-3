@@ -26,6 +26,21 @@ class MainMenuActionsTest {
   }
 
   @Test
+  void selectedDemoEventUsesOnlyTheIsolatedPreviewEntry() {
+    menu.getEvents().trigger(DemoEventPicker.SELECT_EVENT, "dice-game");
+    verify(game).openDemoEvent("dice-game");
+    verify(game, never()).startEvent(any());
+    verify(game, never()).startNewRun();
+  }
+
+  @Test
+  void randomDemoPassesNoForcedId() {
+    menu.getEvents().trigger(DemoEventPicker.SELECT_EVENT, "");
+    verify(game).openDemoEvent((String) null);
+    verify(game, never()).startEvent(any());
+  }
+
+  @Test
   void startBeginsANewRunOnTheMap() {
     menu.getEvents().trigger(MainMenuDisplay.START_EVENT);
 

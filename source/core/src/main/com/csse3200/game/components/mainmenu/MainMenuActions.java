@@ -26,7 +26,12 @@ public class MainMenuActions extends Component {
     entity.getEvents().addListener(MainMenuDisplay.SETTINGS_EVENT, this::onSettings);
     entity.getEvents().addListener(MainMenuDisplay.EXIT_EVENT, this::onExit);
     entity.getEvents().addListener("library", this::onLibrary);
-    entity.getEvents().addListener(MainMenuDisplay.DEMO_EVENT, game::openDemoEvent);
+    entity.getEvents().addListener(MainMenuDisplay.DEMO_EVENT, () -> game.openDemoEvent());
+    entity
+        .getEvents()
+        .addListener(
+            DemoEventPicker.SELECT_EVENT,
+            (String id) -> game.openDemoEvent(id.isEmpty() ? null : id));
     entity.getEvents().addListener(MainMenuDisplay.DEMO_CAMPFIRE_EVENT, game::openDemoCampfire);
     entity.getEvents().addListener(MainMenuDisplay.DEMO_SHOP_EVENT, game::openDemoShop);
   }
