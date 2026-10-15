@@ -11,7 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 final class MerchantInteractionMarker extends Actor {
   private final Drawable pixel;
   private boolean hovered;
-  private float hoverTime;
+  private float animationTime;
 
   MerchantInteractionMarker(Drawable pixel, Runnable approach) {
     this.pixel = pixel;
@@ -34,7 +34,6 @@ final class MerchantInteractionMarker extends Actor {
             super.exit(event, x, y, pointer, toActor);
             if (pointer == -1) {
               hovered = false;
-              hoverTime = 0;
             }
           }
         });
@@ -43,25 +42,34 @@ final class MerchantInteractionMarker extends Actor {
   @Override
   public void act(float delta) {
     super.act(delta);
-    if (hovered) hoverTime += delta;
+    animationTime += delta;
   }
 
   @Override
   public void draw(Batch batch, float alpha) {
     Color old = new Color(batch.getColor());
-    float x = getX() + 28;
-    float y = getY() + 36 + (hovered ? 2 + (float) Math.sin(hoverTime * 5) * 2 : 0);
-    if (hovered) {
-      batch.setColor(0.95f, 0.79f, 0.35f, alpha * 0.16f);
-      diamond(batch, x, y, 23, 4);
+    float pulse = 0.5f + 0.5f * (float) Math.sin(animationTime * 2f);
+    float x = getX() + getWidth() / 2f;
+    // Animate only the painted symbol; the transparent click target remains fixed.
+    float y = getY() + 36 + (float) Math.sin(animationTime * 1.8f) * 1.5f + (hovered ? 2f : 0f);
+    batch.setColor(1f, 0.65f, 0.16f, alpha * (hovered ? 0.20f : 0.08f) * (0.7f + pulse * 0.3f));
+    diamond(batch, x, y, 20, 4);
+    batch.setColor(0.19f, 0.08f, 0.015f, alpha * 0.8f);
+    diamond(batch, x + 1, y - 1, 17, 3);
+    batch.setColor(
+        1f, hovered ? 0.91f : 0.79f, hovered ? 0.57f : 0.32f, alpha * (0.85f + pulse * 0.15f));
+    diamond(batch, x, y, 16, 2);
+    for (int row = -3; row <= 3; row++) {
+      int halfWidth = 3 - Math.abs(row);
+      pixel.draw(batch, x - halfWidth, y + row, halfWidth * 2 + 1, 1);
     }
-    batch.setColor(1f, hovered ? 0.92f : 0.83f, hovered ? 0.66f : 0.5f, alpha);
-    diamond(batch, x, y, 18, 2);
-    diamond(batch, x, y, 5, 2);
     for (int i = 0; i < 6; i++) {
-      pixel.draw(batch, x - 10 + i * 2, y - 26 - i * 2, 2, 2);
-      pixel.draw(batch, x + 10 - i * 2, y - 26 - i * 2, 2, 2);
+      pixel.draw(batch, x - 10 + i * 2, y - 23 - i * 2, 2, 2);
+      pixel.draw(batch, x + 10 - i * 2, y - 23 - i * 2, 2, 2);
     }
+    batch.setColor(1f, 0.94f, 0.7f, alpha * (0.65f + pulse * 0.35f));
+    pixel.draw(batch, x, y + 16, 2, 2);
+    pixel.draw(batch, x - 1, y - 1, 2, 2);
     batch.setColor(old);
   }
 

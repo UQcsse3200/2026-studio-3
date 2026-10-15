@@ -14,6 +14,9 @@ import java.util.function.BiConsumer;
 
 /** Live tabletop offer: readable card, slim price plaque and purchase button, no cabinet. */
 final class CardDisplaySlot extends Group {
+  static final float SLOT_HEIGHT = 458f;
+  private static final float CARD_DISPLAY_WIDTH = 238f;
+  private static final float CARD_DISPLAY_HEIGHT = 365f;
   private final Group cardLayer = new Group();
   private final Label priceLabel;
   private final TextButton purchaseButton;
@@ -25,18 +28,19 @@ final class CardDisplaySlot extends Group {
       Label.LabelStyle priceStyle,
       TextButton.TextButtonStyle buttonStyle,
       BiConsumer<String, Long> purchase) {
-    setSize(270, 410);
+    setSize(270, SLOT_HEIGHT);
     setTouchable(Touchable.childrenOnly);
-    // Inset the live face inside the painted uprights instead of covering the wood.
-    cardLayer.setPosition(14, 94);
+    // Account for transparent margins in the authored face, so visible pixels fill the wood
+    // opening.
+    cardLayer.setPosition(18, 94);
     cardLayer.setTouchable(Touchable.disabled);
     addActor(cardLayer);
     Table pricePanel = new Table();
-    pricePanel.setBackground(new MerchantShopFrame(pixel, new Color(0.12f, 0.06f, 0.03f, 1)));
+    // The scenery's lower wood rail is the price plaque; only the live text overlays it.
     priceLabel = new Label("", priceStyle);
     priceLabel.setFontScale(1f);
     pricePanel.add(priceLabel);
-    pricePanel.setBounds(8.5f, 47, 253, 28);
+    pricePanel.setBounds(8.5f, 78, 253, 24);
     addActor(pricePanel);
     TextButton.TextButtonStyle insetStyle = new TextButton.TextButtonStyle(buttonStyle);
     insetStyle.up = new MerchantShopFrame(pixel, new Color(0.14f, 0.043f, 0.027f, 1));
@@ -44,8 +48,8 @@ final class CardDisplaySlot extends Group {
     insetStyle.disabled = new MerchantShopFrame(pixel, new Color(0.08f, 0.064f, 0.056f, 1));
     insetStyle.over = new MerchantShopFrame(pixel, new Color(0.22f, 0.085f, 0.04f, 1));
     purchaseButton = new TextButton("Purchase", insetStyle);
-    purchaseButton.getLabel().setFontScale(0.9f);
-    purchaseButton.setBounds(8.5f, 6, 253, 40);
+    purchaseButton.getLabel().setFontScale(0.96f);
+    purchaseButton.setBounds(3, 28, 264, 46);
     purchaseButton.addListener(
         new ChangeListener() {
           @Override
@@ -54,6 +58,11 @@ final class CardDisplaySlot extends Group {
           }
         });
     addActor(purchaseButton);
+  }
+
+  /** Painted openings are slightly closer together than the evenly spaced price plaques. */
+  void alignWithFrame(int index) {
+    cardLayer.setX(18f - index * 3f);
   }
 
   void bind(Actor card, int price, String offerId, long quoteRevision) {
@@ -65,11 +74,12 @@ final class CardDisplaySlot extends Group {
     if (card instanceof CardWidget) {
       card.setSize(CardWidget.CARD_WIDTH, CardWidget.CARD_HEIGHT);
       Group fitted = new Group();
-      fitted.setScale(242f / CardWidget.CARD_WIDTH, 322f / CardWidget.CARD_HEIGHT);
+      fitted.setScale(
+          CARD_DISPLAY_WIDTH / CardWidget.CARD_WIDTH, CARD_DISPLAY_HEIGHT / CardWidget.CARD_HEIGHT);
       fitted.addActor(card);
       cardLayer.addActor(fitted);
     } else {
-      card.setSize(242, 322);
+      card.setSize(CARD_DISPLAY_WIDTH, CARD_DISPLAY_HEIGHT);
       cardLayer.addActor(card);
     }
   }

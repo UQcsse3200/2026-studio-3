@@ -59,6 +59,7 @@ public class MainMenuDisplay extends UIComponent {
   private TextButton settingsButton;
   private TextButton exitButton;
   private Dialog tutorialChoiceDialog;
+  private DemoEventPicker demoEventPicker;
 
   @Override
   public void create() {
@@ -154,6 +155,8 @@ public class MainMenuDisplay extends UIComponent {
             logger.debug("{} button clicked", text);
             if (START_EVENT.equals(eventName)) {
               showTutorialChoice();
+            } else if (DEMO_EVENT.equals(eventName)) {
+              showDemoEventPicker(buttonFrameTexture);
             } else {
               entity.getEvents().trigger(eventName);
             }
@@ -170,6 +173,18 @@ public class MainMenuDisplay extends UIComponent {
           }
         });
     return button;
+  }
+
+  /** Temporary chooser attached exclusively to the main-menu Demo Event button. */
+  private void showDemoEventPicker(Texture buttonFrameTexture) {
+    if (demoEventPicker == null || !demoEventPicker.hasParent()) {
+      demoEventPicker =
+          new DemoEventPicker(
+              skin,
+              buttonFrameTexture,
+              id -> entity.getEvents().trigger(DemoEventPicker.SELECT_EVENT, id));
+      demoEventPicker.show(stage);
+    }
   }
 
   /** Shows the choice between the battle tutorial and a normal new run. */
@@ -293,6 +308,10 @@ public class MainMenuDisplay extends UIComponent {
 
   @Override
   public void dispose() {
+    if (demoEventPicker != null) {
+      demoEventPicker.remove();
+      demoEventPicker = null;
+    }
     if (tutorialChoiceDialog != null) {
       tutorialChoiceDialog.remove();
       tutorialChoiceDialog = null;
