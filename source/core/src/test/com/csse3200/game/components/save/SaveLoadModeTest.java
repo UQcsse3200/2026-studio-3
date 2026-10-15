@@ -13,6 +13,12 @@ class SaveLoadModeTest {
   }
 
   @Test
+  void mainMenuModeAllowsDeleteWithoutSave() {
+    assertFalse(SaveLoadMode.LOAD_AND_DELETE.isSaveAllowed());
+    assertTrue(SaveLoadMode.LOAD_AND_DELETE.isDeleteAllowed());
+  }
+
+  @Test
   void loadOnlyModeCannotMutateSlots() {
     assertFalse(SaveLoadMode.LOAD_ONLY.isSaveAllowed());
     assertFalse(SaveLoadMode.LOAD_ONLY.isDeleteAllowed());
