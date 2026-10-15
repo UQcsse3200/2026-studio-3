@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextTooltip;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
@@ -41,6 +42,14 @@ import java.util.function.IntFunction;
 public class InventoryPopupComponent extends UIComponent {
 
   private static final String PANEL_TEXTURE = "images/ui/inventory-panel.png";
+  private static final float WINDOW_WIDTH = 590f;
+  private static final float CONTENT_WIDTH = 530f;
+  private static final float LIST_WIDTH = 518f;
+  private static final float ROW_HEIGHT = 94f;
+  private static final float ROW_SPACING = 6f;
+  private static final int MAX_VISIBLE_ROWS = 3;
+  private static final float TEXT_WIDTH = 308f;
+  private static final float ACTION_WIDTH = 112f;
 
   private static final Color NAME_COLOUR = new Color(0.9f, 0.84f, 0.73f, 1f);
   private static final Color DESCRIPTION_COLOUR = new Color(0.65f, 0.58f, 0.52f, 1f);
@@ -55,6 +64,9 @@ public class InventoryPopupComponent extends UIComponent {
   private static final Color BORDER_COLOUR = new Color(0.55f, 0.35f, 0.28f, 1f);
   private static final Color TEXT_COLOUR = new Color(0.9f, 0.84f, 0.73f, 1f);
   private static final Color DETAIL_COLOUR = new Color(0.72f, 0.65f, 0.58f, 1f);
+  private static final Color CURSE_COLOUR = new Color(0.91f, 0.52f, 0.45f, 1f);
+  private static final Color ACTION_COLOUR = new Color(0.97f, 0.80f, 0.42f, 1f);
+  private static final Color DISABLED_ACTION_COLOUR = new Color(0.48f, 0.46f, 0.45f, 1f);
 
   private static final Map<ItemType, String> ITEM_ICONS =
       Map.ofEntries(
@@ -70,44 +82,47 @@ public class InventoryPopupComponent extends UIComponent {
           Map.entry(ItemType.BLOOD_OATH_SIGIL, "images/ui/blood-oath-sigil.png"),
           Map.entry(ItemType.ETERNAL_VITALITY, "images/ui/eternal-vitality.png"));
 
-  private static final Map<ItemType, IntFunction<String>> ITEM_DESCRIPTIONS =
+  record ItemText(String effect) {}
+
+  private static final Map<ItemType, IntFunction<ItemText>> ITEM_DESCRIPTIONS =
       new EnumMap<>(ItemType.class);
 
   static {
-    ITEM_DESCRIPTIONS.put(ItemType.ENERGY_CRYSTAL, count -> "+" + count + " Max Energy");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.ENERGY_CRYSTAL, count -> new ItemText("+" + count + " MAX ENERGY (CAP 5)"));
 
     ITEM_DESCRIPTIONS.put(
         ItemType.MERCHANTS_FAVOR,
         count -> {
-          float discount = Math.min(count * 0.10f, 0.5f);
-          return String.format("+%.0f%% Shop Discount | Max 50%%", discount * 100);
+          int discount = Math.min(count * 10, 50);
+          return new ItemText("+" + discount + "% SHOP DISCOUNT");
         });
 
     // Lucky Coins provide a non-stacking bonus per reward claim.
     // Additional coins are retained for later gold rewards.
-    ITEM_DESCRIPTIONS.put(
-        ItemType.LUCKY_COIN, count -> "+10% Gold Reward bonus per claim (max +20 gold)");
+    ITEM_DESCRIPTIONS.put(ItemType.LUCKY_COIN, count -> new ItemText("+10% GOLD (MAX +20)"));
 
-    ITEM_DESCRIPTIONS.put(ItemType.IRON_AEGIS, count -> "Use in battle: +5 Armour");
+    ITEM_DESCRIPTIONS.put(ItemType.IRON_AEGIS, count -> new ItemText("+5 ARMOUR"));
 
-    ITEM_DESCRIPTIONS.put(ItemType.WARRIORS_CREST, count -> "Use in battle: +1 Strength");
-
-    ITEM_DESCRIPTIONS.put(ItemType.ASHEN_EMBER, count -> "-" + count + " Max Energy | Minimum 1");
+    ITEM_DESCRIPTIONS.put(ItemType.WARRIORS_CREST, count -> new ItemText("+1 STRENGTH"));
 
     ITEM_DESCRIPTIONS.put(
-        ItemType.BRAND_OF_THE_DAMNED, count -> "Strength gains -" + count + " | Minimum 0");
+        ItemType.ASHEN_EMBER, count -> new ItemText("-" + count + " MAX ENERGY (MIN 1)"));
 
     ITEM_DESCRIPTIONS.put(
-        ItemType.SHATTERED_AEGIS, count -> "Block gains -" + count + " | Minimum 0");
+        ItemType.BRAND_OF_THE_DAMNED, count -> new ItemText("STRENGTH GAINS -" + count));
 
-    ITEM_DESCRIPTIONS.put(ItemType.AMBROSIA_FLASK, count -> "Use in battle: Restore 20 Health");
+    ITEM_DESCRIPTIONS.put(ItemType.SHATTERED_AEGIS, count -> new ItemText("BLOCK GAINS -" + count));
+
+    ITEM_DESCRIPTIONS.put(ItemType.AMBROSIA_FLASK, count -> new ItemText("RESTORE 20 HEALTH"));
     ITEM_DESCRIPTIONS.put(
-        ItemType.BLOOD_OATH_SIGIL,
-        count ->
-            "Turn start: -" + (count * 2) + " Health | Ignores Block/Armour | Minimum 1 Health");
+        ItemType.BLOOD_OATH_SIGIL, count -> new ItemText("-" + (count * 2) + " HEALTH / TURN"));
     ITEM_DESCRIPTIONS.put(
-        ItemType.ETERNAL_VITALITY,
-        count -> "+" + (count * 20) + " Max Health | Fully healed when obtained");
+        ItemType.ETERNAL_VITALITY, count -> new ItemText("+" + (count * 20) + " MAX HEALTH"));
+  }
+
+  static ItemText describeItem(ItemType item, int count) {
+    return ITEM_DESCRIPTIONS.getOrDefault(item, ignored -> new ItemText("")).apply(count);
   }
 
   private final RunState runState;
@@ -137,6 +152,7 @@ public class InventoryPopupComponent extends UIComponent {
 
     popup.setBackgroundTexture(PANEL_TEXTURE);
     popup.setPadding(14f, 22f, 14f, 22f);
+    popup.setMinSize(WINDOW_WIDTH, 0f);
     popup.setDefaultCloseButtonVisible(false);
     popup.setOnShow(this::refresh);
     popup.setOnHide(this::clearUseFeedback);
@@ -157,44 +173,70 @@ public class InventoryPopupComponent extends UIComponent {
     PlayerRunState playerState = runState.getOrCreatePlayerState();
     List<ItemType> ownedItems = playerState.getOwnedItems();
     List<ItemType> itemTypes = distinctInOrder(ownedItems);
+    float listHeight =
+        Math.max(1, Math.min(itemTypes.size(), MAX_VISIBLE_ROWS)) * (ROW_HEIGHT + ROW_SPACING);
 
     Table header = new Table();
     header.add().width(30f);
     header.add(new Label("INVENTORY", titleStyle())).expandX().center();
     header.add(createCloseButton()).size(30f);
 
-    content.add(header).growX().padBottom(1f).row();
+    content.add(header).width(CONTENT_WIDTH).height(54f).padBottom(1f).row();
 
+    int itemCount = ownedItems.size();
+    int typeCount = itemTypes.size();
     Label summary =
-        new Label(ownedItems.size() + " Items | " + itemTypes.size() + " Types", detailStyle());
+        new Label(
+            itemCount
+                + (itemCount == 1 ? " Item | " : " Items | ")
+                + typeCount
+                + (typeCount == 1 ? " Type" : " Types"),
+            detailStyle());
 
-    content.add(summary).center().padBottom(5f).growX().row();
-    content.add(divider()).height(1f).growX().padBottom(5f).row();
+    content.add(summary).width(CONTENT_WIDTH).height(26f).left().padBottom(5f).row();
+    content.add(divider()).width(CONTENT_WIDTH).height(1f).padBottom(5f).row();
 
     if (ownedItems.isEmpty()) {
-      content.add(new Label("No items collected yet.", detailStyle())).pad(40f).row();
-      return;
+      content
+          .add(new Label("No items collected yet.", detailStyle()))
+          .width(CONTENT_WIDTH)
+          .height(listHeight)
+          .center()
+          .row();
+    } else {
+      Table itemList = new Table();
+      itemList.top();
+
+      for (ItemType item : itemTypes) {
+        itemList
+            .add(createItemRow(playerState, item))
+            .width(LIST_WIDTH)
+            .height(ROW_HEIGHT)
+            .padBottom(ROW_SPACING)
+            .row();
+      }
+
+      ScrollPane scrollPane = new ScrollPane(itemList, skin);
+      scrollPane.setFadeScrollBars(false);
+      scrollPane.setScrollbarsOnTop(true);
+      scrollPane.setOverscroll(false, false);
+      scrollPane.setScrollingDisabled(true, false);
+
+      content.add(scrollPane).width(CONTENT_WIDTH).height(listHeight).row();
     }
-
-    Table itemList = new Table();
-    itemList.top();
-
-    for (ItemType item : itemTypes) {
-      itemList.add(createItemRow(playerState, item)).growX().padBottom(6f).row();
-    }
-
-    ScrollPane scrollPane = new ScrollPane(itemList, skin);
-    scrollPane.setFadeScrollBars(false);
-    scrollPane.setScrollingDisabled(true, false);
-
-    content.add(scrollPane).grow().row();
 
     String turnHint =
         canUseBattleItems.getAsBoolean()
             ? "Consumable items can be used this turn."
-            : "Consumable items can only be used on your turn.";
+            : "Consumable items can be used on your turn in battle.";
 
-    content.add(new Label(turnHint, detailStyle())).padTop(8f).padBottom(4f);
+    content
+        .add(new Label(turnHint, detailStyle()))
+        .width(CONTENT_WIDTH)
+        .height(28f)
+        .center()
+        .padTop(8f)
+        .padBottom(4f);
   }
 
   private Table createItemRow(PlayerRunState playerState, ItemType item) {
@@ -206,31 +248,41 @@ public class InventoryPopupComponent extends UIComponent {
 
     Table row = new Table();
     row.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_COLOUR));
-    row.pad(7f, 9f, 7f, 9f);
+    row.pad(8f, 12f, 8f, 12f);
 
     String iconPath = ITEM_ICONS.get(item);
     ResourceService resources = ServiceLocator.getResourceService();
-
+    Image icon = new Image();
     if (iconPath != null && resources != null && resources.containsAsset(iconPath, Texture.class)) {
-      row.add(new Image(resources.getAsset(iconPath, Texture.class))).size(38f).padRight(10f);
+      icon = new Image(resources.getAsset(iconPath, Texture.class));
     }
+    row.add(icon).size(56f).padRight(8f);
 
     Table text = new Table();
     text.left();
 
-    text.add(new Label(ItemFormatting.formatItemName(item), nameStyle())).left().row();
+    text.add(new Label(ItemFormatting.formatItemName(item), nameStyle()))
+        .width(TEXT_WIDTH)
+        .height(30f)
+        .left()
+        .row();
 
-    String description = ITEM_DESCRIPTIONS.getOrDefault(item, ignored -> "").apply(count);
+    ItemText description = describeItem(item, count);
+    Color effectColour = item.isCurse() ? CURSE_COLOUR : GOLD_COLOUR;
+    Label effect = new Label(description.effect(), smallLabelStyle(effectColour));
+    effect.setWrap(true);
+    text.add(effect).width(TEXT_WIDTH).height(28f).left().row();
 
-    text.add(new Label(description, detailStyle())).left().padTop(2f);
+    row.add(text).width(TEXT_WIDTH).left();
 
-    row.add(text).left().growX();
-
+    Table actionColumn = new Table();
+    actionColumn.add(createCountBadge(count)).width(54f).height(26f).right().row();
     if (item.isBattleConsumable()) {
-      row.add(createUseButton(item)).width(66f).height(34f).padLeft(8f);
+      actionColumn.add(createUseButton(item)).width(ACTION_WIDTH).height(36f).padTop(4f);
     } else {
-      row.add(createStatusBadge(item)).padLeft(10f);
+      actionColumn.add(createStatusBadge(item)).width(ACTION_WIDTH).height(36f).padTop(4f);
     }
+    row.add(actionColumn).width(ACTION_WIDTH).padLeft(8f);
 
     frame.add(row).grow();
     return frame;
@@ -238,7 +290,7 @@ public class InventoryPopupComponent extends UIComponent {
 
   private Table createStatusBadge(ItemType item) {
     String status = item.isCurse() ? "CURSE" : item == ItemType.LUCKY_COIN ? "ON GOLD" : "PASSIVE";
-    Color statusColour = item.isCurse() ? CREST_EFFECT_COLOUR : DESCRIPTION_COLOUR;
+    Color statusColour = item.isCurse() ? CURSE_COLOUR : GOLD_COLOUR;
 
     Table border = new Table();
     border.setBackground(skin.newDrawable("white", ROW_BORDER_COLOUR));
@@ -246,24 +298,42 @@ public class InventoryPopupComponent extends UIComponent {
 
     Table badge = new Table();
     badge.setBackground(skin.newDrawable("white", ROW_BACKGROUND_COLOUR));
-    badge.add(new Label(status, smallLabelStyle(statusColour))).pad(5f, 8f, 5f, 8f);
+    badge.add(new Label(status, smallLabelStyle(statusColour))).center();
 
-    border.add(badge);
+    border.add(badge).grow();
     return border;
   }
 
-  private TextButton createUseButton(ItemType item) {
-    TextButtonStyle style =
-        new TextButtonStyle(skin.get(STYLE_NAME_DEFAULT, TextButtonStyle.class));
+  private Table createCountBadge(int count) {
+    Table badge = new Table();
+    badge.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_BACKGROUND_COLOUR));
+    badge.add(new Label("x" + count, smallLabelStyle(NAME_COLOUR))).center();
+    return badge;
+  }
 
+  private Table createUseButton(ItemType item) {
+    TextButtonStyle style = new TextButtonStyle();
     style.font = skin.getFont(FONT_SMALL);
-    style.fontColor = GOLD_COLOUR;
-    style.overFontColor = NAME_COLOUR;
+    style.fontColor = ACTION_COLOUR;
+    style.overFontColor = Color.WHITE;
     style.downFontColor = Color.WHITE;
-    style.disabledFontColor = DESCRIPTION_COLOUR;
+    style.disabledFontColor = DISABLED_ACTION_COLOUR;
+    style.checkedFontColor = ACTION_COLOUR;
+    style.up = skin.newDrawable(STYLE_NAME_WHITE, ROW_BACKGROUND_COLOUR);
+    style.over = skin.newDrawable(STYLE_NAME_WHITE, ROW_COLOUR);
+    style.down = skin.newDrawable(STYLE_NAME_WHITE, BORDER_COLOUR);
+    style.disabled = skin.newDrawable(STYLE_NAME_WHITE, ROW_BACKGROUND_COLOUR);
+    style.checked = style.up;
+    style.checkedOver = style.over;
 
     TextButton button = new TextButton("USE", style);
     button.setDisabled(!canUseItemNow(item));
+    Table border = new Table();
+    border.setBackground(
+        skin.newDrawable(
+            STYLE_NAME_WHITE, button.isDisabled() ? ROW_BORDER_COLOUR : ACTION_COLOUR));
+    border.pad(2f);
+    border.add(button).grow();
 
     String tooltip =
         item == ItemType.AMBROSIA_FLASK
@@ -277,20 +347,23 @@ public class InventoryPopupComponent extends UIComponent {
           public void changed(ChangeEvent event, Actor actor) {
             if (!canUseItemNow(item)) {
               button.setDisabled(true);
+              border.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR));
               return;
             }
 
+            CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+            int before = effectValue(item, stats);
             boolean used = runState.getOrCreatePlayerState().useBattleItem(item, player);
 
             if (used) {
               useActionInProgress = true;
-              button.setDisabled(true);
-              showUseFeedback(item);
+              showUseFeedback(item, effectValue(item, stats) - before);
+              refresh();
             }
           }
         });
 
-    return button;
+    return border;
   }
 
   private boolean canUseItemNow(ItemType item) {
@@ -307,7 +380,19 @@ public class InventoryPopupComponent extends UIComponent {
     return stats != null && stats.getHealth() < stats.getMaxHealth();
   }
 
-  private void showUseFeedback(ItemType itemId) {
+  private static int effectValue(ItemType item, CombatStatsComponent stats) {
+    return switch (item) {
+      case IRON_AEGIS -> stats.getArmour();
+      case WARRIORS_CREST -> {
+        StatusEffect strength = stats.getStatusEffect("STRENGTH");
+        yield strength == null ? 0 : strength.getValue();
+      }
+      case AMBROSIA_FLASK -> stats.getHealth();
+      default -> 0;
+    };
+  }
+
+  private void showUseFeedback(ItemType itemId, int actualGain) {
     if (useFeedback != null) {
       useFeedback.remove();
       useFeedback = null;
@@ -319,15 +404,15 @@ public class InventoryPopupComponent extends UIComponent {
     if (itemId == ItemType.IRON_AEGIS) {
       effectColour = AEGIS_EFFECT_COLOUR;
       title = "IRON AEGIS USED";
-      detail = "+5 ARMOUR";
+      detail = "+" + actualGain + " ARMOUR";
     } else if (itemId == ItemType.WARRIORS_CREST) {
       effectColour = CREST_EFFECT_COLOUR;
       title = "WARRIOR'S CREST USED";
-      detail = "+1 STRENGTH";
+      detail = "+" + actualGain + " STRENGTH";
     } else {
       effectColour = AMBROSIA_EFFECT_COLOUR;
       title = "AMBROSIA USED";
-      detail = "+20 HEALTH";
+      detail = "+" + actualGain + " HEALTH";
     }
 
     Table border = new Table();
@@ -379,8 +464,6 @@ public class InventoryPopupComponent extends UIComponent {
             Actions.scaleTo(1.08f, 1.08f, 0f),
             Actions.delay(0.05f),
             Actions.scaleTo(1f, 1f, 0f),
-            Actions.delay(0.12f),
-            Actions.run(this::refresh),
             Actions.delay(0.23f),
             Actions.run(
                 () -> {

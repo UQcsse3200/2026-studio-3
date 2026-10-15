@@ -2,6 +2,7 @@ package com.csse3200.game.components.spritedisplay.displaying;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardDiscoveryService;
@@ -46,14 +48,17 @@ public class RewardDisplay extends Displaying {
   private static final Logger logger = LoggerFactory.getLogger(RewardDisplay.class);
 
   private static final String BACKGROUND_TEXTURE = "images/ui/victory-background-approved.png";
-  private static final String PANEL_TEXTURE = "images/ui/reward-panel-mythic-cords-aged.png";
+  private static final String PANEL_TEXTURE = "images/ui/reward-panel-mythic-wingless.png";
+  private static final String WINGS_TEXTURE = "images/ui/victory-wings-overlay.png";
   private static final String CARD_TEXTURE = "images/ui/reward-card-mythic-aged.png";
   private static final String GOLD_TEXTURE = "images/ui/gold-reward.png";
+  private static final String GOLD_FEEDBACK_ICON = "images/ui/victory-gold-icon.png";
+  private static final String BATTLE_MENU_ICONS = "images/ui/battle-menu-icons.png";
   private static final String VICTORY_TITLE_TEXTURE = "images/ui/victory-title-mythic.png";
-  private static final float REFERENCE_WIDTH = 1672f;
   private static final float REFERENCE_HEIGHT = 941f;
   private static final float REFERENCE_PANEL_WIDTH = 1222f;
   private static final float REFERENCE_PANEL_HEIGHT = 876f;
+  private static final float VICTORY_LAYOUT_SCALE = 800f / REFERENCE_HEIGHT;
   private static final int[] VICTORY_LETTER_X = {0, 252, 526, 817, 1120, 1390, 1730, 2170};
   private static final float PANEL_TEXTURE_WIDTH = 1584f;
   private static final float PANEL_TEXTURE_HEIGHT = 993f;
@@ -89,6 +94,8 @@ public class RewardDisplay extends Displaying {
   private boolean claimInProgress;
   private boolean created;
   private boolean disposed;
+  private boolean feedbackFinished;
+  private boolean navigationSent;
   private Actor background;
   private Actor scrimActor;
   private Actor rewardUi;
@@ -99,8 +106,10 @@ public class RewardDisplay extends Displaying {
   private CardWidgetAssets cardWidgetAssets;
   private final List<Actor> rewardOptionCards = new ArrayList<>();
   private final List<Actor> victoryTitleLetters = new ArrayList<>();
+  private final List<Actor> victoryWings = new ArrayList<>();
   private final List<Actor> victoryParticles = new ArrayList<>();
   private VictoryAnimationController victoryAnimationController;
+  private RewardClaimFeedback rewardClaimFeedback;
 
   public RewardDisplay(
       DisplayingRecord rec,
@@ -192,12 +201,10 @@ public class RewardDisplay extends Displaying {
     scrimActor = dimmer;
     stage.addActor(dimmer);
 
-    // The approved mock-up is 1672 x 941. Scale both axes from that single reference scale so the
-    // frame keeps the exact 1222 x 876 design proportion on every viewport.
-    float referenceScale =
-        Math.min(stage.getWidth() / REFERENCE_WIDTH, stage.getHeight() / REFERENCE_HEIGHT);
-    float panelWidth = REFERENCE_PANEL_WIDTH * referenceScale;
-    float panelHeight = REFERENCE_PANEL_HEIGHT * referenceScale;
+    // Keep the approved 1672 x 941 composition at a fixed logical size. The shared viewport may
+    // extend in either direction on different displays, but must not resize the victory artwork.
+    float panelWidth = REFERENCE_PANEL_WIDTH * VICTORY_LAYOUT_SCALE;
+    float panelHeight = REFERENCE_PANEL_HEIGHT * VICTORY_LAYOUT_SCALE;
 
     Stack panel = new Stack();
     Image panelFrame = image(PANEL_TEXTURE);
@@ -212,6 +219,15 @@ public class RewardDisplay extends Displaying {
     rewardUi = root;
     stage.addActor(root);
 
+    ResourceService resources = ServiceLocator.getResourceService();
+    Texture battleIcons = resources.getAsset(BATTLE_MENU_ICONS, Texture.class);
+    Texture goldIcon = resources.getAsset(GOLD_FEEDBACK_ICON, Texture.class);
+    if (battleIcons != null && goldIcon != null) {
+      battleIcons.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+      goldIcon.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+      rewardClaimFeedback = new RewardClaimFeedback(stage, skin, battleIcons, goldIcon);
+    }
+
     victoryAnimationController =
         new VictoryAnimationController(
             background,
@@ -221,6 +237,7 @@ public class RewardDisplay extends Displaying {
             victoryTitleLetters,
             victorySubtitle,
             sunPulse,
+            victoryWings,
             victoryParticles,
             rewardOptionCards);
     victoryAnimationController.playEntrance();
@@ -230,6 +247,13 @@ public class RewardDisplay extends Displaying {
     Group effects = new Group();
     effects.setSize(panelWidth, panelHeight);
     effects.setTouchable(Touchable.disabled);
+
+    Texture wingsTexture =
+        ServiceLocator.getResourceService().getAsset(WINGS_TEXTURE, Texture.class);
+    wingsTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    victoryWings.clear();
+    addVictoryWing(effects, wingsTexture, panelWidth, panelHeight, 420, 270f);
+    addVictoryWing(effects, wingsTexture, panelWidth, panelHeight, 854, 40f);
 
     Texture panelTexture =
         ServiceLocator.getResourceService().getAsset(PANEL_TEXTURE, Texture.class);
@@ -270,6 +294,27 @@ public class RewardDisplay extends Displaying {
     return effects;
   }
 
+  private void addVictoryWing(
+      Group effects,
+      Texture texture,
+      float panelWidth,
+      float panelHeight,
+      int sourceX,
+      float pivotX) {
+    Image wing = new Image(new TextureRegion(texture, sourceX, 0, 310, 215));
+    float width = panelWidth * 310f / PANEL_TEXTURE_WIDTH;
+    float height = panelHeight * 215f / PANEL_TEXTURE_HEIGHT;
+    wing.setBounds(
+        panelWidth * sourceX / PANEL_TEXTURE_WIDTH,
+        panelHeight * (PANEL_TEXTURE_HEIGHT - 215f) / PANEL_TEXTURE_HEIGHT,
+        width,
+        height);
+    wing.setOrigin(width * pivotX / 310f, height * 40f / 215f);
+    wing.setTouchable(Touchable.disabled);
+    victoryWings.add(wing);
+    effects.addActor(wing);
+  }
+
   private Table createPanelContent(float panelWidth, float panelHeight) {
     Table content = new Table();
     content.top();
@@ -292,7 +337,7 @@ public class RewardDisplay extends Displaying {
     Table cards = new Table();
     cards.defaults().padLeft(panelWidth * 0.011f).padRight(panelWidth * 0.011f);
 
-    float cardWidth = panelWidth * (options.size() > 2 ? 0.215f : 0.25f);
+    float cardWidth = panelWidth * 0.215f;
     float cardHeight = panelHeight * 0.395f;
 
     rewardOptionCards.clear();
@@ -345,12 +390,13 @@ public class RewardDisplay extends Displaying {
     Table details = new Table();
     details.top();
     details.setTouchable(Touchable.disabled);
-    details.pad(cardHeight * 0.115f, cardWidth * 0.075f, cardHeight * 0.055f, cardWidth * 0.075f);
+    details.pad(cardHeight * 0.115f, cardWidth * 0.075f, cardHeight * 0.035f, cardWidth * 0.075f);
 
-    Label name = new Label(rewardTitle(option), largeStyle(GOLD));
-    name.setFontScale(isLongRewardName(option) ? 0.58f : 0.76f);
-    name.setAlignment(com.badlogic.gdx.utils.Align.center);
-    details.add(name).width(cardWidth * 0.86f).center();
+    float textWidth = cardWidth * 0.76f;
+    float nameHeight = cardHeight * 0.17f;
+    Label name =
+        fittedRewardLabel(rewardTitle(option), largeStyle(GOLD), textWidth, nameHeight, 0.68f);
+    details.add(name).width(textWidth).height(nameHeight).center();
     details.row();
 
     Image icon = image(rewardIcon(option));
@@ -362,28 +408,27 @@ public class RewardDisplay extends Displaying {
         .padTop(cardHeight * 0.025f);
     details.row();
 
-    Label description = new Label(rewardDescription(option), smallStyle(CREAM));
-    description.setWrap(true);
-    description.setAlignment(com.badlogic.gdx.utils.Align.center);
+    float descriptionHeight = cardHeight * 0.21f;
+    Label description =
+        fittedRewardLabel(
+            rewardDescription(option), smallStyle(CREAM), textWidth, descriptionHeight, 0.82f);
     details
         .add(description)
-        .width(cardWidth * 0.88f)
-        .height(cardHeight * 0.13f)
+        .width(textWidth)
+        .height(descriptionHeight)
         .center()
         .padTop(cardHeight * 0.008f);
     details.row();
 
     details.add().expandY();
     details.row();
-    Label select = new Label("SELECT", largeStyle(GOLD));
-    select.setFontScale(0.82f);
-    select.setAlignment(com.badlogic.gdx.utils.Align.center);
+    float ornamentWidth = cardWidth * 0.34f;
+    float ornamentHeight = cardHeight * 0.04f;
     details
-        .add(select)
-        .width(cardWidth * 0.78f)
-        .height(cardHeight * 0.12f)
+        .add(createRewardCardOrnament(ornamentWidth, ornamentHeight))
+        .size(ornamentWidth, ornamentHeight)
         .center()
-        .padBottom(cardHeight * 0.055f);
+        .padBottom(cardHeight * 0.025f);
     card.add(details);
 
     card.setTouchable(Touchable.enabled);
@@ -417,6 +462,31 @@ public class RewardDisplay extends Displaying {
           }
         });
     return card;
+  }
+
+  private Group createRewardCardOrnament(float width, float height) {
+    Group ornament = new Group();
+    ornament.setSize(width, height);
+    ornament.setTouchable(Touchable.disabled);
+
+    Color bronze = new Color(0.55f, 0.39f, 0.22f, 1f);
+    Color gold = new Color(0.76f, 0.57f, 0.32f, 1f);
+    float midX = width / 2f;
+    float midY = height / 2f;
+    addOrnamentPixel(ornament, bronze, 0f, midY - 1f, width * 0.36f, 2f);
+    addOrnamentPixel(ornament, bronze, width * 0.64f, midY - 1f, width * 0.36f, 2f);
+    addOrnamentPixel(ornament, gold, midX - 1.5f, 0f, 3f, height);
+    addOrnamentPixel(ornament, gold, midX - 7f, midY - 1.5f, 14f, 3f);
+    addOrnamentPixel(ornament, CREAM, midX - 2f, midY - 2f, 4f, 4f);
+    return ornament;
+  }
+
+  private void addOrnamentPixel(
+      Group ornament, Color color, float x, float y, float width, float height) {
+    Image pixel = new Image(skin.newDrawable("white", color));
+    pixel.setBounds(x, y, width, height);
+    pixel.setTouchable(Touchable.disabled);
+    ornament.addActor(pixel);
   }
 
   private String describeOption(RewardOption option) {
@@ -497,11 +567,23 @@ public class RewardDisplay extends Displaying {
     return runState.getOrCreatePlayerState().calculateLuckyCoinBonus(option.goldAmount);
   }
 
-  private boolean isLongRewardName(RewardOption option) {
-    return option != null
-        && (option.type == RewardType.CARD
-            || option.itemId == ItemType.MERCHANTS_FAVOR
-            || option.itemId == ItemType.WARRIORS_CREST);
+  private Label fittedRewardLabel(
+      String text, LabelStyle style, float width, float height, float preferredScale) {
+    Label label = new Label(text, style);
+    label.setWrap(true);
+    label.setAlignment(Align.center);
+
+    GlyphLayout layout = new GlyphLayout();
+    float scale = preferredScale;
+    while (scale > 0.25f) {
+      layout.setText(style.font, text, style.fontColor, width / scale, Align.center, true);
+      if (layout.width * scale <= width && layout.height * scale <= height) {
+        break;
+      }
+      scale -= 0.02f;
+    }
+    label.setFontScale(Math.max(0.25f, scale));
+    return label;
   }
 
   private String rewardIcon(RewardOption option) {
@@ -561,9 +643,19 @@ public class RewardDisplay extends Displaying {
 
     claimInProgress = true;
     try {
+      int goldBefore =
+          option.type == RewardType.GOLD ? runState.getOrCreatePlayerState().getGold() : 0;
       rewardService.claimRunReward(runState, option, null);
+      int amount =
+          option.type == RewardType.GOLD
+              ? runState.getOrCreatePlayerState().getGold() - goldBefore
+              : 1;
       goldRewardUsesLuckyCoin = false;
-      completeReward();
+      completeReward(
+          option.type,
+          option.type == RewardType.GOLD ? GOLD_FEEDBACK_ICON : rewardIcon(option),
+          rewardOptionActor(option),
+          amount);
     } catch (RuntimeException exception) {
       claimInProgress = false;
       logger.error("Could not claim {} reward", option.type, exception);
@@ -609,7 +701,7 @@ public class RewardDisplay extends Displaying {
           new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-              claimCard(option, cardId);
+              claimCard(option, cardId, cardButton);
             }
           });
       cardButton.addListener(
@@ -630,7 +722,7 @@ public class RewardDisplay extends Displaying {
     stage.addActor(cardSelectionTable);
   }
 
-  private void claimCard(RewardOption option, String cardId) {
+  private void claimCard(RewardOption option, String cardId, Actor selectedCard) {
     if (disposed || claimed || claimInProgress || runState == null) {
       return;
     }
@@ -640,7 +732,13 @@ public class RewardDisplay extends Displaying {
     }
     try {
       rewardService.claimRunReward(runState, option, cardId);
-      completeReward();
+      String artPath =
+          cardService
+              .getCard(cardId)
+              .map(card -> card.texturePath)
+              .filter(path -> path != null && !path.isBlank())
+              .orElse(CARD_TEXTURE);
+      completeReward(RewardType.CARD, artPath, selectedCard, 1);
     } catch (RuntimeException exception) {
       claimInProgress = false;
       if (cardSelectionTable != null) {
@@ -650,18 +748,45 @@ public class RewardDisplay extends Displaying {
     }
   }
 
-  private void completeReward() {
+  private void completeReward(RewardType type, String artPath, Actor source, int amount) {
     if (claimed) {
       return;
     }
     claimed = true;
     afterRewardApplied.run();
     entity.getEvents().trigger(REWARD_CLAIMED_EVENT);
-    entity.getEvents().trigger(EndBattleDisplay.RETURN_TO_MENU_EVENT);
+    Texture art = ServiceLocator.getResourceService().getAsset(artPath, Texture.class);
+    if (rewardClaimFeedback == null || art == null) {
+      feedbackFinished = true;
+      return;
+    }
+    rewardClaimFeedback.play(
+        type, new TextureRegion(art), source, amount, () -> feedbackFinished = true);
+  }
+
+  private Actor rewardOptionActor(RewardOption option) {
+    int index = options.indexOf(option);
+    return index >= 0 && index < rewardOptionCards.size() ? rewardOptionCards.get(index) : null;
+  }
+
+  /** Dispatches navigation after the end screen has finished rendering its current frame. */
+  public void finishFeedbackAndNavigate() {
+    if (feedbackFinished && !navigationSent && !disposed) {
+      navigationSent = true;
+      entity.getEvents().trigger(EndBattleDisplay.RETURN_TO_MENU_EVENT);
+    }
   }
 
   List<Actor> getRewardOptionCards() {
     return List.copyOf(rewardOptionCards);
+  }
+
+  Actor getRewardUi() {
+    return rewardUi;
+  }
+
+  RewardClaimFeedback getClaimFeedback() {
+    return rewardClaimFeedback;
   }
 
   @Override
@@ -669,6 +794,9 @@ public class RewardDisplay extends Displaying {
     disposed = true;
     if (victoryAnimationController != null) {
       victoryAnimationController.dispose();
+    }
+    if (rewardClaimFeedback != null) {
+      rewardClaimFeedback.dispose();
     }
     if (background != null) {
       background.remove();

@@ -2,12 +2,17 @@ package com.csse3200.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.areas.ForestGameArea;
 import com.csse3200.game.areas.terrain.TerrainFactory;
@@ -105,6 +110,7 @@ public class BattleScreen extends ScreenAdapter {
   private BattleTutorialGuidanceView tutorialView;
   private BattleActions battleActions;
   private static final Logger logger = LoggerFactory.getLogger(BattleScreen.class);
+  private static final String BATTLE_TITLE_TEXTURE = "images/ui/battle-title-wordmark.png";
   private final Renderer renderer;
   private final ForestGameArea gameArea;
 
@@ -117,6 +123,7 @@ public class BattleScreen extends ScreenAdapter {
     "images/armour.png",
     "images/enemy_release/heavens_grace.png",
     "images/ui/inventory-panel.png",
+    BATTLE_TITLE_TEXTURE,
     "images/effects/shield.png",
     "images/effects/fortify.png",
     "images/ui/lucky-coin.png",
@@ -568,6 +575,8 @@ public class BattleScreen extends ScreenAdapter {
     }
 
     gameArea.displayUI(battleUi);
+    setBattleMenuFontScale();
+    addBattleTitle(stage);
     installHandCardWidgets();
 
     Path deckEditorUiJson = Path.of(DECK_EDITOR_UI_JSON);
@@ -610,6 +619,32 @@ public class BattleScreen extends ScreenAdapter {
 
     battleUi.getEvents().addListener("openMenu", deckEditor::open);
     battleUi.getEvents().addListener("openInventory", inventoryPopup::open);
+  }
+
+  private void addBattleTitle(Stage stage) {
+    Texture texture =
+        ServiceLocator.getResourceService().getAsset(BATTLE_TITLE_TEXTURE, Texture.class);
+    stage.addActor(createBattleTitle(stage, texture));
+  }
+
+  static Image createBattleTitle(Stage stage, Texture texture) {
+    texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    Image title = new Image(texture);
+    title.setName("battleTitleWordmark");
+    title.setScaling(Scaling.fit);
+    title.setBounds(36f, stage.getViewport().getWorldHeight() - 133f, 222f, 91f);
+    title.setTouchable(Touchable.disabled);
+    return title;
+  }
+
+  private void setBattleMenuFontScale() {
+    for (String trigger : List.of("openMenu", "openInventory", "endTurn")) {
+      for (Clickable clickable : uiFactory.getByTrigger(trigger)) {
+        if (clickable.getBtn() instanceof ImageTextButton button) {
+          button.getLabel().setFontScale(0.86f);
+        }
+      }
+    }
   }
 
   private DisplayingFactory buildDeckEditorDisplays(

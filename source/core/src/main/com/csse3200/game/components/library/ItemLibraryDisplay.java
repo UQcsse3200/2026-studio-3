@@ -113,6 +113,7 @@ public class ItemLibraryDisplay extends UIComponent {
     buttonStyle = createButtonStyle();
 
     Table panel = new Table();
+    panel.setName("itemLibraryPanel");
     panel.setBackground(skin.newDrawable(WHITE, PANEL_COLOUR));
     panel.pad(24f, 32f, 28f, 32f);
 
@@ -127,6 +128,7 @@ public class ItemLibraryDisplay extends UIComponent {
     applyFilter(false);
 
     Table wrapper = new Table();
+    wrapper.setName("itemLibraryWrapper");
     wrapper.setFillParent(true);
     wrapper.center().pad(MenuTheme.SCREEN_PADDING);
     wrapper.add(panel).width(PANEL_WIDTH).height(PANEL_HEIGHT);
