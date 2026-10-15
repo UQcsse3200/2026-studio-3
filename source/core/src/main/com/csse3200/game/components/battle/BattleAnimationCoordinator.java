@@ -31,6 +31,10 @@ import org.slf4j.LoggerFactory;
  * <p>Visuals are separate entities, spawned into {@link com.csse3200.game.entities.EntityService}.
  * They are disposed from this component's own {@link #update()} rather than from their own, because
  * an entity must not dispose itself while its components are being iterated.
+ *
+ * <p>Listeners are notified before the controller applies damage, so a hit on a target with Armour
+ * or Block is checked again on the next update. If no health was lost, the armour icon is shown on
+ * top of the normal hit burst, so players can tell the hit was absorbed.
  */
 public class BattleAnimationCoordinator extends Component {
   private static final Logger logger = LoggerFactory.getLogger(BattleAnimationCoordinator.class);
@@ -47,6 +51,12 @@ public class BattleAnimationCoordinator extends Component {
   private final List<Entity> activeVisuals = new ArrayList<>();
   private Texture fallbackGlow;
   private boolean disposed;
+
+  /** Hits on defended targets, checked one frame later to see whether they were absorbed. */
+  private final List<PendingHit> pendingHits = new ArrayList<>();
+
+  /** A hit recorded before damage is applied, checked after the controller has applied it. */
+  private record PendingHit(Entity target, int healthBefore, float startDelay) {}
 
   /**
    * @param controller the battle controller to listen to
@@ -82,6 +92,7 @@ public class BattleAnimationCoordinator extends Component {
     if (disposed) {
       return;
     }
+    safely("pending hits", this::resolvePendingHits);
     Iterator<Entity> iterator = activeVisuals.iterator();
     while (iterator.hasNext()) {
       Entity visual = iterator.next();
@@ -110,6 +121,9 @@ public class BattleAnimationCoordinator extends Component {
 
   /** Read-only visual completion probe; does not delay or alter combat. */
   public boolean hasActiveVisuals() {
+    if (!pendingHits.isEmpty()) {
+      return true;
+    }
     return activeVisuals.stream()
         .anyMatch(
             visual -> {
@@ -155,9 +169,58 @@ public class BattleAnimationCoordinator extends Component {
     List<EffectType> orderedTypes = distinctTypesInOrder(effects);
     for (Entity target : effectHandler.getLivingEnemyTargets(request, enemies)) {
       for (int i = 0; i < orderedTypes.size(); i++) {
-        spawnVisual(orderedTypes.get(i), target, i * EFFECT_STAGGER_SECONDS);
+        EffectType type = orderedTypes.get(i);
+        float delay = i * EFFECT_STAGGER_SECONDS;
+        spawnVisual(type, target, delay);
+        if (type == EffectType.DAMAGE) {
+          watchForBlockedHit(target, delay);
+        }
       }
     }
+  }
+
+  /** Records a hit on a target with Armour or Block, so it can be checked after damage applies. */
+  private void watchForBlockedHit(Entity target, float startDelay) {
+    CombatStatsComponent stats = target.getComponent(CombatStatsComponent.class);
+    if (stats == null || (stats.getArmour() <= 0 && stats.getBlock() <= 0)) {
+      return;
+    }
+    pendingHits.add(new PendingHit(target, stats.getHealth(), startDelay));
+  }
+
+  /** Shows the armour icon on each recorded target that lost no health from its hit. */
+  private void resolvePendingHits() {
+    if (pendingHits.isEmpty()) {
+      return;
+    }
+    List<PendingHit> hits = new ArrayList<>(pendingHits);
+    pendingHits.clear();
+    for (PendingHit hit : hits) {
+      if (wasFullyAbsorbed(hit)) {
+        spawnBlockedVisual(hit.target(), hit.startDelay());
+      }
+    }
+  }
+
+  /** A recorded hit was fully absorbed if the target's health did not drop. */
+  private static boolean wasFullyAbsorbed(PendingHit hit) {
+    CombatStatsComponent stats = hit.target().getComponent(CombatStatsComponent.class);
+    return stats != null && stats.getHealth() >= hit.healthBefore();
+  }
+
+  /** Shows the armour icon on a target whose hit was fully absorbed, on top of the hit burst. */
+  private void spawnBlockedVisual(Entity target, float startDelay) {
+    EffectVisualStyle style = OffensiveEffectVisuals.BLOCKED_STYLE;
+    Vector2 scale = target.getScale();
+    float baseSize = Math.max(MIN_SIZE, Math.max(scale.x, scale.y) * SIZE_FACTOR);
+
+    Entity visual = new Entity();
+    visual.addComponent(new EffectVisualComponent(textureFor(style), style, baseSize, startDelay));
+    // Sit above the target's head so the icon does not cover the enemy sprite.
+    Vector2 aboveHead = target.getCenterPosition().cpy().add(0f, scale.y * 0.2f);
+    visual.setPosition(aboveHead);
+    ServiceLocator.getEntityService().register(visual);
+    activeVisuals.add(visual);
   }
 
   private void onPlayerEffects(List<ResolvedCardEffect> effects) {
@@ -262,6 +325,7 @@ public class BattleAnimationCoordinator extends Component {
       visual.dispose();
     }
     activeVisuals.clear();
+    pendingHits.clear();
     if (fallbackGlow != null) {
       fallbackGlow.dispose();
       fallbackGlow = null;

@@ -1,6 +1,8 @@
 package com.csse3200.game.components.battle;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
@@ -23,6 +25,8 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
+import com.csse3200.game.cards.play.CardPlayRequest;
+import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.entities.Entity;
@@ -47,6 +51,7 @@ class BattleAnimationCoordinatorTest {
   private EntityService entities;
   private BattleAnimationCoordinator coordinator;
   private EventListener1<List<ResolvedCardEffect>> playerEffects;
+  private EventListener1<List<ResolvedCardEffect>> enemyEffects;
 
   @BeforeEach
   void setUp() {
@@ -80,6 +85,41 @@ class BattleAnimationCoordinatorTest {
         ArgumentCaptor.forClass(EventListener1.class);
     verify(controller).addPlayerEffectsListener(listener.capture());
     playerEffects = listener.getValue();
+  }
+
+  /** Creates a coordinator with one targeted enemy that has the given health and armour. */
+  private CombatStatsComponent createCoordinatorWithEnemy(int health, int armour) {
+    EffectVisualRegistry registry = new EffectVisualRegistry();
+    OffensiveEffectVisuals.registerAll(registry);
+
+    CombatStatsComponent stats = new CombatStatsComponent(health, 0);
+    Entity enemy = new Entity().addComponent(stats);
+    enemy.setScale(1f, 1f);
+    stats.addArmour(armour);
+
+    BattleController controller = mock(BattleController.class);
+    CardEffectHandler handler = mock(CardEffectHandler.class);
+    CardPlayRequest request = mock(CardPlayRequest.class);
+    when(controller.getCardPlayRequest()).thenReturn(request);
+    when(handler.getLivingEnemyTargets(eq(request), any())).thenReturn(List.of(enemy));
+
+    coordinator =
+        new BattleAnimationCoordinator(controller, handler, List.of(enemy), new Entity(), registry);
+    coordinator.create();
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<EventListener1<List<ResolvedCardEffect>>> listener =
+        ArgumentCaptor.forClass(EventListener1.class);
+    verify(controller).addEnemyEffectsListener(listener.capture());
+    enemyEffects = listener.getValue();
+
+    when(resources.getAsset(eq(OffensiveEffectVisuals.BLOCKED_ICON_PATH), eq(Texture.class)))
+        .thenReturn(mock(Texture.class));
+    return stats;
+  }
+
+  private static ResolvedCardEffect damage(int value) {
+    return new ResolvedCardEffect(
+        "test-card", EffectType.DAMAGE, TargetType.SINGLE_ENEMY, value, 0, 0);
   }
 
   private static ResolvedCardEffect effect(EffectType type) {
@@ -186,6 +226,54 @@ class BattleAnimationCoordinatorTest {
       verify(batch).draw(eq(icon), anyFloat(), anyFloat(), anyFloat(), anyFloat());
       coordinator.dispose();
       verify(icon, never()).dispose();
+    }
+  }
+
+  @Test
+  void fullyAbsorbedHitShouldShowArmourIconOnTopOfHitBurst() {
+    CombatStatsComponent stats = createCoordinatorWithEnemy(20, 5);
+    try (MockedConstruction<Texture> textures = mockConstruction(Texture.class)) {
+      enemyEffects.handle(List.of(damage(3)));
+
+      // The hit burst still plays straight away, as before.
+      Entity hit = spawnedVisual();
+      assertNotNull(hit.getComponent(EffectBurstComponent.class));
+      assertTrue(coordinator.hasActiveVisuals());
+
+      stats.takeDamage(3); // the controller applies the damage after notifying listeners
+      coordinator.update();
+
+      ArgumentCaptor<Entity> visuals = ArgumentCaptor.forClass(Entity.class);
+      verify(entities, times(2)).register(visuals.capture());
+      Entity blocked = visuals.getAllValues().get(1);
+      assertNotNull(blocked.getComponent(EffectVisualComponent.class));
+      assertNull(blocked.getComponent(EffectBurstComponent.class));
+    }
+  }
+
+  @Test
+  void hitThatPartlyBreaksThroughArmourShouldOnlyShowHitBurst() {
+    CombatStatsComponent stats = createCoordinatorWithEnemy(20, 2);
+    try (MockedConstruction<Texture> textures = mockConstruction(Texture.class)) {
+      enemyEffects.handle(List.of(damage(5)));
+      stats.takeDamage(5);
+      coordinator.update();
+
+      Entity visual = spawnedVisual();
+      assertNotNull(visual.getComponent(EffectBurstComponent.class));
+    }
+  }
+
+  @Test
+  void hitOnUndefendedTargetShouldOnlyShowHitBurst() {
+    CombatStatsComponent stats = createCoordinatorWithEnemy(20, 0);
+    try (MockedConstruction<Texture> textures = mockConstruction(Texture.class)) {
+      enemyEffects.handle(List.of(damage(5)));
+      stats.takeDamage(5);
+      coordinator.update();
+
+      Entity visual = spawnedVisual();
+      assertNotNull(visual.getComponent(EffectBurstComponent.class));
     }
   }
 }
