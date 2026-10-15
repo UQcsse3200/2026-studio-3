@@ -276,4 +276,82 @@ class BattleAnimationCoordinatorTest {
       assertNotNull(visual.getComponent(EffectBurstComponent.class));
     }
   }
+
+  /** Creates a coordinator with one enemy and a player with the given combat stats. */
+  private Entity createCoordinatorWithDefendedPlayer(CombatStatsComponent playerStats) {
+    Entity player = new Entity().addComponent(playerStats);
+    player.setScale(1f, 1f);
+    Entity enemy = new Entity();
+    coordinator =
+        new BattleAnimationCoordinator(
+            mock(BattleController.class),
+            mock(CardEffectHandler.class),
+            List.of(enemy),
+            player,
+            new EffectVisualRegistry());
+    coordinator.create();
+    when(resources.getAsset(eq(OffensiveEffectVisuals.BLOCKED_ICON_PATH), eq(Texture.class)))
+        .thenReturn(mock(Texture.class));
+    return enemy;
+  }
+
+  @Test
+  void enemyAttackFullyAbsorbedByPlayerArmourShouldShowArmourIconOnPlayer() {
+    CombatStatsComponent playerStats = new CombatStatsComponent(20, 0);
+    playerStats.addArmour(5);
+    Entity enemy = createCoordinatorWithDefendedPlayer(playerStats);
+    try (MockedConstruction<Texture> textures = mockConstruction(Texture.class)) {
+      enemy.getEvents().trigger("enemyAttack");
+      playerStats.takeDamage(3); // the enemy applies damage right after triggering the event
+      coordinator.update();
+
+      Entity visual = spawnedVisual();
+      assertNotNull(visual.getComponent(EffectVisualComponent.class));
+    }
+  }
+
+  @Test
+  void enemyAttackStoppedByBlockAloneShouldNotShowArmourIcon() {
+    CombatStatsComponent playerStats = new CombatStatsComponent(20, 0);
+    playerStats.addBlock(5);
+    playerStats.addArmour(5);
+    Entity enemy = createCoordinatorWithDefendedPlayer(playerStats);
+    try (MockedConstruction<Texture> textures = mockConstruction(Texture.class)) {
+      enemy.getEvents().trigger("enemyAttack");
+      playerStats.takeDamage(3); // Block absorbs all of it, Armour is untouched
+      coordinator.update();
+
+      verify(entities, never()).register(any(Entity.class));
+    }
+  }
+
+  @Test
+  void enemyAttackThatBreaksThroughPlayerArmourShouldNotShowArmourIcon() {
+    CombatStatsComponent playerStats = new CombatStatsComponent(20, 0);
+    playerStats.addArmour(2);
+    Entity enemy = createCoordinatorWithDefendedPlayer(playerStats);
+    try (MockedConstruction<Texture> textures = mockConstruction(Texture.class)) {
+      enemy.getEvents().trigger("enemyAttack");
+      playerStats.takeDamage(5);
+      coordinator.update();
+
+      verify(entities, never()).register(any(Entity.class));
+    }
+  }
+
+  @Test
+  void twoAbsorbedAttacksInTheSameFrameShouldShowOneArmourIcon() {
+    CombatStatsComponent playerStats = new CombatStatsComponent(20, 0);
+    playerStats.addArmour(10);
+    Entity enemy = createCoordinatorWithDefendedPlayer(playerStats);
+    try (MockedConstruction<Texture> textures = mockConstruction(Texture.class)) {
+      enemy.getEvents().trigger("enemyAttack");
+      playerStats.takeDamage(3);
+      enemy.getEvents().trigger("enemyAttack");
+      playerStats.takeDamage(3);
+      coordinator.update();
+
+      verify(entities, times(1)).register(any(Entity.class));
+    }
+  }
 }

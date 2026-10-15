@@ -7,9 +7,12 @@ public final class OffensiveEffectVisuals {
   /** Armour icon shown by the health bar, reused so a blocked hit reads as "Armour absorbed it". */
   public static final String BLOCKED_ICON_PATH = "images/armour.png";
 
-  /** Style for a hit fully absorbed by Armour or Block: the armour icon pops over the hit burst. */
+  /**
+   * Style for a hit fully absorbed by fully absorbed by Armour: the armour icon pops over the hit
+   * burst.
+   */
   public static final EffectVisualStyle BLOCKED_STYLE =
-      new EffectVisualStyle(BLOCKED_ICON_PATH, Color.WHITE, 0.6f, 0.3f, 0.6f, 0.05f);
+      new EffectVisualStyle(BLOCKED_ICON_PATH, Color.WHITE, 0.9f, 0.3f, 0.6f, 0.05f);
 
   private OffensiveEffectVisuals() {
     throw new IllegalStateException("Utility class");

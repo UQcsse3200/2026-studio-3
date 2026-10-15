@@ -12,12 +12,7 @@ import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.services.ServiceLocator;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,8 +28,11 @@ import org.slf4j.LoggerFactory;
  * an entity must not dispose itself while its components are being iterated.
  *
  * <p>Listeners are notified before the controller applies damage, so a hit on a target with Armour
- * or Block is checked again on the next update. If no health was lost, the armour icon is shown on
- * top of the normal hit burst, so players can tell the hit was absorbed.
+ * is checked again on the next update. If Armour absorbed it and no health was lost, the armour
+ * icon is shown on top of the normal hit burst. A hit stopped by Block alone shows no icon.
+ *
+ * <p>The same check runs when an enemy attacks the player: {@code "enemyAttack"} also fires before
+ * the damage lands, so a fully absorbed enemy attack shows the armour icon above the player.
  */
 public class BattleAnimationCoordinator extends Component {
   private static final Logger logger = LoggerFactory.getLogger(BattleAnimationCoordinator.class);
@@ -52,11 +50,22 @@ public class BattleAnimationCoordinator extends Component {
   private Texture fallbackGlow;
   private boolean disposed;
 
-  /** Hits on defended targets, checked one frame later to see whether they were absorbed. */
+  /** Hits on targets with Armour, checked one frame later to see whether Armour absorbed them. */
   private final List<PendingHit> pendingHits = new ArrayList<>();
 
-  /** A hit recorded before damage is applied, checked after the controller has applied it. */
-  private record PendingHit(Entity target, int healthBefore, float startDelay) {}
+  /** A hit recorded before damage is applied, checked after the damage has been applied. */
+  private record PendingHit(Entity target, int healthBefore, int armourBefore, float startDelay) {}
+
+  /** The armour icon currently showing on each target, so repeated hits reuse one icon. */
+  private final Map<Entity, Entity> blockedVisuals = new HashMap<>();
+
+  /** Keeps the armour icon readable on small targets such as the player. */
+  private static final float BLOCKED_MIN_BASE_SIZE = 2f;
+
+  /** How far above the target's centre the armour icon sits, relative to the target's height. */
+  private static final float ENEMY_BLOCKED_LIFT = 0.18f;
+
+  private static final float PLAYER_BLOCKED_LIFT = 0.5f;
 
   /**
    * @param controller the battle controller to listen to
@@ -85,6 +94,9 @@ public class BattleAnimationCoordinator extends Component {
         effects -> safely("enemy effects", () -> onEnemyEffects(effects)));
     controller.addPlayerEffectsListener(
         effects -> safely("player effects", () -> onPlayerEffects(effects)));
+    for (Entity enemy : enemies) {
+      enemy.getEvents().addListener("enemyAttack", this::onEnemyAttack);
+    }
   }
 
   @Override
@@ -179,13 +191,27 @@ public class BattleAnimationCoordinator extends Component {
     }
   }
 
-  /** Records a hit on a target with Armour or Block, so it can be checked after damage applies. */
+  /** Fires before an enemy's attack damage lands on the player, so the player is checked next. */
+  private void onEnemyAttack() {
+    safely("enemy attack", () -> watchForBlockedHit(player, 0f));
+  }
+
+  /** Records a hit on a target with Armour, so it can be checked after damage applies. */
   private void watchForBlockedHit(Entity target, float startDelay) {
     CombatStatsComponent stats = target.getComponent(CombatStatsComponent.class);
-    if (stats == null || (stats.getArmour() <= 0 && stats.getBlock() <= 0)) {
+    if (stats == null || stats.getArmour() <= 0 || hasPendingHit(target)) {
       return;
     }
-    pendingHits.add(new PendingHit(target, stats.getHealth(), startDelay));
+    pendingHits.add(new PendingHit(target, stats.getHealth(), stats.getArmour(), startDelay));
+  }
+
+  private boolean hasPendingHit(Entity target) {
+    for (PendingHit hit : pendingHits) {
+      if (hit.target() == target) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /** Shows the armour icon on each recorded target that lost no health from its hit. */
@@ -202,25 +228,41 @@ public class BattleAnimationCoordinator extends Component {
     }
   }
 
-  /** A recorded hit was fully absorbed if the target's health did not drop. */
+  /**
+   * A recorded hit was absorbed by Armour if no health was lost and some Armour was used. A hit
+   * stopped by Block alone does not count, so the Armour icon never stands in for Block.
+   */
   private static boolean wasFullyAbsorbed(PendingHit hit) {
     CombatStatsComponent stats = hit.target().getComponent(CombatStatsComponent.class);
-    return stats != null && stats.getHealth() >= hit.healthBefore();
+    return stats != null
+        && stats.getHealth() >= hit.healthBefore()
+        && stats.getArmour() < hit.armourBefore();
   }
 
-  /** Shows the armour icon on a target whose hit was fully absorbed, on top of the hit burst. */
+  /**
+   * Shows the armour icon above a target whose hit was fully absorbed, on top of the hit burst. If
+   * the target is still showing an icon from an earlier hit, the existing icon is kept so they
+   * never stack on top of each other.
+   */
   private void spawnBlockedVisual(Entity target, float startDelay) {
+    Entity previous = blockedVisuals.get(target);
+    if (previous != null && activeVisuals.contains(previous)) {
+      return; // an icon is already showing for this target, so keep it instead of restarting
+    }
+
     EffectVisualStyle style = OffensiveEffectVisuals.BLOCKED_STYLE;
     Vector2 scale = target.getScale();
-    float baseSize = Math.max(MIN_SIZE, Math.max(scale.x, scale.y) * SIZE_FACTOR);
+    float baseSize = Math.max(BLOCKED_MIN_BASE_SIZE, Math.max(scale.x, scale.y) * SIZE_FACTOR);
 
     Entity visual = new Entity();
     visual.addComponent(new EffectVisualComponent(textureFor(style), style, baseSize, startDelay));
-    // Sit above the target's head so the icon does not cover the enemy sprite.
-    Vector2 aboveHead = target.getCenterPosition().cpy().add(0f, scale.y * 0.2f);
+    // Sit above the target's head so the icon does not cover its sprite.
+    float lift = target == player ? PLAYER_BLOCKED_LIFT : ENEMY_BLOCKED_LIFT;
+    Vector2 aboveHead = target.getCenterPosition().cpy().add(0f, scale.y * lift);
     visual.setPosition(aboveHead);
     ServiceLocator.getEntityService().register(visual);
     activeVisuals.add(visual);
+    blockedVisuals.put(target, visual);
   }
 
   private void onPlayerEffects(List<ResolvedCardEffect> effects) {
@@ -326,6 +368,7 @@ public class BattleAnimationCoordinator extends Component {
     }
     activeVisuals.clear();
     pendingHits.clear();
+    blockedVisuals.clear();
     if (fallbackGlow != null) {
       fallbackGlow.dispose();
       fallbackGlow = null;
