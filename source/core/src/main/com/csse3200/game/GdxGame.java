@@ -19,6 +19,8 @@ import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.narration.NarrationConfigLoader;
 import com.csse3200.game.narration.NarrationLoadingException;
+import com.csse3200.game.rewards.ItemDiscoveryService;
+import com.csse3200.game.rewards.ItemDiscoveryStore;
 import com.csse3200.game.save.AutosaveCoordinator;
 import com.csse3200.game.save.GameStateSnapshotProvider;
 import com.csse3200.game.save.JsonSaveGameRepository;
@@ -71,6 +73,7 @@ public class GdxGame extends Game {
       };
   private BestiaryService bestiaryService;
   private CardDiscoveryService cardDiscoveryService;
+  private ItemDiscoveryService itemDiscoveryService;
 
   /**
    * Gets discovery progress shared by all screens in this game session.
@@ -101,6 +104,11 @@ public class GdxGame extends Game {
    */
   public CardDiscoveryService getCardDiscoveryService() {
     return cardDiscoveryService;
+  }
+
+  /** Returns item discovery progress shared by all screens in this game session. */
+  public ItemDiscoveryService getItemDiscoveryService() {
+    return itemDiscoveryService;
   }
 
   // Lives here rather than on a screen, since setScreen() disposes the outgoing screen.
@@ -140,7 +148,8 @@ public class GdxGame extends Game {
             runState.getOrCreatePlayerDeck(cardLibrary),
             runState,
             bestiaryService,
-            cardDiscoveryService));
+            cardDiscoveryService,
+            itemDiscoveryService));
   }
 
   @Override
@@ -156,6 +165,14 @@ public class GdxGame extends Game {
         .addListener(
             CardDiscoveryService.ENTRY_UPDATED_EVENT,
             ignored -> cardDiscoveryStore.save(cardDiscoveryService.getProgressSnapshot()));
+    itemDiscoveryService = new ItemDiscoveryService();
+    ItemDiscoveryStore itemDiscoveryStore = ItemDiscoveryStore.defaultStore();
+    itemDiscoveryService.mergeProgress(itemDiscoveryStore.load());
+    itemDiscoveryService
+        .getEvents()
+        .addListener(
+            ItemDiscoveryService.ENTRY_UPDATED_EVENT,
+            ignored -> itemDiscoveryStore.save(itemDiscoveryService.getProgressSnapshot()));
 
     // Sets background to light yellow
     Gdx.gl.glClearColor(162f / 255f, 73 / 255f, 54 / 255f, 1);
