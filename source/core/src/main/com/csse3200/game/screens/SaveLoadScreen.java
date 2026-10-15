@@ -88,7 +88,7 @@ public class SaveLoadScreen extends ScreenAdapter {
                 SLOT_IDS,
                 restoreService,
                 () -> game.setScreen(GdxGame.ScreenType.MAIN_MENU),
-                SaveLoadMode.LOAD_ONLY,
+                SaveLoadMode.LOAD_AND_DELETE,
                 false,
                 () -> Gdx.app.postRunnable(game::resumeLoadedRun)));
     ServiceLocator.getEntityService().register(ui);

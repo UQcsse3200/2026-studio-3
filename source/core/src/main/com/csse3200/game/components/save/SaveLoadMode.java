@@ -5,6 +5,9 @@ public enum SaveLoadMode {
   /** Safe screens such as the map may create, replace, load and delete manual saves. */
   SAVE_AND_LOAD(true, true),
 
+  /** The main menu may load and delete saves, but has no active run state to save. */
+  LOAD_AND_DELETE(false, true),
+
   /** Unsafe or pre-run screens may only load an existing save. */
   LOAD_ONLY(false, false);
 

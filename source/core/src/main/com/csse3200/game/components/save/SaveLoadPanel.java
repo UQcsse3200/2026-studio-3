@@ -251,7 +251,7 @@ public class SaveLoadPanel extends UIComponent {
   private void addHeader() {
     Label.LabelStyle titleStyle = new Label.LabelStyle(skin.get("title", Label.LabelStyle.class));
     titleStyle.fontColor = MenuTheme.warmParchment();
-    String title = mode == SaveLoadMode.LOAD_ONLY ? "Load Game" : "Save / Load";
+    String title = mode.isSaveAllowed() ? "Save / Load" : "Load Game";
     rootTable.add(new Label(title, titleStyle)).colspan(3).padBottom(20f);
     if (backAction != null) {
       TextButton backButton = new TextButton("Back", themedButtonStyle());

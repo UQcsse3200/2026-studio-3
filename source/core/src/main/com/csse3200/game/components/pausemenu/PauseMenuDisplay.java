@@ -163,7 +163,7 @@ public class PauseMenuDisplay extends UIComponent {
 
     resumeButton = menuButton("Resume", RESUME_EVENT);
     if (saveEnabled) {
-      String saveLoadLabel = saveLoadMode == SaveLoadMode.LOAD_ONLY ? "Load Game" : "Save & Load";
+      String saveLoadLabel = saveLoadMode.isSaveAllowed() ? "Save & Load" : "Load Game";
       saveLoadButton = menuButton(saveLoadLabel, SAVE_LOAD_EVENT);
     }
     settingsButton = menuButton("Settings", SETTINGS_EVENT);
