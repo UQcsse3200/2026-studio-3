@@ -3,6 +3,8 @@ package com.csse3200.game.screens;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.GdxGame;
+import com.csse3200.game.components.bestiary.BestiaryDisplay;
+import com.csse3200.game.components.library.CardLibraryDisplay;
 import com.csse3200.game.components.library.LibraryMenuDisplay;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.entities.Entity;
@@ -22,7 +24,11 @@ import org.slf4j.LoggerFactory;
 public class LibraryScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(LibraryScreen.class);
   private static final String[] LIBRARY_TEXTURES = {
-    MainMenuDisplay.BACKGROUND_TEXTURE, MainMenuDisplay.BUTTON_FRAME_TEXTURE
+    MainMenuDisplay.BACKGROUND_TEXTURE,
+    MainMenuDisplay.BUTTON_FRAME_TEXTURE,
+    CardLibraryDisplay.BUTTON_TEXTURE,
+    BestiaryDisplay.BUTTON_TEXTURE,
+    LibraryMenuDisplay.ITEM_BUTTON_TEXTURE
   };
 
   private final GdxGame game;
