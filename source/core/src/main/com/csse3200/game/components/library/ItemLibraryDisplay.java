@@ -22,6 +22,8 @@ import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.ui.ItemArtwork;
+import com.csse3200.game.ui.ItemIconView;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
 import java.util.EnumMap;
@@ -43,11 +45,10 @@ public class ItemLibraryDisplay extends UIComponent {
   private static final String LARGE = "large";
   private static final String SMALL = "small";
   private static final String DEFAULT = "default";
-  private static final String ITEM_ART_DIRECTORY = "images/ui/";
 
   private static final Map<ItemType, String> ITEM_DESCRIPTIONS = new EnumMap<>(ItemType.class);
 
-  private Image itemImage;
+  private ItemIconView itemIconView;
 
   static {
     ITEM_DESCRIPTIONS.put(
@@ -91,8 +92,7 @@ public class ItemLibraryDisplay extends UIComponent {
   private TextButton.TextButtonStyle buttonStyle;
 
   public static String resolveArtworkPath(ItemType item) {
-    String fileName = item.name().toLowerCase().replace('_', '-') + ".png";
-    return ITEM_ART_DIRECTORY + fileName;
+    return ItemArtwork.framedPath(item);
   }
 
   public ItemLibraryDisplay(GdxGame game) {
@@ -282,14 +282,7 @@ public class ItemLibraryDisplay extends UIComponent {
   }
 
   private Table createDetailPanel() {
-    itemImage = new Image();
-    itemImage.setScaling(Scaling.fit);
-
-    Table artworkBackground = new Table();
-    artworkBackground.setBackground(skin.newDrawable(WHITE, new Color(0.035f, 0.03f, 0.04f, 1f)));
-    Stack artwork = new Stack();
-    artwork.add(artworkBackground);
-    artwork.add(itemImage);
+    itemIconView = new ItemIconView();
 
     Table detailPanel = new Table();
     detailPanel.setBackground(skin.newDrawable(WHITE, DETAIL_COLOUR));
@@ -307,7 +300,7 @@ public class ItemLibraryDisplay extends UIComponent {
 
     detailPanel.add(nameLabel).left().expandX();
     detailPanel.row();
-    detailPanel.add(artwork).width(200f).height(200f).padTop(8f).padBottom(16f);
+    detailPanel.add(itemIconView).width(200f).height(200f).padTop(8f).padBottom(16f);
     detailPanel.row();
     detailPanel.add(descriptionLabel).expandX().fillX().left().padTop(12f);
     detailPanel.row();
@@ -325,14 +318,11 @@ public class ItemLibraryDisplay extends UIComponent {
   private void setItemImage(String texturePath) {
     ResourceService resources = ServiceLocator.getResourceService();
     if (!resources.containsAsset(texturePath, Texture.class)) {
-      itemImage.setDrawable(null);
-      itemImage.setVisible(false);
+      itemIconView.setItem(null);
       return;
     }
     Texture texture = resources.getAsset(texturePath, Texture.class);
-    texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-    itemImage.setDrawable(new TextureRegionDrawable(texture));
-    itemImage.setVisible(true);
+    itemIconView.setItem(texture);
   }
 
   private Label.LabelStyle bodyLabelStyle() {

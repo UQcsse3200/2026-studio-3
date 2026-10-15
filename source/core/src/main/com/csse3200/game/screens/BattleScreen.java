@@ -84,6 +84,7 @@ import com.csse3200.game.tutorial.BattleTutorialComponent;
 import com.csse3200.game.tutorial.BattleTutorialController;
 import com.csse3200.game.tutorial.BattleTutorialGuidanceView;
 import com.csse3200.game.tutorial.BattleTutorialObservation;
+import com.csse3200.game.ui.ItemArtwork;
 import com.csse3200.game.ui.PopupDisplay;
 import com.csse3200.game.ui.PopupInputComponent;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
@@ -114,32 +115,21 @@ public class BattleScreen extends ScreenAdapter {
   private final Renderer renderer;
   private final ForestGameArea gameArea;
 
-  private static final String[] mainGameTextures = {
-    "images/heart.png",
-    "images/energy.png",
-    "images/money.png",
-    "images/level.png",
-    "images/enemy.png",
-    "images/armour.png",
-    "images/enemy_release/heavens_grace.png",
-    "images/ui/inventory-panel.png",
-    BATTLE_TITLE_TEXTURE,
-    "images/effects/shield.png",
-    "images/effects/fortify.png",
-    "images/ui/lucky-coin.png",
-    "images/ui/energy-crystal.png",
-    "images/ui/merchants-favor.png",
-    "images/ui/iron-aegis.png",
-    "images/ui/warriors-crest.png",
-    "images/ui/ashen-ember.png",
-    "images/ui/brand-of-the-damned.png",
-    "images/ui/shattered-aegis.png",
-    "images/ui/ambrosia-flask.png",
-    "images/ui/blood-oath-sigil.png",
-    "images/ui/eternal-vitality.png",
-    "images/effects/heal.png",
-    "images/enemies/intents/buff.png"
-  };
+  private static final String[] mainGameTextures =
+      ItemArtwork.withAllCutouts(
+          "images/heart.png",
+          "images/energy.png",
+          "images/money.png",
+          "images/level.png",
+          "images/enemy.png",
+          "images/armour.png",
+          "images/enemy_release/heavens_grace.png",
+          "images/ui/inventory-panel.png",
+          BATTLE_TITLE_TEXTURE,
+          "images/effects/shield.png",
+          "images/effects/fortify.png",
+          "images/effects/heal.png",
+          "images/enemies/intents/buff.png");
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
   private static final float HAND_Y = 1000f;

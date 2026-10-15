@@ -5,11 +5,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
@@ -19,12 +21,16 @@ import com.badlogic.gdx.utils.Align;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.entities.Entity;
+import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.CursePenalties;
 import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.ui.ItemArtwork;
+import com.csse3200.game.ui.ItemIconView;
 import com.csse3200.game.ui.PopupDisplay;
 import com.csse3200.game.ui.UIComponent;
 import java.util.EnumMap;
@@ -65,22 +71,9 @@ public class InventoryPopupComponent extends UIComponent {
   private static final Color TEXT_COLOUR = new Color(0.9f, 0.84f, 0.73f, 1f);
   private static final Color DETAIL_COLOUR = new Color(0.72f, 0.65f, 0.58f, 1f);
   private static final Color CURSE_COLOUR = new Color(0.91f, 0.52f, 0.45f, 1f);
+  private static final Color CURSE_CRACK_COLOUR = new Color(0.52f, 0.25f, 0.72f, 1f);
   private static final Color ACTION_COLOUR = new Color(0.97f, 0.80f, 0.42f, 1f);
   private static final Color DISABLED_ACTION_COLOUR = new Color(0.48f, 0.46f, 0.45f, 1f);
-
-  private static final Map<ItemType, String> ITEM_ICONS =
-      Map.ofEntries(
-          Map.entry(ItemType.LUCKY_COIN, "images/ui/lucky-coin.png"),
-          Map.entry(ItemType.ENERGY_CRYSTAL, "images/ui/energy-crystal.png"),
-          Map.entry(ItemType.MERCHANTS_FAVOR, "images/ui/merchants-favor.png"),
-          Map.entry(ItemType.IRON_AEGIS, "images/ui/iron-aegis.png"),
-          Map.entry(ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png"),
-          Map.entry(ItemType.ASHEN_EMBER, "images/ui/ashen-ember.png"),
-          Map.entry(ItemType.BRAND_OF_THE_DAMNED, "images/ui/brand-of-the-damned.png"),
-          Map.entry(ItemType.SHATTERED_AEGIS, "images/ui/shattered-aegis.png"),
-          Map.entry(ItemType.AMBROSIA_FLASK, "images/ui/ambrosia-flask.png"),
-          Map.entry(ItemType.BLOOD_OATH_SIGIL, "images/ui/blood-oath-sigil.png"),
-          Map.entry(ItemType.ETERNAL_VITALITY, "images/ui/eternal-vitality.png"));
 
   record ItemText(String effect) {}
 
@@ -132,6 +125,9 @@ public class InventoryPopupComponent extends UIComponent {
 
   private boolean useActionInProgress;
   private Actor useFeedback;
+  private Actor curseGainFeedback;
+  private final EventListener1<CursePenalties.GainReduction> curseGainListener =
+      this::showCurseGainFeedback;
   private static final String STYLE_NAME_WHITE = "white";
   private static final String STYLE_NAME_DEFAULT = "default";
   private static final String STYLE_NAME_SMALL = "small";
@@ -156,6 +152,22 @@ public class InventoryPopupComponent extends UIComponent {
     popup.setDefaultCloseButtonVisible(false);
     popup.setOnShow(this::refresh);
     popup.setOnHide(this::clearUseFeedback);
+    if (player != null) {
+      player.getEvents().addListener(CursePenalties.GAIN_REDUCED_EVENT, curseGainListener);
+    }
+  }
+
+  @Override
+  public void dispose() {
+    if (player != null) {
+      player.getEvents().removeListener(CursePenalties.GAIN_REDUCED_EVENT, curseGainListener);
+    }
+    clearUseFeedback();
+    if (curseGainFeedback != null) {
+      curseGainFeedback.remove();
+      curseGainFeedback = null;
+    }
+    super.dispose();
   }
 
   /** Opens the popup with the inventory refreshed from the current run state. */
@@ -250,11 +262,13 @@ public class InventoryPopupComponent extends UIComponent {
     row.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_COLOUR));
     row.pad(8f, 12f, 8f, 12f);
 
-    String iconPath = ITEM_ICONS.get(item);
+    String iconPath = ItemArtwork.cutoutPath(item);
     ResourceService resources = ServiceLocator.getResourceService();
-    Image icon = new Image();
+    ItemIconView icon = new ItemIconView();
     if (iconPath != null && resources != null && resources.containsAsset(iconPath, Texture.class)) {
-      icon = new Image(resources.getAsset(iconPath, Texture.class));
+      icon.setItem(resources.getAsset(iconPath, Texture.class));
+    } else {
+      icon.setItem(null);
     }
     row.add(icon).size(56f).padRight(8f);
 
@@ -409,6 +423,9 @@ public class InventoryPopupComponent extends UIComponent {
       effectColour = CREST_EFFECT_COLOUR;
       title = "WARRIOR'S CREST USED";
       detail = "+" + actualGain + " STRENGTH";
+      if (actualGain < 1) {
+        detail += " (BRAND -" + (1 - actualGain) + ")";
+      }
     } else {
       effectColour = AMBROSIA_EFFECT_COLOUR;
       title = "AMBROSIA USED";
@@ -424,12 +441,14 @@ public class InventoryPopupComponent extends UIComponent {
     Table message = new Table();
     message.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_BACKGROUND_COLOUR));
 
-    String iconPath = ITEM_ICONS.get(itemId);
+    String iconPath = ItemArtwork.cutoutPath(itemId);
     ResourceService resources = ServiceLocator.getResourceService();
 
     if (iconPath != null && resources != null && resources.containsAsset(iconPath, Texture.class)) {
       Texture texture = resources.getAsset(iconPath, Texture.class);
-      message.add(new Image(texture)).size(42f).pad(7f, 8f, 7f, 8f);
+      ItemIconView icon = new ItemIconView();
+      icon.setItem(texture);
+      message.add(icon).size(42f).pad(7f, 8f, 7f, 8f);
     }
 
     Table text = new Table();
@@ -482,6 +501,86 @@ public class InventoryPopupComponent extends UIComponent {
             Actions.removeActor());
 
     border.addAction(steppedPixelEffect);
+  }
+
+  private void showCurseGainFeedback(CursePenalties.GainReduction reduction) {
+    // Consumables already have their own actual-value feedback inside the open inventory.
+    if (stage == null || popup.isShowing()) {
+      return;
+    }
+
+    String curseName;
+    String statName;
+    if (CursePenalties.STRENGTH_PENALTY.equals(reduction.penalty())) {
+      curseName = "BRAND OF THE DAMNED";
+      statName = "STRENGTH";
+    } else if (CursePenalties.BLOCK_PENALTY.equals(reduction.penalty())) {
+      curseName = "SHATTERED AEGIS";
+      statName = "BLOCK";
+    } else {
+      return;
+    }
+
+    if (curseGainFeedback != null) {
+      curseGainFeedback.remove();
+    }
+    Table feedback = new Table();
+    feedback.setName("curseGainFeedback");
+    feedback.setBackground(
+        skin.newDrawable(STYLE_NAME_WHITE, new Color(0.05f, 0.04f, 0.08f, 0.88f)));
+    feedback.pad(5f, 10f, 5f, 10f);
+    feedback.add(new Label(curseName, smallLabelStyle(CURSE_COLOUR))).center().row();
+
+    Label gain = new Label("+" + reduction.requested() + " " + statName, labelStyle(TEXT_COLOUR));
+    gain.setName("curseGainNumber");
+    gain.setAlignment(Align.center);
+    Group crack = new Group();
+    crack.setName("curseGainCrack");
+    crack.setVisible(false);
+    crack.getColor().a = 0f;
+    Image slash = new Image(skin.newDrawable(STYLE_NAME_WHITE, CURSE_CRACK_COLOUR));
+    slash.setSize(144f, 3f);
+    slash.setPosition(43f, 15f);
+    slash.setOrigin(72f, 1.5f);
+    slash.setRotation(-12f);
+    crack.addActor(slash);
+    Image splinter = new Image(skin.newDrawable(STYLE_NAME_WHITE, CURSE_CRACK_COLOUR));
+    splinter.setSize(28f, 2f);
+    splinter.setPosition(128f, 20f);
+    splinter.setOrigin(14f, 1f);
+    splinter.setRotation(35f);
+    crack.addActor(splinter);
+
+    Stack number = new Stack();
+    number.add(gain);
+    number.add(crack);
+    feedback.add(number).size(230f, 34f);
+    feedback.pack();
+    feedback.setPosition((stage.getWidth() - feedback.getWidth()) / 2f, stage.getHeight() - 170f);
+    feedback.getColor().a = 0f;
+    stage.addActor(feedback);
+    curseGainFeedback = feedback;
+    crack.addAction(
+        Actions.sequence(
+            Actions.delay(0.22f),
+            Actions.visible(true),
+            Actions.fadeIn(0.03f),
+            Actions.delay(0.07f),
+            Actions.fadeOut(0.15f)));
+    feedback.addAction(
+        Actions.sequence(
+            Actions.fadeIn(0.08f),
+            Actions.delay(0.24f),
+            Actions.run(() -> gain.setText("+" + reduction.actual() + " " + statName)),
+            Actions.delay(0.55f),
+            Actions.fadeOut(0.18f),
+            Actions.run(
+                () -> {
+                  if (curseGainFeedback == feedback) {
+                    curseGainFeedback = null;
+                  }
+                }),
+            Actions.removeActor()));
   }
 
   private void clearUseFeedback() {

@@ -2,6 +2,7 @@ package com.csse3200.game.components.battle;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,6 +28,7 @@ import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.RenderService;
+import com.csse3200.game.rewards.CursePenalties;
 import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.ResourceService;
@@ -266,6 +268,7 @@ class InventoryPopupComponentTest {
     PopupDisplay popup = mock(PopupDisplay.class);
     Table content = new Table();
     when(popup.getContentTable()).thenReturn(content);
+    when(popup.isShowing()).thenReturn(true);
     InventoryPopupComponent inventory =
         new InventoryPopupComponent(runState, popup, player, () -> true);
     inventoryEntity = new Entity().addComponent(inventory);
@@ -276,7 +279,65 @@ class InventoryPopupComponentTest {
 
     assertEquals(0, runState.getOrCreatePlayerState().getOwnedItemCount(ItemType.WARRIORS_CREST));
     assertNull(stats.getStatusEffect("STRENGTH"));
-    assertEquals("+0 STRENGTH", feedbackDetail());
+    assertEquals("+0 STRENGTH (BRAND -1)", feedbackDetail());
+  }
+
+  @Test
+  void cursedCardGainShowsActualValueBrieflyOutsideInventory() {
+    RunState runState = new RunState();
+    CombatStatsComponent stats = new CombatStatsComponent(100, 5);
+    Entity player = new Entity().addComponent(stats);
+    PopupDisplay popup = mock(PopupDisplay.class);
+    InventoryPopupComponent inventory =
+        new InventoryPopupComponent(runState, popup, player, () -> true);
+    inventoryEntity = new Entity().addComponent(inventory);
+    inventoryEntity.create();
+
+    CursePenalties.addPenalty(stats, CursePenalties.STRENGTH_PENALTY);
+    assertEquals(0, CursePenalties.reduce(stats, CursePenalties.STRENGTH_PENALTY, 1));
+
+    Actor feedback = stage.getRoot().findActor("curseGainFeedback");
+    assertNotNull(feedback);
+    assertTrue(labelsIn(feedback).contains("BRAND OF THE DAMNED"));
+    assertTrue(labelsIn(feedback).contains("+1 STRENGTH"));
+    Actor crack = assertInstanceOf(Group.class, feedback).findActor("curseGainCrack");
+    assertNotNull(crack);
+    assertTrue(!crack.isVisible());
+
+    stage.act(0.08f);
+    stage.act(0.14f);
+    assertTrue(!crack.isVisible());
+    stage.act(0.1f);
+    assertTrue(crack.isVisible());
+    stage.act(0.02f);
+    assertTrue(labelsIn(feedback).contains("+0 STRENGTH"));
+    for (int i = 0; i < 20; i++) {
+      stage.act(0.1f);
+    }
+    assertNull(stage.getRoot().findActor("curseGainFeedback"));
+  }
+
+  @Test
+  void stackedAegisCurseShowsActualBlockGain() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 5);
+    Entity player = new Entity().addComponent(stats);
+    InventoryPopupComponent inventory =
+        new InventoryPopupComponent(new RunState(), mock(PopupDisplay.class), player, () -> true);
+    inventoryEntity = new Entity().addComponent(inventory);
+    inventoryEntity.create();
+
+    CursePenalties.addPenalty(stats, CursePenalties.BLOCK_PENALTY);
+    CursePenalties.addPenalty(stats, CursePenalties.BLOCK_PENALTY);
+    assertEquals(1, CursePenalties.reduce(stats, CursePenalties.BLOCK_PENALTY, 3));
+
+    Actor feedback = stage.getRoot().findActor("curseGainFeedback");
+    assertNotNull(feedback);
+    assertTrue(labelsIn(feedback).contains("SHATTERED AEGIS"));
+    assertTrue(labelsIn(feedback).contains("+3 BLOCK"));
+    stage.act(0.08f);
+    stage.act(0.24f);
+    stage.act(0.02f);
+    assertTrue(labelsIn(feedback).contains("+1 BLOCK"));
   }
 
   @Test
