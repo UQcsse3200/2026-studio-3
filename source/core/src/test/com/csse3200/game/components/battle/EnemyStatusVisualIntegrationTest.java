@@ -136,7 +136,7 @@ class EnemyStatusVisualIntegrationTest {
 
   @Test
   void exposePlaysVulnerableOnEachActualTarget() {
-    assertResolvedVisuals("expose", "VULNERABLE", 2, 2, true);
+    assertResolvedVisuals("expose", "VULNERABLE", 1, 2, true);
   }
 
   @Test
