@@ -470,12 +470,12 @@ public class BattleScreen extends ScreenAdapter {
   }
 
   private void onTutorialFinished(BattleTutorialController.Outcome outcome) {
-    // All tutorial changes live in this screen's disposable run. Joel's shared new-run path resets
-    // the persistent run and opens the story/map on victory or voluntary exit.
+    // Tutorial changes stay in this screen's disposable run. Reset the persistent run and open
+    // the map on victory or voluntary exit; the opening story was already shown before battle.
     if (outcome == BattleTutorialController.Outcome.LOST) {
       game.setScreen(GdxGame.ScreenType.MAIN_MENU);
     } else {
-      game.startNewRun();
+      game.startRunAfterTutorial();
     }
   }
 

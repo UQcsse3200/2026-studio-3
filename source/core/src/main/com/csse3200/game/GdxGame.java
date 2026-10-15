@@ -225,6 +225,17 @@ public class GdxGame extends Game {
    * cannot carry tutorial progress into the new run.
    */
   public void startNewRun() {
+    resetRunState();
+    showNarration("opening", ScreenType.MAP);
+  }
+
+  /** Opens a fresh map without repeating the opening narration already shown before the tutorial. */
+  public void startRunAfterTutorial() {
+    resetRunState();
+    setScreen(ScreenType.MAP);
+  }
+
+  private void resetRunState() {
     logger.info("Starting a fresh run");
 
     Screen currentScreen = getScreen();
@@ -234,7 +245,6 @@ public class GdxGame extends Game {
     super.setScreen(null);
 
     runState.endRun();
-    showNarration("opening", ScreenType.MAP);
   }
 
   /** Opens the battle screen. */
@@ -244,7 +254,7 @@ public class GdxGame extends Game {
 
   /** Opens an isolated teaching battle without entering or completing a map node. */
   public void startTutorialBattle() {
-    setScreen(ScreenType.TUTORIAL_BATTLE);
+    showNarration("opening", ScreenType.TUTORIAL_BATTLE);
   }
 
   /**

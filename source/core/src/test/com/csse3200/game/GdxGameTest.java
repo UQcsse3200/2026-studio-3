@@ -76,7 +76,15 @@ class GdxGameTest {
     Screen oldScreen = mock(Screen.class);
     game.setScreen(oldScreen);
 
-    try (MockedConstruction<BattleScreen> battles =
+    AtomicReference<Runnable> finishOpening = new AtomicReference<>();
+    try (MockedConstruction<NarrationScreen> narrations =
+            mockConstruction(
+                NarrationScreen.class,
+                (narration, context) -> {
+                  assertEquals("opening", context.arguments().get(0));
+                  finishOpening.set((Runnable) context.arguments().get(1));
+                });
+        MockedConstruction<BattleScreen> battles =
         mockConstruction(
             BattleScreen.class,
             (battle, context) -> {
@@ -85,10 +93,52 @@ class GdxGameTest {
             })) {
       game.startTutorialBattle();
 
+      assertEquals(1, narrations.constructed().size());
+      assertSame(narrations.constructed().get(0), game.getScreen());
+      assertTrue(battles.constructed().isEmpty());
+      finishOpening.get().run();
+
       assertEquals(1, battles.constructed().size());
       verify(oldScreen).dispose();
       assertEquals(7, game.getRunState().getActiveNodeId());
       verify(battles.constructed().get(0)).show();
+    }
+  }
+
+  @Test
+  void afterTutorialResetsRunAndOpensMapWithoutNarration() {
+    GdxGame game = gameWithActiveNode(RoomType.COMBAT);
+    RunState run = game.getRunState();
+    PlayerRunState oldPlayer = run.getOrCreatePlayerState();
+    run.markCardFusionUsed();
+    Screen oldScreen = mock(Screen.class);
+    game.setScreen(oldScreen);
+    doAnswer(
+            invocation -> {
+              assertSame(oldPlayer, run.getOrCreatePlayerState());
+              return null;
+            })
+        .when(oldScreen)
+        .dispose();
+
+    try (MockedConstruction<NarrationScreen> narrations = mockConstruction(NarrationScreen.class);
+        MockedConstruction<MapScreen> maps =
+            mockConstruction(
+                MapScreen.class,
+                (map, context) -> {
+                  verify(oldScreen).dispose();
+                  assertFalse(run.isRunActive());
+                  assertNull(run.getMapGraph());
+                  assertNull(run.getActiveNodeId());
+                  assertFalse(run.hasUsedCardFusion());
+                  assertNotSame(oldPlayer, run.getOrCreatePlayerState());
+                })) {
+      game.startRunAfterTutorial();
+
+      assertTrue(narrations.constructed().isEmpty());
+      assertEquals(1, maps.constructed().size());
+      assertSame(maps.constructed().get(0), game.getScreen());
+      verify(maps.constructed().get(0)).show();
     }
   }
 
