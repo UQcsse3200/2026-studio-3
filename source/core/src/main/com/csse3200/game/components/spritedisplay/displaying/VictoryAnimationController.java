@@ -20,6 +20,8 @@ final class VictoryAnimationController {
   private static final float TITLE_DELAY = 0.22f;
   private static final float LETTER_STAGGER = 0.07f;
   private static final float LETTER_DURATION = 0.22f;
+  private static final float WING_DELAY = 0.24f;
+  private static final float WING_OPEN_DURATION = 0.44f;
   private static final float SUBTITLE_DELAY = 0.76f;
   private static final float CARD_DELAY = 0.91f;
   private static final float CARD_STAGGER = 0.1f;
@@ -36,6 +38,7 @@ final class VictoryAnimationController {
   private final List<Actor> titleLetters;
   private final Actor subtitle;
   private final Actor sunPulse;
+  private final List<Actor> wings;
   private final List<Actor> particles;
   private final List<Actor> rewardCards;
   private State state = State.INITIAL;
@@ -52,6 +55,7 @@ final class VictoryAnimationController {
         new Actor(),
         new Actor(),
         List.of(),
+        List.of(),
         rewardCards);
   }
 
@@ -65,6 +69,30 @@ final class VictoryAnimationController {
       Actor sunPulse,
       List<? extends Actor> particles,
       List<? extends Actor> rewardCards) {
+    this(
+        background,
+        scrim,
+        panel,
+        title,
+        titleLetters,
+        subtitle,
+        sunPulse,
+        List.of(),
+        particles,
+        rewardCards);
+  }
+
+  VictoryAnimationController(
+      Actor background,
+      Actor scrim,
+      Actor panel,
+      Actor title,
+      List<? extends Actor> titleLetters,
+      Actor subtitle,
+      Actor sunPulse,
+      List<? extends Actor> wings,
+      List<? extends Actor> particles,
+      List<? extends Actor> rewardCards) {
     this.background = Objects.requireNonNull(background, "background cannot be null");
     this.scrim = Objects.requireNonNull(scrim, "scrim cannot be null");
     this.panel = Objects.requireNonNull(panel, "panel cannot be null");
@@ -72,6 +100,7 @@ final class VictoryAnimationController {
     this.titleLetters = List.copyOf(titleLetters);
     this.subtitle = Objects.requireNonNull(subtitle, "subtitle cannot be null");
     this.sunPulse = Objects.requireNonNull(sunPulse, "sunPulse cannot be null");
+    this.wings = List.copyOf(wings);
     this.particles = List.copyOf(particles);
     this.rewardCards = List.copyOf(rewardCards);
   }
@@ -93,7 +122,22 @@ final class VictoryAnimationController {
       prepare(letter, 0.86f);
     }
     prepare(subtitle, 0.97f);
-    prepare(sunPulse, 0.94f);
+    prepare(sunPulse, 0.9f);
+    for (int index = 0; index < wings.size(); index++) {
+      Actor wing = wings.get(index);
+      wing.clearActions();
+      wing.getColor().a = 1f;
+      wing.setScale(0.96f);
+      boolean left = index == 0;
+      wing.setRotation(left ? -42f : 42f);
+      wing.addAction(
+          Actions.sequence(
+              Actions.delay(WING_DELAY),
+              Actions.parallel(
+                  Actions.rotateTo(left ? 5f : -5f, WING_OPEN_DURATION, Interpolation.sineOut),
+                  Actions.scaleTo(1f, 1f, WING_OPEN_DURATION, Interpolation.sineOut)),
+              Actions.rotateTo(0f, 0.12f, Interpolation.sineOut)));
+    }
     for (Actor particle : particles) {
       prepare(particle, 0.7f);
     }
@@ -124,13 +168,14 @@ final class VictoryAnimationController {
 
     sunPulse.addAction(
         Actions.sequence(
-            Actions.delay(0.5f),
+            Actions.delay(0.43f),
             Actions.parallel(
-                Actions.alpha(0.28f, 0.24f, Interpolation.fade),
-                Actions.scaleTo(1.04f, 1.04f, 0.24f, Interpolation.sineOut)),
+                Actions.alpha(0.34f, 0.13f, Interpolation.fade),
+                Actions.scaleTo(1.055f, 1.055f, 0.13f, Interpolation.pow2Out)),
             Actions.parallel(
-                Actions.fadeOut(0.34f, Interpolation.fade),
-                Actions.scaleTo(1.08f, 1.08f, 0.34f, Interpolation.sineOut))));
+                Actions.alpha(0.22f, 0.11f, Interpolation.fade),
+                Actions.scaleTo(1f, 1f, 0.11f, Interpolation.sineOut)),
+            Actions.fadeOut(0.27f, Interpolation.fade)));
 
     for (int index = 0; index < particles.size(); index++) {
       Actor particle = particles.get(index);
@@ -218,6 +263,9 @@ final class VictoryAnimationController {
     title.clearActions();
     subtitle.clearActions();
     sunPulse.clearActions();
+    for (Actor wing : wings) {
+      wing.clearActions();
+    }
     for (Actor letter : titleLetters) {
       letter.clearActions();
     }
