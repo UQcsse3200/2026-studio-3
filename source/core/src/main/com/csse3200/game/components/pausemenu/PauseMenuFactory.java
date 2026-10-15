@@ -105,9 +105,16 @@ public final class PauseMenuFactory {
 
   private static void loadMenuAssets() {
     ResourceService resources = ServiceLocator.getResourceService();
-    resources.loadTextures(
-        new String[] {MainMenuDisplay.BACKGROUND_TEXTURE, MainMenuDisplay.BUTTON_FRAME_TEXTURE});
+    resources.loadTextures(menuTexturePaths());
     resources.loadAll();
+  }
+
+  static String[] menuTexturePaths() {
+    return new String[] {
+      MainMenuDisplay.BACKGROUND_TEXTURE,
+      MainMenuDisplay.BUTTON_FRAME_TEXTURE,
+      SaveLoadPanel.BUTTON_TEXTURE
+    };
   }
 
   private static SaveLoadPanel buildSavePanel(GdxGame game) {

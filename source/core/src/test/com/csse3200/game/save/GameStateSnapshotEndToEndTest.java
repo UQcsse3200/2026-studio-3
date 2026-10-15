@@ -16,8 +16,10 @@ import com.csse3200.game.maps.NodeState;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.ItemType;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -40,10 +42,13 @@ class GameStateSnapshotEndToEndTest {
 
   private SaveGameService saveGameService;
   private BestiaryService bestiary;
+  private PlayerRunState playerState;
 
   @BeforeEach
   void setUp() {
-    PlayerRunState playerState = new PlayerRunState(65, 100, 120);
+    playerState = new PlayerRunState(65, 100, 120);
+    playerState.addOwnedItem(ItemType.LUCKY_COIN);
+    playerState.addOwnedItem(ItemType.IRON_AEGIS);
     PlayerDeck deck = PlayerDeckFactory.createStarterDeck();
     RunState runState = buildRunStateWithConnectedNodes();
     bestiary = BestiaryService.loadDefault();
@@ -70,6 +75,7 @@ class GameStateSnapshotEndToEndTest {
     assertEquals(65, loaded.player.currentHealth);
     assertEquals(100, loaded.player.maxHealth);
     assertEquals(120, loaded.player.gold);
+    assertEquals(List.of("LUCKY_COIN", "IRON_AEGIS"), loaded.player.ownedItems);
   }
 
   @Test
@@ -141,6 +147,8 @@ class GameStateSnapshotEndToEndTest {
     assertEquals(65, restoredPlayerState.getCurrentHealth());
     assertEquals(100, restoredPlayerState.getMaxHealth());
     assertEquals(120, restoredPlayerState.getGold());
+    assertEquals(
+        List.of(ItemType.LUCKY_COIN, ItemType.IRON_AEGIS), restoredPlayerState.getOwnedItems());
     assertEquals(
         PlayerDeckFactory.getStarterDeckCardIds(),
         restoredDeck.getCards().stream()

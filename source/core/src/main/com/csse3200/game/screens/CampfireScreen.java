@@ -30,6 +30,7 @@ import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.components.cards.CardUpgradeDisplay;
 import com.csse3200.game.components.cards.CardUpgradeSelection;
+import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.cards.PlayerDeckCardUpgradeCommitter;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
@@ -53,7 +54,7 @@ public class CampfireScreen extends ScreenAdapter {
   private static final String MAIN_SCENE = "images/campfire/main_scene_dusk.png";
   private static final String MAIN_SCENE_EXTENDED = "images/campfire/main_scene_extended.png";
   private static final String REST_SCENE = "images/campfire/rest_scene_wide.png";
-  private static final String UPGRADE_SCENE = "images/campfire/upgrade_table_wide.png";
+  private static final String UPGRADE_SCENE = "images/campfire/upgrade_rune_altar_v2.png";
   private static final String REST_ICON = "images/campfire/rest_icon.png";
   private static final String UPGRADE_ICON = "images/campfire/upgrade_icon.png";
   private static final String[] TEXTURES = {
@@ -72,6 +73,7 @@ public class CampfireScreen extends ScreenAdapter {
   private Label restResult;
   private Table restOutcome;
   private boolean transitioning;
+  private CampfireUpgradeEntrance upgradeEntrance;
 
   public CampfireScreen(GdxGame game) {
     this(game, game.getRunState());
@@ -92,8 +94,14 @@ public class CampfireScreen extends ScreenAdapter {
     skin = new Skin(Gdx.files.internal("flat-earth/skin/flat-earth-ui.json"));
     ResourceService resources = ServiceLocator.getResourceService();
     resources.loadTextures(TEXTURES);
+    resources.loadTextures(upgradeCardTexturePaths());
     resources.loadAll();
     createUI();
+  }
+
+  /** Preload the shared card-library presentation before registering the upgrade display. */
+  static String[] upgradeCardTexturePaths() {
+    return CardWidgetAssets.collectTexturePaths(CardConfigLoader.loadCards());
   }
 
   private void createUI() {
@@ -123,19 +131,26 @@ public class CampfireScreen extends ScreenAdapter {
     addSceneImage(mainScene, extendedTexture, true);
     Image mainBackground = addSceneImage(mainScene, mainTexture, false);
     blendSceneEdges(mainScene, extendedTexture, mainBackground);
+    CampfireChoiceDecoration title = new CampfireChoiceDecoration(skin, true);
+    title.setPosition((UI_WIDTH - title.getWidth()) / 2, UI_HEIGHT - 180);
+    mainScene.addActor(title);
     addDiamond(
         mainScene,
         mainBackground,
         resources.getAsset(REST_ICON, Texture.class),
         515f,
         480f,
+        20f,
+        "Rest",
         this::beginRest);
     addDiamond(
         mainScene,
         mainBackground,
         resources.getAsset(UPGRADE_ICON, Texture.class),
-        1435f,
+        1450f,
         445f,
+        11f,
+        "Upgrade",
         this::beginUpgrade);
 
     restScene = newScene();
@@ -146,7 +161,16 @@ public class CampfireScreen extends ScreenAdapter {
     upgradeScene = newScene();
     Image tableBackground =
         addSceneImage(upgradeScene, resources.getAsset(UPGRADE_SCENE, Texture.class), true);
-    addUpgradeTableHotspot(tableBackground, upgradeDisplay, upgradeSelection);
+    CampfireUpgradeEntrance entrance =
+        new CampfireUpgradeEntrance(
+            skin,
+            () -> openCardUpgrade(upgradeDisplay),
+            () -> transitioning,
+            resources.getAsset(UPGRADE_SCENE, Texture.class));
+    upgradeEntrance = entrance;
+    entrance.setScale(tableBackground.getHeight() / 992f);
+    entrance.setPosition(tableBackground.getX(), tableBackground.getY());
+    upgradeScene.addActor(entrance);
     upgradeScene.addListener(
         new InputListener() {
           @Override
@@ -235,20 +259,27 @@ public class CampfireScreen extends ScreenAdapter {
       Texture iconTexture,
       float imageX,
       float imageY,
+      float verticalLift,
+      String title,
       Runnable onClick) {
     iconTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     // Coordinates come from the supplied 1672 x 941 main-scene reference.
     float scale = background.getWidth() / 1672f;
     float centerX = background.getX() + imageX * scale;
-    float centerY = background.getY() + (941f - imageY) * scale;
+    // Independent lifts align each bottom ornament with its own scene landmark.
+    float centerY = background.getY() + (941f - imageY) * scale + verticalLift;
+    CampfireChoiceDecoration decoration = new CampfireChoiceDecoration(skin, false);
+    decoration.optionText(skin, title);
+    decoration.setPosition(centerX - 140, centerY - 230);
+    scene.addActor(decoration);
     Image icon = new Image(iconTexture);
-    icon.setSize(200f, 200f);
-    icon.setPosition(centerX - 100f, centerY - 100f);
+    icon.setSize(125f, 125f);
+    icon.setPosition(centerX - 62.5f, centerY - 62.5f);
     icon.setTouchable(Touchable.disabled);
     scene.addActor(icon);
 
     Actor hotspot = new Actor();
-    hotspot.setBounds(centerX - 68f, centerY - 70f, 136f, 140f);
+    hotspot.setBounds(centerX - 54f, centerY - 82f, 108f, 138f);
     float restingY = icon.getY();
     hotspot.addListener(
         new ClickListener() {
@@ -258,6 +289,7 @@ public class CampfireScreen extends ScreenAdapter {
               return;
             }
             Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Hand);
+            decoration.setHovered(true);
             icon.clearActions();
             icon.addAction(
                 Actions.forever(
@@ -273,6 +305,7 @@ public class CampfireScreen extends ScreenAdapter {
               return;
             }
             Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+            decoration.setHovered(false);
             icon.clearActions();
             icon.setY(restingY);
           }
@@ -287,40 +320,9 @@ public class CampfireScreen extends ScreenAdapter {
     scene.addActor(hotspot);
   }
 
-  private void addUpgradeTableHotspot(
-      Image background, CardUpgradeDisplay upgradeDisplay, CardUpgradeSelection selection) {
-    float scale = background.getHeight() / 992f;
-    Actor hotspot = new Actor();
-    // The Upgrade button is painted into the wide table scene, near its lower-right corner.
-    hotspot.setBounds(
-        background.getX() + 1005f * scale,
-        background.getY() + 117f * scale,
-        250f * scale,
-        90f * scale);
-    hotspot.addListener(
-        new ClickListener() {
-          @Override
-          public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-            if (pointer == -1 && !selection.getCardUpgradeOption().isEmpty()) {
-              Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Hand);
-            }
-          }
-
-          @Override
-          public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
-            if (pointer == -1) {
-              Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
-            }
-          }
-
-          @Override
-          public void clicked(InputEvent event, float x, float y) {
-            if (!transitioning) {
-              upgradeDisplay.showLibrary();
-            }
-          }
-        });
-    upgradeScene.addActor(hotspot);
+  /** Both workbench entrances delegate to the existing team card-upgrade flow. */
+  private void openCardUpgrade(CardUpgradeDisplay display) {
+    if (!transitioning) display.showLibrary();
   }
 
   private void createRestOutcome() {
@@ -432,6 +434,7 @@ public class CampfireScreen extends ScreenAdapter {
 
   @Override
   public void dispose() {
+    if (upgradeEntrance != null) upgradeEntrance.dispose();
     Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
     skin.dispose();
     renderer.dispose();

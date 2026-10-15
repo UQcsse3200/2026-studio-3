@@ -12,7 +12,7 @@ import com.csse3200.game.rendering.RenderComponent;
  * Excess image content is cropped. The caller owns texture loading and disposal.
  */
 public class CombatBackgroundComponent extends RenderComponent {
-  private static final int BACKGROUND_LAYER = 0;
+  private static final int BACKGROUND_LAYER = -1;
   private static final float BACKGROUND_Z = 1f;
 
   private final Texture texture;

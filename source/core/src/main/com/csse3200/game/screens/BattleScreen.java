@@ -2,7 +2,9 @@ package com.csse3200.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -11,6 +13,7 @@ import com.csse3200.game.areas.ForestGameArea;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
+import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.debug.CardEffectDebugComponent;
 import com.csse3200.game.cards.debug.CardEffectDebugDisplay;
@@ -34,9 +37,13 @@ import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
+import com.csse3200.game.components.pausemenu.PauseMenuActions;
+import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuFactory;
+import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.save.SaveLoadPanel;
+import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
 import com.csse3200.game.components.spritedisplay.clickable.CardAimController;
 import com.csse3200.game.components.spritedisplay.clickable.Clickable;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
@@ -56,6 +63,7 @@ import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.physics.PhysicsEngine;
 import com.csse3200.game.physics.PhysicsService;
+import com.csse3200.game.rendering.AnimationRenderComponent;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.DragNDropService;
@@ -63,7 +71,12 @@ import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.tutorial.BattleTutorialComponent;
+import com.csse3200.game.tutorial.BattleTutorialController;
+import com.csse3200.game.tutorial.BattleTutorialGuidanceView;
+import com.csse3200.game.tutorial.BattleTutorialObservation;
 import com.csse3200.game.ui.PopupDisplay;
+import com.csse3200.game.ui.PopupInputComponent;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
@@ -82,6 +95,10 @@ import org.slf4j.LoggerFactory;
  */
 public class BattleScreen extends ScreenAdapter {
   private final GdxGame game;
+  private final RunState runState;
+  private final boolean tutorialBattle;
+  private BattleTutorialGuidanceView tutorialView;
+  private BattleActions battleActions;
   private static final Logger logger = LoggerFactory.getLogger(BattleScreen.class);
   private final Renderer renderer;
   private final ForestGameArea gameArea;
@@ -93,11 +110,17 @@ public class BattleScreen extends ScreenAdapter {
     "images/level.png",
     "images/enemy.png",
     "images/armour.png",
+    "images/enemy_release/heavens_grace.png",
+    "images/ui/inventory-panel.png",
+    "images/effects/shield.png",
+    "images/effects/fortify.png",
     "images/ui/lucky-coin.png",
     "images/ui/energy-crystal.png",
     "images/ui/merchants-favor.png",
     "images/ui/iron-aegis.png",
-    "images/ui/warriors-crest.png"
+    "images/ui/warriors-crest.png",
+    "images/effects/heal.png",
+    "images/enemies/intents/buff.png"
   };
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
@@ -114,8 +137,6 @@ public class BattleScreen extends ScreenAdapter {
   private static final int AMOUNT_OF_CARDS_IN_DECK = 5;
   private static final String CARD_WIDGET_SKIN = "flat-earth/skin/flat-earth-ui.json";
 
-  private static final String CARD_INVENTORY_STYLE = "popup";
-
   private static final String BATTLE_UI_JSON = "sprites/BattleUi.json";
   private static final String DECK_EDITOR_UI_JSON = "sprites/DeckEditorUi.json";
 
@@ -130,6 +151,7 @@ public class BattleScreen extends ScreenAdapter {
   private final CardPlayService cardPlayService;
   private final CardAimController enemyCardAim;
   private final CardAimController playerCardAim;
+  private final CardAimController allEnemiesCardAim;
   private ClickableFactory uiFactory;
   private final PlayerRunState playerState;
   private List<ClickableRecord> staticUiRecords;
@@ -137,7 +159,14 @@ public class BattleScreen extends ScreenAdapter {
   private List<CardInstance> handRowOrder = new ArrayList<>();
 
   public BattleScreen(GdxGame game) {
+    this(game, false);
+  }
+
+  /** A tutorial has a disposable run and one fixed opponent instead of a map encounter. */
+  public BattleScreen(GdxGame game, boolean tutorialBattle) {
     this.game = game;
+    this.tutorialBattle = tutorialBattle;
+    this.runState = tutorialBattle ? new RunState() : game.getRunState();
 
     ServiceLocator.registerDragNDropService(new DragNDropService());
 
@@ -163,7 +192,7 @@ public class BattleScreen extends ScreenAdapter {
 
     ServiceLocator.registerCamera(renderer.getCamera().getCamera());
 
-    Integer mapProgression = game.getRunState().getMapProgression();
+    Integer mapProgression = tutorialBattle ? 1 : runState.getMapProgression();
 
     logger.debug("Initialising main game screen entities");
     TerrainFactory terrainFactory = new TerrainFactory(renderer.getCamera());
@@ -171,13 +200,16 @@ public class BattleScreen extends ScreenAdapter {
         new BattleGameArea(
             terrainFactory,
             mapProgression,
-            game.getRunState(),
-            game.getBackgroundId(),
-            BattleEncounterSelector.enemiesFor(game.getRunState()));
+            runState,
+            tutorialBattle ? "dungeon" : game.getBackgroundId(),
+            tutorialBattle
+                ? List.of("bone_crawler")
+                : BattleEncounterSelector.enemiesFor(runState));
     this.gameArea = forestGameArea;
     forestGameArea.create();
-    RunState runState = game.getRunState();
+
     playerState = runState.getOrCreatePlayerState();
+    Entity player = forestGameArea.getPlayer();
 
     List<CardConfig> configs = CardConfigLoader.loadCards();
     library = new CardLibrary(configs);
@@ -189,12 +221,25 @@ public class BattleScreen extends ScreenAdapter {
     cardInteractionSkin = createCardInteractionSkin();
 
     PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(library);
+    if (tutorialBattle) {
+      var openingOrder = new ArrayList<>(playerDeck.getCards());
+      java.util.Collections.shuffle(openingOrder);
+      for (int i = 0; i < openingOrder.size(); i++) {
+        if ("strike".equals(openingOrder.get(i).cardId())) {
+          java.util.Collections.swap(
+              openingOrder, Math.min(AMOUNT_OF_CARDS_IN_DECK, openingOrder.size()) / 2, i);
+          break;
+        }
+      }
+      playerDeck = PlayerDeck.fromInstances(library, openingOrder);
+    }
     battleDeck = new BattleDeck(playerDeck);
-    battleDeck.shuffleDrawPile();
+    if (!tutorialBattle) {
+      battleDeck.shuffleDrawPile();
+    }
     battleDeck.drawCards(AMOUNT_OF_CARDS_IN_DECK);
     handRowOrder = new ArrayList<>(battleDeck.getHandInstances());
 
-    Entity player = forestGameArea.getPlayer();
     EnergyComponent energy = player.getComponent(EnergyComponent.class);
 
     Map<String, Entity> enemyTargets = forestGameArea.getEnemyTargets();
@@ -205,7 +250,16 @@ public class BattleScreen extends ScreenAdapter {
         new CardAimController(
             ServiceLocator.getRenderService().getStage(),
             ServiceLocator.getCamera(),
-            Map.of("player", player));
+            Map.of("player", player),
+            TargetType.SELF,
+            this::battlefieldBounds);
+    allEnemiesCardAim =
+        new CardAimController(
+            ServiceLocator.getRenderService().getStage(),
+            ServiceLocator.getCamera(),
+            enemyTargets,
+            TargetType.ALL_ENEMIES,
+            this::battlefieldBounds);
     cardEffects = new CardEffectResolutionService(library);
     cardPlayService =
         new CardPlayService(
@@ -260,13 +314,167 @@ public class BattleScreen extends ScreenAdapter {
             int maxEnergy =
                 forestGameArea.getPlayer().getComponent(EnergyComponent.class).getMaxEnergy();
 
-            game.getRunState().setPlayerHealth(currentHealth);
-            game.getRunState().setPlayerMaxHealth(maxHealth);
-            game.getRunState().setPlayerMaxEnergy(maxEnergy);
+            runState.setPlayerHealth(currentHealth);
+            runState.setPlayerMaxHealth(maxHealth);
+            runState.setPlayerMaxEnergy(maxEnergy);
           }
         });
     createUI();
+    if (tutorialBattle) {
+      String demonstrationId = handRowOrder.get(handRowOrder.size() / 2).instanceId();
+      tutorialView =
+          new BattleTutorialGuidanceView(
+              ServiceLocator.getRenderService().getStage(),
+              cardWidgetSkin,
+              () ->
+                  uiFactory.getByTrigger("playCard").stream()
+                      .map(Clickable::getBtn)
+                      .map(actor -> (com.badlogic.gdx.scenes.scene2d.Actor) actor)
+                      .toList(),
+              () ->
+                  uiFactory.getByTrigger("playCard").stream()
+                      .filter(c -> c.getArgs().length > 0 && demonstrationId.equals(c.getArgs()[0]))
+                      .map(Clickable::getBtn)
+                      .findFirst()
+                      .orElse(null),
+              () ->
+                  uiFactory.getByTrigger("openMenu").stream()
+                      .map(Clickable::getBtn)
+                      .findFirst()
+                      .orElse(null),
+              () ->
+                  uiFactory.getByTrigger("endTurn").stream()
+                      .map(Clickable::getBtn)
+                      .findFirst()
+                      .orElse(null));
+      tutorialView.setExitStyle(
+          com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins.forIcon(
+                  com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins.Icon
+                      .END_TURN)
+              .get(com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton.ImageTextButtonStyle.class));
+      tutorialView.setStatTargets(
+          () ->
+              uiFactory.getByTrigger("openInventory").stream()
+                  .map(Clickable::getBtn)
+                  .findFirst()
+                  .orElse(null),
+          () ->
+              player
+                  .getComponent(com.csse3200.game.components.player.PlayerEnergyDisplay.class)
+                  .getEnergyActor(),
+          () ->
+              player
+                  .getComponent(com.csse3200.game.components.player.PlayerStatsDisplay.class)
+                  .getHealthLabel(),
+          () ->
+              forestGameArea.getEnemies().stream()
+                  .map(
+                      e ->
+                          e.getComponent(
+                              com.csse3200.game.components.enemy.EnemyStatsDisplay.class))
+                  .filter(java.util.Objects::nonNull)
+                  .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getHealthActor)
+                  .findFirst()
+                  .orElse(null));
+      tutorialView.setDetailedTargets(
+          () ->
+              player
+                  .getComponent(com.csse3200.game.components.player.PlayerEnergyDisplay.class)
+                  .getEnergyVisualBounds(),
+          () ->
+              forestGameArea.getEnemies().stream()
+                  .map(
+                      e ->
+                          e.getComponent(
+                              com.csse3200.game.components.enemy.EnemyStatsDisplay.class))
+                  .filter(java.util.Objects::nonNull)
+                  .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getTutorialArmourActor)
+                  .findFirst()
+                  .orElse(null));
+      tutorialView.setEnemyBounds(
+          () -> forestGameArea.getEnemies().stream().map(this::tutorialEnemyBounds).toList());
+      tutorialView.setDragActor(
+          () -> ServiceLocator.getDragAndDropService().getDragAndDrop().getDragActor());
+      tutorialView.setEnemyRenderer(
+          batch -> {
+            com.badlogic.gdx.math.Matrix4 previous =
+                new com.badlogic.gdx.math.Matrix4(batch.getProjectionMatrix());
+            batch.setProjectionMatrix(ServiceLocator.getCamera().combined);
+            batch.setColor(com.badlogic.gdx.graphics.Color.WHITE);
+            for (Entity enemy : forestGameArea.getEnemies()) {
+              AnimationRenderComponent spriteRenderer =
+                  enemy.getComponent(AnimationRenderComponent.class);
+              if (spriteRenderer != null)
+                spriteRenderer.render((com.badlogic.gdx.graphics.g2d.SpriteBatch) batch);
+            }
+            batch.setProjectionMatrix(previous);
+            batch.setColor(com.badlogic.gdx.graphics.Color.WHITE);
+          });
+      BattleAnimationCoordinator visuals =
+          animationCoordinatorEntity.getComponent(BattleAnimationCoordinator.class);
+      BattleTutorialComponent guidance =
+          new BattleTutorialComponent(
+              controller, tutorialView, this::onTutorialFinished, demonstrationId);
+      guidance.setObservation(
+          new BattleTutorialObservation(
+              () ->
+                  forestGameArea.getEnemies().stream()
+                      .mapToInt(e -> e.getComponent(CombatStatsComponent.class).getHealth())
+                      .sum(),
+              () -> player.getComponent(CombatStatsComponent.class).getHealth(),
+              () ->
+                  !visuals.hasActiveVisuals()
+                      && !battleActions.hasPendingEnemyReveals()
+                      && tutorialView.isPlayerHealthDisplayed(
+                          player.getComponent(CombatStatsComponent.class).getHealth())
+                      && forestGameArea.getEnemies().stream()
+                          .allMatch(
+                              e -> {
+                                AnimationRenderComponent animator =
+                                    e.getComponent(AnimationRenderComponent.class);
+                                return animator == null
+                                    || !"hurt".equals(animator.getCurrentAnimation())
+                                    || animator.isFinished();
+                              })));
+      ServiceLocator.getEntityService().register(new Entity().addComponent(guidance));
+      // Remains after guidance cleans itself up: existing tutorial battle completion is unchanged.
+      controller.addBattleEndListener(
+          won ->
+              Gdx.app.postRunnable(
+                  () ->
+                      onTutorialFinished(
+                          Boolean.TRUE.equals(won)
+                              ? BattleTutorialController.Outcome.WON
+                              : BattleTutorialController.Outcome.LOST)));
+    }
     controller.start();
+  }
+
+  private Rectangle tutorialEnemyBounds(Entity enemy) {
+    Stage stage = ServiceLocator.getRenderService().getStage();
+    Vector2 pos = enemy.getPosition(), scale = enemy.getScale();
+    Vector3 a = ServiceLocator.getCamera().project(new Vector3(pos.x, pos.y, 0));
+    Vector3 b =
+        ServiceLocator.getCamera().project(new Vector3(pos.x + scale.x, pos.y + scale.y, 0));
+    Vector2 lower =
+        stage.screenToStageCoordinates(new Vector2(a.x, Gdx.graphics.getHeight() - a.y));
+    Vector2 upper =
+        stage.screenToStageCoordinates(new Vector2(b.x, Gdx.graphics.getHeight() - b.y));
+    return new Rectangle(
+        Math.min(lower.x, upper.x) - 8,
+        Math.min(lower.y, upper.y) - 8,
+        Math.abs(upper.x - lower.x) + 16,
+        Math.abs(upper.y - lower.y) + 16);
+  }
+
+  private void onTutorialFinished(BattleTutorialController.Outcome outcome) {
+    // All tutorial changes live in this screen's disposable run. Joel's shared new-run path resets
+    // the persistent run and opens the story/map on victory or voluntary exit.
+    if (outcome == BattleTutorialController.Outcome.LOST) {
+      game.setScreen(GdxGame.ScreenType.MAIN_MENU);
+    } else {
+      game.startNewRun();
+    }
   }
 
   public void createUI() {
@@ -279,6 +487,8 @@ public class BattleScreen extends ScreenAdapter {
     uiFactory = new ClickableFactory(buildAllRecords());
     uiFactory.registerInstanceVariant("aimDrag", rec -> new DragNDrop(rec, enemyCardAim));
     uiFactory.registerInstanceVariant("selfAimDrag", rec -> new DragNDrop(rec, playerCardAim));
+    uiFactory.registerInstanceVariant(
+        "allEnemiesAimDrag", rec -> new DragNDrop(rec, allEnemiesCardAim));
 
     Terminal terminal = new Terminal();
     terminal.addCommand("skipbattle", new SkipBattleCommand(controller));
@@ -286,28 +496,35 @@ public class BattleScreen extends ScreenAdapter {
     terminal.addCommand("sethealth", new SetHealthCommand(gameArea.getPlayer()));
     terminal.addCommand("giveitem", new GiveItemCommand(gameArea.getPlayer()));
 
-    PopupDisplay cardInventory = new PopupDisplay("Card Inventory", CARD_INVENTORY_STYLE);
+    // Untitled: DeckEditorComponent draws its own "CARD INVENTORY" header, like the item inventory.
+    PopupDisplay cardInventory = new PopupDisplay("");
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
-    PopupDisplay itemInventory = new PopupDisplay("Item Inventory", CARD_INVENTORY_STYLE);
+    PopupDisplay itemInventory = new PopupDisplay("Item Inventory");
     itemInventory.setMinSize(ITEM_INVENTORY_MIN_WIDTH, ITEM_INVENTORY_MIN_HEIGHT);
     InventoryPopupComponent inventoryPopup =
         new InventoryPopupComponent(
             game.getRunState(), itemInventory, gameArea.getPlayer(), controller::isPlayerTurn);
+
     Entity itemInventoryEntity =
-        new Entity().addComponent(itemInventory).addComponent(inventoryPopup);
+        new Entity()
+            .addComponent(itemInventory)
+            .addComponent(new PopupInputComponent(itemInventory))
+            .addComponent(inventoryPopup);
     ServiceLocator.getEntityService().register(itemInventoryEntity);
 
     Stage stage = ServiceLocator.getRenderService().getStage();
+    battleActions = new BattleActions(controller, game, gameArea.getEnemies(), tutorialBattle);
     Entity battleUi =
         new Entity()
             .addComponent(new InputDecorator(stage, 10))
             .addComponent(uiFactory)
             .addComponent(displays)
-            .addComponent(new BattleActions(controller, game))
+            .addComponent(battleActions)
             .addComponent(new CardActions(controller, gameArea.getPlayer()))
             .addComponent(new Team3CardPlayAdapter(cardPlayService, controller))
             .addComponent(cardInventory)
+            .addComponent(new PopupInputComponent(cardInventory))
             .addComponent(
                 new DamageOnCardPlayComponent(
                     gameArea.getPlayer().getComponent(CombatStatsComponent.class)))
@@ -327,7 +544,15 @@ public class BattleScreen extends ScreenAdapter {
               installHandCardWidgets();
             });
     // Pause menu + in-place save/load overlay (added before the entity is created).
-    SaveLoadPanel savePanel = PauseMenuFactory.attach(battleUi, game);
+    SaveLoadPanel savePanel = null;
+    if (tutorialBattle) {
+      battleUi
+          .addComponent(new PauseMenuDisplay())
+          .addComponent(new PauseMenuInput())
+          .addComponent(new PauseMenuActions(game, true));
+    } else {
+      savePanel = PauseMenuFactory.attach(battleUi, game);
+    }
 
     gameArea.displayUI(battleUi);
     installHandCardWidgets();
@@ -336,7 +561,7 @@ public class BattleScreen extends ScreenAdapter {
     List<ClickableRecord> deckEditorClickables =
         ClickableFactory.loadRecordsFromJson(deckEditorUiJson);
     ClickableFactory deckPoolFactory = new ClickableFactory(deckEditorClickables);
-    savePanel.hide(); // save overlay starts hidden, opened by the Save & Load button
+    if (savePanel != null) savePanel.hide(); // Tutorial previews must not save the real run.
 
     List<DisplayingRecord> deckEditorDisplayRecords =
         DisplayingFactory.loadRecordsFromJson(deckEditorUiJson);
@@ -414,6 +639,7 @@ public class BattleScreen extends ScreenAdapter {
   static EffectVisualRegistry createEffectVisualRegistry() {
     EffectVisualRegistry registry = new EffectVisualRegistry();
     OffensiveEffectVisuals.registerAll(registry);
+    PlayerEffectVisuals.registerAll(registry);
     EnemyStatusEffectVisuals.registerAll(registry);
     return registry;
   }
@@ -421,7 +647,9 @@ public class BattleScreen extends ScreenAdapter {
   @Override
   public void render(float delta) {
     ServiceLocator.getEntityService().update();
+    if (tutorialView != null) tutorialView.alignWorldStatsToViewport();
     renderer.render();
+    if (tutorialView != null) tutorialView.renderAboveBattle();
   }
 
   @Override
@@ -435,9 +663,11 @@ public class BattleScreen extends ScreenAdapter {
     playerState.captureFrom(gameArea.getPlayer());
     enemyCardAim.dispose();
     playerCardAim.dispose();
+    allEnemiesCardAim.dispose();
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
+    ServiceLocator.getResourceService().unloadAssets(EnemyStatusEffectVisuals.texturePaths());
     cardInteractionSkin.dispose();
     cardWidgetSkin.dispose();
     ServiceLocator.getResourceService().unloadAssets(mainGameTextures);
@@ -447,6 +677,7 @@ public class BattleScreen extends ScreenAdapter {
     logger.debug("Loading assets");
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(mainGameTextures);
+    resourceService.loadTextures(EnemyStatusEffectVisuals.texturePaths());
     ServiceLocator.getResourceService().loadAll();
   }
 
@@ -465,8 +696,48 @@ public class BattleScreen extends ScreenAdapter {
 
   private List<ClickableRecord> buildAllRecords() {
     List<ClickableRecord> records = new ArrayList<>(buildHandRecords());
-    records.addAll(staticUiRecords);
+    records.addAll(buildBattleMenuRecords());
     return records;
+  }
+
+  /** Applies the themed frame and matching icon without changing any button trigger or payload. */
+  private List<ClickableRecord> buildBattleMenuRecords() {
+    List<ClickableRecord> records = new ArrayList<>();
+    for (ClickableRecord clickableRecord : staticUiRecords) {
+      BattleMenuSkins.Icon icon =
+          switch (clickableRecord.trigger()) {
+            case "openMenu" -> BattleMenuSkins.Icon.CARD;
+            case "openInventory" -> BattleMenuSkins.Icon.INVENTORY;
+            case "endTurn" -> BattleMenuSkins.Icon.END_TURN;
+            default -> null;
+          };
+      if (icon == null) {
+        records.add(clickableRecord);
+        continue;
+      }
+
+      records.add(
+          ClickableRecord.builder(clickableRecord.trigger())
+              .text(clickableRecord.text())
+              .skin(BattleMenuSkins.forIcon(icon))
+              .position(clickableRecord.x(), clickableRecord.y())
+              .size(clickableRecord.width(), clickableRecord.height())
+              .variant(clickableRecord.variant())
+              .args(clickableRecord.args())
+              .label(clickableRecord.label())
+              .disabled(clickableRecord.disabled())
+              .build());
+    }
+    return records;
+  }
+
+  /** The battle play area above the raised hand and below the top controls/battle log. */
+  private Rectangle battlefieldBounds() {
+    Stage stage = ServiceLocator.getRenderService().getStage();
+    // Cards rise by 120 on hover; leave another 24 pixels before accepting a battlefield drop.
+    float bottom = Math.max(0f, stage.getHeight() - HAND_Y + CARD_HEIGHT + 144f);
+    float top = stage.getHeight() - 180f;
+    return new Rectangle(0f, bottom, stage.getWidth(), Math.max(0f, top - bottom));
   }
 
   private List<ClickableRecord> buildHandRecords() {
@@ -489,7 +760,7 @@ public class BattleScreen extends ScreenAdapter {
           switch (card.target()) {
             case SELF -> "selfAimDrag";
             case SINGLE_ENEMY -> "aimDrag";
-            case ALL_ENEMIES -> "drag";
+            case ALL_ENEMIES -> "allEnemiesAimDrag";
           };
 
       float offsetFromCenter = i - centerIndex;
@@ -506,6 +777,7 @@ public class BattleScreen extends ScreenAdapter {
               .rotation(rotation)
               .disabled(disabled);
 
+      // The drag source supplies a player/enemy ID or an all-enemies marker on a valid drop.
       builder.args(instance.instanceId());
 
       records.add(builder.build());

@@ -20,18 +20,26 @@ public class MainMenuActions extends Component {
   @Override
   public void create() {
     entity.getEvents().addListener(MainMenuDisplay.START_EVENT, this::onStart);
+    entity.getEvents().addListener(MainMenuDisplay.ENTER_TUTORIAL_EVENT, this::onEnterTutorial);
     entity.getEvents().addListener(MainMenuDisplay.LOAD_EVENT, this::onLoad);
     entity.getEvents().addListener(MainMenuDisplay.BESTIARY_EVENT, this::onBestiary);
     entity.getEvents().addListener(MainMenuDisplay.SETTINGS_EVENT, this::onSettings);
     entity.getEvents().addListener(MainMenuDisplay.EXIT_EVENT, this::onExit);
     entity.getEvents().addListener("library", this::onLibrary);
+    entity.getEvents().addListener(MainMenuDisplay.DEMO_EVENT, game::openDemoEvent);
+    entity.getEvents().addListener(MainMenuDisplay.DEMO_CAMPFIRE_EVENT, game::openDemoCampfire);
   }
 
   /** Discards any run in progress and opens a fresh map. */
   private void onStart() {
     logger.info("Opening map");
-    game.getRunState().endRun();
-    game.showNarration("opening", GdxGame.ScreenType.MAP);
+    game.startNewRun();
+  }
+
+  /** Launches the optional teaching encounter after New Game's Enter Tutorial choice. */
+  private void onEnterTutorial() {
+    logger.info("Opening the tutorial battle");
+    game.startTutorialBattle();
   }
 
   /** Opens the Save/Load screen. */

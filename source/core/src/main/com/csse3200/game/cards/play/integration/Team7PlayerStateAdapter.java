@@ -67,14 +67,22 @@ public final class Team7PlayerStateAdapter implements PlayerStateView, PlayerEff
             combatStats.heal(effect.value());
           }
         }
-        case STRENGTH ->
-            combatStats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
+        case STRENGTH -> addStrength(effect.value());
         case ENERGY_GAIN -> energy.restoreEnergy(effect.value());
         case CLEANSE -> combatStats.clearNegativeStatusEffects();
         case FORTIFY -> combatStats.addArmour(effect.value());
         default -> throw unsupportedPlayerEffect(effect.type());
       }
     }
+  }
+
+  private void addStrength(int amount) {
+    StatusEffect strength = combatStats.getStatusEffect(EffectType.STRENGTH.name());
+    if (strength == null) {
+      combatStats.applyStatusEffect(EffectType.STRENGTH.name(), amount, 0);
+      return;
+    }
+    strength.addValue(amount);
   }
 
   private static List<ResolvedCardEffect> validatedPlayerEffects(List<ResolvedCardEffect> effects) {

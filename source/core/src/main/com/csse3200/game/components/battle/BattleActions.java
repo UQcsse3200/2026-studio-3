@@ -7,6 +7,7 @@ import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.combat.BattlePhase;
+import com.csse3200.game.entities.Entity;
 import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
@@ -39,19 +40,48 @@ public class BattleActions extends Component {
   /** How long the enemy "thinks" before its action, log line and effects are revealed. */
   private static final float ENEMY_TURN_DELAY = 1.2f;
 
+  public static final String ENEMY_TURN_EVENT = "enemyTurn";
+
   private final BattleController controller;
   private final GdxGame game;
+  private final boolean tutorialBattle;
+  private final List<Entity> enemies;
 
   // While true, reveals (log, effects, phase changes, the hand coming back up) are queued instead
   // of fired immediately, so the enemy's whole turn can be held back and replayed together after
   // ENEMY_TURN_DELAY. This is the one point the "enemy thinks" pause lives — see dispatch() and
   // flushDeferredReveals().
   private boolean deferringEnemyTurn = false;
+  private int pendingRevealBatches;
+
+  /** Read-only presentation timing probe for tutorial guidance. */
+  public boolean hasPendingEnemyReveals() {
+    return deferringEnemyTurn || pendingRevealBatches > 0;
+  }
+
   private final List<Runnable> queuedReveals = new ArrayList<>();
+  private final List<EnemyReleaseComponent> releaseAnimations = new ArrayList<>();
+  private boolean awaitingRelease;
+  private boolean released;
 
   public BattleActions(BattleController controller, GdxGame game) {
+    this(controller, game, List.of(), false);
+  }
+
+  public BattleActions(BattleController controller, GdxGame game, boolean tutorialBattle) {
+    this(controller, game, List.of(), tutorialBattle);
+  }
+
+  public BattleActions(BattleController controller, GdxGame game, List<Entity> enemies) {
+    this(controller, game, enemies, false);
+  }
+
+  public BattleActions(
+      BattleController controller, GdxGame game, List<Entity> enemies, boolean tutorialBattle) {
     this.controller = controller;
     this.game = game;
+    this.enemies = List.copyOf(enemies);
+    this.tutorialBattle = tutorialBattle;
   }
 
   /**
@@ -79,7 +109,9 @@ public class BattleActions extends Component {
         message -> dispatch(() -> entity.getEvents().trigger(BATTLE_LOG_EVENT, message)));
     controller.addEnemyEffectsListener(effects -> dispatch(() -> onEnemyEffects(effects)));
     controller.addPlayerEffectsListener(this::onPlayerEffects);
-    controller.addBattleEndListener(this::onBattleEnd);
+    if (!tutorialBattle) {
+      controller.addBattleEndListener(this::onBattleEnd);
+    }
     controller.addHandChangedListener(hand -> entity.getEvents().trigger(HAND_CHANGED_EVENT, hand));
   }
 
@@ -88,8 +120,16 @@ public class BattleActions extends Component {
     // holding back every reveal that follows until the whole enemy turn is done.
     if (nextPhase == BattlePhase.ENEMY_TURN && previousPhase == BattlePhase.PLAYER_END) {
       deferringEnemyTurn = true;
+      entity.getEvents().trigger(ENEMY_TURN_EVENT);
       entity.getEvents().trigger(PHASE_CHANGED_EVENT, nextPhase);
       return;
+    }
+
+    if (nextPhase == BattlePhase.PLAYER_TURN
+        && previousPhase == BattlePhase.PLAYER_START
+        && controller.getPlayerTurnNumber() > 1) {
+      dispatch(
+          () -> entity.getEvents().trigger("playerTurnStarted", controller.getPlayerTurnNumber()));
     }
 
     dispatch(() -> entity.getEvents().trigger(PHASE_CHANGED_EVENT, nextPhase));
@@ -120,11 +160,16 @@ public class BattleActions extends Component {
     deferringEnemyTurn = false;
     List<Runnable> reveals = new ArrayList<>(queuedReveals);
     queuedReveals.clear();
+    pendingRevealBatches++;
     Timer.schedule(
         new Timer.Task() {
           @Override
           public void run() {
-            reveals.forEach(Runnable::run);
+            try {
+              reveals.forEach(Runnable::run);
+            } finally {
+              pendingRevealBatches--;
+            }
           }
         },
         ENEMY_TURN_DELAY);
@@ -161,10 +206,58 @@ public class BattleActions extends Component {
       }
     }
 
-    GdxGame.ScreenType target = win ? GdxGame.ScreenType.VICTORY : GdxGame.ScreenType.DEFEAT;
+    // queue the release animations if the win conditions have been met.
+    if (win) {
+      releaseAnimations.clear();
+
+      for (Entity e : enemies) {
+        EnemyReleaseComponent release = e.getComponent(EnemyReleaseComponent.class);
+
+        if (release != null) {
+          release.startRelease();
+          releaseAnimations.add(release);
+        }
+      }
+
+      if (!releaseAnimations.isEmpty()) {
+        awaitingRelease = true;
+        return;
+      }
+    }
+
+    openResultScreen(win);
+  }
+
+  private void triggerEndTurn() {
+    controller.endPlayerTurn();
+  }
+
+  @Override
+  public void update() {
+    if (!awaitingRelease) {
+      return;
+    }
+
+    boolean finishedRelease =
+        releaseAnimations.stream().allMatch(EnemyReleaseComponent::isFinished);
+
+    if (finishedRelease) {
+      awaitingRelease = false;
+      openResultScreen(true);
+    }
+  }
+
+  private void openResultScreen(boolean won) {
+    GdxGame.ScreenType target = won ? GdxGame.ScreenType.VICTORY : GdxGame.ScreenType.DEFEAT;
+
     if (Gdx.app != null) {
-      Gdx.app.postRunnable(() -> game.setScreen(target));
-    } else {
+      Gdx.app.postRunnable(
+          () -> {
+            if (!released) {
+              game.setScreen(target);
+            }
+          });
+    } else if (!released) {
       game.setScreen(target);
     }
   }
@@ -194,11 +287,16 @@ public class BattleActions extends Component {
     return healthRatio >= 0.8f;
   }
 
-  private void triggerEndTurn() {
-    controller.endPlayerTurn();
+  @Override
+  public void dispose() {
+    released = true;
+    awaitingRelease = false;
+    releaseAnimations.clear();
+    super.dispose();
   }
 
   private void onStart() {
-    game.setScreen(GdxGame.ScreenType.BATTLE_SCREEN);
+    game.setScreen(
+        tutorialBattle ? GdxGame.ScreenType.TUTORIAL_BATTLE : GdxGame.ScreenType.BATTLE_SCREEN);
   }
 }

@@ -28,6 +28,7 @@ public class PopupTextDisplay extends Displaying {
 
   public PopupTextDisplay(DisplayingRecord rec) {
     super(rec);
+    useColourAsFontColour(rec);
     label.setWrap(true);
     label.setAlignment(Align.topLeft);
     label.setVisible(false);

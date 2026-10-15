@@ -78,7 +78,11 @@ public class RewardService {
     validateOption(selected);
 
     switch (selected.type) {
-      case GOLD -> runState.getOrCreatePlayerState().addGold(selected.goldAmount);
+      case GOLD -> {
+        var playerState = runState.getOrCreatePlayerState();
+        playerState.claimGoldReward(
+            selected.goldAmount, playerState.hasOwnedItem(ItemType.LUCKY_COIN));
+      }
       case ITEM -> runState.getOrCreatePlayerState().addOwnedItem(selected.itemId);
       case CARD -> {
         if (!selected.cardSelection.contains(selectedCardId)) {

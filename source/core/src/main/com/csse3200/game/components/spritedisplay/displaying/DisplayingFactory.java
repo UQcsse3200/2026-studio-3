@@ -22,6 +22,8 @@ public class DisplayingFactory extends UIComponent {
   static {
     registerVariant(DEFAULT_VARIANT, rec -> new Displaying(rec) {});
     registerVariant("battleLog", BattleLogDisplay::new);
+    registerVariant("playerTurn", PlayerTurnDisplay::new);
+    registerVariant("enemyTurn", EnemyTurnDisplay::new);
     registerVariant("endBattle", EndBattleDisplay::new);
     registerVariant("selectBadges", CardBadgesDisplay::new);
     registerVariant("cardPreview", CardPreviewDisplay::new);
@@ -153,5 +155,24 @@ public class DisplayingFactory extends UIComponent {
       displaying.dispose();
     }
     displayings.clear();
+  }
+
+  /**
+   * Returns every displaying of the given type created by this factory. Used by callers (e.g.
+   * {@link com.csse3200.game.screens.EndBattleScreen}) that need to interact with a specific
+   * displaying variant after construction — a JSON config may define more than one instance of the
+   * same variant (e.g. the victory heading and the "click anywhere" hint both use "endBattle").
+   *
+   * @param type the Displaying subclass to look for
+   * @return every matching instance, in the order they were created; empty if none exist
+   */
+  public <T extends Displaying> List<T> getDisplayings(Class<T> type) {
+    List<T> matches = new ArrayList<>();
+    for (Displaying displaying : displayings) {
+      if (type.isInstance(displaying)) {
+        matches.add(type.cast(displaying));
+      }
+    }
+    return matches;
   }
 }

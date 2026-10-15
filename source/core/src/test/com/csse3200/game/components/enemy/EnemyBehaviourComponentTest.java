@@ -206,8 +206,6 @@ class EnemyBehaviourComponentTest {
     assertEquals(7, behaviour.getCurrentIntent().getValue());
   }
 
-  // 攻击伤害应该等于意图里广播出去的数值，而不是重新按自身 baseAttack 计算——
-  // 这样"护甲换伤害"这类意图数值高于 baseAttack 的打法，命中时才会真的多造成伤害
   @Test
   void shouldDealDamageEqualToIntentValueNotJustBaseAttack() {
     EnemyBehaviourComponent behaviour =

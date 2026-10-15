@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.csse3200.game.GdxGame.ScreenType;
 import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.RoomType;
@@ -149,7 +150,12 @@ public class AudioService {
     if (resources == null) {
       return;
     }
-    Sound sound = resources.getAsset(soundPaths[soundID.ordinal()], Sound.class);
+    Sound sound;
+    try {
+      sound = resources.getAsset(soundPaths[soundID.ordinal()], Sound.class);
+    } catch (GdxRuntimeException exception) {
+      return;
+    }
     if (sound == null) {
       return;
     }

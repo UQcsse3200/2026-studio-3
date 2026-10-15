@@ -2,7 +2,6 @@ package com.csse3200.game.components.combat;
 
 import com.csse3200.game.cards.EffectType;
 import com.csse3200.game.cards.TargetType;
-import com.csse3200.game.cards.effects.*;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.cards.play.CardPlayResult;
@@ -12,6 +11,7 @@ import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.cards.CardEffectHandler;
+import com.csse3200.game.components.enemy.EnemyAnimationController;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.enemy.EnemyStatsComponent;
@@ -52,6 +52,7 @@ public class BattleController {
   private final CardPlayService cardPlayService;
   private CardPlayRequest pendingCard;
   private boolean lastCardPlaySucceeded;
+  private int playerTurnNumber;
 
   /** Logging Strings & Error messages */
   private static final String PHASE_CHANGED_EVENT = "battlePhaseChanged";
@@ -101,6 +102,7 @@ public class BattleController {
     this.currentPhase = BattlePhase.SETUP;
     this.currentEnemyIndex = -1;
     this.currentEnemyIntent = null;
+    this.playerTurnNumber = 0;
     this.eventHandler = new EventHandler();
     this.eventQueue = new ArrayDeque<>();
     for (Entity enemy : this.enemies) {
@@ -295,6 +297,7 @@ public class BattleController {
     // Normal housekeeping for resetting the state machine.
     this.eventQueue.clear();
     this.resetEnemyCursor();
+    this.playerTurnNumber = 0;
     this.setEnemyIntent(null);
     this.setCurrentPhase(BattlePhase.SETUP);
     this.notifyPhaseChange(previousPhase, BattlePhase.SETUP);
@@ -319,6 +322,10 @@ public class BattleController {
     return this.currentPhase == BattlePhase.PLAYER_TURN;
   }
 
+  public int getPlayerTurnNumber() {
+    return this.playerTurnNumber;
+  }
+
   /**
    * Returns the current targeted enemy.
    *
@@ -337,6 +344,11 @@ public class BattleController {
   public void addPhaseChangeListener(EventListener2<BattlePhase, BattlePhase> listener) {
     Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(PHASE_CHANGED_EVENT, listener);
+  }
+
+  /** Removes the exact phase listener registered by a screen-scoped observer. */
+  public void removePhaseChangeListener(EventListener2<BattlePhase, BattlePhase> listener) {
+    eventHandler.removeListener(PHASE_CHANGED_EVENT, listener);
   }
 
   /**
@@ -360,6 +372,11 @@ public class BattleController {
   public void addBattleEndListener(EventListener1<Boolean> listener) {
     Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener(BATTLE_ENDED_EVENT, listener);
+  }
+
+  /** Removes the exact battle-end listener registered by a screen-scoped observer. */
+  public void removeBattleEndListener(EventListener1<Boolean> listener) {
+    eventHandler.removeListener(BATTLE_ENDED_EVENT, listener);
   }
 
   /**
@@ -398,6 +415,11 @@ public class BattleController {
   public void addCardPlayedListener(EventListener2<String, String> listener) {
     Objects.requireNonNull(listener, LISTENER_NOT_NULL);
     eventHandler.addListener("cardPlayed", listener);
+  }
+
+  /** Removes the exact card-play listener registered by a screen-scoped observer. */
+  public void removeCardPlayedListener(EventListener2<String, String> listener) {
+    eventHandler.removeListener("cardPlayed", listener);
   }
 
   /** Sends a one-line description of the latest battle action to any log listeners. */
@@ -521,7 +543,7 @@ public class BattleController {
     CombatStatsComponent playerStats = this.player.getComponent(CombatStatsComponent.class);
     boolean allEnemiesDead = this.enemies.stream().noneMatch(this::isEnemyAlive);
 
-    if (playerStats.isDead()) {
+    if (Boolean.TRUE.equals(playerStats.isDead())) {
       handle(BattleEvent.PLAYER_DEFEATED);
       return true;
     }
@@ -803,6 +825,8 @@ public class BattleController {
     if (this.queueBattleOutcomeIfOver()) {
       return;
     }
+
+    this.playerTurnNumber++;
     // Start-of-turn operations: refill energy for the new player turn.
     EnergyComponent energy = playerEnergy();
     if (energy != null) {
@@ -918,7 +942,19 @@ public class BattleController {
             + damage
             + (playerStats != null ? " (you have " + playerStats.getHealth() + " HP)" : "")
             + ".");
-    handle(BattleEvent.ENEMY_ACTION_RESOLVED);
+    // Keep each hit with its own action; advance only after this enemy returns.
+    Runnable resolved =
+        () -> {
+          if (currentPhase == BattlePhase.ENEMY_ATTACK && getActiveEnemy() == enemy) {
+            handle(BattleEvent.ENEMY_ACTION_RESOLVED);
+          }
+        };
+    EnemyAnimationController animation = enemy.getComponent(EnemyAnimationController.class);
+    if (animation == null) {
+      resolved.run();
+    } else {
+      animation.runAfterAttack(resolved);
+    }
   }
 
   private void enterEnemyDefend() {

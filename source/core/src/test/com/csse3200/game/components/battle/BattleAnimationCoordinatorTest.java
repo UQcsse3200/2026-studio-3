@@ -116,8 +116,10 @@ class BattleAnimationCoordinatorTest {
       verify(entities, times(2)).register(visuals.capture());
       SpriteBatch batch = mock(SpriteBatch.class);
       when(batch.getPackedColor()).thenReturn(123f);
+      // Multiple effects are staggered (0.3s apart), so advance 0.4s before both are drawable.
       for (Entity visual : visuals.getAllValues()) {
         EffectVisualComponent component = visual.getComponent(EffectVisualComponent.class);
+        component.update();
         component.update();
         component.render(batch);
       }
@@ -168,14 +170,15 @@ class BattleAnimationCoordinatorTest {
 
   @Test
   void shouldBorrowManagedIconsWithoutGeneratingOrDisposingThem() {
+    // Damage now plays a particle burst instead of an icon, so use an effect that draws one.
     EffectVisualRegistry registry = new EffectVisualRegistry();
-    OffensiveEffectVisuals.registerAll(registry);
+    PlayerEffectVisuals.registerAll(registry);
     createCoordinator(registry);
     Texture icon = mock(Texture.class);
     when(resources.getAsset(anyString(), eq(Texture.class))).thenReturn(icon);
 
     try (MockedConstruction<Texture> textures = mockConstruction(Texture.class)) {
-      playerEffects.handle(List.of(effect(EffectType.DAMAGE)));
+      playerEffects.handle(List.of(effect(EffectType.HEAL)));
 
       assertTrue(textures.constructed().isEmpty());
       SpriteBatch batch = mock(SpriteBatch.class);

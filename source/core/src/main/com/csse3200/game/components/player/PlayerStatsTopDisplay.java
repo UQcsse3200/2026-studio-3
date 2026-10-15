@@ -14,6 +14,7 @@ import com.csse3200.game.ui.UIComponent;
 
 public class PlayerStatsTopDisplay extends UIComponent {
   Table table;
+  Table levelTable;
   private Image heartImage;
   private Label healthLabel;
   private Image levelImage;
@@ -23,8 +24,6 @@ public class PlayerStatsTopDisplay extends UIComponent {
   private RunState runState;
   private static final float FONT_SCALE = 0.75f;
   private static final String STYLE_NAME_LARGE = "large";
-  private final float mapWidth = Gdx.graphics.getWidth();
-  private final float mapHeight = Gdx.graphics.getHeight();
 
   public PlayerStatsTopDisplay(RunState runState) {
     this.runState = runState;
@@ -47,10 +46,17 @@ public class PlayerStatsTopDisplay extends UIComponent {
    * @see Table for positioning options
    */
   private void addActors() {
+    float stageWidth =
+        stage.getViewport() == null ? Gdx.graphics.getWidth() : stage.getViewport().getWorldWidth();
+    float stageHeight =
+        stage.getViewport() == null
+            ? Gdx.graphics.getHeight()
+            : stage.getViewport().getWorldHeight();
+
     table = new Table(skin);
     table.top().left();
-    table.setSize(mapWidth, 50);
-    table.setPosition(0, mapHeight - 50);
+    table.setSize(stageWidth, 50);
+    table.setPosition(0, stageHeight - 50);
     table.setBackground(skin.newDrawable("color", new Color(0.105f, 0.070f, 0.065f, 0.98f)));
     table.padTop(5f).padLeft(10f);
 
@@ -68,15 +74,6 @@ public class PlayerStatsTopDisplay extends UIComponent {
     healthLabel = new Label(healthText, skin, STYLE_NAME_LARGE);
     healthLabel.setFontScale(FONT_SCALE);
 
-    // Level image
-    levelImage =
-        new Image(ServiceLocator.getResourceService().getAsset("images/level.png", Texture.class));
-
-    // Level text
-    String levelText = String.format("%d", runState.getMapProgression());
-    levelLabel = new Label(levelText, skin, STYLE_NAME_LARGE);
-    levelLabel.setFontScale(FONT_SCALE);
-
     // Money image
     moneyImage =
         new Image(ServiceLocator.getResourceService().getAsset("images/money.png", Texture.class));
@@ -88,16 +85,32 @@ public class PlayerStatsTopDisplay extends UIComponent {
     moneyLabel = new Label(moneyText, skin, STYLE_NAME_LARGE);
     moneyLabel.setFontScale(FONT_SCALE);
 
-    // adds stats to the table
+    // level table
+    levelTable = new Table(skin);
+
+    // Level image
+    levelImage =
+        new Image(ServiceLocator.getResourceService().getAsset("images/level.png", Texture.class));
+
+    // Level text
+    String levelText = String.format("%d", runState.getMapProgression());
+    levelLabel = new Label(levelText, skin, STYLE_NAME_LARGE);
+    levelLabel.setFontScale(FONT_SCALE);
+
+    // add stats to the gold and health table
     table.add(heartImage).size(imageSideLength).pad(5);
     table.add(healthLabel).left().pad(10);
 
-    table.add(levelImage).size(imageSideLength).pad(5);
-    table.add(levelLabel).left().pad(10);
-
     table.add(moneyImage).size(imageSideLength).pad(5);
-    table.add(moneyLabel).left();
+    table.add(moneyLabel).left().pad(10);
     stage.addActor(table);
+
+    // add stats to level table
+    levelTable.add(levelImage).size(imageSideLength).pad(5);
+    levelTable.add(levelLabel).left().pad(10);
+    levelTable.pack();
+    levelTable.setPosition((stageWidth - levelTable.getWidth()) / 2f, stageHeight - 45);
+    stage.addActor(levelTable);
   }
 
   @Override
@@ -139,6 +152,9 @@ public class PlayerStatsTopDisplay extends UIComponent {
   @Override
   public void dispose() {
     super.dispose();
+
+    table.remove();
+    levelTable.remove();
     heartImage.remove();
     healthLabel.remove();
     levelImage.remove();

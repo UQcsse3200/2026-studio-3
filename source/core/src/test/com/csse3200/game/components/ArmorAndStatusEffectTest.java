@@ -1,5 +1,6 @@
 package com.csse3200.game.components;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -8,6 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -143,6 +147,81 @@ class ArmourAndStatusEffectTest {
     assertEquals(5, combat.getBlock());
     combat.addBlock(-100);
     assertEquals(5, combat.getBlock());
+  }
+
+  @Test
+  void addingBlockShouldSaturateWithoutErasingDefenses() {
+    CombatStatsComponent combat = new CombatStatsComponent(100, 20);
+    combat.setArmour(7);
+    combat.setBlock(Integer.MAX_VALUE - 1);
+    Entity entity = new Entity().addComponent(combat);
+    List<Integer> updates = new ArrayList<>();
+    entity.getEvents().addListener("updateBlock", (Integer value) -> updates.add(value));
+
+    combat.addBlock(2);
+    combat.addBlock(Integer.MAX_VALUE);
+    combat.addBlock(0);
+    combat.addBlock(-1);
+
+    assertEquals(Integer.MAX_VALUE, combat.getBlock());
+    assertEquals(List.of(Integer.MAX_VALUE, Integer.MAX_VALUE), updates);
+    assertEquals(7, combat.getArmour());
+    assertEquals(100, combat.getHealth());
+  }
+
+  @Test
+  void bulkExpiryShouldAllowRemovalListenerToAddStatusWithoutTickingIt() {
+    CombatStatsComponent combat = new CombatStatsComponent(100, 20);
+    Entity entity = new Entity().addComponent(combat);
+    combat.applyStatusEffect("VULNERABLE", 1, 1);
+    combat.applyStatusEffect("HEAL", 2, 3);
+    List<String> removed = new ArrayList<>();
+    List<Boolean> absentDuringNotification = new ArrayList<>();
+    entity
+        .getEvents()
+        .addListener(
+            "statusEffectRemoved",
+            (String type) -> {
+              removed.add(type);
+              absentDuringNotification.add(!combat.hasStatusEffect(type));
+              combat.applyStatusEffect("STRENGTH", 2, 4);
+            });
+
+    assertDoesNotThrow(combat::updateStatusEffects);
+
+    assertEquals(List.of("VULNERABLE"), removed);
+    assertEquals(List.of(true), absentDuringNotification);
+    assertNull(combat.getStatusEffect("VULNERABLE"));
+    assertEquals(2, combat.getStatusEffect("HEAL").getDuration());
+    assertEquals(4, combat.getStatusEffect("STRENGTH").getDuration());
+    assertEquals(100, combat.getHealth());
+  }
+
+  @Test
+  void bulkExpiryShouldPreserveReplacementsCreatedByRemovalListener() {
+    CombatStatsComponent combat = new CombatStatsComponent(100, 20);
+    Entity entity = new Entity().addComponent(combat);
+    combat.applyStatusEffect("VULNERABLE", 1, 1);
+    combat.applyStatusEffect("FEEBLE", 1, 1);
+    List<String> removed = new ArrayList<>();
+    entity
+        .getEvents()
+        .addListener(
+            "statusEffectRemoved",
+            (String type) -> {
+              removed.add(type);
+              if (removed.size() == 1) {
+                combat.applyStatusEffect("VULNERABLE", 1, 4);
+                combat.applyStatusEffect("FEEBLE", 1, 4);
+              }
+            });
+
+    assertDoesNotThrow(combat::updateStatusEffects);
+
+    assertEquals(2, removed.size());
+    assertEquals(Set.of("VULNERABLE", "FEEBLE"), Set.copyOf(removed));
+    assertEquals(4, combat.getStatusEffect("VULNERABLE").getDuration());
+    assertEquals(4, combat.getStatusEffect("FEEBLE").getDuration());
   }
 
   @Test

@@ -107,6 +107,15 @@ public class LibraryMenuDisplay extends UIComponent {
           }
         });
 
+    itemLibraryButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            logger.debug("Item Library button clicked");
+            game.setScreen(GdxGame.ScreenType.ITEM_LIBRARY);
+          }
+        });
+
     enemyLibraryButton.addListener(
         new InputListener() {
           @Override
@@ -115,15 +124,6 @@ public class LibraryMenuDisplay extends UIComponent {
             if (pointer == -1) {
               AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
             }
-          }
-        });
-
-    itemLibraryButton.addListener(
-        new ChangeListener() {
-          @Override
-          public void changed(ChangeEvent event, Actor actor) {
-            logger.debug("Item Library button clicked");
-            game.setScreen(GdxGame.ScreenType.ITEM_LIBRARY);
           }
         });
 

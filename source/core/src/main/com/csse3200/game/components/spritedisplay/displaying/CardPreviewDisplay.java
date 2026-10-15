@@ -26,11 +26,12 @@ public class CardPreviewDisplay extends Displaying {
   private static final float ART_TEXT_GAP = 10f;
 
   // --- Styling constants ---
-  private static final float BORDER_WIDTH = 4f;
+  private static final float BORDER_WIDTH = 2f;
   private static final float PADDING = 8f;
   private static final float BOTTOM_PADDING = 20f; // NEW: Space between panel and bottom of popup
-  private static final Color BACKGROUND_COLOR = new Color(0.76f, 0.60f, 0.42f, 1f); // Light Brown
-  private static final Color BORDER_COLOR = new Color(1f, 0.84f, 0f, 1f); // Gold
+  // Matches the item inventory's row frame and fill (InventoryPopupComponent).
+  private static final Color BACKGROUND_COLOR = new Color(0.055f, 0.05f, 0.065f, 0.96f);
+  private static final Color BORDER_COLOR = new Color(0.33f, 0.25f, 0.25f, 1f);
 
   private PopupDisplay popup;
   private final Image art = new Image();
@@ -49,6 +50,7 @@ public class CardPreviewDisplay extends Displaying {
 
   public CardPreviewDisplay(DisplayingRecord rec) {
     super(rec);
+    useColourAsFontColour(rec);
     art.setTouchable(Touchable.disabled);
     art.setVisible(false);
     label.setWrap(true);

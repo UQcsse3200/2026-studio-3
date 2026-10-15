@@ -5,6 +5,7 @@ import com.csse3200.game.cards.effects.CardEffectResolutionContext;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.StatusEffect;
+import com.csse3200.game.components.StatusEffectCalculator;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAI;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIFactory;
@@ -169,8 +170,28 @@ public class EnemyBehaviourComponent extends Component {
       int damage =
           new CardEffectResolutionContext(strength, feeble, vulnerable)
               .resolveDamage(currentIntent.getValue());
+      // Starts the attack animation (EnemyAnimationController) before the damage lands.
+      entity.getEvents().trigger("enemyAttack");
       targetStats.takeDamage(damage);
     }
+  }
+
+  /**
+   * Scales the telegraphed damage by this enemy's outgoing modifier, so effects like Feeble
+   * actually reduce what it deals.
+   *
+   * <p>The intent keeps its original value, so what was telegraphed to the player is unchanged.
+   *
+   * @return the damage this attack should deal
+   */
+  private int outgoingDamage() {
+    CombatStatsComponent stats = entity.getComponent(CombatStatsComponent.class);
+    if (stats == null) {
+      return currentIntent.getValue();
+    }
+
+    float modifier = StatusEffectCalculator.getOutgoingDamageModifier(stats);
+    return Math.round(currentIntent.getValue() * modifier);
   }
 
   private static int statusValue(CombatStatsComponent stats, EffectType type) {

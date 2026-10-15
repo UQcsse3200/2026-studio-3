@@ -11,4 +11,9 @@ public interface AimSession {
   String release(Vector2 pointer);
 
   void cancel();
+
+  /** Whether to keep the selected card in hand and show an arrow instead of a cursor card. */
+  default boolean usesTargetingArrow() {
+    return false;
+  }
 }

@@ -150,8 +150,9 @@ class EncounterGameAreaAssetsTest {
       verify(resources).loadTextures(IntentIcons.all());
       factory.verify(() -> PlayerFactory.createPlayer(run));
     } finally {
-      hud.dispose();
+      // Both HUDs are only created inside the player factory, so only dispose them if it ran.
       if (topHudCreated.get()) {
+        hud.dispose();
         topHud.dispose();
       }
       area.dispose();

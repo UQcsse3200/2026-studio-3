@@ -7,7 +7,6 @@ import com.csse3200.game.cards.deck.PlayerDeckFactory;
 import com.csse3200.game.entities.factories.PlayerFactory;
 import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.services.ServiceLocator;
-import java.util.Objects;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +32,7 @@ public class RunState {
   private PlayerRunState playerState;
   private boolean pendingEliteTempleReward;
   private Long encounterSeed;
+  private Random random = new Random();
 
   /**
    * Returns the durable player values for this run, initialising them from the player config on
@@ -163,7 +163,7 @@ public class RunState {
 
     this.mapGraph = mapGraph;
     this.activeNodeId = null;
-    this.encounterSeed = new Random().nextLong();
+    this.encounterSeed = random.nextLong();
     return true;
   }
 
@@ -272,7 +272,7 @@ public class RunState {
 
     // A fresh seed covers saves made before the seed was recorded; restoreEncounterSeed puts
     // back the saved one when there is one.
-    this.encounterSeed = new Random().nextLong();
+    this.encounterSeed = random.nextLong();
     return true;
   }
 
@@ -294,16 +294,14 @@ public class RunState {
     return activeNodeId;
   }
 
-  /** Returns the height of the currently active node. */
+  /** Returns the active map height, or zero for mapless states such as the tutorial battle. */
   public Integer getMapProgression() {
-    Integer mapNodeId = this.getActiveNodeId();
-    MapNode activeNode = mapGraph.getNode(mapNodeId);
-
-    if (mapNodeId == null || !Objects.nonNull(activeNode) || activeNode.getHeight() <= 0) {
+    if (mapGraph == null || activeNodeId == null) {
       return 0;
     }
 
-    return mapGraph.getNode(this.getActiveNodeId()).getHeight();
+    MapNode activeNode = mapGraph.getNode(activeNodeId);
+    return activeNode == null || activeNode.getHeight() <= 0 ? 0 : activeNode.getHeight();
   }
 
   /**
@@ -351,6 +349,7 @@ public class RunState {
     cardFusionUsed = false;
     playerState = null;
     pendingEliteTempleReward = false;
+    pendingReward = null;
   }
 
   /**
