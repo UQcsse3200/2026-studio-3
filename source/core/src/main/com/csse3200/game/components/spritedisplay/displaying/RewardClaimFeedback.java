@@ -202,9 +202,7 @@ final class RewardClaimFeedback {
         };
     for (int i = 0; i < 6; i++) {
       // Three bright points hug the reward; distant ones disperse and appear less often.
-      if ((i == 3 && index % 2 != 0)
-          || (i == 4 && index % 3 != 0)
-          || (i == 5 && index % 4 != 0)) {
+      if ((i == 3 && index % 2 != 0) || (i == 4 && index % 3 != 0) || (i == 5 && index % 4 != 0)) {
         continue;
       }
       float distance = 5f + i * 8f;
