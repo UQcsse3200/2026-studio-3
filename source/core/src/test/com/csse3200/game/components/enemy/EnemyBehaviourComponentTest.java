@@ -63,6 +63,24 @@ class EnemyBehaviourComponentTest {
 
     assertEquals(IntentType.UNKNOWN, behaviour.getCurrentIntent().getType());
   }
+  @Test
+  void shouldAllowAIToBeReplacedForTutorialBattle() {
+    EnemyAI replacement = context -> EnemyIntent.defend(99);
+    EnemyBehaviourComponent behaviour =
+            new EnemyBehaviourComponent(EnemyAIFactory.CYCLE_ATTACK_DEFEND);
+
+    behaviour.setAI(replacement);
+
+    Entity enemy =
+            new Entity()
+                    .addComponent(new CombatStatsComponent(20, 5))
+                    .addComponent(behaviour);
+
+    EnemyIntent intent = behaviour.rollIntent();
+
+    assertEquals(IntentType.DEFEND, intent.getType());
+    assertEquals(99, intent.getValue());
+  }
 
   @Test
   void shouldAttackOnTheFirstTurn() {
