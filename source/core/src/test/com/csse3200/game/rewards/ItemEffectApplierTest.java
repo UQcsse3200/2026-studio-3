@@ -39,6 +39,18 @@ class ItemEffectApplierTest {
   }
 
   @Test
+  void shouldDispatchToGoldAndShopItemEffects() {
+    InventoryComponent inventory = new InventoryComponent(0);
+    Entity player = new Entity().addComponent(inventory);
+
+    ItemEffectApplier.applyItemEffect(ItemType.LUCKY_COIN, player);
+    ItemEffectApplier.applyItemEffect(ItemType.MERCHANTS_FAVOR, player);
+
+    assertEquals(0.1f, inventory.getGoldBonusMultiplier(), 0.001f);
+    assertEquals(0.1f, inventory.getShopDiscount(), 0.001f);
+  }
+
+  @Test
   void shouldRestoreTwentyHealthWithoutExceedingMaxHealth() {
     Entity player = new Entity();
     CombatStatsComponent stats = new CombatStatsComponent(85, 5, 100);
