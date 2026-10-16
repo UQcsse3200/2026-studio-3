@@ -33,10 +33,13 @@ import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.ui.ItemArtwork;
+import com.csse3200.game.ui.ItemIconView;
 import com.csse3200.game.ui.PopupDisplay;
 import com.csse3200.game.ui.UIComponent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -259,6 +262,124 @@ class InventoryPopupComponentTest {
   }
 
   @Test
+  void useButtonRechecksTurnStateWhenClickedAfterOpening() {
+    RunState runState = new RunState();
+    runState.getOrCreatePlayerState().addOwnedItem(ItemType.IRON_AEGIS);
+    Entity player = new Entity().addComponent(new CombatStatsComponent(100, 5));
+    PopupDisplay popup = mock(PopupDisplay.class);
+    Table content = new Table();
+    when(popup.getContentTable()).thenReturn(content);
+    AtomicBoolean isPlayersTurn = new AtomicBoolean(true);
+    InventoryPopupComponent inventory =
+        new InventoryPopupComponent(runState, popup, player, isPlayersTurn::get);
+    inventoryEntity = new Entity().addComponent(inventory);
+    inventoryEntity.create();
+    inventory.open();
+
+    TextButton button = firstUseButton(content);
+    assertTrue(!button.isDisabled());
+    isPlayersTurn.set(false);
+    button.fire(new ChangeListener.ChangeEvent());
+
+    assertTrue(button.isDisabled());
+    assertEquals(1, runState.getOrCreatePlayerState().getOwnedItemCount(ItemType.IRON_AEGIS));
+    assertEquals(0, player.getComponent(CombatStatsComponent.class).getArmour());
+  }
+
+  @Test
+  void repeatedUseDuringFeedbackCannotConsumeAnotherCopy() {
+    RunState runState = new RunState();
+    runState.getOrCreatePlayerState().addOwnedItem(ItemType.IRON_AEGIS);
+    runState.getOrCreatePlayerState().addOwnedItem(ItemType.IRON_AEGIS);
+    Entity player = new Entity().addComponent(new CombatStatsComponent(100, 5));
+    PopupDisplay popup = mock(PopupDisplay.class);
+    Table content = new Table();
+    when(popup.getContentTable()).thenReturn(content);
+    InventoryPopupComponent inventory =
+        new InventoryPopupComponent(runState, popup, player, () -> true);
+    inventoryEntity = new Entity().addComponent(inventory);
+    inventoryEntity.create();
+    inventory.open();
+
+    TextButton button = firstUseButton(content);
+    button.fire(new ChangeListener.ChangeEvent());
+    button.fire(new ChangeListener.ChangeEvent());
+
+    assertEquals(1, runState.getOrCreatePlayerState().getOwnedItemCount(ItemType.IRON_AEGIS));
+    assertEquals(5, player.getComponent(CombatStatsComponent.class).getArmour());
+  }
+
+  @Test
+  void healingItemIsDisabledAtFullHealthAndEnabledAfterDamage() {
+    RunState runState = new RunState();
+    runState.getOrCreatePlayerState().addOwnedItem(ItemType.AMBROSIA_FLASK);
+    CombatStatsComponent stats = new CombatStatsComponent(100, 5);
+    Entity player = new Entity().addComponent(stats);
+    PopupDisplay popup = mock(PopupDisplay.class);
+    Table content = new Table();
+    when(popup.getContentTable()).thenReturn(content);
+    InventoryPopupComponent inventory =
+        new InventoryPopupComponent(runState, popup, player, () -> true);
+    inventoryEntity = new Entity().addComponent(inventory);
+    inventoryEntity.create();
+    inventory.open();
+
+    TextButton button = firstUseButton(content);
+    assertTrue(button.isDisabled());
+    button.fire(new ChangeListener.ChangeEvent());
+    assertEquals(1, runState.getOrCreatePlayerState().getOwnedItemCount(ItemType.AMBROSIA_FLASK));
+
+    stats.setHealth(80);
+    inventory.open();
+    assertTrue(!firstUseButton(content).isDisabled());
+  }
+
+  @Test
+  void healingItemCannotBeUsedWithoutAPlayer() {
+    RunState runState = new RunState();
+    runState.getOrCreatePlayerState().addOwnedItem(ItemType.AMBROSIA_FLASK);
+    PopupDisplay popup = mock(PopupDisplay.class);
+    Table content = new Table();
+    when(popup.getContentTable()).thenReturn(content);
+    InventoryPopupComponent inventory =
+        new InventoryPopupComponent(runState, popup, null, () -> true);
+    inventoryEntity = new Entity().addComponent(inventory);
+    inventoryEntity.create();
+    inventory.open();
+
+    assertTrue(firstUseButton(content).isDisabled());
+    assertEquals(1, runState.getOrCreatePlayerState().getOwnedItemCount(ItemType.AMBROSIA_FLASK));
+  }
+
+  @Test
+  void availableItemArtworkAppearsInInventoryAndUseFeedback() {
+    RunState runState = new RunState();
+    runState.getOrCreatePlayerState().addOwnedItem(ItemType.IRON_AEGIS);
+    String iconPath = ItemArtwork.cutoutPath(ItemType.IRON_AEGIS);
+    ResourceService resources = ServiceLocator.getResourceService();
+    Texture iconTexture = mock(Texture.class);
+    when(resources.containsAsset(iconPath, Texture.class)).thenReturn(true);
+    when(resources.getAsset(iconPath, Texture.class)).thenReturn(iconTexture);
+    Entity player = new Entity().addComponent(new CombatStatsComponent(100, 5));
+    PopupDisplay popup = mock(PopupDisplay.class);
+    Table content = new Table();
+    when(popup.getContentTable()).thenReturn(content);
+    InventoryPopupComponent inventory =
+        new InventoryPopupComponent(runState, popup, player, () -> true);
+    inventoryEntity = new Entity().addComponent(inventory);
+    inventoryEntity.create();
+    inventory.open();
+
+    ItemIconView rowIcon = assertInstanceOf(ItemIconView.class, content.findActor("itemIconView"));
+    assertTrue(rowIcon.getArtwork().isVisible());
+    clickFirstUseButton(content);
+    Table feedback = assertInstanceOf(Table.class, stage.getActors().peek());
+    ItemIconView feedbackIcon =
+        assertInstanceOf(ItemIconView.class, feedback.findActor("itemIconView"));
+    assertTrue(feedbackIcon.getArtwork().isVisible());
+  }
+
+  @Test
   void crestFeedbackShowsZeroWhenCurseCancelsTheStrengthGain() {
     RunState runState = new RunState();
     runState.getOrCreatePlayerState().addOwnedItem(ItemType.WARRIORS_CREST);
@@ -362,6 +483,10 @@ class InventoryPopupComponentTest {
   }
 
   private void clickFirstUseButton(Table content) {
+    firstUseButton(content).fire(new ChangeListener.ChangeEvent());
+  }
+
+  private TextButton firstUseButton(Table content) {
     ScrollPane scroll = assertInstanceOf(ScrollPane.class, content.getCells().get(3).getActor());
     Table rows = assertInstanceOf(Table.class, scroll.getWidget());
     Table frame = assertInstanceOf(Table.class, rows.getCells().first().getActor());
@@ -369,7 +494,7 @@ class InventoryPopupComponentTest {
     Table actionColumn = assertInstanceOf(Table.class, row.getCells().get(2).getActor());
     Table control = assertInstanceOf(Table.class, actionColumn.getCells().get(1).getActor());
     TextButton button = assertInstanceOf(TextButton.class, control.getCells().first().getActor());
-    button.fire(new ChangeListener.ChangeEvent());
+    return button;
   }
 
   private String feedbackDetail() {
