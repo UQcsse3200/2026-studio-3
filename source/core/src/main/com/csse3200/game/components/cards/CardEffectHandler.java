@@ -103,10 +103,11 @@ public class CardEffectHandler {
         }
         case STRENGTH -> {
           AudioService.playSound(SoundId.MAGIC_CHIME, 0.5f);
-          stats.applyStatusEffect(
-              effect.type().name(),
-              CursePenalties.reduce(stats, CursePenalties.STRENGTH_PENALTY, effect.value()),
-              effect.duration());
+          int strengthGain =
+              CursePenalties.reduce(stats, CursePenalties.STRENGTH_PENALTY, effect.value());
+          if (strengthGain > 0) {
+            stats.applyStatusEffect(effect.type().name(), strengthGain, effect.duration());
+          }
         }
         case ENERGY_GAIN -> {
           AudioService.playSound(SoundId.MAGIC_CHIME, 0.5f);
