@@ -102,7 +102,14 @@ loadScripts(document, 'script');</script>
 
  <p>Visuals are separate entities, spawned into <a href="../../entities/EntityService.html" title="class in com.csse3200.game.entities"><code>EntityService</code></a>.
  They are disposed from this component's own <a href="#update()"><code>update()</code></a> rather than from their own, because
- an entity must not dispose itself while its components are being iterated.</div>
+ an entity must not dispose itself while its components are being iterated.
+
+ <p>Listeners are notified before the controller applies damage, so a hit on a target with Armour
+ is checked again on the next update. If Armour absorbed it and no health was lost, the armour
+ icon is shown on top of the normal hit burst. A hit stopped by Block alone shows no icon.
+
+ <p>The same check runs when an enemy attacks the player: <code>"enemyAttack"</code> also fires before
+ the damage lands, so a fully absorbed enemy attack shows the armour icon above the player.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
