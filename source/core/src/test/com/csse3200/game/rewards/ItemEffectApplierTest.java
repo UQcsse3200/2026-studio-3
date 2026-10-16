@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.player.EnergyComponent;
+import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,18 @@ class ItemEffectApplierTest {
 
     assertEquals(5, stats.getArmour());
     assertEquals(1, stats.getStatusEffect("STRENGTH").getValue());
+  }
+
+  @Test
+  void shouldDispatchToGoldAndShopItemEffects() {
+    InventoryComponent inventory = new InventoryComponent(0);
+    Entity player = new Entity().addComponent(inventory);
+
+    ItemEffectApplier.applyItemEffect(ItemType.LUCKY_COIN, player);
+    ItemEffectApplier.applyItemEffect(ItemType.MERCHANTS_FAVOR, player);
+
+    assertEquals(0.1f, inventory.getGoldBonusMultiplier(), 0.001f);
+    assertEquals(0.1f, inventory.getShopDiscount(), 0.001f);
   }
 
   @Test
