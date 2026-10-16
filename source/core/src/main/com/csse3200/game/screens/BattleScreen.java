@@ -53,12 +53,8 @@ import com.csse3200.game.components.spritedisplay.clickable.CardAimController;
 import com.csse3200.game.components.spritedisplay.clickable.Clickable;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
-import com.csse3200.game.components.spritedisplay.clickable.DragNDrop;
-import com.csse3200.game.components.spritedisplay.displaying.CardBadgesDisplay;
-import com.csse3200.game.components.spritedisplay.displaying.CardPreviewDisplay;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord;
-import com.csse3200.game.components.spritedisplay.displaying.PopupTextDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -147,6 +143,7 @@ public class BattleScreen extends ScreenAdapter {
 
   private static final String BATTLE_UI_JSON = "sprites/BattleUi.json";
   private static final String DECK_EDITOR_UI_JSON = "sprites/DeckEditorUi.json";
+  private static final String HAND_TRIGGER = "playCard";
 
   private final BattleController controller;
   private final CardLibrary library;
@@ -165,6 +162,13 @@ public class BattleScreen extends ScreenAdapter {
   private List<ClickableRecord> staticUiRecords;
 
   private List<CardInstance> handRowOrder = new ArrayList<>();
+
+  // Whether the hand row is currently up (visible/interactable) or down (hidden mid-enemy-turn),
+  // tracked from the same "up"/"down" events InOutOnTrigger widgets slide on. A freshly rebuilt
+  // hand (e.g. a cooldown retrieval firing during the enemy's "thinking" pause, before "up" has
+  // fired) must match this instead of always snapping visible, or the row pops into view early
+  // and the later real "up" animation looks broken.
+  private boolean handVisible = true;
 
   public BattleScreen(GdxGame game) {
     this(game, false);
@@ -335,12 +339,12 @@ public class BattleScreen extends ScreenAdapter {
               ServiceLocator.getRenderService().getStage(),
               cardWidgetSkin,
               () ->
-                  uiFactory.getByTrigger("playCard").stream()
+                  uiFactory.getByTrigger(HAND_TRIGGER).stream()
                       .map(Clickable::getBtn)
                       .map(actor -> (com.badlogic.gdx.scenes.scene2d.Actor) actor)
                       .toList(),
               () ->
-                  uiFactory.getByTrigger("playCard").stream()
+                  uiFactory.getByTrigger(HAND_TRIGGER).stream()
                       .filter(c -> c.getArgs().length > 0 && demonstrationId.equals(c.getArgs()[0]))
                       .map(Clickable::getBtn)
                       .findFirst()
@@ -492,11 +496,9 @@ public class BattleScreen extends ScreenAdapter {
 
     staticUiRecords = ClickableFactory.loadRecordsFromJson(battleUiJson);
 
-    uiFactory = new ClickableFactory(buildAllRecords());
-    uiFactory.registerInstanceVariant("aimDrag", rec -> new DragNDrop(rec, enemyCardAim));
-    uiFactory.registerInstanceVariant("selfAimDrag", rec -> new DragNDrop(rec, playerCardAim));
-    uiFactory.registerInstanceVariant(
-        "allEnemiesAimDrag", rec -> new DragNDrop(rec, allEnemiesCardAim));
+    uiFactory =
+        new BattleClickableFactory(
+            buildAllRecords(), enemyCardAim, playerCardAim, allEnemiesCardAim);
 
     Terminal terminal = new Terminal();
     terminal.addCommand("skipbattle", new SkipBattleCommand(controller));
@@ -545,14 +547,12 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new KeyboardTerminalInputComponent())
             .addComponent(new TerminalDisplay());
 
+    battleUi.getEvents().addListener("up", () -> handVisible = true);
+    battleUi.getEvents().addListener("down", () -> handVisible = false);
     battleUi
         .getEvents()
         .addListener(
-            BattleActions.HAND_CHANGED_EVENT,
-            (List<CardInstance> hand) -> {
-              uiFactory.rebuildHand(buildHandRecords());
-              installHandCardWidgets();
-            });
+            BattleActions.HAND_CHANGED_EVENT, (List<CardInstance> hand) -> rebuildHandWidgets());
     // Pause menu + in-place save/load overlay (added before the entity is created).
     SaveLoadPanel savePanel = null;
     if (tutorialBattle) {
@@ -567,6 +567,7 @@ public class BattleScreen extends ScreenAdapter {
     gameArea.displayUI(battleUi);
     setBattleMenuFontScale();
     addBattleTitle(stage);
+    snapHandToVisibility();
     installHandCardWidgets();
 
     Path deckEditorUiJson = Path.of(DECK_EDITOR_UI_JSON);
@@ -646,31 +647,30 @@ public class BattleScreen extends ScreenAdapter {
     List<DisplayingRecord> all = new ArrayList<>(records);
     all.add(badgesRec);
 
-    DisplayingFactory factory = new DisplayingFactory(all);
-
-    factory.registerInstanceVariant(
-        "popupText",
-        rec -> {
-          PopupTextDisplay d = new PopupTextDisplay(rec);
-          d.addPopup(popup);
-          return d;
-        });
-    factory.registerInstanceVariant(
-        "cardPreview",
-        rec -> {
-          CardPreviewDisplay d = new CardPreviewDisplay(rec);
-          d.addPopup(popup);
-          return d;
-        });
-
-    factory.registerInstanceVariant("cardBadges", CardBadgesDisplay::new);
-    return factory;
+    return new DeckEditorDisplayingFactory(all, popup);
   }
 
   private void onDeckRearranged(List<CardInstance> newHandRow) {
     handRowOrder = new ArrayList<>(newHandRow);
-    uiFactory.rebuildHand(buildHandRecords());
+    rebuildHandWidgets();
+  }
+
+  /** Replaces the on-screen hand with widgets for {@link #handRowOrder}. */
+  private void rebuildHandWidgets() {
+    uiFactory.rebuildByTrigger(HAND_TRIGGER, buildHandRecords());
+    snapHandToVisibility();
     installHandCardWidgets();
+  }
+
+  /** Snaps every hand widget straight to the current up/down state, skipping any animation. */
+  private void snapHandToVisibility() {
+    for (Clickable card : uiFactory.getByTrigger(HAND_TRIGGER)) {
+      if (handVisible) {
+        card.showNow();
+      } else {
+        card.hideNow();
+      }
+    }
   }
 
   /** Builds the same registered visual groups for every battle. */
@@ -796,9 +796,9 @@ public class BattleScreen extends ScreenAdapter {
       }
       String variant =
           switch (card.target()) {
-            case SELF -> "selfAimDrag";
-            case SINGLE_ENEMY -> "aimDrag";
-            case ALL_ENEMIES -> "allEnemiesAimDrag";
+            case SELF -> BattleClickableFactory.SELF_AIM_DRAG;
+            case SINGLE_ENEMY -> BattleClickableFactory.AIM_DRAG;
+            case ALL_ENEMIES -> BattleClickableFactory.ALL_ENEMIES_AIM_DRAG;
           };
 
       float offsetFromCenter = i - centerIndex;
@@ -806,7 +806,7 @@ public class BattleScreen extends ScreenAdapter {
       float y = HAND_Y + Math.abs(offsetFromCenter) * HAND_ARC_DROP_PER_CARD;
 
       ClickableRecord.Builder builder =
-          ClickableRecord.builder("playCard")
+          ClickableRecord.builder(HAND_TRIGGER)
               .label(card.name())
               .variant(variant)
               .position(x, y)
@@ -844,7 +844,7 @@ public class BattleScreen extends ScreenAdapter {
       instancesById.put(instance.instanceId(), instance);
     }
 
-    for (Clickable clickable : uiFactory.getByTrigger("playCard")) {
+    for (Clickable clickable : uiFactory.getByTrigger(HAND_TRIGGER)) {
       installHandCardWidget(clickable, instancesById);
     }
   }
