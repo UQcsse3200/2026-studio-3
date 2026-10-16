@@ -34,6 +34,7 @@ import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.enemy.EnemyAI.TutorialEnemyAI;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
@@ -84,7 +85,6 @@ import com.csse3200.game.ui.terminal.commands.GiveGoldCommand;
 import com.csse3200.game.ui.terminal.commands.GiveItemCommand;
 import com.csse3200.game.ui.terminal.commands.SetHealthCommand;
 import com.csse3200.game.ui.terminal.commands.SkipBattleCommand;
-import com.csse3200.game.components.enemy.EnemyAI.TutorialEnemyAI;
 import java.nio.file.Path;
 import java.util.*;
 import org.slf4j.Logger;
@@ -211,8 +211,7 @@ public class BattleScreen extends ScreenAdapter {
 
     if (tutorialBattle) {
       for (Entity enemy : forestGameArea.getEnemies()) {
-        EnemyBehaviourComponent behaviour =
-                enemy.getComponent(EnemyBehaviourComponent.class);
+        EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
 
         if (behaviour != null) {
           behaviour.setAI(new TutorialEnemyAI());

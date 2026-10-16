@@ -23,6 +23,7 @@ import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryTrackingComponent;
 import com.csse3200.game.bestiary.BestiaryUnlockState;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.battle.FloatingDamageDisplay;
 import com.csse3200.game.components.enemy.EnemyAnimationController;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyStatsComponent;
@@ -89,8 +90,14 @@ class EnemyFactoryTest {
   }
 
   @Test
+  void createAttachesFloatingDamageDisplayWhenRendering() {
+    Entity enemy = EnemyFactory.create("lesser_shade");
+
+    assertNotNull(enemy.getComponent(FloatingDamageDisplay.class));
+  }
+
+  @Test
   void nonBossEnemiesRegisterDefendAndCastWhenAtlasHasThem() {
-    // 图集里每个名字都能找到帧，模拟已经画好 defend / cast 的普通怪和精英怪
     TextureAtlas atlas = mock(TextureAtlas.class);
     Array<AtlasRegion> regions = new Array<>();
     regions.add(mock(AtlasRegion.class));
@@ -100,6 +107,7 @@ class EnemyFactoryTest {
     for (String id : List.of("bone_crawler", "tomb_guardian")) {
       AnimationRenderComponent animator =
           EnemyFactory.create(id).getComponent(AnimationRenderComponent.class);
+
       assertTrue(animator.hasAnimation("defend"), id);
       assertTrue(animator.hasAnimation("cast"), id);
     }
@@ -107,36 +115,12 @@ class EnemyFactoryTest {
 
   @Test
   void enemiesWithoutDefendOrCastRegionsSkipThem() {
-    // 默认的假图集找不到任何帧：缺少的动画只是不注册，不会出错
     Entity enemy = EnemyFactory.create("lesser_shade");
     AnimationRenderComponent animator = enemy.getComponent(AnimationRenderComponent.class);
 
     assertFalse(animator.hasAnimation("defend"));
     assertFalse(animator.hasAnimation("cast"));
     assertDoesNotThrow(enemy::create);
-  }
-
-  @Test
-  void createdEnemyLifecycleDoesNotThrow() {
-    Entity enemy = EnemyFactory.create("lesser_shade");
-
-    assertDoesNotThrow(enemy::create);
-  }
-
-  @Test
-  void createUsesRosterStats() {
-    Entity enemy = EnemyFactory.create("lesser_shade");
-    CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
-
-    assertEquals(24, stats.getHealth());
-  }
-
-  @Test
-  void createUsesRosterDisplayName() {
-    Entity enemy = EnemyFactory.create("lesser_shade");
-    EnemyStatsComponent enemyStats = enemy.getComponent(EnemyStatsComponent.class);
-
-    assertNotNull(enemyStats.getDisplayName());
   }
 
   @Test

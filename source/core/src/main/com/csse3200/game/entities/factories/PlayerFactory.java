@@ -3,6 +3,7 @@ package com.csse3200.game.entities.factories;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.battle.FloatingDamageDisplay;
 import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
 import com.csse3200.game.components.player.*;
@@ -21,13 +22,21 @@ import com.csse3200.game.rendering.AnimationRenderComponent;
 import com.csse3200.game.rendering.TextureRenderComponent;
 import com.csse3200.game.services.ServiceLocator;
 
-/**
- * Factory to create a player entity.
- *
- * <p>Predefined player properties are loaded from a config stored as a json file and should have
- * the properties stores in 'PlayerConfig'.
- */
+/** Predefined player properties are loaded from the player configuration file. */
 public class PlayerFactory {
+  private static final PlayerConfig stats =
+      FileLoader.readClass(PlayerConfig.class, "configs/player.json");
+
+  private static final String PLAYER_ATLAS = "images/player/player.atlas";
+
+  private static final float IDLE_FRAME_DURATION = 0.12f;
+  private static final float HURT_FRAME_DURATION = 0.08f;
+  private static final float ATTACK_FRAME_DURATION = 0.06f;
+  private static final float PLAYER_RENDER_SCALE = 2f;
+
+  private PlayerFactory() {
+    throw new IllegalStateException("Instantiating static util class");
+  }
 
   public static int getDefaultHealth() {
     return stats.health;
@@ -41,20 +50,11 @@ public class PlayerFactory {
     return stats.maxEnergy;
   }
 
-  private static final PlayerConfig stats =
-      FileLoader.readClass(PlayerConfig.class, "configs/player.json");
-
-  private static final String PLAYER_ATLAS = "images/player/player.atlas";
-
-  private static final float IDLE_FRAME_DURATION = 0.12f;
-  private static final float HURT_FRAME_DURATION = 0.08f;
-  private static final float ATTACK_FRAME_DURATION = 0.06f;
-  private static final float PLAYER_RENDER_SCALE = 2f;
-
   /**
-   * Create a player entity.
+   * Creates a player entity using the standard texture renderer.
    *
-   * @return entity
+   * @param runState current run state
+   * @return the assembled player entity
    */
   public static Entity createPlayer(RunState runState) {
     InputComponent inputComponent =
@@ -78,6 +78,10 @@ public class PlayerFactory {
             .addComponent(new EnemyMemoryComponent())
             .addComponent(new PlayerTrackerComponent());
 
+    if (ServiceLocator.getRenderService() != null) {
+      player.addComponent(new FloatingDamageDisplay());
+    }
+
     runState.getOrCreatePlayerState().applyTo(player);
 
     PhysicsUtils.setScaledCollider(player, 0.6f, 0.3f);
@@ -86,6 +90,13 @@ public class PlayerFactory {
     return player;
   }
 
+  /**
+   * Creates an animated player entity with the specified current health.
+   *
+   * @param currentHealth current player health
+   * @param runState current run state
+   * @return the assembled player entity
+   */
   public static Entity createPlayer(int currentHealth, RunState runState) {
     InputComponent inputComponent =
         ServiceLocator.getInputService().getInputFactory().createForPlayer();
@@ -118,6 +129,10 @@ public class PlayerFactory {
             .addComponent(new PlayerTrackerComponent())
             .addComponent(new PlayerAnimationController());
 
+    if (ServiceLocator.getRenderService() != null) {
+      player.addComponent(new FloatingDamageDisplay());
+    }
+
     runState.getOrCreatePlayerState().applyTo(player);
 
     PhysicsUtils.setScaledCollider(player, 0.6f, 0.3f);
@@ -128,10 +143,9 @@ public class PlayerFactory {
   }
 
   /**
-   * Creates the initial durable player state from the same config used by {@link
-   * #createPlayer(RunState)}.
+   * Creates the initial durable player state from the same config used by player creation.
    *
-   * @return default health and gold for a new run
+   * @return default player state for a new run
    */
   public static PlayerRunState createInitialRunState() {
     return new PlayerRunState(stats.health, stats.maxHealth, stats.gold);
@@ -143,9 +157,5 @@ public class PlayerFactory {
     }
 
     return runState.getPlayerMaxEnergy();
-  }
-
-  private PlayerFactory() {
-    throw new IllegalStateException("Instantiating static util class");
   }
 }

@@ -6,6 +6,7 @@ import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryTrackingComponent;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.EnemyReleaseComponent;
+import com.csse3200.game.components.battle.FloatingDamageDisplay;
 import com.csse3200.game.components.enemy.*;
 import com.csse3200.game.components.spritedisplay.reactive.EnemyDropTargetComponent;
 import com.csse3200.game.entities.Entity;
@@ -96,7 +97,7 @@ public class EnemyFactory {
     AnimationRenderComponent animator = new AnimationRenderComponent(atlas);
     animator.addAnimation("idle", IDLE_FRAME_DURATION, Animation.PlayMode.LOOP);
     animator.addAnimation("hurt", HURT_FRAME_DURATION, Animation.PlayMode.NORMAL);
-    // Attack and death are optional for legacy atlases. Missing regions are logged and skipped.
+    // Combat animations are optional for legacy atlases. Missing regions are logged and skipped.
     animator.addAnimation("attack", ATTACK_FRAME_DURATION, Animation.PlayMode.NORMAL);
     // 所有怪都注册 cast 和 defend：图集里没有这两段的怪会被跳过，播放时由 EnemyAnimationController 退回 idle
     boolean boss = config.tier == EnemyTier.BOSS;
@@ -141,6 +142,7 @@ public class EnemyFactory {
     // failing enemy creation.
     if (ServiceLocator.getRenderService() != null) {
       enemy.addComponent(new EnemyIntentDisplay());
+      enemy.addComponent(new FloatingDamageDisplay());
     }
 
     BestiaryService bestiary = ServiceLocator.getBestiaryService();

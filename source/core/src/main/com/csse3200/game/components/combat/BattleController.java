@@ -908,7 +908,7 @@ public class BattleController {
 
     // Resolve poison before the enemy acts. Status damage bypasses block and armour.
     CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
-    enemyStats.processPoisonTick(enemyStats::takePiercingDamage);
+    enemyStats.processPoisonTick(enemyStats::takePoisonDamage);
 
     if (skipEnemyTurnIfDead(enemy)) return;
 

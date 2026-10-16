@@ -5,7 +5,6 @@ import com.csse3200.game.cards.effects.CardEffectResolutionContext;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.StatusEffect;
-import com.csse3200.game.components.StatusEffectCalculator;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAI;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIFactory;
@@ -13,6 +12,7 @@ import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.Memory.PlayerMemory;
 import com.csse3200.game.entities.Entity;
 import java.util.Objects;
+
 /**
  * Decides and telegraphs an enemy's action each round, then resolves it.
  *
@@ -23,7 +23,7 @@ public class EnemyBehaviourComponent extends Component {
   private static final int UNKNOWN_PLAYER_HEALTH = 0;
 
   private final String behaviourId;
-  private  EnemyAI ai;
+  private EnemyAI ai;
   private EnemyIntent currentIntent = EnemyIntent.unknown();
   private int turnNumber = 0;
   private CombatStatsComponent playerStats;
@@ -56,6 +56,7 @@ public class EnemyBehaviourComponent extends Component {
   public String getBehaviourId() {
     return behaviourId;
   }
+
   /**
    * Replaces the AI used by this enemy.
    *
@@ -174,13 +175,8 @@ public class EnemyBehaviourComponent extends Component {
 
     CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
     if (targetStats != null) {
-      CombatStatsComponent attackerStats = entity.getComponent(CombatStatsComponent.class);
-      int strength = statusValue(attackerStats, EffectType.STRENGTH);
-      int feeble = statusValue(attackerStats, EffectType.FEEBLE);
-      int vulnerable = statusValue(targetStats, EffectType.VULNERABLE);
-      int damage =
-          new CardEffectResolutionContext(strength, feeble, vulnerable)
-              .resolveDamage(currentIntent.getValue());
+      int damage = resolveAttackDamage(targetStats);
+
       // Starts the attack animation (EnemyAnimationController) before the damage lands.
       entity.getEvents().trigger("enemyAttack");
       targetStats.takeDamage(damage);
@@ -188,23 +184,46 @@ public class EnemyBehaviourComponent extends Component {
   }
 
   /**
-   * Scales the telegraphed damage by this enemy's outgoing modifier, so effects like Feeble
-   * actually reduce what it deals.
+   * Returns the value that should currently be displayed for this intent.
    *
-   * <p>The intent keeps its original value, so what was telegraphed to the player is unchanged.
+   * <p>Attack intents are resolved from the latest Strength, Feeble and Vulnerable statuses. Other
+   * intent types retain their original value.
    *
-   * @return the damage this attack should deal
+   * @return the current resolved value of the telegraphed intent
    */
-  private int outgoingDamage() {
-    CombatStatsComponent stats = entity.getComponent(CombatStatsComponent.class);
-    if (stats == null) {
+  public int getResolvedIntentValue() {
+    if (currentIntent.getType() != IntentType.ATTACK) {
       return currentIntent.getValue();
     }
 
-    float modifier = StatusEffectCalculator.getOutgoingDamageModifier(stats);
-    return Math.round(currentIntent.getValue() * modifier);
+    return resolveAttackDamage(playerStats);
   }
 
+  /**
+   * Resolves the current attack intent using the attacker's Strength and Feeble and the target's
+   * Vulnerable status.
+   *
+   * @param targetStats combat stats of the intended target; may be null
+   * @return final pre-mitigation damage
+   */
+  private int resolveAttackDamage(CombatStatsComponent targetStats) {
+    CombatStatsComponent attackerStats = entity.getComponent(CombatStatsComponent.class);
+
+    int strength = statusValue(attackerStats, EffectType.STRENGTH);
+    int feeble = statusValue(attackerStats, EffectType.FEEBLE);
+    int vulnerable = statusValue(targetStats, EffectType.VULNERABLE);
+
+    return new CardEffectResolutionContext(strength, feeble, vulnerable)
+        .resolveDamage(currentIntent.getValue());
+  }
+
+  /**
+   * Reads a non-negative status value from the supplied combat stats.
+   *
+   * @param stats combat stats containing the status
+   * @param type status type to read
+   * @return status value, or zero when absent
+   */
   private static int statusValue(CombatStatsComponent stats, EffectType type) {
     if (stats == null) {
       return 0;

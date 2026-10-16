@@ -1,5 +1,7 @@
 package com.csse3200.game.components;
 
+import com.csse3200.game.components.combat.DamageTakenEvent;
+import com.csse3200.game.components.combat.DamageType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -135,7 +137,11 @@ public class CombatStatsComponent extends Component {
     if (damage >= 0 && !isDead()) {
       int afterBlock = absorbDamageWithBlock(damage);
       int remainingDamage = absorbDamageWithArmour(afterBlock);
+      int healthLost = Math.min(this.health, remainingDamage);
+
+      triggerDamageTaken(healthLost, DamageType.NORMAL);
       setHealth(Math.max(this.health - remainingDamage, 0));
+
       if (entity != null && isDead()) {
         entity.getEvents().trigger("entityIsDead");
       }
@@ -172,11 +178,34 @@ public class CombatStatsComponent extends Component {
    * @param damage piercing damage
    */
   public void takePiercingDamage(int damage) {
+    takeDirectDamage(damage, DamageType.PIERCE);
+  }
+
+  /**
+   * Damages the entity's health directly with poison, ignoring block and armour.
+   *
+   * @param damage poison damage
+   */
+  public void takePoisonDamage(int damage) {
+    takeDirectDamage(damage, DamageType.POISON);
+  }
+
+  private void takeDirectDamage(int damage, DamageType type) {
     if (damage >= 0 && !isDead()) {
+      int healthLost = Math.min(this.health, damage);
+
+      triggerDamageTaken(healthLost, type);
       setHealth(Math.max(this.health - damage, 0));
+
       if (entity != null && isDead()) {
         entity.getEvents().trigger("entityIsDead");
       }
+    }
+  }
+
+  private void triggerDamageTaken(int healthLost, DamageType type) {
+    if (entity != null && healthLost > 0) {
+      entity.getEvents().trigger("damageTaken", new DamageTakenEvent(healthLost, type));
     }
   }
 
