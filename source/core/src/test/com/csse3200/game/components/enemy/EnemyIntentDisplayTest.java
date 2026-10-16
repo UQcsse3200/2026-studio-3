@@ -47,11 +47,9 @@ class EnemyIntentDisplayTest {
   void shouldClearIntentWhenEnemyDefeated() {
     EnemyIntent intent = new EnemyIntent(IntentType.ATTACK, 5);
 
-    // First give the display an intent
     entity.getEvents().trigger("intentChanged", intent);
     assertEquals(intent, intentDisplay.getCurrentIntent());
 
-    // Then defeat the enemy
     entity.getEvents().trigger("enemyDefeated");
 
     assertNull(intentDisplay.getCurrentIntent());
@@ -103,14 +101,35 @@ class EnemyIntentDisplayTest {
   }
 
   @Test
+  void shouldShowResolvedDamageForAttackIntents() {
+    EnemyIntent intent = EnemyIntent.attack(8);
+
+    assertEquals("6", EnemyIntentDisplay.labelTextFor(intent, 6));
+  }
+
+  @Test
+  void shouldHideZeroResolvedAttackDamage() {
+    EnemyIntent intent = EnemyIntent.attack(8);
+
+    assertEquals("", EnemyIntentDisplay.labelTextFor(intent, 0));
+  }
+
+  @Test
   void shouldShowArmourForDefendIntents() {
     assertEquals("5", EnemyIntentDisplay.labelTextFor(EnemyIntent.defend(5)));
   }
 
   @Test
+  void shouldKeepRawArmourForDefendIntents() {
+    EnemyIntent intent = EnemyIntent.defend(5);
+
+    assertEquals("5", EnemyIntentDisplay.labelTextFor(intent, 100));
+  }
+
+  @Test
   void shouldShowDurationForStatusIntents() {
     assertEquals(
-        "2", EnemyIntentDisplay.labelTextFor(EnemyIntent.debuff(IntentEffectType.TAUNT, 0, 2)));
+            "2", EnemyIntentDisplay.labelTextFor(EnemyIntent.debuff(IntentEffectType.TAUNT, 0, 2)));
   }
 
   @Test
