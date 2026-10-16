@@ -188,7 +188,48 @@ class EnemyBehaviourComponentTest {
   }
 
   @Test
-  void shouldApplyFeebleOnceAndRoundFinalDamageDownWithoutChangingIntent() {
+  void shouldResolveDisplayedAttackValueFromLatestStatuses() {
+    EnemyBehaviourComponent behaviour =
+            new EnemyBehaviourComponent("test_live_intent", fixedAi(EnemyIntent.attack(8)));
+
+    CombatStatsComponent attackerStats = enemyStats();
+    enemyWith(behaviour, attackerStats);
+
+    CombatStatsComponent playerStats = new CombatStatsComponent(30, 4);
+    behaviour.setPlayerStats(playerStats);
+    behaviour.rollIntent();
+
+    assertEquals(8, behaviour.getResolvedIntentValue());
+
+    attackerStats.applyStatusEffect(EffectType.FEEBLE.name(), 1, 2);
+    assertEquals(6, behaviour.getResolvedIntentValue());
+
+    playerStats.applyStatusEffect(EffectType.VULNERABLE.name(), 1, 2);
+    assertEquals(9, behaviour.getResolvedIntentValue());
+
+    attackerStats.removeStatusEffect(EffectType.FEEBLE.name());
+    assertEquals(12, behaviour.getResolvedIntentValue());
+
+    playerStats.removeStatusEffect(EffectType.VULNERABLE.name());
+    assertEquals(8, behaviour.getResolvedIntentValue());
+  }
+
+  @Test
+  void shouldKeepOriginalValueForNonAttackIntent() {
+    EnemyBehaviourComponent behaviour =
+            new EnemyBehaviourComponent("test_defend", fixedAi(EnemyIntent.defend(5)));
+
+    CombatStatsComponent stats = enemyStats();
+    stats.applyStatusEffect(EffectType.STRENGTH.name(), 10, 0);
+    enemyWith(behaviour, stats);
+
+    behaviour.rollIntent();
+
+    assertEquals(5, behaviour.getResolvedIntentValue());
+  }
+
+  @Test
+      void shouldApplyFeebleOnceAndRoundFinalDamageDownWithoutChangingIntent() {
     EnemyBehaviourComponent behaviour =
         new EnemyBehaviourComponent("test_feeble", fixedAi(EnemyIntent.attack(7)));
     CombatStatsComponent attackerStats = enemyStats();
