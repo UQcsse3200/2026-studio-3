@@ -25,6 +25,7 @@ import com.csse3200.game.rewards.RewardGenerator;
 import com.csse3200.game.rewards.RewardService;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.ui.ItemArtwork;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Random;
@@ -34,24 +35,16 @@ import org.slf4j.LoggerFactory;
 /** Terminal screen shown when a battle ends, for either a win or a loss. */
 public class EndBattleScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(EndBattleScreen.class);
-  private static final String[] REWARD_TEXTURES = {
-    "images/ui/victory-background-approved.png",
-    "images/ui/reward-panel-mythic-wingless.png",
-    "images/ui/victory-wings-overlay.png",
-    "images/ui/reward-card-mythic-aged.png",
-    "images/ui/gold-reward.png",
-    "images/ui/victory-gold-icon.png",
-    "images/ui/battle-menu-icons.png",
-    "images/ui/victory-title-mythic.png",
-    "images/ui/lucky-coin.png",
-    "images/ui/energy-crystal.png",
-    "images/ui/merchants-favor.png",
-    "images/ui/iron-aegis.png",
-    "images/ui/warriors-crest.png",
-    "images/ui/ashen-ember.png",
-    "images/ui/brand-of-the-damned.png",
-    "images/ui/shattered-aegis.png"
-  };
+  private static final String[] REWARD_TEXTURES =
+      ItemArtwork.withAllCutouts(
+          "images/ui/victory-background-approved.png",
+          "images/ui/reward-panel-mythic-wingless.png",
+          "images/ui/victory-wings-overlay.png",
+          "images/ui/reward-card-mythic-aged.png",
+          "images/ui/gold-reward.png",
+          "images/ui/victory-gold-icon.png",
+          "images/ui/battle-menu-icons.png",
+          "images/ui/victory-title-mythic.png");
   private static final String[] DEFEAT_TEXTURES = {
     "images/ui/victory-background-approved.png",
     "images/ui/defeat-screen-mythic-small-title.png",

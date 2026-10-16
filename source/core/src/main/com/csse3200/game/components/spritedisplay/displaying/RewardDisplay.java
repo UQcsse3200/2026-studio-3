@@ -35,9 +35,10 @@ import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.services.audio.SoundId;
+import com.csse3200.game.ui.ItemArtwork;
+import com.csse3200.game.ui.ItemIconView;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,17 +67,6 @@ public class RewardDisplay extends Displaying {
   private static final Color GOLD = new Color(0.96f, 0.78f, 0.38f, 1f);
   private static final Color CREAM = new Color(0.93f, 0.87f, 0.73f, 1f);
   private static final Color MUTED = new Color(0.72f, 0.66f, 0.58f, 1f);
-  private static final Map<ItemType, String> ITEM_ICONS =
-      Map.of(
-          ItemType.LUCKY_COIN, "images/ui/lucky-coin.png",
-          ItemType.ENERGY_CRYSTAL, "images/ui/energy-crystal.png",
-          ItemType.MERCHANTS_FAVOR, "images/ui/merchants-favor.png",
-          ItemType.IRON_AEGIS, "images/ui/iron-aegis.png",
-          ItemType.WARRIORS_CREST, "images/ui/warriors-crest.png",
-          ItemType.ASHEN_EMBER, "images/ui/ashen-ember.png",
-          ItemType.BRAND_OF_THE_DAMNED, "images/ui/brand-of-the-damned.png",
-          ItemType.SHATTERED_AEGIS, "images/ui/shattered-aegis.png");
-
   private final RunState runState;
   private final GdxGame game;
   private final RewardService rewardService;
@@ -399,13 +389,20 @@ public class RewardDisplay extends Displaying {
     details.add(name).width(textWidth).height(nameHeight).center();
     details.row();
 
-    Image icon = image(rewardIcon(option));
-    icon.setScaling(Scaling.fit);
-    details
-        .add(icon)
-        .size(cardWidth * 0.44f, cardHeight * 0.34f)
-        .center()
-        .padTop(cardHeight * 0.025f);
+    float iconSize = Math.min(cardWidth * 0.44f, cardHeight * 0.34f);
+    Actor icon;
+    if (option.type == RewardType.ITEM && option.itemId != null) {
+      ItemIconView itemIcon = new ItemIconView();
+      ResourceService resources = ServiceLocator.getResourceService();
+      itemIcon.setItem(
+          resources == null ? null : resources.getAsset(rewardIcon(option), Texture.class));
+      icon = itemIcon;
+    } else {
+      Image rewardImage = image(rewardIcon(option));
+      rewardImage.setScaling(Scaling.fit);
+      icon = rewardImage;
+    }
+    details.add(icon).size(iconSize).center().padTop(cardHeight * 0.025f);
     details.row();
 
     float descriptionHeight = cardHeight * 0.21f;
@@ -588,7 +585,7 @@ public class RewardDisplay extends Displaying {
 
   private String rewardIcon(RewardOption option) {
     if (option != null && option.type == RewardType.ITEM) {
-      return ITEM_ICONS.getOrDefault(option.itemId, GOLD_TEXTURE);
+      return option.itemId == null ? GOLD_TEXTURE : ItemArtwork.cutoutPath(option.itemId);
     }
     if (option != null
         && option.type == RewardType.CARD
@@ -753,7 +750,13 @@ public class RewardDisplay extends Displaying {
       return;
     }
     claimed = true;
-    afterRewardApplied.run();
+    try {
+      afterRewardApplied.run();
+    } catch (RuntimeException exception) {
+      // The reward is already in the run state. Do not allow a failed post-claim callback to
+      // strand the player here or permit a second claim of the same reward.
+      logger.error("Post-reward callback failed after {} was applied", type, exception);
+    }
     entity.getEvents().trigger(REWARD_CLAIMED_EVENT);
     Texture art = ServiceLocator.getResourceService().getAsset(artPath, Texture.class);
     if (rewardClaimFeedback == null || art == null) {

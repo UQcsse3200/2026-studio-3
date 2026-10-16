@@ -2,6 +2,7 @@ package com.csse3200.game.components.library;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -29,8 +31,12 @@ import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import javax.imageio.ImageIO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -99,6 +105,40 @@ class ItemLibraryDisplayTest {
     verify(resources).getAsset(MainMenuDisplay.BACKGROUND_TEXTURE, Texture.class);
     button("Back").fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
     verify(game).setScreen(GdxGame.ScreenType.LIBRARY);
+  }
+
+  @Test
+  void everyItemHasItsOwnSquareArtworkAsset() throws IOException {
+    for (ItemType item : ItemType.values()) {
+      String path = ItemLibraryDisplay.resolveArtworkPath(item);
+      assertTrue(Gdx.files.internal(path).exists(), path);
+      try (InputStream input = Gdx.files.internal(path).read()) {
+        var image = ImageIO.read(input);
+        assertNotNull(image, path);
+        assertEquals(96, image.getWidth(), path);
+        assertEquals(96, image.getHeight(), path);
+      }
+    }
+  }
+
+  @Test
+  void everyItemHasTransparentCutoutWhileLibraryKeepsFramedArtwork() throws IOException {
+    for (ItemType item : ItemType.values()) {
+      String slug = item.name().toLowerCase(Locale.ROOT).replace('_', '-');
+      String framedPath = ItemLibraryDisplay.resolveArtworkPath(item);
+      String cutoutPath = "images/ui/item-cutouts/" + slug + ".png";
+      assertEquals("images/ui/" + slug + ".png", framedPath);
+      assertTrue(Gdx.files.internal(framedPath).exists(), framedPath);
+      assertTrue(Gdx.files.internal(cutoutPath).exists(), cutoutPath);
+      try (InputStream input = Gdx.files.internal(cutoutPath).read()) {
+        var image = ImageIO.read(input);
+        assertNotNull(image, cutoutPath);
+        assertEquals(96, image.getWidth(), cutoutPath);
+        assertEquals(96, image.getHeight(), cutoutPath);
+        assertTrue(image.getColorModel().hasAlpha(), cutoutPath);
+        assertEquals(0, image.getRGB(0, 0) >>> 24, cutoutPath);
+      }
+    }
   }
 
   @Test
