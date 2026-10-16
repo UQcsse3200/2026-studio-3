@@ -327,6 +327,8 @@ public class BattleScreen extends ScreenAdapter {
             int maxHealth =
                 forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getMaxHealth();
 
+            // Max energy is deliberately not saved here: the entity value already includes item
+            // effects, which are re-derived from the inventory at the start of every battle.
             runState.setPlayerHealth(currentHealth);
             runState.setPlayerMaxHealth(maxHealth);
           }
