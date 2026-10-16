@@ -3,7 +3,6 @@ package com.csse3200.game.screens;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.GdxGame;
-import com.csse3200.game.components.library.CardLibraryDisplay;
 import com.csse3200.game.components.library.ItemLibraryDisplay;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.entities.Entity;
@@ -32,7 +31,8 @@ public class ItemLibraryScreen extends ScreenAdapter {
   static String[] collectTexturePaths() {
     Set<String> paths = new LinkedHashSet<>();
     paths.add(MainMenuDisplay.BACKGROUND_TEXTURE);
-    paths.add(CardLibraryDisplay.BUTTON_TEXTURE);
+    paths.add(MainMenuDisplay.BUTTON_FRAME_TEXTURE);
+    paths.add(ItemLibraryDisplay.BUTTON_TEXTURE);
     for (ItemType item : ItemType.values()) {
       paths.add(ItemLibraryDisplay.resolveArtworkPath(item));
     }

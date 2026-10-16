@@ -34,6 +34,7 @@ import java.util.Map;
  * regardless of what the player currently owns — it's a reference library, not a live inventory.
  */
 public class ItemLibraryDisplay extends UIComponent {
+  public static final String BUTTON_TEXTURE = "images/item_library_button_frame.png";
   private static final float PANEL_WIDTH = 1120f;
   private static final float PANEL_HEIGHT = 680f;
   private static final Color PANEL_COLOUR = new Color(0.105f, 0.07f, 0.065f, 0.96f);
@@ -166,7 +167,9 @@ public class ItemLibraryDisplay extends UIComponent {
     titleBlock.row();
     titleBlock.add(subtitle).left().padTop(5f);
 
-    TextButton backButton = new TextButton("Back", buttonStyle);
+    Texture backFrame = getTexture(MainMenuDisplay.BUTTON_FRAME_TEXTURE);
+    backFrame.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    TextButton backButton = new TextButton("Back", MenuTheme.createButtonStyle(skin, backFrame));
     backButton.getLabel().setFontScale(0.85f);
     backButton.addListener(
         new ChangeListener() {
@@ -364,7 +367,7 @@ public class ItemLibraryDisplay extends UIComponent {
   }
 
   private Drawable buttonDrawable(Color tint) {
-    Texture texture = getTexture(CardLibraryDisplay.BUTTON_TEXTURE);
+    Texture texture = getTexture(BUTTON_TEXTURE);
     texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     TextureRegionDrawable drawable = new TextureRegionDrawable(new TextureRegion(texture));
     drawable.setMinWidth(0f);

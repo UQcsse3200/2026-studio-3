@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.csse3200.game.components.library.CardLibraryDisplay;
 import com.csse3200.game.components.library.ItemLibraryDisplay;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.extensions.GameExtension;
@@ -24,7 +23,8 @@ class ItemLibraryScreenTest {
     List<String> texturePaths = Arrays.asList(ItemLibraryScreen.collectTexturePaths());
 
     assertTrue(texturePaths.contains(MainMenuDisplay.BACKGROUND_TEXTURE));
-    assertTrue(texturePaths.contains(CardLibraryDisplay.BUTTON_TEXTURE));
+    assertTrue(texturePaths.contains(MainMenuDisplay.BUTTON_FRAME_TEXTURE));
+    assertTrue(texturePaths.contains(ItemLibraryDisplay.BUTTON_TEXTURE));
     for (ItemType item : ItemType.values()) {
       assertTrue(texturePaths.contains(ItemLibraryDisplay.resolveArtworkPath(item)));
     }
