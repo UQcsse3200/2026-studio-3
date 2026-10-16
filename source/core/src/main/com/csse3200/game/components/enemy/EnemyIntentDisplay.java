@@ -102,7 +102,25 @@ public class EnemyIntentDisplay extends RenderComponent {
       return;
     }
 
-    String labelText = labelTextFor(currentIntent);
+    /**
+     * Gets the live resolved attack damage for the current intent.
+     *
+     * <p>The behaviour component recalculates this from the latest statuses, so the displayed value
+     * changes immediately when Strength, Feeble or Vulnerable changes.
+     *
+     * @return resolved attack damage, or the raw intent value when behaviour is unavailable
+     */
+    private int resolvedAttackDamage() {
+      EnemyBehaviourComponent behaviour = entity.getComponent(EnemyBehaviourComponent.class);
+
+      if (behaviour == null) {
+        return currentIntent == null ? 0 : currentIntent.getValue();
+      }
+
+      return behaviour.getResolvedIntentValue();
+    }
+
+    String labelText = labelTextFor(currentIntent, resolvedAttackDamage());
     if (labelText.isEmpty()) {
       return;
     }
@@ -123,12 +141,28 @@ public class EnemyIntentDisplay extends RenderComponent {
    * @return the number as text, or an empty string when there is nothing useful to show
    */
   static String labelTextFor(EnemyIntent intent) {
+    return labelTextFor(intent, intent == null ? 0 : intent.getValue());
+  }
+
+  /**
+   * Picks the number shown beside the icon using the current resolved attack damage.
+   *
+   * <p>Attack intents show their final damage after status modifiers. Defence intents retain their
+   * original armour value, while other intents show their duration.
+   *
+   * @param intent intent being telegraphed
+   * @param resolvedAttackDamage final attack damage after current status modifiers
+   * @return the number as text, or an empty string when there is nothing useful to show
+   */
+  static String labelTextFor(EnemyIntent intent, int resolvedAttackDamage) {
     if (intent == null) {
       return "";
     }
 
     return switch (intent.getType()) {
-      case ATTACK, DEFEND -> intent.getValue() <= 0 ? "" : Integer.toString(intent.getValue());
+      case ATTACK ->
+              resolvedAttackDamage <= 0 ? "" : Integer.toString(resolvedAttackDamage);
+      case DEFEND -> intent.getValue() <= 0 ? "" : Integer.toString(intent.getValue());
       default -> durationTextFor(intent);
     };
   }
