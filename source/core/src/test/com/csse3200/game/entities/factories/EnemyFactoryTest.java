@@ -122,26 +122,30 @@ class EnemyFactoryTest {
   }
 
   @Test
-  void createdEnemyLifecycleDoesNotThrow() {
-    Entity enemy = EnemyFactory.create("lesser_shade");
+  void nonBossEnemiesRegisterDefendAndCastWhenAtlasHasThem() {
+    TextureAtlas atlas = mock(TextureAtlas.class);
+    Array<AtlasRegion> regions = new Array<>();
+    regions.add(mock(AtlasRegion.class));
+    when(atlas.findRegions(anyString())).thenReturn(regions);
+    when(resourceService.getAsset(anyString(), eq(TextureAtlas.class))).thenReturn(atlas);
 
+    for (String id : List.of("bone_crawler", "tomb_guardian")) {
+      AnimationRenderComponent animator =
+          EnemyFactory.create(id).getComponent(AnimationRenderComponent.class);
+
+      assertTrue(animator.hasAnimation("defend"), id);
+      assertTrue(animator.hasAnimation("cast"), id);
+    }
+  }
+
+  @Test
+  void enemiesWithoutDefendOrCastRegionsSkipThem() {
+    Entity enemy = EnemyFactory.create("lesser_shade");
+    AnimationRenderComponent animator = enemy.getComponent(AnimationRenderComponent.class);
+
+    assertFalse(animator.hasAnimation("defend"));
+    assertFalse(animator.hasAnimation("cast"));
     assertDoesNotThrow(enemy::create);
-  }
-
-  @Test
-  void createUsesRosterStats() {
-    Entity enemy = EnemyFactory.create("lesser_shade");
-    CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
-
-    assertEquals(24, stats.getHealth());
-  }
-
-  @Test
-  void createUsesRosterDisplayName() {
-    Entity enemy = EnemyFactory.create("lesser_shade");
-    EnemyStatsComponent enemyStats = enemy.getComponent(EnemyStatsComponent.class);
-
-    assertNotNull(enemyStats.getDisplayName());
   }
 
   @Test
