@@ -16,7 +16,9 @@ import static org.mockito.Mockito.when;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Array;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryTrackingComponent;
 import com.csse3200.game.bestiary.BestiaryUnlockState;
@@ -92,6 +94,31 @@ class EnemyFactoryTest {
     Entity enemy = EnemyFactory.create("lesser_shade");
 
     assertNotNull(enemy.getComponent(FloatingDamageDisplay.class));
+  void nonBossEnemiesRegisterDefendAndCastWhenAtlasHasThem() {
+    // 图集里每个名字都能找到帧，模拟已经画好 defend / cast 的普通怪和精英怪
+    TextureAtlas atlas = mock(TextureAtlas.class);
+    Array<AtlasRegion> regions = new Array<>();
+    regions.add(mock(AtlasRegion.class));
+    when(atlas.findRegions(anyString())).thenReturn(regions);
+    when(resourceService.getAsset(anyString(), eq(TextureAtlas.class))).thenReturn(atlas);
+
+    for (String id : List.of("bone_crawler", "tomb_guardian")) {
+      AnimationRenderComponent animator =
+          EnemyFactory.create(id).getComponent(AnimationRenderComponent.class);
+      assertTrue(animator.hasAnimation("defend"), id);
+      assertTrue(animator.hasAnimation("cast"), id);
+    }
+  }
+
+  @Test
+  void enemiesWithoutDefendOrCastRegionsSkipThem() {
+    // 默认的假图集找不到任何帧：缺少的动画只是不注册，不会出错
+    Entity enemy = EnemyFactory.create("lesser_shade");
+    AnimationRenderComponent animator = enemy.getComponent(AnimationRenderComponent.class);
+
+    assertFalse(animator.hasAnimation("defend"));
+    assertFalse(animator.hasAnimation("cast"));
+    assertDoesNotThrow(enemy::create);
   }
 
   @Test

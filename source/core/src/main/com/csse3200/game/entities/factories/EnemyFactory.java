@@ -43,6 +43,8 @@ public class EnemyFactory {
   private static final float DEATH_FRAME_DURATION = 0.3f;
   private static final float CAST_FRAME_DURATION = 0.1f;
   private static final float DEFEND_FRAME_DURATION = 0.1f;
+  // 非 Boss 的 cast / defend 只有一帧姿势，停留这么久再回到 idle
+  private static final float HELD_POSE_DURATION = 0.8f;
   private static final float BOSS_DEATH_FRAME_DURATION = 0.12f;
 
   /** Multiplier applied on top of the sprite's own size so enemies read clearly on screen. */
@@ -97,10 +99,14 @@ public class EnemyFactory {
     animator.addAnimation("hurt", HURT_FRAME_DURATION, Animation.PlayMode.NORMAL);
     // Attack and death are optional for legacy atlases. Missing regions are logged and skipped.
     animator.addAnimation("attack", ATTACK_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    // 所有怪都注册 cast 和 defend：图集里没有这两段的怪会被跳过，播放时由 EnemyAnimationController 退回 idle
+    boolean boss = config.tier == EnemyTier.BOSS;
+    animator.addAnimation(
+        "cast", boss ? CAST_FRAME_DURATION : HELD_POSE_DURATION, Animation.PlayMode.NORMAL);
+    animator.addAnimation(
+        "defend", boss ? DEFEND_FRAME_DURATION : HELD_POSE_DURATION, Animation.PlayMode.NORMAL);
 
-    if (config.tier == EnemyTier.BOSS) {
-      animator.addAnimation("cast", CAST_FRAME_DURATION, Animation.PlayMode.NORMAL);
-      animator.addAnimation("defend", DEFEND_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    if (boss) {
       animator.addAnimation("death", BOSS_DEATH_FRAME_DURATION, Animation.PlayMode.NORMAL);
     } else {
       animator.addAnimation("death", DEATH_FRAME_DURATION, Animation.PlayMode.NORMAL);
