@@ -162,18 +162,55 @@ public class EnemyBehaviourComponent extends Component {
 
     CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
     if (targetStats != null) {
-      CombatStatsComponent attackerStats = entity.getComponent(CombatStatsComponent.class);
-      int strength = statusValue(attackerStats, EffectType.STRENGTH);
-      int feeble = statusValue(attackerStats, EffectType.FEEBLE);
-      int vulnerable = statusValue(targetStats, EffectType.VULNERABLE);
-      int damage =
-          new CardEffectResolutionContext(strength, feeble, vulnerable)
-              .resolveDamage(currentIntent.getValue());
+      int damage = resolveAttackDamage(targetStats);
+
       // Starts the attack animation (EnemyAnimationController) before the damage lands.
       entity.getEvents().trigger("enemyAttack");
       targetStats.takeDamage(damage);
     }
   }
+
+  /**
+   * Returns the value that should currently be displayed for this intent.
+   *
+   * <p>Attack intents are resolved from the latest Strength, Feeble and Vulnerable statuses. Other
+   * intent types retain their original value.
+   *
+   * @return the current resolved value of the telegraphed intent
+   */
+  public int getResolvedIntentValue() {
+    if (currentIntent.getType() != IntentType.ATTACK) {
+      return currentIntent.getValue();
+    }
+
+    return resolveAttackDamage(playerStats);
+  }
+
+  /**
+   * Resolves the current attack intent using the attacker's Strength and Feeble and the target's
+   * Vulnerable status.
+   *
+   * @param targetStats combat stats of the intended target; may be null
+   * @return final pre-mitigation damage
+   */
+  private int resolveAttackDamage(CombatStatsComponent targetStats) {
+    CombatStatsComponent attackerStats = entity.getComponent(CombatStatsComponent.class);
+
+    int strength = statusValue(attackerStats, EffectType.STRENGTH);
+    int feeble = statusValue(attackerStats, EffectType.FEEBLE);
+    int vulnerable = statusValue(targetStats, EffectType.VULNERABLE);
+
+    return new CardEffectResolutionContext(strength, feeble, vulnerable)
+            .resolveDamage(currentIntent.getValue());
+  }
+
+  /**
+   * Reads a non-negative status value from the supplied combat stats.
+   *
+   * @param stats combat stats containing the status
+   * @param type status type to read
+   * @return status value, or zero when absent
+   */
 
   private static int statusValue(CombatStatsComponent stats, EffectType type) {
     if (stats == null) {
