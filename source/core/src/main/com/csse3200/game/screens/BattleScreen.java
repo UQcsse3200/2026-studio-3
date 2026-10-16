@@ -2,12 +2,17 @@ package com.csse3200.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.areas.ForestGameArea;
 import com.csse3200.game.areas.terrain.TerrainFactory;
@@ -49,12 +54,8 @@ import com.csse3200.game.components.spritedisplay.clickable.CardAimController;
 import com.csse3200.game.components.spritedisplay.clickable.Clickable;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableFactory;
 import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
-import com.csse3200.game.components.spritedisplay.clickable.DragNDrop;
-import com.csse3200.game.components.spritedisplay.displaying.CardBadgesDisplay;
-import com.csse3200.game.components.spritedisplay.displaying.CardPreviewDisplay;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord;
-import com.csse3200.game.components.spritedisplay.displaying.PopupTextDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -67,6 +68,10 @@ import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.AnimationRenderComponent;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
+import com.csse3200.game.rewards.BloodOathSigilEffect;
+import com.csse3200.game.rewards.BrandOfTheDamnedEffect;
+import com.csse3200.game.rewards.ItemType;
+import com.csse3200.game.rewards.ShatteredAegisEffect;
 import com.csse3200.game.services.DragNDropService;
 import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
@@ -76,6 +81,7 @@ import com.csse3200.game.tutorial.BattleTutorialComponent;
 import com.csse3200.game.tutorial.BattleTutorialController;
 import com.csse3200.game.tutorial.BattleTutorialGuidanceView;
 import com.csse3200.game.tutorial.BattleTutorialObservation;
+import com.csse3200.game.ui.ItemArtwork;
 import com.csse3200.game.ui.PopupDisplay;
 import com.csse3200.game.ui.PopupInputComponent;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
@@ -83,6 +89,7 @@ import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
 import com.csse3200.game.ui.terminal.commands.GiveGoldCommand;
 import com.csse3200.game.ui.terminal.commands.GiveItemCommand;
+import com.csse3200.game.ui.terminal.commands.GiveOwnedItemCommand;
 import com.csse3200.game.ui.terminal.commands.SetHealthCommand;
 import com.csse3200.game.ui.terminal.commands.SkipBattleCommand;
 import java.nio.file.Path;
@@ -101,28 +108,25 @@ public class BattleScreen extends ScreenAdapter {
   private BattleTutorialGuidanceView tutorialView;
   private BattleActions battleActions;
   private static final Logger logger = LoggerFactory.getLogger(BattleScreen.class);
+  private static final String BATTLE_TITLE_TEXTURE = "images/ui/battle-title-wordmark.png";
   private final Renderer renderer;
   private final ForestGameArea gameArea;
 
-  private static final String[] mainGameTextures = {
-    "images/heart.png",
-    "images/energy.png",
-    "images/money.png",
-    "images/level.png",
-    "images/enemy.png",
-    "images/armour.png",
-    "images/enemy_release/heavens_grace.png",
-    "images/ui/inventory-panel.png",
-    "images/effects/shield.png",
-    "images/effects/fortify.png",
-    "images/ui/lucky-coin.png",
-    "images/ui/energy-crystal.png",
-    "images/ui/merchants-favor.png",
-    "images/ui/iron-aegis.png",
-    "images/ui/warriors-crest.png",
-    "images/effects/heal.png",
-    "images/enemies/intents/buff.png"
-  };
+  private static final String[] mainGameTextures =
+      ItemArtwork.withAllCutouts(
+          "images/heart.png",
+          "images/energy.png",
+          "images/money.png",
+          "images/level.png",
+          "images/enemy.png",
+          "images/armour.png",
+          "images/enemy_release/heavens_grace.png",
+          "images/ui/inventory-panel.png",
+          BATTLE_TITLE_TEXTURE,
+          "images/effects/shield.png",
+          "images/effects/fortify.png",
+          "images/effects/heal.png",
+          "images/enemies/intents/buff.png");
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
   private static final float HAND_Y = 1000f;
@@ -140,6 +144,7 @@ public class BattleScreen extends ScreenAdapter {
 
   private static final String BATTLE_UI_JSON = "sprites/BattleUi.json";
   private static final String DECK_EDITOR_UI_JSON = "sprites/DeckEditorUi.json";
+  private static final String HAND_TRIGGER = "playCard";
 
   private final BattleController controller;
   private final CardLibrary library;
@@ -159,6 +164,13 @@ public class BattleScreen extends ScreenAdapter {
   private List<ClickableRecord> staticUiRecords;
 
   private List<CardInstance> handRowOrder = new ArrayList<>();
+
+  // Whether the hand row is currently up (visible/interactable) or down (hidden mid-enemy-turn),
+  // tracked from the same "up"/"down" events InOutOnTrigger widgets slide on. A freshly rebuilt
+  // hand (e.g. a cooldown retrieval firing during the enemy's "thinking" pause, before "up" has
+  // fired) must match this instead of always snapping visible, or the row pops into view early
+  // and the later real "up" animation looks broken.
+  private boolean handVisible = true;
 
   public BattleScreen(GdxGame game) {
     this(game, false);
@@ -212,6 +224,9 @@ public class BattleScreen extends ScreenAdapter {
 
     playerState = runState.getOrCreatePlayerState();
     Entity player = forestGameArea.getPlayer();
+    if (!tutorialBattle) {
+      applyBattleStartCurses(player);
+    }
 
     List<CardConfig> configs = CardConfigLoader.loadCards();
     library = new CardLibrary(configs);
@@ -314,12 +329,11 @@ public class BattleScreen extends ScreenAdapter {
                 forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getHealth();
             int maxHealth =
                 forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getMaxHealth();
-            int maxEnergy =
-                forestGameArea.getPlayer().getComponent(EnergyComponent.class).getMaxEnergy();
 
+            // Max energy is deliberately not saved here: the entity value already includes item
+            // effects, which are re-derived from the inventory at the start of every battle.
             runState.setPlayerHealth(currentHealth);
             runState.setPlayerMaxHealth(maxHealth);
-            runState.setPlayerMaxEnergy(maxEnergy);
           }
         });
     createUI();
@@ -330,12 +344,12 @@ public class BattleScreen extends ScreenAdapter {
               ServiceLocator.getRenderService().getStage(),
               cardWidgetSkin,
               () ->
-                  uiFactory.getByTrigger("playCard").stream()
+                  uiFactory.getByTrigger(HAND_TRIGGER).stream()
                       .map(Clickable::getBtn)
                       .map(actor -> (com.badlogic.gdx.scenes.scene2d.Actor) actor)
                       .toList(),
               () ->
-                  uiFactory.getByTrigger("playCard").stream()
+                  uiFactory.getByTrigger(HAND_TRIGGER).stream()
                       .filter(c -> c.getArgs().length > 0 && demonstrationId.equals(c.getArgs()[0]))
                       .map(Clickable::getBtn)
                       .findFirst()
@@ -475,23 +489,23 @@ public class BattleScreen extends ScreenAdapter {
 
     staticUiRecords = ClickableFactory.loadRecordsFromJson(battleUiJson);
 
-    uiFactory = new ClickableFactory(buildAllRecords());
-    uiFactory.registerInstanceVariant("aimDrag", rec -> new DragNDrop(rec, enemyCardAim));
-    uiFactory.registerInstanceVariant("selfAimDrag", rec -> new DragNDrop(rec, playerCardAim));
-    uiFactory.registerInstanceVariant(
-        "allEnemiesAimDrag", rec -> new DragNDrop(rec, allEnemiesCardAim));
+    uiFactory =
+        new BattleClickableFactory(
+            buildAllRecords(), enemyCardAim, playerCardAim, allEnemiesCardAim);
 
     Terminal terminal = new Terminal();
     terminal.addCommand("skipbattle", new SkipBattleCommand(controller));
     terminal.addCommand("givegold", new GiveGoldCommand(gameArea.getPlayer()));
     terminal.addCommand("sethealth", new SetHealthCommand(gameArea.getPlayer()));
     terminal.addCommand("giveitem", new GiveItemCommand(gameArea.getPlayer()));
+    terminal.addCommand(
+        "giveowneditem", new GiveOwnedItemCommand(game.getRunState().getOrCreatePlayerState()));
 
     // Untitled: DeckEditorComponent draws its own "CARD INVENTORY" header, like the item inventory.
     PopupDisplay cardInventory = new PopupDisplay("");
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
-    PopupDisplay itemInventory = new PopupDisplay("Item Inventory");
+    PopupDisplay itemInventory = new PopupDisplay("");
     itemInventory.setMinSize(ITEM_INVENTORY_MIN_WIDTH, ITEM_INVENTORY_MIN_HEIGHT);
     InventoryPopupComponent inventoryPopup =
         new InventoryPopupComponent(
@@ -526,14 +540,12 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(new KeyboardTerminalInputComponent())
             .addComponent(new TerminalDisplay());
 
+    battleUi.getEvents().addListener("up", () -> handVisible = true);
+    battleUi.getEvents().addListener("down", () -> handVisible = false);
     battleUi
         .getEvents()
         .addListener(
-            BattleActions.HAND_CHANGED_EVENT,
-            (List<CardInstance> hand) -> {
-              uiFactory.rebuildHand(buildHandRecords());
-              installHandCardWidgets();
-            });
+            BattleActions.HAND_CHANGED_EVENT, (List<CardInstance> hand) -> rebuildHandWidgets());
     // Pause menu + in-place save/load overlay (added before the entity is created).
     SaveLoadPanel savePanel = null;
     if (tutorialBattle) {
@@ -546,6 +558,9 @@ public class BattleScreen extends ScreenAdapter {
     }
 
     gameArea.displayUI(battleUi);
+    setBattleMenuFontScale();
+    addBattleTitle(stage);
+    snapHandToVisibility();
     installHandCardWidgets();
 
     Path deckEditorUiJson = Path.of(DECK_EDITOR_UI_JSON);
@@ -590,6 +605,32 @@ public class BattleScreen extends ScreenAdapter {
     battleUi.getEvents().addListener("openInventory", inventoryPopup::open);
   }
 
+  private void addBattleTitle(Stage stage) {
+    Texture texture =
+        ServiceLocator.getResourceService().getAsset(BATTLE_TITLE_TEXTURE, Texture.class);
+    stage.addActor(createBattleTitle(stage, texture));
+  }
+
+  static Image createBattleTitle(Stage stage, Texture texture) {
+    texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    Image title = new Image(texture);
+    title.setName("battleTitleWordmark");
+    title.setScaling(Scaling.fit);
+    title.setBounds(36f, stage.getViewport().getWorldHeight() - 133f, 222f, 91f);
+    title.setTouchable(Touchable.disabled);
+    return title;
+  }
+
+  private void setBattleMenuFontScale() {
+    for (String trigger : List.of("openMenu", "openInventory", "endTurn")) {
+      for (Clickable clickable : uiFactory.getByTrigger(trigger)) {
+        if (clickable.getBtn() instanceof ImageTextButton button) {
+          button.getLabel().setFontScale(0.86f);
+        }
+      }
+    }
+  }
+
   private DisplayingFactory buildDeckEditorDisplays(
       PopupDisplay popup, List<DisplayingRecord> records) {
 
@@ -599,31 +640,30 @@ public class BattleScreen extends ScreenAdapter {
     List<DisplayingRecord> all = new ArrayList<>(records);
     all.add(badgesRec);
 
-    DisplayingFactory factory = new DisplayingFactory(all);
-
-    factory.registerInstanceVariant(
-        "popupText",
-        rec -> {
-          PopupTextDisplay d = new PopupTextDisplay(rec);
-          d.addPopup(popup);
-          return d;
-        });
-    factory.registerInstanceVariant(
-        "cardPreview",
-        rec -> {
-          CardPreviewDisplay d = new CardPreviewDisplay(rec);
-          d.addPopup(popup);
-          return d;
-        });
-
-    factory.registerInstanceVariant("cardBadges", CardBadgesDisplay::new);
-    return factory;
+    return new DeckEditorDisplayingFactory(all, popup);
   }
 
   private void onDeckRearranged(List<CardInstance> newHandRow) {
     handRowOrder = new ArrayList<>(newHandRow);
-    uiFactory.rebuildHand(buildHandRecords());
+    rebuildHandWidgets();
+  }
+
+  /** Replaces the on-screen hand with widgets for {@link #handRowOrder}. */
+  private void rebuildHandWidgets() {
+    uiFactory.rebuildByTrigger(HAND_TRIGGER, buildHandRecords());
+    snapHandToVisibility();
     installHandCardWidgets();
+  }
+
+  /** Snaps every hand widget straight to the current up/down state, skipping any animation. */
+  private void snapHandToVisibility() {
+    for (Clickable card : uiFactory.getByTrigger(HAND_TRIGGER)) {
+      if (handVisible) {
+        card.showNow();
+      } else {
+        card.hideNow();
+      }
+    }
   }
 
   /** Builds the same registered visual groups for every battle. */
@@ -755,9 +795,9 @@ public class BattleScreen extends ScreenAdapter {
       }
       String variant =
           switch (card.target()) {
-            case SELF -> "selfAimDrag";
-            case SINGLE_ENEMY -> "aimDrag";
-            case ALL_ENEMIES -> "allEnemiesAimDrag";
+            case SELF -> BattleClickableFactory.SELF_AIM_DRAG;
+            case SINGLE_ENEMY -> BattleClickableFactory.AIM_DRAG;
+            case ALL_ENEMIES -> BattleClickableFactory.ALL_ENEMIES_AIM_DRAG;
           };
 
       float offsetFromCenter = i - centerIndex;
@@ -765,7 +805,7 @@ public class BattleScreen extends ScreenAdapter {
       float y = HAND_Y + Math.abs(offsetFromCenter) * HAND_ARC_DROP_PER_CARD;
 
       ClickableRecord.Builder builder =
-          ClickableRecord.builder("playCard")
+          ClickableRecord.builder(HAND_TRIGGER)
               .label(card.name())
               .variant(variant)
               .position(x, y)
@@ -804,7 +844,7 @@ public class BattleScreen extends ScreenAdapter {
       instancesById.put(instance.instanceId(), instance);
     }
 
-    for (Clickable clickable : uiFactory.getByTrigger("playCard")) {
+    for (Clickable clickable : uiFactory.getByTrigger(HAND_TRIGGER)) {
       installHandCardWidget(clickable, instancesById);
     }
   }
@@ -830,6 +870,22 @@ public class BattleScreen extends ScreenAdapter {
       cardKeywordTooltip.attachTo(clickable.getBtn(), resolved.description());
     } catch (IllegalArgumentException | IllegalStateException exception) {
       logger.warn("Could not install card widget for instance {}", instanceId, exception);
+    }
+  }
+
+  /** Applies curse items that take effect at the start of every battle. */
+  private void applyBattleStartCurses(Entity player) {
+    int brandCount = playerState.getOwnedItemCount(ItemType.BRAND_OF_THE_DAMNED);
+    for (int i = 0; i < brandCount; i++) {
+      new BrandOfTheDamnedEffect().apply(player);
+    }
+    int aegisCount = playerState.getOwnedItemCount(ItemType.SHATTERED_AEGIS);
+    for (int i = 0; i < aegisCount; i++) {
+      new ShatteredAegisEffect().apply(player);
+    }
+    int sigilCount = playerState.getOwnedItemCount(ItemType.BLOOD_OATH_SIGIL);
+    for (int i = 0; i < sigilCount; i++) {
+      new BloodOathSigilEffect().apply(player);
     }
   }
 }
