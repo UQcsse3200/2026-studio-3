@@ -14,6 +14,7 @@ public final class ChanceOutcomeApplier {
   private final PlayerStateGateway player;
   private final CardCatalogGateway cardCatalog;
   private final DeckGateway deck;
+  private final ItemRewardGateway items;
 
   /**
    * Creates an outcome applier for one player boundary.
@@ -24,6 +25,7 @@ public final class ChanceOutcomeApplier {
     this.player = Objects.requireNonNull(player, "player cannot be null");
     this.cardCatalog = null;
     this.deck = null;
+    this.items = null;
   }
 
   /**
@@ -35,13 +37,30 @@ public final class ChanceOutcomeApplier {
    */
   public ChanceOutcomeApplier(
       PlayerStateGateway player, CardCatalogGateway cardCatalog, DeckGateway deck) {
-    this.player = Objects.requireNonNull(player, "player cannot be null");
-    this.cardCatalog = Objects.requireNonNull(cardCatalog, "cardCatalog cannot be null");
-    this.deck = Objects.requireNonNull(deck, "deck cannot be null");
+    this(player, cardCatalog, deck, null);
   }
 
   /**
-   * Applies card, currency, and health changes as one logical operation.
+   * Creates an outcome applier with persistent card and ownership-only item boundaries.
+   *
+   * @param player live player state receiving health and currency changes
+   * @param cardCatalog authoritative card catalogue
+   * @param deck persistent deck receiving cards
+   * @param items item ownership boundary, or null when item rewards are unavailable
+   */
+  public ChanceOutcomeApplier(
+      PlayerStateGateway player,
+      CardCatalogGateway cardCatalog,
+      DeckGateway deck,
+      ItemRewardGateway items) {
+    this.player = Objects.requireNonNull(player, "player cannot be null");
+    this.cardCatalog = Objects.requireNonNull(cardCatalog, "cardCatalog cannot be null");
+    this.deck = Objects.requireNonNull(deck, "deck cannot be null");
+    this.items = items;
+  }
+
+  /**
+   * Applies card rewards, item ownership, currency and health as one logical operation.
    *
    * <p>Currency is never allowed to become negative. Currency is committed and verified before the
    * direct health delta is applied. Health is the final mutation because lethal direct health loss
@@ -85,6 +104,11 @@ public final class ChanceOutcomeApplier {
     if (cardValidation != null) {
       return cardValidation;
     }
+    List<String> itemRewardIds = outcome.getItemRewardIds();
+    ChanceResolution itemValidation = validateItemRewards(outcome, itemRewardIds);
+    if (itemValidation != null) {
+      return itemValidation;
+    }
 
     List<String> addedCardIds = new ArrayList<>();
     for (String cardRewardId : cardRewardIds) {
@@ -109,6 +133,29 @@ public final class ChanceOutcomeApplier {
       addedCardIds.add(cardRewardId);
     }
 
+    List<String> attemptedItemIds = new ArrayList<>();
+    for (String itemRewardId : itemRewardIds) {
+      attemptedItemIds.add(itemRewardId);
+      boolean added;
+      try {
+        added = items.addItem(itemRewardId);
+      } catch (RuntimeException exception) {
+        added = false;
+      }
+      if (!added) {
+        boolean itemsRestored = rollbackItemAdditions(attemptedItemIds);
+        boolean cardsRestored = rollbackCardAdditions(addedCardIds);
+        return failure(
+            itemsRestored && cardsRestored
+                ? ChanceResolution.Status.ITEM_ADD_FAILED
+                : ChanceResolution.Status.ROLLBACK_FAILED,
+            outcome,
+            itemsRestored && cardsRestored
+                ? "Item ownership could not be added; earlier rewards were rolled back."
+                : "Item acquisition or reward rollback failed; manual recovery is required.");
+      }
+    }
+
     try {
       if (outcome.getCurrencyDelta() != 0) {
         player.setCurrency(currencyTarget);
@@ -117,7 +164,8 @@ public final class ChanceOutcomeApplier {
         throw new IllegalStateException("Player currency update was not accepted");
       }
     } catch (RuntimeException exception) {
-      boolean rollbackSucceeded = rollbackBeforeHealth(addedCardIds, currencyBefore);
+      boolean rollbackSucceeded =
+          rollbackBeforeHealth(addedCardIds, attemptedItemIds, currencyBefore);
       return failure(
           rollbackSucceeded
               ? ChanceResolution.Status.PLAYER_UPDATE_FAILED
@@ -139,7 +187,8 @@ public final class ChanceOutcomeApplier {
     } catch (RuntimeException exception) {
       int healthAfter = player.getHealth();
       if (healthAfter == healthBefore) {
-        boolean rollbackSucceeded = rollbackBeforeHealth(addedCardIds, currencyBefore);
+        boolean rollbackSucceeded =
+            rollbackBeforeHealth(addedCardIds, attemptedItemIds, currencyBefore);
         return failure(
             rollbackSucceeded
                 ? ChanceResolution.Status.PLAYER_UPDATE_FAILED
@@ -169,7 +218,8 @@ public final class ChanceOutcomeApplier {
         commitCardAdditions(addedCardIds);
       } catch (RuntimeException exception) {
         if (player.getHealth() == healthBefore) {
-          boolean rollbackSucceeded = rollbackBeforeHealth(addedCardIds, currencyBefore);
+          boolean rollbackSucceeded =
+              rollbackBeforeHealth(addedCardIds, attemptedItemIds, currencyBefore);
           return failure(
               rollbackSucceeded
                   ? ChanceResolution.Status.CARD_ADD_FAILED
@@ -190,6 +240,29 @@ public final class ChanceOutcomeApplier {
             "The reward card could not be committed after health changed; automatic rollback was "
                 + "skipped because health events may be irreversible.");
       }
+    }
+
+    try {
+      commitItemAdditions(attemptedItemIds);
+    } catch (RuntimeException exception) {
+      if (player.getHealth() == healthBefore) {
+        boolean restored = rollbackBeforeHealth(addedCardIds, attemptedItemIds, currencyBefore);
+        return failure(
+            restored
+                ? ChanceResolution.Status.ITEM_ADD_FAILED
+                : ChanceResolution.Status.ROLLBACK_FAILED,
+            outcome,
+            "Item commit failed; "
+                + (restored ? "earlier changes were restored." : "manual recovery is required."));
+      }
+      return ChanceResolution.failure(
+          ChanceResolution.Status.ROLLBACK_FAILED,
+          outcome,
+          healthBefore,
+          player.getHealth(),
+          currencyBefore,
+          player.getCurrency(),
+          "Item commit failed after health changed; automatic rollback is unsafe.");
     }
 
     return ChanceResolution.applied(
@@ -250,10 +323,64 @@ public final class ChanceOutcomeApplier {
     return null;
   }
 
-  private boolean rollbackBeforeHealth(List<String> cardRewardIds, int currency) {
+  private ChanceResolution validateItemRewards(ChanceOutcome outcome, List<String> itemRewardIds) {
+    if (itemRewardIds.isEmpty()) {
+      return null;
+    }
+    if (items == null) {
+      return failure(
+          ChanceResolution.Status.ITEM_NOT_FOUND,
+          outcome,
+          "Item ownership services are unavailable.");
+    }
+    for (String itemId : itemRewardIds) {
+      if (itemId.isBlank()) {
+        return failure(
+            ChanceResolution.Status.INVALID_ITEM_REWARD,
+            outcome,
+            "The item identifier must not be blank.");
+      }
+      try {
+        if (!items.containsItem(itemId)) {
+          return failure(
+              ChanceResolution.Status.ITEM_NOT_FOUND,
+              outcome,
+              "The item is not registered: " + itemId);
+        }
+      } catch (RuntimeException exception) {
+        return failure(
+            ChanceResolution.Status.ITEM_NOT_FOUND,
+            outcome,
+            "The item catalogue could not validate the reward.");
+      }
+    }
+    return null;
+  }
+
+  private boolean rollbackBeforeHealth(
+      List<String> cardRewardIds, List<String> itemRewardIds, int currency) {
+    boolean itemsRestored = rollbackItemAdditions(itemRewardIds);
     boolean cardRestored = rollbackCardAdditions(cardRewardIds);
     boolean currencyRestored = rollbackCurrency(currency);
-    return cardRestored && currencyRestored;
+    return itemsRestored && cardRestored && currencyRestored;
+  }
+
+  private boolean rollbackItemAdditions(List<String> itemRewardIds) {
+    boolean restored = true;
+    for (int index = itemRewardIds.size() - 1; index >= 0; index--) {
+      try {
+        restored = items.rollbackItemAddition(itemRewardIds.get(index)) && restored;
+      } catch (RuntimeException exception) {
+        restored = false;
+      }
+    }
+    return restored;
+  }
+
+  private void commitItemAdditions(List<String> itemRewardIds) {
+    for (int index = itemRewardIds.size() - 1; index >= 0; index--) {
+      items.commitItemAddition(itemRewardIds.get(index));
+    }
   }
 
   private boolean rollbackCardAdditions(List<String> cardRewardIds) {

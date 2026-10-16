@@ -12,6 +12,7 @@ public final class ChanceOutcome {
   private final int healthDelta;
   private final int currencyDelta;
   private final List<String> cardRewardIds;
+  private final List<String> itemRewardIds;
 
   /**
    * Creates a Chance Encounter outcome.
@@ -35,9 +36,45 @@ public final class ChanceOutcome {
   }
 
   private ChanceOutcome(int healthDelta, int currencyDelta, List<String> cardRewardIds) {
+    this(healthDelta, currencyDelta, cardRewardIds, List.of());
+  }
+
+  private ChanceOutcome(
+      int healthDelta, int currencyDelta, List<String> cardRewardIds, List<String> itemRewardIds) {
     this.healthDelta = healthDelta;
     this.currencyDelta = currencyDelta;
     this.cardRewardIds = List.copyOf(cardRewardIds);
+    this.itemRewardIds = List.copyOf(itemRewardIds);
+  }
+
+  /**
+   * Creates an outcome granting ordered item IDs, retaining duplicate copies.
+   *
+   * <p>IDs use the authoritative ItemType names. Acquisition records ownership only; the Item
+   * system owns effect application when creating the player, starting battle or using an item.
+   *
+   * @param healthDelta signed change in health
+   * @param currencyDelta signed change in currency
+   * @param itemRewardIds stable item identifiers
+   * @return immutable outcome containing item rewards
+   */
+  public static ChanceOutcome withItemRewards(
+      int healthDelta, int currencyDelta, List<String> itemRewardIds) {
+    return withRewards(healthDelta, currencyDelta, List.of(), itemRewardIds);
+  }
+
+  /**
+   * Creates an outcome with ordered card and item rewards, retaining duplicate copies.
+   *
+   * @param healthDelta signed change in health
+   * @param currencyDelta signed change in currency
+   * @param cardRewardIds stable card identifiers
+   * @param itemRewardIds stable item identifiers
+   * @return immutable combined outcome
+   */
+  public static ChanceOutcome withRewards(
+      int healthDelta, int currencyDelta, List<String> cardRewardIds, List<String> itemRewardIds) {
+    return new ChanceOutcome(healthDelta, currencyDelta, cardRewardIds, itemRewardIds);
   }
 
   /**
@@ -92,12 +129,20 @@ public final class ChanceOutcome {
     return cardRewardIds;
   }
 
+  /** Returns immutable ordered item IDs, possibly empty and containing duplicate copies. */
+  public List<String> getItemRewardIds() {
+    return itemRewardIds;
+  }
+
   /**
-   * Checks whether this outcome changes neither health nor currency.
+   * Checks whether this outcome changes no statistics and grants no cards or items.
    *
-   * @return true when both deltas are zero
+   * @return true when both deltas are zero and both reward lists are empty
    */
   public boolean isNoEffect() {
-    return healthDelta == 0 && currencyDelta == 0 && cardRewardIds.isEmpty();
+    return healthDelta == 0
+        && currencyDelta == 0
+        && cardRewardIds.isEmpty()
+        && itemRewardIds.isEmpty();
   }
 }

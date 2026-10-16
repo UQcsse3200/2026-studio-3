@@ -12,6 +12,8 @@ public final class ChanceResolution {
     INVALID_CHOICE,
     /** This session already applied a successful choice. */
     ALREADY_RESOLVED,
+    /** Another resolution is currently applying mutations for this session. */
+    RESOLUTION_IN_PROGRESS,
     /** The session has already completed or been cancelled. */
     ENCOUNTER_CLOSED,
     /** The staged encounter accepted the choice and requires another choice. */
@@ -30,6 +32,12 @@ public final class ChanceResolution {
     CARD_NOT_FOUND,
     /** The persistent deck rejected the reward card. */
     CARD_ADD_FAILED,
+    /** The configured item identifier is blank or otherwise invalid. */
+    INVALID_ITEM_REWARD,
+    /** The item ID is not registered, or ownership services are unavailable. */
+    ITEM_NOT_FOUND,
+    /** Persistent item ownership could not be added. */
+    ITEM_ADD_FAILED,
     /** A Player update failed and all original values were restored. */
     PLAYER_UPDATE_FAILED,
     /** A Player update failed and at least one original value could not be restored. */

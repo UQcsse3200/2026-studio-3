@@ -60,10 +60,15 @@ class ChanceEncounterFactoryTest {
     assertEquals(
         "A cracked sanctum shrine still burns with a god's spoiled light. An angel might leave an offering here to learn what the fallen still demand.",
         encounter.getDescription());
-    assertEquals(2, encounter.getChoices().size());
+    assertEquals(4, encounter.getChoices().size());
     assertChoice(
         encounter, 0, "make-offering", "Bleed a little of your light into the shrine.", -10, 25);
     assertChoice(encounter, 1, "leave", "Pass without kneeling.", 0, 0);
+    assertEquals(
+        List.of("BRAND_OF_THE_DAMNED"), encounter.resolveChoice("accept-brand").getItemRewardIds());
+    assertEquals(
+        List.of("BLOOD_OATH_SIGIL"),
+        encounter.resolveChoice("swear-blood-oath").getItemRewardIds());
   }
 
   @Test
