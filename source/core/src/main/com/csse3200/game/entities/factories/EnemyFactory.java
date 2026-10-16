@@ -6,6 +6,7 @@ import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryTrackingComponent;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.EnemyReleaseComponent;
+import com.csse3200.game.components.battle.FloatingDamageDisplay;
 import com.csse3200.game.components.enemy.*;
 import com.csse3200.game.components.spritedisplay.reactive.EnemyDropTargetComponent;
 import com.csse3200.game.entities.Entity;
@@ -135,6 +136,7 @@ public class EnemyFactory {
     // failing enemy creation.
     if (ServiceLocator.getRenderService() != null) {
       enemy.addComponent(new EnemyIntentDisplay());
+      enemy.addComponent(new FloatingDamageDisplay());
     }
 
     BestiaryService bestiary = ServiceLocator.getBestiaryService();

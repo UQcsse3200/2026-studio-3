@@ -21,6 +21,7 @@ import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryTrackingComponent;
 import com.csse3200.game.bestiary.BestiaryUnlockState;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.battle.FloatingDamageDisplay;
 import com.csse3200.game.components.enemy.EnemyAnimationController;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.EnemyStatsComponent;
@@ -84,6 +85,13 @@ class EnemyFactoryTest {
 
     assertNotNull(enemy.getComponent(AnimationRenderComponent.class));
     assertNotNull(enemy.getComponent(EnemyAnimationController.class));
+  }
+
+  @Test
+  void createAttachesFloatingDamageDisplayWhenRendering() {
+    Entity enemy = EnemyFactory.create("lesser_shade");
+
+    assertNotNull(enemy.getComponent(FloatingDamageDisplay.class));
   }
 
   @Test
