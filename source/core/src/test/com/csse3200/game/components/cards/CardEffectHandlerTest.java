@@ -8,6 +8,7 @@ import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.entities.Entity;
+import com.csse3200.game.rewards.BrandOfTheDamnedEffect;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
@@ -242,5 +243,25 @@ class CardEffectHandlerTest {
     List<Entity> targets = handler.getLivingEnemyTargets(request, List.of(enemyOne, enemyTwo));
 
     assertTrue(targets.isEmpty());
+  }
+
+  @Test
+  void fullyCancelledStrengthGainKeepsExistingStrength() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 5);
+    Entity player = new Entity().addComponent(stats);
+    CardEffectHandler handler = new CardEffectHandler();
+    new BrandOfTheDamnedEffect().apply(player);
+
+    handler.applyPlayerEffects(
+        List.of(
+            new ResolvedCardEffect("inner_focus", EffectType.STRENGTH, TargetType.SELF, 2, 0, 0)),
+        player);
+    assertEquals(1, stats.getStatusEffect("STRENGTH").getValue());
+
+    handler.applyPlayerEffects(
+        List.of(
+            new ResolvedCardEffect("astral_ward", EffectType.STRENGTH, TargetType.SELF, 1, 0, 0)),
+        player);
+    assertEquals(1, stats.getStatusEffect("STRENGTH").getValue());
   }
 }

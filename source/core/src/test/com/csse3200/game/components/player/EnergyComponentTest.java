@@ -13,22 +13,22 @@ class EnergyComponentTest {
 
   @Test
   void shouldInitializeWithFullEnergy() {
-    EnergyComponent energy = new EnergyComponent(10);
-    assertEquals(10, energy.getCurrentEnergy());
-    assertEquals(10, energy.getMaxEnergy());
+    EnergyComponent energy = new EnergyComponent(5);
+    assertEquals(5, energy.getCurrentEnergy());
+    assertEquals(5, energy.getMaxEnergy());
   }
 
   @Test
   void shouldSetGetCurrentEnergy() {
-    EnergyComponent energy = new EnergyComponent(10);
-    energy.setCurrentEnergy(5);
-    assertEquals(5, energy.getCurrentEnergy());
+    EnergyComponent energy = new EnergyComponent(5);
+    energy.setCurrentEnergy(3);
+    assertEquals(3, energy.getCurrentEnergy());
 
     energy.setCurrentEnergy(-3);
     assertEquals(0, energy.getCurrentEnergy());
 
     energy.setCurrentEnergy(100);
-    assertEquals(10, energy.getCurrentEnergy()); // clamped to max
+    assertEquals(5, energy.getCurrentEnergy()); // clamped to max
   }
 
   @Test
@@ -45,67 +45,77 @@ class EnergyComponentTest {
   }
 
   @Test
+  void constructorClampsMaxEnergyToTheCap() {
+    EnergyComponent energy = new EnergyComponent(6);
+    assertEquals(EnergyComponent.MAX_ENERGY_CAP, energy.getMaxEnergy());
+    assertEquals(EnergyComponent.MAX_ENERGY_CAP, energy.getCurrentEnergy());
+
+    EnergyComponent minimum = new EnergyComponent(0);
+    assertEquals(1, minimum.getMaxEnergy());
+  }
+
+  @Test
   void shouldCheckCanAfford() {
-    EnergyComponent energy = new EnergyComponent(10);
+    EnergyComponent energy = new EnergyComponent(5);
+    assertTrue(energy.canAfford(3));
     assertTrue(energy.canAfford(5));
-    assertTrue(energy.canAfford(10));
-    assertFalse(energy.canAfford(11));
+    assertFalse(energy.canAfford(6));
   }
 
   @Test
   void shouldSpendEnergyWhenAffordable() {
-    EnergyComponent energy = new EnergyComponent(10);
-    boolean result = energy.spendEnergy(4);
+    EnergyComponent energy = new EnergyComponent(5);
+    boolean result = energy.spendEnergy(2);
 
     assertTrue(result);
-    assertEquals(6, energy.getCurrentEnergy());
+    assertEquals(3, energy.getCurrentEnergy());
   }
 
   @Test
   void shouldNotSpendEnergyWhenInsufficient() {
-    EnergyComponent energy = new EnergyComponent(10);
-    boolean result = energy.spendEnergy(20);
+    EnergyComponent energy = new EnergyComponent(5);
+    boolean result = energy.spendEnergy(6);
 
     assertFalse(result);
-    assertEquals(10, energy.getCurrentEnergy()); // state unchanged
-  }
-
-  @Test
-  void shouldNotSpendNegativeEnergy() {
-    EnergyComponent energy = new EnergyComponent(10);
-    boolean result = energy.spendEnergy(-1);
-
-    assertFalse(result);
-    assertEquals(10, energy.getCurrentEnergy());
-  }
-
-  @Test
-  void shouldRestoreEnergyWithoutExceedingMax() {
-    EnergyComponent energy = new EnergyComponent(10);
-    energy.spendEnergy(8); // currentEnergy = 2
-
-    energy.restoreEnergy(3);
-    assertEquals(5, energy.getCurrentEnergy());
-
-    energy.restoreEnergy(100);
-    assertEquals(10, energy.getCurrentEnergy()); // clamped to max
-  }
-
-  @Test
-  void shouldNotRestoreNegativeEnergy() {
-    EnergyComponent energy = new EnergyComponent(10);
-    energy.spendEnergy(5); // currentEnergy = 5
-
-    energy.restoreEnergy(-2);
     assertEquals(5, energy.getCurrentEnergy()); // state unchanged
   }
 
   @Test
+  void shouldNotSpendNegativeEnergy() {
+    EnergyComponent energy = new EnergyComponent(5);
+    boolean result = energy.spendEnergy(-1);
+
+    assertFalse(result);
+    assertEquals(5, energy.getCurrentEnergy());
+  }
+
+  @Test
+  void shouldRestoreEnergyWithoutExceedingMax() {
+    EnergyComponent energy = new EnergyComponent(5);
+    energy.spendEnergy(4); // currentEnergy = 1
+
+    energy.restoreEnergy(2);
+    assertEquals(3, energy.getCurrentEnergy());
+
+    energy.restoreEnergy(100);
+    assertEquals(5, energy.getCurrentEnergy()); // clamped to max
+  }
+
+  @Test
+  void shouldNotRestoreNegativeEnergy() {
+    EnergyComponent energy = new EnergyComponent(5);
+    energy.spendEnergy(2); // currentEnergy = 3
+
+    energy.restoreEnergy(-2);
+    assertEquals(3, energy.getCurrentEnergy()); // state unchanged
+  }
+
+  @Test
   void shouldResetEnergyOnTurnStart() {
-    EnergyComponent energy = new EnergyComponent(10);
-    energy.spendEnergy(7); // currentEnergy = 3
+    EnergyComponent energy = new EnergyComponent(5);
+    energy.spendEnergy(4); // currentEnergy = 1
 
     energy.onTurnStart();
-    assertEquals(10, energy.getCurrentEnergy());
+    assertEquals(5, energy.getCurrentEnergy());
   }
 }
