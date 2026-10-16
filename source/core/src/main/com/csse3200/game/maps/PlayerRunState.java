@@ -1,6 +1,7 @@
 package com.csse3200.game.maps;
 
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.rewards.ItemEffectApplier;
@@ -203,9 +204,28 @@ public class PlayerRunState {
       // Replaying it here would add another 20 health on every screen transition/load.
       if (itemId != ItemType.LUCKY_COIN
           && itemId != ItemType.ETERNAL_VITALITY
+          && itemId != ItemType.ENERGY_CRYSTAL
+          && itemId != ItemType.ASHEN_EMBER
           && !itemId.isBattleConsumable()) {
         ItemEffectApplier.applyItemEffect(itemId, player);
       }
+      applyNetMaxEnergyModifier(player);
+    }
+  }
+
+  /**
+   * Applies Ember of the Divine and Ashen Ember together, so the result does not depend on the
+   * order they were obtained. The net change is applied once and then clamped by EnergyComponent.
+   */
+  private void applyNetMaxEnergyModifier(Entity player) {
+    EnergyComponent energy = player.getComponent(EnergyComponent.class);
+    if (energy == null) {
+      return;
+    }
+    int netChange =
+        getOwnedItemCount(ItemType.ENERGY_CRYSTAL) - getOwnedItemCount(ItemType.ASHEN_EMBER);
+    if (netChange != 0) {
+      energy.setMaxEnergy(energy.getMaxEnergy() + netChange);
     }
   }
 
