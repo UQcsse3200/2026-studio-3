@@ -201,7 +201,7 @@ public class EnemyBehaviourComponent extends Component {
     int vulnerable = statusValue(targetStats, EffectType.VULNERABLE);
 
     return new CardEffectResolutionContext(strength, feeble, vulnerable)
-            .resolveDamage(currentIntent.getValue());
+        .resolveDamage(currentIntent.getValue());
   }
 
   /**
@@ -211,7 +211,6 @@ public class EnemyBehaviourComponent extends Component {
    * @param type status type to read
    * @return status value, or zero when absent
    */
-
   private static int statusValue(CombatStatsComponent stats, EffectType type) {
     if (stats == null) {
       return 0;

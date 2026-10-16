@@ -129,7 +129,7 @@ class EnemyIntentDisplayTest {
   @Test
   void shouldShowDurationForStatusIntents() {
     assertEquals(
-            "2", EnemyIntentDisplay.labelTextFor(EnemyIntent.debuff(IntentEffectType.TAUNT, 0, 2)));
+        "2", EnemyIntentDisplay.labelTextFor(EnemyIntent.debuff(IntentEffectType.TAUNT, 0, 2)));
   }
 
   @Test
