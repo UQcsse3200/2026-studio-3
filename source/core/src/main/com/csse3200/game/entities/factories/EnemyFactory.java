@@ -99,7 +99,6 @@ public class EnemyFactory {
     animator.addAnimation("hurt", HURT_FRAME_DURATION, Animation.PlayMode.NORMAL);
     // Combat animations are optional for legacy atlases. Missing regions are logged and skipped.
     animator.addAnimation("attack", ATTACK_FRAME_DURATION, Animation.PlayMode.NORMAL);
-<<<<<<< HEAD
     // 所有怪都注册 cast 和 defend：图集里没有这两段的怪会被跳过，播放时由 EnemyAnimationController 退回 idle
     boolean boss = config.tier == EnemyTier.BOSS;
     animator.addAnimation(
@@ -108,12 +107,6 @@ public class EnemyFactory {
         "defend", boss ? DEFEND_FRAME_DURATION : HELD_POSE_DURATION, Animation.PlayMode.NORMAL);
 
     if (boss) {
-=======
-    animator.addAnimation("cast", CAST_FRAME_DURATION, Animation.PlayMode.NORMAL);
-    animator.addAnimation("defend", DEFEND_FRAME_DURATION, Animation.PlayMode.NORMAL);
-
-    if (config.tier == EnemyTier.BOSS) {
->>>>>>> 3b296796 (Fix enemy factory animation tests)
       animator.addAnimation("death", BOSS_DEATH_FRAME_DURATION, Animation.PlayMode.NORMAL);
     } else {
       animator.addAnimation("death", DEATH_FRAME_DURATION, Animation.PlayMode.NORMAL);
