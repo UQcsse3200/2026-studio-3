@@ -12,6 +12,7 @@ import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.Memory.PlayerMemory;
 import com.csse3200.game.entities.Entity;
 import java.util.Objects;
+
 /**
  * Decides and telegraphs an enemy's action each round, then resolves it.
  *
@@ -22,7 +23,7 @@ public class EnemyBehaviourComponent extends Component {
   private static final int UNKNOWN_PLAYER_HEALTH = 0;
 
   private final String behaviourId;
-  private  EnemyAI ai;
+  private EnemyAI ai;
   private EnemyIntent currentIntent = EnemyIntent.unknown();
   private int turnNumber = 0;
   private CombatStatsComponent playerStats;
@@ -55,6 +56,7 @@ public class EnemyBehaviourComponent extends Component {
   public String getBehaviourId() {
     return behaviourId;
   }
+
   /**
    * Replaces the AI used by this enemy.
    *
