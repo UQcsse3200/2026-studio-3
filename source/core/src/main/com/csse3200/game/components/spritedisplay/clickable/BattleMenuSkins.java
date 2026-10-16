@@ -90,9 +90,9 @@ public final class BattleMenuSkins {
       baseSkin = new Skin(Gdx.files.internal("flat-earth/skin/flat-earth-ui.json"));
     }
     if (up == null) {
-      up = createFrame(Color.valueOf("11131E"), Color.valueOf("8B542C"), Color.valueOf("E2A44A"));
-      over = createFrame(Color.valueOf("191B28"), Color.valueOf("B16C34"), Color.valueOf("FFD071"));
-      down = createFrame(Color.valueOf("090B12"), Color.valueOf("704021"), Color.valueOf("B97932"));
+      up = createFrame(Color.valueOf("11131E"), Color.valueOf("80634B"), Color.valueOf("C9A477"));
+      over = createFrame(Color.valueOf("191B28"), Color.valueOf("9A7655"), Color.valueOf("DFC08F"));
+      down = createFrame(Color.valueOf("090B12"), Color.valueOf("654C3C"), Color.valueOf("A8845D"));
     }
   }
 
@@ -132,7 +132,7 @@ public final class BattleMenuSkins {
     pixmap.drawRectangle(x, y, 6, 6);
     pixmap.setColor(bronze);
     pixmap.fillRectangle(x + 2, y + 2, 3, 3);
-    pixmap.setColor(Color.valueOf("FFE075"));
+    pixmap.setColor(Color.valueOf("D9BC8A"));
     pixmap.fillRectangle(x + 3, y + 3, 2, 2);
   }
 }

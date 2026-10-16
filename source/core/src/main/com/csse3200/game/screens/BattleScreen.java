@@ -2,12 +2,17 @@ package com.csse3200.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.areas.ForestGameArea;
 import com.csse3200.game.areas.terrain.TerrainFactory;
@@ -62,6 +67,10 @@ import com.csse3200.game.physics.PhysicsService;
 import com.csse3200.game.rendering.AnimationRenderComponent;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
+import com.csse3200.game.rewards.BloodOathSigilEffect;
+import com.csse3200.game.rewards.BrandOfTheDamnedEffect;
+import com.csse3200.game.rewards.ItemType;
+import com.csse3200.game.rewards.ShatteredAegisEffect;
 import com.csse3200.game.services.DragNDropService;
 import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
@@ -71,6 +80,7 @@ import com.csse3200.game.tutorial.BattleTutorialComponent;
 import com.csse3200.game.tutorial.BattleTutorialController;
 import com.csse3200.game.tutorial.BattleTutorialGuidanceView;
 import com.csse3200.game.tutorial.BattleTutorialObservation;
+import com.csse3200.game.ui.ItemArtwork;
 import com.csse3200.game.ui.PopupDisplay;
 import com.csse3200.game.ui.PopupInputComponent;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
@@ -78,6 +88,7 @@ import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
 import com.csse3200.game.ui.terminal.commands.GiveGoldCommand;
 import com.csse3200.game.ui.terminal.commands.GiveItemCommand;
+import com.csse3200.game.ui.terminal.commands.GiveOwnedItemCommand;
 import com.csse3200.game.ui.terminal.commands.SetHealthCommand;
 import com.csse3200.game.ui.terminal.commands.SkipBattleCommand;
 import java.nio.file.Path;
@@ -96,28 +107,25 @@ public class BattleScreen extends ScreenAdapter {
   private BattleTutorialGuidanceView tutorialView;
   private BattleActions battleActions;
   private static final Logger logger = LoggerFactory.getLogger(BattleScreen.class);
+  private static final String BATTLE_TITLE_TEXTURE = "images/ui/battle-title-wordmark.png";
   private final Renderer renderer;
   private final ForestGameArea gameArea;
 
-  private static final String[] mainGameTextures = {
-    "images/heart.png",
-    "images/energy.png",
-    "images/money.png",
-    "images/level.png",
-    "images/enemy.png",
-    "images/armour.png",
-    "images/enemy_release/heavens_grace.png",
-    "images/ui/inventory-panel.png",
-    "images/effects/shield.png",
-    "images/effects/fortify.png",
-    "images/ui/lucky-coin.png",
-    "images/ui/energy-crystal.png",
-    "images/ui/merchants-favor.png",
-    "images/ui/iron-aegis.png",
-    "images/ui/warriors-crest.png",
-    "images/effects/heal.png",
-    "images/enemies/intents/buff.png"
-  };
+  private static final String[] mainGameTextures =
+      ItemArtwork.withAllCutouts(
+          "images/heart.png",
+          "images/energy.png",
+          "images/money.png",
+          "images/level.png",
+          "images/enemy.png",
+          "images/armour.png",
+          "images/enemy_release/heavens_grace.png",
+          "images/ui/inventory-panel.png",
+          BATTLE_TITLE_TEXTURE,
+          "images/effects/shield.png",
+          "images/effects/fortify.png",
+          "images/effects/heal.png",
+          "images/enemies/intents/buff.png");
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
   private static final float HAND_Y = 1000f;
@@ -214,6 +222,9 @@ public class BattleScreen extends ScreenAdapter {
 
     playerState = runState.getOrCreatePlayerState();
     Entity player = forestGameArea.getPlayer();
+    if (!tutorialBattle) {
+      applyBattleStartCurses(player);
+    }
 
     List<CardConfig> configs = CardConfigLoader.loadCards();
     library = new CardLibrary(configs);
@@ -315,12 +326,11 @@ public class BattleScreen extends ScreenAdapter {
                 forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getHealth();
             int maxHealth =
                 forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getMaxHealth();
-            int maxEnergy =
-                forestGameArea.getPlayer().getComponent(EnergyComponent.class).getMaxEnergy();
 
+            // Max energy is deliberately not saved here: the entity value already includes item
+            // effects, which are re-derived from the inventory at the start of every battle.
             runState.setPlayerHealth(currentHealth);
             runState.setPlayerMaxHealth(maxHealth);
-            runState.setPlayerMaxEnergy(maxEnergy);
           }
         });
     createUI();
@@ -497,12 +507,14 @@ public class BattleScreen extends ScreenAdapter {
     terminal.addCommand("givegold", new GiveGoldCommand(gameArea.getPlayer()));
     terminal.addCommand("sethealth", new SetHealthCommand(gameArea.getPlayer()));
     terminal.addCommand("giveitem", new GiveItemCommand(gameArea.getPlayer()));
+    terminal.addCommand(
+        "giveowneditem", new GiveOwnedItemCommand(game.getRunState().getOrCreatePlayerState()));
 
     // Untitled: DeckEditorComponent draws its own "CARD INVENTORY" header, like the item inventory.
     PopupDisplay cardInventory = new PopupDisplay("");
     cardInventory.setMinSize(CARD_INVENTORY_MIN_WIDTH, CARD_INVENTORY_MIN_HEIGHT);
 
-    PopupDisplay itemInventory = new PopupDisplay("Item Inventory");
+    PopupDisplay itemInventory = new PopupDisplay("");
     itemInventory.setMinSize(ITEM_INVENTORY_MIN_WIDTH, ITEM_INVENTORY_MIN_HEIGHT);
     InventoryPopupComponent inventoryPopup =
         new InventoryPopupComponent(
@@ -555,6 +567,8 @@ public class BattleScreen extends ScreenAdapter {
     }
 
     gameArea.displayUI(battleUi);
+    setBattleMenuFontScale();
+    addBattleTitle(stage);
     snapHandToVisibility();
     installHandCardWidgets();
 
@@ -598,6 +612,32 @@ public class BattleScreen extends ScreenAdapter {
 
     battleUi.getEvents().addListener("openMenu", deckEditor::open);
     battleUi.getEvents().addListener("openInventory", inventoryPopup::open);
+  }
+
+  private void addBattleTitle(Stage stage) {
+    Texture texture =
+        ServiceLocator.getResourceService().getAsset(BATTLE_TITLE_TEXTURE, Texture.class);
+    stage.addActor(createBattleTitle(stage, texture));
+  }
+
+  static Image createBattleTitle(Stage stage, Texture texture) {
+    texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    Image title = new Image(texture);
+    title.setName("battleTitleWordmark");
+    title.setScaling(Scaling.fit);
+    title.setBounds(36f, stage.getViewport().getWorldHeight() - 133f, 222f, 91f);
+    title.setTouchable(Touchable.disabled);
+    return title;
+  }
+
+  private void setBattleMenuFontScale() {
+    for (String trigger : List.of("openMenu", "openInventory", "endTurn")) {
+      for (Clickable clickable : uiFactory.getByTrigger(trigger)) {
+        if (clickable.getBtn() instanceof ImageTextButton button) {
+          button.getLabel().setFontScale(0.86f);
+        }
+      }
+    }
   }
 
   private DisplayingFactory buildDeckEditorDisplays(
@@ -831,6 +871,22 @@ public class BattleScreen extends ScreenAdapter {
       clickable.setVisualContent(() -> new CardWidget(resolved, cardWidgetAssets));
     } catch (IllegalArgumentException | IllegalStateException exception) {
       logger.warn("Could not install card widget for instance {}", instanceId, exception);
+    }
+  }
+
+  /** Applies curse items that take effect at the start of every battle. */
+  private void applyBattleStartCurses(Entity player) {
+    int brandCount = playerState.getOwnedItemCount(ItemType.BRAND_OF_THE_DAMNED);
+    for (int i = 0; i < brandCount; i++) {
+      new BrandOfTheDamnedEffect().apply(player);
+    }
+    int aegisCount = playerState.getOwnedItemCount(ItemType.SHATTERED_AEGIS);
+    for (int i = 0; i < aegisCount; i++) {
+      new ShatteredAegisEffect().apply(player);
+    }
+    int sigilCount = playerState.getOwnedItemCount(ItemType.BLOOD_OATH_SIGIL);
+    for (int i = 0; i < sigilCount; i++) {
+      new BloodOathSigilEffect().apply(player);
     }
   }
 }
