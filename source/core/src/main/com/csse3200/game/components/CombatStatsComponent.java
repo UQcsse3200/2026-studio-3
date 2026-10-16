@@ -1,5 +1,7 @@
 package com.csse3200.game.components;
 
+import com.csse3200.game.components.combat.DamageTakenEvent;
+import com.csse3200.game.components.combat.DamageType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,8 +10,6 @@ import java.util.Map;
 import java.util.function.IntConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.csse3200.game.components.combat.DamageTakenEvent;
-import com.csse3200.game.components.combat.DamageType;
 
 /**
  * Component used to store information related to combat such as health, attack, armour, block and

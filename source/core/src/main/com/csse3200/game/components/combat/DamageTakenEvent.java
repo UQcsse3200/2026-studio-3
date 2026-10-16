@@ -13,11 +13,11 @@ import java.util.Objects;
  */
 public record DamageTakenEvent(int amount, DamageType type) {
 
-    public DamageTakenEvent {
-        if (amount < 0) {
-            throw new IllegalArgumentException("Damage amount cannot be negative");
-        }
-
-        Objects.requireNonNull(type, "Damage type cannot be null");
+  public DamageTakenEvent {
+    if (amount < 0) {
+      throw new IllegalArgumentException("Damage amount cannot be negative");
     }
+
+    Objects.requireNonNull(type, "Damage type cannot be null");
+  }
 }
