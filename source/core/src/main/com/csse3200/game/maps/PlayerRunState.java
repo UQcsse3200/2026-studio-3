@@ -209,8 +209,8 @@ public class PlayerRunState {
           && !itemId.isBattleConsumable()) {
         ItemEffectApplier.applyItemEffect(itemId, player);
       }
-      applyNetMaxEnergyModifier(player);
     }
+    applyNetMaxEnergyModifier(player);
   }
 
   /**
