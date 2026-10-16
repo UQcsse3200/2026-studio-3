@@ -7,6 +7,7 @@ import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
+import com.csse3200.game.rewards.CursePenalties;
 import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.services.audio.SoundId;
 import java.util.ArrayList;
@@ -85,7 +86,8 @@ public class CardEffectHandler {
       switch (effect.type()) {
         case BLOCK -> {
           AudioService.playSound(SoundId.SHIELD_GUARD, 0.3f);
-          stats.addBlock(effect.value());
+          stats.addBlock(
+              CursePenalties.reduce(stats, CursePenalties.BLOCK_PENALTY, effect.value()));
         }
         case FORTIFY -> {
           AudioService.playSound(SoundId.SHIELD_GUARD, 0.3f);
@@ -101,7 +103,10 @@ public class CardEffectHandler {
         }
         case STRENGTH -> {
           AudioService.playSound(SoundId.MAGIC_CHIME, 0.5f);
-          stats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
+          stats.applyStatusEffect(
+              effect.type().name(),
+              CursePenalties.reduce(stats, CursePenalties.STRENGTH_PENALTY, effect.value()),
+              effect.duration());
         }
         case ENERGY_GAIN -> {
           AudioService.playSound(SoundId.MAGIC_CHIME, 0.5f);

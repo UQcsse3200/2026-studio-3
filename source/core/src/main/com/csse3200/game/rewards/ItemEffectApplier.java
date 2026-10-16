@@ -10,6 +10,8 @@ public class ItemEffectApplier {
       case MERCHANTS_FAVOR -> new MerchantsFavorEffect().apply(player);
       case IRON_AEGIS -> new IronAegisEffect().apply(player);
       case WARRIORS_CREST -> new WarriorsCrestEffect().apply(player);
+      case ASHEN_EMBER -> new AshenEmberEffect().apply(player);
+      case AMBROSIA_FLASK -> new AmbrosiaFlaskEffect().apply(player);
     }
   }
 }
