@@ -190,7 +190,7 @@ class EnemyBehaviourComponentTest {
   @Test
   void shouldResolveDisplayedAttackValueFromLatestStatuses() {
     EnemyBehaviourComponent behaviour =
-            new EnemyBehaviourComponent("test_live_intent", fixedAi(EnemyIntent.attack(8)));
+        new EnemyBehaviourComponent("test_live_intent", fixedAi(EnemyIntent.attack(8)));
 
     CombatStatsComponent attackerStats = enemyStats();
     enemyWith(behaviour, attackerStats);
@@ -217,7 +217,7 @@ class EnemyBehaviourComponentTest {
   @Test
   void shouldKeepOriginalValueForNonAttackIntent() {
     EnemyBehaviourComponent behaviour =
-            new EnemyBehaviourComponent("test_defend", fixedAi(EnemyIntent.defend(5)));
+        new EnemyBehaviourComponent("test_defend", fixedAi(EnemyIntent.defend(5)));
 
     CombatStatsComponent stats = enemyStats();
     stats.applyStatusEffect(EffectType.STRENGTH.name(), 10, 0);
@@ -229,7 +229,7 @@ class EnemyBehaviourComponentTest {
   }
 
   @Test
-      void shouldApplyFeebleOnceAndRoundFinalDamageDownWithoutChangingIntent() {
+  void shouldApplyFeebleOnceAndRoundFinalDamageDownWithoutChangingIntent() {
     EnemyBehaviourComponent behaviour =
         new EnemyBehaviourComponent("test_feeble", fixedAi(EnemyIntent.attack(7)));
     CombatStatsComponent attackerStats = enemyStats();
