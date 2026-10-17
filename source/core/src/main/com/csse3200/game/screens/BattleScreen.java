@@ -34,6 +34,10 @@ import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.enemy.BossDialogueComponent;
+import com.csse3200.game.components.enemy.BossDialogueConfig;
+import com.csse3200.game.components.enemy.EnemyAI.BossAI;
+import com.csse3200.game.components.enemy.EnemyAI.TutorialEnemyAI;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
@@ -84,7 +88,6 @@ import com.csse3200.game.ui.terminal.commands.GiveGoldCommand;
 import com.csse3200.game.ui.terminal.commands.GiveItemCommand;
 import com.csse3200.game.ui.terminal.commands.SetHealthCommand;
 import com.csse3200.game.ui.terminal.commands.SkipBattleCommand;
-import com.csse3200.game.components.enemy.EnemyAI.TutorialEnemyAI;
 import java.nio.file.Path;
 import java.util.*;
 import org.slf4j.Logger;
@@ -155,6 +158,7 @@ public class BattleScreen extends ScreenAdapter {
   private final CardAimController allEnemiesCardAim;
   private ClickableFactory uiFactory;
   private final PlayerRunState playerState;
+  private final BossDialogueConfig bossDialogueConfig;
   private List<ClickableRecord> staticUiRecords;
 
   private List<CardInstance> handRowOrder = new ArrayList<>();
@@ -185,6 +189,7 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
+    bossDialogueConfig = BossDialogueConfig.load();
     loadAssets();
 
     renderer = RenderFactory.createRenderer();
@@ -211,8 +216,7 @@ public class BattleScreen extends ScreenAdapter {
 
     if (tutorialBattle) {
       for (Entity enemy : forestGameArea.getEnemies()) {
-        EnemyBehaviourComponent behaviour =
-                enemy.getComponent(EnemyBehaviourComponent.class);
+        EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
 
         if (behaviour != null) {
           behaviour.setAI(new TutorialEnemyAI());
@@ -332,6 +336,7 @@ public class BattleScreen extends ScreenAdapter {
           }
         });
     createUI();
+    installBossDialogue(forestGameArea);
     if (tutorialBattle) {
       String demonstrationId = handRowOrder.get(handRowOrder.size() / 2).instanceId();
       tutorialView =
@@ -404,7 +409,7 @@ public class BattleScreen extends ScreenAdapter {
                   .findFirst()
                   .orElse(null));
       tutorialView.setEnemyBounds(
-          () -> forestGameArea.getEnemies().stream().map(this::tutorialEnemyBounds).toList());
+          () -> forestGameArea.getEnemies().stream().map(this::battleEntityBounds).toList());
       tutorialView.setDragActor(
           () -> ServiceLocator.getDragAndDropService().getDragAndDrop().getDragActor());
       tutorialView.setEnemyRenderer(
@@ -462,7 +467,28 @@ public class BattleScreen extends ScreenAdapter {
     controller.start();
   }
 
-  private Rectangle tutorialEnemyBounds(Entity enemy) {
+  /** Installs dialogue only for an enemy whose active AI is the Boss AI. */
+  private void installBossDialogue(BattleGameArea battleArea) {
+    for (Entity enemy : battleArea.getEnemies()) {
+      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+      if (behaviour == null || !(behaviour.getAI() instanceof BossAI bossAI)) {
+        continue;
+      }
+
+      BossDialogueComponent dialogue =
+          new BossDialogueComponent(
+              ServiceLocator.getRenderService().getStage(),
+              bossAI,
+              bossDialogueConfig,
+              controller,
+              () -> battleEntityBounds(enemy),
+              ServiceLocator.getResourceService());
+      ServiceLocator.getEntityService().register(new Entity().addComponent(dialogue));
+      return;
+    }
+  }
+
+  private Rectangle battleEntityBounds(Entity enemy) {
     Stage stage = ServiceLocator.getRenderService().getStage();
     Vector2 pos = enemy.getPosition(), scale = enemy.getScale();
     Vector3 a = ServiceLocator.getCamera().project(new Vector3(pos.x, pos.y, 0));
@@ -680,6 +706,7 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getResourceService().unloadAssets(EnemyStatusEffectVisuals.texturePaths());
+    ServiceLocator.getResourceService().unloadAssets(bossDialogueConfig.texturePaths());
     cardInteractionSkin.dispose();
     cardWidgetSkin.dispose();
     ServiceLocator.getResourceService().unloadAssets(mainGameTextures);
@@ -690,6 +717,7 @@ public class BattleScreen extends ScreenAdapter {
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(mainGameTextures);
     resourceService.loadTextures(EnemyStatusEffectVisuals.texturePaths());
+    resourceService.loadTextures(bossDialogueConfig.texturePaths());
     ServiceLocator.getResourceService().loadAll();
   }
 

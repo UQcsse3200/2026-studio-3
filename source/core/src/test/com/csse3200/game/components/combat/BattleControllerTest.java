@@ -108,6 +108,20 @@ class BattleControllerTest {
   }
 
   @Test
+  void shouldRejectCardSubmissionWhileCardPlayIsBlocked() {
+    controller.start();
+    controller.setCardPlayBlocked(true);
+
+    assertTrue(controller.isCardPlayBlocked());
+    assertFalse(controller.submitCardPlayRequest(CardPlayRequest.self("defend")));
+    assertNull(controller.getCardPlayRequest());
+
+    controller.setCardPlayBlocked(false);
+    assertFalse(controller.isCardPlayBlocked());
+    assertTrue(controller.submitCardPlayRequest(CardPlayRequest.self("defend")));
+  }
+
+  @Test
   void shouldRemoveOnlyTheSpecifiedPhaseListener() {
     List<BattlePhase> removed = new ArrayList<>();
     EventListener2<BattlePhase, BattlePhase> listener = (previous, next) -> removed.add(next);

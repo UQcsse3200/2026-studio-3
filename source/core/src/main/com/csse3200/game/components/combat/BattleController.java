@@ -52,6 +52,7 @@ public class BattleController {
   private final CardPlayService cardPlayService;
   private CardPlayRequest pendingCard;
   private boolean lastCardPlaySucceeded;
+  private boolean cardPlayBlocked;
   private int playerTurnNumber;
 
   /** Logging Strings & Error messages */
@@ -564,11 +565,21 @@ public class BattleController {
     return this.pendingCard;
   }
 
+  /** Enables or disables card submission without changing the current battle phase. */
+  public void setCardPlayBlocked(boolean blocked) {
+    cardPlayBlocked = blocked;
+  }
+
+  /** Returns whether an external presentation, such as Boss dialogue, currently blocks cards. */
+  public boolean isCardPlayBlocked() {
+    return cardPlayBlocked;
+  }
+
   /** Submits a card during the player's turn, rejecting submissions while an action is running. */
   public boolean submitCardPlayRequest(CardPlayRequest cardPlayRequest) {
     Objects.requireNonNull(cardPlayRequest, "cardPlayRequest cannot be null.");
 
-    if (processingEvents || !canHandle(BattleEvent.CARD_PLAY_REQUESTED)) {
+    if (cardPlayBlocked || processingEvents || !canHandle(BattleEvent.CARD_PLAY_REQUESTED)) {
       return false;
     }
     lastCardPlaySucceeded = false;
