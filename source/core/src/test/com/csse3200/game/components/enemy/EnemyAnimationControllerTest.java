@@ -81,7 +81,7 @@ class EnemyAnimationControllerTest {
     verify(animator).startAnimation("hurt");
   }
 
-  // 图集里有 death 帧的敌人，死亡时应该播 death，而不是退回 hurt
+  // An enemy whose atlas has death frames should play death when it dies, not fall back to hurt
   @Test
   void shouldPlayDeathWhenDeathAnimationAvailable() {
     when(animator.hasAnimation("death")).thenReturn(true);

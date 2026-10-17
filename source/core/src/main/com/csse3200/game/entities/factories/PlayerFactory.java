@@ -7,6 +7,7 @@ import com.csse3200.game.components.battle.FloatingDamageDisplay;
 import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
 import com.csse3200.game.components.player.*;
+import com.csse3200.game.components.status.StatusIconDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.configs.PlayerConfig;
 import com.csse3200.game.files.FileLoader;
@@ -123,6 +124,8 @@ public class PlayerFactory {
             .addComponent(inputComponent)
             .addComponent(new EnergyComponent(resolveMaxEnergy(runState)))
             .addComponent(new PlayerStatsDisplay())
+            // Status icons sit just under the health bar, which is anchored 1.25 units below.
+            .addComponent(new StatusIconDisplay(-1.25f, false))
             .addComponent(new PlayerStatsTopDisplay(runState))
             .addComponent(new PlayerEnergyDisplay())
             .addComponent(new EnemyMemoryComponent())

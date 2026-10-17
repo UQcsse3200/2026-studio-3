@@ -278,7 +278,7 @@ class EnemyBehaviourComponentTest {
     behaviour.rollIntent();
     behaviour.executeIntent(player);
 
-    assertEquals(19, playerStats.getHealth()); // 30 - 11，而不是 30 - 6
+    assertEquals(19, playerStats.getHealth()); // 30 - 11, not 30 - 6
   }
 
   @Test

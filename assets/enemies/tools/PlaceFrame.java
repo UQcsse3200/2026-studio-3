@@ -6,18 +6,21 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 /**
- * 把一张已经去好背景的透明图缩放后放进 512x512 的帧里，和现有的帧对齐。
+ * Scales a transparent image whose background is already removed and places it in a 512x512 frame,
+ * aligned with the existing frames.
  *
- * <p>用法: java PlaceFrame.java &lt;in.png&gt; &lt;out.png&gt; &lt;height&gt; &lt;x&gt; &lt;y&gt; [--center]
+ * <p>Usage: java PlaceFrame.java &lt;in.png&gt; &lt;out.png&gt; &lt;height&gt; &lt;x&gt; &lt;y&gt; [--center]
  *
  * <ul>
- *   <li>height：内容（不透明部分）缩放后的高度，单位是帧上的像素
- *   <li>x, y：默认是内容底边中点放到的位置（站在地上的怪，y 一般是地面线 478）；加 --center 时是内容中心的位置（悬浮的怪）
+ *   <li>height: height of the content (the opaque part) after scaling, in frame pixels
+ *   <li>x, y: by default where the bottom centre of the content goes (for standing enemies, y is
+ *       usually the ground line 478); with --center, where the content's centre goes (floating
+ *       enemies)
  * </ul>
  */
 public class PlaceFrame {
   static final int FRAME = 512;
-  static final int ALPHA_MIN = 16; // 低于这个透明度的淡光晕不算进内容范围
+  static final int ALPHA_MIN = 16; // Faint glow below this alpha does not count as content
 
   public static void main(String[] args) throws IOException {
     BufferedImage in = ImageIO.read(new File(args[0]));
@@ -35,7 +38,7 @@ public class PlaceFrame {
     double left = x - contentW / 2;
     double top = center ? y - height / 2.0 : y - height;
 
-    // 整张图按同一比例缩放，再把内容框的左上角挪到目标位置
+    // Scale the whole image by one ratio, then move the content box's top-left to the target
     BufferedImage out = new BufferedImage(FRAME, FRAME, BufferedImage.TYPE_INT_ARGB);
     Graphics2D g = out.createGraphics();
     g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
@@ -55,7 +58,7 @@ public class PlaceFrame {
     }
   }
 
-  /** 不透明内容的包围盒 {left, top, right, bottom}，右下不含。 */
+  /** Bounding box of the opaque content {left, top, right, bottom}, right and bottom exclusive. */
   static int[] contentBox(BufferedImage img) {
     int x0 = img.getWidth();
     int y0 = img.getHeight();

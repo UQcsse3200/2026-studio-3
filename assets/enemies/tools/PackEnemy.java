@@ -11,20 +11,24 @@ import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 
 /**
- * 把 frames_dir 里 &lt;enemy&gt;_&lt;动画名&gt;_&lt;序号&gt;.png 的帧拼成图集并写出 .atlas。
+ * Packs the &lt;enemy&gt;_&lt;animation&gt;_&lt;index&gt;.png frames in frames_dir into an atlas and
+ * writes the .atlas file.
  *
- * <p>用法: java PackEnemy.java &lt;enemy_id&gt; &lt;frames_dir&gt; &lt;out_dir&gt; [--nearest]
+ * <p>Usage: java PackEnemy.java &lt;enemy_id&gt; &lt;frames_dir&gt; &lt;out_dir&gt; [--nearest]
  *
- * <p>--nearest: 像素风图集用 Nearest 滤镜，游戏里缩放时像素块保持锐利
+ * <p>--nearest: use the Nearest filter for pixel-art atlases so pixels stay sharp when scaled in
+ * game
  *
- * <p>idle_0、idle_1、attack_0、hurt_0、death_0 必须有，并且总在前五格（位置和以前一样，default 区域就是 idle_0，图鉴不受影响）；
- * 其余帧（defend、cast、各形态的帧）按 ORDER 的顺序往后排。图集宽 2048，每行 4 帧，高度按行数取 1024 或 2048。
+ * <p>idle_0, idle_1, attack_0, hurt_0 and death_0 are required and always take the first five
+ * slots (same positions as before, the default region is idle_0, so the bestiary is unaffected);
+ * the other frames (defend, cast, form frames) follow in ORDER. The atlas is 2048 wide with 4
+ * frames per row, and 1024 or 2048 high depending on the number of rows.
  */
 public class PackEnemy {
   static final int S = 512;
   static final int COLUMNS = 4;
   static final List<String> REQUIRED = List.of("idle_0", "idle_1", "attack_0", "hurt_0", "death_0");
-  // 其余动画的排列顺序；不在这里的动画排在最后，按名字排序
+  // Order of the remaining animations; animations not listed here go last, sorted by name
   static final List<String> ORDER =
       List.of(
           "idle", "attack", "hurt", "death", "defend", "cast", "idle_taunt", "hurt_taunt",
@@ -43,7 +47,7 @@ public class PackEnemy {
     }
     int height = rows <= 2 ? 1024 : 2048;
 
-    // 帧之间互不重叠，贴到全透明的底图上就是原样复制
+    // Frames never overlap, so drawing onto a fully transparent canvas copies them exactly
     BufferedImage sheet = new BufferedImage(COLUMNS * S, height, BufferedImage.TYPE_INT_ARGB);
     int[] px = new int[S * S];
     for (int i = 0; i < frames.size(); i++) {
@@ -76,7 +80,7 @@ public class PackEnemy {
     System.out.println("packed " + enemy + ": " + frames.size() + " frames, 2048x" + height);
   }
 
-  /** 找出这只怪的所有帧：必需的五帧在前，其余按 ORDER 和序号排序。 */
+  /** Finds all frames of this enemy: the five required frames first, the rest by ORDER and index. */
   static List<Frame> collect(String enemy, File dir) {
     Pattern pattern = Pattern.compile(Pattern.quote(enemy) + "_([a-z_]+)_(\\d+)\\.png");
     List<Frame> extra = new ArrayList<>();
@@ -129,7 +133,7 @@ public class PackEnemy {
         + "\n";
   }
 
-  /** 一帧：文件、区域名、序号；在图集里的位置由它排第几决定。 */
+  /** One frame: file, region name and index; its atlas position is decided by its place in order. */
   static final class Frame {
     final File file;
     final String name;

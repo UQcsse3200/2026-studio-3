@@ -9,6 +9,7 @@ import com.csse3200.game.components.battle.EnemyReleaseComponent;
 import com.csse3200.game.components.battle.FloatingDamageDisplay;
 import com.csse3200.game.components.enemy.*;
 import com.csse3200.game.components.spritedisplay.reactive.EnemyDropTargetComponent;
+import com.csse3200.game.components.status.StatusIconDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.configs.EnemyConfig;
 import com.csse3200.game.entities.configs.EnemyConfigs;
@@ -43,7 +44,7 @@ public class EnemyFactory {
   private static final float DEATH_FRAME_DURATION = 0.3f;
   private static final float CAST_FRAME_DURATION = 0.1f;
   private static final float DEFEND_FRAME_DURATION = 0.1f;
-  // 非 Boss 的 cast / defend 只有一帧姿势，停留这么久再回到 idle
+  // Non-boss cast / defend is a single held pose, shown for this long before returning to idle
   private static final float HELD_POSE_DURATION = 0.8f;
   private static final float BOSS_DEATH_FRAME_DURATION = 0.12f;
 
@@ -99,7 +100,8 @@ public class EnemyFactory {
     animator.addAnimation("hurt", HURT_FRAME_DURATION, Animation.PlayMode.NORMAL);
     // Combat animations are optional for legacy atlases. Missing regions are logged and skipped.
     animator.addAnimation("attack", ATTACK_FRAME_DURATION, Animation.PlayMode.NORMAL);
-    // 所有怪都注册 cast 和 defend：图集里没有这两段的怪会被跳过，播放时由 EnemyAnimationController 退回 idle
+    // Every enemy registers cast and defend: enemies whose atlas lacks them are skipped, and
+    // EnemyAnimationController falls back to idle when they play
     boolean boss = config.tier == EnemyTier.BOSS;
     animator.addAnimation(
         "cast", boss ? CAST_FRAME_DURATION : HELD_POSE_DURATION, Animation.PlayMode.NORMAL);
@@ -123,6 +125,8 @@ public class EnemyFactory {
             .addComponent(animator)
             .addComponent(new EnemyAnimationController())
             .addComponent(new EnemyStatsDisplay())
+            // Status icons sit just under the health bar, which is anchored 0.6 units below.
+            .addComponent(new StatusIconDisplay(-0.6f, false))
             .addComponent(new EnemyCombatEffectsComponent())
             .addComponent(new EnemyReleaseComponent());
 
