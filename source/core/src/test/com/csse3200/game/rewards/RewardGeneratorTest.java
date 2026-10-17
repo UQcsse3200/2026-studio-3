@@ -1,8 +1,10 @@
 package com.csse3200.game.rewards;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.extensions.GameExtension;
@@ -52,7 +54,7 @@ class RewardGeneratorTest {
   }
 
   @Test
-  void itemRewardPoolIncludesEveryGameplayItem() {
+  void itemRewardPoolIncludesOnlyPostBattleItems() {
     RewardGenerator generator = new RewardGenerator(new Random(42));
     EnumSet<ItemType> generated = EnumSet.noneOf(ItemType.class);
 
@@ -60,7 +62,17 @@ class RewardGeneratorTest {
       generated.add(generator.generateItemRewardOption().itemId);
     }
 
-    assertTrue(generated.containsAll(EnumSet.allOf(ItemType.class)));
+    EnumSet<ItemType> expected =
+        EnumSet.of(
+            ItemType.LUCKY_COIN,
+            ItemType.ENERGY_CRYSTAL,
+            ItemType.MERCHANTS_FAVOR,
+            ItemType.IRON_AEGIS,
+            ItemType.WARRIORS_CREST);
+
+    assertEquals(expected, generated);
+    assertFalse(generated.contains(ItemType.AMBROSIA_FLASK));
+    assertTrue(generated.stream().noneMatch(ItemType::isCurse));
   }
 
   @Test
@@ -77,16 +89,53 @@ class RewardGeneratorTest {
       counts.merge(picked, 1, Integer::sum);
     }
 
-    // Energy Crystal should land close to 1/9 of trials, noticeably less than the other items
-    // which should each land close to 2/9.
+    // Energy Crystal should land close to 1/9 of trials, noticeably less than the other
+    // post-battle items, which should each land close to 2/9.
     int energyCrystalCount = counts.get(ItemType.ENERGY_CRYSTAL);
     for (ItemType type : ItemType.values()) {
-      if (type == ItemType.ENERGY_CRYSTAL) {
+      if (type == ItemType.ENERGY_CRYSTAL
+          || type == ItemType.AMBROSIA_FLASK
+          || type == ItemType.ETERNAL_VITALITY
+          || type.isCurse()) {
         continue;
       }
       assertTrue(
           energyCrystalCount < counts.get(type),
           "Expected ENERGY_CRYSTAL to appear less often than " + type);
     }
+  }
+
+  @Test
+  void defaultConstructorCreatesAUsableGenerator() {
+    RewardGenerator generator = new RewardGenerator();
+
+    int gold = generator.generateGoldOption().getBaseAmount();
+    assertTrue(gold >= 20 && gold <= 30);
+    assertNotNull(generator.generateItemRewardOption());
+  }
+
+  @Test
+  void shouldRejectNullRandom() {
+    assertThrows(IllegalArgumentException.class, () -> new RewardGenerator(null));
+  }
+
+  @Test
+  void shouldRejectInvalidGoldBonusMultipliers() {
+    RewardGenerator generator = new RewardGenerator(new Random(1));
+
+    assertThrows(IllegalArgumentException.class, () -> generator.generateGoldRewardOption(-0.1f));
+    assertThrows(
+        IllegalArgumentException.class, () -> generator.generateGoldRewardOption(Float.NaN));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> generator.generateGoldRewardOption(Float.POSITIVE_INFINITY));
+  }
+
+  @Test
+  void goldBonusMultiplierScalesTheBaseReward() {
+    RewardOption base = new RewardGenerator(new Random(7)).generateGoldRewardOption();
+    RewardOption boosted = new RewardGenerator(new Random(7)).generateGoldRewardOption(0.5f);
+
+    assertEquals(Math.round(base.goldAmount * 1.5f), boosted.goldAmount);
   }
 }
