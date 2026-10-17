@@ -5,20 +5,26 @@ import java.util.Arrays;
 import javax.imageio.ImageIO;
 
 /**
- * 白底 AI 图抠图：去白底/水印/被包围的白色空隙，光晕做半透明"去白"并保持明亮。
+ * Cuts out AI art drawn on a white background: removes the background, the watermark and enclosed
+ * white gaps, and turns glows semi-transparent ("unwhitening") while keeping them bright.
  *
- * <p>用法: java Cutout.java &lt;in.png&gt; &lt;out.png&gt; [选项]
+ * <p>Usage: java Cutout.java &lt;in.png&gt; &lt;out.png&gt; [options]
  *
  * <ul>
- *   <li>--watermark x0,y0,x1,y1 | none：用背景色盖掉的水印区域，默认 1262,1440,1536,1536
- *   <li>--min-gap N：被身体围住的白色空隙超过这么多像素才去掉，默认 300
- *   <li>--bg-tol N：和背景色每个通道相差不超过这个值才算"纯背景"，默认 3
- *   <li>--alpha-min F：去白后不透明度低于这个值的像素直接去掉，默认 0.03
- *   <li>--grey-sat F：背景区域里饱和度低于它的灰色像素（影子、灰雾、灰色速度线）直接去掉，有颜色的光效保留
- *   <li>--floor-y N：这一行以下，较深的灰色（地面影子）也算背景；遇到角色的深色描边会停下，不会吃进灰白色的靴子
+ *   <li>--watermark x0,y0,x1,y1 | none: watermark area painted over with the background colour,
+ *       default 1262,1440,1536,1536
+ *   <li>--min-gap N: white gaps enclosed by the body are removed only if larger than this many
+ *       pixels, default 300
+ *   <li>--bg-tol N: a pixel counts as "pure background" only if every channel is within this of
+ *       the background colour, default 3
+ *   <li>--alpha-min F: pixels below this opacity after unwhitening are removed, default 0.03
+ *   <li>--grey-sat F: grey pixels in the background area with saturation below this (shadows, grey
+ *       mist, grey speed lines) are removed; coloured light effects are kept
+ *   <li>--floor-y N: below this row, darker greys (ground shadows) also count as background; it stops
+ *       at the character's dark outline, so it will not eat into light grey boots
  * </ul>
  *
- * <p>只能读 JDK 支持的格式（PNG/JPEG 等），.webp 原图要先另存为 PNG。
+ * <p>Only reads formats the JDK supports (PNG, JPEG, etc.); save .webp originals as PNG first.
  */
 public class Cutout {
   public static void main(String[] args) throws IOException {
@@ -79,7 +85,7 @@ public class Cutout {
     for (int i = 0; i < px.length; i++) {
       px[i] &= 0xFFFFFF;
     }
-    // 用四周边缘像素的中位数当作背景色
+    // Use the median of the border pixels as the background colour
     int edgeCount = 0;
     int[][] edge = new int[3][2 * ((w + 7) / 8) + 2 * ((h + 7) / 8)];
     for (int x = 0; x < w; x += 8) {
@@ -126,7 +132,8 @@ public class Cutout {
           }
           return val[i] > 0.80 && sat[i] < 0.45;
         };
-    // 被身体围住的大块背景色（与外部不连通）；只认和背景色几乎相同的像素，避免误删白色光芯
+    // Large patches of background colour enclosed by the body (not connected to the outside); only
+    // pixels almost identical to the background count, so white glowing cores are not removed
     Region pureWhite =
         i -> {
           for (int c = 0; c < 3; c++) {
@@ -173,7 +180,7 @@ public class Cutout {
         }
       }
     }
-    // 从空隙往外扩展到相邻的浅色过渡像素，去掉空隙边缘的白色毛边
+    // Grow each gap into neighbouring light transition pixels to remove the white fringe around it
     if (seedCount > 0) {
       boolean[] grown = flood(w, h, gapSeeds, seedCount, j -> light.test(j) || pureWhite.test(j));
       for (int j = 0; j < grown.length; j++) {
@@ -198,7 +205,8 @@ public class Cutout {
       if (a < alphaMin) {
         continue;
       }
-      // 光晕"去白"：按不透明度反推原色，再把最亮的通道拉满，保持明亮
+      // Unwhiten glows: recover the original colour from the opacity, then push the brightest
+      // channel to full so the glow stays bright
       a = Math.min(1.0, a * 1.3);
       double[] c = new double[3];
       double m = 0;
@@ -224,11 +232,11 @@ public class Cutout {
     boolean test(int i);
   }
 
-  /** 从种子出发，沿上下左右连通的、满足条件的像素扩展出的区域。 */
+  /** The region grown from the seed through 4-connected pixels that meet the condition. */
   private static boolean[] flood(int w, int h, int[] seeds, int seedCount, Region ok) {
     boolean[] reg = new boolean[w * h];
     boolean[] seen = new boolean[w * h];
-    int[] stack = new int[w * h]; // 入栈时就标记，每个像素最多入栈一次
+    int[] stack = new int[w * h]; // Marked when pushed, so each pixel is pushed at most once
     int top = 0;
     for (int s = 0; s < seedCount; s++) {
       top = push(stack, top, seen, seeds[s]);

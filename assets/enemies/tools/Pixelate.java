@@ -10,32 +10,39 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 /**
- * 把 512x512 的敌人帧像素化：缩小 -> 共用调色板 -> 硬边透明 -> 内描边 -> 最近邻放大。
+ * Pixelates 512x512 enemy frames: downscale -> shared palette -> hard-edged alpha -> inner outline
+ * -> nearest-neighbour upscale.
  *
- * <p>加 --flatten 时改为把已经像素化的帧"压平"成更 2D 的平涂风格：合并细碎杂色为大色块、减少颜色层次、重新描边。
+ * <p>With --flatten, instead "flattens" already pixelated frames into a flatter 2D style: merges
+ * small noisy colours into large blocks, reduces colour levels and redraws the outline.
  *
- * <p>用法: java Pixelate.java [--flatten] [--palette a.png,b.png] &lt;pixel_size&gt; &lt;colors&gt;
+ * <p>Usage: java Pixelate.java [--flatten] [--palette a.png,b.png] &lt;pixel_size&gt; &lt;colors&gt;
  * &lt;out_dir&gt; &lt;frame.png&gt; [&lt;frame.png&gt; ...]
  *
- * <p>同一只怪的所有帧要一起传入，这样它们共用一套调色板。缩放、取色的整数运算和 Pillow 一致，结果和原来的 Python 版逐像素相同。
+ * <p>Pass all frames of one enemy together so they share one palette. The integer arithmetic for
+ * scaling and colour picking matches Pillow, so the output is pixel-identical to the original
+ * Python version.
  *
- * <p>--palette：给已有的怪补新帧时用。不重新算调色板，直接用这些已经像素化的帧里出现过的颜色，新帧和原有帧色调一致，原有帧也不用重做（此时 colors
- * 不起作用）。
+ * <p>--palette: for adding new frames to an existing enemy. Instead of computing a new palette, it
+ * uses the colours found in these already pixelated frames, so new frames match the existing ones
+ * and the existing frames need not be redone (colors has no effect in this mode).
  *
- * <p>--soft-alpha：保留半透明（护罩、光晕这类效果），透明度分成几档而不是只有全透明/全不透明；内描边只描不透明的身体。
+ * <p>--soft-alpha: keeps semi-transparency (shields, glows and similar effects) by splitting alpha
+ * into a few levels instead of only fully transparent or fully opaque; the inner outline is drawn
+ * only around the opaque body.
  */
 public class Pixelate {
   static final int FRAME = 512;
-  static final int ALPHA_CUT = 110; // 低于这个透明度的像素直接去掉
-  static final double OUTLINE_DARKEN = 0.35; // 内描边：轮廓内侧像素压暗到原亮度的这个比例
-  static final double ACCENT_SHARE = 0.15; // 格子里高亮/鲜艳像素占比超过这个值，就保留它们的颜色
-  static final int GLOW_MIN_ALPHA = 60; // 半透明光效像素至少要有这个不透明度才算数
-  static final int VIVID_MIN = 2; // 格子里至少有这么多鲜艳像素，就保留鲜艳色
-  static final int SMOOTH_PASSES = 2; // --flatten：众数滤波次数，越多色块越大越平
-  static final int[] SOFT_LEVELS = {24, 96, 176}; // --soft-alpha：透明度分档的分界
-  static final int[] SOFT_ALPHAS = {0, 80, 150, 255}; // --soft-alpha：每一档实际用的透明度
+  static final int ALPHA_CUT = 110; // Pixels below this alpha are removed
+  static final double OUTLINE_DARKEN = 0.35; // Inner outline: pixels inside the edge are darkened to this share of their brightness
+  static final double ACCENT_SHARE = 0.15; // Keep the bright/vivid colours if their share of a cell exceeds this
+  static final int GLOW_MIN_ALPHA = 60; // Semi-transparent glow pixels need at least this alpha
+  static final int VIVID_MIN = 2; // Keep the vivid colour if a cell has at least this many vivid pixels
+  static final int SMOOTH_PASSES = 2; // --flatten: mode filter passes; more means bigger, flatter blocks
+  static final int[] SOFT_LEVELS = {24, 96, 176}; // --soft-alpha: boundaries between alpha levels
+  static final int[] SOFT_ALPHAS = {0, 80, 150, 255}; // --soft-alpha: alpha used for each level
 
-  static boolean softAlpha; // --soft-alpha 开关，整次运行只设一次
+  static boolean softAlpha; // --soft-alpha switch, set once per run
 
   public static void main(String[] args) throws IOException {
     boolean flatten = false;
@@ -108,7 +115,8 @@ public class Pixelate {
   static Img flattenGrid(Img grid, int passes) {
     int[][] bands = {grid.channel(16), grid.channel(8), grid.channel(0)};
     for (int pass = 0; pass < passes; pass++) {
-      // 每个格子取周围 3x3 里出现最多的颜色，细碎的渐变和杂点会并进大色块（和 Pillow 一样逐通道处理）
+      // Each cell takes the most common colour in its 3x3 neighbourhood, so fine gradients and noise
+      // merge into larger blocks (per channel, like Pillow)
       for (int c = 0; c < 3; c++) {
         bands[c] = modeFilter(bands[c], grid.w, grid.h);
       }
@@ -120,7 +128,7 @@ public class Pixelate {
     return out;
   }
 
-  /** 3x3 众数滤波：出现次数不超过 2 的值不算，保留原值。 */
+  /** 3x3 mode filter: values appearing at most twice do not count, and the original is kept. */
   static int[] modeFilter(int[] band, int w, int h) {
     int[] out = new int[band.length];
     int[] hist = new int[256];
@@ -148,7 +156,7 @@ public class Pixelate {
 
   static Img shrink(Img frame, int size) {
     int n = (int) Math.rint(FRAME / (double) size);
-    // 预乘透明度后再平均，避免透明区域的颜色渗进边缘
+    // Premultiply by alpha before averaging, so colour from transparent areas does not bleed into edges
     int len = frame.p.length;
     int[] pr = new int[len];
     int[] pg = new int[len];
@@ -171,8 +179,10 @@ public class Pixelate {
     for (int y = 0; y < n; y++) {
       for (int x = 0; x < n; x++) {
         int a = ca[y * n + x];
-        // 格子里发光/鲜艳的像素够多时，用它们的平均色：眼睛、宝珠这类小亮点不会被周围暗色抹掉，
-        // 半透明的光效（光束、刀光）也会变成实心亮色像素，而不是被透明度门槛直接切掉
+        // When a cell has enough glowing/vivid pixels, use their average colour: small highlights such
+        // as eyes and orbs are not wiped out by the darker colours around them,
+        // and semi-transparent effects (beams, slashes) become solid bright pixels instead of being
+        // cut off by the alpha threshold
         List<int[]> accents = new ArrayList<>();
         for (int sy = y * size; sy < Math.min((y + 1) * size, FRAME); sy++) {
           for (int sx = x * size; sx < Math.min((x + 1) * size, FRAME); sx++) {
@@ -188,7 +198,8 @@ public class Pixelate {
             vivid.add(c);
           }
         }
-        // 鲜艳像素只要有几个就保留，且只取鲜艳像素的平均色，避免被白色高光冲淡（眼睛往往只有两三个像素）
+        // Keep vivid pixels as long as there are a few, averaging only the vivid ones so white
+        // highlights do not wash them out (eyes are often only two or three pixels)
         if (vivid.size() >= VIVID_MIN || accents.size() >= size * size * ACCENT_SHARE) {
           List<int[]> keep = new ArrayList<>(vivid.size() >= VIVID_MIN ? vivid : accents);
           for (int[] c : accents) {
@@ -196,10 +207,12 @@ public class Pixelate {
               keep.add(c);
             }
           }
-          // 只取最亮的一半：小光点（眼睛）的亮芯不会被外圈较暗的光晕拉暗
+          // Take only the brightest half, so the bright core of a small light (an eye) is not
+          // dimmed by the darker glow around it
           keep.sort((p, q) -> Integer.compare(max(q), max(p)));
           keep = keep.subList(0, Math.max(1, keep.size() / 2));
-          // 半透明光晕在 --soft-alpha 下保持半透明，眼睛这类长在身体上的亮点仍然不透明
+          // Semi-transparent glows stay semi-transparent under --soft-alpha; highlights on the body
+          // such as eyes stay opaque
           int glowAlpha = softAlpha ? Math.max(softLevel(a), SOFT_ALPHAS[1]) : 255;
           small.set(x, y, glowAlpha << 24 | average(keep));
           continue;
@@ -219,7 +232,7 @@ public class Pixelate {
     return small;
   }
 
-  /** --soft-alpha：把格子的平均透明度归到某一档。 */
+  /** --soft-alpha: snaps a cell's average alpha to one of the levels. */
   static int softLevel(int a) {
     for (int i = 0; i < SOFT_LEVELS.length; i++) {
       if (a < SOFT_LEVELS[i]) {
@@ -229,7 +242,11 @@ public class Pixelate {
     return 255;
   }
 
-  /** 所有帧共用一套调色板。鲜艳色（眼睛、宝珠）和白色高光分别单独留名额，互不挤占，也不会被大面积的主体颜色吞掉。 */
+  /**
+   * One palette shared by all frames. Vivid colours (eyes, orbs) and white highlights each get
+   * their own reserved slots, so they neither crowd each other out nor get swallowed by the large
+   * body colours.
+   */
   static List<int[]> sharedPalette(List<Img> smalls, int colors, int vividSlots, int glowSlots) {
     List<int[]> pixels = new ArrayList<>();
     for (Img s : smalls) {
@@ -266,7 +283,7 @@ public class Pixelate {
     return entries;
   }
 
-  /** 已经像素化的帧里出现过的所有不透明颜色，按第一次出现的顺序排列。 */
+  /** Every opaque colour found in the already pixelated frames, in order of first appearance. */
   static List<int[]> paletteOf(String[] paths) throws IOException {
     Map<Integer, int[]> colors = new LinkedHashMap<>();
     for (String path : paths) {
@@ -279,7 +296,11 @@ public class Pixelate {
     return new ArrayList<>(colors.values());
   }
 
-  /** 每种色相（绿、橙、红、青……）先保证至少一个名额，剩下的再按面积分，少量但颜色独特的细节（比如绿眼睛）不会被大面积的同类色吞掉。 */
+  /**
+   * Each hue (green, orange, red, cyan...) is guaranteed at least one slot and the rest are shared
+   * by area, so small but distinctly coloured details (such as green eyes) are not swallowed by
+   * large areas of similar colour.
+   */
   static List<int[]> vividEntries(List<int[]> vivid, int slots) {
     int hueBins = 12;
     int minPixels = 3;
@@ -306,21 +327,22 @@ public class Pixelate {
   }
 
   static boolean isVivid(int[] c) {
-    // 鲜艳色：红眼睛、琥珀色宝珠、青色光
+    // Vivid colours: red eyes, amber orbs, cyan light
     int hi = max(c);
     int lo = Math.min(c[0], Math.min(c[1], c[2]));
     return hi > 140 && (hi - lo) / (double) hi > 0.55;
   }
 
   static boolean isHotCore(int[] c) {
-    // 发光的亮芯：很亮，而且带明显色彩（比如眼睛中心的淡黄白色），不是灰白
+    // Glowing cores: very bright and clearly coloured (such as the pale yellow-white centre of an
+    // eye), not grey-white
     int hi = max(c);
     int lo = Math.min(c[0], Math.min(c[1], c[2]));
     return hi > 230 && hi - lo > 60;
   }
 
   static boolean isAccent(int[] c) {
-    // 鲜艳色、发光亮芯，或接近白色的高光
+    // Vivid colours, glowing cores, or near-white highlights
     return isVivid(c) || isHotCore(c) || Math.min(c[0], Math.min(c[1], c[2])) > 200;
   }
 
@@ -333,7 +355,7 @@ public class Pixelate {
     if (isAccent(c)) {
       return true;
     }
-    // 半透明且明亮的像素：光束、刀光、拖尾的发光部分
+    // Semi-transparent bright pixels: the glowing parts of beams, slashes and trails
     return a < 255 && max(c) > 200;
   }
 
@@ -345,7 +367,8 @@ public class Pixelate {
       int gray = luma(v);
       int argb = c & 0xFF000000;
       for (int ch = 0; ch < 3; ch++) {
-        // 在灰度图和原图之间外插（和 ImageEnhance.Color 一样用 float，再截断）
+        // Extrapolate between the greyscale and original images (in float like ImageEnhance.Color,
+        // then truncate)
         float t = gray + amount * (v[ch] - gray);
         int q = t <= 0f ? 0 : t >= 255f ? 255 : (int) t;
         argb |= q << (16 - 8 * ch);
@@ -370,8 +393,10 @@ public class Pixelate {
       for (int x = 0; x < img.w; x++) {
         int c = img.get(x, y);
         int[] v = rgb(c);
-        // 透明像素不描；发光的亮色像素也不描，否则细光效会整条被压暗
-        // --soft-alpha 下只描不透明的身体，挨着半透明护罩的地方也算轮廓
+        // Transparent pixels are not outlined; neither are bright glowing pixels, or thin light
+        // effects would be darkened along their whole length
+        // Under --soft-alpha only the opaque body is outlined; pixels next to a semi-transparent
+        // shield also count as the edge
         int a = c >>> 24;
         if (a == 0 || (softAlpha && a < 255) || isAccent(v) || max(v) > 200) {
           continue;
@@ -396,9 +421,10 @@ public class Pixelate {
     return out;
   }
 
-  // ---------- 中位切分调色板（和 Pillow 的 MEDIANCUT 相同：每次切像素最多的盒子，按亮度加权的最长轴在中位数处切开） ----------
+  // ---------- Median-cut palette (same as Pillow's MEDIANCUT: always split the box with the most
+  // pixels, at the median of its longest luminance-weighted axis) ----------
 
-  /** 返回最多 colors 个颜色。 */
+  /** Returns at most colors colours. */
   static List<int[]> medianCut(List<int[]> pixels, int colors) {
     Map<Integer, int[]> counts = new HashMap<>();
     for (int[] p : pixels) {
@@ -459,8 +485,9 @@ public class Pixelate {
       }
       final int ax = axis;
       List<int[]> sorted = new ArrayList<>(colors);
-      sorted.sort((p, q) -> Integer.compare(q[ax], p[ax])); // 从大到小
-      // 从大的一端累加，过半就停；和停止处同值的颜色也归到左边
+      sorted.sort((p, q) -> Integer.compare(q[ax], p[ax])); // Largest first
+      // Accumulate from the large end and stop past half; colours equal to the stopping value also
+      // go to the left
       int cut = 0;
       int total = 0;
       while (cut < sorted.size()) {
@@ -477,7 +504,7 @@ public class Pixelate {
         }
       }
       if (cut == sorted.size()) {
-        // 右边为空：把和最小值同值的颜色挪到右边
+        // Right side is empty: move the colours equal to the smallest value to the right
         int value = sorted.get(sorted.size() - 1)[ax];
         while (cut > 0 && sorted.get(cut - 1)[ax] == value) {
           cut--;
@@ -521,7 +548,10 @@ public class Pixelate {
     }
   }
 
-  /** 和 Pillow 的 QuantHeap 一样的二叉大根堆，像素数相同时的出堆顺序也一致。 */
+  /**
+   * A binary max-heap like Pillow's QuantHeap; boxes with equal pixel counts also come out in the
+   * same order.
+   */
   static final class BoxHeap {
     private Box[] heap = new Box[64];
     private int count;
@@ -564,9 +594,12 @@ public class Pixelate {
     }
   }
 
-  // ---------- 小工具 ----------
+  // ---------- Small helpers ----------
 
-  /** 和 Pillow 量化到调色板时一样：按 4 级色阶取最近色，距离相同时取靠前的。 */
+  /**
+   * Same as Pillow when quantising to a palette: nearest colour at 4-level precision, the earlier
+   * one on a tie.
+   */
   static int nearest(List<int[]> palette, int[] c) {
     int r = c[0] & 0xFC;
     int g = c[1] & 0xFC;
@@ -583,7 +616,10 @@ public class Pixelate {
     return best[0] << 16 | best[1] << 8 | best[2];
   }
 
-  /** 和 Pillow 的 BOX 缩放相同的定点运算：先横向再纵向，每一步都四舍五入到 8 位。 */
+  /**
+   * Same fixed-point arithmetic as Pillow's BOX resize: horizontal first, then vertical, rounding
+   * to 8 bits at each step.
+   */
   static int[] boxResize(int[] src, int w, int h, int nw, int nh) {
     int[][] kx = boxCoeffs(w, nw);
     int[][] ky = boxCoeffs(h, nh);
@@ -612,7 +648,7 @@ public class Pixelate {
     return out;
   }
 
-  /** 每个输出位置返回 {起点, 权重...}，权重是 22 位定点数。 */
+  /** For each output position returns {start, weights...}; weights are 22-bit fixed point. */
   private static int[][] boxCoeffs(int inSize, int outSize) {
     double scale = (double) inSize / outSize;
     double filterScale = Math.max(1.0, scale);
@@ -651,12 +687,12 @@ public class Pixelate {
     return ((t >> 8) + t) >> 8;
   }
 
-  /** 和 Pillow 转灰度相同的整数公式。 */
+  /** Same integer formula Pillow uses to convert to greyscale. */
   static int luma(int[] c) {
     return (c[0] * 19595 + c[1] * 38470 + c[2] * 7471 + 0x8000) >> 16;
   }
 
-  /** 和 Python colorsys.rgb_to_hsv 相同的色相（0~1）。 */
+  /** Hue (0 to 1), same as Python colorsys.rgb_to_hsv. */
   static double hue(int[] c) {
     double r = c[0] / 255.0;
     double g = c[1] / 255.0;
@@ -683,7 +719,7 @@ public class Pixelate {
     return Math.max(c[0], Math.max(c[1], c[2]));
   }
 
-  /** 各通道整除平均，返回 0xRRGGBB。 */
+  /** Integer average of each channel, returned as 0xRRGGBB. */
   static int average(List<int[]> colors) {
     long r = 0;
     long g = 0;
@@ -697,7 +733,10 @@ public class Pixelate {
     return (int) (r / n) << 16 | (int) (g / n) << 8 | (int) (b / n);
   }
 
-  /** ARGB 像素数组，读写 PNG，以及和 Pillow 行为一致的最近邻缩放、裁剪、透明叠加。 */
+  /**
+   * ARGB pixel array: reads and writes PNG, and does nearest-neighbour scaling, cropping and alpha
+   * compositing the same way Pillow does.
+   */
   static final class Img {
     final int w;
     final int h;
@@ -763,7 +802,7 @@ public class Pixelate {
       return out;
     }
 
-    /** 最近邻缩放，坐标按 Pillow 的方式用 double 累加。 */
+    /** Nearest-neighbour scaling, accumulating coordinates in double the way Pillow does. */
     Img resizeNearest(int nw, int nh) {
       Img out = new Img(nw, nh);
       double ax = (double) w / nw;
@@ -789,7 +828,10 @@ public class Pixelate {
       return out;
     }
 
-    /** 把 src 按透明度叠加到 (dx, dy)，整数运算和 Pillow 的 alpha_composite 相同。 */
+    /**
+     * Alpha-composites src at (dx, dy), using the same integer arithmetic as Pillow's
+     * alpha_composite.
+     */
     void alphaComposite(Img src, int dx, int dy) {
       for (int y = 0; y < src.h; y++) {
         for (int x = 0; x < src.w; x++) {

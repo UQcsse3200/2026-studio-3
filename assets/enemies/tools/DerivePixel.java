@@ -4,20 +4,22 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 /**
- * 从像素化后的 idle_0 派生 idle_1 / hurt_0 / death_0，所有变化都按整格进行，不破坏像素颗粒。
+ * Derives idle_1 / hurt_0 / death_0 from a pixelated idle_0. Every change moves whole cells, so the
+ * pixel grid is never broken.
  *
- * <p>用法: java DerivePixel.java &lt;pixel_size&gt; &lt;frames_dir&gt; &lt;enemy_id&gt; [--floating] [--form
+ * <p>Usage: java DerivePixel.java &lt;pixel_size&gt; &lt;frames_dir&gt; &lt;enemy_id&gt; [--floating] [--form
  * &lt;name&gt;]
  *
- * <p>--form：给某个形态派生，例如 --form taunt 从 idle_taunt_0 派生 idle_taunt_1 和 hurt_taunt_0（形态没有死亡帧）。
+ * <p>--form: derive frames for a form, e.g. --form taunt derives idle_taunt_1 and hurt_taunt_0 from
+ * idle_taunt_0 (forms have no death frame).
  */
 public class DerivePixel {
   static final int FRAME = 512;
-  static final double BREATH_SHARE = 0.7; // 站立的怪：上面这个比例的身体在 idle_1 里下压 1 格
-  static final int FLOAT_LIFT = 2; // 悬浮的怪：idle_1 整体上浮的格数
-  static final double DEATH_SQUASH = 0.75; // 死亡帧纵向压扁到原高度的这个比例
+  static final double BREATH_SHARE = 0.7; // Standing enemies: this upper share of the body sinks 1 cell in idle_1
+  static final int FLOAT_LIFT = 2; // Floating enemies: cells the whole body rises in idle_1
+  static final double DEATH_SQUASH = 0.75; // Death frame is squashed to this share of its height
   static final int[] HURT_TINT = {255, 70, 60};
-  static final int GROUND_Y = 478; // 地面线（512 帧上的像素行），和 tomb_guardian 一致
+  static final int GROUND_Y = 478; // Ground line (pixel row on a 512 frame), same as tomb_guardian
 
   public static void main(String[] args) throws IOException {
     int size = Integer.parseInt(args[0]);
@@ -34,7 +36,7 @@ public class DerivePixel {
         throw new IllegalArgumentException("unknown option " + args[i]);
       }
     }
-    // 形态的帧名带后缀，比如 idle_taunt_0、hurt_taunt_0
+    // Form frame names carry a suffix, e.g. idle_taunt_0, hurt_taunt_0
     String suffix = form == null ? "" : "_" + form;
 
     Img grid =
@@ -63,8 +65,8 @@ public class DerivePixel {
     }
     int[] box = grid.alphaBox();
     int cut = box[1] + (int) Math.rint((box[3] - box[1]) * BREATH_SHARE);
-    out.paste(grid.crop(0, cut, grid.w, grid.h), 0, cut); // 下半身不动，脚不离地
-    out.alphaComposite(grid.crop(0, 0, grid.w, cut), 0, 1); // 上半身下压 1 格
+    out.paste(grid.crop(0, cut, grid.w, grid.h), 0, cut); // Lower body stays, feet on the ground
+    out.alphaComposite(grid.crop(0, 0, grid.w, cut), 0, 1); // Upper body sinks 1 cell
     return out;
   }
 
@@ -77,13 +79,13 @@ public class DerivePixel {
       for (int ch = 0; ch < 3; ch++) {
         int shift = 16 - 8 * ch;
         int src = (c >> shift) & 0xFF;
-        int red = gray * HURT_TINT[ch] / 255; // 从黑到受伤红的渐变映射
-        argb |= (int) (src + 0.75f * (red - src)) << shift; // 原色和红色 1:3 混合
+        int red = gray * HURT_TINT[ch] / 255; // Gradient map from black to hurt red
+        argb |= (int) (src + 0.75f * (red - src)) << shift; // Mix original and red 1:3
       }
       tinted.p[i] = argb;
     }
     Img out = new Img(grid.w, grid.h);
-    out.paste(tinted, 1, 0); // 往右（远离玩家）后仰 1 格
+    out.paste(tinted, 1, 0); // Lean back 1 cell to the right (away from the player)
     return out;
   }
 
@@ -91,21 +93,21 @@ public class DerivePixel {
     Img gray = new Img(grid.w, grid.h);
     for (int i = 0; i < grid.p.length; i++) {
       int c = grid.p[i];
-      int v = (int) (0.8f * luma(c)); // 去色并压暗到 80%
+      int v = (int) (0.8f * luma(c)); // Desaturate and darken to 80%
       int a = (c >>> 24) == 0 ? 0 : 215;
       gray.p[i] = a << 24 | v << 16 | v << 8 | v;
     }
     int[] box = gray.alphaBox();
     Img body = gray.crop(box[0], box[1], box[2], box[3]);
     body = body.resizeNearest(body.w, Math.max(1, (int) Math.rint(body.h * DEATH_SQUASH)));
-    // 站立的怪塌到原来的最低点；悬浮的怪落到地面线上
+    // Standing enemies collapse to their original lowest point; floating ones drop to the ground line
     int floor = floating ? (int) Math.rint(GROUND_Y / (double) size) : box[3];
     Img out = new Img(grid.w, grid.h);
     out.paste(body, box[0], floor - body.h);
     return out;
   }
 
-  /** 和 Pillow 转灰度相同的整数公式。 */
+  /** Same integer formula Pillow uses to convert to greyscale. */
   static int luma(int argb) {
     int r = (argb >> 16) & 0xFF;
     int g = (argb >> 8) & 0xFF;
@@ -113,7 +115,10 @@ public class DerivePixel {
     return (r * 19595 + g * 38470 + b * 7471 + 0x8000) >> 16;
   }
 
-  /** ARGB 像素数组，读写 PNG，以及和 Pillow 行为一致的最近邻缩放、裁剪、粘贴、透明叠加。 */
+  /**
+   * ARGB pixel array: reads and writes PNG, and does nearest-neighbour scaling, cropping, pasting
+   * and alpha compositing the same way Pillow does.
+   */
   static final class Img {
     final int w;
     final int h;
@@ -153,7 +158,7 @@ public class DerivePixel {
       return x >= 0 && y >= 0 && x < w && y < h;
     }
 
-    /** 不透明区域的包围盒 {left, top, right, bottom}，右下不含。 */
+    /** Bounding box of the opaque area {left, top, right, bottom}, right and bottom exclusive. */
     int[] alphaBox() {
       int x0 = w;
       int y0 = h;
@@ -184,7 +189,7 @@ public class DerivePixel {
       return out;
     }
 
-    /** 直接覆盖（连透明度一起），超出边界的部分丢掉。 */
+    /** Overwrites directly (alpha included); anything outside the bounds is dropped. */
     void paste(Img src, int dx, int dy) {
       for (int y = 0; y < src.h; y++) {
         for (int x = 0; x < src.w; x++) {
@@ -195,7 +200,7 @@ public class DerivePixel {
       }
     }
 
-    /** 最近邻缩放，坐标按 Pillow 的方式用 double 累加。 */
+    /** Nearest-neighbour scaling, accumulating coordinates in double the way Pillow does. */
     Img resizeNearest(int nw, int nh) {
       Img out = new Img(nw, nh);
       double ax = (double) w / nw;
@@ -221,7 +226,10 @@ public class DerivePixel {
       return out;
     }
 
-    /** 把 src 按透明度叠加到 (dx, dy)，整数运算和 Pillow 的 alpha_composite 相同。 */
+    /**
+     * Alpha-composites src at (dx, dy), using the same integer arithmetic as Pillow's
+     * alpha_composite.
+     */
     void alphaComposite(Img src, int dx, int dy) {
       for (int y = 0; y < src.h; y++) {
         for (int x = 0; x < src.w; x++) {
