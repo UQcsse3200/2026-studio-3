@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
@@ -21,6 +22,8 @@ import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.ui.ItemArtwork;
+import com.csse3200.game.ui.ItemIconView;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
 import java.util.EnumMap;
@@ -42,11 +45,10 @@ public class ItemLibraryDisplay extends UIComponent {
   private static final String LARGE = "large";
   private static final String SMALL = "small";
   private static final String DEFAULT = "default";
-  private static final String ITEM_ART_DIRECTORY = "images/ui/";
 
   private static final Map<ItemType, String> ITEM_DESCRIPTIONS = new EnumMap<>(ItemType.class);
 
-  private Image itemImage;
+  private ItemIconView itemIconView;
 
   static {
     ITEM_DESCRIPTIONS.put(
@@ -55,10 +57,28 @@ public class ItemLibraryDisplay extends UIComponent {
         ItemType.MERCHANTS_FAVOR, "+10% shop discount per copy, stacks up to a 50% cap.");
     ITEM_DESCRIPTIONS.put(
         ItemType.LUCKY_COIN,
-        "Consumed when claiming a GOLD reward: adds 10% of your gold (current + reward), capped"
-            + " at +20. Only one copy used per claim.");
-    ITEM_DESCRIPTIONS.put(ItemType.IRON_AEGIS, "Consume during battle to gain +5 Armour.");
-    ITEM_DESCRIPTIONS.put(ItemType.WARRIORS_CREST, "Consume during battle to gain +1 Strength.");
+        "+10% gold on a GOLD reward claim (current + reward), capped at +20. One copy is used"
+            + " per claim.");
+    ITEM_DESCRIPTIONS.put(ItemType.IRON_AEGIS, "+5 Armour when used in battle. Single use.");
+    ITEM_DESCRIPTIONS.put(ItemType.WARRIORS_CREST, "+1 Strength when used in battle. Single use.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.AMBROSIA_FLASK,
+        "Restore 20 Health when used in battle, up to max Health. Single use.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.BRAND_OF_THE_DAMNED,
+        "Every Strength gain is reduced by 1 per copy, to a minimum of 0.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.SHATTERED_AEGIS, "Every Block gain is reduced by 1 per copy, to a minimum of 0.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.AMBROSIA_FLASK, "Consume during battle to restore 20 Health, up to max health.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.ASHEN_EMBER, "Reduces maximum energy by 1 per copy, to a minimum of 1.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.BLOOD_OATH_SIGIL,
+        "Lose 2 Health at the start of each of your turns per copy. Bypasses Block and"
+            + " Armour. Cannot reduce Health below 1.");
+    ITEM_DESCRIPTIONS.put(
+        ItemType.ETERNAL_VITALITY, "+20 max Health per copy, and fully heal when obtained.");
   }
 
   private final GdxGame game;
@@ -66,11 +86,13 @@ public class ItemLibraryDisplay extends UIComponent {
   private Stack rootStack;
   private Label nameLabel;
   private Label descriptionLabel;
+  private Label sourceLabel;
+  private Table itemListTable;
+  private boolean showingCurses;
   private TextButton.TextButtonStyle buttonStyle;
 
   public static String resolveArtworkPath(ItemType item) {
-    String fileName = item.name().toLowerCase().replace('_', '-') + ".png";
-    return ITEM_ART_DIRECTORY + fileName;
+    return ItemArtwork.framedPath(item);
   }
 
   public ItemLibraryDisplay(GdxGame game) {
@@ -91,6 +113,7 @@ public class ItemLibraryDisplay extends UIComponent {
     buttonStyle = createButtonStyle();
 
     Table panel = new Table();
+    panel.setName("itemLibraryPanel");
     panel.setBackground(skin.newDrawable(WHITE, PANEL_COLOUR));
     panel.pad(24f, 32f, 28f, 32f);
 
@@ -98,9 +121,14 @@ public class ItemLibraryDisplay extends UIComponent {
     panel.row();
     addDivider(panel);
     panel.row();
+    TextButton relicsButton = addFilters(panel);
+    panel.row();
     addItemContent(panel);
+    relicsButton.setChecked(true);
+    applyFilter(false);
 
     Table wrapper = new Table();
+    wrapper.setName("itemLibraryWrapper");
     wrapper.setFillParent(true);
     wrapper.center().pad(MenuTheme.SCREEN_PADDING);
     wrapper.add(panel).width(PANEL_WIDTH).height(PANEL_HEIGHT);
@@ -150,8 +178,10 @@ public class ItemLibraryDisplay extends UIComponent {
           }
         });
 
-    panel.add(titleBlock).left().expandX();
-    panel.add(backButton).right().width(170f).height(58f);
+    Table header = new Table();
+    header.add(titleBlock).left().expandX();
+    header.add(backButton).right().width(170f).height(58f);
+    panel.add(header).colspan(2).expandX().fillX();
   }
 
   private void addDivider(Table panel) {
@@ -161,31 +191,15 @@ public class ItemLibraryDisplay extends UIComponent {
   }
 
   private void addItemContent(Table panel) {
-    ItemType[] items = ItemType.values();
-    addItemList(items, panel);
-    if (items.length > 0) {
-      showItem(items[0]);
-    }
+    addItemList(panel);
   }
 
-  private void addItemList(ItemType[] items, Table panel) {
-    Table itemList = new Table();
-    itemList.top();
-    itemList.defaults().width(290f).height(76f).padBottom(8f).left();
-    for (ItemType item : items) {
-      TextButton itemButton = new TextButton(ItemFormatting.formatItemName(item), buttonStyle);
-      itemButton.getLabel().setFontScale(0.6f);
-      itemButton.addListener(
-          new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-              showItem(item);
-            }
-          });
-      itemList.add(itemButton).row();
-    }
+  private void addItemList(Table panel) {
+    itemListTable = new Table();
+    itemListTable.top();
+    itemListTable.defaults().width(290f).height(76f).padBottom(8f).left();
 
-    ScrollPane scrollPane = new ScrollPane(itemList, skin);
+    ScrollPane scrollPane = new ScrollPane(itemListTable, skin);
     scrollPane.setFadeScrollBars(false);
     scrollPane.setScrollingDisabled(true, false);
 
@@ -200,15 +214,75 @@ public class ItemLibraryDisplay extends UIComponent {
     panel.add(createDetailPanel()).expand().fill();
   }
 
-  private Table createDetailPanel() {
-    itemImage = new Image();
-    itemImage.setScaling(Scaling.fit);
+  private TextButton addFilters(Table panel) {
+    Table filters = new Table();
+    filters.defaults().width(185f).height(62f).padRight(12f);
+    ButtonGroup<TextButton> filterGroup = new ButtonGroup<>();
+    filterGroup.setMinCheckCount(1);
+    filterGroup.setMaxCheckCount(1);
+    filterGroup.setUncheckLast(true);
 
-    Table artworkBackground = new Table();
-    artworkBackground.setBackground(skin.newDrawable(WHITE, new Color(0.035f, 0.03f, 0.04f, 1f)));
-    Stack artwork = new Stack();
-    artwork.add(artworkBackground);
-    artwork.add(itemImage);
+    TextButton relicsButton = createFilterButton("Relics", false, filterGroup);
+    filters.add(relicsButton);
+    filters.add(createFilterButton("Curses", true, filterGroup));
+
+    panel.add(filters).left().colspan(2).padBottom(16f);
+    return relicsButton;
+  }
+
+  private TextButton createFilterButton(
+      String text, boolean curses, ButtonGroup<TextButton> group) {
+    TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(buttonStyle);
+    style.checked = style.over != null ? style.over : style.down;
+    style.checkedFontColor = Color.WHITE;
+    TextButton button = new TextButton(text, style);
+    button.getLabel().setFontScale(0.85f);
+    group.add(button);
+    button.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            if (button.isChecked()) {
+              applyFilter(curses);
+            }
+          }
+        });
+    return button;
+  }
+
+  private void applyFilter(boolean curses) {
+    showingCurses = curses;
+    rebuildItemList();
+  }
+
+  private void rebuildItemList() {
+    itemListTable.clearChildren();
+    ItemType firstItem = null;
+    for (ItemType item : ItemType.values()) {
+      if (item.isCurse() != showingCurses) {
+        continue;
+      }
+      if (firstItem == null) {
+        firstItem = item;
+      }
+      TextButton itemButton = new TextButton(ItemFormatting.formatItemName(item), buttonStyle);
+      itemButton.getLabel().setFontScale(0.6f);
+      itemButton.addListener(
+          new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+              showItem(item);
+            }
+          });
+      itemListTable.add(itemButton).row();
+    }
+    if (firstItem != null) {
+      showItem(firstItem);
+    }
+  }
+
+  private Table createDetailPanel() {
+    itemIconView = new ItemIconView();
 
     Table detailPanel = new Table();
     detailPanel.setBackground(skin.newDrawable(WHITE, DETAIL_COLOUR));
@@ -221,32 +295,34 @@ public class ItemLibraryDisplay extends UIComponent {
     nameLabel.setFontScale(1.25f);
     descriptionLabel.setFontScale(1.1f);
     descriptionLabel.setWrap(true);
+    sourceLabel = new Label("", bodyLabelStyle());
+    sourceLabel.setWrap(true);
 
     detailPanel.add(nameLabel).left().expandX();
     detailPanel.row();
-    detailPanel.add(artwork).width(200f).height(200f).padTop(8f).padBottom(16f);
+    detailPanel.add(itemIconView).width(200f).height(200f).padTop(8f).padBottom(16f);
     detailPanel.row();
-    detailPanel.add(descriptionLabel).width(650f).left().padTop(12f);
+    detailPanel.add(descriptionLabel).expandX().fillX().left().padTop(12f);
+    detailPanel.row();
+    detailPanel.add(sourceLabel).expandX().fillX().left().padTop(12f);
     return detailPanel;
   }
 
   private void showItem(ItemType item) {
     nameLabel.setText(ItemFormatting.formatItemName(item));
     descriptionLabel.setText(ITEM_DESCRIPTIONS.getOrDefault(item, "No description available."));
+    sourceLabel.setText("Obtained from: " + ItemFormatting.formatItemSource(item));
     setItemImage(resolveArtworkPath(item));
   }
 
   private void setItemImage(String texturePath) {
     ResourceService resources = ServiceLocator.getResourceService();
     if (!resources.containsAsset(texturePath, Texture.class)) {
-      itemImage.setDrawable(null);
-      itemImage.setVisible(false);
+      itemIconView.setItem(null);
       return;
     }
     Texture texture = resources.getAsset(texturePath, Texture.class);
-    texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-    itemImage.setDrawable(new TextureRegionDrawable(texture));
-    itemImage.setVisible(true);
+    itemIconView.setItem(texture);
   }
 
   private Label.LabelStyle bodyLabelStyle() {

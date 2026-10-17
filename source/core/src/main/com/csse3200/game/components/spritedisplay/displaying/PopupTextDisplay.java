@@ -20,8 +20,8 @@ import com.csse3200.game.ui.PopupDisplay;
  * </ul>
  *
  * Text is set the usual way: the entity fires the record's {@code trigger} with a String payload.
- * Register it per-screen (it needs the popup): {@code displays.registerInstanceVariant("popupText",
- * rec -> new PopupTextDisplay(rec, popup))}.
+ * It needs the popup, so it is created by a screen's {@link DisplayingFactory} subclass (e.g.
+ * {@code DeckEditorDisplayingFactory}), which calls {@link #addPopup} before returning it.
  */
 public class PopupTextDisplay extends Displaying {
   private PopupDisplay popup;

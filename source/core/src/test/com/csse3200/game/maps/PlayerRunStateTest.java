@@ -28,6 +28,40 @@ class PlayerRunStateTest {
   }
 
   @Test
+  void eternalVitalityImmediatelyRaisesMaxHealthHealsAndIsNotReappliedOnNewScreens() {
+    PlayerRunState state = new PlayerRunState(35, 100, 42);
+
+    state.grantEternalVitality();
+
+    assertEquals(120, state.getMaxHealth());
+    assertEquals(120, state.getCurrentHealth());
+    assertEquals(1, state.getOwnedItemCount(ItemType.ETERNAL_VITALITY));
+
+    Entity firstScreen = player(1, 1, 0);
+    state.applyTo(firstScreen);
+    assertEquals(120, firstScreen.getComponent(CombatStatsComponent.class).getMaxHealth());
+    assertEquals(120, firstScreen.getComponent(CombatStatsComponent.class).getHealth());
+
+    state.captureFrom(firstScreen);
+    Entity nextScreen = player(1, 1, 0);
+    state.applyTo(nextScreen);
+    assertEquals(120, nextScreen.getComponent(CombatStatsComponent.class).getMaxHealth());
+  }
+
+  @Test
+  void eachEternalVitalityCopyGrantsAnotherTwentyMaxHealthAndFullHeal() {
+    PlayerRunState state = new PlayerRunState(35, 100, 42);
+
+    state.grantEternalVitality();
+    state.restore(40, 120, 42);
+    state.grantEternalVitality();
+
+    assertEquals(140, state.getMaxHealth());
+    assertEquals(140, state.getCurrentHealth());
+    assertEquals(2, state.getOwnedItemCount(ItemType.ETERNAL_VITALITY));
+  }
+
+  @Test
   void capturesValuesBeforeTheScreenPlayerIsDisposed() {
     PlayerRunState state = new PlayerRunState(65, 100, 42);
     Entity player = player(30, 120, 77);
@@ -254,6 +288,30 @@ class PlayerRunStateTest {
   }
 
   @Test
+  void ambrosiaFlaskRestoresTwentyHealthAndConsumesOneCopy() {
+    PlayerRunState state = new PlayerRunState(55, 100, 50);
+    state.addOwnedItem(ItemType.AMBROSIA_FLASK);
+    Entity player = player(55, 100, 50);
+
+    assertTrue(state.useBattleItem(ItemType.AMBROSIA_FLASK, player));
+
+    assertEquals(75, player.getComponent(CombatStatsComponent.class).getHealth());
+    assertEquals(0, state.getOwnedItemCount(ItemType.AMBROSIA_FLASK));
+  }
+
+  @Test
+  void ambrosiaFlaskCannotBeConsumedAtFullHealth() {
+    PlayerRunState state = new PlayerRunState(100, 100, 50);
+    state.addOwnedItem(ItemType.AMBROSIA_FLASK);
+    Entity player = player(100, 100, 50);
+
+    assertFalse(state.useBattleItem(ItemType.AMBROSIA_FLASK, player));
+
+    assertEquals(100, player.getComponent(CombatStatsComponent.class).getHealth());
+    assertEquals(1, state.getOwnedItemCount(ItemType.AMBROSIA_FLASK));
+  }
+
+  @Test
   void doesNotRemoveBattleConsumableWhenItCannotBeApplied() {
     PlayerRunState state = new PlayerRunState(100, 100, 50);
     state.addOwnedItem(ItemType.IRON_AEGIS);
@@ -277,5 +335,32 @@ class PlayerRunStateTest {
 
     assertEquals(0.5f, state.getShopDiscount(), 0.001f);
     assertEquals(0.5f, player.getComponent(InventoryComponent.class).getShopDiscount(), 0.001f);
+  }
+
+  @Test
+  void energyItemsGiveTheSameMaxEnergyInEitherAcquisitionOrder() {
+    PlayerRunState crystalFirst = new PlayerRunState(100, 100, 0);
+    crystalFirst.addOwnedItem(ItemType.ENERGY_CRYSTAL);
+    crystalFirst.addOwnedItem(ItemType.ASHEN_EMBER);
+
+    PlayerRunState emberFirst = new PlayerRunState(100, 100, 0);
+    emberFirst.addOwnedItem(ItemType.ASHEN_EMBER);
+    emberFirst.addOwnedItem(ItemType.ENERGY_CRYSTAL);
+
+    EnergyComponent crystalFirstEnergy = new EnergyComponent(5);
+    EnergyComponent emberFirstEnergy = new EnergyComponent(5);
+    crystalFirst.applyTo(energyTestPlayer(crystalFirstEnergy));
+    emberFirst.applyTo(energyTestPlayer(emberFirstEnergy));
+
+    // Ember of the Divine and Ashen Ember cancel out, regardless of order.
+    assertEquals(5, crystalFirstEnergy.getMaxEnergy());
+    assertEquals(5, emberFirstEnergy.getMaxEnergy());
+  }
+
+  private static Entity energyTestPlayer(EnergyComponent energy) {
+    return new Entity()
+        .addComponent(new CombatStatsComponent(100, 5))
+        .addComponent(new InventoryComponent(0))
+        .addComponent(energy);
   }
 }

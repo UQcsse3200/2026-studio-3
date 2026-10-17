@@ -226,10 +226,18 @@ class EnemyStatusEffectVisualComponentTest {
               int count = Integer.bitCount(mask);
               for (int i = 0; i < 3; i++) {
                 if ((mask & (1 << i)) == 0) continue;
+                visuals[i].replay(0f);
+                float[] application = renderedBounds(visuals[i]);
+                assertTrue(application[2] <= width * 0.9f + 0.0001f);
+                assertTrue(application[3] <= height * 0.9f + 0.0001f);
+                assertEquals(application[2], application[3], 0.0001f);
+                assertEquals(left + width / 2f, application[0] + application[2] / 2f, 0.0001f);
+                assertEquals(bottom + height / 2f, application[1] + application[3] / 2f, 0.0001f);
+                visuals[i].showPersistent();
                 float[] effect = renderedBounds(visuals[i]);
                 double angle = 2d * Math.PI * slot++ / count;
-                float expectedWidth = width * (count == 1 ? 1.4f : 0.55f);
-                float expectedHeight = count == 1 ? height * 1.4f : expectedWidth;
+                float expectedWidth = Math.min(width * (count == 1 ? 0.9f : 0.55f), height * 0.9f);
+                float expectedHeight = expectedWidth;
                 assertEquals(expectedWidth, effect[2], 0.0001f);
                 assertEquals(expectedHeight, effect[3], 0.0001f);
                 assertEquals(
@@ -288,8 +296,8 @@ class EnemyStatusEffectVisualComponentTest {
           if ((mask & (1 << i)) == 0) continue;
           double angle = Math.PI * 2d * (step / 4d + slot++ / (double) count);
           float[] effect = renderedBounds(visuals[i]);
-          assertEquals(count == 1 ? 2.8f : 1.1f, effect[2], 0.0001f);
-          assertEquals(count == 1 ? 4.2f : 1.1f, effect[3], 0.0001f);
+          assertEquals(count == 1 ? 1.8f : 1.1f, effect[2], 0.0001f);
+          assertEquals(count == 1 ? 1.8f : 1.1f, effect[3], 0.0001f);
           assertEquals(
               3f + (count == 1 ? 0f : 1.3f * Math.cos(angle)), effect[0] + effect[2] / 2f, 0.0001f);
           assertEquals(
@@ -408,7 +416,8 @@ class EnemyStatusEffectVisualComponentTest {
           assertEquals(frame / 2 * 256, region.getValue().getRegionY());
           assertEquals(3f, bounds[0] + bounds[2] / 2f, 0.0001f);
           assertEquals(5.5f, bounds[1] + bounds[2] / 2f, 0.0001f);
-          assertTrue(bounds[2] >= 2f);
+          assertEquals(1.8f, bounds[2], 0.0001f);
+          assertEquals(bounds[2], bounds[3], 0.0001f);
           visual.update();
         }
         float[] hint = renderedBounds(visual);
@@ -521,5 +530,81 @@ class EnemyStatusEffectVisualComponentTest {
     assertTrue(registry.lookup(EffectType.POISON).rise() > 0);
     assertEquals(0f, registry.lookup(EffectType.VULNERABLE).rise());
     assertTrue(registry.lookup(EffectType.FEEBLE).rise() < 0);
+  }
+
+  @Test
+  void rectangularEffectKeepsItsAspectRatioInBothPhases() {
+    when(texture.getWidth()).thenReturn(512);
+    when(texture.getHeight()).thenReturn(256);
+    for (EffectType type :
+        new EffectType[] {EffectType.POISON, EffectType.VULNERABLE, EffectType.FEEBLE}) {
+      stats.applyStatusEffect(type.name(), 1, 3);
+      EnemyStatusEffectVisualComponent visual =
+          new EnemyStatusEffectVisualComponent(texture, registry.lookup(type), target, 0f, type);
+      for (boolean persistent : new boolean[] {false, true}) {
+        if (persistent) visual.showPersistent();
+        float[] bounds = renderedBounds(visual);
+        assertEquals(2f, bounds[2] / bounds[3], 0.0001f);
+        assertTrue(bounds[2] <= target.getScale().x * 0.9f + 0.0001f);
+        assertTrue(bounds[3] <= target.getScale().y * 0.9f + 0.0001f);
+      }
+      stats.removeStatusEffect(type.name());
+    }
+  }
+
+  @Test
+  void realStatusSheetsKeepTheirVisibleCentreOnTheMovingTarget() throws Exception {
+    EffectType[] types = {EffectType.POISON, EffectType.VULNERABLE, EffectType.FEEBLE};
+    String[] paths = EnemyStatusEffectVisuals.texturePaths();
+    for (int index = 0; index < types.length; index++) {
+      BufferedImage image = ImageIO.read(new File(paths[index]));
+      int w = image.getWidth() / 2;
+      int h = image.getHeight() / 2;
+      int left = w, top = h, right = -1, bottom = -1;
+      for (int y = 0; y < image.getHeight(); y++) {
+        for (int x = 0; x < image.getWidth(); x++) {
+          if ((image.getRGB(x, y) >>> 24) == 0) continue;
+          left = Math.min(left, x % w);
+          right = Math.max(right, x % w);
+          top = Math.min(top, y % h);
+          bottom = Math.max(bottom, y % h);
+        }
+      }
+      System.out.println(
+          types[index]
+              + " sheet visible union: "
+              + left
+              + ","
+              + top
+              + " to "
+              + right
+              + ","
+              + bottom);
+      Texture sheet = new Texture(Gdx.files.internal(paths[index]));
+      try {
+        stats.applyStatusEffect(types[index].name(), 1, 3);
+        EnemyStatusEffectVisualComponent visual =
+            new EnemyStatusEffectVisualComponent(
+                sheet, registry.lookup(types[index]), target, 0f, types[index]);
+        for (boolean persistent : new boolean[] {false, true}) {
+          if (persistent) visual.showPersistent();
+          for (float x : new float[] {2f, 1.5f, 2f}) {
+            target.setPosition(x, 4f);
+            float[] bounds = renderedBounds(visual);
+            assertEquals(
+                target.getCenterPosition().x,
+                bounds[0] + (left + right + 1) / (2f * w) * bounds[2],
+                0.0001f);
+            assertEquals(
+                target.getCenterPosition().y,
+                bounds[1] + (1f - (top + bottom + 1) / (2f * h)) * bounds[3],
+                0.0001f);
+          }
+        }
+        stats.removeStatusEffect(types[index].name());
+      } finally {
+        sheet.dispose();
+      }
+    }
   }
 }
