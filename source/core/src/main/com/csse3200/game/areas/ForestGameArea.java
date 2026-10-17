@@ -54,7 +54,6 @@ public class ForestGameArea extends GameArea {
     "images/mystical_tree.png",
     "images/cemetery.png",
     "images/temple.png",
-    "images/forest_with_sun.png",
     "images/cave.png",
     "images/sky_tower.png",
     "images/god_mountain.png",

@@ -20,7 +20,7 @@ public final class EnemyScaling {
     double attackRate;
 
     if (base.tier == EnemyTier.ELITE) {
-      healthRate = 0.8;
+      healthRate = 0.08;
       attackRate = 0.05;
     } else {
       healthRate = 0.05;
