@@ -754,4 +754,39 @@ class ArmourAndStatusEffectTest {
     assertEquals(List.of("VULNERABLE"), removed);
     assertEquals(2, applied.size());
   }
+
+  @Test
+  void strengthReapplicationAddsToTheExistingValue() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 0);
+    stats.applyStatusEffect("STRENGTH", 2, 0);
+    stats.applyStatusEffect("STRENGTH", 3, 0);
+    assertEquals(5, stats.getStatusEffect("STRENGTH").getValue());
+    assertEquals(0, stats.getStatusEffect("STRENGTH").getDuration());
+  }
+
+  @Test
+  void permanentStrengthWinsInEitherApplicationOrder() {
+    for (boolean permanentFirst : new boolean[] {true, false}) {
+      CombatStatsComponent stats = new CombatStatsComponent(100, 0);
+      stats.applyStatusEffect("STRENGTH", 1, permanentFirst ? 0 : 2);
+      stats.applyStatusEffect("STRENGTH", 1, permanentFirst ? 2 : 0);
+      assertEquals(2, stats.getStatusEffect("STRENGTH").getValue());
+      assertEquals(0, stats.getStatusEffect("STRENGTH").getDuration());
+    }
+  }
+
+  @Test
+  void strengthReapplicationKeepsTheLongerDurationAndNotifiesEachTime() {
+    CombatStatsComponent stats = new CombatStatsComponent(100, 0);
+    Entity entity = new Entity().addComponent(stats);
+    List<String> applied = new ArrayList<>();
+    entity.getEvents().addListener("statusEffectApplied", (String type) -> applied.add(type));
+
+    stats.applyStatusEffect("STRENGTH", 1, 3);
+    stats.applyStatusEffect("STRENGTH", 2, 1);
+
+    assertEquals(3, stats.getStatusEffect("STRENGTH").getValue());
+    assertEquals(3, stats.getStatusEffect("STRENGTH").getDuration());
+    assertEquals(List.of("STRENGTH", "STRENGTH"), applied);
+  }
 }

@@ -32,6 +32,7 @@ public class CombatStatsComponent extends Component {
   private static final String POISON = "POISON";
   private static final String FEEBLE = "FEEBLE";
   private static final String VULNERABLE = "VULNERABLE";
+  private static final String STRENGTH = "STRENGTH";
   private int health;
   private int baseAttack;
   private int maxHealth;
@@ -415,8 +416,9 @@ public class CombatStatsComponent extends Component {
    * Applies a status effect.
    *
    * <p>Poison stacks are grouped by remaining duration. Feeble does not stack its damage reduction
-   * and keeps the longer duration on reapplication; permanent duration takes precedence. Other
-   * statuses retain their overwrite behaviour.
+   * and keeps the longer duration on reapplication; permanent duration takes precedence. Strength
+   * adds to the existing value and follows the same duration rule. Other statuses retain their
+   * overwrite behaviour.
    *
    * @param effect status effect to apply
    */
@@ -431,6 +433,8 @@ public class CombatStatsComponent extends Component {
       applyPoison(effect);
     } else if (FEEBLE.equals(type) || VULNERABLE.equals(type)) {
       applyNonStackingStatus(type, effect);
+    } else if (STRENGTH.equals(type)) {
+      applyStrength(effect);
     } else {
       // Preserve the existing behaviour for other statuses.
       statusEffects.put(type, effect);
@@ -470,6 +474,22 @@ public class CombatStatsComponent extends Component {
     }
     // Feeble and Vulnerable share duration refresh rules and never stack intensity.
     statusEffects.put(type, new StatusEffect(type, 1, duration));
+  }
+
+  private void applyStrength(StatusEffect effect) {
+    StatusEffect existing = statusEffects.get(STRENGTH);
+    // Reapplying the live object itself must not double its value.
+    if (existing == null || existing == effect) {
+      statusEffects.put(STRENGTH, effect);
+      return;
+    }
+    int duration =
+        existing.getDuration() <= 0 || effect.getDuration() <= 0
+            ? 0
+            : Math.max(existing.getDuration(), effect.getDuration());
+    // Every Strength gain adds up, so cards, items and other sources never overwrite each other.
+    statusEffects.put(
+        STRENGTH, new StatusEffect(STRENGTH, existing.getValue() + effect.getValue(), duration));
   }
 
   /**
