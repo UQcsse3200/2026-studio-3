@@ -113,7 +113,7 @@ public class MapGraph implements EncounterCallback {
     int node1Pos = node1.getNodeId() % MapGenerationConfig.MAP_WIDTH;
     int node2Pos = node2.getNodeId() % MapGenerationConfig.MAP_WIDTH;
 
-    return node1Pos - node2Pos;
+    return node2Pos - node1Pos;
   }
 
   /**
