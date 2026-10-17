@@ -34,6 +34,7 @@ import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.enemy.EnemyAI.TutorialEnemyAI;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
@@ -207,6 +208,16 @@ public class BattleScreen extends ScreenAdapter {
                 : BattleEncounterSelector.enemiesFor(runState));
     this.gameArea = forestGameArea;
     forestGameArea.create();
+
+    if (tutorialBattle) {
+      for (Entity enemy : forestGameArea.getEnemies()) {
+        EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+
+        if (behaviour != null) {
+          behaviour.setAI(new TutorialEnemyAI());
+        }
+      }
+    }
 
     playerState = runState.getOrCreatePlayerState();
     Entity player = forestGameArea.getPlayer();
