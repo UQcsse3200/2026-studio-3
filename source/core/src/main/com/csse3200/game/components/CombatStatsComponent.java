@@ -29,6 +29,7 @@ public class CombatStatsComponent extends Component {
   private static final String EVT_MAX_HEALTH = "updateMaxHealth";
   private static final String POISON = "POISON";
   private static final String FEEBLE = "FEEBLE";
+  private static final String VULNERABLE = "VULNERABLE";
   private int health;
   private int baseAttack;
   private int maxHealth;
@@ -400,8 +401,8 @@ public class CombatStatsComponent extends Component {
 
     if (POISON.equals(type)) {
       applyPoison(effect);
-    } else if (FEEBLE.equals(type)) {
-      applyFeeble(effect);
+    } else if (FEEBLE.equals(type) || VULNERABLE.equals(type)) {
+      applyNonStackingStatus(type, effect);
     } else {
       // Preserve the existing behaviour for other statuses.
       statusEffects.put(type, effect);
@@ -430,8 +431,8 @@ public class CombatStatsComponent extends Component {
     statusEffects.put(POISON, target);
   }
 
-  private void applyFeeble(StatusEffect effect) {
-    StatusEffect existing = statusEffects.get(FEEBLE);
+  private void applyNonStackingStatus(String type, StatusEffect effect) {
+    StatusEffect existing = statusEffects.get(type);
     int duration = effect.getDuration();
     if (existing != null) {
       duration =
@@ -439,8 +440,8 @@ public class CombatStatsComponent extends Component {
               ? 0
               : Math.max(existing.getDuration(), duration);
     }
-    // Feeble does not stack its damage reduction; permanent duration takes precedence.
-    statusEffects.put(FEEBLE, new StatusEffect(FEEBLE, 1, duration));
+    // Feeble and Vulnerable share duration refresh rules and never stack intensity.
+    statusEffects.put(type, new StatusEffect(type, 1, duration));
   }
 
   /**
@@ -551,7 +552,7 @@ public class CombatStatsComponent extends Component {
       return false;
     }
     return switch (type.toUpperCase(Locale.ROOT)) {
-      case POISON, "VULNERABLE", FEEBLE -> true;
+      case POISON, VULNERABLE, FEEBLE -> true;
       default -> false;
     };
   }

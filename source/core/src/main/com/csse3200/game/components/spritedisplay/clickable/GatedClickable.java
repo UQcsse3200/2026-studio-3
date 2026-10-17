@@ -15,7 +15,7 @@ public class GatedClickable extends Clickable {
   @Override
   public void create() {
     super.create();
-    entity.getEvents().addListener("up", () -> setInteractable(true));
-    entity.getEvents().addListener("down", () -> setInteractable(false));
+    subscribe("up", () -> setInteractable(true));
+    subscribe("down", () -> setInteractable(false));
   }
 }

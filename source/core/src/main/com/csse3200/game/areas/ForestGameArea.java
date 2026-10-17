@@ -11,7 +11,6 @@ import com.csse3200.game.components.enemy.IntentIcons;
 import com.csse3200.game.components.gamearea.CombatBackgroundComponent;
 import com.csse3200.game.components.gamearea.CombatBackgroundConfig;
 import com.csse3200.game.components.gamearea.CombatBackgroundConfigs;
-import com.csse3200.game.components.gamearea.GameAreaDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.factories.EnemyFactory;
 import com.csse3200.game.entities.factories.ObstacleFactory;
@@ -151,7 +150,6 @@ public class ForestGameArea extends GameArea {
   }
 
   public void displayUI(Entity ui) {
-    ui.addComponent(new GameAreaDisplay(""));
     spawnEntity(ui);
   }
 

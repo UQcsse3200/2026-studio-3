@@ -22,6 +22,7 @@ import com.csse3200.game.entities.Entity;
 import com.csse3200.game.events.EventHandler;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.events.listeners.EventListener2;
+import com.csse3200.game.rewards.CursePenalties;
 import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.services.audio.SoundId;
 import java.util.ArrayDeque;
@@ -837,10 +838,21 @@ public class BattleController {
     CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
     if (playerStats != null) {
       playerStats.resetBlock();
+      applyBloodOathAtTurnStart(playerStats);
     }
     applyHealingAtTurnStart();
     retrieveCooledDownCards();
     handle(BattleEvent.PLAYER_TURN_STARTED);
+  }
+
+  /** Curse: Blood-Oath Sigil drains Health at the start of each player turn, never below 1. */
+  private void applyBloodOathAtTurnStart(CombatStatsComponent playerStats) {
+    int stacks = CursePenalties.getPenalty(playerStats, CursePenalties.BLOOD_OATH);
+    int damage = stacks * CursePenalties.BLOOD_OATH_DAMAGE_PER_COPY;
+    int allowed = Math.min(damage, playerStats.getHealth() - 1);
+    if (allowed > 0) {
+      playerStats.takePiercingDamage(allowed);
+    }
   }
 
   /**
