@@ -131,6 +131,7 @@ public class DeckEditorComponent extends UIComponent {
   private float gridTopY;
   private float stageHeight;
   private static final String STYLE_NAME_WHITE = "white";
+  private static final String STYLE_NAME_DEFAULT = "default";
 
   private final InputListener wheelListener =
       new InputListener() {
@@ -233,7 +234,8 @@ public class DeckEditorComponent extends UIComponent {
     header.add().width(30f);
     header.add(new Label("CARD INVENTORY", labelStyle(NAME_COLOUR, "font"))).expandX().center();
 
-    TextButtonStyle closeStyle = new TextButtonStyle(skin.get("default", TextButtonStyle.class));
+    TextButtonStyle closeStyle =
+        new TextButtonStyle(skin.get(STYLE_NAME_DEFAULT, TextButtonStyle.class));
     closeStyle.fontColor = NAME_COLOUR;
     closeStyle.up = skin.newDrawable(STYLE_NAME_WHITE, ROW_BACKGROUND_COLOUR);
     closeStyle.over = skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR);
@@ -250,7 +252,8 @@ public class DeckEditorComponent extends UIComponent {
   }
 
   private TextButtonStyle createSetDeckStyle() {
-    TextButtonStyle style = new TextButtonStyle(skin.get("default", TextButtonStyle.class));
+    TextButtonStyle style =
+        new TextButtonStyle(skin.get(STYLE_NAME_DEFAULT, TextButtonStyle.class));
     style.fontColor = GOLD_COLOUR;
     style.overFontColor = NAME_COLOUR;
     style.downFontColor = Color.WHITE;
@@ -279,7 +282,7 @@ public class DeckEditorComponent extends UIComponent {
   }
 
   private static LabelStyle labelStyle(Color colour, String fontName) {
-    LabelStyle style = new LabelStyle(skin.get("default", LabelStyle.class));
+    LabelStyle style = new LabelStyle(skin.get(STYLE_NAME_DEFAULT, LabelStyle.class));
     style.font = skin.getFont(fontName);
     style.fontColor = colour;
     return style;
