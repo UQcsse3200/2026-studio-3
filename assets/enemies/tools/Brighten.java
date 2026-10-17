@@ -4,18 +4,20 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 /**
- * 提亮过暗的敌人帧：暗部提亮并偏冷色，发光部分保持不变，再沿轮廓内侧加一圈冷色边缘光。
+ * Brightens enemy frames that are too dark: lifts and cools the shadows, keeps glowing parts
+ * unchanged, then adds a cool rim light along the inside of the outline.
  *
- * <p>用法: java Brighten.java &lt;gamma&gt; &lt;rim_strength&gt; &lt;out_dir&gt; &lt;frame.png&gt; [&lt;frame.png&gt;
+ * <p>Usage: java Brighten.java &lt;gamma&gt; &lt;rim_strength&gt; &lt;out_dir&gt; &lt;frame.png&gt; [&lt;frame.png&gt;
  * ...]
  *
- * <p>gamma: 小于 1 越小越亮，比如 0.65；rim_strength: 边缘光强度 0~1，比如 0.45
+ * <p>gamma: below 1, smaller is brighter, e.g. 0.65; rim_strength: rim light strength from 0 to 1,
+ * e.g. 0.45
  */
 public class Brighten {
-  static final double STEEL_HUE = 0.6; // 偏向的冷色色相（蓝灰）
-  static final double STEEL_MIN_SAT = 0.15; // 灰色部分至少带这么多冷色
+  static final double STEEL_HUE = 0.6; // Cool hue to shift towards (blue-grey)
+  static final double STEEL_MIN_SAT = 0.15; // Minimum cool tint given to grey parts
   static final int[] RIM_COLOR = {150, 185, 215};
-  static final int RIM_WIDTH = 5; // 边缘光宽度（512 帧上的像素）
+  static final int RIM_WIDTH = 5; // Rim light width (pixels on a 512 frame)
 
   public static void main(String[] args) throws IOException {
     double gamma = Double.parseDouble(args[0]);
@@ -54,7 +56,7 @@ public class Brighten {
       px[i] = argb(a, Math.rint(c[0] * 255), Math.rint(c[1] * 255), Math.rint(c[2] * 255));
     }
 
-    // 轮廓内侧的一圈：原 alpha 减去收缩后的 alpha
+    // The band just inside the outline: original alpha minus the eroded alpha
     boolean[] solid = new boolean[px.length];
     for (int i = 0; i < px.length; i++) {
       solid[i] = (px[i] >>> 24) > 128;
@@ -86,7 +88,10 @@ public class Brighten {
     return out;
   }
 
-  /** 收缩（最小值滤波）后这个像素是否仍在形状内；越界的位置取最近的边缘像素。 */
+  /**
+   * Whether this pixel is still inside the shape after erosion (minimum filter); positions
+   * outside the image use the nearest edge pixel.
+   */
   private static boolean shrunk(boolean[] solid, int w, int h, int x, int y, int reach) {
     for (int dy = -reach; dy <= reach; dy++) {
       for (int dx = -reach; dx <= reach; dx++) {
@@ -106,7 +111,7 @@ public class Brighten {
     return hi > 200 || (hi > 140 && (hi - lo) / (double) hi > 0.55);
   }
 
-  /** 和 Python colorsys.rgb_to_hsv 相同。 */
+  /** Same as Python colorsys.rgb_to_hsv. */
   static double[] rgbToHsv(double r, double g, double b) {
     double hi = Math.max(r, Math.max(g, b));
     double lo = Math.min(r, Math.min(g, b));
@@ -125,7 +130,7 @@ public class Brighten {
     return new double[] {h, range / hi, hi};
   }
 
-  /** 和 Python colorsys.hsv_to_rgb 相同。 */
+  /** Same as Python colorsys.hsv_to_rgb. */
   static double[] hsvToRgb(double h, double s, double v) {
     if (s == 0.0) {
       return new double[] {v, v, v};

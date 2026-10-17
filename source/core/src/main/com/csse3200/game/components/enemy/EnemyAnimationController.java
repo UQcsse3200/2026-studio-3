@@ -21,6 +21,7 @@ public class EnemyAnimationController extends Component {
   private final EventListener0 defeatedListener = this::onDefeated;
   private final EventListener0 castListener = this::onCast;
   private final EventListener0 defendListener = this::onDefend;
+  private final EventListener1<String> formListener = this::setForm;
   private AnimationRenderComponent animator;
   private Vector2 attackOrigin;
   private float attackElapsed;
@@ -29,6 +30,7 @@ public class EnemyAnimationController extends Component {
   private boolean defeated;
   private boolean disposed;
   private static final String ATTACK = "attack";
+  private String currentForm = "normal";
 
   @Override
   public void create() {
@@ -39,7 +41,8 @@ public class EnemyAnimationController extends Component {
     entity.getEvents().addListener("enemyCast", castListener);
     entity.getEvents().addListener("enemyDefend", defendListener);
     entity.getEvents().addListener("enemyAttack", attackListener);
-    animator.startAnimation("idle");
+    entity.getEvents().addListener("enemyFormChanged", formListener);
+    startAction("idle", "idle");
   }
 
   @Override
@@ -64,18 +67,33 @@ public class EnemyAnimationController extends Component {
     String currentAnimation = animator.getCurrentAnimation();
     // Switching to idle resets the renderer's completion state.
     boolean animationFinished = animator.isFinished();
-    if (("hurt".equals(currentAnimation)
-            || ATTACK.equals(currentAnimation)
-            || "cast".equals(currentAnimation)
-            || "defend".equals(currentAnimation))
+    if ((isAction(currentAnimation, "hurt")
+            || isAction(currentAnimation, ATTACK)
+            || isAction(currentAnimation, "cast")
+            || isAction(currentAnimation, "defend"))
         && animationFinished) {
-      animator.startAnimation("idle");
+      startAction("idle", "idle");
     }
     if (attackInProgress
         && attackOrigin == null
-        && (!ATTACK.equals(currentAnimation) || animationFinished)) {
+        && (!isAction(currentAnimation, ATTACK) || animationFinished)) {
       finishAttack();
     }
+  }
+
+  /** Changes the held stance without interrupting an attack or cast already in progress. */
+  public void setForm(String form) {
+    if (disposed || defeated || form == null || form.isBlank()) return;
+    String nextForm = form.trim();
+    if (nextForm.equals(currentForm)) return;
+    currentForm = nextForm;
+    if (isAction(animator.getCurrentAnimation(), "idle")) {
+      startAction("idle", "idle");
+    }
+  }
+
+  public String getCurrentForm() {
+    return currentForm;
   }
 
   /** Continue the battle once both the attack frames and return motion have finished. */
@@ -100,7 +118,7 @@ public class EnemyAnimationController extends Component {
       return;
     }
     resetAttackMotion();
-    animator.startAnimation("hurt");
+    startAction("hurt", "hurt");
   }
 
   private void onDefeated() {
@@ -108,8 +126,9 @@ public class EnemyAnimationController extends Component {
       return;
     }
     defeated = true;
+    currentForm = "normal";
     resetAttackMotion();
-    startIfAvailable("death", "hurt");
+    startAction("death", "hurt");
   }
 
   private void onCast() {
@@ -117,7 +136,7 @@ public class EnemyAnimationController extends Component {
       return;
     }
     resetAttackMotion();
-    startIfAvailable("cast", "idle");
+    startAction("cast", "idle");
   }
 
   private void onDefend() {
@@ -125,7 +144,7 @@ public class EnemyAnimationController extends Component {
       return;
     }
     resetAttackMotion();
-    startIfAvailable("defend", "idle");
+    startAction("defend", "idle");
   }
 
   private void onAttack() {
@@ -133,7 +152,7 @@ public class EnemyAnimationController extends Component {
       return;
     }
     resetAttackMotion();
-    startIfAvailable(ATTACK, "idle");
+    startAction(ATTACK, "idle");
     // Move with the attack frames; idle remains the fallback for missing frames.
     attackOrigin = entity.getPosition();
     attackElapsed = 0f;
@@ -158,10 +177,22 @@ public class EnemyAnimationController extends Component {
     entity.getEvents().removeListener("enemyDefeated", defeatedListener);
     entity.getEvents().removeListener("enemyCast", castListener);
     entity.getEvents().removeListener("enemyDefend", defendListener);
+    entity.getEvents().removeListener("enemyFormChanged", formListener);
     super.dispose();
   }
 
-  private void startIfAvailable(String animation, String fallback) {
-    animator.startAnimation(animator.hasAnimation(animation) ? animation : fallback);
+  private static boolean isAction(String current, String action) {
+    return action.equals(current) || (current != null && current.startsWith(action + "_"));
+  }
+
+  private void startAction(String action, String fallback) {
+    String formAnimation = action + "_" + currentForm;
+    if (!"normal".equals(currentForm) && animator.hasAnimation(formAnimation)) {
+      animator.startAnimation(formAnimation);
+    } else if (animator.hasAnimation(action) || action.equals(fallback)) {
+      animator.startAnimation(action);
+    } else if (!action.equals(fallback)) {
+      startAction(fallback, fallback);
+    }
   }
 }

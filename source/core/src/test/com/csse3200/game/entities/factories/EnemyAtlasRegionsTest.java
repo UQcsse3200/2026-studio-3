@@ -14,9 +14,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
- * 守住 #438 的动画区域命名：Tianyu 的形态切换代码（#436）按名字读这些区域，图鉴读 default 区域。
+ * Guards the animation region names from #438: Tianyu's form-switching code (#436) reads these
+ * regions by name, and the bestiary reads the default region.
  *
- * <p>只解析 .atlas 文本，不加载贴图，所以不需要 GPU。
+ * <p>Only parses the .atlas text and loads no textures, so no GPU is needed.
  */
 @ExtendWith(GameExtension.class)
 class EnemyAtlasRegionsTest {
@@ -26,7 +27,10 @@ class EnemyAtlasRegionsTest {
     return new TextureAtlasData(file, file.parent(), false);
   }
 
-  /** 每个区域名在图集里出现的次数（同名多帧算多次）。 */
+  /**
+   * How many times each region name appears in the atlas (a name with several frames counts once
+   * per frame).
+   */
   private static Map<String, Integer> regionCounts(String id) {
     Map<String, Integer> counts = new HashMap<>();
     for (TextureAtlasData.Region region : atlas(id).getRegions()) {
@@ -62,8 +66,14 @@ class EnemyAtlasRegionsTest {
   }
 
   @Test
+  void bossHasSilenceForm() {
+    assertEquals(2, regionCounts("boss_knight").get("idle_silence"));
+  }
+
+  @Test
   void defaultRegionIsStillTheFirstIdleFrame() {
-    // 图鉴显示 default 区域；新动画不能挪动它，它要和 idle 第 0 帧是同一块
+    // The bestiary shows the default region; new animations must not move it, and it must be the
+    // same region as idle frame 0
     for (String id :
         List.of("lesser_shade", "bone_crawler", "dark_acolyte", "tomb_guardian", "void_knight")) {
       TextureAtlasData.Region defaultRegion = null;

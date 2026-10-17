@@ -10,6 +10,9 @@ import com.csse3200.game.cards.TargetType;
 import com.csse3200.game.cards.effects.ResolvedCardEffect;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.player.EnergyComponent;
+import com.csse3200.game.entities.Entity;
+import com.csse3200.game.rewards.CursePenalties;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -54,6 +57,21 @@ class Team7PlayerStateAdapterTest {
     adapter.applyPlayerEffects(List.of(effect(EffectType.STRENGTH, 2, 0, 0)));
 
     assertEquals(3, stats.getStatusEffect(EffectType.STRENGTH.name()).getValue());
+  }
+
+  @Test
+  void curseItemsReduceCardGainsByTheirActualStackCount() {
+    CombatStatsComponent stats = new CombatStatsComponent(10, 1);
+    CursePenalties.addPenalty(stats, CursePenalties.STRENGTH_PENALTY);
+    CursePenalties.addPenalty(stats, CursePenalties.BLOCK_PENALTY);
+    CursePenalties.addPenalty(stats, CursePenalties.BLOCK_PENALTY);
+    Team7PlayerStateAdapter adapter = new Team7PlayerStateAdapter(new EnergyComponent(3), stats);
+
+    adapter.applyPlayerEffects(
+        List.of(effect(EffectType.STRENGTH, 3, 0, 0), effect(EffectType.BLOCK, 4, 0, 1)));
+
+    assertEquals(2, stats.getStatusEffect(EffectType.STRENGTH.name()).getValue());
+    assertEquals(2, stats.getBlock());
   }
 
   @Test
@@ -107,6 +125,59 @@ class Team7PlayerStateAdapterTest {
 
     assertThrows(IllegalArgumentException.class, () -> adapter.applyPlayerEffects(effects));
     assertEquals(0, stats.getBlock());
+  }
+
+  @Test
+  void entityConstructorRequiresBothPlayerComponents() {
+    Entity complete =
+        new Entity()
+            .addComponent(new EnergyComponent(3))
+            .addComponent(new CombatStatsComponent(10, 1));
+    assertEquals(3, new Team7PlayerStateAdapter(complete).currentEnergy());
+    assertThrows(IllegalArgumentException.class, () -> new Team7PlayerStateAdapter((Entity) null));
+    assertThrows(IllegalArgumentException.class, () -> new Team7PlayerStateAdapter(new Entity()));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new Team7PlayerStateAdapter(new Entity().addComponent(new EnergyComponent(3))));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new Team7PlayerStateAdapter(null, new CombatStatsComponent(10, 1)));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new Team7PlayerStateAdapter(new EnergyComponent(3), null));
+  }
+
+  @Test
+  void rejectsNullAndNonPlayerEffectsBeforeApplyingAnyOfThem() {
+    CombatStatsComponent stats = new CombatStatsComponent(10, 1);
+    Team7PlayerStateAdapter adapter = new Team7PlayerStateAdapter(new EnergyComponent(3), stats);
+
+    assertThrows(IllegalArgumentException.class, () -> adapter.statusValue(null));
+    assertThrows(IllegalArgumentException.class, () -> adapter.applyPlayerEffects(null));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> adapter.applyPlayerEffects(Collections.singletonList(null)));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            adapter.applyPlayerEffects(
+                List.of(
+                    effect(EffectType.BLOCK, 5, 0, 0),
+                    new ResolvedCardEffect(
+                        "strike", EffectType.DAMAGE, TargetType.SINGLE_ENEMY, 2, 0, 1))));
+    assertEquals(0, stats.getBlock());
+  }
+
+  @Test
+  void healingOverTimeCreatesAStatusInsteadOfHealingImmediately() {
+    CombatStatsComponent stats = new CombatStatsComponent(10, 1);
+    stats.setHealth(4);
+    Team7PlayerStateAdapter adapter = new Team7PlayerStateAdapter(new EnergyComponent(3), stats);
+
+    adapter.applyPlayerEffects(List.of(effect(EffectType.HEAL, 2, 2, 0)));
+
+    assertEquals(4, stats.getHealth());
+    assertTrue(stats.hasStatusEffect(EffectType.HEAL.name()));
   }
 
   private static ResolvedCardEffect effect(EffectType type, int value, int duration, int sequence) {

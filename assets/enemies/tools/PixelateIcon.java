@@ -7,14 +7,16 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 /**
- * 把 128x128 的意图/状态图标像素化：按格取色 -> 每个图标单独的小调色板 -> 统一 1 格白描边 -> 最近邻放大。
+ * Pixelates 128x128 intent/status icons: colour per cell -> a small palette per icon -> a uniform
+ * 1-cell white outline -> nearest-neighbour upscale.
  *
- * <p>用法（JDK 11+ 可直接运行源文件）: java PixelateIcon.java &lt;pixel_size&gt; &lt;colors&gt;
+ * <p>Usage (JDK 11+ can run the source file directly): java PixelateIcon.java &lt;pixel_size&gt;
+ * &lt;colors&gt;
  * &lt;out_dir&gt; &lt;icon.png&gt; [&lt;icon.png&gt; ...]
  */
 public class PixelateIcon {
-  private static final int ALPHA_CUT = 128; // 格子平均不透明度低于这个值就算透明
-  private static final double WHITE_SHARE = 0.5; // 格子里白色像素占比达到这个值就画成白色（保留图形之间的白色分隔线）
+  private static final int ALPHA_CUT = 128; // Cells with average alpha below this are transparent
+  private static final double WHITE_SHARE = 0.5; // Cells whose share of white pixels reaches this are drawn white (keeps white dividing lines between shapes)
   private static final int WHITE = 0xFFFFFFFF;
   private static final int[][] NEIGHBOURS = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
@@ -70,7 +72,8 @@ public class PixelateIcon {
         }
         white[y][x] = col == 0 || body - col >= WHITE_SHARE * body;
         if (col > 0) {
-          // 只平均有色像素，再贴到调色板上：渐变变成整齐的色带，不会被白边冲淡
+          // Average only the coloured pixels, then snap to the palette: gradients become clean bands
+          // and are not washed out by the white edge
           fill[y][x] = nearest(palette, (int) (r / col), (int) (g / col), (int) (b / col));
         }
       }
@@ -82,7 +85,7 @@ public class PixelateIcon {
         if (!solid[y][x]) {
           continue;
         }
-        // 轮廓上的格子一律白色：外描边粗细统一为 1 格
+        // Cells on the outline are always white, so the outer outline is a uniform 1 cell thick
         boolean edge = false;
         for (int[] d : NEIGHBOURS) {
           edge |= outside(solid, x + d[0], y + d[1]);
@@ -110,7 +113,10 @@ public class PixelateIcon {
     return x < 0 || y < 0 || x >= n || y >= n || !solid[y][x];
   }
 
-  /** 中位切分：调色板只从有色像素里取，白色描边单独处理，不占名额。 */
+  /**
+   * Median cut: the palette is taken only from coloured pixels; the white outline is handled
+   * separately and takes no slot.
+   */
   private static int[][] palette(BufferedImage img, int colors) {
     List<int[]> pixels = new ArrayList<>();
     for (int y = 0; y < img.getHeight(); y++) {
@@ -124,7 +130,7 @@ public class PixelateIcon {
     List<List<int[]>> boxes = new ArrayList<>();
     boxes.add(pixels);
     while (boxes.size() < colors) {
-      // 每次切开像素最多、且颜色还有差异的那个盒子
+      // Each time, split the box with the most pixels that still has colour variation
       List<int[]> box = null;
       for (List<int[]> candidate : boxes) {
         if (widestChannel(candidate)[1] > 0 && (box == null || candidate.size() > box.size())) {
@@ -156,7 +162,7 @@ public class PixelateIcon {
     return palette;
   }
 
-  /** 返回 {跨度最大的通道, 该通道的跨度}。 */
+  /** Returns {the channel with the widest range, that channel's range}. */
   private static int[] widestChannel(List<int[]> box) {
     int best = 0;
     int bestRange = -1;

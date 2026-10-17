@@ -21,6 +21,8 @@ import com.csse3200.game.components.enemy.Memory.PlayerMemory;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.extensions.GameExtension;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -46,6 +48,45 @@ class EnemyBehaviourComponentTest {
   /** An AI that always returns the same intent, so intent resolution can be tested directly. */
   private static EnemyAI fixedAi(EnemyIntent intent) {
     return context -> intent;
+  }
+
+  @Test
+  void shouldEmitEnrageFormOnlyWhenTheAiStateChanges() {
+    CombatStatsComponent stats = new CombatStatsComponent(40, 16);
+    EnemyBehaviourComponent behaviour = new EnemyBehaviourComponent("enrage_low_health");
+    Entity enemy = enemyWith(behaviour, stats);
+    List<String> forms = new ArrayList<>();
+    enemy.getEvents().addListener("enemyFormChanged", (String form) -> forms.add(form));
+
+    behaviour.rollIntent();
+    stats.setHealth(19);
+    behaviour.rollIntent();
+    behaviour.rollIntent();
+    stats.setHealth(30);
+    behaviour.rollIntent();
+
+    assertEquals(List.of("enraged", "normal"), forms);
+  }
+
+  @Test
+  void shouldFollowMemoryTriggeredEnrageAndReturnAfterPlayerDefends() {
+    EnemyBehaviourComponent behaviour = new EnemyBehaviourComponent("enrage_low_health");
+    Entity enemy = enemyWith(behaviour, new CombatStatsComponent(40, 16));
+    List<String> forms = new ArrayList<>();
+    enemy.getEvents().addListener("enemyFormChanged", (String form) -> forms.add(form));
+    EnemyMemoryComponent memory = new EnemyMemoryComponent();
+    behaviour.setEnemyMemory(memory);
+
+    behaviour.rollIntent();
+    for (int turn = 0; turn < 3; turn++) {
+      memory.settlePlayerTurn();
+    }
+    behaviour.rollIntent();
+    memory.recordCardPlayed(CardType.SKILL, true);
+    memory.settlePlayerTurn();
+    behaviour.rollIntent();
+
+    assertEquals(List.of("enraged", "normal"), forms);
   }
 
   @Test
@@ -168,6 +209,39 @@ class EnemyBehaviourComponentTest {
   }
 
   @Test
+  void tutorialBuffIncreasesTheNextAttack() {
+    EnemyBehaviourComponent behaviour = new EnemyBehaviourComponent(EnemyAIFactory.TUTORIAL);
+    CombatStatsComponent stats = enemyStats();
+    enemyWith(behaviour, stats);
+    behaviour.setPlayerStats(new CombatStatsComponent(30, 1));
+    behaviour.rollIntent();
+    behaviour.rollIntent();
+    assertEquals(IntentType.BUFF, behaviour.rollIntent().getType());
+
+    behaviour.executeIntent(null);
+
+    assertEquals(8, stats.getBaseAttack());
+    assertEquals(8, behaviour.rollIntent().getValue());
+  }
+
+  @Test
+  void tutorialAttackCannotKillEvenWhenPlayerIsVulnerable() {
+    EnemyBehaviourComponent behaviour = new EnemyBehaviourComponent(EnemyAIFactory.TUTORIAL);
+    enemyWith(behaviour, enemyStats());
+    CombatStatsComponent playerStats = new CombatStatsComponent(4, 1);
+    playerStats.applyStatusEffect(EffectType.VULNERABLE.name(), 1, 2);
+    Entity player = new Entity().addComponent(playerStats);
+    player.create();
+    behaviour.setPlayerStats(playerStats);
+
+    assertEquals(3, behaviour.rollIntent().getValue());
+    assertEquals(3, behaviour.getResolvedIntentValue());
+    behaviour.executeIntent(player);
+
+    assertEquals(1, playerStats.getHealth());
+  }
+
+  @Test
   void shouldDamageTheTargetWhenResolvingAttack() {
     EnemyBehaviourComponent behaviour =
         new EnemyBehaviourComponent(EnemyAIFactory.CYCLE_ATTACK_DEFEND);
@@ -205,6 +279,47 @@ class EnemyBehaviourComponentTest {
   }
 
   @Test
+  void shouldResolveDisplayedAttackValueFromLatestStatuses() {
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent("test_live_intent", fixedAi(EnemyIntent.attack(8)));
+
+    CombatStatsComponent attackerStats = enemyStats();
+    enemyWith(behaviour, attackerStats);
+
+    CombatStatsComponent playerStats = new CombatStatsComponent(30, 4);
+    behaviour.setPlayerStats(playerStats);
+    behaviour.rollIntent();
+
+    assertEquals(8, behaviour.getResolvedIntentValue());
+
+    attackerStats.applyStatusEffect(EffectType.FEEBLE.name(), 1, 2);
+    assertEquals(6, behaviour.getResolvedIntentValue());
+
+    playerStats.applyStatusEffect(EffectType.VULNERABLE.name(), 1, 2);
+    assertEquals(9, behaviour.getResolvedIntentValue());
+
+    attackerStats.removeStatusEffect(EffectType.FEEBLE.name());
+    assertEquals(12, behaviour.getResolvedIntentValue());
+
+    playerStats.removeStatusEffect(EffectType.VULNERABLE.name());
+    assertEquals(8, behaviour.getResolvedIntentValue());
+  }
+
+  @Test
+  void shouldKeepOriginalValueForNonAttackIntent() {
+    EnemyBehaviourComponent behaviour =
+        new EnemyBehaviourComponent("test_defend", fixedAi(EnemyIntent.defend(5)));
+
+    CombatStatsComponent stats = enemyStats();
+    stats.applyStatusEffect(EffectType.STRENGTH.name(), 10, 0);
+    enemyWith(behaviour, stats);
+
+    behaviour.rollIntent();
+
+    assertEquals(5, behaviour.getResolvedIntentValue());
+  }
+
+  @Test
   void shouldApplyFeebleOnceAndRoundFinalDamageDownWithoutChangingIntent() {
     EnemyBehaviourComponent behaviour =
         new EnemyBehaviourComponent("test_feeble", fixedAi(EnemyIntent.attack(7)));
@@ -237,7 +352,7 @@ class EnemyBehaviourComponentTest {
     behaviour.rollIntent();
     behaviour.executeIntent(player);
 
-    assertEquals(19, playerStats.getHealth()); // 30 - 11，而不是 30 - 6
+    assertEquals(19, playerStats.getHealth()); // 30 - 11, not 30 - 6
   }
 
   @Test

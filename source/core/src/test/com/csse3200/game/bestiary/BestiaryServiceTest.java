@@ -26,7 +26,8 @@ class BestiaryServiceTest {
   void shouldLoadDefaultRosterWithResolvedSpritePaths() {
     BestiaryService service = BestiaryService.loadDefault();
 
-    assertEquals(6, service.getEntries().size());
+    assertEquals(7, service.getEntries().size());
+    assertTrue(service.contains("votive_attendant"));
     assertTrue(service.contains("lesser_shade"));
     assertTrue(service.contains("tomb_guardian"));
     assertTrue(service.contains("void_knight"));

@@ -374,3 +374,17 @@ attack
   orig: 256, 256
   offset: 0, 0
   index: 9
+idle_silence
+  rotate: false
+  xy: 256, 256
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: 0
+idle_silence
+  rotate: false
+  xy: 512, 256
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: 1

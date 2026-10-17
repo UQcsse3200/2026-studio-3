@@ -5,19 +5,23 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 /**
- * 给像素帧里某一段色相的发光部分换颜色，其余部分不动。用来从原有帧做出形态帧，例如把 Riven Knight 盔甲裂纹的青光改成红光（狂暴形态）。
+ * Recolours the glowing parts of a pixel frame within one hue range, leaving everything else
+ * unchanged. Used to make form frames from existing ones, e.g. turning the cyan glow in Riven
+ * Knight's armour cracks red (enraged form).
  *
- * <p>用法: java Recolor.java &lt;hue_min&gt; &lt;hue_max&gt; &lt;min_sat&gt; &lt;min_val&gt; &lt;hue_shift&gt;
+ * <p>Usage: java Recolor.java &lt;hue_min&gt; &lt;hue_max&gt; &lt;min_sat&gt; &lt;min_val&gt; &lt;hue_shift&gt;
  * &lt;sat_scale&gt; &lt;in.png&gt; &lt;out.png&gt; [&lt;in.png&gt; &lt;out.png&gt; ...]
  *
  * <ul>
- *   <li>hue_min / hue_max：要换色的色相范围（0~360 度）
- *   <li>min_sat / min_val：饱和度、亮度至少这么高才算发光部分（0~1），暗的盔甲和描边不会被改到
- *   <li>hue_shift：色相旋转的角度，例如 180 把青色转成红色
- *   <li>sat_scale：饱和度乘的倍数，大于 1 让新颜色更浓
+ *   <li>hue_min / hue_max: the hue range to recolour (0 to 360 degrees)
+ *   <li>min_sat / min_val: minimum saturation and brightness to count as glowing (0 to 1), so dark
+ *       armour and outlines are left alone
+ *   <li>hue_shift: hue rotation in degrees, e.g. 180 turns cyan into red
+ *   <li>sat_scale: saturation multiplier; above 1 makes the new colour richer
  * </ul>
  *
- * <p>亮度不低于 CORE_VAL 的光芯即使饱和度很低（接近白色）也一起换色，让光芯带一点新颜色。
+ * <p>Cores at or above CORE_VAL brightness are recoloured too even when barely saturated (nearly
+ * white), so they pick up a hint of the new colour.
  */
 public class Recolor {
   static final float CORE_VAL = 0.95f;
