@@ -16,6 +16,7 @@ import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.components.battle.InventoryPopupComponent;
+import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuFactory;
 import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
@@ -61,6 +62,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
   private ImageButton exitButton;
   private MapDisplay mapDisplay;
   private ImageTextButton inventoryButton;
+  private Entity uiEntity;
 
   public MapScreen(GdxGame game) {
     this.game = game;
@@ -128,8 +130,8 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     terminal.addCommand(
         "discoverallcards", new DiscoverAllCardsCommand(game.getCardDiscoveryService()));
 
-    Entity ui = new Entity();
-    ui.addComponent(new InputDecorator(ServiceLocator.getRenderService().getStage(), 10))
+    uiEntity = new Entity();
+    uiEntity.addComponent(new InputDecorator(ServiceLocator.getRenderService().getStage(), 10))
         .addComponent(mapDisplay)
         .addComponent(terminal)
         .addComponent(new KeyboardTerminalInputComponent())
@@ -137,11 +139,11 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
     // Pause menu + in-place save/load overlay (the map is the natural place to save a run).
     // No on-screen pause button here (it didn't fit the map HUD); Escape still opens the menu.
-    SaveLoadPanel savePanel = PauseMenuFactory.attachWithoutButton(ui, game);
-    ServiceLocator.getEntityService().register(ui);
+    SaveLoadPanel savePanel = PauseMenuFactory.attachWithoutButton(uiEntity, game);
+    ServiceLocator.getEntityService().register(uiEntity);
     savePanel.hide(); // save overlay starts hidden, opened by the Save & Load button
 
-    createExitButton(game);
+    createMenuButton(game);
     createInventoryButton(runState);
   }
 
@@ -250,7 +252,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
    *
    * @param game the GdxGame required to change the game screen.
    */
-  private void createExitButton(GdxGame game) {
+  private void createMenuButton(GdxGame game) {
     Stage stage = ServiceLocator.getRenderService().getStage();
     // not hover
     Texture buttonTexture = new Texture(Gdx.files.internal("images/map/main_menu_btn.png"));
@@ -274,7 +276,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
-            game.setScreen(GdxGame.ScreenType.MAIN_MENU);
+            uiEntity.getEvents().trigger(PauseMenuDisplay.PAUSE_EVENT);
           }
         });
 

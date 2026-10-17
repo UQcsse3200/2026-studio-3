@@ -138,12 +138,17 @@ public class MapDisplay extends UIComponent {
     scrollPane.setFillParent(true);
     scrollPane.setScrollingDisabled(true, false);
     scrollPane.setOverscroll(false, false);
-
     stage.addActor(scrollPane);
 
     scrollPane.layout();
-    scrollPane.setScrollPercentY(1f);
-
+    if (mapGraph.getCurrentNode().getHeight() == 0) {
+      scrollPane.setScrollPercentY(1f);
+    }
+    else {
+      int activeNodeHeight = mapGraph.getCurrentNode().getHeight();
+      scrollPane.setScrollY(stage.getWidth() - getNodeY(activeNodeHeight - 1));
+    }
+    
     addPlayerStats();
     addLegend();
   }
@@ -204,6 +209,16 @@ public class MapDisplay extends UIComponent {
    */
   private float getNodeY(MapNode node) {
     return node.getHeight() * 1.5f * nodeWidth + 2.5f * nodeWidth;
+  }
+
+  /**
+   * Calculates the y position for a height
+   *
+   * @param height height needed to find it's layer
+   * @return float y value to position the scrollpane
+   */
+  private float getNodeY(int height) {
+    return height * 1.5f * nodeWidth + 2.5f * nodeWidth;
   }
 
   /**
