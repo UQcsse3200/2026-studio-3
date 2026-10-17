@@ -82,9 +82,10 @@ public class PlayerEnergyDisplay extends UIComponent {
 
     // Energy image
     energyImage =
-        new Image(ServiceLocator.getResourceService().getAsset("images/ui/inventory-panel.png", Texture.class));
+        new Image(
+            ServiceLocator.getResourceService()
+                .getAsset("images/ui/inventory-panel.png", Texture.class));
     energyImage.setScaling(Scaling.stretch);
-  
 
     // Energy text
     EnergyComponent energyComponent = entity.getComponent(EnergyComponent.class);
