@@ -66,6 +66,11 @@ class EnemyAtlasRegionsTest {
   }
 
   @Test
+  void bossHasSilenceForm() {
+    assertEquals(2, regionCounts("boss_knight").get("idle_silence"));
+  }
+
+  @Test
   void defaultRegionIsStillTheFirstIdleFrame() {
     // The bestiary shows the default region; new animations must not move it, and it must be the
     // same region as idle frame 0

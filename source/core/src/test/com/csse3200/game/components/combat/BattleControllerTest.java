@@ -241,6 +241,45 @@ class BattleControllerTest {
   }
 
   @Test
+  void shouldHoldBossSilenceFormUntilSilenceEnds() {
+    Entity silencedPlayer = new Entity().addComponent(new CombatStatsComponent(100, 0));
+    silencedPlayer.create();
+    CombatStatsComponent bossStats = new CombatStatsComponent(150, 14);
+    Entity boss =
+        new Entity()
+            .addComponent(bossStats)
+            .addComponent(new EnemyStatsComponent("Vitium"))
+            .addComponent(new EnemyBehaviourComponent("boss"));
+    Entity guardian =
+        new Entity()
+            .addComponent(new CombatStatsComponent(30, 5))
+            .addComponent(new EnemyStatsComponent("Tomb Guardian"))
+            .addComponent(new EnemyBehaviourComponent("shield_break_retaliation"));
+    boss.create();
+    guardian.create();
+    new BattleController(silencedPlayer, List.of(boss, guardian));
+    List<String> bossForms = new ArrayList<>();
+    List<String> guardianForms = new ArrayList<>();
+    boss.getEvents().addListener("enemyFormChanged", (String form) -> bossForms.add(form));
+    guardian.getEvents().addListener("enemyFormChanged", (String form) -> guardianForms.add(form));
+    CombatStatsComponent playerStats = silencedPlayer.getComponent(CombatStatsComponent.class);
+
+    playerStats.applyStatusEffect("POISON", 1, 2);
+    assertTrue(bossForms.isEmpty());
+    playerStats.applyStatusEffect("SILENCE", 1, 2);
+    playerStats.removeStatusEffect("SILENCE");
+    assertEquals(List.of("silence", "normal"), bossForms);
+
+    // A defeated Boss is left alone when the silence it cast runs out
+    playerStats.applyStatusEffect("SILENCE", 1, 2);
+    bossStats.setHealth(0);
+    playerStats.removeStatusEffect("SILENCE");
+
+    assertEquals(List.of("silence", "normal", "silence"), bossForms);
+    assertTrue(guardianForms.isEmpty());
+  }
+
+  @Test
   void shouldSwitchGuardianFormOnlyForItsOwnLiveTaunt() {
     Entity tauntedPlayer = new Entity().addComponent(new CombatStatsComponent(100, 0));
     tauntedPlayer.create();

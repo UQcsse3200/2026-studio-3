@@ -43,11 +43,15 @@ public class EnemyFactory {
   private static final float IDLE_FRAME_DURATION = 0.5f;
   private static final float HURT_FRAME_DURATION = 0.15f;
   private static final float ATTACK_FRAME_DURATION = 0.2f;
+  // The enraged attack is a single red slash frame, held longer than a normal attack so it reads
+  private static final float ENRAGED_ATTACK_FRAME_DURATION = 0.5f;
   private static final float DEATH_FRAME_DURATION = 0.3f;
   private static final float CAST_FRAME_DURATION = 0.1f;
   private static final float DEFEND_FRAME_DURATION = 0.1f;
   // Non-boss cast / defend is a single held pose, shown for this long before returning to idle
   private static final float HELD_POSE_DURATION = 0.8f;
+  // The Boss's silence form loops two glowing cast frames to show it is still channelling
+  private static final float SILENCE_HOLD_FRAME_DURATION = 0.2f;
   private static final float BOSS_DEATH_FRAME_DURATION = 0.12f;
 
   /** Multiplier applied on top of the sprite's own size so enemies read clearly on screen. */
@@ -122,7 +126,11 @@ public class EnemyFactory {
       addOptionalAnimation(
           atlas, animator, "idle_enraged", IDLE_FRAME_DURATION, Animation.PlayMode.LOOP);
       addOptionalAnimation(
-          atlas, animator, "attack_enraged", ATTACK_FRAME_DURATION, Animation.PlayMode.NORMAL);
+          atlas,
+          animator,
+          "attack_enraged",
+          ENRAGED_ATTACK_FRAME_DURATION,
+          Animation.PlayMode.NORMAL);
       addOptionalAnimation(
           atlas, animator, "hurt_enraged", HURT_FRAME_DURATION, Animation.PlayMode.NORMAL);
     } else if ("shield_break_retaliation".equals(config.behaviour)) {
@@ -130,6 +138,9 @@ public class EnemyFactory {
           atlas, animator, "idle_taunt", IDLE_FRAME_DURATION, Animation.PlayMode.LOOP);
       addOptionalAnimation(
           atlas, animator, "hurt_taunt", HURT_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    } else if ("boss".equals(config.behaviour)) {
+      addOptionalAnimation(
+          atlas, animator, "idle_silence", SILENCE_HOLD_FRAME_DURATION, Animation.PlayMode.LOOP);
     }
 
     CombatStatsComponent stats = new CombatStatsComponent(config.health, config.baseAttack);
