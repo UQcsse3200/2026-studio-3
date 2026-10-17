@@ -8,6 +8,7 @@ import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAI;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIFactory;
+import com.csse3200.game.components.enemy.EnemyAI.TutorialEnemyAI;
 import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.Memory.PlayerMemory;
 import com.csse3200.game.entities.Entity;
@@ -28,6 +29,7 @@ public class EnemyBehaviourComponent extends Component {
   private int turnNumber = 0;
   private CombatStatsComponent playerStats;
   private EnemyMemoryComponent enemyMemory;
+  private boolean enrageFormActive;
 
   /**
    * Creates a behaviour that resolves its AI from a behaviour identifier.
@@ -115,8 +117,20 @@ public class EnemyBehaviourComponent extends Component {
     CombatStatsComponent stats = entity.getComponent(CombatStatsComponent.class);
     currentIntent = stats == null ? EnemyIntent.unknown() : ai.decide(buildContext(stats));
 
+    if (ai instanceof com.csse3200.game.components.enemy.EnemyAI.EnrageLowHealthAI enrageAi
+        && enrageFormActive != enrageAi.isEnraged()) {
+      enrageFormActive = enrageAi.isEnraged();
+      entity.getEvents().trigger("enemyFormChanged", enrageFormActive ? "enraged" : "normal");
+    }
+
     entity.getEvents().trigger("intentChanged", currentIntent);
     return currentIntent;
+  }
+
+  /** Replaces only the already-telegraphed action; the next roll still uses the normal AI. */
+  public void forceCurrentIntent(EnemyIntent intent) {
+    currentIntent = java.util.Objects.requireNonNull(intent, "intent cannot be null");
+    entity.getEvents().trigger("intentChanged", currentIntent);
   }
 
   /**
@@ -152,8 +166,9 @@ public class EnemyBehaviourComponent extends Component {
       case ATTACK -> attack(target);
       case DEFEND -> defend();
       case DEBUFF -> applyDebuff(target);
+      case BUFF -> buff();
       default -> {
-        // No behaviour produces BUFF yet; UNKNOWN is intentionally inert.
+        // UNKNOWN is intentionally inert.
       }
     }
   }
@@ -176,7 +191,6 @@ public class EnemyBehaviourComponent extends Component {
     CombatStatsComponent targetStats = target.getComponent(CombatStatsComponent.class);
     if (targetStats != null) {
       int damage = resolveAttackDamage(targetStats);
-
       // Starts the attack animation (EnemyAnimationController) before the damage lands.
       entity.getEvents().trigger("enemyAttack");
       targetStats.takeDamage(damage);
@@ -213,8 +227,13 @@ public class EnemyBehaviourComponent extends Component {
     int feeble = statusValue(attackerStats, EffectType.FEEBLE);
     int vulnerable = statusValue(targetStats, EffectType.VULNERABLE);
 
-    return new CardEffectResolutionContext(strength, feeble, vulnerable)
-        .resolveDamage(currentIntent.getValue());
+    int damage =
+        new CardEffectResolutionContext(strength, feeble, vulnerable)
+            .resolveDamage(currentIntent.getValue());
+    // Keep the shown intent and the actual tutorial hit nonlethal after all modifiers.
+    return ai instanceof TutorialEnemyAI && targetStats != null
+        ? Math.min(damage, Math.max(0, targetStats.getHealth() - 1))
+        : damage;
   }
 
   /**
@@ -237,6 +256,15 @@ public class EnemyBehaviourComponent extends Component {
     if (stats != null) {
       entity.getEvents().trigger("enemyDefend");
       stats.addArmour(currentIntent.getValue());
+    }
+  }
+
+  /** Applies an attack buff for the tutorial enemy's third action. */
+  private void buff() {
+    CombatStatsComponent stats = entity.getComponent(CombatStatsComponent.class);
+    if (stats != null) {
+      entity.getEvents().trigger("enemyCast");
+      stats.setBaseAttack(stats.getBaseAttack() + Math.max(0, currentIntent.getValue()));
     }
   }
 

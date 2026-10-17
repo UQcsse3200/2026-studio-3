@@ -106,6 +106,12 @@ public class BattleController {
     this.playerTurnNumber = 0;
     this.eventHandler = new EventHandler();
     this.eventQueue = new ArrayDeque<>();
+    EventHandler playerEvents = player.getEvents();
+    if (playerEvents != null) {
+      EventListener1<String> tauntStatusListener = this::refreshTauntFormForStatus;
+      playerEvents.addListener("statusEffectApplied", tauntStatusListener);
+      playerEvents.addListener("statusEffectRemoved", tauntStatusListener);
+    }
     for (Entity enemy : this.enemies) {
       EventHandler enemyEvents = enemy.getEvents();
       if (enemyEvents != null) {
@@ -114,8 +120,13 @@ public class BattleController {
             () -> {
               CombatStatsComponent playerStats =
                   this.player.getComponent(CombatStatsComponent.class);
+              String tauntKey = IntentEffectType.TAUNT.name() + ":" + enemy.getId();
+              boolean hadTaunt = playerStats != null && playerStats.hasStatusEffect(tauntKey);
               if (playerStats != null) {
-                playerStats.removeStatusEffect(IntentEffectType.TAUNT.name() + ":" + enemy.getId());
+                playerStats.removeStatusEffect(tauntKey);
+              }
+              if (!hadTaunt) {
+                setTauntForm(enemy, false);
               }
             });
       }
@@ -274,6 +285,50 @@ public class BattleController {
             })
         .map(enemy -> Integer.toString(enemy.getId()))
         .toList();
+  }
+
+  private void refreshTauntFormForStatus(String statusKey) {
+    for (Entity enemy : enemies) {
+      if ((IntentEffectType.TAUNT.name() + ":" + enemy.getId()).equals(statusKey)) {
+        CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+        CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
+        setTauntForm(
+            enemy,
+            playerStats != null
+                && playerStats.hasStatusEffect(statusKey)
+                && enemyStats != null
+                && !enemyStats.isDead());
+      }
+    }
+  }
+
+  private void setTauntForm(Entity enemy, boolean active) {
+    EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+    if (behaviour != null
+        && "shield_break_retaliation".equals(behaviour.getBehaviourId())
+        && enemy.getEvents() != null) {
+      enemy.getEvents().trigger("enemyFormChanged", active ? "taunt" : "normal");
+    }
+  }
+
+  /** Returns the enemy in a left-to-right, zero-based battle slot, or null if invalid. */
+  public Entity getEnemyInSlot(int slot) {
+    return slot >= 0 && slot < enemies.size() ? enemies.get(slot) : null;
+  }
+
+  /** Replaces one already-visible intent for the upcoming enemy phase only. */
+  public boolean forceNextEnemyIntent(int slot, EnemyIntent intent) {
+    Entity enemy = getEnemyInSlot(slot);
+    if (!isPlayerTurn() || enemy == null || intent == null) return false;
+    CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
+    EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+    if (stats == null || stats.isDead() || behaviour == null) return false;
+    behaviour.forceCurrentIntent(intent);
+    if (currentEnemyIndex == slot) {
+      setEnemyIntent(intent);
+    }
+    narrateDebuffIntent(enemy, intent);
+    return true;
   }
 
   /** Player decides to end their turn */

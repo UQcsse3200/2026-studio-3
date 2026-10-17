@@ -187,6 +187,20 @@ class BattleControllerTest {
   }
 
   @Test
+  void shouldRejectInvalidForcedIntentsAndAcceptEitherLivingSlotDuringPlayerTurn() {
+    EnemyIntent forced = EnemyIntent.attack(7);
+    assertFalse(controller.forceNextEnemyIntent(0, forced));
+    controller.start();
+    assertFalse(controller.forceNextEnemyIntent(-1, forced));
+    assertFalse(controller.forceNextEnemyIntent(2, forced));
+    assertFalse(controller.forceNextEnemyIntent(0, null));
+    assertTrue(controller.forceNextEnemyIntent(1, forced));
+    verify(secondEnemyBehaviour).forceCurrentIntent(forced);
+    assertTrue(controller.forceNextEnemyIntent(0, forced));
+    verify(firstEnemyBehaviour).forceCurrentIntent(forced);
+  }
+
+  @Test
   void shouldResetToSetupAfterTheBattleHasStarted() {
     controller.start();
 
@@ -224,6 +238,60 @@ class BattleControllerTest {
 
     assertFalse(playerStats.hasStatusEffect("TAUNT:" + firstId));
     assertEquals(List.of(secondId), battle.getAliveTaunterTargetIds());
+  }
+
+  @Test
+  void shouldSwitchGuardianFormOnlyForItsOwnLiveTaunt() {
+    Entity tauntedPlayer = new Entity().addComponent(new CombatStatsComponent(100, 0));
+    tauntedPlayer.create();
+    CombatStatsComponent guardianStats = new CombatStatsComponent(30, 5);
+    Entity guardian =
+        new Entity()
+            .addComponent(guardianStats)
+            .addComponent(new EnemyStatsComponent("Tomb Guardian"))
+            .addComponent(new EnemyBehaviourComponent("shield_break_retaliation"));
+    guardian.create();
+    new BattleController(tauntedPlayer, List.of(guardian));
+    List<String> forms = new ArrayList<>();
+    guardian.getEvents().addListener("enemyFormChanged", (String form) -> forms.add(form));
+    CombatStatsComponent playerStats = tauntedPlayer.getComponent(CombatStatsComponent.class);
+    String ownTaunt = "TAUNT:" + guardian.getId();
+
+    playerStats.applyStatusEffect("TAUNT:999999", 999999, 2);
+    assertTrue(forms.isEmpty());
+    playerStats.applyStatusEffect(ownTaunt, guardian.getId(), 2);
+    playerStats.removeStatusEffect(ownTaunt);
+    playerStats.applyStatusEffect(ownTaunt, guardian.getId(), 2);
+    guardianStats.setHealth(0);
+
+    assertEquals(List.of("taunt", "normal", "taunt", "normal"), forms);
+    assertFalse(playerStats.hasStatusEffect(ownTaunt));
+  }
+
+  @Test
+  void shouldClearGuardianFormWhenItsTauntExpires() {
+    Entity tauntedPlayer = new Entity().addComponent(new CombatStatsComponent(100, 0));
+    tauntedPlayer.create();
+    Entity guardian =
+        new Entity()
+            .addComponent(new CombatStatsComponent(30, 1))
+            .addComponent(new EnemyStatsComponent("Tomb Guardian"))
+            .addComponent(new EnemyBehaviourComponent("shield_break_retaliation"));
+    guardian.create();
+    BattleController battle = new BattleController(tauntedPlayer, List.of(guardian));
+    List<String> forms = new ArrayList<>();
+    guardian.getEvents().addListener("enemyFormChanged", (String form) -> forms.add(form));
+    CombatStatsComponent playerStats = tauntedPlayer.getComponent(CombatStatsComponent.class);
+    String ownTaunt = "TAUNT:" + guardian.getId();
+    playerStats.applyStatusEffect(ownTaunt, guardian.getId(), 2);
+
+    battle.start();
+    battle.endPlayerTurn();
+    assertEquals(List.of("taunt"), forms);
+    battle.endPlayerTurn();
+
+    assertEquals(List.of("taunt", "normal"), forms);
+    assertFalse(playerStats.hasStatusEffect(ownTaunt));
   }
 
   @Test

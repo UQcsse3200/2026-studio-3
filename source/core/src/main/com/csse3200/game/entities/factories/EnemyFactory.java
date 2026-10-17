@@ -2,6 +2,8 @@ package com.csse3200.game.entities.factories;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
+import com.badlogic.gdx.utils.Array;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryTrackingComponent;
 import com.csse3200.game.components.CombatStatsComponent;
@@ -114,6 +116,22 @@ public class EnemyFactory {
       animator.addAnimation("death", DEATH_FRAME_DURATION, Animation.PlayMode.NORMAL);
     }
 
+    // Form art is optional until the final elite atlases arrive. The controller uses the
+    // corresponding normal action whenever one of these regions is absent.
+    if ("enrage_low_health".equals(config.behaviour)) {
+      addOptionalAnimation(
+          atlas, animator, "idle_enraged", IDLE_FRAME_DURATION, Animation.PlayMode.LOOP);
+      addOptionalAnimation(
+          atlas, animator, "attack_enraged", ATTACK_FRAME_DURATION, Animation.PlayMode.NORMAL);
+      addOptionalAnimation(
+          atlas, animator, "hurt_enraged", HURT_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    } else if ("shield_break_retaliation".equals(config.behaviour)) {
+      addOptionalAnimation(
+          atlas, animator, "idle_taunt", IDLE_FRAME_DURATION, Animation.PlayMode.LOOP);
+      addOptionalAnimation(
+          atlas, animator, "hurt_taunt", HURT_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    }
+
     CombatStatsComponent stats = new CombatStatsComponent(config.health, config.baseAttack);
     stats.setArmour(config.armour);
 
@@ -157,16 +175,20 @@ public class EnemyFactory {
     return enemy;
   }
 
-  /**
-   * Resolves the texture atlas path for an enemy.
-   *
-   * <p>An explicit {@link EnemyConfig#sprite} wins. Otherwise the path is {@code
-   * images/enemies/<id>.atlas} by convention, falling back to {@link #DEFAULT_ATLAS} when the id is
-   * missing.
-   *
-   * @param config enemy configuration
-   * @return an internal texture atlas path
-   */
+  /** Registers a form animation only when its atlas region has been supplied. */
+  private static void addOptionalAnimation(
+      TextureAtlas atlas,
+      AnimationRenderComponent animator,
+      String name,
+      float frameDuration,
+      Animation.PlayMode playMode) {
+    Array<AtlasRegion> regions = atlas.findRegions(name);
+    if (regions != null && regions.size > 0) {
+      animator.addAnimation(name, frameDuration, playMode);
+    }
+  }
+
+  /** Resolves an explicit enemy atlas, or the conventional atlas for its id. */
   private static String atlasPath(EnemyConfig config) {
     if (config.sprite != null && !config.sprite.isBlank()) {
       return config.sprite;

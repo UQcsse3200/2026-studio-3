@@ -87,9 +87,11 @@ import com.csse3200.game.ui.PopupInputComponent;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
+import com.csse3200.game.ui.terminal.commands.ForceIntentCommand;
 import com.csse3200.game.ui.terminal.commands.GiveGoldCommand;
 import com.csse3200.game.ui.terminal.commands.GiveItemCommand;
 import com.csse3200.game.ui.terminal.commands.GiveOwnedItemCommand;
+import com.csse3200.game.ui.terminal.commands.SetEnemyHealthCommand;
 import com.csse3200.game.ui.terminal.commands.SetHealthCommand;
 import com.csse3200.game.ui.terminal.commands.SkipBattleCommand;
 import java.nio.file.Path;
@@ -216,7 +218,7 @@ public class BattleScreen extends ScreenAdapter {
             runState,
             tutorialBattle ? "dungeon" : game.getBackgroundId(),
             tutorialBattle
-                ? List.of("bone_crawler")
+                ? List.of("votive_attendant")
                 : BattleEncounterSelector.enemiesFor(runState));
     this.gameArea = forestGameArea;
     forestGameArea.create();
@@ -517,6 +519,8 @@ public class BattleScreen extends ScreenAdapter {
     terminal.addCommand("skipbattle", new SkipBattleCommand(controller));
     terminal.addCommand("givegold", new GiveGoldCommand(gameArea.getPlayer()));
     terminal.addCommand("sethealth", new SetHealthCommand(gameArea.getPlayer()));
+    terminal.addCommand("setenemyhp", new SetEnemyHealthCommand(controller));
+    terminal.addCommand("forceintent", new ForceIntentCommand(controller));
     terminal.addCommand("giveitem", new GiveItemCommand(gameArea.getPlayer()));
     terminal.addCommand(
         "giveowneditem", new GiveOwnedItemCommand(game.getRunState().getOrCreatePlayerState()));

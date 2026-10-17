@@ -82,11 +82,92 @@ class EnemyFactoryTest {
   }
 
   @Test
+  void tutorialAttendantUsesItsArtAndAi() {
+    Entity enemy = EnemyFactory.create("votive_attendant");
+    CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
+    EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+
+    assertEquals(30, stats.getHealth());
+    assertEquals(5, stats.getBaseAttack());
+    assertEquals(2, stats.getArmour());
+    assertEquals("tutorial", behaviour.getBehaviourId());
+    verify(resourceService).getAsset("images/enemies/votive_attendant.atlas", TextureAtlas.class);
+  }
+
+  @Test
   void createAttachesAnimationComponents() {
     Entity enemy = EnemyFactory.create("lesser_shade");
 
     assertNotNull(enemy.getComponent(AnimationRenderComponent.class));
     assertNotNull(enemy.getComponent(EnemyAnimationController.class));
+  }
+
+  @Test
+  void createRegistersOnlySuppliedEliteFormRegions() {
+    TextureAtlas knightAtlas = mock(TextureAtlas.class);
+    Array<AtlasRegion> frames = new Array<>();
+    frames.add(mock(AtlasRegion.class));
+    when(knightAtlas.findRegions("idle_enraged")).thenReturn(frames);
+    when(resourceService.getAsset("images/enemies/void_knight.atlas", TextureAtlas.class))
+        .thenReturn(knightAtlas);
+    AnimationRenderComponent knight =
+        EnemyFactory.create("void_knight").getComponent(AnimationRenderComponent.class);
+    assertTrue(knight.hasAnimation("idle_enraged"));
+    assertFalse(knight.hasAnimation("attack_enraged"));
+
+    TextureAtlas guardianAtlas = mock(TextureAtlas.class);
+    when(guardianAtlas.findRegions("idle_taunt")).thenReturn(frames);
+    when(resourceService.getAsset("images/enemies/tomb_guardian.atlas", TextureAtlas.class))
+        .thenReturn(guardianAtlas);
+    AnimationRenderComponent guardian =
+        EnemyFactory.create("tomb_guardian").getComponent(AnimationRenderComponent.class);
+    assertTrue(guardian.hasAnimation("idle_taunt"));
+    assertFalse(guardian.hasAnimation("hurt_taunt"));
+  }
+
+  @Test
+  void createStillRegistersBossAnimationsWithoutEliteForms() {
+    TextureAtlas atlas = mock(TextureAtlas.class);
+    Array<AtlasRegion> castFrames = new Array<>();
+    castFrames.add(mock(AtlasRegion.class));
+    when(atlas.findRegions("cast")).thenReturn(castFrames);
+    when(resourceService.getAsset("images/enemies/boss_knight.atlas", TextureAtlas.class))
+        .thenReturn(atlas);
+    AnimationRenderComponent boss =
+        EnemyFactory.create("boss_knight").getComponent(AnimationRenderComponent.class);
+
+    assertTrue(boss.hasAnimation("cast"));
+    assertFalse(boss.hasAnimation("idle_enraged"));
+    assertFalse(boss.hasAnimation("idle_taunt"));
+  }
+
+  @Test
+  void createUsesExplicitAtlasOrFallsBackToEnemyIdWhenSpriteIsBlank() {
+    EnemyConfig config = new EnemyConfig();
+    config.id = "void_knight";
+    config.behaviour = "enrage_low_health";
+    config.sprite = "images/enemies/alternate_knight.atlas";
+    EnemyFactory.create(config);
+    verify(resourceService).getAsset(config.sprite, TextureAtlas.class);
+
+    config.sprite = "";
+    EnemyFactory.create(config);
+    verify(resourceService).getAsset("images/enemies/void_knight.atlas", TextureAtlas.class);
+
+    config.sprite = null;
+    config.id = null;
+    EnemyFactory.create(config);
+    config.id = "";
+    EnemyFactory.create(config);
+    verify(resourceService, atLeastOnce())
+        .getAsset("images/enemies/default.atlas", TextureAtlas.class);
+  }
+
+  @Test
+  void createdEnemyLifecycleDoesNotThrow() {
+    Entity enemy = EnemyFactory.create("lesser_shade");
+
+    assertDoesNotThrow(enemy::create);
   }
 
   @Test

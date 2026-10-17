@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -116,6 +117,48 @@ class EnemyAnimationControllerTest {
     enemy.getEvents().trigger("enemyDefend");
 
     verify(animator).startAnimation("defend");
+  }
+
+  @Test
+  void shouldHoldTauntIdleAndUseNormalCastWhenTauntCastIsMissing() {
+    when(animator.hasAnimation("idle_taunt")).thenReturn(true);
+    when(animator.hasAnimation("cast")).thenReturn(true);
+    when(animator.getCurrentAnimation()).thenReturn("idle");
+    enemy.getEvents().trigger("enemyFormChanged", "taunt");
+    verify(animator).startAnimation("idle_taunt");
+
+    enemy.getEvents().trigger("enemyCast");
+    verify(animator).startAnimation("cast");
+    when(animator.getCurrentAnimation()).thenReturn("cast");
+    when(animator.isFinished()).thenReturn(true);
+    enemy.update();
+    verify(animator, times(2)).startAnimation("idle_taunt");
+  }
+
+  @Test
+  void shouldFallBackToNormalAttackWhenEnragedAttackIsMissing() {
+    when(animator.hasAnimation("attack")).thenReturn(true);
+    enemy.getEvents().trigger("enemyFormChanged", "enraged");
+    enemy.getEvents().trigger("enemyAttack");
+
+    verify(animator).startAnimation("attack");
+    verify(animator, never()).startAnimation("attack_enraged");
+  }
+
+  @Test
+  void shouldUseEnragedHurtWhenAvailableAndReturnToNormalOnFormExit() {
+    when(animator.hasAnimation("hurt_enraged")).thenReturn(true);
+    when(animator.getCurrentAnimation()).thenReturn("idle");
+    enemy.getEvents().trigger("enemyFormChanged", "enraged");
+    enemy.getEvents().trigger("enemyDamaged", 2);
+    verify(animator).startAnimation("hurt_enraged");
+
+    enemy.getEvents().trigger("enemyFormChanged", "normal");
+    when(animator.getCurrentAnimation()).thenReturn("hurt_enraged");
+    when(animator.isFinished()).thenReturn(true);
+    enemy.update();
+    verify(animator, atLeastOnce()).startAnimation("idle");
+    assertEquals("normal", enemy.getComponent(EnemyAnimationController.class).getCurrentForm());
   }
 
   @Test
