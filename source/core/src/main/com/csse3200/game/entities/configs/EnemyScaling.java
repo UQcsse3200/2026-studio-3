@@ -20,11 +20,11 @@ public final class EnemyScaling {
     double attackRate;
 
     if (base.tier == EnemyTier.ELITE) {
-      healthRate = 0.10;
-      attackRate = 0.07;
-    } else {
-      healthRate = 0.08;
+      healthRate = 0.8;
       attackRate = 0.05;
+    } else {
+      healthRate = 0.05;
+      attackRate = 0.03;
     }
 
     EnemyConfig scaled = new EnemyConfig();

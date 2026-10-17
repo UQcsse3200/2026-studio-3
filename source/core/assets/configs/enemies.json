@@ -56,7 +56,7 @@
     {
       "id": "boss_knight",
       "name": "Vitium",
-      "health": 150,
+      "health": 100,
       "baseAttack": 14,
       "armour": 8,
       "tier": "BOSS",
