@@ -30,4 +30,38 @@ class ItemFormattingTest {
   void formatsWarriorsCrest() {
     assertEquals("Blessed Crest", ItemFormatting.formatItemName(ItemType.WARRIORS_CREST));
   }
+
+  @Test
+  void formatsAmbrosiaFlask() {
+    assertEquals("Draught of Ambrosia", ItemFormatting.formatItemName(ItemType.AMBROSIA_FLASK));
+  }
+
+  @Test
+  void formatsBloodOathSigilAsCurseFromChanceEvents() {
+    assertEquals("Blood-Oath Sigil", ItemFormatting.formatItemName(ItemType.BLOOD_OATH_SIGIL));
+    assertEquals("Chance Events", ItemFormatting.formatItemSource(ItemType.BLOOD_OATH_SIGIL));
+  }
+
+  @Test
+  void formatsEternalVitalityAsElitePortalReward() {
+    assertEquals("Eternal Vitality", ItemFormatting.formatItemName(ItemType.ETERNAL_VITALITY));
+    assertEquals(
+        "Elite Portal - Ancient Temple",
+        ItemFormatting.formatItemSource(ItemType.ETERNAL_VITALITY));
+  }
+
+  @Test
+  void battleRewardItemsShowBattleRewardsAsSource() {
+    assertEquals("Battle rewards", ItemFormatting.formatItemSource(ItemType.LUCKY_COIN));
+    assertEquals("Battle rewards", ItemFormatting.formatItemSource(ItemType.WARRIORS_CREST));
+  }
+
+  @Test
+  void curseItemsShowChanceEventsAsSource() {
+    for (ItemType item : ItemType.values()) {
+      if (item.isCurse()) {
+        assertEquals("Chance Events", ItemFormatting.formatItemSource(item));
+      }
+    }
+  }
 }

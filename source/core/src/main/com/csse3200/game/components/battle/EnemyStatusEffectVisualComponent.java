@@ -30,7 +30,7 @@ import java.util.Objects;
 public class EnemyStatusEffectVisualComponent extends RenderComponent {
   private static final float STATUS_CYCLE_SECONDS = 2.4f;
   private static final float POISON_CYCLE_SECONDS = 3.6f;
-  private static final float SINGLE_SCALE = 1.4f;
+  private static final float MAX_VISIBLE_SCALE = 0.9f;
   private static final float ORBIT_EFFECT_WIDTH = 0.55f;
   private static final float ORBIT_RADIUS_X = 0.65f;
   private static final float ORBIT_RADIUS_Y = 0.2f;
@@ -51,6 +51,7 @@ public class EnemyStatusEffectVisualComponent extends RenderComponent {
   private float persistentTime;
   private boolean disposed;
   private boolean badgeVisible;
+  private Rectangle effectBounds;
   private final Map<TextureRegion, Rectangle> visibleFrameBounds = new HashMap<>();
 
   /**
@@ -163,10 +164,14 @@ public class EnemyStatusEffectVisualComponent extends RenderComponent {
     float eased = 1f - (1f - t) * (1f - t);
     Vector2 scale = target.getScale();
     float baseSize = Math.min(scale.x, scale.y);
-    Vector2 centre = target.getCenterPosition();
+    Rectangle visibleBounds = visibleTargetBounds();
+    Vector2 centre =
+        new Vector2(
+            visibleBounds.x + visibleBounds.width / 2f,
+            visibleBounds.y + visibleBounds.height / 2f);
     float size = baseSize * (style.startScale() + (style.endScale() - style.startScale()) * eased);
-    float x = centre.x + (statusType == null ? scale.x * 0.18f : 0f) - size / 2f;
-    float y = centre.y + style.rise() * baseSize * eased - size / 2f;
+    float x = centre.x - size / 2f;
+    float y = centre.y - size / 2f;
     if (statusType != null && !persistent) {
       // Keep the application burst independent of the persistent layout.
       size = baseSize * (1.05f + 0.2f * eased);
@@ -195,8 +200,8 @@ public class EnemyStatusEffectVisualComponent extends RenderComponent {
       }
       double phase = sharedOrbitTime() / ORBIT_SECONDS;
       if (count == 1) {
-        width = bounds.width * SINGLE_SCALE;
-        height = bounds.height * SINGLE_SCALE;
+        width = bounds.width * MAX_VISIBLE_SCALE;
+        height = bounds.height * MAX_VISIBLE_SCALE;
       } else {
         double angle = Math.PI * 2d * (phase + slot / (double) count);
         width = bounds.width * ORBIT_EFFECT_WIDTH;
@@ -207,6 +212,27 @@ public class EnemyStatusEffectVisualComponent extends RenderComponent {
       x = centre.x - width / 2f;
       y = centre.y - height / 2f;
     }
+    // Fit the original frame ratio inside the visible body without moving its centre.
+    float maxWidth = Math.min(width, visibleBounds.width * MAX_VISIBLE_SCALE);
+    float maxHeight = Math.min(height, visibleBounds.height * MAX_VISIBLE_SCALE);
+    TextureRegion image = frames[frame];
+    float fit = Math.min(maxWidth / image.getRegionWidth(), maxHeight / image.getRegionHeight());
+    float fittedWidth = image.getRegionWidth() * fit;
+    float fittedHeight = image.getRegionHeight() * fit;
+    x += (width - fittedWidth) / 2f;
+    y += (height - fittedHeight) / 2f;
+    width = fittedWidth;
+    height = fittedHeight;
+    // Use one centre for the whole sheet so transparent margins do not cause frame jitter.
+    if (effectBounds == null) {
+      for (TextureRegion cell : frames) {
+        Rectangle bounds = readVisibleFrameBounds(cell);
+        if (effectBounds == null) effectBounds = new Rectangle(bounds);
+        else effectBounds.merge(bounds);
+      }
+    }
+    x += (0.5f - effectBounds.x - effectBounds.width / 2f) * width;
+    y += (0.5f - effectBounds.y - effectBounds.height / 2f) * height;
     float previousColor = batch.getPackedColor();
     try {
       batch.setColor(style.color().r, style.color().g, style.color().b, alpha);
