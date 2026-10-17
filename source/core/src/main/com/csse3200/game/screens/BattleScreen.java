@@ -600,13 +600,16 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(deckEditor);
     ServiceLocator.getEntityService().register(deckEditorEntity);
 
-    // Hide the deck editor's scroll buttons until the popup opens. DeckEditorComponent.create()
+    // Hide the deck editor's JSON buttons until the popup opens. DeckEditorComponent.create()
     // tries to do this itself, but runs before the JSON-loaded clickables are registered in the
-    // factory, so nothing gets hidden. These two loops fix that.
+    // factory, so nothing gets hidden. These loops fix that.
     for (Clickable c : deckPoolFactory.getByTrigger("deckScrollUp")) {
       c.getBtn().setVisible(false);
     }
     for (Clickable c : deckPoolFactory.getByTrigger("deckScrollDown")) {
+      c.getBtn().setVisible(false);
+    }
+    for (Clickable c : deckPoolFactory.getByTrigger("deckSetDeck")) {
       c.getBtn().setVisible(false);
     }
 
