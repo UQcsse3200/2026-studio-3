@@ -10,11 +10,13 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -48,6 +50,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockedConstruction;
 
 @ExtendWith(GameExtension.class)
 class EnemyFactoryTest {
@@ -100,6 +103,40 @@ class EnemyFactoryTest {
 
     assertNotNull(enemy.getComponent(AnimationRenderComponent.class));
     assertNotNull(enemy.getComponent(EnemyAnimationController.class));
+  }
+
+  @Test
+  void enragedAttackIsHeldLongerThanNormalAttack() {
+    TextureAtlas knightAtlas = mock(TextureAtlas.class);
+    Array<AtlasRegion> frames = new Array<>();
+    frames.add(mock(AtlasRegion.class));
+    when(knightAtlas.findRegions(anyString())).thenReturn(frames);
+    when(resourceService.getAsset("images/enemies/void_knight.atlas", TextureAtlas.class))
+        .thenReturn(knightAtlas);
+
+    try (MockedConstruction<AnimationRenderComponent> animators =
+        mockConstruction(AnimationRenderComponent.class)) {
+      EnemyFactory.create("void_knight");
+      AnimationRenderComponent animator = animators.constructed().get(0);
+
+      verify(animator).addAnimation("attack", 0.2f, Animation.PlayMode.NORMAL);
+      verify(animator).addAnimation("attack_enraged", 0.5f, Animation.PlayMode.NORMAL);
+    }
+  }
+
+  @Test
+  void bossRegistersSilenceFormWhenAtlasHasIt() {
+    TextureAtlas bossAtlas = mock(TextureAtlas.class);
+    Array<AtlasRegion> frames = new Array<>();
+    frames.add(mock(AtlasRegion.class));
+    when(bossAtlas.findRegions("idle_silence")).thenReturn(frames);
+    when(resourceService.getAsset("images/enemies/boss_knight.atlas", TextureAtlas.class))
+        .thenReturn(bossAtlas);
+
+    AnimationRenderComponent boss =
+        EnemyFactory.create("boss_knight").getComponent(AnimationRenderComponent.class);
+
+    assertTrue(boss.hasAnimation("idle_silence"));
   }
 
   @Test

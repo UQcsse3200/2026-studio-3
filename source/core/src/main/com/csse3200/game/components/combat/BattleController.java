@@ -111,6 +111,9 @@ public class BattleController {
       EventListener1<String> tauntStatusListener = this::refreshTauntFormForStatus;
       playerEvents.addListener("statusEffectApplied", tauntStatusListener);
       playerEvents.addListener("statusEffectRemoved", tauntStatusListener);
+      EventListener1<String> silenceStatusListener = this::refreshSilenceFormForStatus;
+      playerEvents.addListener("statusEffectApplied", silenceStatusListener);
+      playerEvents.addListener("statusEffectRemoved", silenceStatusListener);
     }
     for (Entity enemy : this.enemies) {
       EventHandler enemyEvents = enemy.getEvents();
@@ -308,6 +311,26 @@ public class BattleController {
         && "shield_break_retaliation".equals(behaviour.getBehaviourId())
         && enemy.getEvents() != null) {
       enemy.getEvents().trigger("enemyFormChanged", active ? "taunt" : "normal");
+    }
+  }
+
+  /** Holds the Boss in its channelling form for as long as its silence stays on the player. */
+  private void refreshSilenceFormForStatus(String statusKey) {
+    if (!IntentEffectType.SILENCE.name().equals(statusKey)) {
+      return;
+    }
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+    boolean silenced = playerStats != null && playerStats.hasStatusEffect(statusKey);
+    for (Entity enemy : enemies) {
+      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+      CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
+      if (behaviour != null
+          && "boss".equals(behaviour.getBehaviourId())
+          && enemyStats != null
+          && !enemyStats.isDead()
+          && enemy.getEvents() != null) {
+        enemy.getEvents().trigger("enemyFormChanged", silenced ? "silence" : "normal");
+      }
     }
   }
 
