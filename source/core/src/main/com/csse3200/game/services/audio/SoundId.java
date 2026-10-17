@@ -24,5 +24,6 @@ public enum SoundId {
   LEAVE_SHOP,
   VICTORY,
   BUTTON_CLICK,
-  DEFEAT
+  DEFEAT,
+  BIG_CLICK
 }

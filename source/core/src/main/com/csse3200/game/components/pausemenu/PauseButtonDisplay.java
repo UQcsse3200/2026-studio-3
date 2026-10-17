@@ -12,6 +12,8 @@ import com.badlogic.gdx.utils.Align;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
 import org.slf4j.Logger;
@@ -90,6 +92,7 @@ public class PauseButtonDisplay extends UIComponent {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent changeEvent, Actor actor) {
+            AudioService.playSound(SoundId.BUTTON_CLICK, 0.5f);
             logger.debug("On-screen pause button clicked");
             entity.getEvents().trigger(PauseMenuDisplay.PAUSE_EVENT);
           }

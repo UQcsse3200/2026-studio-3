@@ -136,6 +136,7 @@ public class MainMenuDisplay extends UIComponent {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent changeEvent, Actor actor) {
+            AudioService.playSound(SoundId.BUTTON_CLICK, 0.5f);
             logger.debug("{} button clicked", text);
             if (START_EVENT.equals(eventName)) {
               showTutorialChoice();

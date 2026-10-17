@@ -18,6 +18,8 @@ import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.components.settingsmenu.SettingsPanel;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
 import java.util.ArrayList;
@@ -134,6 +136,7 @@ public class PauseMenuDisplay extends UIComponent {
             return table.isVisible();
           }
 
+
           @Override
           public boolean scrolled(
               InputEvent event, float x, float y, float amountX, float amountY) {
@@ -243,6 +246,7 @@ public class PauseMenuDisplay extends UIComponent {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent changeEvent, Actor actor) {
+            AudioService.playSound(SoundId.BUTTON_CLICK, 0.5f);
             logger.debug("Confirmation confirmed");
             confirmDialog.hide(null);
             if (pendingConfirm != null) {
@@ -255,6 +259,7 @@ public class PauseMenuDisplay extends UIComponent {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent changeEvent, Actor actor) {
+            AudioService.playSound(SoundId.BUTTON_CLICK, 0.5f);
             logger.debug("Confirmation cancelled");
             confirmDialog.hide(null);
             setFocus(pauseFocusables());
@@ -293,6 +298,15 @@ public class PauseMenuDisplay extends UIComponent {
    */
   private TextButton menuButton(String text, String eventName) {
     TextButton button = new TextButton(text, buttonStyle());
+
+    button.addListener(
+            new ChangeListener() {
+              @Override
+              public void changed(ChangeEvent changeEvent, Actor actor) {
+                AudioService.playSound(SoundId.BUTTON_CLICK, 0.5f);
+              }
+            });
+
     if (eventName != null) {
       button.addListener(
           new ChangeListener() {

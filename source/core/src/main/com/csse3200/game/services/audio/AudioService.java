@@ -71,6 +71,7 @@ public class AudioService {
     "sounds/victory.ogg",
     "sounds/buttonClick.ogg",
     "sounds/defeat.ogg",
+    "sounds/bigClick.mp3",
   };
   private static final String[] musicPaths = {
     "music/BGM_03_mp3.mp3",
