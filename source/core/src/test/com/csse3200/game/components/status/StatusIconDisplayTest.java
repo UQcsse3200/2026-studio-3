@@ -102,7 +102,7 @@ class StatusIconDisplayTest {
     stats.applyStatusEffect("POISON", 3, 4);
     display.update();
 
-    assertEquals("4", count(0));
+    assertEquals("3", count(0));
     assertEquals("2", count(1));
   }
 
@@ -172,7 +172,7 @@ class StatusIconDisplayTest {
     assertTrue(tooltip.isVisible());
     assertEquals("Poison 3", tooltipText(tooltip, 0));
     assertEquals(StatusInfo.POISON.describe(3), tooltipText(tooltip, 1));
-    assertEquals("2 turns remaining", tooltipText(tooltip, 2));
+    assertEquals("3 stacks: 2 turns remaining", tooltipText(tooltip, 2));
   }
 
   @Test
@@ -183,6 +183,20 @@ class StatusIconDisplayTest {
     hover(row().getChildren().first());
 
     assertEquals("Takes 4 damage each time a card is played.", tooltipText(tooltip(), 1));
+  }
+
+  @Test
+  void shouldShowTotalPoisonStacksAndListEachGroupOnHover() {
+    stats.applyStatusEffect("POISON", 4, 2);
+    stats.applyStatusEffect("POISON", 3, 3);
+    display.create();
+
+    hover(row().getChildren().first());
+
+    assertEquals("7", count(0));
+    assertEquals("Poison 7", tooltipText(tooltip(), 0));
+    assertEquals(
+        "4 stacks: 2 turns remaining\n3 stacks: 3 turns remaining", tooltipText(tooltip(), 2));
   }
 
   @Test

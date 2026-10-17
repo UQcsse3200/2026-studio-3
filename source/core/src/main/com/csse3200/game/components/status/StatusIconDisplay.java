@@ -202,15 +202,22 @@ public class StatusIconDisplay extends UIComponent {
     }
     String title =
         SHOWS_VALUE.contains(info) ? info.title() + " " + effect.getValue() : info.title();
-    return new StatusTooltip.Content(
-        title, info.describe(effect.getValue()), StatusInfo.durationText(effect.getDuration()));
+    String duration =
+        info == StatusInfo.POISON
+            ? StatusInfo.poisonDurationText(stats.getPoisonStacksByDuration())
+            : StatusInfo.durationText(effect.getDuration());
+    return new StatusTooltip.Content(title, info.describe(effect.getValue()), duration);
   }
 
   /**
-   * Turns remaining for statuses that expire. Permanent statuses show their value instead if it
-   * matters (such as Strength points), and nothing otherwise.
+   * Total stacks for Poison, since that is the damage it deals next turn; the tooltip lists how
+   * long each group lasts. Other statuses show the turns remaining if they expire, their value if
+   * it matters (such as Strength points), and nothing otherwise.
    */
   private static String countText(StatusInfo info, Shown status) {
+    if (info == StatusInfo.POISON) {
+      return Integer.toString(status.value());
+    }
     if (status.duration() > 0) {
       return Integer.toString(status.duration());
     }

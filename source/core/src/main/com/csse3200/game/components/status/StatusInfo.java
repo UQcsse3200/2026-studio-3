@@ -2,8 +2,11 @@ package com.csse3200.game.components.status;
 
 import com.csse3200.game.components.enemy.IntentIcons;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Display name, rules text and icon for each status effect that can appear on a combatant.
@@ -84,6 +87,34 @@ public enum StatusInfo {
       return "Lasts until the end of combat";
     }
     return duration == 1 ? "1 turn remaining" : duration + " turns remaining";
+  }
+
+  /**
+   * Describes each group of poison on its own line. Poison applied with different durations ticks
+   * down separately, so some stacks can run out before others.
+   *
+   * <p>Groups are listed soonest to expire first, with permanent stacks last.
+   *
+   * @param stacksByDuration poison stacks keyed by remaining duration, as returned by {@code
+   *     CombatStatsComponent.getPoisonStacksByDuration()}; a key of zero or less means permanent
+   * @return text such as "4 stacks: 2 turns remaining", one line per group
+   */
+  public static String poisonDurationText(Map<Integer, Integer> stacksByDuration) {
+    return stacksByDuration.entrySet().stream()
+        .sorted(
+            Comparator.comparingInt(
+                (Map.Entry<Integer, Integer> group) ->
+                    group.getKey() <= 0 ? Integer.MAX_VALUE : group.getKey()))
+        .map(group -> stacksText(group.getValue()) + ": " + groupDurationText(group.getKey()))
+        .collect(Collectors.joining("\n"));
+  }
+
+  private static String stacksText(int stacks) {
+    return stacks == 1 ? "1 stack" : stacks + " stacks";
+  }
+
+  private static String groupDurationText(int duration) {
+    return duration <= 0 ? "until the end of combat" : durationText(duration);
   }
 
   /**

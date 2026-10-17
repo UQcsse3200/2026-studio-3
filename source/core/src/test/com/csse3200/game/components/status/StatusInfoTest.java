@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -75,5 +76,21 @@ class StatusInfoTest {
     for (StatusInfo info : StatusInfo.values()) {
       assertTrue(unique.contains(info.iconPath()), info.name());
     }
+  }
+
+  @Test
+  void shouldListPoisonGroupsSoonestFirstWithPermanentStacksLast() {
+    Map<Integer, Integer> groups = Map.of(0, 2, 3, 3, 2, 4);
+
+    assertEquals(
+        "4 stacks: 2 turns remaining\n"
+            + "3 stacks: 3 turns remaining\n"
+            + "2 stacks: until the end of combat",
+        StatusInfo.poisonDurationText(groups));
+  }
+
+  @Test
+  void shouldUseTheSingularForOneStackAndOneTurn() {
+    assertEquals("1 stack: 1 turn remaining", StatusInfo.poisonDurationText(Map.of(1, 1)));
   }
 }
