@@ -484,7 +484,7 @@
       {
         "id": "purify",
         "name": "Purify",
-        "description": "The stain of corruption is washed away. Remove all negative effects from yourself.",
+        "description": "The stain of corruption is washed away. Remove Poison, Vulnerable and Feeble from yourself.",
         "lore": "Corruption can cling even to those sent to cleanse it. The angel turns that same discipline inward before continuing the work of release.",
         "cost": 1,
         "type": "SKILL",
@@ -494,7 +494,7 @@
         "texturePath": "images/cards/purify.png",
         "upgrade": {
           "name": "Purify+",
-          "description": "The stain of corruption is washed away by grace. Remove all negative effects from yourself.",
+          "description": "The stain of corruption is washed away by grace. Remove Poison, Vulnerable and Feeble from yourself.",
           "cost": 0,
           "rarity": "UNCOMMON",
           "effects": [{ "type": "CLEANSE", "value": 1, "duration": 0 }]
