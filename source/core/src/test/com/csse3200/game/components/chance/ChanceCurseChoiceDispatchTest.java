@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.csse3200.game.cards.TestCardService;
@@ -82,7 +83,7 @@ class ChanceCurseChoiceDispatchTest {
       entity.create();
       display.getChoiceButtons().get(0).fire(new ChangeEvent());
       assertEquals(95, player.getCurrency());
-      var overlay = stage.getRoot().findActor("acquisition-result-overlay");
+      Table overlay = stage.getRoot().findActor("acquisition-result-overlay");
       assertNotNull(overlay);
       assertEquals(
           "Gold +60",
@@ -146,7 +147,7 @@ class ChanceCurseChoiceDispatchTest {
       assertTrue(session.isResolved());
       assertEquals(35 + gold, player.getCurrency());
       assertEquals(40, player.getHealth());
-      var overlay = stage.getRoot().findActor("acquisition-result-overlay");
+      Table overlay = stage.getRoot().findActor("acquisition-result-overlay");
       assertNotNull(overlay);
       assertFalse(display.getContinueButton().isVisible());
       assertEquals(
