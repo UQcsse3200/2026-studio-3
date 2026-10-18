@@ -57,11 +57,10 @@ public class Terminal extends Component {
    *     description}. Commands registered without help text are listed by name only.
    */
   public List<String> getHelpLines() {
-    List<String> lines = new ArrayList<>();
-    for (String name : new TreeMap<>(commands).keySet()) {
-      lines.add(helpLines.getOrDefault(name, name));
-    }
-    return lines;
+    return commands.keySet().stream()
+        .sorted()
+        .map(name -> helpLines.getOrDefault(name, name))
+        .toList();
   }
 
   /**
