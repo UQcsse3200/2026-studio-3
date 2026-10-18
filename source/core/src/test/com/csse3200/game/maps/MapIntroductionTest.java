@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(GameExtension.class)
 class MapIntroductionTest {
   private Skin skin;
+  private Texture panelTexture;
   private Stage stage;
   private RunState runState;
   private MapIntroduction introduction;
@@ -31,13 +33,14 @@ class MapIntroductionTest {
   void setUp() {
     skin = new Skin(Gdx.files.internal("flat-earth/skin/flat-earth-ui.json"));
     stage = new Stage(new FitViewport(1280f, 800f), mock(Batch.class));
+    panelTexture = new Texture(Gdx.files.internal("images/ui/inventory-panel.png"));
     MapGraph graph =
         new MapGraph(
             Map.of(0, new MapNode(0, RoomType.START), 7, new MapNode(7, RoomType.COMBAT)), false);
     graph.connectNodes(0, 7);
     runState = new RunState();
     runState.startRun(graph, 0);
-    introduction = new MapIntroduction(skin, runState);
+    introduction = new MapIntroduction(skin, runState, panelTexture);
     introduction.resize(stage.getWidth(), stage.getHeight());
     stage.addActor(introduction);
   }
@@ -45,6 +48,7 @@ class MapIntroductionTest {
   @AfterEach
   void tearDown() {
     stage.dispose();
+    panelTexture.dispose();
     skin.dispose();
   }
 
@@ -69,7 +73,7 @@ class MapIntroductionTest {
   @Test
   void rebuildingTheMapKeepsTheIntroductionCollapsed() {
     introduction.remove();
-    MapIntroduction returning = new MapIntroduction(skin, runState);
+    MapIntroduction returning = new MapIntroduction(skin, runState, panelTexture);
     stage.addActor(returning);
 
     assertFalse(returning.findActor("map-introduction-panel").isVisible());
