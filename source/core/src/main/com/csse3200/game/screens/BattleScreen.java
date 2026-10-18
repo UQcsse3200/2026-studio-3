@@ -503,12 +503,29 @@ public class BattleScreen extends ScreenAdapter {
             buildAllRecords(), enemyCardAim, playerCardAim, allEnemiesCardAim);
 
     Terminal terminal = new Terminal();
-    terminal.addCommand("skipbattle", new SkipBattleCommand(controller));
-    terminal.addCommand("givegold", new GiveGoldCommand(gameArea.getPlayer()));
-    terminal.addCommand("sethealth", new SetHealthCommand(gameArea.getPlayer()));
-    terminal.addCommand("giveitem", new GiveItemCommand(gameArea.getPlayer()));
+    terminal.setContextName("Battle commands");
     terminal.addCommand(
-        "giveowneditem", new GiveOwnedItemCommand(game.getRunState().getOrCreatePlayerState()));
+        "skipbattle", "skipbattle", "win the battle instantly", new SkipBattleCommand(controller));
+    terminal.addCommand(
+        "givegold",
+        "givegold <amount>",
+        "add gold to the player",
+        new GiveGoldCommand(gameArea.getPlayer()));
+    terminal.addCommand(
+        "sethealth",
+        "sethealth <hp>",
+        "set the player's current health",
+        new SetHealthCommand(gameArea.getPlayer()));
+    terminal.addCommand(
+        "giveitem",
+        "giveitem <ITEM_TYPE>",
+        "offer an item as a battle reward",
+        new GiveItemCommand(gameArea.getPlayer()));
+    terminal.addCommand(
+        "giveowneditem",
+        "giveowneditem <ITEM_TYPE>",
+        "add an item straight to the inventory",
+        new GiveOwnedItemCommand(game.getRunState().getOrCreatePlayerState()));
 
     // Untitled: DeckEditorComponent draws its own "CARD INVENTORY" header, like the item inventory.
     PopupDisplay cardInventory = new PopupDisplay("");
