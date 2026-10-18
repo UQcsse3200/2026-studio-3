@@ -50,7 +50,8 @@ public class MapDisplay extends UIComponent {
     "images/map/cross.png",
     "images/map/legend.png",
     "images/map/main_menu_btn.png",
-    "images/map/campfire.png"
+    "images/map/campfire.png",
+    "images/ui/inventory-panel.png"
   };
 
   private Group group;
@@ -148,7 +149,12 @@ public class MapDisplay extends UIComponent {
     addPlayerStats();
     addLegend();
     if (runState != null) {
-      mapIntroduction = new MapIntroduction(skin, runState);
+      mapIntroduction =
+          new MapIntroduction(
+              skin,
+              runState,
+              ServiceLocator.getResourceService()
+                  .getAsset("images/ui/inventory-panel.png", Texture.class));
       mapIntroduction.resize(stage.getWidth(), stage.getHeight());
       stage.addActor(mapIntroduction);
     }

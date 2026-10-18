@@ -6,11 +6,15 @@ The first Map of each fresh run opens a **Your Journey** panel in the left margi
 
 **Got it** collapses the panel into a **?** button, which reopens the same explanation. The panel has no modal overlay and does not take keyboard or scroll focus. Nodes outside the panel remain interactive.
 
+The panel reuses the Inventory background (`images/ui/inventory-panel.png`) as a nine-patch so its corners retain their proportions in the narrow sidebar. Its gold heading and cream body text match the Inventory palette. Both **?** and **Got it** use `BattleMenuSkins.frameStyle(...)`, the shared bronze frame introduced by Maria in [PR #487](https://github.com/UQcsse3200/2026-studio-3/pull/487). The group branch includes that small style API from `main`; no JSON button migration is required.
+
 `RunState.startRun()` marks the introduction pending. `MapIntroduction` consumes this flag once when the Map display is created. Returning from encounters does not show the panel again. Restoring a saved run starts with the panel collapsed, including saves at the starting point. Ending the run clears the pending flag; starting another fresh run makes the introduction available again. The save format is unchanged.
 
-`MapDisplay` owns the introduction, repositions it below the stats bar on resize, and removes it on disposal. Fonts and drawables are borrowed from the shared Map skin.
+`MapDisplay` owns the introduction, repositions it below the stats bar on resize, and removes it on disposal. Fonts are borrowed from the shared Map skin. The panel texture is managed with the Map assets, and the button frames are shared through `BattleMenuSkins`.
 
 ## Verification
+
+- On 18 October 2026, the UI consistency update passed all 31 focused Map, Inventory, menu-layout and shared-button tests, plus formatting and desktop compilation. Fresh-run, collapse/reopen, return/restore, hover and resize were rendered for visual checks at 1280×800 and 1600×900.
 
 - Five `MapIntroductionTest` cases cover collapse/reopen, returning Map display, unobstructed node selection, layout after resize, and control cleanup.
 - Four added `RunStateTest` cases cover first display per fresh run, encounter return, restoration at the start, and clearing an unshown introduction.
