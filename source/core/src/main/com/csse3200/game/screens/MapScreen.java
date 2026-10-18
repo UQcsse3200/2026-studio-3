@@ -122,11 +122,21 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     // PROPOSED: debug terminal for cheats/commands on the map (unlock nodes, etc.). Same
     // Terminal/KeyboardTerminalInputComponent/TerminalDisplay trio used elsewhere; F1 toggles it.
     Terminal terminal = new Terminal();
-    terminal.addCommand("unlocknode", new UnlockNodeCommand(runState));
-    terminal.addCommand("listnodes", new ListNodesCommand(runState));
-    terminal.addCommand("goto", new GotoCommand(runState, mapDisplay.getMapSelectionController()));
+    terminal.setContextName("Map commands");
     terminal.addCommand(
-        "discoverallcards", new DiscoverAllCardsCommand(game.getCardDiscoveryService()));
+        "unlocknode", "unlocknode <nodeId>", "unlock a map node", new UnlockNodeCommand(runState));
+    terminal.addCommand(
+        "listnodes", "listnodes", "print every node and its state", new ListNodesCommand(runState));
+    terminal.addCommand(
+        "goto",
+        "goto <floor> <roomtype>",
+        "jump to a node, e.g. goto 3 SHOP",
+        new GotoCommand(runState, mapDisplay.getMapSelectionController()));
+    terminal.addCommand(
+        "discoverallcards",
+        "discoverallcards",
+        "mark every card as discovered",
+        new DiscoverAllCardsCommand(game.getCardDiscoveryService()));
 
     Entity ui = new Entity();
     ui.addComponent(new InputDecorator(ServiceLocator.getRenderService().getStage(), 10))
