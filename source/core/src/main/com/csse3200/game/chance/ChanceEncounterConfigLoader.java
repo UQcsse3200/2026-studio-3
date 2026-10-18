@@ -229,7 +229,7 @@ public final class ChanceEncounterConfigLoader {
           || decimal.compareTo(BigDecimal.valueOf(Integer.MAX_VALUE)) > 0) {
         errors.add(label + " must be an exact 32-bit integer, was " + value.asString());
       }
-    } catch (NumberFormatException exception) {
+    } catch (NumberFormatException | ArithmeticException e) {
       errors.add(label + " must be an exact 32-bit integer, was " + value.asString());
     }
   }
