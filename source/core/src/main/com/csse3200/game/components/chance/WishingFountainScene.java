@@ -158,7 +158,7 @@ final class WishingFountainScene extends Group {
             batch,
             x,
             y,
-            7 + i % 4 * 3,
+            7f + (i % 4) * 3f,
             2,
             FOAM,
             parentAlpha
@@ -167,7 +167,7 @@ final class WishingFountainScene extends Group {
       }
       float ripple = (clock * 0.65f) % 1f;
       for (int i = 0; i < 22; i++) {
-        float angle = i * (float) Math.PI * 2 / 22;
+        float angle = i * (float) Math.PI * 2f / 22f;
         rect(
             batch,
             640 + (float) Math.cos(angle) * (18 + ripple * 64),
@@ -180,8 +180,8 @@ final class WishingFountainScene extends Group {
       for (int i = 0; i < 8; i++) {
         rect(
             batch,
-            612 + i * 8,
-            211 + (i % 3) * 3,
+            612f + i * 8f,
+            211f + (i % 3) * 3f,
             5,
             2,
             CrossGlow.GOLD,
@@ -194,8 +194,8 @@ final class WishingFountainScene extends Group {
       rect(batch, x - width / 2, bottom, width, top - bottom, WATER, 0.34f * alpha);
       for (int i = 0; i < 16; i++) {
         float y = top - ((clock * 72 + i * 17) % (top - bottom));
-        float offset = ((i * 7) % 5 - 2) * 2;
-        rect(batch, x + offset, y, 2 + i % 2, 3 + i % 4 * 2, FOAM, 0.65f * alpha);
+        float offset = ((i * 7) % 5 - 2) * 2f;
+        rect(batch, x + offset, y, 2f + (i % 2), 3f + (i % 4) * 2f, FOAM, 0.65f * alpha);
       }
       for (int i = 0; i < 6; i++) {
         float phase = (clock * 1.6f + i / 6f) % 1;
@@ -229,10 +229,10 @@ final class WishingFountainScene extends Group {
       for (int i = 3; i >= 1; i--) {
         rect(
             batch,
-            640 - i * 7,
-            504 - i * 7,
-            i * 14,
-            i * 14,
+            640f - i * 7f,
+            504f - i * 7f,
+            i * 14f,
+            i * 14f,
             GOLD,
             (0.025f + charge * 0.045f) * brightness * parentAlpha);
       }

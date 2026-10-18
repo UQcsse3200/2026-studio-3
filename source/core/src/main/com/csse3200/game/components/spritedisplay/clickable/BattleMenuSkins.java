@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import java.util.EnumMap;
@@ -85,14 +86,33 @@ public final class BattleMenuSkins {
     return skin;
   }
 
+  /** The drawn frame (no icon) as a text button style, used by the {@link Framed} variant. */
+  public static TextButton.TextButtonStyle frameStyle(BitmapFont font) {
+    ensureFrames();
+    TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
+    style.up = up;
+    style.over = over;
+    style.down = down;
+    style.font = font;
+    style.fontColor = Color.valueOf("E8C894");
+    style.overFontColor = Color.valueOf("FFE3A0");
+    style.downFontColor = Color.valueOf("C68A3A");
+    style.pressedOffsetY = -2f;
+    return style;
+  }
+
   private static void ensureSharedResources() {
     if (baseSkin == null) {
       baseSkin = new Skin(Gdx.files.internal("flat-earth/skin/flat-earth-ui.json"));
     }
+    ensureFrames();
+  }
+
+  private static void ensureFrames() {
     if (up == null) {
-      up = createFrame(Color.valueOf("11131E"), Color.valueOf("8B542C"), Color.valueOf("E2A44A"));
-      over = createFrame(Color.valueOf("191B28"), Color.valueOf("B16C34"), Color.valueOf("FFD071"));
-      down = createFrame(Color.valueOf("090B12"), Color.valueOf("704021"), Color.valueOf("B97932"));
+      up = createFrame(Color.valueOf("11131E"), Color.valueOf("80634B"), Color.valueOf("C9A477"));
+      over = createFrame(Color.valueOf("191B28"), Color.valueOf("9A7655"), Color.valueOf("DFC08F"));
+      down = createFrame(Color.valueOf("090B12"), Color.valueOf("654C3C"), Color.valueOf("A8845D"));
     }
   }
 
@@ -132,7 +152,7 @@ public final class BattleMenuSkins {
     pixmap.drawRectangle(x, y, 6, 6);
     pixmap.setColor(bronze);
     pixmap.fillRectangle(x + 2, y + 2, 3, 3);
-    pixmap.setColor(Color.valueOf("FFE075"));
+    pixmap.setColor(Color.valueOf("D9BC8A"));
     pixmap.fillRectangle(x + 3, y + 3, 2, 2);
   }
 }

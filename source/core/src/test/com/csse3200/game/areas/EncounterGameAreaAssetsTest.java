@@ -12,7 +12,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.cards.CardConfigLoader;
@@ -100,6 +102,20 @@ class EncounterGameAreaAssetsTest {
     RunState run = new RunState();
     run.setMapGraph(new MapGraph(Map.of(7, new MapNode(7, roomType)), false));
     PlayerStatsDisplay hud = new PlayerStatsDisplay();
+
+    TextureAtlas atlas = mock(TextureAtlas.class);
+
+    when(ServiceLocator.getResourceService()
+            .getAsset("images/player/player.atlas", TextureAtlas.class))
+        .thenReturn(atlas);
+
+    TextureAtlas.AtlasRegion atlasRegion = new TextureAtlas.AtlasRegion(texture, 0, 0, 0, 0);
+
+    Array<TextureAtlas.AtlasRegion> regions = new Array<>();
+    regions.add(atlasRegion);
+
+    when(atlas.findRegions("idle")).thenReturn(regions);
+
     PlayerStatsTopDisplay topHud = new PlayerStatsTopDisplay(run);
     AtomicBoolean topHudCreated = new AtomicBoolean();
     Entity player =
