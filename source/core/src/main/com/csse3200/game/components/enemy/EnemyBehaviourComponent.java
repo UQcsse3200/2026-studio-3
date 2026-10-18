@@ -5,7 +5,6 @@ import com.csse3200.game.cards.effects.CardEffectResolutionContext;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.StatusEffect;
-import com.csse3200.game.components.StatusEffectCalculator;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAI;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext;
 import com.csse3200.game.components.enemy.EnemyAI.EnemyAIFactory;
@@ -64,7 +63,6 @@ public class EnemyBehaviourComponent extends Component {
   public EnemyAI getAI() {
     return ai;
   }
-
 
   /**
    * Replaces the AI used by this enemy.

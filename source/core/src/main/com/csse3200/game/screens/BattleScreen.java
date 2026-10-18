@@ -43,7 +43,6 @@ import com.csse3200.game.components.enemy.BossDialogueComponent;
 import com.csse3200.game.components.enemy.BossDialogueConfig;
 import com.csse3200.game.components.enemy.EnemyAI.BossAI;
 import com.csse3200.game.components.enemy.EnemyAI.TutorialEnemyAI;
-import com.csse3200.game.components.enemy.EnemyAI.TutorialEnemyAI;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
@@ -118,25 +117,21 @@ public class BattleScreen extends ScreenAdapter {
   private final Renderer renderer;
   private final ForestGameArea gameArea;
 
-  private static final String[] mainGameTextures = {
-    "images/heart.png",
-    "images/energy.png",
-    "images/money.png",
-    "images/level.png",
-    "images/enemy.png",
-    "images/armour.png",
-    "images/enemy_release/heavens_grace.png",
-    "images/ui/inventory-panel.png",
-    "images/effects/shield.png",
-    "images/effects/fortify.png",
-    "images/ui/lucky-coin.png",
-    "images/ui/energy-crystal.png",
-    "images/ui/merchants-favor.png",
-    "images/ui/iron-aegis.png",
-    "images/ui/warriors-crest.png",
-    "images/effects/heal.png",
-    "images/enemies/intents/buff.png"
-  };
+  private static final String[] mainGameTextures =
+      ItemArtwork.withAllCutouts(
+          "images/heart.png",
+          "images/energy.png",
+          "images/money.png",
+          "images/level.png",
+          "images/enemy.png",
+          "images/armour.png",
+          "images/enemy_release/heavens_grace.png",
+          "images/ui/inventory-panel.png",
+          BATTLE_TITLE_TEXTURE,
+          "images/effects/shield.png",
+          "images/effects/fortify.png",
+          "images/effects/heal.png",
+          "images/enemies/intents/buff.png");
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 
   private static final float HAND_Y = 1000f;
