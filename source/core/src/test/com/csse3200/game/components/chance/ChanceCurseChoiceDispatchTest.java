@@ -26,7 +26,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-/** Checks choice dispatch through existing scenic UI; does not assert visual layout acceptance. */
+/** Checks confirmed Curse rewards pass through the scenic UI exactly once. */
 @ExtendWith(GameExtension.class)
 class ChanceCurseChoiceDispatchTest {
   @Test
@@ -51,6 +51,54 @@ class ChanceCurseChoiceDispatchTest {
   void shouldDispatchAshenEmberChoice() {
     shouldDispatchNewScenicChoiceWithoutChangingUi(
         "abandoned-mine", "search-tunnels", "ASHEN_EMBER", 60);
+  }
+
+  @Test
+  void mineWithoutCurseDisplaysOnlyTheCommittedGold() {
+    Stage stage = new Stage(new ScreenViewport(), mock(SpriteBatch.class));
+    RenderService renderService = new RenderService();
+    renderService.setStage(stage);
+    ServiceLocator.registerRenderService(renderService);
+    ServiceLocator.registerEntityService(new EntityService());
+    var encounter =
+        ChanceEncounterConfigLoader.loadEncounters().stream()
+            .filter(event -> event.getId().equals("abandoned-mine"))
+            .findFirst()
+            .orElseThrow();
+    ItemRewardGateway items = mock(ItemRewardGateway.class);
+    MockPlayerStateGateway player = new MockPlayerStateGateway(40, 100, 35);
+    ChanceEncounterSession session =
+        new ChanceEncounterSession(
+            1,
+            encounter,
+            ChanceEncounterBehaviourFactory.create(
+                encounter, new TestMineRandom(0.9, 0), TestCardService.withCards("bandage")),
+            new ChanceOutcomeApplier(
+                player, mock(CardCatalogGateway.class), mock(DeckGateway.class), items),
+            null);
+    ChanceEncounterDisplay display = new ChanceEncounterDisplay(session);
+    Entity entity = new Entity().addComponent(display);
+    try {
+      entity.create();
+      display.getChoiceButtons().get(0).fire(new ChangeEvent());
+      assertEquals(95, player.getCurrency());
+      var overlay = stage.getRoot().findActor("acquisition-result-overlay");
+      assertNotNull(overlay);
+      assertEquals(
+          "Gold +60",
+          ((com.badlogic.gdx.scenes.scene2d.ui.Label) overlay.findActor("acquisition-entry-gold"))
+              .getText()
+              .toString());
+      assertNull(overlay.findActor("acquisition-entry-BRAND_OF_THE_DAMNED"));
+      assertEquals(1, session.getAcquisitionResult(null).orElseThrow().entries().size());
+      overlay.findActor("acquisition-continue").fire(new ChangeEvent());
+      assertTrue(session.isCompleted());
+      assertEquals(95, player.getCurrency());
+      verifyNoInteractions(items);
+    } finally {
+      entity.dispose();
+      stage.dispose();
+    }
   }
 
   private void shouldDispatchNewScenicChoiceWithoutChangingUi(
@@ -98,9 +146,21 @@ class ChanceCurseChoiceDispatchTest {
       assertTrue(session.isResolved());
       assertEquals(35 + gold, player.getCurrency());
       assertEquals(40, player.getHealth());
-      assertTrue(display.getContinueButton().isVisible());
+      var overlay = stage.getRoot().findActor("acquisition-result-overlay");
+      assertNotNull(overlay);
+      assertFalse(display.getContinueButton().isVisible());
+      assertEquals(
+          "Gold +" + gold,
+          ((com.badlogic.gdx.scenes.scene2d.ui.Label)
+                  overlay.findActor("acquisition-entry-gold"))
+              .getText()
+              .toString());
+      assertNotNull(overlay.findActor("acquisition-entry-" + itemId));
       display.getChoiceButtons().get(choiceIndex).fire(new ChangeEvent());
       verify(items, times(1)).addItem(itemId);
+      overlay.findActor("acquisition-close").fire(new ChangeEvent());
+      assertNull(stage.getRoot().findActor("acquisition-result-overlay"));
+      assertTrue(display.getContinueButton().isVisible());
     } finally {
       entity.dispose();
       stage.dispose();
