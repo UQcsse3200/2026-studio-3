@@ -114,7 +114,8 @@ class CardUpgradeStandardTest {
 
     assertEquals(baseCard.cardId(), upgradedCard.cardId(), id + ": upgrade must keep the base ID");
     assertEquals(baseCard.type(), upgradedCard.type(), id + ": upgrade must keep the base type");
-    assertEquals(baseCard.target(), upgradedCard.target(), id + ": upgrade must keep the base target");
+    assertEquals(
+        baseCard.target(), upgradedCard.target(), id + ": upgrade must keep the base target");
 
     assertEquals(card.name + "+", upgrade.name, id + ": upgrade name must be the base name + '+'");
     assertEquals(card.rarity, upgrade.rarity, id + ": upgrade must keep the base rarity");
