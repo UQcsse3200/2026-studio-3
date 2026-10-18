@@ -561,13 +561,13 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
       Vector2 direction = new Vector2(finish).sub(start).nor();
       Vector2 tip = new Vector2(finish).sub(new Vector2(direction).scl(10));
       for (int i = 0; i < 10; i++) {
-        Vector2 point = new Vector2(tip).sub(new Vector2(direction).scl(i * 2));
+        Vector2 point = new Vector2(tip).sub(new Vector2(direction).scl(i * 2f));
         rect(batch, point.x, point.y, 3, 3);
       }
       for (int i = 0; i < 5; i++) {
-        Vector2 base = new Vector2(tip).sub(new Vector2(direction).scl(i * 2));
-        rect(batch, base.x - direction.y * i * 2, base.y + direction.x * i * 2, 3, 3);
-        rect(batch, base.x + direction.y * i * 2, base.y - direction.x * i * 2, 3, 3);
+        Vector2 base = new Vector2(tip).sub(new Vector2(direction).scl(i * 2f));
+        rect(batch, base.x - direction.y * i * 2f, base.y + direction.x * i * 2f, 3, 3);
+        rect(batch, base.x + direction.y * i * 2f, base.y - direction.x * i * 2f, 3, 3);
       }
       if (prompt.step() == BattleTutorialController.Step.PLAY_A_CARD && highlights.size() > 1)
         drawDragArc(batch, target, highlights.get(1));
