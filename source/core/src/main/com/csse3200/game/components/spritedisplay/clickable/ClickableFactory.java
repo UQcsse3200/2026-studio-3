@@ -29,7 +29,8 @@ public class ClickableFactory extends UIComponent {
           .register(DEFAULT_VARIANT, rec -> new Clickable(rec) {})
           .register("inout", InOutOnTrigger::new)
           .register("drag", DragNDrop::new)
-          .register("gated", GatedClickable::new);
+          .register("gated", GatedClickable::new)
+          .register("framed", Framed::new);
 
   /**
    * @see ClickableJsonLoader#loadRecordsFromJson(Path)
