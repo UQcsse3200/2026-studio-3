@@ -43,15 +43,11 @@ public class DebugShortcutInputComponent extends InputComponent {
 
   @Override
   public boolean keyUp(int keycode) {
-    switch (keycode) {
-      case Keys.CONTROL_LEFT:
-        controlPressed = false;
-        return false;
-      case Keys.SHIFT_LEFT:
-        shiftPressed = false;
-        return false;
-      default:
-        return false;
+    if (keycode == Keys.CONTROL_LEFT) {
+      controlPressed = false;
+    } else if (keycode == Keys.SHIFT_LEFT) {
+      shiftPressed = false;
     }
+    return false;
   }
 }

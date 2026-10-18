@@ -12,6 +12,9 @@ public class ItemEffectApplier {
       case WARRIORS_CREST -> new WarriorsCrestEffect().apply(player);
       case ASHEN_EMBER -> new AshenEmberEffect().apply(player);
       case AMBROSIA_FLASK -> new AmbrosiaFlaskEffect().apply(player);
+      default -> {
+        // Items without a direct entity effect are handled via run state or combat hooks.
+      }
     }
   }
 }
