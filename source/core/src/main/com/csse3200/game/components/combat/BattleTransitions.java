@@ -93,8 +93,9 @@ public class BattleTransitions {
    * @return the resulting phase, or {@code null} when the transition is not allowed
    */
   public BattlePhase getNextPhase(BattlePhase currentPhase, BattleEvent incomingEvent) {
-    Map<BattleEvent, BattlePhase> transitions = allowedTransitions.get(currentPhase);
-    // Below guards against null pointer exception
-    return transitions == null ? null : transitions.get(incomingEvent);
+    if (currentPhase == null || incomingEvent == null) {
+      return null;
+    }
+    return allowedTransitions.getOrDefault(currentPhase, Map.of()).get(incomingEvent);
   }
 }

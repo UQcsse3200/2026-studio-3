@@ -238,19 +238,7 @@ public class BattleScreen extends ScreenAdapter {
         CardWidgetAssets.fromManagedResources(cardWidgetSkin, ServiceLocator.getResourceService());
     cardInteractionSkin = createCardInteractionSkin();
 
-    PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(library);
-    if (tutorialBattle) {
-      var openingOrder = new ArrayList<>(playerDeck.getCards());
-      java.util.Collections.shuffle(openingOrder);
-      for (int i = 0; i < openingOrder.size(); i++) {
-        if ("strike".equals(openingOrder.get(i).cardId())) {
-          java.util.Collections.swap(
-              openingOrder, Math.min(AMOUNT_OF_CARDS_IN_DECK, openingOrder.size()) / 2, i);
-          break;
-        }
-      }
-      playerDeck = PlayerDeck.fromInstances(library, openingOrder);
-    }
+    PlayerDeck playerDeck = prepareBattleDeckSource();
     battleDeck = new BattleDeck(playerDeck);
     if (!tutorialBattle) {
       battleDeck.shuffleDrawPile();
@@ -338,133 +326,153 @@ public class BattleScreen extends ScreenAdapter {
         });
     createUI();
     if (tutorialBattle) {
-      String demonstrationId = handRowOrder.get(handRowOrder.size() / 2).instanceId();
-      tutorialView =
-          new BattleTutorialGuidanceView(
-              ServiceLocator.getRenderService().getStage(),
-              cardWidgetSkin,
-              () ->
-                  uiFactory.getByTrigger(PLAY_CARD_TRIGGER).stream()
-                      .map(Clickable::getBtn)
-                      .map(actor -> (com.badlogic.gdx.scenes.scene2d.Actor) actor)
-                      .toList(),
-              () ->
-                  uiFactory.getByTrigger(PLAY_CARD_TRIGGER).stream()
-                      .filter(c -> c.getArgs().length > 0 && demonstrationId.equals(c.getArgs()[0]))
-                      .map(Clickable::getBtn)
-                      .findFirst()
-                      .orElse(null),
-              () ->
-                  uiFactory.getByTrigger(OPEN_MENU_TRIGGER).stream()
-                      .map(Clickable::getBtn)
-                      .findFirst()
-                      .orElse(null),
-              () ->
-                  uiFactory.getByTrigger(END_TURN_TRIGGER).stream()
-                      .map(Clickable::getBtn)
-                      .findFirst()
-                      .orElse(null));
-      tutorialView.setExitStyle(
-          com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins.forIcon(
-                  com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins.Icon
-                      .END_TURN)
-              .get(com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton.ImageTextButtonStyle.class));
-      tutorialView.setStatTargets(
-          () ->
-              uiFactory.getByTrigger(OPEN_INVENTORY_TRIGGER).stream()
-                  .map(Clickable::getBtn)
-                  .findFirst()
-                  .orElse(null),
-          () ->
-              player
-                  .getComponent(com.csse3200.game.components.player.PlayerEnergyDisplay.class)
-                  .getEnergyActor(),
-          () ->
-              player
-                  .getComponent(com.csse3200.game.components.player.PlayerStatsDisplay.class)
-                  .getHealthLabel(),
-          () ->
-              forestGameArea.getEnemies().stream()
-                  .map(
-                      e ->
-                          e.getComponent(
-                              com.csse3200.game.components.enemy.EnemyStatsDisplay.class))
-                  .filter(java.util.Objects::nonNull)
-                  .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getHealthActor)
-                  .findFirst()
-                  .orElse(null));
-      tutorialView.setDetailedTargets(
-          () ->
-              player
-                  .getComponent(com.csse3200.game.components.player.PlayerEnergyDisplay.class)
-                  .getEnergyVisualBounds(),
-          () ->
-              forestGameArea.getEnemies().stream()
-                  .map(
-                      e ->
-                          e.getComponent(
-                              com.csse3200.game.components.enemy.EnemyStatsDisplay.class))
-                  .filter(java.util.Objects::nonNull)
-                  .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getTutorialArmourActor)
-                  .findFirst()
-                  .orElse(null));
-      tutorialView.setEnemyBounds(
-          () -> forestGameArea.getEnemies().stream().map(this::tutorialEnemyBounds).toList());
-      tutorialView.setDragActor(
-          () -> ServiceLocator.getDragAndDropService().getDragAndDrop().getDragActor());
-      tutorialView.setEnemyRenderer(
-          batch -> {
-            com.badlogic.gdx.math.Matrix4 previous =
-                new com.badlogic.gdx.math.Matrix4(batch.getProjectionMatrix());
-            batch.setProjectionMatrix(ServiceLocator.getCamera().combined);
-            batch.setColor(com.badlogic.gdx.graphics.Color.WHITE);
-            for (Entity enemy : forestGameArea.getEnemies()) {
-              AnimationRenderComponent spriteRenderer =
-                  enemy.getComponent(AnimationRenderComponent.class);
-              if (spriteRenderer != null)
-                spriteRenderer.render((com.badlogic.gdx.graphics.g2d.SpriteBatch) batch);
-            }
-            batch.setProjectionMatrix(previous);
-            batch.setColor(com.badlogic.gdx.graphics.Color.WHITE);
-          });
-      BattleAnimationCoordinator visuals =
-          animationCoordinatorEntity.getComponent(BattleAnimationCoordinator.class);
-      BattleTutorialComponent guidance =
-          new BattleTutorialComponent(
-              controller, tutorialView, this::onTutorialFinished, demonstrationId);
-      guidance.setObservation(
-          new BattleTutorialObservation(
-              () ->
-                  forestGameArea.getEnemies().stream()
-                      .mapToInt(e -> e.getComponent(CombatStatsComponent.class).getHealth())
-                      .sum(),
-              () -> player.getComponent(CombatStatsComponent.class).getHealth(),
-              () ->
-                  !visuals.hasActiveVisuals()
-                      && !battleActions.hasPendingEnemyReveals()
-                      && tutorialView.isPlayerHealthDisplayed(
-                          player.getComponent(CombatStatsComponent.class).getHealth())
-                      && forestGameArea.getEnemies().stream()
-                          .allMatch(
-                              e -> {
-                                AnimationRenderComponent animator =
-                                    e.getComponent(AnimationRenderComponent.class);
-                                return animator == null
-                                    || !"hurt".equals(animator.getCurrentAnimation())
-                                    || animator.isFinished();
-                              })));
-      ServiceLocator.getEntityService().register(new Entity().addComponent(guidance));
-      // Remains after guidance cleans itself up: existing tutorial battle completion is unchanged.
-      controller.addBattleEndListener(
-          won ->
-              Gdx.app.postRunnable(
-                  () ->
-                      onTutorialFinished(
-                          Boolean.TRUE.equals(won)
-                              ? BattleTutorialController.Outcome.WON
-                              : BattleTutorialController.Outcome.LOST)));
+      setupTutorialGuidance(forestGameArea, player, animationCoordinatorEntity);
     }
     controller.start();
+  }
+
+  private PlayerDeck prepareBattleDeckSource() {
+    PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(library);
+    if (!tutorialBattle) {
+      return playerDeck;
+    }
+    var openingOrder = new ArrayList<>(playerDeck.getCards());
+    java.util.Collections.shuffle(openingOrder);
+    for (int i = 0; i < openingOrder.size(); i++) {
+      if ("strike".equals(openingOrder.get(i).cardId())) {
+        java.util.Collections.swap(
+            openingOrder, Math.min(AMOUNT_OF_CARDS_IN_DECK, openingOrder.size()) / 2, i);
+        break;
+      }
+    }
+    return PlayerDeck.fromInstances(library, openingOrder);
+  }
+
+  private void setupTutorialGuidance(
+      BattleGameArea forestGameArea, Entity player, Entity animationCoordinatorEntity) {
+    String demonstrationId = handRowOrder.get(handRowOrder.size() / 2).instanceId();
+    tutorialView =
+        new BattleTutorialGuidanceView(
+            ServiceLocator.getRenderService().getStage(),
+            cardWidgetSkin,
+            () ->
+                uiFactory.getByTrigger(PLAY_CARD_TRIGGER).stream()
+                    .map(Clickable::getBtn)
+                    .map(actor -> (com.badlogic.gdx.scenes.scene2d.Actor) actor)
+                    .toList(),
+            () ->
+                uiFactory.getByTrigger(PLAY_CARD_TRIGGER).stream()
+                    .filter(c -> c.getArgs().length > 0 && demonstrationId.equals(c.getArgs()[0]))
+                    .map(Clickable::getBtn)
+                    .findFirst()
+                    .orElse(null),
+            () ->
+                uiFactory.getByTrigger(OPEN_MENU_TRIGGER).stream()
+                    .map(Clickable::getBtn)
+                    .findFirst()
+                    .orElse(null),
+            () ->
+                uiFactory.getByTrigger(END_TURN_TRIGGER).stream()
+                    .map(Clickable::getBtn)
+                    .findFirst()
+                    .orElse(null));
+    tutorialView.setExitStyle(
+        com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins.forIcon(
+                com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins.Icon.END_TURN)
+            .get(com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton.ImageTextButtonStyle.class));
+    tutorialView.setStatTargets(
+        () ->
+            uiFactory.getByTrigger(OPEN_INVENTORY_TRIGGER).stream()
+                .map(Clickable::getBtn)
+                .findFirst()
+                .orElse(null),
+        () ->
+            player
+                .getComponent(com.csse3200.game.components.player.PlayerEnergyDisplay.class)
+                .getEnergyActor(),
+        () ->
+            player
+                .getComponent(com.csse3200.game.components.player.PlayerStatsDisplay.class)
+                .getHealthLabel(),
+        () ->
+            forestGameArea.getEnemies().stream()
+                .map(
+                    e -> e.getComponent(com.csse3200.game.components.enemy.EnemyStatsDisplay.class))
+                .filter(java.util.Objects::nonNull)
+                .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getHealthActor)
+                .findFirst()
+                .orElse(null));
+    tutorialView.setDetailedTargets(
+        () ->
+            player
+                .getComponent(com.csse3200.game.components.player.PlayerEnergyDisplay.class)
+                .getEnergyVisualBounds(),
+        () ->
+            forestGameArea.getEnemies().stream()
+                .map(
+                    e -> e.getComponent(com.csse3200.game.components.enemy.EnemyStatsDisplay.class))
+                .filter(java.util.Objects::nonNull)
+                .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getTutorialArmourActor)
+                .findFirst()
+                .orElse(null));
+    tutorialView.setEnemyBounds(
+        () -> forestGameArea.getEnemies().stream().map(this::tutorialEnemyBounds).toList());
+    tutorialView.setDragActor(
+        () -> ServiceLocator.getDragAndDropService().getDragAndDrop().getDragActor());
+    tutorialView.setEnemyRenderer(
+        batch -> {
+          com.badlogic.gdx.math.Matrix4 previous =
+              new com.badlogic.gdx.math.Matrix4(batch.getProjectionMatrix());
+          batch.setProjectionMatrix(ServiceLocator.getCamera().combined);
+          batch.setColor(com.badlogic.gdx.graphics.Color.WHITE);
+          for (Entity enemy : forestGameArea.getEnemies()) {
+            AnimationRenderComponent spriteRenderer =
+                enemy.getComponent(AnimationRenderComponent.class);
+            if (spriteRenderer != null)
+              spriteRenderer.render((com.badlogic.gdx.graphics.g2d.SpriteBatch) batch);
+          }
+          batch.setProjectionMatrix(previous);
+          batch.setColor(com.badlogic.gdx.graphics.Color.WHITE);
+        });
+    BattleAnimationCoordinator visuals =
+        animationCoordinatorEntity.getComponent(BattleAnimationCoordinator.class);
+    BattleTutorialComponent guidance =
+        new BattleTutorialComponent(
+            controller, tutorialView, this::onTutorialFinished, demonstrationId);
+    guidance.setObservation(
+        new BattleTutorialObservation(
+            () ->
+                forestGameArea.getEnemies().stream()
+                    .mapToInt(e -> e.getComponent(CombatStatsComponent.class).getHealth())
+                    .sum(),
+            () -> player.getComponent(CombatStatsComponent.class).getHealth(),
+            () -> isTutorialVisualStateSettled(forestGameArea, player, visuals)));
+    ServiceLocator.getEntityService().register(new Entity().addComponent(guidance));
+    // Remains after guidance cleans itself up: existing tutorial battle completion is unchanged.
+    controller.addBattleEndListener(
+        won ->
+            Gdx.app.postRunnable(
+                () ->
+                    onTutorialFinished(
+                        Boolean.TRUE.equals(won)
+                            ? BattleTutorialController.Outcome.WON
+                            : BattleTutorialController.Outcome.LOST)));
+  }
+
+  private boolean isTutorialVisualStateSettled(
+      BattleGameArea forestGameArea, Entity player, BattleAnimationCoordinator visuals) {
+    return !visuals.hasActiveVisuals()
+        && !battleActions.hasPendingEnemyReveals()
+        && tutorialView.isPlayerHealthDisplayed(
+            player.getComponent(CombatStatsComponent.class).getHealth())
+        && forestGameArea.getEnemies().stream().allMatch(this::isEnemyHurtAnimationFinished);
+  }
+
+  private boolean isEnemyHurtAnimationFinished(Entity enemy) {
+    AnimationRenderComponent animator = enemy.getComponent(AnimationRenderComponent.class);
+    return animator == null
+        || !"hurt".equals(animator.getCurrentAnimation())
+        || animator.isFinished();
   }
 
   private Rectangle tutorialEnemyBounds(Entity enemy) {

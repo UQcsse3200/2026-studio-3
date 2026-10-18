@@ -176,7 +176,10 @@ public class BattleController {
    */
   private void processEvent(BattleEvent event) {
     BattlePhase nextPhase = battleTransitions.getNextPhase(this.getCurrentPhase(), event);
-    this.validateEventTransition(event, nextPhase);
+    if (nextPhase == null) {
+      throw new IllegalStateException(
+          "Invalid battle transition: " + this.currentPhase + "-->" + event);
+    }
     this.transition(nextPhase);
   }
 
@@ -496,21 +499,6 @@ public class BattleController {
       }
     }
     return false;
-  }
-
-  /**
-   * A helper function that validates whether a transition is allowed.
-   *
-   * @param event The currently executing event.
-   * @param nextPhase The speculative next phase to transition to.
-   * @throws IllegalStateException Throws when the state transition is deemed illegal.
-   */
-  private void validateEventTransition(BattleEvent event, BattlePhase nextPhase)
-      throws IllegalStateException {
-    if (Objects.isNull(nextPhase)) {
-      throw new IllegalStateException(
-          "Invalid battle transition: " + this.currentPhase + "-->" + event);
-    }
   }
 
   /**

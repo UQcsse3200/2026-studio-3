@@ -120,19 +120,29 @@ final class ChanceEncounterConfigValidator {
       errors.add(label + ".outcome: currencyDelta must be present");
     }
 
-    String cardRewardId = choice.outcome.cardRewardId;
-    if (cardRewardId != null && cardRewardId.isBlank()) {
+    validateCardReward(choice.outcome.cardRewardId, label, cardCatalog, errors);
+  }
+
+  private static void validateCardReward(
+      String cardRewardId, String label, CardCatalogGateway cardCatalog, List<String> errors) {
+    if (cardRewardId == null) {
+      return;
+    }
+    if (cardRewardId.isBlank()) {
       errors.add(label + ".outcome: cardRewardId must not be blank when present");
-    } else if (cardRewardId != null && cardCatalog != null) {
-      boolean knownCard;
-      try {
-        knownCard = cardCatalog.containsCard(cardRewardId);
-      } catch (RuntimeException exception) {
-        knownCard = false;
-      }
-      if (!knownCard) {
-        errors.add(label + ".outcome: unknown cardRewardId '" + cardRewardId + "'");
-      }
+      return;
+    }
+    if (cardCatalog == null) {
+      return;
+    }
+    boolean knownCard;
+    try {
+      knownCard = cardCatalog.containsCard(cardRewardId);
+    } catch (RuntimeException exception) {
+      knownCard = false;
+    }
+    if (!knownCard) {
+      errors.add(label + ".outcome: unknown cardRewardId '" + cardRewardId + "'");
     }
   }
 }

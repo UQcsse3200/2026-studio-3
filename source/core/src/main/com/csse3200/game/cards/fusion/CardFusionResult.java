@@ -6,9 +6,6 @@ import java.util.Optional;
 public record CardFusionResult(
     boolean successful, Optional<String> rewardedCardId, CardFusionFailureReason failureReason) {
   public CardFusionResult {
-    if (rewardedCardId == null) {
-      throw new IllegalArgumentException("rewardedCardId must not be null");
-    }
     if (failureReason == null) {
       throw new IllegalArgumentException("failureReason must not be null");
     }
