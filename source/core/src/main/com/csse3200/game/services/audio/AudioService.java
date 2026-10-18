@@ -232,7 +232,7 @@ public class AudioService {
    */
   public static void setMusicVolume(float volume) {
 
-    musicVolume = Math.max(0f, Math.min(1f, volume));
+    musicVolume = Math.clamp(volume, 0f, 1f);
     if (playing != null) {
       playing.setVolume(musicVolume);
     }
@@ -374,7 +374,7 @@ public class AudioService {
    */
   private static void applyVolumes(float music, float soundEffects) {
     setMusicVolume(music * FULL_MUSIC_VOLUME);
-    soundEffectsVolume = Math.max(0f, Math.min(1f, soundEffects));
+    soundEffectsVolume = Math.clamp(soundEffects, 0f, 1f);
   }
 
   private static Playlist battlePlaylist(RoomType room) {

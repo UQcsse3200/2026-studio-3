@@ -33,6 +33,8 @@ import com.csse3200.game.rewards.RewardService;
 import com.csse3200.game.rewards.RewardType;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.ui.ItemArtwork;
 import com.csse3200.game.ui.ItemIconView;
 import java.util.ArrayList;
@@ -711,6 +713,12 @@ public class RewardDisplay extends Displaying {
     }
     rewardClaimFeedback.play(
         type, new TextureRegion(art), source, amount, () -> feedbackFinished = true);
+
+    switch (type) {
+      case CARD: AudioService.playSound(SoundId.CARD_SHUFFLE, 0.5f);
+      case GOLD: AudioService.playSound(SoundId.ITEM_PURCHASE, 0.5f);
+      case ITEM: AudioService.playSound(SoundId.ITEM_PICKUP, 0.5f);
+    }
   }
 
   private Actor rewardOptionActor(RewardOption option) {
