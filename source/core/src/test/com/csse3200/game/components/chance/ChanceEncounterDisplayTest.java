@@ -85,6 +85,42 @@ class ChanceEncounterDisplayTest {
   }
 
   @Test
+  void fourShrineChoicesRemainSeparateWithinTheScene() {
+    var encounter =
+        new ChanceEncounter(
+            "mysterious-shrine",
+            "A cracked shrine offers a risky trade.",
+            List.of(
+                new ChanceChoice(
+                    "make-offering",
+                    "Make an Offering: -10 HP, +25 Gold.",
+                    new ChanceOutcome(-10, 25)),
+                new ChanceChoice("leave", "Leave the Shrine.", new ChanceOutcome(0, 0)),
+                new ChanceChoice(
+                    "accept-brand",
+                    "Accept the Brand: +50 Gold; Curse reduces future Strength gains by 1.",
+                    new ChanceOutcome(0, 50)),
+                new ChanceChoice(
+                    "swear-blood-oath",
+                    "Swear the Blood Oath: +70 Gold; Curse drains 2 HP each player turn in battle (min 1 HP).",
+                    new ChanceOutcome(0, 70))));
+    ChanceEncounterDisplay display = new ChanceEncounterDisplay(encounter);
+    entity = new Entity().addComponent(display);
+    entity.create();
+    stage.getViewport().update(1280, 800, true);
+    stage.act(0);
+    ((Table) stage.getActors().get(0)).validate();
+    List<TextButton> buttons = display.getChoiceButtons();
+    assertEquals(4, buttons.size());
+    for (int i = 1; i < buttons.size(); i++) {
+      assertEquals(buttons.get(0).getX(), buttons.get(i).getX(), .01f);
+      assertTrue(buttons.get(i - 1).getY() >= buttons.get(i).getY() + buttons.get(i).getHeight());
+    }
+    assertTrue(buttons.get(0).getY() + buttons.get(0).getHeight() < 600f);
+    assertTrue(buttons.get(3).getY() >= 0f);
+  }
+
+  @Test
   void shrineOfferingWaitsForResponseAndRetainsOriginalOutcomeAndContinue() {
     AtomicInteger completions = new AtomicInteger();
     ChanceEncounterDisplay display = createShrine(completions);
