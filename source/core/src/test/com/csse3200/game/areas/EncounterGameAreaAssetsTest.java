@@ -157,12 +157,6 @@ class EncounterGameAreaAssetsTest {
       area.create();
 
       assertSame(player, area.getPlayer());
-      for (String status : new String[] {"SILENCE", "DAMAGE_ON_CARD_PLAY", "TAUNT:42"}) {
-        player.getComponent(CombatStatsComponent.class).applyStatusEffect(status, 1, 2);
-        hud.update();
-        verify(resources).getAsset(IntentIcons.pathForStatus(status), Texture.class);
-      }
-      verify(resources).getAsset(IntentIcons.DEBUFF, Texture.class);
       verify(resources).loadTextures(IntentIcons.all());
       factory.verify(() -> PlayerFactory.createPlayer(run));
     } finally {

@@ -1,0 +1,20 @@
+{
+  "opening": {
+    "text": "Existence could be beautiful, but for you, it is not.",
+    "image": "images/enemies/dialogue/boss_dialogue_phase_one.png",
+    "frameCount": 30,
+    "durationSeconds": 5.14
+  },
+  "phaseTwo": {
+    "text": "Then let me show you what purifing really costs.",
+    "image": "images/enemies/dialogue/boss_dialogue_phase_two.png",
+    "frameCount": 30,
+    "durationSeconds": 3.02
+  },
+  "enraged": {
+    "text": "Do you know why they sent you? Because they had no one left.",
+    "image": "images/enemies/dialogue/boss_dialogue_enraged.png",
+    "frameCount": 30,
+    "durationSeconds": 4.82
+  }
+}
