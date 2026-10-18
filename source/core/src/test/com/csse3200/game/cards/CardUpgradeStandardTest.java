@@ -85,6 +85,7 @@ class CardUpgradeStandardTest {
     CardResolver resolver = new CardResolver();
 
     assertAll(
+        () -> assertUpgraded(library, resolver, "strike", "Strike+", 1, List.of(effect(12, 0))),
         () -> assertUpgraded(library, resolver, "defend", "Defend+", 1, List.of(effect(8, 0))),
         () ->
             assertUpgraded(
@@ -104,6 +105,16 @@ class CardUpgradeStandardTest {
   private static void assertFollowsStandard(CardConfig card) {
     CardUpgradeConfig upgrade = card.upgrade;
     String id = card.id;
+
+    CardResolver resolver = new CardResolver();
+    ResolvedCard baseCard =
+        resolver.resolve(card, new CardInstance("standard-" + id, id, CardInstance.BASE_LEVEL));
+    ResolvedCard upgradedCard =
+        resolver.resolve(card, new CardInstance("standard-" + id, id, CardInstance.UPGRADED_LEVEL));
+
+    assertEquals(baseCard.cardId(), upgradedCard.cardId(), id + ": upgrade must keep the base ID");
+    assertEquals(baseCard.type(), upgradedCard.type(), id + ": upgrade must keep the base type");
+    assertEquals(baseCard.target(), upgradedCard.target(), id + ": upgrade must keep the base target");
 
     assertEquals(card.name + "+", upgrade.name, id + ": upgrade name must be the base name + '+'");
     assertEquals(card.rarity, upgrade.rarity, id + ": upgrade must keep the base rarity");
