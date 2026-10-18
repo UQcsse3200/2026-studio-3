@@ -173,26 +173,31 @@ public final class ChanceEncounterConfigLoader {
 
       int choiceIndex = 0;
       for (JsonValue choice = choices.child; choice != null; choice = choice.next, choiceIndex++) {
-        if (!choice.isObject()) {
-          continue;
-        }
-
-        String choiceLabel = "encounter[" + encounterIndex + "].choice[" + choiceIndex + "]";
-        JsonValue outcome = choice.get("outcome");
-        if (outcome == null || outcome.isNull()) {
-          continue;
-        }
-        if (!outcome.isObject()) {
-          errors.add(choiceLabel + ": outcome must be a JSON object");
-          continue;
-        }
-
-        String label = choiceLabel + ".outcome";
-        validateInteger(outcome.get("healthDelta"), label + ".healthDelta", errors);
-        validateInteger(outcome.get("currencyDelta"), label + ".currencyDelta", errors);
-        validateOptionalString(outcome.get("cardRewardId"), label + ".cardRewardId", errors);
+        validateChoiceOutcome(choice, encounterIndex, choiceIndex, errors);
       }
     }
+  }
+
+  private static void validateChoiceOutcome(
+      JsonValue choice, int encounterIndex, int choiceIndex, List<String> errors) {
+    if (!choice.isObject()) {
+      return;
+    }
+
+    String choiceLabel = "encounter[" + encounterIndex + "].choice[" + choiceIndex + "]";
+    JsonValue outcome = choice.get("outcome");
+    if (outcome == null || outcome.isNull()) {
+      return;
+    }
+    if (!outcome.isObject()) {
+      errors.add(choiceLabel + ": outcome must be a JSON object");
+      return;
+    }
+
+    String label = choiceLabel + ".outcome";
+    validateInteger(outcome.get("healthDelta"), label + ".healthDelta", errors);
+    validateInteger(outcome.get("currencyDelta"), label + ".currencyDelta", errors);
+    validateOptionalString(outcome.get("cardRewardId"), label + ".cardRewardId", errors);
   }
 
   private static void validateOptionalString(JsonValue value, String label, List<String> errors) {
