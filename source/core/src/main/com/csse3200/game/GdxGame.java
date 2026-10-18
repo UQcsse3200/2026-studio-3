@@ -229,7 +229,9 @@ public class GdxGame extends Game {
     showNarration("opening", ScreenType.MAP);
   }
 
-  /** Opens a fresh map without repeating the opening narration already shown before the tutorial. */
+  /**
+   * Opens a fresh map without repeating the opening narration already shown before the tutorial.
+   */
   public void startRunAfterTutorial() {
     resetRunState();
     setScreen(ScreenType.MAP);
