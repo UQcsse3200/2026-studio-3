@@ -113,9 +113,9 @@ loadScripts(document, 'script');</script>
  position in the hand row (selection order). Each grid card renders through <a href="../cards/CardWidget.html" title="class in com.csse3200.game.components.cards"><code>CardWidget</code></a>, so its frame, name plate and badges match the
  battle hand exactly.
 
- <p>The scroll buttons' definitions come from a dedicated <code>DeckEditorUi.json</code> — separate
- from <code>BattleUi.json</code> — and are created by this component's own <a href="../spritedisplay/clickable/ClickableFactory.html" title="class in com.csse3200.game.components.spritedisplay.clickable"><code>ClickableFactory</code></a>.
- Their visibility and interactivity are toggled in place (never rebuilt) so the JSON-provided
+ <p>The scroll and "Set Deck" buttons come from <code>DeckEditorUi.json</code> (separate from <code>
+ BattleUi.json</code>) and are created by this component's own <a href="../spritedisplay/clickable/ClickableFactory.html" title="class in com.csse3200.game.components.spritedisplay.clickable"><code>ClickableFactory</code></a>. Their
+ visibility and interactivity are toggled in place (never rebuilt) so the JSON-provided
  coordinates are honoured.
 
  <p>Everything display-only (preview panel, preview, summary, error, badges) is a <code>
