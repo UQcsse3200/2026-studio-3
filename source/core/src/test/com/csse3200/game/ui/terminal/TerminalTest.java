@@ -106,4 +106,45 @@ class TerminalTest {
     terminal.handleBackspace();
     assertEquals("a", terminal.getEnteredMessage());
   }
+
+  @Test
+  void helpLinesListEveryCommandSortedByName() {
+    Terminal terminal = new Terminal();
+    terminal.addCommand("zeta", "zeta <n>", "does z", command);
+    terminal.addCommand("alpha", "alpha", "does a", command);
+
+    java.util.List<String> lines = terminal.getHelpLines();
+
+    assertEquals("alpha - does a", lines.get(0));
+    assertTrue(lines.contains("debug on|off - toggle the physics debug overlay"));
+    assertEquals("zeta <n> - does z", lines.get(lines.size() - 1));
+  }
+
+  @Test
+  void commandWithoutHelpTextIsListedByName() {
+    Terminal terminal = new Terminal();
+    terminal.addCommand("bare", command);
+
+    assertTrue(terminal.getHelpLines().contains("bare"));
+  }
+
+  @Test
+  void contextNameDefaultsAndCanBeChanged() {
+    Terminal terminal = new Terminal();
+    assertEquals("Terminal", terminal.getContextName());
+
+    terminal.setContextName("Map commands");
+    assertEquals("Map commands", terminal.getContextName());
+  }
+
+  @Test
+  void commandsAddedWithHelpTextStillRun() {
+    Terminal terminal = new Terminal();
+    terminal.addCommand("ping", "ping", "test", command);
+    terminal.setEnteredMessage("ping");
+    when(command.action(any())).thenReturn(true);
+
+    assertTrue(terminal.processMessage());
+    verify(command).action(any());
+  }
 }

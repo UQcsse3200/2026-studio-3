@@ -4,15 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.badlogic.gdx.math.Vector2;
 import com.csse3200.game.extensions.GameExtension;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(GameExtension.class)
 class MapConnectionGroupTest {
-
-  @BeforeEach
-  void setUp() {}
 
   @Test
   void calculateHorizontalConnection() {

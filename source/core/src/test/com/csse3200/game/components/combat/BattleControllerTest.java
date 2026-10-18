@@ -33,6 +33,7 @@ import com.csse3200.game.components.player.PlayerActions;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.events.listeners.EventListener2;
+import com.csse3200.game.rewards.BloodOathSigilEffect;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
@@ -104,6 +105,33 @@ class BattleControllerTest {
   void shouldWaitForPlayerInputWhenPlayerTurnStarts() {
     controller.start();
 
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+  }
+
+  @Test
+  void bloodOathDamagesHealthAtTurnStartWithoutConsumingArmour() {
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    stats.addArmour(5);
+    new BloodOathSigilEffect().apply(player);
+    new BloodOathSigilEffect().apply(player);
+
+    controller.start();
+
+    assertEquals(16, stats.getHealth());
+    assertEquals(5, stats.getArmour());
+    assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
+  }
+
+  @Test
+  void bloodOathCannotKillThePlayerAtTurnStart() {
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    stats.setHealth(3);
+    new BloodOathSigilEffect().apply(player);
+    new BloodOathSigilEffect().apply(player);
+
+    controller.start();
+
+    assertEquals(1, stats.getHealth());
     assertEquals(BattlePhase.PLAYER_TURN, controller.getCurrentPhase());
   }
 
@@ -891,5 +919,37 @@ class BattleControllerTest {
 
     assertEquals(Map.of("SILENCE", 2), beforeRemoval);
     assertTrue(afterRemoval.isEmpty());
+  }
+
+  @Test
+  void bloodOathSigilDrainsHealthAtPlayerTurnStart() {
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    new BloodOathSigilEffect().apply(player);
+
+    controller.start();
+
+    assertEquals(18, stats.getHealth());
+  }
+
+  @Test
+  void bloodOathSigilNeverDrainsBelowOneHealth() {
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+    new BloodOathSigilEffect().apply(player);
+    new BloodOathSigilEffect().apply(player);
+    stats.setHealth(3);
+
+    controller.start();
+
+    assertEquals(1, stats.getHealth());
+    assertFalse(stats.isDead());
+  }
+
+  @Test
+  void playerStartDoesNotDrainHealthWithoutBloodOathSigil() {
+    CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
+
+    controller.start();
+
+    assertEquals(20, stats.getHealth());
   }
 }

@@ -8,6 +8,7 @@ import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.entities.Entity;
+import com.csse3200.game.rewards.CursePenalties;
 import java.util.Comparator;
 import java.util.List;
 
@@ -59,7 +60,9 @@ public final class Team7PlayerStateAdapter implements PlayerStateView, PlayerEff
     List<ResolvedCardEffect> ordered = validatedPlayerEffects(effects);
     for (ResolvedCardEffect effect : ordered) {
       switch (effect.type()) {
-        case BLOCK -> combatStats.addBlock(effect.value());
+        case BLOCK ->
+            combatStats.addBlock(
+                CursePenalties.reduce(combatStats, CursePenalties.BLOCK_PENALTY, effect.value()));
         case HEAL -> {
           if (effect.duration() > 0) {
             combatStats.applyStatusEffect(effect.type().name(), effect.value(), effect.duration());
@@ -67,7 +70,10 @@ public final class Team7PlayerStateAdapter implements PlayerStateView, PlayerEff
             combatStats.heal(effect.value());
           }
         }
-        case STRENGTH -> addStrength(effect.value());
+        case STRENGTH ->
+            addStrength(
+                CursePenalties.reduce(
+                    combatStats, CursePenalties.STRENGTH_PENALTY, effect.value()));
         case ENERGY_GAIN -> energy.restoreEnergy(effect.value());
         case CLEANSE -> combatStats.clearNegativeStatusEffects();
         case FORTIFY -> combatStats.addArmour(effect.value());

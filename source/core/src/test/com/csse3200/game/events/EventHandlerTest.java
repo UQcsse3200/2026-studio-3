@@ -1,5 +1,6 @@
 package com.csse3200.game.events;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -58,7 +59,7 @@ class EventHandlerTest {
 
   @Test
   void shouldHandleNoListeners() {
-    handler.trigger("not-real-event");
+    assertDoesNotThrow(() -> handler.trigger("not-real-event"));
   }
 
   @Test

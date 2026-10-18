@@ -22,6 +22,7 @@ import com.csse3200.game.entities.Entity;
 import com.csse3200.game.events.EventHandler;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.events.listeners.EventListener2;
+import com.csse3200.game.rewards.CursePenalties;
 import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.services.audio.SoundId;
 import java.util.ArrayDeque;
@@ -64,6 +65,7 @@ public class BattleController {
   private static final String HAND_CHANGED_EVENT = "handChanged";
   private static final String LISTENER_NOT_NULL = "Listener must not be null.";
   private static final String TURNS_SUFFIX = " turns.";
+  private static final String CARD_PLAYED_EVENT = "cardPlayed";
 
   public BattleController(Entity player, List<Entity> enemies) throws IllegalArgumentException {
     this(player, enemies, null, null);
@@ -174,7 +176,10 @@ public class BattleController {
    */
   private void processEvent(BattleEvent event) {
     BattlePhase nextPhase = battleTransitions.getNextPhase(this.getCurrentPhase(), event);
-    this.validateEventTransition(event, nextPhase);
+    if (nextPhase == null) {
+      throw new IllegalStateException(
+          "Invalid battle transition: " + this.currentPhase + "-->" + event);
+    }
     this.transition(nextPhase);
   }
 
@@ -414,12 +419,12 @@ public class BattleController {
   /** Notifies listeners after a successful card play, before checking victory or defeat. */
   public void addCardPlayedListener(EventListener2<String, String> listener) {
     Objects.requireNonNull(listener, LISTENER_NOT_NULL);
-    eventHandler.addListener("cardPlayed", listener);
+    eventHandler.addListener(CARD_PLAYED_EVENT, listener);
   }
 
   /** Removes the exact card-play listener registered by a screen-scoped observer. */
   public void removeCardPlayedListener(EventListener2<String, String> listener) {
-    eventHandler.removeListener("cardPlayed", listener);
+    eventHandler.removeListener(CARD_PLAYED_EVENT, listener);
   }
 
   /** Sends a one-line description of the latest battle action to any log listeners. */
@@ -494,21 +499,6 @@ public class BattleController {
       }
     }
     return false;
-  }
-
-  /**
-   * A helper function that validates whether a transition is allowed.
-   *
-   * @param event The currently executing event.
-   * @param nextPhase The speculative next phase to transition to.
-   * @throws IllegalStateException Throws when the state transition is deemed illegal.
-   */
-  private void validateEventTransition(BattleEvent event, BattlePhase nextPhase)
-      throws IllegalStateException {
-    if (Objects.isNull(nextPhase)) {
-      throw new IllegalStateException(
-          "Invalid battle transition: " + this.currentPhase + "-->" + event);
-    }
   }
 
   /**
@@ -684,7 +674,8 @@ public class BattleController {
 
   private void finishPlayerCardAction() {
     if (lastCardPlaySucceeded && pendingCard != null) {
-      eventHandler.trigger("cardPlayed", pendingCard.instanceId(), pendingCard.target().targetId());
+      eventHandler.trigger(
+          CARD_PLAYED_EVENT, pendingCard.instanceId(), pendingCard.target().targetId());
     }
 
     pendingCard = null;
@@ -835,10 +826,21 @@ public class BattleController {
     CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
     if (playerStats != null) {
       playerStats.resetBlock();
+      applyBloodOathAtTurnStart(playerStats);
     }
     applyHealingAtTurnStart();
     retrieveCooledDownCards();
     handle(BattleEvent.PLAYER_TURN_STARTED);
+  }
+
+  /** Curse: Blood-Oath Sigil drains Health at the start of each player turn, never below 1. */
+  private void applyBloodOathAtTurnStart(CombatStatsComponent playerStats) {
+    int stacks = CursePenalties.getPenalty(playerStats, CursePenalties.BLOOD_OATH);
+    int damage = stacks * CursePenalties.BLOOD_OATH_DAMAGE_PER_COPY;
+    int allowed = Math.min(damage, playerStats.getHealth() - 1);
+    if (allowed > 0) {
+      playerStats.takePiercingDamage(allowed);
+    }
   }
 
   /**
