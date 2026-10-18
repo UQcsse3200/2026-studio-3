@@ -26,6 +26,7 @@ public class PlayerDeck {
   private final CardService cardService;
   private final CardInstanceFactory cardInstanceFactory;
   private final List<CardInstance> cards = new ArrayList<>();
+  private static final String INSTANCE_ID = "instanceId";
 
   /** Creates an empty player deck backed by the configured card definitions. */
   public PlayerDeck() {
@@ -149,7 +150,7 @@ public class PlayerDeck {
    * @return true if that copy was removed, otherwise false
    */
   public boolean removeCard(String instanceId) {
-    String validInstanceId = validateId(instanceId, "instanceId");
+    String validInstanceId = validateId(instanceId, INSTANCE_ID);
     for (int i = 0; i < cards.size(); i++) {
       if (cards.get(i).instanceId().equals(validInstanceId)) {
         cards.remove(i);
@@ -169,7 +170,7 @@ public class PlayerDeck {
    * @return true if that exact copy was removed, otherwise false
    */
   public boolean removeCardInstance(String instanceId) {
-    String validInstanceId = validateId(instanceId, "instanceId");
+    String validInstanceId = validateId(instanceId, INSTANCE_ID);
     for (int i = 0; i < cards.size(); i++) {
       if (cards.get(i).instanceId().equals(validInstanceId)) {
         cards.remove(i);
@@ -191,7 +192,7 @@ public class PlayerDeck {
 
   /** Returns the exact owned copy with this instance ID. */
   public Optional<CardInstance> getCard(String instanceId) {
-    String validInstanceId = validateId(instanceId, "instanceId");
+    String validInstanceId = validateId(instanceId, INSTANCE_ID);
     return cards.stream().filter(card -> card.instanceId().equals(validInstanceId)).findFirst();
   }
 

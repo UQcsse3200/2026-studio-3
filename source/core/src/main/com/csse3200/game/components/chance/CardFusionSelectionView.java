@@ -72,6 +72,7 @@ final class CardFusionSelectionView {
   private boolean unavailable;
   private boolean completed;
   private boolean exitRequested;
+  private static final String STYLE_NAME_WHITE = "white";
 
   CardFusionSelectionView(
       CardFusionEncounterFlow flow, CardService cardService, Skin skin, Stage stage) {
@@ -87,7 +88,7 @@ final class CardFusionSelectionView {
     }
     root = new Table();
     root.setFillParent(true);
-    root.setBackground(skin.newDrawable("white", new Color(0.02f, 0.02f, 0.03f, 1f)));
+    root.setBackground(skin.newDrawable(STYLE_NAME_WHITE, new Color(0.02f, 0.02f, 0.03f, 1f)));
     scene = new Group();
     scene.setSize(FusionSceneAssets.WIDTH, FusionSceneAssets.HEIGHT);
     Image background = FusionSceneAssets.background(skin);
@@ -107,7 +108,8 @@ final class CardFusionSelectionView {
   }
 
   private void buildSelectionLayer() {
-    Image dim = new Image(skin.newDrawable("white", new Color(0.025f, 0.024f, 0.045f, 0.62f)));
+    Image dim =
+        new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(0.025f, 0.024f, 0.045f, 0.62f)));
     dim.setBounds(0f, 0f, FusionSceneAssets.WIDTH, FusionSceneAssets.HEIGHT);
     dim.setTouchable(Touchable.disabled);
     selectionLayer.addActor(dim);
@@ -121,7 +123,8 @@ final class CardFusionSelectionView {
                 FusionSceneAssets.FrameKind.TITLE));
     titlePanel.setBounds(210f, 656f, 860f, 94f);
     selectionLayer.addActor(titlePanel);
-    Image titleRule = new Image(skin.newDrawable("white", new Color(0.76f, 0.51f, 0.25f, 0.85f)));
+    Image titleRule =
+        new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(0.76f, 0.51f, 0.25f, 0.85f)));
     titleRule.setBounds(365f, 667f, 550f, 2f);
     selectionLayer.addActor(titleRule);
     addSmallDiamond(selectionLayer, 640f, 668f, 6f, GOLD);
@@ -190,7 +193,7 @@ final class CardFusionSelectionView {
     selectedPreview.setBounds(442f, 100f, 188f, 50f);
     selectionLayer.addActor(selectedPreview);
     Image statusDivider =
-        new Image(skin.newDrawable("white", new Color(0.40f, 0.29f, 0.17f, 0.75f)));
+        new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(0.40f, 0.29f, 0.17f, 0.75f)));
     statusDivider.setBounds(168f, 96f, 574f, 1f);
     statusDivider.setTouchable(Touchable.disabled);
     selectionLayer.addActor(statusDivider);
@@ -247,7 +250,7 @@ final class CardFusionSelectionView {
 
   private void addSmallDiamond(
       Group parent, float centerX, float centerY, float size, Color color) {
-    Image diamond = new Image(skin.newDrawable("white", color));
+    Image diamond = new Image(skin.newDrawable(STYLE_NAME_WHITE, color));
     diamond.setBounds(centerX - size / 2f, centerY - size / 2f, size, size);
     diamond.setOrigin(size / 2f, size / 2f);
     diamond.setRotation(45f);
@@ -467,7 +470,7 @@ final class CardFusionSelectionView {
                   Actions.fadeOut(0.72f, Interpolation.sine))));
     }
 
-    Image spark = new Image(skin.newDrawable("white", new Color(1f, 0.47f, 0.16f, 1f)));
+    Image spark = new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(1f, 0.47f, 0.16f, 1f)));
     spark.setBounds(altarCoreX - 5f, altarCoreY - 5f, 10f, 10f);
     spark.setOrigin(5f, 5f);
     spark.setRotation(45f);
@@ -480,7 +483,8 @@ final class CardFusionSelectionView {
             Actions.fadeOut(0.25f)));
     sequenceLayer.addActor(spark);
 
-    Image sparkCore = new Image(skin.newDrawable("white", new Color(1f, 0.82f, 0.43f, 1f)));
+    Image sparkCore =
+        new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(1f, 0.82f, 0.43f, 1f)));
     sparkCore.setBounds(altarCoreX - 2.5f, altarCoreY - 2.5f, 5f, 5f);
     sparkCore.setOrigin(2.5f, 2.5f);
     sparkCore.setRotation(45f);
@@ -512,7 +516,7 @@ final class CardFusionSelectionView {
       sequenceLayer.addActor(ray);
     }
 
-    Image flash = new Image(skin.newDrawable("white", new Color(1f, 0.86f, 0.68f, 1f)));
+    Image flash = new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(1f, 0.86f, 0.68f, 1f)));
     flash.setBounds(0f, 0f, FusionSceneAssets.WIDTH, FusionSceneAssets.HEIGHT);
     flash.setTouchable(Touchable.disabled);
     flash.getColor().a = 0f;
@@ -535,7 +539,7 @@ final class CardFusionSelectionView {
       Image softEdge =
           new Image(
               skin.newDrawable(
-                  "white", new Color(1f, 0.62f, 0.30f, 0.11f * (1f - 0.55f * progress))));
+                  STYLE_NAME_WHITE, new Color(1f, 0.62f, 0.30f, 0.11f * (1f - 0.55f * progress))));
       softEdge.setBounds(x, 25f - outerWidth / 2f, segmentLength, outerWidth);
       ray.addActor(softEdge);
 
@@ -543,7 +547,7 @@ final class CardFusionSelectionView {
       Image warmCenter =
           new Image(
               skin.newDrawable(
-                  "white", new Color(1f, 0.84f, 0.58f, 0.19f * (1f - 0.6f * progress))));
+                  STYLE_NAME_WHITE, new Color(1f, 0.84f, 0.58f, 0.19f * (1f - 0.6f * progress))));
       warmCenter.setBounds(x, 25f - innerWidth / 2f, segmentLength, innerWidth);
       ray.addActor(warmCenter);
     }
@@ -564,7 +568,8 @@ final class CardFusionSelectionView {
 
   private void showResult(String rewardId) {
     sequenceLayer.clearChildren();
-    Image shade = new Image(skin.newDrawable("white", new Color(0.02f, 0.02f, 0.03f, 0.48f)));
+    Image shade =
+        new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(0.02f, 0.02f, 0.03f, 0.48f)));
     shade.setBounds(0f, 0f, FusionSceneAssets.WIDTH, FusionSceneAssets.HEIGHT);
     shade.setTouchable(Touchable.disabled);
     sequenceLayer.addActor(shade);
@@ -575,7 +580,7 @@ final class CardFusionSelectionView {
     sequenceLayer.addActor(title);
     sequenceLayer.addActor(makeRewardCardFront(rewardId));
     addFinalMessage("A new Rare card joins your deck.", true);
-    Image flash = new Image(skin.newDrawable("white", new Color(1f, 0.82f, 0.66f, 1f)));
+    Image flash = new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(1f, 0.82f, 0.66f, 1f)));
     flash.setBounds(0f, 0f, FusionSceneAssets.WIDTH, FusionSceneAssets.HEIGHT);
     flash.setTouchable(Touchable.disabled);
     flash.addAction(Actions.sequence(Actions.fadeOut(0.45f), Actions.removeActor()));
@@ -624,10 +629,12 @@ final class CardFusionSelectionView {
     name.setFontScale(cardName(rewardId).length() > 17 ? 1.02f : 1.23f);
     name.setBounds(96f, 459f, 247f, 44f);
     card.addActor(name);
-    Image headerDivider = new Image(skin.newDrawable("white", new Color(0.61f, 0.50f, 0.30f, 1f)));
+    Image headerDivider =
+        new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(0.61f, 0.50f, 0.30f, 1f)));
     headerDivider.setBounds(96f, 452f, 240f, 1f);
     card.addActor(headerDivider);
-    Image headerNode = new Image(skin.newDrawable("white", new Color(0.74f, 0.39f, 0.18f, 1f)));
+    Image headerNode =
+        new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(0.74f, 0.39f, 0.18f, 1f)));
     headerNode.setBounds(214f, 451f, 3f, 3f);
     card.addActor(headerNode);
     Image costBadge =

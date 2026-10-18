@@ -20,7 +20,9 @@ class GameAreaTest {
     GameArea gameArea =
         new GameArea() {
           @Override
-          public void create() {}
+          public void create() {
+            // No-op implementation for testing base GameArea entity lifecycle.
+          }
         };
 
     ServiceLocator.registerEntityService(new EntityService());

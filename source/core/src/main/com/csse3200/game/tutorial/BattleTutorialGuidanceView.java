@@ -291,31 +291,13 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
     highlights.clear();
     brightActors.clear();
     if (prompt == null) return;
+    populateHighlightTargets();
+    layoutNarrationBox(w, h);
+  }
+
+  private void populateHighlightTargets() {
     switch (prompt.highlight()) {
-      case HAND -> {
-        if (prompt.step() == BattleTutorialController.Step.PLAY_A_CARD) {
-          Actor dragging = dragActor.get();
-          add(dragging != null ? dragging : demonstration.get());
-          highlights.addAll(enemies.get());
-          Actor stats = findEnemyStats();
-          if (stats != null) brightActors.add(stats);
-        } else {
-          Rectangle union = null;
-          for (Actor actor : hand.get()) {
-            if (actor == null || actor.getStage() != stage || !actor.isVisible()) continue;
-            brightActors.add(actor);
-            if (union == null) union = bounds(actor);
-            else union.merge(bounds(actor));
-          }
-          if (union != null) {
-            union.x -= 18;
-            union.y -= 18;
-            union.width += 36;
-            union.height += 36;
-            highlights.add(union);
-          }
-        }
-      }
+      case HAND -> collectHandTargets();
       case CARD_COST -> {
         if (demonstration.get() instanceof Group group)
           descendants(group).stream()
@@ -346,6 +328,34 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
       case STATUS_EFFECTS -> add(findStat("Energy:", true));
       case NONE -> {}
     }
+  }
+
+  private void collectHandTargets() {
+    if (prompt.step() == BattleTutorialController.Step.PLAY_A_CARD) {
+      Actor dragging = dragActor.get();
+      add(dragging != null ? dragging : demonstration.get());
+      highlights.addAll(enemies.get());
+      Actor stats = findEnemyStats();
+      if (stats != null) brightActors.add(stats);
+      return;
+    }
+    Rectangle union = null;
+    for (Actor actor : hand.get()) {
+      if (actor == null || actor.getStage() != stage || !actor.isVisible()) continue;
+      brightActors.add(actor);
+      if (union == null) union = bounds(actor);
+      else union.merge(bounds(actor));
+    }
+    if (union != null) {
+      union.x -= 18;
+      union.y -= 18;
+      union.width += 36;
+      union.height += 36;
+      highlights.add(union);
+    }
+  }
+
+  private void layoutNarrationBox(float w, float h) {
     message.setFontScale(Math.min(1, Math.max(0.65f, w / 900f)));
     float textWidth = 0;
     for (String line : prompt.text().split("\n")) {
@@ -367,6 +377,19 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
             prompt.step() == BattleTutorialController.Step.INTRO
                 ? Math.max(h * 0.23f, narration.getPrefHeight())
                 : narration.getPrefHeight());
+    Rectangle box = resolveNarrationBounds(width, height, w, h);
+    narration.setBounds(box.x, box.y, box.width, box.height);
+    narration.validate();
+  }
+
+  private Rectangle resolveNarrationBounds(float width, float height, float w, float h) {
+    if (prompt.step() == BattleTutorialController.Step.PLAY_A_CARD) {
+      if (dragPrompt == null) dragPrompt = new Rectangle((w - width) / 2, h * 0.72f, width, height);
+      return clamp(new Rectangle(dragPrompt), w, h);
+    }
+    if (prompt.step() == BattleTutorialController.Step.INTRO) {
+      return clamp(new Rectangle((w - width) / 2, h * 0.6f, width, height), w, h);
+    }
     Rectangle target =
         highlights.isEmpty() ? new Rectangle(w / 2, h * 0.6f, 0, 0) : highlights.get(0);
     Placement preferred =
@@ -375,24 +398,15 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
           case ENEMY_STATS, ENEMY_ARMOUR, ENEMIES -> Placement.LEFT;
           default -> Placement.ABOVE;
         };
-    Rectangle box;
-    if (prompt.step() == BattleTutorialController.Step.PLAY_A_CARD) {
-      if (dragPrompt == null) dragPrompt = new Rectangle((w - width) / 2, h * 0.72f, width, height);
-      box = clamp(new Rectangle(dragPrompt), w, h);
-    } else if (prompt.step() == BattleTutorialController.Step.INTRO) {
-      box = clamp(new Rectangle((w - width) / 2, h * 0.6f, width, height), w, h);
-    } else {
-      box = place(target, width, height, w, h, preferred);
-      if (prompt.highlight() == BattleTutorialPrompt.HighlightTarget.CARD_INVENTORY
-          || prompt.highlight() == BattleTutorialPrompt.HighlightTarget.ITEM_INVENTORY
-          || prompt.highlight() == BattleTutorialPrompt.HighlightTarget.END_TURN) {
-        // Keep the prompt below the button's top edge, away from the game title.
-        box.y = Math.min(box.y, target.y + target.height - box.height);
-        box = clamp(box, w, h);
-      }
+    Rectangle box = place(target, width, height, w, h, preferred);
+    if (prompt.highlight() == BattleTutorialPrompt.HighlightTarget.CARD_INVENTORY
+        || prompt.highlight() == BattleTutorialPrompt.HighlightTarget.ITEM_INVENTORY
+        || prompt.highlight() == BattleTutorialPrompt.HighlightTarget.END_TURN) {
+      // Keep the prompt below the button's top edge, away from the game title.
+      box.y = Math.min(box.y, target.y + target.height - box.height);
+      box = clamp(box, w, h);
     }
-    narration.setBounds(box.x, box.y, box.width, box.height);
-    narration.validate();
+    return box;
   }
 
   static Rectangle place(
@@ -547,13 +561,13 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
       Vector2 direction = new Vector2(finish).sub(start).nor();
       Vector2 tip = new Vector2(finish).sub(new Vector2(direction).scl(10));
       for (int i = 0; i < 10; i++) {
-        Vector2 point = new Vector2(tip).sub(new Vector2(direction).scl(i * 2));
+        Vector2 point = new Vector2(tip).sub(new Vector2(direction).scl(i * 2f));
         rect(batch, point.x, point.y, 3, 3);
       }
       for (int i = 0; i < 5; i++) {
-        Vector2 base = new Vector2(tip).sub(new Vector2(direction).scl(i * 2));
-        rect(batch, base.x - direction.y * i * 2, base.y + direction.x * i * 2, 3, 3);
-        rect(batch, base.x + direction.y * i * 2, base.y - direction.x * i * 2, 3, 3);
+        Vector2 base = new Vector2(tip).sub(new Vector2(direction).scl(i * 2f));
+        rect(batch, base.x - direction.y * i * 2f, base.y + direction.x * i * 2f, 3, 3);
+        rect(batch, base.x + direction.y * i * 2f, base.y - direction.x * i * 2f, 3, 3);
       }
       if (prompt.step() == BattleTutorialController.Step.PLAY_A_CARD && highlights.size() > 1)
         drawDragArc(batch, target, highlights.get(1));

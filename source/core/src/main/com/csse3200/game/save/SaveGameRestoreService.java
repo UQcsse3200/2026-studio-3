@@ -277,6 +277,10 @@ public class SaveGameRestoreService {
       return RestoreResult.failure(
           RestoreError.INVALID_MAP_STATE, "Saved active encounter node does not exist in the map");
     }
+    return validateMapConnections(mapData, nodeIds);
+  }
+
+  private RestoreResult validateMapConnections(MapSaveData mapData, Set<Integer> nodeIds) {
     for (MapNodeSaveData nodeData : mapData.nodes) {
       for (Integer connectionId : nodeData.connectionIds) {
         if (connectionId == null || !nodeIds.contains(connectionId)) {

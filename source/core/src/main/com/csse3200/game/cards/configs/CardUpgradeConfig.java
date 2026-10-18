@@ -26,5 +26,7 @@ public class CardUpgradeConfig {
   public EffectConfig[] effects = new EffectConfig[0];
 
   /** Required by the JSON deserialiser. */
-  public CardUpgradeConfig() {}
+  public CardUpgradeConfig() {
+    // Default constructor required for LibGDX JSON deserialisation.
+  }
 }
