@@ -218,8 +218,13 @@ public final class ChanceEncounterConfigLoader {
     }
 
     try {
-      new BigDecimal(value.asString()).intValueExact();
-    } catch (ArithmeticException | NumberFormatException exception) {
+      BigDecimal decimal = new BigDecimal(value.asString()).stripTrailingZeros();
+      if (decimal.scale() > 0
+          || decimal.compareTo(BigDecimal.valueOf(Integer.MIN_VALUE)) < 0
+          || decimal.compareTo(BigDecimal.valueOf(Integer.MAX_VALUE)) > 0) {
+        errors.add(label + " must be an exact 32-bit integer, was " + value.asString());
+      }
+    } catch (NumberFormatException exception) {
       errors.add(label + " must be an exact 32-bit integer, was " + value.asString());
     }
   }
