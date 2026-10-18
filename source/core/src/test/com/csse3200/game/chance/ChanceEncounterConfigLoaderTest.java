@@ -80,10 +80,15 @@ class ChanceEncounterConfigLoaderTest {
     assertEncounter(
         encounters.get(0),
         "mysterious-shrine",
-        "A cracked sanctum shrine still burns with a god's spoiled light. An angel might leave an offering here to learn what the fallen still demand.",
-        new ExpectedChoice(
-            "make-offering", "Bleed a little of your light into the shrine.", -10, 25),
-        new ExpectedChoice("leave", "Pass without kneeling.", 0, 0));
+        "A cracked sanctum shrine burns with a god's spoiled light. Offer your light or accept a Curse for Gold. Curses persist and stack in future battles.",
+        new ExpectedChoice("make-offering", "Make an Offering: -10 HP, +25 Gold.", -10, 25),
+        new ExpectedChoice("leave", "Leave the Shrine.", 0, 0));
+    assertEquals(
+        "Accept the Brand: +50 Gold; Curse reduces future Strength gains by 1.",
+        encounters.get(0).getChoices().get(2).getDescription());
+    assertEquals(
+        "Swear the Blood Oath: +70 Gold; Curse drains 2 HP each player turn in battle (min 1 HP).",
+        encounters.get(0).getChoices().get(3).getDescription());
     assertEncounter(
         encounters.get(1),
         "wandering-healer",
@@ -102,13 +107,13 @@ class ChanceEncounterConfigLoaderTest {
     assertEncounter(
         encounters.get(3),
         "abandoned-mine",
-        "Beneath the sanctum, old workings still hold relics of the fallen. Lasting penalties in future battles, per copy: Brand of the Damned (Strength gains -1, min 0); Blood-Oath Sigil (player turn-start -2 HP, bypasses Block/Armour, min 1 HP); Shattered Aegis (Block gains -1, min 0); Ashen Ember (max Energy -1 in subsequent battles, min 1).",
+        "Beneath the sanctum, fallen relics lie in abandoned workings. A random Curse can weaken Strength or Block gains, drain HP at player turn-start, or reduce maximum Energy in future battles.",
         new ExpectedChoice(
             "search-tunnels",
-            "Explore the Mine: gain 60 Gold; 50% chance of one random, lasting Curse.",
+            "Explore the Mine: +60 Gold; 50% chance of one lasting Curse.",
             0,
             60),
-        new ExpectedChoice("leave", "Leave", 0, 0));
+        new ExpectedChoice("leave", "Leave the Mine.", 0, 0));
     assertEncounter(
         encounters.get(4),
         "wishing-fountain",

@@ -2,12 +2,12 @@
   "encounters": [
     {
       "id": "mysterious-shrine",
-      "description": "A cracked sanctum shrine still burns with a god's spoiled light. An angel might leave an offering here to learn what the fallen still demand.",
+      "description": "A cracked sanctum shrine burns with a god's spoiled light. Offer your light or accept a Curse for Gold. Curses persist and stack in future battles.",
       "weight": 1,
       "choices": [
         {
           "id": "make-offering",
-          "description": "Bleed a little of your light into the shrine.",
+          "description": "Make an Offering: -10 HP, +25 Gold.",
           "outcome": {
             "healthDelta": -10,
             "currencyDelta": 25
@@ -15,7 +15,7 @@
         },
         {
           "id": "leave",
-          "description": "Pass without kneeling.",
+          "description": "Leave the Shrine.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0
@@ -23,7 +23,7 @@
         },
         {
           "id": "accept-brand",
-          "description": "Accept the Brand: gain 50 Gold and Brand of the Damned. In future battles, every Strength gain is reduced by 1 per copy (minimum 0).",
+          "description": "Accept the Brand: +50 Gold; Curse reduces future Strength gains by 1.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 50,
@@ -32,7 +32,7 @@
         },
         {
           "id": "swear-blood-oath",
-          "description": "Swear the Blood Oath: gain 70 Gold and Blood-Oath Sigil. In future battles, lose 2 HP per copy at the start of each player turn, bypassing Block and Armour (minimum 1 HP).",
+          "description": "Swear the Blood Oath: +70 Gold; Curse drains 2 HP each player turn in battle (min 1 HP).",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 70,
@@ -98,12 +98,12 @@
     },
     {
       "id": "abandoned-mine",
-      "description": "Beneath the sanctum, old workings still hold relics of the fallen. Lasting penalties in future battles, per copy: Brand of the Damned (Strength gains -1, min 0); Blood-Oath Sigil (player turn-start -2 HP, bypasses Block/Armour, min 1 HP); Shattered Aegis (Block gains -1, min 0); Ashen Ember (max Energy -1 in subsequent battles, min 1).",
+      "description": "Beneath the sanctum, fallen relics lie in abandoned workings. A random Curse can weaken Strength or Block gains, drain HP at player turn-start, or reduce maximum Energy in future battles.",
       "weight": 1,
       "choices": [
         {
           "id": "search-tunnels",
-          "description": "Explore the Mine: gain 60 Gold; 50% chance of one random, lasting Curse.",
+          "description": "Explore the Mine: +60 Gold; 50% chance of one lasting Curse.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 60
@@ -132,7 +132,7 @@
         },
         {
           "id": "leave",
-          "description": "Leave",
+          "description": "Leave the Mine.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0
