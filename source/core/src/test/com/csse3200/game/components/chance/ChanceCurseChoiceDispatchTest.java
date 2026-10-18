@@ -151,8 +151,7 @@ class ChanceCurseChoiceDispatchTest {
       assertFalse(display.getContinueButton().isVisible());
       assertEquals(
           "Gold +" + gold,
-          ((com.badlogic.gdx.scenes.scene2d.ui.Label)
-                  overlay.findActor("acquisition-entry-gold"))
+          ((com.badlogic.gdx.scenes.scene2d.ui.Label) overlay.findActor("acquisition-entry-gold"))
               .getText()
               .toString());
       assertNotNull(overlay.findActor("acquisition-entry-" + itemId));
