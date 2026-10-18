@@ -130,7 +130,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     terminal.addCommand(
         "goto",
         "goto <floor> <roomtype>",
-        "jump to a node, e.g. goto 3 SHOP",
+        "jump to a node, e.g. goto 2 COMBAT",
         new GotoCommand(runState, mapDisplay.getMapSelectionController()));
     terminal.addCommand(
         "discoverallcards",
