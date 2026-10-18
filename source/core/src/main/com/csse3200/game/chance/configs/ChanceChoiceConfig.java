@@ -15,5 +15,7 @@ public class ChanceChoiceConfig {
   public ChanceCurseRiskConfig curseRisk;
 
   /** Required by the JSON deserialiser. */
-  public ChanceChoiceConfig() {}
+  public ChanceChoiceConfig() {
+    // Default constructor required for LibGDX JSON deserialisation.
+  }
 }

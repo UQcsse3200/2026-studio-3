@@ -11,14 +11,14 @@
       "texture": "images/dungeon.png"
     },
     {
-      "id": "forest",
-      "name": "Forest",
-      "texture": "images/forest.png"
+      "id": "cave",
+      "name": "Cave",
+      "texture": "images/cave.png"
     },
     {
-      "id": "inside_castle",
-      "name": "Inside Castle",
-      "texture": "images/inside_castle.png"
+      "id": "church",
+      "name": "Church",
+      "texture": "images/church.png"
     },
     {
       "id": "cemetery",
@@ -36,9 +36,9 @@
       "texture": "images/stones_ruins.png"
     },
     {
-      "id": "underwater",
-      "name": "Underwater",
-      "texture": "images/underwater.png"
+      "id": "god_mountain",
+      "name": "God Mountain",
+      "texture": "images/god_mountain.png"
     },
     {
       "id": "temple",
@@ -46,14 +46,14 @@
       "texture": "images/temple.png"
     },
     {
-      "id": "autumn_forest",
-      "name": "Autumn Forest",
-      "texture": "images/autumn_forest.png"
+      "id": "sky_tower",
+      "name": "Sky Tower",
+      "texture": "images/sky_tower.png"
     },
     {
-      "id": "forest_with_sun",
-      "name": "Forest With Sun",
-      "texture": "images/forest_with_sun.png"
+      "id": "god_statues",
+      "name": "God Statues",
+      "texture": "images/god_statues.png"
     }
   ]
 }

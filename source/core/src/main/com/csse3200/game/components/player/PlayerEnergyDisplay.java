@@ -82,8 +82,10 @@ public class PlayerEnergyDisplay extends UIComponent {
 
     // Energy image
     energyImage =
-        new Image(ServiceLocator.getResourceService().getAsset("images/energy.png", Texture.class));
-    energyImage.setScaling(Scaling.fit);
+        new Image(
+            ServiceLocator.getResourceService()
+                .getAsset("images/ui/inventory-panel.png", Texture.class));
+    energyImage.setScaling(Scaling.stretch);
 
     // Energy text
     EnergyComponent energyComponent = entity.getComponent(EnergyComponent.class);
@@ -96,7 +98,7 @@ public class PlayerEnergyDisplay extends UIComponent {
     stack.add(energyImage);
     stack.add(energyLabel);
     energyLabel.setAlignment(Align.center);
-    table.add(stack).size(400f);
+    table.add(stack).size(100f);
     stage.addActor(table);
     table.setPosition(150f, 200f);
   }

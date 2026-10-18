@@ -24,6 +24,7 @@ import com.csse3200.game.services.ServiceLocator;
 final class FusionSceneAssets {
   static final float WIDTH = 1280f;
   static final float HEIGHT = 800f;
+  private static final String STYLE_NAME_WHITE = "white";
 
   private FusionSceneAssets() {}
 
@@ -40,7 +41,7 @@ final class FusionSceneAssets {
       image.setScaling(Scaling.fill);
       image.setColor(0.74f, 0.72f, 0.75f, 1f);
     } else {
-      image = new Image(skin.newDrawable("white", new Color(0.12f, 0.10f, 0.16f, 1f)));
+      image = new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(0.12f, 0.10f, 0.16f, 1f)));
     }
     image.setBounds(0f, 0f, WIDTH, HEIGHT);
     image.setTouchable(Touchable.disabled);
@@ -57,7 +58,7 @@ final class FusionSceneAssets {
       image = new Image(new TextureRegionDrawable(new TextureRegion(texture)));
       image.setScaling(Scaling.fit);
     } else {
-      image = new Image(skin.newDrawable("white", new Color(0.22f, 0.23f, 0.32f, 1f)));
+      image = new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(0.22f, 0.23f, 0.32f, 1f)));
     }
     image.setTouchable(Touchable.disabled);
     return image;
@@ -75,7 +76,7 @@ final class FusionSceneAssets {
       image = new Image(new TextureRegionDrawable(new TextureRegion(texture)));
       image.setScaling(Scaling.fit);
     } else {
-      image = new Image(skin.newDrawable("white", new Color(0.18f, 0.15f, 0.21f, 1f)));
+      image = new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(0.18f, 0.15f, 0.21f, 1f)));
     }
     image.setTouchable(Touchable.disabled);
     return image;
@@ -85,7 +86,7 @@ final class FusionSceneAssets {
     ResourceService resources = ServiceLocator.getResourceService();
     if (resources == null
         || !resources.containsAsset(ShopDisplay.PLAQUE_FRAME_TEXTURE, Texture.class)) {
-      return skin.newDrawable("white", tint);
+      return skin.newDrawable(STYLE_NAME_WHITE, tint);
     }
     Texture texture = resources.getAsset(ShopDisplay.PLAQUE_FRAME_TEXTURE, Texture.class);
     texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
@@ -129,7 +130,7 @@ final class FusionSceneAssets {
     private WarmGlowDrawable(Skin skin, float strength) {
       for (int level = 1; level < levels.length; level++) {
         levels[level] =
-            skin.newDrawable("white", new Color(1f, 0.56f, 0.22f, strength * level / 6f));
+            skin.newDrawable(STYLE_NAME_WHITE, new Color(1f, 0.56f, 0.22f, strength * level / 6f));
       }
       for (int row = 0; row < ROWS; row++) {
         for (int column = 0; column < COLUMNS; column++) {
@@ -168,17 +169,19 @@ final class FusionSceneAssets {
     private final FrameKind kind;
 
     private PixelFrameDrawable(Skin skin, Color fillColor, Color edgeColor, FrameKind kind) {
-      fill = fillColor == null ? null : skin.newDrawable("white", fillColor);
-      edge = skin.newDrawable("white", edgeColor);
-      innerEdge = skin.newDrawable("white", new Color(edgeColor).mul(0.65f, 0.65f, 0.65f, 0.72f));
-      accent = skin.newDrawable("white", new Color(edgeColor).mul(1.18f, 1.13f, 1.04f, 1f));
+      fill = fillColor == null ? null : skin.newDrawable(STYLE_NAME_WHITE, fillColor);
+      edge = skin.newDrawable(STYLE_NAME_WHITE, edgeColor);
+      innerEdge =
+          skin.newDrawable(STYLE_NAME_WHITE, new Color(edgeColor).mul(0.65f, 0.65f, 0.65f, 0.72f));
+      accent =
+          skin.newDrawable(STYLE_NAME_WHITE, new Color(edgeColor).mul(1.18f, 1.13f, 1.04f, 1f));
       forgeAccent =
           skin.newDrawable(
-              "white",
+              STYLE_NAME_WHITE,
               kind == FrameKind.REWARD_CARD
                   ? new Color(0.94f, 0.46f, 0.15f, 0.95f)
                   : new Color(0.68f, 0.34f, 0.15f, 0.9f));
-      darkMetal = skin.newDrawable("white", new Color(0.13f, 0.11f, 0.13f, 1f));
+      darkMetal = skin.newDrawable(STYLE_NAME_WHITE, new Color(0.13f, 0.11f, 0.13f, 1f));
       this.kind = kind;
     }
 
