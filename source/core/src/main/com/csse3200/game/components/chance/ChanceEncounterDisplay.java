@@ -333,11 +333,13 @@ public class ChanceEncounterDisplay extends UIComponent {
     background.setScaling(com.badlogic.gdx.utils.Scaling.stretch);
     scene.add(background);
     Table information = new Table();
+    information.setBackground(
+        new EncounterInformationShade(information, skin.getDrawable(STYLE_NAME_WHITE)));
     information
         .top()
         .left()
-        .padTop(com.badlogic.gdx.scenes.scene2d.ui.Value.percentHeight(.14f, rootTable))
-        .padLeft(com.badlogic.gdx.scenes.scene2d.ui.Value.percentWidth(.043f, rootTable));
+        .padTop(com.badlogic.gdx.scenes.scene2d.ui.Value.percentHeight(.065f, rootTable))
+        .padLeft(com.badlogic.gdx.scenes.scene2d.ui.Value.percentWidth(.032f, rootTable));
     information.defaults().left();
     information
         .add(new Label("+  CHANCE ENCOUNTER", createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR)))
@@ -420,6 +422,8 @@ public class ChanceEncounterDisplay extends UIComponent {
     background.setScaling(com.badlogic.gdx.utils.Scaling.stretch);
     scene.add(background);
     Table information = new Table();
+    information.setBackground(
+        new EncounterInformationShade(information, skin.getDrawable(STYLE_NAME_WHITE)));
     information.top().left().pad(36f, 42f, 0f, 0f);
     information.defaults().left();
     information
@@ -484,6 +488,8 @@ public class ChanceEncounterDisplay extends UIComponent {
     shrineScene = new MysteriousShrineScene(skin);
     scene.add(shrineScene);
     Table information = new Table();
+    information.setBackground(
+        new EncounterInformationShade(information, skin.getDrawable(STYLE_NAME_WHITE)));
     information.top().left().pad(36f, 42f, 0f, 0f);
     information.defaults().left();
     information
@@ -659,6 +665,8 @@ public class ChanceEncounterDisplay extends UIComponent {
     scene.add(fountainScene);
 
     Table information = new Table();
+    information.setBackground(
+        new EncounterInformationShade(information, skin.getDrawable(STYLE_NAME_WHITE)));
     information.top().left().pad(40f, 48f, 0f, 0f);
     information.defaults().left();
     information
@@ -1134,30 +1142,32 @@ public class ChanceEncounterDisplay extends UIComponent {
       scene.addActor(background);
     }
 
-    Label eyebrowLabel =
-        new Label(CHANCE_ENCOUNTER_LABEL, createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR));
-    eyebrowLabel.setFontScale(1.16f);
-    eyebrowLabel.setBounds(60f, 710f, 530f, 34f);
-    scene.addActor(eyebrowLabel);
-
+    Table information = new Table();
+    information.setName("mine-information");
+    information.setBounds(0, 0, SCENE_WIDTH, SCENE_HEIGHT);
+    information.setBackground(
+        new EncounterInformationShade(information, skin.getDrawable(STYLE_NAME_WHITE)));
+    information.top().left().pad(36f, 42f, 0f, 0f);
+    information.defaults().left();
+    information
+        .add(new Label(CHANCE_ENCOUNTER_LABEL, createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR)))
+        .padBottom(12)
+        .row();
     Label titleLabel =
         new Label(formatTitle(encounter.getId()), createLabelStyle(STYLE_NAME_LARGE, BODY_COLOUR));
-    titleLabel.setFontScale(1.55f);
-    titleLabel.setBounds(60f, 650f, 560f, 56f);
-    scene.addActor(titleLabel);
-
-    Image divider =
-        new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(0.48f, 0.30f, 0.20f, 0.85f)));
-    divider.setBounds(60f, 638f, 525f, 2f);
+    titleLabel.setName("mine-information-title");
+    titleLabel.setFontScale(.98f);
+    information.add(titleLabel).padBottom(12).row();
+    Image divider = new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(.52f, .37f, .19f, 1)));
     divider.setTouchable(Touchable.disabled);
-    scene.addActor(divider);
-
+    information.add(divider).width(390).height(1).padBottom(12).row();
     Label descriptionLabel =
         new Label(encounter.getDescription(), createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
-    descriptionLabel.setFontScale(1.13f);
+    descriptionLabel.setName("mine-information-description");
+    descriptionLabel.setFontScale(.88f);
     descriptionLabel.setWrap(true);
-    descriptionLabel.setBounds(60f, 515f, 540f, 108f);
-    scene.addActor(descriptionLabel);
+    information.add(descriptionLabel).width(390);
+    scene.addActor(information);
 
     // The original prompt remains available to refreshChoices, but the scene and buttons
     // provide the visual invitation without another opaque panel over the mine cart.
