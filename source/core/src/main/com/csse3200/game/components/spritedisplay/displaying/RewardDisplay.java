@@ -417,6 +417,7 @@ public class RewardDisplay extends Displaying {
 
           @Override
           public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+            AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
             frame.setColor(1f, 0.88f, 0.58f, 1f);
             if (victoryAnimationController != null) {
               victoryAnimationController.showHover(card);
@@ -656,6 +657,11 @@ public class RewardDisplay extends Displaying {
                 InputEvent event, float x, float y, int pointer, int buttonCode) {
               event.stop();
               return true;
+            }
+
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+              AudioService.playSound(SoundId.CARD_HOVER, 0.7f);
             }
           });
       cardChoiceButtons.add(cardButton);
