@@ -93,7 +93,9 @@ class ChanceCurseChoiceDispatchTest {
       assertNull(overlay.findActor("acquisition-entry-BRAND_OF_THE_DAMNED"));
       assertEquals(1, session.getAcquisitionResult(null).orElseThrow().entries().size());
       overlay.findActor("acquisition-continue").fire(new ChangeEvent());
-      stage.act(0.25f);
+      for (int frame = 0; frame < 10; frame++) {
+        stage.act(1f / 30f);
+      }
       assertTrue(session.isCompleted());
       assertEquals(95, player.getCurrency());
       verifyNoInteractions(items);
