@@ -83,9 +83,10 @@ class StatusInfoTest {
     Map<Integer, Integer> groups = Map.of(0, 2, 3, 3, 2, 4);
 
     assertEquals(
-        "4 stacks: 2 turns remaining\n"
-            + "3 stacks: 3 turns remaining\n"
-            + "2 stacks: until the end of combat",
+        """
+        4 stacks: 2 turns remaining
+        3 stacks: 3 turns remaining
+        2 stacks: until the end of combat""",
         StatusInfo.poisonDurationText(groups));
   }
 

@@ -15,7 +15,6 @@ import com.csse3200.game.components.StatusEffect;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.UIComponent;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
@@ -129,15 +128,13 @@ public class StatusIconDisplay extends UIComponent {
 
   /** Collects the known statuses in a stable order: by display order, then by key. */
   private static Map<String, Shown> readStatuses(CombatStatsComponent stats) {
-    List<String> keys = new ArrayList<>();
-    for (String key : stats.getStatusEffectDurations().keySet()) {
-      if (StatusInfo.forKey(key).isPresent()) {
-        keys.add(key);
-      }
-    }
-    keys.sort(
-        Comparator.comparing((String key) -> StatusInfo.forKey(key).orElseThrow().ordinal())
-            .thenComparing(Comparator.naturalOrder()));
+    List<String> keys =
+        stats.getStatusEffectDurations().keySet().stream()
+            .filter(key -> StatusInfo.forKey(key).isPresent())
+            .sorted(
+                Comparator.comparing((String key) -> StatusInfo.forKey(key).orElseThrow().ordinal())
+                    .thenComparing(Comparator.naturalOrder()))
+            .toList();
 
     Map<String, Shown> statuses = new LinkedHashMap<>();
     for (String key : keys) {

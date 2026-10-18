@@ -133,7 +133,7 @@ public class FloatingDamageDisplay extends RenderComponent {
   }
 
   static float verticalOffset(float elapsed) {
-    float progress = Math.min(Math.max(elapsed / DISPLAY_DURATION, 0f), 1f);
+    float progress = Math.clamp(elapsed / DISPLAY_DURATION, 0f, 1f);
     return RISE_DISTANCE * progress;
   }
 

@@ -119,20 +119,7 @@ public class BattleController {
     for (Entity enemy : this.enemies) {
       EventHandler enemyEvents = enemy.getEvents();
       if (enemyEvents != null) {
-        enemyEvents.addListener(
-            "enemyDefeated",
-            () -> {
-              CombatStatsComponent playerStats =
-                  this.player.getComponent(CombatStatsComponent.class);
-              String tauntKey = IntentEffectType.TAUNT.name() + ":" + enemy.getId();
-              boolean hadTaunt = playerStats != null && playerStats.hasStatusEffect(tauntKey);
-              if (playerStats != null) {
-                playerStats.removeStatusEffect(tauntKey);
-              }
-              if (!hadTaunt) {
-                setTauntForm(enemy, false);
-              }
-            });
+        enemyEvents.addListener("enemyDefeated", () -> clearTauntOnDefeat(enemy));
       }
     }
   }
@@ -315,6 +302,22 @@ public class BattleController {
     }
   }
 
+  /**
+   * Removes a defeated enemy's taunt from the player, and returns the enemy to its normal form if
+   * it had no taunt active.
+   */
+  private void clearTauntOnDefeat(Entity enemy) {
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+    String tauntKey = IntentEffectType.TAUNT.name() + ":" + enemy.getId();
+    boolean hadTaunt = playerStats != null && playerStats.hasStatusEffect(tauntKey);
+    if (playerStats != null) {
+      playerStats.removeStatusEffect(tauntKey);
+    }
+    if (!hadTaunt) {
+      setTauntForm(enemy, false);
+    }
+  }
+
   /** Holds the Boss in its channelling form for as long as its silence stays on the player. */
   private void refreshSilenceFormForStatus(String statusKey) {
     if (!IntentEffectType.SILENCE.name().equals(statusKey)) {
@@ -328,7 +331,7 @@ public class BattleController {
       if (behaviour != null
           && "boss".equals(behaviour.getBehaviourId())
           && enemyStats != null
-          && !enemyStats.isDead()
+          && !Boolean.TRUE.equals(enemyStats.isDead())
           && enemy.getEvents() != null) {
         enemy.getEvents().trigger("enemyFormChanged", silenced ? "silence" : "normal");
       }

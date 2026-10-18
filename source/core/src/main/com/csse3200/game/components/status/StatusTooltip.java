@@ -27,7 +27,7 @@ public final class StatusTooltip extends Table {
   private static final float PADDING = 12f;
   private static final float GAP = 8f;
   private static final String LABEL_STYLE = "small";
-  private static final Color BACKGROUND = new Color(0.04f, 0.06f, 0.09f, 0.98f);
+  private static final Color PANEL_COLOUR = new Color(0.04f, 0.06f, 0.09f, 0.98f);
   private static final Color DURATION_COLOUR = new Color(0.72f, 0.76f, 0.82f, 1f);
 
   /**
@@ -69,7 +69,7 @@ public final class StatusTooltip extends Table {
     durationLabel = new Label("", durationStyle);
     durationLabel.setWrap(true);
 
-    setBackground(skin.newDrawable("white", BACKGROUND));
+    setBackground(skin.newDrawable("white", PANEL_COLOUR));
     pad(PADDING);
     defaults().width(TEXT_WIDTH).left();
     add(titleLabel);

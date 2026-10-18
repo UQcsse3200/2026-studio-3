@@ -237,7 +237,7 @@ public class EnemyBehaviourComponent extends Component {
             .resolveDamage(currentIntent.getValue());
     // Keep the shown intent and the actual tutorial hit nonlethal after all modifiers.
     return ai instanceof TutorialEnemyAI && targetStats != null
-        ? Math.min(damage, Math.max(0, targetStats.getHealth() - 1))
+        ? Math.clamp(targetStats.getHealth() - 1L, 0, damage)
         : damage;
   }
 

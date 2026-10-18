@@ -30,7 +30,8 @@ public class EnemyAnimationController extends Component {
   private boolean defeated;
   private boolean disposed;
   private static final String ATTACK = "attack";
-  private String currentForm = "normal";
+  private static final String NORMAL_FORM = "normal";
+  private String currentForm = NORMAL_FORM;
 
   @Override
   public void create() {
@@ -126,7 +127,7 @@ public class EnemyAnimationController extends Component {
       return;
     }
     defeated = true;
-    currentForm = "normal";
+    currentForm = NORMAL_FORM;
     resetAttackMotion();
     startAction("death", "hurt");
   }
@@ -187,11 +188,11 @@ public class EnemyAnimationController extends Component {
 
   private void startAction(String action, String fallback) {
     String formAnimation = action + "_" + currentForm;
-    if (!"normal".equals(currentForm) && animator.hasAnimation(formAnimation)) {
+    if (!NORMAL_FORM.equals(currentForm) && animator.hasAnimation(formAnimation)) {
       animator.startAnimation(formAnimation);
     } else if (animator.hasAnimation(action) || action.equals(fallback)) {
       animator.startAnimation(action);
-    } else if (!action.equals(fallback)) {
+    } else {
       startAction(fallback, fallback);
     }
   }

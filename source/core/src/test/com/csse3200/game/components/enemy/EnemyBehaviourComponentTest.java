@@ -113,8 +113,7 @@ class EnemyBehaviourComponentTest {
 
     behaviour.setAI(replacement);
 
-    Entity enemy =
-        new Entity().addComponent(new CombatStatsComponent(20, 5)).addComponent(behaviour);
+    new Entity().addComponent(new CombatStatsComponent(20, 5)).addComponent(behaviour);
 
     EnemyIntent intent = behaviour.rollIntent();
 
