@@ -85,12 +85,12 @@ class GdxGameTest {
                   finishOpening.set((Runnable) context.arguments().get(1));
                 });
         MockedConstruction<BattleScreen> battles =
-        mockConstruction(
-            BattleScreen.class,
-            (battle, context) -> {
-              assertSame(game, context.arguments().get(0));
-              assertEquals(true, context.arguments().get(1));
-            })) {
+            mockConstruction(
+                BattleScreen.class,
+                (battle, context) -> {
+                  assertSame(game, context.arguments().get(0));
+                  assertEquals(true, context.arguments().get(1));
+                })) {
       game.startTutorialBattle();
 
       assertEquals(1, narrations.constructed().size());
