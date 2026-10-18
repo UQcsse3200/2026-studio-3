@@ -780,7 +780,7 @@ class ArmourAndStatusEffectTest {
     CombatStatsComponent stats = new CombatStatsComponent(100, 0);
     Entity entity = new Entity().addComponent(stats);
     List<String> applied = new ArrayList<>();
-    entity.getEvents().addListener("statusEffectApplied", (String type) -> applied.add(type));
+    entity.getEvents().<String>addListener("statusEffectApplied", applied::add);
 
     stats.applyStatusEffect("STRENGTH", 1, 3);
     stats.applyStatusEffect("STRENGTH", 2, 1);

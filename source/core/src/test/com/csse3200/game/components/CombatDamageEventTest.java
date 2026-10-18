@@ -82,7 +82,7 @@ class CombatDamageEventTest {
     CombatStatsComponent stats = new CombatStatsComponent(20, 0);
 
     entity.addComponent(stats);
-    entity.getEvents().addListener("damageTaken", (DamageTakenEvent event) -> events.add(event));
+    entity.getEvents().<DamageTakenEvent>addListener("damageTaken", events::add);
 
     return stats;
   }

@@ -274,8 +274,8 @@ class BattleControllerTest {
     new BattleController(silencedPlayer, List.of(boss, guardian));
     List<String> bossForms = new ArrayList<>();
     List<String> guardianForms = new ArrayList<>();
-    boss.getEvents().addListener("enemyFormChanged", (String form) -> bossForms.add(form));
-    guardian.getEvents().addListener("enemyFormChanged", (String form) -> guardianForms.add(form));
+    boss.getEvents().<String>addListener("enemyFormChanged", bossForms::add);
+    guardian.getEvents().<String>addListener("enemyFormChanged", guardianForms::add);
     CombatStatsComponent playerStats = silencedPlayer.getComponent(CombatStatsComponent.class);
 
     playerStats.applyStatusEffect("POISON", 1, 2);
@@ -306,7 +306,7 @@ class BattleControllerTest {
     guardian.create();
     new BattleController(tauntedPlayer, List.of(guardian));
     List<String> forms = new ArrayList<>();
-    guardian.getEvents().addListener("enemyFormChanged", (String form) -> forms.add(form));
+    guardian.getEvents().<String>addListener("enemyFormChanged", forms::add);
     CombatStatsComponent playerStats = tauntedPlayer.getComponent(CombatStatsComponent.class);
     String ownTaunt = "TAUNT:" + guardian.getId();
 
@@ -333,7 +333,7 @@ class BattleControllerTest {
     guardian.create();
     BattleController battle = new BattleController(tauntedPlayer, List.of(guardian));
     List<String> forms = new ArrayList<>();
-    guardian.getEvents().addListener("enemyFormChanged", (String form) -> forms.add(form));
+    guardian.getEvents().<String>addListener("enemyFormChanged", forms::add);
     CombatStatsComponent playerStats = tauntedPlayer.getComponent(CombatStatsComponent.class);
     String ownTaunt = "TAUNT:" + guardian.getId();
     playerStats.applyStatusEffect(ownTaunt, guardian.getId(), 2);

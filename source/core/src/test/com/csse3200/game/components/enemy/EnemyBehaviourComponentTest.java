@@ -56,7 +56,7 @@ class EnemyBehaviourComponentTest {
     EnemyBehaviourComponent behaviour = new EnemyBehaviourComponent("enrage_low_health");
     Entity enemy = enemyWith(behaviour, stats);
     List<String> forms = new ArrayList<>();
-    enemy.getEvents().addListener("enemyFormChanged", (String form) -> forms.add(form));
+    enemy.getEvents().<String>addListener("enemyFormChanged", forms::add);
 
     behaviour.rollIntent();
     stats.setHealth(19);
@@ -73,7 +73,7 @@ class EnemyBehaviourComponentTest {
     EnemyBehaviourComponent behaviour = new EnemyBehaviourComponent("enrage_low_health");
     Entity enemy = enemyWith(behaviour, new CombatStatsComponent(40, 16));
     List<String> forms = new ArrayList<>();
-    enemy.getEvents().addListener("enemyFormChanged", (String form) -> forms.add(form));
+    enemy.getEvents().<String>addListener("enemyFormChanged", forms::add);
     EnemyMemoryComponent memory = new EnemyMemoryComponent();
     behaviour.setEnemyMemory(memory);
 
