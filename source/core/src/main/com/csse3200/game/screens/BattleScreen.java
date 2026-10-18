@@ -371,7 +371,7 @@ public class BattleScreen extends ScreenAdapter {
               .get(com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton.ImageTextButtonStyle.class));
       tutorialView.setStatTargets(
           () ->
-              uiFactory.getByTrigger("openInventory").stream()
+              uiFactory.getByTrigger(OPEN_INVENTORY_TRIGGER).stream()
                   .map(Clickable::getBtn)
                   .findFirst()
                   .orElse(null),
@@ -634,7 +634,7 @@ public class BattleScreen extends ScreenAdapter {
   }
 
   private void setBattleMenuFontScale() {
-    for (String trigger : List.of("openMenu", "openInventory", "endTurn")) {
+    for (String trigger : List.of(OPEN_MENU_TRIGGER, OPEN_INVENTORY_TRIGGER, END_TURN_TRIGGER)) {
       for (Clickable clickable : uiFactory.getByTrigger(trigger)) {
         if (clickable.getBtn() instanceof ImageTextButton button) {
           button.getLabel().setFontScale(0.86f);
