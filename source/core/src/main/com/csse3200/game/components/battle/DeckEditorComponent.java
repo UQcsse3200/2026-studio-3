@@ -59,9 +59,9 @@ import org.slf4j.LoggerFactory;
  * com.csse3200.game.components.cards.CardWidget}, so its frame, name plate and badges match the
  * battle hand exactly.
  *
- * <p>The scroll buttons' definitions come from a dedicated {@code DeckEditorUi.json} — separate
- * from {@code BattleUi.json} — and are created by this component's own {@link ClickableFactory}.
- * Their visibility and interactivity are toggled in place (never rebuilt) so the JSON-provided
+ * <p>The scroll and "Set Deck" buttons come from {@code DeckEditorUi.json} (separate from {@code
+ * BattleUi.json}) and are created by this component's own {@link ClickableFactory}. Their
+ * visibility and interactivity are toggled in place (never rebuilt) so the JSON-provided
  * coordinates are honoured.
  *
  * <p>Everything display-only (preview panel, preview, summary, error, badges) is a {@code
@@ -74,12 +74,12 @@ public class DeckEditorComponent extends UIComponent {
   private static final String SELECT_TRIGGER = "toggleDeckCard";
   private static final String SCROLL_UP_TRIGGER = "deckScrollUp";
   private static final String SCROLL_DOWN_TRIGGER = "deckScrollDown";
+  private static final String SET_DECK_TRIGGER = "deckSetDeck";
 
   // Look shared with InventoryPopupComponent's item inventory popup.
   private static final String PANEL_TEXTURE = "images/ui/inventory-panel.png";
   private static final Color NAME_COLOUR = new Color(0.9f, 0.84f, 0.73f, 1f);
   private static final Color DESCRIPTION_COLOUR = new Color(0.65f, 0.58f, 0.52f, 1f);
-  private static final Color GOLD_COLOUR = new Color(0.83f, 0.61f, 0.27f, 1f);
   private static final Color ROW_BORDER_COLOUR = new Color(0.33f, 0.25f, 0.25f, 1f);
   private static final Color ROW_BACKGROUND_COLOUR = new Color(0.055f, 0.05f, 0.065f, 0.96f);
   private static final float HEADER_HEIGHT = 30f;
@@ -172,6 +172,7 @@ public class DeckEditorComponent extends UIComponent {
     entity.getEvents().addListener(SELECT_TRIGGER, this::toggleSelection);
     entity.getEvents().addListener(SCROLL_UP_TRIGGER, () -> scrollBy(-1));
     entity.getEvents().addListener(SCROLL_DOWN_TRIGGER, () -> scrollBy(1));
+    entity.getEvents().addListener(SET_DECK_TRIGGER, this::onSetDeckClicked);
     popup.setOnShow(this::onOpened);
     popup.setOnHide(this::onClosed);
     popup.setOnWindowClicked(this::bringEditorWidgetsToFront);
@@ -199,18 +200,10 @@ public class DeckEditorComponent extends UIComponent {
     gridSpacerCell = content.add(gridSpacer).colspan(2);
     content.row();
 
-    TextButton setDeckButton = new TextButton("Set Deck", createSetDeckStyle());
-    setDeckButton.addListener(
-        new ChangeListener() {
-          @Override
-          public void changed(ChangeEvent event, Actor actor) {
-            onSetDeckClicked();
-          }
-        });
-
-    // Sits just under the grid, level with the summary text (y = 400 from the window's top edge in
-    // DeckEditorUi.json).
-    content.add(setDeckButton).size(140f, 48f).padTop(8f).padRight(20f);
+    // Holds the space for the "Set Deck" button, which is a stage-level clickable defined in
+    // DeckEditorUi.json, level with the summary text (y = 400 from the window's top edge).
+    Actor setDeckSpacer = new Actor();
+    content.add(setDeckSpacer).size(140f, 48f).padTop(8f).padRight(20f);
     Actor summarySpacer = new Actor();
     content.add(summarySpacer).width(520f).padTop(10f);
     content.row();
@@ -249,18 +242,6 @@ public class DeckEditorComponent extends UIComponent {
         });
     header.add(close).size(30f);
     return header;
-  }
-
-  private TextButtonStyle createSetDeckStyle() {
-    TextButtonStyle style =
-        new TextButtonStyle(skin.get(STYLE_NAME_DEFAULT, TextButtonStyle.class));
-    style.fontColor = GOLD_COLOUR;
-    style.overFontColor = NAME_COLOUR;
-    style.downFontColor = Color.WHITE;
-    style.up = skin.newDrawable(STYLE_NAME_WHITE, ROW_BACKGROUND_COLOUR);
-    style.over = skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR);
-    style.down = skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR);
-    return style;
   }
 
   private Table createFooterHint() {
@@ -463,6 +444,9 @@ public class DeckEditorComponent extends UIComponent {
 
     setScrollButtonState(SCROLL_UP_TRIGGER, shouldShow, canScrollUp);
     setScrollButtonState(SCROLL_DOWN_TRIGGER, shouldShow, canScrollDown);
+    for (Clickable clickable : poolFactory.getByTrigger(SET_DECK_TRIGGER)) {
+      clickable.getBtn().setVisible(open);
+    }
   }
 
   private void setScrollButtonState(String trigger, boolean visible, boolean enabled) {
