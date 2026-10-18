@@ -31,6 +31,7 @@ import com.csse3200.game.chance.ChanceOutcome;
 import com.csse3200.game.chance.DiceEncounterBehaviour;
 import com.csse3200.game.chance.DiceRoll;
 import com.csse3200.game.chance.WishingFountainEncounterBehaviour;
+import com.csse3200.game.components.encounters.AcquisitionResultDisplay;
 import com.csse3200.game.components.shop.ShopDisplay;
 import com.csse3200.game.encounters.integration.CardFusionEncounterFlow;
 import com.csse3200.game.encounters.integration.ChanceEncounterSession;
@@ -127,8 +128,10 @@ public class ChanceEncounterDisplay extends UIComponent {
   private TextButton continueButton;
   private TextButtonStyle choiceStyle;
   private TextButtonStyle selectedChoiceStyle;
+  private int visibleChoiceCount;
   private DiceRollDisplay diceRollDisplay;
   private CardFusionSelectionView cardFusionView;
+  private AcquisitionResultDisplay acquisitionView;
   private ContextualHelpDialog helpDialog;
   private TextButton helpButton;
   private int lastDisplayedRollSequence;
@@ -1417,6 +1420,7 @@ public class ChanceEncounterDisplay extends UIComponent {
 
     List<ChanceChoice> availableChoices =
         encounterSession == null ? encounter.getChoices() : encounterSession.getAvailableChoices();
+    visibleChoiceCount = availableChoices.size();
     int choiceNumber = 1;
     for (ChanceChoice choice : availableChoices) {
       addChoiceButton(choice, choiceNumber);
@@ -1560,7 +1564,12 @@ public class ChanceEncounterDisplay extends UIComponent {
                 if (pointer == -1) shrineScene.setOfferingHovered(false);
               }
             });
-      choicesTable.add(choiceButton).width(650).height(76).padBottom(8);
+      if (visibleChoiceCount >= 4) {
+        choiceButton.getLabel().setFontScale(.87f);
+        choicesTable.add(choiceButton).width(820f).height(82f).padBottom(8f);
+      } else {
+        choicesTable.add(choiceButton).width(650f).height(76f).padBottom(8f);
+      }
       choicesTable.row();
     } else if (scenicFountain) {
       boolean wish = WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID.equals(choice.getId());
@@ -1669,6 +1678,16 @@ public class ChanceEncounterDisplay extends UIComponent {
       return;
     }
     showOutcome(resolution.getOutcome(), selectedButton, originalButtonText);
+    if (acquisitionView == null) {
+      acquisitionView =
+          new AcquisitionResultDisplay(
+              stage, skin, ServiceLocator.getCardLibrary(), ServiceLocator.getResourceService());
+    }
+    if (encounterSession
+        .getAcquisitionSession(ServiceLocator.getCardLibrary())
+        .show(acquisitionView, this::completeEncounter, () -> continueButton.setVisible(true))) {
+      continueButton.setVisible(false);
+    }
   }
 
   private void showOutcome(
@@ -1827,6 +1846,9 @@ public class ChanceEncounterDisplay extends UIComponent {
 
   @Override
   public void dispose() {
+    if (acquisitionView != null && encounterSession != null) {
+      encounterSession.getAcquisitionSession(ServiceLocator.getCardLibrary()).close();
+    }
     if (shrineScene != null) shrineScene.cancel();
     if (fountainScene != null) {
       fountainScene.cancel();
