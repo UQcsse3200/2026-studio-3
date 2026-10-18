@@ -63,15 +63,15 @@ import org.slf4j.LoggerFactory;
  */
 public class ShopDisplay extends UIComponent {
   private static final Logger logger = LoggerFactory.getLogger(ShopDisplay.class);
-  private static final String LARGE = "large";
-  private static final String DEFAULT = "default";
+  private static final String STYLE_NAME_LARGE = "large";
+  private static final String STYLE_NAME_DEFAULT = "default";
   public static final String BACKGROUND_TEXTURE = "images/shop/shop_outpost_background_v3.png";
   public static final String MERCHANT_TEXTURE = "images/shop/wandering_merchant_v3.png";
   public static final String PANEL_FRAME_TEXTURE = "images/shop/shop_panel_worn.png";
   public static final String CARD_FRAME_TEXTURE = "images/shop/shop_card_worn.png";
   public static final String PLAQUE_FRAME_TEXTURE = "images/shop/shop_plaque_worn.png";
-  private static final String SMALL = "small";
-  private static final String WHITE = "white";
+  private static final String STYLE_NAME_SMALL = "small";
+  private static final String STYLE_NAME_WHITE = "white";
   private static final float Z_INDEX = 2f;
   private static final float PANEL_WIDTH = 936f;
   private static final float CARD_WIDTH = 282f;
@@ -282,7 +282,7 @@ public class ShopDisplay extends UIComponent {
 
   private Drawable createCardDrawable(Color tint) {
     return createPatchDrawable(
-        CARD_FRAME_TEXTURE, 70, 64, 887, 1401, 92, 92, 92, 92, 0.17f, tint, WHITE);
+        CARD_FRAME_TEXTURE, 70, 64, 887, 1401, 92, 92, 92, 92, 0.17f, tint, STYLE_NAME_WHITE);
   }
 
   private Drawable createPatchDrawable(
@@ -328,7 +328,7 @@ public class ShopDisplay extends UIComponent {
     }
 
     Table backdrop = new Table();
-    backdrop.setBackground(skin.newDrawable(WHITE, BACKDROP_COLOUR));
+    backdrop.setBackground(skin.newDrawable(STYLE_NAME_WHITE, BACKDROP_COLOUR));
     rootStack.add(backdrop);
 
     Table screenLayout = new Table();
@@ -347,7 +347,8 @@ public class ShopDisplay extends UIComponent {
 
     if (shopEncounter.getItems().isEmpty()) {
       Label emptyLabel =
-          new Label("No relics remain for sale.", createLabelStyle(DEFAULT, MUTED_COLOUR));
+          new Label(
+              "No relics remain for sale.", createLabelStyle(STYLE_NAME_DEFAULT, MUTED_COLOUR));
       shopPanel.add(emptyLabel).center().pad(80f).colspan(3);
     } else {
       addShopItems(shopPanel);
@@ -388,9 +389,11 @@ public class ShopDisplay extends UIComponent {
     speechLayer.bottom().right();
 
     Table greeting = new Table();
-    greeting.setBackground(skin.newDrawable(WHITE, new Color(0.105f, 0.052f, 0.052f, 0.78f)));
+    greeting.setBackground(
+        skin.newDrawable(STYLE_NAME_WHITE, new Color(0.105f, 0.052f, 0.052f, 0.78f)));
     Label greetingLabel =
-        new Label("\"Looking for something rare?\"", createLabelStyle(SMALL, BODY_COLOUR));
+        new Label(
+            "\"Looking for something rare?\"", createLabelStyle(STYLE_NAME_SMALL, BODY_COLOUR));
     greetingLabel.setFontScale(0.86f);
     greetingLabel.setAlignment(Align.center);
     greeting.add(greetingLabel).center().pad(12f, 6f, 12f, 6f);
@@ -400,11 +403,11 @@ public class ShopDisplay extends UIComponent {
 
   private void addHeader(Table shopPanel) {
     Table titleBlock = new Table();
-    Label title = new Label("Wayside Reliquary", createLabelStyle(LARGE, BODY_COLOUR));
+    Label title = new Label("Wayside Reliquary", createLabelStyle(STYLE_NAME_LARGE, BODY_COLOUR));
     Label subtitle =
         new Label(
             "Choose carefully. Each offer may be purchased once.",
-            createLabelStyle(SMALL, MUTED_COLOUR));
+            createLabelStyle(STYLE_NAME_SMALL, MUTED_COLOUR));
     title.setFontScale(1.16f);
     title.setWrap(false);
     subtitle.setFontScale(0.92f);
@@ -412,14 +415,14 @@ public class ShopDisplay extends UIComponent {
     titleBlock.row();
     titleBlock.add(subtitle).left().padTop(6f);
     titleBlock.row();
-    merchantsFavorLabel = new Label("", createLabelStyle("small", GOLD_COLOUR));
+    merchantsFavorLabel = new Label("", createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR));
     merchantsFavorLabel.setFontScale(0.92f);
     titleBlock.add(merchantsFavorLabel).left().padTop(6f);
 
     Table purse = new Table();
     purse.setBackground(createPlaqueDrawable(new Color(0.76f, 0.63f, 0.45f, 1f)));
     purse.pad(12f, 18f, 12f, 18f);
-    goldLabel = new Label("", createLabelStyle(DEFAULT, GOLD_COLOUR));
+    goldLabel = new Label("", createLabelStyle(STYLE_NAME_DEFAULT, GOLD_COLOUR));
     goldLabel.setFontScale(1.22f);
     purse.add(goldLabel);
 
@@ -429,7 +432,8 @@ public class ShopDisplay extends UIComponent {
 
   private void addDivider(Table shopPanel) {
     Table divider = new Table();
-    divider.setBackground(skin.newDrawable(WHITE, new Color(0.34f, 0.25f, 0.17f, 0.92f)));
+    divider.setBackground(
+        skin.newDrawable(STYLE_NAME_WHITE, new Color(0.34f, 0.25f, 0.17f, 0.92f)));
     shopPanel.add(divider).height(2f).expandX().fillX().colspan(3).padTop(14f).padBottom(16f);
   }
 
@@ -462,9 +466,9 @@ public class ShopDisplay extends UIComponent {
         discount > 0f
             ? String.format("%d GOLD (-%.0f%%)", shownPrice, discount * 100f)
             : String.format("%d GOLD", item.price);
-    Label priceLabel = new Label(priceText, createLabelStyle(DEFAULT, GOLD_COLOUR));
-    Label stockLabel = new Label("", createLabelStyle("small", MUTED_COLOUR));
-    Label stateLabel = new Label("", createLabelStyle("small", AVAILABLE_COLOUR));
+    Label priceLabel = new Label(priceText, createLabelStyle(STYLE_NAME_DEFAULT, GOLD_COLOUR));
+    Label stockLabel = new Label("", createLabelStyle(STYLE_NAME_SMALL, MUTED_COLOUR));
+    Label stateLabel = new Label("", createLabelStyle(STYLE_NAME_SMALL, AVAILABLE_COLOUR));
     priceLabel.setFontScale(0.98f);
     stockLabel.setFontScale(0.8f);
     stateLabel.setFontScale(0.82f);
@@ -544,8 +548,9 @@ public class ShopDisplay extends UIComponent {
 
   private Table createUnavailablePlaceholder() {
     Table placeholder = new Table();
-    placeholder.setBackground(skin.newDrawable(WHITE, ART_COLOUR));
-    Label label = new Label("CARD ART\nUNAVAILABLE", createLabelStyle(SMALL, MUTED_COLOUR));
+    placeholder.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ART_COLOUR));
+    Label label =
+        new Label("CARD ART\nUNAVAILABLE", createLabelStyle(STYLE_NAME_SMALL, MUTED_COLOUR));
     label.setFontScale(1.3f);
     label.setAlignment(Align.center);
     placeholder.add(label).center();
@@ -596,7 +601,8 @@ public class ShopDisplay extends UIComponent {
   private void addFooter(Table shopPanel) {
     statusLabel =
         new Label(
-            "The world is broken. Still trade goes on.", createLabelStyle(SMALL, MUTED_COLOUR));
+            "The world is broken. Still trade goes on.",
+            createLabelStyle(STYLE_NAME_SMALL, MUTED_COLOUR));
     statusLabel.setFontScale(0.88f);
     statusLabel.setWrap(true);
 
@@ -633,11 +639,11 @@ public class ShopDisplay extends UIComponent {
     if (result.isSuccess()) {
       purchasedItemIds.add(itemId);
       String itemName = result.getItem() == null ? "the offer" : result.getItem().getDisplayName();
-      statusLabel.setStyle(createLabelStyle(SMALL, AVAILABLE_COLOUR));
+      statusLabel.setStyle(createLabelStyle(STYLE_NAME_SMALL, AVAILABLE_COLOUR));
       AudioService.playSound(SoundId.ITEM_PURCHASE, 0.5f);
       statusLabel.setText(String.format("Purchased %s. It was added to your deck.", itemName));
     } else {
-      statusLabel.setStyle(createLabelStyle(SMALL, UNAFFORDABLE_COLOUR));
+      statusLabel.setStyle(createLabelStyle(STYLE_NAME_SMALL, UNAFFORDABLE_COLOUR));
       AudioService.playSound(SoundId.ERROR, 0.5f);
       statusLabel.setText(result.getMessage());
     }
@@ -686,7 +692,7 @@ public class ShopDisplay extends UIComponent {
     switch (state) {
       case AVAILABLE:
         widgets.card.setBackground(availableCardBackground);
-        widgets.stateLabel.setStyle(createLabelStyle(SMALL, AVAILABLE_COLOUR));
+        widgets.stateLabel.setStyle(createLabelStyle(STYLE_NAME_SMALL, AVAILABLE_COLOUR));
         widgets.stateLabel.setText("AVAILABLE");
         widgets.buyButton.setStyle(availableButtonStyle);
         widgets.buyButton.setText("Purchase");
@@ -694,7 +700,7 @@ public class ShopDisplay extends UIComponent {
         break;
       case UNAFFORDABLE:
         widgets.card.setBackground(unaffordableCardBackground);
-        widgets.stateLabel.setStyle(createLabelStyle(SMALL, UNAFFORDABLE_COLOUR));
+        widgets.stateLabel.setStyle(createLabelStyle(STYLE_NAME_SMALL, UNAFFORDABLE_COLOUR));
         widgets.stateLabel.setText("UNAFFORDABLE");
         widgets.buyButton.setStyle(unaffordableButtonStyle);
         widgets.buyButton.setText("Not enough gold");
@@ -702,7 +708,7 @@ public class ShopDisplay extends UIComponent {
         break;
       case SOLD:
         widgets.card.setBackground(soldCardBackground);
-        widgets.stateLabel.setStyle(createLabelStyle(SMALL, SOLD_COLOUR));
+        widgets.stateLabel.setStyle(createLabelStyle(STYLE_NAME_SMALL, SOLD_COLOUR));
         widgets.stateLabel.setText("SOLD");
         widgets.buyButton.setStyle(soldButtonStyle);
         widgets.buyButton.setText("Sold");
@@ -711,7 +717,7 @@ public class ShopDisplay extends UIComponent {
       case UNAVAILABLE:
       default:
         widgets.card.setBackground(unavailableCardBackground);
-        widgets.stateLabel.setStyle(createLabelStyle(SMALL, UNAFFORDABLE_COLOUR));
+        widgets.stateLabel.setStyle(createLabelStyle(STYLE_NAME_SMALL, UNAFFORDABLE_COLOUR));
         widgets.stateLabel.setText("UNAVAILABLE");
         widgets.buyButton.setStyle(unaffordableButtonStyle);
         widgets.buyButton.setText("Unavailable");

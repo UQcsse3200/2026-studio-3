@@ -47,7 +47,7 @@ public final class CardInstanceFactory {
     }
 
     Optional<CardConfig> config = cardService.getCard(cardId);
-    if (config == null || config.isEmpty()) {
+    if (config.isEmpty()) {
       throw new IllegalArgumentException("Unknown card ID: " + cardId);
     }
     if (requireUpgrade && config.get().upgrade == null) {

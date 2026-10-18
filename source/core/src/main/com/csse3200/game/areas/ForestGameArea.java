@@ -51,14 +51,14 @@ public class ForestGameArea extends GameArea {
     "images/iso_grass_3.png",
     "images/dungeon.png",
     "images/stones_ruins.png",
-    "images/inside_castle.png",
     "images/mystical_tree.png",
-    "images/forest.png",
     "images/cemetery.png",
-    "images/underwater.png",
     "images/temple.png",
-    "images/autumn_forest.png",
-    "images/forest_with_sun.png"
+    "images/cave.png",
+    "images/sky_tower.png",
+    "images/god_mountain.png",
+    "images/church.png",
+    "images/god_statues.png"
   };
   private static final String[] forestTextureAtlases = {
     "images/terrain_iso_grass.atlas",
@@ -220,7 +220,7 @@ public class ForestGameArea extends GameArea {
     Entity cloud = new Entity().addComponent(new CloudRenderComponent("images/cloud.png"));
     cloud.getComponent(CloudRenderComponent.class).scaleEntity();
     cloud.setScale(cloud.getScale().scl(3.5f)); // scaling cloud to be bigger
-    spawnEntityAt(cloud, new GridPoint2(PLAYER_SPAWN).add(0, -1), true, true);
+    spawnEntityAt(cloud, new GridPoint2(PLAYER_SPAWN).add(0, -2), true, true);
   }
 
   /**
