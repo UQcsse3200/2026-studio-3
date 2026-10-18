@@ -143,7 +143,7 @@ public class MapGenerationController {
 
     List<List<MapNode>> generatedPaths = new ArrayList<>();
 
-    int pathCount = rand.nextInt(3, 5);
+    int pathCount = rand.nextInt(4, 5);
     MapNode startNode = map.getNode(0);
     List<MapNode> firstRow = map.getNodesByHeight(1);
 

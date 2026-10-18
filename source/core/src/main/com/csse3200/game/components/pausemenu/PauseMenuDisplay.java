@@ -136,7 +136,6 @@ public class PauseMenuDisplay extends UIComponent {
             return table.isVisible();
           }
 
-
           @Override
           public boolean scrolled(
               InputEvent event, float x, float y, float amountX, float amountY) {
@@ -306,6 +305,15 @@ public class PauseMenuDisplay extends UIComponent {
                 AudioService.playSound(SoundId.BUTTON_CLICK, 0.5f);
               }
             });
+
+    button.addListener(
+            new InputListener() {
+              @Override
+              public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
+              }
+            }
+    );
 
     if (eventName != null) {
       button.addListener(
