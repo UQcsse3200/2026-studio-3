@@ -78,6 +78,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Uses current block to absorb as much of the incoming damage as possible, reducing block
  accordingly, and returns whatever damage remains.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/status/StatusTooltip.html#act(float)" class="member-name-link">act(float)</a> - Method in class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusTooltip.html" title="class in com.csse3200.game.components.status">StatusTooltip</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/maps/MapNodeActor.html#act(float)" class="member-name-link">act(float)</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/MapNodeActor.html" title="class in com.csse3200.game.maps">MapNodeActor</a></dt>
 <dd>
 <div class="block">Re-checks the node's state every frame and refreshes the visual if it changed since last
@@ -93,6 +95,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/ui/terminal/commands/DiscoverAllCardsCommand.html#action(java.util.ArrayList)" class="member-name-link">action(ArrayList&lt;String&gt;)</a> - Method in class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/DiscoverAllCardsCommand.html" title="class in com.csse3200.game.ui.terminal.commands">DiscoverAllCardsCommand</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/ForceIntentCommand.html#action(java.util.ArrayList)" class="member-name-link">action(ArrayList&lt;String&gt;)</a> - Method in class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/ForceIntentCommand.html" title="class in com.csse3200.game.ui.terminal.commands">ForceIntentCommand</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ui/terminal/commands/GiveGoldCommand.html#action(java.util.ArrayList)" class="member-name-link">action(ArrayList&lt;String&gt;)</a> - Method in class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/GiveGoldCommand.html" title="class in com.csse3200.game.ui.terminal.commands">GiveGoldCommand</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ui/terminal/commands/GiveItemCommand.html#action(java.util.ArrayList)" class="member-name-link">action(ArrayList&lt;String&gt;)</a> - Method in class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/GiveItemCommand.html" title="class in com.csse3200.game.ui.terminal.commands">GiveItemCommand</a></dt>
@@ -102,6 +106,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/ui/terminal/commands/GotoCommand.html#action(java.util.ArrayList)" class="member-name-link">action(ArrayList&lt;String&gt;)</a> - Method in class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/GotoCommand.html" title="class in com.csse3200.game.ui.terminal.commands">GotoCommand</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ui/terminal/commands/ListNodesCommand.html#action(java.util.ArrayList)" class="member-name-link">action(ArrayList&lt;String&gt;)</a> - Method in class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/ListNodesCommand.html" title="class in com.csse3200.game.ui.terminal.commands">ListNodesCommand</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/SetEnemyHealthCommand.html#action(java.util.ArrayList)" class="member-name-link">action(ArrayList&lt;String&gt;)</a> - Method in class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/SetEnemyHealthCommand.html" title="class in com.csse3200.game.ui.terminal.commands">SetEnemyHealthCommand</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ui/terminal/commands/SetHealthCommand.html#action(java.util.ArrayList)" class="member-name-link">action(ArrayList&lt;String&gt;)</a> - Method in class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/SetHealthCommand.html" title="class in com.csse3200.game.ui.terminal.commands">SetHealthCommand</a></dt>
 <dd>&nbsp;</dd>
@@ -253,6 +259,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Adds one stack of the given penalty, lasting for the rest of the battle.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyAI/BossAI.html#addPhaseChangeListener(com.csse3200.game.events.listeners.EventListener1)" class="member-name-link">addPhaseChangeListener(EventListener1&lt;BossAI.BossPhase&gt;)</a> - Method in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/BossAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">BossAI</a></dt>
+<dd>
+<div class="block">Adds a listener notified when the Boss advances to a later phase.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/combat/BattleController.html#addPhaseChangeListener(com.csse3200.game.events.listeners.EventListener2)" class="member-name-link">addPhaseChangeListener(EventListener2&lt;BattlePhase, BattlePhase&gt;)</a> - Method in class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a></dt>
 <dd>
 <div class="block">Adds a listener to the event handler, which ultimately informs external teams about a phase
@@ -349,6 +359,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/rewards/AmbrosiaFlaskEffect.html#%3Cinit%3E()" class="member-name-link">AmbrosiaFlaskEffect()</a> - Constructor for class com.csse3200.game.rewards.<a href="com/csse3200/game/rewards/AmbrosiaFlaskEffect.html" title="class in com.csse3200.game.rewards">AmbrosiaFlaskEffect</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/combat/DamageTakenEvent.html#amount()" class="member-name-link">amount()</a> - Method in record class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/DamageTakenEvent.html" title="class in com.csse3200.game.components.combat">DamageTakenEvent</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./com/csse3200/game/components/combat/DamageTakenEvent.html#param-amount"><code>amount</code></a> record component.</div>
+</dd>
 <dt><a href="com/csse3200/game/GdxGame.ScreenType.html#ANCIENT_TEMPLE" class="member-name-link">ANCIENT_TEMPLE</a> - Enum constant in enum class com.csse3200.game.<a href="com/csse3200/game/GdxGame.ScreenType.html" title="enum class in com.csse3200.game">GdxGame.ScreenType</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/screens/AncientTempleScreen.html" class="type-name-link" title="class in com.csse3200.game.screens">AncientTempleScreen</a> - Class in <a href="com/csse3200/game/screens/package-summary.html">com.csse3200.game.screens</a></dt>
@@ -549,6 +563,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/maps/MapInputHandler.html#attachAll(java.util.List)" class="member-name-link">attachAll(List&lt;MapNodeActor&gt;)</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/MapInputHandler.html" title="class in com.csse3200.game.maps">MapInputHandler</a></dt>
 <dd>
 <div class="block">Attaches click listeners to a list of node actors.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/status/StatusTooltip.html#attachTo(com.badlogic.gdx.scenes.scene2d.Actor,java.util.function.Supplier)" class="member-name-link">attachTo(Actor, Supplier&lt;StatusTooltip.Content&gt;)</a> - Method in class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusTooltip.html" title="class in com.csse3200.game.components.status">StatusTooltip</a></dt>
+<dd>
+<div class="block">Shows this panel while the pointer is over the given actor.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/pausemenu/PauseMenuFactory.html#attachWithoutButton(com.csse3200.game.entities.Entity,com.csse3200.game.GdxGame)" class="member-name-link">attachWithoutButton(Entity, GdxGame)</a> - Static method in class com.csse3200.game.components.pausemenu.<a href="com/csse3200/game/components/pausemenu/PauseMenuFactory.html" title="class in com.csse3200.game.components.pausemenu">PauseMenuFactory</a></dt>
 <dd>
@@ -1002,6 +1020,24 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAI/BossAI.PressureLevel.html" class="type-name-link" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.PressureLevel</a> - Enum Class in <a href="com/csse3200/game/components/enemy/EnemyAI/package-summary.html">com.csse3200.game.components.enemy.EnemyAI</a></dt>
 <dd>
 <div class="block">Global aggression level applied on top of the current phase table.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueComponent.html" class="type-name-link" title="class in com.csse3200.game.components.enemy">BossDialogueComponent</a> - Class in <a href="com/csse3200/game/components/enemy/package-summary.html">com.csse3200.game.components.enemy</a></dt>
+<dd>
+<div class="block">Displays the supplied illustrated dialogue at the Boss opening and phase transitions.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueComponent.html#%3Cinit%3E(com.badlogic.gdx.scenes.scene2d.Stage,com.csse3200.game.components.enemy.EnemyAI.BossAI,com.csse3200.game.components.enemy.BossDialogueConfig,com.csse3200.game.components.combat.BattleController,java.util.function.Supplier,com.csse3200.game.services.ResourceService)" class="member-name-link">BossDialogueComponent(Stage, BossAI, BossDialogueConfig, BattleController, Supplier&lt;Rectangle&gt;, ResourceService)</a> - Constructor for class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueComponent.html" title="class in com.csse3200.game.components.enemy">BossDialogueComponent</a></dt>
+<dd>
+<div class="block">Creates a dialogue component using textures managed by the battle resource service.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueConfig.html" class="type-name-link" title="class in com.csse3200.game.components.enemy">BossDialogueConfig</a> - Class in <a href="com/csse3200/game/components/enemy/package-summary.html">com.csse3200.game.components.enemy</a></dt>
+<dd>
+<div class="block">Configured story images, transcripts and display times for the Boss encounter.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueConfig.html#%3Cinit%3E()" class="member-name-link">BossDialogueConfig()</a> - Constructor for class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueConfig.html" title="class in com.csse3200.game.components.enemy">BossDialogueConfig</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueConfig.Dialogue.html" class="type-name-link" title="class in com.csse3200.game.components.enemy">BossDialogueConfig.Dialogue</a> - Class in <a href="com/csse3200/game/components/enemy/package-summary.html">com.csse3200.game.components.enemy</a></dt>
+<dd>
+<div class="block">One phase's dialogue presentation.</div>
 </dd>
 <dt><a href="com/csse3200/game/services/audio/SoundId.html#BOTTLE_CORK" class="member-name-link">BOTTLE_CORK</a> - Enum constant in enum class com.csse3200.game.services.audio.<a href="com/csse3200/game/services/audio/SoundId.html" title="enum class in com.csse3200.game.services.audio">SoundId</a></dt>
 <dd>&nbsp;</dd>
@@ -2121,6 +2157,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/reactive/package-summary.html">com.csse3200.game.components.spritedisplay.reactive</a> - package com.csse3200.game.components.spritedisplay.reactive</dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/status/package-summary.html">com.csse3200.game.components.status</a> - package com.csse3200.game.components.status</dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/tasks/package-summary.html">com.csse3200.game.components.tasks</a> - package com.csse3200.game.components.tasks</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/concurrency/package-summary.html">com.csse3200.game.concurrency</a> - package com.csse3200.game.concurrency</dt>
@@ -2344,6 +2382,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Creates an instance of a <code>Content</code> record class.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/status/StatusTooltip.Content.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">Content(String, String, String)</a> - Constructor for record class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusTooltip.Content.html" title="class in com.csse3200.game.components.status">StatusTooltip.Content</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>Content</code> record class.</div>
+</dd>
 <dt><a href="com/csse3200/game/chance/DiceEncounterBehaviour.html#CONTINUE_CHOICE_ID" class="member-name-link">CONTINUE_CHOICE_ID</a> - Static variable in class com.csse3200.game.chance.<a href="com/csse3200/game/chance/DiceEncounterBehaviour.html" title="class in com.csse3200.game.chance">DiceEncounterBehaviour</a></dt>
 <dd>
 <div class="block">Stable identifier for risking the current Gold stake in round two.</div>
@@ -2428,6 +2470,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/battle/EnemyReleaseDisplay.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/EnemyReleaseDisplay.html" title="class in com.csse3200.game.components.battle">EnemyReleaseDisplay</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/battle/FloatingDamageDisplay.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/FloatingDamageDisplay.html" title="class in com.csse3200.game.components.battle">FloatingDamageDisplay</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/battle/InventoryPopupComponent.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/InventoryPopupComponent.html" title="class in com.csse3200.game.components.battle">InventoryPopupComponent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/bestiary/BestiaryDisplay.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.bestiary.<a href="com/csse3200/game/components/bestiary/BestiaryDisplay.html" title="class in com.csse3200.game.components.bestiary">BestiaryDisplay</a></dt>
@@ -2442,6 +2486,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Called when the entity is created and registered.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueComponent.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueComponent.html" title="class in com.csse3200.game.components.enemy">BossDialogueComponent</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAnimationController.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyAnimationController.html" title="class in com.csse3200.game.components.enemy">EnemyAnimationController</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyCombatEffectsComponent.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyCombatEffectsComponent.html" title="class in com.csse3200.game.components.enemy">EnemyCombatEffectsComponent</a></dt>
@@ -2537,6 +2583,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/RewardDisplay.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/RewardDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">RewardDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/reactive/EnemyDropTargetComponent.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.spritedisplay.reactive.<a href="com/csse3200/game/components/spritedisplay/reactive/EnemyDropTargetComponent.html" title="class in com.csse3200.game.components.spritedisplay.reactive">EnemyDropTargetComponent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/status/StatusIconDisplay.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusIconDisplay.html" title="class in com.csse3200.game.components.status">StatusIconDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/TouchAttackComponent.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/TouchAttackComponent.html" title="class in com.csse3200.game.components">TouchAttackComponent</a></dt>
 <dd>&nbsp;</dd>
@@ -2692,7 +2740,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/entities/factories/PlayerFactory.html#createInitialRunState()" class="member-name-link">createInitialRunState()</a> - Static method in class com.csse3200.game.entities.factories.<a href="com/csse3200/game/entities/factories/PlayerFactory.html" title="class in com.csse3200.game.entities.factories">PlayerFactory</a></dt>
 <dd>
-<div class="block">Creates the initial durable player state from the same config used by <a href="com/csse3200/game/entities/factories/PlayerFactory.html#createPlayer(com.csse3200.game.maps.RunState)"><code>PlayerFactory.createPlayer(RunState)</code></a>.</div>
+<div class="block">Creates the initial durable player state from the same config used by player creation.</div>
 </dd>
 <dt><a href="com/csse3200/game/physics/PhysicsEngine.html#createJoint(com.badlogic.gdx.physics.box2d.JointDef)" class="member-name-link">createJoint(JointDef)</a> - Method in class com.csse3200.game.physics.<a href="com/csse3200/game/physics/PhysicsEngine.html" title="class in com.csse3200.game.physics">PhysicsEngine</a></dt>
 <dd>&nbsp;</dd>
@@ -2701,10 +2749,12 @@ loadScripts(document, 'script');</script>
 <div class="block">Builds the Pierce slash entity.</div>
 </dd>
 <dt><a href="com/csse3200/game/entities/factories/PlayerFactory.html#createPlayer(int,com.csse3200.game.maps.RunState)" class="member-name-link">createPlayer(int, RunState)</a> - Static method in class com.csse3200.game.entities.factories.<a href="com/csse3200/game/entities/factories/PlayerFactory.html" title="class in com.csse3200.game.entities.factories">PlayerFactory</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Creates an animated player entity with the specified current health.</div>
+</dd>
 <dt><a href="com/csse3200/game/entities/factories/PlayerFactory.html#createPlayer(com.csse3200.game.maps.RunState)" class="member-name-link">createPlayer(RunState)</a> - Static method in class com.csse3200.game.entities.factories.<a href="com/csse3200/game/entities/factories/PlayerFactory.html" title="class in com.csse3200.game.entities.factories">PlayerFactory</a></dt>
 <dd>
-<div class="block">Create a player entity.</div>
+<div class="block">Creates a player entity using the standard texture renderer.</div>
 </dd>
 <dt><a href="com/csse3200/game/entities/factories/RenderFactory.html#createRenderer()" class="member-name-link">createRenderer()</a> - Static method in class com.csse3200.game.entities.factories.<a href="com/csse3200/game/entities/factories/RenderFactory.html" title="class in com.csse3200.game.entities.factories">RenderFactory</a></dt>
 <dd>&nbsp;</dd>
@@ -2821,6 +2871,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Damages the target each time it plays a card.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/status/StatusInfo.html#DAMAGE_ON_CARD_PLAY" class="member-name-link">DAMAGE_ON_CARD_PLAY</a> - Enum constant in enum class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusInfo.html" title="enum class in com.csse3200.game.components.status">StatusInfo</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/IntentIcons.html#DAMAGE_ON_CARD_PLAY" class="member-name-link">DAMAGE_ON_CARD_PLAY</a> - Static variable in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/IntentIcons.html" title="class in com.csse3200.game.components.enemy">IntentIcons</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/battle/DamageOnCardPlayComponent.html" class="type-name-link" title="class in com.csse3200.game.components.battle">DamageOnCardPlayComponent</a> - Class in <a href="com/csse3200/game/components/battle/package-summary.html">com.csse3200.game.components.battle</a></dt>
@@ -2829,6 +2881,18 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/components/battle/DamageOnCardPlayComponent.html#%3Cinit%3E(com.csse3200.game.components.CombatStatsComponent)" class="member-name-link">DamageOnCardPlayComponent(CombatStatsComponent)</a> - Constructor for class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/DamageOnCardPlayComponent.html" title="class in com.csse3200.game.components.battle">DamageOnCardPlayComponent</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/combat/DamageTakenEvent.html" class="type-name-link" title="class in com.csse3200.game.components.combat">DamageTakenEvent</a> - Record Class in <a href="com/csse3200/game/components/combat/package-summary.html">com.csse3200.game.components.combat</a></dt>
+<dd>
+<div class="block">Describes the actual health lost from one instance of damage.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/combat/DamageTakenEvent.html#%3Cinit%3E(int,com.csse3200.game.components.combat.DamageType)" class="member-name-link">DamageTakenEvent(int, DamageType)</a> - Constructor for record class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/DamageTakenEvent.html" title="class in com.csse3200.game.components.combat">DamageTakenEvent</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>DamageTakenEvent</code> record class.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/combat/DamageType.html" class="type-name-link" title="enum class in com.csse3200.game.components.combat">DamageType</a> - Enum Class in <a href="com/csse3200/game/components/combat/package-summary.html">com.csse3200.game.components.combat</a></dt>
+<dd>
+<div class="block">Identifies the source category of damage for combat feedback.</div>
+</dd>
 <dt><a href="com/csse3200/game/save/LoadResult.html#data()" class="member-name-link">data()</a> - Method in record class com.csse3200.game.save.<a href="com/csse3200/game/save/LoadResult.html" title="class in com.csse3200.game.save">LoadResult</a></dt>
 <dd>
 <div class="block">Returns the value of the <code>data</code> record component.</div>
@@ -2882,6 +2946,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAI/RandomStanceAI.html#decide(com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext)" class="member-name-link">decide(EnemyAIContext)</a> - Method in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/RandomStanceAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">RandomStanceAI</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAI/ShieldBreakRetaliationAI.html#decide(com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext)" class="member-name-link">decide(EnemyAIContext)</a> - Method in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/ShieldBreakRetaliationAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">ShieldBreakRetaliationAI</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyAI/TutorialEnemyAI.html#decide(com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext)" class="member-name-link">decide(EnemyAIContext)</a> - Method in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/TutorialEnemyAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">TutorialEnemyAI</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/save/SaveGameData.html#deck" class="member-name-link">deck</a> - Variable in class com.csse3200.game.save.<a href="com/csse3200/game/save/SaveGameData.html" title="class in com.csse3200.game.save">SaveGameData</a></dt>
 <dd>&nbsp;</dd>
@@ -2947,6 +3013,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Line-up used when the table has nothing suitable.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueConfig.html#DEFAULT_FILE" class="member-name-link">DEFAULT_FILE</a> - Static variable in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueConfig.html" title="class in com.csse3200.game.components.enemy">BossDialogueConfig</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/narration/NarrationConfigLoader.html#DEFAULT_FILE" class="member-name-link">DEFAULT_FILE</a> - Static variable in class com.csse3200.game.narration.<a href="com/csse3200/game/narration/NarrationConfigLoader.html" title="class in com.csse3200.game.narration">NarrationConfigLoader</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/shop/ShopInventoryGenerator.html#DEFAULT_MAX_STOCK" class="member-name-link">DEFAULT_MAX_STOCK</a> - Static variable in class com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopInventoryGenerator.html" title="class in com.csse3200.game.shop">ShopInventoryGenerator</a></dt>
@@ -3067,6 +3135,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/screens/DemoShopScreen.html#%3Cinit%3E(com.csse3200.game.GdxGame)" class="member-name-link">DemoShopScreen(GdxGame)</a> - Constructor for class com.csse3200.game.screens.<a href="com/csse3200/game/screens/DemoShopScreen.html" title="class in com.csse3200.game.screens">DemoShopScreen</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/status/StatusInfo.html#describe(int)" class="member-name-link">describe(int)</a> - Method in enum class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusInfo.html" title="enum class in com.csse3200.game.components.status">StatusInfo</a></dt>
+<dd>
+<div class="block">Returns the rules text for this status at its current magnitude.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/configs/CardConfig.html#description" class="member-name-link">description</a> - Variable in class com.csse3200.game.cards.configs.<a href="com/csse3200/game/cards/configs/CardConfig.html" title="class in com.csse3200.game.cards.configs">CardConfig</a></dt>
 <dd>
 <div class="block">Rules text shown to the player.</div>
@@ -3105,6 +3177,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the value of the <a href="./com/csse3200/game/cards/runtime/ResolvedCard.html#param-description"><code>description</code></a> record component.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/status/StatusTooltip.Content.html#description()" class="member-name-link">description()</a> - Method in record class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusTooltip.Content.html" title="class in com.csse3200.game.components.status">StatusTooltip.Content</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./com/csse3200/game/components/status/StatusTooltip.Content.html#param-description"><code>description</code></a> record component.</div>
+</dd>
 <dt><a href="com/csse3200/game/physics/PhysicsEngine.html#destroyBody(com.badlogic.gdx.physics.box2d.Body)" class="member-name-link">destroyBody(Body)</a> - Method in class com.csse3200.game.physics.<a href="com/csse3200/game/physics/PhysicsEngine.html" title="class in com.csse3200.game.physics">PhysicsEngine</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/physics/PhysicsEngine.html#destroyJoint(com.badlogic.gdx.physics.box2d.Joint)" class="member-name-link">destroyJoint(Joint)</a> - Method in class com.csse3200.game.physics.<a href="com/csse3200/game/physics/PhysicsEngine.html" title="class in com.csse3200.game.physics">PhysicsEngine</a></dt>
@@ -3112,6 +3188,12 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/CardPreviewDisplay.Content.html#details()" class="member-name-link">details()</a> - Method in record class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/CardPreviewDisplay.Content.html" title="class in com.csse3200.game.components.spritedisplay.displaying">CardPreviewDisplay.Content</a></dt>
 <dd>
 <div class="block">Returns the value of the <code>details</code> record component.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueConfig.Dialogue.html#%3Cinit%3E()" class="member-name-link">Dialogue()</a> - Constructor for class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueConfig.Dialogue.html" title="class in com.csse3200.game.components.enemy">BossDialogueConfig.Dialogue</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueConfig.html#dialogueFor(com.csse3200.game.components.enemy.EnemyAI.BossAI.BossPhase)" class="member-name-link">dialogueFor(BossAI.BossPhase)</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueConfig.html" title="class in com.csse3200.game.components.enemy">BossDialogueConfig</a></dt>
+<dd>
+<div class="block">Returns the presentation assigned to a Boss phase.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/chance/ChanceEncounterDisplay.html#DICE_GAME_BACKGROUND_TEXTURE" class="member-name-link">DICE_GAME_BACKGROUND_TEXTURE</a> - Static variable in class com.csse3200.game.components.chance.<a href="com/csse3200/game/components/chance/ChanceEncounterDisplay.html" title="class in com.csse3200.game.components.chance">ChanceEncounterDisplay</a></dt>
 <dd>&nbsp;</dd>
@@ -3171,6 +3253,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/ui/terminal/commands/DiscoverAllCardsCommand.html#%3Cinit%3E(com.csse3200.game.cards.CardDiscoveryService)" class="member-name-link">DiscoverAllCardsCommand(CardDiscoveryService)</a> - Constructor for class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/DiscoverAllCardsCommand.html" title="class in com.csse3200.game.ui.terminal.commands">DiscoverAllCardsCommand</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueComponent.html#dismiss()" class="member-name-link">dismiss()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueComponent.html" title="class in com.csse3200.game.components.enemy">BossDialogueComponent</a></dt>
+<dd>
+<div class="block">Closes the visible dialogue and restores card input.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/Displaying.html" class="type-name-link" title="class in com.csse3200.game.components.spritedisplay.displaying">Displaying</a> - Class in <a href="com/csse3200/game/components/spritedisplay/displaying/package-summary.html">com.csse3200.game.components.spritedisplay.displaying</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/Displaying.html#%3Cinit%3E(com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord)" class="member-name-link">Displaying(DisplayingRecord)</a> - Constructor for class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/Displaying.html" title="class in com.csse3200.game.components.spritedisplay.displaying">Displaying</a></dt>
@@ -3237,6 +3323,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/battle/EnemyStatusEffectVisualComponent.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/EnemyStatusEffectVisualComponent.html" title="class in com.csse3200.game.components.battle">EnemyStatusEffectVisualComponent</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/battle/FloatingDamageDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/FloatingDamageDisplay.html" title="class in com.csse3200.game.components.battle">FloatingDamageDisplay</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/battle/InventoryPopupComponent.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/InventoryPopupComponent.html" title="class in com.csse3200.game.components.battle">InventoryPopupComponent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/bestiary/BestiaryDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.bestiary.<a href="com/csse3200/game/components/bestiary/BestiaryDisplay.html" title="class in com.csse3200.game.components.bestiary">BestiaryDisplay</a></dt>
@@ -3251,6 +3339,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Called when the component is disposed.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueComponent.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueComponent.html" title="class in com.csse3200.game.components.enemy">BossDialogueComponent</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAnimationController.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyAnimationController.html" title="class in com.csse3200.game.components.enemy">EnemyAnimationController</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyIntentDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyIntentDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyIntentDisplay</a></dt>
@@ -3306,6 +3396,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/RewardDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/RewardDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">RewardDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/reactive/EnemyDropTargetComponent.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.spritedisplay.reactive.<a href="com/csse3200/game/components/spritedisplay/reactive/EnemyDropTargetComponent.html" title="class in com.csse3200.game.components.spritedisplay.reactive">EnemyDropTargetComponent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/status/StatusIconDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusIconDisplay.html" title="class in com.csse3200.game.components.status">StatusIconDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/entities/Entity.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.entities.<a href="com/csse3200/game/entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a></dt>
 <dd>
@@ -3425,6 +3517,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/battle/EnemyStatusEffectVisualComponent.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/EnemyStatusEffectVisualComponent.html" title="class in com.csse3200.game.components.battle">EnemyStatusEffectVisualComponent</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/battle/FloatingDamageDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/FloatingDamageDisplay.html" title="class in com.csse3200.game.components.battle">FloatingDamageDisplay</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/battle/InventoryPopupComponent.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/InventoryPopupComponent.html" title="class in com.csse3200.game.components.battle">InventoryPopupComponent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/bestiary/BestiaryDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.bestiary.<a href="com/csse3200/game/components/bestiary/BestiaryDisplay.html" title="class in com.csse3200.game.components.bestiary">BestiaryDisplay</a></dt>
@@ -3495,6 +3589,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/RewardDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/RewardDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">RewardDisplay</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/status/StatusIconDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusIconDisplay.html" title="class in com.csse3200.game.components.status">StatusIconDisplay</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/maps/MapDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/MapDisplay.html" title="class in com.csse3200.game.maps">MapDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/rendering/AnimationRenderComponent.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.rendering.<a href="com/csse3200/game/rendering/AnimationRenderComponent.html" title="class in com.csse3200.game.rendering">AnimationRenderComponent</a></dt>
@@ -3546,6 +3642,17 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/battle/EffectVisualStyle.html#duration()" class="member-name-link">duration()</a> - Method in record class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/EffectVisualStyle.html" title="class in com.csse3200.game.components.battle">EffectVisualStyle</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./com/csse3200/game/components/battle/EffectVisualStyle.html#param-duration"><code>duration</code></a> record component.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/status/StatusTooltip.Content.html#duration()" class="member-name-link">duration()</a> - Method in record class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusTooltip.Content.html" title="class in com.csse3200.game.components.status">StatusTooltip.Content</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./com/csse3200/game/components/status/StatusTooltip.Content.html#param-duration"><code>duration</code></a> record component.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueConfig.Dialogue.html#durationSeconds" class="member-name-link">durationSeconds</a> - Variable in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueConfig.Dialogue.html" title="class in com.csse3200.game.components.enemy">BossDialogueConfig.Dialogue</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/status/StatusInfo.html#durationText(int)" class="member-name-link">durationText(int)</a> - Static method in enum class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusInfo.html" title="enum class in com.csse3200.game.components.status">StatusInfo</a></dt>
+<dd>
+<div class="block">Describes how long a status lasts, using the duration convention of <code>
+ CombatStatsComponent</code>: a positive number is the turns remaining, zero or less means permanent.</div>
 </dd>
 <dt><a href="com/csse3200/game/ui/MenuTheme.html#dustyMauve()" class="member-name-link">dustyMauve()</a> - Static method in class com.csse3200.game.ui.<a href="com/csse3200/game/ui/MenuTheme.html" title="class in com.csse3200.game.ui">MenuTheme</a></dt>
 <dd>&nbsp;</dd>
@@ -4097,6 +4204,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIFactory.html#ENRAGE_LOW_HEALTH" class="member-name-link">ENRAGE_LOW_HEALTH</a> - Static variable in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIFactory.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIFactory</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueConfig.html#enraged" class="member-name-link">enraged</a> - Variable in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueConfig.html" title="class in com.csse3200.game.components.enemy">BossDialogueConfig</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAI/BossAI.BossPhase.html#ENRAGED" class="member-name-link">ENRAGED</a> - Enum constant in enum class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/BossAI.BossPhase.html" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.BossPhase</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAI/EnrageLowHealthAI.html" class="type-name-link" title="class in com.csse3200.game.components.enemy.EnemyAI">EnrageLowHealthAI</a> - Class in <a href="com/csse3200/game/components/enemy/EnemyAI/package-summary.html">com.csse3200.game.components.enemy.EnemyAI</a></dt>
@@ -4210,6 +4319,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/combat/DamageTakenEvent.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/DamageTakenEvent.html" title="class in com.csse3200.game.components.combat">DamageTakenEvent</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyIntent.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></dt>
 <dd>
 <div class="block">Two intents are equal when their type, value, effect type and duration all match.</div>
@@ -4235,6 +4348,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/DisplayingRecord.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/DisplayingRecord.html" title="class in com.csse3200.game.components.spritedisplay.displaying">DisplayingRecord</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/status/StatusTooltip.Content.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusTooltip.Content.html" title="class in com.csse3200.game.components.status">StatusTooltip.Content</a></dt>
 <dd>
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </dd>
@@ -4397,6 +4514,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Decreases 25% the damage output to target while active.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/status/StatusInfo.html#FEEBLE" class="member-name-link">FEEBLE</a> - Enum constant in enum class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusInfo.html" title="enum class in com.csse3200.game.components.status">StatusInfo</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/files/FileLoader.html" class="type-name-link" title="class in com.csse3200.game.files">FileLoader</a> - Class in <a href="com/csse3200/game/files/package-summary.html">com.csse3200.game.files</a></dt>
 <dd>
 <div class="block">Wrapper for reading Java objects from JSON files.</div>
@@ -4444,6 +4563,12 @@ loadScripts(document, 'script');</script>
 <div class="block">Iterates over registered input handlers in descending priority and stops as soon as the input
  is processed</div>
 </dd>
+<dt><a href="com/csse3200/game/components/battle/FloatingDamageDisplay.html" class="type-name-link" title="class in com.csse3200.game.components.battle">FloatingDamageDisplay</a> - Class in <a href="com/csse3200/game/components/battle/package-summary.html">com.csse3200.game.components.battle</a></dt>
+<dd>
+<div class="block">Draws short-lived damage numbers above an entity after it loses health.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/battle/FloatingDamageDisplay.html#%3Cinit%3E()" class="member-name-link">FloatingDamageDisplay()</a> - Constructor for class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/FloatingDamageDisplay.html" title="class in com.csse3200.game.components.battle">FloatingDamageDisplay</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/chance/ChanceEncounterDisplay.html#FLOODED_BACKGROUND_TEXTURE" class="member-name-link">FLOODED_BACKGROUND_TEXTURE</a> - Static variable in class com.csse3200.game.components.chance.<a href="com/csse3200/game/components/chance/ChanceEncounterDisplay.html" title="class in com.csse3200.game.components.chance">ChanceEncounterDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/DisplayingRecord.html#fontName()" class="member-name-link">fontName()</a> - Method in record class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/DisplayingRecord.html" title="class in com.csse3200.game.components.spritedisplay.displaying">DisplayingRecord</a></dt>
@@ -4452,11 +4577,25 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/DisplayingRecord.Builder.html#fontName(java.lang.String)" class="member-name-link">fontName(String)</a> - Method in class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/DisplayingRecord.Builder.html" title="class in com.csse3200.game.components.spritedisplay.displaying">DisplayingRecord.Builder</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html#forceCurrentIntent(com.csse3200.game.components.enemy.EnemyIntent)" class="member-name-link">forceCurrentIntent(EnemyIntent)</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html" title="class in com.csse3200.game.components.enemy">EnemyBehaviourComponent</a></dt>
+<dd>
+<div class="block">Replaces only the already-telegraphed action; the next roll still uses the normal AI.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/combat/BattleController.html#forceEnemiesDefeated()" class="member-name-link">forceEnemiesDefeated()</a> - Method in class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a></dt>
 <dd>
 <div class="block">Debug/cheat entry point: kills every enemy via piercing damage (bypassing block/armor, same as
  a real killing blow) and lets the normal outcome check pick it up, so this reuses the real win
  path instead of faking a VICTORY transition directly.</div>
+</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/ForceIntentCommand.html" class="type-name-link" title="class in com.csse3200.game.ui.terminal.commands">ForceIntentCommand</a> - Class in <a href="com/csse3200/game/ui/terminal/commands/package-summary.html">com.csse3200.game.ui.terminal.commands</a></dt>
+<dd>
+<div class="block">Debug command: forceintent &lt;zero-based slot&gt; &lt;intent&gt;.</div>
+</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/ForceIntentCommand.html#%3Cinit%3E(com.csse3200.game.components.combat.BattleController)" class="member-name-link">ForceIntentCommand(BattleController)</a> - Constructor for class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/ForceIntentCommand.html" title="class in com.csse3200.game.ui.terminal.commands">ForceIntentCommand</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/combat/BattleController.html#forceNextEnemyIntent(int,com.csse3200.game.components.enemy.EnemyIntent)" class="member-name-link">forceNextEnemyIntent(int, EnemyIntent)</a> - Method in class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a></dt>
+<dd>
+<div class="block">Replaces one already-visible intent for the upcoming enemy phase only.</div>
 </dd>
 <dt><a href="com/csse3200/game/save/SaveErrorMessages.html#forDelete(com.csse3200.game.save.DeleteSaveResult)" class="member-name-link">forDelete(DeleteSaveResult)</a> - Static method in class com.csse3200.game.save.<a href="com/csse3200/game/save/SaveErrorMessages.html" title="class in com.csse3200.game.save">SaveErrorMessages</a></dt>
 <dd>
@@ -4480,6 +4619,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/clickable/BattleMenuSkins.html#forIcon(com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins.Icon)" class="member-name-link">forIcon(BattleMenuSkins.Icon)</a> - Static method in class com.csse3200.game.components.spritedisplay.clickable.<a href="com/csse3200/game/components/spritedisplay/clickable/BattleMenuSkins.html" title="class in com.csse3200.game.components.spritedisplay.clickable">BattleMenuSkins</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/status/StatusInfo.html#forKey(java.lang.String)" class="member-name-link">forKey(String)</a> - Static method in enum class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusInfo.html" title="enum class in com.csse3200.game.components.status">StatusInfo</a></dt>
+<dd>
+<div class="block">Finds the entry for a status key as stored by <code>CombatStatsComponent</code>.</div>
+</dd>
 <dt><a href="com/csse3200/game/save/SaveErrorMessages.html#forLoad(com.csse3200.game.save.LoadResult)" class="member-name-link">forLoad(LoadResult)</a> - Static method in class com.csse3200.game.save.<a href="com/csse3200/game/save/SaveErrorMessages.html" title="class in com.csse3200.game.save">SaveErrorMessages</a></dt>
 <dd>
 <div class="block">Returns a user-facing message for a load attempt result.</div>
@@ -4517,6 +4660,8 @@ loadScripts(document, 'script');</script>
 <div class="block">FPS cap of the game.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/cards/UncommonCardLibraryWidget.html#FRAME_TEXTURE" class="member-name-link">FRAME_TEXTURE</a> - Static variable in class com.csse3200.game.components.cards.<a href="com/csse3200/game/components/cards/UncommonCardLibraryWidget.html" title="class in com.csse3200.game.components.cards">UncommonCardLibraryWidget</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueConfig.Dialogue.html#frameCount" class="member-name-link">frameCount</a> - Variable in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueConfig.Dialogue.html" title="class in com.csse3200.game.components.enemy">BossDialogueConfig.Dialogue</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/clickable/Framed.html" class="type-name-link" title="class in com.csse3200.game.components.spritedisplay.clickable">Framed</a> - Class in <a href="com/csse3200/game/components/spritedisplay/clickable/package-summary.html">com.csse3200.game.components.spritedisplay.clickable</a></dt>
 <dd>
@@ -4721,6 +4866,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/encounters/integration/EncounterFlowController.html#getActiveType()" class="member-name-link">getActiveType()</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/EncounterFlowController.html" title="class in com.csse3200.game.encounters.integration">EncounterFlowController</a></dt>
 <dd>
 <div class="block">Returns the current encounter category.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html#getAI()" class="member-name-link">getAI()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html" title="class in com.csse3200.game.components.enemy">EnemyBehaviourComponent</a></dt>
+<dd>
+<div class="block">Returns the independent AI instance owned by this enemy.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/combat/BattleController.html#getAliveTaunterTargetIds()" class="member-name-link">getAliveTaunterTargetIds()</a> - Method in class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a></dt>
 <dd>
@@ -4947,6 +5096,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/components/player/EnergyComponent.html#getCurrentEnergy()" class="member-name-link">getCurrentEnergy()</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/EnergyComponent.html" title="class in com.csse3200.game.components.player">EnergyComponent</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyAnimationController.html#getCurrentForm()" class="member-name-link">getCurrentForm()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyAnimationController.html" title="class in com.csse3200.game.components.enemy">EnemyAnimationController</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/rendering/AnimationRenderComponent.html#getCurrentFrame()" class="member-name-link">getCurrentFrame()</a> - Method in class com.csse3200.game.rendering.<a href="com/csse3200/game/rendering/AnimationRenderComponent.html" title="class in com.csse3200.game.rendering">AnimationRenderComponent</a></dt>
 <dd>
 <div class="block">Frame for the next draw; querying does not advance animation.</div>
@@ -5095,6 +5246,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/bestiary/BestiaryTrackingComponent.html#getEnemyId()" class="member-name-link">getEnemyId()</a> - Method in class com.csse3200.game.bestiary.<a href="com/csse3200/game/bestiary/BestiaryTrackingComponent.html" title="class in com.csse3200.game.bestiary">BestiaryTrackingComponent</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/combat/BattleController.html#getEnemyInSlot(int)" class="member-name-link">getEnemyInSlot(int)</a> - Method in class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a></dt>
+<dd>
+<div class="block">Returns the enemy in a left-to-right, zero-based battle slot, or null if invalid.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html#getEnemyMaxHealth()" class="member-name-link">getEnemyMaxHealth()</a> - Method in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIContext</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/battle/BattleGameArea.html#getEnemyTargets()" class="member-name-link">getEnemyTargets()</a> - Method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/BattleGameArea.html" title="class in com.csse3200.game.components.battle">BattleGameArea</a></dt>
@@ -5569,6 +5724,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/effects/TurnEffectStore.html#getResolutions()" class="member-name-link">getResolutions()</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/TurnEffectStore.html" title="class in com.csse3200.game.cards.effects">TurnEffectStore</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html#getResolvedIntentValue()" class="member-name-link">getResolvedIntentValue()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html" title="class in com.csse3200.game.components.enemy">EnemyBehaviourComponent</a></dt>
+<dd>
+<div class="block">Returns the value that should currently be displayed for this intent.</div>
+</dd>
 <dt><a href="com/csse3200/game/services/ServiceLocator.html#getResourceService()" class="member-name-link">getResourceService()</a> - Static method in class com.csse3200.game.services.<a href="com/csse3200/game/services/ServiceLocator.html" title="class in com.csse3200.game.services">ServiceLocator</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/maps/MapNode.html#getRoomType()" class="member-name-link">getRoomType()</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/MapNode.html" title="class in com.csse3200.game.maps">MapNode</a></dt>
@@ -5760,6 +5919,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/battle/EnemyReleaseDisplay.html#getZIndex()" class="member-name-link">getZIndex()</a> - Method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/EnemyReleaseDisplay.html" title="class in com.csse3200.game.components.battle">EnemyReleaseDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/battle/EnemyStatusEffectVisualComponent.html#getZIndex()" class="member-name-link">getZIndex()</a> - Method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/EnemyStatusEffectVisualComponent.html" title="class in com.csse3200.game.components.battle">EnemyStatusEffectVisualComponent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/battle/FloatingDamageDisplay.html#getZIndex()" class="member-name-link">getZIndex()</a> - Method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/FloatingDamageDisplay.html" title="class in com.csse3200.game.components.battle">FloatingDamageDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/bestiary/BestiaryDisplay.html#getZIndex()" class="member-name-link">getZIndex()</a> - Method in class com.csse3200.game.components.bestiary.<a href="com/csse3200/game/components/bestiary/BestiaryDisplay.html" title="class in com.csse3200.game.components.bestiary">BestiaryDisplay</a></dt>
 <dd>&nbsp;</dd>
@@ -5977,6 +6138,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns a hash code value for this object.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/combat/DamageTakenEvent.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/DamageTakenEvent.html" title="class in com.csse3200.game.components.combat">DamageTakenEvent</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyIntent.html#hashCode()" class="member-name-link">hashCode()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/Memory/PlayerMemory.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class com.csse3200.game.components.enemy.Memory.<a href="com/csse3200/game/components/enemy/Memory/PlayerMemory.html" title="class in com.csse3200.game.components.enemy.Memory">PlayerMemory</a></dt>
@@ -6000,6 +6165,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Returns a hash code value for this object.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/DisplayingRecord.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/DisplayingRecord.html" title="class in com.csse3200.game.components.spritedisplay.displaying">DisplayingRecord</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/status/StatusTooltip.Content.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusTooltip.Content.html" title="class in com.csse3200.game.components.status">StatusTooltip.Content</a></dt>
 <dd>
 <div class="block">Returns a hash code value for this object.</div>
 </dd>
@@ -6119,6 +6288,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Hides the panel.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/status/StatusTooltip.html#hide()" class="member-name-link">hide()</a> - Method in class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusTooltip.html" title="class in com.csse3200.game.components.status">StatusTooltip</a></dt>
+<dd>
+<div class="block">Hides the panel and removes it from its stage.</div>
+</dd>
 <dt><a href="com/csse3200/game/ui/PopupDisplay.html#hide()" class="member-name-link">hide()</a> - Method in class com.csse3200.game.ui.<a href="com/csse3200/game/ui/PopupDisplay.html" title="class in com.csse3200.game.ui">PopupDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/cards/CardUpgradeDisplay.html#hideLibrary()" class="member-name-link">hideLibrary()</a> - Method in class com.csse3200.game.components.cards.<a href="com/csse3200/game/components/cards/CardUpgradeDisplay.html" title="class in com.csse3200.game.components.cards">CardUpgradeDisplay</a></dt>
@@ -6165,6 +6338,12 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the value of the <a href="./com/csse3200/game/components/battle/EffectVisualStyle.html#param-iconPath"><code>iconPath</code></a> record component.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/status/StatusInfo.html#iconPath()" class="member-name-link">iconPath()</a> - Method in enum class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusInfo.html" title="enum class in com.csse3200.game.components.status">StatusInfo</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/status/StatusInfo.html#iconPaths()" class="member-name-link">iconPaths()</a> - Static method in enum class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusInfo.html" title="enum class in com.csse3200.game.components.status">StatusInfo</a></dt>
+<dd>
+<div class="block">Returns every icon path once, for preloading through the resource service.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/configs/CardConfig.html#id" class="member-name-link">id</a> - Variable in class com.csse3200.game.cards.configs.<a href="com/csse3200/game/cards/configs/CardConfig.html" title="class in com.csse3200.game.cards.configs">CardConfig</a></dt>
 <dd>
 <div class="block">Unique key used to look this card up.</div>
@@ -6191,6 +6370,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Gets all valid enemy ids in the roster.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueConfig.Dialogue.html#image" class="member-name-link">image</a> - Variable in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueConfig.Dialogue.html" title="class in com.csse3200.game.components.enemy">BossDialogueConfig.Dialogue</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/clickable/ClickableRecord.ButtonType.html#IMAGE" class="member-name-link">IMAGE</a> - Enum constant in enum class com.csse3200.game.components.spritedisplay.clickable.<a href="com/csse3200/game/components/spritedisplay/clickable/ClickableRecord.ButtonType.html" title="enum class in com.csse3200.game.components.spritedisplay.clickable">ClickableRecord.ButtonType</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/clickable/ClickableRecord.ButtonType.html#IMAGE_TEXT" class="member-name-link">IMAGE_TEXT</a> - Enum constant in enum class com.csse3200.game.components.spritedisplay.clickable.<a href="com/csse3200/game/components/spritedisplay/clickable/ClickableRecord.ButtonType.html" title="enum class in com.csse3200.game.components.spritedisplay.clickable">ClickableRecord.ButtonType</a></dt>
@@ -6433,6 +6614,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">True once the delegated success/leave scene has been acknowledged by the player.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/combat/BattleController.html#isCardPlayBlocked()" class="member-name-link">isCardPlayBlocked()</a> - Method in class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a></dt>
+<dd>
+<div class="block">Returns whether an external presentation, such as Boss dialogue, currently blocks cards.</div>
+</dd>
 <dt><a href="com/csse3200/game/encounters/integration/ChanceEncounterSession.html#isCompleted()" class="member-name-link">isCompleted()</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceEncounterSession.html" title="class in com.csse3200.game.encounters.integration">ChanceEncounterSession</a></dt>
 <dd>
 <div class="block">Reports whether this session has notified its completion callback.</div>
@@ -6462,6 +6647,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/combat/BattleController.html#isEnemyAlive(com.csse3200.game.entities.Entity)" class="member-name-link">isEnemyAlive(Entity)</a> - Method in class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a></dt>
 <dd>
 <div class="block">Returns if the enemy is alive.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyAI/EnrageLowHealthAI.html#isEnraged()" class="member-name-link">isEnraged()</a> - Method in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/EnrageLowHealthAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnrageLowHealthAI</a></dt>
+<dd>
+<div class="block">Whether the most recently selected intent used the enraged stance.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/battle/EffectBurstComponent.html#isExpired()" class="member-name-link">isExpired()</a> - Method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/EffectBurstComponent.html" title="class in com.csse3200.game.components.battle">EffectBurstComponent</a></dt>
 <dd>&nbsp;</dd>
@@ -6850,6 +7039,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Loads persisted progress, returning an empty map when no valid data is available.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueConfig.html#load()" class="member-name-link">load()</a> - Static method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueConfig.html" title="class in com.csse3200.game.components.enemy">BossDialogueConfig</a></dt>
+<dd>
+<div class="block">Loads and validates the normal Boss dialogue configuration.</div>
+</dd>
 <dt><a href="com/csse3200/game/services/audio/AudioService.html#load()" class="member-name-link">load()</a> - Static method in class com.csse3200.game.services.audio.<a href="com/csse3200/game/services/audio/AudioService.html" title="class in com.csse3200.game.services.audio">AudioService</a></dt>
 <dd>
 <div class="block">Loads all the audio files defined in their respective path arrays.</div>
@@ -6858,6 +7051,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/save/SaveGameRepository.html#load(int)" class="member-name-link">load(int)</a> - Method in interface com.csse3200.game.save.<a href="com/csse3200/game/save/SaveGameRepository.html" title="interface in com.csse3200.game.save">SaveGameRepository</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueConfig.html#load(java.lang.String)" class="member-name-link">load(String)</a> - Static method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueConfig.html" title="class in com.csse3200.game.components.enemy">BossDialogueConfig</a></dt>
+<dd>
+<div class="block">Loads and validates Boss dialogue configuration from an internal asset path.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/CardAcquisitionPoolLoader.html#load(java.lang.String,com.csse3200.game.cards.CardService)" class="member-name-link">load(String, CardService)</a> - Static method in class com.csse3200.game.cards.<a href="com/csse3200/game/cards/CardAcquisitionPoolLoader.html" title="class in com.csse3200.game.cards">CardAcquisitionPoolLoader</a></dt>
 <dd>
 <div class="block">Loads and validates one acquisition allow-list.</div>
@@ -7450,6 +7647,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">the normal vector of the collider surface at the hit point.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/combat/DamageType.html#NORMAL" class="member-name-link">NORMAL</a> - Enum constant in enum class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/DamageType.html" title="enum class in com.csse3200.game.components.combat">DamageType</a></dt>
+<dd>
+<div class="block">Standard damage that can be reduced by block and armour.</div>
+</dd>
 <dt><a href="com/csse3200/game/entities/configs/EnemyTier.html#NORMAL" class="member-name-link">NORMAL</a> - Enum constant in enum class com.csse3200.game.entities.configs.<a href="com/csse3200/game/entities/configs/EnemyTier.html" title="enum class in com.csse3200.game.entities.configs">EnemyTier</a></dt>
 <dd>
 <div class="block">modest statistics and a single behaviour pattern.</div>
@@ -7618,6 +7819,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Fired when the popup opens.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueConfig.html#opening" class="member-name-link">opening</a> - Variable in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueConfig.html" title="class in com.csse3200.game.components.enemy">BossDialogueConfig</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/tutorial/BattleTutorialPromptContent.html#OPENING_HAND" class="member-name-link">OPENING_HAND</a> - Static variable in class com.csse3200.game.tutorial.<a href="com/csse3200/game/tutorial/BattleTutorialPromptContent.html" title="class in com.csse3200.game.tutorial">BattleTutorialPromptContent</a></dt>
 <dd>
 <div class="block">Introduces the opening hand without assuming a full five cards are always available.</div>
@@ -7753,9 +7956,13 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/components/gamearea/PerformanceDisplay.html#%3Cinit%3E()" class="member-name-link">PerformanceDisplay()</a> - Constructor for class com.csse3200.game.components.gamearea.<a href="com/csse3200/game/components/gamearea/PerformanceDisplay.html" title="class in com.csse3200.game.components.gamearea">PerformanceDisplay</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyAI/BossAI.html#PHASE_CHANGED_EVENT" class="member-name-link">PHASE_CHANGED_EVENT</a> - Static variable in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/BossAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">BossAI</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAI/BossAI.BossPhase.html#PHASE_ONE" class="member-name-link">PHASE_ONE</a> - Enum constant in enum class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/BossAI.BossPhase.html" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.BossPhase</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAI/BossAI.BossPhase.html#PHASE_TWO" class="member-name-link">PHASE_TWO</a> - Enum constant in enum class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/BossAI.BossPhase.html" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.BossPhase</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueConfig.html#phaseTwo" class="member-name-link">phaseTwo</a> - Variable in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueConfig.html" title="class in com.csse3200.game.components.enemy">BossDialogueConfig</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/physics/components/PhysicsComponent.html" class="type-name-link" title="class in com.csse3200.game.physics.components">PhysicsComponent</a> - Class in <a href="com/csse3200/game/physics/components/package-summary.html">com.csse3200.game.physics.components</a></dt>
 <dd>
@@ -7808,6 +8015,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/cards/EffectType.html#PIERCE" class="member-name-link">PIERCE</a> - Enum constant in enum class com.csse3200.game.cards.<a href="com/csse3200/game/cards/EffectType.html" title="enum class in com.csse3200.game.cards">EffectType</a></dt>
 <dd>
 <div class="block">Immediate damage that ignores the target's block and armour.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/combat/DamageType.html#PIERCE" class="member-name-link">PIERCE</a> - Enum constant in enum class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/DamageType.html" title="enum class in com.csse3200.game.components.combat">DamageType</a></dt>
+<dd>
+<div class="block">Damage that bypasses block and armour.</div>
 </dd>
 <dt><a href="com/csse3200/game/input/InputComponent.html#pinch(com.badlogic.gdx.math.Vector2,com.badlogic.gdx.math.Vector2,com.badlogic.gdx.math.Vector2,com.badlogic.gdx.math.Vector2)" class="member-name-link">pinch(Vector2, Vector2, Vector2, Vector2)</a> - Method in class com.csse3200.game.input.<a href="com/csse3200/game/input/InputComponent.html" title="class in com.csse3200.game.input">InputComponent</a></dt>
 <dd>&nbsp;</dd>
@@ -7983,7 +8194,7 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/entities/factories/PlayerFactory.html" class="type-name-link" title="class in com.csse3200.game.entities.factories">PlayerFactory</a> - Class in <a href="com/csse3200/game/entities/factories/package-summary.html">com.csse3200.game.entities.factories</a></dt>
 <dd>
-<div class="block">Factory to create a player entity.</div>
+<div class="block">Predefined player properties are loaded from the player configuration file.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/combat/BattleController.html#playerHasStatusEffect(java.lang.String)" class="member-name-link">playerHasStatusEffect(String)</a> - Method in class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a></dt>
 <dd>
@@ -8065,8 +8276,18 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Damage over time applied at the start of the target's turn.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/combat/DamageType.html#POISON" class="member-name-link">POISON</a> - Enum constant in enum class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/DamageType.html" title="enum class in com.csse3200.game.components.combat">DamageType</a></dt>
+<dd>
+<div class="block">Ongoing poison damage that bypasses block and armour.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/status/StatusInfo.html#POISON" class="member-name-link">POISON</a> - Enum constant in enum class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusInfo.html" title="enum class in com.csse3200.game.components.status">StatusInfo</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html#POISON_DAGGER" class="member-name-link">POISON_DAGGER</a> - Static variable in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html" title="class in com.csse3200.game.cards.deck">PlayerDeckFactory</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/status/StatusInfo.html#poisonDurationText(java.util.Map)" class="member-name-link">poisonDurationText(Map&lt;Integer, Integer&gt;)</a> - Static method in enum class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusInfo.html" title="enum class in com.csse3200.game.components.status">StatusInfo</a></dt>
+<dd>
+<div class="block">Describes each group of poison on its own line.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/battle/DeckEditorDisplayingFactory.html#POPUP_TEXT" class="member-name-link">POPUP_TEXT</a> - Static variable in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/DeckEditorDisplayingFactory.html" title="class in com.csse3200.game.components.battle">DeckEditorDisplayingFactory</a></dt>
 <dd>
 <div class="block">Text laid out relative to the popup window.</div>
@@ -8472,6 +8693,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/maps/PlayerRunState.html#removeOwnedItem(com.csse3200.game.rewards.ItemType)" class="member-name-link">removeOwnedItem(ItemType)</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></dt>
 <dd>
 <div class="block">Removes one copy of an owned item.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyAI/BossAI.html#removePhaseChangeListener(com.csse3200.game.events.listeners.EventListener1)" class="member-name-link">removePhaseChangeListener(EventListener1&lt;BossAI.BossPhase&gt;)</a> - Method in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/BossAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">BossAI</a></dt>
+<dd>
+<div class="block">Removes a previously registered phase listener.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/combat/BattleController.html#removePhaseChangeListener(com.csse3200.game.events.listeners.EventListener2)" class="member-name-link">removePhaseChangeListener(EventListener2&lt;BattlePhase, BattlePhase&gt;)</a> - Method in class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a></dt>
 <dd>
@@ -9228,6 +9453,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/rendering/DebugRenderer.html#setActive(boolean)" class="member-name-link">setActive(boolean)</a> - Method in class com.csse3200.game.rendering.<a href="com/csse3200/game/rendering/DebugRenderer.html" title="class in com.csse3200.game.rendering">DebugRenderer</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html#setAI(com.csse3200.game.components.enemy.EnemyAI.EnemyAI)" class="member-name-link">setAI(EnemyAI)</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html" title="class in com.csse3200.game.components.enemy">EnemyBehaviourComponent</a></dt>
+<dd>
+<div class="block">Replaces the AI used by this enemy.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/clickable/InOutOnTrigger.html#setAnimationDuration(float)" class="member-name-link">setAnimationDuration(float)</a> - Method in class com.csse3200.game.components.spritedisplay.clickable.<a href="com/csse3200/game/components/spritedisplay/clickable/InOutOnTrigger.html" title="class in com.csse3200.game.components.spritedisplay.clickable">InOutOnTrigger</a></dt>
 <dd>
 <div class="block">Optional: Override to change the animation speed.</div>
@@ -9277,6 +9506,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/components/cards/UncommonCardLibraryWidget.html#setCard(com.csse3200.game.cards.runtime.ResolvedCard)" class="member-name-link">setCard(ResolvedCard)</a> - Method in class com.csse3200.game.components.cards.<a href="com/csse3200/game/components/cards/UncommonCardLibraryWidget.html" title="class in com.csse3200.game.components.cards">UncommonCardLibraryWidget</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/combat/BattleController.html#setCardPlayBlocked(boolean)" class="member-name-link">setCardPlayBlocked(boolean)</a> - Method in class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a></dt>
+<dd>
+<div class="block">Enables or disables card submission without changing the current battle phase.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/EndBattleDisplay.html#setClickToReturnEnabled(boolean)" class="member-name-link">setClickToReturnEnabled(boolean)</a> - Method in class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/EndBattleDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">EndBattleDisplay</a></dt>
 <dd>
 <div class="block">Controls whether clicking/pressing a key anywhere on this screen triggers <a href="com/csse3200/game/components/spritedisplay/displaying/EndBattleDisplay.html#RETURN_TO_MENU_EVENT"><code>EndBattleDisplay.RETURN_TO_MENU_EVENT</code></a>.</div>
@@ -9329,6 +9562,12 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/tutorial/BattleTutorialGuidanceView.html#setEnemyBounds(java.util.function.Supplier)" class="member-name-link">setEnemyBounds(Supplier&lt;List&lt;Rectangle&gt;&gt;)</a> - Method in class com.csse3200.game.tutorial.<a href="com/csse3200/game/tutorial/BattleTutorialGuidanceView.html" title="class in com.csse3200.game.tutorial">BattleTutorialGuidanceView</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/SetEnemyHealthCommand.html" class="type-name-link" title="class in com.csse3200.game.ui.terminal.commands">SetEnemyHealthCommand</a> - Class in <a href="com/csse3200/game/ui/terminal/commands/package-summary.html">com.csse3200.game.ui.terminal.commands</a></dt>
+<dd>
+<div class="block">Debug command: setenemyhp &lt;zero-based slot&gt; &lt;health&gt;.</div>
+</dd>
+<dt><a href="com/csse3200/game/ui/terminal/commands/SetEnemyHealthCommand.html#%3Cinit%3E(com.csse3200.game.components.combat.BattleController)" class="member-name-link">SetEnemyHealthCommand(BattleController)</a> - Constructor for class com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/SetEnemyHealthCommand.html" title="class in com.csse3200.game.ui.terminal.commands">SetEnemyHealthCommand</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html#setEnemyMemory(com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent)" class="member-name-link">setEnemyMemory(EnemyMemoryComponent)</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyBehaviourComponent.html" title="class in com.csse3200.game.components.enemy">EnemyBehaviourComponent</a></dt>
 <dd>
 <div class="block">Supplies the shared enemy-memory component attached to the player.</div>
@@ -9346,6 +9585,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/tutorial/BattleTutorialGuidanceView.html#setExitStyle(com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle)" class="member-name-link">setExitStyle(TextButton.TextButtonStyle)</a> - Method in class com.csse3200.game.tutorial.<a href="com/csse3200/game/tutorial/BattleTutorialGuidanceView.html" title="class in com.csse3200.game.tutorial">BattleTutorialGuidanceView</a></dt>
 <dd>
 <div class="block">Share battle-menu drawables without owning or disposing their skin.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyAnimationController.html#setForm(java.lang.String)" class="member-name-link">setForm(String)</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyAnimationController.html" title="class in com.csse3200.game.components.enemy">EnemyAnimationController</a></dt>
+<dd>
+<div class="block">Changes the held stance without interrupting an attack or cast already in progress.</div>
 </dd>
 <dt><a href="com/csse3200/game/physics/components/ColliderComponent.html#setFriction(float)" class="member-name-link">setFriction(float)</a> - Method in class com.csse3200.game.physics.components.<a href="com/csse3200/game/physics/components/ColliderComponent.html" title="class in com.csse3200.game.physics.components">ColliderComponent</a></dt>
 <dd>
@@ -9800,6 +10043,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Prevents the target from playing cards while active.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/status/StatusInfo.html#SILENCE" class="member-name-link">SILENCE</a> - Enum constant in enum class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusInfo.html" title="enum class in com.csse3200.game.components.status">StatusInfo</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/IntentIcons.html#SILENCE" class="member-name-link">SILENCE</a> - Static variable in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/IntentIcons.html" title="class in com.csse3200.game.components.enemy">IntentIcons</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/TargetType.html#SINGLE_ENEMY" class="member-name-link">SINGLE_ENEMY</a> - Enum constant in enum class com.csse3200.game.cards.<a href="com/csse3200/game/cards/TargetType.html" title="enum class in com.csse3200.game.cards">TargetType</a></dt>
@@ -10024,8 +10269,30 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/components/StatusEffectCalculator.html" class="type-name-link" title="class in com.csse3200.game.components">StatusEffectCalculator</a> - Class in <a href="com/csse3200/game/components/package-summary.html">com.csse3200.game.components</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/status/StatusIconDisplay.html" class="type-name-link" title="class in com.csse3200.game.components.status">StatusIconDisplay</a> - Class in <a href="com/csse3200/game/components/status/package-summary.html">com.csse3200.game.components.status</a></dt>
+<dd>
+<div class="block">Shows a row of status icons beside a combatant.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/status/StatusIconDisplay.html#%3Cinit%3E(float,boolean)" class="member-name-link">StatusIconDisplay(float, boolean)</a> - Constructor for class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusIconDisplay.html" title="class in com.csse3200.game.components.status">StatusIconDisplay</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/status/StatusInfo.html" class="type-name-link" title="enum class in com.csse3200.game.components.status">StatusInfo</a> - Enum Class in <a href="com/csse3200/game/components/status/package-summary.html">com.csse3200.game.components.status</a></dt>
+<dd>
+<div class="block">Display name, rules text and icon for each status effect that can appear on a combatant.</div>
+</dd>
 <dt><a href="com/csse3200/game/save/SaveSlotMetadata.html#statusMessage" class="member-name-link">statusMessage</a> - Variable in class com.csse3200.game.save.<a href="com/csse3200/game/save/SaveSlotMetadata.html" title="class in com.csse3200.game.save">SaveSlotMetadata</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/status/StatusTooltip.html" class="type-name-link" title="class in com.csse3200.game.components.status">StatusTooltip</a> - Class in <a href="com/csse3200/game/components/status/package-summary.html">com.csse3200.game.components.status</a></dt>
+<dd>
+<div class="block">A hover panel explaining one status effect: its name, what it does and how long it lasts.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/status/StatusTooltip.html#%3Cinit%3E(com.badlogic.gdx.scenes.scene2d.ui.Skin)" class="member-name-link">StatusTooltip(Skin)</a> - Constructor for class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusTooltip.html" title="class in com.csse3200.game.components.status">StatusTooltip</a></dt>
+<dd>
+<div class="block">Creates a hidden panel that borrows its fonts and drawables from the given skin.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/status/StatusTooltip.Content.html" class="type-name-link" title="class in com.csse3200.game.components.status">StatusTooltip.Content</a> - Record Class in <a href="com/csse3200/game/components/status/package-summary.html">com.csse3200.game.components.status</a></dt>
+<dd>
+<div class="block">What the panel shows for one status.</div>
+</dd>
 <dt><a href="com/csse3200/game/cards/play/integration/Team7PlayerStateAdapter.html#statusValue(com.csse3200.game.cards.EffectType)" class="member-name-link">statusValue(EffectType)</a> - Method in class com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/Team7PlayerStateAdapter.html" title="class in com.csse3200.game.cards.play.integration">Team7PlayerStateAdapter</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/play/PlayerStateView.html#statusValue(com.csse3200.game.cards.EffectType)" class="member-name-link">statusValue(EffectType)</a> - Method in interface com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/PlayerStateView.html" title="interface in com.csse3200.game.cards.play">PlayerStateView</a></dt>
@@ -10072,6 +10339,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Increases damage the target deals for the rest of the combat.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/status/StatusInfo.html#STRENGTH" class="member-name-link">STRENGTH</a> - Enum constant in enum class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusInfo.html" title="enum class in com.csse3200.game.components.status">StatusInfo</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/rewards/CursePenalties.html#STRENGTH_PENALTY" class="member-name-link">STRENGTH_PENALTY</a> - Static variable in class com.csse3200.game.rewards.<a href="com/csse3200/game/rewards/CursePenalties.html" title="class in com.csse3200.game.rewards">CursePenalties</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html#STRIKE" class="member-name-link">STRIKE</a> - Static variable in class com.csse3200.game.cards.deck.<a href="com/csse3200/game/cards/deck/PlayerDeckFactory.html" title="class in com.csse3200.game.cards.deck">PlayerDeckFactory</a></dt>
@@ -10193,6 +10462,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Damages the entity's health directly, ignoring block and armour.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/CombatStatsComponent.html#takePoisonDamage(int)" class="member-name-link">takePoisonDamage(int)</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/CombatStatsComponent.html" title="class in com.csse3200.game.components">CombatStatsComponent</a></dt>
+<dd>
+<div class="block">Damages the entity's health directly with poison, ignoring block and armour.</div>
+</dd>
 <dt><a href="com/csse3200/game/input/InputComponent.html#tap(float,float,int,int)" class="member-name-link">tap(float, float, int, int)</a> - Method in class com.csse3200.game.input.<a href="com/csse3200/game/input/InputComponent.html" title="class in com.csse3200.game.input">InputComponent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/input/InputService.html#tap(float,float,int,int)" class="member-name-link">tap(float, float, int, int)</a> - Method in class com.csse3200.game.input.<a href="com/csse3200/game/input/InputService.html" title="class in com.csse3200.game.input">InputService</a></dt>
@@ -10252,6 +10525,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Forces single-enemy cards to target an active taunting enemy.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/status/StatusInfo.html#TAUNT" class="member-name-link">TAUNT</a> - Enum constant in enum class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusInfo.html" title="enum class in com.csse3200.game.components.status">StatusInfo</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/IntentIcons.html#TAUNT" class="member-name-link">TAUNT</a> - Static variable in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/IntentIcons.html" title="class in com.csse3200.game.components.enemy">IntentIcons</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/play/integration/Team1EnemyStateAdapter.html" class="type-name-link" title="class in com.csse3200.game.cards.play.integration">Team1EnemyStateAdapter</a> - Class in <a href="com/csse3200/game/cards/play/integration/package-summary.html">com.csse3200.game.cards.play.integration</a></dt>
@@ -10335,6 +10610,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/areas/terrain/TerrainTile.html#%3Cinit%3E(com.badlogic.gdx.graphics.g2d.TextureRegion)" class="member-name-link">TerrainTile(TextureRegion)</a> - Constructor for class com.csse3200.game.areas.terrain.<a href="com/csse3200/game/areas/terrain/TerrainTile.html" title="class in com.csse3200.game.areas.terrain">TerrainTile</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueConfig.Dialogue.html#text" class="member-name-link">text</a> - Variable in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueConfig.Dialogue.html" title="class in com.csse3200.game.components.enemy">BossDialogueConfig.Dialogue</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/clickable/ClickableRecord.html#text()" class="member-name-link">text()</a> - Method in record class com.csse3200.game.components.spritedisplay.clickable.<a href="com/csse3200/game/components/spritedisplay/clickable/ClickableRecord.html" title="class in com.csse3200.game.components.spritedisplay.clickable">ClickableRecord</a></dt>
 <dd>
 <div class="block">Returns the value of the <code>text</code> record component.</div>
@@ -10373,6 +10650,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Runtime sheets to load once with the battle assets, and unload after its visuals are disposed.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueConfig.html#texturePaths()" class="member-name-link">texturePaths()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueConfig.html" title="class in com.csse3200.game.components.enemy">BossDialogueConfig</a></dt>
+<dd>
+<div class="block">Returns every image path for preloading by the battle screen.</div>
+</dd>
 <dt><a href="com/csse3200/game/rendering/TextureRenderComponent.html" class="type-name-link" title="class in com.csse3200.game.rendering">TextureRenderComponent</a> - Class in <a href="com/csse3200/game/rendering/package-summary.html">com.csse3200.game.rendering</a></dt>
 <dd>
 <div class="block">Render a static texture.</div>
@@ -10403,6 +10684,12 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/areas/terrain/TerrainComponent.html#tileToWorldPosition(com.badlogic.gdx.math.GridPoint2)" class="member-name-link">tileToWorldPosition(GridPoint2)</a> - Method in class com.csse3200.game.areas.terrain.<a href="com/csse3200/game/areas/terrain/TerrainComponent.html" title="class in com.csse3200.game.areas.terrain">TerrainComponent</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/status/StatusInfo.html#title()" class="member-name-link">title()</a> - Method in enum class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusInfo.html" title="enum class in com.csse3200.game.components.status">StatusInfo</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/status/StatusTooltip.Content.html#title()" class="member-name-link">title()</a> - Method in record class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusTooltip.Content.html" title="class in com.csse3200.game.components.status">StatusTooltip.Content</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./com/csse3200/game/components/status/StatusTooltip.Content.html#param-title"><code>title</code></a> record component.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/mainmenu/MainMenuDisplay.html#TITLE_LOGO_TEXTURE" class="member-name-link">TITLE_LOGO_TEXTURE</a> - Static variable in class com.csse3200.game.components.mainmenu.<a href="com/csse3200/game/components/mainmenu/MainMenuDisplay.html" title="class in com.csse3200.game.components.mainmenu">MainMenuDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ui/MenuTheme.html#TITLE_SPACING" class="member-name-link">TITLE_SPACING</a> - Static variable in class com.csse3200.game.ui.<a href="com/csse3200/game/ui/MenuTheme.html" title="class in com.csse3200.game.ui">MenuTheme</a></dt>
@@ -10491,6 +10778,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns a string representation of this record class.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/combat/DamageTakenEvent.html#toString()" class="member-name-link">toString()</a> - Method in record class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/DamageTakenEvent.html" title="class in com.csse3200.game.components.combat">DamageTakenEvent</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/Component.html#toString()" class="member-name-link">toString()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/Component.html" title="class in com.csse3200.game.components">Component</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyIntent.html#toString()" class="member-name-link">toString()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></dt>
@@ -10516,6 +10807,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Returns a string representation of this record class.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/DisplayingRecord.html#toString()" class="member-name-link">toString()</a> - Method in record class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/DisplayingRecord.html" title="class in com.csse3200.game.components.spritedisplay.displaying">DisplayingRecord</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/status/StatusTooltip.Content.html#toString()" class="member-name-link">toString()</a> - Method in record class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusTooltip.Content.html" title="class in com.csse3200.game.components.status">StatusTooltip.Content</a></dt>
 <dd>
 <div class="block">Returns a string representation of this record class.</div>
 </dd>
@@ -10691,7 +10986,15 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/cards/effects/TurnEffectStore.html#%3Cinit%3E()" class="member-name-link">TurnEffectStore()</a> - Constructor for class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/TurnEffectStore.html" title="class in com.csse3200.game.cards.effects">TurnEffectStore</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIFactory.html#TUTORIAL" class="member-name-link">TUTORIAL</a> - Static variable in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIFactory.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIFactory</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/GdxGame.ScreenType.html#TUTORIAL_BATTLE" class="member-name-link">TUTORIAL_BATTLE</a> - Enum constant in enum class com.csse3200.game.<a href="com/csse3200/game/GdxGame.ScreenType.html" title="enum class in com.csse3200.game">GdxGame.ScreenType</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyAI/TutorialEnemyAI.html" class="type-name-link" title="class in com.csse3200.game.components.enemy.EnemyAI">TutorialEnemyAI</a> - Class in <a href="com/csse3200/game/components/enemy/EnemyAI/package-summary.html">com.csse3200.game.components.enemy.EnemyAI</a></dt>
+<dd>
+<div class="block">Tutorial enemy AI that follows a fixed attack, defend and buff cycle.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/enemy/EnemyAI/TutorialEnemyAI.html#%3Cinit%3E()" class="member-name-link">TutorialEnemyAI()</a> - Constructor for class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/TutorialEnemyAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">TutorialEnemyAI</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/chance/DiceEncounterBehaviour.Round.html#TWO" class="member-name-link">TWO</a> - Enum constant in enum class com.csse3200.game.chance.<a href="com/csse3200/game/chance/DiceEncounterBehaviour.Round.html" title="enum class in com.csse3200.game.chance">DiceEncounterBehaviour.Round</a></dt>
 <dd>&nbsp;</dd>
@@ -10720,6 +11023,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/cards/runtime/ResolvedCard.html#type()" class="member-name-link">type()</a> - Method in record class com.csse3200.game.cards.runtime.<a href="com/csse3200/game/cards/runtime/ResolvedCard.html" title="class in com.csse3200.game.cards.runtime">ResolvedCard</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./com/csse3200/game/cards/runtime/ResolvedCard.html#param-type"><code>type</code></a> record component.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/combat/DamageTakenEvent.html#type()" class="member-name-link">type()</a> - Method in record class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/DamageTakenEvent.html" title="class in com.csse3200.game.components.combat">DamageTakenEvent</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./com/csse3200/game/components/combat/DamageTakenEvent.html#param-type"><code>type</code></a> record component.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/clickable/ClickableRecord.html#type()" class="member-name-link">type()</a> - Method in record class com.csse3200.game.components.spritedisplay.clickable.<a href="com/csse3200/game/components/spritedisplay/clickable/ClickableRecord.html" title="class in com.csse3200.game.components.spritedisplay.clickable">ClickableRecord</a></dt>
 <dd>
@@ -10838,12 +11145,16 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/battle/EnemyStatusEffectVisualComponent.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/EnemyStatusEffectVisualComponent.html" title="class in com.csse3200.game.components.battle">EnemyStatusEffectVisualComponent</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/battle/FloatingDamageDisplay.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/FloatingDamageDisplay.html" title="class in com.csse3200.game.components.battle">FloatingDamageDisplay</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/CameraComponent.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/CameraComponent.html" title="class in com.csse3200.game.components">CameraComponent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/Component.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/Component.html" title="class in com.csse3200.game.components">Component</a></dt>
 <dd>
 <div class="block">Called once per frame of the game, and should be used for most component logic.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/enemy/BossDialogueComponent.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/BossDialogueComponent.html" title="class in com.csse3200.game.components.enemy">BossDialogueComponent</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAnimationController.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyAnimationController.html" title="class in com.csse3200.game.components.enemy">EnemyAnimationController</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyStatsDisplay</a></dt>
@@ -10861,6 +11172,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/player/PlayerStatsDisplay.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/reactive/EnemyDropTargetComponent.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.spritedisplay.reactive.<a href="com/csse3200/game/components/spritedisplay/reactive/EnemyDropTargetComponent.html" title="class in com.csse3200.game.components.spritedisplay.reactive">EnemyDropTargetComponent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/status/StatusIconDisplay.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusIconDisplay.html" title="class in com.csse3200.game.components.status">StatusIconDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/tasks/ChaseTask.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.tasks.<a href="com/csse3200/game/components/tasks/ChaseTask.html" title="class in com.csse3200.game.components.tasks">ChaseTask</a></dt>
 <dd>&nbsp;</dd>
@@ -11131,6 +11444,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/combat/DamageType.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/DamageType.html" title="enum class in com.csse3200.game.components.combat">DamageType</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAI/BossAI.BossMove.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/BossAI.BossMove.html" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.BossMove</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
@@ -11156,6 +11473,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/clickable/ClickableRecord.ButtonType.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class com.csse3200.game.components.spritedisplay.clickable.<a href="com/csse3200/game/components/spritedisplay/clickable/ClickableRecord.ButtonType.html" title="enum class in com.csse3200.game.components.spritedisplay.clickable">ClickableRecord.ButtonType</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/status/StatusInfo.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusInfo.html" title="enum class in com.csse3200.game.components.status">StatusInfo</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
@@ -11328,6 +11649,11 @@ the order they are declared.</div>
 <div class="block">Returns an array containing the constants of this enum class, in
 the order they are declared.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/combat/DamageType.html#values()" class="member-name-link">values()</a> - Static method in enum class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/DamageType.html" title="enum class in com.csse3200.game.components.combat">DamageType</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAI/BossAI.BossMove.html#values()" class="member-name-link">values()</a> - Static method in enum class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/BossAI.BossMove.html" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.BossMove</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum class, in
@@ -11359,6 +11685,11 @@ the order they are declared.</div>
 the order they are declared.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/clickable/ClickableRecord.ButtonType.html#values()" class="member-name-link">values()</a> - Static method in enum class com.csse3200.game.components.spritedisplay.clickable.<a href="com/csse3200/game/components/spritedisplay/clickable/ClickableRecord.ButtonType.html" title="enum class in com.csse3200.game.components.spritedisplay.clickable">ClickableRecord.ButtonType</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/status/StatusInfo.html#values()" class="member-name-link">values()</a> - Static method in enum class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusInfo.html" title="enum class in com.csse3200.game.components.status">StatusInfo</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum class, in
 the order they are declared.</div>
@@ -11509,6 +11840,8 @@ the order they are declared.</div>
 <dd>
 <div class="block">Increases damage the target receives while active.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/status/StatusInfo.html#VULNERABLE" class="member-name-link">VULNERABLE</a> - Enum constant in enum class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusInfo.html" title="enum class in com.csse3200.game.components.status">StatusInfo</a></dt>
+<dd>&nbsp;</dd>
 </dl>
 <h2 class="title" id="I:W">W</h2>
 <dl class="index">

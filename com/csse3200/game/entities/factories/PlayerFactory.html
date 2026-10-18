@@ -92,10 +92,7 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">PlayerFactory</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Factory to create a player entity.
-
- <p>Predefined player properties are loaded from a config stored as a json file and should have
- the properties stores in 'PlayerConfig'.</div>
+<div class="block">Predefined player properties are loaded from the player configuration file.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -113,16 +110,18 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="../../maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#createInitialRunState()" class="member-name-link">createInitialRunState</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Creates the initial durable player state from the same config used by <a href="#createPlayer(com.csse3200.game.maps.RunState)"><code>createPlayer(RunState)</code></a>.</div>
+<div class="block">Creates the initial durable player state from the same config used by player creation.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="../Entity.html" title="class in com.csse3200.game.entities">Entity</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#createPlayer(int,com.csse3200.game.maps.RunState)" class="member-name-link">createPlayer</a><wbr>(int&nbsp;currentHealth,
  <a href="../../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Creates an animated player entity with the specified current health.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="../Entity.html" title="class in com.csse3200.game.entities">Entity</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#createPlayer(com.csse3200.game.maps.RunState)" class="member-name-link">createPlayer</a><wbr>(<a href="../../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Create a player entity.</div>
+<div class="block">Creates a player entity using the standard texture renderer.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static int</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getDefaultHealth()" class="member-name-link">getDefaultHealth</a>()</code></div>
@@ -172,10 +171,12 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="createPlayer(com.csse3200.game.maps.RunState)">
 <h3>createPlayer</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="../Entity.html" title="class in com.csse3200.game.entities">Entity</a></span>&nbsp;<span class="element-name">createPlayer</span><wbr><span class="parameters">(<a href="../../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState)</span></div>
-<div class="block">Create a player entity.</div>
+<div class="block">Creates a player entity using the standard texture renderer.</div>
 <dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>runState</code> - current run state</dd>
 <dt>Returns:</dt>
-<dd>entity</dd>
+<dd>the assembled player entity</dd>
 </dl>
 </section>
 </li>
@@ -184,16 +185,24 @@ loadScripts(document, 'script');</script>
 <h3>createPlayer</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="../Entity.html" title="class in com.csse3200.game.entities">Entity</a></span>&nbsp;<span class="element-name">createPlayer</span><wbr><span class="parameters">(int&nbsp;currentHealth,
  <a href="../../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState)</span></div>
+<div class="block">Creates an animated player entity with the specified current health.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>currentHealth</code> - current player health</dd>
+<dd><code>runState</code> - current run state</dd>
+<dt>Returns:</dt>
+<dd>the assembled player entity</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="createInitialRunState()">
 <h3>createInitialRunState</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="../../maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a></span>&nbsp;<span class="element-name">createInitialRunState</span>()</div>
-<div class="block">Creates the initial durable player state from the same config used by <a href="#createPlayer(com.csse3200.game.maps.RunState)"><code>createPlayer(RunState)</code></a>.</div>
+<div class="block">Creates the initial durable player state from the same config used by player creation.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>default health and gold for a new run</dd>
+<dd>default player state for a new run</dd>
 </dl>
 </section>
 </li>

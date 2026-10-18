@@ -141,16 +141,36 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Resolves the current intent against the given target.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#forceCurrentIntent(com.csse3200.game.components.enemy.EnemyIntent)" class="member-name-link">forceCurrentIntent</a><wbr>(<a href="EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a>&nbsp;intent)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Replaces only the already-telegraphed action; the next roll still uses the normal AI.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="EnemyAI/EnemyAI.html" title="interface in com.csse3200.game.components.enemy.EnemyAI">EnemyAI</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAI()" class="member-name-link">getAI</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the independent AI instance owned by this enemy.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getBehaviourId()" class="member-name-link">getBehaviourId</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentIntent()" class="member-name-link">getCurrentIntent</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#rollIntent()" class="member-name-link">rollIntent</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getResolvedIntentValue()" class="member-name-link">getResolvedIntentValue</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the value that should currently be displayed for this intent.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#rollIntent()" class="member-name-link">rollIntent</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Decides the action for the coming round and telegraphs it.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAI(com.csse3200.game.components.enemy.EnemyAI.EnemyAI)" class="member-name-link">setAI</a><wbr>(<a href="EnemyAI/EnemyAI.html" title="interface in com.csse3200.game.components.enemy.EnemyAI">EnemyAI</a>&nbsp;ai)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Replaces the AI used by this enemy.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setEnemyMemory(com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent)" class="member-name-link">setEnemyMemory</a><wbr>(<a href="Memory/EnemyMemoryComponent.html" title="class in com.csse3200.game.components.enemy.Memory">EnemyMemoryComponent</a>&nbsp;enemyMemory)</code></div>
@@ -208,6 +228,27 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="getAI()">
+<h3>getAI</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="EnemyAI/EnemyAI.html" title="interface in com.csse3200.game.components.enemy.EnemyAI">EnemyAI</a></span>&nbsp;<span class="element-name">getAI</span>()</div>
+<div class="block">Returns the independent AI instance owned by this enemy.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setAI(com.csse3200.game.components.enemy.EnemyAI.EnemyAI)">
+<h3>setAI</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setAI</span><wbr><span class="parameters">(<a href="EnemyAI/EnemyAI.html" title="interface in com.csse3200.game.components.enemy.EnemyAI">EnemyAI</a>&nbsp;ai)</span></div>
+<div class="block">Replaces the AI used by this enemy.
+
+ <p>This is intended for specialised battles that reuse an existing enemy entity with different
+ behaviour, such as the tutorial battle.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>ai</code> - replacement AI</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="setPlayerStats(com.csse3200.game.components.CombatStatsComponent)">
 <h3>setPlayerStats</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setPlayerStats</span><wbr><span class="parameters">(<a href="../CombatStatsComponent.html" title="class in com.csse3200.game.components">CombatStatsComponent</a>&nbsp;playerStats)</span></div>
@@ -261,6 +302,13 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="forceCurrentIntent(com.csse3200.game.components.enemy.EnemyIntent)">
+<h3>forceCurrentIntent</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">forceCurrentIntent</span><wbr><span class="parameters">(<a href="EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a>&nbsp;intent)</span></div>
+<div class="block">Replaces only the already-telegraphed action; the next roll still uses the normal AI.</div>
+</section>
+</li>
+<li>
 <section class="detail" id="executeIntent(com.csse3200.game.entities.Entity)">
 <h3>executeIntent</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">executeIntent</span><wbr><span class="parameters">(<a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;target)</span></div>
@@ -268,6 +316,20 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>target</code> - the entity the intent acts on, typically the player</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getResolvedIntentValue()">
+<h3>getResolvedIntentValue</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getResolvedIntentValue</span>()</div>
+<div class="block">Returns the value that should currently be displayed for this intent.
+
+ <p>Attack intents are resolved from the latest Strength, Feeble and Vulnerable statuses. Other
+ intent types retain their original value.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>the current resolved value of the telegraphed intent</dd>
 </dl>
 </section>
 </li>

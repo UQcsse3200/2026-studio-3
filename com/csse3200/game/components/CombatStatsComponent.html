@@ -325,14 +325,19 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Damages the entity's health directly, ignoring block and armour.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#tickStatusEffect(java.lang.String)" class="member-name-link">tickStatusEffect</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;type)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#takePoisonDamage(int)" class="member-name-link">takePoisonDamage</a><wbr>(int&nbsp;damage)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Damages the entity's health directly with poison, ignoring block and armour.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#tickStatusEffect(java.lang.String)" class="member-name-link">tickStatusEffect</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;type)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Decrements only the named status and removes it when expired.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateStatusEffects()" class="member-name-link">updateStatusEffects</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateStatusEffects()" class="member-name-link">updateStatusEffects</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Decrements every active status and removes expired effects.</div>
 </div>
 </div>
@@ -490,6 +495,17 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>damage</code> - piercing damage</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="takePoisonDamage(int)">
+<h3>takePoisonDamage</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">takePoisonDamage</span><wbr><span class="parameters">(int&nbsp;damage)</span></div>
+<div class="block">Damages the entity's health directly with poison, ignoring block and armour.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>damage</code> - poison damage</dd>
 </dl>
 </section>
 </li>
@@ -690,8 +706,9 @@ loadScripts(document, 'script');</script>
 <div class="block">Applies a status effect.
 
  <p>Poison stacks are grouped by remaining duration. Feeble does not stack its damage reduction
- and keeps the longer duration on reapplication; permanent duration takes precedence. Other
- statuses retain their overwrite behaviour.</div>
+ and keeps the longer duration on reapplication; permanent duration takes precedence. Strength
+ adds to the existing value and follows the same duration rule. Other statuses retain their
+ overwrite behaviour.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>effect</code> - status effect to apply</dd>
