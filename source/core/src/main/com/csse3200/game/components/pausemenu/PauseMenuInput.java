@@ -30,16 +30,13 @@ public class PauseMenuInput extends InputComponent {
 
     // Paused: keyboard-drive the menu, and consume everything else.
     switch (keycode) {
-      case Keys.UP:
-      case Keys.W:
+      case Keys.UP, Keys.W:
         entity.getEvents().trigger(PauseMenuDisplay.NAV_UP_EVENT);
         return true;
-      case Keys.DOWN:
-      case Keys.S:
+      case Keys.DOWN, Keys.S:
         entity.getEvents().trigger(PauseMenuDisplay.NAV_DOWN_EVENT);
         return true;
-      case Keys.ENTER:
-      case Keys.SPACE:
+      case Keys.ENTER, Keys.SPACE:
         entity.getEvents().trigger(PauseMenuDisplay.NAV_SELECT_EVENT);
         return true;
       case Keys.ESCAPE:

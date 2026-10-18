@@ -104,9 +104,9 @@ public class PlayerStatsDisplay extends UIComponent {
     healthBarStyle.background.setMinHeight(20);
     healthBarStyle.knobBefore.setMinHeight(20);
 
-    healthBar = new ProgressBar(0, (float) maxHealth, 1, false, healthBarStyle);
+    healthBar = new ProgressBar(0, maxHealth, 1, false, healthBarStyle);
     healthBar.setSize(150, 20);
-    healthBar.setValue((float) currentHealth);
+    healthBar.setValue(currentHealth);
     healthBar.setAnimateDuration(0.2f);
 
     // Health stack
@@ -268,8 +268,8 @@ public class PlayerStatsDisplay extends UIComponent {
   public void updatePlayerHealthUI(int currentHealth, int maxHealth) {
     CharSequence text = String.format("%d / %d", currentHealth, maxHealth);
     healthLabel.setText(text);
-    healthBar.setRange(0, (float) maxHealth);
-    healthBar.setValue((float) currentHealth);
+    healthBar.setRange(0, maxHealth);
+    healthBar.setValue(currentHealth);
     updateHealthBarColour();
   }
 

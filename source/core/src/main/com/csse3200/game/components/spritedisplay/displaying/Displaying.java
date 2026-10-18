@@ -83,7 +83,6 @@ public abstract class Displaying extends UIComponent {
   @Override
   protected void draw(SpriteBatch batch) {
     // Position and size the label every frame
-    // int screenHeight = Gdx.graphics.getHeight();
     float stageHeight = label.getStage().getViewport().getWorldHeight();
     label.setPosition(x, stageHeight - y);
 
