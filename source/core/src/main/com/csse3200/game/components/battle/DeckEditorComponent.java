@@ -31,6 +31,8 @@ import com.csse3200.game.components.spritedisplay.clickable.ClickableRecord;
 import com.csse3200.game.components.spritedisplay.displaying.CardBadgesDisplay;
 import com.csse3200.game.components.spritedisplay.displaying.CardPreviewDisplay;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.ui.PopupDisplay;
 import com.csse3200.game.ui.UIComponent;
 import java.util.ArrayList;
@@ -184,6 +186,7 @@ public class DeckEditorComponent extends UIComponent {
   public void open() {
     refreshPoolAndSelection();
     updateGridSpacer();
+    AudioService.playSound(SoundId.CARD_SHUFFLE, 0.5f);
     popup.show();
   }
 
@@ -569,14 +572,17 @@ public class DeckEditorComponent extends UIComponent {
     }
     if (selected.remove(instance)) {
       // deselecting always allowed
+      AudioService.playSound(SoundId.BUTTON_CLICK, 0.5f);
     } else {
       if (selected.size() >= HAND_SIZE) {
         entity
             .getEvents()
             .trigger(
                 DeckEditorEvents.ERROR, "Hand is full, deselect a card before adding another.");
+        AudioService.playSound(SoundId.ERROR, 0.5f);
         return;
       }
+      AudioService.playSound(SoundId.CARD_CLICK, 0.5f);
       selected.add(instance);
     }
     showPreview(instance);
@@ -604,6 +610,7 @@ public class DeckEditorComponent extends UIComponent {
       if (onDeckChanged != null) {
         onDeckChanged.accept(confirmedSelection);
       }
+      AudioService.playSound(SoundId.CARD_SHUFFLE, 0.5f);
       popup.hide();
     } catch (IllegalStateException notEnoughEnergy) {
       entity

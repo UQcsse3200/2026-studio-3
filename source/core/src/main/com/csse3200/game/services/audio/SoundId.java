@@ -25,5 +25,6 @@ public enum SoundId {
   VICTORY,
   BUTTON_CLICK,
   DEFEAT,
-  BIG_CLICK
+  BIG_CLICK,
+  CARD_CLICK
 }
