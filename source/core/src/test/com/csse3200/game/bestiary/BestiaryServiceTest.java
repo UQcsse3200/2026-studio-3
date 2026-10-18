@@ -79,7 +79,7 @@ class BestiaryServiceTest {
 
     assertTrue(service.recordDefeated("boss_knight"));
     BestiaryEntryView defeatedBoss = service.getEntry("boss_knight").orElseThrow();
-    assertEquals(150, defeatedBoss.health().orElseThrow());
+    assertEquals(100, defeatedBoss.health().orElseThrow());
     assertEquals(14, defeatedBoss.baseAttack().orElseThrow());
     assertEquals(8, defeatedBoss.armour().orElseThrow());
     assertEquals("boss", defeatedBoss.behaviour().orElseThrow());

@@ -18,7 +18,7 @@ public class EnergyComponent extends Component {
   private int maxEnergy;
 
   public EnergyComponent(int maxEnergy) {
-    this.maxEnergy = Math.min(Math.max(maxEnergy, 1), MAX_ENERGY_CAP);
+    this.maxEnergy = Math.clamp(maxEnergy, 1, MAX_ENERGY_CAP);
     this.currentEnergy = this.maxEnergy;
   }
 
@@ -47,7 +47,7 @@ public class EnergyComponent extends Component {
   }
 
   public void setMaxEnergy(int maxEnergy) {
-    this.maxEnergy = Math.min(Math.max(maxEnergy, 1), MAX_ENERGY_CAP);
+    this.maxEnergy = Math.clamp(maxEnergy, 1, MAX_ENERGY_CAP);
     this.currentEnergy = Math.min(this.currentEnergy, this.maxEnergy);
     notifyEnergyChange();
   }

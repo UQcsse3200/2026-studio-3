@@ -30,6 +30,7 @@ final class DiceRollDisplay {
   private final Label totalLabel;
   private final Label scenicTotalValueLabel;
   private boolean rolling;
+  private static final String STYLE_NAME_WHITE = "white";
 
   DiceRollDisplay(Skin skin, LabelStyle labelStyle) {
     this(skin, labelStyle, false);
@@ -38,7 +39,7 @@ final class DiceRollDisplay {
   DiceRollDisplay(Skin skin, LabelStyle labelStyle, boolean scenic) {
     table = new Table();
     if (!scenic) {
-      table.setBackground(skin.newDrawable("white", BACKDROP));
+      table.setBackground(skin.newDrawable(STYLE_NAME_WHITE, BACKDROP));
     }
     table.pad(10f, 16f, 10f, 16f);
 
@@ -98,11 +99,11 @@ final class DiceRollDisplay {
       spark.setSize(10f, 10f);
       spark.setPosition(points[i][0], points[i][1]);
       Table horizontal = new Table();
-      horizontal.setBackground(skin.newDrawable("white", colour));
+      horizontal.setBackground(skin.newDrawable(STYLE_NAME_WHITE, colour));
       horizontal.setBounds(0f, 4f, 10f, 2f);
       spark.addActor(horizontal);
       Table vertical = new Table();
-      vertical.setBackground(skin.newDrawable("white", colour));
+      vertical.setBackground(skin.newDrawable(STYLE_NAME_WHITE, colour));
       vertical.setBounds(4f, 0f, 2f, 10f);
       spark.addActor(vertical);
       spark.getColor().a = 0.25f;
@@ -130,7 +131,7 @@ final class DiceRollDisplay {
     };
     for (float[] stroke : strokes) {
       Table fragment = new Table();
-      fragment.setBackground(skin.newDrawable("white", colour));
+      fragment.setBackground(skin.newDrawable(STYLE_NAME_WHITE, colour));
       fragment.setBounds(stroke[0], stroke[1], stroke[2], stroke[3]);
       fragments.addActor(fragment);
     }
@@ -151,7 +152,7 @@ final class DiceRollDisplay {
       float x = 58f + (float) Math.cos(angle) * 51f - size / 2f;
       float y = 56f + (float) Math.sin(angle) * 50f - size / 2f;
       Table mote = new Table();
-      mote.setBackground(skin.newDrawable("white", colour));
+      mote.setBackground(skin.newDrawable(STYLE_NAME_WHITE, colour));
       mote.setBounds(x, y, size, size);
       orbit.addActor(mote);
     }
@@ -226,16 +227,16 @@ final class DiceRollDisplay {
     private DieFace(Skin skin, Color frameColour) {
       setTransform(true);
       setOrigin(41f, 41f);
-      setBackground(skin.newDrawable("white", frameColour));
+      setBackground(skin.newDrawable(STYLE_NAME_WHITE, frameColour));
 
       Table face = new Table();
-      face.setBackground(skin.newDrawable("white", FACE));
+      face.setBackground(skin.newDrawable(STYLE_NAME_WHITE, FACE));
       Table grid = new Table();
       for (int row = 0; row < 3; row++) {
         for (int column = 0; column < 3; column++) {
           int index = row * 3 + column;
           Table pip = new Table();
-          pip.setBackground(skin.newDrawable("white", PIP));
+          pip.setBackground(skin.newDrawable(STYLE_NAME_WHITE, PIP));
           pips[index] = pip;
           grid.add(pip).size(10f).pad(5f);
         }

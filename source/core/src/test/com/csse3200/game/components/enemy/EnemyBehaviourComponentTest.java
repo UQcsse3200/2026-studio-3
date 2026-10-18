@@ -1,5 +1,6 @@
 package com.csse3200.game.components.enemy;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -362,7 +363,7 @@ class EnemyBehaviourComponentTest {
 
     behaviour.rollIntent();
 
-    behaviour.executeIntent(null);
+    assertDoesNotThrow(() -> behaviour.executeIntent(null));
   }
 
   @Test
@@ -433,7 +434,7 @@ class EnemyBehaviourComponentTest {
 
     behaviour.rollIntent();
 
-    behaviour.executeIntent(null);
+    assertDoesNotThrow(() -> behaviour.executeIntent(null));
   }
 
   @Test

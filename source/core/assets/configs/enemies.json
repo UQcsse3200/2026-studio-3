@@ -47,7 +47,7 @@
     {
       "id": "tomb_guardian",
       "name": "Tomb Guardian",
-      "health": 72,
+      "health": 50,
       "baseAttack": 10,
       "armour": 5,
       "tier": "ELITE",
@@ -59,7 +59,7 @@
       "id": "void_knight",
       "name": "Riven Knight",
       "health": 40,
-      "baseAttack": 16,
+      "baseAttack": 14,
       "armour": 0,
       "tier": "ELITE",
       "behaviour": "enrage_low_health",
@@ -68,7 +68,7 @@
     {
       "id": "boss_knight",
       "name": "Vitium",
-      "health": 150,
+      "health": 100,
       "baseAttack": 14,
       "armour": 8,
       "tier": "BOSS",
