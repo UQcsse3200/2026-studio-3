@@ -30,6 +30,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.csse3200.game.bestiary.BestiaryEntryView;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryUnlockState;
+import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.entities.configs.EnemyConfig;
 import com.csse3200.game.entities.configs.EnemyConfigs;
 import com.csse3200.game.entities.configs.EnemyTier;
@@ -390,26 +391,30 @@ class BestiaryDisplayTest {
   }
 
   @Test
-  void shouldHideUndiscoveredEntryThenRevealItOnEncounter() {
+  void shouldShowUndiscoveredEntryWithoutChangingProgress() {
     EnemyConfigs configs = new EnemyConfigs();
     configs.enemies = new EnemyConfig[] {createConfig("enemy", "Enemy", EnemyTier.NORMAL)};
     BestiaryService service = new BestiaryService(configs);
     BestiaryDisplay display = createDisplay(service);
     display.create();
-    assertNull(display.getDisplayedEntry());
-    assertEquals(BestiaryDisplay.EMPTY_STATE_MESSAGE, display.getEmptyStateText());
+    assertEquals("Enemy", display.getDisplayedEntry().displayName());
+    assertEquals(BestiaryUnlockState.DEFEATED, display.getDisplayedEntry().unlockState());
+    assertEquals(BestiaryUnlockState.LOCKED, service.getEntry("enemy").orElseThrow().unlockState());
+    assertNull(display.getEmptyStateText());
 
     service.recordEncountered("enemy");
-    assertEquals(BestiaryUnlockState.ENCOUNTERED, display.getDisplayedEntry().unlockState());
+    assertEquals(BestiaryUnlockState.DEFEATED, display.getDisplayedEntry().unlockState());
+    assertEquals(
+        BestiaryUnlockState.ENCOUNTERED, service.getEntry("enemy").orElseThrow().unlockState());
     assertNull(display.getEmptyStateText());
 
     display.dispose();
     service.recordDefeated("enemy");
-    assertEquals(BestiaryUnlockState.ENCOUNTERED, display.getDisplayedEntry().unlockState());
+    assertEquals(BestiaryUnlockState.DEFEATED, display.getDisplayedEntry().unlockState());
   }
 
   @Test
-  void shouldSwitchTiersAndRefreshAnEmptyCategoryAfterDiscovery() {
+  void shouldShowEveryTierBeforeDiscovery() {
     EnemyConfigs configs = new EnemyConfigs();
     configs.enemies =
         new EnemyConfig[] {
@@ -423,24 +428,24 @@ class BestiaryDisplayTest {
     BestiaryDisplay display = createDisplay(service);
     display.create();
 
-    assertNull(display.getDisplayedEntry());
-    assertEquals(BestiaryDisplay.EMPTY_STATE_MESSAGE, display.getEmptyStateText());
+    assertEquals("normal_enemy", display.getDisplayedEntry().enemyId());
+    assertNull(display.getEmptyStateText());
 
     display.applyFilter(EnemyTier.ELITE);
     assertEquals("elite_enemy", display.getDisplayedEntry().enemyId());
     assertNull(display.getEmptyStateText());
 
     display.applyFilter(EnemyTier.BOSS);
-    assertNull(display.getDisplayedEntry());
-    assertEquals(BestiaryDisplay.EMPTY_STATE_MESSAGE, display.getEmptyStateText());
+    assertEquals("boss_enemy", display.getDisplayedEntry().enemyId());
+    assertNull(display.getEmptyStateText());
 
     service.recordEncountered("boss_enemy");
     assertEquals("boss_enemy", display.getDisplayedEntry().enemyId());
     assertNull(display.getEmptyStateText());
 
     display.applyFilter(EnemyTier.NORMAL);
-    assertNull(display.getDisplayedEntry());
-    assertEquals(BestiaryDisplay.EMPTY_STATE_MESSAGE, display.getEmptyStateText());
+    assertEquals("normal_enemy", display.getDisplayedEntry().enemyId());
+    assertNull(display.getEmptyStateText());
 
     display.dispose();
   }
@@ -451,6 +456,12 @@ class BestiaryDisplayTest {
     ServiceLocator.registerRenderService(renderService);
     ResourceService resourceService = mock(ResourceService.class);
     when(resourceService.getAsset(BestiaryDisplay.BUTTON_TEXTURE, Texture.class))
+        .thenReturn(mock(Texture.class));
+    when(resourceService.getAsset(MainMenuDisplay.BUTTON_FRAME_TEXTURE, Texture.class))
+        .thenReturn(mock(Texture.class));
+    when(resourceService.getAsset(BestiaryDisplay.ELITE_FRAME_TEXTURE, Texture.class))
+        .thenReturn(mock(Texture.class));
+    when(resourceService.getAsset(BestiaryDisplay.BOSS_FRAME_TEXTURE, Texture.class))
         .thenReturn(mock(Texture.class));
     ServiceLocator.registerResourceService(resourceService);
     return new BestiaryDisplay(service, () -> {});

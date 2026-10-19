@@ -6,6 +6,7 @@ import com.csse3200.game.GdxGame;
 import com.csse3200.game.bestiary.BestiaryEntryView;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.components.bestiary.BestiaryDisplay;
+import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
@@ -25,7 +26,12 @@ import org.slf4j.LoggerFactory;
 public class BestiaryScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(BestiaryScreen.class);
   private static final String FALLBACK_ATLAS = "images/enemies/default.atlas";
-  private static final String[] BESTIARY_TEXTURES = {BestiaryDisplay.BUTTON_TEXTURE};
+  private static final String[] BESTIARY_TEXTURES = {
+    BestiaryDisplay.BUTTON_TEXTURE,
+    MainMenuDisplay.BUTTON_FRAME_TEXTURE,
+    BestiaryDisplay.ELITE_FRAME_TEXTURE,
+    BestiaryDisplay.BOSS_FRAME_TEXTURE
+  };
 
   private final GdxGame game;
   private final Renderer renderer;
@@ -87,7 +93,7 @@ public class BestiaryScreen extends ScreenAdapter {
   static String[] collectAtlasPaths(BestiaryService bestiary) {
     Set<String> paths = new LinkedHashSet<>();
     paths.add(FALLBACK_ATLAS);
-    for (BestiaryEntryView entry : bestiary.getEntries()) {
+    for (BestiaryEntryView entry : bestiary.getCatalogueEntries()) {
       entry.sprite().ifPresent(paths::add);
     }
     return paths.toArray(new String[0]);
