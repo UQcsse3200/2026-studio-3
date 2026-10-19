@@ -15,5 +15,7 @@ public class ChanceEncounterConfig {
   public ChanceChoiceConfig[] choices = new ChanceChoiceConfig[0];
 
   /** Required by the JSON deserialiser. */
-  public ChanceEncounterConfig() {}
+  public ChanceEncounterConfig() {
+    // Default constructor required for LibGDX JSON deserialisation.
+  }
 }

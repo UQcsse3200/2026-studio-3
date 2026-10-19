@@ -49,5 +49,7 @@ public class CardConfig {
   public CardUpgradeConfig upgrade = null;
 
   /** Required by the JSON deserialiser. */
-  public CardConfig() {}
+  public CardConfig() {
+    // Default constructor required for LibGDX JSON deserialisation.
+  }
 }

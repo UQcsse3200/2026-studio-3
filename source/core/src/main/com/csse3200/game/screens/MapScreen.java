@@ -31,6 +31,7 @@ import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.ui.ItemArtwork;
 import com.csse3200.game.ui.PopupDisplay;
 import com.csse3200.game.ui.PopupInputComponent;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
@@ -122,12 +123,26 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     // PROPOSED: debug terminal for cheats/commands on the map (unlock nodes, etc.). Same
     // Terminal/KeyboardTerminalInputComponent/TerminalDisplay trio used elsewhere; F1 toggles it.
     Terminal terminal = new Terminal();
-    terminal.addCommand("unlocknode", new UnlockNodeCommand(runState));
-    terminal.addCommand("listnodes", new ListNodesCommand(runState));
-    terminal.addCommand("goto", new GotoCommand(runState, mapDisplay.getMapSelectionController()));
+    terminal.setContextName("Map commands");
     terminal.addCommand(
-        "discoverallcards", new DiscoverAllCardsCommand(game.getCardDiscoveryService()));
-    terminal.addCommand("playnarration", new PlayNarrationCommand(game));
+        "unlocknode", "unlocknode <nodeId>", "unlock a map node", new UnlockNodeCommand(runState));
+    terminal.addCommand(
+        "listnodes", "listnodes", "print every node and its state", new ListNodesCommand(runState));
+    terminal.addCommand(
+        "goto",
+        "goto <floor> <roomtype>",
+        "jump to a node, e.g. goto 2 COMBAT",
+        new GotoCommand(runState, mapDisplay.getMapSelectionController()));
+    terminal.addCommand(
+        "discoverallcards",
+        "discoverallcards",
+        "mark every card as discovered",
+        new DiscoverAllCardsCommand(game.getCardDiscoveryService()));
+    terminal.addCommand(
+        "playnarration",
+        "playnarration <opening|pre_boss|victory|defeat>",
+        "preview a narration sequence and return to the map",
+        new PlayNarrationCommand(game));
 
     Entity ui = new Entity();
     ui.addComponent(new InputDecorator(ServiceLocator.getRenderService().getStage(), 10))
@@ -156,14 +171,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
    */
   private void createInventoryButton(RunState runState) {
     ResourceService resourceService = ServiceLocator.getResourceService();
-    String[] inventoryTextures = {
-      "images/ui/inventory-panel.png",
-      "images/ui/lucky-coin.png",
-      "images/ui/energy-crystal.png",
-      "images/ui/merchants-favor.png",
-      "images/ui/iron-aegis.png",
-      "images/ui/warriors-crest.png"
-    };
+    String[] inventoryTextures = ItemArtwork.withAllCutouts("images/ui/inventory-panel.png");
     for (String texturePath : inventoryTextures) {
       if (!resourceService.containsAsset(texturePath, Texture.class)) {
         resourceService.loadTextures(new String[] {texturePath});

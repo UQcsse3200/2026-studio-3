@@ -8,6 +8,7 @@ import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.components.cards.CardWidgetAssets;
+import com.csse3200.game.components.spritedisplay.displaying.DefeatDisplay;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingFactory;
 import com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord;
 import com.csse3200.game.components.spritedisplay.displaying.EndBattleDisplay;
@@ -25,6 +26,7 @@ import com.csse3200.game.rewards.RewardGenerator;
 import com.csse3200.game.rewards.RewardService;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.ui.ItemArtwork;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Random;
@@ -34,21 +36,26 @@ import org.slf4j.LoggerFactory;
 /** Terminal screen shown when a battle ends, for either a win or a loss. */
 public class EndBattleScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(EndBattleScreen.class);
-  private static final String[] REWARD_TEXTURES = {
-    "images/ui/reward-panel.png",
-    "images/ui/reward-card.png",
-    "images/ui/gold-reward.png",
-    "images/ui/victory-title.png",
-    "images/ui/lucky-coin.png",
-    "images/ui/energy-crystal.png",
-    "images/ui/merchants-favor.png",
-    "images/ui/iron-aegis.png",
-    "images/ui/warriors-crest.png"
+  private static final String[] REWARD_TEXTURES =
+      ItemArtwork.withAllCutouts(
+          "images/ui/victory-background-approved.png",
+          "images/ui/reward-panel-mythic-wingless.png",
+          "images/ui/victory-wings-overlay.png",
+          "images/ui/reward-card-mythic-aged.png",
+          "images/ui/gold-reward.png",
+          "images/ui/victory-gold-icon.png",
+          "images/ui/battle-menu-icons.png",
+          "images/ui/victory-title-mythic.png");
+  private static final String[] DEFEAT_TEXTURES = {
+    "images/ui/victory-background-approved.png",
+    "images/ui/defeat-screen-mythic-small-title.png",
+    "images/ui/defeat-screen-mythic-intact.png"
   };
 
   private final GdxGame game;
   private final Renderer renderer;
   private final boolean won;
+  private RewardDisplay rewardDisplay;
   private String[] cardTextures = new String[0];
   private boolean returning = false;
   private boolean rewardClaimed = false;
@@ -67,7 +74,7 @@ public class EndBattleScreen extends ScreenAdapter {
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
-    ServiceLocator.getResourceService().loadTextures(REWARD_TEXTURES);
+    ServiceLocator.getResourceService().loadTextures(won ? REWARD_TEXTURES : DEFEAT_TEXTURES);
     ServiceLocator.getResourceService().loadAll();
 
     renderer = RenderFactory.createRenderer();
@@ -83,49 +90,33 @@ public class EndBattleScreen extends ScreenAdapter {
   private void createUI(boolean won, CardService cardLibrary, CardRewardProfile profile) {
     Stage stage = ServiceLocator.getRenderService().getStage();
 
-    DisplayingFactory displays = new DisplayingFactory(Path.of("sprites/EndBattle.json"));
-
-    Entity ui = new Entity().addComponent(new InputDecorator(stage, 10)).addComponent(displays);
-
-    boolean requiresPlayerChoice = false;
+    Entity ui = new Entity().addComponent(new InputDecorator(stage, 10));
+    DisplayingFactory displays = null;
 
     if (won) {
+      displays = new DisplayingFactory(Path.of("sprites/EndBattle.json"));
+      ui.addComponent(displays);
       RewardService rewardService =
           new RewardService(new RewardGenerator(), cardLibrary, profile, new Random());
       DisplayingRecord rewardRecord =
           DisplayingRecord.builder("").position(0, 500).variant("reward").build();
-      ui.addComponent(
+      rewardDisplay =
           new RewardDisplay(
               rewardRecord,
               rewardService,
               game,
               cardLibrary,
               game.getCardDiscoveryService(),
-              game::autosaveAfterRewardClaimed));
-      requiresPlayerChoice = true;
-
+              game::autosaveAfterRewardClaimed);
+      ui.addComponent(rewardDisplay);
     } else {
-      // The themed reward screen already supplies its own victory title. The legacy end-battle
-      // display is only needed for defeat, where it provides the heading and return input.
-      ui.addComponent(new DisplayingFactory(Path.of("sprites/EndBattle.json")));
-    }
-
-    if (requiresPlayerChoice) {
-      for (EndBattleDisplay endBattleDisplay : displays.getDisplayings(EndBattleDisplay.class)) {
-        endBattleDisplay.setClickToReturnEnabled(false);
-        endBattleDisplay.setVisible(false);
-      }
+      ui.addComponent(new DefeatDisplay());
     }
 
     ui.getEvents().addListener(RewardDisplay.REWARD_CLAIMED_EVENT, this::onRewardClaimed);
     ui.getEvents().addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, this::returnToMenu);
     ServiceLocator.getEntityService().register(ui);
-
-    if (!won) {
-      ui.getEvents().trigger(EndBattleDisplay.RESULT_EVENT, "DEFEAT");
-    }
-
-    if (requiresPlayerChoice) {
+    if (displays != null) {
       for (EndBattleDisplay endBattleDisplay : displays.getDisplayings(EndBattleDisplay.class)) {
         endBattleDisplay.setClickToReturnEnabled(false);
         endBattleDisplay.setVisible(false);
@@ -201,6 +192,9 @@ public class EndBattleScreen extends ScreenAdapter {
   public void render(float delta) {
     ServiceLocator.getEntityService().update();
     renderer.render();
+    if (rewardDisplay != null) {
+      rewardDisplay.finishFeedbackAndNavigate();
+    }
   }
 
   @Override
@@ -213,7 +207,7 @@ public class EndBattleScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
-    ServiceLocator.getResourceService().unloadAssets(REWARD_TEXTURES);
+    ServiceLocator.getResourceService().unloadAssets(won ? REWARD_TEXTURES : DEFEAT_TEXTURES);
     ServiceLocator.getResourceService().unloadAssets(cardTextures);
   }
 }

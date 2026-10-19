@@ -193,42 +193,45 @@ public class BattleActions extends Component {
   private void onBattleEnd(Boolean won) {
     boolean win = Boolean.TRUE.equals(won);
     entity.getEvents().trigger(win ? BATTLE_WON_EVENT : BATTLE_LOST_EVENT);
+    recordRunOutcome(win);
 
+    // queue the release animations if the win conditions have been met.
+    if (win && startReleaseAnimations()) {
+      awaitingRelease = true;
+      return;
+    }
+
+    openResultScreen(win);
+  }
+
+  private void recordRunOutcome(boolean win) {
     // Report the result to the run so the map node is marked done (win) or the run stays put
     // (loss). The end screen reads this to decide whether to go back to the map or the menu.
     RunState runState = game.getRunState();
     rewardProfile = win ? rewardProfileFor(runState) : CardRewardProfile.NORMAL;
-    if (runState != null) {
-      boolean hadActiveEncounter = runState.getActiveNodeId() != null;
-      if (win && isEligibleEliteVictory(runState)) {
-        runState.setPendingEliteTempleReward(true);
-      }
-      runState.completeEncounter(win);
-      if (win && hadActiveEncounter) {
-        game.requestAutosaveAfterEncounter();
+    if (runState == null) {
+      return;
+    }
+    boolean hadActiveEncounter = runState.getActiveNodeId() != null;
+    if (win && isEligibleEliteVictory(runState)) {
+      runState.setPendingEliteTempleReward(true);
+    }
+    runState.completeEncounter(win);
+    if (win && hadActiveEncounter) {
+      game.requestAutosaveAfterEncounter();
+    }
+  }
+
+  private boolean startReleaseAnimations() {
+    releaseAnimations.clear();
+    for (Entity e : enemies) {
+      EnemyReleaseComponent release = e.getComponent(EnemyReleaseComponent.class);
+      if (release != null) {
+        release.startRelease();
+        releaseAnimations.add(release);
       }
     }
-
-    // queue the release animations if the win conditions have been met.
-    if (win) {
-      releaseAnimations.clear();
-
-      for (Entity e : enemies) {
-        EnemyReleaseComponent release = e.getComponent(EnemyReleaseComponent.class);
-
-        if (release != null) {
-          release.startRelease();
-          releaseAnimations.add(release);
-        }
-      }
-
-      if (!releaseAnimations.isEmpty()) {
-        awaitingRelease = true;
-        return;
-      }
-    }
-
-    openResultScreen(win);
+    return !releaseAnimations.isEmpty();
   }
 
   private void triggerEndTurn() {

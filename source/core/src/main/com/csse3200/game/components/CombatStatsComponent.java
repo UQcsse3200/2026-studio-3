@@ -1,5 +1,7 @@
 package com.csse3200.game.components;
 
+import com.csse3200.game.components.combat.DamageTakenEvent;
+import com.csse3200.game.components.combat.DamageType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,12 +31,15 @@ public class CombatStatsComponent extends Component {
   private static final String EVT_MAX_HEALTH = "updateMaxHealth";
   private static final String POISON = "POISON";
   private static final String FEEBLE = "FEEBLE";
+  private static final String VULNERABLE = "VULNERABLE";
+  private static final String STRENGTH = "STRENGTH";
   private int health;
   private int baseAttack;
   private int maxHealth;
   private int armour = 0;
   private int block = 0;
   private final Map<String, StatusEffect> statusEffects = new HashMap<>();
+  private static final String EVT_ENTITY_DEAD = "entityIsDead";
 
   /**
    * Entity's base constructor
@@ -135,9 +140,13 @@ public class CombatStatsComponent extends Component {
     if (damage >= 0 && !isDead()) {
       int afterBlock = absorbDamageWithBlock(damage);
       int remainingDamage = absorbDamageWithArmour(afterBlock);
+      int healthLost = Math.min(this.health, remainingDamage);
+
+      triggerDamageTaken(healthLost, DamageType.NORMAL);
       setHealth(Math.max(this.health - remainingDamage, 0));
+
       if (entity != null && isDead()) {
-        entity.getEvents().trigger("entityIsDead");
+        entity.getEvents().trigger(EVT_ENTITY_DEAD);
       }
     }
   }
@@ -160,7 +169,7 @@ public class CombatStatsComponent extends Component {
     } else if (amount < 0 && !isDead()) {
       setHealth(Math.max(this.health + amount, 0));
       if (entity != null && isDead()) {
-        entity.getEvents().trigger("entityIsDead");
+        entity.getEvents().trigger(EVT_ENTITY_DEAD);
       }
     }
   }
@@ -172,11 +181,34 @@ public class CombatStatsComponent extends Component {
    * @param damage piercing damage
    */
   public void takePiercingDamage(int damage) {
+    takeDirectDamage(damage, DamageType.PIERCE);
+  }
+
+  /**
+   * Damages the entity's health directly with poison, ignoring block and armour.
+   *
+   * @param damage poison damage
+   */
+  public void takePoisonDamage(int damage) {
+    takeDirectDamage(damage, DamageType.POISON);
+  }
+
+  private void takeDirectDamage(int damage, DamageType type) {
     if (damage >= 0 && !isDead()) {
+      int healthLost = Math.min(this.health, damage);
+
+      triggerDamageTaken(healthLost, type);
       setHealth(Math.max(this.health - damage, 0));
+
       if (entity != null && isDead()) {
-        entity.getEvents().trigger("entityIsDead");
+        entity.getEvents().trigger(EVT_ENTITY_DEAD);
       }
+    }
+  }
+
+  private void triggerDamageTaken(int healthLost, DamageType type) {
+    if (entity != null && healthLost > 0) {
+      entity.getEvents().trigger("damageTaken", new DamageTakenEvent(healthLost, type));
     }
   }
 
@@ -193,7 +225,7 @@ public class CombatStatsComponent extends Component {
       entity
           .getEvents()
           .trigger(
-              "updateMaxHealth",
+              EVT_MAX_HEALTH,
               this.maxHealth); // this line (basically tells other that is listening to this that
       // the value is changed)
     }
@@ -385,8 +417,9 @@ public class CombatStatsComponent extends Component {
    * Applies a status effect.
    *
    * <p>Poison stacks are grouped by remaining duration. Feeble does not stack its damage reduction
-   * and keeps the longer duration on reapplication; permanent duration takes precedence. Other
-   * statuses retain their overwrite behaviour.
+   * and keeps the longer duration on reapplication; permanent duration takes precedence. Strength
+   * adds to the existing value and follows the same duration rule. Other statuses retain their
+   * overwrite behaviour.
    *
    * @param effect status effect to apply
    */
@@ -399,8 +432,10 @@ public class CombatStatsComponent extends Component {
 
     if (POISON.equals(type)) {
       applyPoison(effect);
-    } else if (FEEBLE.equals(type)) {
-      applyFeeble(effect);
+    } else if (FEEBLE.equals(type) || VULNERABLE.equals(type)) {
+      applyNonStackingStatus(type, effect);
+    } else if (STRENGTH.equals(type)) {
+      applyStrength(effect);
     } else {
       // Preserve the existing behaviour for other statuses.
       statusEffects.put(type, effect);
@@ -429,8 +464,8 @@ public class CombatStatsComponent extends Component {
     statusEffects.put(POISON, target);
   }
 
-  private void applyFeeble(StatusEffect effect) {
-    StatusEffect existing = statusEffects.get(FEEBLE);
+  private void applyNonStackingStatus(String type, StatusEffect effect) {
+    StatusEffect existing = statusEffects.get(type);
     int duration = effect.getDuration();
     if (existing != null) {
       duration =
@@ -438,8 +473,24 @@ public class CombatStatsComponent extends Component {
               ? 0
               : Math.max(existing.getDuration(), duration);
     }
-    // Feeble does not stack its damage reduction; permanent duration takes precedence.
-    statusEffects.put(FEEBLE, new StatusEffect(FEEBLE, 1, duration));
+    // Feeble and Vulnerable share duration refresh rules and never stack intensity.
+    statusEffects.put(type, new StatusEffect(type, 1, duration));
+  }
+
+  private void applyStrength(StatusEffect effect) {
+    StatusEffect existing = statusEffects.get(STRENGTH);
+    // Reapplying the live object itself must not double its value.
+    if (existing == null || existing == effect) {
+      statusEffects.put(STRENGTH, effect);
+      return;
+    }
+    int duration =
+        existing.getDuration() <= 0 || effect.getDuration() <= 0
+            ? 0
+            : Math.max(existing.getDuration(), effect.getDuration());
+    // Every Strength gain adds up, so cards, items and other sources never overwrite each other.
+    statusEffects.put(
+        STRENGTH, new StatusEffect(STRENGTH, existing.getValue() + effect.getValue(), duration));
   }
 
   /**
@@ -550,7 +601,7 @@ public class CombatStatsComponent extends Component {
       return false;
     }
     return switch (type.toUpperCase(Locale.ROOT)) {
-      case POISON, "VULNERABLE", FEEBLE -> true;
+      case POISON, VULNERABLE, FEEBLE -> true;
       default -> false;
     };
   }

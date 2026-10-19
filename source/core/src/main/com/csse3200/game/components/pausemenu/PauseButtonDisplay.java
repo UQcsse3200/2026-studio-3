@@ -1,18 +1,13 @@
 package com.csse3200.game.components.pausemenu;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
-import com.csse3200.game.components.mainmenu.MainMenuDisplay;
-import com.csse3200.game.services.ResourceService;
-import com.csse3200.game.services.ServiceLocator;
-import com.csse3200.game.ui.MenuTheme;
+import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
 import com.csse3200.game.ui.UIComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,9 +23,6 @@ public class PauseButtonDisplay extends UIComponent {
   private static final float Z_INDEX = 2f;
   private static final float BUTTON_WIDTH = 170f;
   private static final float BUTTON_HEIGHT = 60f;
-  // The frame uses the large menu font; scale the label down so short labels fit this smaller
-  // button.
-  private static final float LABEL_SCALE = 0.6f;
   private static final float DEFAULT_EDGE_PAD = 12f;
 
   private final int align;
@@ -84,8 +76,7 @@ public class PauseButtonDisplay extends UIComponent {
     // Only the button captures clicks; the rest of the (full-screen) table lets gameplay through.
     table.setTouchable(Touchable.childrenOnly);
 
-    pauseButton = new TextButton("Pause", buttonStyle());
-    pauseButton.getLabel().setFontScale(LABEL_SCALE);
+    pauseButton = new TextButton("Pause", BattleMenuSkins.frameStyle(skin.getFont("button")));
     pauseButton.addListener(
         new ChangeListener() {
           @Override
@@ -97,20 +88,6 @@ public class PauseButtonDisplay extends UIComponent {
 
     table.add(pauseButton).width(BUTTON_WIDTH).height(BUTTON_HEIGHT).pad(edgePad);
     stage.addActor(table);
-  }
-
-  /**
-   * Main-menu styled button when the frame texture is loaded; plain skin otherwise (e.g. tests).
-   */
-  private TextButtonStyle buttonStyle() {
-    ResourceService resources = ServiceLocator.getResourceService();
-    if (resources != null
-        && resources.containsAsset(MainMenuDisplay.BUTTON_FRAME_TEXTURE, Texture.class)) {
-      Texture frame = resources.getAsset(MainMenuDisplay.BUTTON_FRAME_TEXTURE, Texture.class);
-      frame.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-      return MenuTheme.createButtonStyle(skin, frame);
-    }
-    return new TextButtonStyle(skin.get(TextButtonStyle.class));
   }
 
   private void show() {

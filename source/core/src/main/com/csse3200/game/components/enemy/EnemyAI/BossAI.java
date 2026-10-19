@@ -2,6 +2,8 @@ package com.csse3200.game.components.enemy.EnemyAI;
 
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.enemy.IntentEffectType;
+import com.csse3200.game.events.EventHandler;
+import com.csse3200.game.events.listeners.EventListener1;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
@@ -12,6 +14,7 @@ import java.util.Random;
  * and the player's observed combat behaviour.
  */
 public class BossAI implements EnemyAI {
+  public static final String PHASE_CHANGED_EVENT = "bossPhaseChanged";
   private static final int HIGH_ARMOUR_THRESHOLD = 8;
 
   /**
@@ -43,6 +46,7 @@ public class BossAI implements EnemyAI {
   private static final int DEBUFF_COOLDOWN_TURNS = 3;
 
   private final Random random;
+  private final EventHandler events = new EventHandler();
 
   private BossPhase currentPhase = BossPhase.PHASE_ONE;
   private BossMove previousMove;
@@ -125,7 +129,19 @@ public class BossAI implements EnemyAI {
 
     if (desiredPhase.ordinal() > currentPhase.ordinal()) {
       currentPhase = desiredPhase;
+      events.trigger(PHASE_CHANGED_EVENT, currentPhase);
     }
+  }
+
+  /** Adds a listener notified when the Boss advances to a later phase. */
+  public void addPhaseChangeListener(EventListener1<BossPhase> listener) {
+    events.addListener(
+        PHASE_CHANGED_EVENT, Objects.requireNonNull(listener, "listener cannot be null"));
+  }
+
+  /** Removes a previously registered phase listener. */
+  public void removePhaseChangeListener(EventListener1<BossPhase> listener) {
+    events.removeListener(PHASE_CHANGED_EVENT, listener);
   }
 
   /** Counts down the debuff cooldown once per decision. */
