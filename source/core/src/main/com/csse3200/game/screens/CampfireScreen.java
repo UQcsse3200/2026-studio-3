@@ -467,7 +467,8 @@ public class CampfireScreen extends ScreenAdapter {
             Actions.delay(MESSAGE_HOLD_SECONDS),
             Actions.parallel(
                 Actions.fadeOut(MESSAGE_EXIT_SECONDS),
-                Actions.moveBy(0, MESSAGE_FLOAT_DISTANCE, MESSAGE_EXIT_SECONDS, Interpolation.pow2Out)),
+                Actions.moveBy(
+                    0, MESSAGE_FLOAT_DISTANCE, MESSAGE_EXIT_SECONDS, Interpolation.pow2Out)),
             Actions.removeActor()));
     mainScene.addActor(msg);
   }
