@@ -18,7 +18,7 @@ public class RewardService {
   private final CardRewardSelectionGenerator cardRewardGenerator;
   private final CardService cardService;
   private final CardAcquisitionPool acquisitionPool;
-  private final ItemDiscoveryService itemDiscoveryService;
+  private final ItemAcquisitionService itemAcquisitionService;
 
   public RewardService() {
     this(new RewardGenerator(), createDefaultCardService(), new Random());
@@ -38,18 +38,18 @@ public class RewardService {
         null);
   }
 
-  /** Creates a reward service that records item discovery after a successful run reward claim. */
+  /** Creates a reward service that grants items through the shared acquisition gateway. */
   public RewardService(
       RewardGenerator generator,
       CardService cardService,
       Random cardRandom,
-      ItemDiscoveryService itemDiscoveryService) {
+      ItemAcquisitionService itemAcquisitionService) {
     this(
         generator,
         cardService,
         CardAcquisitionPoolLoader.loadDefault(cardService),
         cardRandom,
-        itemDiscoveryService);
+        itemAcquisitionService);
   }
 
   /** Creates a reward service with an explicit shared acquisition policy. */
@@ -61,13 +61,13 @@ public class RewardService {
     this(generator, cardService, acquisitionPool, cardRandom, null);
   }
 
-  /** Creates a reward service with an explicit acquisition policy and discovery tracker. */
+  /** Creates a reward service with explicit card and item acquisition policies. */
   public RewardService(
       RewardGenerator generator,
       CardService cardService,
       CardAcquisitionPool acquisitionPool,
       Random cardRandom,
-      ItemDiscoveryService itemDiscoveryService) {
+      ItemAcquisitionService itemAcquisitionService) {
     this.generator = Objects.requireNonNull(generator, "generator must not be null");
     this.cardService = Objects.requireNonNull(cardService, "cardService must not be null");
     this.acquisitionPool =
@@ -75,7 +75,7 @@ public class RewardService {
     this.cardRewardGenerator =
         new CardRewardSelectionGenerator(
             acquisitionPool, Objects.requireNonNull(cardRandom, "cardRandom must not be null"));
-    this.itemDiscoveryService = itemDiscoveryService;
+    this.itemAcquisitionService = itemAcquisitionService;
   }
 
   /** Generates rewards for a player without a gold bonus. */
@@ -115,9 +115,13 @@ public class RewardService {
             selected.goldAmount, playerState.hasOwnedItem(ItemType.LUCKY_COIN));
       }
       case ITEM -> {
-        runState.getOrCreatePlayerState().addOwnedItem(selected.itemId);
-        if (itemDiscoveryService != null) {
-          itemDiscoveryService.recordDiscovered(selected.itemId);
+        if (itemAcquisitionService == null) {
+          runState.getOrCreatePlayerState().addOwnedItem(selected.itemId);
+        } else {
+          itemAcquisitionService.grant(
+              runState.getOrCreatePlayerState(),
+              selected.itemId,
+              ItemAcquisitionSource.NORMAL_REWARD);
         }
       }
       case CARD -> {

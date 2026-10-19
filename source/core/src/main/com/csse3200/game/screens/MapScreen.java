@@ -31,6 +31,7 @@ import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.ui.ItemArtwork;
 import com.csse3200.game.ui.PopupDisplay;
 import com.csse3200.game.ui.PopupInputComponent;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
@@ -154,20 +155,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
    */
   private void createInventoryButton(RunState runState) {
     ResourceService resourceService = ServiceLocator.getResourceService();
-    String[] inventoryTextures = {
-      "images/ui/inventory-panel.png",
-      "images/ui/lucky-coin.png",
-      "images/ui/energy-crystal.png",
-      "images/ui/merchants-favor.png",
-      "images/ui/iron-aegis.png",
-      "images/ui/warriors-crest.png",
-      "images/ui/ashen-ember.png",
-      "images/ui/brand-of-the-damned.png",
-      "images/ui/shattered-aegis.png",
-      "images/ui/ambrosia-flask.png",
-      "images/ui/blood-oath-sigil.png",
-      "images/ui/eternal-vitality.png"
-    };
+    String[] inventoryTextures = ItemArtwork.withAllCutouts("images/ui/inventory-panel.png");
     for (String texturePath : inventoryTextures) {
       if (!resourceService.containsAsset(texturePath, Texture.class)) {
         resourceService.loadTextures(new String[] {texturePath});

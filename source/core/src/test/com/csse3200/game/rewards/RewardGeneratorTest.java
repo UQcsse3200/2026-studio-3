@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.extensions.GameExtension;
@@ -102,5 +103,39 @@ class RewardGeneratorTest {
           energyCrystalCount < counts.get(type),
           "Expected ENERGY_CRYSTAL to appear less often than " + type);
     }
+  }
+
+  @Test
+  void defaultConstructorCreatesAUsableGenerator() {
+    RewardGenerator generator = new RewardGenerator();
+
+    int gold = generator.generateGoldOption().getBaseAmount();
+    assertTrue(gold >= 20 && gold <= 30);
+    assertNotNull(generator.generateItemRewardOption());
+  }
+
+  @Test
+  void shouldRejectNullRandom() {
+    assertThrows(IllegalArgumentException.class, () -> new RewardGenerator(null));
+  }
+
+  @Test
+  void shouldRejectInvalidGoldBonusMultipliers() {
+    RewardGenerator generator = new RewardGenerator(new Random(1));
+
+    assertThrows(IllegalArgumentException.class, () -> generator.generateGoldRewardOption(-0.1f));
+    assertThrows(
+        IllegalArgumentException.class, () -> generator.generateGoldRewardOption(Float.NaN));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> generator.generateGoldRewardOption(Float.POSITIVE_INFINITY));
+  }
+
+  @Test
+  void goldBonusMultiplierScalesTheBaseReward() {
+    RewardOption base = new RewardGenerator(new Random(7)).generateGoldRewardOption();
+    RewardOption boosted = new RewardGenerator(new Random(7)).generateGoldRewardOption(0.5f);
+
+    assertEquals(Math.round(base.goldAmount * 1.5f), boosted.goldAmount);
   }
 }

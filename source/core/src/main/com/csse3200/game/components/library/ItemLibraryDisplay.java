@@ -18,10 +18,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
+import com.csse3200.game.events.listeners.EventListener1;
+import com.csse3200.game.rewards.ItemDiscoveryService;
 import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.ui.ItemArtwork;
+import com.csse3200.game.ui.ItemIconView;
 import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
 import java.util.EnumMap;
@@ -44,11 +48,13 @@ public class ItemLibraryDisplay extends UIComponent {
   private static final String LARGE = "large";
   private static final String SMALL = "small";
   private static final String DEFAULT = "default";
-  private static final String ITEM_ART_DIRECTORY = "images/ui/";
+  private static final String LOCKED_DESCRIPTION = "Obtain this item during a run to reveal it.";
 
   private static final Map<ItemType, String> ITEM_DESCRIPTIONS = new EnumMap<>(ItemType.class);
 
-  private Image itemImage;
+  private final ItemDiscoveryService itemDiscoveryService;
+  private final EventListener1<ItemType> discoveryListener = ignored -> rebuildItemList();
+  private ItemIconView itemIconView;
 
   static {
     ITEM_DESCRIPTIONS.put(
@@ -92,18 +98,23 @@ public class ItemLibraryDisplay extends UIComponent {
   private TextButton.TextButtonStyle buttonStyle;
 
   public static String resolveArtworkPath(ItemType item) {
-    String fileName = item.name().toLowerCase().replace('_', '-') + ".png";
-    return ITEM_ART_DIRECTORY + fileName;
+    return ItemArtwork.framedPath(item);
   }
 
   public ItemLibraryDisplay(GdxGame game) {
     this.game = game;
+    this.itemDiscoveryService = game.getItemDiscoveryService();
   }
 
   @Override
   public void create() {
     super.create();
     addActors();
+    if (itemDiscoveryService != null) {
+      itemDiscoveryService
+          .getEvents()
+          .addListener(ItemDiscoveryService.ENTRY_UPDATED_EVENT, discoveryListener);
+    }
   }
 
   private void addActors() {
@@ -114,6 +125,7 @@ public class ItemLibraryDisplay extends UIComponent {
     buttonStyle = createButtonStyle();
 
     Table panel = new Table();
+    panel.setName("itemLibraryPanel");
     panel.setBackground(skin.newDrawable(WHITE, PANEL_COLOUR));
     panel.pad(24f, 32f, 28f, 32f);
 
@@ -128,6 +140,7 @@ public class ItemLibraryDisplay extends UIComponent {
     applyFilter(false);
 
     Table wrapper = new Table();
+    wrapper.setName("itemLibraryWrapper");
     wrapper.setFillParent(true);
     wrapper.center().pad(MenuTheme.SCREEN_PADDING);
     wrapper.add(panel).width(PANEL_WIDTH).height(PANEL_HEIGHT);
@@ -266,7 +279,7 @@ public class ItemLibraryDisplay extends UIComponent {
       if (firstItem == null) {
         firstItem = item;
       }
-      TextButton itemButton = new TextButton(ItemFormatting.formatItemName(item), buttonStyle);
+      TextButton itemButton = new TextButton(displayName(item), buttonStyle);
       itemButton.getLabel().setFontScale(0.6f);
       itemButton.addListener(
           new ChangeListener() {
@@ -283,14 +296,7 @@ public class ItemLibraryDisplay extends UIComponent {
   }
 
   private Table createDetailPanel() {
-    itemImage = new Image();
-    itemImage.setScaling(Scaling.fit);
-
-    Table artworkBackground = new Table();
-    artworkBackground.setBackground(skin.newDrawable(WHITE, new Color(0.035f, 0.03f, 0.04f, 1f)));
-    Stack artwork = new Stack();
-    artwork.add(artworkBackground);
-    artwork.add(itemImage);
+    itemIconView = new ItemIconView();
 
     Table detailPanel = new Table();
     detailPanel.setBackground(skin.newDrawable(WHITE, DETAIL_COLOUR));
@@ -308,7 +314,7 @@ public class ItemLibraryDisplay extends UIComponent {
 
     detailPanel.add(nameLabel).left().expandX();
     detailPanel.row();
-    detailPanel.add(artwork).width(200f).height(200f).padTop(8f).padBottom(16f);
+    detailPanel.add(itemIconView).width(200f).height(200f).padTop(8f).padBottom(16f);
     detailPanel.row();
     detailPanel.add(descriptionLabel).expandX().fillX().left().padTop(12f);
     detailPanel.row();
@@ -317,23 +323,47 @@ public class ItemLibraryDisplay extends UIComponent {
   }
 
   private void showItem(ItemType item) {
+    if (!isDiscovered(item)) {
+      nameLabel.setText(displayName(item));
+      descriptionLabel.setText(LOCKED_DESCRIPTION);
+      sourceLabel.setText("");
+      hideItemImage();
+      return;
+    }
+
     nameLabel.setText(ItemFormatting.formatItemName(item));
     descriptionLabel.setText(ITEM_DESCRIPTIONS.getOrDefault(item, "No description available."));
     sourceLabel.setText("Obtained from: " + ItemFormatting.formatItemSource(item));
     setItemImage(resolveArtworkPath(item));
   }
 
+  private String displayName(ItemType item) {
+    if (isDiscovered(item)) {
+      return ItemFormatting.formatItemName(item);
+    }
+    return item.isCurse() ? "Unknown Curse" : "Unknown Relic";
+  }
+
+  private boolean isDiscovered(ItemType item) {
+    return itemDiscoveryService != null && itemDiscoveryService.isDiscovered(item);
+  }
+
+  private void hideItemImage() {
+    itemIconView.setItem(null);
+  }
+
   private void setItemImage(String texturePath) {
     ResourceService resources = ServiceLocator.getResourceService();
     if (!resources.containsAsset(texturePath, Texture.class)) {
-      itemImage.setDrawable(null);
-      itemImage.setVisible(false);
+      resources.loadTextures(new String[] {texturePath});
+      resources.loadAll();
+    }
+    if (!resources.containsAsset(texturePath, Texture.class)) {
+      hideItemImage();
       return;
     }
     Texture texture = resources.getAsset(texturePath, Texture.class);
-    texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-    itemImage.setDrawable(new TextureRegionDrawable(texture));
-    itemImage.setVisible(true);
+    itemIconView.setItem(texture);
   }
 
   private Label.LabelStyle bodyLabelStyle() {
@@ -387,6 +417,11 @@ public class ItemLibraryDisplay extends UIComponent {
 
   @Override
   public void dispose() {
+    if (itemDiscoveryService != null) {
+      itemDiscoveryService
+          .getEvents()
+          .removeListener(ItemDiscoveryService.ENTRY_UPDATED_EVENT, discoveryListener);
+    }
     if (rootStack != null) {
       rootStack.remove();
       rootStack.clear();

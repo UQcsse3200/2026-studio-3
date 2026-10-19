@@ -336,4 +336,31 @@ class PlayerRunStateTest {
     assertEquals(0.5f, state.getShopDiscount(), 0.001f);
     assertEquals(0.5f, player.getComponent(InventoryComponent.class).getShopDiscount(), 0.001f);
   }
+
+  @Test
+  void energyItemsGiveTheSameMaxEnergyInEitherAcquisitionOrder() {
+    PlayerRunState crystalFirst = new PlayerRunState(100, 100, 0);
+    crystalFirst.addOwnedItem(ItemType.ENERGY_CRYSTAL);
+    crystalFirst.addOwnedItem(ItemType.ASHEN_EMBER);
+
+    PlayerRunState emberFirst = new PlayerRunState(100, 100, 0);
+    emberFirst.addOwnedItem(ItemType.ASHEN_EMBER);
+    emberFirst.addOwnedItem(ItemType.ENERGY_CRYSTAL);
+
+    EnergyComponent crystalFirstEnergy = new EnergyComponent(5);
+    EnergyComponent emberFirstEnergy = new EnergyComponent(5);
+    crystalFirst.applyTo(energyTestPlayer(crystalFirstEnergy));
+    emberFirst.applyTo(energyTestPlayer(emberFirstEnergy));
+
+    // Ember of the Divine and Ashen Ember cancel out, regardless of order.
+    assertEquals(5, crystalFirstEnergy.getMaxEnergy());
+    assertEquals(5, emberFirstEnergy.getMaxEnergy());
+  }
+
+  private static Entity energyTestPlayer(EnergyComponent energy) {
+    return new Entity()
+        .addComponent(new CombatStatsComponent(100, 5))
+        .addComponent(new InventoryComponent(0))
+        .addComponent(energy);
+  }
 }

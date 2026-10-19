@@ -12,6 +12,7 @@ import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.extensions.GameExtension;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,23 +31,42 @@ class CardPlayServiceIntegrationTest {
     // Draw every card into hand up front — playing a card no longer draws a replacement.
     battleDeck.drawCards(CARD_IDS.size());
 
-    EnergyComponent energy = new EnergyComponent(10);
+    EnergyComponent energy = new EnergyComponent(EnergyComponent.MAX_ENERGY_CAP);
     CardPlayService service = new CardPlayService(library, battleDeck, energy);
+    AtomicInteger energySpent = new AtomicInteger();
 
+    // Max energy is capped at 5, so each card is played on a fresh turn and the total cost is
+    // tracked across all plays.
     CardPlayResult strike =
-        service.playCard(CardPlayRequest.singleEnemy(instanceId(battleDeck, "strike"), "enemy-1"));
+        playOnFreshTurn(
+            service,
+            energy,
+            energySpent,
+            CardPlayRequest.singleEnemy(instanceId(battleDeck, "strike"), "enemy-1"));
     CardPlayResult defend =
-        service.playCard(CardPlayRequest.self(instanceId(battleDeck, "defend")));
+        playOnFreshTurn(
+            service, energy, energySpent, CardPlayRequest.self(instanceId(battleDeck, "defend")));
     CardPlayResult poisonDagger =
-        service.playCard(
+        playOnFreshTurn(
+            service,
+            energy,
+            energySpent,
             CardPlayRequest.singleEnemy(instanceId(battleDeck, "poison_dagger"), "enemy-1"));
     CardPlayResult expose =
-        service.playCard(CardPlayRequest.allEnemies(instanceId(battleDeck, "expose")));
+        playOnFreshTurn(
+            service,
+            energy,
+            energySpent,
+            CardPlayRequest.allEnemies(instanceId(battleDeck, "expose")));
     CardPlayResult innerFocus =
-        service.playCard(CardPlayRequest.self(instanceId(battleDeck, "inner_focus")));
+        playOnFreshTurn(
+            service,
+            energy,
+            energySpent,
+            CardPlayRequest.self(instanceId(battleDeck, "inner_focus")));
     CardPlayResult bandage =
-        service.playCard(CardPlayRequest.self(instanceId(battleDeck, "bandage")));
-
+        playOnFreshTurn(
+            service, energy, energySpent, CardPlayRequest.self(instanceId(battleDeck, "bandage")));
     assertTrue(
         Stream.of(strike, defend, poisonDagger, expose, innerFocus, bandage)
             .allMatch(CardPlayResult::success));
@@ -58,7 +78,7 @@ class CardPlayServiceIntegrationTest {
     assertEquals(List.of(EffectType.STRENGTH), types(innerFocus.playerEffects()));
     assertEquals(List.of(EffectType.HEAL), types(bandage.playerEffects()));
 
-    assertEquals(3, energy.getCurrentEnergy());
+    assertEquals(7, energySpent.get());
     assertTrue(bandage.updatedHand().isEmpty());
     assertEquals(
         CARD_IDS, bandage.updatedDiscardPile().stream().map(CardInstance::cardId).toList());
@@ -75,5 +95,17 @@ class CardPlayServiceIntegrationTest {
   private static List<EffectType> types(
       List<com.csse3200.game.cards.effects.ResolvedCardEffect> effects) {
     return effects.stream().map(com.csse3200.game.cards.effects.ResolvedCardEffect::type).toList();
+  }
+
+  private static CardPlayResult playOnFreshTurn(
+      CardPlayService service,
+      EnergyComponent energy,
+      AtomicInteger energySpent,
+      CardPlayRequest request) {
+    energy.onTurnStart();
+    int before = energy.getCurrentEnergy();
+    CardPlayResult result = service.playCard(request);
+    energySpent.addAndGet(before - energy.getCurrentEnergy());
+    return result;
   }
 }
