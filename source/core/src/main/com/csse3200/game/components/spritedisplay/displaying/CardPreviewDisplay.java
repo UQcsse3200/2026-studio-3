@@ -136,8 +136,8 @@ public class CardPreviewDisplay extends Displaying {
       refreshVisibility();
       return;
     }
-    textureWidth = (float) texture.getWidth();
-    textureHeight = (float) texture.getHeight();
+    textureWidth = texture.getWidth();
+    textureHeight = texture.getHeight();
     art.setDrawable(new TextureRegionDrawable(new TextureRegion(texture)));
     label.setText(content.details());
     hasContent = true;

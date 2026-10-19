@@ -274,7 +274,7 @@ public class CampfireScreen extends ScreenAdapter {
     // Independent lifts align each bottom ornament with its own scene landmark.
     float centerY = background.getY() + (941f - imageY) * scale + verticalLift;
     CampfireChoiceDecoration decoration = new CampfireChoiceDecoration(skin, false);
-    decoration.optionText(skin, title);
+    decoration.optionText(title);
     decoration.setPosition(centerX - 140, centerY - 230);
     scene.addActor(decoration);
     Image icon = new Image(iconTexture);
