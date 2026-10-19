@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.badlogic.gdx.Files;
@@ -140,9 +141,55 @@ class UserSettingsTest {
   }
 
   @Test
+  void shouldApplyDisplayWithoutAudioOrPersistence() {
+    withExternalSettingsFile(
+        () -> {
+          AudioSettingsApplier applier = mock(AudioSettingsApplier.class);
+          ServiceLocator.registerAudioSettingsApplier(applier);
+          clearInvocations(applier);
+          Gdx.graphics = mock(Graphics.class);
+          Settings settings = new Settings();
+          settings.fps = 120;
+          settings.masterVolume = 0.3f;
+
+          UserSettings.applyDisplaySettings(settings);
+
+          verify(Gdx.graphics).setForegroundFPS(120);
+          verify(Gdx.graphics).setVSync(true);
+          verify(Gdx.graphics).setWindowedMode(1280, 800);
+          verifyNoInteractions(applier);
+          assertFalse(Gdx.files.external("DECO2800Game/settings.json").exists());
+          return null;
+        });
+  }
+
+  @Test
+  void shouldApplyAudioWithoutDisplayOrPersistence() {
+    withExternalSettingsFile(
+        () -> {
+          AudioSettingsApplier applier = mock(AudioSettingsApplier.class);
+          ServiceLocator.registerAudioSettingsApplier(applier);
+          clearInvocations(applier);
+          Gdx.graphics = mock(Graphics.class);
+          Settings settings = new Settings();
+          settings.masterVolume = 0.5f;
+          settings.musicVolume = 0.6f;
+
+          UserSettings.applyAudioSettings(settings);
+
+          verify(applier).applyVolumes(0.3f, 0.5f);
+          verifyNoInteractions(Gdx.graphics);
+          assertFalse(Gdx.files.external("DECO2800Game/settings.json").exists());
+          return null;
+        });
+  }
+
+  @Test
   void shouldRejectNullSettings() {
     assertThrows(IllegalArgumentException.class, () -> UserSettings.set(null, false));
     assertThrows(IllegalArgumentException.class, () -> UserSettings.applySettings(null));
+    assertThrows(IllegalArgumentException.class, () -> UserSettings.applyDisplaySettings(null));
+    assertThrows(IllegalArgumentException.class, () -> UserSettings.applyAudioSettings(null));
   }
 
   private <T> T withExternalSettingsFile(java.util.concurrent.Callable<T> action) {

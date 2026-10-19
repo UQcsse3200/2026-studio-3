@@ -13,9 +13,12 @@ import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Graphics.DisplayMode;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.files.UserSettings.Settings;
@@ -72,6 +75,83 @@ class SettingsPanelTest {
   }
 
   @Test
+  void populationDoesNotWriteOrApplySettings() {
+    AtomicInteger audioCount = new AtomicInteger();
+    AtomicInteger displayCount = new AtomicInteger();
+    new SettingsPanel(
+        skin,
+        backCount::incrementAndGet,
+        () -> initial,
+        settings -> writeCount.incrementAndGet(),
+        settings -> audioCount.incrementAndGet(),
+        settings -> displayCount.incrementAndGet());
+
+    assertEquals(0, writeCount.get());
+    assertEquals(0, audioCount.get());
+    assertEquals(0, displayCount.get());
+  }
+
+  @Test
+  void resetAppliesAudioOnceWithoutBubblingPopulationEvents() {
+    AtomicInteger audioCount = new AtomicInteger();
+    AtomicInteger displayCount = new AtomicInteger();
+    AtomicInteger controlChanges = new AtomicInteger();
+    SettingsPanel panel =
+        new SettingsPanel(
+            skin,
+            backCount::incrementAndGet,
+            () -> initial,
+            settings -> writeCount.incrementAndGet(),
+            settings -> audioCount.incrementAndGet(),
+            settings -> displayCount.incrementAndGet());
+    Group parent = new Group();
+    parent.addActor(panel);
+    parent.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            if (actor instanceof Slider || actor instanceof CheckBox) {
+              controlChanges.incrementAndGet();
+            }
+          }
+        });
+
+    click(panel.getResetButton());
+
+    assertEquals(1, writeCount.get());
+    assertEquals(1, audioCount.get());
+    assertEquals(0, displayCount.get());
+    assertEquals(0, controlChanges.get());
+  }
+
+  @Test
+  void displayApplyDoesNotReapplyAudio() {
+    AtomicReference<Settings> audio = new AtomicReference<>();
+    AtomicReference<Settings> display = new AtomicReference<>();
+    SettingsPanel panel =
+        new SettingsPanel(
+            skin,
+            backCount::incrementAndGet,
+            () -> initial,
+            written::set,
+            audio::set,
+            display::set);
+    panel.getMasterVolumeSlider().setValue(0.5f);
+    panel.getFpsText().setText("120");
+    assertEquals(0.5f, audio.get().masterVolume);
+    assertNull(display.get());
+    Settings lastAudio = audio.get();
+
+    click(panel.getApplyButton());
+
+    assertSame(lastAudio, audio.get());
+    assertEquals(0.5f, audio.get().masterVolume);
+    assertEquals(120, display.get().fps);
+    assertEquals(0.5f, written.get().masterVolume);
+    assertEquals(120, written.get().fps);
+  }
+
+  @Test
   void initialControlsReflectCurrentSettings() {
     SettingsPanel panel = createPanel();
 
@@ -111,7 +191,7 @@ class SettingsPanelTest {
   }
 
   @Test
-  void resetStagesDefaultsAndBackDiscardsWithoutWriting() {
+  void resetSavesAudioAndBackDiscardsDisplayDefaults() {
     SettingsPanel panel = createPanel();
 
     click(panel.getResetButton());
@@ -123,20 +203,34 @@ class SettingsPanelTest {
     assertEquals("60", panel.getFpsText().getText());
     assertFalse(panel.getFullScreenCheck().isChecked());
     assertTrue(panel.getVsyncCheck().isChecked());
-    assertNull(written.get());
-    assertEquals("Defaults restored. Click Apply to save.", feedback(panel).getText().toString());
+    assertEquals(1f, written.get().masterVolume);
+    assertEquals(1f, written.get().musicVolume);
+    assertEquals(1f, written.get().soundEffectsVolume);
+    assertFalse(written.get().muted);
+    assertEquals(75, written.get().fps);
+    assertTrue(written.get().fullscreen);
+    assertFalse(written.get().vsync);
+    assertEquals(
+        "Audio defaults applied and saved. Click Apply to save display defaults.",
+        feedback(panel).getText().toString());
 
     click(panel.getBackButton());
     assertEquals(1, backCount.get());
-    assertNull(written.get());
-    assertEquals(0, writeCount.get());
+    assertEquals(1f, written.get().masterVolume);
+    assertEquals(1f, written.get().musicVolume);
+    assertEquals(1f, written.get().soundEffectsVolume);
+    assertFalse(written.get().muted);
+    assertEquals(75, written.get().fps);
+    assertTrue(written.get().fullscreen);
+    assertFalse(written.get().vsync);
+    assertEquals(1, writeCount.get());
     assertEquals(75, initial.fps);
     assertEquals(0.8f, initial.masterVolume, 0.001f);
     assertTrue(initial.muted);
   }
 
   @Test
-  void resetReplacesErrorAndSuccessFeedbackWithoutSaving() {
+  void repeatedResetReplacesFeedbackWithoutDuplicateAudioSaves() {
     SettingsPanel panel = createPanel();
     panel.getFpsText().setText("-1");
     click(panel.getApplyButton());
@@ -144,26 +238,30 @@ class SettingsPanelTest {
         "Invalid FPS. Enter a positive whole number.", feedback(panel).getText().toString());
 
     click(panel.getResetButton());
-    assertEquals("Defaults restored. Click Apply to save.", feedback(panel).getText().toString());
+    assertEquals(
+        "Audio defaults applied and saved. Click Apply to save display defaults.",
+        feedback(panel).getText().toString());
     assertEquals("60", panel.getFpsText().getText());
-    assertEquals(0, writeCount.get());
+    assertEquals(1, writeCount.get());
 
     click(panel.getApplyButton());
     Settings saved = written.get();
-    assertEquals("Settings applied.", feedback(panel).getText().toString());
+    assertEquals("Display settings applied and saved.", feedback(panel).getText().toString());
     // Repeated reset must show the reminder even when the controls already contain defaults.
     click(panel.getResetButton());
     click(panel.getResetButton());
-    assertEquals("Defaults restored. Click Apply to save.", feedback(panel).getText().toString());
-    assertEquals(1, writeCount.get());
+    assertEquals(
+        "Audio defaults applied and saved. Click Apply to save display defaults.",
+        feedback(panel).getText().toString());
+    assertEquals(2, writeCount.get());
     assertSame(saved, written.get());
   }
 
   @Test
-  void resetThenApplySavesAudioAndDisplayDefaultsOnce() {
+  void resetSavesAudioThenApplySavesDisplayDefaultsSeparately() {
     SettingsPanel panel = createPanel();
     click(panel.getResetButton());
-    assertEquals(0, writeCount.get());
+    assertEquals(1, writeCount.get());
 
     click(panel.getApplyButton());
 
@@ -179,9 +277,9 @@ class SettingsPanelTest {
     assertEquals(1280, saved.displayMode.width);
     assertEquals(800, saved.displayMode.height);
     assertEquals(60, saved.displayMode.refreshRate);
-    assertEquals(1, writeCount.get());
+    assertEquals(2, writeCount.get());
     assertEquals(0, backCount.get());
-    assertEquals("Settings applied.", feedback(panel).getText().toString());
+    assertEquals("Display settings applied and saved.", feedback(panel).getText().toString());
   }
 
   @Test
@@ -194,9 +292,10 @@ class SettingsPanelTest {
     assertEquals("", feedback(panel).getText().toString());
     click(panel.getResetButton());
     panel.getMusicVolumeSlider().setValue(0.3f);
-    assertEquals("", feedback(panel).getText().toString());
+    assertEquals(
+        "Audio saved. Display changes require Apply.", feedback(panel).getText().toString());
     panel.getFpsText().setText("120");
-    assertEquals(0, writeCount.get());
+    assertEquals(2, writeCount.get());
     click(panel.getApplyButton());
 
     Settings saved = written.get();
@@ -207,12 +306,12 @@ class SettingsPanelTest {
     assertFalse(saved.muted);
     assertFalse(saved.fullscreen);
     assertTrue(saved.vsync);
-    assertEquals(1, writeCount.get());
-    assertEquals("Settings applied.", feedback(panel).getText().toString());
+    assertEquals(3, writeCount.get());
+    assertEquals("Display settings applied and saved.", feedback(panel).getText().toString());
   }
 
   @Test
-  void invalidFpsBlocksAllEditsAndPreservesDraft() {
+  void invalidFpsBlocksDisplayEditsAndPreservesSavedAudio() {
     SettingsPanel panel = createPanel();
     panel.getMasterVolumeSlider().setValue(0.5f);
     panel.getFullScreenCheck().setChecked(false);
@@ -222,8 +321,9 @@ class SettingsPanelTest {
       panel.getFpsText().setText(input);
       click(panel.getApplyButton());
 
-      assertNull(written.get(), input);
-      assertEquals(0, writeCount.get(), input);
+      assertEquals(75, written.get().fps, input);
+      assertEquals(0.5f, written.get().masterVolume, 0.001f, input);
+      assertEquals(1, writeCount.get(), input);
       assertEquals(input, panel.getFpsText().getText());
       assertEquals(0.5f, panel.getMasterVolumeSlider().getValue(), 0.001f);
       assertFalse(panel.getFullScreenCheck().isChecked());
@@ -238,7 +338,7 @@ class SettingsPanelTest {
   }
 
   @Test
-  void correctingInvalidFpsWritesAllPendingEditsExactlyOnce() {
+  void correctingInvalidFpsCommitsDisplayWithPreviouslySavedAudio() {
     SettingsPanel panel = createPanel();
     panel.getMasterVolumeSlider().setValue(0.5f);
     panel.getMusicVolumeSlider().setValue(0.3f);
@@ -248,12 +348,12 @@ class SettingsPanelTest {
     panel.getVsyncCheck().setChecked(true);
     panel.getFpsText().setText("-60");
     click(panel.getApplyButton());
-    assertEquals(0, writeCount.get());
+    assertEquals(4, writeCount.get());
 
     panel.getFpsText().setText(" 00120 ");
     click(panel.getApplyButton());
 
-    assertEquals(1, writeCount.get());
+    assertEquals(5, writeCount.get());
     Settings saved = written.get();
     assertEquals(120, saved.fps);
     assertEquals(0.5f, saved.masterVolume, 0.001f);
@@ -263,13 +363,13 @@ class SettingsPanelTest {
     assertFalse(saved.fullscreen);
     assertTrue(saved.vsync);
     assertEquals("120", panel.getFpsText().getText());
-    assertEquals("Settings applied.", feedback(panel).getText().toString());
+    assertEquals("Display settings applied and saved.", feedback(panel).getText().toString());
     assertEquals(Color.GREEN, feedback(panel).getStyle().fontColor);
     assertEquals(0, backCount.get());
   }
 
   @Test
-  void invalidApplyAfterSuccessLeavesLastSavedSettingsUnchanged() {
+  void invalidApplyAfterSuccessPreservesDisplayAndLatestSavedAudio() {
     SettingsPanel panel = createPanel();
     panel.getFpsText().setText("120");
     click(panel.getApplyButton());
@@ -279,8 +379,9 @@ class SettingsPanelTest {
     panel.getMasterVolumeSlider().setValue(0.2f);
     click(panel.getApplyButton());
 
-    assertEquals(1, writeCount.get());
-    assertSame(saved, written.get());
+    assertEquals(2, writeCount.get());
+    assertEquals(120, written.get().fps);
+    assertEquals(0.2f, written.get().masterVolume, 0.001f);
     assertEquals(120, saved.fps);
     assertEquals(0.8f, saved.masterVolume, 0.001f);
     assertEquals("-1", panel.getFpsText().getText());
@@ -294,11 +395,13 @@ class SettingsPanelTest {
         settings -> {
           writeCount.incrementAndGet();
           written.set(settings);
-        });
+        },
+        settings -> {},
+        settings -> {});
   }
 
   @Test
-  void editingAnyControlClearsSuccessFeedback() {
+  void displayEditsClearSuccessFeedbackAndAudioEditsShowSaveFeedback() {
     SettingsPanel panel = createPanel();
     panel.getFpsText().setProgrammaticChangeEvents(true);
     SelectBox<?> resolution = panel.findActor("resolution");
@@ -312,11 +415,13 @@ class SettingsPanelTest {
       () -> panel.getMusicVolumeSlider().setValue(0.3f),
       () -> panel.getSoundEffectsVolumeSlider().setValue(0.2f)
     };
-    for (Runnable edit : edits) {
+    for (int index = 0; index < edits.length; index++) {
       click(panel.getApplyButton());
-      assertEquals("Settings applied.", feedback(panel).getText().toString());
-      edit.run();
-      assertEquals("", feedback(panel).getText().toString());
+      assertEquals("Display settings applied and saved.", feedback(panel).getText().toString());
+      edits[index].run();
+      assertEquals(
+          index < 4 ? "" : "Audio saved. Display changes require Apply.",
+          feedback(panel).getText().toString());
     }
   }
 
@@ -334,12 +439,12 @@ class SettingsPanelTest {
     assertEquals("", feedback(panel).getText().toString());
     assertEquals(0, writeCount.get());
     click(panel.getApplyButton());
-    assertEquals("Settings applied.", feedback(panel).getText().toString());
+    assertEquals("Display settings applied and saved.", feedback(panel).getText().toString());
     assertEquals(1, writeCount.get());
   }
 
   @Test
-  void failedWritePreservesDraftAndAllowsRetry() {
+  void failedAudioWritePreservesDraftAndApplyRetriesAudioBeforeDisplay() {
     AtomicBoolean failWrite = new AtomicBoolean(false);
     SettingsPanel panel =
         new SettingsPanel(
@@ -352,18 +457,20 @@ class SettingsPanelTest {
                 throw new IllegalStateException("Simulated write failure");
               }
               written.set(settings);
-            });
+            },
+            settings -> {},
+            settings -> {});
     click(panel.getApplyButton());
     Settings saved = written.get();
-    assertEquals("Settings applied.", feedback(panel).getText().toString());
+    assertEquals("Display settings applied and saved.", feedback(panel).getText().toString());
     panel.getFpsText().setText(" 00120 ");
-    panel.getMasterVolumeSlider().setValue(0.5f);
     failWrite.set(true);
+    panel.getMasterVolumeSlider().setValue(0.5f);
 
     click(panel.getApplyButton());
 
     assertEquals(
-        "Could not apply settings. Please try again.", feedback(panel).getText().toString());
+        "Audio updated, but could not be saved. Try again.", feedback(panel).getText().toString());
     assertEquals(Color.SALMON, feedback(panel).getStyle().fontColor);
     assertSame(saved, written.get());
     assertEquals(" 00120 ", panel.getFpsText().getText());
@@ -371,14 +478,15 @@ class SettingsPanelTest {
     assertEquals(0, backCount.get());
 
     panel.getMusicVolumeSlider().setValue(0.3f);
-    assertEquals("", feedback(panel).getText().toString());
+    assertEquals(
+        "Audio updated, but could not be saved. Try again.", feedback(panel).getText().toString());
     failWrite.set(false);
     click(panel.getApplyButton());
-    assertEquals(3, writeCount.get());
+    assertEquals(6, writeCount.get());
     assertEquals(120, written.get().fps);
     assertEquals(0.5f, written.get().masterVolume, 0.001f);
     assertEquals(0.3f, written.get().musicVolume, 0.001f);
-    assertEquals("Settings applied.", feedback(panel).getText().toString());
+    assertEquals("Display settings applied and saved.", feedback(panel).getText().toString());
   }
 
   private static Label feedback(SettingsPanel panel) {

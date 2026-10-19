@@ -13,3 +13,6 @@ source/sprint2-test-run.log
 source/core/assets/images/silly_ghost.png
 source/core/assets/images/sillyGhost.atlas
 >>>>>>> Stashed changes
+
+### JVM crash logs ###
+hs_err_pid*.log
