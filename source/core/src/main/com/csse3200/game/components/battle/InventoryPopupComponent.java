@@ -58,7 +58,6 @@ public class InventoryPopupComponent extends UIComponent {
   private static final float ACTION_WIDTH = 112f;
 
   private static final Color NAME_COLOUR = new Color(0.9f, 0.84f, 0.73f, 1f);
-  private static final Color DESCRIPTION_COLOUR = new Color(0.65f, 0.58f, 0.52f, 1f);
   private static final Color GOLD_COLOUR = new Color(0.83f, 0.61f, 0.27f, 1f);
   private static final Color AEGIS_EFFECT_COLOUR = new Color(0.32f, 0.73f, 0.91f, 1f);
   private static final Color CREST_EFFECT_COLOUR = new Color(0.9f, 0.32f, 0.18f, 1f);
@@ -303,7 +302,7 @@ public class InventoryPopupComponent extends UIComponent {
   }
 
   private Table createStatusBadge(ItemType item) {
-    String status = item.isCurse() ? "CURSE" : item == ItemType.LUCKY_COIN ? "ON GOLD" : "PASSIVE";
+    String status = statusBadgeText(item);
     Color statusColour = item.isCurse() ? CURSE_COLOUR : GOLD_COLOUR;
 
     Table border = new Table();
@@ -316,6 +315,13 @@ public class InventoryPopupComponent extends UIComponent {
 
     border.add(badge).grow();
     return border;
+  }
+
+  private static String statusBadgeText(ItemType item) {
+    if (item.isCurse()) {
+      return "CURSE";
+    }
+    return item == ItemType.LUCKY_COIN ? "ON GOLD" : "PASSIVE";
   }
 
   private Table createCountBadge(int count) {
@@ -415,21 +421,25 @@ public class InventoryPopupComponent extends UIComponent {
     Color effectColour;
     String title;
     String detail;
-    if (itemId == ItemType.IRON_AEGIS) {
-      effectColour = AEGIS_EFFECT_COLOUR;
-      title = "IRON AEGIS USED";
-      detail = "+" + actualGain + " ARMOUR";
-    } else if (itemId == ItemType.WARRIORS_CREST) {
-      effectColour = CREST_EFFECT_COLOUR;
-      title = "WARRIOR'S CREST USED";
-      detail = "+" + actualGain + " STRENGTH";
-      if (actualGain < 1) {
-        detail += " (BRAND -" + (1 - actualGain) + ")";
+    switch (itemId) {
+      case IRON_AEGIS -> {
+        effectColour = AEGIS_EFFECT_COLOUR;
+        title = "IRON AEGIS USED";
+        detail = "+" + actualGain + " ARMOUR";
       }
-    } else {
-      effectColour = AMBROSIA_EFFECT_COLOUR;
-      title = "AMBROSIA USED";
-      detail = "+" + actualGain + " HEALTH";
+      case WARRIORS_CREST -> {
+        effectColour = CREST_EFFECT_COLOUR;
+        title = "WARRIOR'S CREST USED";
+        detail = "+" + actualGain + " STRENGTH";
+        if (actualGain < 1) {
+          detail += " (BRAND -" + (1 - actualGain) + ")";
+        }
+      }
+      default -> {
+        effectColour = AMBROSIA_EFFECT_COLOUR;
+        title = "AMBROSIA USED";
+        detail = "+" + actualGain + " HEALTH";
+      }
     }
 
     Table border = new Table();

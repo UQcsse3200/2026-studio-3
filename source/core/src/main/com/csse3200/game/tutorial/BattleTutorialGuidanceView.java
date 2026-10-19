@@ -298,13 +298,7 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
   private void populateHighlightTargets() {
     switch (prompt.highlight()) {
       case HAND -> collectHandTargets();
-      case CARD_COST -> {
-        if (demonstration.get() instanceof Group group)
-          descendants(group).stream()
-              .filter(a -> a instanceof Label l && l.getText().toString().matches("\\d+"))
-              .findFirst()
-              .ifPresent(this::add);
-      }
+      case CARD_COST -> addCardCostHighlight();
       case USED_CARD -> {
         add(demonstration.get());
         // Compare real available and inactive appearances; only the used card gets a frame.
@@ -326,7 +320,18 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
       case ENEMIES, ENEMY_STATS -> add(enemyStats.get());
       case ENEMY_ARMOUR -> add(enemyArmour.get());
       case STATUS_EFFECTS -> add(findStat("Energy:", true));
-      case NONE -> {}
+      case NONE -> {
+        // No highlight target for this step.
+      }
+    }
+  }
+
+  private void addCardCostHighlight() {
+    if (demonstration.get() instanceof Group group) {
+      descendants(group).stream()
+          .filter(a -> a instanceof Label l && l.getText().toString().matches("\\d+"))
+          .findFirst()
+          .ifPresent(this::add);
     }
   }
 
@@ -356,7 +361,7 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
   }
 
   private void layoutNarrationBox(float w, float h) {
-    message.setFontScale(Math.min(1, Math.max(0.65f, w / 900f)));
+    message.setFontScale(Math.clamp(w / 900f, 0.65f, 1f));
     float textWidth = 0;
     for (String line : prompt.text().split("\n")) {
       textWidth =
@@ -368,7 +373,7 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
     float width =
         prompt.step() == BattleTutorialController.Step.INTRO
             ? Math.min(w - 64, w * 0.65f)
-            : Math.min(w - 32, Math.min(440, Math.max(220, textWidth + 40)));
+            : Math.min(w - 32, Math.clamp(textWidth + 40, 220f, 440f));
     narration.setWidth(width);
     narration.invalidateHierarchy();
     float height =
@@ -404,7 +409,7 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
         || prompt.highlight() == BattleTutorialPrompt.HighlightTarget.END_TURN) {
       // Keep the prompt below the button's top edge, away from the game title.
       box.y = Math.min(box.y, target.y + target.height - box.height);
-      box = clamp(box, w, h);
+      clamp(box, w, h);
     }
     return box;
   }
@@ -434,8 +439,8 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
   private static Rectangle clamp(Rectangle box, float w, float h) {
     box.width = Math.min(box.width, w - 32);
     box.height = Math.min(box.height, h - 80);
-    box.x = Math.max(16, Math.min(box.x, w - 16 - box.width));
-    box.y = Math.max(16, Math.min(box.y, h - 64 - box.height));
+    box.x = Math.clamp(box.x, 16f, w - 16 - box.width);
+    box.y = Math.clamp(box.y, 16f, h - 64 - box.height);
     return box;
   }
 
@@ -556,8 +561,8 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
               narration.getY() + narration.getHeight() / 2);
       Vector2 finish =
           new Vector2(
-              Math.max(target.x, Math.min(start.x, target.x + target.width)),
-              Math.max(target.y, Math.min(start.y, target.y + target.height)));
+              Math.clamp(start.x, target.x, target.x + target.width),
+              Math.clamp(start.y, target.y, target.y + target.height));
       Vector2 direction = new Vector2(finish).sub(start).nor();
       Vector2 tip = new Vector2(finish).sub(new Vector2(direction).scl(10));
       for (int i = 0; i < 10; i++) {

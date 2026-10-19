@@ -127,7 +127,7 @@ final class CampfireUpgradeEntrance extends Group {
     public void act(float delta) {
       super.act(delta);
       elapsed += delta;
-      float target = hovered && !blocked.getAsBoolean() ? 1 : 0;
+      float target = hovered && !blocked.getAsBoolean() ? 1f : 0f;
       hoverBlend +=
           Math.signum(target - hoverBlend)
               * Math.min(
@@ -183,11 +183,8 @@ final class CampfireUpgradeEntrance extends Group {
         float angle = i * TAU / 240;
         trackPixel(
             batch,
-            cx,
-            cy,
-            angle,
-            190 * shrink,
-            99 * shrink,
+            cx + (float) Math.cos(angle) * 190 * shrink,
+            cy + (float) Math.sin(angle) * 99 * shrink,
             outerLight(angle, phase) * energy * .85f,
             alpha);
       }
@@ -229,19 +226,22 @@ final class CampfireUpgradeEntrance extends Group {
                     + "uniform mat4 u_projTrans; varying vec4 v_color; varying vec2 v_texCoords;"
                     + "void main(){v_color=a_color; v_texCoords=a_texCoord0;"
                     + "gl_Position=u_projTrans*a_position;}",
-                "#ifdef GL_ES\nprecision mediump float;\n#endif\n"
-                    + "varying vec4 v_color; varying vec2 v_texCoords; uniform sampler2D u_texture;"
-                    + "uniform float u_energy; uniform vec4 u_region;"
-                    + "void main(){vec4 p=texture2D(u_texture,v_texCoords);"
-                    + "float ivory=step(.72,p.r)*step(.70,p.g)*step(.48,p.b);"
-                    + "float gold=step(.34,p.r)*step(.23,p.g)*step(p.b*1.35,p.r);"
-                    + "vec2 local=(v_texCoords-u_region.xy)/u_region.zw;"
-                    + "vec2 d=abs((local-vec2(.493,.526))*vec2(148.0,116.0));"
-                    + "float silhouette=step(d.x/70.0+d.y/55.0,1.03);"
-                    + "float mask=max(ivory,gold)*silhouette;"
-                    + "vec3 warm=min(p.rgb*1.45+vec3(.12,.055,.012),vec3(1.0,.77,.38));"
-                    + "vec3 lit=mix(warm,vec3(1.0,.94,.79),ivory);"
-                    + "gl_FragColor=vec4(lit,mask*v_color.a*min(1.0,u_energy*mix(.90,1.0,ivory)));}");
+                """
+                #ifdef GL_ES
+                precision mediump float;
+                #endif
+                varying vec4 v_color; varying vec2 v_texCoords; uniform sampler2D u_texture;
+                uniform float u_energy; uniform vec4 u_region;
+                void main(){vec4 p=texture2D(u_texture,v_texCoords);
+                float ivory=step(.72,p.r)*step(.70,p.g)*step(.48,p.b);
+                float gold=step(.34,p.r)*step(.23,p.g)*step(p.b*1.35,p.r);
+                vec2 local=(v_texCoords-u_region.xy)/u_region.zw;
+                vec2 d=abs((local-vec2(.493,.526))*vec2(148.0,116.0));
+                float silhouette=step(d.x/70.0+d.y/55.0,1.03);
+                float mask=max(ivory,gold)*silhouette;
+                vec3 warm=min(p.rgb*1.45+vec3(.12,.055,.012),vec3(1.0,.77,.38));
+                vec3 lit=mix(warm,vec3(1.0,.94,.79),ivory);
+                gl_FragColor=vec4(lit,mask*v_color.a*min(1.0,u_energy*mix(.90,1.0,ivory)));}""");
         if (!centerShader.isCompiled()) {
           Gdx.app.error("CampfireUpgradeEntrance", centerShader.getLog());
           centerShader.dispose();
@@ -263,18 +263,8 @@ final class CampfireUpgradeEntrance extends Group {
       batch.setShader(previous);
     }
 
-    private void trackPixel(
-        Batch batch,
-        float cx,
-        float cy,
-        float angle,
-        float rx,
-        float ry,
-        float strength,
-        float alpha) {
+    private void trackPixel(Batch batch, float x, float y, float strength, float alpha) {
       if (strength < .005f) return;
-      float x = cx + (float) Math.cos(angle) * rx;
-      float y = cy + (float) Math.sin(angle) * ry;
       batch.setColor(1, .55f, .12f, alpha * strength * .16f);
       dot(batch, x - 2, y - 2, 5, 5);
       batch.setColor(1, .76f, .27f, alpha * strength);
@@ -297,7 +287,7 @@ final class CampfireUpgradeEntrance extends Group {
     }
 
     private void dot(Batch batch, float x, float y, float w, float h) {
-      pixel.draw(batch, Math.round(x), Math.round(y), w, h);
+      pixel.draw(batch, (float) Math.round(x), (float) Math.round(y), w, h);
     }
   }
 }
