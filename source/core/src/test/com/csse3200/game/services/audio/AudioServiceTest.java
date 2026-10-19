@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -65,6 +66,7 @@ class AudioServiceTest {
   private static final String DEFEAT = "sounds/defeat.ogg";
   private static final String ERROR = "sounds/error.mp3";
   private static final String PAUSE = "music/pauseMenu.ogg";
+  private static final float LONGER_THAN_A_FADE = 2f;
 
   @TempDir Path folder;
 
@@ -89,6 +91,7 @@ class AudioServiceTest {
     ServiceLocator.registerResourceService(resources);
     AudioService.reset();
     AudioService.useMusicStore(resources);
+    AudioService.fadeManually();
 
     // keep the tests away from the real settings file, starting from the default settings
     realFiles = Gdx.files;
@@ -247,14 +250,50 @@ class AudioServiceTest {
   }
 
   @Test
-  void enteringABattleStopsTheMapMusicAndStartsABattleTrack() {
+  void enteringABattleFadesOutTheMapMusicAndStartsABattleTrack() {
     AudioService.onScreenChanged(ScreenType.MAP);
     Music mapTrack = tracks.get(lastStarted());
 
     AudioService.onScreenChanged(ScreenType.BATTLE_SCREEN);
 
-    verify(mapTrack).stop();
+    verify(mapTrack, never()).stop();
     assertTrue(BATTLE_TRACKS.contains(lastStarted()));
+    finishFades();
+    verify(mapTrack).stop();
+  }
+
+  /** The old song fades out while the new one fades in, instead of cutting straight over. */
+  @Test
+  void changingSongsCrossfades() {
+    AudioService.onScreenChanged(ScreenType.MAP);
+    finishFades();
+    Music mapTrack = tracks.get(lastStarted());
+    when(mapTrack.getVolume()).thenReturn(0.5f);
+
+    AudioService.onScreenChanged(ScreenType.BATTLE_SCREEN);
+    Music battleTrack = tracks.get(lastStarted());
+    AudioService.updateFades(0.5f);
+
+    verify(mapTrack).setVolume(0.25f);
+    verify(battleTrack).setVolume(0.25f);
+    verify(mapTrack, never()).stop();
+
+    finishFades();
+
+    verify(mapTrack).stop();
+    verify(battleTrack).setVolume(0.5f);
+  }
+
+  @Test
+  void stoppingTheMusicAlsoStopsSongsStillFadingOut() {
+    AudioService.onScreenChanged(ScreenType.MAP);
+    Music mapTrack = tracks.get(lastStarted());
+    AudioService.onScreenChanged(ScreenType.BATTLE_SCREEN);
+
+    AudioService.stopMusic();
+
+    verify(mapTrack).stop();
+    assertFalse(AudioService.isMusicPlaying());
   }
 
   @Test
@@ -263,6 +302,7 @@ class AudioServiceTest {
     Music battleTrack = tracks.get(lastStarted());
 
     AudioService.onScreenChanged(ScreenType.VICTORY);
+    finishFades();
 
     verify(battleTrack).stop();
     assertTrue(sounds.containsKey(VICTORY));
@@ -276,6 +316,7 @@ class AudioServiceTest {
     Music battleTrack = tracks.get(lastStarted());
 
     AudioService.onScreenChanged(ScreenType.DEFEAT);
+    finishFades();
 
     verify(battleTrack).stop();
     assertTrue(sounds.containsKey(DEFEAT));
@@ -355,6 +396,7 @@ class AudioServiceTest {
     UserSettings.set(volumes(0.6f, 1f), false);
 
     AudioService.onScreenChanged(ScreenType.MAP);
+    finishFades();
 
     verify(tracks.get(lastStarted())).setVolume(0.3f);
   }
@@ -382,13 +424,16 @@ class AudioServiceTest {
   @Test
   void muteSilencesMusicAndSoundEffects() {
     AudioService.onScreenChanged(ScreenType.MAP);
+    finishFades();
+    Music track = tracks.get(lastStarted());
+    clearInvocations(track);
     Settings muted = new Settings();
     muted.muted = true;
 
     UserSettings.applyAudioSettings(muted);
     AudioService.playSound(SoundId.ERROR, 0.8f);
 
-    verify(tracks.get(lastStarted())).setVolume(0f);
+    verify(track).setVolume(0f);
     verify(sounds.get(ERROR)).play(0f);
   }
 
@@ -408,7 +453,9 @@ class AudioServiceTest {
   @Test
   void volumeStaysBetweenZeroAndOne() {
     AudioService.onScreenChanged(ScreenType.MAP);
+    finishFades();
     Music track = tracks.get(lastStarted());
+    clearInvocations(track);
 
     AudioService.setMusicVolume(1.5f);
     AudioService.setMusicVolume(-1f);
@@ -448,9 +495,26 @@ class AudioServiceTest {
 
     AudioService.onGamePaused();
 
-    verify(mapTrack).pause();
+    verify(mapTrack, never()).pause();
     assertEquals(PAUSE, lastStarted());
     verify(tracks.get(PAUSE)).play();
+    finishFades();
+    verify(mapTrack).pause();
+  }
+
+  @Test
+  void resumingBeforeTheSongHasFadedOutDoesNotPauseIt() {
+    AudioService.onScreenChanged(ScreenType.MAP);
+    finishFades();
+    Music mapTrack = tracks.get(lastStarted());
+
+    AudioService.onGamePaused();
+    AudioService.updateFades(0.3f);
+    AudioService.onGameResumed();
+    finishFades();
+
+    verify(mapTrack, never()).pause();
+    verify(tracks.get(PAUSE)).stop();
   }
 
   @Test
@@ -459,7 +523,9 @@ class AudioServiceTest {
     Music mapTrack = tracks.get(lastStarted());
 
     AudioService.onGamePaused();
+    finishFades();
     AudioService.onGameResumed();
+    finishFades();
 
     verify(tracks.get(PAUSE)).stop();
     verify(mapTrack, times(2)).play();
@@ -494,6 +560,7 @@ class AudioServiceTest {
     AudioService.onGamePaused();
 
     AudioService.onScreenChanged(ScreenType.MAIN_MENU);
+    finishFades();
 
     verify(tracks.get(PAUSE)).stop();
     verify(mapTrack).stop();
@@ -508,6 +575,7 @@ class AudioServiceTest {
 
     UserSettings.applyAudioSettings(volumes(0.4f, 1f));
     AudioService.onGameResumed();
+    finishFades();
 
     verify(tracks.get(PAUSE)).setVolume(0.2f);
     verify(mapTrack).setVolume(0.2f);
@@ -555,6 +623,10 @@ class AudioServiceTest {
 
   private String lastStarted() {
     return started.get(started.size() - 1);
+  }
+
+  private static void finishFades() {
+    AudioService.updateFades(LONGER_THAN_A_FADE);
   }
 
   /** Stands in for the current screen's stage, with a real root so events can be fired at it. */
