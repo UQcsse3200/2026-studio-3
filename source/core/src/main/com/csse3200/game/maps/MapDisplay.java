@@ -240,8 +240,8 @@ public class MapDisplay extends UIComponent {
   private void addPlayerStats() {
     playerTable = new Table();
 
-    playerTable.setSize(UI_WIDTH, 100);
-    playerTable.setPosition(0, UI_HEIGHT - 100);
+    playerTable.setSize(UI_WIDTH, 50);
+    playerTable.setPosition(0, UI_HEIGHT - 50);
     playerTable.setBackground(skin.newDrawable("color", new Color(0.105f, 0.070f, 0.065f, 0.98f)));
     playerTable.setDebug(false); // for testing
     playerTable.left();
@@ -365,8 +365,8 @@ public class MapDisplay extends UIComponent {
     if (playerTable != null) {
       float sideExtension = extraWidth / 2f;
 
-      playerTable.setSize(width + extraWidth, 100f);
-      playerTable.setPosition(-sideExtension, height - 100f);
+      playerTable.setSize(width + extraWidth, 50);
+      playerTable.setPosition(-sideExtension, height - 50);
 
       // Keep stats 15 units inside the original 1280 area
       playerTable.padLeft(sideExtension + 15f);
