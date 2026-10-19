@@ -28,6 +28,9 @@ import com.csse3200.game.maps.NodeState;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.ItemDiscoveryService;
+import com.csse3200.game.rewards.ItemType;
+import com.csse3200.game.rewards.ItemUnlockState;
 import com.csse3200.game.services.ServiceLocator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -321,6 +324,36 @@ class SaveGameRestoreServiceTest {
     assertEquals(RestoreError.INVALID_PROGRESS_STATE, result.error());
     assertEquals(CardUnlockState.SEEN, cards.getProgressSnapshot().get(STRIKE));
     assertEquals(CardUnlockState.LOCKED, cards.getProgressSnapshot().get(DEFEND));
+  }
+
+  @Test
+  void restoringSaveMergesItemDiscoveryWithoutRelockingCurrentProfileProgress() {
+    PlayerRunState playerState = new PlayerRunState(12, 50, 3);
+    PlayerDeck deck = testDeck(List.of(STRIKE));
+    RunState runState = new RunState();
+    runState.startRun(existingMap(), 0);
+    ItemDiscoveryService items = new ItemDiscoveryService();
+    items.recordDiscovered(ItemType.ENERGY_CRYSTAL);
+
+    SaveGameData saveData = validSaveData();
+    saveData.progress.items =
+        List.of(
+            new ItemProgressSaveData(
+                ItemType.IRON_AEGIS.name(), ItemUnlockState.DISCOVERED.name()));
+
+    RestoreResult result =
+        new SaveGameRestoreService(
+                playerState,
+                deck,
+                runState,
+                BestiaryService.loadDefault(),
+                CardDiscoveryService.loadDefault(),
+                items)
+            .restore(saveData);
+
+    assertTrue(result.success());
+    assertTrue(items.isDiscovered(ItemType.ENERGY_CRYSTAL));
+    assertTrue(items.isDiscovered(ItemType.IRON_AEGIS));
   }
 
   @Test
