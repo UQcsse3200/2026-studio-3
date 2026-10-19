@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -28,6 +29,8 @@ public class CardUpgradeDisplay extends UIComponent {
   private static final Color DISABLED_FACE = new Color(0.62f, 0.60f, 0.55f, 1f);
   private static final Color SCRIM = new Color(0.02f, 0.02f, 0.02f, 0.76f);
   private static final Color PANEL = new Color(0.10f, 0.08f, 0.06f, 0.95f);
+  private static final int VISIBLE_ROWS = 2;
+  private static final float GRID_MAX_HEIGHT = VISIBLE_ROWS * (CARD_HEIGHT + 20f);
   private static final String WHITE = "white";
   private static final String SMALL = "small";
   private final Map<String, Table> tilesByInstanceId = new LinkedHashMap<>();
@@ -161,7 +164,9 @@ public class CardUpgradeDisplay extends UIComponent {
         cardGrid.row();
       }
     }
-
+    ScrollPane gridScroll = new ScrollPane(cardGrid, skin);
+    gridScroll.setScrollingDisabled(true, false);
+    gridScroll.setFadeScrollBars(false);
     confirmButton = new TextButton("Upgrade (0)", skin);
     confirmButton.addListener(
         new ChangeListener() {
@@ -176,7 +181,7 @@ public class CardUpgradeDisplay extends UIComponent {
             onUpgradeCommitted.run();
           }
         });
-    libraryPanel.add(cardGrid).center().padTop(10f);
+    libraryPanel.add(gridScroll).center().padTop(10f).maxHeight(GRID_MAX_HEIGHT);
     libraryPanel.row();
     libraryPanel.add(confirmButton).width(140f).height(42f).right().padTop(14f);
     overlay.add(libraryPanel).center();
@@ -339,5 +344,10 @@ public class CardUpgradeDisplay extends UIComponent {
 
   int getDisplayedOptionCount() {
     return tilesByInstanceId.size();
+  }
+
+  /** Return true if there is at least one eligible card for upgrade. */
+  public boolean hasUpgradeOptions() {
+    return !selection.getCardUpgradeOption().isEmpty();
   }
 }
