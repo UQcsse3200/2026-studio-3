@@ -58,11 +58,13 @@ class ChanceEncounterFactoryTest {
     ChanceEncounter encounter = ChanceEncounterFactory.createInitialEncounters().get(0);
 
     assertEquals(
-        "A cracked sanctum shrine burns with a god's spoiled light. Offer your light or accept a Curse for Gold. Curses persist and stack in future battles.",
+        "A cracked sanctum shrine still burns with a god's spoiled light.",
         encounter.getDescription());
     assertEquals(4, encounter.getChoices().size());
-    assertChoice(encounter, 0, "make-offering", "Make an Offering: -10 HP, +25 Gold.", -10, 25);
-    assertChoice(encounter, 1, "leave", "Leave the Shrine.", 0, 0);
+    assertChoice(encounter, 0, "make-offering", "Make an Offering.", -10, 25);
+    assertChoice(encounter, 1, "accept-brand", "Accept the Brand.", 0, 50);
+    assertChoice(encounter, 2, "swear-blood-oath", "Swear the Blood Oath.", 0, 70);
+    assertChoice(encounter, 3, "leave", "Leave the Shrine.", 0, 0);
     assertEquals(
         List.of("BRAND_OF_THE_DAMNED"), encounter.resolveChoice("accept-brand").getItemRewardIds());
     assertEquals(

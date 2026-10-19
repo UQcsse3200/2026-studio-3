@@ -2,28 +2,20 @@
   "encounters": [
     {
       "id": "mysterious-shrine",
-      "description": "A cracked sanctum shrine burns with a god's spoiled light. Offer your light or accept a Curse for Gold. Curses persist and stack in future battles.",
+      "description": "A cracked sanctum shrine still burns with a god's spoiled light.",
       "weight": 1,
       "choices": [
         {
           "id": "make-offering",
-          "description": "Make an Offering: -10 HP, +25 Gold.",
+          "description": "Make an Offering.",
           "outcome": {
             "healthDelta": -10,
             "currencyDelta": 25
           }
         },
         {
-          "id": "leave",
-          "description": "Leave the Shrine.",
-          "outcome": {
-            "healthDelta": 0,
-            "currencyDelta": 0
-          }
-        },
-        {
           "id": "accept-brand",
-          "description": "Accept the Brand: +50 Gold; Curse reduces future Strength gains by 1.",
+          "description": "Accept the Brand.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 50,
@@ -32,11 +24,19 @@
         },
         {
           "id": "swear-blood-oath",
-          "description": "Swear the Blood Oath: +70 Gold; Curse drains 2 HP each player turn in battle (min 1 HP).",
+          "description": "Swear the Blood Oath.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 70,
             "itemRewardIds": ["BLOOD_OATH_SIGIL"]
+          }
+        },
+        {
+          "id": "leave",
+          "description": "Leave the Shrine.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0
           }
         }
       ]
@@ -98,12 +98,12 @@
     },
     {
       "id": "abandoned-mine",
-      "description": "Beneath the sanctum, fallen relics lie in abandoned workings. A random Curse can weaken Strength or Block gains, drain HP at player turn-start, or reduce maximum Energy in future battles.",
+      "description": "Beneath the sanctum, old workings still hold relics of the fallen.",
       "weight": 1,
       "choices": [
         {
           "id": "search-tunnels",
-          "description": "Explore the Mine: +60 Gold; 50% chance of one lasting Curse.",
+          "description": "Explore the Mine.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 60
