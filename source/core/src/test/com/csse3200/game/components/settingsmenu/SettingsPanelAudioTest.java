@@ -46,7 +46,9 @@ class SettingsPanelAudioTest {
   private final List<Settings> displayUpdates = new ArrayList<>();
   private final List<Settings> writes = new ArrayList<>();
   private boolean failWrites;
+  private boolean failDisplayApply;
   private int writeAttempts;
+  private int backCount;
 
   @BeforeEach
   void setUp() {
@@ -218,6 +220,8 @@ class SettingsPanelAudioTest {
 
     assertEquals(2, audioUpdates.size());
     assertTrue(writes.isEmpty());
+    Label feedback = panel.findActor("settings-feedback");
+    assertEquals("Audio saved. Display changes require Apply.", feedback.getText().toString());
     assertTrue(panel.flushPendingAudioChanges());
   }
 
@@ -269,6 +273,7 @@ class SettingsPanelAudioTest {
     fireChange(panel.getApplyButton());
     assertEquals(0.73f, saved().masterVolume);
     assertEquals(0.61f, saved().musicVolume);
+    assertEquals(1, audioUpdates.size());
   }
 
   @Test
@@ -316,10 +321,178 @@ class SettingsPanelAudioTest {
     assertEquals("invalid", panel.getFpsText().getText());
   }
 
+  @Test
+  void applyFlushesAnUnfinishedDragEvenWhenFpsIsInvalid() {
+    SettingsPanel panel = createPanel();
+    Slider slider = panel.getMasterVolumeSlider();
+    slider.setSize(300f, 30f);
+    InputListener input = sliderInput(slider);
+    input.touchDown(new InputEvent(), 0f, 15f, 0, 0);
+    panel.getFpsText().setText("invalid");
+    assertTrue(writes.isEmpty());
+
+    fireChange(panel.getApplyButton());
+
+    assertEquals(1, writes.size());
+    assertEquals(0f, saved().masterVolume);
+    assertEquals(75, saved().fps);
+    assertTrue(displayUpdates.isEmpty());
+    assertEquals(1, audioUpdates.size());
+    assertEquals("Invalid FPS. Enter a positive whole number.", feedback(panel));
+    input.touchUp(new InputEvent(), 0f, 15f, 0, 0);
+    assertEquals(1, writes.size());
+  }
+
+  @Test
+  void applyFlushesAudioSeparatelyBeforeSavingDisplay() {
+    SettingsPanel panel = createPanel();
+    Slider slider = panel.getMasterVolumeSlider();
+    slider.setSize(300f, 30f);
+    sliderInput(slider).touchDown(new InputEvent(), 0f, 15f, 0, 0);
+    panel.getFpsText().setText(" 00120 ");
+
+    fireChange(panel.getApplyButton());
+
+    assertEquals(2, writes.size());
+    assertEquals(75, writes.get(0).fps);
+    assertEquals(0f, writes.get(0).masterVolume);
+    assertEquals(120, saved().fps);
+    assertEquals(0f, saved().masterVolume);
+    assertEquals(1, audioUpdates.size());
+    assertEquals(1, displayUpdates.size());
+    assertEquals("120", panel.getFpsText().getText());
+    assertEquals("Display settings applied and saved.", feedback(panel));
+  }
+
+  @Test
+  void resetThenBackRetainsAudioDefaultsAndDiscardsDisplayDefaults() {
+    initial.muted = true;
+    SettingsPanel panel = createPanel();
+    fireChange(panel.getResetButton());
+
+    assertEffectiveVolumes(1f, 1f);
+    assertEquals(1, audioUpdates.size());
+    assertEquals(1, writes.size());
+    assertEquals(75, saved().fps);
+    assertTrue(saved().fullscreen);
+    assertFalse(saved().vsync);
+    assertNull(saved().displayMode);
+    assertEquals("60", panel.getFpsText().getText());
+    assertTrue(displayUpdates.isEmpty());
+
+    fireChange(panel.getBackButton());
+
+    assertEquals(1, backCount);
+    assertEquals(1, writes.size());
+    Settings saved = saved();
+    SettingsPanel reopened =
+        new SettingsPanel(
+            skin, () -> {}, () -> saved, writes::add, audioUpdates::add, displayUpdates::add);
+    assertEquals("75", reopened.getFpsText().getText());
+    assertTrue(reopened.getFullScreenCheck().isChecked());
+    assertFalse(reopened.getVsyncCheck().isChecked());
+    assertEquals(1f, reopened.getMasterVolumeSlider().getValue());
+    assertEquals(1f, reopened.getMusicVolumeSlider().getValue());
+    assertEquals(1f, reopened.getSoundEffectsVolumeSlider().getValue());
+    assertFalse(reopened.getMuteCheck().isChecked());
+  }
+
+  @Test
+  void failedResetKeepsAudioLiveAndBackWaitsForSuccessfulRetry() {
+    SettingsPanel panel = createPanel();
+    failWrites = true;
+    fireChange(panel.getResetButton());
+    assertEffectiveVolumes(1f, 1f);
+    assertTrue(writes.isEmpty());
+    assertEquals("Audio updated, but could not be saved. Try again.", feedback(panel));
+
+    fireChange(panel.getBackButton());
+    assertEquals(0, backCount);
+    assertEquals(2, writeAttempts);
+    assertEquals("60", panel.getFpsText().getText());
+    assertTrue(displayUpdates.isEmpty());
+    failWrites = false;
+    panel.requestBack();
+
+    assertEquals(1, backCount);
+    assertEquals(3, writeAttempts);
+    assertEquals(1, writes.size());
+    assertEquals(1f, saved().masterVolume);
+    assertEquals(75, saved().fps);
+    assertEquals(1, audioUpdates.size());
+  }
+
+  @Test
+  void backFlushesAnUnfinishedDragWithoutValidatingOrSavingDisplayDrafts() {
+    SettingsPanel panel = createPanel();
+    Slider slider = panel.getMasterVolumeSlider();
+    slider.setSize(300f, 30f);
+    sliderInput(slider).touchDown(new InputEvent(), 0f, 15f, 0, 0);
+    panel.getFpsText().setText("invalid");
+    panel.getFullScreenCheck().setChecked(false);
+
+    panel.requestBack();
+
+    assertEquals(1, writes.size());
+    assertEquals(0f, saved().masterVolume);
+    assertEquals(75, saved().fps);
+    assertTrue(saved().fullscreen);
+    assertEquals(1, backCount);
+    assertTrue(displayUpdates.isEmpty());
+  }
+
+  @Test
+  void displaySaveFailurePreservesDraftAndRetryDoesNotReapplyAudio() {
+    SettingsPanel panel = createPanel();
+    panel.getFpsText().setText(" 00120 ");
+    panel.getFullScreenCheck().setChecked(false);
+    failWrites = true;
+
+    fireChange(panel.getApplyButton());
+
+    assertEquals("Could not save display settings. Please try again.", feedback(panel));
+    assertEquals(" 00120 ", panel.getFpsText().getText());
+    assertTrue(writes.isEmpty());
+    assertTrue(displayUpdates.isEmpty());
+    assertTrue(audioUpdates.isEmpty());
+    failWrites = false;
+    fireChange(panel.getApplyButton());
+    assertEquals(2, writeAttempts);
+    assertEquals(120, saved().fps);
+    assertFalse(saved().fullscreen);
+    assertEquals("120", panel.getFpsText().getText());
+    assertEquals(1, displayUpdates.size());
+    assertTrue(audioUpdates.isEmpty());
+  }
+
+  @Test
+  void displayApplicationFailureKeepsSavedBaselineForAudioUpdatesAndRetry() {
+    SettingsPanel panel = createPanel();
+    panel.getFpsText().setText("120");
+    panel.getFullScreenCheck().setChecked(false);
+    failDisplayApply = true;
+
+    fireChange(panel.getApplyButton());
+
+    assertEquals("Display settings saved, but could not be applied.", feedback(panel));
+    assertEquals(1, writes.size());
+    assertTrue(audioUpdates.isEmpty());
+    panel.getMusicVolumeSlider().setValue(0.2f);
+    assertEquals(120, saved().fps);
+    assertFalse(saved().fullscreen);
+    assertEquals(0.2f, saved().musicVolume, 0.0001f);
+    failDisplayApply = false;
+    fireChange(panel.getApplyButton());
+    assertEquals(3, writes.size());
+    assertEquals(1, displayUpdates.size());
+    assertEquals(1, audioUpdates.size());
+    assertEquals("Display settings applied and saved.", feedback(panel));
+  }
+
   private SettingsPanel createPanel() {
     return new SettingsPanel(
         skin,
-        () -> {},
+        () -> backCount++,
         () -> initial,
         settings -> {
           writeAttempts++;
@@ -329,7 +502,17 @@ class SettingsPanelAudioTest {
           writes.add(settings);
         },
         audioUpdates::add,
-        displayUpdates::add);
+        settings -> {
+          if (failDisplayApply) {
+            throw new IllegalStateException("Simulated display failure");
+          }
+          displayUpdates.add(settings);
+        });
+  }
+
+  private static String feedback(SettingsPanel panel) {
+    Label label = panel.findActor("settings-feedback");
+    return label.getText().toString();
   }
 
   private Settings saved() {

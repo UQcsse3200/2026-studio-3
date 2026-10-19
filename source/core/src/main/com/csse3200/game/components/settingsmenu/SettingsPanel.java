@@ -107,7 +107,7 @@ public class SettingsPanel extends Table {
 
     add(themedLabel("Settings", "title")).colspan(3).padBottom(8f).row();
 
-    addSectionTitle("Audio");
+    addSectionTitle("Audio (saved automatically)");
     masterVolumeSlider = volumeSlider("master-volume");
     masterVolumeValue = themedLabel("100%");
     addControlRow("Master Volume", masterVolumeSlider, masterVolumeValue);
@@ -124,7 +124,7 @@ public class SettingsPanel extends Table {
     muteCheck.setName("mute");
     addControlRow("Mute", muteCheck, null);
 
-    addSectionTitle("Display");
+    addSectionTitle("Display (Apply required)");
     fpsText = new TextField("60", skin);
     fpsText.setName("fps-cap");
     addControlRow("FPS Cap", fpsText, null);
@@ -226,17 +226,14 @@ public class SettingsPanel extends Table {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
-            Settings defaults = new Settings();
-            copyAudio(defaults, liveSettings);
-            populate(defaults);
-            showFeedback("Defaults restored. Click Apply to save.", MenuTheme.warmParchment());
+            resetDefaults();
           }
         });
     backButton.addListener(
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
-            backAction.run();
+            requestBack();
           }
         });
     applyButton.addListener(
@@ -252,6 +249,7 @@ public class SettingsPanel extends Table {
     slider.addListener(
         new ChangeListener() {
           private float observedValue = slider.getValue();
+          private boolean changedDuringDrag;
 
           @Override
           public void changed(ChangeEvent event, Actor actor) {
@@ -259,6 +257,7 @@ public class SettingsPanel extends Table {
             boolean changed = Float.compare(observedValue, slider.getValue()) != 0;
             observedValue = slider.getValue();
             if (populating) {
+              changedDuringDrag = false;
               event.stop();
               return;
             }
@@ -266,14 +265,37 @@ public class SettingsPanel extends Table {
               updateVolume.accept(slider.getValue());
               audioApplier.accept(copyOf(liveSettings));
               if (slider.isDragging()) {
+                changedDuringDrag = true;
                 showFeedback("Audio updated. Saves when you release.", MenuTheme.warmParchment());
               }
             }
             if (!slider.isDragging()) {
-              flushPendingAudioChanges();
+              if (flushPendingAudioChanges() && changedDuringDrag) {
+                showFeedback("Audio saved. Display changes require Apply.", Color.GREEN);
+              }
+              changedDuringDrag = false;
             }
           }
         });
+  }
+
+  private void resetDefaults() {
+    Settings defaults = new Settings();
+    copyAudio(defaults, liveSettings);
+    populate(defaults);
+    audioApplier.accept(copyOf(liveSettings));
+    if (flushPendingAudioChanges()) {
+      showFeedback(
+          "Audio defaults applied and saved. Click Apply to save display defaults.",
+          MenuTheme.warmParchment());
+    }
+  }
+
+  /** Leaves settings only after live audio has been saved successfully. */
+  public void requestBack() {
+    if (flushPendingAudioChanges()) {
+      backAction.run();
+    }
   }
 
   /** Saves pending audio without reading or applying draft display controls. */
@@ -338,13 +360,16 @@ public class SettingsPanel extends Table {
   }
 
   private void applyChanges() {
+    if (!flushPendingAudioChanges()) {
+      return;
+    }
     Integer parsedFps = FpsValidator.parse(fpsText.getText());
     if (parsedFps == null) {
       showFeedback("Invalid FPS. Enter a positive whole number.", Color.SALMON);
       return;
     }
 
-    Settings updated = copyOf(liveSettings);
+    Settings updated = copyOf(appliedSettings);
     updated.fps = parsedFps;
     updated.fullscreen = fullScreenCheck.isChecked();
     updated.vsync = vsyncCheck.isChecked();
@@ -356,18 +381,28 @@ public class SettingsPanel extends Table {
 
     try {
       settingsWriter.accept(updated);
-      displayApplier.accept(copyOf(updated));
-      audioApplier.accept(copyOf(updated));
     } catch (RuntimeException e) {
-      logger.error("Could not apply settings", e);
-      showFeedback("Could not apply settings. Please try again.", Color.SALMON);
+      logger.error("Could not save display settings", e);
+      showFeedback("Could not save display settings. Please try again.", Color.SALMON);
       return;
     }
 
     appliedSettings = copyOf(updated);
     liveSettings = copyOf(updated);
-    populate(appliedSettings);
-    showFeedback("Settings applied.", Color.GREEN);
+    try {
+      displayApplier.accept(copyOf(updated));
+    } catch (RuntimeException e) {
+      logger.error("Could not apply saved display settings", e);
+      showFeedback("Display settings saved, but could not be applied.", Color.SALMON);
+      return;
+    }
+    populating = true;
+    try {
+      populateDisplay(appliedSettings);
+    } finally {
+      populating = false;
+    }
+    showFeedback("Display settings applied and saved.", Color.GREEN);
   }
 
   private void showFeedback(String message, Color color) {
