@@ -342,6 +342,9 @@ public class PauseMenuDisplay extends UIComponent {
   }
 
   private void showSettings() {
+    if (settingsPanel != null) {
+      return;
+    }
     settingsTable = buildSettingsTable();
     table.clearChildren();
     table.add(settingsTable);
@@ -349,11 +352,19 @@ public class PauseMenuDisplay extends UIComponent {
   }
 
   private void showPauseButtons() {
+    flushSettingsAudio();
     table.clearChildren();
     table.add(menuTable);
     settingsTable = null;
     settingsPanel = null;
     setFocus(pauseFocusables());
+  }
+
+  private void flushSettingsAudio() {
+    if (settingsPanel != null) {
+      // Resume and disposal cannot stay open on failure; the panel logs unsuccessful saves.
+      settingsPanel.flushPendingAudioChanges();
+    }
   }
 
   /** The buttons the player can keyboard-navigate on the root pause view, top to bottom. */
@@ -424,7 +435,7 @@ public class PauseMenuDisplay extends UIComponent {
       confirmDialog.hide(null);
       setFocus(pauseFocusables());
     } else if (settingsTable != null) {
-      showPauseButtons();
+      settingsPanel.requestBack();
     }
   }
 
@@ -459,12 +470,15 @@ public class PauseMenuDisplay extends UIComponent {
 
   @Override
   public void dispose() {
+    flushSettingsAudio();
     if (confirmDialog != null) {
       confirmDialog.remove();
     }
     if (table != null) {
       table.clear();
     }
+    settingsPanel = null;
+    settingsTable = null;
     super.dispose();
   }
 
