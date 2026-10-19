@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+import com.badlogic.gdx.Application;
+import com.badlogic.gdx.Gdx;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardType;
@@ -109,7 +111,7 @@ class BattleActionsTest {
   }
 
   @Test
-  void tutorialKeepsTheBattleActionsButDoesNotInstallOrdinaryOutcomeNavigation() {
+  void tutorialKeepsBattleActionsAndInstallsItsOutcomeNavigation() {
     BattleController mockController = mock(BattleController.class);
     GdxGame game = mock(GdxGame.class);
     Entity battleUI = new Entity().addComponent(new BattleActions(mockController, game, true));
@@ -118,8 +120,154 @@ class BattleActionsTest {
     battleUI.getEvents().trigger("endTurn");
 
     verify(mockController).endPlayerTurn();
-    verify(mockController, never()).addBattleEndListener(any());
+    verify(mockController).addBattleEndListener(any());
     verify(game, never()).requestAutosaveAfterEncounter();
+  }
+
+  @Test
+  void tutorialVictoryWaitsForEveryEnemyReleaseWithoutChangingTheNormalRun() {
+    BattleController battleController = mock(BattleController.class);
+    GdxGame game = mock(GdxGame.class);
+    RunState runState = mock(RunState.class);
+    when(game.getRunState()).thenReturn(runState);
+    EnemyReleaseComponent first = mock(EnemyReleaseComponent.class);
+    EnemyReleaseComponent second = mock(EnemyReleaseComponent.class);
+    Entity battleUI =
+        new Entity()
+            .addComponent(
+                new BattleActions(
+                    battleController,
+                    game,
+                    List.of(new Entity().addComponent(first), new Entity().addComponent(second)),
+                    true));
+    battleUI.create();
+
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<EventListener1<Boolean>> endListener =
+        ArgumentCaptor.forClass(EventListener1.class);
+    verify(battleController).addBattleEndListener(endListener.capture());
+
+    Application previousApp = Gdx.app;
+    Application app = mock(Application.class);
+    List<Runnable> navigation = new ArrayList<>();
+    doAnswer(invocation -> navigation.add(invocation.getArgument(0))).when(app).postRunnable(any());
+    Gdx.app = app;
+    try {
+      endListener.getValue().handle(true);
+      verify(first).startRelease();
+      verify(second).startRelease();
+      battleUI.update();
+      assertTrue(navigation.isEmpty());
+
+      when(first.isFinished()).thenReturn(true);
+      battleUI.update();
+      assertTrue(navigation.isEmpty());
+
+      when(second.isFinished()).thenReturn(true);
+      battleUI.update();
+      battleUI.update();
+      assertEquals(1, navigation.size());
+      verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
+      navigation.get(0).run();
+      verify(game).setScreen(GdxGame.ScreenType.TUTORIAL_VICTORY);
+      verify(game, never()).requestAutosaveAfterEncounter();
+      verify(game, never()).startNewRun();
+      verifyNoInteractions(runState);
+    } finally {
+      Gdx.app = previousApp;
+    }
+  }
+
+  @Test
+  void tutorialDefeatReturnsToTheMenuWithoutReleasingEnemiesOrChangingTheRun() {
+    BattleController battleController = mock(BattleController.class);
+    GdxGame game = mock(GdxGame.class);
+    EnemyReleaseComponent release = mock(EnemyReleaseComponent.class);
+    Entity battleUI =
+        new Entity()
+            .addComponent(
+                new BattleActions(
+                    battleController, game, List.of(new Entity().addComponent(release)), true));
+    battleUI.create();
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<EventListener1<Boolean>> endListener =
+        ArgumentCaptor.forClass(EventListener1.class);
+    verify(battleController).addBattleEndListener(endListener.capture());
+
+    Application previousApp = Gdx.app;
+    Gdx.app = null;
+    try {
+      endListener.getValue().handle(false);
+      verify(game).setScreen(GdxGame.ScreenType.MAIN_MENU);
+      verify(game, never()).getRunState();
+      verify(game, never()).startNewRun();
+      verify(release, never()).startRelease();
+    } finally {
+      Gdx.app = previousApp;
+    }
+  }
+
+  @Test
+  void ordinaryVictoryStillWaitsForReleaseAndOpensTheRewardScreen() {
+    BattleController battleController = mock(BattleController.class);
+    GdxGame game = mock(GdxGame.class);
+    RunState runState = mock(RunState.class);
+    when(game.getRunState()).thenReturn(runState);
+    when(runState.getActiveNodeId()).thenReturn(7);
+    EnemyReleaseComponent release = mock(EnemyReleaseComponent.class);
+    Entity battleUI =
+        new Entity()
+            .addComponent(
+                new BattleActions(
+                    battleController, game, List.of(new Entity().addComponent(release))));
+    battleUI.create();
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<EventListener1<Boolean>> endListener =
+        ArgumentCaptor.forClass(EventListener1.class);
+    verify(battleController).addBattleEndListener(endListener.capture());
+
+    Application previousApp = Gdx.app;
+    Gdx.app = null;
+    try {
+      endListener.getValue().handle(true);
+      verify(release).startRelease();
+      verify(runState).completeEncounter(true);
+      verify(game).requestAutosaveAfterEncounter();
+      battleUI.update();
+      verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
+
+      when(release.isFinished()).thenReturn(true);
+      battleUI.update();
+      verify(game).setScreen(GdxGame.ScreenType.VICTORY);
+    } finally {
+      Gdx.app = previousApp;
+    }
+  }
+
+  @Test
+  void disposedTutorialDoesNotRunQueuedVictoryNavigation() {
+    BattleController battleController = mock(BattleController.class);
+    GdxGame game = mock(GdxGame.class);
+    Entity battleUI = new Entity().addComponent(new BattleActions(battleController, game, true));
+    battleUI.create();
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<EventListener1<Boolean>> endListener =
+        ArgumentCaptor.forClass(EventListener1.class);
+    verify(battleController).addBattleEndListener(endListener.capture());
+
+    Application previousApp = Gdx.app;
+    Application app = mock(Application.class);
+    ArgumentCaptor<Runnable> navigation = ArgumentCaptor.forClass(Runnable.class);
+    Gdx.app = app;
+    try {
+      endListener.getValue().handle(true);
+      verify(app).postRunnable(navigation.capture());
+      battleUI.getComponent(BattleActions.class).dispose();
+      navigation.getValue().run();
+      verifyNoInteractions(game);
+    } finally {
+      Gdx.app = previousApp;
+    }
   }
 
   @Test

@@ -128,6 +128,7 @@ public class BattleScreen extends ScreenAdapter {
           "images/armour.png",
           "images/enemy_release/heavens_grace.png",
           "images/ui/inventory-panel.png",
+          "images/main_menu_button_frame.png",
           BATTLE_TITLE_TEXTURE,
           "images/effects/shield.png",
           "images/effects/fortify.png",
@@ -559,11 +560,8 @@ public class BattleScreen extends ScreenAdapter {
   }
 
   private void onTutorialFinished(BattleTutorialController.Outcome outcome) {
-    // All tutorial changes live in this screen's disposable run. Joel's shared new-run path resets
-    // the persistent run and opens the story/map on victory or voluntary exit.
-    if (outcome == BattleTutorialController.Outcome.LOST) {
-      game.setScreen(GdxGame.ScreenType.MAIN_MENU);
-    } else {
+    // BattleActions handles real outcomes after the release animation; voluntary exit skips it.
+    if (outcome == BattleTutorialController.Outcome.CANCELLED) {
       game.startNewRun();
     }
   }

@@ -61,6 +61,55 @@ public class RunStateTest {
     assertEquals(NodeState.AVAILABLE, graph.getNode(2).getState());
   }
 
+  @Test
+  void mapIntroductionAppearsOncePerFreshRun() {
+    RunState runState = new RunState();
+    assertFalse(runState.consumeMapIntroduction());
+
+    assertTrue(runState.startRun(createGraph(), 0));
+    assertTrue(runState.consumeMapIntroduction());
+    assertFalse(runState.consumeMapIntroduction());
+
+    runState.endRun();
+    assertTrue(runState.startRun(createGraph(), 0));
+    assertTrue(runState.consumeMapIntroduction());
+  }
+
+  @Test
+  void returningFromAnEncounterDoesNotRepeatTheMapIntroduction() {
+    RunState runState = new RunState();
+    MapGraph graph = createGraph();
+    runState.startRun(graph, 0);
+    assertTrue(runState.consumeMapIntroduction());
+
+    graph.moveToNode(1);
+    runState.enterEncounter(1);
+    runState.completeEncounter(true);
+
+    assertFalse(runState.consumeMapIntroduction());
+  }
+
+  @Test
+  void restoringARunDoesNotRepeatTheMapIntroductionEvenAtTheStart() {
+    RunState runState = new RunState();
+    MapGraph graph = createGraph();
+    runState.startRun(graph, 0);
+
+    assertTrue(runState.restoreRun(graph, null));
+
+    assertFalse(runState.consumeMapIntroduction());
+  }
+
+  @Test
+  void endingARunClearsAnUnshownMapIntroduction() {
+    RunState runState = new RunState();
+    runState.startRun(createGraph(), 0);
+
+    runState.endRun();
+
+    assertFalse(runState.consumeMapIntroduction());
+  }
+
   private MapGraph createFinalEncounterGraph() {
     MapGraph graph =
         new MapGraph(

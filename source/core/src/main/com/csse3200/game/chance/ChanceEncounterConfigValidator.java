@@ -82,6 +82,7 @@ final class ChanceEncounterConfigValidator {
 
     Set<String> choiceIds = new HashSet<>();
     for (int i = 0; i < encounter.choices.length; i++) {
+      validateCurseRisk(encounter, encounter.choices[i], label + ".choice[" + i + "]", errors);
       validateChoice(
           encounter.choices[i], label + ".choice[" + i + "]", choiceIds, cardCatalog, errors);
     }
@@ -120,29 +121,68 @@ final class ChanceEncounterConfigValidator {
       errors.add(label + ".outcome: currencyDelta must be present");
     }
 
-    validateCardReward(choice.outcome.cardRewardId, label, cardCatalog, errors);
+    if (choice.outcome.itemRewardIds != null) {
+      for (String itemId : choice.outcome.itemRewardIds) {
+        if (itemId == null || !itemId.matches("[A-Z][A-Z0-9_]*")) {
+          errors.add(label + ".outcome: invalid itemRewardId '" + itemId + "'");
+        }
+      }
+    }
+
+    String cardRewardId = choice.outcome.cardRewardId;
+    if (cardRewardId != null && cardRewardId.isBlank()) {
+      errors.add(label + ".outcome: cardRewardId must not be blank when present");
+    } else if (cardRewardId != null && cardCatalog != null) {
+      boolean knownCard;
+      try {
+        knownCard = cardCatalog.containsCard(cardRewardId);
+      } catch (RuntimeException exception) {
+        knownCard = false;
+      }
+      if (!knownCard) {
+        errors.add(label + ".outcome: unknown cardRewardId '" + cardRewardId + "'");
+      }
+    }
   }
 
-  private static void validateCardReward(
-      String cardRewardId, String label, CardCatalogGateway cardCatalog, List<String> errors) {
-    if (cardRewardId == null) {
+  private static void validateCurseRisk(
+      ChanceEncounterConfig encounter,
+      ChanceChoiceConfig choice,
+      String label,
+      List<String> errors) {
+    if (choice == null || choice.curseRisk == null) return;
+    if (!AbandonedMineEncounterBehaviour.ENCOUNTER_ID.equals(encounter.id)
+        || !AbandonedMineEncounterBehaviour.SEARCH_CHOICE_ID.equals(choice.id)) {
+      errors.add(label + ": curseRisk is supported only for abandoned-mine/search-tunnels");
+    }
+    var risk = choice.curseRisk;
+    if (risk.triggerChance == null
+        || !Double.isFinite(risk.triggerChance)
+        || risk.triggerChance < 0
+        || risk.triggerChance > 1) {
+      errors.add(label + ": triggerChance must be between 0 and 1");
+    }
+    if (risk.items == null || risk.items.length == 0) {
+      errors.add(label + ": Curse item pool must not be empty");
       return;
     }
-    if (cardRewardId.isBlank()) {
-      errors.add(label + ".outcome: cardRewardId must not be blank when present");
-      return;
+    Set<String> ids = new HashSet<>();
+    long total = 0;
+    for (var item : risk.items) {
+      if (item == null || item.id == null || !item.id.matches("[A-Z][A-Z0-9_]*")) {
+        errors.add(label + ": invalid Curse item ID");
+        continue;
+      }
+      if (!ids.add(item.id)) errors.add(label + ": duplicate Curse item ID '" + item.id + "'");
+      if (item.weight == null || item.weight <= 0) {
+        errors.add(label + ": Curse item weight must be positive");
+      } else total += item.weight;
     }
-    if (cardCatalog == null) {
-      return;
-    }
-    boolean knownCard;
-    try {
-      knownCard = cardCatalog.containsCard(cardRewardId);
-    } catch (RuntimeException exception) {
-      knownCard = false;
-    }
-    if (!knownCard) {
-      errors.add(label + ".outcome: unknown cardRewardId '" + cardRewardId + "'");
+    if (total > Integer.MAX_VALUE) errors.add(label + ": Curse weight total exceeds integer range");
+    if (choice.outcome != null
+        && (choice.outcome.cardRewardId != null
+            || (choice.outcome.itemRewardIds != null && choice.outcome.itemRewardIds.length > 0))) {
+      errors.add(label + ": Curse risk choice must not contain fixed Card or Item rewards");
     }
   }
 }

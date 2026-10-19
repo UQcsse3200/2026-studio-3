@@ -8,8 +8,11 @@ public class ChanceChoiceConfig {
   /** Player-facing choice description. */
   public String description = "";
 
-  /** Required outcome produced by selecting this choice. */
+  /** Required base outcome, before runtime risk is resolved. */
   public ChanceOutcomeConfig outcome;
+
+  /** Optional runtime Curse risk, currently supported only by the Mine exploration choice. */
+  public ChanceCurseRiskConfig curseRisk;
 
   /** Required by the JSON deserialiser. */
   public ChanceChoiceConfig() {

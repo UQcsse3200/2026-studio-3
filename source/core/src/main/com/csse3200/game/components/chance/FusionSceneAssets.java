@@ -366,6 +366,26 @@ final class FusionSceneAssets {
 
   static TextButtonStyle buttonStyle(Skin skin, boolean primary) {
     TextButtonStyle style = new TextButtonStyle(skin.get(TextButtonStyle.class));
+    ResourceService resources = ServiceLocator.getResourceService();
+    String texturePath =
+        primary
+            ? ChanceEncounterDisplay.FUSION_FORGE_BUTTON_TEXTURE
+            : ChanceEncounterDisplay.FUSION_QUIET_BUTTON_TEXTURE;
+    if (resources != null && resources.containsAsset(texturePath, Texture.class)) {
+      Texture texture = resources.getAsset(texturePath, Texture.class);
+      texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+      style.up = forgedButtonDrawable(texture, primary, new Color(0.86f, 0.84f, 0.83f, 1f));
+      style.over = forgedButtonDrawable(texture, primary, Color.WHITE);
+      style.down = forgedButtonDrawable(texture, primary, new Color(0.66f, 0.65f, 0.64f, 1f));
+      style.disabled =
+          forgedButtonDrawable(texture, primary, new Color(0.42f, 0.40f, 0.40f, 0.92f));
+      style.fontColor = new Color(0.96f, 0.87f, 0.72f, 1f);
+      style.overFontColor = Color.WHITE;
+      style.downFontColor = Color.WHITE;
+      style.disabledFontColor = new Color(0.66f, 0.61f, 0.56f, 1f);
+      return style;
+    }
+
     Color base =
         primary ? new Color(0.55f, 0.40f, 0.31f, 0.97f) : new Color(0.38f, 0.35f, 0.43f, 0.97f);
     style.up = plaque(skin, base);
@@ -377,6 +397,43 @@ final class FusionSceneAssets {
     style.downFontColor = Color.WHITE;
     style.disabledFontColor = new Color(0.61f, 0.57f, 0.54f, 1f);
     return style;
+  }
+
+  /** Keep the forged end caps and rune in proportion while stretching the quiet text area. */
+  private static Drawable forgedButtonDrawable(Texture texture, boolean primary, Color tint) {
+    int top = primary ? 8 : 88;
+    int cropHeight = primary ? 729 : 589;
+    int capWidth = primary ? 450 : 470;
+    int fillX = primary ? 600 : 700;
+    TextureRegionDrawable left =
+        new TextureRegionDrawable(new TextureRegion(texture, 0, top, capWidth, cropHeight));
+    TextureRegionDrawable fill =
+        new TextureRegionDrawable(new TextureRegion(texture, fillX, top, 64, cropHeight));
+    TextureRegionDrawable right =
+        new TextureRegionDrawable(
+            new TextureRegion(texture, texture.getWidth() - capWidth, top, capWidth, cropHeight));
+    TextureRegionDrawable rune =
+        primary ? new TextureRegionDrawable(new TextureRegion(texture, 870, top, 243, 277)) : null;
+    return new BaseDrawable() {
+      @Override
+      public void draw(Batch batch, float x, float y, float width, float height) {
+        Color original = batch.getColor();
+        float r = original.r;
+        float g = original.g;
+        float b = original.b;
+        float a = original.a;
+        batch.setColor(r * tint.r, g * tint.g, b * tint.b, a * tint.a);
+        float endWidth = Math.min(width * 0.24f, height * capWidth / cropHeight);
+        left.draw(batch, x, y, endWidth, height);
+        fill.draw(batch, x + endWidth, y, width - 2f * endWidth, height);
+        right.draw(batch, x + width - endWidth, y, endWidth, height);
+        if (rune != null) {
+          float runeSize = height * 0.38f;
+          rune.draw(batch, x + (width - runeSize) / 2f, y + height - runeSize, runeSize, runeSize);
+        }
+        batch.setColor(r, g, b, a);
+      }
+    };
   }
 
   static TextButton button(String text, Skin skin, boolean primary) {

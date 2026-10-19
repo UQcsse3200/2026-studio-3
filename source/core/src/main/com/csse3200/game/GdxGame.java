@@ -43,6 +43,7 @@ import com.csse3200.game.screens.NarrationScreen;
 import com.csse3200.game.screens.SaveLoadScreen;
 import com.csse3200.game.screens.SettingsScreen;
 import com.csse3200.game.screens.TempleCardSelectionScreen;
+import com.csse3200.game.screens.TutorialVictoryScreen;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
 import java.util.Random;
@@ -278,7 +279,8 @@ public class GdxGame extends Game {
     openDemoEvent(CardFusionEncounterBehaviour.ENCOUNTER_ID);
   }
 
-  private void openDemoEvent(String previewEncounterId) {
+  /** Opens an isolated demo only; null retains the existing weighted random selection. */
+  public void openDemoEvent(String previewEncounterId) {
     prepareScreenTransition(ScreenType.ENCOUNTER);
     setScreen(new DemoEventScreen(this, previewEncounterId));
   }
@@ -334,6 +336,7 @@ public class GdxGame extends Game {
       case ANCIENT_TEMPLE -> new AncientTempleScreen(this);
       case TEMPLE_CARD_SELECTION -> new TempleCardSelectionScreen(this);
       case TUTORIAL_BATTLE -> new BattleScreen(this, true);
+      case TUTORIAL_VICTORY -> new TutorialVictoryScreen(this);
       case DEFEAT -> new EndBattleScreen(this, false);
       case BESTIARY -> new BestiaryScreen(this);
       case ITEM_LIBRARY -> new ItemLibraryScreen(this);
@@ -352,6 +355,7 @@ public class GdxGame extends Game {
     CAMPFIRE,
     BATTLE_SCREEN,
     TUTORIAL_BATTLE,
+    TUTORIAL_VICTORY,
     VICTORY,
     DEFEAT,
     ELITE_PORTAL,

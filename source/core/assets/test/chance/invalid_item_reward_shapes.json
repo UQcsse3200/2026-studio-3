@@ -1,0 +1,62 @@
+{
+  "encounters": [
+    {
+      "id": "item-test",
+      "description": "Item rewards",
+      "weight": 1,
+      "choices": [
+        {
+          "id": "choice-0",
+          "description": "Test item reward",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0,
+            "itemRewardIds": null
+          }
+        },
+        {
+          "id": "choice-1",
+          "description": "Test item reward",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0,
+            "itemRewardIds": "LUCKY_COIN"
+          }
+        },
+        {
+          "id": "choice-2",
+          "description": "Test item reward",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0,
+            "itemRewardIds": [
+              null
+            ]
+          }
+        },
+        {
+          "id": "choice-3",
+          "description": "Test item reward",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0,
+            "itemRewardIds": [
+              3
+            ]
+          }
+        },
+        {
+          "id": "choice-4",
+          "description": "Test item reward",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0,
+            "itemRewardIds": [
+              " "
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

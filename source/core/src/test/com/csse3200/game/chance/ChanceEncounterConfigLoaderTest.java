@@ -22,6 +22,36 @@ class ChanceEncounterConfigLoaderTest {
   private static final String TEST_DIRECTORY = "test/chance/";
 
   @Test
+  void shouldRejectInvalidItemRewardShapesAndEntries() {
+    assertMessageContains(
+        loadInvalid("invalid_item_reward_shapes.json"),
+        "choice[0].outcome.itemRewardIds must be an array",
+        "choice[1].outcome.itemRewardIds must be an array",
+        "choice[2].outcome.itemRewardIds[0] must not be null",
+        "choice[3].outcome.itemRewardIds[0] must be a string",
+        "choice[4].outcome.itemRewardIds[0] must not be blank");
+    assertMessageContains(
+        loadInvalid("invalid_item_reward_ids.json"),
+        "invalid itemRewardId 'ashen-ember'",
+        "invalid itemRewardId 'LUCKY COIN'",
+        "invalid itemRewardId '1_ITEM'");
+  }
+
+  @Test
+  void shouldLoadCombinedRewardsPreservingDuplicateItemCopies() {
+    ChanceEncounter encounter =
+        ChanceEncounterConfigLoader.loadEncounters(TEST_DIRECTORY + "combined_item_rewards.json")
+            .getFirst();
+    ChanceOutcome outcome = encounter.resolveChoice("accept");
+    assertEquals(10, outcome.getHealthDelta());
+    assertEquals(5, outcome.getCurrencyDelta());
+    assertEquals(List.of("bandage"), outcome.getCardRewardIds());
+    assertEquals(List.of("ENERGY_CRYSTAL", "ENERGY_CRYSTAL"), outcome.getItemRewardIds());
+    assertThrows(UnsupportedOperationException.class, outcome.getItemRewardIds()::clear);
+    assertTrue(encounter.resolveChoice("empty").isNoEffect());
+  }
+
+  @Test
   void shouldLoadAllConfiguredEncountersFromDefaultFile() {
     List<ChanceEncounter> encounters = ChanceEncounterConfigLoader.loadEncounters();
     List<String> encounterIds = encounters.stream().map(ChanceEncounter::getId).toList();
@@ -50,10 +80,15 @@ class ChanceEncounterConfigLoaderTest {
     assertEncounter(
         encounters.get(0),
         "mysterious-shrine",
-        "A cracked sanctum shrine still burns with a god's spoiled light. An angel might leave an offering here to learn what the fallen still demand.",
-        new ExpectedChoice(
-            "make-offering", "Bleed a little of your light into the shrine.", -10, 25),
-        new ExpectedChoice("leave", "Pass without kneeling.", 0, 0));
+        "A cracked sanctum shrine burns with a god's spoiled light. Offer your light or accept a Curse for Gold. Curses persist and stack in future battles.",
+        new ExpectedChoice("make-offering", "Make an Offering: -10 HP, +25 Gold.", -10, 25),
+        new ExpectedChoice("leave", "Leave the Shrine.", 0, 0));
+    assertEquals(
+        "Accept the Brand: +50 Gold; Curse reduces future Strength gains by 1.",
+        encounters.get(0).getChoices().get(2).getDescription());
+    assertEquals(
+        "Swear the Blood Oath: +70 Gold; Curse drains 2 HP each player turn in battle (min 1 HP).",
+        encounters.get(0).getChoices().get(3).getDescription());
     assertEncounter(
         encounters.get(1),
         "wandering-healer",
@@ -72,9 +107,13 @@ class ChanceEncounterConfigLoaderTest {
     assertEncounter(
         encounters.get(3),
         "abandoned-mine",
-        "Beneath the sanctum, old workings still hold relics of the fallen. An angel might risk the dark for tools of release.",
-        new ExpectedChoice("search-tunnels", "Search the unstable tunnels for valuables.", -12, 30),
-        new ExpectedChoice("leave", "Leave the workings closed.", 0, 0));
+        "Beneath the sanctum, fallen relics lie in abandoned workings. A random Curse can weaken Strength or Block gains, drain HP at player turn-start, or reduce maximum Energy in future battles.",
+        new ExpectedChoice(
+            "search-tunnels",
+            "Explore the Mine: +60 Gold; 50% chance of one lasting Curse.",
+            0,
+            60),
+        new ExpectedChoice("leave", "Leave the Mine.", 0, 0));
     assertEncounter(
         encounters.get(4),
         "wishing-fountain",
@@ -312,7 +351,8 @@ class ChanceEncounterConfigLoaderTest {
       ExpectedChoice... expectedChoices) {
     assertEquals(expectedId, encounter.getId());
     assertEquals(expectedDescription, encounter.getDescription());
-    assertEquals(expectedChoices.length, encounter.getChoices().size());
+    int addedChoices = "mysterious-shrine".equals(expectedId) ? 2 : 0;
+    assertEquals(expectedChoices.length + addedChoices, encounter.getChoices().size());
 
     for (int i = 0; i < expectedChoices.length; i++) {
       ExpectedChoice expected = expectedChoices[i];
@@ -324,6 +364,7 @@ class ChanceEncounterConfigLoaderTest {
       assertEquals(expected.healthDelta(), outcome.getHealthDelta());
       assertEquals(expected.currencyDelta(), outcome.getCurrencyDelta());
       assertEquals(expected.cardRewardId(), outcome.getCardRewardId());
+      assertTrue(outcome.getItemRewardIds().isEmpty());
       assertSame(outcome, encounter.resolveChoice(expected.id()));
     }
   }

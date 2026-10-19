@@ -33,4 +33,11 @@ public interface ShopTransactionGateway {
    * @return the current shop discount rate
    */
   float getShopDiscount();
+
+  /**
+   * Charges an undiscounted service fee without granting a card. Unsupported adapters fail closed.
+   */
+  default ShopTransactionStatus chargeServiceFee(int amount) {
+    return ShopTransactionStatus.TRANSACTION_FAILED;
+  }
 }

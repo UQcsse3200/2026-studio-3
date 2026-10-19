@@ -100,6 +100,8 @@ class EncounterGameAreaAssetsTest {
     ServiceLocator.registerCardLibrary(new CardLibrary(CardConfigLoader.loadCards()));
 
     RunState run = new RunState();
+    // Initialize durable ownership before mocking PlayerFactory's static methods.
+    run.getOrCreatePlayerState();
     run.setMapGraph(new MapGraph(Map.of(7, new MapNode(7, roomType)), false));
     PlayerStatsDisplay hud = new PlayerStatsDisplay();
 

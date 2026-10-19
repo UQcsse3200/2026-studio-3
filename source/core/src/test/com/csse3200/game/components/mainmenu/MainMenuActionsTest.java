@@ -26,6 +26,21 @@ class MainMenuActionsTest {
   }
 
   @Test
+  void selectedDemoEventUsesOnlyTheIsolatedPreviewEntry() {
+    menu.getEvents().trigger(DemoEventPicker.SELECT_EVENT, "dice-game");
+    verify(game).openDemoEvent("dice-game");
+    verify(game, never()).startEvent(any());
+    verify(game, never()).startNewRun();
+  }
+
+  @Test
+  void randomDemoPassesNoForcedId() {
+    menu.getEvents().trigger(DemoEventPicker.SELECT_EVENT, "");
+    verify(game).openDemoEvent((String) null);
+    verify(game, never()).startEvent(any());
+  }
+
+  @Test
   void startBeginsANewRunOnTheMap() {
     menu.getEvents().trigger(MainMenuDisplay.START_EVENT);
 
@@ -75,7 +90,6 @@ class MainMenuActionsTest {
     menu.getEvents().trigger("map");
     menu.getEvents().trigger("shop");
     menu.getEvents().trigger("battle");
-    menu.getEvents().trigger("demoShop");
     menu.getEvents().trigger("demoFusion");
 
     verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
@@ -93,5 +107,13 @@ class MainMenuActionsTest {
     menu.getEvents().trigger(MainMenuDisplay.DEMO_CAMPFIRE_EVENT);
     verify(game).openDemoEvent();
     verify(game).openDemoCampfire();
+  }
+
+  @Test
+  void demoShopOnlyOpensTheIndependentPreview() {
+    menu.getEvents().trigger(MainMenuDisplay.DEMO_SHOP_EVENT);
+    verify(game).openDemoShop();
+    verify(game, never()).startNewRun();
+    verify(game, never()).setScreen(any(GdxGame.ScreenType.class));
   }
 }

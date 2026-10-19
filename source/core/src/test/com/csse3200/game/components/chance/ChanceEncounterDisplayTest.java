@@ -309,6 +309,18 @@ class ChanceEncounterDisplayTest {
     entities.register(sceneEntity);
 
     try {
+      Table information = sceneStage.getRoot().findActor("mine-information");
+      assertTrue(information.getBackground() instanceof EncounterInformationShade);
+      assertEquals(42f, information.getPadLeft());
+      assertEquals(36f, information.getPadTop());
+      com.badlogic.gdx.scenes.scene2d.ui.Label title =
+          information.findActor("mine-information-title");
+      com.badlogic.gdx.scenes.scene2d.ui.Label description =
+          information.findActor("mine-information-description");
+      assertEquals(.98f, title.getFontScaleX());
+      assertEquals(.88f, description.getFontScaleX());
+      assertEquals(encounter.getDescription(), description.getText().toString());
+      assertEquals(390f, information.getCell(description).getPrefWidth());
       assertEquals(2, display.getChoiceButtons().size());
       assertNull(display.getHelpButton());
       assertEquals(

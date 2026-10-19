@@ -283,7 +283,7 @@ public class AudioService {
         }
       }
       case LIBRARY, CARD_LIBRARY, BESTIARY -> startPlaylist(Playlist.LIBRARY);
-      case VICTORY -> {
+      case VICTORY, TUTORIAL_VICTORY -> {
         stopMusic();
         playLoadedSound(SoundId.VICTORY, VICTORY_VOLUME);
       }
