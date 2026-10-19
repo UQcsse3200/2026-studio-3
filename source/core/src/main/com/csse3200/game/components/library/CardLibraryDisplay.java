@@ -10,7 +10,6 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
@@ -18,9 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardDiscoveryService;
@@ -34,7 +31,6 @@ import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.cards.UncommonCardLibraryWidget;
-import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
@@ -125,9 +121,9 @@ public class CardLibraryDisplay extends UIComponent {
   private void addActors() {
     rootStack = new Stack();
     rootStack.setFillParent(true);
-    addBackground(rootStack);
+    LibraryUiHelper.addBackground(skin, rootStack);
 
-    buttonStyle = createButtonStyle();
+    buttonStyle = LibraryUiHelper.createButtonStyle(skin);
 
     Table panel = new Table();
     panel.setBackground(skin.newDrawable(WHITE, PANEL_COLOUR));
@@ -135,7 +131,7 @@ public class CardLibraryDisplay extends UIComponent {
 
     addHeader(panel);
     panel.row();
-    addDivider(panel);
+    LibraryUiHelper.addDivider(skin, panel);
     panel.row();
     addCardContent(panel);
 
@@ -147,39 +143,25 @@ public class CardLibraryDisplay extends UIComponent {
     stage.addActor(rootStack);
   }
 
-  private void addBackground(Stack stack) {
-    Texture backgroundTexture = getTexture(MainMenuDisplay.BACKGROUND_TEXTURE);
-    backgroundTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-    Image background = new Image(backgroundTexture);
-    background.setScaling(Scaling.fill);
-    stack.add(background);
-
-    Color overlayColour = MenuTheme.deepPlum();
-    overlayColour.a = 0.62f;
-    Table overlay = new Table();
-    overlay.setBackground(skin.newDrawable(WHITE, overlayColour));
-    stack.add(overlay);
-  }
-
   private void addHeader(Table panel) {
     Table titleBlock = new Table();
-    Label eyebrow = new Label("CARD LIBRARY", labelStyle(SMALL, MenuTheme.softCoral()));
-    Label title = new Label("Card Library", labelStyle(LARGE, MenuTheme.warmParchment()));
+    Label eyebrow =
+        new Label("CARD LIBRARY", LibraryUiHelper.labelStyle(skin, SMALL, MenuTheme.softCoral()));
+    Label title =
+        new Label(
+            "Card Library", LibraryUiHelper.labelStyle(skin, LARGE, MenuTheme.warmParchment()));
     Label subtitle =
         new Label(
             "Discover cards during a run to reveal their lore.",
-            labelStyle(SMALL, MenuTheme.warmParchment()));
+            LibraryUiHelper.labelStyle(skin, SMALL, MenuTheme.warmParchment()));
     eyebrow.setFontScale(1.15f);
     title.setFontScale(1.35f);
     subtitle.setFontScale(1.05f);
-    discoveryCounterLabel = new Label("", labelStyle(SMALL, MenuTheme.softCoral()));
+    discoveryCounterLabel =
+        new Label("", LibraryUiHelper.labelStyle(skin, SMALL, MenuTheme.softCoral()));
     discoveryCounterLabel.setFontScale(1.05f);
 
-    titleBlock.add(eyebrow).left();
-    titleBlock.row();
-    titleBlock.add(title).left().padTop(2f);
-    titleBlock.row();
-    titleBlock.add(subtitle).left().padTop(5f);
+    LibraryUiHelper.populateTitleBlock(titleBlock, eyebrow, title, subtitle);
     titleBlock.row();
     titleBlock.add(discoveryCounterLabel).left().padTop(5f);
 
@@ -203,12 +185,6 @@ public class CardLibraryDisplay extends UIComponent {
         });
     panel.add(titleBlock).left().expandX();
     panel.add(backButton).right().width(170f).height(58f);
-  }
-
-  private void addDivider(Table panel) {
-    Table divider = new Table();
-    divider.setBackground(skin.newDrawable(WHITE, MenuTheme.softCoral()));
-    panel.add(divider).colspan(2).expandX().fillX().height(2f).padTop(16f).padBottom(16f);
   }
 
   private void addCardContent(Table panel) {
@@ -298,7 +274,10 @@ public class CardLibraryDisplay extends UIComponent {
     Table listPanel = new Table();
     listPanel.setBackground(skin.newDrawable(WHITE, LIST_COLOUR));
     listPanel.pad(18f);
-    listPanel.add(new Label("CARDS", labelStyle(SMALL, MenuTheme.softCoral()))).left().expandX();
+    listPanel
+        .add(new Label("CARDS", LibraryUiHelper.labelStyle(skin, SMALL, MenuTheme.softCoral())))
+        .left()
+        .expandX();
     listPanel.row();
     addSearchControls(listPanel);
     listPanel.row();
@@ -322,7 +301,10 @@ public class CardLibraryDisplay extends UIComponent {
 
   private void addSearchControls(Table listPanel) {
     listPanel
-        .add(new Label("Search discovered cards", labelStyle(SMALL, MenuTheme.warmParchment())))
+        .add(
+            new Label(
+                "Search discovered cards",
+                LibraryUiHelper.labelStyle(skin, SMALL, MenuTheme.warmParchment())))
         .left()
         .padTop(10f);
     listPanel.row();
@@ -353,7 +335,8 @@ public class CardLibraryDisplay extends UIComponent {
     searchRow.add(clear).width(76f).height(42f).padLeft(8f);
     listPanel.add(searchRow).growX().padTop(5f);
     listPanel.row();
-    resultCountLabel = new Label("", labelStyle(SMALL, MenuTheme.softCoral()));
+    resultCountLabel =
+        new Label("", LibraryUiHelper.labelStyle(skin, SMALL, MenuTheme.softCoral()));
     resultCountLabel.setName("card-library-result-count");
     listPanel.add(resultCountLabel).left().padTop(8f);
     noResultsLabel = new Label("No matches", bodyLabelStyle());
@@ -450,7 +433,7 @@ public class CardLibraryDisplay extends UIComponent {
       return detailPanel;
     }
 
-    stateLabel = new Label("", labelStyle(SMALL, MenuTheme.softCoral()));
+    stateLabel = new Label("", LibraryUiHelper.labelStyle(skin, SMALL, MenuTheme.softCoral()));
     stateLabel.setFontScale(1.05f);
     upgradePreview = new CheckBox(" Upgraded", skin);
     upgradePreview.setName("card-library-upgrade-preview");
@@ -475,14 +458,15 @@ public class CardLibraryDisplay extends UIComponent {
     lockedPreview = createLockedPreview();
     cardPreview.add(lockedPreview);
 
-    nameLabel = new Label("", labelStyle(LARGE, MenuTheme.warmParchment()));
+    nameLabel = new Label("", LibraryUiHelper.labelStyle(skin, LARGE, MenuTheme.warmParchment()));
     descriptionLabel = new Label("", bodyLabelStyle());
     loreLabel = new Label("", bodyLabelStyle());
-    costLabel = new Label("", labelStyle(DEFAULT, MenuTheme.softCoral()));
+    costLabel = new Label("", LibraryUiHelper.labelStyle(skin, DEFAULT, MenuTheme.softCoral()));
     typeLabel = new Label("", bodyLabelStyle());
     targetLabel = new Label("", bodyLabelStyle());
     rarityLabel = new Label("", bodyLabelStyle());
-    effectsLabel = new Label("", labelStyle(SMALL, MenuTheme.warmParchment()));
+    effectsLabel =
+        new Label("", LibraryUiHelper.labelStyle(skin, SMALL, MenuTheme.warmParchment()));
 
     nameLabel.setFontScale(0.9f);
     descriptionLabel.setFontScale(0.78f);
@@ -528,9 +512,12 @@ public class CardLibraryDisplay extends UIComponent {
   private Table createLockedPreview() {
     Table preview = new Table();
     preview.setBackground(skin.newDrawable(WHITE, LOCKED_COLOUR));
-    lockedArtLabel = new Label("?", labelStyle(LARGE, MenuTheme.warmParchment()));
+    lockedArtLabel =
+        new Label("?", LibraryUiHelper.labelStyle(skin, LARGE, MenuTheme.warmParchment()));
     lockedArtLabel.setFontScale(4f);
-    Label lockedMessage = new Label("UNDISCOVERED", labelStyle(SMALL, MenuTheme.warmParchment()));
+    Label lockedMessage =
+        new Label(
+            "UNDISCOVERED", LibraryUiHelper.labelStyle(skin, SMALL, MenuTheme.warmParchment()));
     preview.add(lockedArtLabel).center();
     preview.row();
     preview.add(lockedMessage).center().padTop(14f);
@@ -746,38 +733,7 @@ public class CardLibraryDisplay extends UIComponent {
   }
 
   private Label.LabelStyle bodyLabelStyle() {
-    return labelStyle(DEFAULT, MenuTheme.warmParchment());
-  }
-
-  private Label.LabelStyle labelStyle(String baseStyle, Color colour) {
-    Label.LabelStyle style = new Label.LabelStyle(skin.get(baseStyle, Label.LabelStyle.class));
-    style.fontColor = colour;
-    return style;
-  }
-
-  private TextButton.TextButtonStyle createButtonStyle() {
-    TextButton.TextButtonStyle style =
-        new TextButton.TextButtonStyle(skin.get(TextButton.TextButtonStyle.class));
-    style.font = skin.getFont("font_large");
-    style.up = buttonDrawable(null);
-    style.over = buttonDrawable(new Color(1f, 0.88f, 0.68f, 1f));
-    style.down = buttonDrawable(new Color(0.7f, 0.48f, 0.58f, 1f));
-    style.checked = buttonDrawable(new Color(1f, 0.72f, 0.34f, 1f));
-    style.checkedOver = buttonDrawable(new Color(1f, 0.86f, 0.55f, 1f));
-    style.fontColor = MenuTheme.warmParchment();
-    style.overFontColor = Color.WHITE;
-    style.downFontColor = Color.WHITE;
-    style.checkedFontColor = Color.WHITE;
-    return style;
-  }
-
-  private Drawable buttonDrawable(Color tint) {
-    Texture texture = getTexture(BUTTON_TEXTURE);
-    texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-    TextureRegionDrawable drawable = new TextureRegionDrawable(new TextureRegion(texture));
-    drawable.setMinWidth(0f);
-    drawable.setMinHeight(0f);
-    return tint == null ? drawable : drawable.tint(tint);
+    return LibraryUiHelper.labelStyle(skin, DEFAULT, MenuTheme.warmParchment());
   }
 
   private Texture getTexture(String path) {

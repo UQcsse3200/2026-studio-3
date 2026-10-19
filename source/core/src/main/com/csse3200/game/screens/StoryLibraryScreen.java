@@ -7,14 +7,8 @@ import com.csse3200.game.components.library.CardLibraryDisplay;
 import com.csse3200.game.components.library.StoryLibraryDisplay;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.entities.Entity;
-import com.csse3200.game.entities.EntityService;
-import com.csse3200.game.entities.factories.RenderFactory;
 import com.csse3200.game.input.InputDecorator;
-import com.csse3200.game.input.InputService;
-import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
-import com.csse3200.game.services.GameTime;
-import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,20 +26,13 @@ public class StoryLibraryScreen extends ScreenAdapter {
     logger.debug("Initialising story library screen services");
     // Uses the game's shared ResourceService, like CardLibraryScreen, so returning to the
     // Library menu still has a resource service to load from.
-    ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerEntityService(new EntityService());
-    ServiceLocator.registerRenderService(new RenderService());
-    ServiceLocator.registerTimeSource(new GameTime());
-
-    renderer = RenderFactory.createRenderer();
+    renderer = LibraryScreenHelper.createRenderer();
     loadAssets();
     createUI(game);
   }
 
   private void loadAssets() {
-    ResourceService resourceService = ServiceLocator.getResourceService();
-    resourceService.loadTextures(STORY_LIBRARY_TEXTURES);
-    resourceService.loadAll();
+    LibraryScreenHelper.loadTextures(STORY_LIBRARY_TEXTURES);
   }
 
   private void createUI(GdxGame game) {
@@ -57,8 +44,7 @@ public class StoryLibraryScreen extends ScreenAdapter {
 
   @Override
   public void render(float delta) {
-    ServiceLocator.getEntityService().update();
-    renderer.render();
+    LibraryScreenHelper.render(renderer);
   }
 
   @Override
@@ -69,9 +55,6 @@ public class StoryLibraryScreen extends ScreenAdapter {
   @Override
   public void dispose() {
     logger.debug("Disposing story library screen");
-    renderer.dispose();
-    ServiceLocator.getRenderService().dispose();
-    ServiceLocator.getEntityService().dispose();
-    ServiceLocator.getResourceService().unloadAssets(STORY_LIBRARY_TEXTURES);
+    LibraryScreenHelper.dispose(renderer, STORY_LIBRARY_TEXTURES);
   }
 }
