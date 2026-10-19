@@ -377,7 +377,7 @@ public class CampfireScreen extends ScreenAdapter {
   }
 
   private void beginUpgrade(CardUpgradeDisplay display) {
-    if (true || !display.hasUpgradeOptions()) {
+    if (!display.hasUpgradeOptions()) {
       showMessage("NO ELIGIBLE CARDS FOR UPGRADE");
       return;
     }
