@@ -65,7 +65,6 @@ public class RewardDisplay extends Displaying {
   private static final Color SCRIM = new Color(0.015f, 0.01f, 0.025f, 0.58f);
   private static final Color GOLD = new Color(0.96f, 0.78f, 0.38f, 1f);
   private static final Color CREAM = new Color(0.93f, 0.87f, 0.73f, 1f);
-  private static final Color MUTED = new Color(0.72f, 0.66f, 0.58f, 1f);
   private final RunState runState;
   private final RewardService rewardService;
   private final CardService cardService;
