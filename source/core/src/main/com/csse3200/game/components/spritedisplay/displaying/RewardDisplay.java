@@ -195,12 +195,13 @@ public class RewardDisplay extends Displaying {
             scrimActor,
             rewardUi,
             victoryTitle,
-            victoryTitleLetters,
-            victorySubtitle,
-            sunPulse,
-            victoryWings,
-            victoryParticles,
-            rewardOptionCards);
+            new VictoryAnimationController.AnimationElements(
+                victoryTitleLetters,
+                victorySubtitle,
+                sunPulse,
+                victoryWings,
+                victoryParticles,
+                rewardOptionCards));
     victoryAnimationController.playEntrance();
   }
 
