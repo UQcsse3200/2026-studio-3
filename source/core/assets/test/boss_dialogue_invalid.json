@@ -1,0 +1,17 @@
+{
+  "opening": {
+    "text": "",
+    "image": "images/enemies/dialogue/boss_dialogue_phase_one.png",
+    "durationSeconds": 5.14
+  },
+  "phaseTwo": {
+    "text": "Phase two",
+    "image": "images/enemies/dialogue/boss_dialogue_phase_two.png",
+    "durationSeconds": 3.02
+  },
+  "enraged": {
+    "text": "Enraged",
+    "image": "images/enemies/dialogue/boss_dialogue_enraged.png",
+    "durationSeconds": 4.82
+  }
+}
