@@ -493,8 +493,7 @@ class InventoryPopupComponentTest {
     Table row = assertInstanceOf(Table.class, frame.getCells().first().getActor());
     Table actionColumn = assertInstanceOf(Table.class, row.getCells().get(2).getActor());
     Table control = assertInstanceOf(Table.class, actionColumn.getCells().get(1).getActor());
-    TextButton button = assertInstanceOf(TextButton.class, control.getCells().first().getActor());
-    return button;
+    return assertInstanceOf(TextButton.class, control.getCells().first().getActor());
   }
 
   private String feedbackDetail() {
