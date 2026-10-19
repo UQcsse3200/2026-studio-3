@@ -1,6 +1,7 @@
 package com.csse3200.game.components.battle;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
@@ -35,6 +36,7 @@ import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ServiceLocator;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,7 +59,10 @@ class BattleActionsTest {
             .addComponent(new EnemyBehaviourComponent("test"));
     controller = new BattleController(player, List.of(enemy));
     GdxGame game = mock(GdxGame.class);
-    entity = new Entity().addComponent(new BattleActions(controller, game));
+    entity =
+        new Entity()
+            .addComponent(new BattleActions(controller, game))
+            .addComponent(new CardActions());
     entity.create();
   }
 
@@ -211,6 +216,37 @@ class BattleActionsTest {
   }
 
   @Test
+  void shouldKeepHandVisibleDuringTheDelayAndRestoreItAfterEnemyReveals() {
+    List<Timer.Task> reveals = new ArrayList<>();
+    try (MockedStatic<Timer> timer = mockStatic(Timer.class)) {
+      timer
+          .when(() -> Timer.schedule(any(Timer.Task.class), anyFloat()))
+          .thenAnswer(
+              invocation -> {
+                Timer.Task task = invocation.getArgument(0);
+                reveals.add(task);
+                return task;
+              });
+      CardBattle battle = cardBattle(new EffectConfig(EffectType.BLOCK, 1));
+      AtomicBoolean handVisible = new AtomicBoolean(true);
+      battle.ui().getEvents().addListener("up", () -> handVisible.set(true));
+      battle.ui().getEvents().addListener("down", () -> handVisible.set(false));
+
+      assertTrue(
+          battle.controller().submitCardPlayRequest(CardPlayRequest.self(battle.instanceId())));
+      assertTrue(handVisible.get());
+      battle.ui().update();
+      assertTrue(handVisible.get());
+      battle.ui().update();
+      assertFalse(handVisible.get());
+      assertEquals(2, battle.controller().getPlayerTurnNumber());
+
+      reveals.get(0).run();
+      assertTrue(handVisible.get());
+    }
+  }
+
+  @Test
   void shouldKeepTurnOpenWhenTheLastEnergyCardRestoresEnergy() {
     CardBattle battle = cardBattle(new EffectConfig(EffectType.ENERGY_GAIN, 2));
     assertTrue(
@@ -243,7 +279,10 @@ class BattleActionsTest {
             List.of(enemy),
             new CardEffectHandler(),
             new CardPlayService(library, deck, energy));
-    Entity ui = new Entity().addComponent(new BattleActions(battle, mock(GdxGame.class)));
+    Entity ui =
+        new Entity()
+            .addComponent(new BattleActions(battle, mock(GdxGame.class)))
+            .addComponent(new CardActions());
     ui.create();
     GameTime time = mock(GameTime.class);
     when(time.getDeltaTime()).thenReturn(1.5f);
