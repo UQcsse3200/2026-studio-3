@@ -4,6 +4,8 @@ Issue: #431 · Branch: `Feature6-zeyu-sprint4-balance` · Owner: Team 6 (invento
 
 Paths are relative to `source/core/`.
 
+**Related:** card values and balance decisions are on Yu Zhu's wiki page [Card Values and Balance Review](https://github.com/UQcsse3200/2026-studio-3/wiki/Card-Values-and-Balance-Review). The wiki owns card numbers and accept/retest decisions; `docs/balance/` owns runtime value sources, curse/item modifiers, encounter baselines and journey evidence. If a card value here disagrees with the wiki or `cards.json`, fix this file.
+
 | Value | Default / example | Authoritative source | Loader / application | Owning team | Runtime notes |
 | --- | --- | --- | --- | --- | --- |
 | Player current HP | 100 | `assets/configs/player.json` → `health` | `PlayerFactory` → `CombatStatsComponent`; durable via `PlayerRunState` | Team 7 | Save: `PlayerSaveData.currentHealth`. Mid-run: combat, Chance, Campfire, Temple. |

@@ -2,6 +2,8 @@
 
 Scope: production combat path for **claim Forbidden reward → save → load → next battle deck**, plus Forbidden upgrade-standard check. Does not change RewardDisplay UI, Ray’s inspect/reward weights, or Team 5 save schema.
 
+**Related:** Forbidden card values and review decisions are on [Card Values and Balance Review](https://github.com/UQcsse3200/2026-studio-3/wiki/Card-Values-and-Balance-Review) (Yu Zhu).
+
 ## Automated evidence
 
 | Step | Check | Test |

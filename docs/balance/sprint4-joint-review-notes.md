@@ -2,6 +2,8 @@
 
 Status: **findings prepared for Teams 1 / 2 / 7**. No foreign systems edited in this branch. Agreed implementers TBD after those teams respond.
 
+**Related:** card value findings are tracked on [Card Values and Balance Review](https://github.com/UQcsse3200/2026-studio-3/wiki/Card-Values-and-Balance-Review) (Yu Zhu). This file covers cross-team runtime findings only; card number changes still go through that page.
+
 ## Findings → candidate owners
 
 | # | Finding | Evidence | Proposed change | Implementer (expected) | Status |

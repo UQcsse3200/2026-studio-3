@@ -4,6 +4,8 @@ Snapshot against `origin/feature/sprint4-cards-game` @ `bff411f3` (13 Oct 2026).
 
 **Ownership:** Team 1 owns enemy / encounter numbers in `enemies.json`, `encounters.json`, and `EnemyScaling`. This file is a **read-only snapshot for Team 6 balance review**, not a CI lock. When Team 1 changes those values, **Zeyu (Team 6 M5)** updates this doc; do not hard-fail tests on these figures.
 
+**Related:** card-level values and decisions are on [Card Values and Balance Review](https://github.com/UQcsse3200/2026-studio-3/wiki/Card-Values-and-Balance-Review) (Yu Zhu). Deck-level playtest results recorded below are the evidence that page asks for; link a row from the wiki rather than copying it.
+
 Player baseline from `configs/player.json`: **100 / 100 HP**, **3 energy**, opening hand **5**. Campfire rest restores **30%** max HP between fights when taken.
 
 ## Config pressure (snapshot before live targets)
