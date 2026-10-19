@@ -391,30 +391,32 @@ class BestiaryDisplayTest {
   }
 
   @Test
-  void shouldShowUndiscoveredEntryWithoutChangingProgress() {
+  void shouldRevealEnemyOnlyAfterEncounterAndStopUpdatingAfterDispose() {
     EnemyConfigs configs = new EnemyConfigs();
     configs.enemies = new EnemyConfig[] {createConfig("enemy", "Enemy", EnemyTier.NORMAL)};
     BestiaryService service = new BestiaryService(configs);
     BestiaryDisplay display = createDisplay(service);
     display.create();
-    assertEquals("Enemy", display.getDisplayedEntry().displayName());
-    assertEquals(BestiaryUnlockState.DEFEATED, display.getDisplayedEntry().unlockState());
+    assertNull(display.getDisplayedEntry());
     assertEquals(BestiaryUnlockState.LOCKED, service.getEntry("enemy").orElseThrow().unlockState());
-    assertNull(display.getEmptyStateText());
+    assertEquals(BestiaryDisplay.EMPTY_STATE_MESSAGE, display.getEmptyStateText());
 
     service.recordEncountered("enemy");
-    assertEquals(BestiaryUnlockState.DEFEATED, display.getDisplayedEntry().unlockState());
+    assertEquals("Enemy", display.getDisplayedEntry().displayName());
+    assertEquals(BestiaryUnlockState.ENCOUNTERED, display.getDisplayedEntry().unlockState());
     assertEquals(
         BestiaryUnlockState.ENCOUNTERED, service.getEntry("enemy").orElseThrow().unlockState());
     assertNull(display.getEmptyStateText());
 
     display.dispose();
     service.recordDefeated("enemy");
-    assertEquals(BestiaryUnlockState.DEFEATED, display.getDisplayedEntry().unlockState());
+    assertEquals(BestiaryUnlockState.ENCOUNTERED, display.getDisplayedEntry().unlockState());
+    assertEquals(
+        BestiaryUnlockState.DEFEATED, service.getEntry("enemy").orElseThrow().unlockState());
   }
 
   @Test
-  void shouldShowEveryTierBeforeDiscovery() {
+  void shouldShowOnlyDiscoveredEnemiesInEachTier() {
     EnemyConfigs configs = new EnemyConfigs();
     configs.enemies =
         new EnemyConfig[] {
@@ -428,22 +430,26 @@ class BestiaryDisplayTest {
     BestiaryDisplay display = createDisplay(service);
     display.create();
 
-    assertEquals("normal_enemy", display.getDisplayedEntry().enemyId());
-    assertNull(display.getEmptyStateText());
+    assertNull(display.getDisplayedEntry());
+    assertEquals(BestiaryDisplay.EMPTY_STATE_MESSAGE, display.getEmptyStateText());
 
     display.applyFilter(EnemyTier.ELITE);
     assertEquals("elite_enemy", display.getDisplayedEntry().enemyId());
     assertNull(display.getEmptyStateText());
 
     display.applyFilter(EnemyTier.BOSS);
-    assertEquals("boss_enemy", display.getDisplayedEntry().enemyId());
-    assertNull(display.getEmptyStateText());
+    assertNull(display.getDisplayedEntry());
+    assertEquals(BestiaryDisplay.EMPTY_STATE_MESSAGE, display.getEmptyStateText());
 
     service.recordEncountered("boss_enemy");
     assertEquals("boss_enemy", display.getDisplayedEntry().enemyId());
     assertNull(display.getEmptyStateText());
 
     display.applyFilter(EnemyTier.NORMAL);
+    assertNull(display.getDisplayedEntry());
+    assertEquals(BestiaryDisplay.EMPTY_STATE_MESSAGE, display.getEmptyStateText());
+
+    service.recordEncountered("normal_enemy");
     assertEquals("normal_enemy", display.getDisplayedEntry().enemyId());
     assertNull(display.getEmptyStateText());
 
