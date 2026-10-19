@@ -14,6 +14,9 @@ import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.ItemDiscoveryService;
+import com.csse3200.game.rewards.ItemType;
+import com.csse3200.game.rewards.ItemUnlockState;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -153,6 +156,29 @@ class GameStateSnapshotProviderTest {
     assertThrows(
         IllegalArgumentException.class,
         () -> new GameStateSnapshotProvider(playerState, deck, runState, bestiary, null));
+  }
+
+  @Test
+  void capturesOnlyDiscoveredItemProgress() {
+    PlayerRunState playerState = new PlayerRunState(100, 100, 50);
+    PlayerDeck deck = PlayerDeckFactory.createStarterDeck();
+    RunState runState = buildRunStateWithSingleNode();
+    ItemDiscoveryService items = new ItemDiscoveryService();
+    items.recordDiscovered(ItemType.IRON_AEGIS);
+
+    SaveGameData data =
+        new GameStateSnapshotProvider(
+                playerState,
+                deck,
+                runState,
+                BestiaryService.loadDefault(),
+                CardDiscoveryService.loadDefault(),
+                items)
+            .capture();
+
+    assertEquals(1, data.progress.items.size());
+    assertEquals(ItemType.IRON_AEGIS.name(), data.progress.items.getFirst().itemId);
+    assertEquals(ItemUnlockState.DISCOVERED.name(), data.progress.items.getFirst().unlockState);
   }
 
   private RunState buildRunStateWithSingleNode() {

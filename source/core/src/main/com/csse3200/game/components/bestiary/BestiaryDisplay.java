@@ -25,11 +25,13 @@ import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.bestiary.BestiaryEntryView;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryUnlockState;
+import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.entities.configs.EnemyTier;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.LibraryNameSearch;
+import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +44,8 @@ public class BestiaryDisplay extends UIComponent {
   private static final float PANEL_WIDTH = 1160f;
   private static final String FALLBACK_ATLAS = "images/enemies/default.atlas";
   public static final String BUTTON_TEXTURE = "images/bestiary_button_frame.png";
+  public static final String ELITE_FRAME_TEXTURE = "images/bestiary_elite_frame.png";
+  public static final String BOSS_FRAME_TEXTURE = "images/bestiary_boss_frame.png";
   private static final Color BACKDROP_COLOUR = new Color(0.018f, 0.012f, 0.02f, 0.92f);
   private static final Color PANEL_COLOUR = new Color(0.105f, 0.07f, 0.065f, 0.98f);
   private static final Color LIST_COLOUR = new Color(0.13f, 0.09f, 0.085f, 1f);
@@ -56,6 +60,9 @@ public class BestiaryDisplay extends UIComponent {
   static final String EMPTY_STATE_MESSAGE = "No enemies discovered in this category yet.";
   static final String NO_RESULTS_MESSAGE =
       "No discovered enemies match this search in this category.";
+  private static final Color NORMAL_COLOUR = new Color(0.76f, 0.64f, 0.46f, 1f);
+  private static final Color ELITE_COLOUR = new Color(0.95f, 0.47f, 0.19f, 1f);
+  private static final Color BOSS_COLOUR = new Color(0.82f, 0.19f, 0.22f, 1f);
   private final BestiaryService bestiary;
   private final Runnable returnAction;
   private final EventListener1<BestiaryEntryView> entryUpdatedListener = this::onEntryUpdated;
@@ -126,10 +133,10 @@ public class BestiaryDisplay extends UIComponent {
   private void addHeader(Table panel) {
     Table titleBlock = new Table();
     Label eyebrow = new Label("ENEMY ARCHIVE", createLabelStyle(SMALL, GOLD_COLOUR));
-    Label title = new Label("Bestiary", createLabelStyle(LARGE, BODY_COLOUR));
+    Label title = new Label("Enemy Library", createLabelStyle(LARGE, BODY_COLOUR));
     Label subtitle =
         new Label(
-            "Discover enemies to reveal their records.", createLabelStyle(SMALL, MUTED_COLOUR));
+            "All enemies. Every tier. Know what awaits.", createLabelStyle(SMALL, MUTED_COLOUR));
     eyebrow.setFontScale(1.2f);
     title.setFontScale(1.45f);
     subtitle.setFontScale(1.15f);
@@ -139,9 +146,13 @@ public class BestiaryDisplay extends UIComponent {
     titleBlock.row();
     titleBlock.add(subtitle).left().padTop(5f);
 
-    TextButton backButton = new TextButton("Back", createButtonStyle());
+    Texture backFrame =
+        ServiceLocator.getResourceService()
+            .getAsset(MainMenuDisplay.BUTTON_FRAME_TEXTURE, Texture.class);
+    backFrame.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    TextButton backButton = new TextButton("Back", MenuTheme.createButtonStyle(skin, backFrame));
     backButton.setName("bestiary-back");
-    backButton.getLabel().setFontScale(1.2f);
+    backButton.getLabel().setFontScale(0.85f);
     backButton.addListener(
         new ChangeListener() {
           @Override
@@ -165,16 +176,16 @@ public class BestiaryDisplay extends UIComponent {
 
   private TextButton addFilters(Table panel) {
     Table filters = new Table();
-    filters.defaults().width(185f).height(62f).padRight(12f);
+    filters.defaults().padRight(12f);
     ButtonGroup<TextButton> filterGroup = new ButtonGroup<>();
     filterGroup.setMinCheckCount(1);
     filterGroup.setMaxCheckCount(1);
     filterGroup.setUncheckLast(true);
 
     TextButton normalButton = createFilterButton("Normal", EnemyTier.NORMAL, filterGroup);
-    filters.add(normalButton);
-    filters.add(createFilterButton("Elite", EnemyTier.ELITE, filterGroup));
-    filters.add(createFilterButton("Boss", EnemyTier.BOSS, filterGroup));
+    filters.add(normalButton).width(185f).height(62f);
+    filters.add(createFilterButton("Elite", EnemyTier.ELITE, filterGroup)).width(191f).height(64f);
+    filters.add(createFilterButton("Boss", EnemyTier.BOSS, filterGroup)).width(198f).height(66f);
 
     panel.add(filters).left().colspan(2).padBottom(16f);
     return normalButton;
@@ -183,7 +194,10 @@ public class BestiaryDisplay extends UIComponent {
   private TextButton createFilterButton(
       String text, EnemyTier tier, ButtonGroup<TextButton> group) {
     TextButtonStyle style = createButtonStyle();
-    style.checked = buttonDrawable(new Color(1f, 0.72f, 0.3f, 1f));
+    style.up = tierButtonDrawable(tier, null);
+    style.over = tierButtonDrawable(tier, new Color(1f, 0.9f, 0.8f, 1f));
+    style.down = tierButtonDrawable(tier, new Color(0.8f, 0.7f, 0.7f, 1f));
+    style.checked = tierButtonDrawable(tier, null);
     style.checkedFontColor = Color.WHITE;
     TextButton button = new TextButton(text, style);
     button.setName("bestiary-filter-" + tier.name());
@@ -279,7 +293,7 @@ public class BestiaryDisplay extends UIComponent {
 
     detailStateLabel = new Label("", createLabelStyle(SMALL, GOLD_COLOUR));
     detailNameLabel = new Label("", createLabelStyle(LARGE, BODY_COLOUR));
-    detailTierLabel = new Label("", createLabelStyle(SMALL, MUTED_COLOUR));
+    detailTierLabel = new Label("", createLabelStyle(SMALL, Color.WHITE));
     detailDescriptionLabel = new Label("", createLabelStyle(DEFAULT, BODY_COLOUR));
     detailStatsLabel = new Label("", createLabelStyle(DEFAULT, GOLD_COLOUR));
     detailNameLabel.setName("bestiary-name");
@@ -439,7 +453,8 @@ public class BestiaryDisplay extends UIComponent {
     }
     displayedEntry = entry;
     detailNameLabel.setText(visibleName(entry));
-    detailTierLabel.setText(entry.tier().name());
+    detailTierLabel.setText(tierCaption(entry.tier()));
+    detailTierLabel.setColor(tierColour(entry.tier()));
     detailDescriptionLabel.setText(descriptionFor(entry));
     detailStatsLabel.setText(statsFor(entry));
 
@@ -451,7 +466,7 @@ public class BestiaryDisplay extends UIComponent {
       return;
     }
 
-    detailStateLabel.setText(entry.unlockState().name());
+    detailStateLabel.setText("ARCHIVE RECORD");
     lockedArtLabel.setVisible(false);
     setEnemyImage(entry.sprite().orElse(""));
   }
@@ -473,7 +488,25 @@ public class BestiaryDisplay extends UIComponent {
   }
 
   static String visibleName(BestiaryEntryView entry) {
-    return entry.displayName();
+    return entry.unlockState().isAtLeast(BestiaryUnlockState.ENCOUNTERED)
+        ? entry.displayName()
+        : "???";
+  }
+
+  private static Color tierColour(EnemyTier tier) {
+    return switch (tier) {
+      case NORMAL -> NORMAL_COLOUR;
+      case ELITE -> ELITE_COLOUR;
+      case BOSS -> BOSS_COLOUR;
+    };
+  }
+
+  private static String tierCaption(EnemyTier tier) {
+    return switch (tier) {
+      case NORMAL -> "NORMAL  /  THREAT I";
+      case ELITE -> "ELITE  /  THREAT II";
+      case BOSS -> "BOSS  /  THREAT III";
+    };
   }
 
   static String descriptionFor(BestiaryEntryView entry) {
@@ -499,23 +532,7 @@ public class BestiaryDisplay extends UIComponent {
   }
 
   private void setEnemyImage(String atlasPath) {
-    ResourceService resources = ServiceLocator.getResourceService();
-    String resolvedPath = atlasPath;
-    if (resolvedPath.isBlank() || !resources.containsAsset(resolvedPath, TextureAtlas.class)) {
-      resolvedPath = FALLBACK_ATLAS;
-    }
-    if (!resources.containsAsset(resolvedPath, TextureAtlas.class)) {
-      detailImage.setDrawable(null);
-      detailImage.setVisible(false);
-      lockedArtLabel.setVisible(true);
-      return;
-    }
-
-    TextureAtlas atlas = resources.getAsset(resolvedPath, TextureAtlas.class);
-    AtlasRegion region = atlas.findRegion(DEFAULT);
-    if (region == null) {
-      region = atlas.findRegion("idle", 0);
-    }
+    AtlasRegion region = enemyRegion(atlasPath);
     if (region == null) {
       detailImage.setDrawable(null);
       detailImage.setVisible(false);
@@ -526,6 +543,27 @@ public class BestiaryDisplay extends UIComponent {
     detailImage.setDrawable(new TextureRegionDrawable(region));
     detailImage.setVisible(true);
     lockedArtLabel.setVisible(false);
+  }
+
+  private AtlasRegion enemyRegion(String atlasPath) {
+    ResourceService resources = ServiceLocator.getResourceService();
+    String resolvedPath = atlasPath;
+    if (resolvedPath.isBlank() || !resources.containsAsset(resolvedPath, TextureAtlas.class)) {
+      resolvedPath = FALLBACK_ATLAS;
+    }
+    if (!resources.containsAsset(resolvedPath, TextureAtlas.class)) {
+      return null;
+    }
+
+    TextureAtlas atlas = resources.getAsset(resolvedPath, TextureAtlas.class);
+    AtlasRegion region = atlas.findRegion(DEFAULT);
+    if (region == null) {
+      region = atlas.findRegion("idle", 0);
+    }
+    if (region == null) {
+      return null;
+    }
+    return region;
   }
 
   private LabelStyle createLabelStyle(String baseStyle, Color colour) {
@@ -546,7 +584,21 @@ public class BestiaryDisplay extends UIComponent {
   }
 
   private Drawable buttonDrawable(Color tint) {
-    Texture texture = ServiceLocator.getResourceService().getAsset(BUTTON_TEXTURE, Texture.class);
+    return frameDrawable(BUTTON_TEXTURE, tint);
+  }
+
+  private Drawable tierButtonDrawable(EnemyTier tier, Color tint) {
+    String path =
+        switch (tier) {
+          case NORMAL -> BUTTON_TEXTURE;
+          case ELITE -> ELITE_FRAME_TEXTURE;
+          case BOSS -> BOSS_FRAME_TEXTURE;
+        };
+    return frameDrawable(path, tint);
+  }
+
+  private Drawable frameDrawable(String path, Color tint) {
+    Texture texture = ServiceLocator.getResourceService().getAsset(path, Texture.class);
     texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     TextureRegionDrawable drawable = new TextureRegionDrawable(new TextureRegion(texture));
     drawable.setMinWidth(0f);

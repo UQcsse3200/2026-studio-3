@@ -20,6 +20,9 @@ import com.csse3200.game.maps.RunState;
 import com.csse3200.game.narration.NarrationConfigLoader;
 import com.csse3200.game.narration.NarrationLoadingException;
 import com.csse3200.game.rewards.CardRewardProfile;
+import com.csse3200.game.rewards.ItemAcquisitionService;
+import com.csse3200.game.rewards.ItemDiscoveryService;
+import com.csse3200.game.rewards.ItemDiscoveryStore;
 import com.csse3200.game.save.AutosaveCoordinator;
 import com.csse3200.game.save.GameStateSnapshotProvider;
 import com.csse3200.game.save.JsonSaveGameRepository;
@@ -37,6 +40,7 @@ import com.csse3200.game.screens.EncounterScreen;
 import com.csse3200.game.screens.EndBattleScreen;
 import com.csse3200.game.screens.ItemLibraryScreen;
 import com.csse3200.game.screens.LibraryScreen;
+import com.csse3200.game.screens.LoadedSaveTransitionAware;
 import com.csse3200.game.screens.MainGameScreen;
 import com.csse3200.game.screens.MainMenuScreen;
 import com.csse3200.game.screens.MapScreen;
@@ -73,6 +77,8 @@ public class GdxGame extends Game {
       };
   private BestiaryService bestiaryService;
   private CardDiscoveryService cardDiscoveryService;
+  private ItemDiscoveryService itemDiscoveryService;
+  private ItemAcquisitionService itemAcquisitionService;
 
   /**
    * Gets discovery progress shared by all screens in this game session.
@@ -103,6 +109,16 @@ public class GdxGame extends Game {
    */
   public CardDiscoveryService getCardDiscoveryService() {
     return cardDiscoveryService;
+  }
+
+  /** Returns item discovery progress shared by all screens in this game session. */
+  public ItemDiscoveryService getItemDiscoveryService() {
+    return itemDiscoveryService;
+  }
+
+  /** Returns the shared item-grant gateway for rewards and Chance Event outcomes. */
+  public ItemAcquisitionService getItemAcquisitionService() {
+    return itemAcquisitionService;
   }
 
   // Lives here rather than on a screen, since setScreen() disposes the outgoing screen.
@@ -142,7 +158,8 @@ public class GdxGame extends Game {
             runState.getOrCreatePlayerDeck(cardLibrary),
             runState,
             bestiaryService,
-            cardDiscoveryService));
+            cardDiscoveryService,
+            itemDiscoveryService));
   }
 
   @Override
@@ -158,6 +175,15 @@ public class GdxGame extends Game {
         .addListener(
             CardDiscoveryService.ENTRY_UPDATED_EVENT,
             ignored -> cardDiscoveryStore.save(cardDiscoveryService.getProgressSnapshot()));
+    itemDiscoveryService = new ItemDiscoveryService();
+    ItemDiscoveryStore itemDiscoveryStore = ItemDiscoveryStore.defaultStore();
+    itemDiscoveryService.mergeProgress(itemDiscoveryStore.load());
+    itemDiscoveryService
+        .getEvents()
+        .addListener(
+            ItemDiscoveryService.ENTRY_UPDATED_EVENT,
+            ignored -> itemDiscoveryStore.save(itemDiscoveryService.getProgressSnapshot()));
+    itemAcquisitionService = new ItemAcquisitionService(itemDiscoveryService);
 
     // Sets background to light yellow
     Gdx.gl.glClearColor(162f / 255f, 73 / 255f, 54 / 255f, 1);
@@ -187,6 +213,20 @@ public class GdxGame extends Game {
   public void showBattleResult(boolean won, CardRewardProfile profile) {
     prepareScreenTransition(won ? ScreenType.VICTORY : ScreenType.DEFEAT);
     setScreen(new EndBattleScreen(this, won, profile));
+  }
+
+  /**
+   * Leaves the current activity after a save has been restored and opens the restored map.
+   *
+   * <p>Battle and encounter screens normally capture their live player while being disposed. They
+   * are notified first so that stale pre-load values cannot overwrite the restored player state.
+   */
+  public void resumeLoadedRun() {
+    Screen currentScreen = getScreen();
+    if (currentScreen instanceof LoadedSaveTransitionAware transitionAware) {
+      transitionAware.prepareForLoadedSaveTransition();
+    }
+    setScreen(ScreenType.MAP);
   }
 
   /**

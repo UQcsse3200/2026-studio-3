@@ -47,10 +47,7 @@ import com.csse3200.game.components.enemy.EnemyAI.TutorialEnemyAI;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
-import com.csse3200.game.components.pausemenu.PauseMenuActions;
-import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuFactory;
-import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
@@ -107,12 +104,13 @@ import org.slf4j.LoggerFactory;
  * The battle screen: the forest arena plus the card-hand UI, driven by {@link BattleController}.
  * Entered from a combat/boss map node (or the debug shortcut).
  */
-public class BattleScreen extends ScreenAdapter {
+public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionAware {
   private final GdxGame game;
   private final RunState runState;
   private final boolean tutorialBattle;
   private BattleTutorialGuidanceView tutorialView;
   private BattleActions battleActions;
+  private boolean suppressPlayerCaptureOnDispose;
   private static final Logger logger = LoggerFactory.getLogger(BattleScreen.class);
   private static final String BATTLE_TITLE_TEXTURE = "images/ui/battle-title-wordmark.png";
   private final Renderer renderer;
@@ -588,7 +586,8 @@ public class BattleScreen extends ScreenAdapter {
         "giveowneditem",
         "giveowneditem <ITEM_TYPE>",
         "add an item straight to the inventory",
-        new GiveOwnedItemCommand(game.getRunState().getOrCreatePlayerState()));
+        new GiveOwnedItemCommand(
+            game.getRunState().getOrCreatePlayerState(), game.getItemAcquisitionService()));
 
     // Untitled: DeckEditorComponent draws its own "CARD INVENTORY" header, like the item inventory.
     PopupDisplay cardInventory = new PopupDisplay("");
@@ -649,15 +648,7 @@ public class BattleScreen extends ScreenAdapter {
         .addListener(
             BattleActions.HAND_CHANGED_EVENT, (List<CardInstance> hand) -> rebuildHandWidgets());
     // Pause menu + in-place save/load overlay (added before the entity is created).
-    SaveLoadPanel savePanel = null;
-    if (tutorialBattle) {
-      battleUi
-          .addComponent(new PauseMenuDisplay())
-          .addComponent(new PauseMenuInput())
-          .addComponent(new PauseMenuActions(game, true));
-    } else {
-      savePanel = PauseMenuFactory.attach(battleUi, game);
-    }
+    SaveLoadPanel savePanel = PauseMenuFactory.attachLoadOnly(battleUi, game, tutorialBattle);
 
     gameArea.displayUI(battleUi);
     setBattleMenuFontScale();
@@ -669,7 +660,7 @@ public class BattleScreen extends ScreenAdapter {
     List<ClickableRecord> deckEditorClickables =
         ClickableFactory.loadRecordsFromJson(deckEditorUiJson);
     ClickableFactory deckPoolFactory = new ClickableFactory(deckEditorClickables);
-    if (savePanel != null) savePanel.hide(); // Tutorial previews must not save the real run.
+    savePanel.hide();
 
     List<DisplayingRecord> deckEditorDisplayRecords =
         DisplayingFactory.loadRecordsFromJson(deckEditorUiJson);
@@ -808,7 +799,9 @@ public class BattleScreen extends ScreenAdapter {
   @Override
   public void dispose() {
     cardInspection.reset();
-    playerState.captureFrom(gameArea.getPlayer());
+    if (!suppressPlayerCaptureOnDispose) {
+      playerState.captureFrom(gameArea.getPlayer());
+    }
     enemyCardAim.dispose();
     playerCardAim.dispose();
     allEnemiesCardAim.dispose();
@@ -820,6 +813,11 @@ public class BattleScreen extends ScreenAdapter {
     cardInteractionSkin.dispose();
     cardWidgetSkin.dispose();
     ServiceLocator.getResourceService().unloadAssets(mainGameTextures);
+  }
+
+  @Override
+  public void prepareForLoadedSaveTransition() {
+    suppressPlayerCaptureOnDispose = true;
   }
 
   private void loadAssets() {
