@@ -74,7 +74,7 @@ class BattleActionsTest {
   }
 
   @Test
-  void shouldAutoEndTurnAfterOneSecondWithoutEnergy() {
+  void shouldAutoEndTurnAfterThreeSecondsWithoutEnergy() {
     EnergyComponent energy = new EnergyComponent(3);
     player.addComponent(energy);
     GameTime time = mock(GameTime.class);
@@ -82,7 +82,7 @@ class BattleActionsTest {
     controller.start();
     energy.spendEnergy(3);
 
-    when(time.getDeltaTime()).thenReturn(0.5f);
+    when(time.getDeltaTime()).thenReturn(1.5f);
     entity.update();
     assertEquals(1, controller.getPlayerTurnNumber());
     assertEquals(20, player.getComponent(CombatStatsComponent.class).getHealth());
@@ -98,7 +98,7 @@ class BattleActionsTest {
     player.addComponent(new EnergyComponent(3));
     GameTime time = mock(GameTime.class);
     ServiceLocator.registerTimeSource(time);
-    when(time.getDeltaTime()).thenReturn(2f);
+    when(time.getDeltaTime()).thenReturn(6f);
     controller.start();
 
     entity.update();
@@ -115,7 +115,7 @@ class BattleActionsTest {
     ServiceLocator.registerTimeSource(time);
     controller.start();
     energy.spendEnergy(3);
-    when(time.getDeltaTime()).thenReturn(0.75f);
+    when(time.getDeltaTime()).thenReturn(2.25f);
     entity.update();
 
     energy.restoreEnergy(1);
@@ -123,7 +123,7 @@ class BattleActionsTest {
     assertEquals(1, controller.getPlayerTurnNumber());
 
     energy.spendEnergy(1);
-    when(time.getDeltaTime()).thenReturn(0.5f);
+    when(time.getDeltaTime()).thenReturn(1.5f);
     entity.update();
     assertEquals(1, controller.getPlayerTurnNumber());
     entity.update();
@@ -135,7 +135,7 @@ class BattleActionsTest {
     Graphics previousGraphics = Gdx.graphics;
     try {
       Gdx.graphics = mock(Graphics.class);
-      when(Gdx.graphics.getDeltaTime()).thenReturn(0.5f);
+      when(Gdx.graphics.getDeltaTime()).thenReturn(1.5f);
       GameTime time = new GameTime();
       ServiceLocator.registerTimeSource(time);
       GamePauseService pause = new GamePauseService(time);
@@ -146,12 +146,12 @@ class BattleActionsTest {
       entity.update();
 
       pause.pause();
-      when(Gdx.graphics.getDeltaTime()).thenReturn(2f);
+      when(Gdx.graphics.getDeltaTime()).thenReturn(6f);
       entity.update();
       assertEquals(1, controller.getPlayerTurnNumber());
 
       pause.resume();
-      when(Gdx.graphics.getDeltaTime()).thenReturn(0.5f);
+      when(Gdx.graphics.getDeltaTime()).thenReturn(1.5f);
       entity.update();
       assertEquals(2, controller.getPlayerTurnNumber());
     } finally {
@@ -177,18 +177,18 @@ class BattleActionsTest {
       ServiceLocator.registerTimeSource(time);
       controller.start();
       energy.spendEnergy(3);
-      when(time.getDeltaTime()).thenReturn(0.75f);
+      when(time.getDeltaTime()).thenReturn(2.25f);
       entity.update();
 
       entity.getEvents().trigger("endTurn");
       assertEquals(2, controller.getPlayerTurnNumber());
       energy.spendEnergy(3);
-      when(time.getDeltaTime()).thenReturn(2f);
+      when(time.getDeltaTime()).thenReturn(6f);
       entity.update();
       assertEquals(2, controller.getPlayerTurnNumber());
 
       reveals.get(0).run();
-      when(time.getDeltaTime()).thenReturn(0.5f);
+      when(time.getDeltaTime()).thenReturn(1.5f);
       entity.update();
       assertEquals(2, controller.getPlayerTurnNumber());
       entity.update();
@@ -246,7 +246,7 @@ class BattleActionsTest {
     Entity ui = new Entity().addComponent(new BattleActions(battle, mock(GdxGame.class)));
     ui.create();
     GameTime time = mock(GameTime.class);
-    when(time.getDeltaTime()).thenReturn(0.5f);
+    when(time.getDeltaTime()).thenReturn(1.5f);
     ServiceLocator.registerTimeSource(time);
     battle.start();
     return new CardBattle(battle, ui, energy, deck.getHand().get(0).instanceId());

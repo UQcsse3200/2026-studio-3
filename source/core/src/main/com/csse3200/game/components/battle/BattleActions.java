@@ -42,7 +42,7 @@ public class BattleActions extends Component {
   /** How long the enemy "thinks" before its action, log line and effects are revealed. */
   private static final float ENEMY_TURN_DELAY = 1.2f;
 
-  private static final float AUTO_END_TURN_DELAY = 1f;
+  private static final float AUTO_END_TURN_DELAY = 3f;
   private float depletedEnergyTime;
 
   public static final String ENEMY_TURN_EVENT = "enemyTurn";

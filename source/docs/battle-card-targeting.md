@@ -12,7 +12,7 @@ The battlefield is the central play area above the raised hand and below the top
 
 ## Automatic turn ending
 
-When the player runs out of energy, the turn ends automatically after one second of gameplay time. The last card resolves before the countdown starts. Recovering energy cancels the countdown; spending it all again starts a fresh delay. Pausing the game pauses the delay, and the End Turn button still works immediately.
+When the player runs out of energy, the turn ends automatically after three seconds of gameplay time. The last card resolves before the countdown starts. Recovering energy cancels the countdown; spending it all again starts a fresh delay. Pausing the game pauses the delay, and the End Turn button still works immediately.
 
 The countdown resets when the battle changes phase and waits for the enemy turn presentation to finish before starting on a new player turn.
 
@@ -23,7 +23,7 @@ The countdown resets when the battle changes phase and waits for the enemy turn 
 - `DragNDrop` dispatches one `playCard(instanceId, targetId)` event on a valid release. Single-enemy cards stay in the hand during aiming; self and all-enemy cards follow the pointer.
 - `Team3CardPlayAdapter` converts the event to the card's configured target type. The `allEnemies` UI marker does not select an individual enemy.
 - The existing card play service and battle controller validate costs and apply effects.
-- `BattleActions` checks energy through `BattleController` and updates the one-second countdown using the shared, pause-aware `GameTime`.
+- `BattleActions` checks energy through `BattleController` and updates the three-second countdown using the shared, pause-aware `GameTime`.
 
 ## Verification
 
@@ -31,4 +31,4 @@ Run `./gradlew.bat :core:test` with JDK 21. `CardAimControllerTest` covers empty
 
 For a gameplay check, drag an attack between enemies, drag a self card into empty battlefield space, and drag an all-enemy card into empty battlefield space. Return a card to the hand to confirm cancellation, and try an unaffordable card to confirm that it stays in hand without applying effects.
 
-To check the automatic turn ending in gameplay, spend the last energy and confirm the enemy turn begins after one second. Repeat while pausing during the delay, then check that an energy-restoring card keeps the turn open.
+To check the automatic turn ending in gameplay, spend the last energy and confirm the enemy turn begins after three seconds. Repeat while pausing during the delay, then check that an energy-restoring card keeps the turn open.
