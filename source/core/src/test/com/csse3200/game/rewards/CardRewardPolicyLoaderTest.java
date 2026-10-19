@@ -32,10 +32,10 @@ class CardRewardPolicyLoaderTest {
             .contains(missing));
     Path invalid = directory.resolve("bad.json");
     Files.writeString(invalid, "{broken");
+    String invalidFilename = invalid.toString();
     assertTrue(
         assertThrows(
-                IllegalArgumentException.class,
-                () -> CardRewardPolicyLoader.load(invalid.toString()))
+                IllegalArgumentException.class, () -> CardRewardPolicyLoader.load(invalidFilename))
             .getMessage()
             .contains("bad.json"));
   }

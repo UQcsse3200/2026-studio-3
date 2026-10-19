@@ -383,9 +383,25 @@ public class CardLibraryDisplay extends UIComponent {
     }
     if (focus != null && focus.isDescendantOf(cardList)) stage.setKeyboardFocus(focus);
     boolean searching = !searchField.getText().trim().isEmpty();
-    resultCountLabel.setText(
-        visible.size() + (searching ? (visible.size() == 1 ? " result" : " results") : " cards"));
+    String countSuffix = " cards";
+    if (searching) {
+      countSuffix = visible.size() == 1 ? " result" : " results";
+    }
+    resultCountLabel.setText(visible.size() + countSuffix);
     if (visible.isEmpty()) cardList.add(noResultsLabel).padTop(16f);
+    refreshSelection(visible);
+    if (selectionMessage != null)
+      selectionMessage.setText(
+          visible.isEmpty()
+              ? "No discovered cards match your search."
+              : "Select a card to view its details.");
+    if (resetScroll) {
+      cardScroll.setScrollY(0f);
+      cardScroll.updateVisualScroll();
+    }
+  }
+
+  private void refreshSelection(List<CardEntryView> visible) {
     if (displayedEntry != null) {
       CardEntryView current =
           visible.stream()
@@ -397,15 +413,6 @@ public class CardLibraryDisplay extends UIComponent {
         cardButtons.get(displayedEntry.cardId()).setChecked(false);
         clearDetails();
       }
-    }
-    if (selectionMessage != null)
-      selectionMessage.setText(
-          visible.isEmpty()
-              ? "No discovered cards match your search."
-              : "Select a card to view its details.");
-    if (resetScroll) {
-      cardScroll.setScrollY(0f);
-      cardScroll.updateVisualScroll();
     }
   }
 

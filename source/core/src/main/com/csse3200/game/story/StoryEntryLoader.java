@@ -57,9 +57,9 @@ public final class StoryEntryLoader {
       }
       if (!seenIds.add(parsed.id())) {
         logger.warn("Skipping duplicate story entry '{}' in {}", parsed.id(), filename);
-        continue;
+      } else {
+        loaded.add(parsed);
       }
-      loaded.add(parsed);
     }
     return List.copyOf(loaded);
   }

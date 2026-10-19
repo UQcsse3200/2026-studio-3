@@ -141,7 +141,8 @@ class WeightedCardRewardSelectionTest {
                   id ->
                       cards.getCard(id).orElseThrow().rarity
                           == com.csse3200.game.cards.Rarity.RARE));
-      assertThrows(UnsupportedOperationException.class, () -> offer.cardIds().add("strike"));
+      List<String> offeredIds = offer.cardIds();
+      assertThrows(UnsupportedOperationException.class, () -> offeredIds.add("strike"));
     }
   }
 

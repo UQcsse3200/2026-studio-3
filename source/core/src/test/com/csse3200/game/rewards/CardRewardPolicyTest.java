@@ -45,16 +45,18 @@ class CardRewardPolicyTest {
           IllegalArgumentException.class, () -> new CardRewardPolicy.RarityWeights(weight, 1, 1));
     }
     assertThrows(IllegalArgumentException.class, () -> new CardRewardPolicy.RarityWeights(0, 0, 0));
+    String negativeWeightJson = VALID.replace("\"COMMON\":7", "\"COMMON\":-1");
+    String nonfiniteWeightJson = VALID.replace("\"RARE\":7", "\"RARE\":1e999");
     assertTrue(
         assertThrows(
                 IllegalArgumentException.class,
-                () -> CardRewardPolicyLoader.parse(VALID.replace("\"COMMON\":7", "\"COMMON\":-1")))
+                () -> CardRewardPolicyLoader.parse(negativeWeightJson))
             .getMessage()
             .contains("normal"));
     assertTrue(
         assertThrows(
                 IllegalArgumentException.class,
-                () -> CardRewardPolicyLoader.parse(VALID.replace("\"RARE\":7", "\"RARE\":1e999")))
+                () -> CardRewardPolicyLoader.parse(nonfiniteWeightJson))
             .getMessage()
             .contains("elite"));
   }

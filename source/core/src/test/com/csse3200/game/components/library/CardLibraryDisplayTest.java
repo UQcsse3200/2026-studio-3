@@ -283,7 +283,7 @@ class CardLibraryDisplayTest {
             .filter(
                 actor ->
                     actor instanceof TextButton button && "Strike".contentEquals(button.getText()))
-            .map(actor -> (TextButton) actor)
+            .map(TextButton.class::cast)
             .findFirst()
             .orElseThrow();
     strike.setChecked(true);

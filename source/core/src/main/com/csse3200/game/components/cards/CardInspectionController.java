@@ -85,19 +85,7 @@ public final class CardInspectionController extends InputComponent {
       return false;
     }
     if (keycode == Keys.F) {
-      if (fHeld) return true;
-      fHeld = true;
-      if (isOpen()) {
-        close();
-        return true;
-      }
-      if (dragging.getAsBoolean()) return false;
-      Actor target = findTarget();
-      if (target == null) return false;
-      ResolvedCard card = sources.get(target).get();
-      if (card == null) return false;
-      open(target, card);
-      return true;
+      return toggleInspection();
     }
     if (isOpen()) {
       if (keycode == Keys.ENTER || keycode == Keys.SPACE) close();
@@ -106,6 +94,22 @@ public final class CardInspectionController extends InputComponent {
     }
     pointerPreferred = false;
     return false;
+  }
+
+  private boolean toggleInspection() {
+    if (fHeld) return true;
+    fHeld = true;
+    if (isOpen()) {
+      close();
+      return true;
+    }
+    if (dragging.getAsBoolean()) return false;
+    Actor target = findTarget();
+    if (target == null) return false;
+    ResolvedCard card = sources.get(target).get();
+    if (card == null) return false;
+    open(target, card);
+    return true;
   }
 
   @Override
@@ -165,7 +169,8 @@ public final class CardInspectionController extends InputComponent {
   private Actor findTarget() {
     Actor focused = sourceAncestor(stage.getKeyboardFocus());
     Vector2 pointer =
-        stage.screenToStageCoordinates(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
+        stage.screenToStageCoordinates(
+            new Vector2((float) Gdx.input.getX(), (float) Gdx.input.getY()));
     Actor pointed = sourceAncestor(stage.hit(pointer.x, pointer.y, true));
     Actor target = pointerPreferred ? pointed : focused;
     if (target == null) target = pointerPreferred ? focused : pointed;

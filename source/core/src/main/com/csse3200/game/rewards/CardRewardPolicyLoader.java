@@ -10,6 +10,8 @@ import java.util.Set;
 /** Loads reviewed reward weights once, independently of the acquisition allow-list. */
 public final class CardRewardPolicyLoader {
   public static final String DEFAULT_FILE = "configs/cardRewardPolicy.json";
+  private static final String NORMAL_PROFILE = "normal";
+  private static final String ELITE_PROFILE = "elite";
 
   private CardRewardPolicyLoader() {}
 
@@ -41,9 +43,10 @@ public final class CardRewardPolicyLoader {
     } catch (RuntimeException exception) {
       throw new IllegalArgumentException("Malformed reward policy JSON", exception);
     }
-    requireFields(root, Set.of("normal", "elite"), "reward policy");
+    requireFields(root, Set.of(NORMAL_PROFILE, ELITE_PROFILE), "reward policy");
     return new CardRewardPolicy(
-        readProfile(root.get("normal"), "normal"), readProfile(root.get("elite"), "elite"));
+        readProfile(root.get(NORMAL_PROFILE), NORMAL_PROFILE),
+        readProfile(root.get(ELITE_PROFILE), ELITE_PROFILE));
   }
 
   private static CardRewardPolicy.RarityWeights readProfile(JsonValue node, String name) {

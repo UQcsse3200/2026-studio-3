@@ -354,11 +354,7 @@ public class BestiaryDisplay extends UIComponent {
     List<BestiaryEntryView> filtered =
         bestiary.getDiscoveredEntriesByTier(activeTier).stream().filter(this::eligible).toList();
     boolean searching = !LibraryNameSearch.normalize(searchField.getText()).isEmpty();
-    resultCountLabel.setText(
-        filtered.size()
-            + (searching
-                ? (filtered.size() == 1 ? " result" : " results")
-                : (filtered.size() == 1 ? " enemy" : " enemies")));
+    updateResultCount(filtered.size(), searching);
     if (filtered.isEmpty()) {
       emptyStateLabel.setText(searching ? NO_RESULTS_MESSAGE : EMPTY_STATE_MESSAGE);
       enemyListTable.add(emptyStateLabel).width(285f).padTop(24f);
@@ -383,6 +379,16 @@ public class BestiaryDisplay extends UIComponent {
     else showDetails(selection);
   }
 
+  private void updateResultCount(int count, boolean searching) {
+    String suffix;
+    if (searching) {
+      suffix = count == 1 ? " result" : " results";
+    } else {
+      suffix = count == 1 ? " enemy" : " enemies";
+    }
+    resultCountLabel.setText(count + suffix);
+  }
+
   private TextButton createEntryButton(String enemyId) {
     TextButton button = new TextButton("", createButtonStyle());
     button.getLabel().setFontScale(1.1f);
@@ -405,15 +411,19 @@ public class BestiaryDisplay extends UIComponent {
   private void clearDetails(boolean empty) {
     displayedEntry = null;
     boolean searching = !LibraryNameSearch.normalize(searchField.getText()).isEmpty();
-    detailStateLabel.setText(empty ? (searching ? "NO RESULTS" : "NO RECORDS") : "NO SELECTION");
+    String state = "NO SELECTION";
+    String description = "Select a discovered enemy to view its record.";
+    if (empty) {
+      state = searching ? "NO RESULTS" : "NO RECORDS";
+      description =
+          searching
+              ? NO_RESULTS_MESSAGE
+              : "New records will appear here when they become available.";
+    }
+    detailStateLabel.setText(state);
     detailNameLabel.setText("No enemy selected");
     detailTierLabel.setText("");
-    detailDescriptionLabel.setText(
-        empty
-            ? (searching
-                ? NO_RESULTS_MESSAGE
-                : "New records will appear here when they become available.")
-            : "Select a discovered enemy to view its record.");
+    detailDescriptionLabel.setText(description);
     detailStatsLabel.setText("");
     detailImage.setDrawable(null);
     detailImage.setVisible(false);

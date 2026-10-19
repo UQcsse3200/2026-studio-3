@@ -113,6 +113,7 @@ class CardResolverTest {
     PlayerDeck deck = new PlayerDeck(library, List.of(cardId, cardId));
     CardInstance selected = deck.getCards().get(0);
     CardInstance sibling = deck.getCards().get(1);
+    String selectedInstanceId = selected.instanceId();
     ResolvedCard base = resolver.resolve(config, sibling);
     CardInstance upgradedInstance = deck.upgradeCard(selected.instanceId());
     ResolvedCard upgraded = resolver.resolve(config, upgradedInstance);
@@ -133,8 +134,7 @@ class CardResolverTest {
         () -> assertFalse(base.upgraded()),
         () -> assertEquals(List.of(upgradedInstance, sibling), deck.getCards()),
         () ->
-            assertThrows(
-                IllegalStateException.class, () -> deck.upgradeCard(selected.instanceId())));
+            assertThrows(IllegalStateException.class, () -> deck.upgradeCard(selectedInstanceId)));
     assertEquals(effects.size(), upgraded.effects().size());
     for (int index = 0; index < effects.size(); index++) {
       EffectConfig expected = effects.get(index);

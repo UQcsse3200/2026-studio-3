@@ -55,27 +55,29 @@ class StoryEntryLoaderTest {
   @Test
   void loadedListIsImmutable() {
     List<StoryEntry> entries = StoryEntryLoader.loadDefault();
+    StoryEntry extra = new StoryEntry("extra", "Extra", List.of("Text."));
 
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> entries.add(new StoryEntry("extra", "Extra", List.of("Text."))));
+    assertThrows(UnsupportedOperationException.class, () -> entries.add(extra));
   }
 
   @Test
   void entryRejectsBlankFieldsAndCopiesParagraphs() {
+    List<String> validParagraphs = List.of("p");
+    List<String> emptyParagraphs = List.of();
+    List<String> blankParagraphs = List.of(" ");
     assertAll(
         () ->
             assertThrows(
-                IllegalArgumentException.class, () -> new StoryEntry(" ", "T", List.of("p"))),
+                IllegalArgumentException.class, () -> new StoryEntry(" ", "T", validParagraphs)),
         () ->
             assertThrows(
-                IllegalArgumentException.class, () -> new StoryEntry("id", "", List.of("p"))),
+                IllegalArgumentException.class, () -> new StoryEntry("id", "", validParagraphs)),
         () ->
             assertThrows(
-                IllegalArgumentException.class, () -> new StoryEntry("id", "T", List.of())),
+                IllegalArgumentException.class, () -> new StoryEntry("id", "T", emptyParagraphs)),
         () ->
             assertThrows(
-                IllegalArgumentException.class, () -> new StoryEntry("id", "T", List.of(" "))));
+                IllegalArgumentException.class, () -> new StoryEntry("id", "T", blankParagraphs)));
 
     List<String> paragraphs = new java.util.ArrayList<>(List.of("p"));
     StoryEntry entry = new StoryEntry("id", "T", paragraphs);
