@@ -50,10 +50,7 @@ public class StatsDisplay extends UIComponent {
     Image armourImage =
         new Image(ServiceLocator.getResourceService().getAsset("images/armour.png", Texture.class));
 
-    armourLabel = new Label(String.valueOf(stats.getArmour()), skin);
-    armourLabel.setColor(Color.WHITE);
-    armourLabel.setFontScale(FONT_SCALE);
-    armourLabel.setAlignment(Align.center);
+    armourLabel = createLabel(String.valueOf(stats.getArmour()));
 
     armourStack = new Stack();
     armourStack.add(armourImage);
@@ -68,10 +65,7 @@ public class StatsDisplay extends UIComponent {
             ServiceLocator.getResourceService()
                 .getAsset("images/effects/shield.png", Texture.class));
 
-    blockLabel = new Label(String.valueOf(stats.getBlock()), skin);
-    blockLabel.setColor(Color.WHITE);
-    blockLabel.setFontScale(FONT_SCALE);
-    blockLabel.setAlignment(Align.center);
+    blockLabel = createLabel(String.valueOf(stats.getBlock()));
 
     blockStack = new Stack();
     blockStack.add(blockImage);
@@ -81,11 +75,7 @@ public class StatsDisplay extends UIComponent {
     updateBlockVisibility(stats.getBlock());
 
     // Health display
-    CharSequence healthText = String.format("%d / %d", stats.getHealth(), stats.getMaxHealth());
-    healthLabel = new Label(healthText, skin);
-    healthLabel.setColor(Color.WHITE);
-    healthLabel.setFontScale(FONT_SCALE);
-    healthLabel.setAlignment(Align.center);
+    healthLabel = createLabel(String.format("%d / %d", stats.getHealth(), stats.getMaxHealth()));
 
     ProgressBar.ProgressBarStyle healthBarStyle = new ProgressBar.ProgressBarStyle();
     healthBarStyle.background = skin.newDrawable(STYLE_NAME_WHITE, Color.DARK_GRAY);
@@ -116,6 +106,14 @@ public class StatsDisplay extends UIComponent {
 
     stage.addActor(table);
     updatePosition();
+  }
+
+  private Label createLabel(String text) {
+    Label label = new Label(text, skin);
+    label.setColor(Color.WHITE);
+    label.setFontScale(FONT_SCALE);
+    label.setAlignment(Align.center);
+    return label;
   }
 
   @Override
@@ -157,6 +155,9 @@ public class StatsDisplay extends UIComponent {
    * @param maxHealth entity's max health
    */
   public void updatePlayerHealthUI(int currentHealth, int maxHealth) {
+    if (healthLabel == null) {
+      return;
+    }
     CharSequence text = String.format("%d / %d", currentHealth, maxHealth);
     healthLabel.setText(text);
     healthBar.setRange(0, (float) maxHealth);
@@ -170,6 +171,9 @@ public class StatsDisplay extends UIComponent {
    * @param armour the entity's armour
    */
   public void updateArmourUI(int armour) {
+    if (armourLabel == null) {
+      return;
+    }
     CharSequence text = String.format("%d", armour);
     armourLabel.setText(text);
     updateArmourVisibility(armour);
@@ -182,6 +186,9 @@ public class StatsDisplay extends UIComponent {
    * @param block the entity's block
    */
   public void updateEnemyBlockUI(int block) {
+    if (blockLabel == null) {
+      return;
+    }
     CharSequence text = String.format("%d", block);
     blockLabel.setText(text);
     updateBlockVisibility(block);
@@ -199,19 +206,18 @@ public class StatsDisplay extends UIComponent {
     int armour = stats.getArmour();
     int block = stats.getBlock();
 
+    Color colour;
     if (armour > 0) {
-      healthBar.getStyle().knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.SKY);
-      healthBar.getStyle().knobBefore.setMinHeight(HEALTH_BAR_HEIGHT);
+      colour = Color.SKY;
     } else if (block > 0) {
-      healthBar.getStyle().knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.VIOLET);
-      healthBar.getStyle().knobBefore.setMinHeight(HEALTH_BAR_HEIGHT);
+      colour = Color.VIOLET;
     } else if ((float) currentHealth / maxHealth <= 0.4f) {
-      healthBar.getStyle().knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.RED);
-      healthBar.getStyle().knobBefore.setMinHeight(HEALTH_BAR_HEIGHT);
+      colour = Color.RED;
     } else {
-      healthBar.getStyle().knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.GREEN);
-      healthBar.getStyle().knobBefore.setMinHeight(HEALTH_BAR_HEIGHT);
+      colour = Color.GREEN;
     }
+    healthBar.getStyle().knobBefore = skin.newDrawable(STYLE_NAME_WHITE, colour);
+    healthBar.getStyle().knobBefore.setMinHeight(HEALTH_BAR_HEIGHT);
   }
 
   /**
