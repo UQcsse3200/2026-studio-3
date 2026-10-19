@@ -57,6 +57,41 @@ class CardWidgetTest {
   }
 
   @Test
+  void upgradeColoursAreLocalAndResetForBothAuthoredAndFallbackFaces() {
+    ResolvedCard base = card("Strike", "Deal 6 damage.", 1, Rarity.COMMON, false);
+    ResolvedCard upgraded = card("Strike+", "Deal 12 damage.", 1, Rarity.COMMON, true);
+    for (boolean authored : List.of(false, true)) {
+      CardWidgetAssets visuals =
+          authored ? CardWidgetAssets.fromSkin(skin, path -> strikeArtwork) : assets;
+      CardWidget widget = new CardWidget(base, visuals);
+      CardWidget sibling = new CardWidget(base, visuals);
+      Color fontColour = new Color(visuals.nameStyle().fontColor);
+      widget.setCard(upgraded);
+      List<Label> labels = new java.util.ArrayList<>();
+      collectLabels(widget, labels);
+      assertTrue(
+          labels.stream()
+              .anyMatch(
+                  label ->
+                      "Strike+".contentEquals(label.getText())
+                          && Color.valueOf("80ED99").equals(label.getColor())));
+      assertTrue(
+          labels.stream().anyMatch(label -> label.getText().toString().contains("[#195c32ff]")));
+      assertEquals(fontColour, visuals.nameStyle().fontColor);
+      assertFalse(sibling.getCard().upgraded());
+      widget.setCard(base);
+      labels.clear();
+      collectLabels(widget, labels);
+      assertTrue(
+          labels.stream()
+              .filter(label -> "Strike".contentEquals(label.getText()))
+              .allMatch(label -> Color.WHITE.equals(label.getColor())));
+      assertFalse(
+          labels.stream().anyMatch(label -> label.getText().toString().contains("[#195c32ff]")));
+    }
+  }
+
+  @Test
   void shouldRenderResolvedCardFields() {
     ResolvedCard strike = card("Strike", "Deal 6 damage.", 1, Rarity.COMMON, false);
 
@@ -271,7 +306,8 @@ class CardWidgetTest {
     widget.validate();
 
     assertEquals(1f, description.getFontScaleY());
-    assertEquals("Deal 6 damage.", description.getText().toString());
+    assertEquals(
+        CardWidgetAssets.formatDescription("Deal 6 damage."), description.getText().toString());
   }
 
   private void assertFixedLayout(ResolvedCard resolved) {
@@ -286,7 +322,9 @@ class CardWidgetTest {
     assertTrue(widget.getMinHeight() <= CardWidget.CARD_HEIGHT, resolved.cardId());
     assertChildrenInside(widget, resolved.cardId());
     Label description = findDescription(widget, resolved.description());
-    assertEquals(resolved.description(), description.getText().toString());
+    assertEquals(
+        CardWidgetAssets.formatDescription(resolved.description(), resolved.upgraded()),
+        description.getText().toString());
     assertTrue(description.getPrefHeight() <= description.getHeight() + 1f, resolved.cardId());
     assertTrue(
         description.getGlyphLayout().width <= description.getWidth() + 1f, resolved.cardId());
@@ -308,7 +346,10 @@ class CardWidgetTest {
 
   private static Label findDescription(Group parent, String description) {
     for (Actor child : parent.getChildren()) {
-      if (child instanceof Label label && description.contentEquals(label.getText())) {
+      if (child instanceof Label label
+          && (CardWidgetAssets.formatDescription(description).contentEquals(label.getText())
+              || CardWidgetAssets.formatDescription(description, true)
+                  .contentEquals(label.getText()))) {
         return label;
       }
       if (child instanceof Group group) {
@@ -319,6 +360,13 @@ class CardWidgetTest {
       }
     }
     return null;
+  }
+
+  private static void collectLabels(Group parent, List<Label> labels) {
+    for (Actor child : parent.getChildren()) {
+      if (child instanceof Label label) labels.add(label);
+      if (child instanceof Group group) collectLabels(group, labels);
+    }
   }
 
   private static ResolvedCard card(

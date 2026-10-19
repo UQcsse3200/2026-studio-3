@@ -1,0 +1,12 @@
+{
+  "entries": [
+    { "id": "first", "title": "First", "paragraphs": ["One.", "Two."] },
+    { "id": "no_title", "paragraphs": ["Missing a title."] },
+    { "id": "number_paragraph", "title": "Bad", "paragraphs": [42] },
+    { "id": "blank_paragraph", "title": "Blank", "paragraphs": ["  "] },
+    { "id": "no_paragraphs", "title": "Empty", "paragraphs": [] },
+    "not an object",
+    { "id": "first", "title": "Duplicate", "paragraphs": ["Should be skipped."] },
+    { "id": "second", "title": "Second", "paragraphs": ["Kept."] }
+  ]
+}

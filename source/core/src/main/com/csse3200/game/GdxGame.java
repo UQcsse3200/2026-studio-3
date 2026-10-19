@@ -19,6 +19,7 @@ import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.narration.NarrationConfigLoader;
 import com.csse3200.game.narration.NarrationLoadingException;
+import com.csse3200.game.rewards.CardRewardProfile;
 import com.csse3200.game.save.AutosaveCoordinator;
 import com.csse3200.game.save.GameStateSnapshotProvider;
 import com.csse3200.game.save.JsonSaveGameRepository;
@@ -42,6 +43,7 @@ import com.csse3200.game.screens.MapScreen;
 import com.csse3200.game.screens.NarrationScreen;
 import com.csse3200.game.screens.SaveLoadScreen;
 import com.csse3200.game.screens.SettingsScreen;
+import com.csse3200.game.screens.StoryLibraryScreen;
 import com.csse3200.game.screens.TempleCardSelectionScreen;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
@@ -181,6 +183,12 @@ public class GdxGame extends Game {
     setScreen(newScreen(screenType));
   }
 
+  /** Opens a battle result with explicit reward context, without retaining it across encounters. */
+  public void showBattleResult(boolean won, CardRewardProfile profile) {
+    prepareScreenTransition(won ? ScreenType.VICTORY : ScreenType.DEFEAT);
+    setScreen(new EndBattleScreen(this, won, profile));
+  }
+
   /**
    * Plays a story crawl, then continues to {@code next}. An unknown or empty sequence completes on
    * its first frame. Narration file errors skip the crawl and continue to {@code next}.
@@ -217,6 +225,19 @@ public class GdxGame extends Game {
    * cannot carry tutorial progress into the new run.
    */
   public void startNewRun() {
+    resetRunState();
+    showNarration("opening", ScreenType.MAP);
+  }
+
+  /**
+   * Opens a fresh map without repeating the opening narration already shown before the tutorial.
+   */
+  public void startRunAfterTutorial() {
+    resetRunState();
+    setScreen(ScreenType.MAP);
+  }
+
+  private void resetRunState() {
     logger.info("Starting a fresh run");
 
     Screen currentScreen = getScreen();
@@ -226,7 +247,6 @@ public class GdxGame extends Game {
     super.setScreen(null);
 
     runState.endRun();
-    showNarration("opening", ScreenType.MAP);
   }
 
   /** Opens the battle screen. */
@@ -236,7 +256,7 @@ public class GdxGame extends Game {
 
   /** Opens an isolated teaching battle without entering or completing a map node. */
   public void startTutorialBattle() {
-    setScreen(ScreenType.TUTORIAL_BATTLE);
+    showNarration("opening", ScreenType.TUTORIAL_BATTLE);
   }
 
   /**
@@ -337,6 +357,7 @@ public class GdxGame extends Game {
       case DEFEAT -> new EndBattleScreen(this, false);
       case BESTIARY -> new BestiaryScreen(this);
       case ITEM_LIBRARY -> new ItemLibraryScreen(this);
+      case STORY_LIBRARY -> new StoryLibraryScreen(this);
     };
   }
 
@@ -358,7 +379,8 @@ public class GdxGame extends Game {
     ANCIENT_TEMPLE,
     TEMPLE_CARD_SELECTION,
     BESTIARY,
-    ITEM_LIBRARY
+    ITEM_LIBRARY,
+    STORY_LIBRARY
   }
 
   /** Exit the game. */

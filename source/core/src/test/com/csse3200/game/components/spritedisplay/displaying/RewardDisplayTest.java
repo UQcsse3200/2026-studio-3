@@ -120,6 +120,31 @@ class RewardDisplayTest {
   }
 
   @Test
+  void resizingAndRepeatedCardOpeningKeepTheOriginalGeneratedOffer() {
+    RewardService service = spy(defaultService());
+    RewardDisplay display = createDisplay(service);
+    RewardOption offered = cardOption(display);
+    List<String> ids = offered.cardSelection.cardIds();
+    PlayerDeck deck = runState.getOrCreatePlayerDeck(cardService);
+    var ownedBefore = deck.getCards();
+    display.selectOption(offered);
+    for (int[] size : new int[][] {{1280, 720}, {1920, 1080}, {1280, 720}}) {
+      stage.getViewport().update(size[0], size[1], true);
+      for (var actor : stage.getRoot().getChildren()) {
+        if (actor instanceof com.badlogic.gdx.scenes.scene2d.utils.Layout layout) {
+          layout.validate();
+        }
+      }
+      stage.act(0f);
+      display.selectOption(offered);
+      assertSame(offered, cardOption(display));
+      assertEquals(ids, cardOption(display).cardSelection.cardIds());
+      assertEquals(ownedBefore, deck.getCards());
+    }
+    verify(service, times(1)).generateRewardOptions();
+  }
+
+  @Test
   void victoryPanelKeepsItsLogicalSizeAcrossViewportWidths() {
     stage.getViewport().update(1280, 800, true);
     RewardDisplay first = createDisplay(defaultService());

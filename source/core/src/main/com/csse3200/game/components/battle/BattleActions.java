@@ -11,6 +11,7 @@ import com.csse3200.game.entities.Entity;
 import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.CardRewardProfile;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,6 +64,7 @@ public class BattleActions extends Component {
   private final List<EnemyReleaseComponent> releaseAnimations = new ArrayList<>();
   private boolean awaitingRelease;
   private boolean released;
+  private CardRewardProfile rewardProfile = CardRewardProfile.NORMAL;
 
   public BattleActions(BattleController controller, GdxGame game) {
     this(controller, game, List.of(), false);
@@ -206,6 +208,7 @@ public class BattleActions extends Component {
     // Report the result to the run so the map node is marked done (win) or the run stays put
     // (loss). The end screen reads this to decide whether to go back to the map or the menu.
     RunState runState = game.getRunState();
+    rewardProfile = win ? rewardProfileFor(runState) : CardRewardProfile.NORMAL;
     if (runState == null) {
       return;
     }
@@ -251,17 +254,16 @@ public class BattleActions extends Component {
   }
 
   private void openResultScreen(boolean won) {
-    GdxGame.ScreenType target = won ? GdxGame.ScreenType.VICTORY : GdxGame.ScreenType.DEFEAT;
-
+    CardRewardProfile profile = rewardProfile;
     if (Gdx.app != null) {
       Gdx.app.postRunnable(
           () -> {
             if (!released) {
-              game.setScreen(target);
+              game.showBattleResult(won, profile);
             }
           });
     } else if (!released) {
-      game.setScreen(target);
+      game.showBattleResult(won, profile);
     }
   }
 
@@ -288,6 +290,20 @@ public class BattleActions extends Component {
     float healthRatio = (float) currentHealth / maxHealth;
 
     return healthRatio >= 0.8f;
+  }
+
+  private CardRewardProfile rewardProfileFor(RunState runState) {
+    if (tutorialBattle
+        || runState == null
+        || runState.getActiveNodeId() == null
+        || runState.getMapGraph() == null) {
+      return CardRewardProfile.NORMAL;
+    }
+    MapNode active = runState.getMapGraph().getNode(runState.getActiveNodeId());
+    return active != null
+            && (active.getRoomType() == RoomType.ELITE || active.getRoomType() == RoomType.FINAL)
+        ? CardRewardProfile.ELITE
+        : CardRewardProfile.NORMAL;
   }
 
   @Override
