@@ -72,8 +72,8 @@ class CardConfigLoaderTest {
   @Test
   void shouldReturnImmutableCardList() {
     List<CardConfig> cards = CardConfigLoader.loadCards();
-
-    assertThrows(UnsupportedOperationException.class, () -> cards.add(new CardConfig()));
+    CardConfig card = new CardConfig();
+    assertThrows(UnsupportedOperationException.class, () -> cards.add(card));
   }
 
   @Test
