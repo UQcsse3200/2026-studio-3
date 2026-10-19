@@ -32,7 +32,7 @@ public class EnemyTurnDisplay extends Displaying {
     label.setStyle(style);
     label.setAlignment(Align.center);
     label.setColor(1f, 1f, 1f, 0f);
-    label.setText("Enemy Turn");
+    label.setText("ENEMY TURN");
 
     entity.getEvents().addListener(BattleActions.ENEMY_TURN_EVENT, this::showEnemyTurn);
   }
