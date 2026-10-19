@@ -508,7 +508,9 @@ public class BattleScreen extends ScreenAdapter {
     terminal.addCommand("sethealth", new SetHealthCommand(gameArea.getPlayer()));
     terminal.addCommand("giveitem", new GiveItemCommand(gameArea.getPlayer()));
     terminal.addCommand(
-        "giveowneditem", new GiveOwnedItemCommand(game.getRunState().getOrCreatePlayerState()));
+        "giveowneditem",
+        new GiveOwnedItemCommand(
+            game.getRunState().getOrCreatePlayerState(), game.getItemAcquisitionService()));
 
     // Untitled: DeckEditorComponent draws its own "CARD INVENTORY" header, like the item inventory.
     PopupDisplay cardInventory = new PopupDisplay("");

@@ -19,6 +19,7 @@ import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.narration.NarrationConfigLoader;
 import com.csse3200.game.narration.NarrationLoadingException;
+import com.csse3200.game.rewards.ItemAcquisitionService;
 import com.csse3200.game.rewards.ItemDiscoveryService;
 import com.csse3200.game.rewards.ItemDiscoveryStore;
 import com.csse3200.game.save.AutosaveCoordinator;
@@ -74,6 +75,7 @@ public class GdxGame extends Game {
   private BestiaryService bestiaryService;
   private CardDiscoveryService cardDiscoveryService;
   private ItemDiscoveryService itemDiscoveryService;
+  private ItemAcquisitionService itemAcquisitionService;
 
   /**
    * Gets discovery progress shared by all screens in this game session.
@@ -109,6 +111,11 @@ public class GdxGame extends Game {
   /** Returns item discovery progress shared by all screens in this game session. */
   public ItemDiscoveryService getItemDiscoveryService() {
     return itemDiscoveryService;
+  }
+
+  /** Returns the shared item-grant gateway for rewards and Chance Event outcomes. */
+  public ItemAcquisitionService getItemAcquisitionService() {
+    return itemAcquisitionService;
   }
 
   // Lives here rather than on a screen, since setScreen() disposes the outgoing screen.
@@ -173,6 +180,7 @@ public class GdxGame extends Game {
         .addListener(
             ItemDiscoveryService.ENTRY_UPDATED_EVENT,
             ignored -> itemDiscoveryStore.save(itemDiscoveryService.getProgressSnapshot()));
+    itemAcquisitionService = new ItemAcquisitionService(itemDiscoveryService);
 
     // Sets background to light yellow
     Gdx.gl.glClearColor(162f / 255f, 73 / 255f, 54 / 255f, 1);

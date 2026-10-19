@@ -144,7 +144,11 @@ class RewardServiceTest {
     CardService cards = new CardLibrary(CardConfigLoader.loadCards());
     ItemDiscoveryService discovery = new ItemDiscoveryService();
     RewardService service =
-        new RewardService(new RewardGenerator(new Random(1)), cards, new Random(2), discovery);
+        new RewardService(
+            new RewardGenerator(new Random(1)),
+            cards,
+            new Random(2),
+            new ItemAcquisitionService(discovery));
 
     service.claimRunReward(new RunState(), RewardOption.item(ItemType.ENERGY_CRYSTAL), null);
 

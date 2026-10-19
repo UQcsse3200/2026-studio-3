@@ -18,6 +18,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
+import com.csse3200.game.events.listeners.EventListener1;
+import com.csse3200.game.rewards.ItemDiscoveryService;
 import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.ResourceService;
@@ -46,9 +48,12 @@ public class ItemLibraryDisplay extends UIComponent {
   private static final String LARGE = "large";
   private static final String SMALL = "small";
   private static final String DEFAULT = "default";
+  private static final String LOCKED_DESCRIPTION = "Obtain this item during a run to reveal it.";
 
   private static final Map<ItemType, String> ITEM_DESCRIPTIONS = new EnumMap<>(ItemType.class);
 
+  private final ItemDiscoveryService itemDiscoveryService;
+  private final EventListener1<ItemType> discoveryListener = ignored -> rebuildItemList();
   private ItemIconView itemIconView;
 
   static {
@@ -98,12 +103,18 @@ public class ItemLibraryDisplay extends UIComponent {
 
   public ItemLibraryDisplay(GdxGame game) {
     this.game = game;
+    this.itemDiscoveryService = game.getItemDiscoveryService();
   }
 
   @Override
   public void create() {
     super.create();
     addActors();
+    if (itemDiscoveryService != null) {
+      itemDiscoveryService
+          .getEvents()
+          .addListener(ItemDiscoveryService.ENTRY_UPDATED_EVENT, discoveryListener);
+    }
   }
 
   private void addActors() {
@@ -268,7 +279,7 @@ public class ItemLibraryDisplay extends UIComponent {
       if (firstItem == null) {
         firstItem = item;
       }
-      TextButton itemButton = new TextButton(ItemFormatting.formatItemName(item), buttonStyle);
+      TextButton itemButton = new TextButton(displayName(item), buttonStyle);
       itemButton.getLabel().setFontScale(0.6f);
       itemButton.addListener(
           new ChangeListener() {
@@ -312,16 +323,43 @@ public class ItemLibraryDisplay extends UIComponent {
   }
 
   private void showItem(ItemType item) {
+    if (!isDiscovered(item)) {
+      nameLabel.setText(displayName(item));
+      descriptionLabel.setText(LOCKED_DESCRIPTION);
+      sourceLabel.setText("");
+      hideItemImage();
+      return;
+    }
+
     nameLabel.setText(ItemFormatting.formatItemName(item));
     descriptionLabel.setText(ITEM_DESCRIPTIONS.getOrDefault(item, "No description available."));
     sourceLabel.setText("Obtained from: " + ItemFormatting.formatItemSource(item));
     setItemImage(resolveArtworkPath(item));
   }
 
+  private String displayName(ItemType item) {
+    if (isDiscovered(item)) {
+      return ItemFormatting.formatItemName(item);
+    }
+    return item.isCurse() ? "Unknown Curse" : "Unknown Relic";
+  }
+
+  private boolean isDiscovered(ItemType item) {
+    return itemDiscoveryService != null && itemDiscoveryService.isDiscovered(item);
+  }
+
+  private void hideItemImage() {
+    itemIconView.setItem(null);
+  }
+
   private void setItemImage(String texturePath) {
     ResourceService resources = ServiceLocator.getResourceService();
     if (!resources.containsAsset(texturePath, Texture.class)) {
-      itemIconView.setItem(null);
+      resources.loadTextures(new String[] {texturePath});
+      resources.loadAll();
+    }
+    if (!resources.containsAsset(texturePath, Texture.class)) {
+      hideItemImage();
       return;
     }
     Texture texture = resources.getAsset(texturePath, Texture.class);
@@ -379,6 +417,11 @@ public class ItemLibraryDisplay extends UIComponent {
 
   @Override
   public void dispose() {
+    if (itemDiscoveryService != null) {
+      itemDiscoveryService
+          .getEvents()
+          .removeListener(ItemDiscoveryService.ENTRY_UPDATED_EVENT, discoveryListener);
+    }
     if (rootStack != null) {
       rootStack.remove();
       rootStack.clear();

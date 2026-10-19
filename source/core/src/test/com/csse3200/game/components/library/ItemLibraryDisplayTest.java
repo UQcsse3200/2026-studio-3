@@ -27,15 +27,18 @@ import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.rendering.RenderService;
+import com.csse3200.game.rewards.ItemDiscoveryService;
 import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.ui.ItemIconView;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import javax.imageio.ImageIO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +51,7 @@ class ItemLibraryDisplayTest {
   private Entity entity;
   private GdxGame game;
   private ResourceService resources;
+  private ItemDiscoveryService discovery;
 
   @BeforeEach
   void setUp() {
@@ -57,6 +61,11 @@ class ItemLibraryDisplayTest {
     ServiceLocator.registerRenderService(renderService);
     ServiceLocator.registerEntityService(new EntityService());
     game = mock(GdxGame.class);
+    discovery = new ItemDiscoveryService();
+    for (ItemType item : ItemType.values()) {
+      discovery.recordDiscovered(item);
+    }
+    when(game.getItemDiscoveryService()).thenReturn(discovery);
     resources = mock(ResourceService.class);
     Texture texture = mock(Texture.class);
     when(texture.getWidth()).thenReturn(64);
@@ -95,6 +104,30 @@ class ItemLibraryDisplayTest {
         labelTexts()
             .contains(
                 "Obtained from: " + ItemFormatting.formatItemSource(ItemType.BLOOD_OATH_SIGIL)));
+  }
+
+  @Test
+  void undiscoveredItemsKeepTheirSlotsButHideDetailsAndArtworkUntilUnlocked() {
+    discovery.replaceProgress(Map.of());
+
+    assertTrue(buttonTexts().contains("Unknown Relic"));
+    assertFalse(buttonTexts().contains(ItemFormatting.formatItemName(ItemType.ENERGY_CRYSTAL)));
+    assertTrue(labelTexts().contains("Unknown Relic"));
+    assertTrue(labelTexts().contains("Obtain this item during a run to reveal it."));
+    assertFalse(labelTexts().stream().anyMatch(text -> text.startsWith("Obtained from:")));
+    ItemIconView icon = (ItemIconView) stage.getRoot().findActor("itemIconView");
+    assertFalse(icon.getArtwork().isVisible());
+
+    discovery.recordDiscovered(ItemType.ENERGY_CRYSTAL);
+
+    button(ItemFormatting.formatItemName(ItemType.ENERGY_CRYSTAL))
+        .fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    assertTrue(labelTexts().contains("+1 max energy per copy, capped at 5 total max energy."));
+    assertTrue(
+        labelTexts()
+            .contains(
+                "Obtained from: " + ItemFormatting.formatItemSource(ItemType.ENERGY_CRYSTAL)));
+    assertTrue(icon.getArtwork().isVisible());
   }
 
   @Test
