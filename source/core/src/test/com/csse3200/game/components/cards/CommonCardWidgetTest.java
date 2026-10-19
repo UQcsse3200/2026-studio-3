@@ -447,7 +447,8 @@ class CommonCardWidgetTest {
     for (Actor actor : group.getChildren()) {
       if (actor instanceof Label label
           && (text.contentEquals(label.getText())
-              || CardWidgetAssets.formatDescription(text).contentEquals(label.getText()))) {
+              || CardWidgetAssets.formatDescription(text).contentEquals(label.getText())
+              || CardWidgetAssets.formatDescription(text, true).contentEquals(label.getText()))) {
         count++;
       } else if (actor instanceof Group child) {
         count += countLabels(child, text);
@@ -487,7 +488,8 @@ class CommonCardWidgetTest {
     for (Actor actor : group.getChildren()) {
       if (actor instanceof Label label
           && (text.contentEquals(label.getText())
-              || CardWidgetAssets.formatDescription(text).contentEquals(label.getText()))) {
+              || CardWidgetAssets.formatDescription(text).contentEquals(label.getText())
+              || CardWidgetAssets.formatDescription(text, true).contentEquals(label.getText()))) {
         label.validate();
         return label;
       }

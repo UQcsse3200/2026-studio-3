@@ -1,6 +1,9 @@
 package com.csse3200.game.cards;
 
 import com.csse3200.game.cards.configs.CardConfig;
+import com.csse3200.game.cards.runtime.CardInstance;
+import com.csse3200.game.cards.runtime.CardResolver;
+import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.events.EventHandler;
 import java.util.Collection;
 import java.util.Collections;
@@ -69,6 +72,28 @@ public class CardDiscoveryService {
       return Optional.empty();
     }
     return Optional.of(viewFor(cardId));
+  }
+
+  /**
+   * Resolves a read-only upgrade preview only for a discovered, upgradable definition.
+   *
+   * <p>The synthetic identity is not owned and must never be saved or submitted for play. This
+   * query neither discovers cards nor changes any owned copy or definition.
+   *
+   * @param cardId registered definition ID
+   * @return upgraded values, or empty for unknown, locked or non-upgradable cards
+   */
+  public Optional<ResolvedCard> getUpgradePreview(String cardId) {
+    if (!contains(cardId) || !progress.get(cardId).isAtLeast(CardUnlockState.SEEN)) {
+      return Optional.empty();
+    }
+    CardConfig config = entries.get(cardId);
+    if (config.upgrade == null) {
+      return Optional.empty();
+    }
+    CardInstance preview =
+        new CardInstance("upgrade-preview-" + cardId, cardId, CardInstance.UPGRADED_LEVEL);
+    return Optional.of(new CardResolver().resolve(config, preview));
   }
 
   /** Returns a stable, immutable copy of every card's current unlock state. */

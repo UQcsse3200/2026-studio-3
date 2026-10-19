@@ -60,6 +60,8 @@ public final class CardWidgetAssets {
   private static final Color RARE_FRAME = new Color(0.93f, 0.61f, 0.14f, 1f);
   private static final Color LIGHT_TEXT = new Color(0.94f, 0.87f, 0.70f, 1f);
   private static final Color DARK_TEXT = new Color(0.10f, 0.065f, 0.045f, 1f);
+  private static final Color UPGRADED_TEXT = Color.valueOf("80ED99");
+  private static final Color UPGRADED_RULES_TEXT = Color.valueOf("195C32");
 
   private final Drawable cardFace;
   private final Drawable innerRim;
@@ -227,7 +229,18 @@ public final class CardWidgetAssets {
   }
 
   static String formatDescription(String description) {
-    return "[#" + DARK_TEXT + "]" + CardKeywordHighlighter.highlight(description) + "[]";
+    return formatDescription(description, false);
+  }
+
+  static String formatDescription(String description, boolean upgraded) {
+    Color colour = upgraded ? UPGRADED_RULES_TEXT : DARK_TEXT;
+    return "[#" + colour + "]" + CardKeywordHighlighter.highlight(description) + "[]";
+  }
+
+  static void styleUpgradeText(Label name, Label cost, boolean upgraded) {
+    // Tint only these actors, never shared styles or fonts. Keywords keep their own markup.
+    name.setColor(upgraded ? UPGRADED_TEXT : Color.WHITE);
+    cost.setColor(upgraded ? UPGRADED_TEXT : Color.WHITE);
   }
 
   Label.LabelStyle upgradeStyle() {

@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
+import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
@@ -43,9 +44,11 @@ import com.csse3200.game.ui.MenuTheme;
 import com.csse3200.game.ui.UIComponent;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +62,7 @@ public class CardLibraryDisplay extends UIComponent {
   private static final Color LIST_COLOUR = new Color(0.13f, 0.09f, 0.085f, 1f);
   private static final Color DETAIL_COLOUR = new Color(0.075f, 0.055f, 0.065f, 1f);
   private static final Color LOCKED_COLOUR = new Color(0.035f, 0.03f, 0.04f, 1f);
+  private static final Color UPGRADED_COLOUR = Color.valueOf("80ED99");
   private static final String WHITE = "white";
   private static final String LARGE = "large";
   private static final String SMALL = "small";
@@ -68,6 +72,7 @@ public class CardLibraryDisplay extends UIComponent {
   private final CardDiscoveryService discovery;
   private final EventListener1<CardEntryView> entryUpdatedListener = this::onEntryUpdated;
   private final Map<String, TextButton> cardButtons = new HashMap<>();
+  private final Set<String> upgradedPreviews = new HashSet<>();
   private List<String> cardOrder = List.of();
   private CardEntryView displayedEntry;
 
@@ -90,6 +95,8 @@ public class CardLibraryDisplay extends UIComponent {
 
   private Label discoveryCounterLabel;
   private Label stateLabel;
+  private CheckBox upgradePreview;
+  private ChangeListener upgradeChangedListener;
   private Label nameLabel;
   private Label descriptionLabel;
   private Label loreLabel;
@@ -406,6 +413,9 @@ public class CardLibraryDisplay extends UIComponent {
     displayedEntry = null;
     detailContent.setVisible(false);
     selectionPrompt.setVisible(true);
+    upgradePreview.setChecked(false);
+    upgradePreview.setDisabled(true);
+    upgradePreview.setVisible(false);
     for (Label label :
         new Label[] {
           stateLabel,
@@ -435,6 +445,24 @@ public class CardLibraryDisplay extends UIComponent {
 
     stateLabel = new Label("", labelStyle(SMALL, MenuTheme.softCoral()));
     stateLabel.setFontScale(1.05f);
+    upgradePreview = new CheckBox(" Upgraded", skin);
+    upgradePreview.setName("card-library-upgrade-preview");
+    upgradePreview.setProgrammaticChangeEvents(false);
+    upgradePreview.getLabel().setFontScale(0.8f);
+    upgradePreview.getLabel().setColor(MenuTheme.warmParchment());
+    upgradePreview.getImageCell().size(24f);
+    upgradeChangedListener =
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            if (displayedEntry == null || upgradePreview.isDisabled()) return;
+            String cardId = displayedEntry.cardId();
+            if (upgradePreview.isChecked()) upgradedPreviews.add(cardId);
+            else upgradedPreviews.remove(cardId);
+            discovery.getEntry(cardId).ifPresent(CardLibraryDisplay.this::showCard);
+          }
+        };
+    upgradePreview.addListener(upgradeChangedListener);
 
     cardPreview = new Stack();
     lockedPreview = createLockedPreview();
@@ -472,10 +500,14 @@ public class CardLibraryDisplay extends UIComponent {
 
     detailContent = new Table();
     detailContent.top();
-    detailContent.add(stateLabel).colspan(2).left().expandX().padBottom(8f);
+    detailContent.add(stateLabel).left().expandX().padBottom(8f);
+    detailContent.add(upgradePreview).right().padBottom(8f);
     detailContent.row();
     detailContent.add(cardPreview).size(CardWidget.CARD_WIDTH, CardWidget.CARD_HEIGHT).top();
-    detailContent.add(archiveDetails).width(330f).expandY().fillY().top().padLeft(18f);
+    ScrollPane detailsScroll = new ScrollPane(archiveDetails, skin);
+    detailsScroll.setFadeScrollBars(false);
+    detailsScroll.setScrollingDisabled(true, false);
+    detailContent.add(detailsScroll).width(330f).expandY().fillY().top().padLeft(18f);
     selectionMessage = new Label("Select a card to view its details.", bodyLabelStyle());
     selectionMessage.setName("card-library-selection-message");
     selectionMessage.setWrap(true);
@@ -526,17 +558,37 @@ public class CardLibraryDisplay extends UIComponent {
     rarityLabel.setText("Rarity: " + card.rarity().map(Enum::name).orElse("???"));
 
     if (card.unlockState() == CardUnlockState.LOCKED) {
+      upgradePreview.setChecked(false);
+      upgradePreview.setDisabled(true);
+      upgradePreview.setVisible(false);
       showLockedCard();
       return;
     }
 
+    var upgraded = discovery.getUpgradePreview(card.cardId());
+    upgradePreview.setVisible(true);
+    upgradePreview.setDisabled(upgraded.isEmpty());
+    upgradePreview.setChecked(upgraded.isPresent() && upgradedPreviews.contains(card.cardId()));
+    ResolvedCard resolved =
+        upgradePreview.isChecked() ? upgraded.orElseThrow() : resolveForDisplay(card);
+    nameLabel.setText(resolved.name());
+    descriptionLabel.setText(resolved.description());
+    nameLabel.setColor(resolved.upgraded() ? UPGRADED_COLOUR : Color.WHITE);
+    descriptionLabel.setColor(resolved.upgraded() ? UPGRADED_COLOUR : Color.WHITE);
+    costLabel.setText("Cost: " + resolved.cost());
+    costLabel.setColor(resolved.upgraded() ? UPGRADED_COLOUR : Color.WHITE);
+    typeLabel.setText("Type: " + resolved.type().name());
+    targetLabel.setText("Target: " + resolved.target().name());
+    rarityLabel.setText("Rarity: " + resolved.rarity().name());
     stateLabel.setText(card.unlockState().name());
-    effectsLabel.setText(
-        "Effects resolve in this order:\n" + formatEffects(card.effects().orElseThrow()));
-    showResolvedCard(resolveForDisplay(card));
+    effectsLabel.setText("Effects resolve in this order:\n" + formatEffects(resolved.effects()));
+    showResolvedCard(resolved);
   }
 
   private void showLockedCard() {
+    nameLabel.setColor(Color.WHITE);
+    descriptionLabel.setColor(Color.WHITE);
+    costLabel.setColor(Color.WHITE);
     stateLabel.setText("UNDISCOVERED");
     effectsLabel.setText("Effects: ???");
     lockedPreview.setVisible(true);
@@ -634,6 +686,9 @@ public class CardLibraryDisplay extends UIComponent {
   }
 
   private void onEntryUpdated(CardEntryView entry) {
+    if (!entry.unlockState().isAtLeast(CardUnlockState.SEEN)) {
+      upgradedPreviews.remove(entry.cardId());
+    }
     refreshCards(false);
     updateDiscoveryCounter();
   }
@@ -738,6 +793,7 @@ public class CardLibraryDisplay extends UIComponent {
         .getEvents()
         .removeListener(CardDiscoveryService.ENTRY_UPDATED_EVENT, entryUpdatedListener);
     if (searchField != null) searchField.removeListener(searchChangedListener);
+    if (upgradePreview != null) upgradePreview.removeListener(upgradeChangedListener);
     if (rootStack != null) {
       Actor focus = stage.getKeyboardFocus();
       if (focus != null && focus.isDescendantOf(rootStack)) stage.setKeyboardFocus(null);
@@ -747,6 +803,7 @@ public class CardLibraryDisplay extends UIComponent {
       rootStack.clear();
     }
     cardButtons.clear();
+    upgradedPreviews.clear();
     cardOrder = List.of();
     searchField = null;
     searchChangedListener = null;
