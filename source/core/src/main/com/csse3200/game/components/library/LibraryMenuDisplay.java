@@ -14,7 +14,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
-import com.csse3200.game.components.bestiary.BestiaryDisplay;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
@@ -26,7 +25,9 @@ import org.slf4j.LoggerFactory;
 
 /** Displays the library category chooser. */
 public class LibraryMenuDisplay extends UIComponent {
-  public static final String ITEM_BUTTON_TEXTURE = "images/item_library_button_frame.png";
+  public static final String CARD_BUTTON_TEXTURE = "images/library_menu_card_button_frame.png";
+  public static final String ENEMY_BUTTON_TEXTURE = "images/library_menu_enemy_button_frame.png";
+  public static final String ITEM_BUTTON_TEXTURE = "images/library_menu_item_button_frame.png";
   private static final Logger logger = LoggerFactory.getLogger(LibraryMenuDisplay.class);
   private final GdxGame game;
 
@@ -66,11 +67,10 @@ public class LibraryMenuDisplay extends UIComponent {
             .getAsset(MainMenuDisplay.BUTTON_FRAME_TEXTURE, Texture.class);
     buttonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     Texture cardButtonFrameTexture =
-        ServiceLocator.getResourceService()
-            .getAsset(CardLibraryDisplay.BUTTON_TEXTURE, Texture.class);
+        ServiceLocator.getResourceService().getAsset(CARD_BUTTON_TEXTURE, Texture.class);
     cardButtonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     Texture enemyButtonFrameTexture =
-        ServiceLocator.getResourceService().getAsset(BestiaryDisplay.BUTTON_TEXTURE, Texture.class);
+        ServiceLocator.getResourceService().getAsset(ENEMY_BUTTON_TEXTURE, Texture.class);
     enemyButtonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     Texture itemButtonFrameTexture =
         ServiceLocator.getResourceService().getAsset(ITEM_BUTTON_TEXTURE, Texture.class);

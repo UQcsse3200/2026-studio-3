@@ -3,8 +3,6 @@ package com.csse3200.game.screens;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.GdxGame;
-import com.csse3200.game.components.bestiary.BestiaryDisplay;
-import com.csse3200.game.components.library.CardLibraryDisplay;
 import com.csse3200.game.components.library.LibraryMenuDisplay;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.entities.Entity;
@@ -26,8 +24,8 @@ public class LibraryScreen extends ScreenAdapter {
   private static final String[] LIBRARY_TEXTURES = {
     MainMenuDisplay.BACKGROUND_TEXTURE,
     MainMenuDisplay.BUTTON_FRAME_TEXTURE,
-    CardLibraryDisplay.BUTTON_TEXTURE,
-    BestiaryDisplay.BUTTON_TEXTURE,
+    LibraryMenuDisplay.CARD_BUTTON_TEXTURE,
+    LibraryMenuDisplay.ENEMY_BUTTON_TEXTURE,
     LibraryMenuDisplay.ITEM_BUTTON_TEXTURE
   };
 
