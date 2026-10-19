@@ -13,11 +13,7 @@ import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.ui.UIComponent;
 
-/**
- * A ui component for displaying player stats, e.g. health.
- *
- * <p>Status effects on the player are shown separately by {@code StatusIconDisplay}.
- */
+/** A ui component for displaying player stats, e.g. health. */
 public class PlayerStatsDisplay extends UIComponent {
   /** Read-only live health display for tutorial anchoring and resolution observation. */
   public Label getHealthLabel() {
@@ -30,6 +26,9 @@ public class PlayerStatsDisplay extends UIComponent {
   private Stack armourStack;
   private Label armourLabel;
   private Cell<Stack> armourCell;
+  private Label blockLabel;
+  private Stack blockStack;
+  private Cell<Stack> blockCell;
   private static final String STYLE_NAME_WHITE = "white";
   private boolean disposed;
   private static final float FONT_SCALE = 0.75f;
@@ -42,6 +41,7 @@ public class PlayerStatsDisplay extends UIComponent {
 
     entity.getEvents().addListener("updateHealth", this::updatePlayerHealthUI);
     entity.getEvents().addListener("updateArmour", this::updateArmourUI);
+    entity.getEvents().addListener("updateBlock", this::updateEnemyBlockUI);
   }
 
   /**
@@ -69,6 +69,25 @@ public class PlayerStatsDisplay extends UIComponent {
     armourStack.add(armourImage);
     armourStack.add(armourLabel);
 
+    // Block image
+    Image blockImage =
+        new Image(
+            ServiceLocator.getResourceService()
+                .getAsset("images/effects/shield.png", Texture.class));
+
+    // Block text
+    int block = entity.getComponent(CombatStatsComponent.class).getBlock();
+    CharSequence blockText = String.format("%d", block);
+    blockLabel = new Label(blockText, skin);
+    blockLabel.setColor(Color.WHITE);
+    blockLabel.setFontScale(FONT_SCALE);
+    blockLabel.setAlignment(Align.center);
+
+    // Block stack
+    blockStack = new Stack();
+    blockStack.add(blockImage);
+    blockStack.add(blockLabel);
+
     // Health label
     int currentHealth = entity.getComponent(CombatStatsComponent.class).getHealth();
     int maxHealth = entity.getComponent(CombatStatsComponent.class).getMaxHealth();
@@ -84,6 +103,8 @@ public class PlayerStatsDisplay extends UIComponent {
 
     if (armour > 0) {
       healthBarStyle.knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.SKY);
+    } else if (block > 0) {
+      healthBarStyle.knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.VIOLET);
     } else {
       healthBarStyle.knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.GREEN);
     }
@@ -104,6 +125,8 @@ public class PlayerStatsDisplay extends UIComponent {
     // Add stacks and cell to table
     armourCell = table.add(armourStack).size(60f);
     updateArmourVisibility(armour);
+    blockCell = table.add(blockStack).size(60f);
+    updateBlockVisibility(block);
     table.add(healthStack).width(150).height(30);
 
     table.pack();
@@ -171,6 +194,18 @@ public class PlayerStatsDisplay extends UIComponent {
   }
 
   /**
+   * Updates the enemy's block on the UI
+   *
+   * @param block the enemy's block
+   */
+  public void updateEnemyBlockUI(int block) {
+    CharSequence text = String.format("%d", block);
+    blockLabel.setText(text);
+    updateBlockVisibility(block);
+    updateHealthBarColour();
+  }
+
+  /**
    * Updates the colour of the health bar. If the entity has armour the colour turns blue. If the
    * entity's health reaches 40% the colour turns red.
    */
@@ -179,9 +214,13 @@ public class PlayerStatsDisplay extends UIComponent {
     int currentHealth = stats.getHealth();
     int maxHealth = stats.getMaxHealth();
     int armour = stats.getArmour();
+    int block = stats.getBlock();
 
     if (armour > 0) {
       healthBar.getStyle().knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.SKY);
+      healthBar.getStyle().knobBefore.setMinHeight(20);
+    } else if (block > 0) {
+      healthBar.getStyle().knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.VIOLET);
       healthBar.getStyle().knobBefore.setMinHeight(20);
     } else if ((float) currentHealth / maxHealth <= 0.4f) {
       healthBar.getStyle().knobBefore = skin.newDrawable(STYLE_NAME_WHITE, Color.RED);
@@ -206,6 +245,22 @@ public class PlayerStatsDisplay extends UIComponent {
       armourCell.size(0f);
     }
     table.pack();
+  }
+
+  /**
+   * Makes the block cell visible if entity has block
+   *
+   * @param block the amount of block the entity has
+   */
+  public void updateBlockVisibility(int block) {
+    int armour = entity.getComponent(CombatStatsComponent.class).getArmour();
+    if (block > 0 && armour <= 0) {
+      blockCell.setActor(blockStack);
+      blockCell.size(60f);
+    } else {
+      blockCell.setActor(null);
+      blockCell.size(0f);
+    }
   }
 
   @Override

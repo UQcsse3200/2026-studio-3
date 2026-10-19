@@ -58,6 +58,7 @@ public class EncounterGameArea extends GameArea {
     "images/energy.png",
     "images/level.png",
     "images/money.png",
+    "images/effects/shield.png",
     // PlayerStatsDisplay's armour icon; the player HUD is also shown in shops and events.
     "images/armour.png",
     ShopDisplay.BACKGROUND_TEXTURE,
