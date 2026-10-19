@@ -55,6 +55,9 @@ import java.util.Objects;
  */
 public class ChanceEncounterDisplay extends UIComponent {
   public static final String DICE_GAME_BACKGROUND_TEXTURE = "images/chance/dice_game_scene_v1.png";
+  public static final String DICE_LOW_BUTTON_TEXTURE = "images/chance/dice_low_button_v2.png";
+  public static final String DICE_HIGH_BUTTON_TEXTURE = "images/chance/dice_high_button_v2.png";
+  public static final String DICE_CONTINUE_BUTTON_TEXTURE = "images/chance/dice_continue_button_v2.png";
   public static final String ABANDONED_MINE_BACKGROUND_TEXTURE =
       "images/chance/abandoned_mine_scene_v1.png";
   public static final String FUSION_BACKGROUND_TEXTURE = "images/chance/card_fusion_forge_v1.png";
@@ -75,6 +78,12 @@ public class ChanceEncounterDisplay extends UIComponent {
       "images/chance/mysterious_shrine_leave_button_v1.png";
   public static final String FLOODED_BACKGROUND_TEXTURE =
       "images/chance/flooded_crossing_static_v1.png";
+  public static final String SHRINE_BRAND_BUTTON_TEXTURE = "images/chance/shrine_brand_button_v2.png";
+  public static final String SHRINE_BLOOD_BUTTON_TEXTURE = "images/chance/shrine_blood_button_v2.png";
+  public static final String CROSSING_FERRY_BUTTON_TEXTURE = "images/chance/crossing_ferry_button_v2.png";
+  public static final String CROSSING_WADE_BUTTON_TEXTURE = "images/chance/crossing_wade_button_v2.png";
+  public static final String MINE_EXPLORE_BUTTON_TEXTURE = "images/chance/mine_explore_button_v2.png";
+  public static final String MINE_LEAVE_BUTTON_TEXTURE = "images/chance/mine_leave_button_v2.png";
   public static final String FUSION_CARD_BACK_TEXTURE =
       "images/chance/card_fusion_back_balanced.png";
 
@@ -1087,7 +1096,7 @@ public class ChanceEncounterDisplay extends UIComponent {
     resultTable.setBounds(245f, 38f, 790f, 70f);
     scene.addActor(resultTable);
 
-    continueButton = new TextButton(CONTINUE_BUTTON, createDiceContinueStyle());
+    continueButton = new TextButton(CONTINUE_BUTTON, illustratedButtonStyle(DICE_CONTINUE_BUTTON_TEXTURE));
     continueButton.getLabel().setFontScale(1.1f);
     continueButton.setBounds(1038f, 42f, 205f, 65f);
     continueButton.setVisible(false);
@@ -1227,6 +1236,27 @@ public class ChanceEncounterDisplay extends UIComponent {
     return style;
   }
 
+  /** Preserve the decorated end caps while fitting an illustration to either choice or Continue. */
+  private TextButtonStyle illustratedButtonStyle(String path) {
+    ResourceService resources = ServiceLocator.getResourceService();
+    if (resources == null || !resources.containsAsset(path, Texture.class)) {
+      return shrineButtonStyle(false);
+    }
+    Texture texture = resources.getAsset(path, Texture.class);
+    texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    TextButtonStyle style = new TextButtonStyle(skin.get(TextButtonStyle.class));
+    style.up = scenicTextureButtonDrawable(texture, 0, texture.getHeight(), 450, 700,
+        new Color(.85f, .83f, .80f, 1f));
+    style.over = scenicTextureButtonDrawable(texture, 0, texture.getHeight(), 450, 700,
+        Color.WHITE);
+    style.down = scenicTextureButtonDrawable(texture, 0, texture.getHeight(), 450, 700,
+        new Color(.67f, .66f, .64f, 1f));
+    style.disabled = style.up;
+    style.fontColor = BODY_COLOUR;
+    style.overFontColor = Color.WHITE;
+    style.disabledFontColor = MUTED_COLOUR;
+    return style;
+  }
   private TextButtonStyle createDiceChoiceStyle() {
     TextButtonStyle style = new TextButtonStyle(skin.get(TextButtonStyle.class));
     style.up = createDicePlaqueDrawable(new Color(0.72f, 0.42f, 0.43f, 0.96f));
@@ -1528,14 +1558,19 @@ public class ChanceEncounterDisplay extends UIComponent {
           .padBottom(8);
       choicesTable.row();
     } else if (scenicFlooded) {
-      choiceButton.setStyle(shrineButtonStyle(choiceNumber == 2));
+      choiceButton.setStyle(illustratedButtonStyle("hire-ferryman".equals(choice.getId())
+          ? CROSSING_FERRY_BUTTON_TEXTURE : CROSSING_WADE_BUTTON_TEXTURE));
       choicesTable
           .add(choiceButton)
           .width(com.badlogic.gdx.scenes.scene2d.ui.Value.percentWidth(.34f, rootTable))
           .height(94)
           .pad(0, 8, 0, 8);
     } else if (scenicShrine) {
-      choiceButton.setStyle(shrineScenicButtonStyle(!"make-offering".equals(choice.getId())));
+      choiceButton.setStyle("accept-brand".equals(choice.getId())
+          ? illustratedButtonStyle(SHRINE_BRAND_BUTTON_TEXTURE)
+          : "swear-blood-oath".equals(choice.getId())
+              ? illustratedButtonStyle(SHRINE_BLOOD_BUTTON_TEXTURE)
+              : shrineScenicButtonStyle(!"make-offering".equals(choice.getId())));
       if ("make-offering".equals(choice.getId()))
         choiceButton.addListener(
             new com.badlogic.gdx.scenes.scene2d.InputListener() {
@@ -1579,8 +1614,9 @@ public class ChanceEncounterDisplay extends UIComponent {
       String choiceId = choice.getId();
       if (DiceEncounterBehaviour.LOW_CHOICE_ID.equals(choiceId)
           || DiceEncounterBehaviour.HIGH_CHOICE_ID.equals(choiceId)) {
-        choiceButton.setStyle(
-            createDicePredictionStyle(DiceEncounterBehaviour.HIGH_CHOICE_ID.equals(choiceId)));
+        choiceButton.setStyle(illustratedButtonStyle(
+            DiceEncounterBehaviour.HIGH_CHOICE_ID.equals(choiceId)
+                ? DICE_HIGH_BUTTON_TEXTURE : DICE_LOW_BUTTON_TEXTURE));
       } else if (DiceEncounterBehaviour.TAKE_CHOICE_ID.equals(choiceId)
           || DiceEncounterBehaviour.CASH_OUT_CHOICE_ID.equals(choiceId)) {
         choiceButton.setStyle(createDiceDecisionStyle(false));
@@ -1590,9 +1626,9 @@ public class ChanceEncounterDisplay extends UIComponent {
       }
       choicesTable.add(choiceButton).width(455f).height(76f).padRight(30f);
     } else if (scenicAbandonedMine) {
-      if (choiceNumber == 2) {
-        choiceButton.setStyle(createMineChoiceStyle(new Color(0.48f, 0.50f, 0.57f, 1f)));
-      }
+      boolean explore = "search-tunnels".equals(choice.getId());
+      choiceButton.setStyle(illustratedButtonStyle(
+          explore ? MINE_EXPLORE_BUTTON_TEXTURE : MINE_LEAVE_BUTTON_TEXTURE));
       choicesTable.add(choiceButton).width(560f).height(100f).padRight(25f);
     } else if (scenicCardFusion) {
       if (choiceNumber == 2) {
@@ -1694,6 +1730,9 @@ public class ChanceEncounterDisplay extends UIComponent {
     }
 
     choiceResolved = true;
+    if (scenicShrine || scenicFlooded || scenicAbandonedMine) {
+      continueButton.setStyle(new TextButtonStyle(selectedButton.getStyle()));
+    }
     for (TextButton button : choiceButtons) {
       button.setDisabled(true);
     }
