@@ -55,7 +55,7 @@ public class CampfireScreen extends ScreenAdapter {
   private static final float MESSAGE_HOLD_SECONDS = 0.2f;
   private static final float MESSAGE_RAISE = 0.15f;
   private static final float MESSAGE_EXIT_SECONDS = 0.5f;
-  private static final float DISTANCE = 30f;
+  private static final float MESSAGE_FLOAT_DISTANCE = 30f;
   private static final String MAIN_SCENE = "images/campfire/main_scene_dusk.png";
   private static final String MAIN_SCENE_EXTENDED = "images/campfire/main_scene_extended.png";
   private static final String REST_SCENE = "images/campfire/rest_scene_wide.png";
@@ -457,15 +457,18 @@ public class CampfireScreen extends ScreenAdapter {
 
   private void showMessage(String text) {
     Label msg = new Label(text, skin, "large");
-    msg.setPosition((UI_WIDTH - msg.getWidth()) / 2, (UI_HEIGHT - msg.getHeight()) / 2 + (UI_HEIGHT * MESSAGE_RAISE));
+    msg.setPosition(
+        (UI_WIDTH - msg.getWidth()) / 2,
+        (UI_HEIGHT - msg.getHeight()) / 2 + (UI_HEIGHT * MESSAGE_RAISE));
     msg.getColor().a = 0f;
     msg.addAction(
-      Actions.sequence(
-          Actions.fadeIn(MESSAGE_FADE_SECONDS),
-          Actions.delay(MESSAGE_HOLD_SECONDS),
-          Actions.parallel(Actions.fadeOut(MESSAGE_EXIT_SECONDS), Actions.moveBy(0, DISTANCE, MESSAGE_EXIT_SECONDS, Interpolation.pow2Out)),
-          Actions.removeActor()));
-      mainScene.addActor(msg);
-
+        Actions.sequence(
+            Actions.fadeIn(MESSAGE_FADE_SECONDS),
+            Actions.delay(MESSAGE_HOLD_SECONDS),
+            Actions.parallel(
+                Actions.fadeOut(MESSAGE_EXIT_SECONDS),
+                Actions.moveBy(0, MESSAGE_FLOAT_DISTANCE, MESSAGE_EXIT_SECONDS, Interpolation.pow2Out)),
+            Actions.removeActor()));
+    mainScene.addActor(msg);
   }
 }
