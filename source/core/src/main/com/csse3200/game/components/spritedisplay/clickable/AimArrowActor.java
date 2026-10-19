@@ -86,7 +86,7 @@ final class AimArrowActor extends Actor {
   }
 
   private void drawCurve(Batch batch, float alpha) {
-    float rise = Math.min(180f, Math.max(45f, start.dst(end) * 0.4f));
+    float rise = Math.clamp(start.dst(end) * 0.4f, 45f, 180f);
     control1.set(start.x, start.y + rise);
     control2.set(end.x - (end.x - start.x) * 0.15f, end.y + rise * 0.35f);
     direction.set(end).sub(control2).nor();

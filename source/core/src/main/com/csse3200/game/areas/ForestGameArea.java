@@ -145,8 +145,6 @@ public class ForestGameArea extends GameArea {
     }
     player = spawnPlayer();
     spawnCloudPlatform();
-
-    // playMusic();
   }
 
   public void displayUI(Entity ui) {
@@ -253,13 +251,6 @@ public class ForestGameArea extends GameArea {
     return enemy == null ? List.of() : List.of(enemy);
   }
 
-  //  private void playMusic() {
-  //    Music music = ServiceLocator.getResourceService().getAsset(backgroundMusic, Music.class);
-  //    music.setLooping(true);
-  //    music.setVolume(0.3f);
-  //    music.play();
-  //  }
-
   private void loadAssets() {
     logger.debug("Loading assets");
     ResourceService resourceService = ServiceLocator.getResourceService();
@@ -270,7 +261,6 @@ public class ForestGameArea extends GameArea {
     resourceService.loadTextures(StatusInfo.iconPaths());
     resourceService.loadTextureAtlases(forestTextureAtlases);
     resourceService.loadSounds(forestSounds);
-    // resourceService.loadMusic(forestMusic);
 
     while (!resourceService.loadForMillis(10)) {
       // This could be upgraded to a loading screen
@@ -284,7 +274,6 @@ public class ForestGameArea extends GameArea {
     resourceService.unloadAssets(forestTextures);
     resourceService.unloadAssets(forestTextureAtlases);
     resourceService.unloadAssets(forestSounds);
-    // resourceService.unloadAssets(forestMusic);
     resourceService.unloadAssets(IntentIcons.all());
     resourceService.unloadAssets(StatusInfo.iconPaths());
   }
@@ -292,7 +281,6 @@ public class ForestGameArea extends GameArea {
   @Override
   public void dispose() {
     super.dispose();
-    // ServiceLocator.getResourceService().getAsset(backgroundMusic, Music.class).stop();
     this.unloadAssets();
   }
 }

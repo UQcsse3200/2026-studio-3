@@ -57,7 +57,7 @@ public class AnimationRenderComponent extends RenderComponent {
    */
   public AnimationRenderComponent(TextureAtlas atlas) {
     this.atlas = atlas;
-    this.animations = new HashMap<>(4);
+    this.animations = HashMap.newHashMap(4);
     timeSource = ServiceLocator.getTimeSource();
   }
 
@@ -177,9 +177,10 @@ public class AnimationRenderComponent extends RenderComponent {
 
   /** Last drawn frame, or the initial frame before the first draw; does not advance playback. */
   public TextureRegion getRenderedFrame() {
-    return renderedFrame != null
-        ? renderedFrame
-        : currentAnimation == null ? null : currentAnimation.getKeyFrame(animationPlayTime);
+    if (renderedFrame != null) {
+      return renderedFrame;
+    }
+    return getCurrentFrame();
   }
 
   /** Frame for the next draw; querying does not advance animation. */

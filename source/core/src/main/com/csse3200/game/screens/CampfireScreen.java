@@ -242,8 +242,8 @@ public class CampfireScreen extends ScreenAdapter {
   private void addExtensionStrip(Group scene, Texture texture, float y, float height, float alpha) {
     int sourceTop = Math.round((UI_HEIGHT - y - height) * texture.getHeight() / UI_HEIGHT);
     int sourceBottom = Math.round((UI_HEIGHT - y) * texture.getHeight() / UI_HEIGHT);
-    sourceTop = Math.max(0, Math.min(texture.getHeight() - 1, sourceTop));
-    sourceBottom = Math.max(sourceTop + 1, Math.min(texture.getHeight(), sourceBottom));
+    sourceTop = Math.clamp(sourceTop, 0, texture.getHeight() - 1);
+    sourceBottom = Math.clamp(sourceBottom, sourceTop + 1, texture.getHeight());
     Image strip =
         new Image(
             new TextureRegion(texture, 0, sourceTop, texture.getWidth(), sourceBottom - sourceTop));

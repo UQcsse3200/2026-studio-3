@@ -231,7 +231,7 @@ public class AudioService {
    */
   public static void setMusicVolume(float volume) {
 
-    musicVolume = Math.max(0f, Math.min(1f, volume));
+    musicVolume = Math.clamp(volume, 0f, 1f);
     if (playing != null) {
       playing.setVolume(musicVolume);
     }
@@ -276,12 +276,7 @@ public class AudioService {
       case MAIN_MENU -> startPlaylist(Playlist.MENU);
       case MAP -> startPlaylist(Playlist.MAP);
       case BATTLE_SCREEN -> startPlaylist(battlePlaylist(currentRoom(run)));
-      case ENCOUNTER -> {
-        // events keep the map music, only shops change it
-        if (currentRoom(run) == RoomType.SHOP) {
-          startPlaylist(Playlist.SHOP);
-        }
-      }
+      case ENCOUNTER -> startEncounterPlaylist(run);
       case LIBRARY, CARD_LIBRARY, BESTIARY -> startPlaylist(Playlist.LIBRARY);
       case VICTORY -> {
         stopMusic();
@@ -297,6 +292,13 @@ public class AudioService {
     }
     if (MENU_SCREENS.contains(screen)) {
       addButtonClicks();
+    }
+  }
+
+  private static void startEncounterPlaylist(RunState run) {
+    // events keep the map music, only shops change it
+    if (currentRoom(run) == RoomType.SHOP) {
+      startPlaylist(Playlist.SHOP);
     }
   }
 
@@ -373,7 +375,7 @@ public class AudioService {
    */
   private static void applyVolumes(float music, float soundEffects) {
     setMusicVolume(music * FULL_MUSIC_VOLUME);
-    soundEffectsVolume = Math.max(0f, Math.min(1f, soundEffects));
+    soundEffectsVolume = Math.clamp(soundEffects, 0f, 1f);
   }
 
   private static Playlist battlePlaylist(RoomType room) {

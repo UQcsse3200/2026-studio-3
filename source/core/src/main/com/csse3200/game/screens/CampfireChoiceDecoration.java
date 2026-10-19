@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.Align;
 /** Non-interactive scene ornaments; all choice callbacks remain owned by CampfireScreen. */
 final class CampfireChoiceDecoration extends Group {
   private final Drawable pixel;
+  private final Label.LabelStyle baseStyle;
   private final boolean heading;
   private float elapsed;
   private boolean hovered;
@@ -20,28 +21,22 @@ final class CampfireChoiceDecoration extends Group {
   CampfireChoiceDecoration(Skin skin, boolean heading) {
     this.heading = heading;
     pixel = skin.getDrawable("white");
+    baseStyle = skin.get("large", Label.LabelStyle.class);
     setTouchable(Touchable.disabled);
-    setSize(280, heading ? 160 : 310);
+    setSize(280, heading ? 160f : 310f);
     if (heading) {
-      text(skin, "Campfire", 0, 53, 280, 60, 2f, new Color(1f, .87f, .48f, 1));
-      text(skin, "Choose your next step", -60, 24, 400, 30, .8f, new Color(.92f, .79f, .59f, 1));
+      text("Campfire", 0, 53, 280, 60, 2f, new Color(1f, .87f, .48f, 1));
+      text("Choose your next step", -60, 24, 400, 30, .8f, new Color(.92f, .79f, .59f, 1));
     }
   }
 
   void optionText(Skin skin, String title) {
-    text(skin, title, 0, 151, 280, 28, .85f, new Color(1f, .86f, .57f, 1));
+    text(title, 0, 151, 280, 28, .85f, new Color(1f, .86f, .57f, 1));
   }
 
   private void text(
-      Skin skin,
-      String text,
-      float x,
-      float y,
-      float width,
-      float height,
-      float scale,
-      Color color) {
-    Label.LabelStyle style = new Label.LabelStyle(skin.get("large", Label.LabelStyle.class));
+      String text, float x, float y, float width, float height, float scale, Color color) {
+    Label.LabelStyle style = new Label.LabelStyle(baseStyle);
     if (heading) style.fontColor = Color.WHITE;
     Label label = new Label(text, style);
     label.setFontScale(scale);
@@ -152,6 +147,6 @@ final class CampfireChoiceDecoration extends Group {
   }
 
   private void dot(Batch batch, float x, float y, float width, float height) {
-    pixel.draw(batch, Math.round(x), Math.round(y), width, height);
+    pixel.draw(batch, (float) Math.round(x), (float) Math.round(y), width, height);
   }
 }
