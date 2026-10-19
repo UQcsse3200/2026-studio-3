@@ -92,7 +92,7 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public final class </span><span class="element-name type-name-label">CardRewardSelectionGenerator</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Samples one fixed, non-repeating Card reward from the shared acquisition pool.</div>
+<div class="block">Samples a rarity-weighted, distinct Card reward without consuming the shared acquisition pool.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -106,9 +106,16 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.cards.CardAcquisitionPool)" class="member-name-link">CardRewardSelectionGenerator</a><wbr>(<a href="../cards/CardAcquisitionPool.html" title="class in com.csse3200.game.cards">CardAcquisitionPool</a>&nbsp;pool)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.cards.CardAcquisitionPool,java.util.Random)" class="member-name-link">CardRewardSelectionGenerator</a><wbr>(<a href="../cards/CardAcquisitionPool.html" title="class in com.csse3200.game.cards">CardAcquisitionPool</a>&nbsp;pool,
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.cards.CardAcquisitionPool,com.csse3200.game.rewards.CardRewardPolicy,com.csse3200.game.rewards.CardRewardProfile,java.util.Random)" class="member-name-link">CardRewardSelectionGenerator</a><wbr>(<a href="../cards/CardAcquisitionPool.html" title="class in com.csse3200.game.cards">CardAcquisitionPool</a>&nbsp;pool,
+ <a href="CardRewardPolicy.html" title="class in com.csse3200.game.rewards">CardRewardPolicy</a>&nbsp;policy,
+ <a href="CardRewardProfile.html" title="enum class in com.csse3200.game.rewards">CardRewardProfile</a>&nbsp;profile,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;random)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Captures validated weights once; generating or displaying an offer does not reload JSON.</div>
+</div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.cards.CardAcquisitionPool,java.util.Random)" class="member-name-link">CardRewardSelectionGenerator</a><wbr>(<a href="../cards/CardAcquisitionPool.html" title="class in com.csse3200.game.cards">CardAcquisitionPool</a>&nbsp;pool,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;random)</code></div>
+<div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -126,7 +133,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="CardRewardSelection.html" title="class in com.csse3200.game.rewards">CardRewardSelection</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generate()" class="member-name-link">generate</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Generates up to three choices, or empty when no definition is eligible.</div>
+<div class="block">Generates up to three choices, or empty when no eligible rarity has positive weight.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="CardRewardSelection.html" title="class in com.csse3200.game.rewards">CardRewardSelection</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generate(int)" class="member-name-link">generate</a><wbr>(int&nbsp;count)</code></div>
@@ -163,6 +170,16 @@ loadScripts(document, 'script');</script>
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;random)</span></div>
 </section>
 </li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.cards.CardAcquisitionPool,com.csse3200.game.rewards.CardRewardPolicy,com.csse3200.game.rewards.CardRewardProfile,java.util.Random)">
+<h3>CardRewardSelectionGenerator</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">CardRewardSelectionGenerator</span><wbr><span class="parameters">(<a href="../cards/CardAcquisitionPool.html" title="class in com.csse3200.game.cards">CardAcquisitionPool</a>&nbsp;pool,
+ <a href="CardRewardPolicy.html" title="class in com.csse3200.game.rewards">CardRewardPolicy</a>&nbsp;policy,
+ <a href="CardRewardProfile.html" title="enum class in com.csse3200.game.rewards">CardRewardProfile</a>&nbsp;profile,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;random)</span></div>
+<div class="block">Captures validated weights once; generating or displaying an offer does not reload JSON.</div>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -175,7 +192,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="generate()">
 <h3>generate</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="CardRewardSelection.html" title="class in com.csse3200.game.rewards">CardRewardSelection</a>&gt;</span>&nbsp;<span class="element-name">generate</span>()</div>
-<div class="block">Generates up to three choices, or empty when no definition is eligible.</div>
+<div class="block">Generates up to three choices, or empty when no eligible rarity has positive weight.</div>
 </section>
 </li>
 <li>

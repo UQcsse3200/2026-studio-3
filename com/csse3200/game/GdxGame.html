@@ -223,30 +223,41 @@ loadScripts(document, 'script');</script>
 <div class="block">Sets the game's screen to a new screen of the provided type.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#showNarration(java.lang.String,com.csse3200.game.GdxGame.ScreenType)" class="member-name-link">showNarration</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;sequenceId,
- <a href="GdxGame.ScreenType.html" title="enum class in com.csse3200.game">GdxGame.ScreenType</a>&nbsp;next)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#showBattleResult(boolean,com.csse3200.game.rewards.CardRewardProfile)" class="member-name-link">showBattleResult</a><wbr>(boolean&nbsp;won,
+ <a href="rewards/CardRewardProfile.html" title="enum class in com.csse3200.game.rewards">CardRewardProfile</a>&nbsp;profile)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Opens a battle result with explicit reward context, without retaining it across encounters.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#showNarration(java.lang.String,com.csse3200.game.GdxGame.ScreenType)" class="member-name-link">showNarration</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;sequenceId,
+ <a href="GdxGame.ScreenType.html" title="enum class in com.csse3200.game">GdxGame.ScreenType</a>&nbsp;next)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Plays a story crawl, then continues to <code>next</code>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startBattle()" class="member-name-link">startBattle</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startBattle()" class="member-name-link">startBattle</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Opens the battle screen.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startElitePortalDebug()" class="member-name-link">startElitePortalDebug</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startElitePortalDebug()" class="member-name-link">startElitePortalDebug</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Temporary development shortcut for previewing the Elite portal flow.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startEvent(java.lang.String)" class="member-name-link">startEvent</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;eventId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startEvent(java.lang.String)" class="member-name-link">startEvent</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;eventId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Opens a specific configured Event for the active map node using the persistent run.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startNewRun()" class="member-name-link">startNewRun</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startNewRun()" class="member-name-link">startNewRun</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Discards the previous run, plays the opening story, and opens a fresh normal map.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startRunAfterTutorial()" class="member-name-link">startRunAfterTutorial</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Opens a fresh map without repeating the opening narration already shown before the tutorial.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startTutorialBattle()" class="member-name-link">startTutorialBattle</a>()</code></div>
@@ -367,6 +378,14 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="showBattleResult(boolean,com.csse3200.game.rewards.CardRewardProfile)">
+<h3>showBattleResult</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">showBattleResult</span><wbr><span class="parameters">(boolean&nbsp;won,
+ <a href="rewards/CardRewardProfile.html" title="enum class in com.csse3200.game.rewards">CardRewardProfile</a>&nbsp;profile)</span></div>
+<div class="block">Opens a battle result with explicit reward context, without retaining it across encounters.</div>
+</section>
+</li>
+<li>
 <section class="detail" id="showNarration(java.lang.String,com.csse3200.game.GdxGame.ScreenType)">
 <h3>showNarration</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">showNarration</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;sequenceId,
@@ -388,6 +407,13 @@ loadScripts(document, 'script');</script>
 
  <p>The outgoing screen is disposed before resetting run state, so its final state capture
  cannot carry tutorial progress into the new run.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="startRunAfterTutorial()">
+<h3>startRunAfterTutorial</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">startRunAfterTutorial</span>()</div>
+<div class="block">Opens a fresh map without repeating the opening narration already shown before the tutorial.</div>
 </section>
 </li>
 <li>
