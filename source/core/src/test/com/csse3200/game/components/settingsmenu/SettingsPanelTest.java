@@ -13,9 +13,12 @@ import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Graphics.DisplayMode;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.files.UserSettings.Settings;
@@ -69,6 +72,79 @@ class SettingsPanelTest {
     } finally {
       Gdx.graphics = originalGraphics;
     }
+  }
+
+  @Test
+  void populationDoesNotWriteOrApplySettings() {
+    AtomicInteger audioCount = new AtomicInteger();
+    AtomicInteger displayCount = new AtomicInteger();
+    new SettingsPanel(
+        skin,
+        backCount::incrementAndGet,
+        () -> initial,
+        settings -> writeCount.incrementAndGet(),
+        settings -> audioCount.incrementAndGet(),
+        settings -> displayCount.incrementAndGet());
+
+    assertEquals(0, writeCount.get());
+    assertEquals(0, audioCount.get());
+    assertEquals(0, displayCount.get());
+  }
+
+  @Test
+  void resetPopulationDoesNotApplyOrBubbleControlChanges() {
+    AtomicInteger applyCount = new AtomicInteger();
+    AtomicInteger controlChanges = new AtomicInteger();
+    SettingsPanel panel =
+        new SettingsPanel(
+            skin,
+            backCount::incrementAndGet,
+            () -> initial,
+            settings -> writeCount.incrementAndGet(),
+            settings -> applyCount.incrementAndGet(),
+            settings -> applyCount.incrementAndGet());
+    Group parent = new Group();
+    parent.addActor(panel);
+    parent.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            if (actor instanceof Slider || actor instanceof CheckBox) {
+              controlChanges.incrementAndGet();
+            }
+          }
+        });
+
+    click(panel.getResetButton());
+
+    assertEquals(0, writeCount.get());
+    assertEquals(0, applyCount.get());
+    assertEquals(0, controlChanges.get());
+  }
+
+  @Test
+  void applyUsesInjectedAudioAndDisplayAppliers() {
+    AtomicReference<Settings> audio = new AtomicReference<>();
+    AtomicReference<Settings> display = new AtomicReference<>();
+    SettingsPanel panel =
+        new SettingsPanel(
+            skin,
+            backCount::incrementAndGet,
+            () -> initial,
+            written::set,
+            audio::set,
+            display::set);
+    panel.getMasterVolumeSlider().setValue(0.5f);
+    panel.getFpsText().setText("120");
+    assertNull(audio.get());
+    assertNull(display.get());
+
+    click(panel.getApplyButton());
+
+    assertEquals(0.5f, audio.get().masterVolume);
+    assertEquals(120, display.get().fps);
+    assertEquals(0.5f, written.get().masterVolume);
+    assertEquals(120, written.get().fps);
   }
 
   @Test
@@ -294,7 +370,9 @@ class SettingsPanelTest {
         settings -> {
           writeCount.incrementAndGet();
           written.set(settings);
-        });
+        },
+        settings -> {},
+        settings -> {});
   }
 
   @Test
@@ -352,7 +430,9 @@ class SettingsPanelTest {
                 throw new IllegalStateException("Simulated write failure");
               }
               written.set(settings);
-            });
+            },
+            settings -> {},
+            settings -> {});
     click(panel.getApplyButton());
     Settings saved = written.get();
     assertEquals("Settings applied.", feedback(panel).getText().toString());

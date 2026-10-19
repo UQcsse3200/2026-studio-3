@@ -40,7 +40,11 @@ public class SettingsPanel extends Table {
   private final Skin skin;
   private final Runnable backAction;
   private final Consumer<Settings> settingsWriter;
+  private final Consumer<Settings> audioApplier;
+  private final Consumer<Settings> displayApplier;
   private Settings appliedSettings;
+  private Settings liveSettings;
+  private boolean populating;
 
   private Slider masterVolumeSlider;
   private Slider musicVolumeSlider;
@@ -60,7 +64,7 @@ public class SettingsPanel extends Table {
 
   /** Creates a panel backed by the global user-settings file. */
   public SettingsPanel(Skin skin, Runnable backAction) {
-    this(skin, backAction, UserSettings::get, settings -> UserSettings.set(settings, true));
+    this(skin, backAction, UserSettings::get, settings -> UserSettings.set(settings, false));
   }
 
   SettingsPanel(
@@ -68,10 +72,29 @@ public class SettingsPanel extends Table {
       Runnable backAction,
       Supplier<Settings> settingsLoader,
       Consumer<Settings> settingsWriter) {
+    this(
+        skin,
+        backAction,
+        settingsLoader,
+        settingsWriter,
+        UserSettings::applyAudioSettings,
+        UserSettings::applyDisplaySettings);
+  }
+
+  SettingsPanel(
+      Skin skin,
+      Runnable backAction,
+      Supplier<Settings> settingsLoader,
+      Consumer<Settings> settingsWriter,
+      Consumer<Settings> audioApplier,
+      Consumer<Settings> displayApplier) {
     this.skin = skin;
     this.backAction = backAction;
     this.settingsWriter = settingsWriter;
+    this.audioApplier = audioApplier;
+    this.displayApplier = displayApplier;
     appliedSettings = copyOf(settingsLoader.get());
+    liveSettings = copyOf(appliedSettings);
     build();
     populate(appliedSettings);
   }
@@ -168,6 +191,10 @@ public class SettingsPanel extends Table {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
+            if (populating) {
+              event.stop();
+              return;
+            }
             feedbackLabel.setText("");
           }
         };
@@ -220,6 +247,16 @@ public class SettingsPanel extends Table {
   }
 
   private void populate(Settings settings) {
+    populating = true;
+    try {
+      populateAudio(settings);
+      populateDisplay(settings);
+    } finally {
+      populating = false;
+    }
+  }
+
+  private void populateAudio(Settings settings) {
     masterVolumeSlider.setValue(settings.masterVolume);
     musicVolumeSlider.setValue(settings.musicVolume);
     soundEffectsVolumeSlider.setValue(settings.soundEffectsVolume);
@@ -227,6 +264,9 @@ public class SettingsPanel extends Table {
     updateVolumeLabel(musicVolumeSlider, musicVolumeValue);
     updateVolumeLabel(soundEffectsVolumeSlider, soundEffectsVolumeValue);
     muteCheck.setChecked(settings.muted);
+  }
+
+  private void populateDisplay(Settings settings) {
     fpsText.setText(Integer.toString(settings.fps));
     fullScreenCheck.setChecked(settings.fullscreen);
     vsyncCheck.setChecked(settings.vsync);
@@ -256,6 +296,8 @@ public class SettingsPanel extends Table {
 
     try {
       settingsWriter.accept(updated);
+      displayApplier.accept(copyOf(updated));
+      audioApplier.accept(copyOf(updated));
     } catch (RuntimeException e) {
       logger.error("Could not apply settings", e);
       showFeedback("Could not apply settings. Please try again.", Color.SALMON);
@@ -263,6 +305,7 @@ public class SettingsPanel extends Table {
     }
 
     appliedSettings = copyOf(updated);
+    liveSettings = copyOf(updated);
     populate(appliedSettings);
     showFeedback("Settings applied.", Color.GREEN);
   }
