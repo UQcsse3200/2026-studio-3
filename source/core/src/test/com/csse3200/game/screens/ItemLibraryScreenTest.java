@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.csse3200.game.components.library.ItemLibraryDisplay;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.extensions.GameExtension;
+import com.csse3200.game.rewards.ItemDiscoveryService;
 import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
 import java.util.Arrays;
@@ -23,6 +24,7 @@ class ItemLibraryScreenTest {
     List<String> texturePaths = Arrays.asList(ItemLibraryScreen.collectTexturePaths());
 
     assertTrue(texturePaths.contains(MainMenuDisplay.BACKGROUND_TEXTURE));
+    assertTrue(texturePaths.contains(MainMenuDisplay.BUTTON_FRAME_TEXTURE));
     assertTrue(texturePaths.contains(ItemLibraryDisplay.BUTTON_TEXTURE));
     for (ItemType item : ItemType.values()) {
       assertTrue(texturePaths.contains(ItemLibraryDisplay.resolveArtworkPath(item)));
@@ -35,6 +37,19 @@ class ItemLibraryScreenTest {
     Set<String> uniquePaths = new HashSet<>(texturePaths);
 
     assertEquals(uniquePaths.size(), texturePaths.size());
+  }
+
+  @Test
+  void collectTexturePathsPreloadsOnlyDiscoveredItemArtwork() {
+    ItemDiscoveryService discovery = new ItemDiscoveryService();
+    discovery.recordDiscovered(ItemType.IRON_AEGIS);
+
+    List<String> texturePaths = Arrays.asList(ItemLibraryScreen.collectTexturePaths(discovery));
+
+    assertTrue(texturePaths.contains(MainMenuDisplay.BACKGROUND_TEXTURE));
+    assertTrue(texturePaths.contains(ItemLibraryDisplay.resolveArtworkPath(ItemType.IRON_AEGIS)));
+    assertFalse(
+        texturePaths.contains(ItemLibraryDisplay.resolveArtworkPath(ItemType.ENERGY_CRYSTAL)));
   }
 
   @Test

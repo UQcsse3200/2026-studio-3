@@ -27,13 +27,14 @@ record CardFrameLayout(
       new CardFrameLayout(
           CardWidgetAssets.COMMON_FRAME_TEXTURE,
           // The PNG's window is opaque black. Keep overlaid art inside its clear rectangular
-          // interior, away from the cost orb, rounded corners and target ribbon.
-          new Bounds(16f, 174f, 193f, 222f),
+          // interior. Match the landscape artwork (approximately 4:3) and reserve the freed
+          // vertical space for rules, rather than letterboxing art in a portrait opening.
+          new Bounds(16f, 251f, 193f, 145f),
           new Bounds(13f, 402f, 43f, 43f),
           new Bounds(60f, 414f, 143f, 28f),
-          new Bounds(23f, 36f, 179f, 111f),
+          new Bounds(23f, 36f, 179f, 188f),
           // Type belongs on the ribbon between the art and rules; target on the bottom plate.
-          new Bounds(75f, 150f, 75f, 17f),
+          new Bounds(75f, 227f, 75f, 17f),
           new Bounds(80f, 15f, 65f, 16f),
           new Bounds(203f, 420f, 10f, 14f),
           0.90f,
@@ -46,8 +47,8 @@ record CardFrameLayout(
   static final CardFrameLayout UNCOMMON =
       standardFrame(
           CardWidgetAssets.UNCOMMON_FRAME_TEXTURE,
-          new Bounds(23f, 39f, 179f, 105f),
-          new Bounds(75f, 153.5f, 75f, 17f),
+          new Bounds(23f, 39f, 179f, 182f),
+          new Bounds(75f, 230.5f, 75f, 17f),
           new Bounds(80f, 17f, 65f, 16f));
 
   static final CardFrameLayout RARE =

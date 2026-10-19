@@ -177,7 +177,8 @@ public final class PauseMenuFactory {
                   playerDeck,
                   runState,
                   game.getBestiaryService(),
-                  game.getCardDiscoveryService()));
+                  game.getCardDiscoveryService(),
+                  game.getItemDiscoveryService()));
     } else {
       saveGameService = new SaveGameService(new JsonSaveGameRepository());
     }
@@ -187,7 +188,8 @@ public final class PauseMenuFactory {
             playerDeck,
             runState,
             game.getBestiaryService(),
-            game.getCardDiscoveryService());
+            game.getCardDiscoveryService(),
+            game.getItemDiscoveryService());
 
     // The Back button hides the overlay (returns to the pause menu). A holder is needed because the
     // panel supplies its own Back action while it is being constructed.

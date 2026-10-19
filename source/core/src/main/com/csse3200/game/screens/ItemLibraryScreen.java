@@ -12,6 +12,7 @@ import com.csse3200.game.input.InputDecorator;
 import com.csse3200.game.input.InputService;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
+import com.csse3200.game.rewards.ItemDiscoveryService;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
@@ -26,23 +27,31 @@ import org.slf4j.LoggerFactory;
  */
 public class ItemLibraryScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(ItemLibraryScreen.class);
-  private static final String[] ITEM_LIBRARY_TEXTURES = collectTexturePaths();
 
   static String[] collectTexturePaths() {
+    return collectTexturePaths(null);
+  }
+
+  static String[] collectTexturePaths(ItemDiscoveryService itemDiscoveryService) {
     Set<String> paths = new LinkedHashSet<>();
     paths.add(MainMenuDisplay.BACKGROUND_TEXTURE);
+    paths.add(MainMenuDisplay.BUTTON_FRAME_TEXTURE);
     paths.add(ItemLibraryDisplay.BUTTON_TEXTURE);
     for (ItemType item : ItemType.values()) {
-      paths.add(ItemLibraryDisplay.resolveArtworkPath(item));
+      if (itemDiscoveryService == null || itemDiscoveryService.isDiscovered(item)) {
+        paths.add(ItemLibraryDisplay.resolveArtworkPath(item));
+      }
     }
     return paths.toArray(new String[0]);
   }
 
   private final GdxGame game;
   private final Renderer renderer;
+  private final String[] itemLibraryTextures;
 
   public ItemLibraryScreen(GdxGame game) {
     this.game = game;
+    itemLibraryTextures = collectTexturePaths(game.getItemDiscoveryService());
 
     logger.debug("Initialising item library screen services");
     ServiceLocator.registerInputService(new InputService());
@@ -58,7 +67,7 @@ public class ItemLibraryScreen extends ScreenAdapter {
 
   private void loadAssets() {
     ResourceService resourceService = ServiceLocator.getResourceService();
-    resourceService.loadTextures(ITEM_LIBRARY_TEXTURES);
+    resourceService.loadTextures(itemLibraryTextures);
     resourceService.loadAll();
   }
 
@@ -86,7 +95,7 @@ public class ItemLibraryScreen extends ScreenAdapter {
     renderer.dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
-    ServiceLocator.getResourceService().unloadAssets(ITEM_LIBRARY_TEXTURES);
+    ServiceLocator.getResourceService().unloadAssets(itemLibraryTextures);
     ServiceLocator.getResourceService().dispose();
     ServiceLocator.clear();
   }

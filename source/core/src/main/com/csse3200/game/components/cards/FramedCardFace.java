@@ -72,7 +72,8 @@ class FramedCardFace extends WidgetGroup {
     this.card = Objects.requireNonNull(card, "card cannot be null");
     cost.setText(Integer.toString(card.cost()));
     name.setText(card.name());
-    description.setText(card.description());
+    description.setText(CardWidgetAssets.formatDescription(card.description(), card.upgraded()));
+    CardWidgetAssets.styleUpgradeText(name, cost, card.upgraded());
     type.setText(formatType(card.type()));
     target.setText(formatTarget(card.target()));
     Drawable drawable = assets.artwork(card.texturePath());
@@ -140,7 +141,7 @@ class FramedCardFace extends WidgetGroup {
   }
 
   String displayedDescription() {
-    return description.getText().toString();
+    return card.description();
   }
 
   String displayedTarget() {

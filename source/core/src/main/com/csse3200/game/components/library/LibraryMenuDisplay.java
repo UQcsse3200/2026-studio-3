@@ -95,6 +95,7 @@ public class LibraryMenuDisplay extends UIComponent {
     TextButton cardLibraryButton = new TextButton("Card Library", cardButtonStyle);
     TextButton enemyLibraryButton = new TextButton("Enemy Library", enemyButtonStyle);
     TextButton itemLibraryButton = new TextButton("Item Library", itemButtonStyle);
+    TextButton storyButton = new TextButton("Story", backButtonStyle);
     TextButton backButton = new TextButton("Back", backButtonStyle);
 
     cardLibraryButton.addListener(
@@ -157,6 +158,26 @@ public class LibraryMenuDisplay extends UIComponent {
           }
         });
 
+    storyButton.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            logger.debug("Story button clicked");
+            game.setScreen(GdxGame.ScreenType.STORY_LIBRARY);
+          }
+        });
+
+    storyButton.addListener(
+        new InputListener() {
+          @Override
+          public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+            super.enter(event, x, y, pointer, fromActor);
+            if (pointer == -1) {
+              AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
+            }
+          }
+        });
+
     backButton.addListener(
         new ChangeListener() {
           @Override
@@ -180,6 +201,7 @@ public class LibraryMenuDisplay extends UIComponent {
     rootTable.add(cardLibraryButton).row();
     rootTable.add(enemyLibraryButton).row();
     rootTable.add(itemLibraryButton).row();
+    rootTable.add(storyButton).row();
     rootTable.add(backButton);
 
     rootStack.add(rootTable);

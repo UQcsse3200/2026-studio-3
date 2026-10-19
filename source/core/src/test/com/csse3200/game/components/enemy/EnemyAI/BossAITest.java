@@ -3,11 +3,15 @@ package com.csse3200.game.components.enemy.EnemyAI;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.enemy.IntentEffectType;
 import com.csse3200.game.components.enemy.IntentType;
 import com.csse3200.game.components.enemy.Memory.PlayerMemory;
+import com.csse3200.game.events.listeners.EventListener1;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import org.junit.jupiter.api.Test;
 
@@ -61,6 +65,33 @@ class BossAITest {
     ai.decide(createContext(100, 0, 2));
 
     assertEquals(BossAI.BossPhase.ENRAGED, ai.getCurrentPhase());
+  }
+
+  @Test
+  void shouldNotifyEachPhaseTransitionOnce() {
+    BossAI ai = new BossAI(new FixedRollRandom(0));
+    List<BossAI.BossPhase> transitions = new ArrayList<>();
+    ai.addPhaseChangeListener(transitions::add);
+
+    ai.decide(createContext(65, 0, 1));
+    ai.decide(createContext(60, 0, 2));
+    ai.decide(createContext(30, 0, 3));
+    ai.decide(createContext(20, 0, 4));
+
+    assertEquals(List.of(BossAI.BossPhase.PHASE_TWO, BossAI.BossPhase.ENRAGED), transitions);
+  }
+
+  @Test
+  void shouldRemovePhaseTransitionListener() {
+    BossAI ai = new BossAI(new FixedRollRandom(0));
+    List<BossAI.BossPhase> transitions = new ArrayList<>();
+    EventListener1<BossAI.BossPhase> listener = transitions::add;
+    ai.addPhaseChangeListener(listener);
+    ai.removePhaseChangeListener(listener);
+
+    ai.decide(createContext(30, 0, 1));
+
+    assertTrue(transitions.isEmpty());
   }
 
   @Test
