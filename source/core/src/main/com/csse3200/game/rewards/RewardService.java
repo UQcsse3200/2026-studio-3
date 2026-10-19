@@ -34,6 +34,8 @@ public class RewardService {
         generator,
         cardService,
         CardAcquisitionPoolLoader.loadDefault(cardService),
+        CardRewardPolicyLoader.loadDefault(),
+        CardRewardProfile.NORMAL,
         cardRandom,
         null);
   }
@@ -48,6 +50,41 @@ public class RewardService {
         generator,
         cardService,
         CardAcquisitionPoolLoader.loadDefault(cardService),
+        CardRewardPolicyLoader.loadDefault(),
+        CardRewardProfile.NORMAL,
+        cardRandom,
+        itemAcquisitionService);
+  }
+
+  /** Production victory context; standalone/preview constructors default to normal. */
+  public RewardService(
+      RewardGenerator generator,
+      CardService cardService,
+      CardRewardProfile profile,
+      Random cardRandom) {
+    this(
+        generator,
+        cardService,
+        CardAcquisitionPoolLoader.loadDefault(cardService),
+        CardRewardPolicyLoader.loadDefault(),
+        profile,
+        cardRandom,
+        null);
+  }
+
+  /** Production victory context with source-aware item acquisition. */
+  public RewardService(
+      RewardGenerator generator,
+      CardService cardService,
+      CardRewardProfile profile,
+      Random cardRandom,
+      ItemAcquisitionService itemAcquisitionService) {
+    this(
+        generator,
+        cardService,
+        CardAcquisitionPoolLoader.loadDefault(cardService),
+        CardRewardPolicyLoader.loadDefault(),
+        profile,
         cardRandom,
         itemAcquisitionService);
   }
@@ -58,7 +95,14 @@ public class RewardService {
       CardService cardService,
       CardAcquisitionPool acquisitionPool,
       Random cardRandom) {
-    this(generator, cardService, acquisitionPool, cardRandom, null);
+    this(
+        generator,
+        cardService,
+        acquisitionPool,
+        CardRewardPolicyLoader.loadDefault(),
+        CardRewardProfile.NORMAL,
+        cardRandom,
+        null);
   }
 
   /** Creates a reward service with explicit card and item acquisition policies. */
@@ -68,13 +112,51 @@ public class RewardService {
       CardAcquisitionPool acquisitionPool,
       Random cardRandom,
       ItemAcquisitionService itemAcquisitionService) {
+    this(
+        generator,
+        cardService,
+        acquisitionPool,
+        CardRewardPolicyLoader.loadDefault(),
+        CardRewardProfile.NORMAL,
+        cardRandom,
+        itemAcquisitionService);
+  }
+
+  /**
+   * Injects eligibility, validated rarity weights and immutable encounter context independently.
+   */
+  public RewardService(
+      RewardGenerator generator,
+      CardService cardService,
+      CardAcquisitionPool acquisitionPool,
+      CardRewardPolicy policy,
+      CardRewardProfile profile,
+      Random cardRandom) {
+    this(generator, cardService, acquisitionPool, policy, profile, cardRandom, null);
+  }
+
+  /**
+   * Injects eligibility, validated rarity weights, immutable encounter context and item discovery
+   * behaviour independently.
+   */
+  public RewardService(
+      RewardGenerator generator,
+      CardService cardService,
+      CardAcquisitionPool acquisitionPool,
+      CardRewardPolicy policy,
+      CardRewardProfile profile,
+      Random cardRandom,
+      ItemAcquisitionService itemAcquisitionService) {
     this.generator = Objects.requireNonNull(generator, "generator must not be null");
     this.cardService = Objects.requireNonNull(cardService, "cardService must not be null");
     this.acquisitionPool =
         Objects.requireNonNull(acquisitionPool, "acquisitionPool must not be null");
     this.cardRewardGenerator =
         new CardRewardSelectionGenerator(
-            acquisitionPool, Objects.requireNonNull(cardRandom, "cardRandom must not be null"));
+            acquisitionPool,
+            Objects.requireNonNull(policy, "policy must not be null"),
+            Objects.requireNonNull(profile, "profile must not be null"),
+            Objects.requireNonNull(cardRandom, "cardRandom must not be null"));
     this.itemAcquisitionService = itemAcquisitionService;
   }
 
@@ -87,7 +169,7 @@ public class RewardService {
    * Generates mutually exclusive Gold, Item and (when eligible) Card options.
    *
    * @param goldBonusMultiplier current Lucky Coin multiplier
-   * @return Gold and Item options, followed by a Card option when the acquisition pool is non-empty
+   * @return Gold and Item options, followed by a Card option when a weighted candidate is available
    */
   public List<RewardOption> generateRewardOptions(float goldBonusMultiplier) {
     List<RewardOption> options = new ArrayList<>();

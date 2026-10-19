@@ -23,6 +23,12 @@ public class EnrageLowHealthAI implements EnemyAI {
   private static final int ENRAGE_MULTIPLIER = 2;
 
   private final EnemyAI basePattern = new CycleFourStanceAI();
+  private boolean enraged;
+
+  /** Whether the most recently selected intent used the enraged stance. */
+  public boolean isEnraged() {
+    return enraged;
+  }
 
   @Override
   public EnemyIntent decide(EnemyAIContext context) {
@@ -34,9 +40,9 @@ public class EnrageLowHealthAI implements EnemyAI {
 
     boolean memoryEnrage = context.getPlayerMemory().isUndefended();
 
-    boolean isEnraged = lowHealthEnrage || memoryEnrage;
+    enraged = lowHealthEnrage || memoryEnrage;
 
-    if (isEnraged && baseIntent.getType() == IntentType.ATTACK) {
+    if (enraged && baseIntent.getType() == IntentType.ATTACK) {
       return EnemyIntent.attack(baseIntent.getValue() * ENRAGE_MULTIPLIER);
     }
 

@@ -40,19 +40,21 @@ public final class ItemFormatting {
     return DISPLAY_NAMES.getOrDefault(itemId, fallbackName(itemId));
   }
 
+  private static final String BATTLE_REWARDS_SOURCE = "Battle rewards";
+  private static final String CHANCE_EVENTS_SOURCE = "Chance Events";
   private static final Map<ItemType, String> SOURCES = new EnumMap<>(ItemType.class);
 
   static {
-    SOURCES.put(ItemType.LUCKY_COIN, "Battle rewards");
-    SOURCES.put(ItemType.ENERGY_CRYSTAL, "Battle rewards");
-    SOURCES.put(ItemType.MERCHANTS_FAVOR, "Battle rewards");
-    SOURCES.put(ItemType.IRON_AEGIS, "Battle rewards");
-    SOURCES.put(ItemType.WARRIORS_CREST, "Battle rewards");
-    SOURCES.put(ItemType.ASHEN_EMBER, "Chance Events");
-    SOURCES.put(ItemType.BRAND_OF_THE_DAMNED, "Chance Events");
-    SOURCES.put(ItemType.SHATTERED_AEGIS, "Chance Events");
-    SOURCES.put(ItemType.AMBROSIA_FLASK, "Chance Events");
-    SOURCES.put(ItemType.BLOOD_OATH_SIGIL, "Chance Events");
+    SOURCES.put(ItemType.LUCKY_COIN, BATTLE_REWARDS_SOURCE);
+    SOURCES.put(ItemType.ENERGY_CRYSTAL, BATTLE_REWARDS_SOURCE);
+    SOURCES.put(ItemType.MERCHANTS_FAVOR, BATTLE_REWARDS_SOURCE);
+    SOURCES.put(ItemType.IRON_AEGIS, BATTLE_REWARDS_SOURCE);
+    SOURCES.put(ItemType.WARRIORS_CREST, BATTLE_REWARDS_SOURCE);
+    SOURCES.put(ItemType.ASHEN_EMBER, CHANCE_EVENTS_SOURCE);
+    SOURCES.put(ItemType.BRAND_OF_THE_DAMNED, CHANCE_EVENTS_SOURCE);
+    SOURCES.put(ItemType.SHATTERED_AEGIS, CHANCE_EVENTS_SOURCE);
+    SOURCES.put(ItemType.AMBROSIA_FLASK, CHANCE_EVENTS_SOURCE);
+    SOURCES.put(ItemType.BLOOD_OATH_SIGIL, CHANCE_EVENTS_SOURCE);
     SOURCES.put(ItemType.ETERNAL_VITALITY, "Elite Portal - Ancient Temple");
   }
 

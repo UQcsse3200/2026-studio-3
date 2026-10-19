@@ -7,7 +7,8 @@ import java.util.Random;
 /**
  * Unpredictable behaviour for Lesser Shade: each round randomly attacks or defends.
  *
- * <p>暗影小怪（Lesser Shade）的打法：每回合像抛硬币一样随机决定攻击还是防御，让玩家猜不到下一步。
+ * <p>How the Lesser Shade fights: each turn it flips a coin to attack or defend, so the player
+ * cannot predict its next move.
  */
 public class RandomStanceAI implements EnemyAI {
   private static final double ATTACK_CHANCE = 0.6;

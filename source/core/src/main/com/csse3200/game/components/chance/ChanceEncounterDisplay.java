@@ -77,10 +77,10 @@ public class ChanceEncounterDisplay extends UIComponent {
   private static final Color BODY_COLOUR = new Color(0.9f, 0.84f, 0.73f, 1f);
   private static final Color MUTED_COLOUR = new Color(0.66f, 0.59f, 0.53f, 1f);
 
-  private static final String WHITE = "white";
-  private static final String LARGE = "large";
-  private static final String SMALL = "small";
-  private static final String DEFAULT = "default";
+  private static final String STYLE_NAME_WHITE = "white";
+  private static final String STYLE_NAME_LARGE = "large";
+  private static final String STYLE_NAME_SMALL = "small";
+  private static final String STYLE_NAME_DEFAULT = "default";
   private static final String BUTTON = "button";
 
   private final ChanceEncounter encounter;
@@ -116,6 +116,11 @@ public class ChanceEncounterDisplay extends UIComponent {
   private int lastDisplayedRollSequence;
   private boolean choiceResolved;
   private boolean completionSent;
+  private static final String CHANCE_ENCOUNTER_LABEL = "CHANCE ENCOUNTER";
+  private static final String CHOOSE_RESPONSE_LABEL = "CHOOSE YOUR RESPONSE";
+  private static final String DETERMINE_OUTCOME_LABEL = "Your decision will determine the outcome.";
+  private static final String CONTINUE_BUTTON = "Continue";
+  private static final String OUTCOME_TEXT = "OUTCOME\n";
 
   /**
    * Creates a display without a map-completion callback, suitable for UI previews.
@@ -222,7 +227,7 @@ public class ChanceEncounterDisplay extends UIComponent {
 
     rootTable = new Table();
     rootTable.setFillParent(true);
-    rootTable.setBackground(skin.newDrawable(WHITE, BACKDROP_COLOUR));
+    rootTable.setBackground(skin.newDrawable(STYLE_NAME_WHITE, BACKDROP_COLOUR));
     rootTable.setTouchable(Touchable.enabled);
     rootTable.center();
     rootTable.getColor().a = 0f;
@@ -232,11 +237,12 @@ public class ChanceEncounterDisplay extends UIComponent {
     encounterTable.pad(30f, 40f, 34f, 40f);
     encounterTable.defaults().spaceBottom(14f);
 
-    Label eyebrowLabel = new Label("CHANCE ENCOUNTER", createLabelStyle(SMALL, GOLD_COLOUR));
+    Label eyebrowLabel =
+        new Label(CHANCE_ENCOUNTER_LABEL, createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR));
     Label titleLabel =
-        new Label(formatTitle(encounter.getId()), createLabelStyle(LARGE, BODY_COLOUR));
+        new Label(formatTitle(encounter.getId()), createLabelStyle(STYLE_NAME_LARGE, BODY_COLOUR));
     Label descriptionLabel =
-        new Label(encounter.getDescription(), createLabelStyle(DEFAULT, BODY_COLOUR));
+        new Label(encounter.getDescription(), createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
     eyebrowLabel.setFontScale(1.25f);
     titleLabel.setFontScale(1.4f);
     descriptionLabel.setFontScale(1.3f);
@@ -251,7 +257,8 @@ public class ChanceEncounterDisplay extends UIComponent {
     encounterTable.add(descriptionLabel).left().width(CONTENT_WIDTH).padBottom(12f);
     encounterTable.row();
 
-    promptLabel = new Label("CHOOSE YOUR RESPONSE", createLabelStyle(SMALL, MUTED_COLOUR));
+    promptLabel =
+        new Label(CHOOSE_RESPONSE_LABEL, createLabelStyle(STYLE_NAME_SMALL, MUTED_COLOUR));
     promptLabel.setFontScale(1.25f);
     encounterTable.add(promptLabel).left().width(CONTENT_WIDTH).padBottom(2f);
     encounterTable.row();
@@ -264,11 +271,10 @@ public class ChanceEncounterDisplay extends UIComponent {
     refreshChoices();
 
     Table resultTable = new Table();
-    resultTable.setBackground(skin.newDrawable(WHITE, RESULT_COLOUR));
+    resultTable.setBackground(skin.newDrawable(STYLE_NAME_WHITE, RESULT_COLOUR));
     resultTable.pad(14f, 18f, 14f, 18f);
     resultLabel =
-        new Label(
-            "Your decision will determine the outcome.", createLabelStyle(DEFAULT, MUTED_COLOUR));
+        new Label(DETERMINE_OUTCOME_LABEL, createLabelStyle(STYLE_NAME_DEFAULT, MUTED_COLOUR));
     resultLabel.setFontScale(1.3f);
     resultLabel.setWrap(true);
     resultTable.add(resultLabel).left().width(CONTENT_WIDTH - 36f);
@@ -276,7 +282,7 @@ public class ChanceEncounterDisplay extends UIComponent {
     encounterTable.add(resultTable).left().width(CONTENT_WIDTH).padTop(6f);
     encounterTable.row();
 
-    continueButton = new TextButton("Continue", createContinueStyle());
+    continueButton = new TextButton(CONTINUE_BUTTON, createContinueStyle());
     continueButton.getLabel().setFontScale(1.3f);
     continueButton.setVisible(false);
     continueButton.addListener(
@@ -304,7 +310,7 @@ public class ChanceEncounterDisplay extends UIComponent {
       texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
       background = new Image(texture);
     } else {
-      background = new Image(skin.newDrawable(WHITE, new Color(.07f, .08f, .13f, 1)));
+      background = new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(.07f, .08f, .13f, 1)));
     }
     background.setScaling(com.badlogic.gdx.utils.Scaling.stretch);
     scene.add(background);
@@ -316,28 +322,28 @@ public class ChanceEncounterDisplay extends UIComponent {
         .padLeft(com.badlogic.gdx.scenes.scene2d.ui.Value.percentWidth(.043f, rootTable));
     information.defaults().left();
     information
-        .add(new Label("+  CHANCE ENCOUNTER", createLabelStyle(SMALL, GOLD_COLOUR)))
+        .add(new Label("+  CHANCE ENCOUNTER", createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR)))
         .padBottom(12);
     information.row();
-    Label title = new Label("Wandering Healer", createLabelStyle(LARGE, BODY_COLOUR));
+    Label title = new Label("Wandering Healer", createLabelStyle(STYLE_NAME_LARGE, BODY_COLOUR));
     title.setFontScale(.98f);
     information.add(title).padBottom(12);
     information.row();
     information
-        .add(new Image(skin.newDrawable(WHITE, new Color(.52f, .37f, .19f, 1))))
+        .add(new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(.52f, .37f, .19f, 1))))
         .width(com.badlogic.gdx.scenes.scene2d.ui.Value.percentWidth(.40f, rootTable))
         .height(1)
         .padBottom(12);
     information.row();
     Label description =
-        new Label(encounter.getDescription(), createLabelStyle(DEFAULT, BODY_COLOUR));
+        new Label(encounter.getDescription(), createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
     description.setWrap(true);
     description.setFontScale(.88f);
     information
         .add(description)
         .width(com.badlogic.gdx.scenes.scene2d.ui.Value.percentWidth(.40f, rootTable));
     scene.add(information);
-    promptLabel = new Label("", createLabelStyle(SMALL, MUTED_COLOUR));
+    promptLabel = new Label("", createLabelStyle(STYLE_NAME_SMALL, MUTED_COLOUR));
     choiceStyle = shrineButtonStyle(false);
     selectedChoiceStyle = new TextButtonStyle(choiceStyle);
     choicesTable = new Table();
@@ -355,7 +361,7 @@ public class ChanceEncounterDisplay extends UIComponent {
         .left()
         .padBottom(com.badlogic.gdx.scenes.scene2d.ui.Value.percentHeight(.27f, rootTable))
         .padLeft(com.badlogic.gdx.scenes.scene2d.ui.Value.percentWidth(.06f, rootTable));
-    resultLabel = new Label("", createLabelStyle(DEFAULT, BODY_COLOUR));
+    resultLabel = new Label("", createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
     resultLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
     resultLabel.setWrap(true);
     result
@@ -364,7 +370,7 @@ public class ChanceEncounterDisplay extends UIComponent {
         .minHeight(65)
         .padBottom(16);
     result.row();
-    continueButton = new TextButton("Continue", shrineButtonStyle(false));
+    continueButton = new TextButton(CONTINUE_BUTTON, shrineButtonStyle(false));
     continueButton.addListener(
         new ChangeListener() {
           @Override
@@ -391,7 +397,7 @@ public class ChanceEncounterDisplay extends UIComponent {
       texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
       background = new Image(texture);
     } else {
-      background = new Image(skin.newDrawable(WHITE, new Color(.07f, .08f, .13f, 1)));
+      background = new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(.07f, .08f, .13f, 1)));
     }
     background.setScaling(com.badlogic.gdx.utils.Scaling.stretch);
     scene.add(background);
@@ -399,26 +405,26 @@ public class ChanceEncounterDisplay extends UIComponent {
     information.top().left().pad(36f, 42f, 0f, 0f);
     information.defaults().left();
     information
-        .add(new Label("CHANCE ENCOUNTER", createLabelStyle(SMALL, GOLD_COLOUR)))
+        .add(new Label(CHANCE_ENCOUNTER_LABEL, createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR)))
         .padBottom(12);
     information.row();
-    Label title = new Label("Flooded Crossing", createLabelStyle(LARGE, BODY_COLOUR));
+    Label title = new Label("Flooded Crossing", createLabelStyle(STYLE_NAME_LARGE, BODY_COLOUR));
     title.setFontScale(.98f);
     information.add(title).padBottom(12);
     information.row();
     information
-        .add(new Image(skin.newDrawable(WHITE, new Color(.52f, .37f, .19f, 1))))
+        .add(new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(.52f, .37f, .19f, 1))))
         .width(390)
         .height(1)
         .padBottom(12);
     information.row();
     Label description =
-        new Label(encounter.getDescription(), createLabelStyle(DEFAULT, BODY_COLOUR));
+        new Label(encounter.getDescription(), createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
     description.setWrap(true);
     description.setFontScale(.88f);
     information.add(description).width(390);
     scene.add(information);
-    promptLabel = new Label("", createLabelStyle(SMALL, MUTED_COLOUR));
+    promptLabel = new Label("", createLabelStyle(STYLE_NAME_SMALL, MUTED_COLOUR));
     choiceStyle = shrineButtonStyle(false);
     selectedChoiceStyle = new TextButtonStyle(choiceStyle);
     choicesTable = new Table();
@@ -428,7 +434,7 @@ public class ChanceEncounterDisplay extends UIComponent {
     Table result = new Table();
     result.setName("flooded-result-narration");
     result.bottom().padBottom(30);
-    resultLabel = new Label("", createLabelStyle(DEFAULT, BODY_COLOUR));
+    resultLabel = new Label("", createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
     resultLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
     resultLabel.setWrap(true);
     result
@@ -437,7 +443,7 @@ public class ChanceEncounterDisplay extends UIComponent {
         .minHeight(65)
         .padBottom(16);
     result.row();
-    continueButton = new TextButton("Continue", shrineButtonStyle(false));
+    continueButton = new TextButton(CONTINUE_BUTTON, shrineButtonStyle(false));
     continueButton.addListener(
         new ChangeListener() {
           @Override
@@ -463,26 +469,26 @@ public class ChanceEncounterDisplay extends UIComponent {
     information.top().left().pad(36f, 42f, 0f, 0f);
     information.defaults().left();
     information
-        .add(new Label("CHANCE ENCOUNTER", createLabelStyle(SMALL, GOLD_COLOUR)))
+        .add(new Label(CHANCE_ENCOUNTER_LABEL, createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR)))
         .padBottom(12);
     information.row();
-    Label title = new Label("Mysterious Shrine", createLabelStyle(LARGE, BODY_COLOUR));
+    Label title = new Label("Mysterious Shrine", createLabelStyle(STYLE_NAME_LARGE, BODY_COLOUR));
     title.setFontScale(.98f);
     information.add(title).padBottom(12);
     information.row();
     information
-        .add(new Image(skin.newDrawable(WHITE, new Color(.52f, .37f, .19f, 1))))
+        .add(new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(.52f, .37f, .19f, 1))))
         .width(390)
         .height(1)
         .padBottom(12);
     information.row();
     Label description =
-        new Label(encounter.getDescription(), createLabelStyle(DEFAULT, BODY_COLOUR));
+        new Label(encounter.getDescription(), createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
     description.setWrap(true);
     description.setFontScale(.88f);
     information.add(description).width(390);
     scene.add(information);
-    promptLabel = new Label("", createLabelStyle(SMALL, MUTED_COLOUR));
+    promptLabel = new Label("", createLabelStyle(STYLE_NAME_SMALL, MUTED_COLOUR));
     choiceStyle = shrineButtonStyle(false);
     selectedChoiceStyle = new TextButtonStyle(choiceStyle);
     choicesTable = new Table();
@@ -492,12 +498,12 @@ public class ChanceEncounterDisplay extends UIComponent {
     Table result = new Table();
     result.setName("shrine-result-narration");
     result.bottom().padBottom(30);
-    resultLabel = new Label("", createLabelStyle(DEFAULT, BODY_COLOUR));
+    resultLabel = new Label("", createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
     resultLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
     resultLabel.setWrap(true);
     result.add(resultLabel).width(800).minHeight(65).padBottom(16);
     result.row();
-    continueButton = new TextButton("Continue", shrineButtonStyle(false));
+    continueButton = new TextButton(CONTINUE_BUTTON, shrineButtonStyle(false));
     continueButton.addListener(
         new ChangeListener() {
           @Override
@@ -549,23 +555,23 @@ public class ChanceEncounterDisplay extends UIComponent {
     information.top().left().pad(40f, 48f, 0f, 0f);
     information.defaults().left();
     information
-        .add(new Label("CHANCE ENCOUNTER", createLabelStyle(SMALL, GOLD_COLOUR)))
+        .add(new Label(CHANCE_ENCOUNTER_LABEL, createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR)))
         .padBottom(14f);
     information.row();
-    Label title = new Label("Wishing Fountain", createLabelStyle(LARGE, BODY_COLOUR));
+    Label title = new Label("Wishing Fountain", createLabelStyle(STYLE_NAME_LARGE, BODY_COLOUR));
     title.setFontScale(1.1f);
     information.add(title).padBottom(12f);
     information.row();
-    Image rule = new Image(skin.newDrawable(WHITE, GOLD_COLOUR));
+    Image rule = new Image(skin.newDrawable(STYLE_NAME_WHITE, GOLD_COLOUR));
     information.add(rule).width(380f).height(1f).padBottom(14f);
     information.row();
     Label description =
-        new Label(encounter.getDescription(), createLabelStyle(DEFAULT, BODY_COLOUR));
+        new Label(encounter.getDescription(), createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
     description.setWrap(true);
     information.add(description).width(360f);
     scene.add(information);
 
-    promptLabel = new Label("", createLabelStyle(SMALL, MUTED_COLOUR));
+    promptLabel = new Label("", createLabelStyle(STYLE_NAME_SMALL, MUTED_COLOUR));
     choiceStyle = fountainButtonStyle(true);
     selectedChoiceStyle = new TextButtonStyle(choiceStyle);
     choicesTable = new Table();
@@ -575,12 +581,12 @@ public class ChanceEncounterDisplay extends UIComponent {
     Table result = new Table();
     result.setName("fountain-result-narration");
     result.bottom().padBottom(34f);
-    resultLabel = new Label("", createLabelStyle(DEFAULT, BODY_COLOUR));
+    resultLabel = new Label("", createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
     resultLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
     resultLabel.setWrap(true);
     result.add(resultLabel).width(850f).minHeight(50f).padBottom(22f);
     result.row();
-    continueButton = new TextButton("Continue", fountainButtonStyle(true));
+    continueButton = new TextButton(CONTINUE_BUTTON, fountainButtonStyle(true));
     continueButton.addListener(
         new ChangeListener() {
           @Override
@@ -625,7 +631,7 @@ public class ChanceEncounterDisplay extends UIComponent {
   private void addFusionIntroActors() {
     rootTable = new Table();
     rootTable.setFillParent(true);
-    rootTable.setBackground(skin.newDrawable(WHITE, BACKDROP_COLOUR));
+    rootTable.setBackground(skin.newDrawable(STYLE_NAME_WHITE, BACKDROP_COLOUR));
     rootTable.setTouchable(Touchable.enabled);
     rootTable.getColor().a = 0f;
 
@@ -635,10 +641,11 @@ public class ChanceEncounterDisplay extends UIComponent {
     addFusionAltarLighting(scene);
     addFusionAltarEmbers(scene);
 
-    Label eyebrow = new Label("CHANCE ENCOUNTER", createLabelStyle(SMALL, GOLD_COLOUR));
+    Label eyebrow =
+        new Label(CHANCE_ENCOUNTER_LABEL, createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR));
     eyebrow.setBounds(68f, 721f, 520f, 30f);
     scene.addActor(eyebrow);
-    Label title = new Label("CARD FUSION", createLabelStyle(LARGE, BODY_COLOUR));
+    Label title = new Label("CARD FUSION", createLabelStyle(STYLE_NAME_LARGE, BODY_COLOUR));
     title.setFontScale(1.35f);
     title.setBounds(68f, 657f, 660f, 57f);
     scene.addActor(title);
@@ -653,19 +660,20 @@ public class ChanceEncounterDisplay extends UIComponent {
     Label descriptionShadow =
         new Label(
             encounter.getDescription(),
-            createLabelStyle(DEFAULT, new Color(0.02f, 0.02f, 0.04f, 0.85f)));
+            createLabelStyle(STYLE_NAME_DEFAULT, new Color(0.02f, 0.02f, 0.04f, 0.85f)));
     descriptionShadow.setAlignment(com.badlogic.gdx.utils.Align.center);
     descriptionShadow.setWrap(true);
     descriptionShadow.setBounds(182f, 157f, 920f, 58f);
     fusionIntroContent.addActor(descriptionShadow);
     Label description =
-        new Label(encounter.getDescription(), createLabelStyle(DEFAULT, BODY_COLOUR));
+        new Label(encounter.getDescription(), createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
     description.setAlignment(com.badlogic.gdx.utils.Align.center);
     description.setWrap(true);
     description.setBounds(180f, 159f, 920f, 58f);
     fusionIntroContent.addActor(description);
 
-    promptLabel = new Label("CHOOSE YOUR RESPONSE", createLabelStyle(SMALL, MUTED_COLOUR));
+    promptLabel =
+        new Label(CHOOSE_RESPONSE_LABEL, createLabelStyle(STYLE_NAME_SMALL, MUTED_COLOUR));
     promptLabel.setVisible(false);
     scene.addActor(promptLabel);
     choiceStyle = FusionSceneAssets.buttonStyle(skin, true);
@@ -677,7 +685,7 @@ public class ChanceEncounterDisplay extends UIComponent {
 
     Table resultPanel = new Table();
     resultPanel.setName("fusion-result-narration");
-    resultLabel = new Label("", createLabelStyle(DEFAULT, BODY_COLOUR));
+    resultLabel = new Label("", createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
     resultLabel.setWrap(true);
     resultLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
     resultPanel.add(resultLabel).grow();
@@ -685,7 +693,7 @@ public class ChanceEncounterDisplay extends UIComponent {
     resultPanel.setVisible(false);
     scene.addActor(resultPanel);
 
-    continueButton = FusionSceneAssets.button("Continue", skin, true);
+    continueButton = FusionSceneAssets.button(CONTINUE_BUTTON, skin, true);
     continueButton.setBounds(502f, 34f, 276f, 70f);
     continueButton.setVisible(false);
     continueButton.addListener(
@@ -778,7 +786,7 @@ public class ChanceEncounterDisplay extends UIComponent {
 
   private void addFusionHeatPixel(
       Group scene, float x, float y, float width, float height, float alpha) {
-    Image mark = new Image(skin.newDrawable(WHITE, new Color(1f, 0.56f, 0.22f, alpha)));
+    Image mark = new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(1f, 0.56f, 0.22f, alpha)));
     mark.setBounds(x, y, width, height);
     mark.setTouchable(Touchable.disabled);
     scene.addActor(mark);
@@ -787,7 +795,8 @@ public class ChanceEncounterDisplay extends UIComponent {
   private void addFusionAltarEmbers(Group scene) {
     float[][] positions = {{525f, 354f}, {562f, 382f}, {642f, 359f}, {704f, 382f}, {748f, 354f}};
     for (int i = 0; i < positions.length; i++) {
-      Image ember = new Image(skin.newDrawable(WHITE, new Color(1f, 0.55f, 0.24f, 0.72f)));
+      Image ember =
+          new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(1f, 0.55f, 0.24f, 0.72f)));
       ember.setBounds(positions[i][0], positions[i][1], 2f, 2f);
       ember.setTouchable(Touchable.disabled);
       ember.getColor().a = 0f;
@@ -839,13 +848,14 @@ public class ChanceEncounterDisplay extends UIComponent {
       spark.setBounds(positions[i][0], positions[i][1], 6f, 6f);
       spark.setTouchable(Touchable.disabled);
       Color warm = new Color(0.96f, 0.69f, 0.38f, 0.65f);
-      Image vertical = new Image(skin.newDrawable(WHITE, warm));
+      Image vertical = new Image(skin.newDrawable(STYLE_NAME_WHITE, warm));
       vertical.setBounds(2f, 0f, 2f, 6f);
       spark.addActor(vertical);
-      Image horizontal = new Image(skin.newDrawable(WHITE, warm));
+      Image horizontal = new Image(skin.newDrawable(STYLE_NAME_WHITE, warm));
       horizontal.setBounds(0f, 2f, 6f, 2f);
       spark.addActor(horizontal);
-      Image center = new Image(skin.newDrawable(WHITE, new Color(1f, 0.91f, 0.68f, 0.8f)));
+      Image center =
+          new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(1f, 0.91f, 0.68f, 0.8f)));
       center.setBounds(2f, 2f, 2f, 2f);
       spark.addActor(center);
       spark.getColor().a = 0.1f;
@@ -867,7 +877,7 @@ public class ChanceEncounterDisplay extends UIComponent {
   private void addDiceGameActors() {
     rootTable = new Table();
     rootTable.setFillParent(true);
-    rootTable.setBackground(skin.newDrawable(WHITE, BACKDROP_COLOUR));
+    rootTable.setBackground(skin.newDrawable(STYLE_NAME_WHITE, BACKDROP_COLOUR));
     rootTable.setTouchable(Touchable.enabled);
     rootTable.getColor().a = 0f;
 
@@ -883,29 +893,31 @@ public class ChanceEncounterDisplay extends UIComponent {
       scene.addActor(background);
     }
 
-    Label eyebrowLabel = new Label("CHANCE ENCOUNTER", createLabelStyle(SMALL, GOLD_COLOUR));
+    Label eyebrowLabel =
+        new Label(CHANCE_ENCOUNTER_LABEL, createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR));
     eyebrowLabel.setFontScale(1.2f);
     eyebrowLabel.setBounds(165f, 682f, 470f, 32f);
     scene.addActor(eyebrowLabel);
 
     Label titleLabel =
-        new Label(formatTitle(encounter.getId()), createLabelStyle(LARGE, BODY_COLOUR));
+        new Label(formatTitle(encounter.getId()), createLabelStyle(STYLE_NAME_LARGE, BODY_COLOUR));
     titleLabel.setFontScale(1.45f);
     titleLabel.setBounds(165f, 622f, 470f, 56f);
     scene.addActor(titleLabel);
 
     Label descriptionLabel =
-        new Label(encounter.getDescription(), createLabelStyle(DEFAULT, BODY_COLOUR));
+        new Label(encounter.getDescription(), createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
     descriptionLabel.setFontScale(1.13f);
     descriptionLabel.setWrap(true);
     descriptionLabel.setBounds(165f, 540f, 470f, 75f);
     scene.addActor(descriptionLabel);
 
-    diceRollDisplay = new DiceRollDisplay(skin, createLabelStyle(DEFAULT, GOLD_COLOUR), true);
+    diceRollDisplay =
+        new DiceRollDisplay(skin, createLabelStyle(STYLE_NAME_DEFAULT, GOLD_COLOUR), true);
     diceRollDisplay.getTable().setBounds(168f, 365f, 505f, 178f);
     scene.addActor(diceRollDisplay.getTable());
 
-    promptLabel = new Label("CHOOSE YOUR RESPONSE", createLabelStyle(SMALL, BODY_COLOUR));
+    promptLabel = new Label(CHOOSE_RESPONSE_LABEL, createLabelStyle(STYLE_NAME_SMALL, BODY_COLOUR));
     promptLabel.setFontScale(1.04f);
     Table promptPlaque = new Table();
     promptPlaque.setBackground(createDicePlaqueDrawable(new Color(0.62f, 0.45f, 0.41f, 0.94f)));
@@ -927,15 +939,14 @@ public class ChanceEncounterDisplay extends UIComponent {
     resultTable.setBackground(createDicePlaqueDrawable(new Color(0.68f, 0.48f, 0.47f, 0.93f)));
     resultTable.pad(8f, 25f, 8f, 25f);
     resultLabel =
-        new Label(
-            "Your decision will determine the outcome.", createLabelStyle(DEFAULT, BODY_COLOUR));
+        new Label(DETERMINE_OUTCOME_LABEL, createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
     resultLabel.setFontScale(1.08f);
     resultLabel.setWrap(true);
     resultTable.add(resultLabel).left().grow();
     resultTable.setBounds(245f, 38f, 790f, 70f);
     scene.addActor(resultTable);
 
-    continueButton = new TextButton("Continue", createDiceChoiceStyle());
+    continueButton = new TextButton(CONTINUE_BUTTON, createDiceChoiceStyle());
     continueButton.getLabel().setFontScale(1.1f);
     continueButton.setBounds(1038f, 42f, 205f, 65f);
     continueButton.setVisible(false);
@@ -972,7 +983,7 @@ public class ChanceEncounterDisplay extends UIComponent {
   private void addAbandonedMineActors() {
     rootTable = new Table();
     rootTable.setFillParent(true);
-    rootTable.setBackground(skin.newDrawable(WHITE, BACKDROP_COLOUR));
+    rootTable.setBackground(skin.newDrawable(STYLE_NAME_WHITE, BACKDROP_COLOUR));
     rootTable.setTouchable(Touchable.enabled);
     rootTable.getColor().a = 0f;
 
@@ -989,24 +1000,26 @@ public class ChanceEncounterDisplay extends UIComponent {
       scene.addActor(background);
     }
 
-    Label eyebrowLabel = new Label("CHANCE ENCOUNTER", createLabelStyle(SMALL, GOLD_COLOUR));
+    Label eyebrowLabel =
+        new Label(CHANCE_ENCOUNTER_LABEL, createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR));
     eyebrowLabel.setFontScale(1.16f);
     eyebrowLabel.setBounds(60f, 710f, 530f, 34f);
     scene.addActor(eyebrowLabel);
 
     Label titleLabel =
-        new Label(formatTitle(encounter.getId()), createLabelStyle(LARGE, BODY_COLOUR));
+        new Label(formatTitle(encounter.getId()), createLabelStyle(STYLE_NAME_LARGE, BODY_COLOUR));
     titleLabel.setFontScale(1.55f);
     titleLabel.setBounds(60f, 650f, 560f, 56f);
     scene.addActor(titleLabel);
 
-    Image divider = new Image(skin.newDrawable(WHITE, new Color(0.48f, 0.30f, 0.20f, 0.85f)));
+    Image divider =
+        new Image(skin.newDrawable(STYLE_NAME_WHITE, new Color(0.48f, 0.30f, 0.20f, 0.85f)));
     divider.setBounds(60f, 638f, 525f, 2f);
     divider.setTouchable(Touchable.disabled);
     scene.addActor(divider);
 
     Label descriptionLabel =
-        new Label(encounter.getDescription(), createLabelStyle(DEFAULT, BODY_COLOUR));
+        new Label(encounter.getDescription(), createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
     descriptionLabel.setFontScale(1.13f);
     descriptionLabel.setWrap(true);
     descriptionLabel.setBounds(60f, 515f, 540f, 108f);
@@ -1014,7 +1027,8 @@ public class ChanceEncounterDisplay extends UIComponent {
 
     // The original prompt remains available to refreshChoices, but the scene and buttons
     // provide the visual invitation without another opaque panel over the mine cart.
-    promptLabel = new Label("CHOOSE YOUR RESPONSE", createLabelStyle(SMALL, MUTED_COLOUR));
+    promptLabel =
+        new Label(CHOOSE_RESPONSE_LABEL, createLabelStyle(STYLE_NAME_SMALL, MUTED_COLOUR));
     promptLabel.setVisible(false);
     scene.addActor(promptLabel);
 
@@ -1029,8 +1043,7 @@ public class ChanceEncounterDisplay extends UIComponent {
     resultTable.setBackground(createDicePlaqueDrawable(new Color(0.55f, 0.45f, 0.48f, 0.96f)));
     resultTable.pad(12f, 24f, 12f, 24f);
     resultLabel =
-        new Label(
-            "Your decision will determine the outcome.", createLabelStyle(DEFAULT, BODY_COLOUR));
+        new Label(DETERMINE_OUTCOME_LABEL, createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
     resultLabel.setFontScale(1.06f);
     resultLabel.setWrap(true);
     resultTable.add(resultLabel).left().grow();
@@ -1039,7 +1052,7 @@ public class ChanceEncounterDisplay extends UIComponent {
     scene.addActor(resultTable);
 
     continueButton =
-        new TextButton("Continue", createMineChoiceStyle(new Color(0.64f, 0.55f, 0.55f, 1f)));
+        new TextButton(CONTINUE_BUTTON, createMineChoiceStyle(new Color(0.64f, 0.55f, 0.55f, 1f)));
     continueButton.getLabel().setFontScale(1.12f);
     continueButton.setBounds(490f, 25f, 300f, 90f);
     continueButton.setVisible(false);
@@ -1099,7 +1112,7 @@ public class ChanceEncounterDisplay extends UIComponent {
 
   private Table createDivider() {
     Table divider = new Table();
-    divider.setBackground(skin.newDrawable(WHITE, GOLD_COLOUR));
+    divider.setBackground(skin.newDrawable(STYLE_NAME_WHITE, GOLD_COLOUR));
     return divider;
   }
 
@@ -1144,7 +1157,7 @@ public class ChanceEncounterDisplay extends UIComponent {
     choicesTable.clearChildren();
     choiceButtons.clear();
     promptLabel.setText(
-        encounterSession == null ? "CHOOSE YOUR RESPONSE" : encounterSession.getChoicePrompt());
+        encounterSession == null ? CHOOSE_RESPONSE_LABEL : encounterSession.getChoicePrompt());
 
     List<ChanceChoice> availableChoices =
         encounterSession == null ? encounter.getChoices() : encounterSession.getAvailableChoices();
@@ -1343,7 +1356,7 @@ public class ChanceEncounterDisplay extends UIComponent {
         for (TextButton button : choiceButtons) {
           button.setDisabled(true);
         }
-        resultLabel.setStyle(createLabelStyle(DEFAULT, BODY_COLOUR));
+        resultLabel.setStyle(createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
         resultLabel.setText("ROLLING...");
         diceRollDisplay.play(
             roll, () -> handleSessionResolution(resolution, selectedButton, originalButtonText));
@@ -1365,7 +1378,7 @@ public class ChanceEncounterDisplay extends UIComponent {
     }
     if (resolution.getStatus() == ChanceResolution.Status.AWAITING_CHOICE) {
       refreshChoices();
-      resultLabel.setStyle(createLabelStyle(DEFAULT, BODY_COLOUR));
+      resultLabel.setStyle(createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
       resultLabel.setText(encounterSession.getStageResultText());
       return;
     }
@@ -1373,9 +1386,9 @@ public class ChanceEncounterDisplay extends UIComponent {
       for (TextButton button : choiceButtons) {
         button.setDisabled(false);
       }
-      resultLabel.setStyle(createLabelStyle(DEFAULT, new Color(0.9f, 0.35f, 0.3f, 1f)));
+      resultLabel.setStyle(createLabelStyle(STYLE_NAME_DEFAULT, new Color(0.9f, 0.35f, 0.3f, 1f)));
       resultLabel.setText(
-          (scenicCardFusion || scenicFountain ? "" : "OUTCOME\n") + resolution.getMessage());
+          (scenicCardFusion || scenicFountain ? "" : OUTCOME_TEXT) + resolution.getMessage());
       if (scenicShrine) choicesTable.padBottom(155);
       if (scenicAbandonedMine
           || scenicCardFusion
@@ -1396,9 +1409,9 @@ public class ChanceEncounterDisplay extends UIComponent {
       for (TextButton button : choiceButtons) {
         button.setDisabled(false);
       }
-      resultLabel.setStyle(createLabelStyle(DEFAULT, new Color(0.9f, 0.35f, 0.3f, 1f)));
+      resultLabel.setStyle(createLabelStyle(STYLE_NAME_DEFAULT, new Color(0.9f, 0.35f, 0.3f, 1f)));
       resultLabel.setText(
-          (scenicCardFusion || scenicFountain ? "" : "OUTCOME\n")
+          (scenicCardFusion || scenicFountain ? "" : OUTCOME_TEXT)
               + "This choice could not be resolved. Please select another option.");
       if (scenicShrine) choicesTable.padBottom(155);
       if (scenicAbandonedMine
@@ -1419,13 +1432,13 @@ public class ChanceEncounterDisplay extends UIComponent {
     selectedButton.setStyle(selectedChoiceStyle);
     selectedButton.setText("SELECTED  -  " + originalButtonText);
 
-    resultLabel.setStyle(createLabelStyle(DEFAULT, BODY_COLOUR));
+    resultLabel.setStyle(createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
     resultLabel.setText(
         scenicCardFusion
             ? (outcome.isNoEffect()
                 ? "You leave the forge without fusing any cards."
                 : formatOutcome(outcome))
-            : (scenicFountain ? "" : "OUTCOME\n") + formatOutcome(outcome));
+            : (scenicFountain ? "" : OUTCOME_TEXT) + formatOutcome(outcome));
     if (scenicCardFusion && fusionIntroContent != null) {
       fusionIntroContent.setVisible(false);
     }

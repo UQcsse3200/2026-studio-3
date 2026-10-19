@@ -41,8 +41,12 @@ class CardConfigLoaderTest {
     List<CardConfig> cards = CardConfigLoader.loadCards();
     CardConfig strike =
         cards.stream().filter(card -> "strike".equals(card.id)).findFirst().orElseThrow();
-    CardConfig defend =
-        cards.stream().filter(card -> "defend".equals(card.id)).findFirst().orElseThrow();
+    // A fixture card is used for the no-upgrade case because catalogue cards are gaining upgrades.
+    CardConfig withoutUpgrade =
+        CardConfigLoader.loadCards(TEST_DIRECTORY + "optional_lore.json").stream()
+            .filter(card -> "plain_card".equals(card.id))
+            .findFirst()
+            .orElseThrow();
 
     assertAll(
         () -> assertEquals("Strike+", strike.upgrade.name),
@@ -50,7 +54,7 @@ class CardConfigLoaderTest {
         () -> assertEquals(1, strike.upgrade.cost),
         () -> assertEquals(Rarity.COMMON, strike.upgrade.rarity),
         () -> assertEquals(12, strike.upgrade.effects[0].value),
-        () -> assertNull(defend.upgrade));
+        () -> assertNull(withoutUpgrade.upgrade));
   }
 
   @Test

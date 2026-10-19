@@ -21,6 +21,7 @@ import com.csse3200.game.input.InputService;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
+import com.csse3200.game.rewards.CardRewardProfile;
 import com.csse3200.game.rewards.RewardGenerator;
 import com.csse3200.game.rewards.RewardService;
 import com.csse3200.game.services.ResourceService;
@@ -60,6 +61,11 @@ public class EndBattleScreen extends ScreenAdapter {
   private boolean rewardClaimed = false;
 
   public EndBattleScreen(GdxGame game, boolean won) {
+    this(game, won, CardRewardProfile.NORMAL);
+  }
+
+  /** Receives the battle classification captured before RunState completes the encounter. */
+  public EndBattleScreen(GdxGame game, boolean won, CardRewardProfile profile) {
     this.game = game;
     this.won = won;
 
@@ -78,10 +84,10 @@ public class EndBattleScreen extends ScreenAdapter {
       loadRewardAssets();
       loadCardAssets(cardConfigs);
     }
-    createUI(won, cardLibrary);
+    createUI(won, cardLibrary, profile);
   }
 
-  private void createUI(boolean won, CardService cardLibrary) {
+  private void createUI(boolean won, CardService cardLibrary, CardRewardProfile profile) {
     Stage stage = ServiceLocator.getRenderService().getStage();
 
     Entity ui = new Entity().addComponent(new InputDecorator(stage, 10));
@@ -92,7 +98,11 @@ public class EndBattleScreen extends ScreenAdapter {
       ui.addComponent(displays);
       RewardService rewardService =
           new RewardService(
-              new RewardGenerator(), cardLibrary, new Random(), game.getItemAcquisitionService());
+              new RewardGenerator(),
+              cardLibrary,
+              profile,
+              new Random(),
+              game.getItemAcquisitionService());
       DisplayingRecord rewardRecord =
           DisplayingRecord.builder("").position(0, 500).variant("reward").build();
       rewardDisplay =

@@ -22,6 +22,50 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(GameExtension.class)
 class RewardServiceTest {
+  @Test
+  void explicitProfilesChangeOnlyCardRarityAndOmitUnselectableCardOptions() {
+    CardService cards = new CardLibrary(CardConfigLoader.loadCards());
+    CardAcquisitionPool pool = new CardAcquisitionPool(cards, List.of("strike", "resurrection"));
+    CardRewardPolicy policy =
+        new CardRewardPolicy(
+            new CardRewardPolicy.RarityWeights(1, 0, 0),
+            new CardRewardPolicy.RarityWeights(0, 0, 1));
+    List<RewardOption> normal =
+        new RewardService(
+                new RewardGenerator(new Random(1)),
+                cards,
+                pool,
+                policy,
+                CardRewardProfile.NORMAL,
+                new Random(2))
+            .generateRewardOptions();
+    List<RewardOption> elite =
+        new RewardService(
+                new RewardGenerator(new Random(1)),
+                cards,
+                pool,
+                policy,
+                CardRewardProfile.ELITE,
+                new Random(2))
+            .generateRewardOptions();
+    assertEquals(List.of("strike"), normal.get(2).cardSelection.cardIds());
+    assertEquals(List.of("resurrection"), elite.get(2).cardSelection.cardIds());
+    assertEquals(normal.get(0).goldAmount, elite.get(0).goldAmount);
+    assertEquals(normal.get(1).itemId, elite.get(1).itemId);
+    CardAcquisitionPool commonOnly = new CardAcquisitionPool(cards, List.of("strike"));
+    List<RewardOption> unavailable =
+        new RewardService(
+                new RewardGenerator(new Random(1)),
+                cards,
+                commonOnly,
+                policy,
+                CardRewardProfile.ELITE,
+                new Random(2))
+            .generateRewardOptions();
+    assertEquals(
+        List.of(RewardType.GOLD, RewardType.ITEM),
+        unavailable.stream().map(option -> option.type).toList());
+  }
 
   @Test
   void shouldGenerateOneGoldOneItemAndOneCardOption() {
