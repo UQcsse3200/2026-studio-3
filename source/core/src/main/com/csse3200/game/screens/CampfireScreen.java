@@ -51,6 +51,11 @@ public class CampfireScreen extends ScreenAdapter {
   private static final float UI_HEIGHT = 800f;
   private static final float FADE_SECONDS = 0.18f;
   private static final float REST_SCENE_SECONDS = 0.9f;
+  private static final float MESSAGE_FADE_SECONDS = 0.2f;
+  private static final float MESSAGE_HOLD_SECONDS = 0.2f;
+  private static final float MESSAGE_RAISE = 0.15f;
+  private static final float MESSAGE_EXIT_SECONDS = 0.5f;
+  private static final float DISTANCE = 30f;
   private static final String MAIN_SCENE = "images/campfire/main_scene_dusk.png";
   private static final String MAIN_SCENE_EXTENDED = "images/campfire/main_scene_extended.png";
   private static final String REST_SCENE = "images/campfire/rest_scene_wide.png";
@@ -372,7 +377,8 @@ public class CampfireScreen extends ScreenAdapter {
   }
 
   private void beginUpgrade(CardUpgradeDisplay display) {
-    if (!display.hasUpgradeOptions()) {
+    if (true || !display.hasUpgradeOptions()) {
+      showMessage("NO ELIGIBLE CARDS FOR UPGRADE");
       return;
     }
     transitioning = true;
@@ -449,5 +455,17 @@ public class CampfireScreen extends ScreenAdapter {
     ServiceLocator.getEntityService().dispose();
   }
 
-  private void showMessage(String text) {}
+  private void showMessage(String text) {
+    Label msg = new Label(text, skin, "large");
+    msg.setPosition((UI_WIDTH - msg.getWidth()) / 2, (UI_HEIGHT - msg.getHeight()) / 2 + (UI_HEIGHT * MESSAGE_RAISE));
+    msg.getColor().a = 0f;
+    msg.addAction(
+      Actions.sequence(
+          Actions.fadeIn(MESSAGE_FADE_SECONDS),
+          Actions.delay(MESSAGE_HOLD_SECONDS),
+          Actions.parallel(Actions.fadeOut(MESSAGE_EXIT_SECONDS), Actions.moveBy(0, DISTANCE, MESSAGE_EXIT_SECONDS, Interpolation.pow2Out)),
+          Actions.removeActor()));
+      mainScene.addActor(msg);
+
+  }
 }
