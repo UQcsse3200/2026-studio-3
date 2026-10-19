@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics;
+import com.badlogic.gdx.utils.Timer;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardType;
@@ -14,6 +17,7 @@ import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.configs.EffectConfig;
 import com.csse3200.game.cards.deck.BattleDeck;
 import com.csse3200.game.cards.deck.PlayerDeck;
+import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.cards.play.CardPlayService;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.cards.CardEffectHandler;
@@ -26,6 +30,7 @@ import com.csse3200.game.entities.Entity;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ServiceLocator;
 import java.util.ArrayList;
@@ -34,6 +39,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 
 @ExtendWith(GameExtension.class)
 class BattleActionsTest {
@@ -86,6 +92,168 @@ class BattleActionsTest {
     assertEquals(19, player.getComponent(CombatStatsComponent.class).getHealth());
     assertEquals(3, energy.getCurrentEnergy());
   }
+
+  @Test
+  void shouldKeepTheTurnOpenWhileEnergyRemains() {
+    player.addComponent(new EnergyComponent(3));
+    GameTime time = mock(GameTime.class);
+    ServiceLocator.registerTimeSource(time);
+    when(time.getDeltaTime()).thenReturn(2f);
+    controller.start();
+
+    entity.update();
+
+    assertEquals(1, controller.getPlayerTurnNumber());
+    assertEquals(20, player.getComponent(CombatStatsComponent.class).getHealth());
+  }
+
+  @Test
+  void shouldRestartCountdownAfterEnergyIsRestoredAndSpentAgain() {
+    EnergyComponent energy = new EnergyComponent(3);
+    player.addComponent(energy);
+    GameTime time = mock(GameTime.class);
+    ServiceLocator.registerTimeSource(time);
+    controller.start();
+    energy.spendEnergy(3);
+    when(time.getDeltaTime()).thenReturn(0.75f);
+    entity.update();
+
+    energy.restoreEnergy(1);
+    entity.update();
+    assertEquals(1, controller.getPlayerTurnNumber());
+
+    energy.spendEnergy(1);
+    when(time.getDeltaTime()).thenReturn(0.5f);
+    entity.update();
+    assertEquals(1, controller.getPlayerTurnNumber());
+    entity.update();
+    assertEquals(2, controller.getPlayerTurnNumber());
+  }
+
+  @Test
+  void shouldPauseTheCountdownWithGameplay() {
+    Graphics previousGraphics = Gdx.graphics;
+    try {
+      Gdx.graphics = mock(Graphics.class);
+      when(Gdx.graphics.getDeltaTime()).thenReturn(0.5f);
+      GameTime time = new GameTime();
+      ServiceLocator.registerTimeSource(time);
+      GamePauseService pause = new GamePauseService(time);
+      EnergyComponent energy = new EnergyComponent(3);
+      player.addComponent(energy);
+      controller.start();
+      energy.spendEnergy(3);
+      entity.update();
+
+      pause.pause();
+      when(Gdx.graphics.getDeltaTime()).thenReturn(2f);
+      entity.update();
+      assertEquals(1, controller.getPlayerTurnNumber());
+
+      pause.resume();
+      when(Gdx.graphics.getDeltaTime()).thenReturn(0.5f);
+      entity.update();
+      assertEquals(2, controller.getPlayerTurnNumber());
+    } finally {
+      Gdx.graphics = previousGraphics;
+    }
+  }
+
+  @Test
+  void shouldResetCountdownOnManualEndAndWaitForEnemyReveals() {
+    List<Timer.Task> reveals = new ArrayList<>();
+    try (MockedStatic<Timer> timer = mockStatic(Timer.class)) {
+      timer
+          .when(() -> Timer.schedule(any(Timer.Task.class), anyFloat()))
+          .thenAnswer(
+              invocation -> {
+                Timer.Task task = invocation.getArgument(0);
+                reveals.add(task);
+                return task;
+              });
+      EnergyComponent energy = new EnergyComponent(3);
+      player.addComponent(energy);
+      GameTime time = mock(GameTime.class);
+      ServiceLocator.registerTimeSource(time);
+      controller.start();
+      energy.spendEnergy(3);
+      when(time.getDeltaTime()).thenReturn(0.75f);
+      entity.update();
+
+      entity.getEvents().trigger("endTurn");
+      assertEquals(2, controller.getPlayerTurnNumber());
+      energy.spendEnergy(3);
+      when(time.getDeltaTime()).thenReturn(2f);
+      entity.update();
+      assertEquals(2, controller.getPlayerTurnNumber());
+
+      reveals.get(0).run();
+      when(time.getDeltaTime()).thenReturn(0.5f);
+      entity.update();
+      assertEquals(2, controller.getPlayerTurnNumber());
+      entity.update();
+      assertEquals(3, controller.getPlayerTurnNumber());
+    }
+  }
+
+  @Test
+  void shouldAutoEndAfterAPlayedCardSpendsTheLastEnergy() {
+    CardBattle battle = cardBattle(new EffectConfig(EffectType.BLOCK, 1));
+    assertTrue(
+        battle.controller().submitCardPlayRequest(CardPlayRequest.self(battle.instanceId())));
+    assertEquals(0, battle.energy().getCurrentEnergy());
+    assertEquals(1, battle.controller().getPlayerTurnNumber());
+
+    battle.ui().update();
+    assertEquals(1, battle.controller().getPlayerTurnNumber());
+    battle.ui().update();
+    assertEquals(2, battle.controller().getPlayerTurnNumber());
+  }
+
+  @Test
+  void shouldKeepTurnOpenWhenTheLastEnergyCardRestoresEnergy() {
+    CardBattle battle = cardBattle(new EffectConfig(EffectType.ENERGY_GAIN, 2));
+    assertTrue(
+        battle.controller().submitCardPlayRequest(CardPlayRequest.self(battle.instanceId())));
+    assertEquals(2, battle.energy().getCurrentEnergy());
+
+    for (int frame = 0; frame < 4; frame++) {
+      battle.ui().update();
+    }
+    assertEquals(1, battle.controller().getPlayerTurnNumber());
+  }
+
+  private CardBattle cardBattle(EffectConfig effect) {
+    CardConfig config = card("last_energy", CardType.SKILL, TargetType.SELF, effect);
+    config.cost = 3;
+    CardLibrary library = new CardLibrary(List.of(config));
+    BattleDeck deck =
+        new BattleDeck(new PlayerDeck(TestCardService.withCards(config.id), List.of(config.id)));
+    deck.drawCards(1);
+    EnergyComponent energy = new EnergyComponent(3);
+    Entity testPlayer =
+        new Entity().addComponent(new CombatStatsComponent(20, 0)).addComponent(energy);
+    Entity enemy =
+        new Entity()
+            .addComponent(new CombatStatsComponent(20, 1))
+            .addComponent(new EnemyBehaviourComponent("test"));
+    BattleController battle =
+        new BattleController(
+            testPlayer,
+            List.of(enemy),
+            new CardEffectHandler(),
+            new CardPlayService(library, deck, energy));
+    Entity ui = new Entity().addComponent(new BattleActions(battle, mock(GdxGame.class)));
+    ui.create();
+    GameTime time = mock(GameTime.class);
+    when(time.getDeltaTime()).thenReturn(0.5f);
+    ServiceLocator.registerTimeSource(time);
+    battle.start();
+    return new CardBattle(battle, ui, energy, deck.getHand().get(0).instanceId());
+  }
+
+  private record CardBattle(
+      BattleController controller, Entity ui, EnergyComponent energy, String instanceId) {}
 
   @Test
   void shouldNotSubmitUnknownCard() {
