@@ -136,7 +136,7 @@ class SettingsPanelTest {
             display::set);
     panel.getMasterVolumeSlider().setValue(0.5f);
     panel.getFpsText().setText("120");
-    assertNull(audio.get());
+    assertEquals(0.5f, audio.get().masterVolume);
     assertNull(display.get());
 
     click(panel.getApplyButton());
@@ -270,9 +270,10 @@ class SettingsPanelTest {
     assertEquals("", feedback(panel).getText().toString());
     click(panel.getResetButton());
     panel.getMusicVolumeSlider().setValue(0.3f);
-    assertEquals("", feedback(panel).getText().toString());
+    assertEquals(
+        "Audio saved. Display changes require Apply.", feedback(panel).getText().toString());
     panel.getFpsText().setText("120");
-    assertEquals(0, writeCount.get());
+    assertEquals(1, writeCount.get());
     click(panel.getApplyButton());
 
     Settings saved = written.get();
@@ -283,12 +284,12 @@ class SettingsPanelTest {
     assertFalse(saved.muted);
     assertFalse(saved.fullscreen);
     assertTrue(saved.vsync);
-    assertEquals(1, writeCount.get());
+    assertEquals(2, writeCount.get());
     assertEquals("Settings applied.", feedback(panel).getText().toString());
   }
 
   @Test
-  void invalidFpsBlocksAllEditsAndPreservesDraft() {
+  void invalidFpsBlocksDisplayEditsAndPreservesSavedAudio() {
     SettingsPanel panel = createPanel();
     panel.getMasterVolumeSlider().setValue(0.5f);
     panel.getFullScreenCheck().setChecked(false);
@@ -298,8 +299,9 @@ class SettingsPanelTest {
       panel.getFpsText().setText(input);
       click(panel.getApplyButton());
 
-      assertNull(written.get(), input);
-      assertEquals(0, writeCount.get(), input);
+      assertEquals(75, written.get().fps, input);
+      assertEquals(0.5f, written.get().masterVolume, 0.001f, input);
+      assertEquals(1, writeCount.get(), input);
       assertEquals(input, panel.getFpsText().getText());
       assertEquals(0.5f, panel.getMasterVolumeSlider().getValue(), 0.001f);
       assertFalse(panel.getFullScreenCheck().isChecked());
@@ -314,7 +316,7 @@ class SettingsPanelTest {
   }
 
   @Test
-  void correctingInvalidFpsWritesAllPendingEditsExactlyOnce() {
+  void correctingInvalidFpsCommitsDisplayWithPreviouslySavedAudio() {
     SettingsPanel panel = createPanel();
     panel.getMasterVolumeSlider().setValue(0.5f);
     panel.getMusicVolumeSlider().setValue(0.3f);
@@ -324,12 +326,12 @@ class SettingsPanelTest {
     panel.getVsyncCheck().setChecked(true);
     panel.getFpsText().setText("-60");
     click(panel.getApplyButton());
-    assertEquals(0, writeCount.get());
+    assertEquals(4, writeCount.get());
 
     panel.getFpsText().setText(" 00120 ");
     click(panel.getApplyButton());
 
-    assertEquals(1, writeCount.get());
+    assertEquals(5, writeCount.get());
     Settings saved = written.get();
     assertEquals(120, saved.fps);
     assertEquals(0.5f, saved.masterVolume, 0.001f);
@@ -345,7 +347,7 @@ class SettingsPanelTest {
   }
 
   @Test
-  void invalidApplyAfterSuccessLeavesLastSavedSettingsUnchanged() {
+  void invalidApplyAfterSuccessPreservesDisplayAndLatestSavedAudio() {
     SettingsPanel panel = createPanel();
     panel.getFpsText().setText("120");
     click(panel.getApplyButton());
@@ -355,8 +357,9 @@ class SettingsPanelTest {
     panel.getMasterVolumeSlider().setValue(0.2f);
     click(panel.getApplyButton());
 
-    assertEquals(1, writeCount.get());
-    assertSame(saved, written.get());
+    assertEquals(2, writeCount.get());
+    assertEquals(120, written.get().fps);
+    assertEquals(0.2f, written.get().masterVolume, 0.001f);
     assertEquals(120, saved.fps);
     assertEquals(0.8f, saved.masterVolume, 0.001f);
     assertEquals("-1", panel.getFpsText().getText());
@@ -376,7 +379,7 @@ class SettingsPanelTest {
   }
 
   @Test
-  void editingAnyControlClearsSuccessFeedback() {
+  void displayEditsClearSuccessFeedbackAndAudioEditsShowSaveFeedback() {
     SettingsPanel panel = createPanel();
     panel.getFpsText().setProgrammaticChangeEvents(true);
     SelectBox<?> resolution = panel.findActor("resolution");
@@ -390,11 +393,13 @@ class SettingsPanelTest {
       () -> panel.getMusicVolumeSlider().setValue(0.3f),
       () -> panel.getSoundEffectsVolumeSlider().setValue(0.2f)
     };
-    for (Runnable edit : edits) {
+    for (int index = 0; index < edits.length; index++) {
       click(panel.getApplyButton());
       assertEquals("Settings applied.", feedback(panel).getText().toString());
-      edit.run();
-      assertEquals("", feedback(panel).getText().toString());
+      edits[index].run();
+      assertEquals(
+          index < 4 ? "" : "Audio saved. Display changes require Apply.",
+          feedback(panel).getText().toString());
     }
   }
 
@@ -437,8 +442,8 @@ class SettingsPanelTest {
     Settings saved = written.get();
     assertEquals("Settings applied.", feedback(panel).getText().toString());
     panel.getFpsText().setText(" 00120 ");
-    panel.getMasterVolumeSlider().setValue(0.5f);
     failWrite.set(true);
+    panel.getMasterVolumeSlider().setValue(0.5f);
 
     click(panel.getApplyButton());
 
@@ -451,10 +456,11 @@ class SettingsPanelTest {
     assertEquals(0, backCount.get());
 
     panel.getMusicVolumeSlider().setValue(0.3f);
-    assertEquals("", feedback(panel).getText().toString());
+    assertEquals(
+        "Audio updated, but could not be saved. Try again.", feedback(panel).getText().toString());
     failWrite.set(false);
     click(panel.getApplyButton());
-    assertEquals(3, writeCount.get());
+    assertEquals(5, writeCount.get());
     assertEquals(120, written.get().fps);
     assertEquals(0.5f, written.get().masterVolume, 0.001f);
     assertEquals(0.3f, written.get().musicVolume, 0.001f);

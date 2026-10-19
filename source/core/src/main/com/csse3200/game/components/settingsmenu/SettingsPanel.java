@@ -183,9 +183,29 @@ public class SettingsPanel extends Table {
   }
 
   private void wireActions() {
-    addVolumeListener(masterVolumeSlider, masterVolumeValue);
-    addVolumeListener(musicVolumeSlider, musicVolumeValue);
-    addVolumeListener(soundEffectsVolumeSlider, soundEffectsVolumeValue);
+    addVolumeListener(
+        masterVolumeSlider, masterVolumeValue, value -> liveSettings.masterVolume = value);
+    addVolumeListener(
+        musicVolumeSlider, musicVolumeValue, value -> liveSettings.musicVolume = value);
+    addVolumeListener(
+        soundEffectsVolumeSlider,
+        soundEffectsVolumeValue,
+        value -> liveSettings.soundEffectsVolume = value);
+    muteCheck.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            if (populating) {
+              event.stop();
+              return;
+            }
+            if (liveSettings.muted != muteCheck.isChecked()) {
+              liveSettings.muted = muteCheck.isChecked();
+              audioApplier.accept(copyOf(liveSettings));
+            }
+            flushPendingAudioChanges();
+          }
+        });
 
     ChangeListener clearFeedback =
         new ChangeListener() {
@@ -198,17 +218,7 @@ public class SettingsPanel extends Table {
             feedbackLabel.setText("");
           }
         };
-    for (Actor control :
-        new Actor[] {
-          fpsText,
-          fullScreenCheck,
-          vsyncCheck,
-          displayModeSelect,
-          muteCheck,
-          masterVolumeSlider,
-          musicVolumeSlider,
-          soundEffectsVolumeSlider
-        }) {
+    for (Actor control : new Actor[] {fpsText, fullScreenCheck, vsyncCheck, displayModeSelect}) {
       control.addListener(clearFeedback);
     }
 
@@ -216,7 +226,9 @@ public class SettingsPanel extends Table {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
-            populate(new Settings());
+            Settings defaults = new Settings();
+            copyAudio(defaults, liveSettings);
+            populate(defaults);
             showFeedback("Defaults restored. Click Apply to save.", MenuTheme.warmParchment());
           }
         });
@@ -236,14 +248,66 @@ public class SettingsPanel extends Table {
         });
   }
 
-  private void addVolumeListener(Slider slider, Label valueLabel) {
+  private void addVolumeListener(Slider slider, Label valueLabel, Consumer<Float> updateVolume) {
     slider.addListener(
         new ChangeListener() {
+          private float observedValue = slider.getValue();
+
           @Override
           public void changed(ChangeEvent event, Actor actor) {
             updateVolumeLabel(slider, valueLabel);
+            boolean changed = Float.compare(observedValue, slider.getValue()) != 0;
+            observedValue = slider.getValue();
+            if (populating) {
+              event.stop();
+              return;
+            }
+            if (changed) {
+              updateVolume.accept(slider.getValue());
+              audioApplier.accept(copyOf(liveSettings));
+              if (slider.isDragging()) {
+                showFeedback("Audio updated. Saves when you release.", MenuTheme.warmParchment());
+              }
+            }
+            if (!slider.isDragging()) {
+              flushPendingAudioChanges();
+            }
           }
         });
+  }
+
+  /** Saves pending audio without reading or applying draft display controls. */
+  public boolean flushPendingAudioChanges() {
+    if (sameAudio(appliedSettings, liveSettings)) {
+      return true;
+    }
+    Settings updated = copyOf(appliedSettings);
+    copyAudio(liveSettings, updated);
+    try {
+      settingsWriter.accept(updated);
+    } catch (RuntimeException e) {
+      logger.error("Could not save audio settings", e);
+      showFeedback("Audio updated, but could not be saved. Try again.", Color.SALMON);
+      return false;
+    }
+    appliedSettings = copyOf(updated);
+    liveSettings = copyOf(updated);
+    showFeedback("Audio saved. Display changes require Apply.", Color.GREEN);
+    return true;
+  }
+
+  private static boolean sameAudio(Settings first, Settings second) {
+    return Float.compare(first.masterVolume, second.masterVolume) == 0
+        && Float.compare(first.musicVolume, second.musicVolume) == 0
+        && Float.compare(first.soundEffectsVolume, second.soundEffectsVolume) == 0
+        && first.muted == second.muted;
+  }
+
+  private static void copyAudio(Settings source, Settings target) {
+    target.masterVolume = source.masterVolume;
+    target.musicVolume = source.musicVolume;
+    target.soundEffectsVolume = source.soundEffectsVolume;
+    target.muted = source.muted;
   }
 
   private void populate(Settings settings) {
@@ -280,12 +344,8 @@ public class SettingsPanel extends Table {
       return;
     }
 
-    Settings updated = copyOf(appliedSettings);
+    Settings updated = copyOf(liveSettings);
     updated.fps = parsedFps;
-    updated.masterVolume = masterVolumeSlider.getValue();
-    updated.musicVolume = musicVolumeSlider.getValue();
-    updated.soundEffectsVolume = soundEffectsVolumeSlider.getValue();
-    updated.muted = muteCheck.isChecked();
     updated.fullscreen = fullScreenCheck.isChecked();
     updated.vsync = vsyncCheck.isChecked();
 
