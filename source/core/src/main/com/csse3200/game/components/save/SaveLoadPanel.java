@@ -57,6 +57,10 @@ public class SaveLoadPanel extends UIComponent {
   private static final float ACTION_BUTTON_HEIGHT = 56f;
   private static final float PANEL_WIDTH = 880f;
   private static final float PANEL_HEIGHT = 500f;
+  private static final float SLOT_LABEL_WIDTH = 250f;
+  private static final String SLOT_LABEL_NAME_PREFIX = "save-slot-label-";
+  private static final String LOAD_BUTTON_NAME_PREFIX = "save-slot-load-";
+  private static final String DELETE_BUTTON_NAME_PREFIX = "save-slot-delete-";
 
   private Stack rootStack;
   private Table rootTable;
@@ -298,15 +302,15 @@ public class SaveLoadPanel extends UIComponent {
   }
 
   private void addSlotRow(int slotId, SaveSlotMetadata metadata) {
-    boolean hasSave = metadata != null && metadata.loadable;
+    boolean hasSaveFile = metadata != null;
+    boolean hasLoadableSave = hasSaveFile && metadata.loadable;
     boolean isAutosave = slotId == AutosaveCoordinator.AUTOSAVE_SLOT_ID;
     String slotName = isAutosave ? "Autosave" : "Slot " + slotId;
 
-    String label =
-        hasSave
-            ? slotName + " — " + describeTimestamp(metadata.savedAtEpochMillis)
-            : slotName + " — empty";
-    rootTable.add(new Label(label, themedLabelStyle())).left().padRight(20f);
+    Label slotLabel = new Label(describeSlot(slotName, metadata), themedLabelStyle());
+    slotLabel.setName(SLOT_LABEL_NAME_PREFIX + slotId);
+    slotLabel.setWrap(true);
+    rootTable.add(slotLabel).width(SLOT_LABEL_WIDTH).left().padRight(20f);
 
     if (!mode.isSaveAllowed()) {
       rootTable.add().width(ACTION_BUTTON_WIDTH).padRight(10f);
@@ -333,7 +337,8 @@ public class SaveLoadPanel extends UIComponent {
     }
 
     TextButton loadButton = new TextButton("Load", themedButtonStyle());
-    loadButton.setDisabled(!hasSave);
+    loadButton.setName(LOAD_BUTTON_NAME_PREFIX + slotId);
+    loadButton.setDisabled(!hasLoadableSave);
     loadButton.addListener(
         new ChangeListener() {
           @Override
@@ -345,7 +350,8 @@ public class SaveLoadPanel extends UIComponent {
 
     if (mode.isDeleteAllowed()) {
       TextButton deleteButton = new TextButton("Delete", themedButtonStyle());
-      deleteButton.setDisabled(!hasSave);
+      deleteButton.setName(DELETE_BUTTON_NAME_PREFIX + slotId);
+      deleteButton.setDisabled(!hasSaveFile);
       deleteButton.addListener(
           new ChangeListener() {
             @Override
@@ -468,6 +474,18 @@ public class SaveLoadPanel extends UIComponent {
     onLoad(slotId);
   }
 
+  Label getSlotLabel(int slotId) {
+    return rootTable.findActor(SLOT_LABEL_NAME_PREFIX + slotId);
+  }
+
+  TextButton getLoadButton(int slotId) {
+    return rootTable.findActor(LOAD_BUTTON_NAME_PREFIX + slotId);
+  }
+
+  TextButton getDeleteButton(int slotId) {
+    return rootTable.findActor(DELETE_BUTTON_NAME_PREFIX + slotId);
+  }
+
   private String formatRestoreMessage(RestoreResult result) {
     if (result.success()) {
       String resumeScreen =
@@ -502,6 +520,21 @@ public class SaveLoadPanel extends UIComponent {
 
   private String describeTimestamp(long epochMillis) {
     return TIMESTAMP_FORMAT.format(Instant.ofEpochMilli(epochMillis));
+  }
+
+  private String describeSlot(String slotName, SaveSlotMetadata metadata) {
+    if (metadata == null) {
+      return slotName + " — empty";
+    }
+    if (metadata.loadable) {
+      return slotName + " — " + describeTimestamp(metadata.savedAtEpochMillis);
+    }
+
+    String reason = metadata.statusMessage;
+    if (reason == null || reason.isBlank()) {
+      reason = "This save file cannot be read";
+    }
+    return slotName + " — unavailable\n" + reason;
   }
 
   @Override
