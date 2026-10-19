@@ -132,11 +132,12 @@ public class BestiaryDisplay extends UIComponent {
 
   private void addHeader(Table panel) {
     Table titleBlock = new Table();
-    Label eyebrow = new Label("ENEMY ARCHIVE", createLabelStyle(SMALL, GOLD_COLOUR));
-    Label title = new Label("Enemy Library", createLabelStyle(LARGE, BODY_COLOUR));
+    Label eyebrow = new Label("ENEMY ARCHIVE", createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR));
+    Label title = new Label("Enemy Library", createLabelStyle(STYLE_NAME_LARGE, BODY_COLOUR));
     Label subtitle =
         new Label(
-            "All enemies. Every tier. Know what awaits.", createLabelStyle(SMALL, MUTED_COLOUR));
+            "All enemies. Every tier. Know what awaits.",
+            createLabelStyle(STYLE_NAME_SMALL, MUTED_COLOUR));
     eyebrow.setFontScale(1.2f);
     title.setFontScale(1.45f);
     subtitle.setFontScale(1.15f);
@@ -224,7 +225,7 @@ public class BestiaryDisplay extends UIComponent {
     enemyScroll.setFadeScrollBars(false);
     enemyScroll.setScrollingDisabled(true, false);
     enemyScroll.setForceScroll(false, true);
-    emptyStateLabel = new Label("", createLabelStyle(SMALL, MUTED_COLOUR));
+    emptyStateLabel = new Label("", createLabelStyle(STYLE_NAME_SMALL, MUTED_COLOUR));
     emptyStateLabel.setName("bestiary-no-results");
     emptyStateLabel.setWrap(true);
 
@@ -246,7 +247,8 @@ public class BestiaryDisplay extends UIComponent {
 
   private void addSearchControls(Table listPanel) {
     listPanel
-        .add(new Label("Search discovered enemies", createLabelStyle(SMALL, BODY_COLOUR)))
+        .add(
+            new Label("Search discovered enemies", createLabelStyle(STYLE_NAME_SMALL, BODY_COLOUR)))
         .left()
         .padTop(10f);
     listPanel.row();
@@ -279,7 +281,7 @@ public class BestiaryDisplay extends UIComponent {
     searchRow.add(clear).width(76f).height(42f).padLeft(8f);
     listPanel.add(searchRow).growX().padTop(5f);
     listPanel.row();
-    resultCountLabel = new Label("", createLabelStyle(SMALL, GOLD_COLOUR));
+    resultCountLabel = new Label("", createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR));
     resultCountLabel.setName("bestiary-result-count");
     listPanel.add(resultCountLabel).left().padTop(8f);
   }
@@ -290,7 +292,6 @@ public class BestiaryDisplay extends UIComponent {
     detailPanel.pad(24f);
     Table detailContent = new Table();
     detailContent.top();
-
 
     detailStateLabel = new Label("", createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR));
     detailNameLabel = new Label("", createLabelStyle(STYLE_NAME_LARGE, BODY_COLOUR));
@@ -303,7 +304,7 @@ public class BestiaryDisplay extends UIComponent {
     detailStatsLabel.setName("bestiary-stats");
     detailStateLabel.setFontScale(1.1f);
     detailNameLabel.setFontScale(1.25f);
-    detailNameLabel.setWrap(true);4
+    detailNameLabel.setWrap(true);
     detailTierLabel.setFontScale(1.1f);
     detailDescriptionLabel.setFontScale(1.15f);
     detailDescriptionLabel.setWrap(true);
