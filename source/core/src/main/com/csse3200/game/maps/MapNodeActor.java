@@ -15,7 +15,6 @@ public class MapNodeActor extends Group {
   private final MapNode node;
   public float size;
   private Image nodeIcon;
-  private Image completedCross;
   private NodeState lastRenderedState;
 
   /**
@@ -79,7 +78,7 @@ public class MapNodeActor extends Group {
     Texture crossTexture =
         ServiceLocator.getResourceService().getAsset("images/map/cross.png", Texture.class);
 
-    completedCross = new Image(crossTexture);
+    Image completedCross = new Image(crossTexture);
 
     completedCross.setSize(size, size);
     completedCross.setPosition(0, 0);
