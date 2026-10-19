@@ -4,6 +4,8 @@ Issue: #431 · Branch: `Feature6-zeyu-sprint4-balance` · Owner: Team 6 (invento
 
 Paths are relative to `source/core/`.
 
+**Related:** card values and balance decisions are on Yu Zhu's wiki page [Card Values and Balance Review](https://github.com/UQcsse3200/2026-studio-3/wiki/Card-Values-and-Balance-Review). The wiki owns card numbers and accept/retest decisions; `docs/balance/` owns runtime value sources, curse/item modifiers, encounter baselines and journey evidence. If a card value here disagrees with the wiki or `cards.json`, fix this file.
+
 | Value | Default / example | Authoritative source | Loader / application | Owning team | Runtime notes |
 | --- | --- | --- | --- | --- | --- |
 | Player current HP | 100 | `assets/configs/player.json` → `health` | `PlayerFactory` → `CombatStatsComponent`; durable via `PlayerRunState` | Team 7 | Save: `PlayerSaveData.currentHealth`. Mid-run: combat, Chance, Campfire, Temple. |
@@ -25,6 +27,17 @@ Paths are relative to `source/core/`.
 | Encounter line-ups | COMBAT / ELITE / FINAL | `assets/configs/encounters.json` | `BattleEncounterSelector` | Team 1 | Weights + progression gates. |
 | Map room mix | combat 60 / event 20 / elite 10 / shop 10 | hardcoded `MapGenerationConfig` / `NodePoolGenerator` | `NodePoolGenerator` (campfire at `MAP_HEIGHT - 1`) | Team 2 | Campfire forced near top; drives encounter density. |
 | Save player fields | HP, max HP, gold | save schema | `GameStateSnapshotProvider` / `SaveGameRestoreService` | Team 5 | Gaps: max energy, owned items (Lucky Coin, Merchant’s Favor, Energy Crystal). |
+
+## Curse items (run modifiers on player gains)
+
+Shattered Aegis, Brand and Blood-Oath are applied once per owned copy when a battle starts (`BattleScreen`) and last for that battle. Ashen Ember is applied once when acquired. Ownership is not recorded here; see the cited commits.
+
+| Curse | Runtime effect | Applied in | Introduced in | Card effects affected |
+| --- | --- | --- | --- | --- |
+| Shattered Aegis | Each Block gain −1 per copy, minimum 0 | `ShatteredAegisEffect` → `CursePenalties.BLOCK_PENALTY`, read in `Team7PlayerStateAdapter` and `CardEffectHandler` | `d02dac21` | BLOCK (Defend, Sealed Pact, Astral Ward, Humble Sanctuary, Consecrated Rampart). **FORTIFY is not reduced** — Iron Oath goes through `addArmour` with no penalty. |
+| Brand of the Damned | Each Strength gain −1 per copy, minimum 0 | `BrandOfTheDamnedEffect` → `CursePenalties.STRENGTH_PENALTY`, same two call sites, plus Warrior's Crest | `1a1f7c54`, reworked in `d02dac21` | STRENGTH (Inner Focus, Sealed Pact, Astral Ward). Does not touch Block. |
+| Blood-Oath Sigil | Lose 2 HP per copy at each player turn start, never below 1 HP; bypasses Block and Armour | `BattleController.applyBloodOathAtTurnStart` | `8d5a1ed0` | None directly; raises effective pressure of long fights. |
+| Ashen Ember | Max energy −1, minimum 1 | `AshenEmberEffect` via `ItemEffectApplier` (on acquisition) | `1a1f7c54` | From base 3 energy, 3-cost Sealed Pact and Blood Price become unplayable unless max energy is raised first. |
 
 ## Forbidden card upgrade values (own cards — for Yu Zhu)
 
