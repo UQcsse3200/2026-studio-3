@@ -40,7 +40,6 @@ import java.util.Random;
  * returning to the map.
  */
 public class AncientTempleScreen extends ScreenAdapter {
-  private static final int ETERNITY_MAX_HEALTH_BONUS = 20;
   private static final int ETERNITY_MAX_ENERGY_BONUS = 1;
   private static final int ETERNITY_FOCUS_HEAL = 20;
 
@@ -322,14 +321,11 @@ public class AncientTempleScreen extends ScreenAdapter {
    */
   private void grantEternalVitality() {
     PlayerRunState playerState = runState.getOrCreatePlayerState();
-
-    int newMaxHealth = playerState.getMaxHealth() + ETERNITY_MAX_HEALTH_BONUS;
-
-    playerState.restore(newMaxHealth, newMaxHealth, playerState.getGold());
+    playerState.grantEternalVitality();
 
     // Keep RunState's legacy health values in sync.
-    runState.setPlayerMaxHealth(newMaxHealth);
-    runState.setPlayerHealth(newMaxHealth);
+    runState.setPlayerMaxHealth(playerState.getMaxHealth());
+    runState.setPlayerHealth(playerState.getCurrentHealth());
 
     finishTemple();
   }

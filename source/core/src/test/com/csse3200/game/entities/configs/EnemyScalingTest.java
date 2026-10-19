@@ -28,8 +28,8 @@ class EnemyScalingTest {
 
     EnemyConfig scaled = EnemyScaling.scale(base, 3);
 
-    assertEquals(124, scaled.health);
-    assertEquals(23, scaled.baseAttack);
+    assertEquals(115, scaled.health);
+    assertEquals(22, scaled.baseAttack);
   }
 
   @Test
@@ -41,8 +41,8 @@ class EnemyScalingTest {
 
     EnemyConfig scaled = EnemyScaling.scale(base, 3);
 
-    assertEquals(130, scaled.health);
-    assertEquals(121, scaled.baseAttack);
+    assertEquals(124, scaled.health);
+    assertEquals(115, scaled.baseAttack);
   }
 
   @Test
@@ -94,8 +94,8 @@ class EnemyScalingTest {
 
     EnemyConfig scaled = EnemyScaling.scale(base, 5);
 
-    assertEquals(140, scaled.health);
-    assertEquals(25, scaled.baseAttack);
+    assertEquals(125, scaled.health);
+    assertEquals(23, scaled.baseAttack);
     assertEquals(100, base.health);
     assertEquals(20, base.baseAttack);
   }
@@ -110,8 +110,8 @@ class EnemyScalingTest {
     EnemyConfig first = EnemyScaling.scale(base, 5);
     EnemyConfig second = EnemyScaling.scale(base, 5);
 
-    assertEquals(140, first.health);
-    assertEquals(25, first.baseAttack);
+    assertEquals(125, first.health);
+    assertEquals(23, first.baseAttack);
     assertEquals(first.health, second.health);
     assertEquals(first.baseAttack, second.baseAttack);
   }

@@ -3,21 +3,21 @@
     {
       "text": "Card Inventory",
       "x": 24,
-      "y": 190,
+      "y": 180,
       "size": [247, 48],
       "trigger": "openMenu"
     },
     {
       "text": "Item Inventory",
       "x": 24,
-      "y": 250,
+      "y": 239,
       "size": [247, 48],
       "trigger": "openInventory"
     },
     {
       "text": "End Turn",
       "x": 24,
-      "y": 310,
+      "y": 299,
       "size": [154, 48],
       "trigger": "endTurn",
       "variant": "gated"
