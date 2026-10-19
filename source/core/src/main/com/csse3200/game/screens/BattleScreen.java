@@ -232,13 +232,7 @@ public class BattleScreen extends ScreenAdapter {
     forestGameArea.create();
 
     if (tutorialBattle) {
-      for (Entity enemy : forestGameArea.getEnemies()) {
-        EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
-
-        if (behaviour != null) {
-          behaviour.setAI(new TutorialEnemyAI());
-        }
-      }
+      applyTutorialEnemyAI(forestGameArea);
     }
 
     playerState = runState.getOrCreatePlayerState();
@@ -320,21 +314,42 @@ public class BattleScreen extends ScreenAdapter {
             player.getComponent(EnemyMemoryComponent.class),
             "Player entity must contain EnemyMemoryComponent");
 
-    for (Entity enemy : forestGameArea.getEnemies()) {
-      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+    wireEnemyMemories(forestGameArea, enemyMemory);
+    registerVictoryHealthSync(forestGameArea);
+    createUI();
+    installBossDialogue(forestGameArea);
+    if (tutorialBattle) {
+      setupTutorialGuidance(forestGameArea, player, animationCoordinatorEntity);
+    }
+    controller.start();
+  }
 
+  private void applyTutorialEnemyAI(BattleGameArea battleArea) {
+    for (Entity enemy : battleArea.getEnemies()) {
+      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+      if (behaviour != null) {
+        behaviour.setAI(new TutorialEnemyAI());
+      }
+    }
+  }
+
+  private void wireEnemyMemories(BattleGameArea battleArea, EnemyMemoryComponent enemyMemory) {
+    for (Entity enemy : battleArea.getEnemies()) {
+      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
       if (behaviour != null) {
         behaviour.setEnemyMemory(enemyMemory);
       }
     }
+  }
 
+  private void registerVictoryHealthSync(BattleGameArea battleArea) {
     controller.addBattleEndListener(
         won -> {
           if (Boolean.TRUE.equals(won)) {
             int currentHealth =
-                forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getHealth();
+                battleArea.getPlayer().getComponent(CombatStatsComponent.class).getHealth();
             int maxHealth =
-                forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getMaxHealth();
+                battleArea.getPlayer().getComponent(CombatStatsComponent.class).getMaxHealth();
 
             // Max energy is deliberately not saved here: the entity value already includes item
             // effects, which are re-derived from the inventory at the start of every battle.
@@ -342,12 +357,6 @@ public class BattleScreen extends ScreenAdapter {
             runState.setPlayerMaxHealth(maxHealth);
           }
         });
-    createUI();
-    installBossDialogue(forestGameArea);
-    if (tutorialBattle) {
-      setupTutorialGuidance(forestGameArea, player, animationCoordinatorEntity);
-    }
-    controller.start();
   }
 
   /** Installs dialogue only for an enemy whose active AI is the Boss AI. */
