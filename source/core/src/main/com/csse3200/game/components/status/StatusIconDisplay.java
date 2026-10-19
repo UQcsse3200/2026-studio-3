@@ -84,6 +84,16 @@ public class StatusIconDisplay extends UIComponent {
     refresh();
   }
 
+  /** Returns the live icon row for tutorial highlights. */
+  public Table getStatusActor() {
+    return row;
+  }
+
+  /** Returns the live hover panel so tutorial dimming can leave it readable. */
+  public StatusTooltip getTooltipActor() {
+    return tooltip;
+  }
+
   @Override
   public void update() {
     refresh();

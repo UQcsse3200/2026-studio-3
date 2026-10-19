@@ -14,18 +14,46 @@ for other integrations. **Team 1's tutorial-only safe
 enemy behaviour is still required** before the no-player-death acceptance
 criterion can be claimed. The fixed ordinary enemy alone is not that behaviour.
 
+## Sprint 4 Status teaching
+
+The active reference route now continues from Strike and Enemy Health into
+`PLAY_POISON_CARD`, `POISON_ANIMATION`, and `STATUS_EFFECTS`, then rejoins
+Enemy Armour, Player Health, and End Turn. The tutorial retains the starter deck
+and fixes an existing Poison Dagger immediately to the right of the central
+Strike in the opening hand. Normal battles keep their existing shuffle.
+
+Both drag lessons use the existing dimming, gold frames, enemy highlight and
+drag arrow. Only the designated exact card instance accepts battle input during
+its lesson. Poison teaching requires a successful real card play, an active
+Poison effect and settled battle animations; taps and rejected drops do not
+advance it. The live Team 1 status row receives the next highlight, and its
+hover panel remains readable above the tutorial dimming.
+
+Poison Dagger costs 1 Energy, deals 4 direct damage, and applies 3 Poison for
+3 enemy turns. Its icon number is the total stacks, not the duration. Each stack
+deals 1 damage at enemy turn start, bypassing Block and Armour. Hovering shows
+the remaining turns for each application; expired groups disappear. The tutorial
+uses the existing card, status and safe-enemy rules without granting effects.
+
+Verification: tutorial controller/component tests cover exact instance gating,
+animation/status readiness, continuation and cleanup. The view regression covers
+the Poison card's input, fixed drag prompt and live status highlight. The live
+battle regression plays the configured cards and checks Poison damage, turn
+countdown, expiry, player survival and preservation of the source deck.
+
 ## Steps and UI
 
 ### Opt-in reference presentation
 
 `BattleScreen(game, true)` supplies the exact instance ID of a guaranteed Strike
-to the four-argument `BattleTutorialComponent` constructor. Only this tutorial
+and its neighbouring Poison Dagger to the five-argument `BattleTutorialComponent` constructor. Only this tutorial
 path retains every card in the real run deck, shuffles a temporary copy, and moves
-one existing Strike to the middle slot of the initial hand. Later inventory changes
+one existing Strike to the middle slot and Poison Dagger to the slot immediately to its right. Later inventory changes
 and normal battles retain their existing behavior. The player model remains visible.
 
-The reference sequence starts with a combined welcome/Hand lesson, Card Inventory, Energy, Card Cost,
-Play a Card, Enemy Health/Armour, Used Card, End Turn, and Player Health.
+The reference sequence starts with welcome/Hand, Card Inventory, Item Inventory, Energy,
+Card Cost, Strike, Enemy Health, Poison Dagger, Status Effects, Enemy Armour, Player Health,
+and End Turn.
 Informational steps advance by tapping anywhere; only the opening Hand lesson displays the tap hint.
 Step six blocks other cards and unrelated controls and requires the actual
 successful play event for the designated Strike copy, actual enemy HP loss,

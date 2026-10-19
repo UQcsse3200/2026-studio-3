@@ -36,6 +36,7 @@ import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.cards.CardEffectHandler;
+import com.csse3200.game.components.cards.CardKeywordTooltip;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.combat.BattleController;
@@ -157,6 +158,7 @@ public class BattleScreen extends ScreenAdapter {
   private final Skin cardWidgetSkin;
   private final Skin cardInteractionSkin;
   private final CardWidgetAssets cardWidgetAssets;
+  private final CardKeywordTooltip cardKeywordTooltip;
   private final CardEffectResolutionService cardEffects;
   private final CardPlayService cardPlayService;
   private final CardAimController enemyCardAim;
@@ -254,6 +256,7 @@ public class BattleScreen extends ScreenAdapter {
     cardWidgetSkin = new Skin(Gdx.files.internal(CARD_WIDGET_SKIN));
     cardWidgetAssets =
         CardWidgetAssets.fromManagedResources(cardWidgetSkin, ServiceLocator.getResourceService());
+    cardKeywordTooltip = new CardKeywordTooltip(cardWidgetSkin);
     cardInteractionSkin = createCardInteractionSkin();
 
     PlayerDeck playerDeck = prepareBattleDeckSource();
@@ -378,11 +381,14 @@ public class BattleScreen extends ScreenAdapter {
     }
     var openingOrder = new ArrayList<>(playerDeck.getCards());
     java.util.Collections.shuffle(openingOrder);
-    for (int i = 0; i < openingOrder.size(); i++) {
-      if ("strike".equals(openingOrder.get(i).cardId())) {
-        java.util.Collections.swap(
-            openingOrder, Math.min(AMOUNT_OF_CARDS_IN_DECK, openingOrder.size()) / 2, i);
-        break;
+    int middle = Math.min(AMOUNT_OF_CARDS_IN_DECK, openingOrder.size()) / 2;
+    for (int offset = 0; offset < 2; offset++) {
+      String cardId = offset == 0 ? "strike" : "poison_dagger";
+      for (int i = 0; i < openingOrder.size(); i++) {
+        if (cardId.equals(openingOrder.get(i).cardId())) {
+          java.util.Collections.swap(openingOrder, middle + offset, i);
+          break;
+        }
       }
     }
     return PlayerDeck.fromInstances(library, openingOrder);
@@ -391,6 +397,7 @@ public class BattleScreen extends ScreenAdapter {
   private void setupTutorialGuidance(
       BattleGameArea forestGameArea, Entity player, Entity animationCoordinatorEntity) {
     String demonstrationId = handRowOrder.get(handRowOrder.size() / 2).instanceId();
+    String poisonId = handRowOrder.get(handRowOrder.size() / 2 + 1).instanceId();
     tutorialView =
         new BattleTutorialGuidanceView(
             ServiceLocator.getRenderService().getStage(),
@@ -455,6 +462,20 @@ public class BattleScreen extends ScreenAdapter {
                 .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getTutorialArmourActor)
                 .findFirst()
                 .orElse(null));
+    var statusDisplay =
+        forestGameArea
+            .getEnemies()
+            .getFirst()
+            .getComponent(com.csse3200.game.components.status.StatusIconDisplay.class);
+    tutorialView.setStatusTargets(
+        () ->
+            uiFactory.getByTrigger(PLAY_CARD_TRIGGER).stream()
+                .filter(c -> c.getArgs().length > 0 && poisonId.equals(c.getArgs()[0]))
+                .map(Clickable::getBtn)
+                .findFirst()
+                .orElse(null),
+        statusDisplay::getStatusActor,
+        statusDisplay::getTooltipActor);
     tutorialView.setEnemyBounds(
         () -> forestGameArea.getEnemies().stream().map(this::battleEntityBounds).toList());
     tutorialView.setDragActor(
@@ -478,7 +499,7 @@ public class BattleScreen extends ScreenAdapter {
         animationCoordinatorEntity.getComponent(BattleAnimationCoordinator.class);
     BattleTutorialComponent guidance =
         new BattleTutorialComponent(
-            controller, tutorialView, this::onTutorialFinished, demonstrationId);
+            controller, tutorialView, this::onTutorialFinished, demonstrationId, poisonId);
     guidance.setObservation(
         new BattleTutorialObservation(
             () ->
@@ -486,7 +507,12 @@ public class BattleScreen extends ScreenAdapter {
                     .mapToInt(e -> e.getComponent(CombatStatsComponent.class).getHealth())
                     .sum(),
             () -> player.getComponent(CombatStatsComponent.class).getHealth(),
-            () -> isTutorialVisualStateSettled(forestGameArea, player, visuals)));
+            () -> isTutorialVisualStateSettled(forestGameArea, player, visuals),
+            () ->
+                forestGameArea.getEnemies().stream()
+                    .anyMatch(
+                        e ->
+                            e.getComponent(CombatStatsComponent.class).hasStatusEffect("POISON"))));
     ServiceLocator.getEntityService().register(new Entity().addComponent(guidance));
     // Remains after guidance cleans itself up: existing tutorial battle completion is unchanged.
     controller.addBattleEndListener(
@@ -780,7 +806,13 @@ public class BattleScreen extends ScreenAdapter {
   }
 
   @Override
+  public void hide() {
+    cardKeywordTooltip.hide();
+  }
+
+  @Override
   public void dispose() {
+    cardKeywordTooltip.hide();
     playerState.captureFrom(gameArea.getPlayer());
     enemyCardAim.dispose();
     playerCardAim.dispose();
@@ -924,6 +956,7 @@ public class BattleScreen extends ScreenAdapter {
   }
 
   private void installHandCardWidgets() {
+    cardKeywordTooltip.hide();
     Map<String, CardInstance> instancesById = new HashMap<>();
     for (CardInstance instance : handRowOrder) {
       instancesById.put(instance.instanceId(), instance);
@@ -952,6 +985,7 @@ public class BattleScreen extends ScreenAdapter {
     try {
       ResolvedCard resolved = cardResolver.resolve(config.get(), instance);
       clickable.setVisualContent(() -> new CardWidget(resolved, cardWidgetAssets));
+      cardKeywordTooltip.attachTo(clickable.getBtn(), resolved.description());
     } catch (IllegalArgumentException | IllegalStateException exception) {
       logger.warn("Could not install card widget for instance {}", instanceId, exception);
     }

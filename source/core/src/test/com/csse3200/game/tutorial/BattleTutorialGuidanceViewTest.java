@@ -200,6 +200,55 @@ class BattleTutorialGuidanceViewTest {
     }
   }
 
+  @Test
+  void poisonLessonAllowsOnlyItsExactCardAndHighlightsTheLiveStatusRow() {
+    Skin skin = new Skin(Gdx.files.internal("flat-earth/skin/flat-earth-ui.json"));
+    Stage stage = new Stage(new FitViewport(1280, 800), mock(Batch.class));
+    try {
+      Actor strike = new Actor();
+      strike.setBounds(500, 20, 200, 300);
+      Actor poison = new Actor();
+      poison.setBounds(680, 20, 200, 300);
+      Actor statuses = new Actor();
+      statuses.setBounds(800, 350, 50, 28);
+      stage.addActor(strike);
+      stage.addActor(poison);
+      stage.addActor(statuses);
+      var advances = new AtomicInteger();
+      var view =
+          new BattleTutorialGuidanceView(
+              stage, skin, () -> List.of(strike, poison), () -> strike, () -> strike, () -> strike);
+      view.setStatusTargets(() -> poison, () -> statuses, () -> null);
+      view.setEnemyBounds(() -> List.of(new Rectangle(740, 400, 200, 180)));
+      view.bindActions(advances::incrementAndGet, () -> {});
+      view.show(BattleTutorialPrompt.referenceStep(BattleTutorialController.Step.PLAY_POISON_CARD));
+      assertEquals(BattleTutorialGuidanceView.bounds(poison), view.highlightBounds().getFirst());
+      assertEquals(2, view.highlightBounds().size());
+      InputEvent wrongCard = event(InputEvent.Type.touchDown);
+      strike.fire(wrongCard);
+      assertTrue(wrongCard.isStopped());
+      InputEvent correctCard = event(InputEvent.Type.touchDown);
+      poison.fire(correctCard);
+      assertFalse(correctCard.isStopped());
+      assertEquals(0, advances.get());
+      Rectangle prompt = view.promptBounds();
+      poison.moveBy(50, 100);
+      view.highlightBounds();
+      assertEquals(prompt, view.promptBounds());
+      view.show(BattleTutorialPrompt.referenceStep(BattleTutorialController.Step.STATUS_EFFECTS));
+      assertEquals(List.of(BattleTutorialGuidanceView.bounds(statuses)), view.highlightBounds());
+      assertFalse(view.promptBounds().overlaps(view.highlightBounds().getFirst()));
+      statuses.moveBy(30, -20);
+      assertEquals(BattleTutorialGuidanceView.bounds(statuses), view.highlightBounds().getFirst());
+      tap(strike);
+      assertEquals(1, advances.get());
+      view.clear();
+    } finally {
+      stage.dispose();
+      skin.dispose();
+    }
+  }
+
   private static InputEvent event(InputEvent.Type type) {
     InputEvent event = new InputEvent();
     event.setType(type);

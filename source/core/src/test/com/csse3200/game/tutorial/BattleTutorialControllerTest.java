@@ -40,6 +40,7 @@ class BattleTutorialControllerTest {
   void referenceSequenceRequiresTheExactDemonstrationCopyAtStepSix() {
     BattleTutorialController tutorial = new BattleTutorialController(true);
     tutorial.setDemonstrationCardId("demo-strike");
+    tutorial.setPoisonCardId("demo-poison");
     tutorial.observeInitialHealth(32, 100);
     tutorial.start();
     assertEquals(BattleTutorialController.Step.HAND, tutorial.getCurrentStep().orElseThrow());
@@ -54,18 +55,39 @@ class BattleTutorialControllerTest {
     tutorial.onSuccessfulCardPlay("demo-strike");
     assertEquals(
         BattleTutorialController.Step.CARD_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(32, 100, true, BattlePhase.PLAYER_TURN);
+    tutorial.observeResolution(32, 100, true, BattlePhase.PLAYER_TURN, false);
     assertEquals(
         BattleTutorialController.Step.CARD_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(26, 100, false, BattlePhase.PLAYER_TURN);
+    tutorial.observeResolution(26, 100, false, BattlePhase.PLAYER_TURN, false);
     assertEquals(
         BattleTutorialController.Step.CARD_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(26, 100, true, BattlePhase.PLAYER_TURN);
+    tutorial.observeResolution(26, 100, true, BattlePhase.PLAYER_TURN, false);
     assertEquals(
         BattleTutorialController.Step.ENEMY_STATS, tutorial.getCurrentStep().orElseThrow());
     tutorial.onSuccessfulCardPlay("demo-strike");
     assertEquals(
         BattleTutorialController.Step.ENEMY_STATS, tutorial.getCurrentStep().orElseThrow());
+    assertTrue(tutorial.continueInformation());
+    assertEquals(
+        BattleTutorialController.Step.PLAY_POISON_CARD, tutorial.getCurrentStep().orElseThrow());
+    assertFalse(tutorial.continueInformation());
+    tutorial.onSuccessfulCardPlay("other-poison-copy");
+    tutorial.onSuccessfulCardPlay("demo-strike");
+    assertEquals(
+        BattleTutorialController.Step.PLAY_POISON_CARD, tutorial.getCurrentStep().orElseThrow());
+    tutorial.onSuccessfulCardPlay("demo-poison");
+    assertEquals(
+        BattleTutorialController.Step.POISON_ANIMATION, tutorial.getCurrentStep().orElseThrow());
+    tutorial.observeResolution(22, 100, true, BattlePhase.PLAYER_TURN, false);
+    tutorial.observeResolution(22, 100, false, BattlePhase.PLAYER_TURN, true);
+    assertEquals(
+        BattleTutorialController.Step.POISON_ANIMATION, tutorial.getCurrentStep().orElseThrow());
+    tutorial.observeResolution(22, 100, true, BattlePhase.ENEMY_TURN, true);
+    assertEquals(
+        BattleTutorialController.Step.POISON_ANIMATION, tutorial.getCurrentStep().orElseThrow());
+    tutorial.observeResolution(22, 100, true, BattlePhase.PLAYER_TURN, true);
+    assertEquals(
+        BattleTutorialController.Step.STATUS_EFFECTS, tutorial.getCurrentStep().orElseThrow());
     assertTrue(tutorial.continueInformation());
     assertEquals(
         BattleTutorialController.Step.ENEMY_ARMOUR, tutorial.getCurrentStep().orElseThrow());
@@ -76,7 +98,7 @@ class BattleTutorialControllerTest {
     tutorial.onPhaseChanged(BattlePhase.PLAYER_END);
     assertEquals(
         BattleTutorialController.Step.ENEMY_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(26, 100, true, BattlePhase.PLAYER_TURN);
+    tutorial.observeResolution(26, 100, true, BattlePhase.PLAYER_TURN, false);
     assertEquals(BattleTutorialController.Step.FREE_PLAY, tutorial.getCurrentStep().orElseThrow());
     assertTrue(tutorial.getOutcome().isEmpty());
   }
@@ -85,20 +107,24 @@ class BattleTutorialControllerTest {
   void endTurnRequiresTheRealTurnAndSettledReturn() {
     var tutorial = new BattleTutorialController(true);
     tutorial.setDemonstrationCardId("strike");
+    tutorial.setPoisonCardId("poison");
     tutorial.observeInitialHealth(32, 100);
     tutorial.start();
     for (int i = 0; i < 5; i++) tutorial.continueInformation();
     tutorial.onSuccessfulCardPlay("strike");
-    tutorial.observeResolution(28, 100, true, BattlePhase.PLAYER_TURN);
+    tutorial.observeResolution(28, 100, true, BattlePhase.PLAYER_TURN, false);
+    tutorial.continueInformation();
+    tutorial.onSuccessfulCardPlay("poison");
+    tutorial.observeResolution(24, 100, true, BattlePhase.PLAYER_TURN, true);
     tutorial.continueInformation();
     tutorial.continueInformation();
     tutorial.continueInformation();
     assertEquals(BattleTutorialController.Step.END_TURN, tutorial.getCurrentStep().orElseThrow());
     tutorial.onPhaseChanged(BattlePhase.PLAYER_END);
-    tutorial.observeResolution(28, 100, false, BattlePhase.PLAYER_TURN);
+    tutorial.observeResolution(28, 100, false, BattlePhase.PLAYER_TURN, false);
     assertEquals(
         BattleTutorialController.Step.ENEMY_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(28, 100, true, BattlePhase.PLAYER_TURN);
+    tutorial.observeResolution(28, 100, true, BattlePhase.PLAYER_TURN, false);
     assertEquals(BattleTutorialController.Step.FREE_PLAY, tutorial.getCurrentStep().orElseThrow());
   }
 
