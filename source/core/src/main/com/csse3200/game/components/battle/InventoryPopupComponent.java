@@ -373,6 +373,7 @@ public class InventoryPopupComponent extends UIComponent {
             boolean used = runState.getOrCreatePlayerState().useBattleItem(item, player);
 
             if (used) {
+              AudioService.playSound(SoundId.ITEM_PICKUP, 0.7f);
               useActionInProgress = true;
               showUseFeedback(item, effectValue(item, stats) - before);
               refresh();
