@@ -3,6 +3,7 @@ package com.csse3200.game.components.battle;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,6 +65,7 @@ class DeckEditorComponentTest {
   private static final String SELECT_TRIGGER = "toggleDeckCard";
   private static final String SCROLL_UP_TRIGGER = "deckScrollUp";
   private static final String SCROLL_DOWN_TRIGGER = "deckScrollDown";
+  private static final String SET_DECK_TRIGGER = "deckSetDeck";
 
   // Layout constants mirrored from DeckEditorComponent.
   private static final float CARD_WIDTH = 100f;
@@ -92,6 +94,7 @@ class DeckEditorComponentTest {
   private Table content;
   private Button scrollUpBtn;
   private Button scrollDownBtn;
+  private Button setDeckBtn;
   private Runnable onShow;
   private Runnable onHide;
   private Runnable onWindowClicked;
@@ -138,8 +141,11 @@ class DeckEditorComponentTest {
     // Built before stubbing: Mockito can't create a mock inside another mock's thenReturn().
     Clickable scrollUp = clickable(scrollUpBtn, new Object[0]);
     Clickable scrollDown = clickable(scrollDownBtn, new Object[0]);
+    setDeckBtn = new Button();
+    Clickable setDeck = clickable(setDeckBtn, new Object[0]);
     when(poolFactory.getByTrigger(SCROLL_UP_TRIGGER)).thenReturn(List.of(scrollUp));
     when(poolFactory.getByTrigger(SCROLL_DOWN_TRIGGER)).thenReturn(List.of(scrollDown));
+    when(poolFactory.getByTrigger(SET_DECK_TRIGGER)).thenReturn(List.of(setDeck));
 
     editor = newEditor(deckChanges::add);
     entity = new Entity().addComponent(editor);
@@ -201,10 +207,22 @@ class DeckEditorComponentTest {
   }
 
   @Test
-  void createBuildsHeaderFooterAndSetDeckButton() {
+  void createBuildsHeaderAndFooter() {
     assertNotNull(findLabel(content, "CARD INVENTORY"));
     assertNotNull(findLabel(content, "Pick 5 cards"));
-    assertNotNull(findTextButton(content, "Set Deck"));
+    // "Set Deck" is a JSON clickable on the stage now, not part of the popup's table.
+    assertNull(findTextButton(content, "Set Deck"));
+  }
+
+  @Test
+  void setDeckButtonShowsWhileOpenAndHidesOnClose() {
+    givenDeck(instances(repeat("strike", 5)), List.of(), List.of());
+    editor.open();
+    assertTrue(setDeckBtn.isVisible());
+
+    popup.hide();
+
+    assertFalse(setDeckBtn.isVisible());
   }
 
   @Test
@@ -661,12 +679,13 @@ class DeckEditorComponentTest {
     Table otherContent = new Table();
     when(popup.getContentTable()).thenReturn(otherContent);
     DeckEditorComponent noCallback = newEditor(null);
-    new Entity().addComponent(noCallback).create();
+    Entity noCallbackEntity = new Entity().addComponent(noCallback);
+    noCallbackEntity.create();
     List<CardInstance> all = instances(repeat("strike", 5));
     givenDeck(all, all, List.of());
     noCallback.open();
 
-    findTextButton(otherContent, "Set Deck").fire(new ChangeListener.ChangeEvent());
+    noCallbackEntity.getEvents().trigger(SET_DECK_TRIGGER);
 
     verify(cardPlayService).rearrangeHand(all);
     verify(popup).hide();
@@ -805,7 +824,7 @@ class DeckEditorComponentTest {
   }
 
   private void clickSetDeck() {
-    findTextButton(content, "Set Deck").fire(new ChangeListener.ChangeEvent());
+    entity.getEvents().trigger(SET_DECK_TRIGGER);
   }
 
   @SuppressWarnings("unchecked")

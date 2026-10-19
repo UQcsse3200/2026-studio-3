@@ -11,15 +11,15 @@ public class EnergyComponent extends Component {
   private static final String EVT_UPDATE_ENERGY = "updateEnergy";
   private static final String EVT_UPDATE_MAX_ENERGY = "updateMaxEnergy";
 
-  private int currentEnergy;
-  private int maxEnergy;
-
   /** Highest max energy the player can reach from any source. */
   public static final int MAX_ENERGY_CAP = 5;
 
+  private int currentEnergy;
+  private int maxEnergy;
+
   public EnergyComponent(int maxEnergy) {
-    this.maxEnergy = maxEnergy;
-    this.currentEnergy = maxEnergy;
+    this.maxEnergy = Math.min(Math.max(maxEnergy, 1), MAX_ENERGY_CAP);
+    this.currentEnergy = this.maxEnergy;
   }
 
   // --- Getters & Setters ---
