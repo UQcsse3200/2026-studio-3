@@ -345,4 +345,9 @@ public class CardUpgradeDisplay extends UIComponent {
   int getDisplayedOptionCount() {
     return tilesByInstanceId.size();
   }
+
+  /** Return true if there is at least one eligible card for upgrade. */
+  public boolean hasUpgradeOptions() {
+    return !selection.getCardUpgradeOption().isEmpty();
+  }
 }

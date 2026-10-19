@@ -151,7 +151,7 @@ public class CampfireScreen extends ScreenAdapter {
         445f,
         11f,
         "Upgrade",
-        this::beginUpgrade);
+        () -> beginUpgrade(upgradeDisplay));
 
     restScene = newScene();
     addSceneImage(restScene, resources.getAsset(REST_SCENE, Texture.class), true);
@@ -371,11 +371,18 @@ public class CampfireScreen extends ScreenAdapter {
                                 () -> transitioning = false)))));
   }
 
-  private void beginUpgrade() {
+  private void beginUpgrade(CardUpgradeDisplay display) {
+    if (!display.hasUpgradeOptions()) {
+      return;
+    }
     transitioning = true;
     Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
     fadeTo(
         upgradeScene,
+        () -> {
+          display.showLibrary();
+          fadeOverlay.toFront();
+        },
         () -> {
           ServiceLocator.getRenderService().getStage().setKeyboardFocus(upgradeScene);
           transitioning = false;
@@ -441,4 +448,6 @@ public class CampfireScreen extends ScreenAdapter {
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
   }
+
+  private void showMessage(String text) {}
 }
