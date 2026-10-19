@@ -91,6 +91,7 @@ public class EncounterGameArea extends GameArea {
   private final String forcedEventId;
   private CardFusionEncounterFlow cardFusionEncounterFlow;
   private ChanceEncounterDisplay chanceDisplay;
+  private boolean capturePlayerStateOnDispose = true;
 
   /**
    * Creates the standalone Shop preview used by the legacy MainGameScreen shortcut.
@@ -371,11 +372,16 @@ public class EncounterGameArea extends GameArea {
    */
   @Override
   public void dispose() {
-    if (player != null) {
+    if (capturePlayerStateOnDispose && player != null) {
       runState.getOrCreatePlayerState().captureFrom(player);
     }
 
     super.dispose();
     unloadAssets();
+  }
+
+  /** Prevents this encounter's older live player entity from overwriting a restored save. */
+  public void skipPlayerStateCaptureOnDispose() {
+    capturePlayerStateOnDispose = false;
   }
 }

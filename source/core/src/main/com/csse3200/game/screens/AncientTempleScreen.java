@@ -60,6 +60,7 @@ public class AncientTempleScreen extends ScreenAdapter {
   private Table root;
   private boolean rewardClaimed;
   private EternityEffect offeredEternityEffect;
+  private static final String FONT_COLOUR = "F1C879";
 
   private enum EternityEffect {
     VITALITY,
@@ -122,7 +123,7 @@ public class AncientTempleScreen extends ScreenAdapter {
     root.padBottom(45f);
 
     Label.LabelStyle titleStyle = new Label.LabelStyle(skin.get("title", Label.LabelStyle.class));
-    titleStyle.fontColor = Color.valueOf("F1C879");
+    titleStyle.fontColor = Color.valueOf(FONT_COLOUR);
 
     Label.LabelStyle bodyStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
     bodyStyle.fontColor = Color.valueOf("E3D3B8");
@@ -175,7 +176,7 @@ public class AncientTempleScreen extends ScreenAdapter {
 
     style.fontColor = Color.valueOf("F6E8C8");
     style.overFontColor = Color.WHITE;
-    style.downFontColor = Color.valueOf("F1C879");
+    style.downFontColor = Color.valueOf(FONT_COLOUR);
 
     return style;
   }
@@ -239,7 +240,7 @@ public class AncientTempleScreen extends ScreenAdapter {
     }
 
     Label.LabelStyle titleStyle = new Label.LabelStyle(skin.get("title", Label.LabelStyle.class));
-    titleStyle.fontColor = Color.valueOf("F1C879");
+    titleStyle.fontColor = Color.valueOf(FONT_COLOUR);
 
     Label.LabelStyle bodyStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
     bodyStyle.fontColor = Color.valueOf("E3D3B8");
