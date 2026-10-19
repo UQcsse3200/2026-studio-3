@@ -146,13 +146,18 @@ public class CardEffectResolver {
   }
 
   private void validateCard(CardConfig card) {
+    if (card == null) {
+      throw new IllegalArgumentException("Invalid card config: card config must not be null");
+    }
     List<String> errors = CardValidator.validate(card);
     if (!errors.isEmpty()) {
       throw new IllegalArgumentException("Invalid card config: " + String.join("; ", errors));
     }
-    for (EffectConfig effect : card.effects) {
-      if (effect == null) {
-        throw new IllegalArgumentException("Card effects cannot contain null");
+    if (card.effects != null) {
+      for (EffectConfig effect : card.effects) {
+        if (effect == null) {
+          throw new IllegalArgumentException("Card effects cannot contain null");
+        }
       }
     }
   }

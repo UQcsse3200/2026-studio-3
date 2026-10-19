@@ -3,6 +3,7 @@ package com.csse3200.game.components.battle;
 import com.badlogic.gdx.math.GridPoint2;
 import com.csse3200.game.areas.ForestGameArea;
 import com.csse3200.game.areas.terrain.TerrainFactory;
+import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.configs.EnemyConfig;
 import com.csse3200.game.entities.configs.EnemyConfigs;
@@ -27,6 +28,8 @@ public class BattleGameArea extends ForestGameArea {
 
   /** Grid y shared by every enemy. */
   private static final int ENEMY_Y = 20;
+
+  private static final int PLAYER_STARTING_HEAL = 20;
 
   private final int progression;
   private final List<String> enemyIds;
@@ -62,6 +65,7 @@ public class BattleGameArea extends ForestGameArea {
   @Override
   public void create() {
     super.create();
+    getPlayer().getComponent(CombatStatsComponent.class).heal(PLAYER_STARTING_HEAL);
 
     EnemyConfigs roster = FileLoader.readClass(EnemyConfigs.class, "configs/enemies.json");
     List<EnemyConfig> configs =

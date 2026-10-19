@@ -171,30 +171,24 @@ public class MapGraph implements EncounterCallback {
    * @param success whether encounter completed successfully
    */
   public void completeNode(Integer nodeId, boolean success) {
-
     MapNode node = nodes.get(nodeId);
-
-    if (node == null) {
+    if (node == null || !success) {
       return;
     }
 
-    if (success) {
+    node.setState(NodeState.COMPLETED);
 
-      node.setState(NodeState.COMPLETED);
-
-      for (MapNode connected : node.getConnections()) {
-        if (connected.getState() == NodeState.LOCKED) {
-          connected.setState(NodeState.AVAILABLE);
-        }
+    for (MapNode connected : node.getConnections()) {
+      if (connected.getState() == NodeState.LOCKED) {
+        connected.setState(NodeState.AVAILABLE);
       }
+    }
 
-      // Ensures the nodes adjacent to the completed node are set to locked
-      for (MapNode horizontalNode : getNodesByHeight(node.getHeight())) {
-        if (!Objects.equals(horizontalNode.getNodeId(), nodeId)) {
-          if (Objects.equals(horizontalNode.getState(), NodeState.AVAILABLE)) {
-            horizontalNode.setState(NodeState.LOCKED);
-          }
-        }
+    // Ensures the nodes adjacent to the completed node are set to locked
+    for (MapNode horizontalNode : getNodesByHeight(node.getHeight())) {
+      if (!Objects.equals(horizontalNode.getNodeId(), nodeId)
+          && Objects.equals(horizontalNode.getState(), NodeState.AVAILABLE)) {
+        horizontalNode.setState(NodeState.LOCKED);
       }
     }
   }

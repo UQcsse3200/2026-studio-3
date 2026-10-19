@@ -50,6 +50,9 @@ public class MapInputHandler {
                 case ELITE, FINAL -> {
                   AudioService.playSound(SoundId.ENTER_ELITE, 0.6f);
                 }
+                default -> {
+                  // Start or other room types without a dedicated entry sound.
+                }
               }
             }
             controller.onNodeClicked(actor.getNodeId());

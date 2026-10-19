@@ -41,6 +41,8 @@ import java.util.Set;
 
 /** Allows the player to choose any card as the reward for Blessing of War. */
 public class TempleCardSelectionScreen extends ScreenAdapter {
+  private static final String TITLE_STYLE = "title";
+
   private final GdxGame game;
   private final RunState runState;
   private final Renderer renderer;
@@ -125,7 +127,8 @@ public class TempleCardSelectionScreen extends ScreenAdapter {
     root.setFillParent(true);
     root.pad(35f);
 
-    Label.LabelStyle titleStyle = new Label.LabelStyle(skin.get("title", Label.LabelStyle.class));
+    Label.LabelStyle titleStyle =
+        new Label.LabelStyle(skin.get(TITLE_STYLE, Label.LabelStyle.class));
     titleStyle.fontColor = Color.valueOf("F1B45A");
 
     Label title = new Label("Blessing of War", titleStyle);
@@ -283,7 +286,7 @@ public class TempleCardSelectionScreen extends ScreenAdapter {
     Table panel = new Table();
     panel.top();
 
-    panel.add(new Label("Choose Any Card", skin, "title")).padBottom(15f);
+    panel.add(new Label("Choose Any Card", skin, TITLE_STYLE)).padBottom(15f);
     panel.row();
 
     panel.add(scrollPane).expand().fill();
@@ -296,7 +299,7 @@ public class TempleCardSelectionScreen extends ScreenAdapter {
     panel.top();
     panel.pad(20f);
 
-    nameLabel = new Label("", skin, "title");
+    nameLabel = new Label("", skin, TITLE_STYLE);
 
     descriptionLabel = new Label("", bodyStyle);
     descriptionLabel.setWrap(true);
