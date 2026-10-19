@@ -30,7 +30,7 @@ import java.util.Objects;
 public class EnemyStatusEffectVisualComponent extends RenderComponent {
   private static final float STATUS_CYCLE_SECONDS = 2.4f;
   private static final float POISON_CYCLE_SECONDS = 3.6f;
-  private static final float SINGLE_SCALE = 1.4f;
+  private static final float MAX_VISIBLE_SCALE = 0.9f;
   private static final float ORBIT_EFFECT_WIDTH = 0.55f;
   private static final float ORBIT_RADIUS_X = 0.65f;
   private static final float ORBIT_RADIUS_Y = 0.2f;
@@ -51,6 +51,7 @@ public class EnemyStatusEffectVisualComponent extends RenderComponent {
   private float persistentTime;
   private boolean disposed;
   private boolean badgeVisible;
+  private Rectangle effectBounds;
   private final Map<TextureRegion, Rectangle> visibleFrameBounds = new HashMap<>();
 
   /**
@@ -157,62 +158,117 @@ public class EnemyStatusEffectVisualComponent extends RenderComponent {
     if (isExpired() || (elapsed < startDelay && !badgeVisible)) {
       return;
     }
+    Rectangle visibleBounds = visibleTargetBounds();
+    if (isPersistentPhase()) {
+      drawPersistent(batch, visibleBounds);
+    } else {
+      drawBurst(batch, visibleBounds);
+    }
+  }
+
+  private void drawBurst(SpriteBatch batch, Rectangle visibleBounds) {
     float t = Math.max(0f, Math.min(1f, (elapsed - startDelay) / style.duration()));
-    boolean persistent = isPersistentPhase();
     int frame = Math.min(3, (int) (t * 4f));
     float eased = 1f - (1f - t) * (1f - t);
     Vector2 scale = target.getScale();
     float baseSize = Math.min(scale.x, scale.y);
-    Vector2 centre = target.getCenterPosition();
-    float size = baseSize * (style.startScale() + (style.endScale() - style.startScale()) * eased);
-    float x = centre.x + (statusType == null ? scale.x * 0.18f : 0f) - size / 2f;
-    float y = centre.y + style.rise() * baseSize * eased - size / 2f;
-    if (statusType != null && !persistent) {
-      // Keep the application burst independent of the persistent layout.
-      size = baseSize * (1.05f + 0.2f * eased);
-      x = centre.x - size / 2f;
-      y = centre.y - size / 2f;
-    }
+    Vector2 centre =
+        new Vector2(
+            visibleBounds.x + visibleBounds.width / 2f,
+            visibleBounds.y + visibleBounds.height / 2f);
+    float size =
+        statusType != null
+            ? baseSize * (1.05f + 0.2f * eased)
+            : baseSize * (style.startScale() + (style.endScale() - style.startScale()) * eased);
+    float x = centre.x - size / 2f;
+    float y = centre.y - size / 2f;
     // Keep the complete third frame readable; fade only during the dissipation frame.
     float fade = t < 0.75f ? 1f : (1f - t) * 4f;
     float alpha = style.color().a * fade * fade * (3f - 2f * fade);
-    float width = size;
-    float height = size;
-    if (persistent) {
-      Rectangle bounds = visibleTargetBounds();
-      centre.set(bounds.x + bounds.width / 2f, bounds.y + bounds.height / 2f);
-      // Replay all four cells instead of keeping the developed frame on screen.
-      frame = Math.min(frames.length - 1, (int) (persistentTime / cycleSeconds() * frames.length));
-      alpha = PERSISTENT_ALPHA;
-      CombatStatsComponent stats = target.getComponent(CombatStatsComponent.class);
-      int count = 0;
-      int slot = 0;
-      for (EffectType type : STATUS_ORDER) {
-        if (stats.hasStatusEffect(type.name())) {
-          if (type == statusType) slot = count;
-          count++;
-        }
+    drawFittedFrame(batch, frames[frame], visibleBounds, x, y, size, size, alpha);
+  }
+
+  private void drawPersistent(SpriteBatch batch, Rectangle visibleBounds) {
+    Vector2 centre =
+        new Vector2(
+            visibleBounds.x + visibleBounds.width / 2f,
+            visibleBounds.y + visibleBounds.height / 2f);
+    // Replay all four cells instead of keeping the developed frame on screen.
+    int frame =
+        Math.min(frames.length - 1, (int) (persistentTime / cycleSeconds() * frames.length));
+    CombatStatsComponent stats = target.getComponent(CombatStatsComponent.class);
+    int count = 0;
+    int slot = 0;
+    for (EffectType type : STATUS_ORDER) {
+      if (stats.hasStatusEffect(type.name())) {
+        if (type == statusType) slot = count;
+        count++;
       }
-      double phase = sharedOrbitTime() / ORBIT_SECONDS;
-      if (count == 1) {
-        width = bounds.width * SINGLE_SCALE;
-        height = bounds.height * SINGLE_SCALE;
-      } else {
-        double angle = Math.PI * 2d * (phase + slot / (double) count);
-        width = bounds.width * ORBIT_EFFECT_WIDTH;
-        height = width;
-        centre.x += bounds.width * ORBIT_RADIUS_X * (float) Math.cos(angle);
-        centre.y += bounds.height * ORBIT_RADIUS_Y * (float) Math.sin(angle);
-      }
-      x = centre.x - width / 2f;
-      y = centre.y - height / 2f;
     }
+    double phase = sharedOrbitTime() / ORBIT_SECONDS;
+    float width;
+    float height;
+    if (count == 1) {
+      width = visibleBounds.width * MAX_VISIBLE_SCALE;
+      height = visibleBounds.height * MAX_VISIBLE_SCALE;
+    } else {
+      double angle = Math.PI * 2d * (phase + slot / (double) count);
+      width = visibleBounds.width * ORBIT_EFFECT_WIDTH;
+      height = width;
+      centre.x += visibleBounds.width * ORBIT_RADIUS_X * (float) Math.cos(angle);
+      centre.y += visibleBounds.height * ORBIT_RADIUS_Y * (float) Math.sin(angle);
+    }
+    drawFittedFrame(
+        batch,
+        frames[frame],
+        visibleBounds,
+        centre.x - width / 2f,
+        centre.y - height / 2f,
+        width,
+        height,
+        PERSISTENT_ALPHA);
+  }
+
+  private void drawFittedFrame(
+      SpriteBatch batch,
+      TextureRegion image,
+      Rectangle visibleBounds,
+      float x,
+      float y,
+      float width,
+      float height,
+      float alpha) {
+    // Fit the original frame ratio inside the visible body without moving its centre.
+    float maxWidth = Math.min(width, visibleBounds.width * MAX_VISIBLE_SCALE);
+    float maxHeight = Math.min(height, visibleBounds.height * MAX_VISIBLE_SCALE);
+    float fit = Math.min(maxWidth / image.getRegionWidth(), maxHeight / image.getRegionHeight());
+    float fittedWidth = image.getRegionWidth() * fit;
+    float fittedHeight = image.getRegionHeight() * fit;
+    x += (width - fittedWidth) / 2f;
+    y += (height - fittedHeight) / 2f;
+    ensureEffectBounds();
+    x += (0.5f - effectBounds.x - effectBounds.width / 2f) * fittedWidth;
+    y += (0.5f - effectBounds.y - effectBounds.height / 2f) * fittedHeight;
     float previousColor = batch.getPackedColor();
     try {
       batch.setColor(style.color().r, style.color().g, style.color().b, alpha);
-      batch.draw(frames[frame], x, y, width, height);
+      batch.draw(image, x, y, fittedWidth, fittedHeight);
     } finally {
       batch.setPackedColor(previousColor);
+    }
+  }
+
+  private void ensureEffectBounds() {
+    if (effectBounds != null) {
+      return;
+    }
+    for (TextureRegion cell : frames) {
+      Rectangle bounds = readVisibleFrameBounds(cell);
+      if (effectBounds == null) {
+        effectBounds = new Rectangle(bounds);
+      } else {
+        effectBounds.merge(bounds);
+      }
     }
   }
 

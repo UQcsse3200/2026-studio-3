@@ -11,10 +11,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-/** 检查真实的 configs/enemies.json：每只敌人都有图鉴描述，且描述符合剧情写作规范。 */
+/**
+ * Checks the real configs/enemies.json: every enemy has a bestiary description, and the
+ * descriptions follow the lore writing guidelines.
+ */
 @ExtendWith(GameExtension.class)
 class EnemyRosterContentTest {
-  // wiki《The Fall of the Pantheon》写作规范禁止的旧设定（档案馆版）用词
+  // Old (Archive-version) lore terms banned by the wiki's "The Fall of the Pantheon" guidelines
   private static final List<String> RETIRED_WORDS =
       List.of("archive", "catalogue", "shelf", "record");
 

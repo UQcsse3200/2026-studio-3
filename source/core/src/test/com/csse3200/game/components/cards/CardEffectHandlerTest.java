@@ -9,6 +9,7 @@ import com.csse3200.game.cards.play.CardPlayRequest;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.rewards.BrandOfTheDamnedEffect;
+import com.csse3200.game.rewards.CursePenalties;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
@@ -104,6 +105,24 @@ class CardEffectHandlerTest {
     CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
     assertEquals(5, stats.getBlock());
     assertEquals(0, stats.getArmour());
+  }
+
+  @Test
+  void cursedCardEffectsUseTheReducedStrengthAndBlockValues() {
+    CombatStatsComponent stats = new CombatStatsComponent(10, 2);
+    CursePenalties.addPenalty(stats, CursePenalties.STRENGTH_PENALTY);
+    CursePenalties.addPenalty(stats, CursePenalties.BLOCK_PENALTY);
+    CursePenalties.addPenalty(stats, CursePenalties.BLOCK_PENALTY);
+    Entity player = new Entity().addComponent(stats);
+
+    handler.applyPlayerEffects(
+        List.of(
+            new ResolvedCardEffect("focus", EffectType.STRENGTH, TargetType.SELF, 3, 0, 0),
+            new ResolvedCardEffect("defend", EffectType.BLOCK, TargetType.SELF, 3, 0, 1)),
+        player);
+
+    assertEquals(2, stats.getStatusEffect("STRENGTH").getValue());
+    assertEquals(1, stats.getBlock());
   }
 
   @Test

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 class DefensiveStanceAITest {
   private final DefensiveStanceAI ai = new DefensiveStanceAI();
 
-  // 骨爬虫的 4 拍循环应该是：防、攻、防、防，并且能循环第二遍
+  // The Bone Crawler's 4-beat cycle should be defend, attack, defend, defend, and then repeat
   @Test
   void shouldFollowDefendHeavyFourTurnCycle() {
     IntentType[] expected = {

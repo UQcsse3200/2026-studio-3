@@ -26,7 +26,8 @@ class BestiaryServiceTest {
   void shouldLoadDefaultRosterWithResolvedSpritePaths() {
     BestiaryService service = BestiaryService.loadDefault();
 
-    assertEquals(6, service.getEntries().size());
+    assertEquals(7, service.getEntries().size());
+    assertTrue(service.contains("votive_attendant"));
     assertTrue(service.contains("lesser_shade"));
     assertTrue(service.contains("tomb_guardian"));
     assertTrue(service.contains("void_knight"));
@@ -78,7 +79,7 @@ class BestiaryServiceTest {
 
     assertTrue(service.recordDefeated("boss_knight"));
     BestiaryEntryView defeatedBoss = service.getEntry("boss_knight").orElseThrow();
-    assertEquals(150, defeatedBoss.health().orElseThrow());
+    assertEquals(100, defeatedBoss.health().orElseThrow());
     assertEquals(14, defeatedBoss.baseAttack().orElseThrow());
     assertEquals(8, defeatedBoss.armour().orElseThrow());
     assertEquals("boss", defeatedBoss.behaviour().orElseThrow());

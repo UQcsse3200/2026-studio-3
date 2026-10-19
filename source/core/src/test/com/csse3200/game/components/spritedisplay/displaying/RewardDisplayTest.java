@@ -8,11 +8,15 @@ import static org.mockito.Mockito.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardAcquisitionPool;
@@ -28,6 +32,7 @@ import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.RenderService;
+import com.csse3200.game.rewards.CardRewardSelection;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.rewards.RewardGenerator;
 import com.csse3200.game.rewards.RewardOption;
@@ -344,6 +349,115 @@ class RewardDisplayTest {
   }
 
   @Test
+  void clickingVisibleRewardCardClaimsOnceAndHoverRestoresItsFrame() {
+    RewardDisplay display = createDisplay(defaultService());
+    Stack goldCard = assertInstanceOf(Stack.class, display.getRewardOptionCards().getFirst());
+    Image frame = assertInstanceOf(Image.class, goldCard.getChildren().first());
+    ClickListener listener = rewardClickListener(goldCard);
+    InputEvent event = new InputEvent();
+
+    listener.enter(event, 1f, 1f, -1, null);
+    assertEquals(0.88f, frame.getColor().g, 0.01f);
+    listener.exit(event, 1f, 1f, -1, null);
+    assertEquals(Color.WHITE, frame.getColor());
+
+    AtomicInteger claimEvents = new AtomicInteger();
+    entity
+        .getEvents()
+        .addListener(RewardDisplay.REWARD_CLAIMED_EVENT, claimEvents::incrementAndGet);
+    listener.clicked(event, 1f, 1f);
+    listener.clicked(event, 1f, 1f);
+
+    assertTrue(display.isClaimed());
+    assertEquals(1, claimEvents.get());
+    assertEquals(75, runState.getOrCreatePlayerState().getGold());
+  }
+
+  @Test
+  void absentRunStatePreventsBothImmediateAndCardRewards() {
+    when(game.getRunState()).thenReturn(null);
+    RewardDisplay display = createDisplay(defaultService());
+    AtomicInteger claimEvents = new AtomicInteger();
+    entity
+        .getEvents()
+        .addListener(RewardDisplay.REWARD_CLAIMED_EVENT, claimEvents::incrementAndGet);
+
+    display.selectOption(display.getOptions().getFirst());
+    display.selectOption(cardOption(display));
+    display.finishFeedbackAndNavigate();
+
+    assertFalse(display.isClaimed());
+    assertFalse(display.isCardRewardCommitted());
+    assertEquals(0, claimEvents.get());
+    assertTrue(display.getCardChoiceButtons().isEmpty());
+  }
+
+  @Test
+  void missingCardDefinitionDoesNotCommitAnInvalidReward() {
+    RewardOption invalidCard = RewardOption.cards(new CardRewardSelection(List.of("missing-card")));
+    RewardService service =
+        new RewardService(fixedRewardGenerator(), cardService, new Random(11)) {
+          @Override
+          public List<RewardOption> generateRewardOptions() {
+            return List.of(invalidCard);
+          }
+        };
+    RewardDisplay display = createDisplay(service);
+    AtomicInteger claimEvents = new AtomicInteger();
+    entity
+        .getEvents()
+        .addListener(RewardDisplay.REWARD_CLAIMED_EVENT, claimEvents::incrementAndGet);
+
+    display.selectOption(invalidCard);
+
+    assertFalse(display.isCardRewardCommitted());
+    assertFalse(display.isClaimed());
+    assertTrue(display.getCardChoiceButtons().isEmpty());
+    assertEquals(0, claimEvents.get());
+  }
+
+  @Test
+  void missingRewardArtStillAllowsSavingAndNavigation() {
+    ResourceService resources = ServiceLocator.getResourceService();
+    when(resources.getAsset("images/ui/victory-gold-icon.png", Texture.class)).thenReturn(null);
+    AtomicInteger checkpoints = new AtomicInteger();
+    AtomicInteger navigationEvents = new AtomicInteger();
+    RewardDisplay display = createDisplay(defaultService(), checkpoints::incrementAndGet);
+    entity
+        .getEvents()
+        .addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, navigationEvents::incrementAndGet);
+
+    display.selectOption(display.getOptions().getFirst());
+    display.finishFeedbackAndNavigate();
+    display.finishFeedbackAndNavigate();
+
+    assertTrue(display.isClaimed());
+    assertEquals(75, runState.getOrCreatePlayerState().getGold());
+    assertEquals(1, checkpoints.get());
+    assertEquals(1, navigationEvents.get());
+  }
+
+  @Test
+  void rewardFeedbackUsesScreenCentreWithoutSourceAndIgnoresConcurrentPlay() {
+    RewardDisplay display = createDisplay(defaultService());
+    RewardClaimFeedback feedback = display.getClaimFeedback();
+    Texture art =
+        ServiceLocator.getResourceService().getAsset("images/ui/gold-reward.png", Texture.class);
+    AtomicInteger completed = new AtomicInteger();
+    int initialActors = feedback.getOverlay().getChildren().size;
+
+    feedback.play(RewardType.ITEM, new TextureRegion(art), null, 1, completed::incrementAndGet);
+    assertEquals(initialActors + 1, feedback.getOverlay().getChildren().size);
+    feedback.play(RewardType.ITEM, new TextureRegion(art), null, 1, completed::incrementAndGet);
+    assertEquals(initialActors + 1, feedback.getOverlay().getChildren().size);
+
+    stage.act(0.85f);
+    stage.act(0.37f);
+    stage.act(0.01f);
+    assertEquals(1, completed.get());
+  }
+
+  @Test
   void goldClaimConsumesOneLuckyCoinAndSavesBeforeFeedbackCompletes() {
     runState.getOrCreatePlayerState().addGold(75);
     runState.getOrCreatePlayerState().addOwnedItem(ItemType.LUCKY_COIN);
@@ -397,6 +511,40 @@ class RewardDisplayTest {
     assertEquals(1, runState.getOrCreatePlayerState().getOwnedItemCount(ItemType.ENERGY_CRYSTAL));
     assertEquals(50, runState.getOrCreatePlayerState().getGold());
     assertFalse(display.isCardRewardCommitted());
+  }
+
+  @Test
+  void everyBattleRewardItemCanBeClaimedThroughTheVisibleItemOption() {
+    for (ItemType item :
+        List.of(
+            ItemType.LUCKY_COIN,
+            ItemType.ENERGY_CRYSTAL,
+            ItemType.MERCHANTS_FAVOR,
+            ItemType.IRON_AEGIS,
+            ItemType.WARRIORS_CREST)) {
+      RewardGenerator generator =
+          new RewardGenerator(new Random(1)) {
+            @Override
+            public RewardOption generateGoldRewardOption(float multiplier) {
+              return RewardOption.gold(25);
+            }
+
+            @Override
+            public RewardOption generateItemRewardOption() {
+              return RewardOption.item(item);
+            }
+          };
+      RewardDisplay display =
+          createDisplay(new RewardService(generator, cardService, new Random(11)));
+      int before = runState.getOrCreatePlayerState().getOwnedItemCount(item);
+
+      rewardClickListener(display.getRewardOptionCards().get(1)).clicked(new InputEvent(), 1f, 1f);
+
+      assertTrue(display.isClaimed(), item.name());
+      assertEquals(before + 1, runState.getOrCreatePlayerState().getOwnedItemCount(item));
+      entity.dispose();
+      entity = null;
+    }
   }
 
   @Test
@@ -585,5 +733,14 @@ class RewardDisplayTest {
         .filter(option -> option.type == RewardType.CARD)
         .findFirst()
         .orElseThrow();
+  }
+
+  private static ClickListener rewardClickListener(Actor card) {
+    for (com.badlogic.gdx.scenes.scene2d.EventListener listener : card.getListeners()) {
+      if (listener instanceof ClickListener clickListener) {
+        return clickListener;
+      }
+    }
+    throw new AssertionError("Reward card is missing its click listener");
   }
 }

@@ -2,12 +2,16 @@ package com.csse3200.game.entities.factories;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
+import com.badlogic.gdx.utils.Array;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryTrackingComponent;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.EnemyReleaseComponent;
+import com.csse3200.game.components.battle.FloatingDamageDisplay;
 import com.csse3200.game.components.enemy.*;
 import com.csse3200.game.components.spritedisplay.reactive.EnemyDropTargetComponent;
+import com.csse3200.game.components.status.StatusIconDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.configs.EnemyConfig;
 import com.csse3200.game.entities.configs.EnemyConfigs;
@@ -39,9 +43,15 @@ public class EnemyFactory {
   private static final float IDLE_FRAME_DURATION = 0.5f;
   private static final float HURT_FRAME_DURATION = 0.15f;
   private static final float ATTACK_FRAME_DURATION = 0.2f;
+  // The enraged attack is a single red slash frame, held longer than a normal attack so it reads
+  private static final float ENRAGED_ATTACK_FRAME_DURATION = 0.5f;
   private static final float DEATH_FRAME_DURATION = 0.3f;
   private static final float CAST_FRAME_DURATION = 0.1f;
   private static final float DEFEND_FRAME_DURATION = 0.1f;
+  // Non-boss cast / defend is a single held pose, shown for this long before returning to idle
+  private static final float HELD_POSE_DURATION = 0.8f;
+  // The Boss's silence form loops two glowing cast frames to show it is still channelling
+  private static final float SILENCE_HOLD_FRAME_DURATION = 0.2f;
   private static final float BOSS_DEATH_FRAME_DURATION = 0.12f;
 
   /** Multiplier applied on top of the sprite's own size so enemies read clearly on screen. */
@@ -94,15 +104,43 @@ public class EnemyFactory {
     AnimationRenderComponent animator = new AnimationRenderComponent(atlas);
     animator.addAnimation("idle", IDLE_FRAME_DURATION, Animation.PlayMode.LOOP);
     animator.addAnimation("hurt", HURT_FRAME_DURATION, Animation.PlayMode.NORMAL);
-    // Attack and death are optional for legacy atlases. Missing regions are logged and skipped.
+    // Combat animations are optional for legacy atlases. Missing regions are logged and skipped.
     animator.addAnimation("attack", ATTACK_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    // Every enemy registers cast and defend: enemies whose atlas lacks them are skipped, and
+    // EnemyAnimationController falls back to idle when they play
+    boolean boss = config.tier == EnemyTier.BOSS;
+    animator.addAnimation(
+        "cast", boss ? CAST_FRAME_DURATION : HELD_POSE_DURATION, Animation.PlayMode.NORMAL);
+    animator.addAnimation(
+        "defend", boss ? DEFEND_FRAME_DURATION : HELD_POSE_DURATION, Animation.PlayMode.NORMAL);
 
-    if (config.tier == EnemyTier.BOSS) {
-      animator.addAnimation("cast", CAST_FRAME_DURATION, Animation.PlayMode.NORMAL);
-      animator.addAnimation("defend", DEFEND_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    if (boss) {
       animator.addAnimation("death", BOSS_DEATH_FRAME_DURATION, Animation.PlayMode.NORMAL);
     } else {
       animator.addAnimation("death", DEATH_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    }
+
+    // Form art is optional until the final elite atlases arrive. The controller uses the
+    // corresponding normal action whenever one of these regions is absent.
+    if ("enrage_low_health".equals(config.behaviour)) {
+      addOptionalAnimation(
+          atlas, animator, "idle_enraged", IDLE_FRAME_DURATION, Animation.PlayMode.LOOP);
+      addOptionalAnimation(
+          atlas,
+          animator,
+          "attack_enraged",
+          ENRAGED_ATTACK_FRAME_DURATION,
+          Animation.PlayMode.NORMAL);
+      addOptionalAnimation(
+          atlas, animator, "hurt_enraged", HURT_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    } else if ("shield_break_retaliation".equals(config.behaviour)) {
+      addOptionalAnimation(
+          atlas, animator, "idle_taunt", IDLE_FRAME_DURATION, Animation.PlayMode.LOOP);
+      addOptionalAnimation(
+          atlas, animator, "hurt_taunt", HURT_FRAME_DURATION, Animation.PlayMode.NORMAL);
+    } else if ("boss".equals(config.behaviour)) {
+      addOptionalAnimation(
+          atlas, animator, "idle_silence", SILENCE_HOLD_FRAME_DURATION, Animation.PlayMode.LOOP);
     }
 
     CombatStatsComponent stats = new CombatStatsComponent(config.health, config.baseAttack);
@@ -116,6 +154,8 @@ public class EnemyFactory {
             .addComponent(animator)
             .addComponent(new EnemyAnimationController())
             .addComponent(new EnemyStatsDisplay())
+            // Status icons sit just under the health bar, which is anchored 0.6 units below.
+            .addComponent(new StatusIconDisplay(-0.6f, false))
             .addComponent(new EnemyCombatEffectsComponent())
             .addComponent(new EnemyReleaseComponent());
 
@@ -135,6 +175,7 @@ public class EnemyFactory {
     // failing enemy creation.
     if (ServiceLocator.getRenderService() != null) {
       enemy.addComponent(new EnemyIntentDisplay());
+      enemy.addComponent(new FloatingDamageDisplay());
     }
 
     BestiaryService bestiary = ServiceLocator.getBestiaryService();
@@ -145,16 +186,20 @@ public class EnemyFactory {
     return enemy;
   }
 
-  /**
-   * Resolves the texture atlas path for an enemy.
-   *
-   * <p>An explicit {@link EnemyConfig#sprite} wins. Otherwise the path is {@code
-   * images/enemies/<id>.atlas} by convention, falling back to {@link #DEFAULT_ATLAS} when the id is
-   * missing.
-   *
-   * @param config enemy configuration
-   * @return an internal texture atlas path
-   */
+  /** Registers a form animation only when its atlas region has been supplied. */
+  private static void addOptionalAnimation(
+      TextureAtlas atlas,
+      AnimationRenderComponent animator,
+      String name,
+      float frameDuration,
+      Animation.PlayMode playMode) {
+    Array<AtlasRegion> regions = atlas.findRegions(name);
+    if (regions != null && regions.size > 0) {
+      animator.addAnimation(name, frameDuration, playMode);
+    }
+  }
+
+  /** Resolves an explicit enemy atlas, or the conventional atlas for its id. */
   private static String atlasPath(EnemyConfig config) {
     if (config.sprite != null && !config.sprite.isBlank()) {
       return config.sprite;

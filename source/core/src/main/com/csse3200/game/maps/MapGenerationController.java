@@ -98,29 +98,12 @@ public class MapGenerationController {
    * @param parentNode Chosen node from which heuristic will be evaluated
    */
   private MapNode chooseNextNode(MapNode parentNode) {
-
     List<MapNode> validNodes = getNodesInRange(parentNode);
 
     for (MapNode node : getNodesInRange(parentNode)) {
-
       int distance = map.getRelativeNodePos(parentNode, node);
       if (distance == 0 && !node.getConnections().isEmpty()) {
-
-        for (MapNode connected : node.getConnections()) { // prevent crossover X-like connections
-          if (connected.getNodeId() == 0 || connected.equals(parentNode)) {
-            continue;
-          }
-
-          int connectionDistance = map.getRelativeNodePos(parentNode, connected);
-          if (connectionDistance == -1) {
-
-            validNodes.removeIf(neighbour -> map.getRelativeNodePos(parentNode, neighbour) == -1);
-          }
-          if (connectionDistance == 1) {
-
-            validNodes.removeIf(neighbour -> map.getRelativeNodePos(parentNode, neighbour) == 1);
-          }
-        }
+        removeCrossoverConnections(parentNode, node, validNodes);
       }
     }
 
@@ -129,6 +112,21 @@ public class MapGenerationController {
     }
 
     return validNodes.get(rand.nextInt(validNodes.size()));
+  }
+
+  private void removeCrossoverConnections(
+      MapNode parentNode, MapNode node, List<MapNode> validNodes) {
+    for (MapNode connected : node.getConnections()) { // prevent crossover X-like connections
+      if (connected.getNodeId() == 0 || connected.equals(parentNode)) {
+        continue;
+      }
+
+      int connectionDistance = map.getRelativeNodePos(parentNode, connected);
+      if (connectionDistance == -1 || connectionDistance == 1) {
+        validNodes.removeIf(
+            neighbour -> map.getRelativeNodePos(parentNode, neighbour) == connectionDistance);
+      }
+    }
   }
 
   /**

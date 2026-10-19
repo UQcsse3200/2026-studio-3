@@ -33,8 +33,6 @@ import com.csse3200.game.rewards.RewardService;
 import com.csse3200.game.rewards.RewardType;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
-import com.csse3200.game.services.audio.AudioService;
-import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.ui.ItemArtwork;
 import com.csse3200.game.ui.ItemIconView;
 import java.util.ArrayList;
@@ -56,6 +54,7 @@ public class RewardDisplay extends Displaying {
   private static final String GOLD_FEEDBACK_ICON = "images/ui/victory-gold-icon.png";
   private static final String BATTLE_MENU_ICONS = "images/ui/battle-menu-icons.png";
   private static final String VICTORY_TITLE_TEXTURE = "images/ui/victory-title-mythic.png";
+  private static final String WHITE_DRAWABLE = "white";
   private static final float REFERENCE_HEIGHT = 941f;
   private static final float REFERENCE_PANEL_WIDTH = 1222f;
   private static final float REFERENCE_PANEL_HEIGHT = 876f;
@@ -68,13 +67,11 @@ public class RewardDisplay extends Displaying {
   private static final Color CREAM = new Color(0.93f, 0.87f, 0.73f, 1f);
   private static final Color MUTED = new Color(0.72f, 0.66f, 0.58f, 1f);
   private final RunState runState;
-  private final GdxGame game;
   private final RewardService rewardService;
   private final CardService cardService;
   private final CardDiscoveryService cardDiscoveryService;
   private final Runnable afterRewardApplied;
   private final CardResolver cardResolver = new CardResolver();
-  private final List<TextButton> optionButtons = new ArrayList<>();
   private final List<Button> cardChoiceButtons = new ArrayList<>();
   private final List<CardWidget> cardWidgets = new ArrayList<>();
   private List<RewardOption> options;
@@ -119,7 +116,7 @@ public class RewardDisplay extends Displaying {
       Runnable afterRewardApplied) {
     super(rec);
     this.rewardService = Objects.requireNonNull(rewardService, "rewardService cannot be null");
-    this.game = Objects.requireNonNull(game, "game cannot be null");
+    Objects.requireNonNull(game, "game cannot be null");
     this.runState = game.getRunState();
     this.cardService = Objects.requireNonNull(cardService, "cardService cannot be null");
     this.cardDiscoveryService =
@@ -144,32 +141,7 @@ public class RewardDisplay extends Displaying {
     options = rewardService.generateRewardOptions();
     cardWidgetAssets =
         CardWidgetAssets.fromManagedResources(skin, ServiceLocator.getResourceService());
-    createCompatibilityButtons();
     buildRewardScreen();
-  }
-
-  /** Keeps the interaction API used by card reward tests while the visible UI remains themed. */
-  private void createCompatibilityButtons() {
-    optionButtons.clear();
-    for (RewardOption option : options) {
-      if (option == null) {
-        continue;
-      }
-      TextButton button = new TextButton(describeOption(option), skin);
-      button.addListener(
-          new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-              switch (option.type) {
-                case GOLD -> AudioService.playSound(SoundId.ITEM_PURCHASE, 0.5f);
-                case ITEM -> AudioService.playSound(SoundId.ITEM_PICKUP, 0.5f);
-                case CARD -> AudioService.playSound(SoundId.CARD_SHUFFLE, 0.5f);
-              }
-              selectOption(option);
-            }
-          });
-      optionButtons.add(button);
-    }
   }
 
   private void buildRewardScreen() {
@@ -186,7 +158,7 @@ public class RewardDisplay extends Displaying {
     stage.addActor(scene);
     scene.toBack();
 
-    Image dimmer = new Image(skin.newDrawable("white", SCRIM));
+    Image dimmer = new Image(skin.newDrawable(WHITE_DRAWABLE, SCRIM));
     dimmer.setFillParent(true);
     scrimActor = dimmer;
     stage.addActor(dimmer);
@@ -271,7 +243,8 @@ public class RewardDisplay extends Displaying {
     victoryParticles.clear();
     for (int index = 0; index < particlePositions.length; index++) {
       float size = index % 3 == 0 ? 4f : 3f;
-      Image particle = new Image(skin.newDrawable("white", new Color(0.75f, 0.5f, 0.22f, 1f)));
+      Image particle =
+          new Image(skin.newDrawable(WHITE_DRAWABLE, new Color(0.75f, 0.5f, 0.22f, 1f)));
       particle.setBounds(
           panelWidth * particlePositions[index][0],
           panelHeight * particlePositions[index][1],
@@ -480,35 +453,10 @@ public class RewardDisplay extends Displaying {
 
   private void addOrnamentPixel(
       Group ornament, Color color, float x, float y, float width, float height) {
-    Image pixel = new Image(skin.newDrawable("white", color));
+    Image pixel = new Image(skin.newDrawable(WHITE_DRAWABLE, color));
     pixel.setBounds(x, y, width, height);
     pixel.setTouchable(Touchable.disabled);
     ornament.addActor(pixel);
-  }
-
-  private String describeOption(RewardOption option) {
-    if (option == null || option.type == null) {
-      return "";
-    }
-    return switch (option.type) {
-      case GOLD -> option.goldAmount + " Gold";
-      case ITEM ->
-          option.itemId == null
-              ? "Item"
-              : ItemFormatting.formatItemName(option.itemId)
-                  + switch (option.itemId) {
-                    case LUCKY_COIN -> " (+10% Gold)";
-                    case ENERGY_CRYSTAL -> " (+1 Max Energy)";
-                    case MERCHANTS_FAVOR -> " (+10% Shop Discount)";
-                    case IRON_AEGIS -> " (+5 Armour when used)";
-                    case WARRIORS_CREST -> " (+1 Strength when used)";
-                    case ASHEN_EMBER -> " (-1 Max Energy)";
-                    case BRAND_OF_THE_DAMNED -> " (-1 from every Strength gain)";
-                    case SHATTERED_AEGIS -> " (-1 from every Block gain)";
-                    default -> "";
-                  };
-      case CARD -> "Choose a Card";
-    };
   }
 
   private String rewardTitle(RewardOption option) {
@@ -616,7 +564,7 @@ public class RewardDisplay extends Displaying {
     ResourceService resources = ServiceLocator.getResourceService();
     Texture texture = resources == null ? null : resources.getAsset(path, Texture.class);
     return texture == null
-        ? new Image(skin.newDrawable("white", new Color(0.08f, 0.06f, 0.08f, 1f)))
+        ? new Image(skin.newDrawable(WHITE_DRAWABLE, new Color(0.08f, 0.06f, 0.08f, 1f)))
         : new Image(texture);
   }
 
