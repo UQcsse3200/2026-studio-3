@@ -186,10 +186,14 @@ class BestiaryDisplayTest {
       Clipboard clipboard = mock(Clipboard.class);
       when(clipboard.getContents()).thenReturn("shade");
       search.setClipboard(clipboard);
+      // libGDX treats Command (SYM) as the shortcut modifier on macOS and Control elsewhere, so
+      // both are pressed to keep the test platform-neutral.
       when(Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)).thenReturn(true);
+      when(Gdx.input.isKeyPressed(Keys.SYM)).thenReturn(true);
       stage.keyDown(Keys.V);
       stage.keyUp(Keys.V);
       when(Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)).thenReturn(false);
+      when(Gdx.input.isKeyPressed(Keys.SYM)).thenReturn(false);
       assertEquals("shade", search.getText());
       assertEquals(List.of("Lesser Shade"), visibleNames(stage.getRoot()));
       when(Gdx.graphics.getWidth()).thenReturn(1920);
