@@ -133,7 +133,7 @@ class AnimationRenderComponentTest {
     assertNull(animator.getRenderedFrame());
   }
 
-  // flashTint 应该在指定时长后自动清除
+  // flashTint should clear itself after the given duration
   @Test
   void shouldExpireFlashTintAfterDuration() {
     TextureAtlas atlas = createMockAtlas("test_name", 1);
@@ -152,14 +152,15 @@ class AnimationRenderComponentTest {
     animator.flashTint(Color.RED, 0.2f);
     assertEquals(Color.RED, animator.getActiveTint());
 
-    animator.draw(batch); // 0.1s 消耗掉，还剩 0.1s
+    animator.draw(batch); // 0.1s used up, 0.1s left
     assertEquals(Color.RED, animator.getActiveTint());
 
-    animator.draw(batch); // 再消耗 0.1s，闪烁结束
+    animator.draw(batch); // Another 0.1s used, the flash is over
     assertNull(animator.getActiveTint());
   }
 
-  // 染色期间画图应该临时切颜色，画完立刻还原，不污染批次的全局颜色状态
+  // While tinted, drawing should switch colour temporarily and restore it right after, leaving the
+  // batch's global colour untouched
   @Test
   void shouldRestoreBatchColorAfterFlash() {
     TextureAtlas atlas = createMockAtlas("test_name", 1);
@@ -187,7 +188,7 @@ class AnimationRenderComponentTest {
     order.verify(batch).setPackedColor(originalPacked);
   }
 
-  // 持续染色不会因为多次 draw 而自动消失，要手动 clearTint 才行
+  // A persistent tint does not wear off over many draws; it needs an explicit clearTint
   @Test
   void shouldKeepPersistentTintUntilCleared() {
     TextureAtlas atlas = createMockAtlas("test_name", 1);
@@ -196,7 +197,7 @@ class AnimationRenderComponentTest {
 
     GameTime gameTime = mock(GameTime.class);
     ServiceLocator.registerTimeSource(gameTime);
-    when(gameTime.getDeltaTime()).thenReturn(100f); // 故意给一个很大的 deltaTime
+    when(gameTime.getDeltaTime()).thenReturn(100f); // A deliberately huge deltaTime
 
     AnimationRenderComponent animator = new AnimationRenderComponent(atlas);
     animator.setEntity(new Entity());

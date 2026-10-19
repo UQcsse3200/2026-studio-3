@@ -11,6 +11,7 @@ import com.csse3200.game.components.enemy.IntentIcons;
 import com.csse3200.game.components.gamearea.CombatBackgroundComponent;
 import com.csse3200.game.components.gamearea.CombatBackgroundConfig;
 import com.csse3200.game.components.gamearea.CombatBackgroundConfigs;
+import com.csse3200.game.components.status.StatusInfo;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.factories.EnemyFactory;
 import com.csse3200.game.entities.factories.ObstacleFactory;
@@ -265,6 +266,8 @@ public class ForestGameArea extends GameArea {
     resourceService.loadTextures(forestTextures);
     // Every intent icon, so any telegraphed intent can be drawn without a missing-asset crash.
     resourceService.loadTextures(IntentIcons.all());
+    // Every status icon, so the status rows above combatants can draw any active status.
+    resourceService.loadTextures(StatusInfo.iconPaths());
     resourceService.loadTextureAtlases(forestTextureAtlases);
     resourceService.loadSounds(forestSounds);
     // resourceService.loadMusic(forestMusic);
@@ -283,6 +286,7 @@ public class ForestGameArea extends GameArea {
     resourceService.unloadAssets(forestSounds);
     // resourceService.unloadAssets(forestMusic);
     resourceService.unloadAssets(IntentIcons.all());
+    resourceService.unloadAssets(StatusInfo.iconPaths());
   }
 
   @Override

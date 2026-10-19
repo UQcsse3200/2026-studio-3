@@ -39,6 +39,10 @@ import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.enemy.BossDialogueComponent;
+import com.csse3200.game.components.enemy.BossDialogueConfig;
+import com.csse3200.game.components.enemy.EnemyAI.BossAI;
+import com.csse3200.game.components.enemy.EnemyAI.TutorialEnemyAI;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
@@ -86,9 +90,11 @@ import com.csse3200.game.ui.PopupInputComponent;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
+import com.csse3200.game.ui.terminal.commands.ForceIntentCommand;
 import com.csse3200.game.ui.terminal.commands.GiveGoldCommand;
 import com.csse3200.game.ui.terminal.commands.GiveItemCommand;
 import com.csse3200.game.ui.terminal.commands.GiveOwnedItemCommand;
+import com.csse3200.game.ui.terminal.commands.SetEnemyHealthCommand;
 import com.csse3200.game.ui.terminal.commands.SetHealthCommand;
 import com.csse3200.game.ui.terminal.commands.SkipBattleCommand;
 import java.nio.file.Path;
@@ -158,6 +164,7 @@ public class BattleScreen extends ScreenAdapter {
   private final CardAimController allEnemiesCardAim;
   private ClickableFactory uiFactory;
   private final PlayerRunState playerState;
+  private final BossDialogueConfig bossDialogueConfig;
   private List<ClickableRecord> staticUiRecords;
 
   private List<CardInstance> handRowOrder = new ArrayList<>();
@@ -199,6 +206,7 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
+    bossDialogueConfig = BossDialogueConfig.load();
     loadAssets();
 
     renderer = RenderFactory.createRenderer();
@@ -218,10 +226,20 @@ public class BattleScreen extends ScreenAdapter {
             runState,
             tutorialBattle ? "dungeon" : game.getBackgroundId(),
             tutorialBattle
-                ? List.of("bone_crawler")
+                ? List.of("votive_attendant")
                 : BattleEncounterSelector.enemiesFor(runState));
     this.gameArea = forestGameArea;
     forestGameArea.create();
+
+    if (tutorialBattle) {
+      for (Entity enemy : forestGameArea.getEnemies()) {
+        EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+
+        if (behaviour != null) {
+          behaviour.setAI(new TutorialEnemyAI());
+        }
+      }
+    }
 
     playerState = runState.getOrCreatePlayerState();
     Entity player = forestGameArea.getPlayer();
@@ -325,10 +343,32 @@ public class BattleScreen extends ScreenAdapter {
           }
         });
     createUI();
+    installBossDialogue(forestGameArea);
     if (tutorialBattle) {
       setupTutorialGuidance(forestGameArea, player, animationCoordinatorEntity);
     }
     controller.start();
+  }
+
+  /** Installs dialogue only for an enemy whose active AI is the Boss AI. */
+  private void installBossDialogue(BattleGameArea battleArea) {
+    for (Entity enemy : battleArea.getEnemies()) {
+      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+      if (behaviour == null || !(behaviour.getAI() instanceof BossAI bossAI)) {
+        continue;
+      }
+
+      BossDialogueComponent dialogue =
+          new BossDialogueComponent(
+              ServiceLocator.getRenderService().getStage(),
+              bossAI,
+              bossDialogueConfig,
+              controller,
+              () -> battleEntityBounds(enemy),
+              ServiceLocator.getResourceService());
+      ServiceLocator.getEntityService().register(new Entity().addComponent(dialogue));
+      return;
+    }
   }
 
   private PlayerDeck prepareBattleDeckSource() {
@@ -416,7 +456,7 @@ public class BattleScreen extends ScreenAdapter {
                 .findFirst()
                 .orElse(null));
     tutorialView.setEnemyBounds(
-        () -> forestGameArea.getEnemies().stream().map(this::tutorialEnemyBounds).toList());
+        () -> forestGameArea.getEnemies().stream().map(this::battleEntityBounds).toList());
     tutorialView.setDragActor(
         () -> ServiceLocator.getDragAndDropService().getDragAndDrop().getDragActor());
     tutorialView.setEnemyRenderer(
@@ -475,7 +515,7 @@ public class BattleScreen extends ScreenAdapter {
         || animator.isFinished();
   }
 
-  private Rectangle tutorialEnemyBounds(Entity enemy) {
+  private Rectangle battleEntityBounds(Entity enemy) {
     Stage stage = ServiceLocator.getRenderService().getStage();
     Vector2 pos = enemy.getPosition(), scale = enemy.getScale();
     Vector3 a = ServiceLocator.getCamera().project(new Vector3(pos.x, pos.y, 0));
@@ -527,6 +567,16 @@ public class BattleScreen extends ScreenAdapter {
         "sethealth <hp>",
         "set the player's current health",
         new SetHealthCommand(gameArea.getPlayer()));
+    terminal.addCommand(
+        "setenemyhp",
+        "setenemyhp <slot> <hp>",
+        "set an enemy's health (slots start at 0)",
+        new SetEnemyHealthCommand(controller));
+    terminal.addCommand(
+        "forceintent",
+        "forceintent <slot> <intent>",
+        "force an enemy's next intent: attack, defend, silence, taunt, damage_on_card_play",
+        new ForceIntentCommand(controller));
     terminal.addCommand(
         "giveitem",
         "giveitem <ITEM_TYPE>",
@@ -739,6 +789,7 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getResourceService().unloadAssets(EnemyStatusEffectVisuals.texturePaths());
+    ServiceLocator.getResourceService().unloadAssets(bossDialogueConfig.texturePaths());
     cardInteractionSkin.dispose();
     cardWidgetSkin.dispose();
     ServiceLocator.getResourceService().unloadAssets(mainGameTextures);
@@ -749,6 +800,7 @@ public class BattleScreen extends ScreenAdapter {
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(mainGameTextures);
     resourceService.loadTextures(EnemyStatusEffectVisuals.texturePaths());
+    resourceService.loadTextures(bossDialogueConfig.texturePaths());
     ServiceLocator.getResourceService().loadAll();
   }
 
