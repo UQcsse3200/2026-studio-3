@@ -80,6 +80,9 @@ class InventoryPopupComponentTest {
         "+50% SHOP DISCOUNT",
         InventoryPopupComponent.describeItem(ItemType.MERCHANTS_FAVOR, 6).effect());
     assertEquals(
+        "+50% SHOP DISCOUNT",
+        InventoryPopupComponent.describeItem(ItemType.MERCHANTS_FAVOR, Integer.MAX_VALUE).effect());
+    assertEquals(
         "-6 HEALTH / TURN",
         InventoryPopupComponent.describeItem(ItemType.BLOOD_OATH_SIGIL, 3).effect());
     assertEquals(

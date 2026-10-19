@@ -88,7 +88,7 @@ public class InventoryPopupComponent extends UIComponent {
     ITEM_DESCRIPTIONS.put(
         ItemType.MERCHANTS_FAVOR,
         count -> {
-          int discount = Math.clamp(count * 10, 0, 50);
+          int discount = Math.clamp(count, 0, 5) * 10;
           return new ItemText("+" + discount + "% SHOP DISCOUNT");
         });
 
