@@ -322,13 +322,14 @@ class AllCardsLiveCombatRegressionTest {
   @Test
   void upgradedRestoringLightShouldHealNineAtEachOfThreeFuturePlayerStartsThenExpire() {
     Harness battle = createUpgradedHarness(List.of("resurrection"), 50, 0);
+    int initialEnergy = battle.energy.getCurrentEnergy();
 
     assertTrue(
         battle.controller.submitCardPlayRequest(
             CardPlayRequest.self(battle.instanceId("resurrection"))));
     assertEquals(
         50, battle.playerStats.getHealth(), "healing must wait until the next player turn");
-    assertEquals(5, battle.energy.getCurrentEnergy());
+    assertEquals(initialEnergy - 5, battle.energy.getCurrentEnergy());
     assertStatus(battle.playerStats, EffectType.HEAL, 9, 3);
 
     battle.controller.endPlayerTurn();
@@ -348,15 +349,17 @@ class AllCardsLiveCombatRegressionTest {
   }
 
   @Test
-  void upgradedRiftLanceShouldDealSixBeforeApplyingTwoVulnerable() {
+  void upgradedRiftLanceShouldDealSixBeforeApplyingVulnerableForTwoTurns() {
     Harness battle = createUpgradedHarness(List.of("rift_lance", "strike"), 100, 0);
+    int initialEnergy = battle.energy.getCurrentEnergy();
 
     assertTrue(
         battle.controller.submitCardPlayRequest(
             CardPlayRequest.singleEnemy(battle.instanceId("rift_lance"), FIRST_TARGET)));
     assertEnemyHealth(battle, 494, 500);
-    assertEquals(9, battle.energy.getCurrentEnergy());
-    assertStatus(battle.firstEnemyStats, EffectType.VULNERABLE, 2, 2);
+    assertEquals(initialEnergy - 1, battle.energy.getCurrentEnergy());
+    // Combat normalizes Vulnerable to one non-stacking intensity, keeping its duration.
+    assertStatus(battle.firstEnemyStats, EffectType.VULNERABLE, 1, 2);
     assertNull(battle.secondEnemyStats.getStatusEffect(EffectType.VULNERABLE.name()));
 
     assertTrue(
@@ -368,13 +371,15 @@ class AllCardsLiveCombatRegressionTest {
   @Test
   void upgradedAstralWardShouldGrantSixBlockTwoPersistentStrengthAndOneEnergy() {
     Harness battle = createUpgradedHarness(List.of("astral_ward", "strike"), 100, 0);
+    int initialEnergy = battle.energy.getCurrentEnergy();
 
     assertTrue(
         battle.controller.submitCardPlayRequest(
             CardPlayRequest.self(battle.instanceId("astral_ward"))));
     assertEquals(6, battle.playerStats.getBlock());
     assertStatus(battle.playerStats, EffectType.STRENGTH, 2, 0);
-    assertEquals(9, battle.energy.getCurrentEnergy(), "pay 2 Energy, then restore 1");
+    assertEquals(
+        initialEnergy - 2 + 1, battle.energy.getCurrentEnergy(), "pay 2 Energy, then restore 1");
 
     assertTrue(
         battle.controller.submitCardPlayRequest(
@@ -388,12 +393,13 @@ class AllCardsLiveCombatRegressionTest {
   @Test
   void upgradedStarfallShouldDealNineToEveryEnemyAndDiscardTheUpgradedInstance() {
     Harness battle = createUpgradedHarness(List.of("starfall"), 100, 0);
+    int initialEnergy = battle.energy.getCurrentEnergy();
     CardInstance selected = battle.deck.getHand().get(0);
 
     assertTrue(
         battle.controller.submitCardPlayRequest(CardPlayRequest.allEnemies(selected.instanceId())));
     assertEnemyHealth(battle, 491, 491);
-    assertEquals(8, battle.energy.getCurrentEnergy());
+    assertEquals(initialEnergy - 2, battle.energy.getCurrentEnergy());
     assertTrue(battle.deck.getHand().isEmpty());
     assertEquals(List.of(selected), battle.deck.getDiscardPileInstances());
     assertTrue(selected.isUpgraded());
@@ -477,7 +483,7 @@ class AllCardsLiveCombatRegressionTest {
 
   private Harness createHarness(PlayerDeck playerDeck, int playerHealth, int enemyAttack) {
     CombatStatsComponent playerStats = new CombatStatsComponent(playerHealth, 0, 200);
-    EnergyComponent energy = new EnergyComponent(10);
+    EnergyComponent energy = new EnergyComponent(EnergyComponent.MAX_ENERGY_CAP);
     Entity player = new Entity().addComponent(playerStats).addComponent(energy);
 
     CombatStatsComponent firstStats = new CombatStatsComponent(500, enemyAttack);
