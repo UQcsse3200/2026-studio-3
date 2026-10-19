@@ -36,6 +36,7 @@ public class AudioService {
   private static Playlist nowPlaying;
   private static Music heldTrack;
   private static boolean gamePaused;
+  private static ResourceService musicStore;
   private static final Random pitchModifier = new Random();
   private static final Random shuffle = new Random();
 
@@ -122,14 +123,13 @@ public class AudioService {
   }
 
   /**
-   * Loads all the audio files defined in their respective path arrays. Called once in GdxGame at
-   * game start.
+   * Loads all the sound effects into the current screen's resources. Music isn't loaded here, see
+   * {@link #playMusic(MusicId)}.
    */
   public static void load() {
 
     cooldownTimestamp = System.currentTimeMillis();
     ServiceLocator.getResourceService().loadSounds(soundPaths);
-    ServiceLocator.getResourceService().loadMusic(musicPaths);
   }
 
   /**
@@ -186,6 +186,10 @@ public class AudioService {
    * Plays a chosen song where it is called. Uses the ordinal of the MusicID enum parameter to find
    * the music index from array. Functions within AudioService can control and configure the music.
    *
+   * <p>Songs are kept in AudioService's own store rather than the screen's ResourceService, and
+   * each one is loaded the first time it plays. Some screens throw their resources away when they
+   * close, which would cut off the song that's playing if it lived there.
+   *
    * @param musicID Enumerator type code that translates to an index of the music path array.
    */
   public static void playMusic(MusicId musicID) {
@@ -194,11 +198,22 @@ public class AudioService {
       playing.stop();
     }
 
-    playing =
-        ServiceLocator.getResourceService().getAsset(musicPaths[musicID.ordinal()], Music.class);
+    playing = music(musicID);
     playing.setVolume(musicVolume);
     playing.setLooping(true);
     playing.play();
+  }
+
+  private static Music music(MusicId musicID) {
+    String path = musicPaths[musicID.ordinal()];
+    if (musicStore == null) {
+      musicStore = new ResourceService();
+    }
+    if (!musicStore.containsAsset(path, Music.class)) {
+      musicStore.loadMusic(new String[] {path});
+      musicStore.loadAll();
+    }
+    return musicStore.getAsset(path, Music.class);
   }
 
   /** Pauses the currently playing music track. */
@@ -322,9 +337,7 @@ public class AudioService {
     if (heldTrack != null) {
       heldTrack.pause();
     }
-    if (ensureLoaded(musicPaths[MusicId.PAUSE_MENU.ordinal()], Music.class)) {
-      playMusic(MusicId.PAUSE_MENU);
-    }
+    playMusic(MusicId.PAUSE_MENU);
   }
 
   /** Called when the game is resumed. Stops the pause menu music and carries on the held song. */
@@ -400,37 +413,30 @@ public class AudioService {
       return;
     }
     stopMusic();
-    MusicId track = list.next();
-    if (ensureLoaded(musicPaths[track.ordinal()], Music.class)) {
-      playMusic(track);
-    }
+    playMusic(list.next());
     nowPlaying = list;
   }
 
   /** Plays one of the sounds added for screens, loading it first if this screen hasn't. */
   private static void playLoadedSound(SoundId soundID, float volume) {
-    if (ensureLoaded(soundPaths[soundID.ordinal()], Sound.class)) {
+    if (ensureLoaded(soundPaths[soundID.ordinal()])) {
       playSound(soundID, volume);
     }
   }
 
   /**
-   * Makes sure a file is loaded before it plays. The save screen sets up its own resource service
+   * Makes sure a sound is loaded before it plays. The save screen sets up its own resource service
    * without loading any audio, so a button click there used to crash the game.
    *
    * @return false if there is no resource service to load into, as in tests
    */
-  private static boolean ensureLoaded(String path, Class<?> type) {
+  private static boolean ensureLoaded(String path) {
     ResourceService resources = ServiceLocator.getResourceService();
     if (resources == null) {
       return false;
     }
-    if (!resources.containsAsset(path, type)) {
-      if (type == Music.class) {
-        resources.loadMusic(new String[] {path});
-      } else {
-        resources.loadSounds(new String[] {path});
-      }
+    if (!resources.containsAsset(path, Sound.class)) {
+      resources.loadSounds(new String[] {path});
       resources.loadAll();
     }
     return true;
@@ -468,5 +474,11 @@ public class AudioService {
     soundEffectsVolume = 1f;
     heldTrack = null;
     gamePaused = false;
+    musicStore = null;
+  }
+
+  /** Lets tests swap in their own store for the music. */
+  static void useMusicStore(ResourceService store) {
+    musicStore = store;
   }
 }

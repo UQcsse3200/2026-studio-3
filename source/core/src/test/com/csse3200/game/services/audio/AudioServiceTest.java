@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -87,6 +88,7 @@ class AudioServiceTest {
         .thenAnswer(call -> sounds.computeIfAbsent(call.getArgument(0), p -> mock(Sound.class)));
     ServiceLocator.registerResourceService(resources);
     AudioService.reset();
+    AudioService.useMusicStore(resources);
 
     // keep the tests away from the real settings file, starting from the default settings
     realFiles = Gdx.files;
@@ -201,6 +203,37 @@ class AudioServiceTest {
     button.fire(new ChangeEvent());
 
     verify(sounds.get(CLICK)).play(anyFloat());
+  }
+
+  /**
+   * The library screens throw their resources away when they close. If the song lived there, going
+   * from the library into the item library would cut it off.
+   */
+  @Test
+  void musicDoesNotLiveInTheScreensResources() {
+    ResourceService libraryResources = mock(ResourceService.class);
+    ServiceLocator.registerResourceService(libraryResources);
+    AudioService.onScreenChanged(ScreenType.LIBRARY);
+    Music libraryTrack = tracks.get(lastStarted());
+
+    ServiceLocator.registerResourceService(mock(ResourceService.class));
+    AudioService.onScreenChanged(ScreenType.ITEM_LIBRARY);
+
+    verify(libraryResources, never()).loadMusic(any());
+    verify(libraryResources, never()).getAsset(anyString(), eq(Music.class));
+    verify(libraryTrack, never()).stop();
+    assertEquals(1, started.size());
+  }
+
+  @Test
+  void loadOnlyPutsSoundEffectsInTheScreensResources() {
+    ResourceService screenResources = mock(ResourceService.class);
+    ServiceLocator.registerResourceService(screenResources);
+
+    AudioService.load();
+
+    verify(screenResources).loadSounds(any());
+    verify(screenResources, never()).loadMusic(any());
   }
 
   @Test
