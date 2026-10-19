@@ -92,9 +92,9 @@ public class StatsDisplay extends UIComponent {
     healthBarStyle.background.setMinHeight(HEALTH_BAR_HEIGHT);
     healthBarStyle.knobBefore.setMinHeight(HEALTH_BAR_HEIGHT);
 
-    healthBar = new ProgressBar(0, (float) stats.getMaxHealth(), 1, false, healthBarStyle);
+    healthBar = new ProgressBar(0, stats.getMaxHealth(), 1, false, healthBarStyle);
     healthBar.setSize(HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT);
-    healthBar.setValue((float) stats.getHealth());
+    healthBar.setValue(stats.getHealth());
     healthBar.setAnimateDuration(0.2f);
 
     healthStack = new Stack();
@@ -109,6 +109,12 @@ public class StatsDisplay extends UIComponent {
     updatePosition();
   }
 
+  /**
+   * Creates a label
+   *
+   * @param text the text shown in the label
+   * @return the new label
+   */
   private Label createLabel(String text) {
     Label label = new Label(text, skin);
     label.setColor(Color.WHITE);
@@ -161,8 +167,8 @@ public class StatsDisplay extends UIComponent {
     }
     CharSequence text = String.format("%d / %d", currentHealth, maxHealth);
     healthLabel.setText(text);
-    healthBar.setRange(0, (float) maxHealth);
-    healthBar.setValue((float) currentHealth);
+    healthBar.setRange(0, maxHealth);
+    healthBar.setValue(currentHealth);
     updateHealthBarColour();
   }
 

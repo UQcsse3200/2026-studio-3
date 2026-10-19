@@ -126,6 +126,13 @@ public class PlayerStatsTopDisplay extends UIComponent {
     stage.addActor(playerImage);
   }
 
+  /**
+   * Creates a label
+   *
+   * @param text the text shown in the label
+   * @param fontColour the font colour of the text
+   * @return the new label
+   */
   private Label createLabel(String text, Color fontColour) {
     Label.LabelStyle labelStyle =
         new Label.LabelStyle(skin.get(STYLE_NAME_LARGE, Label.LabelStyle.class));
