@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
@@ -55,6 +56,7 @@ public class ItemLibraryDisplay extends UIComponent {
   private final ItemDiscoveryService itemDiscoveryService;
   private final EventListener1<ItemType> discoveryListener = ignored -> rebuildItemList();
   private ItemIconView itemIconView;
+  private Label lockedArtworkLabel;
 
   static {
     ITEM_DESCRIPTIONS.put(
@@ -93,7 +95,9 @@ public class ItemLibraryDisplay extends UIComponent {
   private Label nameLabel;
   private Label descriptionLabel;
   private Label sourceLabel;
+  private Label discoveryCountLabel;
   private Table itemListTable;
+  private ItemType selectedItem;
   private boolean showingCurses;
   private TextButton.TextButtonStyle buttonStyle;
 
@@ -210,6 +214,7 @@ public class ItemLibraryDisplay extends UIComponent {
 
   private void addItemList(Table panel) {
     itemListTable = new Table();
+    itemListTable.setName("itemLibraryEntries");
     itemListTable.top();
     itemListTable.defaults().width(290f).height(76f).padBottom(8f).left();
 
@@ -220,7 +225,13 @@ public class ItemLibraryDisplay extends UIComponent {
     Table listPanel = new Table();
     listPanel.setBackground(skin.newDrawable(WHITE, LIST_COLOUR));
     listPanel.pad(18f);
-    listPanel.add(new Label("ITEMS", labelStyle(SMALL, MenuTheme.softCoral()))).left().expandX();
+    Table listHeader = new Table();
+    listHeader.add(new Label("ITEMS", labelStyle(SMALL, MenuTheme.softCoral()))).left().expandX();
+    discoveryCountLabel = new Label("", labelStyle(SMALL, MenuTheme.warmParchment()));
+    discoveryCountLabel.setName("itemDiscoveryCount");
+    discoveryCountLabel.setFontScale(0.75f);
+    listHeader.add(discoveryCountLabel).right();
+    listPanel.add(listHeader).expandX().fillX();
     listPanel.row();
     listPanel.add(scrollPane).expand().fill().padTop(12f);
 
@@ -270,6 +281,7 @@ public class ItemLibraryDisplay extends UIComponent {
   }
 
   private void rebuildItemList() {
+    updateDiscoveryCount();
     itemListTable.clearChildren();
     ItemType firstItem = null;
     for (ItemType item : ItemType.values()) {
@@ -290,13 +302,35 @@ public class ItemLibraryDisplay extends UIComponent {
           });
       itemListTable.add(itemButton).row();
     }
-    if (firstItem != null) {
+    if (selectedItem != null && selectedItem.isCurse() == showingCurses) {
+      showItem(selectedItem);
+    } else if (firstItem != null) {
       showItem(firstItem);
     }
   }
 
+  private void updateDiscoveryCount() {
+    int discovered = 0;
+    for (ItemType item : ItemType.values()) {
+      if (isDiscovered(item)) {
+        discovered++;
+      }
+    }
+    discoveryCountLabel.setText("Discovered " + discovered + " / " + ItemType.values().length);
+  }
+
   private Table createDetailPanel() {
     itemIconView = new ItemIconView();
+    lockedArtworkLabel = new Label("?", labelStyle(LARGE, MenuTheme.warmParchment()));
+    lockedArtworkLabel.setName("itemLockedArtwork");
+    lockedArtworkLabel.setAlignment(Align.center);
+
+    Table artworkBackground = new Table();
+    artworkBackground.setBackground(skin.newDrawable(WHITE, new Color(0.035f, 0.03f, 0.04f, 1f)));
+    Stack artwork = new Stack();
+    artwork.add(artworkBackground);
+    artwork.add(itemIconView);
+    artwork.add(lockedArtworkLabel);
 
     Table detailPanel = new Table();
     detailPanel.setBackground(skin.newDrawable(WHITE, DETAIL_COLOUR));
@@ -314,7 +348,7 @@ public class ItemLibraryDisplay extends UIComponent {
 
     detailPanel.add(nameLabel).left().expandX();
     detailPanel.row();
-    detailPanel.add(itemIconView).width(200f).height(200f).padTop(8f).padBottom(16f);
+    detailPanel.add(artwork).width(200f).height(200f).padTop(8f).padBottom(16f);
     detailPanel.row();
     detailPanel.add(descriptionLabel).expandX().fillX().left().padTop(12f);
     detailPanel.row();
@@ -323,17 +357,20 @@ public class ItemLibraryDisplay extends UIComponent {
   }
 
   private void showItem(ItemType item) {
+    selectedItem = item;
     if (!isDiscovered(item)) {
       nameLabel.setText(displayName(item));
       descriptionLabel.setText(LOCKED_DESCRIPTION);
       sourceLabel.setText("");
       hideItemImage();
+      lockedArtworkLabel.setVisible(true);
       return;
     }
 
     nameLabel.setText(ItemFormatting.formatItemName(item));
     descriptionLabel.setText(ITEM_DESCRIPTIONS.getOrDefault(item, "No description available."));
     sourceLabel.setText("Obtained from: " + ItemFormatting.formatItemSource(item));
+    lockedArtworkLabel.setVisible(false);
     setItemImage(resolveArtworkPath(item));
   }
 
@@ -341,7 +378,7 @@ public class ItemLibraryDisplay extends UIComponent {
     if (isDiscovered(item)) {
       return ItemFormatting.formatItemName(item);
     }
-    return item.isCurse() ? "Unknown Curse" : "Unknown Relic";
+    return "???";
   }
 
   private boolean isDiscovered(ItemType item) {
