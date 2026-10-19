@@ -116,12 +116,31 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Injects eligibility, validated rarity weights and immutable encounter context independently.</div>
 </div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,com.csse3200.game.cards.CardAcquisitionPool,java.util.Random)" class="member-name-link">RewardService</a><wbr>(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,com.csse3200.game.cards.CardAcquisitionPool,com.csse3200.game.rewards.CardRewardPolicy,com.csse3200.game.rewards.CardRewardProfile,java.util.Random,com.csse3200.game.rewards.ItemAcquisitionService)" class="member-name-link">RewardService</a><wbr>(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
+ <a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="../cards/CardAcquisitionPool.html" title="class in com.csse3200.game.cards">CardAcquisitionPool</a>&nbsp;acquisitionPool,
+ <a href="CardRewardPolicy.html" title="class in com.csse3200.game.rewards">CardRewardPolicy</a>&nbsp;policy,
+ <a href="CardRewardProfile.html" title="enum class in com.csse3200.game.rewards">CardRewardProfile</a>&nbsp;profile,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;cardRandom,
+ <a href="ItemAcquisitionService.html" title="class in com.csse3200.game.rewards">ItemAcquisitionService</a>&nbsp;itemAcquisitionService)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Injects eligibility, validated rarity weights, immutable encounter context and item discovery
+ behaviour independently.</div>
+</div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,com.csse3200.game.cards.CardAcquisitionPool,java.util.Random)" class="member-name-link">RewardService</a><wbr>(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
  <a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
  <a href="../cards/CardAcquisitionPool.html" title="class in com.csse3200.game.cards">CardAcquisitionPool</a>&nbsp;acquisitionPool,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;cardRandom)</code></div>
-<div class="col-last odd-row-color">
+<div class="col-last even-row-color">
 <div class="block">Creates a reward service with an explicit shared acquisition policy.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,com.csse3200.game.cards.CardAcquisitionPool,java.util.Random,com.csse3200.game.rewards.ItemAcquisitionService)" class="member-name-link">RewardService</a><wbr>(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
+ <a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="../cards/CardAcquisitionPool.html" title="class in com.csse3200.game.cards">CardAcquisitionPool</a>&nbsp;acquisitionPool,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;cardRandom,
+ <a href="ItemAcquisitionService.html" title="class in com.csse3200.game.rewards">ItemAcquisitionService</a>&nbsp;itemAcquisitionService)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a reward service with explicit card and item acquisition policies.</div>
 </div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,com.csse3200.game.rewards.CardRewardProfile,java.util.Random)" class="member-name-link">RewardService</a><wbr>(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
  <a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
@@ -130,11 +149,26 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Production victory context; standalone/preview constructors default to normal.</div>
 </div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,java.util.Random)" class="member-name-link">RewardService</a><wbr>(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,com.csse3200.game.rewards.CardRewardProfile,java.util.Random,com.csse3200.game.rewards.ItemAcquisitionService)" class="member-name-link">RewardService</a><wbr>(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
+ <a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="CardRewardProfile.html" title="enum class in com.csse3200.game.rewards">CardRewardProfile</a>&nbsp;profile,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;cardRandom,
+ <a href="ItemAcquisitionService.html" title="class in com.csse3200.game.rewards">ItemAcquisitionService</a>&nbsp;itemAcquisitionService)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Production victory context with source-aware item acquisition.</div>
+</div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,java.util.Random)" class="member-name-link">RewardService</a><wbr>(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
  <a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;cardRandom)</code></div>
-<div class="col-last odd-row-color">
+<div class="col-last even-row-color">
 <div class="block">Creates a reward service with deterministic injectable generation dependencies.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,java.util.Random,com.csse3200.game.rewards.ItemAcquisitionService)" class="member-name-link">RewardService</a><wbr>(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
+ <a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;cardRandom,
+ <a href="ItemAcquisitionService.html" title="class in com.csse3200.game.rewards">ItemAcquisitionService</a>&nbsp;itemAcquisitionService)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a reward service that grants items through the shared acquisition gateway.</div>
 </div>
 </div>
 </section>
@@ -212,6 +246,16 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,java.util.Random,com.csse3200.game.rewards.ItemAcquisitionService)">
+<h3>RewardService</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">RewardService</span><wbr><span class="parameters">(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
+ <a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;cardRandom,
+ <a href="ItemAcquisitionService.html" title="class in com.csse3200.game.rewards">ItemAcquisitionService</a>&nbsp;itemAcquisitionService)</span></div>
+<div class="block">Creates a reward service that grants items through the shared acquisition gateway.</div>
+</section>
+</li>
+<li>
 <section class="detail" id="&lt;init&gt;(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,com.csse3200.game.rewards.CardRewardProfile,java.util.Random)">
 <h3>RewardService</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">RewardService</span><wbr><span class="parameters">(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
@@ -219,6 +263,17 @@ loadScripts(document, 'script');</script>
  <a href="CardRewardProfile.html" title="enum class in com.csse3200.game.rewards">CardRewardProfile</a>&nbsp;profile,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;cardRandom)</span></div>
 <div class="block">Production victory context; standalone/preview constructors default to normal.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,com.csse3200.game.rewards.CardRewardProfile,java.util.Random,com.csse3200.game.rewards.ItemAcquisitionService)">
+<h3>RewardService</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">RewardService</span><wbr><span class="parameters">(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
+ <a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="CardRewardProfile.html" title="enum class in com.csse3200.game.rewards">CardRewardProfile</a>&nbsp;profile,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;cardRandom,
+ <a href="ItemAcquisitionService.html" title="class in com.csse3200.game.rewards">ItemAcquisitionService</a>&nbsp;itemAcquisitionService)</span></div>
+<div class="block">Production victory context with source-aware item acquisition.</div>
 </section>
 </li>
 <li>
@@ -232,6 +287,17 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,com.csse3200.game.cards.CardAcquisitionPool,java.util.Random,com.csse3200.game.rewards.ItemAcquisitionService)">
+<h3>RewardService</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">RewardService</span><wbr><span class="parameters">(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
+ <a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="../cards/CardAcquisitionPool.html" title="class in com.csse3200.game.cards">CardAcquisitionPool</a>&nbsp;acquisitionPool,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;cardRandom,
+ <a href="ItemAcquisitionService.html" title="class in com.csse3200.game.rewards">ItemAcquisitionService</a>&nbsp;itemAcquisitionService)</span></div>
+<div class="block">Creates a reward service with explicit card and item acquisition policies.</div>
+</section>
+</li>
+<li>
 <section class="detail" id="&lt;init&gt;(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,com.csse3200.game.cards.CardAcquisitionPool,com.csse3200.game.rewards.CardRewardPolicy,com.csse3200.game.rewards.CardRewardProfile,java.util.Random)">
 <h3>RewardService</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">RewardService</span><wbr><span class="parameters">(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
@@ -241,6 +307,20 @@ loadScripts(document, 'script');</script>
  <a href="CardRewardProfile.html" title="enum class in com.csse3200.game.rewards">CardRewardProfile</a>&nbsp;profile,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;cardRandom)</span></div>
 <div class="block">Injects eligibility, validated rarity weights and immutable encounter context independently.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.rewards.RewardGenerator,com.csse3200.game.cards.CardService,com.csse3200.game.cards.CardAcquisitionPool,com.csse3200.game.rewards.CardRewardPolicy,com.csse3200.game.rewards.CardRewardProfile,java.util.Random,com.csse3200.game.rewards.ItemAcquisitionService)">
+<h3>RewardService</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">RewardService</span><wbr><span class="parameters">(<a href="RewardGenerator.html" title="class in com.csse3200.game.rewards">RewardGenerator</a>&nbsp;generator,
+ <a href="../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cardService,
+ <a href="../cards/CardAcquisitionPool.html" title="class in com.csse3200.game.cards">CardAcquisitionPool</a>&nbsp;acquisitionPool,
+ <a href="CardRewardPolicy.html" title="class in com.csse3200.game.rewards">CardRewardPolicy</a>&nbsp;policy,
+ <a href="CardRewardProfile.html" title="enum class in com.csse3200.game.rewards">CardRewardProfile</a>&nbsp;profile,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html" title="class or interface in java.util" class="external-link">Random</a>&nbsp;cardRandom,
+ <a href="ItemAcquisitionService.html" title="class in com.csse3200.game.rewards">ItemAcquisitionService</a>&nbsp;itemAcquisitionService)</span></div>
+<div class="block">Injects eligibility, validated rarity weights, immutable encounter context and item discovery
+ behaviour independently.</div>
 </section>
 </li>
 </ul>

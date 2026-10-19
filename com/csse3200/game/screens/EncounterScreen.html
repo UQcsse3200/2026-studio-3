@@ -93,11 +93,12 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code>com.badlogic.gdx.Screen</code></dd>
+<dd><code>com.badlogic.gdx.Screen</code>, <code><a href="LoadedSaveTransitionAware.html" title="interface in com.csse3200.game.screens">LoadedSaveTransitionAware</a></code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">EncounterScreen</span>
-<span class="extends-implements">extends com.badlogic.gdx.ScreenAdapter</span></div>
+<span class="extends-implements">extends com.badlogic.gdx.ScreenAdapter
+implements <a href="LoadedSaveTransitionAware.html" title="interface in com.csse3200.game.screens">LoadedSaveTransitionAware</a></span></div>
 <div class="block">Hosts Team 2 non-battle encounters entered from the run map.
 
  <p>The active map node is stored in <a href="../maps/RunState.html" title="class in com.csse3200.game.maps"><code>RunState</code></a>. EVENT nodes launch the Chance encounter
@@ -139,12 +140,17 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#dispose()" class="member-name-link">dispose</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#render(float)" class="member-name-link">render</a><wbr>(float&nbsp;delta)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#prepareForLoadedSaveTransition()" class="member-name-link">prepareForLoadedSaveTransition</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Prevents disposal from overwriting a save that has just been restored.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resize(int,int)" class="member-name-link">resize</a><wbr>(int&nbsp;width,
- int&nbsp;height)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#render(float)" class="member-name-link">render</a><wbr>(float&nbsp;delta)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resize(int,int)" class="member-name-link">resize</a><wbr>(int&nbsp;width,
+ int&nbsp;height)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -221,6 +227,18 @@ loadScripts(document, 'script');</script>
 <dd><code>dispose</code>&nbsp;in interface&nbsp;<code>com.badlogic.gdx.Screen</code></dd>
 <dt>Overrides:</dt>
 <dd><code>dispose</code>&nbsp;in class&nbsp;<code>com.badlogic.gdx.ScreenAdapter</code></dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="prepareForLoadedSaveTransition()">
+<h3>prepareForLoadedSaveTransition</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">prepareForLoadedSaveTransition</span>()</div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="LoadedSaveTransitionAware.html#prepareForLoadedSaveTransition()">LoadedSaveTransitionAware</a></code></span></div>
+<div class="block">Prevents disposal from overwriting a save that has just been restored.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="LoadedSaveTransitionAware.html#prepareForLoadedSaveTransition()">prepareForLoadedSaveTransition</a></code>&nbsp;in interface&nbsp;<code><a href="LoadedSaveTransitionAware.html" title="interface in com.csse3200.game.screens">LoadedSaveTransitionAware</a></code></dd>
 </dl>
 </section>
 </li>
