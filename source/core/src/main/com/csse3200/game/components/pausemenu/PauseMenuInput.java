@@ -1,6 +1,7 @@
 package com.csse3200.game.components.pausemenu;
 
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.input.InputComponent;
 import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.ServiceLocator;
@@ -28,6 +29,13 @@ public class PauseMenuInput extends InputComponent {
       return false;
     }
 
+    // Forward keys to the focused pause-settings text field
+    Stage settingsStage = getSettingsInputStage();
+    if (keycode != Keys.ESCAPE && settingsStage != null) {
+      settingsStage.keyDown(keycode);
+      return true;
+    }
+
     // Paused: keyboard-drive the menu, and consume everything else.
     switch (keycode) {
       case Keys.UP:
@@ -52,12 +60,32 @@ public class PauseMenuInput extends InputComponent {
 
   @Override
   public boolean keyTyped(char character) {
-    return isPaused();
+    if (!isPaused()) {
+      return false;
+    }
+    Stage settingsStage = getSettingsInputStage();
+    if (settingsStage != null && character != '\u001b') {
+      settingsStage.keyTyped(character);
+    }
+    return true;
   }
 
   @Override
   public boolean keyUp(int keycode) {
-    return isPaused();
+    if (!isPaused()) {
+      return false;
+    }
+    Stage settingsStage = getSettingsInputStage();
+    if (settingsStage != null && keycode != Keys.ESCAPE) {
+      settingsStage.keyUp(keycode);
+    }
+    return true;
+  }
+
+  /** Forward editing to the focused settings field, while still consuming gameplay input. */
+  private Stage getSettingsInputStage() {
+    PauseMenuDisplay display = entity.getComponent(PauseMenuDisplay.class);
+    return display == null ? null : display.getSettingsInputStage();
   }
 
   private boolean isPaused() {

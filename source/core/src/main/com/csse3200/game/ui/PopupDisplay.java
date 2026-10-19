@@ -54,6 +54,7 @@ public class PopupDisplay extends UIComponent {
   private Runnable onShow;
   private Runnable onHide;
   private Runnable onWindowClicked;
+  private static final String STYLE_NAME_WHITE = "white";
 
   public PopupDisplay() {
     this("");
@@ -108,7 +109,7 @@ public class PopupDisplay extends UIComponent {
   }
 
   private void applyBackgroundColour() {
-    window.setBackground(skin.newDrawable("white", backgroundColour));
+    window.setBackground(skin.newDrawable(STYLE_NAME_WHITE, backgroundColour));
   }
 
   /** Sets the inset between the window frame and its title/content. */
@@ -154,7 +155,7 @@ public class PopupDisplay extends UIComponent {
   }
 
   private void addActors() {
-    backdrop = new Image(skin.newDrawable("white", BACKDROP_COLOUR));
+    backdrop = new Image(skin.newDrawable(STYLE_NAME_WHITE, BACKDROP_COLOUR));
     backdrop.setFillParent(true);
 
     window = new Window(title, skin, styleName);
@@ -300,7 +301,7 @@ public class PopupDisplay extends UIComponent {
 
   public void setHeaderColour(Color colour) {
     if (window != null) {
-      window.getTitleTable().setBackground(skin.newDrawable("white", colour));
+      window.getTitleTable().setBackground(skin.newDrawable(STYLE_NAME_WHITE, colour));
     }
   }
 

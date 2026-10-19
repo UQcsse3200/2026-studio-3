@@ -44,8 +44,8 @@ public class AnimationRenderComponent extends RenderComponent {
   private float animationPlayTime;
   private TextureRegion renderedFrame;
 
-  // 战斗特效用的整体染色：flashTint 会在 tintTimeRemaining 用完后自动清除，
-  // setPersistentTint 则要显式调用 clearTint 才会消失（比如激怒状态要一直红到死亡）
+  // Whole-sprite tint for combat effects: flashTint clears itself once tintTimeRemaining runs out,
+  // while setPersistentTint stays until clearTint is called (e.g. enraged stays red until death)
   private Color activeTint;
   private boolean tintPersistent;
   private float tintTimeRemaining;
@@ -251,7 +251,8 @@ public class AnimationRenderComponent extends RenderComponent {
     Vector2 scale = entity.getScale();
 
     if (activeTint != null) {
-      // SpriteBatch 的颜色是全局状态，画完必须马上还原，不然会污染其他实体的绘制颜色
+      // The SpriteBatch colour is global state, so restore it right after drawing, or other
+      // entities would be drawn in the wrong colour
       float previousColor = batch.getPackedColor();
       batch.setColor(activeTint);
       batch.draw(region, pos.x, pos.y, scale.x, scale.y);

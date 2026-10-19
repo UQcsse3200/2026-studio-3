@@ -87,6 +87,36 @@ public final class ChanceOutcomeApplier {
     }
 
     List<String> addedCardIds = new ArrayList<>();
+    ChanceResolution cardStageFailure = stageCardAdditions(outcome, cardRewardIds, addedCardIds);
+    if (cardStageFailure != null) {
+      return cardStageFailure;
+    }
+
+    ChanceResolution currencyFailure =
+        applyCurrencyUpdate(outcome, currencyTarget, addedCardIds, currencyBefore);
+    if (currencyFailure != null) {
+      return currencyFailure;
+    }
+
+    ChanceResolution healthFailure =
+        applyHealthUpdate(
+            outcome, appliedHealthDelta, healthTarget, addedCardIds, healthBefore, currencyBefore);
+    if (healthFailure != null) {
+      return healthFailure;
+    }
+
+    ChanceResolution commitFailure =
+        commitAddedCards(outcome, addedCardIds, healthBefore, currencyBefore);
+    if (commitFailure != null) {
+      return commitFailure;
+    }
+
+    return ChanceResolution.applied(
+        outcome, healthBefore, player.getHealth(), currencyBefore, player.getCurrency());
+  }
+
+  private ChanceResolution stageCardAdditions(
+      ChanceOutcome outcome, List<String> cardRewardIds, List<String> addedCardIds) {
     for (String cardRewardId : cardRewardIds) {
       boolean cardAdded;
       try {
@@ -108,7 +138,11 @@ public final class ChanceOutcomeApplier {
       }
       addedCardIds.add(cardRewardId);
     }
+    return null;
+  }
 
+  private ChanceResolution applyCurrencyUpdate(
+      ChanceOutcome outcome, int currencyTarget, List<String> addedCardIds, int currencyBefore) {
     try {
       if (outcome.getCurrencyDelta() != 0) {
         player.setCurrency(currencyTarget);
@@ -116,6 +150,7 @@ public final class ChanceOutcomeApplier {
       if (player.getCurrency() != currencyTarget) {
         throw new IllegalStateException("Player currency update was not accepted");
       }
+      return null;
     } catch (RuntimeException exception) {
       boolean rollbackSucceeded = rollbackBeforeHealth(addedCardIds, currencyBefore);
       return failure(
@@ -128,7 +163,15 @@ public final class ChanceOutcomeApplier {
               : "The outcome could not update currency or fully roll back; manual recovery is"
                   + " required.");
     }
+  }
 
+  private ChanceResolution applyHealthUpdate(
+      ChanceOutcome outcome,
+      int appliedHealthDelta,
+      int healthTarget,
+      List<String> addedCardIds,
+      int healthBefore,
+      int currencyBefore) {
     try {
       if (appliedHealthDelta != 0) {
         player.applyDirectHealthChange(appliedHealthDelta);
@@ -136,6 +179,7 @@ public final class ChanceOutcomeApplier {
       if (player.getHealth() != healthTarget) {
         throw new IllegalStateException("Player health update was not accepted");
       }
+      return null;
     } catch (RuntimeException exception) {
       int healthAfter = player.getHealth();
       if (healthAfter == healthBefore) {
@@ -163,37 +207,39 @@ public final class ChanceOutcomeApplier {
           "The direct health update failed after health changed; earlier outcome changes were "
               + "kept because rollback may be unsafe after health events began.");
     }
+  }
 
-    if (!addedCardIds.isEmpty()) {
-      try {
-        commitCardAdditions(addedCardIds);
-      } catch (RuntimeException exception) {
-        if (player.getHealth() == healthBefore) {
-          boolean rollbackSucceeded = rollbackBeforeHealth(addedCardIds, currencyBefore);
-          return failure(
-              rollbackSucceeded
-                  ? ChanceResolution.Status.CARD_ADD_FAILED
-                  : ChanceResolution.Status.ROLLBACK_FAILED,
-              outcome,
-              rollbackSucceeded
-                  ? "The reward card could not be committed; no encounter changes were kept."
-                  : "The reward card commit and rollback both failed; manual recovery is"
-                      + " required.");
-        }
-        return ChanceResolution.failure(
-            ChanceResolution.Status.ROLLBACK_FAILED,
-            outcome,
-            healthBefore,
-            player.getHealth(),
-            currencyBefore,
-            player.getCurrency(),
-            "The reward card could not be committed after health changed; automatic rollback was "
-                + "skipped because health events may be irreversible.");
-      }
+  private ChanceResolution commitAddedCards(
+      ChanceOutcome outcome, List<String> addedCardIds, int healthBefore, int currencyBefore) {
+    if (addedCardIds.isEmpty()) {
+      return null;
     }
-
-    return ChanceResolution.applied(
-        outcome, healthBefore, player.getHealth(), currencyBefore, player.getCurrency());
+    try {
+      commitCardAdditions(addedCardIds);
+      return null;
+    } catch (RuntimeException exception) {
+      if (player.getHealth() == healthBefore) {
+        boolean rollbackSucceeded = rollbackBeforeHealth(addedCardIds, currencyBefore);
+        return failure(
+            rollbackSucceeded
+                ? ChanceResolution.Status.CARD_ADD_FAILED
+                : ChanceResolution.Status.ROLLBACK_FAILED,
+            outcome,
+            rollbackSucceeded
+                ? "The reward card could not be committed; no encounter changes were kept."
+                : "The reward card commit and rollback both failed; manual recovery is"
+                    + " required.");
+      }
+      return ChanceResolution.failure(
+          ChanceResolution.Status.ROLLBACK_FAILED,
+          outcome,
+          healthBefore,
+          player.getHealth(),
+          currencyBefore,
+          player.getCurrency(),
+          "The reward card could not be committed after health changed; automatic rollback was "
+              + "skipped because health events may be irreversible.");
+    }
   }
 
   ChanceResolution failure(ChanceResolution.Status status, ChanceOutcome outcome, String message) {

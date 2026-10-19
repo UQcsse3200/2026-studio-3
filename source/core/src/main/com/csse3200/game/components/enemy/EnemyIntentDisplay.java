@@ -75,7 +75,6 @@ public class EnemyIntentDisplay extends RenderComponent {
     }
 
     String iconPath = IntentIcons.pathFor(currentIntent.getType(), currentIntent.getEffectType());
-
     Texture icon = resourceService.getAsset(iconPath, Texture.class);
     if (icon == null) {
       return;
@@ -91,7 +90,8 @@ public class EnemyIntentDisplay extends RenderComponent {
   }
 
   /**
-   * Draws the number beside the intent icon: damage or armour for a hit, turns for an effect.
+   * Draws the number beside the intent icon: resolved damage for attacks, armour for defence, or
+   * turns for an effect.
    *
    * @param batch sprite batch currently used by the render service
    * @param iconX horizontal position of the intent icon
@@ -102,7 +102,7 @@ public class EnemyIntentDisplay extends RenderComponent {
       return;
     }
 
-    String labelText = labelTextFor(currentIntent);
+    String labelText = labelTextFor(currentIntent, resolvedAttackDamage());
     if (labelText.isEmpty()) {
       return;
     }
@@ -114,21 +114,47 @@ public class EnemyIntentDisplay extends RenderComponent {
   }
 
   /**
-   * Picks the number shown beside the icon.
+   * Gets the current resolved attack damage from this enemy's behaviour component.
    *
-   * <p>Attacks and blocks show how much, so the player can decide whether to defend or push; every
-   * other intent keeps showing how many turns its effect will last.
+   * @return resolved attack damage, or the raw intent value if no behaviour is available
+   */
+  private int resolvedAttackDamage() {
+    if (currentIntent == null) {
+      return 0;
+    }
+
+    EnemyBehaviourComponent behaviour = entity.getComponent(EnemyBehaviourComponent.class);
+    return behaviour == null ? currentIntent.getValue() : behaviour.getResolvedIntentValue();
+  }
+
+  /**
+   * Picks the number shown beside the icon using the raw intent value.
    *
    * @param intent intent being telegraphed
    * @return the number as text, or an empty string when there is nothing useful to show
    */
   static String labelTextFor(EnemyIntent intent) {
+    return labelTextFor(intent, intent == null ? 0 : intent.getValue());
+  }
+
+  /**
+   * Picks the number shown beside the icon.
+   *
+   * <p>Attack intents show resolved damage, defence intents show their original armour value, and
+   * other intents show how many turns their effect will last.
+   *
+   * @param intent intent being telegraphed
+   * @param resolvedAttackDamage final attack damage after status modifiers
+   * @return the number as text, or an empty string when there is nothing useful to show
+   */
+  static String labelTextFor(EnemyIntent intent, int resolvedAttackDamage) {
     if (intent == null) {
       return "";
     }
 
     return switch (intent.getType()) {
-      case ATTACK, DEFEND -> intent.getValue() <= 0 ? "" : Integer.toString(intent.getValue());
+      case ATTACK -> resolvedAttackDamage <= 0 ? "" : Integer.toString(resolvedAttackDamage);
+      case DEFEND -> intent.getValue() <= 0 ? "" : Integer.toString(intent.getValue());
       default -> durationTextFor(intent);
     };
   }
@@ -137,8 +163,7 @@ public class EnemyIntentDisplay extends RenderComponent {
    * Converts an intent's finite duration into the text displayed beside its icon.
    *
    * <p>Zero and negative durations represent effects without a finite duration, so they produce no
-   * text. This method does not depend on libGDX rendering state, allowing the display rule to be
-   * tested without an OpenGL context.
+   * text.
    *
    * @param intent intent whose duration should be displayed
    * @return the positive duration as text, or an empty string when no duration should be displayed

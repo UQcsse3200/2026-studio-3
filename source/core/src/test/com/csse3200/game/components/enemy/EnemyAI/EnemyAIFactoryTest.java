@@ -7,6 +7,11 @@ import org.junit.jupiter.api.Test;
 
 class EnemyAIFactoryTest {
   @Test
+  void shouldCreateTutorialAi() {
+    assertInstanceOf(TutorialEnemyAI.class, EnemyAIFactory.create(EnemyAIFactory.TUTORIAL));
+  }
+
+  @Test
   void shouldCreateCycleAttackDefendAI() {
     EnemyAI ai = EnemyAIFactory.create(EnemyAIFactory.CYCLE_ATTACK_DEFEND);
 

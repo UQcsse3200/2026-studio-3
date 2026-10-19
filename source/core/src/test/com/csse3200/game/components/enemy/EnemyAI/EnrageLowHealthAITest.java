@@ -1,6 +1,8 @@
 package com.csse3200.game.components.enemy.EnemyAI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.enemy.IntentType;
@@ -112,6 +114,15 @@ class EnrageLowHealthAITest {
     assertEquals(BASE_ATTACK * 2, highHealthButUndefended.getValue());
 
     assertEquals(BASE_ATTACK * 2, lowHealthWithEmptyMemory.getValue());
+  }
+
+  @Test
+  void shouldExposeCurrentEnrageStateForPresentation() {
+    assertFalse(ai.isEnraged());
+    ai.decide(createContext(19, 40, 0, 1));
+    assertTrue(ai.isEnraged());
+    ai.decide(createContext(30, 40, 0, 2));
+    assertFalse(ai.isEnraged());
   }
 
   private EnemyAIContext createContext(int health, int maxHealth, int armour, int turnNumber) {

@@ -6,12 +6,14 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
@@ -353,6 +355,11 @@ public class PauseMenuDisplay extends UIComponent {
 
   private void showPauseButtons() {
     flushSettingsAudio();
+    if (settingsPanel != null
+        && stage.getKeyboardFocus() != null
+        && stage.getKeyboardFocus().isDescendantOf(settingsPanel)) {
+      stage.setKeyboardFocus(null);
+    }
     table.clearChildren();
     table.add(menuTable);
     settingsTable = null;
@@ -542,5 +549,17 @@ public class PauseMenuDisplay extends UIComponent {
 
   SettingsPanel getSettingsPanel() {
     return settingsPanel;
+  }
+
+  // Returns the stage only when a visible pause-settings text field owns keyboard focus.
+  Stage getSettingsInputStage() {
+    Actor focus = stage.getKeyboardFocus();
+    return table.isVisible()
+            && settingsPanel != null
+            && confirmDialog.getStage() == null
+            && focus instanceof TextField
+            && focus.isDescendantOf(settingsPanel)
+        ? stage
+        : null;
   }
 }

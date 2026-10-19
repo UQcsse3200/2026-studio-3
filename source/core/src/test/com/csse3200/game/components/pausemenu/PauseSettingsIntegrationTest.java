@@ -1,7 +1,9 @@
 package com.csse3200.game.components.pausemenu;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,6 +24,7 @@ import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Graphics.DisplayMode;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -44,6 +47,8 @@ import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.files.UserSettings;
 import com.csse3200.game.files.UserSettings.Settings;
+import com.csse3200.game.input.InputComponent;
+import com.csse3200.game.input.InputDecorator;
 import com.csse3200.game.input.InputService;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.services.GamePauseService;
@@ -64,6 +69,9 @@ class PauseSettingsIntegrationTest {
   private PauseMenuDisplay display;
   private Entity pauseMenu;
   private PauseMenuInput input;
+  private InputService inputs;
+  private InputComponent gameplay;
+  private Input originalInput;
   private Graphics originalGraphics;
   private Files originalFiles;
   private FileHandle settingsFile;
@@ -73,6 +81,8 @@ class PauseSettingsIntegrationTest {
   void setUp() {
     originalGraphics = Gdx.graphics;
     originalFiles = Gdx.files;
+    originalInput = Gdx.input;
+    Gdx.input = mock(Input.class);
     Gdx.files = spy(originalFiles);
     settingsFile = spy(new FileHandle(folder.resolve("settings.json").toFile()));
     doReturn(settingsFile).when(Gdx.files).external(anyString());
@@ -97,7 +107,8 @@ class PauseSettingsIntegrationTest {
     renderService.setStage(stage);
     ServiceLocator.registerRenderService(renderService);
     ServiceLocator.registerEntityService(new EntityService());
-    ServiceLocator.registerInputService(mock(InputService.class));
+    inputs = new InputService();
+    ServiceLocator.registerInputService(inputs);
     pauseService = new GamePauseService(new GameTime());
     ServiceLocator.registerPauseService(pauseService);
 
@@ -108,19 +119,147 @@ class PauseSettingsIntegrationTest {
         new Entity()
             .addComponent(display)
             .addComponent(new PauseMenuActions(game))
-            .addComponent(input);
+            .addComponent(input)
+            .addComponent(new InputDecorator(stage, 10));
     pauseMenu.create();
+    gameplay = mock(InputComponent.class);
+    inputs.register(gameplay);
   }
 
   @AfterEach
   void tearDown() {
-    try {
-      pauseMenu.dispose();
-      stage.dispose();
-    } finally {
-      Gdx.files = originalFiles;
-      Gdx.graphics = originalGraphics;
-    }
+    assertAll(
+        () -> {
+          if (pauseMenu != null) pauseMenu.dispose();
+        },
+        () -> {
+          if (stage != null) stage.dispose();
+        },
+        () -> Gdx.files = originalFiles,
+        () -> Gdx.graphics = originalGraphics,
+        () -> Gdx.input = originalInput);
+  }
+
+  @Test
+  void allowsFpsEditingWhileBlockingGameplayInput() {
+    TextField fps = focusFps();
+    fps.selectAll();
+
+    inputs.keyDown(Keys.NUM_1);
+    inputs.keyTyped('1');
+    inputs.keyUp(Keys.NUM_1);
+    inputs.keyTyped('2');
+    inputs.keyTyped('0');
+
+    assertEquals("120", fps.getText());
+
+    inputs.keyDown(Keys.LEFT);
+    inputs.keyUp(Keys.LEFT);
+    inputs.keyTyped('\b');
+
+    assertEquals("10", fps.getText());
+
+    inputs.keyTyped('4');
+
+    assertEquals("140", fps.getText());
+
+    org.mockito.Mockito.verify(gameplay, never()).keyDown(org.mockito.ArgumentMatchers.anyInt());
+    org.mockito.Mockito.verify(gameplay, never()).keyTyped(org.mockito.ArgumentMatchers.anyChar());
+    org.mockito.Mockito.verify(gameplay, never()).keyUp(org.mockito.ArgumentMatchers.anyInt());
+  }
+
+  @Test
+  void typingIgnoresMenuShortcutsAndEscapeReturnsToPauseMenu() {
+    TextField fps = focusFps();
+    fps.selectAll();
+
+    inputs.keyDown(Keys.W);
+    inputs.keyTyped('w');
+    inputs.keyUp(Keys.W);
+
+    inputs.keyDown(Keys.S);
+    inputs.keyTyped('s');
+    inputs.keyUp(Keys.S);
+
+    inputs.keyDown(Keys.SPACE);
+    inputs.keyTyped(' ');
+    inputs.keyUp(Keys.SPACE);
+    inputs.keyDown(Keys.ENTER);
+
+    assertEquals("ws ", fps.getText());
+    assertNull(display.getFocusedButton());
+    verify(settingsFile, never()).writeString(anyString(), eq(false));
+
+    inputs.keyDown(Keys.ESCAPE);
+
+    assertFalse(display.isSettingsVisible());
+    assertNull(stage.getKeyboardFocus());
+    assertTrue(pauseService.isPaused());
+
+    inputs.keyTyped('9');
+
+    assertEquals("ws ", fps.getText());
+
+    inputs.keyDown(Keys.DOWN);
+
+    assertEquals(display.getResumeButton(), display.getFocusedButton());
+  }
+
+  @Test
+  void blocksOtherTextFieldsUntilResumed() {
+    TextField fps = focusFps();
+    TextField underlying = new TextField("unchanged", fps.getStyle());
+    underlying.setCursorPosition(underlying.getText().length());
+    stage.addActor(underlying);
+    stage.setKeyboardFocus(underlying);
+
+    inputs.keyDown(Keys.NUM_9);
+    inputs.keyTyped('9');
+    inputs.keyUp(Keys.NUM_9);
+
+    assertEquals("unchanged", underlying.getText());
+    assertEquals("75", fps.getText());
+
+    click(display.getSettingsBackButton());
+    click(display.getResumeButton());
+    inputs.keyTyped('9');
+
+    assertEquals("unchanged9", underlying.getText());
+  }
+
+  private TextField focusFps() {
+    inputs.keyDown(Keys.ESCAPE);
+    click(display.getSettingsButton());
+    TextField fps = display.getSettingsPanel().findActor("fps-cap");
+    stage.setKeyboardFocus(fps);
+    return fps;
+  }
+
+  @Test
+  void failedAudioSaveKeepsFpsFocusUntilEscapeSuccessfullyLeavesSettings() {
+    TextField fps = focusFps();
+    fps.selectAll();
+    inputs.keyTyped('x');
+    doThrow(new GdxRuntimeException("Simulated storage failure"))
+        .when(settingsFile)
+        .writeString(anyString(), eq(false));
+    display.getSettingsPanel().<Slider>findActor("music-volume").setValue(0.2f);
+
+    inputs.keyDown(Keys.ESCAPE);
+
+    assertTrue(display.isSettingsVisible());
+    assertTrue(pauseService.isPaused());
+    assertSame(fps, stage.getKeyboardFocus());
+    assertEquals("x", fps.getText());
+    doCallRealMethod().when(settingsFile).writeString(anyString(), eq(false));
+    inputs.keyDown(Keys.ESCAPE);
+
+    assertFalse(display.isSettingsVisible());
+    assertNull(stage.getKeyboardFocus());
+    assertTrue(pauseService.isPaused());
+    assertEquals(75, UserSettings.get().fps);
+    assertEquals(0.2f, UserSettings.get().musicVolume, 0.0001f);
+    verify(settingsFile, times(3)).writeString(anyString(), eq(false));
   }
 
   @Test
@@ -155,7 +294,7 @@ class PauseSettingsIntegrationTest {
       if (attempt == 0) {
         click(display.getSettingsBackButton());
       } else {
-        assertTrue(input.keyDown(Keys.ESCAPE));
+        assertTrue(inputs.keyDown(Keys.ESCAPE));
       }
       assertTrue(pauseService.isPaused());
       assertFalse(display.isSettingsVisible());
@@ -181,7 +320,7 @@ class PauseSettingsIntegrationTest {
 
     click(display.getSettingsBackButton());
     assertTrue(display.isSettingsVisible());
-    assertTrue(input.keyDown(Keys.ESCAPE));
+    assertTrue(inputs.keyDown(Keys.ESCAPE));
     assertSame(panel, display.getSettingsPanel());
     assertTrue(pauseService.isPaused());
     assertEquals(0.6f, UserSettings.get().musicVolume);
@@ -190,7 +329,7 @@ class PauseSettingsIntegrationTest {
         "Audio updated, but could not be saved. Try again.", feedback.getText().toString());
     doCallRealMethod().when(settingsFile).writeString(anyString(), eq(false));
 
-    assertTrue(input.keyDown(Keys.ESCAPE));
+    assertTrue(inputs.keyDown(Keys.ESCAPE));
 
     assertFalse(display.isSettingsVisible());
     assertTrue(pauseService.isPaused());
@@ -214,7 +353,7 @@ class PauseSettingsIntegrationTest {
     assertEquals(0f, UserSettings.get().masterVolume);
     assertEquals(75, UserSettings.get().fps);
     assertTrue(UserSettings.get().fullscreen);
-    assertTrue(input.keyDown(Keys.ESCAPE));
+    assertTrue(inputs.keyDown(Keys.ESCAPE));
     click(display.getSettingsButton());
     assertEquals(0f, display.getSettingsPanel().<Slider>findActor("master-volume").getValue());
     assertEquals("75", display.getSettingsPanel().<TextField>findActor("fps-cap").getText());

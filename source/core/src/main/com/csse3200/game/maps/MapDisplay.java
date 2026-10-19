@@ -347,7 +347,7 @@ public class MapDisplay extends UIComponent {
   private void addLegend() {
     legendTable = new Table();
 
-    legendTable.setSize(192, (32 + 16) * 7);
+    legendTable.setSize(192f, (32f + 16f) * 7f);
     Image legend =
         new Image(
             ServiceLocator.getResourceService().getAsset("images/map/legend.png", Texture.class));
