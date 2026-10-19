@@ -211,9 +211,18 @@ final class RewardClaimFeedback {
     if (index % 3 == 0) {
       float x = current.x - direction.x * 15f;
       float y = current.y - direction.y * 15f;
-      addTrailDot(REWARD_STAR_PREFIX + type, Color.WHITE, x, y, 12f, 2f, 0.85f, 0f, 0f, 0.17f);
-      addTrailDot(REWARD_STAR_PREFIX + type, Color.WHITE, x, y, 2f, 12f, 0.85f, 0f, 0f, 0.17f);
-      addTrailDot(REWARD_STAR_PREFIX + type, Color.WHITE, x, y, 3f, 3f, 1f, 0f, 0f, 0.17f);
+      animateTrailDot(
+          createTrailDot(REWARD_STAR_PREFIX + type, Color.WHITE, x, y, 12f, 2f, 0.85f),
+          0f,
+          0f,
+          0.17f);
+      animateTrailDot(
+          createTrailDot(REWARD_STAR_PREFIX + type, Color.WHITE, x, y, 2f, 12f, 0.85f),
+          0f,
+          0f,
+          0.17f);
+      animateTrailDot(
+          createTrailDot(REWARD_STAR_PREFIX + type, Color.WHITE, x, y, 3f, 3f, 1f), 0f, 0f, 0.17f);
     }
   }
 
@@ -227,7 +236,7 @@ final class RewardClaimFeedback {
       RewardType type, Color colour, Vector2 current, Vector2 direction, int i) {
     float distance = 5f + i * 8f;
     float sideways = (i % 2 == 0 ? 1f : -1f) * (2f + i * 4f);
-    float size = i < 3 ? (type == RewardType.GOLD ? 7f : 6f) : 4f;
+    float size = trailSegmentSize(type, i);
     float width = type == RewardType.CARD ? size * 0.75f : size;
     float height = type == RewardType.CARD ? size * 1.4f : size;
     float x = current.x - direction.x * distance - direction.y * sideways;
@@ -236,42 +245,35 @@ final class RewardClaimFeedback {
     float driftX = -direction.x * (7f + i * 3f) - direction.y * sideways;
     float driftY = -direction.y * (7f + i * 3f) + direction.x * sideways;
     if (i < 3) {
-      addTrailDot(
-          "rewardGlow" + type,
-          colour,
-          x,
-          y,
-          width + 7f,
-          height + 7f,
-          0.2f,
+      animateTrailDot(
+          createTrailDot("rewardGlow" + type, colour, x, y, width + 7f, height + 7f, 0.2f),
           driftX,
           driftY,
           duration);
     }
-    addTrailDot(
-        "rewardTrail" + type,
-        colour,
-        x,
-        y,
-        width,
-        height,
-        Math.max(0.48f, 1f - i * 0.1f),
+    animateTrailDot(
+        createTrailDot(
+            "rewardTrail" + type, colour, x, y, width, height, Math.max(0.48f, 1f - i * 0.1f)),
         driftX,
         driftY,
         duration);
   }
 
-  private void addTrailDot(
+  private static float trailSegmentSize(RewardType type, int index) {
+    if (index >= 3) {
+      return 4f;
+    }
+    return type == RewardType.GOLD ? 7f : 6f;
+  }
+
+  private Image createTrailDot(
       String name,
       Color colour,
       float centerX,
       float centerY,
       float width,
       float height,
-      float opacity,
-      float driftX,
-      float driftY,
-      float duration) {
+      float opacity) {
     Image dot = new Image(skin.getDrawable("white"));
     dot.setName(name);
     dot.setTouchable(Touchable.disabled);
@@ -281,6 +283,10 @@ final class RewardClaimFeedback {
     dot.setPosition(centerX - width / 2f, centerY - height / 2f);
     overlay.addActor(dot);
     dot.toBack();
+    return dot;
+  }
+
+  private static void animateTrailDot(Image dot, float driftX, float driftY, float duration) {
     dot.addAction(
         Actions.sequence(
             Actions.parallel(Actions.moveBy(driftX, driftY, duration), Actions.fadeOut(duration)),
