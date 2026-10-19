@@ -68,13 +68,24 @@ public record BattleTutorialPrompt(
       case PLAY_A_CARD ->
           new BattleTutorialPrompt(
               step, BattleTutorialPromptContent.PLAY_A_CARD, HighlightTarget.HAND, false);
+      case PLAY_POISON_CARD ->
+          new BattleTutorialPrompt(
+              step,
+              "Drag this Poison Dagger onto the enemy\nto apply Poison.",
+              HighlightTarget.HAND,
+              false);
+      case STATUS_EFFECTS ->
+          information(
+              step,
+              "This row shows active status effects.\nHover over an icon to see what it does.",
+              HighlightTarget.STATUS_EFFECTS);
       case END_TURN ->
           new BattleTutorialPrompt(
               step, BattleTutorialPromptContent.END_TURN, HighlightTarget.END_TURN, false);
       case FREE_PLAY ->
           new BattleTutorialPrompt(
               step, BattleTutorialPromptContent.WIN_OR_LOSE, HighlightTarget.NONE, false);
-      case CARD_ANIMATION, ENEMY_ANIMATION, BATTLE_ENDED, CANCELLED ->
+      case CARD_ANIMATION, POISON_ANIMATION, ENEMY_ANIMATION, BATTLE_ENDED, CANCELLED ->
           new BattleTutorialPrompt(step, "", HighlightTarget.NONE, false);
     };
   }

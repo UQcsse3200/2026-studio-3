@@ -29,7 +29,7 @@ public final class BattleTutorialComponent extends Component {
       BattleController battle,
       BattleTutorialView view,
       Consumer<BattleTutorialController.Outcome> onFinished) {
-    this(battle, view, onFinished, null);
+    this(battle, view, onFinished, null, null);
   }
 
   /** Opt-in reference sequence for the tutorial screen, with a guaranteed demonstration copy. */
@@ -37,10 +37,12 @@ public final class BattleTutorialComponent extends Component {
       BattleController battle,
       BattleTutorialView view,
       Consumer<BattleTutorialController.Outcome> onFinished,
-      String demonstrationCardId) {
+      String demonstrationCardId,
+      String poisonCardId) {
     tutorial = new BattleTutorialController(demonstrationCardId != null);
     tutorialReferenceSequence = demonstrationCardId != null;
     tutorial.setDemonstrationCardId(demonstrationCardId);
+    tutorial.setPoisonCardId(poisonCardId);
     this.battle = Objects.requireNonNull(battle, "battle cannot be null");
     this.view = Objects.requireNonNull(view, "view cannot be null");
     this.onFinished = Objects.requireNonNull(onFinished, "onFinished cannot be null");
@@ -88,7 +90,8 @@ public final class BattleTutorialComponent extends Component {
           observation.enemyHealth().getAsInt(),
           observation.playerHealth().getAsInt(),
           observation.visualsSettled().getAsBoolean() && view.areTransientEffectsFinished(),
-          battle.getCurrentPhase());
+          battle.getCurrentPhase(),
+          observation.enemyHasPoison().getAsBoolean());
     }
     if (disposed || completionQueued || pendingOutcome == null) {
       return;

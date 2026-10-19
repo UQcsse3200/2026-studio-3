@@ -128,6 +128,7 @@ public class BattleScreen extends ScreenAdapter {
           "images/armour.png",
           "images/enemy_release/heavens_grace.png",
           "images/ui/inventory-panel.png",
+          "images/main_menu_button_frame.png",
           BATTLE_TITLE_TEXTURE,
           "images/effects/shield.png",
           "images/effects/fortify.png",
@@ -381,11 +382,14 @@ public class BattleScreen extends ScreenAdapter {
     }
     var openingOrder = new ArrayList<>(playerDeck.getCards());
     java.util.Collections.shuffle(openingOrder);
-    for (int i = 0; i < openingOrder.size(); i++) {
-      if ("strike".equals(openingOrder.get(i).cardId())) {
-        java.util.Collections.swap(
-            openingOrder, Math.min(AMOUNT_OF_CARDS_IN_DECK, openingOrder.size()) / 2, i);
-        break;
+    int middle = Math.min(AMOUNT_OF_CARDS_IN_DECK, openingOrder.size()) / 2;
+    for (int offset = 0; offset < 2; offset++) {
+      String cardId = offset == 0 ? "strike" : "poison_dagger";
+      for (int i = 0; i < openingOrder.size(); i++) {
+        if (cardId.equals(openingOrder.get(i).cardId())) {
+          java.util.Collections.swap(openingOrder, middle + offset, i);
+          break;
+        }
       }
     }
     return PlayerDeck.fromInstances(library, openingOrder);
@@ -394,6 +398,7 @@ public class BattleScreen extends ScreenAdapter {
   private void setupTutorialGuidance(
       BattleGameArea forestGameArea, Entity player, Entity animationCoordinatorEntity) {
     String demonstrationId = handRowOrder.get(handRowOrder.size() / 2).instanceId();
+    String poisonId = handRowOrder.get(handRowOrder.size() / 2 + 1).instanceId();
     tutorialView =
         new BattleTutorialGuidanceView(
             ServiceLocator.getRenderService().getStage(),
@@ -458,6 +463,20 @@ public class BattleScreen extends ScreenAdapter {
                 .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getTutorialArmourActor)
                 .findFirst()
                 .orElse(null));
+    var statusDisplay =
+        forestGameArea
+            .getEnemies()
+            .getFirst()
+            .getComponent(com.csse3200.game.components.status.StatusIconDisplay.class);
+    tutorialView.setStatusTargets(
+        () ->
+            uiFactory.getByTrigger(PLAY_CARD_TRIGGER).stream()
+                .filter(c -> c.getArgs().length > 0 && poisonId.equals(c.getArgs()[0]))
+                .map(Clickable::getBtn)
+                .findFirst()
+                .orElse(null),
+        statusDisplay::getStatusActor,
+        statusDisplay::getTooltipActor);
     tutorialView.setEnemyBounds(
         () -> forestGameArea.getEnemies().stream().map(this::battleEntityBounds).toList());
     tutorialView.setDragActor(
@@ -481,7 +500,7 @@ public class BattleScreen extends ScreenAdapter {
         animationCoordinatorEntity.getComponent(BattleAnimationCoordinator.class);
     BattleTutorialComponent guidance =
         new BattleTutorialComponent(
-            controller, tutorialView, this::onTutorialFinished, demonstrationId);
+            controller, tutorialView, this::onTutorialFinished, demonstrationId, poisonId);
     guidance.setObservation(
         new BattleTutorialObservation(
             () ->
@@ -489,7 +508,12 @@ public class BattleScreen extends ScreenAdapter {
                     .mapToInt(e -> e.getComponent(CombatStatsComponent.class).getHealth())
                     .sum(),
             () -> player.getComponent(CombatStatsComponent.class).getHealth(),
-            () -> isTutorialVisualStateSettled(forestGameArea, player, visuals)));
+            () -> isTutorialVisualStateSettled(forestGameArea, player, visuals),
+            () ->
+                forestGameArea.getEnemies().stream()
+                    .anyMatch(
+                        e ->
+                            e.getComponent(CombatStatsComponent.class).hasStatusEffect("POISON"))));
     ServiceLocator.getEntityService().register(new Entity().addComponent(guidance));
     // Remains after guidance cleans itself up: existing tutorial battle completion is unchanged.
     controller.addBattleEndListener(
