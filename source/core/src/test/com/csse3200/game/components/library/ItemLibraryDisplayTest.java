@@ -26,6 +26,7 @@ import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.extensions.GameExtension;
+import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rewards.ItemDiscoveryService;
 import com.csse3200.game.rewards.ItemFormatting;
@@ -110,24 +111,84 @@ class ItemLibraryDisplayTest {
   void undiscoveredItemsKeepTheirSlotsButHideDetailsAndArtworkUntilUnlocked() {
     discovery.replaceProgress(Map.of());
 
-    assertTrue(buttonTexts().contains("Unknown Relic"));
-    assertFalse(buttonTexts().contains(ItemFormatting.formatItemName(ItemType.ENERGY_CRYSTAL)));
-    assertTrue(labelTexts().contains("Unknown Relic"));
+    assertEquals(relicCount(), itemEntryButtons().size());
+    assertTrue(
+        itemEntryButtons().stream().allMatch(button -> button.getText().toString().equals("???")));
+    assertEquals("Discovered 0 / " + ItemType.values().length, discoveryCountText());
+    for (ItemType item : ItemType.values()) {
+      String name = ItemFormatting.formatItemName(item);
+      assertFalse(buttonTexts().contains(name), name);
+      assertFalse(labelTexts().contains(name), name);
+    }
+    assertTrue(labelTexts().contains("???"));
     assertTrue(labelTexts().contains("Obtain this item during a run to reveal it."));
     assertFalse(labelTexts().stream().anyMatch(text -> text.startsWith("Obtained from:")));
+    assertFalse(labelTexts().contains("+1 max energy per copy, capped at 5 total max energy."));
     ItemIconView icon = (ItemIconView) stage.getRoot().findActor("itemIconView");
     assertFalse(icon.getArtwork().isVisible());
+    assertTrue(((Label) stage.getRoot().findActor("itemLockedArtwork")).isVisible());
 
+    itemEntryButtons()
+        .get(1)
+        .fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    assertTrue(labelTexts().contains("Obtain this item during a run to reveal it."));
+    assertFalse(icon.getArtwork().isVisible());
     discovery.recordDiscovered(ItemType.ENERGY_CRYSTAL);
 
-    button(ItemFormatting.formatItemName(ItemType.ENERGY_CRYSTAL))
-        .fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    assertEquals("Discovered 1 / " + ItemType.values().length, discoveryCountText());
+    assertEquals(
+        1,
+        itemEntryButtons().stream()
+            .filter(
+                button ->
+                    button
+                        .getText()
+                        .toString()
+                        .equals(ItemFormatting.formatItemName(ItemType.ENERGY_CRYSTAL)))
+            .count());
     assertTrue(labelTexts().contains("+1 max energy per copy, capped at 5 total max energy."));
     assertTrue(
         labelTexts()
             .contains(
                 "Obtained from: " + ItemFormatting.formatItemSource(ItemType.ENERGY_CRYSTAL)));
     assertTrue(icon.getArtwork().isVisible());
+    assertFalse(((Label) stage.getRoot().findActor("itemLockedArtwork")).isVisible());
+    assertFalse(buttonTexts().contains(ItemFormatting.formatItemName(ItemType.IRON_AEGIS)));
+  }
+
+  @Test
+  void lockedCurseSlotsNeverRevealNamesEffectsOrSources() {
+    discovery.replaceProgress(Map.of());
+    button("Curses").setChecked(true);
+
+    assertEquals(curseCount(), itemEntryButtons().size());
+    assertTrue(
+        itemEntryButtons().stream().allMatch(button -> button.getText().toString().equals("???")));
+    assertTrue(labelTexts().contains("Obtain this item during a run to reveal it."));
+    assertFalse(labelTexts().stream().anyMatch(text -> text.startsWith("Obtained from:")));
+    assertFalse(labelTexts().stream().anyMatch(text -> text.contains("Lose 2 Health")));
+    assertFalse(buttonTexts().contains(ItemFormatting.formatItemName(ItemType.BLOOD_OATH_SIGIL)));
+
+    discovery.recordDiscovered(ItemType.BLOOD_OATH_SIGIL);
+
+    assertEquals("Discovered 1 / " + ItemType.values().length, discoveryCountText());
+    assertTrue(buttonTexts().contains(ItemFormatting.formatItemName(ItemType.BLOOD_OATH_SIGIL)));
+    assertFalse(buttonTexts().contains(ItemFormatting.formatItemName(ItemType.ENERGY_CRYSTAL)));
+  }
+
+  @Test
+  void consumedItemStaysDiscoveredInTheLibrary() {
+    discovery.replaceProgress(Map.of());
+    PlayerRunState player = new PlayerRunState(20, 20, 0);
+    player.addOwnedItem(ItemType.LUCKY_COIN);
+    discovery.recordDiscovered(ItemType.LUCKY_COIN);
+    player.claimGoldReward(10, true);
+
+    assertEquals(0, player.getOwnedItemCount(ItemType.LUCKY_COIN));
+    assertTrue(discovery.isDiscovered(ItemType.LUCKY_COIN));
+    assertTrue(buttonTexts().contains(ItemFormatting.formatItemName(ItemType.LUCKY_COIN)));
+    assertEquals("Discovered 1 / " + ItemType.values().length, discoveryCountText());
+    assertFalse(((Label) stage.getRoot().findActor("itemLockedArtwork")).isVisible());
   }
 
   @Test
@@ -210,6 +271,27 @@ class ItemLibraryDisplayTest {
         .filter(button -> text.equals(button.getText().toString()))
         .findFirst()
         .orElseThrow();
+  }
+
+  private List<TextButton> itemEntryButtons() {
+    Table entries = (Table) stage.getRoot().findActor("itemLibraryEntries");
+    List<TextButton> buttons = new ArrayList<>();
+    for (Actor actor : entries.getChildren()) {
+      buttons.add((TextButton) actor);
+    }
+    return buttons;
+  }
+
+  private String discoveryCountText() {
+    return ((Label) stage.getRoot().findActor("itemDiscoveryCount")).getText().toString();
+  }
+
+  private long relicCount() {
+    return java.util.Arrays.stream(ItemType.values()).filter(item -> !item.isCurse()).count();
+  }
+
+  private long curseCount() {
+    return java.util.Arrays.stream(ItemType.values()).filter(ItemType::isCurse).count();
   }
 
   private List<String> buttonTexts() {
