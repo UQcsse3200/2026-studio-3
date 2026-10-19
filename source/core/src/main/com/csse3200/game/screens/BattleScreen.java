@@ -430,16 +430,12 @@ public class BattleScreen extends ScreenAdapter {
             player
                 .getComponent(com.csse3200.game.components.player.PlayerEnergyDisplay.class)
                 .getEnergyActor(),
-        () ->
-            player
-                .getComponent(com.csse3200.game.components.player.PlayerStatsDisplay.class)
-                .getHealthLabel(),
+        () -> player.getComponent(com.csse3200.game.components.StatsDisplay.class).getHealthLabel(),
         () ->
             forestGameArea.getEnemies().stream()
-                .map(
-                    e -> e.getComponent(com.csse3200.game.components.enemy.EnemyStatsDisplay.class))
+                .map(e -> e.getComponent(com.csse3200.game.components.StatsDisplay.class))
                 .filter(java.util.Objects::nonNull)
-                .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getHealthActor)
+                .map(com.csse3200.game.components.StatsDisplay::getHealthActor)
                 .findFirst()
                 .orElse(null));
     tutorialView.setDetailedTargets(
@@ -449,10 +445,9 @@ public class BattleScreen extends ScreenAdapter {
                 .getEnergyVisualBounds(),
         () ->
             forestGameArea.getEnemies().stream()
-                .map(
-                    e -> e.getComponent(com.csse3200.game.components.enemy.EnemyStatsDisplay.class))
+                .map(e -> e.getComponent(com.csse3200.game.components.StatsDisplay.class))
                 .filter(java.util.Objects::nonNull)
-                .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getTutorialArmourActor)
+                .map(com.csse3200.game.components.StatsDisplay::getTutorialArmourActor)
                 .findFirst()
                 .orElse(null));
     tutorialView.setEnemyBounds(

@@ -27,7 +27,7 @@ public class PlayerEnergyDisplay extends UIComponent {
     if (opaquePixels == null) {
       com.badlogic.gdx.graphics.Pixmap source =
           new com.badlogic.gdx.graphics.Pixmap(
-              com.badlogic.gdx.Gdx.files.internal("images/energy.png"));
+              com.badlogic.gdx.Gdx.files.internal("images/ui/inventory-panel.png"));
       int left = source.getWidth(), top = source.getHeight(), right = 0, bottom = 0;
       for (int y = 0; y < source.getHeight(); y++)
         for (int x = 0; x < source.getWidth(); x++)

@@ -22,6 +22,7 @@ public class StatsDisplay extends UIComponent {
   Table table;
   private ProgressBar healthBar;
   private Label healthLabel;
+  private Stack healthStack;
 
   private Stack armourStack;
   private Label armourLabel;
@@ -96,7 +97,7 @@ public class StatsDisplay extends UIComponent {
     healthBar.setValue((float) stats.getHealth());
     healthBar.setAnimateDuration(0.2f);
 
-    Stack healthStack = new Stack();
+    healthStack = new Stack();
     healthStack.add(healthBar);
     healthStack.add(healthLabel);
 
@@ -270,6 +271,18 @@ public class StatsDisplay extends UIComponent {
 
   public Label getBlockLabel() {
     return blockLabel;
+  }
+
+  public Stack getHealthActor() {
+    return healthStack;
+  }
+
+  /** Show zero armour during teaching without changing combat state. */
+  public Stack getTutorialArmourActor() {
+    armourCell.setActor(armourStack);
+    armourCell.size(CELL_SIZE);
+    table.pack();
+    return armourStack;
   }
 
   @Override
