@@ -11,6 +11,8 @@ import com.csse3200.game.entities.Entity;
 import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.services.GameTime;
+import com.csse3200.game.services.ServiceLocator;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +41,9 @@ public class BattleActions extends Component {
 
   /** How long the enemy "thinks" before its action, log line and effects are revealed. */
   private static final float ENEMY_TURN_DELAY = 1.2f;
+
+  private static final float AUTO_END_TURN_DELAY = 1f;
+  private float depletedEnergyTime;
 
   public static final String ENEMY_TURN_EVENT = "enemyTurn";
 
@@ -116,6 +121,7 @@ public class BattleActions extends Component {
   }
 
   private void onPhaseChange(BattlePhase previousPhase, BattlePhase nextPhase) {
+    depletedEnergyTime = 0f;
     // Entering the enemy's turn fires immediately — no delay on ending your own turn — and starts
     // holding back every reveal that follows until the whole enemy turn is done.
     if (nextPhase == BattlePhase.ENEMY_TURN && previousPhase == BattlePhase.PLAYER_END) {
@@ -237,6 +243,7 @@ public class BattleActions extends Component {
 
   @Override
   public void update() {
+    updateAutoEndTurn();
     if (!awaitingRelease) {
       return;
     }
@@ -247,6 +254,27 @@ public class BattleActions extends Component {
     if (finishedRelease) {
       awaitingRelease = false;
       openResultScreen(true);
+    }
+  }
+
+  /** Gives the last card time to show its effects before automatically ending an empty turn. */
+  private void updateAutoEndTurn() {
+    if (released
+        || hasPendingEnemyReveals()
+        || !controller.isPlayerTurn()
+        || !controller.isPlayerEnergyDepleted()) {
+      depletedEnergyTime = 0f;
+      return;
+    }
+
+    GameTime time = ServiceLocator.getTimeSource();
+    if (time == null) {
+      return;
+    }
+    depletedEnergyTime += Math.max(0f, time.getDeltaTime());
+    if (depletedEnergyTime >= AUTO_END_TURN_DELAY) {
+      depletedEnergyTime = 0f;
+      controller.endPlayerTurn();
     }
   }
 
@@ -293,6 +321,7 @@ public class BattleActions extends Component {
   @Override
   public void dispose() {
     released = true;
+    depletedEnergyTime = 0f;
     awaitingRelease = false;
     releaseAnimations.clear();
     super.dispose();

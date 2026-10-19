@@ -26,6 +26,8 @@ import com.csse3200.game.entities.Entity;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.services.GameTime;
+import com.csse3200.game.services.ServiceLocator;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,6 +65,26 @@ class BattleActionsTest {
     config.effects = new EffectConfig[] {effect};
     config.texturePath = "images/cards/" + id + ".png";
     return config;
+  }
+
+  @Test
+  void shouldAutoEndTurnAfterOneSecondWithoutEnergy() {
+    EnergyComponent energy = new EnergyComponent(3);
+    player.addComponent(energy);
+    GameTime time = mock(GameTime.class);
+    ServiceLocator.registerTimeSource(time);
+    controller.start();
+    energy.spendEnergy(3);
+
+    when(time.getDeltaTime()).thenReturn(0.5f);
+    entity.update();
+    assertEquals(1, controller.getPlayerTurnNumber());
+    assertEquals(20, player.getComponent(CombatStatsComponent.class).getHealth());
+
+    entity.update();
+    assertEquals(2, controller.getPlayerTurnNumber());
+    assertEquals(19, player.getComponent(CombatStatsComponent.class).getHealth());
+    assertEquals(3, energy.getCurrentEnergy());
   }
 
   @Test
