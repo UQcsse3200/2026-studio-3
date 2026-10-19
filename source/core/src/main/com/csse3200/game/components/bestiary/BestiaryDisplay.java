@@ -124,7 +124,7 @@ public class BestiaryDisplay extends UIComponent {
   private void addHeader(Table panel) {
     Table titleBlock = new Table();
     Label eyebrow = new Label("ENEMY ARCHIVE", createLabelStyle(SMALL, GOLD_COLOUR));
-    Label title = new Label("Bestiary", createLabelStyle(LARGE, BODY_COLOUR));
+    Label title = new Label("Enemy Library", createLabelStyle(LARGE, BODY_COLOUR));
     Label subtitle =
         new Label(
             "All enemies. Every tier. Know what awaits.", createLabelStyle(SMALL, MUTED_COLOUR));
