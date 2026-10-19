@@ -162,14 +162,45 @@ class AudioServiceTest {
   }
 
   @Test
+  void theTutorialBattleSwitchesFromMenuToBattleMusic() {
+    AudioService.onScreenChanged(ScreenType.MAIN_MENU);
+
+    AudioService.onScreenChanged(ScreenType.TUTORIAL_BATTLE);
+
+    assertTrue(BATTLE_TRACKS.contains(lastStarted()));
+  }
+
+  /** The tutorial isn't part of a run, so a room left over from an earlier run doesn't count. */
+  @Test
+  void theTutorialBattleIgnoresTheRoomFromAnEarlierRun() {
+    AudioService.onScreenChanged(ScreenType.TUTORIAL_BATTLE, runIn(RoomType.FINAL));
+
+    assertTrue(BATTLE_TRACKS.contains(lastStarted()));
+  }
+
+  @Test
   void theLibraryScreensShareOneTrack() {
     AudioService.onScreenChanged(ScreenType.LIBRARY);
     AudioService.onScreenChanged(ScreenType.CARD_LIBRARY);
+    AudioService.onScreenChanged(ScreenType.LIBRARY);
+    AudioService.onScreenChanged(ScreenType.ITEM_LIBRARY);
     AudioService.onScreenChanged(ScreenType.LIBRARY);
     AudioService.onScreenChanged(ScreenType.BESTIARY);
 
     assertEquals(1, started.size());
     assertTrue(LIBRARY_TRACKS.contains(lastStarted()));
+  }
+
+  @Test
+  void itemLibraryButtonsClick() {
+    Group root = stageRoot();
+    Button button = new Button(new Button.ButtonStyle());
+    root.addActor(button);
+
+    AudioService.onScreenChanged(ScreenType.ITEM_LIBRARY);
+    button.fire(new ChangeEvent());
+
+    verify(sounds.get(CLICK)).play(anyFloat());
   }
 
   @Test

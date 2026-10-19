@@ -47,6 +47,7 @@ public class AudioService {
           ScreenType.SAVE_LOAD,
           ScreenType.LIBRARY,
           ScreenType.CARD_LIBRARY,
+          ScreenType.ITEM_LIBRARY,
           ScreenType.BESTIARY);
 
   // this may appear to be a lot to load into ram, but these files are kilobytes big
@@ -262,9 +263,10 @@ public class AudioService {
    *
    * <p>Battles check the room they were entered from, so elite fights and the final boss get their
    * own tracks, and the encounter screen only switches to shop music when it is a shop. The
-   * library, card library and bestiary share one set of tracks, so moving between them keeps the
-   * same song going. Screens without their own music (settings, events, the save screen and so on)
-   * leave the current track playing, so going into the settings and back doesn't restart it.
+   * tutorial battle isn't part of a run, so it always gets the normal battle tracks. The library
+   * screens share one set of tracks, so moving between them keeps the same song going. Screens
+   * without their own music (settings, events, the save screen and so on) leave the current track
+   * playing, so going into the settings and back doesn't restart it.
    *
    * @param screen the screen that just opened
    * @param run the current run, used to tell what kind of room the player has walked into
@@ -276,13 +278,14 @@ public class AudioService {
       case MAIN_MENU -> startPlaylist(Playlist.MENU);
       case MAP -> startPlaylist(Playlist.MAP);
       case BATTLE_SCREEN -> startPlaylist(battlePlaylist(currentRoom(run)));
+      case TUTORIAL_BATTLE -> startPlaylist(Playlist.BATTLE);
       case ENCOUNTER -> {
         // events keep the map music, only shops change it
         if (currentRoom(run) == RoomType.SHOP) {
           startPlaylist(Playlist.SHOP);
         }
       }
-      case LIBRARY, CARD_LIBRARY, BESTIARY -> startPlaylist(Playlist.LIBRARY);
+      case LIBRARY, CARD_LIBRARY, ITEM_LIBRARY, BESTIARY -> startPlaylist(Playlist.LIBRARY);
       case VICTORY -> {
         stopMusic();
         playLoadedSound(SoundId.VICTORY, VICTORY_VOLUME);
