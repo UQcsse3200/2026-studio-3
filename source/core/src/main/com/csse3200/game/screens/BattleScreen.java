@@ -40,6 +40,10 @@ import com.csse3200.game.components.cards.CardKeywordTooltip;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.enemy.BossDialogueComponent;
+import com.csse3200.game.components.enemy.BossDialogueConfig;
+import com.csse3200.game.components.enemy.EnemyAI.BossAI;
+import com.csse3200.game.components.enemy.EnemyAI.TutorialEnemyAI;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
@@ -87,9 +91,11 @@ import com.csse3200.game.ui.PopupInputComponent;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
+import com.csse3200.game.ui.terminal.commands.ForceIntentCommand;
 import com.csse3200.game.ui.terminal.commands.GiveGoldCommand;
 import com.csse3200.game.ui.terminal.commands.GiveItemCommand;
 import com.csse3200.game.ui.terminal.commands.GiveOwnedItemCommand;
+import com.csse3200.game.ui.terminal.commands.SetEnemyHealthCommand;
 import com.csse3200.game.ui.terminal.commands.SetHealthCommand;
 import com.csse3200.game.ui.terminal.commands.SkipBattleCommand;
 import java.nio.file.Path;
@@ -160,6 +166,7 @@ public class BattleScreen extends ScreenAdapter {
   private final CardAimController allEnemiesCardAim;
   private ClickableFactory uiFactory;
   private final PlayerRunState playerState;
+  private final BossDialogueConfig bossDialogueConfig;
   private List<ClickableRecord> staticUiRecords;
 
   private List<CardInstance> handRowOrder = new ArrayList<>();
@@ -201,6 +208,7 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
+    bossDialogueConfig = BossDialogueConfig.load();
     loadAssets();
 
     renderer = RenderFactory.createRenderer();
@@ -220,10 +228,20 @@ public class BattleScreen extends ScreenAdapter {
             runState,
             tutorialBattle ? "dungeon" : game.getBackgroundId(),
             tutorialBattle
-                ? List.of("bone_crawler")
+                ? List.of("votive_attendant")
                 : BattleEncounterSelector.enemiesFor(runState));
     this.gameArea = forestGameArea;
     forestGameArea.create();
+
+    if (tutorialBattle) {
+      for (Entity enemy : forestGameArea.getEnemies()) {
+        EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+
+        if (behaviour != null) {
+          behaviour.setAI(new TutorialEnemyAI());
+        }
+      }
+    }
 
     playerState = runState.getOrCreatePlayerState();
     Entity player = forestGameArea.getPlayer();
@@ -328,125 +346,32 @@ public class BattleScreen extends ScreenAdapter {
           }
         });
     createUI();
+    installBossDialogue(forestGameArea);
     if (tutorialBattle) {
-      String demonstrationId = handRowOrder.get(handRowOrder.size() / 2).instanceId();
-      tutorialView =
-          new BattleTutorialGuidanceView(
-              ServiceLocator.getRenderService().getStage(),
-              cardWidgetSkin,
-              () ->
-                  uiFactory.getByTrigger(PLAY_CARD_TRIGGER).stream()
-                      .map(Clickable::getBtn)
-                      .map(actor -> (com.badlogic.gdx.scenes.scene2d.Actor) actor)
-                      .toList(),
-              () ->
-                  uiFactory.getByTrigger(PLAY_CARD_TRIGGER).stream()
-                      .filter(c -> c.getArgs().length > 0 && demonstrationId.equals(c.getArgs()[0]))
-                      .map(Clickable::getBtn)
-                      .findFirst()
-                      .orElse(null),
-              () ->
-                  uiFactory.getByTrigger("openMenu").stream()
-                      .map(Clickable::getBtn)
-                      .findFirst()
-                      .orElse(null),
-              () ->
-                  uiFactory.getByTrigger("endTurn").stream()
-                      .map(Clickable::getBtn)
-                      .findFirst()
-                      .orElse(null));
-      tutorialView.setExitStyle(
-          com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins.forIcon(
-                  com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins.Icon
-                      .END_TURN)
-              .get(com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton.ImageTextButtonStyle.class));
-      tutorialView.setStatTargets(
-          () ->
-              uiFactory.getByTrigger("openInventory").stream()
-                  .map(Clickable::getBtn)
-                  .findFirst()
-                  .orElse(null),
-          () ->
-              player
-                  .getComponent(com.csse3200.game.components.player.PlayerEnergyDisplay.class)
-                  .getEnergyActor(),
-          () ->
-              player
-                  .getComponent(com.csse3200.game.components.player.PlayerStatsDisplay.class)
-                  .getHealthLabel(),
-          () ->
-              forestGameArea.getEnemies().stream()
-                  .map(
-                      e ->
-                          e.getComponent(
-                              com.csse3200.game.components.enemy.EnemyStatsDisplay.class))
-                  .filter(java.util.Objects::nonNull)
-                  .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getHealthActor)
-                  .findFirst()
-                  .orElse(null));
-      tutorialView.setDetailedTargets(
-          () ->
-              player
-                  .getComponent(com.csse3200.game.components.player.PlayerEnergyDisplay.class)
-                  .getEnergyVisualBounds(),
-          () ->
-              forestGameArea.getEnemies().stream()
-                  .map(
-                      e ->
-                          e.getComponent(
-                              com.csse3200.game.components.enemy.EnemyStatsDisplay.class))
-                  .filter(java.util.Objects::nonNull)
-                  .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getTutorialArmourActor)
-                  .findFirst()
-                  .orElse(null));
-      tutorialView.setEnemyBounds(
-          () -> forestGameArea.getEnemies().stream().map(this::tutorialEnemyBounds).toList());
-      tutorialView.setDragActor(
-          () -> ServiceLocator.getDragAndDropService().getDragAndDrop().getDragActor());
-      tutorialView.setEnemyRenderer(
-          batch -> {
-            com.badlogic.gdx.math.Matrix4 previous =
-                new com.badlogic.gdx.math.Matrix4(batch.getProjectionMatrix());
-            batch.setProjectionMatrix(ServiceLocator.getCamera().combined);
-            batch.setColor(com.badlogic.gdx.graphics.Color.WHITE);
-            for (Entity enemy : forestGameArea.getEnemies()) {
-              AnimationRenderComponent spriteRenderer =
-                  enemy.getComponent(AnimationRenderComponent.class);
-              if (spriteRenderer != null)
-                spriteRenderer.render((com.badlogic.gdx.graphics.g2d.SpriteBatch) batch);
-            }
-            batch.setProjectionMatrix(previous);
-            batch.setColor(com.badlogic.gdx.graphics.Color.WHITE);
-          });
-      BattleAnimationCoordinator visuals =
-          animationCoordinatorEntity.getComponent(BattleAnimationCoordinator.class);
-      BattleTutorialComponent guidance =
-          new BattleTutorialComponent(
-              controller, tutorialView, this::onTutorialFinished, demonstrationId);
-      guidance.setObservation(
-          new BattleTutorialObservation(
-              () ->
-                  forestGameArea.getEnemies().stream()
-                      .mapToInt(e -> e.getComponent(CombatStatsComponent.class).getHealth())
-                      .sum(),
-              () -> player.getComponent(CombatStatsComponent.class).getHealth(),
-              () ->
-                  !visuals.hasActiveVisuals()
-                      && !battleActions.hasPendingEnemyReveals()
-                      && tutorialView.isPlayerHealthDisplayed(
-                          player.getComponent(CombatStatsComponent.class).getHealth())
-                      && forestGameArea.getEnemies().stream()
-                          .allMatch(
-                              e -> {
-                                AnimationRenderComponent animator =
-                                    e.getComponent(AnimationRenderComponent.class);
-                                return animator == null
-                                    || !"hurt".equals(animator.getCurrentAnimation())
-                                    || animator.isFinished();
-                              })));
-      ServiceLocator.getEntityService().register(new Entity().addComponent(guidance));
+      setupTutorialGuidance(forestGameArea, player, animationCoordinatorEntity);
     }
     controller.start();
+  }
+
+  /** Installs dialogue only for an enemy whose active AI is the Boss AI. */
+  private void installBossDialogue(BattleGameArea battleArea) {
+    for (Entity enemy : battleArea.getEnemies()) {
+      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+      if (behaviour == null || !(behaviour.getAI() instanceof BossAI bossAI)) {
+        continue;
+      }
+
+      BossDialogueComponent dialogue =
+          new BossDialogueComponent(
+              ServiceLocator.getRenderService().getStage(),
+              bossAI,
+              bossDialogueConfig,
+              controller,
+              () -> battleEntityBounds(enemy),
+              ServiceLocator.getResourceService());
+      ServiceLocator.getEntityService().register(new Entity().addComponent(dialogue));
+      return;
+    }
   }
 
   private PlayerDeck prepareBattleDeckSource() {
@@ -534,7 +459,7 @@ public class BattleScreen extends ScreenAdapter {
                 .findFirst()
                 .orElse(null));
     tutorialView.setEnemyBounds(
-        () -> forestGameArea.getEnemies().stream().map(this::tutorialEnemyBounds).toList());
+        () -> forestGameArea.getEnemies().stream().map(this::battleEntityBounds).toList());
     tutorialView.setDragActor(
         () -> ServiceLocator.getDragAndDropService().getDragAndDrop().getDragActor());
     tutorialView.setEnemyRenderer(
@@ -593,7 +518,7 @@ public class BattleScreen extends ScreenAdapter {
         || animator.isFinished();
   }
 
-  private Rectangle tutorialEnemyBounds(Entity enemy) {
+  private Rectangle battleEntityBounds(Entity enemy) {
     Stage stage = ServiceLocator.getRenderService().getStage();
     Vector2 pos = enemy.getPosition(), scale = enemy.getScale();
     Vector3 a = ServiceLocator.getCamera().project(new Vector3(pos.x, pos.y, 0));
@@ -642,6 +567,16 @@ public class BattleScreen extends ScreenAdapter {
         "sethealth <hp>",
         "set the player's current health",
         new SetHealthCommand(gameArea.getPlayer()));
+    terminal.addCommand(
+        "setenemyhp",
+        "setenemyhp <slot> <hp>",
+        "set an enemy's health (slots start at 0)",
+        new SetEnemyHealthCommand(controller));
+    terminal.addCommand(
+        "forceintent",
+        "forceintent <slot> <intent>",
+        "force an enemy's next intent: attack, defend, silence, taunt, damage_on_card_play",
+        new ForceIntentCommand(controller));
     terminal.addCommand(
         "giveitem",
         "giveitem <ITEM_TYPE>",
@@ -860,6 +795,7 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getResourceService().unloadAssets(EnemyStatusEffectVisuals.texturePaths());
+    ServiceLocator.getResourceService().unloadAssets(bossDialogueConfig.texturePaths());
     cardInteractionSkin.dispose();
     cardWidgetSkin.dispose();
     ServiceLocator.getResourceService().unloadAssets(mainGameTextures);
@@ -870,6 +806,7 @@ public class BattleScreen extends ScreenAdapter {
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(mainGameTextures);
     resourceService.loadTextures(EnemyStatusEffectVisuals.texturePaths());
+    resourceService.loadTextures(bossDialogueConfig.texturePaths());
     ServiceLocator.getResourceService().loadAll();
   }
 
