@@ -60,16 +60,16 @@ public class GdxGame extends Game {
   private static final Logger logger = LoggerFactory.getLogger(GdxGame.class);
   private static final String[] BACKGROUND_IDS =
       new String[] {
-        "dungeon",
-        "forest",
-        "temple",
+        "cave",
         "stones_ruins",
-        "autumn_forest",
-        "inside_castle",
         "mystical_tree",
-        "underwater",
         "cemetery",
-        "forest_with_sun"
+        "sky_tower",
+        "temple",
+        "god_mountain",
+        "dungeon",
+        "church",
+        "god_statues"
       };
   private BestiaryService bestiaryService;
   private CardDiscoveryService cardDiscoveryService;

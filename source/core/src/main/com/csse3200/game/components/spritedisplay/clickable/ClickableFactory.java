@@ -1,38 +1,36 @@
 // ClickableFactory.java
 package com.csse3200.game.components.spritedisplay.clickable;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.csse3200.game.components.spritedisplay.VariantRegistry;
 import com.csse3200.game.ui.UIComponent;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Builds and manages the live {@link Clickable} widgets for a set of {@link ClickableRecord}s:
  * resolves each record's variant, constructs and draws the widget, and disposes it. JSON parsing
  * lives separately in {@link ClickableJsonLoader} — this class only cares about the runtime widget
  * lifecycle, not where the records came from.
+ *
+ * <p>Uses the GoF Factory Method pattern: every widget is made by {@link
+ * #createClickable(ClickableRecord)}, which a screen-specific subclass overrides to build variants
+ * that need that screen's dependencies (see {@code BattleClickableFactory}).
  */
 public class ClickableFactory extends UIComponent {
 
   private static final String DEFAULT_VARIANT = "Clickable";
-  private static final String HAND_TRIGGER = "playCard";
-  private static final Map<String, ClickableSupplier> STATIC_VARIANTS = new HashMap<>();
 
-  static {
-    registerVariant(DEFAULT_VARIANT, rec -> new Clickable(rec) {});
-    registerVariant("inout", InOutOnTrigger::new);
-    registerVariant("drag", DragNDrop::new);
-    registerVariant("gated", GatedClickable::new);
-  }
-
-  public static void registerVariant(String name, ClickableSupplier supplier) {
-    STATIC_VARIANTS.put(name, supplier);
-  }
+  // Variants that need nothing but their record. Read-only after class initialisation.
+  private static final VariantRegistry<ClickableRecord, Clickable> DEFAULT_VARIANTS =
+      new VariantRegistry<ClickableRecord, Clickable>("clickable")
+          .register(DEFAULT_VARIANT, rec -> new Clickable(rec) {})
+          .register("inout", InOutOnTrigger::new)
+          .register("drag", DragNDrop::new)
+          .register("gated", GatedClickable::new)
+          .register("framed", Framed::new);
 
   /**
    * @see ClickableJsonLoader#loadRecordsFromJson(Path)
@@ -43,14 +41,6 @@ public class ClickableFactory extends UIComponent {
 
   private final List<ClickableRecord> records = new ArrayList<>();
   private final List<Clickable> clickables = new ArrayList<>();
-  private final Map<String, ClickableSupplier> instanceVariants = new HashMap<>();
-
-  // Tracks whether the hand row is currently supposed to be up (visible/interactable) or down
-  // (hidden mid-enemy-turn), by listening to the same "up"/"down" events InOutOnTrigger widgets
-  // do. A freshly built/rebuilt hand widget (e.g. from a cooldown retrieval firing mid the enemy's
-  // "thinking" pause, before "up" has fired yet) must match this instead of always snapping
-  // visible, or the row pops into view early and the later real "up" animation looks broken.
-  private boolean handVisible = true;
 
   public ClickableFactory(Path file) {
     this(loadRecordsFromJson(file));
@@ -61,76 +51,37 @@ public class ClickableFactory extends UIComponent {
   }
 
   /**
-   * Registers a variant for THIS factory instance only, overriding a static variant of the same
-   * name if present. Optional — most variants should go in the static block above instead.
+   * Factory method: creates the widget for one record. The default looks the record's variant up in
+   * {@link #DEFAULT_VARIANTS}. Subclasses override this to handle variants that need extra
+   * dependencies, and call {@code super.createClickable(rec)} for everything else.
+   *
+   * @throws IllegalArgumentException if the variant is not known
    */
-  public void registerInstanceVariant(String name, ClickableSupplier supplier) {
-    instanceVariants.put(name, supplier);
-  }
-
-  private ClickableSupplier resolveVariant(String name) {
-    ClickableSupplier supplier = instanceVariants.get(name);
-    if (supplier != null) {
-      return supplier;
-    }
-    return STATIC_VARIANTS.get(name);
+  protected Clickable createClickable(ClickableRecord rec) {
+    return DEFAULT_VARIANTS.create(rec.variant(), rec);
   }
 
   @Override
   public void create() {
     super.create();
-    entity.getEvents().addListener("up", () -> handVisible = true);
-    entity.getEvents().addListener("down", () -> handVisible = false);
     for (ClickableRecord rec : records) {
       clickables.add(buildClickable(rec));
     }
   }
 
   private Clickable buildClickable(ClickableRecord rec) {
-    ClickableSupplier supplier = resolveVariant(rec.variant());
-    if (supplier == null) {
-      Gdx.app.error(
-          "ClickableFactory",
-          "Unknown clickable variant \"" + rec.variant() + "\", falling back to default");
-      supplier = STATIC_VARIANTS.get(DEFAULT_VARIANT);
-    }
-
-    Clickable clickable = supplier.create(rec);
+    Clickable clickable = createClickable(rec);
     clickable.setEntity(this.entity);
     clickable.create();
     stage.addActor(clickable.getBtn());
     clickable.onAddedToStage(stage);
-
-    // Hand cards snap straight to whichever state ("up"/visible or "down"/hidden) the rest of the
-    // hand is currently in, rather than always popping up — matters when a rebuild happens while
-    // the row is meant to be down (e.g. a cooldown retrieval mid the enemy's "thinking" pause).
-    if (HAND_TRIGGER.equals(rec.trigger())) {
-      if (handVisible) {
-        clickable.showNow();
-      } else {
-        clickable.hideNow();
-      }
-    }
     return clickable;
   }
 
   /**
-   * Rebuilds the on-screen hand: drops every {@code "playCard"} widget and builds fresh ones from
-   * {@code handRecords}, leaving the static UI widgets untouched. Called when the hand changes (a
-   * card played and a replacement drawn), so the new hand — including the drawn card — shows
-   * immediately.
-   *
-   * @param handRecords one record per card currently in the player's hand
-   */
-  public void rebuildHand(List<ClickableRecord> handRecords) {
-    rebuildByTrigger(HAND_TRIGGER, handRecords);
-  }
-
-  /**
    * Rebuilds every widget with the given trigger name: drops the old ones and builds fresh ones
-   * from {@code records}, leaving every other widget this factory owns untouched. Generalization of
-   * {@link #rebuildHand} for other dynamically-rebuilt widget groups (e.g. a popup's per-card
-   * toggle buttons).
+   * from {@code records}, leaving every other widget this factory owns untouched. Used for
+   * dynamically rebuilt widget groups such as the battle hand or a popup's per-card toggle buttons.
    *
    * @param trigger trigger name identifying which widgets to replace
    * @param records replacement records, built in order

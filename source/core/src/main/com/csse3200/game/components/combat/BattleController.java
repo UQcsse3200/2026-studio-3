@@ -22,6 +22,7 @@ import com.csse3200.game.entities.Entity;
 import com.csse3200.game.events.EventHandler;
 import com.csse3200.game.events.listeners.EventListener1;
 import com.csse3200.game.events.listeners.EventListener2;
+import com.csse3200.game.rewards.CursePenalties;
 import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.services.audio.SoundId;
 import java.util.ArrayDeque;
@@ -52,6 +53,7 @@ public class BattleController {
   private final CardPlayService cardPlayService;
   private CardPlayRequest pendingCard;
   private boolean lastCardPlaySucceeded;
+  private boolean cardPlayBlocked;
   private int playerTurnNumber;
 
   /** Logging Strings & Error messages */
@@ -64,6 +66,7 @@ public class BattleController {
   private static final String HAND_CHANGED_EVENT = "handChanged";
   private static final String LISTENER_NOT_NULL = "Listener must not be null.";
   private static final String TURNS_SUFFIX = " turns.";
+  private static final String CARD_PLAYED_EVENT = "cardPlayed";
 
   public BattleController(Entity player, List<Entity> enemies) throws IllegalArgumentException {
     this(player, enemies, null, null);
@@ -105,18 +108,19 @@ public class BattleController {
     this.playerTurnNumber = 0;
     this.eventHandler = new EventHandler();
     this.eventQueue = new ArrayDeque<>();
+    EventHandler playerEvents = player.getEvents();
+    if (playerEvents != null) {
+      EventListener1<String> tauntStatusListener = this::refreshTauntFormForStatus;
+      playerEvents.addListener("statusEffectApplied", tauntStatusListener);
+      playerEvents.addListener("statusEffectRemoved", tauntStatusListener);
+      EventListener1<String> silenceStatusListener = this::refreshSilenceFormForStatus;
+      playerEvents.addListener("statusEffectApplied", silenceStatusListener);
+      playerEvents.addListener("statusEffectRemoved", silenceStatusListener);
+    }
     for (Entity enemy : this.enemies) {
       EventHandler enemyEvents = enemy.getEvents();
       if (enemyEvents != null) {
-        enemyEvents.addListener(
-            "enemyDefeated",
-            () -> {
-              CombatStatsComponent playerStats =
-                  this.player.getComponent(CombatStatsComponent.class);
-              if (playerStats != null) {
-                playerStats.removeStatusEffect(IntentEffectType.TAUNT.name() + ":" + enemy.getId());
-              }
-            });
+        enemyEvents.addListener("enemyDefeated", () -> clearTauntOnDefeat(enemy));
       }
     }
   }
@@ -174,7 +178,10 @@ public class BattleController {
    */
   private void processEvent(BattleEvent event) {
     BattlePhase nextPhase = battleTransitions.getNextPhase(this.getCurrentPhase(), event);
-    this.validateEventTransition(event, nextPhase);
+    if (nextPhase == null) {
+      throw new IllegalStateException(
+          "Invalid battle transition: " + this.currentPhase + "-->" + event);
+    }
     this.transition(nextPhase);
   }
 
@@ -273,6 +280,86 @@ public class BattleController {
             })
         .map(enemy -> Integer.toString(enemy.getId()))
         .toList();
+  }
+
+  private void refreshTauntFormForStatus(String statusKey) {
+    for (Entity enemy : enemies) {
+      if ((IntentEffectType.TAUNT.name() + ":" + enemy.getId()).equals(statusKey)) {
+        CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+        CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
+        setTauntForm(
+            enemy,
+            playerStats != null
+                && playerStats.hasStatusEffect(statusKey)
+                && enemyStats != null
+                && !enemyStats.isDead());
+      }
+    }
+  }
+
+  private void setTauntForm(Entity enemy, boolean active) {
+    EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+    if (behaviour != null
+        && "shield_break_retaliation".equals(behaviour.getBehaviourId())
+        && enemy.getEvents() != null) {
+      enemy.getEvents().trigger("enemyFormChanged", active ? "taunt" : "normal");
+    }
+  }
+
+  /**
+   * Removes a defeated enemy's taunt from the player, and returns the enemy to its normal form if
+   * it had no taunt active.
+   */
+  private void clearTauntOnDefeat(Entity enemy) {
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+    String tauntKey = IntentEffectType.TAUNT.name() + ":" + enemy.getId();
+    boolean hadTaunt = playerStats != null && playerStats.hasStatusEffect(tauntKey);
+    if (playerStats != null) {
+      playerStats.removeStatusEffect(tauntKey);
+    }
+    if (!hadTaunt) {
+      setTauntForm(enemy, false);
+    }
+  }
+
+  /** Holds the Boss in its channelling form for as long as its silence stays on the player. */
+  private void refreshSilenceFormForStatus(String statusKey) {
+    if (!IntentEffectType.SILENCE.name().equals(statusKey)) {
+      return;
+    }
+    CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
+    boolean silenced = playerStats != null && playerStats.hasStatusEffect(statusKey);
+    for (Entity enemy : enemies) {
+      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+      CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
+      if (behaviour != null
+          && "boss".equals(behaviour.getBehaviourId())
+          && enemyStats != null
+          && !Boolean.TRUE.equals(enemyStats.isDead())
+          && enemy.getEvents() != null) {
+        enemy.getEvents().trigger("enemyFormChanged", silenced ? "silence" : "normal");
+      }
+    }
+  }
+
+  /** Returns the enemy in a left-to-right, zero-based battle slot, or null if invalid. */
+  public Entity getEnemyInSlot(int slot) {
+    return slot >= 0 && slot < enemies.size() ? enemies.get(slot) : null;
+  }
+
+  /** Replaces one already-visible intent for the upcoming enemy phase only. */
+  public boolean forceNextEnemyIntent(int slot, EnemyIntent intent) {
+    Entity enemy = getEnemyInSlot(slot);
+    if (!isPlayerTurn() || enemy == null || intent == null) return false;
+    CombatStatsComponent stats = enemy.getComponent(CombatStatsComponent.class);
+    EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+    if (stats == null || stats.isDead() || behaviour == null) return false;
+    behaviour.forceCurrentIntent(intent);
+    if (currentEnemyIndex == slot) {
+      setEnemyIntent(intent);
+    }
+    narrateDebuffIntent(enemy, intent);
+    return true;
   }
 
   /** Player decides to end their turn */
@@ -414,12 +501,12 @@ public class BattleController {
   /** Notifies listeners after a successful card play, before checking victory or defeat. */
   public void addCardPlayedListener(EventListener2<String, String> listener) {
     Objects.requireNonNull(listener, LISTENER_NOT_NULL);
-    eventHandler.addListener("cardPlayed", listener);
+    eventHandler.addListener(CARD_PLAYED_EVENT, listener);
   }
 
   /** Removes the exact card-play listener registered by a screen-scoped observer. */
   public void removeCardPlayedListener(EventListener2<String, String> listener) {
-    eventHandler.removeListener("cardPlayed", listener);
+    eventHandler.removeListener(CARD_PLAYED_EVENT, listener);
   }
 
   /** Sends a one-line description of the latest battle action to any log listeners. */
@@ -497,21 +584,6 @@ public class BattleController {
   }
 
   /**
-   * A helper function that validates whether a transition is allowed.
-   *
-   * @param event The currently executing event.
-   * @param nextPhase The speculative next phase to transition to.
-   * @throws IllegalStateException Throws when the state transition is deemed illegal.
-   */
-  private void validateEventTransition(BattleEvent event, BattlePhase nextPhase)
-      throws IllegalStateException {
-    if (Objects.isNull(nextPhase)) {
-      throw new IllegalStateException(
-          "Invalid battle transition: " + this.currentPhase + "-->" + event);
-    }
-  }
-
-  /**
    * Stub function for notifying UI or any listeners about a phase change.
    *
    * @param previousPhase The phase that is being left.
@@ -564,11 +636,21 @@ public class BattleController {
     return this.pendingCard;
   }
 
+  /** Enables or disables card submission without changing the current battle phase. */
+  public void setCardPlayBlocked(boolean blocked) {
+    cardPlayBlocked = blocked;
+  }
+
+  /** Returns whether an external presentation, such as Boss dialogue, currently blocks cards. */
+  public boolean isCardPlayBlocked() {
+    return cardPlayBlocked;
+  }
+
   /** Submits a card during the player's turn, rejecting submissions while an action is running. */
   public boolean submitCardPlayRequest(CardPlayRequest cardPlayRequest) {
     Objects.requireNonNull(cardPlayRequest, "cardPlayRequest cannot be null.");
 
-    if (processingEvents || !canHandle(BattleEvent.CARD_PLAY_REQUESTED)) {
+    if (cardPlayBlocked || processingEvents || !canHandle(BattleEvent.CARD_PLAY_REQUESTED)) {
       return false;
     }
     lastCardPlaySucceeded = false;
@@ -684,7 +766,8 @@ public class BattleController {
 
   private void finishPlayerCardAction() {
     if (lastCardPlaySucceeded && pendingCard != null) {
-      eventHandler.trigger("cardPlayed", pendingCard.instanceId(), pendingCard.target().targetId());
+      eventHandler.trigger(
+          CARD_PLAYED_EVENT, pendingCard.instanceId(), pendingCard.target().targetId());
     }
 
     pendingCard = null;
@@ -835,10 +918,21 @@ public class BattleController {
     CombatStatsComponent playerStats = player.getComponent(CombatStatsComponent.class);
     if (playerStats != null) {
       playerStats.resetBlock();
+      applyBloodOathAtTurnStart(playerStats);
     }
     applyHealingAtTurnStart();
     retrieveCooledDownCards();
     handle(BattleEvent.PLAYER_TURN_STARTED);
+  }
+
+  /** Curse: Blood-Oath Sigil drains Health at the start of each player turn, never below 1. */
+  private void applyBloodOathAtTurnStart(CombatStatsComponent playerStats) {
+    int stacks = CursePenalties.getPenalty(playerStats, CursePenalties.BLOOD_OATH);
+    int damage = stacks * CursePenalties.BLOOD_OATH_DAMAGE_PER_COPY;
+    int allowed = Math.min(damage, playerStats.getHealth() - 1);
+    if (allowed > 0) {
+      playerStats.takePiercingDamage(allowed);
+    }
   }
 
   /**
@@ -908,7 +1002,7 @@ public class BattleController {
 
     // Resolve poison before the enemy acts. Status damage bypasses block and armour.
     CombatStatsComponent enemyStats = enemy.getComponent(CombatStatsComponent.class);
-    enemyStats.processPoisonTick(enemyStats::takePiercingDamage);
+    enemyStats.processPoisonTick(enemyStats::takePoisonDamage);
 
     if (skipEnemyTurnIfDead(enemy)) return;
 

@@ -40,7 +40,6 @@ import java.util.Random;
  * returning to the map.
  */
 public class AncientTempleScreen extends ScreenAdapter {
-  private static final int ETERNITY_MAX_HEALTH_BONUS = 20;
   private static final int ETERNITY_MAX_ENERGY_BONUS = 1;
   private static final int ETERNITY_FOCUS_HEAL = 20;
 
@@ -61,6 +60,7 @@ public class AncientTempleScreen extends ScreenAdapter {
   private Table root;
   private boolean rewardClaimed;
   private EternityEffect offeredEternityEffect;
+  private static final String FONT_COLOUR = "F1C879";
 
   private enum EternityEffect {
     VITALITY,
@@ -123,7 +123,7 @@ public class AncientTempleScreen extends ScreenAdapter {
     root.padBottom(45f);
 
     Label.LabelStyle titleStyle = new Label.LabelStyle(skin.get("title", Label.LabelStyle.class));
-    titleStyle.fontColor = Color.valueOf("F1C879");
+    titleStyle.fontColor = Color.valueOf(FONT_COLOUR);
 
     Label.LabelStyle bodyStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
     bodyStyle.fontColor = Color.valueOf("E3D3B8");
@@ -176,7 +176,7 @@ public class AncientTempleScreen extends ScreenAdapter {
 
     style.fontColor = Color.valueOf("F6E8C8");
     style.overFontColor = Color.WHITE;
-    style.downFontColor = Color.valueOf("F1C879");
+    style.downFontColor = Color.valueOf(FONT_COLOUR);
 
     return style;
   }
@@ -240,7 +240,7 @@ public class AncientTempleScreen extends ScreenAdapter {
     }
 
     Label.LabelStyle titleStyle = new Label.LabelStyle(skin.get("title", Label.LabelStyle.class));
-    titleStyle.fontColor = Color.valueOf("F1C879");
+    titleStyle.fontColor = Color.valueOf(FONT_COLOUR);
 
     Label.LabelStyle bodyStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
     bodyStyle.fontColor = Color.valueOf("E3D3B8");
@@ -321,14 +321,11 @@ public class AncientTempleScreen extends ScreenAdapter {
    */
   private void grantEternalVitality() {
     PlayerRunState playerState = runState.getOrCreatePlayerState();
-
-    int newMaxHealth = playerState.getMaxHealth() + ETERNITY_MAX_HEALTH_BONUS;
-
-    playerState.restore(newMaxHealth, newMaxHealth, playerState.getGold());
+    playerState.grantEternalVitality();
 
     // Keep RunState's legacy health values in sync.
-    runState.setPlayerMaxHealth(newMaxHealth);
-    runState.setPlayerHealth(newMaxHealth);
+    runState.setPlayerMaxHealth(playerState.getMaxHealth());
+    runState.setPlayerHealth(playerState.getCurrentHealth());
 
     finishTemple();
   }

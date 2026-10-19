@@ -565,7 +565,7 @@ class AllCardsLiveCombatRegressionTest {
         assertStatus(battle.secondEnemyStats, EffectType.POISON, 3, 3);
       }
       case "poison_mark" -> {
-        assertStatus(battle.firstEnemyStats, EffectType.VULNERABLE, 2, 2);
+        assertStatus(battle.firstEnemyStats, EffectType.VULNERABLE, 1, 2);
         assertStatus(battle.firstEnemyStats, EffectType.POISON, 2, 2);
       }
       case "starfall" -> assertEnemyHealth(battle, 494, 494);

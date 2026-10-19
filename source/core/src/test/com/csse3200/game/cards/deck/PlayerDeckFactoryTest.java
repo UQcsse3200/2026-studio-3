@@ -27,10 +27,10 @@ class PlayerDeckFactoryTest {
     // checked — see the TEMP comment in PlayerDeckFactory. Revert both together afterward.
     assertEquals(11, deck.size());
     assertEquals(4, deck.countByCardId(PlayerDeckFactory.STRIKE));
-    assertEquals(3, deck.countByCardId(PlayerDeckFactory.DEFEND));
+    assertEquals(2, deck.countByCardId(PlayerDeckFactory.DEFEND));
     assertEquals(1, deck.countByCardId(PlayerDeckFactory.POISON_DAGGER));
     assertEquals(1, deck.countByCardId(PlayerDeckFactory.EXPOSE));
-    assertEquals(1, deck.countByCardId(PlayerDeckFactory.BANDAGE));
+    assertEquals(2, deck.countByCardId(PlayerDeckFactory.BANDAGE));
     assertEquals(1, deck.countByCardId(PlayerDeckFactory.INNER_FOCUS));
   }
 

@@ -5,10 +5,18 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardAcquisitionPool;
@@ -24,6 +32,7 @@ import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.RenderService;
+import com.csse3200.game.rewards.CardRewardSelection;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.rewards.RewardGenerator;
 import com.csse3200.game.rewards.RewardOption;
@@ -136,9 +145,121 @@ class RewardDisplayTest {
   }
 
   @Test
+  void victoryPanelKeepsItsLogicalSizeAcrossViewportWidths() {
+    stage.getViewport().update(1280, 800, true);
+    RewardDisplay first = createDisplay(defaultService());
+    Table firstRoot = (Table) first.getRewardUi();
+    firstRoot.validate();
+    float panelWidth = firstRoot.getCells().first().getActor().getWidth();
+    float panelHeight = firstRoot.getCells().first().getActor().getHeight();
+    float cardWidth = first.getRewardOptionCards().getFirst().getWidth();
+    float cardHeight = first.getRewardOptionCards().getFirst().getHeight();
+    assertTrue(cardWidth > 0f);
+    assertTrue(cardHeight > 0f);
+    assertEquals(1222f * 800f / 941f, panelWidth, 0.5f);
+    assertEquals(876f * 800f / 941f, panelHeight, 0.5f);
+
+    entity.dispose();
+    entity = null;
+    stage.getViewport().update(1920, 1080, true);
+    RewardDisplay second = createDisplay(defaultService());
+    Table secondRoot = (Table) second.getRewardUi();
+    secondRoot.validate();
+    assertEquals(panelWidth, secondRoot.getCells().first().getActor().getWidth(), 0.01f);
+    assertEquals(panelHeight, secondRoot.getCells().first().getActor().getHeight(), 0.01f);
+    assertEquals(cardWidth, second.getRewardOptionCards().getFirst().getWidth(), 0.01f);
+    assertEquals(cardHeight, second.getRewardOptionCards().getFirst().getHeight(), 0.01f);
+  }
+
+  @Test
+  void rewardDestinationIconsKeepTheirSizeAfterViewportResize() {
+    stage.getViewport().update(1280, 800, true);
+    RewardDisplay display = createDisplay(defaultService());
+    RewardClaimFeedback feedback = display.getClaimFeedback();
+    assertNotNull(feedback);
+    float iconWidth = feedback.getDestination(RewardType.ITEM).getWidth();
+    float iconHeight = feedback.getDestination(RewardType.ITEM).getHeight();
+
+    stage.getViewport().update(1920, 1080, true);
+    stage.act(0f);
+
+    assertEquals(56f, iconWidth, 0.01f);
+    assertEquals(56f, iconHeight, 0.01f);
+    assertEquals(iconWidth, feedback.getDestination(RewardType.ITEM).getWidth(), 0.01f);
+    assertEquals(iconHeight, feedback.getDestination(RewardType.ITEM).getHeight(), 0.01f);
+    assertEquals(24f, feedback.getDestination(RewardType.ITEM).getX(), 0.01f);
+    assertEquals(stage.getHeight() - 239f, feedback.getDestination(RewardType.ITEM).getY(), 0.01f);
+  }
+
+  @Test
+  void itemClaimLeavesOnlyAThinAmberTrailWithoutChangingTheFlight() {
+    stage.getViewport().update(1280, 800, true);
+    RewardDisplay display = createDisplay(defaultService());
+    RewardClaimFeedback feedback = display.getClaimFeedback();
+
+    display.selectOption(display.getOptions().get(1));
+    stage.act(0.13f);
+
+    Actor trail = feedback.getOverlay().findActor("rewardTrailITEM");
+    assertInstanceOf(Image.class, trail);
+    assertTrue(trail.getWidth() <= 6f);
+    assertTrue(trail.getHeight() <= 7f);
+    Color tint = trail.getColor();
+    Color amber = Color.valueOf("FFC27A");
+    assertEquals(amber.r, tint.r, 0.01f);
+    assertEquals(amber.g, tint.g, 0.01f);
+    assertEquals(amber.b, tint.b, 0.01f);
+    assertNotNull(feedback.getOverlay().findActor("rewardGlowITEM"));
+    assertNotNull(feedback.getOverlay().findActor("rewardStarITEM"));
+    assertTrue(feedback.getOverlay().getChildren().size > 20);
+    assertEquals(56f, feedback.getDestination(RewardType.ITEM).getWidth(), 0.01f);
+    assertTrue(display.isClaimed());
+  }
+
+  @Test
+  void goldAndCardClaimsUseTheirOwnShortTrailColours() {
+    RewardDisplay goldDisplay = createDisplay(defaultService());
+    goldDisplay.selectOption(goldDisplay.getOptions().getFirst());
+    stage.act(0.13f);
+    Actor goldTrail = goldDisplay.getClaimFeedback().getOverlay().findActor("rewardTrailGOLD");
+    assertInstanceOf(Image.class, goldTrail);
+    assertTrailColour(goldTrail, "FFE7A1");
+
+    entity.dispose();
+    entity = null;
+    RewardDisplay cardDisplay = createDisplay(defaultService());
+    cardDisplay.selectOption(cardOption(cardDisplay));
+    cardDisplay
+        .getCardChoiceButtons()
+        .getFirst()
+        .fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    stage.act(0.13f);
+    Actor cardTrail = cardDisplay.getClaimFeedback().getOverlay().findActor("rewardTrailCARD");
+    assertInstanceOf(Image.class, cardTrail);
+    assertTrailColour(cardTrail, "C6E9FF");
+  }
+
+  private static void assertTrailColour(Actor trail, String hex) {
+    Color expected = Color.valueOf(hex);
+    assertEquals(expected.r, trail.getColor().r, 0.01f);
+    assertEquals(expected.g, trail.getColor().g, 0.01f);
+    assertEquals(expected.b, trail.getColor().b, 0.01f);
+  }
+
+  @Test
   void openingCardRewardShowsWidgetsAndMarksCandidatesSeen() {
     RewardDisplay display = createDisplay(defaultService());
     RewardOption option = cardOption(display);
+
+    RewardClaimFeedback feedback = display.getClaimFeedback();
+    assertNotNull(feedback);
+    assertEquals(24f, feedback.getDestination(RewardType.CARD).getX());
+    assertEquals(56f, feedback.getDestination(RewardType.CARD).getWidth());
+    assertEquals(56f, feedback.getDestination(RewardType.ITEM).getWidth());
+    assertEquals(56f, feedback.getDestination(RewardType.GOLD).getWidth());
+    assertEquals(stage.getHeight() - 180f, feedback.getDestination(RewardType.CARD).getY());
+    assertEquals(stage.getHeight() - 239f, feedback.getDestination(RewardType.ITEM).getY());
+    assertEquals(stage.getHeight() - 299f, feedback.getDestination(RewardType.GOLD).getY());
 
     PlayerDeck deck = runState.getOrCreatePlayerDeck(cardService);
     int initialDeckSize = deck.size();
@@ -151,6 +272,8 @@ class RewardDisplayTest {
             CardDiscoveryService.ENTRY_UPDATED_EVENT, ignored -> discoveryEvents.incrementAndGet());
 
     display.selectOption(option);
+
+    assertSame(stage, feedback.getOverlay().getStage());
 
     assertTrue(display.isCardRewardCommitted());
     assertFalse(display.isClaimed());
@@ -223,6 +346,15 @@ class RewardDisplayTest {
     assertEquals(initialDeckSize + 1, deck.size());
     assertEquals(1, checkpointCalls.get());
     assertEquals(1, claimEvents.get());
+    assertEquals(0, navigationEvents.get());
+    stage.act(0.7f);
+    display.finishFeedbackAndNavigate();
+    assertEquals(0, navigationEvents.get());
+    stage.act(0.6f);
+    stage.act(0.01f);
+    display.update();
+    assertEquals(0, navigationEvents.get());
+    display.finishFeedbackAndNavigate();
     assertEquals(1, navigationEvents.get());
   }
 
@@ -242,6 +374,271 @@ class RewardDisplayTest {
   }
 
   @Test
+  void clickingVisibleRewardCardClaimsOnceAndHoverRestoresItsFrame() {
+    RewardDisplay display = createDisplay(defaultService());
+    Stack goldCard = assertInstanceOf(Stack.class, display.getRewardOptionCards().getFirst());
+    Image frame = assertInstanceOf(Image.class, goldCard.getChildren().first());
+    ClickListener listener = rewardClickListener(goldCard);
+    InputEvent event = new InputEvent();
+
+    listener.enter(event, 1f, 1f, -1, null);
+    assertEquals(0.88f, frame.getColor().g, 0.01f);
+    listener.exit(event, 1f, 1f, -1, null);
+    assertEquals(Color.WHITE, frame.getColor());
+
+    AtomicInteger claimEvents = new AtomicInteger();
+    entity
+        .getEvents()
+        .addListener(RewardDisplay.REWARD_CLAIMED_EVENT, claimEvents::incrementAndGet);
+    listener.clicked(event, 1f, 1f);
+    listener.clicked(event, 1f, 1f);
+
+    assertTrue(display.isClaimed());
+    assertEquals(1, claimEvents.get());
+    assertEquals(75, runState.getOrCreatePlayerState().getGold());
+  }
+
+  @Test
+  void absentRunStatePreventsBothImmediateAndCardRewards() {
+    when(game.getRunState()).thenReturn(null);
+    RewardDisplay display = createDisplay(defaultService());
+    AtomicInteger claimEvents = new AtomicInteger();
+    entity
+        .getEvents()
+        .addListener(RewardDisplay.REWARD_CLAIMED_EVENT, claimEvents::incrementAndGet);
+
+    display.selectOption(display.getOptions().getFirst());
+    display.selectOption(cardOption(display));
+    display.finishFeedbackAndNavigate();
+
+    assertFalse(display.isClaimed());
+    assertFalse(display.isCardRewardCommitted());
+    assertEquals(0, claimEvents.get());
+    assertTrue(display.getCardChoiceButtons().isEmpty());
+  }
+
+  @Test
+  void missingCardDefinitionDoesNotCommitAnInvalidReward() {
+    RewardOption invalidCard = RewardOption.cards(new CardRewardSelection(List.of("missing-card")));
+    RewardService service =
+        new RewardService(fixedRewardGenerator(), cardService, new Random(11)) {
+          @Override
+          public List<RewardOption> generateRewardOptions() {
+            return List.of(invalidCard);
+          }
+        };
+    RewardDisplay display = createDisplay(service);
+    AtomicInteger claimEvents = new AtomicInteger();
+    entity
+        .getEvents()
+        .addListener(RewardDisplay.REWARD_CLAIMED_EVENT, claimEvents::incrementAndGet);
+
+    display.selectOption(invalidCard);
+
+    assertFalse(display.isCardRewardCommitted());
+    assertFalse(display.isClaimed());
+    assertTrue(display.getCardChoiceButtons().isEmpty());
+    assertEquals(0, claimEvents.get());
+  }
+
+  @Test
+  void missingRewardArtStillAllowsSavingAndNavigation() {
+    ResourceService resources = ServiceLocator.getResourceService();
+    when(resources.getAsset("images/ui/victory-gold-icon.png", Texture.class)).thenReturn(null);
+    AtomicInteger checkpoints = new AtomicInteger();
+    AtomicInteger navigationEvents = new AtomicInteger();
+    RewardDisplay display = createDisplay(defaultService(), checkpoints::incrementAndGet);
+    entity
+        .getEvents()
+        .addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, navigationEvents::incrementAndGet);
+
+    display.selectOption(display.getOptions().getFirst());
+    display.finishFeedbackAndNavigate();
+    display.finishFeedbackAndNavigate();
+
+    assertTrue(display.isClaimed());
+    assertEquals(75, runState.getOrCreatePlayerState().getGold());
+    assertEquals(1, checkpoints.get());
+    assertEquals(1, navigationEvents.get());
+  }
+
+  @Test
+  void rewardFeedbackUsesScreenCentreWithoutSourceAndIgnoresConcurrentPlay() {
+    RewardDisplay display = createDisplay(defaultService());
+    RewardClaimFeedback feedback = display.getClaimFeedback();
+    Texture art =
+        ServiceLocator.getResourceService().getAsset("images/ui/gold-reward.png", Texture.class);
+    AtomicInteger completed = new AtomicInteger();
+    int initialActors = feedback.getOverlay().getChildren().size;
+
+    feedback.play(RewardType.ITEM, new TextureRegion(art), null, 1, completed::incrementAndGet);
+    assertEquals(initialActors + 1, feedback.getOverlay().getChildren().size);
+    feedback.play(RewardType.ITEM, new TextureRegion(art), null, 1, completed::incrementAndGet);
+    assertEquals(initialActors + 1, feedback.getOverlay().getChildren().size);
+
+    stage.act(0.85f);
+    stage.act(0.37f);
+    stage.act(0.01f);
+    assertEquals(1, completed.get());
+  }
+
+  @Test
+  void goldClaimConsumesOneLuckyCoinAndSavesBeforeFeedbackCompletes() {
+    runState.getOrCreatePlayerState().addGold(75);
+    runState.getOrCreatePlayerState().addOwnedItem(ItemType.LUCKY_COIN);
+    runState.getOrCreatePlayerState().addOwnedItem(ItemType.LUCKY_COIN);
+    AtomicInteger checkpoints = new AtomicInteger();
+    AtomicInteger navigationEvents = new AtomicInteger();
+    RewardDisplay display =
+        createDisplay(
+            defaultService(),
+            () -> {
+              assertEquals(165, runState.getOrCreatePlayerState().getGold());
+              assertEquals(
+                  1, runState.getOrCreatePlayerState().getOwnedItemCount(ItemType.LUCKY_COIN));
+              checkpoints.incrementAndGet();
+            });
+    entity
+        .getEvents()
+        .addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, navigationEvents::incrementAndGet);
+
+    display.selectOption(display.getOptions().getFirst());
+    display.selectOption(display.getOptions().get(1));
+    display.finishFeedbackAndNavigate();
+
+    assertTrue(display.isClaimed());
+    assertEquals(165, runState.getOrCreatePlayerState().getGold());
+    assertEquals(1, checkpoints.get());
+    assertEquals(0, navigationEvents.get());
+    stage.act(0.85f);
+    stage.act(0.37f);
+    stage.act(0.01f);
+    display.finishFeedbackAndNavigate();
+    assertEquals(1, navigationEvents.get());
+  }
+
+  @Test
+  void itemClaimAddsOnlySelectedItemAndSavesBeforeNavigation() {
+    AtomicInteger checkpoints = new AtomicInteger();
+    RewardDisplay display =
+        createDisplay(
+            defaultService(),
+            () -> {
+              assertEquals(
+                  1, runState.getOrCreatePlayerState().getOwnedItemCount(ItemType.ENERGY_CRYSTAL));
+              checkpoints.incrementAndGet();
+            });
+
+    display.selectOption(display.getOptions().get(1));
+
+    assertTrue(display.isClaimed());
+    assertEquals(1, checkpoints.get());
+    assertEquals(1, runState.getOrCreatePlayerState().getOwnedItemCount(ItemType.ENERGY_CRYSTAL));
+    assertEquals(50, runState.getOrCreatePlayerState().getGold());
+    assertFalse(display.isCardRewardCommitted());
+  }
+
+  @Test
+  void everyBattleRewardItemCanBeClaimedThroughTheVisibleItemOption() {
+    for (ItemType item :
+        List.of(
+            ItemType.LUCKY_COIN,
+            ItemType.ENERGY_CRYSTAL,
+            ItemType.MERCHANTS_FAVOR,
+            ItemType.IRON_AEGIS,
+            ItemType.WARRIORS_CREST)) {
+      RewardGenerator generator =
+          new RewardGenerator(new Random(1)) {
+            @Override
+            public RewardOption generateGoldRewardOption(float multiplier) {
+              return RewardOption.gold(25);
+            }
+
+            @Override
+            public RewardOption generateItemRewardOption() {
+              return RewardOption.item(item);
+            }
+          };
+      RewardDisplay display =
+          createDisplay(new RewardService(generator, cardService, new Random(11)));
+      int before = runState.getOrCreatePlayerState().getOwnedItemCount(item);
+
+      rewardClickListener(display.getRewardOptionCards().get(1)).clicked(new InputEvent(), 1f, 1f);
+
+      assertTrue(display.isClaimed(), item.name());
+      assertEquals(before + 1, runState.getOrCreatePlayerState().getOwnedItemCount(item));
+      entity.dispose();
+      entity = null;
+    }
+  }
+
+  @Test
+  void failedGoldClaimDoesNotSaveOrNavigateAndCanBeRetried() {
+    AtomicInteger attempts = new AtomicInteger();
+    AtomicInteger checkpoints = new AtomicInteger();
+    RewardService service =
+        new RewardService(fixedRewardGenerator(), cardService, new Random(11)) {
+          @Override
+          public void claimRunReward(RunState state, RewardOption selected, String selectedCardId) {
+            if (attempts.getAndIncrement() == 0) {
+              throw new IllegalStateException("simulated gold claim failure");
+            }
+            super.claimRunReward(state, selected, selectedCardId);
+          }
+        };
+    RewardDisplay display = createDisplay(service, checkpoints::incrementAndGet);
+    RewardOption gold = display.getOptions().getFirst();
+    int startingGold = runState.getOrCreatePlayerState().getGold();
+
+    display.selectOption(gold);
+    display.finishFeedbackAndNavigate();
+    assertFalse(display.isClaimed());
+    assertEquals(startingGold, runState.getOrCreatePlayerState().getGold());
+    assertEquals(0, checkpoints.get());
+
+    display.selectOption(gold);
+    assertTrue(display.isClaimed());
+    assertEquals(startingGold + gold.goldAmount, runState.getOrCreatePlayerState().getGold());
+    assertEquals(1, checkpoints.get());
+    assertEquals(2, attempts.get());
+  }
+
+  @Test
+  void failedPostClaimCallbackStillFinishesWithoutDuplicatingReward() {
+    AtomicInteger callbackCalls = new AtomicInteger();
+    AtomicInteger claimEvents = new AtomicInteger();
+    AtomicInteger navigationEvents = new AtomicInteger();
+    RewardDisplay display =
+        createDisplay(
+            defaultService(),
+            () -> {
+              callbackCalls.incrementAndGet();
+              throw new IllegalStateException("simulated checkpoint failure");
+            });
+    entity
+        .getEvents()
+        .addListener(RewardDisplay.REWARD_CLAIMED_EVENT, claimEvents::incrementAndGet);
+    entity
+        .getEvents()
+        .addListener(EndBattleDisplay.RETURN_TO_MENU_EVENT, navigationEvents::incrementAndGet);
+
+    RewardOption gold = display.getOptions().getFirst();
+    int startingGold = runState.getOrCreatePlayerState().getGold();
+    display.selectOption(gold);
+    display.selectOption(gold);
+
+    assertTrue(display.isClaimed());
+    assertEquals(startingGold + gold.goldAmount, runState.getOrCreatePlayerState().getGold());
+    assertEquals(1, callbackCalls.get());
+    assertEquals(1, claimEvents.get());
+    stage.act(0.85f);
+    stage.act(0.37f);
+    stage.act(0.01f);
+    display.finishFeedbackAndNavigate();
+    assertEquals(1, navigationEvents.get());
+  }
+
+  @Test
   void emptyCardPoolLeavesOnlyGoldAndItemPanelCards() {
     CardAcquisitionPool emptyPool = new CardAcquisitionPool(cardService, List.of());
 
@@ -252,6 +649,10 @@ class RewardDisplayTest {
 
     assertEquals(2, display.getOptions().size());
     assertEquals(2, display.getRewardOptionCards().size());
+    Table root = (Table) display.getRewardUi();
+    root.validate();
+    assertEquals(
+        1222f * 800f / 941f * 0.215f, display.getRewardOptionCards().getFirst().getWidth(), 1f);
 
     assertTrue(display.getOptions().stream().noneMatch(option -> option.type == RewardType.CARD));
   }
@@ -357,5 +758,14 @@ class RewardDisplayTest {
         .filter(option -> option.type == RewardType.CARD)
         .findFirst()
         .orElseThrow();
+  }
+
+  private static ClickListener rewardClickListener(Actor card) {
+    for (com.badlogic.gdx.scenes.scene2d.EventListener listener : card.getListeners()) {
+      if (listener instanceof ClickListener clickListener) {
+        return clickListener;
+      }
+    }
+    throw new AssertionError("Reward card is missing its click listener");
   }
 }

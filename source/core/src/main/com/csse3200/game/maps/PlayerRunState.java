@@ -1,6 +1,7 @@
 package com.csse3200.game.maps;
 
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.rewards.ItemEffectApplier;
@@ -10,6 +11,7 @@ import java.util.List;
 
 /** Run-scoped player values that must survive screen disposal. */
 public class PlayerRunState {
+  private static final int ETERNAL_VITALITY_HEALTH_BONUS = 20;
   private static final float LUCKY_COIN_BONUS = 0.1f;
   private static final int MAX_LUCKY_COIN_GOLD_BONUS = 20;
   private static final float MERCHANTS_FAVOR_DISCOUNT = 0.10f;
@@ -115,6 +117,13 @@ public class PlayerRunState {
     itemInventory.addItem(itemId);
   }
 
+  /** Grants the temple's permanent vitality blessing and records it in the inventory. */
+  public void grantEternalVitality() {
+    int newMaxHealth = Math.addExact(maxHealth, ETERNAL_VITALITY_HEALTH_BONUS);
+    restore(newMaxHealth, newMaxHealth, gold);
+    itemInventory.addItem(ItemType.ETERNAL_VITALITY);
+  }
+
   /** Removes one copy of an owned item. */
   public boolean removeOwnedItem(ItemType itemId) {
     return itemInventory.removeItem(itemId);
@@ -163,7 +172,10 @@ public class PlayerRunState {
       return false;
     }
 
-    requireStats(player);
+    CombatStatsComponent stats = requireStats(player);
+    if (itemId == ItemType.AMBROSIA_FLASK && stats.getHealth() >= stats.getMaxHealth()) {
+      return false;
+    }
     ItemEffectApplier.applyItemEffect(itemId, player);
     return itemInventory.removeItem(itemId);
   }
@@ -188,9 +200,32 @@ public class PlayerRunState {
     for (ItemType itemId : itemInventory.getItems()) {
       // Lucky Coin is consumed only when the player claims a boosted gold reward. It has no
       // always-on effect on the battle entity.
-      if (itemId != ItemType.LUCKY_COIN && !itemId.isBattleConsumable()) {
+      // Eternal Vitality has already increased the durable max-health snapshot when acquired.
+      // Replaying it here would add another 20 health on every screen transition/load.
+      if (itemId != ItemType.LUCKY_COIN
+          && itemId != ItemType.ETERNAL_VITALITY
+          && itemId != ItemType.ENERGY_CRYSTAL
+          && itemId != ItemType.ASHEN_EMBER
+          && !itemId.isBattleConsumable()) {
         ItemEffectApplier.applyItemEffect(itemId, player);
       }
+    }
+    applyNetMaxEnergyModifier(player);
+  }
+
+  /**
+   * Applies Ember of the Divine and Ashen Ember together, so the result does not depend on the
+   * order they were obtained. The net change is applied once and then clamped by EnergyComponent.
+   */
+  private void applyNetMaxEnergyModifier(Entity player) {
+    EnergyComponent energy = player.getComponent(EnergyComponent.class);
+    if (energy == null) {
+      return;
+    }
+    int netChange =
+        getOwnedItemCount(ItemType.ENERGY_CRYSTAL) - getOwnedItemCount(ItemType.ASHEN_EMBER);
+    if (netChange != 0) {
+      energy.setMaxEnergy(energy.getMaxEnergy() + netChange);
     }
   }
 

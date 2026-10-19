@@ -23,6 +23,18 @@
       "description": "Bone Crawlers were set to tend the sanctum's ossuary and keep the bones of the faithful safe. Fallen, they wear those bones as armour and guard them from everyone. A Bone Crawler stays behind its plates for as long as it can, and strikes only when the shell is thick enough."
     },
     {
+      "id": "votive_attendant",
+      "name": "Votive Attendant",
+      "health": 30,
+      "baseAttack": 5,
+      "armour": 2,
+      "tier": "NORMAL",
+      "behaviour": "tutorial",
+      "sprite": "images/enemies/votive_attendant.atlas",
+      "renderScale": 1.0,
+      "description": "A masked lantern bearer of the sanctum. Corrupted but still faithful to its old duty, it guides newcomers through the halls."
+    },
+    {
       "id": "dark_acolyte",
       "name": "Dark Acolyte",
       "health": 34,
@@ -35,7 +47,7 @@
     {
       "id": "tomb_guardian",
       "name": "Tomb Guardian",
-      "health": 72,
+      "health": 50,
       "baseAttack": 10,
       "armour": 5,
       "tier": "ELITE",
@@ -47,7 +59,7 @@
       "id": "void_knight",
       "name": "Riven Knight",
       "health": 40,
-      "baseAttack": 16,
+      "baseAttack": 14,
       "armour": 0,
       "tier": "ELITE",
       "behaviour": "enrage_low_health",
@@ -56,7 +68,7 @@
     {
       "id": "boss_knight",
       "name": "Vitium",
-      "health": 150,
+      "health": 100,
       "baseAttack": 14,
       "armour": 8,
       "tier": "BOSS",

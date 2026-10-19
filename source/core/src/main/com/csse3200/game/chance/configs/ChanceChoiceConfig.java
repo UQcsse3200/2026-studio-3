@@ -12,5 +12,7 @@ public class ChanceChoiceConfig {
   public ChanceOutcomeConfig outcome;
 
   /** Required by the JSON deserialiser. */
-  public ChanceChoiceConfig() {}
+  public ChanceChoiceConfig() {
+    // Default constructor required for LibGDX JSON deserialisation.
+  }
 }
