@@ -14,7 +14,7 @@ import com.csse3200.game.ui.UIComponent;
 public class StatsDisplay extends UIComponent {
 
   private static final String STYLE_NAME_WHITE = "white";
-  private static final float FONT_SCALE = 0.75f;
+  private static final float FONT_SCALE = 1f;
   private static final float HEALTH_BAR_HEIGHT = 20f;
   private static final float HEALTH_BAR_WIDTH = 150f;
   private static final float CELL_SIZE = 60f;
@@ -226,6 +226,10 @@ public class StatsDisplay extends UIComponent {
    * @param armour the amount of armour the entity has
    */
   public void updateArmourVisibility(int armour) {
+    if (armourCell == null) {
+      return;
+    }
+
     if (armour > 0) {
       armourCell.setActor(armourStack);
       armourCell.size(CELL_SIZE);
@@ -242,6 +246,9 @@ public class StatsDisplay extends UIComponent {
    * @param block the amount of block the entity has
    */
   public void updateBlockVisibility(int block) {
+    if (blockCell == null) {
+      return;
+    }
     int armour = entity.getComponent(CombatStatsComponent.class).getArmour();
     if (block > 0 && armour <= 0) {
       blockCell.setActor(blockStack);
@@ -250,6 +257,19 @@ public class StatsDisplay extends UIComponent {
       blockCell.setActor(null);
       blockCell.size(0f);
     }
+  }
+
+  /** Read-only live health display for tutorial anchoring and resolution observation. */
+  public Label getHealthLabel() {
+    return healthLabel;
+  }
+
+  public Label getArmourLabel() {
+    return armourLabel;
+  }
+
+  public Label getBlockLabel() {
+    return blockLabel;
   }
 
   @Override
