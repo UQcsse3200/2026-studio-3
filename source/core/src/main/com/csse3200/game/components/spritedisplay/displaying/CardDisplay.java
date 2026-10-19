@@ -2,12 +2,18 @@ package com.csse3200.game.components.spritedisplay.displaying;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 
-@Deprecated
+/**
+ * @deprecated Legacy demo card display superseded by the battle card UI.
+ */
+@Deprecated(since = "1.0")
 public class CardDisplay extends Displaying {
 
   private final Label text;
 
-  @Deprecated
+  /**
+   * @deprecated Legacy demo card display constructor superseded by the battle card UI.
+   */
+  @Deprecated(since = "1.0")
   public CardDisplay(DisplayingRecord rec) {
     super(rec);
     this.text = getLabel(); // Get the text from the superclass
