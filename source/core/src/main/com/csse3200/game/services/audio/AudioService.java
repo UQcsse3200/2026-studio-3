@@ -1,5 +1,11 @@
 package com.csse3200.game.services.audio;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -15,11 +21,6 @@ import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
 
 public class AudioService {
 
@@ -308,12 +309,9 @@ public class AudioService {
       case BATTLE_SCREEN -> startPlaylist(battlePlaylist(currentRoom(run)));
       case TUTORIAL_BATTLE -> startPlaylist(Playlist.BATTLE);
       case ENCOUNTER -> {
-        // Events keep the map music, only shops change it
-        switch (currentRoom(run)) {
-          case SHOP -> startPlaylist(Playlist.SHOP);
-          default -> {
-            // Keep the map music for other encounters
-          }
+        // events keep the map music, only shops change it
+        if (currentRoom(run) == RoomType.SHOP) {
+          startPlaylist(Playlist.SHOP);
         }
       }
       case LIBRARY, CARD_LIBRARY, ITEM_LIBRARY, BESTIARY -> startPlaylist(Playlist.LIBRARY);
