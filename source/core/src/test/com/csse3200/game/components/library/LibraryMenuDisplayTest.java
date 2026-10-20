@@ -1,5 +1,6 @@
 package com.csse3200.game.components.library;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -8,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
@@ -192,6 +194,46 @@ class LibraryMenuDisplayTest {
   }
 
   @Test
+  void enterRemainsHandledWhenActivationDisposesTheDisplay() {
+    assertActivationRemainsHandledAfterDisposal(Input.Keys.ENTER);
+  }
+
+  @Test
+  void spaceRemainsHandledWhenActivationDisposesTheDisplay() {
+    assertActivationRemainsHandledAfterDisposal(Input.Keys.SPACE);
+  }
+
+  private void assertActivationRemainsHandledAfterDisposal(int key) {
+    display.handleKey(Input.Keys.DOWN);
+    doAnswer(
+            invocation -> {
+              display.dispose();
+              return null;
+            })
+        .when(game)
+        .setScreen(GdxGame.ScreenType.CARD_LIBRARY);
+
+    assertTrue(display.handleKey(key), Input.Keys.toString(key));
+    assertEquals(-1, display.getSelectedIndex());
+    verify(game).setScreen(GdxGame.ScreenType.CARD_LIBRARY);
+  }
+
+  @Test
+  void escapeRemainsHandledWhenActivationDisposesTheDisplay() {
+    doAnswer(
+            invocation -> {
+              display.dispose();
+              return null;
+            })
+        .when(game)
+        .setScreen(GdxGame.ScreenType.MAIN_MENU);
+
+    assertTrue(display.handleKey(Input.Keys.ESCAPE));
+    assertEquals(-1, display.getSelectedIndex());
+    verify(game).setScreen(GdxGame.ScreenType.MAIN_MENU);
+  }
+
+  @Test
   void mouseEntryThenDownContinuesFromHoveredButtonWithoutChangingHoverSound() {
     try (MockedStatic<AudioService> audio = mockStatic(AudioService.class)) {
       InputEvent enter = new InputEvent();
@@ -211,6 +253,17 @@ class LibraryMenuDisplayTest {
     assertFalse(press(Input.Keys.F));
     assertEquals(-1, display.getSelectedIndex());
     verifyNoInteractions(game);
+  }
+
+  @Test
+  void disposingTwiceDoesNotThrowAndClearsSelection() {
+    display.handleKey(Input.Keys.DOWN);
+    assertDoesNotThrow(
+        () -> {
+          display.dispose();
+          display.dispose();
+        });
+    assertEquals(-1, display.getSelectedIndex());
   }
 
   @Test

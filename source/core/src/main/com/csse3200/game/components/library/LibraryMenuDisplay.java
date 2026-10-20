@@ -265,8 +265,10 @@ public class LibraryMenuDisplay extends UIComponent {
         return true;
       }
       case Input.Keys.ENTER, Input.Keys.SPACE -> {
-        if (selectedIndex >= 0) activateButton(selectedIndex);
-        return selectedIndex >= 0;
+        int index = selectedIndex;
+        if (index < 0) return false;
+        activateButton(index);
+        return true;
       }
       case Input.Keys.ESCAPE -> {
         activateButton(menuButtons.size() - 1);
@@ -302,13 +304,14 @@ public class LibraryMenuDisplay extends UIComponent {
     if (rootStack != null) {
       Actor focus = stage.getKeyboardFocus();
       if (focus != null && focus.isDescendantOf(rootStack)) stage.setKeyboardFocus(null);
-      rootStack.removeListener(keyboardListener);
+      if (keyboardListener != null) rootStack.removeListener(keyboardListener);
       for (int i = 0; i < menuButtons.size(); i++) {
         menuButtons.get(i).setStyle(originalStyles.get(i));
         menuButtons.get(i).clearListeners();
       }
       rootStack.remove();
       rootStack.clear();
+      rootStack = null;
     }
     menuButtons.clear();
     originalStyles.clear();
