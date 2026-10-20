@@ -36,7 +36,6 @@ public class AudioService {
   private static SoundId lastSound = SoundId.MENU_HOVER;
   private static long cooldownTimestamp;
   private static float musicVolume = 0.5f;
-  private static boolean soundEffectsOn = true;
   private static float soundEffectsVolume = 1f;
   private static Playlist nowPlaying;
   private static Music heldTrack;
@@ -84,7 +83,6 @@ public class AudioService {
     "sounds/defeat.ogg",
   };
   private static final String[] musicPaths = {
-    "music/BGM_03_mp3.mp3",
     "music/menuHearthlight.ogg",
     "music/menuStorybook.ogg",
     "music/menuHeroesGate.ogg",
@@ -184,10 +182,6 @@ public class AudioService {
    */
   public static void playSound(SoundId soundID, float volume) {
 
-    if (!soundEffectsOn) {
-      return;
-    }
-
     // No resource service (as in tests) or the sound isn't loaded: skip rather than crash.
     ResourceService resources = ServiceLocator.getResourceService();
     if (resources == null) {
@@ -258,16 +252,7 @@ public class AudioService {
     return musicStore.getAsset(path, Music.class);
   }
 
-  /** Pauses the currently playing music track. */
-  public static void pauseMusic() {
-
-    playing.pause();
-  }
-
-  /**
-   * Stops the music completely, unlike {@link #pauseMusic()} which can carry on from the same spot.
-   * Songs that are still fading out stop straight away too.
-   */
+  /** Stops the music completely. Songs that are still fading out stop straight away too. */
   public static void stopMusic() {
     if (playing != null) {
       playing.stop();
@@ -278,12 +263,6 @@ public class AudioService {
     }
     fades.clear();
     nowPlaying = null;
-  }
-
-  /** Sets whether the currently playing song is looping. */
-  public static void setMusicLooping(boolean looping) {
-
-    playing.setLooping(looping);
   }
 
   /**
@@ -298,24 +277,6 @@ public class AudioService {
     if (playing != null) {
       playing.setVolume(musicVolume);
     }
-  }
-
-  /**
-   * Switches all sound effects on or off. Music isn't affected, it has its own volume.
-   *
-   * @param on true to play sound effects
-   */
-  public static void setSoundEffectsOn(boolean on) {
-    soundEffectsOn = on;
-  }
-
-  /**
-   * Whether sound effects are switched on.
-   *
-   * @return false if they have been turned off in the settings
-   */
-  public static boolean areSoundEffectsOn() {
-    return soundEffectsOn;
   }
 
   /**
@@ -604,7 +565,6 @@ public class AudioService {
     lastSound = SoundId.MENU_HOVER;
     cooldownTimestamp = 0;
     musicVolume = 0.5f;
-    soundEffectsOn = true;
     soundEffectsVolume = 1f;
     heldTrack = null;
     gamePaused = false;

@@ -525,25 +525,6 @@ class AudioServiceTest {
   }
 
   @Test
-  void soundEffectsCanBeSwitchedOff() {
-    AudioService.setSoundEffectsOn(false);
-
-    AudioService.playSound(SoundId.ERROR, 0.5f);
-
-    assertFalse(AudioService.areSoundEffectsOn());
-    assertTrue(sounds.isEmpty());
-  }
-
-  @Test
-  void musicStillPlaysWithSoundEffectsOff() {
-    AudioService.setSoundEffectsOn(false);
-
-    AudioService.onScreenChanged(ScreenType.MAIN_MENU);
-
-    verify(tracks.get(lastStarted())).play();
-  }
-
-  @Test
   void pausingSwapsToThePauseMusic() {
     AudioService.onScreenChanged(ScreenType.MAP);
     Music mapTrack = tracks.get(lastStarted());
