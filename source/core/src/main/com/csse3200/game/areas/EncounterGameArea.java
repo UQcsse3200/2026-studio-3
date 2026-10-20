@@ -58,6 +58,7 @@ public class EncounterGameArea extends GameArea {
     "images/energy.png",
     "images/level.png",
     "images/money.png",
+    "images/effects/shield.png",
     // PlayerStatsDisplay's armour icon; the player HUD is also shown in shops and events.
     "images/armour.png",
     ShopDisplay.BACKGROUND_TEXTURE,
@@ -91,6 +92,7 @@ public class EncounterGameArea extends GameArea {
   private final String forcedEventId;
   private CardFusionEncounterFlow cardFusionEncounterFlow;
   private ChanceEncounterDisplay chanceDisplay;
+  private boolean capturePlayerStateOnDispose = true;
 
   /**
    * Creates the standalone Shop preview used by the legacy MainGameScreen shortcut.
@@ -103,8 +105,9 @@ public class EncounterGameArea extends GameArea {
         terrainFactory,
         ShopEncounter.DEFAULT_NODE_ID,
         RoomType.SHOP,
-        (nodeId, success) ->
-            logger.debug("Standalone shop completed for node {} with success={}", nodeId, success),
+        (completedNodeId, success) ->
+            logger.debug(
+                "Standalone shop completed for node {} with success={}", completedNodeId, success),
         null,
         null,
         runState);
@@ -371,11 +374,16 @@ public class EncounterGameArea extends GameArea {
    */
   @Override
   public void dispose() {
-    if (player != null) {
+    if (capturePlayerStateOnDispose && player != null) {
       runState.getOrCreatePlayerState().captureFrom(player);
     }
 
     super.dispose();
     unloadAssets();
+  }
+
+  /** Prevents this encounter's older live player entity from overwriting a restored save. */
+  public void skipPlayerStateCaptureOnDispose() {
+    capturePlayerStateOnDispose = false;
   }
 }

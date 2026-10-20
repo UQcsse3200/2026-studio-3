@@ -22,7 +22,11 @@ import org.slf4j.LoggerFactory;
 public class LibraryScreen extends ScreenAdapter {
   private static final Logger logger = LoggerFactory.getLogger(LibraryScreen.class);
   private static final String[] LIBRARY_TEXTURES = {
-    MainMenuDisplay.BACKGROUND_TEXTURE, MainMenuDisplay.BUTTON_FRAME_TEXTURE
+    MainMenuDisplay.BACKGROUND_TEXTURE,
+    MainMenuDisplay.BUTTON_FRAME_TEXTURE,
+    LibraryMenuDisplay.CARD_BUTTON_TEXTURE,
+    LibraryMenuDisplay.ENEMY_BUTTON_TEXTURE,
+    LibraryMenuDisplay.ITEM_BUTTON_TEXTURE
   };
 
   private final GdxGame game;

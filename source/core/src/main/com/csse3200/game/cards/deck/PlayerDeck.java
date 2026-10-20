@@ -170,14 +170,7 @@ public class PlayerDeck {
    * @return true if that exact copy was removed, otherwise false
    */
   public boolean removeCardInstance(String instanceId) {
-    String validInstanceId = validateId(instanceId, INSTANCE_ID);
-    for (int i = 0; i < cards.size(); i++) {
-      if (cards.get(i).instanceId().equals(validInstanceId)) {
-        cards.remove(i);
-        return true;
-      }
-    }
-    return false;
+    return removeCard(instanceId);
   }
 
   /**
@@ -224,11 +217,7 @@ public class PlayerDeck {
    * @return immutable list of card IDs
    */
   public List<String> getCardIds() {
-    List<String> cardIds = new ArrayList<>(cards.size());
-    for (CardInstance card : cards) {
-      cardIds.add(card.cardId());
-    }
-    return List.copyOf(cardIds);
+    return cards.stream().map(CardInstance::cardId).toList();
   }
 
   /**

@@ -81,9 +81,9 @@ public class PlayerStatsTopDisplay extends UIComponent {
     // Health text
     int currentHealth = entity.getComponent(CombatStatsComponent.class).getHealth();
     int maxHealth = entity.getComponent(CombatStatsComponent.class).getMaxHealth();
-    CharSequence healthText = String.format("%d / %d", currentHealth, maxHealth);
-    healthLabel = new Label(healthText, skin, STYLE_NAME_LARGE);
-    healthLabel.setFontScale(FONT_SCALE);
+    healthLabel =
+        createLabel(
+            String.format("%d / %d", currentHealth, maxHealth), new Color(0.75f, 0.18f, 0.16f, 1f));
 
     // Money image
     moneyImage =
@@ -92,8 +92,8 @@ public class PlayerStatsTopDisplay extends UIComponent {
     // Money text
     InventoryComponent inventoryComponent = entity.getComponent(InventoryComponent.class);
     int money = inventoryComponent.getGold();
-    CharSequence moneyText = String.format("$%d", money);
-    moneyLabel = new Label(moneyText, skin, STYLE_NAME_LARGE);
+
+    moneyLabel = createLabel(String.format("$%d", money), new Color(0.95f, 0.73f, 0.28f, 1f));
     moneyLabel.setFontScale(FONT_SCALE);
 
     // level table
@@ -104,8 +104,9 @@ public class PlayerStatsTopDisplay extends UIComponent {
         new Image(ServiceLocator.getResourceService().getAsset("images/level.png", Texture.class));
 
     // Level text
-    String levelText = String.format("%d", runState.getMapProgression());
-    levelLabel = new Label(levelText, skin, STYLE_NAME_LARGE);
+    levelLabel =
+        createLabel(
+            String.format("%d", runState.getMapProgression()), new Color(0.95f, 0.73f, 0.28f, 1f));
     levelLabel.setFontScale(FONT_SCALE);
 
     // add stats to the gold and health table
@@ -125,6 +126,24 @@ public class PlayerStatsTopDisplay extends UIComponent {
     stage.addActor(playerImage);
   }
 
+  /**
+   * Creates a label
+   *
+   * @param text the text shown in the label
+   * @param fontColour the font colour of the text
+   * @return the new label
+   */
+  private Label createLabel(String text, Color fontColour) {
+    Label.LabelStyle labelStyle =
+        new Label.LabelStyle(skin.get(STYLE_NAME_LARGE, Label.LabelStyle.class));
+
+    labelStyle.fontColor = fontColour;
+
+    Label label = new Label(text, labelStyle);
+    label.setFontScale(FONT_SCALE);
+    return label;
+  }
+
   @Override
   public void draw(SpriteBatch batch) {
     // draw is handled by the stage
@@ -142,7 +161,7 @@ public class PlayerStatsTopDisplay extends UIComponent {
   }
 
   /**
-   * s* Updates the player's level on the ui.
+   * Updates the player's level on the ui.
    *
    * @param level player's current level
    */

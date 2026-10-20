@@ -268,16 +268,16 @@ class CardEffectHandlerTest {
   void fullyCancelledStrengthGainKeepsExistingStrength() {
     CombatStatsComponent stats = new CombatStatsComponent(100, 5);
     Entity player = new Entity().addComponent(stats);
-    CardEffectHandler handler = new CardEffectHandler();
+    CardEffectHandler strengthHandler = new CardEffectHandler();
     new BrandOfTheDamnedEffect().apply(player);
 
-    handler.applyPlayerEffects(
+    strengthHandler.applyPlayerEffects(
         List.of(
             new ResolvedCardEffect("inner_focus", EffectType.STRENGTH, TargetType.SELF, 2, 0, 0)),
         player);
     assertEquals(1, stats.getStatusEffect("STRENGTH").getValue());
 
-    handler.applyPlayerEffects(
+    strengthHandler.applyPlayerEffects(
         List.of(
             new ResolvedCardEffect("astral_ward", EffectType.STRENGTH, TargetType.SELF, 1, 0, 0)),
         player);

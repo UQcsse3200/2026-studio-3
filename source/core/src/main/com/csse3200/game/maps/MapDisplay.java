@@ -33,7 +33,7 @@ public class MapDisplay extends UIComponent {
   private final RunState runState;
   private final MapInputHandler mapInputHandler;
   private final MapSelectionController mapSelectionController;
-  private static final String LARGE = "large";
+  private static final String STYLE_NAME_LARGE = "large";
   private static final String[] mapAssets = {
     "images/map/combat.png",
     "images/map/combat_elite.png",
@@ -240,8 +240,8 @@ public class MapDisplay extends UIComponent {
   private void addPlayerStats() {
     playerTable = new Table();
 
-    playerTable.setSize(UI_WIDTH, 100);
-    playerTable.setPosition(0, UI_HEIGHT - 100);
+    playerTable.setSize(UI_WIDTH, 50);
+    playerTable.setPosition(0, UI_HEIGHT - 50);
     playerTable.setBackground(skin.newDrawable("color", new Color(0.105f, 0.070f, 0.065f, 0.98f)));
     playerTable.setDebug(false); // for testing
     playerTable.left();
@@ -280,7 +280,8 @@ public class MapDisplay extends UIComponent {
     }
 
     String healthText = String.format("%d / %d", currentHealth, maxHealth);
-    Label.LabelStyle healthStyle = new Label.LabelStyle(skin.get(LARGE, Label.LabelStyle.class));
+    Label.LabelStyle healthStyle =
+        new Label.LabelStyle(skin.get(STYLE_NAME_LARGE, Label.LabelStyle.class));
     healthStyle.fontColor = new Color(0.75f, 0.18f, 0.16f, 1f);
 
     Label healthLabel = new Label(healthText, healthStyle);
@@ -303,7 +304,8 @@ public class MapDisplay extends UIComponent {
       money = stats.gold;
     }
 
-    Label.LabelStyle moneyStyle = new Label.LabelStyle(skin.get(LARGE, Label.LabelStyle.class));
+    Label.LabelStyle moneyStyle =
+        new Label.LabelStyle(skin.get(STYLE_NAME_LARGE, Label.LabelStyle.class));
     moneyStyle.fontColor = new Color(0.95f, 0.73f, 0.28f, 1f);
     String moneyText = String.format("$%d", money);
     Label moneyLabel = new Label(moneyText, moneyStyle);
@@ -314,7 +316,8 @@ public class MapDisplay extends UIComponent {
         new Image(ServiceLocator.getResourceService().getAsset("images/level.png", Texture.class));
 
     // Level text
-    Label.LabelStyle levelStyle = new Label.LabelStyle(skin.get(LARGE, Label.LabelStyle.class));
+    Label.LabelStyle levelStyle =
+        new Label.LabelStyle(skin.get(STYLE_NAME_LARGE, Label.LabelStyle.class));
     levelStyle.fontColor = new Color(0.95f, 0.73f, 0.28f, 1f);
     String levelText = String.format("%d", mapGraph.getCurrentNode().getHeight());
     Label levelLabel = new Label(levelText, levelStyle);
@@ -365,8 +368,8 @@ public class MapDisplay extends UIComponent {
     if (playerTable != null) {
       float sideExtension = extraWidth / 2f;
 
-      playerTable.setSize(width + extraWidth, 100f);
-      playerTable.setPosition(-sideExtension, height - 100f);
+      playerTable.setSize(width + extraWidth, 50);
+      playerTable.setPosition(-sideExtension, height - 50);
 
       // Keep stats 15 units inside the original 1280 area
       playerTable.padLeft(sideExtension + 15f);

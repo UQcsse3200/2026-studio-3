@@ -97,7 +97,12 @@ public class EndBattleScreen extends ScreenAdapter {
       displays = new DisplayingFactory(Path.of("sprites/EndBattle.json"));
       ui.addComponent(displays);
       RewardService rewardService =
-          new RewardService(new RewardGenerator(), cardLibrary, profile, new Random());
+          new RewardService(
+              new RewardGenerator(),
+              cardLibrary,
+              profile,
+              new Random(),
+              game.getItemAcquisitionService());
       DisplayingRecord rewardRecord =
           DisplayingRecord.builder("").position(0, 500).variant("reward").build();
       rewardDisplay =

@@ -9,6 +9,14 @@ import java.util.Objects;
 
 /** Controls presentation-only animation for the post-battle victory reward screen. */
 final class VictoryAnimationController {
+  record AnimationElements(
+      List<? extends Actor> titleLetters,
+      Actor subtitle,
+      Actor sunPulse,
+      List<? extends Actor> wings,
+      List<? extends Actor> particles,
+      List<? extends Actor> rewardCards) {}
+
   enum State {
     INITIAL,
     ENTERING,
@@ -51,58 +59,22 @@ final class VictoryAnimationController {
         scrim,
         panel,
         title,
-        List.of(title),
-        new Actor(),
-        new Actor(),
-        List.of(),
-        List.of(),
-        rewardCards);
+        new AnimationElements(
+            List.of(title), new Actor(), new Actor(), List.of(), List.of(), rewardCards));
   }
 
   VictoryAnimationController(
-      Actor background,
-      Actor scrim,
-      Actor panel,
-      Actor title,
-      List<? extends Actor> titleLetters,
-      Actor subtitle,
-      Actor sunPulse,
-      List<? extends Actor> particles,
-      List<? extends Actor> rewardCards) {
-    this(
-        background,
-        scrim,
-        panel,
-        title,
-        titleLetters,
-        subtitle,
-        sunPulse,
-        List.of(),
-        particles,
-        rewardCards);
-  }
-
-  VictoryAnimationController(
-      Actor background,
-      Actor scrim,
-      Actor panel,
-      Actor title,
-      List<? extends Actor> titleLetters,
-      Actor subtitle,
-      Actor sunPulse,
-      List<? extends Actor> wings,
-      List<? extends Actor> particles,
-      List<? extends Actor> rewardCards) {
+      Actor background, Actor scrim, Actor panel, Actor title, AnimationElements elements) {
     this.background = Objects.requireNonNull(background, "background cannot be null");
     this.scrim = Objects.requireNonNull(scrim, "scrim cannot be null");
     this.panel = Objects.requireNonNull(panel, "panel cannot be null");
     this.title = Objects.requireNonNull(title, "title cannot be null");
-    this.titleLetters = List.copyOf(titleLetters);
-    this.subtitle = Objects.requireNonNull(subtitle, "subtitle cannot be null");
-    this.sunPulse = Objects.requireNonNull(sunPulse, "sunPulse cannot be null");
-    this.wings = List.copyOf(wings);
-    this.particles = List.copyOf(particles);
-    this.rewardCards = List.copyOf(rewardCards);
+    this.titleLetters = List.copyOf(elements.titleLetters());
+    this.subtitle = Objects.requireNonNull(elements.subtitle(), "subtitle cannot be null");
+    this.sunPulse = Objects.requireNonNull(elements.sunPulse(), "sunPulse cannot be null");
+    this.wings = List.copyOf(elements.wings());
+    this.particles = List.copyOf(elements.particles());
+    this.rewardCards = List.copyOf(elements.rewardCards());
   }
 
   /** Starts the entrance sequence once. Repeated calls are ignored. */

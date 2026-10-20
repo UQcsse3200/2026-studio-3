@@ -62,7 +62,7 @@ public class BattleLogDisplay extends Displaying {
     if (label.getStage() == null) {
       return;
     }
-    float maxWidth = label.getStage().getViewport().getWorldWidth() / 1.75f;
+    float maxWidth = label.getStage().getViewport().getWorldWidth() / 1.5f;
 
     label.setText(String.valueOf(payload));
     label.setWrap(true);

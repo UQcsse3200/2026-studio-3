@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * flow, while SHOP nodes launch the Shop encounter flow. Completion is reported back to the same
  * RunState before returning to the map.
  */
-public class EncounterScreen extends ScreenAdapter {
+public class EncounterScreen extends ScreenAdapter implements LoadedSaveTransitionAware {
   private static final Logger logger = LoggerFactory.getLogger(EncounterScreen.class);
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 7.5f);
   private final String[] cardTexturePaths;
@@ -144,7 +144,7 @@ public class EncounterScreen extends ScreenAdapter {
     inputEntity.addComponent(new InputDecorator(ServiceLocator.getRenderService().getStage(), 10));
 
     // Pause menu + in-place save/load overlay.
-    SaveLoadPanel savePanel = PauseMenuFactory.attach(inputEntity, game);
+    SaveLoadPanel savePanel = PauseMenuFactory.attachLoadOnly(inputEntity, game);
     ServiceLocator.getEntityService().register(inputEntity);
     savePanel.hide(); // save overlay starts hidden, opened by the Save & Load button
   }
@@ -238,5 +238,10 @@ public class EncounterScreen extends ScreenAdapter {
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getResourceService().unloadAssets(cardTexturePaths);
+  }
+
+  @Override
+  public void prepareForLoadedSaveTransition() {
+    encounterGameArea.skipPlayerStateCaptureOnDispose();
   }
 }
