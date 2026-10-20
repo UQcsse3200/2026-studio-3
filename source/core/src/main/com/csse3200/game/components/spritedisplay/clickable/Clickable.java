@@ -19,8 +19,6 @@ import com.csse3200.game.components.Component;
 import com.csse3200.game.events.listeners.EventListener;
 import com.csse3200.game.events.listeners.EventListener0;
 import com.csse3200.game.events.listeners.EventListener2;
-import com.csse3200.game.services.audio.AudioService;
-import com.csse3200.game.services.audio.SoundId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -165,7 +163,6 @@ public abstract class Clickable extends Component {
           @Override
           public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
             onEnter();
-            AudioService.playSound(SoundId.CARD_HOVER, 0.5f);
           }
 
           @Override

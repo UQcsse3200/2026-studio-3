@@ -33,6 +33,8 @@ import com.csse3200.game.rewards.RewardService;
 import com.csse3200.game.rewards.RewardType;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.ui.ItemArtwork;
 import com.csse3200.game.ui.ItemIconView;
 import java.util.ArrayList;
@@ -417,6 +419,7 @@ public class RewardDisplay extends Displaying {
 
           @Override
           public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+            AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
             frame.setColor(1f, 0.88f, 0.58f, 1f);
             if (victoryAnimationController != null) {
               victoryAnimationController.showHover(card);
@@ -657,6 +660,11 @@ public class RewardDisplay extends Displaying {
               event.stop();
               return true;
             }
+
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+              AudioService.playSound(SoundId.CARD_HOVER, 0.7f);
+            }
           });
       cardChoiceButtons.add(cardButton);
       cardWidgets.add(widget);
@@ -713,6 +721,15 @@ public class RewardDisplay extends Displaying {
     }
     rewardClaimFeedback.play(
         type, new TextureRegion(art), source, amount, () -> feedbackFinished = true);
+
+    switch (type) {
+      case CARD:
+        AudioService.playSound(SoundId.CARD_SHUFFLE, 0.5f);
+      case GOLD:
+        AudioService.playSound(SoundId.ITEM_PURCHASE, 0.5f);
+      case ITEM:
+        AudioService.playSound(SoundId.ITEM_PICKUP, 0.5f);
+    }
   }
 
   private Actor rewardOptionActor(RewardOption option) {

@@ -6,8 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton;
@@ -80,6 +79,8 @@ import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.tutorial.BattleTutorialComponent;
 import com.csse3200.game.tutorial.BattleTutorialController;
 import com.csse3200.game.tutorial.BattleTutorialGuidanceView;
@@ -930,6 +931,16 @@ public class BattleScreen extends ScreenAdapter {
     }
 
     for (Clickable clickable : uiFactory.getByTrigger(PLAY_CARD_TRIGGER)) {
+      clickable
+          .getBtn()
+          .addListener(
+              new InputListener() {
+                @Override
+                public void enter(
+                    InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                  AudioService.playSound(SoundId.CARD_HOVER, 0.5f);
+                }
+              });
       installHandCardWidget(clickable, instancesById);
     }
   }

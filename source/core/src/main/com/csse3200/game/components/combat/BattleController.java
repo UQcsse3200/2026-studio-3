@@ -984,6 +984,8 @@ public class BattleController {
       }
     }
 
+    AudioService.playSound(SoundId.BIG_CLICK, 0.3f);
+
     handle(BattleEvent.PLAYER_TURN_ENDED);
   }
 

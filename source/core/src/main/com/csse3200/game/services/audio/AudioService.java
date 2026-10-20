@@ -71,6 +71,8 @@ public class AudioService {
     "sounds/victory.ogg",
     "sounds/buttonClick.ogg",
     "sounds/defeat.ogg",
+    "sounds/bigClick.mp3",
+    "sounds/cardClick.mp3"
   };
   private static final String[] musicPaths = {
     "music/BGM_03_mp3.mp3",
@@ -231,7 +233,7 @@ public class AudioService {
    */
   public static void setMusicVolume(float volume) {
 
-    musicVolume = Math.max(0f, Math.min(1f, volume));
+    musicVolume = Math.clamp(volume, 0f, 1f);
     if (playing != null) {
       playing.setVolume(musicVolume);
     }
@@ -373,7 +375,7 @@ public class AudioService {
    */
   private static void applyVolumes(float music, float soundEffects) {
     setMusicVolume(music * FULL_MUSIC_VOLUME);
-    soundEffectsVolume = Math.max(0f, Math.min(1f, soundEffects));
+    soundEffectsVolume = Math.clamp(soundEffects, 0f, 1f);
   }
 
   private static Playlist battlePlaylist(RoomType room) {
