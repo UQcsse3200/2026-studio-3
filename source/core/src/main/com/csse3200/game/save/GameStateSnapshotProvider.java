@@ -124,6 +124,7 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
     List<MapNodeSaveData> nodeSnapshots = new ArrayList<>();
     MapGraph mapGraph = runState.getMapGraph();
 
+    assert mapGraph != null;
     for (MapNode node : mapGraph.getNodes().values()) {
       List<Integer> connectionIds = node.getConnections().stream().map(MapNode::getNodeId).toList();
       nodeSnapshots.add(
