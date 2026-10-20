@@ -189,7 +189,7 @@ public class InventoryPopupComponent extends UIComponent {
     List<ItemType> ownedItems = playerState.getOwnedItems();
     List<ItemType> itemTypes = distinctInOrder(ownedItems);
     float listHeight =
-        Math.max(1, Math.min(itemTypes.size(), MAX_VISIBLE_ROWS)) * (ROW_HEIGHT + ROW_SPACING);
+        Math.clamp(itemTypes.size(), 1, MAX_VISIBLE_ROWS) * (ROW_HEIGHT + ROW_SPACING);
 
     Table header = new Table();
     header.add().width(30f);
@@ -310,11 +310,11 @@ public class InventoryPopupComponent extends UIComponent {
     Color statusColour = item.isCurse() ? CURSE_COLOUR : GOLD_COLOUR;
 
     Table border = new Table();
-    border.setBackground(skin.newDrawable("white", ROW_BORDER_COLOUR));
+    border.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR));
     border.pad(2f);
 
     Table badge = new Table();
-    badge.setBackground(skin.newDrawable("white", ROW_BACKGROUND_COLOUR));
+    badge.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_BACKGROUND_COLOUR));
     badge.add(new Label(status, smallLabelStyle(statusColour))).center();
 
     border.add(badge).grow();
@@ -344,7 +344,7 @@ public class InventoryPopupComponent extends UIComponent {
     style.checkedOver = style.over;
 
     TextButton button = new TextButton("USE", style);
-    button.setDisabled(!canUseItemNow(item));
+    button.setDisabled(canUseItemNow(item));
     Table border = new Table();
     border.setBackground(
         skin.newDrawable(
@@ -362,7 +362,7 @@ public class InventoryPopupComponent extends UIComponent {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
-            if (!canUseItemNow(item)) {
+            if (canUseItemNow(item)) {
               button.setDisabled(true);
               border.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR));
               return;
@@ -386,16 +386,16 @@ public class InventoryPopupComponent extends UIComponent {
 
   private boolean canUseItemNow(ItemType item) {
     if (useActionInProgress || !canUseBattleItems.getAsBoolean()) {
-      return false;
-    }
-    if (item != ItemType.AMBROSIA_FLASK) {
       return true;
     }
-    if (player == null) {
+    if (item != ItemType.AMBROSIA_FLASK) {
       return false;
     }
+    if (player == null) {
+      return true;
+    }
     CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
-    return stats != null && stats.getHealth() < stats.getMaxHealth();
+    return stats == null || stats.getHealth() >= stats.getMaxHealth();
   }
 
   private static int effectValue(ItemType item, CombatStatsComponent stats) {

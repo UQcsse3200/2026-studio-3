@@ -1,10 +1,13 @@
 package com.csse3200.game.components.spritedisplay.displaying;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.csse3200.game.services.ServiceLocator;
 
 /**
  * A short, self-dismissing line describing the most recent battle action, so the player sees "you
@@ -18,10 +21,7 @@ public class BattleLogDisplay extends Displaying {
   private static final float FADE_IN = 0.15f;
   private static final float HOLD = 2.5f;
   private static final float FADE_OUT = 0.4f;
-  private static final Color BATTLE_LOG_FONT_COLOUR =
-      new Color(0.8588235294117647f, 0.7450980392156863f, 0.6313725490196078f, 1);
-  private static final Color BATTLE_LOG_BACKGROUND_COLOUR =
-      new Color(0.105f, 0.070f, 0.065f, 0.98f);
+  private static final Color FONT_COLOR = Color.valueOf("E8C894");
 
   public BattleLogDisplay(DisplayingRecord rec) {
     super(rec);
@@ -31,13 +31,21 @@ public class BattleLogDisplay extends Displaying {
   public void create() {
     super.create();
 
-    // creating a backdrop for the text so it can be seen against backgrounds of all colours
     Label.LabelStyle style = new Label.LabelStyle(label.getStyle());
-    style.background = skin.newDrawable("color", BATTLE_LOG_BACKGROUND_COLOUR);
-    label.setStyle(style);
+    style.font = skin.getFont("button");
+    style.fontColor = FONT_COLOR;
 
-    label.getStyle().fontColor = BATTLE_LOG_FONT_COLOUR;
-    label.setColor(BATTLE_LOG_FONT_COLOUR);
+    Texture panelTexture =
+        ServiceLocator.getResourceService()
+            .getAsset("images/ui/inventory-panel.png", Texture.class);
+
+    TextureRegionDrawable panel = new TextureRegionDrawable(panelTexture);
+    panel.setMinWidth(0f);
+    panel.setMinHeight(0f);
+    style.background = panel;
+
+    label.setStyle(style);
+    label.setColor(Color.WHITE);
     label.getColor().a = 0f; // setting the alpha to 0 so it's invisible but still there
     label.setAlignment(Align.center);
 

@@ -12,5 +12,7 @@ public class ChanceOutcomeConfig {
   public String cardRewardId;
 
   /** Required by the JSON deserialiser. */
-  public ChanceOutcomeConfig() {}
+  public ChanceOutcomeConfig() {
+    // Default constructor required for LibGDX JSON deserialisation.
+  }
 }

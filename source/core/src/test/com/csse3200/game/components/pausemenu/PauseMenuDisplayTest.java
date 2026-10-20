@@ -323,6 +323,17 @@ class PauseMenuDisplayTest {
   }
 
   @Test
+  void navBackAtRootClosesMenu() {
+    nav(PauseMenuDisplay.PAUSE_EVENT);
+    assertTrue(display.isMenuVisible());
+
+    nav(PauseMenuDisplay.NAV_BACK_EVENT);
+
+    assertEquals(1, resumeCount.get());
+    assertFalse(display.isMenuVisible());
+  }
+
+  @Test
   void navBackCancelsConfirmDialogWithoutExiting() {
     nav(PauseMenuDisplay.PAUSE_EVENT);
     click(display.getReturnButton());
