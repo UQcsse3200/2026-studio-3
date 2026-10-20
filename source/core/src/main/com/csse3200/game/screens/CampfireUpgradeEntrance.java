@@ -287,7 +287,7 @@ final class CampfireUpgradeEntrance extends Group {
     }
 
     private void dot(Batch batch, float x, float y, float w, float h) {
-      pixel.draw(batch, (float) Math.round(x), (float) Math.round(y), w, h);
+      pixel.draw(batch, Math.round(x), Math.round(y), w, h);
     }
   }
 }

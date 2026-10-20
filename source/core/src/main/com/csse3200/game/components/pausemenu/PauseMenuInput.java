@@ -1,6 +1,7 @@
 package com.csse3200.game.components.pausemenu;
 
 import com.badlogic.gdx.Input.Keys;
+import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.input.InputComponent;
 import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.ServiceLocator;
@@ -13,9 +14,15 @@ import com.csse3200.game.services.ServiceLocator;
  */
 public class PauseMenuInput extends InputComponent {
   private static final int PAUSE_INPUT_PRIORITY = 100;
+  private final SaveLoadPanel saveLoadPanel;
 
   public PauseMenuInput() {
+    this(null);
+  }
+
+  public PauseMenuInput(SaveLoadPanel saveLoadPanel) {
     super(PAUSE_INPUT_PRIORITY);
+    this.saveLoadPanel = saveLoadPanel;
   }
 
   @Override
@@ -26,6 +33,22 @@ public class PauseMenuInput extends InputComponent {
         return true;
       }
       return false;
+    }
+
+    if (saveLoadPanel != null && saveLoadPanel.isLoadConfirmationVisible()) {
+      if (keycode == Keys.ENTER || keycode == Keys.SPACE) {
+        saveLoadPanel.confirmPendingLoad();
+      } else if (keycode == Keys.ESCAPE) {
+        saveLoadPanel.cancelPendingLoad();
+      }
+      return true;
+    }
+
+    if (saveLoadPanel != null && saveLoadPanel.isVisible()) {
+      if (keycode == Keys.ESCAPE) {
+        saveLoadPanel.navigateBack();
+      }
+      return true;
     }
 
     // Paused: keyboard-drive the menu, and consume everything else.

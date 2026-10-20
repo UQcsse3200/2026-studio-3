@@ -10,6 +10,8 @@ import com.csse3200.game.maps.MapGraph;
 import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.ItemDiscoveryService;
+import com.csse3200.game.rewards.ItemUnlockState;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +27,7 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
   private final RunState runState;
   private final BestiaryService bestiaryService;
   private final CardDiscoveryService cardDiscoveryService;
+  private final ItemDiscoveryService itemDiscoveryService;
 
   public GameStateSnapshotProvider(
       PlayerRunState playerState,
@@ -32,6 +35,22 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
       RunState runState,
       BestiaryService bestiaryService,
       CardDiscoveryService cardDiscoveryService) {
+    this(
+        playerState,
+        playerDeck,
+        runState,
+        bestiaryService,
+        cardDiscoveryService,
+        new ItemDiscoveryService());
+  }
+
+  public GameStateSnapshotProvider(
+      PlayerRunState playerState,
+      PlayerDeck playerDeck,
+      RunState runState,
+      BestiaryService bestiaryService,
+      CardDiscoveryService cardDiscoveryService,
+      ItemDiscoveryService itemDiscoveryService) {
     if (playerState == null) {
       throw new IllegalArgumentException("playerState must not be null");
     }
@@ -47,11 +66,15 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
     if (cardDiscoveryService == null) {
       throw new IllegalArgumentException("cardDiscoveryService must not be null");
     }
+    if (itemDiscoveryService == null) {
+      throw new IllegalArgumentException("itemDiscoveryService must not be null");
+    }
     this.playerState = playerState;
     this.playerDeck = playerDeck;
     this.runState = runState;
     this.bestiaryService = bestiaryService;
     this.cardDiscoveryService = cardDiscoveryService;
+    this.itemDiscoveryService = itemDiscoveryService;
   }
 
   @Override
@@ -143,8 +166,15 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
             .map(entry -> new CardProgressSaveData(entry.getKey(), entry.getValue().name()))
             .toList();
 
+    List<ItemProgressSaveData> itemProgress =
+        itemDiscoveryService.getProgressSnapshot().entrySet().stream()
+            .filter(entry -> entry.getValue() != ItemUnlockState.LOCKED)
+            .map(entry -> new ItemProgressSaveData(entry.getKey().name(), entry.getValue().name()))
+            .toList();
+
     ProgressSaveData progress =
-        new ProgressSaveData(pendingRewardId, resumeScreen, bestiaryProgress, cardProgress);
+        new ProgressSaveData(
+            pendingRewardId, resumeScreen, bestiaryProgress, cardProgress, itemProgress);
     progress.encounterSeed = runState.getEncounterSeed();
     progress.pendingEliteTempleReward = runState.hasPendingEliteTempleReward();
     progress.cardFusionUsed = runState.hasUsedCardFusion();

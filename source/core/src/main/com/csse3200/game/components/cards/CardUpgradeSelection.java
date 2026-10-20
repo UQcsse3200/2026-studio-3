@@ -7,12 +7,12 @@ import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.cards.runtime.CardResolver;
 import com.csse3200.game.cards.runtime.ResolvedCard;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /** Selects exact owned card copies for upgrade and builds resolved before/after previews. */
 public class CardUpgradeSelection {
@@ -57,11 +57,11 @@ public class CardUpgradeSelection {
       throw new IllegalStateException("Deck source returned null");
     }
     this.options = buildUpgradeOptions(List.copyOf(deck));
-    Set<String> selectableIds = new HashSet<>();
-    for (UpgradeOption card : options) {
-      selectableIds.add(card.instance().instanceId());
-    }
-    this.selectableInstanceIds = Set.copyOf(selectableIds);
+    this.selectableInstanceIds =
+        options.stream()
+            .map(UpgradeOption::instance)
+            .map(CardInstance::instanceId)
+            .collect(Collectors.toUnmodifiableSet());
     selected.clear();
   }
 

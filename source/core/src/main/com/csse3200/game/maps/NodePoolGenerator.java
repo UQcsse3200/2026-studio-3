@@ -24,7 +24,7 @@ public final class NodePoolGenerator {
     }
 
     int nodeCount = config.getNormalNodeCount();
-    Map<Integer, MapNode> nodes = new HashMap<>(nodeCount + 1);
+    Map<Integer, MapNode> nodes = HashMap.newHashMap(nodeCount + 1);
 
     // Using zero-based IDs here: 0 to nodeCount - 1.
     for (int index = 1; index < config.getNormalNodeCount(); index++) {

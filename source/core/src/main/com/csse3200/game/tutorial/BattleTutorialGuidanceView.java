@@ -198,6 +198,11 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
     this.dragActor = Objects.requireNonNull(dragActor);
   }
 
+  /** Whether a guided lesson currently owns battle input and the final overlay pass. */
+  public boolean isBlockingInput() {
+    return attached && prompt != null && prompt.step() != BattleTutorialController.Step.FREE_PLAY;
+  }
+
   @Override
   public void showResolvedDamage(int amount) {
     if (amount <= 0) return;
