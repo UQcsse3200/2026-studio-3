@@ -1,7 +1,6 @@
 package com.csse3200.game.maps;
 
 import com.csse3200.game.events.EventHandler;
-import java.util.ArrayList;
 import java.util.List;
 
 /** Handles player clicks on map nodes and requests moves through MapGraph. */
@@ -35,11 +34,7 @@ public class MapSelectionController {
    * @return ids of all currently selectable nodes
    */
   public List<Integer> getSelectableNodeIds() {
-    List<Integer> ids = new ArrayList<>();
-    for (MapNode node : mapGraph.getNodesByState(NodeState.AVAILABLE)) {
-      ids.add(node.getNodeId());
-    }
-    return ids;
+    return mapGraph.getNodesByState(NodeState.AVAILABLE).stream().map(MapNode::getNodeId).toList();
   }
 
   /**
