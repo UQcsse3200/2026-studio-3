@@ -64,6 +64,7 @@ public class MapDisplay extends UIComponent {
 
   private Table playerTable;
   private Table legendTable;
+  private Table levelTable;
   // to store positions
   private final Map<Integer, Vector2> nodePositions = new HashMap<>();
   // Node-id labels, shown only while debug rendering is active — same toggle 'debug on'
@@ -266,7 +267,7 @@ public class MapDisplay extends UIComponent {
     table.padLeft(10f);
     table.padTop(5f);
 
-    Table levelTable = new Table();
+    levelTable = new Table();
 
     // Image size
     float imageSideLength = 20f;
@@ -347,8 +348,6 @@ public class MapDisplay extends UIComponent {
     levelTable.add(levelImage).size(imageSideLength).pad(5);
     levelTable.add(levelLabel).left().pad(10);
     levelTable.pack();
-    levelTable.setPosition(
-        (mapWidth - levelTable.getWidth()) / 2f, (50f - levelTable.getHeight()) / 2f);
     playerTable.addActor(levelTable);
 
     playerTable.add(table);
@@ -387,6 +386,9 @@ public class MapDisplay extends UIComponent {
 
       playerTable.invalidateHierarchy();
       playerTable.layout();
+
+      levelTable.setPosition(
+        (width - levelTable.getWidth()) / 2f, (50f - levelTable.getHeight()) / 2f);
     }
 
     if (legendTable != null) {
