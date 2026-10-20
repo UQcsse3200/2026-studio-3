@@ -8,9 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.description;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -285,7 +285,8 @@ class LibraryMenuDisplayTest {
 
   @Test
   void selectionUsesOwnHoverDrawableAndDeselectionRestoresOriginalStyleObject() {
-    List<TextButton.TextButtonStyle> originals = buttons.stream().map(TextButton::getStyle).toList();
+    List<TextButton.TextButtonStyle> originals =
+        buttons.stream().map(TextButton::getStyle).toList();
     for (int i = 0; i < buttons.size(); i++) {
       TextButton.TextButtonStyle original = originals.get(i);
       assertNotNull(original.over, buttons.get(i).getText().toString());
