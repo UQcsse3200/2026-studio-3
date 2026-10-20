@@ -6,7 +6,9 @@ import com.csse3200.game.ui.terminal.commands.DebugCommand;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +19,9 @@ import org.slf4j.LoggerFactory;
 public class Terminal extends Component {
   private static final Logger logger = LoggerFactory.getLogger(Terminal.class);
   private final Map<String, Command> commands;
+  // Help text per command name, shown in the F1 help panel. Sorted so the panel order is stable.
+  private final Map<String, String> helpLines = new TreeMap<>();
+  private String contextName = "Terminal";
   private String enteredMessage = "";
   private boolean isOpen = false;
 
@@ -27,7 +32,35 @@ public class Terminal extends Component {
   public Terminal(Map<String, Command> commands) {
     this.commands = commands;
 
-    addCommand("debug", new DebugCommand());
+    addCommand("debug", "debug on|off", "toggle the physics debug overlay", new DebugCommand());
+  }
+
+  /**
+   * Sets the name of the screen this terminal belongs to (e.g. "Battle" or "Map"). It is used as
+   * the heading of the help panel so players can see which commands apply where they are.
+   *
+   * @param contextName heading shown above the command list
+   */
+  public void setContextName(String contextName) {
+    this.contextName = contextName;
+  }
+
+  /**
+   * @return name of the screen context this terminal belongs to
+   */
+  public String getContextName() {
+    return contextName;
+  }
+
+  /**
+   * @return one line per registered command, sorted by command name, in the form {@code usage -
+   *     description}. Commands registered without help text are listed by name only.
+   */
+  public List<String> getHelpLines() {
+    return commands.keySet().stream()
+        .sorted()
+        .map(name -> helpLines.getOrDefault(name, name))
+        .toList();
   }
 
   /**
@@ -78,6 +111,19 @@ public class Terminal extends Component {
       logger.error("Command {} is already registered", name);
     }
     commands.put(name, command);
+  }
+
+  /**
+   * Adds a command together with help text for the F1 help panel.
+   *
+   * @param name command name
+   * @param usage how to type the command, e.g. {@code goto <floor> <roomtype>}
+   * @param description short explanation of what the command does
+   * @param command command
+   */
+  public void addCommand(String name, String usage, String description, Command command) {
+    addCommand(name, command);
+    helpLines.put(name, usage + " - " + description);
   }
 
   /**

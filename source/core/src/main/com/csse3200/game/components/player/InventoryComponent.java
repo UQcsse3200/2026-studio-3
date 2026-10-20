@@ -216,7 +216,7 @@ public class InventoryComponent extends Component {
    * @param discount discount value to set, as a fraction
    */
   public void setShopDiscount(float discount) {
-    this.shopDiscount = Math.min(Math.max(discount, 0f), 0.5f);
+    this.shopDiscount = Math.clamp(discount, 0f, 0.5f);
   }
 
   public float getShopDiscount() {

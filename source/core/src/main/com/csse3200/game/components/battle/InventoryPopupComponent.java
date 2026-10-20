@@ -47,6 +47,8 @@ import java.util.function.IntFunction;
  */
 public class InventoryPopupComponent extends UIComponent {
 
+  private record UseFeedbackDetails(Color colour, String title, String detail) {}
+
   private static final String PANEL_TEXTURE = "images/ui/inventory-panel.png";
   private static final float WINDOW_WIDTH = 590f;
   private static final float CONTENT_WIDTH = 530f;
@@ -58,7 +60,6 @@ public class InventoryPopupComponent extends UIComponent {
   private static final float ACTION_WIDTH = 112f;
 
   private static final Color NAME_COLOUR = new Color(0.9f, 0.84f, 0.73f, 1f);
-  private static final Color DESCRIPTION_COLOUR = new Color(0.65f, 0.58f, 0.52f, 1f);
   private static final Color GOLD_COLOUR = new Color(0.83f, 0.61f, 0.27f, 1f);
   private static final Color AEGIS_EFFECT_COLOUR = new Color(0.32f, 0.73f, 0.91f, 1f);
   private static final Color CREST_EFFECT_COLOUR = new Color(0.9f, 0.32f, 0.18f, 1f);
@@ -87,7 +88,7 @@ public class InventoryPopupComponent extends UIComponent {
     ITEM_DESCRIPTIONS.put(
         ItemType.MERCHANTS_FAVOR,
         count -> {
-          int discount = Math.min(count * 10, 50);
+          int discount = Math.clamp(count, 0, 5) * 10;
           return new ItemText("+" + discount + "% SHOP DISCOUNT");
         });
 
@@ -186,7 +187,7 @@ public class InventoryPopupComponent extends UIComponent {
     List<ItemType> ownedItems = playerState.getOwnedItems();
     List<ItemType> itemTypes = distinctInOrder(ownedItems);
     float listHeight =
-        Math.max(1, Math.min(itemTypes.size(), MAX_VISIBLE_ROWS)) * (ROW_HEIGHT + ROW_SPACING);
+        Math.clamp(itemTypes.size(), 1, MAX_VISIBLE_ROWS) * (ROW_HEIGHT + ROW_SPACING);
 
     Table header = new Table();
     header.add().width(30f);
@@ -303,15 +304,22 @@ public class InventoryPopupComponent extends UIComponent {
   }
 
   private Table createStatusBadge(ItemType item) {
-    String status = item.isCurse() ? "CURSE" : item == ItemType.LUCKY_COIN ? "ON GOLD" : "PASSIVE";
+    String status;
+    if (item.isCurse()) {
+      status = "CURSE";
+    } else if (item == ItemType.LUCKY_COIN) {
+      status = "ON GOLD";
+    } else {
+      status = "PASSIVE";
+    }
     Color statusColour = item.isCurse() ? CURSE_COLOUR : GOLD_COLOUR;
 
     Table border = new Table();
-    border.setBackground(skin.newDrawable("white", ROW_BORDER_COLOUR));
+    border.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR));
     border.pad(2f);
 
     Table badge = new Table();
-    badge.setBackground(skin.newDrawable("white", ROW_BACKGROUND_COLOUR));
+    badge.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_BACKGROUND_COLOUR));
     badge.add(new Label(status, smallLabelStyle(statusColour))).center();
 
     border.add(badge).grow();
@@ -341,7 +349,7 @@ public class InventoryPopupComponent extends UIComponent {
     style.checkedOver = style.over;
 
     TextButton button = new TextButton("USE", style);
-    button.setDisabled(!canUseItemNow(item));
+    button.setDisabled(canUseItemNow(item));
     Table border = new Table();
     border.setBackground(
         skin.newDrawable(
@@ -359,7 +367,7 @@ public class InventoryPopupComponent extends UIComponent {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
-            if (!canUseItemNow(item)) {
+            if (canUseItemNow(item)) {
               button.setDisabled(true);
               border.setBackground(skin.newDrawable(STYLE_NAME_WHITE, ROW_BORDER_COLOUR));
               return;
@@ -382,16 +390,16 @@ public class InventoryPopupComponent extends UIComponent {
 
   private boolean canUseItemNow(ItemType item) {
     if (useActionInProgress || !canUseBattleItems.getAsBoolean()) {
-      return false;
-    }
-    if (item != ItemType.AMBROSIA_FLASK) {
       return true;
     }
-    if (player == null) {
+    if (item != ItemType.AMBROSIA_FLASK) {
       return false;
     }
+    if (player == null) {
+      return true;
+    }
     CombatStatsComponent stats = player.getComponent(CombatStatsComponent.class);
-    return stats != null && stats.getHealth() < stats.getMaxHealth();
+    return stats == null || stats.getHealth() >= stats.getMaxHealth();
   }
 
   private static int effectValue(ItemType item, CombatStatsComponent stats) {
@@ -412,25 +420,25 @@ public class InventoryPopupComponent extends UIComponent {
       useFeedback = null;
     }
 
-    Color effectColour;
-    String title;
-    String detail;
-    if (itemId == ItemType.IRON_AEGIS) {
-      effectColour = AEGIS_EFFECT_COLOUR;
-      title = "IRON AEGIS USED";
-      detail = "+" + actualGain + " ARMOUR";
-    } else if (itemId == ItemType.WARRIORS_CREST) {
-      effectColour = CREST_EFFECT_COLOUR;
-      title = "WARRIOR'S CREST USED";
-      detail = "+" + actualGain + " STRENGTH";
-      if (actualGain < 1) {
-        detail += " (BRAND -" + (1 - actualGain) + ")";
-      }
-    } else {
-      effectColour = AMBROSIA_EFFECT_COLOUR;
-      title = "AMBROSIA USED";
-      detail = "+" + actualGain + " HEALTH";
-    }
+    UseFeedbackDetails feedback =
+        switch (itemId) {
+          case IRON_AEGIS ->
+              new UseFeedbackDetails(
+                  AEGIS_EFFECT_COLOUR, "IRON AEGIS USED", "+" + actualGain + " ARMOUR");
+          case WARRIORS_CREST -> {
+            String detail = "+" + actualGain + " STRENGTH";
+            if (actualGain < 1) {
+              detail += " (BRAND -" + (1 - actualGain) + ")";
+            }
+            yield new UseFeedbackDetails(CREST_EFFECT_COLOUR, "WARRIOR'S CREST USED", detail);
+          }
+          default ->
+              new UseFeedbackDetails(
+                  AMBROSIA_EFFECT_COLOUR, "AMBROSIA USED", "+" + actualGain + " HEALTH");
+        };
+    Color effectColour = feedback.colour();
+    String title = feedback.title();
+    String detail = feedback.detail();
 
     Table border = new Table();
     border.setTransform(true);

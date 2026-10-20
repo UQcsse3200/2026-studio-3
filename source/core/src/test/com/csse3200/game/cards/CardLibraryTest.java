@@ -122,9 +122,10 @@ class CardLibraryTest {
 
   @Test
   void shouldRejectBlankCardId() {
-    assertThrows(IllegalArgumentException.class, () -> library.register(card(null)));
-    assertThrows(IllegalArgumentException.class, () -> library.register(card("")));
-    assertThrows(IllegalArgumentException.class, () -> library.register(card("  ")));
+    for (String id : new String[] {null, "", "  "}) {
+      CardConfig config = card(id);
+      assertThrows(IllegalArgumentException.class, () -> library.register(config));
+    }
   }
 
   @Test
@@ -134,10 +135,15 @@ class CardLibraryTest {
 
   @Test
   void shouldRejectCardIdsWithSurroundingWhitespace() {
+    CardConfig leadingWhitespace = card(" strike");
+    CardConfig trailingWhitespace = card("strike ");
+
     assertAll(
-        () -> assertThrows(IllegalArgumentException.class, () -> library.register(card(" strike"))),
         () ->
-            assertThrows(IllegalArgumentException.class, () -> library.register(card("strike "))));
+            assertThrows(IllegalArgumentException.class, () -> library.register(leadingWhitespace)),
+        () ->
+            assertThrows(
+                IllegalArgumentException.class, () -> library.register(trailingWhitespace)));
   }
 
   @Test
@@ -149,23 +155,29 @@ class CardLibraryTest {
 
   @Test
   void shouldRejectNullIdInConstructorCollection() {
-    assertThrows(IllegalArgumentException.class, () -> new CardLibrary(List.of(card(null))));
+    List<CardConfig> configs = List.of(card(null));
+
+    assertThrows(IllegalArgumentException.class, () -> new CardLibrary(configs));
   }
 
   @Test
   void shouldRejectEmptyOrWhitespaceOnlyIdInConstructorCollection() {
+    List<CardConfig> emptyIdConfigs = List.of(card(""));
+    List<CardConfig> whitespaceIdConfigs = List.of(card("  "));
+
     assertAll(
-        () ->
-            assertThrows(IllegalArgumentException.class, () -> new CardLibrary(List.of(card("")))),
+        () -> assertThrows(IllegalArgumentException.class, () -> new CardLibrary(emptyIdConfigs)),
         () ->
             assertThrows(
-                IllegalArgumentException.class, () -> new CardLibrary(List.of(card("  ")))));
+                IllegalArgumentException.class, () -> new CardLibrary(whitespaceIdConfigs)));
   }
 
   @Test
   void shouldPreventModificationOfReturnedCollection() {
     List<CardConfig> allCards = library.getAllCards();
-    assertThrows(UnsupportedOperationException.class, () -> allCards.add(card("defend")));
+    CardConfig additionalCard = card("defend");
+
+    assertThrows(UnsupportedOperationException.class, () -> allCards.add(additionalCard));
     assertThrows(UnsupportedOperationException.class, () -> allCards.remove(strike));
 
     assertEquals(2, library.getAllCards().size());

@@ -54,6 +54,7 @@ public class RewardDisplay extends Displaying {
   private static final String GOLD_FEEDBACK_ICON = "images/ui/victory-gold-icon.png";
   private static final String BATTLE_MENU_ICONS = "images/ui/battle-menu-icons.png";
   private static final String VICTORY_TITLE_TEXTURE = "images/ui/victory-title-mythic.png";
+  private static final String WHITE_DRAWABLE = "white";
   private static final float REFERENCE_HEIGHT = 941f;
   private static final float REFERENCE_PANEL_WIDTH = 1222f;
   private static final float REFERENCE_PANEL_HEIGHT = 876f;
@@ -64,7 +65,6 @@ public class RewardDisplay extends Displaying {
   private static final Color SCRIM = new Color(0.015f, 0.01f, 0.025f, 0.58f);
   private static final Color GOLD = new Color(0.96f, 0.78f, 0.38f, 1f);
   private static final Color CREAM = new Color(0.93f, 0.87f, 0.73f, 1f);
-  private static final Color MUTED = new Color(0.72f, 0.66f, 0.58f, 1f);
   private final RunState runState;
   private final RewardService rewardService;
   private final CardService cardService;
@@ -157,7 +157,7 @@ public class RewardDisplay extends Displaying {
     stage.addActor(scene);
     scene.toBack();
 
-    Image dimmer = new Image(skin.newDrawable("white", SCRIM));
+    Image dimmer = new Image(skin.newDrawable(WHITE_DRAWABLE, SCRIM));
     dimmer.setFillParent(true);
     scrimActor = dimmer;
     stage.addActor(dimmer);
@@ -195,12 +195,13 @@ public class RewardDisplay extends Displaying {
             scrimActor,
             rewardUi,
             victoryTitle,
-            victoryTitleLetters,
-            victorySubtitle,
-            sunPulse,
-            victoryWings,
-            victoryParticles,
-            rewardOptionCards);
+            new VictoryAnimationController.AnimationElements(
+                victoryTitleLetters,
+                victorySubtitle,
+                sunPulse,
+                victoryWings,
+                victoryParticles,
+                rewardOptionCards));
     victoryAnimationController.playEntrance();
   }
 
@@ -242,7 +243,8 @@ public class RewardDisplay extends Displaying {
     victoryParticles.clear();
     for (int index = 0; index < particlePositions.length; index++) {
       float size = index % 3 == 0 ? 4f : 3f;
-      Image particle = new Image(skin.newDrawable("white", new Color(0.75f, 0.5f, 0.22f, 1f)));
+      Image particle =
+          new Image(skin.newDrawable(WHITE_DRAWABLE, new Color(0.75f, 0.5f, 0.22f, 1f)));
       particle.setBounds(
           panelWidth * particlePositions[index][0],
           panelHeight * particlePositions[index][1],
@@ -451,7 +453,7 @@ public class RewardDisplay extends Displaying {
 
   private void addOrnamentPixel(
       Group ornament, Color color, float x, float y, float width, float height) {
-    Image pixel = new Image(skin.newDrawable("white", color));
+    Image pixel = new Image(skin.newDrawable(WHITE_DRAWABLE, color));
     pixel.setBounds(x, y, width, height);
     pixel.setTouchable(Touchable.disabled);
     ornament.addActor(pixel);
@@ -562,7 +564,7 @@ public class RewardDisplay extends Displaying {
     ResourceService resources = ServiceLocator.getResourceService();
     Texture texture = resources == null ? null : resources.getAsset(path, Texture.class);
     return texture == null
-        ? new Image(skin.newDrawable("white", new Color(0.08f, 0.06f, 0.08f, 1f)))
+        ? new Image(skin.newDrawable(WHITE_DRAWABLE, new Color(0.08f, 0.06f, 0.08f, 1f)))
         : new Image(texture);
   }
 

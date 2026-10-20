@@ -46,6 +46,7 @@ import com.csse3200.game.ui.terminal.TerminalDisplay;
 import com.csse3200.game.ui.terminal.commands.DiscoverAllCardsCommand;
 import com.csse3200.game.ui.terminal.commands.GotoCommand;
 import com.csse3200.game.ui.terminal.commands.ListNodesCommand;
+import com.csse3200.game.ui.terminal.commands.PlayNarrationCommand;
 import com.csse3200.game.ui.terminal.commands.UnlockNodeCommand;
 import java.util.Comparator;
 import org.slf4j.Logger;
@@ -129,11 +130,26 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     // PROPOSED: debug terminal for cheats/commands on the map (unlock nodes, etc.). Same
     // Terminal/KeyboardTerminalInputComponent/TerminalDisplay trio used elsewhere; F1 toggles it.
     Terminal terminal = new Terminal();
-    terminal.addCommand("unlocknode", new UnlockNodeCommand(runState));
-    terminal.addCommand("listnodes", new ListNodesCommand(runState));
-    terminal.addCommand("goto", new GotoCommand(runState, mapDisplay.getMapSelectionController()));
+    terminal.setContextName("Map commands");
     terminal.addCommand(
-        "discoverallcards", new DiscoverAllCardsCommand(game.getCardDiscoveryService()));
+        "unlocknode", "unlocknode <nodeId>", "unlock a map node", new UnlockNodeCommand(runState));
+    terminal.addCommand(
+        "listnodes", "listnodes", "print every node and its state", new ListNodesCommand(runState));
+    terminal.addCommand(
+        "goto",
+        "goto <floor> <roomtype>",
+        "jump to a node, e.g. goto 2 COMBAT",
+        new GotoCommand(runState, mapDisplay.getMapSelectionController()));
+    terminal.addCommand(
+        "discoverallcards",
+        "discoverallcards",
+        "mark every card as discovered",
+        new DiscoverAllCardsCommand(game.getCardDiscoveryService()));
+    terminal.addCommand(
+        "playnarration",
+        "playnarration <opening|pre_boss|victory|defeat>",
+        "preview a narration sequence and return to the map",
+        new PlayNarrationCommand(game));
 
     uiEntity = new Entity();
     uiEntity

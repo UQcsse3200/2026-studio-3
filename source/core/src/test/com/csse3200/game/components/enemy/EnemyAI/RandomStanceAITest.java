@@ -14,7 +14,7 @@ class RandomStanceAITest {
     return new EnemyAIContext(30, 24, 24, 6, 0, EnemyIntent.unknown(), 1);
   }
 
-  // 用打桩的 Random 固定返回一个小值，落在攻击的概率区间内
+  // A stubbed Random always returns a small value, inside the attack probability range
   @Test
   void shouldAttackWhenRollIsBelowAttackChance() {
     Random random = mock(Random.class);
@@ -24,7 +24,7 @@ class RandomStanceAITest {
     assertEquals(IntentType.ATTACK, ai.decide(context()).getType());
   }
 
-  // 用打桩的 Random 固定返回一个大值，落在防御的概率区间内
+  // A stubbed Random always returns a large value, inside the defend probability range
   @Test
   void shouldDefendWhenRollIsAboveAttackChance() {
     Random random = mock(Random.class);

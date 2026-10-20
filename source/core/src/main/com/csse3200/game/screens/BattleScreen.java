@@ -50,16 +50,18 @@ import com.csse3200.game.components.battle.InventoryPopupComponent;
 import com.csse3200.game.components.battle.OffensiveEffectVisuals;
 import com.csse3200.game.components.battle.PlayerEffectVisuals;
 import com.csse3200.game.components.cards.CardEffectHandler;
+import com.csse3200.game.components.cards.CardInspectionController;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.combat.BattleController;
+import com.csse3200.game.components.enemy.BossDialogueComponent;
+import com.csse3200.game.components.enemy.BossDialogueConfig;
+import com.csse3200.game.components.enemy.enemyai.BossAI;
+import com.csse3200.game.components.enemy.enemyai.TutorialEnemyAI;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.memory.PlayerTrackerComponent;
-import com.csse3200.game.components.pausemenu.PauseMenuActions;
-import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuFactory;
-import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
@@ -100,9 +102,11 @@ import com.csse3200.game.ui.PopupInputComponent;
 import com.csse3200.game.ui.terminal.KeyboardTerminalInputComponent;
 import com.csse3200.game.ui.terminal.Terminal;
 import com.csse3200.game.ui.terminal.TerminalDisplay;
+import com.csse3200.game.ui.terminal.commands.ForceIntentCommand;
 import com.csse3200.game.ui.terminal.commands.GiveGoldCommand;
 import com.csse3200.game.ui.terminal.commands.GiveItemCommand;
 import com.csse3200.game.ui.terminal.commands.GiveOwnedItemCommand;
+import com.csse3200.game.ui.terminal.commands.SetEnemyHealthCommand;
 import com.csse3200.game.ui.terminal.commands.SetHealthCommand;
 import com.csse3200.game.ui.terminal.commands.SkipBattleCommand;
 import java.nio.file.Path;
@@ -121,12 +125,13 @@ import org.slf4j.LoggerFactory;
  * The battle screen: the forest arena plus the card-hand UI, driven by {@link BattleController}.
  * Entered from a combat/boss map node (or the debug shortcut).
  */
-public class BattleScreen extends ScreenAdapter {
+public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionAware {
   private final GdxGame game;
   private final RunState runState;
   private final boolean tutorialBattle;
   private BattleTutorialGuidanceView tutorialView;
   private BattleActions battleActions;
+  private boolean suppressPlayerCaptureOnDispose;
   private static final Logger logger = LoggerFactory.getLogger(BattleScreen.class);
   private static final String BATTLE_TITLE_TEXTURE = "images/ui/battle-title-wordmark.png";
   private final Renderer renderer;
@@ -164,7 +169,6 @@ public class BattleScreen extends ScreenAdapter {
 
   private static final String BATTLE_UI_JSON = "sprites/BattleUi.json";
   private static final String DECK_EDITOR_UI_JSON = "sprites/DeckEditorUi.json";
-  private static final String HAND_TRIGGER = "playCard";
 
   private final BattleController controller;
   private final CardLibrary library;
@@ -179,10 +183,16 @@ public class BattleScreen extends ScreenAdapter {
   private final CardAimController playerCardAim;
   private final CardAimController allEnemiesCardAim;
   private ClickableFactory uiFactory;
+  private CardInspectionController cardInspection;
   private final PlayerRunState playerState;
+  private final BossDialogueConfig bossDialogueConfig;
   private List<ClickableRecord> staticUiRecords;
 
   private List<CardInstance> handRowOrder = new ArrayList<>();
+  private static final String PLAY_CARD_TRIGGER = "playCard";
+  private static final String OPEN_MENU_TRIGGER = "openMenu";
+  private static final String OPEN_INVENTORY_TRIGGER = "openInventory";
+  private static final String END_TURN_TRIGGER = "endTurn";
 
   // Whether the hand row is currently up (visible/interactable) or down (hidden mid-enemy-turn),
   // tracked from the same "up"/"down" events InOutOnTrigger widgets slide on. A freshly rebuilt
@@ -217,6 +227,7 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.registerEntityService(new EntityService());
     ServiceLocator.registerRenderService(new RenderService());
 
+    bossDialogueConfig = BossDialogueConfig.load();
     loadAssets();
 
     renderer = RenderFactory.createRenderer();
@@ -225,7 +236,7 @@ public class BattleScreen extends ScreenAdapter {
 
     ServiceLocator.registerCamera(renderer.getCamera().getCamera());
 
-    Integer mapProgression = tutorialBattle ? 1 : runState.getMapProgression();
+    int mapProgression = tutorialBattle ? 1 : runState.getMapProgression();
 
     logger.debug("Initialising main game screen entities");
     TerrainFactory terrainFactory = new TerrainFactory(renderer.getCamera());
@@ -236,10 +247,20 @@ public class BattleScreen extends ScreenAdapter {
             runState,
             tutorialBattle ? "dungeon" : game.getBackgroundId(),
             tutorialBattle
-                ? List.of("bone_crawler")
+                ? List.of("votive_attendant")
                 : BattleEncounterSelector.enemiesFor(runState));
     this.gameArea = forestGameArea;
     forestGameArea.create();
+
+    if (tutorialBattle) {
+      for (Entity enemy : forestGameArea.getEnemies()) {
+        EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+
+        if (behaviour != null) {
+          behaviour.setAI(new TutorialEnemyAI());
+        }
+      }
+    }
 
     playerState = runState.getOrCreatePlayerState();
     Entity player = forestGameArea.getPlayer();
@@ -256,19 +277,7 @@ public class BattleScreen extends ScreenAdapter {
         CardWidgetAssets.fromManagedResources(cardWidgetSkin, ServiceLocator.getResourceService());
     cardInteractionSkin = createCardInteractionSkin();
 
-    PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(library);
-    if (tutorialBattle) {
-      var openingOrder = new ArrayList<>(playerDeck.getCards());
-      java.util.Collections.shuffle(openingOrder);
-      for (int i = 0; i < openingOrder.size(); i++) {
-        if ("strike".equals(openingOrder.get(i).cardId())) {
-          java.util.Collections.swap(
-              openingOrder, Math.min(AMOUNT_OF_CARDS_IN_DECK, openingOrder.size()) / 2, i);
-          break;
-        }
-      }
-      playerDeck = PlayerDeck.fromInstances(library, openingOrder);
-    }
+    PlayerDeck playerDeck = prepareBattleDeckSource();
     battleDeck = new BattleDeck(playerDeck);
     if (!tutorialBattle) {
       battleDeck.shuffleDrawPile();
@@ -355,137 +364,179 @@ public class BattleScreen extends ScreenAdapter {
           }
         });
     createUI();
+    installBossDialogue(forestGameArea);
     if (tutorialBattle) {
-      String demonstrationId = handRowOrder.get(handRowOrder.size() / 2).instanceId();
-      tutorialView =
-          new BattleTutorialGuidanceView(
-              ServiceLocator.getRenderService().getStage(),
-              cardWidgetSkin,
-              () ->
-                  uiFactory.getByTrigger(HAND_TRIGGER).stream()
-                      .map(Clickable::getBtn)
-                      .map(actor -> (com.badlogic.gdx.scenes.scene2d.Actor) actor)
-                      .toList(),
-              () ->
-                  uiFactory.getByTrigger(HAND_TRIGGER).stream()
-                      .filter(c -> c.getArgs().length > 0 && demonstrationId.equals(c.getArgs()[0]))
-                      .map(Clickable::getBtn)
-                      .findFirst()
-                      .orElse(null),
-              () ->
-                  uiFactory.getByTrigger("openMenu").stream()
-                      .map(Clickable::getBtn)
-                      .findFirst()
-                      .orElse(null),
-              () ->
-                  uiFactory.getByTrigger("endTurn").stream()
-                      .map(Clickable::getBtn)
-                      .findFirst()
-                      .orElse(null));
-      tutorialView.setExitStyle(
-          com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins.forIcon(
-                  com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins.Icon
-                      .END_TURN)
-              .get(com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton.ImageTextButtonStyle.class));
-      tutorialView.setStatTargets(
-          () ->
-              uiFactory.getByTrigger("openInventory").stream()
-                  .map(Clickable::getBtn)
-                  .findFirst()
-                  .orElse(null),
-          () ->
-              player
-                  .getComponent(com.csse3200.game.components.player.PlayerEnergyDisplay.class)
-                  .getEnergyActor(),
-          () ->
-              player
-                  .getComponent(com.csse3200.game.components.player.PlayerStatsDisplay.class)
-                  .getHealthLabel(),
-          () ->
-              forestGameArea.getEnemies().stream()
-                  .map(
-                      e ->
-                          e.getComponent(
-                              com.csse3200.game.components.enemy.EnemyStatsDisplay.class))
-                  .filter(java.util.Objects::nonNull)
-                  .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getHealthActor)
-                  .findFirst()
-                  .orElse(null));
-      tutorialView.setDetailedTargets(
-          () ->
-              player
-                  .getComponent(com.csse3200.game.components.player.PlayerEnergyDisplay.class)
-                  .getEnergyVisualBounds(),
-          () ->
-              forestGameArea.getEnemies().stream()
-                  .map(
-                      e ->
-                          e.getComponent(
-                              com.csse3200.game.components.enemy.EnemyStatsDisplay.class))
-                  .filter(java.util.Objects::nonNull)
-                  .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getTutorialArmourActor)
-                  .findFirst()
-                  .orElse(null));
-      tutorialView.setEnemyBounds(
-          () -> forestGameArea.getEnemies().stream().map(this::tutorialEnemyBounds).toList());
-      tutorialView.setDragActor(
-          () -> ServiceLocator.getDragAndDropService().getDragAndDrop().getDragActor());
-      tutorialView.setEnemyRenderer(
-          batch -> {
-            com.badlogic.gdx.math.Matrix4 previous =
-                new com.badlogic.gdx.math.Matrix4(batch.getProjectionMatrix());
-            batch.setProjectionMatrix(ServiceLocator.getCamera().combined);
-            batch.setColor(com.badlogic.gdx.graphics.Color.WHITE);
-            for (Entity enemy : forestGameArea.getEnemies()) {
-              AnimationRenderComponent spriteRenderer =
-                  enemy.getComponent(AnimationRenderComponent.class);
-              if (spriteRenderer != null)
-                spriteRenderer.render((com.badlogic.gdx.graphics.g2d.SpriteBatch) batch);
-            }
-            batch.setProjectionMatrix(previous);
-            batch.setColor(com.badlogic.gdx.graphics.Color.WHITE);
-          });
-      BattleAnimationCoordinator visuals =
-          animationCoordinatorEntity.getComponent(BattleAnimationCoordinator.class);
-      BattleTutorialComponent guidance =
-          new BattleTutorialComponent(
-              controller, tutorialView, this::onTutorialFinished, demonstrationId);
-      guidance.setObservation(
-          new BattleTutorialObservation(
-              () ->
-                  forestGameArea.getEnemies().stream()
-                      .mapToInt(e -> e.getComponent(CombatStatsComponent.class).getHealth())
-                      .sum(),
-              () -> player.getComponent(CombatStatsComponent.class).getHealth(),
-              () ->
-                  !visuals.hasActiveVisuals()
-                      && !battleActions.hasPendingEnemyReveals()
-                      && tutorialView.isPlayerHealthDisplayed(
-                          player.getComponent(CombatStatsComponent.class).getHealth())
-                      && forestGameArea.getEnemies().stream()
-                          .allMatch(
-                              e -> {
-                                AnimationRenderComponent animator =
-                                    e.getComponent(AnimationRenderComponent.class);
-                                return animator == null
-                                    || !"hurt".equals(animator.getCurrentAnimation())
-                                    || animator.isFinished();
-                              })));
-      ServiceLocator.getEntityService().register(new Entity().addComponent(guidance));
-      // Remains after guidance cleans itself up: existing tutorial battle completion is unchanged.
-      controller.addBattleEndListener(
-          won ->
-              Gdx.app.postRunnable(
-                  () ->
-                      onTutorialFinished(
-                          Boolean.TRUE.equals(won)
-                              ? BattleTutorialController.Outcome.WON
-                              : BattleTutorialController.Outcome.LOST)));
+      setupTutorialGuidance(forestGameArea, player, animationCoordinatorEntity);
     }
     controller.start();
   }
 
-  private Rectangle tutorialEnemyBounds(Entity enemy) {
+  /** Installs dialogue only for an enemy whose active AI is the Boss AI. */
+  private void installBossDialogue(BattleGameArea battleArea) {
+    for (Entity enemy : battleArea.getEnemies()) {
+      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+      if (behaviour == null || !(behaviour.getAI() instanceof BossAI bossAI)) {
+        continue;
+      }
+
+      BossDialogueComponent dialogue =
+          new BossDialogueComponent(
+              ServiceLocator.getRenderService().getStage(),
+              bossAI,
+              bossDialogueConfig,
+              controller,
+              () -> battleEntityBounds(enemy),
+              ServiceLocator.getResourceService());
+      ServiceLocator.getEntityService().register(new Entity().addComponent(dialogue));
+      return;
+    }
+  }
+
+  private PlayerDeck prepareBattleDeckSource() {
+    PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(library);
+    if (!tutorialBattle) {
+      return playerDeck;
+    }
+    var openingOrder = new ArrayList<>(playerDeck.getCards());
+    java.util.Collections.shuffle(openingOrder);
+    for (int i = 0; i < openingOrder.size(); i++) {
+      if ("strike".equals(openingOrder.get(i).cardId())) {
+        java.util.Collections.swap(
+            openingOrder, Math.min(AMOUNT_OF_CARDS_IN_DECK, openingOrder.size()) / 2, i);
+        break;
+      }
+    }
+    return PlayerDeck.fromInstances(library, openingOrder);
+  }
+
+  private void setupTutorialGuidance(
+      BattleGameArea forestGameArea, Entity player, Entity animationCoordinatorEntity) {
+    String demonstrationId = handRowOrder.get(handRowOrder.size() / 2).instanceId();
+    tutorialView =
+        new BattleTutorialGuidanceView(
+            ServiceLocator.getRenderService().getStage(),
+            cardWidgetSkin,
+            () ->
+                uiFactory.getByTrigger(PLAY_CARD_TRIGGER).stream()
+                    .map(Clickable::getBtn)
+                    .map(actor -> (com.badlogic.gdx.scenes.scene2d.Actor) actor)
+                    .toList(),
+            () ->
+                uiFactory.getByTrigger(PLAY_CARD_TRIGGER).stream()
+                    .filter(c -> c.getArgs().length > 0 && demonstrationId.equals(c.getArgs()[0]))
+                    .map(Clickable::getBtn)
+                    .findFirst()
+                    .orElse(null),
+            () ->
+                uiFactory.getByTrigger(OPEN_MENU_TRIGGER).stream()
+                    .map(Clickable::getBtn)
+                    .findFirst()
+                    .orElse(null),
+            () ->
+                uiFactory.getByTrigger(END_TURN_TRIGGER).stream()
+                    .map(Clickable::getBtn)
+                    .findFirst()
+                    .orElse(null));
+    tutorialView.setExitStyle(
+        com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins.forIcon(
+                com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins.Icon.END_TURN)
+            .get(com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton.ImageTextButtonStyle.class));
+    tutorialView.setStatTargets(
+        () ->
+            uiFactory.getByTrigger(OPEN_INVENTORY_TRIGGER).stream()
+                .map(Clickable::getBtn)
+                .findFirst()
+                .orElse(null),
+        () ->
+            player
+                .getComponent(com.csse3200.game.components.player.PlayerEnergyDisplay.class)
+                .getEnergyActor(),
+        () ->
+            player
+                .getComponent(com.csse3200.game.components.player.PlayerStatsDisplay.class)
+                .getHealthLabel(),
+        () ->
+            forestGameArea.getEnemies().stream()
+                .map(
+                    e -> e.getComponent(com.csse3200.game.components.enemy.EnemyStatsDisplay.class))
+                .filter(java.util.Objects::nonNull)
+                .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getHealthActor)
+                .findFirst()
+                .orElse(null));
+    tutorialView.setDetailedTargets(
+        () ->
+            player
+                .getComponent(com.csse3200.game.components.player.PlayerEnergyDisplay.class)
+                .getEnergyVisualBounds(),
+        () ->
+            forestGameArea.getEnemies().stream()
+                .map(
+                    e -> e.getComponent(com.csse3200.game.components.enemy.EnemyStatsDisplay.class))
+                .filter(java.util.Objects::nonNull)
+                .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getTutorialArmourActor)
+                .findFirst()
+                .orElse(null));
+    tutorialView.setEnemyBounds(
+        () -> forestGameArea.getEnemies().stream().map(this::battleEntityBounds).toList());
+    tutorialView.setDragActor(
+        () -> ServiceLocator.getDragAndDropService().getDragAndDrop().getDragActor());
+    tutorialView.setEnemyRenderer(
+        batch -> {
+          com.badlogic.gdx.math.Matrix4 previous =
+              new com.badlogic.gdx.math.Matrix4(batch.getProjectionMatrix());
+          batch.setProjectionMatrix(ServiceLocator.getCamera().combined);
+          batch.setColor(com.badlogic.gdx.graphics.Color.WHITE);
+          for (Entity enemy : forestGameArea.getEnemies()) {
+            AnimationRenderComponent spriteRenderer =
+                enemy.getComponent(AnimationRenderComponent.class);
+            if (spriteRenderer != null)
+              spriteRenderer.render((com.badlogic.gdx.graphics.g2d.SpriteBatch) batch);
+          }
+          batch.setProjectionMatrix(previous);
+          batch.setColor(com.badlogic.gdx.graphics.Color.WHITE);
+        });
+    BattleAnimationCoordinator visuals =
+        animationCoordinatorEntity.getComponent(BattleAnimationCoordinator.class);
+    BattleTutorialComponent guidance =
+        new BattleTutorialComponent(
+            controller, tutorialView, this::onTutorialFinished, demonstrationId);
+    guidance.setObservation(
+        new BattleTutorialObservation(
+            () ->
+                forestGameArea.getEnemies().stream()
+                    .mapToInt(e -> e.getComponent(CombatStatsComponent.class).getHealth())
+                    .sum(),
+            () -> player.getComponent(CombatStatsComponent.class).getHealth(),
+            () -> isTutorialVisualStateSettled(forestGameArea, player, visuals)));
+    ServiceLocator.getEntityService().register(new Entity().addComponent(guidance));
+    // Remains after guidance cleans itself up: existing tutorial battle completion is unchanged.
+    controller.addBattleEndListener(
+        won ->
+            Gdx.app.postRunnable(
+                () ->
+                    onTutorialFinished(
+                        Boolean.TRUE.equals(won)
+                            ? BattleTutorialController.Outcome.WON
+                            : BattleTutorialController.Outcome.LOST)));
+  }
+
+  private boolean isTutorialVisualStateSettled(
+      BattleGameArea forestGameArea, Entity player, BattleAnimationCoordinator visuals) {
+    return !visuals.hasActiveVisuals()
+        && !battleActions.hasPendingEnemyReveals()
+        && tutorialView.isPlayerHealthDisplayed(
+            player.getComponent(CombatStatsComponent.class).getHealth())
+        && forestGameArea.getEnemies().stream().allMatch(this::isEnemyHurtAnimationFinished);
+  }
+
+  private boolean isEnemyHurtAnimationFinished(Entity enemy) {
+    AnimationRenderComponent animator = enemy.getComponent(AnimationRenderComponent.class);
+    return animator == null
+        || !"hurt".equals(animator.getCurrentAnimation())
+        || animator.isFinished();
+  }
+
+  private Rectangle battleEntityBounds(Entity enemy) {
     Stage stage = ServiceLocator.getRenderService().getStage();
     Vector2 pos = enemy.getPosition(), scale = enemy.getScale();
     Vector3 a = ServiceLocator.getCamera().project(new Vector3(pos.x, pos.y, 0));
@@ -503,12 +554,12 @@ public class BattleScreen extends ScreenAdapter {
   }
 
   private void onTutorialFinished(BattleTutorialController.Outcome outcome) {
-    // All tutorial changes live in this screen's disposable run. Joel's shared new-run path resets
-    // the persistent run and opens the story/map on victory or voluntary exit.
+    // Tutorial changes stay in this screen's disposable run. Reset the persistent run and open
+    // the map on victory or voluntary exit; the opening story was already shown before battle.
     if (outcome == BattleTutorialController.Outcome.LOST) {
       game.setScreen(GdxGame.ScreenType.MAIN_MENU);
     } else {
-      game.startNewRun();
+      game.startRunAfterTutorial();
     }
   }
 
@@ -524,12 +575,40 @@ public class BattleScreen extends ScreenAdapter {
             buildAllRecords(), enemyCardAim, playerCardAim, allEnemiesCardAim);
 
     Terminal terminal = new Terminal();
-    terminal.addCommand("skipbattle", new SkipBattleCommand(controller));
-    terminal.addCommand("givegold", new GiveGoldCommand(gameArea.getPlayer()));
-    terminal.addCommand("sethealth", new SetHealthCommand(gameArea.getPlayer()));
-    terminal.addCommand("giveitem", new GiveItemCommand(gameArea.getPlayer()));
+    terminal.setContextName("Battle commands");
     terminal.addCommand(
-        "giveowneditem", new GiveOwnedItemCommand(game.getRunState().getOrCreatePlayerState()));
+        "skipbattle", "skipbattle", "win the battle instantly", new SkipBattleCommand(controller));
+    terminal.addCommand(
+        "givegold",
+        "givegold <amount>",
+        "add gold to the player",
+        new GiveGoldCommand(gameArea.getPlayer()));
+    terminal.addCommand(
+        "sethealth",
+        "sethealth <hp>",
+        "set the player's current health",
+        new SetHealthCommand(gameArea.getPlayer()));
+    terminal.addCommand(
+        "setenemyhp",
+        "setenemyhp <slot> <hp>",
+        "set an enemy's health (slots start at 0)",
+        new SetEnemyHealthCommand(controller));
+    terminal.addCommand(
+        "forceintent",
+        "forceintent <slot> <intent>",
+        "force an enemy's next intent: attack, defend, silence, taunt, damage_on_card_play",
+        new ForceIntentCommand(controller));
+    terminal.addCommand(
+        "giveitem",
+        "giveitem <ITEM_TYPE>",
+        "offer an item as a battle reward",
+        new GiveItemCommand(gameArea.getPlayer()));
+    terminal.addCommand(
+        "giveowneditem",
+        "giveowneditem <ITEM_TYPE>",
+        "add an item straight to the inventory",
+        new GiveOwnedItemCommand(
+            game.getRunState().getOrCreatePlayerState(), game.getItemAcquisitionService()));
 
     // Untitled: DeckEditorComponent draws its own "CARD INVENTORY" header, like the item inventory.
     PopupDisplay cardInventory = new PopupDisplay("");
@@ -549,10 +628,23 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.getEntityService().register(itemInventoryEntity);
 
     Stage stage = ServiceLocator.getRenderService().getStage();
+    cardInspection =
+        new CardInspectionController(
+            stage,
+            cardWidgetSkin,
+            cardWidgetAssets,
+            () ->
+                cardInventory.isShowing()
+                    || itemInventory.isShowing()
+                    || terminal.isOpen()
+                    || ServiceLocator.getPauseService().isPaused()
+                    || (tutorialView != null && tutorialView.isBlockingInput()),
+            () -> ServiceLocator.getDragAndDropService().getDragAndDrop().isDragging());
     battleActions = new BattleActions(controller, game, gameArea.getEnemies(), tutorialBattle);
     Entity battleUi =
         new Entity()
             .addComponent(new InputDecorator(stage, 10))
+            .addComponent(cardInspection)
             .addComponent(uiFactory)
             .addComponent(displays)
             .addComponent(battleActions)
@@ -577,15 +669,7 @@ public class BattleScreen extends ScreenAdapter {
         .addListener(
             BattleActions.HAND_CHANGED_EVENT, (List<CardInstance> hand) -> rebuildHandWidgets());
     // Pause menu + in-place save/load overlay (added before the entity is created).
-    SaveLoadPanel savePanel = null;
-    if (tutorialBattle) {
-      battleUi
-          .addComponent(new PauseMenuDisplay())
-          .addComponent(new PauseMenuInput())
-          .addComponent(new PauseMenuActions(game, true));
-    } else {
-      savePanel = PauseMenuFactory.attach(battleUi, game);
-    }
+    SaveLoadPanel savePanel = PauseMenuFactory.attachLoadOnly(battleUi, game, tutorialBattle);
 
     gameArea.displayUI(battleUi);
     setBattleMenuFontScale();
@@ -597,7 +681,7 @@ public class BattleScreen extends ScreenAdapter {
     List<ClickableRecord> deckEditorClickables =
         ClickableFactory.loadRecordsFromJson(deckEditorUiJson);
     ClickableFactory deckPoolFactory = new ClickableFactory(deckEditorClickables);
-    if (savePanel != null) savePanel.hide(); // Tutorial previews must not save the real run.
+    savePanel.hide();
 
     List<DisplayingRecord> deckEditorDisplayRecords =
         DisplayingFactory.loadRecordsFromJson(deckEditorUiJson);
@@ -621,18 +705,21 @@ public class BattleScreen extends ScreenAdapter {
             .addComponent(deckEditor);
     ServiceLocator.getEntityService().register(deckEditorEntity);
 
-    // Hide the deck editor's scroll buttons until the popup opens. DeckEditorComponent.create()
+    // Hide the deck editor's JSON buttons until the popup opens. DeckEditorComponent.create()
     // tries to do this itself, but runs before the JSON-loaded clickables are registered in the
-    // factory, so nothing gets hidden. These two loops fix that.
+    // factory, so nothing gets hidden. These loops fix that.
     for (Clickable c : deckPoolFactory.getByTrigger("deckScrollUp")) {
       c.getBtn().setVisible(false);
     }
     for (Clickable c : deckPoolFactory.getByTrigger("deckScrollDown")) {
       c.getBtn().setVisible(false);
     }
+    for (Clickable c : deckPoolFactory.getByTrigger("deckSetDeck")) {
+      c.getBtn().setVisible(false);
+    }
 
-    battleUi.getEvents().addListener("openMenu", deckEditor::open);
-    battleUi.getEvents().addListener("openInventory", inventoryPopup::open);
+    battleUi.getEvents().addListener(OPEN_MENU_TRIGGER, deckEditor::open);
+    battleUi.getEvents().addListener(OPEN_INVENTORY_TRIGGER, inventoryPopup::open);
   }
 
   private void addBattleTitle(Stage stage) {
@@ -652,7 +739,7 @@ public class BattleScreen extends ScreenAdapter {
   }
 
   private void setBattleMenuFontScale() {
-    for (String trigger : List.of("openMenu", "openInventory", "endTurn")) {
+    for (String trigger : List.of(OPEN_MENU_TRIGGER, OPEN_INVENTORY_TRIGGER, END_TURN_TRIGGER)) {
       for (Clickable clickable : uiFactory.getByTrigger(trigger)) {
         if (clickable.getBtn() instanceof ImageTextButton button) {
           button.getLabel().setFontScale(0.86f);
@@ -680,14 +767,15 @@ public class BattleScreen extends ScreenAdapter {
 
   /** Replaces the on-screen hand with widgets for {@link #handRowOrder}. */
   private void rebuildHandWidgets() {
-    uiFactory.rebuildByTrigger(HAND_TRIGGER, buildHandRecords());
+    cardInspection.clearSources();
+    uiFactory.rebuildByTrigger(PLAY_CARD_TRIGGER, buildHandRecords());
     snapHandToVisibility();
     installHandCardWidgets();
   }
 
   /** Snaps every hand widget straight to the current up/down state, skipping any animation. */
   private void snapHandToVisibility() {
-    for (Clickable card : uiFactory.getByTrigger(HAND_TRIGGER)) {
+    for (Clickable card : uiFactory.getByTrigger(PLAY_CARD_TRIGGER)) {
       if (handVisible) {
         card.showNow();
       } else {
@@ -720,8 +808,21 @@ public class BattleScreen extends ScreenAdapter {
   }
 
   @Override
+  public void pause() {
+    cardInspection.reset();
+  }
+
+  @Override
+  public void hide() {
+    cardInspection.reset();
+  }
+
+  @Override
   public void dispose() {
-    playerState.captureFrom(gameArea.getPlayer());
+    cardInspection.reset();
+    if (!suppressPlayerCaptureOnDispose) {
+      playerState.captureFrom(gameArea.getPlayer());
+    }
     enemyCardAim.dispose();
     playerCardAim.dispose();
     allEnemiesCardAim.dispose();
@@ -729,9 +830,15 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.getRenderService().dispose();
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getResourceService().unloadAssets(EnemyStatusEffectVisuals.texturePaths());
+    ServiceLocator.getResourceService().unloadAssets(bossDialogueConfig.texturePaths());
     cardInteractionSkin.dispose();
     cardWidgetSkin.dispose();
     ServiceLocator.getResourceService().unloadAssets(mainGameTextures);
+  }
+
+  @Override
+  public void prepareForLoadedSaveTransition() {
+    suppressPlayerCaptureOnDispose = true;
   }
 
   private void loadAssets() {
@@ -739,6 +846,7 @@ public class BattleScreen extends ScreenAdapter {
     ResourceService resourceService = ServiceLocator.getResourceService();
     resourceService.loadTextures(mainGameTextures);
     resourceService.loadTextures(EnemyStatusEffectVisuals.texturePaths());
+    resourceService.loadTextures(bossDialogueConfig.texturePaths());
     ServiceLocator.getResourceService().loadAll();
   }
 
@@ -767,9 +875,9 @@ public class BattleScreen extends ScreenAdapter {
     for (ClickableRecord clickableRecord : staticUiRecords) {
       BattleMenuSkins.Icon icon =
           switch (clickableRecord.trigger()) {
-            case "openMenu" -> BattleMenuSkins.Icon.CARD;
-            case "openInventory" -> BattleMenuSkins.Icon.INVENTORY;
-            case "endTurn" -> BattleMenuSkins.Icon.END_TURN;
+            case OPEN_MENU_TRIGGER -> BattleMenuSkins.Icon.CARD;
+            case OPEN_INVENTORY_TRIGGER -> BattleMenuSkins.Icon.INVENTORY;
+            case END_TURN_TRIGGER -> BattleMenuSkins.Icon.END_TURN;
             default -> null;
           };
       if (icon == null) {
@@ -829,7 +937,7 @@ public class BattleScreen extends ScreenAdapter {
       float y = HAND_Y + Math.abs(offsetFromCenter) * HAND_ARC_DROP_PER_CARD;
 
       ClickableRecord.Builder builder =
-          ClickableRecord.builder(HAND_TRIGGER)
+          ClickableRecord.builder(PLAY_CARD_TRIGGER)
               .label(card.name())
               .variant(variant)
               .position(x, y)
@@ -867,7 +975,7 @@ public class BattleScreen extends ScreenAdapter {
       instancesById.put(instance.instanceId(), instance);
     }
 
-    for (Clickable clickable : uiFactory.getByTrigger(HAND_TRIGGER)) {
+    for (Clickable clickable : uiFactory.getByTrigger(PLAY_CARD_TRIGGER)) {
       installHandCardWidget(clickable, instancesById);
     }
   }
@@ -890,9 +998,20 @@ public class BattleScreen extends ScreenAdapter {
     try {
       ResolvedCard resolved = cardResolver.resolve(config.get(), instance);
       clickable.setVisualContent(() -> new CardWidget(resolved, cardWidgetAssets));
+      cardInspection.registerSource(clickable.getBtn(), () -> resolveInspectionCard(instanceId));
     } catch (IllegalArgumentException | IllegalStateException exception) {
       logger.warn("Could not install card widget for instance {}", instanceId, exception);
     }
+  }
+
+  private ResolvedCard resolveInspectionCard(String instanceId) {
+    return battleDeck.getHand().stream()
+        .filter(card -> instanceId.equals(card.instanceId()))
+        .findFirst()
+        .flatMap(
+            card ->
+                library.getCard(card.cardId()).map(config -> cardResolver.resolve(config, card)))
+        .orElse(null);
   }
 
   /** Applies curse items that take effect at the start of every battle. */

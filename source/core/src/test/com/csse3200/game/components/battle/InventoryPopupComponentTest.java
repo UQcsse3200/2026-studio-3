@@ -80,6 +80,9 @@ class InventoryPopupComponentTest {
         "+50% SHOP DISCOUNT",
         InventoryPopupComponent.describeItem(ItemType.MERCHANTS_FAVOR, 6).effect());
     assertEquals(
+        "+50% SHOP DISCOUNT",
+        InventoryPopupComponent.describeItem(ItemType.MERCHANTS_FAVOR, Integer.MAX_VALUE).effect());
+    assertEquals(
         "-6 HEALTH / TURN",
         InventoryPopupComponent.describeItem(ItemType.BLOOD_OATH_SIGIL, 3).effect());
     assertEquals(
@@ -493,8 +496,7 @@ class InventoryPopupComponentTest {
     Table row = assertInstanceOf(Table.class, frame.getCells().first().getActor());
     Table actionColumn = assertInstanceOf(Table.class, row.getCells().get(2).getActor());
     Table control = assertInstanceOf(Table.class, actionColumn.getCells().get(1).getActor());
-    TextButton button = assertInstanceOf(TextButton.class, control.getCells().first().getActor());
-    return button;
+    return assertInstanceOf(TextButton.class, control.getCells().first().getActor());
   }
 
   private String feedbackDetail() {

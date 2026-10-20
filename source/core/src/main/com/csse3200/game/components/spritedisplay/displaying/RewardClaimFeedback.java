@@ -20,6 +20,15 @@ import java.util.Objects;
 
 /** Presentation-only destinations and brief claim feedback for the three battle reward types. */
 final class RewardClaimFeedback {
+  private record TrailDotSpec(
+      String name,
+      Color colour,
+      Vector2 center,
+      Vector2 size,
+      float opacity,
+      Vector2 drift,
+      float duration) {}
+
   private static final float ICON_X = 24f;
   private static final float ICON_SIZE = 56f;
   private static final float[] BATTLE_BUTTON_Y_FROM_TOP = {180f, 239f, 299f};
@@ -189,89 +198,130 @@ final class RewardClaimFeedback {
     };
   }
 
+  private static final String REWARD_STAR_PREFIX = "rewardStar";
+
   private Vector2 flightPoint(Vector2 start, Vector2 end, float elapsed) {
     return new Vector2(start).lerp(end, Interpolation.sine.apply(elapsed / FLIGHT_DURATION));
   }
 
   private void emitTrail(RewardType type, Vector2 current, Vector2 direction, int index) {
-    Color colour =
-        switch (type) {
-          case GOLD -> GOLD_TRAIL;
-          case ITEM -> ITEM_TRAIL;
-          case CARD -> CARD_TRAIL;
-        };
+    Color colour = trailColour(type);
+    emitTrailSegments(type, colour, current, direction, index);
+    emitRewardStar(type, current, direction, index);
+  }
+
+  private Color trailColour(RewardType type) {
+    return switch (type) {
+      case GOLD -> GOLD_TRAIL;
+      case ITEM -> ITEM_TRAIL;
+      case CARD -> CARD_TRAIL;
+    };
+  }
+
+  private void emitTrailSegments(
+      RewardType type, Color colour, Vector2 current, Vector2 direction, int index) {
     for (int i = 0; i < 6; i++) {
       // Three bright points hug the reward; distant ones disperse and appear less often.
-      if ((i == 3 && index % 2 != 0) || (i == 4 && index % 3 != 0) || (i == 5 && index % 4 != 0)) {
-        continue;
+      if (!shouldSkipTrailSegment(i, index)) {
+        emitTrailSegment(type, colour, current, direction, i);
       }
-      float distance = 5f + i * 8f;
-      float sideways = (i % 2 == 0 ? 1f : -1f) * (2f + i * 4f);
-      float size = i < 3 ? (type == RewardType.GOLD ? 7f : 6f) : 4f;
-      float width = type == RewardType.CARD ? size * 0.75f : size;
-      float height = type == RewardType.CARD ? size * 1.4f : size;
-      float x = current.x - direction.x * distance - direction.y * sideways;
-      float y = current.y - direction.y * distance + direction.x * sideways;
-      float duration = 0.16f + i * 0.014f;
-      float driftX = -direction.x * (7f + i * 3f) - direction.y * sideways;
-      float driftY = -direction.y * (7f + i * 3f) + direction.x * sideways;
-      if (i < 3) {
-        addTrailDot(
-            "rewardGlow" + type,
-            colour,
-            x,
-            y,
-            width + 7f,
-            height + 7f,
-            0.2f,
-            driftX,
-            driftY,
-            duration);
-      }
-      addTrailDot(
-          "rewardTrail" + type,
-          colour,
-          x,
-          y,
-          width,
-          height,
-          Math.max(0.48f, 1f - i * 0.1f),
-          driftX,
-          driftY,
-          duration);
-    }
-    if (index % 3 == 0) {
-      float x = current.x - direction.x * 15f;
-      float y = current.y - direction.y * 15f;
-      addTrailDot("rewardStar" + type, Color.WHITE, x, y, 12f, 2f, 0.85f, 0f, 0f, 0.17f);
-      addTrailDot("rewardStar" + type, Color.WHITE, x, y, 2f, 12f, 0.85f, 0f, 0f, 0.17f);
-      addTrailDot("rewardStar" + type, Color.WHITE, x, y, 3f, 3f, 1f, 0f, 0f, 0.17f);
     }
   }
 
-  private void addTrailDot(
-      String name,
-      Color colour,
-      float centerX,
-      float centerY,
-      float width,
-      float height,
-      float opacity,
-      float driftX,
-      float driftY,
-      float duration) {
+  private void emitRewardStar(RewardType type, Vector2 current, Vector2 direction, int index) {
+    if (index % 3 != 0) {
+      return;
+    }
+
+    float x = current.x - direction.x * 15f;
+    float y = current.y - direction.y * 15f;
+    addTrailDot(
+        new TrailDotSpec(
+            REWARD_STAR_PREFIX + type,
+            Color.WHITE,
+            new Vector2(x, y),
+            new Vector2(12f, 2f),
+            0.85f,
+            new Vector2(),
+            0.17f));
+    addTrailDot(
+        new TrailDotSpec(
+            REWARD_STAR_PREFIX + type,
+            Color.WHITE,
+            new Vector2(x, y),
+            new Vector2(2f, 12f),
+            0.85f,
+            new Vector2(),
+            0.17f));
+    addTrailDot(
+        new TrailDotSpec(
+            REWARD_STAR_PREFIX + type,
+            Color.WHITE,
+            new Vector2(x, y),
+            new Vector2(3f, 3f),
+            1f,
+            new Vector2(),
+            0.17f));
+  }
+
+  private boolean shouldSkipTrailSegment(int step, int index) {
+    return (step == 3 && index % 2 != 0)
+        || (step == 4 && index % 3 != 0)
+        || (step == 5 && index % 4 != 0);
+  }
+
+  private void emitTrailSegment(
+      RewardType type, Color colour, Vector2 current, Vector2 direction, int i) {
+    float distance = 5f + i * 8f;
+    float sideways = (i % 2 == 0 ? 1f : -1f) * (2f + i * 4f);
+    float size = 4f;
+    if (i < 3) {
+      size = type == RewardType.GOLD ? 7f : 6f;
+    }
+    float width = type == RewardType.CARD ? size * 0.75f : size;
+    float height = type == RewardType.CARD ? size * 1.4f : size;
+    float x = current.x - direction.x * distance - direction.y * sideways;
+    float y = current.y - direction.y * distance + direction.x * sideways;
+    float duration = 0.16f + i * 0.014f;
+    float driftX = -direction.x * (7f + i * 3f) - direction.y * sideways;
+    float driftY = -direction.y * (7f + i * 3f) + direction.x * sideways;
+    if (i < 3) {
+      addTrailDot(
+          new TrailDotSpec(
+              "rewardGlow" + type,
+              colour,
+              new Vector2(x, y),
+              new Vector2(width + 7f, height + 7f),
+              0.2f,
+              new Vector2(driftX, driftY),
+              duration));
+    }
+    addTrailDot(
+        new TrailDotSpec(
+            "rewardTrail" + type,
+            colour,
+            new Vector2(x, y),
+            new Vector2(width, height),
+            Math.max(0.48f, 1f - i * 0.1f),
+            new Vector2(driftX, driftY),
+            duration));
+  }
+
+  private void addTrailDot(TrailDotSpec spec) {
     Image dot = new Image(skin.getDrawable("white"));
-    dot.setName(name);
+    dot.setName(spec.name());
     dot.setTouchable(Touchable.disabled);
-    dot.setColor(colour);
-    dot.getColor().a = opacity;
-    dot.setSize(width, height);
-    dot.setPosition(centerX - width / 2f, centerY - height / 2f);
+    dot.setColor(spec.colour());
+    dot.getColor().a = spec.opacity();
+    dot.setSize(spec.size().x, spec.size().y);
+    dot.setPosition(spec.center().x - spec.size().x / 2f, spec.center().y - spec.size().y / 2f);
     overlay.addActor(dot);
     dot.toBack();
     dot.addAction(
         Actions.sequence(
-            Actions.parallel(Actions.moveBy(driftX, driftY, duration), Actions.fadeOut(duration)),
+            Actions.parallel(
+                Actions.moveBy(spec.drift().x, spec.drift().y, spec.duration()),
+                Actions.fadeOut(spec.duration())),
             Actions.removeActor()));
   }
 

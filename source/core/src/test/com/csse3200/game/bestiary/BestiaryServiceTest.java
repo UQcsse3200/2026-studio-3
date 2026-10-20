@@ -26,7 +26,8 @@ class BestiaryServiceTest {
   void shouldLoadDefaultRosterWithResolvedSpritePaths() {
     BestiaryService service = BestiaryService.loadDefault();
 
-    assertEquals(6, service.getEntries().size());
+    assertEquals(7, service.getEntries().size());
+    assertTrue(service.contains("votive_attendant"));
     assertTrue(service.contains("lesser_shade"));
     assertTrue(service.contains("tomb_guardian"));
     assertTrue(service.contains("void_knight"));
@@ -78,7 +79,7 @@ class BestiaryServiceTest {
 
     assertTrue(service.recordDefeated("boss_knight"));
     BestiaryEntryView defeatedBoss = service.getEntry("boss_knight").orElseThrow();
-    assertEquals(150, defeatedBoss.health().orElseThrow());
+    assertEquals(100, defeatedBoss.health().orElseThrow());
     assertEquals(14, defeatedBoss.baseAttack().orElseThrow());
     assertEquals(8, defeatedBoss.armour().orElseThrow());
     assertEquals("boss", defeatedBoss.behaviour().orElseThrow());
@@ -97,6 +98,26 @@ class BestiaryServiceTest {
     assertTrue(entries.stream().allMatch(entry -> entry.sprite().isEmpty()));
     assertTrue(entries.stream().allMatch(entry -> entry.health().isEmpty()));
     assertThrows(UnsupportedOperationException.class, entries::clear);
+  }
+
+  @Test
+  void shouldExposeCompleteCatalogueWithoutUnlockingSavedProgress() {
+    BestiaryService service = createService();
+    Map<String, BestiaryUnlockState> originalProgress = service.getProgressSnapshot();
+
+    List<BestiaryEntryView> catalogue = service.getCatalogueEntries();
+    BestiaryEntryView shade =
+        service.getCatalogueEntriesByTier(EnemyTier.NORMAL).stream()
+            .filter(entry -> entry.enemyId().equals("shade"))
+            .findFirst()
+            .orElseThrow();
+
+    assertEquals(List.of("alpha", "shade", "knight", "guardian"), ids(catalogue));
+    assertEquals("Lesser Shade", shade.displayName());
+    assertEquals("images/enemies/shade.atlas", shade.sprite().orElseThrow());
+    assertEquals(24, shade.health().orElseThrow());
+    assertEquals(originalProgress, service.getProgressSnapshot());
+    assertEquals(BestiaryUnlockState.LOCKED, service.getEntry("shade").orElseThrow().unlockState());
   }
 
   @Test

@@ -14,6 +14,7 @@ public final class EnemyAIFactory {
   public static final String DEFENSIVE_STANCE = "defensive_stance";
   public static final String ARMOUR_SCALING = "armour_scaling";
   public static final String ERRATIC = "erratic";
+  public static final String TUTORIAL = "tutorial";
 
   /** Behaviour used when a configuration names an unknown behaviour. */
   public static final String DEFAULT_BEHAVIOUR = CYCLE_ATTACK_DEFEND;
@@ -42,6 +43,7 @@ public final class EnemyAIFactory {
       case DEFENSIVE_STANCE -> new DefensiveStanceAI();
       case ARMOUR_SCALING -> new ArmourScalingAI();
       case ERRATIC -> new RandomStanceAI();
+      case TUTORIAL -> new TutorialEnemyAI();
       default -> {
         logger.warn(
             "Unknown enemy behaviour id '{}', falling back to {}", behaviourId, DEFAULT_BEHAVIOUR);
