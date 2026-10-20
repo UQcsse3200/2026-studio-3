@@ -12,7 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-/** Non-interactive curved card aim and outlines of the actual selectable target bounds. */
+/** Non-interactive curved card aim and underlines beneath selectable targets. */
 final class AimArrowActor extends Actor {
   private static final Color IDLE = new Color(0.94f, 0.88f, 0.72f, 1f);
   private static final Color SELECTED = new Color(0.96f, 0.32f, 0.24f, 1f);
@@ -74,19 +74,15 @@ final class AimArrowActor extends Actor {
     targetBounds.forEach(
         (id, box) -> {
           boolean selected = highlighted.contains(id);
-          tint(batch, IDLE, alpha * (selected ? 0.65f : 0.22f));
-          outline(batch, box, 1f);
-          if (selected) {
-            tint(batch, SELECTED, alpha * 0.95f);
-            corners(batch, box, 2f, 14f);
-          }
+          tint(batch, selected ? SELECTED : IDLE, alpha * (selected ? 0.95f : 0.22f));
+          line(batch, box.x, box.y, box.x + box.width, box.y, selected ? 2f : 1f);
         });
     if (drawArrow && start.dst2(end) > 1f) drawCurve(batch, alpha);
     batch.setColor(previous);
   }
 
   private void drawCurve(Batch batch, float alpha) {
-    float rise = Math.min(180f, Math.max(45f, start.dst(end) * 0.4f));
+    float rise = Math.clamp(start.dst(end) * 0.4f, 45f, 180f);
     control1.set(start.x, start.y + rise);
     control2.set(end.x - (end.x - start.x) * 0.15f, end.y + rise * 0.35f);
     direction.set(end).sub(control2).nor();
@@ -149,15 +145,6 @@ final class AimArrowActor extends Actor {
 
   private void tint(Batch batch, Color colour, float alpha) {
     batch.setColor(colour.r, colour.g, colour.b, alpha);
-  }
-
-  private void outline(Batch batch, Rectangle box, float thickness) {
-    float right = box.x + box.width;
-    float top = box.y + box.height;
-    line(batch, box.x, box.y, right, box.y, thickness);
-    line(batch, right, box.y, right, top, thickness);
-    line(batch, right, top, box.x, top, thickness);
-    line(batch, box.x, top, box.x, box.y, thickness);
   }
 
   private void corners(Batch batch, Rectangle box, float thickness, float length) {

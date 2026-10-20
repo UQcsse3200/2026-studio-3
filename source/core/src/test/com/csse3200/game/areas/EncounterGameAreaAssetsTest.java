@@ -20,10 +20,10 @@ import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.StatsDisplay;
 import com.csse3200.game.components.enemy.IntentIcons;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.player.InventoryComponent;
-import com.csse3200.game.components.player.PlayerStatsDisplay;
 import com.csse3200.game.components.player.PlayerStatsTopDisplay;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.factories.PlayerFactory;
@@ -103,7 +103,7 @@ class EncounterGameAreaAssetsTest {
     // Initialize durable ownership before mocking PlayerFactory's static methods.
     run.getOrCreatePlayerState();
     run.setMapGraph(new MapGraph(Map.of(7, new MapNode(7, roomType)), false));
-    PlayerStatsDisplay hud = new PlayerStatsDisplay();
+    StatsDisplay hud = new StatsDisplay();
 
     TextureAtlas atlas = mock(TextureAtlas.class);
 

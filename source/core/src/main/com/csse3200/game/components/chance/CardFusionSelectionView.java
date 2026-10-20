@@ -453,10 +453,8 @@ final class CardFusionSelectionView {
     if (completed || unavailable || selectedInstanceIds.size() != REQUIRED_CARDS) {
       return;
     }
-    List<String> consumedCardIds = new ArrayList<>();
-    for (String id : selectedInstanceIds) {
-      consumedCardIds.add(eligibleInstances.get(id).cardId());
-    }
+    List<String> consumedCardIds =
+        selectedInstanceIds.stream().map(id -> eligibleInstances.get(id).cardId()).toList();
     CardFusionResult result = flow.fuse(List.copyOf(selectedInstanceIds));
     if (result.successful()) {
       completed = true;
@@ -722,11 +720,17 @@ final class CardFusionSelectionView {
     Label description = label(rulesText, CREAM);
     description.setAlignment(Align.topLeft);
     description.setWrap(true);
-    description.setFontScale(
-        rulesText.length() > 80 ? 0.89f : rulesText.length() > 65 ? 0.98f : 1.08f);
+    description.setFontScale(descriptionFontScale(rulesText));
     description.setBounds(29f, 37f, 298f, 94f);
     card.addActor(description);
     return card;
+  }
+
+  private static float descriptionFontScale(String rulesText) {
+    if (rulesText.length() > 80) {
+      return 0.89f;
+    }
+    return rulesText.length() > 65 ? 0.98f : 1.08f;
   }
 
   private void showLeave() {

@@ -53,10 +53,10 @@ public class BestiaryDisplay extends UIComponent {
   private static final Color GOLD_COLOUR = new Color(0.95f, 0.73f, 0.28f, 1f);
   private static final Color BODY_COLOUR = new Color(0.9f, 0.84f, 0.73f, 1f);
   private static final Color MUTED_COLOUR = new Color(0.65f, 0.58f, 0.52f, 1f);
-  private static final String WHITE = "white";
-  private static final String LARGE = "large";
-  private static final String SMALL = "small";
-  private static final String DEFAULT = "default";
+  private static final String STYLE_NAME_WHITE = "white";
+  private static final String STYLE_NAME_LARGE = "large";
+  private static final String STYLE_NAME_SMALL = "small";
+  private static final String STYLE_NAME_DEFAULT = "default";
   static final String EMPTY_STATE_MESSAGE = "No enemies discovered in this category yet.";
   static final String NO_RESULTS_MESSAGE =
       "No discovered enemies match this search in this category.";
@@ -108,7 +108,7 @@ public class BestiaryDisplay extends UIComponent {
     rootTable = new Table();
     rootTable.setFillParent(true);
     rootTable.setTouchable(Touchable.enabled);
-    rootTable.setBackground(skin.newDrawable(WHITE, BACKDROP_COLOUR));
+    rootTable.setBackground(skin.newDrawable(STYLE_NAME_WHITE, BACKDROP_COLOUR));
     rootTable.center();
 
     Table panel = new Table();
@@ -132,11 +132,12 @@ public class BestiaryDisplay extends UIComponent {
 
   private void addHeader(Table panel) {
     Table titleBlock = new Table();
-    Label eyebrow = new Label("ENEMY ARCHIVE", createLabelStyle(SMALL, GOLD_COLOUR));
-    Label title = new Label("Enemy Library", createLabelStyle(LARGE, BODY_COLOUR));
+    Label eyebrow = new Label("ENEMY ARCHIVE", createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR));
+    Label title = new Label("Enemy Library", createLabelStyle(STYLE_NAME_LARGE, BODY_COLOUR));
     Label subtitle =
         new Label(
-            "All enemies. Every tier. Know what awaits.", createLabelStyle(SMALL, MUTED_COLOUR));
+            "All enemies. Every tier. Know what awaits.",
+            createLabelStyle(STYLE_NAME_SMALL, MUTED_COLOUR));
     eyebrow.setFontScale(1.2f);
     title.setFontScale(1.45f);
     subtitle.setFontScale(1.15f);
@@ -170,7 +171,7 @@ public class BestiaryDisplay extends UIComponent {
 
   private void addDivider(Table panel) {
     Table divider = new Table();
-    divider.setBackground(skin.newDrawable(WHITE, GOLD_COLOUR));
+    divider.setBackground(skin.newDrawable(STYLE_NAME_WHITE, GOLD_COLOUR));
     panel.add(divider).colspan(2).expandX().fillX().height(2f).padTop(16f).padBottom(14f);
   }
 
@@ -224,14 +225,14 @@ public class BestiaryDisplay extends UIComponent {
     enemyScroll.setFadeScrollBars(false);
     enemyScroll.setScrollingDisabled(true, false);
     enemyScroll.setForceScroll(false, true);
-    emptyStateLabel = new Label("", createLabelStyle(SMALL, MUTED_COLOUR));
+    emptyStateLabel = new Label("", createLabelStyle(STYLE_NAME_SMALL, MUTED_COLOUR));
     emptyStateLabel.setName("bestiary-no-results");
     emptyStateLabel.setWrap(true);
 
     Table listPanel = new Table();
-    listPanel.setBackground(skin.newDrawable(WHITE, LIST_COLOUR));
+    listPanel.setBackground(skin.newDrawable(STYLE_NAME_WHITE, LIST_COLOUR));
     listPanel.pad(18f);
-    Label listTitle = new Label("ENEMIES", createLabelStyle(SMALL, GOLD_COLOUR));
+    Label listTitle = new Label("ENEMIES", createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR));
     listTitle.setFontScale(1.15f);
     listPanel.add(listTitle).left().expandX();
     listPanel.row();
@@ -246,7 +247,8 @@ public class BestiaryDisplay extends UIComponent {
 
   private void addSearchControls(Table listPanel) {
     listPanel
-        .add(new Label("Search discovered enemies", createLabelStyle(SMALL, BODY_COLOUR)))
+        .add(
+            new Label("Search discovered enemies", createLabelStyle(STYLE_NAME_SMALL, BODY_COLOUR)))
         .left()
         .padTop(10f);
     listPanel.row();
@@ -279,23 +281,24 @@ public class BestiaryDisplay extends UIComponent {
     searchRow.add(clear).width(76f).height(42f).padLeft(8f);
     listPanel.add(searchRow).growX().padTop(5f);
     listPanel.row();
-    resultCountLabel = new Label("", createLabelStyle(SMALL, GOLD_COLOUR));
+    resultCountLabel = new Label("", createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR));
     resultCountLabel.setName("bestiary-result-count");
     listPanel.add(resultCountLabel).left().padTop(8f);
   }
 
   private Table createDetailPanel() {
     Table detailPanel = new Table();
-    detailPanel.setBackground(skin.newDrawable(WHITE, DETAIL_COLOUR));
+    detailPanel.setBackground(skin.newDrawable(STYLE_NAME_WHITE, DETAIL_COLOUR));
     detailPanel.pad(24f);
     Table detailContent = new Table();
     detailContent.top();
 
-    detailStateLabel = new Label("", createLabelStyle(SMALL, GOLD_COLOUR));
-    detailNameLabel = new Label("", createLabelStyle(LARGE, BODY_COLOUR));
-    detailTierLabel = new Label("", createLabelStyle(SMALL, Color.WHITE));
-    detailDescriptionLabel = new Label("", createLabelStyle(DEFAULT, BODY_COLOUR));
-    detailStatsLabel = new Label("", createLabelStyle(DEFAULT, GOLD_COLOUR));
+    detailStateLabel = new Label("", createLabelStyle(STYLE_NAME_SMALL, GOLD_COLOUR));
+    detailNameLabel = new Label("", createLabelStyle(STYLE_NAME_LARGE, BODY_COLOUR));
+    detailTierLabel = new Label("", createLabelStyle(STYLE_NAME_SMALL, MUTED_COLOUR));
+    detailDescriptionLabel = new Label("", createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
+    detailStatsLabel = new Label("", createLabelStyle(STYLE_NAME_DEFAULT, GOLD_COLOUR));
+    detailStatsLabel = new Label("", createLabelStyle(STYLE_NAME_DEFAULT, GOLD_COLOUR));
     detailNameLabel.setName("bestiary-name");
     detailDescriptionLabel.setName("bestiary-description");
     detailStatsLabel.setName("bestiary-stats");
@@ -309,11 +312,12 @@ public class BestiaryDisplay extends UIComponent {
     detailStatsLabel.setWrap(true);
 
     Table artBackground = new Table();
-    artBackground.setBackground(skin.newDrawable(WHITE, new Color(0.035f, 0.03f, 0.04f, 1f)));
+    artBackground.setBackground(
+        skin.newDrawable(STYLE_NAME_WHITE, new Color(0.035f, 0.03f, 0.04f, 1f)));
     detailImage = new Image();
     detailImage.setName("bestiary-artwork");
     detailImage.setScaling(Scaling.fit);
-    lockedArtLabel = new Label("?", createLabelStyle(LARGE, MUTED_COLOUR));
+    lockedArtLabel = new Label("?", createLabelStyle(STYLE_NAME_LARGE, MUTED_COLOUR));
     lockedArtLabel.setFontScale(4f);
 
     Stack artwork = new Stack();
@@ -524,7 +528,7 @@ public class BestiaryDisplay extends UIComponent {
 
     String behaviour = entry.behaviour().orElse("Unknown").replace('_', ' ').toUpperCase();
     return String.format(
-        "HP  %d     ATTACK  %d     ARMOUR  %d\nBEHAVIOUR  %s",
+        "HP  %d     ATTACK  %d     ARMOUR  %d%nBEHAVIOUR  %s",
         entry.health().orElse(0),
         entry.baseAttack().orElse(0),
         entry.armour().orElse(0),
@@ -556,7 +560,7 @@ public class BestiaryDisplay extends UIComponent {
     }
 
     TextureAtlas atlas = resources.getAsset(resolvedPath, TextureAtlas.class);
-    AtlasRegion region = atlas.findRegion(DEFAULT);
+    AtlasRegion region = atlas.findRegion(STYLE_NAME_DEFAULT);
     if (region == null) {
       region = atlas.findRegion("idle", 0);
     }

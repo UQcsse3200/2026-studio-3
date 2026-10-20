@@ -95,7 +95,7 @@ public final class ChanceOutcomeApplier {
     }
 
     long requestedHealth = (long) healthBefore + outcome.getHealthDelta();
-    int healthTarget = (int) Math.max(0L, Math.min((long) player.getMaxHealth(), requestedHealth));
+    int healthTarget = Math.clamp(requestedHealth, 0, player.getMaxHealth());
     int appliedHealthDelta = healthTarget - healthBefore;
     int currencyTarget = (int) requestedCurrency;
     List<String> cardRewardIds = outcome.getCardRewardIds();

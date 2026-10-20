@@ -6,7 +6,6 @@ import com.csse3200.game.bestiary.BestiaryUnlockState;
 import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardUnlockState;
 import com.csse3200.game.cards.deck.PlayerDeck;
-import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.maps.MapGraph;
 import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.PlayerRunState;
@@ -15,7 +14,6 @@ import com.csse3200.game.rewards.ItemDiscoveryService;
 import com.csse3200.game.rewards.ItemUnlockState;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Captures the live run as a {@link SaveGameData} snapshot.
@@ -113,11 +111,12 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
   }
 
   private DeckSaveData captureDeck() {
-    List<CardInstanceSaveData> cardSnapshots = new ArrayList<>();
-    for (CardInstance card : playerDeck.getCards()) {
-      cardSnapshots.add(
-          new CardInstanceSaveData(card.instanceId(), card.cardId(), card.upgradeLevel()));
-    }
+    List<CardInstanceSaveData> cardSnapshots =
+        playerDeck.getCards().stream()
+            .map(
+                card ->
+                    new CardInstanceSaveData(card.instanceId(), card.cardId(), card.upgradeLevel()))
+            .toList();
     return new DeckSaveData(cardSnapshots);
   }
 
@@ -125,11 +124,9 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
     List<MapNodeSaveData> nodeSnapshots = new ArrayList<>();
     MapGraph mapGraph = runState.getMapGraph();
 
+    assert mapGraph != null;
     for (MapNode node : mapGraph.getNodes().values()) {
-      List<Integer> connectionIds = new ArrayList<>();
-      for (MapNode connected : node.getConnections()) {
-        connectionIds.add(connected.getNodeId());
-      }
+      List<Integer> connectionIds = node.getConnections().stream().map(MapNode::getNodeId).toList();
       nodeSnapshots.add(
           new MapNodeSaveData(
               node.getNodeId(), node.getRoomType().name(), node.getState().name(), connectionIds));
@@ -158,13 +155,11 @@ public class GameStateSnapshotProvider implements SaveGameSnapshotProvider {
     // in-progress to replay. Always MAP for now — revisit if that rule changes.
     String resumeScreen = GdxGame.ScreenType.MAP.name();
 
-    List<BestiaryProgressSaveData> bestiaryProgress = new ArrayList<>();
-    for (Map.Entry<String, BestiaryUnlockState> entry :
-        bestiaryService.getProgressSnapshot().entrySet()) {
-      if (entry.getValue() != BestiaryUnlockState.LOCKED) {
-        bestiaryProgress.add(new BestiaryProgressSaveData(entry.getKey(), entry.getValue().name()));
-      }
-    }
+    List<BestiaryProgressSaveData> bestiaryProgress =
+        bestiaryService.getProgressSnapshot().entrySet().stream()
+            .filter(entry -> entry.getValue() != BestiaryUnlockState.LOCKED)
+            .map(entry -> new BestiaryProgressSaveData(entry.getKey(), entry.getValue().name()))
+            .toList();
 
     List<CardProgressSaveData> cardProgress =
         cardDiscoveryService.getProgressSnapshot().entrySet().stream()
