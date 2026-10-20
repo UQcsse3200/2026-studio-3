@@ -6,7 +6,7 @@ public final class MapGenerationConfig {
   public static final int MAP_WIDTH = 7;
   public static final int MAP_HEIGHT = 10;
   public static final int MAX_NODE_COUNT = MAP_WIDTH * MAP_HEIGHT;
-  public static final int BRANCH_CHANCE = 8;
+  public static final int BRANCH_CHANCE = 6;
 
   private int normalNodeCount = 70;
 

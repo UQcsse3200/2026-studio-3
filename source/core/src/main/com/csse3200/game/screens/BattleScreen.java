@@ -6,6 +6,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -34,7 +37,21 @@ import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.cards.runtime.CardResolver;
 import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
-import com.csse3200.game.components.battle.*;
+import com.csse3200.game.components.battle.BattleActions;
+import com.csse3200.game.components.battle.BattleAnimationCoordinator;
+import com.csse3200.game.components.battle.BattleClickableFactory;
+import com.csse3200.game.components.battle.BattleEncounterSelector;
+import com.csse3200.game.components.battle.BattleGameArea;
+import com.csse3200.game.components.battle.CardActions;
+import com.csse3200.game.components.battle.DamageOnCardPlayComponent;
+import com.csse3200.game.components.battle.DeckEditorComponent;
+import com.csse3200.game.components.battle.DeckEditorDisplayingFactory;
+import com.csse3200.game.components.battle.DeckEditorEvents;
+import com.csse3200.game.components.battle.EffectVisualRegistry;
+import com.csse3200.game.components.battle.EnemyStatusEffectVisuals;
+import com.csse3200.game.components.battle.InventoryPopupComponent;
+import com.csse3200.game.components.battle.OffensiveEffectVisuals;
+import com.csse3200.game.components.battle.PlayerEffectVisuals;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.cards.CardInspectionController;
 import com.csse3200.game.components.cards.CardWidget;
@@ -42,12 +59,15 @@ import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.enemy.BossDialogueComponent;
 import com.csse3200.game.components.enemy.BossDialogueConfig;
-import com.csse3200.game.components.enemy.EnemyAI.BossAI;
-import com.csse3200.game.components.enemy.EnemyAI.TutorialEnemyAI;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
-import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
-import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
+import com.csse3200.game.components.enemy.enemyai.BossAI;
+import com.csse3200.game.components.enemy.enemyai.TutorialEnemyAI;
+import com.csse3200.game.components.enemy.memory.EnemyMemoryComponent;
+import com.csse3200.game.components.enemy.memory.PlayerTrackerComponent;
+import com.csse3200.game.components.pausemenu.PauseMenuActions;
+import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuFactory;
+import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
@@ -78,6 +98,8 @@ import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.GameTime;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.tutorial.BattleTutorialComponent;
 import com.csse3200.game.tutorial.BattleTutorialController;
 import com.csse3200.game.tutorial.BattleTutorialGuidanceView;
@@ -96,7 +118,14 @@ import com.csse3200.game.ui.terminal.commands.SetEnemyHealthCommand;
 import com.csse3200.game.ui.terminal.commands.SetHealthCommand;
 import com.csse3200.game.ui.terminal.commands.SkipBattleCommand;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -521,7 +550,8 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
 
   private Rectangle battleEntityBounds(Entity enemy) {
     Stage stage = ServiceLocator.getRenderService().getStage();
-    Vector2 pos = enemy.getPosition(), scale = enemy.getScale();
+    Vector2 pos = enemy.getPosition();
+    Vector2 scale = enemy.getScale();
     Vector3 a = ServiceLocator.getCamera().project(new Vector3(pos.x, pos.y, 0));
     Vector3 b =
         ServiceLocator.getCamera().project(new Vector3(pos.x + scale.x, pos.y + scale.y, 0));
@@ -655,7 +685,15 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
         .addListener(
             BattleActions.HAND_CHANGED_EVENT, (List<CardInstance> hand) -> rebuildHandWidgets());
     // Pause menu + in-place save/load overlay (added before the entity is created).
-    SaveLoadPanel savePanel = PauseMenuFactory.attachLoadOnly(battleUi, game, tutorialBattle);
+    SaveLoadPanel savePanel = null;
+    if (tutorialBattle) {
+      battleUi
+          .addComponent(new PauseMenuDisplay())
+          .addComponent(new PauseMenuInput())
+          .addComponent(new PauseMenuActions(game, true));
+    } else {
+      savePanel = PauseMenuFactory.attach(battleUi, game);
+    }
 
     gameArea.displayUI(battleUi);
     setBattleMenuFontScale();
@@ -962,6 +1000,16 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
     }
 
     for (Clickable clickable : uiFactory.getByTrigger(PLAY_CARD_TRIGGER)) {
+      clickable
+          .getBtn()
+          .addListener(
+              new InputListener() {
+                @Override
+                public void enter(
+                    InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                  AudioService.playSound(SoundId.CARD_HOVER, 0.5f);
+                }
+              });
       installHandCardWidget(clickable, instancesById);
     }
   }

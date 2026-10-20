@@ -53,10 +53,15 @@ public class UserSettings {
    * @param settings Settings to apply
    */
   public static void applySettings(Settings settings) {
+    applyDisplaySettings(settings);
+    applyAudioSettings(settings);
+  }
+
+  /** Applies only display settings without storing them or changing audio. */
+  public static void applyDisplaySettings(Settings settings) {
     if (settings == null) {
       throw new IllegalArgumentException("settings must not be null");
     }
-    normalise(settings);
     Gdx.graphics.setForegroundFPS(settings.fps);
     Gdx.graphics.setVSync(settings.vsync);
 
@@ -69,8 +74,6 @@ public class UserSettings {
     } else {
       Gdx.graphics.setWindowedMode(WINDOW_WIDTH, WINDOW_HEIGHT);
     }
-
-    applyAudioSettings(settings);
   }
 
   /** Applies only the audio portion of the supplied settings to a registered audio system. */

@@ -134,7 +134,6 @@ class EncounterGameAreaAssetsTest {
               // Asset lifecycle verification does not complete an encounter.
             },
             null,
-            null,
             run,
             eventId) {
           @Override

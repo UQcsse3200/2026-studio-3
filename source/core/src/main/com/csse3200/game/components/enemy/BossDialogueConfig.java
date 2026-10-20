@@ -1,6 +1,6 @@
 package com.csse3200.game.components.enemy;
 
-import com.csse3200.game.components.enemy.EnemyAI.BossAI.BossPhase;
+import com.csse3200.game.components.enemy.enemyai.BossAI.BossPhase;
 import com.csse3200.game.files.FileLoader;
 import java.util.Arrays;
 import java.util.Objects;

@@ -63,7 +63,7 @@ public class MapGenerationController {
   // initialized from initializePaths().
   private int buildPath(List<MapNode> path) {
 
-    for (int i = 2; i < MapGenerationConfig.MAP_HEIGHT + 1; i++) {
+    for (int i = 2; i < MapGenerationConfig.MAP_HEIGHT; i++) {
 
       MapNode prevNode = path.getLast();
       MapNode nextNode = chooseNextNode(prevNode);
@@ -87,6 +87,8 @@ public class MapGenerationController {
 
       path.add(nextNode);
     }
+
+    map.connectNodes(path.getLast(), map.getNode(MapGenerationConfig.MAX_NODE_COUNT));
 
     return 0;
   }
@@ -139,7 +141,7 @@ public class MapGenerationController {
 
     List<List<MapNode>> generatedPaths = new ArrayList<>();
 
-    int pathCount = rand.nextInt(3, 5);
+    int pathCount = rand.nextInt(4, 5);
     MapNode startNode = map.getNode(0);
     List<MapNode> firstRow = map.getNodesByHeight(1);
 

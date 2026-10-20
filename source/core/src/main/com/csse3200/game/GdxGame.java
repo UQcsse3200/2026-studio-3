@@ -51,6 +51,7 @@ import com.csse3200.game.screens.StoryLibraryScreen;
 import com.csse3200.game.screens.TempleCardSelectionScreen;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.ui.BackOnEscape;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -207,6 +208,8 @@ public class GdxGame extends Game {
     logger.info("Setting game screen to {}", screenType);
     prepareScreenTransition(screenType);
     setScreen(newScreen(screenType));
+    AudioService.onScreenShown(screenType);
+    BackOnEscape.attach(screenType);
   }
 
   /** Opens a battle result with explicit reward context, without retaining it across encounters. */

@@ -63,6 +63,11 @@ public class SettingsMenuDisplay extends UIComponent {
 
   @Override
   public void dispose() {
+    if (settingsPanel != null) {
+      // Forced disposal cannot stay open on failure; the panel logs unsuccessful saves.
+      settingsPanel.flushPendingAudioChanges();
+      settingsPanel = null;
+    }
     if (rootStack != null) {
       rootStack.remove();
       rootStack.clear();

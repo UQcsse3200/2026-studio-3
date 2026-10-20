@@ -1,7 +1,7 @@
 package com.csse3200.game.components.pausemenu;
 
 import com.badlogic.gdx.Input.Keys;
-import com.csse3200.game.components.save.SaveLoadPanel;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.csse3200.game.input.InputComponent;
 import com.csse3200.game.services.GamePauseService;
 import com.csse3200.game.services.ServiceLocator;
@@ -9,20 +9,15 @@ import com.csse3200.game.services.ServiceLocator;
 /**
  * Keyboard control for the pause menu. When the game isn't paused, Escape opens the menu. While
  * paused, it drives the menu by keyboard — Up/Down (or W/S) move the selection, Enter/Space
- * activates it, Escape backs out of a subview/dialog — and swallows all other input so gameplay
- * shortcuts don't leak through. The display and actions components handle the fired events.
+ * activates it, Escape backs out of a subview/dialog or closes the menu when already at the root,
+ * and swallows all other input so gameplay shortcuts don't leak through. The display and actions
+ * components handle the fired events.
  */
 public class PauseMenuInput extends InputComponent {
   private static final int PAUSE_INPUT_PRIORITY = 100;
-  private final SaveLoadPanel saveLoadPanel;
 
   public PauseMenuInput() {
-    this(null);
-  }
-
-  public PauseMenuInput(SaveLoadPanel saveLoadPanel) {
     super(PAUSE_INPUT_PRIORITY);
-    this.saveLoadPanel = saveLoadPanel;
   }
 
   @Override
@@ -35,34 +30,22 @@ public class PauseMenuInput extends InputComponent {
       return false;
     }
 
-    if (saveLoadPanel != null && saveLoadPanel.isLoadConfirmationVisible()) {
-      if (keycode == Keys.ENTER || keycode == Keys.SPACE) {
-        saveLoadPanel.confirmPendingLoad();
-      } else if (keycode == Keys.ESCAPE) {
-        saveLoadPanel.cancelPendingLoad();
-      }
-      return true;
-    }
-
-    if (saveLoadPanel != null && saveLoadPanel.isVisible()) {
-      if (keycode == Keys.ESCAPE) {
-        saveLoadPanel.navigateBack();
-      }
+    // Forward keys to the focused pause-settings text field
+    Stage settingsStage = getSettingsInputStage();
+    if (keycode != Keys.ESCAPE && settingsStage != null) {
+      settingsStage.keyDown(keycode);
       return true;
     }
 
     // Paused: keyboard-drive the menu, and consume everything else.
     switch (keycode) {
-      case Keys.UP:
-      case Keys.W:
+      case Keys.UP, Keys.W:
         entity.getEvents().trigger(PauseMenuDisplay.NAV_UP_EVENT);
         return true;
-      case Keys.DOWN:
-      case Keys.S:
+      case Keys.DOWN, Keys.S:
         entity.getEvents().trigger(PauseMenuDisplay.NAV_DOWN_EVENT);
         return true;
-      case Keys.ENTER:
-      case Keys.SPACE:
+      case Keys.ENTER, Keys.SPACE:
         entity.getEvents().trigger(PauseMenuDisplay.NAV_SELECT_EVENT);
         return true;
       case Keys.ESCAPE:
@@ -75,12 +58,32 @@ public class PauseMenuInput extends InputComponent {
 
   @Override
   public boolean keyTyped(char character) {
-    return isPaused();
+    if (!isPaused()) {
+      return false;
+    }
+    Stage settingsStage = getSettingsInputStage();
+    if (settingsStage != null && character != '\u001b') {
+      settingsStage.keyTyped(character);
+    }
+    return true;
   }
 
   @Override
   public boolean keyUp(int keycode) {
-    return isPaused();
+    if (!isPaused()) {
+      return false;
+    }
+    Stage settingsStage = getSettingsInputStage();
+    if (settingsStage != null && keycode != Keys.ESCAPE) {
+      settingsStage.keyUp(keycode);
+    }
+    return true;
+  }
+
+  /** Forward editing to the focused settings field, while still consuming gameplay input. */
+  private Stage getSettingsInputStage() {
+    PauseMenuDisplay display = entity.getComponent(PauseMenuDisplay.class);
+    return display == null ? null : display.getSettingsInputStage();
   }
 
   private boolean isPaused() {
