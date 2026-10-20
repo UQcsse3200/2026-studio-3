@@ -70,7 +70,6 @@ public class PlayerActions extends Component {
 
   /** Makes the player attack. */
   public void attack() {
-    // TODO: Logic for player attack
     Sound attackSound =
         ServiceLocator.getResourceService().getAsset("sounds/Impact4.ogg", Sound.class);
     attackSound.play();

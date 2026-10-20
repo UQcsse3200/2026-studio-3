@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface CardEffectResultStore {
   /** Records the immutable result produced for one played card. */
-  void record(CardEffectResolution resolution);
+  void recordResult(CardEffectResolution resolution);
 
   /**
    * @return recorded card resolutions in play order

@@ -125,21 +125,21 @@ public class CardPreviewDisplay extends Displaying {
 
   @Override
   public void onTrigger(Object payload) {
-    if (!(payload instanceof Content content) || content.texturePath() == null) {
+    if (!(payload instanceof Content(String texturePath, String details)) || texturePath == null) {
       hasContent = false;
       refreshVisibility();
       return;
     }
-    Texture texture = loadTexture(content.texturePath());
+    Texture texture = loadTexture(texturePath);
     if (texture == null) {
       hasContent = false;
       refreshVisibility();
       return;
     }
-    textureWidth = texture.getWidth();
-    textureHeight = texture.getHeight();
+    textureWidth = (float) texture.getWidth();
+    textureHeight = (float) texture.getHeight();
     art.setDrawable(new TextureRegionDrawable(new TextureRegion(texture)));
-    label.setText(content.details());
+    label.setText(details);
     hasContent = true;
     refreshVisibility();
   }

@@ -78,10 +78,11 @@ class ChanceOutcomeTest {
   @Test
   void shouldRepresentMultipleCardRewardsAndRetainDuplicates() {
     ChanceOutcome outcome = ChanceOutcome.withCardRewards(0, 15, List.of("bandage", "bandage"));
+    List<String> rewardIds = outcome.getCardRewardIds();
 
     assertEquals("bandage", outcome.getCardRewardId());
     assertEquals(List.of("bandage", "bandage"), outcome.getCardRewardIds());
-    assertThrows(UnsupportedOperationException.class, () -> outcome.getCardRewardIds().clear());
+    assertThrows(UnsupportedOperationException.class, rewardIds::clear);
     assertFalse(outcome.isNoEffect());
   }
 }
