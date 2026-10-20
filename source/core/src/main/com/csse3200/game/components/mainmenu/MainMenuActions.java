@@ -54,9 +54,7 @@ public class MainMenuActions extends Component {
     game.setScreen(GdxGame.ScreenType.LIBRARY);
   }
 
-  /** Opens the library screen. Not currently reachable from the main menu — see TODO. */
-  // TODO: no menu button currently triggers this event; flagged to Team 4/William re: whether
-  // Library needs a menu entry point now that the old menu (which had one) is gone.
+  /** Opens the library screen. Not currently reachable from the main menu*/
   private void onLibrary() {
     logger.info("Opening library screen");
     game.setScreen(GdxGame.ScreenType.LIBRARY);
