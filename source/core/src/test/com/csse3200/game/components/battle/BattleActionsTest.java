@@ -37,6 +37,7 @@ import com.csse3200.game.services.ServiceLocator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,9 +49,20 @@ class BattleActionsTest {
   private BattleController controller;
   private Entity player;
   private Entity entity;
+  private MockedStatic<Timer> timer;
+  private final List<Timer.Task> enemyReveals = new ArrayList<>();
 
   @BeforeEach
   void setUp() {
+    timer = mockStatic(Timer.class);
+    timer
+        .when(() -> Timer.schedule(any(Timer.Task.class), anyFloat()))
+        .thenAnswer(
+            invocation -> {
+              Timer.Task task = invocation.getArgument(0);
+              enemyReveals.add(task);
+              return task;
+            });
     player = new Entity();
     player.addComponent(new CombatStatsComponent(20, 0));
     Entity enemy =
@@ -78,8 +90,13 @@ class BattleActionsTest {
     return config;
   }
 
+  @AfterEach
+  void tearDown() {
+    timer.close();
+  }
+
   @Test
-  void shouldAutoEndTurnAfterThreeSecondsWithoutEnergy() {
+  void shouldEndAnEmptyPlayerTurnWithoutWaiting() {
     EnergyComponent energy = new EnergyComponent(3);
     player.addComponent(energy);
     GameTime time = mock(GameTime.class);
@@ -87,12 +104,8 @@ class BattleActionsTest {
     controller.start();
     energy.spendEnergy(3);
 
-    when(time.getDeltaTime()).thenReturn(1.5f);
     entity.update();
-    assertEquals(1, controller.getPlayerTurnNumber());
-    assertEquals(20, player.getComponent(CombatStatsComponent.class).getHealth());
 
-    entity.update();
     assertEquals(2, controller.getPlayerTurnNumber());
     assertEquals(19, player.getComponent(CombatStatsComponent.class).getHealth());
     assertEquals(3, energy.getCurrentEnergy());
@@ -113,137 +126,113 @@ class BattleActionsTest {
   }
 
   @Test
-  void shouldRestartCountdownAfterEnergyIsRestoredAndSpentAgain() {
-    EnergyComponent energy = new EnergyComponent(3);
-    player.addComponent(energy);
-    GameTime time = mock(GameTime.class);
-    ServiceLocator.registerTimeSource(time);
-    controller.start();
-    energy.spendEnergy(3);
-    when(time.getDeltaTime()).thenReturn(2.25f);
-    entity.update();
+  void shouldAutoEndAfterAPlayedCardSpendsTheLastEnergy() {
+    CardBattle battle = cardBattle(new EffectConfig(EffectType.BLOCK, 1));
+    assertTrue(
+        battle.controller().submitCardPlayRequest(CardPlayRequest.self(battle.instanceId())));
+    assertEquals(0, battle.energy().getCurrentEnergy());
+    when(ServiceLocator.getTimeSource().getDeltaTime()).thenReturn(0f);
 
-    energy.restoreEnergy(1);
-    entity.update();
-    assertEquals(1, controller.getPlayerTurnNumber());
+    battle.ui().update();
 
-    energy.spendEnergy(1);
-    when(time.getDeltaTime()).thenReturn(1.5f);
-    entity.update();
-    assertEquals(1, controller.getPlayerTurnNumber());
-    entity.update();
-    assertEquals(2, controller.getPlayerTurnNumber());
+    assertEquals(2, battle.controller().getPlayerTurnNumber());
   }
 
   @Test
-  void shouldPauseTheCountdownWithGameplay() {
+  void shouldWaitThreeSecondsAfterEnemyEffectsBeforeReturningTheHand() {
+    CardBattle battle = cardBattle(new EffectConfig(EffectType.BLOCK, 1));
+    AtomicBoolean handVisible = observeHand(battle.ui());
+    List<String> reveals = new ArrayList<>();
+    battle
+        .ui()
+        .getEvents()
+        .addListener(
+            BattleActions.BATTLE_LOG_EVENT, (String message) -> reveals.add("enemyAction"));
+    battle
+        .ui()
+        .getEvents()
+        .addListener("playerTurnStarted", (Integer turn) -> reveals.add("playerTurn"));
+    BattleActions actions = battle.ui().getComponent(BattleActions.class);
+
+    battle.ui().getEvents().trigger("endTurn");
+    assertFalse(handVisible.get());
+    assertTrue(actions.hasPendingEnemyReveals());
+    assertFalse(actions.isPlayerTurn());
+    battle.ui().update(); // The pause must not start before the enemy action is shown.
+    enemyReveals.get(0).run();
+    assertTrue(reveals.contains("enemyAction"));
+    assertFalse(reveals.contains("playerTurn"));
+    assertFalse(handVisible.get());
+
+    battle.ui().update(); // 1.5 seconds after the enemy action.
+    assertFalse(handVisible.get());
+    assertTrue(actions.hasPendingEnemyReveals());
+    battle.ui().update(); // 3 seconds after the enemy action.
+    assertTrue(handVisible.get());
+    assertEquals("playerTurn", reveals.get(reveals.size() - 1));
+    assertFalse(actions.hasPendingEnemyReveals());
+    assertTrue(actions.isPlayerTurn());
+  }
+
+  @Test
+  void shouldPauseTheDelayAfterTheEnemyTurnWithGameplay() {
     Graphics previousGraphics = Gdx.graphics;
     try {
       Gdx.graphics = mock(Graphics.class);
       when(Gdx.graphics.getDeltaTime()).thenReturn(1.5f);
+      CardBattle battle = cardBattle(new EffectConfig(EffectType.BLOCK, 1));
+      AtomicBoolean handVisible = observeHand(battle.ui());
       GameTime time = new GameTime();
       ServiceLocator.registerTimeSource(time);
       GamePauseService pause = new GamePauseService(time);
-      EnergyComponent energy = new EnergyComponent(3);
-      player.addComponent(energy);
-      controller.start();
-      energy.spendEnergy(3);
-      entity.update();
+      battle.ui().getEvents().trigger("endTurn");
+      enemyReveals.get(0).run();
+      battle.ui().update();
+      assertFalse(handVisible.get());
 
       pause.pause();
       when(Gdx.graphics.getDeltaTime()).thenReturn(6f);
-      entity.update();
-      assertEquals(1, controller.getPlayerTurnNumber());
+      battle.ui().update();
+      assertFalse(handVisible.get());
 
       pause.resume();
       when(Gdx.graphics.getDeltaTime()).thenReturn(1.5f);
-      entity.update();
-      assertEquals(2, controller.getPlayerTurnNumber());
+      battle.ui().update();
+      assertTrue(handVisible.get());
     } finally {
       Gdx.graphics = previousGraphics;
     }
   }
 
   @Test
-  void shouldResetCountdownOnManualEndAndWaitForEnemyReveals() {
-    List<Timer.Task> reveals = new ArrayList<>();
-    try (MockedStatic<Timer> timer = mockStatic(Timer.class)) {
-      timer
-          .when(() -> Timer.schedule(any(Timer.Task.class), anyFloat()))
-          .thenAnswer(
-              invocation -> {
-                Timer.Task task = invocation.getArgument(0);
-                reveals.add(task);
-                return task;
-              });
-      EnergyComponent energy = new EnergyComponent(3);
-      player.addComponent(energy);
-      GameTime time = mock(GameTime.class);
-      ServiceLocator.registerTimeSource(time);
-      controller.start();
-      energy.spendEnergy(3);
-      when(time.getDeltaTime()).thenReturn(2.25f);
-      entity.update();
-
-      entity.getEvents().trigger("endTurn");
-      assertEquals(2, controller.getPlayerTurnNumber());
-      energy.spendEnergy(3);
-      when(time.getDeltaTime()).thenReturn(6f);
-      entity.update();
-      assertEquals(2, controller.getPlayerTurnNumber());
-
-      reveals.get(0).run();
-      when(time.getDeltaTime()).thenReturn(1.5f);
-      entity.update();
-      assertEquals(2, controller.getPlayerTurnNumber());
-      entity.update();
-      assertEquals(3, controller.getPlayerTurnNumber());
-    }
-  }
-
-  @Test
-  void shouldAutoEndAfterAPlayedCardSpendsTheLastEnergy() {
+  void shouldIgnoreEndTurnPressesWhileEnemyPresentationIsPending() {
     CardBattle battle = cardBattle(new EffectConfig(EffectType.BLOCK, 1));
-    assertTrue(
-        battle.controller().submitCardPlayRequest(CardPlayRequest.self(battle.instanceId())));
-    assertEquals(0, battle.energy().getCurrentEnergy());
-    assertEquals(1, battle.controller().getPlayerTurnNumber());
+    battle.ui().getEvents().trigger("endTurn");
+    battle.ui().getEvents().trigger("endTurn");
+    battle.ui().getEvents().trigger("endTurnSelected");
+    assertEquals(2, battle.controller().getPlayerTurnNumber());
+
+    enemyReveals.get(0).run();
+    battle.ui().getEvents().trigger("endTurn");
+    battle.ui().getEvents().trigger("endTurnSelected");
+    assertEquals(2, battle.controller().getPlayerTurnNumber());
 
     battle.ui().update();
-    assertEquals(1, battle.controller().getPlayerTurnNumber());
     battle.ui().update();
-    assertEquals(2, battle.controller().getPlayerTurnNumber());
+    battle.ui().getEvents().trigger("endTurn");
+    assertEquals(3, battle.controller().getPlayerTurnNumber());
   }
 
   @Test
-  void shouldKeepHandVisibleDuringTheDelayAndRestoreItAfterEnemyReveals() {
-    List<Timer.Task> reveals = new ArrayList<>();
-    try (MockedStatic<Timer> timer = mockStatic(Timer.class)) {
-      timer
-          .when(() -> Timer.schedule(any(Timer.Task.class), anyFloat()))
-          .thenAnswer(
-              invocation -> {
-                Timer.Task task = invocation.getArgument(0);
-                reveals.add(task);
-                return task;
-              });
-      CardBattle battle = cardBattle(new EffectConfig(EffectType.BLOCK, 1));
-      AtomicBoolean handVisible = new AtomicBoolean(true);
-      battle.ui().getEvents().addListener("up", () -> handVisible.set(true));
-      battle.ui().getEvents().addListener("down", () -> handVisible.set(false));
-
-      assertTrue(
-          battle.controller().submitCardPlayRequest(CardPlayRequest.self(battle.instanceId())));
-      assertTrue(handVisible.get());
-      battle.ui().update();
-      assertTrue(handVisible.get());
-      battle.ui().update();
-      assertFalse(handVisible.get());
-      assertEquals(2, battle.controller().getPlayerTurnNumber());
-
-      reveals.get(0).run();
-      assertTrue(handVisible.get());
-    }
+  void shouldCancelThePendingHandReturnWhenDisposed() {
+    CardBattle battle = cardBattle(new EffectConfig(EffectType.BLOCK, 1));
+    AtomicBoolean handVisible = observeHand(battle.ui());
+    battle.ui().getEvents().trigger("endTurn");
+    enemyReveals.get(0).run();
+    battle.ui().getComponent(BattleActions.class).dispose();
+    battle.ui().update();
+    battle.ui().update();
+    assertFalse(handVisible.get());
   }
 
   @Test
@@ -257,6 +246,13 @@ class BattleActionsTest {
       battle.ui().update();
     }
     assertEquals(1, battle.controller().getPlayerTurnNumber());
+  }
+
+  private AtomicBoolean observeHand(Entity ui) {
+    AtomicBoolean visible = new AtomicBoolean(true);
+    ui.getEvents().addListener("up", () -> visible.set(true));
+    ui.getEvents().addListener("down", () -> visible.set(false));
+    return visible;
   }
 
   private CardBattle cardBattle(EffectConfig effect) {

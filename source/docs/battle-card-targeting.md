@@ -10,11 +10,11 @@ Battle cards use their configured `TargetType` to choose their drag interaction:
 
 The battlefield is the central play area above the raised hand and below the top controls and battle log. Its bounds are supplied by `BattleScreen` in stage coordinates and include clearance for the card hover animation. Releasing in the hand, over the top controls, or outside the stage cancels the play. No energy is spent on cancellation. Normal battle validation still rejects unaffordable cards, unavailable targets, and plays outside the player's turn.
 
-## Automatic turn ending
+## Turn timing
 
-When the player runs out of energy, the turn ends automatically after three seconds of gameplay time. The last card resolves before the countdown starts. Recovering energy cancels the countdown; spending it all again starts a fresh delay. Pausing the game pauses the delay, and the End Turn button still works immediately.
+When the player runs out of energy, their turn ends on the next update after the last card resolves. The enemy then takes its turn. After the enemy action and effects are shown, there is a three-second pause before the player's hand returns and the next player turn is announced. The pause also applies when the player uses End Turn manually.
 
-The countdown resets when the battle changes phase and waits for the enemy turn presentation to finish before starting on a new player turn.
+Pausing gameplay pauses the three-second wait. The hand stays down throughout the enemy turn and the following pause, and repeated End Turn presses are ignored until control returns. Cards that restore energy during resolution keep the player's turn open.
 
 ## Implementation
 
@@ -23,12 +23,12 @@ The countdown resets when the battle changes phase and waits for the enemy turn 
 - `DragNDrop` dispatches one `playCard(instanceId, targetId)` event on a valid release. Single-enemy cards stay in the hand during aiming; self and all-enemy cards follow the pointer.
 - `Team3CardPlayAdapter` converts the event to the card's configured target type. The `allEnemies` UI marker does not select an individual enemy.
 - The existing card play service and battle controller validate costs and apply effects.
-- `BattleActions` checks energy through `BattleController` and updates the three-second countdown using the shared, pause-aware `GameTime`.
+- `BattleActions` ends an empty player turn after card resolution. It reveals enemy effects, then uses the shared, pause-aware `GameTime` to delay returning the hand for three seconds. `CardActions` follows the presented phases to show and hide the hand.
 
 ## Verification
 
-Run `./gradlew.bat :core:test` with JDK 21. `CardAimControllerTest` covers empty battlefield drops, cancellation, single-enemy selection, unavailable targets, energy costs, self effects, and effects on multiple enemies. Existing drag and target-selector tests cover the original interaction. `BattleActionsTest` covers the automatic turn delay, pausing, energy recovery, manual turn ending, enemy presentation, and cards spending or restoring the last energy.
+Run `./gradlew.bat :core:test` with JDK 21. `CardAimControllerTest` covers empty battlefield drops, cancellation, single-enemy selection, unavailable targets, energy costs, self effects, and effects on multiple enemies. Existing drag and target-selector tests cover the original interaction. `BattleActionsTest` covers immediate energy-based turn ending, the pause after enemy effects, pausing gameplay, repeated End Turn presses, disposal, hand visibility, and cards spending or restoring the last energy.
 
 For a gameplay check, drag an attack between enemies, drag a self card into empty battlefield space, and drag an all-enemy card into empty battlefield space. Return a card to the hand to confirm cancellation, and try an unaffordable card to confirm that it stays in hand without applying effects.
 
-To check the automatic turn ending in gameplay, spend the last energy and confirm the enemy turn begins after three seconds. Repeat while pausing during the delay, then check that an energy-restoring card keeps the turn open.
+To check the timing in gameplay, spend the last energy and confirm the enemy turn begins immediately. After the enemy action is shown, the hand should stay down for three seconds before your turn returns. Repeat with the End Turn button and while pausing during the wait, then check that an energy-restoring card keeps the current turn open.

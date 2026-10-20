@@ -600,7 +600,10 @@ public class BattleScreen extends ScreenAdapter {
     itemInventory.setMinSize(ITEM_INVENTORY_MIN_WIDTH, ITEM_INVENTORY_MIN_HEIGHT);
     InventoryPopupComponent inventoryPopup =
         new InventoryPopupComponent(
-            game.getRunState(), itemInventory, gameArea.getPlayer(), controller::isPlayerTurn);
+            game.getRunState(),
+            itemInventory,
+            gameArea.getPlayer(),
+            () -> battleActions != null && battleActions.isPlayerTurn());
 
     Entity itemInventoryEntity =
         new Entity()
