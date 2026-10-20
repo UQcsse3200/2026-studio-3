@@ -233,8 +233,8 @@ class SettingsPanelAudioTest {
     InputListener input = sliderInput(slider);
     input.touchDown(new InputEvent(), 0f, 15f, 0, 0);
     InputEvent cancelled = new InputEvent();
-    cancelled.setStageX(Integer.MIN_VALUE);
-    cancelled.setStageY(Integer.MIN_VALUE);
+    cancelled.setStageX((float) Integer.MIN_VALUE);
+    cancelled.setStageY((float) Integer.MIN_VALUE);
     assertTrue(cancelled.isTouchFocusCancel());
 
     input.touchUp(cancelled, 300f, 15f, 0, 0);

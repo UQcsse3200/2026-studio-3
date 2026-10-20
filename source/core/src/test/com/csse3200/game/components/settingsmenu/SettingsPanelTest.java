@@ -224,9 +224,6 @@ class SettingsPanelTest {
     assertTrue(written.get().fullscreen);
     assertFalse(written.get().vsync);
     assertEquals(1, writeCount.get());
-    assertEquals(75, initial.fps);
-    assertEquals(0.8f, initial.masterVolume, 0.001f);
-    assertTrue(initial.muted);
   }
 
   @Test

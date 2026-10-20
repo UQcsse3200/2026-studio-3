@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyChar;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -163,9 +165,9 @@ class PauseSettingsIntegrationTest {
 
     assertEquals("140", fps.getText());
 
-    org.mockito.Mockito.verify(gameplay, never()).keyDown(org.mockito.ArgumentMatchers.anyInt());
-    org.mockito.Mockito.verify(gameplay, never()).keyTyped(org.mockito.ArgumentMatchers.anyChar());
-    org.mockito.Mockito.verify(gameplay, never()).keyUp(org.mockito.ArgumentMatchers.anyInt());
+    verify(gameplay, never()).keyDown(anyInt());
+    verify(gameplay, never()).keyTyped(anyChar());
+    verify(gameplay, never()).keyUp(anyInt());
   }
 
   @Test

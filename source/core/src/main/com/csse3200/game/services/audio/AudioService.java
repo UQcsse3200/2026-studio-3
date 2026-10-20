@@ -308,9 +308,12 @@ public class AudioService {
       case BATTLE_SCREEN -> startPlaylist(battlePlaylist(currentRoom(run)));
       case TUTORIAL_BATTLE -> startPlaylist(Playlist.BATTLE);
       case ENCOUNTER -> {
-        // events keep the map music, only shops change it
-        if (currentRoom(run) == RoomType.SHOP) {
-          startPlaylist(Playlist.SHOP);
+        // Events keep the map music, only shops change it
+        switch (currentRoom(run)) {
+          case SHOP -> startPlaylist(Playlist.SHOP);
+          default -> {
+            // Keep the map music for other encounters
+          }
         }
       }
       case LIBRARY, CARD_LIBRARY, ITEM_LIBRARY, BESTIARY -> startPlaylist(Playlist.LIBRARY);

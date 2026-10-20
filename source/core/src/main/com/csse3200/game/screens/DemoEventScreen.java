@@ -15,7 +15,6 @@ import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
 import com.csse3200.game.input.InputDecorator;
 import com.csse3200.game.input.InputService;
-import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.physics.PhysicsEngine;
@@ -84,7 +83,6 @@ public class DemoEventScreen extends ScreenAdapter {
     ServiceLocator.getEntityService().register(input);
 
     RunState demoRunState = new RunState();
-    PlayerRunState demoPlayerState = demoRunState.getOrCreatePlayerState();
     PlayerDeck demoPlayerDeck = demoRunState.getOrCreatePlayerDeck(cardLibrary);
 
     encounterGameArea =

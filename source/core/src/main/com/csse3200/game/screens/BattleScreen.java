@@ -426,26 +426,6 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
     return PlayerDeck.fromInstances(library, openingOrder);
   }
 
-  private void setupTutorialEnemies(ForestGameArea forestGameArea) {
-    for (Entity enemy : forestGameArea.getEnemies()) {
-      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
-
-      if (behaviour != null) {
-        behaviour.setAI(new TutorialEnemyAI());
-      }
-    }
-  }
-
-  private void setupEnemyMemory(ForestGameArea forestGameArea, EnemyMemoryComponent enemyMemory) {
-    for (Entity enemy : forestGameArea.getEnemies()) {
-      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
-
-      if (behaviour != null) {
-        behaviour.setEnemyMemory(enemyMemory);
-      }
-    }
-  }
-
   private void setupTutorialGuidance(
       BattleGameArea forestGameArea, Entity player, Entity animationCoordinatorEntity) {
     String demonstrationId = handRowOrder.get(handRowOrder.size() / 2).instanceId();

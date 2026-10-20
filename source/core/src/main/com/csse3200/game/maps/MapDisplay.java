@@ -59,7 +59,6 @@ public class MapDisplay extends UIComponent {
   private static final float UI_HEIGHT = 800f;
 
   private float mapHeight;
-  private final float mapWidth = UI_WIDTH;
   private float nodeWidth;
 
   private Table playerTable;
@@ -92,7 +91,7 @@ public class MapDisplay extends UIComponent {
 
   /** Calculates the dimensions */
   private void updateDimensions() {
-    nodeWidth = mapWidth / 13f;
+    nodeWidth = UI_WIDTH / 13f;
     mapHeight = (MapGenerationConfig.MAP_HEIGHT + 1) * 2f * nodeWidth;
   }
 
@@ -120,7 +119,7 @@ public class MapDisplay extends UIComponent {
     loadMapAssets();
 
     group = new Group();
-    group.setSize(mapWidth - 512, mapHeight);
+    group.setSize(UI_WIDTH - 512, mapHeight);
     addBackground();
     addNodes();
     addConnections();
@@ -164,7 +163,7 @@ public class MapDisplay extends UIComponent {
       mapInputHandler.attach(nodeActor);
       float x =
           (node.getRoomType() == RoomType.FINAL || node.getRoomType() == RoomType.START)
-              ? mapWidth / 2f - nodeActor.getNodeSize() / 2f
+              ? UI_WIDTH / 2f - nodeActor.getNodeSize() / 2f
               : getNodeX(node.getNodeId(), nodeWidth);
       float y = getNodeY(node);
 
@@ -194,7 +193,7 @@ public class MapDisplay extends UIComponent {
    */
   private float getNodeX(int nodeId, float nodeWidth) {
     float mapStart = 352f;
-    float mapEnd = mapWidth - 352f;
+    float mapEnd = UI_WIDTH - 352f;
 
     float spacing = (mapEnd - mapStart - nodeWidth) / 6f;
 
