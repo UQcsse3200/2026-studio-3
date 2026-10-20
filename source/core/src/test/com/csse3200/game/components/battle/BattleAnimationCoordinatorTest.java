@@ -204,7 +204,12 @@ class BattleAnimationCoordinatorTest {
       SpriteBatch batch = mock(SpriteBatch.class);
       spawnedVisual().getComponent(EffectVisualComponent.class).render(batch);
       verify(batch)
-          .draw(eq(textures.constructed().getFirst()), anyFloat(), anyFloat(), anyFloat(), anyFloat());
+          .draw(
+              eq(textures.constructed().getFirst()),
+              anyFloat(),
+              anyFloat(),
+              anyFloat(),
+              anyFloat());
       verify(batch).setColor(0f, 1f, 0f, 1f);
     }
   }
