@@ -15,15 +15,9 @@ import com.csse3200.game.services.ServiceLocator;
  */
 public class PauseMenuInput extends InputComponent {
   private static final int PAUSE_INPUT_PRIORITY = 100;
-  private final SaveLoadPanel saveLoadPanel;
 
   public PauseMenuInput() {
-    this(null);
-  }
-
-  public PauseMenuInput(SaveLoadPanel saveLoadPanel) {
     super(PAUSE_INPUT_PRIORITY);
-    this.saveLoadPanel = saveLoadPanel;
   }
 
   @Override

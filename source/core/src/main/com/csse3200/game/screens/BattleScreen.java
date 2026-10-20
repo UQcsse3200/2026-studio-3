@@ -61,7 +61,10 @@ import com.csse3200.game.components.enemy.enemyai.BossAI;
 import com.csse3200.game.components.enemy.enemyai.TutorialEnemyAI;
 import com.csse3200.game.components.enemy.memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.memory.PlayerTrackerComponent;
+import com.csse3200.game.components.pausemenu.PauseMenuActions;
+import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuFactory;
+import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
@@ -678,7 +681,15 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
         .addListener(
             BattleActions.HAND_CHANGED_EVENT, (List<CardInstance> hand) -> rebuildHandWidgets());
     // Pause menu + in-place save/load overlay (added before the entity is created).
-    SaveLoadPanel savePanel = PauseMenuFactory.attachLoadOnly(battleUi, game, tutorialBattle);
+    SaveLoadPanel savePanel = null;
+    if (tutorialBattle) {
+      battleUi
+          .addComponent(new PauseMenuDisplay())
+          .addComponent(new PauseMenuInput())
+          .addComponent(new PauseMenuActions(game, true));
+    } else {
+      savePanel = PauseMenuFactory.attach(battleUi, game);
+    }
 
     gameArea.displayUI(battleUi);
     setBattleMenuFontScale();

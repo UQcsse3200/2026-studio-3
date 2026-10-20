@@ -1,18 +1,15 @@
 package com.csse3200.game.components.pausemenu;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Align;
 import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
-import com.csse3200.game.components.save.SaveLoadMode;
 import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RunState;
-import com.csse3200.game.save.AutosaveCoordinator;
 import com.csse3200.game.save.GameStateSnapshotProvider;
 import com.csse3200.game.save.JsonSaveGameRepository;
 import com.csse3200.game.save.SaveGameRestoreService;
@@ -32,9 +29,7 @@ import java.util.List;
  * textures the styled pause menu / save panel need.
  */
 public final class PauseMenuFactory {
-  private static final List<Integer> MANUAL_SAVE_SLOT_IDS = List.of(1, 2, 3);
-  private static final List<Integer> LOAD_SLOT_IDS =
-      List.of(1, 2, 3, AutosaveCoordinator.AUTOSAVE_SLOT_ID);
+  private static final List<Integer> SAVE_SLOT_IDS = List.of(1, 2, 3);
 
   private PauseMenuFactory() {
     throw new IllegalStateException("Utility class");
@@ -50,8 +45,7 @@ public final class PauseMenuFactory {
    * @return the save/load panel, so the caller can hide it after the entity is created
    */
   public static SaveLoadPanel attach(Entity uiEntity, GdxGame game) {
-    return attach(
-        uiEntity, game, new PauseButtonDisplay(Align.topRight), SaveLoadMode.SAVE_AND_LOAD, false);
+    return attach(uiEntity, game, Align.topRight);
   }
 
   /**
@@ -59,12 +53,7 @@ public final class PauseMenuFactory {
    * (an {@link Align} constant) so each screen can keep it clear of its own HUD.
    */
   public static SaveLoadPanel attach(Entity uiEntity, GdxGame game, int pauseButtonAlign) {
-    return attach(
-        uiEntity,
-        game,
-        new PauseButtonDisplay(pauseButtonAlign),
-        SaveLoadMode.SAVE_AND_LOAD,
-        false);
+    return attach(uiEntity, game, new PauseButtonDisplay(pauseButtonAlign));
   }
 
   /**
@@ -73,12 +62,7 @@ public final class PauseMenuFactory {
    */
   public static SaveLoadPanel attach(
       Entity uiEntity, GdxGame game, int pauseButtonAlign, float pauseButtonEdgePad) {
-    return attach(
-        uiEntity,
-        game,
-        new PauseButtonDisplay(pauseButtonAlign, pauseButtonEdgePad),
-        SaveLoadMode.SAVE_AND_LOAD,
-        false);
+    return attach(uiEntity, game, new PauseButtonDisplay(pauseButtonAlign, pauseButtonEdgePad));
   }
 
   /**
@@ -86,43 +70,19 @@ public final class PauseMenuFactory {
    * the button doesn't fit the HUD, e.g. the map.
    */
   public static SaveLoadPanel attachWithoutButton(Entity uiEntity, GdxGame game) {
-    return attach(uiEntity, game, null, SaveLoadMode.SAVE_AND_LOAD, false);
-  }
-
-  /**
-   * Attaches a load-only pause menu for an active battle or encounter. Loading is confirmed and the
-   * restored run resumes on the map; no snapshot provider is installed, so saving is also blocked
-   * below the UI layer.
-   */
-  public static SaveLoadPanel attachLoadOnly(Entity uiEntity, GdxGame game) {
-    return attachLoadOnly(uiEntity, game, false);
-  }
-
-  /** As {@link #attachLoadOnly(Entity, GdxGame)}, with tutorial-specific exit behaviour. */
-  public static SaveLoadPanel attachLoadOnly(
-      Entity uiEntity, GdxGame game, boolean tutorialBattle) {
-    return attach(
-        uiEntity,
-        game,
-        new PauseButtonDisplay(Align.topRight),
-        SaveLoadMode.LOAD_ONLY,
-        tutorialBattle);
+    return attach(uiEntity, game, (PauseButtonDisplay) null);
   }
 
   private static SaveLoadPanel attach(
-      Entity uiEntity,
-      GdxGame game,
-      PauseButtonDisplay pauseButton,
-      SaveLoadMode mode,
-      boolean tutorialBattle) {
+      Entity uiEntity, GdxGame game, PauseButtonDisplay pauseButton) {
     ensurePauseService();
     loadMenuAssets();
 
-    SaveLoadPanel savePanel = buildSavePanel(game, mode);
+    SaveLoadPanel savePanel = buildSavePanel(game);
     uiEntity
-        .addComponent(new PauseMenuDisplay(mode))
-        .addComponent(new PauseMenuInput(savePanel))
-        .addComponent(new PauseMenuActions(game, tutorialBattle))
+        .addComponent(new PauseMenuDisplay())
+        .addComponent(new PauseMenuInput())
+        .addComponent(new PauseMenuActions(game))
         .addComponent(savePanel);
     if (pauseButton != null) {
       uiEntity.addComponent(pauseButton);
@@ -157,7 +117,7 @@ public final class PauseMenuFactory {
     };
   }
 
-  private static SaveLoadPanel buildSavePanel(GdxGame game, SaveLoadMode mode) {
+  private static SaveLoadPanel buildSavePanel(GdxGame game) {
     RunState runState = game.getRunState();
     PlayerRunState playerState = runState.getOrCreatePlayerState();
 
@@ -167,60 +127,29 @@ public final class PauseMenuFactory {
     }
     PlayerDeck playerDeck = runState.getOrCreatePlayerDeck(cardLibrary);
 
-    SaveGameService saveGameService;
-    if (mode.isSaveAllowed()) {
-      saveGameService =
-          new SaveGameService(
-              new JsonSaveGameRepository(),
-              new GameStateSnapshotProvider(
-                  playerState,
-                  playerDeck,
-                  runState,
-                  game.getBestiaryService(),
-                  game.getCardDiscoveryService(),
-                  game.getItemDiscoveryService()));
-    } else {
-      saveGameService = new SaveGameService(new JsonSaveGameRepository());
-    }
+    SaveGameService saveGameService =
+        new SaveGameService(
+            new JsonSaveGameRepository(),
+            new GameStateSnapshotProvider(
+                playerState,
+                playerDeck,
+                runState,
+                game.getBestiaryService(),
+                game.getCardDiscoveryService()));
     SaveGameRestoreService restoreService =
         new SaveGameRestoreService(
             playerState,
             playerDeck,
             runState,
             game.getBestiaryService(),
-            game.getCardDiscoveryService(),
-            game.getItemDiscoveryService());
+            game.getCardDiscoveryService());
 
-    // The Back button hides the overlay (returns to the pause menu). A holder is needed because the
-    // panel supplies its own Back action while it is being constructed.
-    PanelHolder holder = new PanelHolder();
-    Runnable loadSuccessAction =
-        () -> {
-          GamePauseService pauseService = ServiceLocator.getPauseService();
-          if (pauseService != null) {
-            pauseService.resume();
-          }
-          Gdx.app.postRunnable(game::resumeLoadedRun);
-        };
-    List<Integer> slotIds = mode == SaveLoadMode.LOAD_ONLY ? LOAD_SLOT_IDS : MANUAL_SAVE_SLOT_IDS;
+    // The Back button hides the overlay (returns to the pause menu). Held via a one-element array
+    // so the lambda can reference the panel that is being constructed.
+    SaveLoadPanel[] holder = new SaveLoadPanel[1];
     SaveLoadPanel panel =
-        new SaveLoadPanel(
-            saveGameService,
-            slotIds,
-            restoreService,
-            holder::hide,
-            mode,
-            mode == SaveLoadMode.LOAD_ONLY,
-            loadSuccessAction);
-    holder.panel = panel;
+        new SaveLoadPanel(saveGameService, SAVE_SLOT_IDS, restoreService, () -> holder[0].hide());
+    holder[0] = panel;
     return panel;
-  }
-
-  private static final class PanelHolder {
-    private SaveLoadPanel panel;
-
-    private void hide() {
-      panel.hide();
-    }
   }
 }

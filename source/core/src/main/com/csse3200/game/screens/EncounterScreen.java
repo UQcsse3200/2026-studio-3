@@ -143,7 +143,7 @@ public class EncounterScreen extends ScreenAdapter implements LoadedSaveTransiti
     inputEntity.addComponent(new InputDecorator(ServiceLocator.getRenderService().getStage(), 10));
 
     // Pause menu + in-place save/load overlay.
-    SaveLoadPanel savePanel = PauseMenuFactory.attachLoadOnly(inputEntity, game);
+    SaveLoadPanel savePanel = PauseMenuFactory.attach(inputEntity, game);
     ServiceLocator.getEntityService().register(inputEntity);
     savePanel.hide(); // save overlay starts hidden, opened by the Save & Load button
   }
