@@ -5,12 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -33,6 +35,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
+import com.csse3200.game.GdxGame;
 import com.csse3200.game.GdxGame.ScreenType;
 import com.csse3200.game.components.settingsmenu.SettingsPanel;
 import com.csse3200.game.extensions.GameExtension;
@@ -43,6 +46,7 @@ import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.RenderService;
+import com.csse3200.game.screens.SettingsScreen;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import java.lang.reflect.Field;
@@ -57,6 +61,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockedConstruction;
 
 /** Covers the music, sounds, button clicks, volume settings and pause music in AudioService. */
 @ExtendWith(GameExtension.class)
@@ -74,6 +79,7 @@ class AudioServiceTest {
   private static final String DEFEAT = "sounds/defeat.ogg";
   private static final String ERROR = "sounds/error.mp3";
   private static final String PAUSE = "music/pauseMenu.ogg";
+  private static final float LONGER_THAN_A_FADE = 2f;
 
   @TempDir Path folder;
 
@@ -99,6 +105,8 @@ class AudioServiceTest {
         .thenAnswer(call -> sounds.computeIfAbsent(call.getArgument(0), p -> mock(Sound.class)));
     ServiceLocator.registerResourceService(resources);
     AudioService.reset();
+    AudioService.useMusicStore(resources);
+    AudioService.fadeManually();
 
     // keep the tests away from the real settings file, starting from the default settings
     realFiles = Gdx.files;
@@ -182,14 +190,98 @@ class AudioServiceTest {
   }
 
   @Test
+  void theTutorialBattleSwitchesFromMenuToBattleMusic() {
+    AudioService.onScreenChanged(ScreenType.MAIN_MENU);
+
+    AudioService.onScreenChanged(ScreenType.TUTORIAL_BATTLE);
+
+    assertTrue(BATTLE_TRACKS.contains(lastStarted()));
+  }
+
+  /** The tutorial isn't part of a run, so a room left over from an earlier run doesn't count. */
+  @Test
+  void theTutorialBattleIgnoresTheRoomFromAnEarlierRun() {
+    AudioService.onScreenChanged(ScreenType.TUTORIAL_BATTLE, runIn(RoomType.FINAL));
+
+    assertTrue(BATTLE_TRACKS.contains(lastStarted()));
+  }
+
+  /** The music stops for the victory sound, so the portal after an elite win has to start it. */
+  @Test
+  void theElitePortalStartsTheMapMusicAfterTheVictorySound() {
+    AudioService.onScreenChanged(ScreenType.BATTLE_SCREEN, runIn(RoomType.ELITE));
+    AudioService.onScreenChanged(ScreenType.VICTORY);
+
+    AudioService.onScreenChanged(ScreenType.ELITE_PORTAL);
+
+    assertTrue(MAP_TRACKS.contains(lastStarted()));
+  }
+
+  @Test
+  void theSameSongCarriesOnThroughTheTempleAndBackToTheMap() {
+    AudioService.onScreenChanged(ScreenType.ELITE_PORTAL);
+    AudioService.onScreenChanged(ScreenType.ANCIENT_TEMPLE);
+    AudioService.onScreenChanged(ScreenType.TEMPLE_CARD_SELECTION);
+    AudioService.onScreenChanged(ScreenType.MAP);
+
+    assertEquals(1, started.size());
+    assertTrue(MAP_TRACKS.contains(lastStarted()));
+  }
+
+  @Test
   void theLibraryScreensShareOneTrack() {
     AudioService.onScreenChanged(ScreenType.LIBRARY);
     AudioService.onScreenChanged(ScreenType.CARD_LIBRARY);
+    AudioService.onScreenChanged(ScreenType.LIBRARY);
+    AudioService.onScreenChanged(ScreenType.ITEM_LIBRARY);
     AudioService.onScreenChanged(ScreenType.LIBRARY);
     AudioService.onScreenChanged(ScreenType.BESTIARY);
 
     assertEquals(1, started.size());
     assertTrue(LIBRARY_TRACKS.contains(lastStarted()));
+  }
+
+  @Test
+  void itemLibraryButtonsClick() {
+    Group root = stageRoot();
+    Button button = new Button(new Button.ButtonStyle());
+    root.addActor(button);
+
+    AudioService.onScreenShown(ScreenType.ITEM_LIBRARY);
+    button.fire(new ChangeEvent());
+
+    verify(sounds.get(CLICK)).play(anyFloat());
+  }
+
+  /**
+   * The library screens throw their resources away when they close. If the song lived there, going
+   * from the library into the item library would cut it off.
+   */
+  @Test
+  void musicDoesNotLiveInTheScreensResources() {
+    ResourceService libraryResources = mock(ResourceService.class);
+    ServiceLocator.registerResourceService(libraryResources);
+    AudioService.onScreenChanged(ScreenType.LIBRARY);
+    Music libraryTrack = tracks.get(lastStarted());
+
+    ServiceLocator.registerResourceService(mock(ResourceService.class));
+    AudioService.onScreenChanged(ScreenType.ITEM_LIBRARY);
+
+    verify(libraryResources, never()).loadMusic(any());
+    verify(libraryResources, never()).getAsset(anyString(), eq(Music.class));
+    verify(libraryTrack, never()).stop();
+    assertEquals(1, started.size());
+  }
+
+  @Test
+  void loadOnlyPutsSoundEffectsInTheScreensResources() {
+    ResourceService screenResources = mock(ResourceService.class);
+    ServiceLocator.registerResourceService(screenResources);
+
+    AudioService.load();
+
+    verify(screenResources).loadSounds(any());
+    verify(screenResources, never()).loadMusic(any());
   }
 
   @Test
@@ -203,14 +295,50 @@ class AudioServiceTest {
   }
 
   @Test
-  void enteringABattleStopsTheMapMusicAndStartsABattleTrack() {
+  void enteringABattleFadesOutTheMapMusicAndStartsABattleTrack() {
     AudioService.onScreenChanged(ScreenType.MAP);
     Music mapTrack = tracks.get(lastStarted());
 
     AudioService.onScreenChanged(ScreenType.BATTLE_SCREEN);
 
-    verify(mapTrack).stop();
+    verify(mapTrack, never()).stop();
     assertTrue(BATTLE_TRACKS.contains(lastStarted()));
+    finishFades();
+    verify(mapTrack).stop();
+  }
+
+  /** The old song fades out while the new one fades in, instead of cutting straight over. */
+  @Test
+  void changingSongsCrossfades() {
+    AudioService.onScreenChanged(ScreenType.MAP);
+    finishFades();
+    Music mapTrack = tracks.get(lastStarted());
+    when(mapTrack.getVolume()).thenReturn(0.5f);
+
+    AudioService.onScreenChanged(ScreenType.BATTLE_SCREEN);
+    Music battleTrack = tracks.get(lastStarted());
+    AudioService.updateFades(0.5f);
+
+    verify(mapTrack).setVolume(0.25f);
+    verify(battleTrack).setVolume(0.25f);
+    verify(mapTrack, never()).stop();
+
+    finishFades();
+
+    verify(mapTrack).stop();
+    verify(battleTrack).setVolume(0.5f);
+  }
+
+  @Test
+  void stoppingTheMusicAlsoStopsSongsStillFadingOut() {
+    AudioService.onScreenChanged(ScreenType.MAP);
+    Music mapTrack = tracks.get(lastStarted());
+    AudioService.onScreenChanged(ScreenType.BATTLE_SCREEN);
+
+    AudioService.stopMusic();
+
+    verify(mapTrack).stop();
+    assertFalse(AudioService.isMusicPlaying());
   }
 
   @Test
@@ -219,6 +347,7 @@ class AudioServiceTest {
     Music battleTrack = tracks.get(lastStarted());
 
     AudioService.onScreenChanged(ScreenType.VICTORY);
+    finishFades();
 
     verify(battleTrack).stop();
     assertTrue(sounds.containsKey(VICTORY));
@@ -232,6 +361,7 @@ class AudioServiceTest {
     Music battleTrack = tracks.get(lastStarted());
 
     AudioService.onScreenChanged(ScreenType.DEFEAT);
+    finishFades();
 
     verify(battleTrack).stop();
     assertTrue(sounds.containsKey(DEFEAT));
@@ -260,10 +390,39 @@ class AudioServiceTest {
     Button button = new Button(new Button.ButtonStyle());
     root.addActor(button);
 
-    AudioService.onScreenChanged(ScreenType.SETTINGS);
+    AudioService.onScreenShown(ScreenType.SETTINGS);
     button.fire(new ChangeEvent());
 
     assertTrue(sounds.containsKey(CLICK));
+    verify(sounds.get(CLICK)).play(anyFloat());
+  }
+
+  /** The music changes before GdxGame builds the new screen, so the old screen's stage is there. */
+  @Test
+  void changingScreenDoesNotAddClicksToTheOldScreen() {
+    Group oldRoot = stageRoot();
+
+    AudioService.onScreenChanged(ScreenType.SETTINGS);
+
+    assertEquals(0, oldRoot.getListeners().size);
+  }
+
+  @Test
+  void buttonsClickOnTheScreenGdxGameJustBuilt() {
+    Group root = new Group();
+    RenderService newScreen = renderingTo(root);
+    try (MockedConstruction<SettingsScreen> screens =
+        mockConstruction(
+            SettingsScreen.class,
+            (screen, context) -> ServiceLocator.registerRenderService(newScreen))) {
+      new GdxGame().setScreen(ScreenType.SETTINGS);
+      assertEquals(1, screens.constructed().size());
+    }
+    Button button = new Button(new Button.ButtonStyle());
+    root.addActor(button);
+
+    button.fire(new ChangeEvent());
+
     verify(sounds.get(CLICK)).play(anyFloat());
   }
 
@@ -276,7 +435,7 @@ class AudioServiceTest {
     Button button = new Button(new Button.ButtonStyle());
     root.addActor(button);
 
-    AudioService.onScreenChanged(ScreenType.SAVE_LOAD);
+    AudioService.onScreenShown(ScreenType.SAVE_LOAD);
     button.fire(new ChangeEvent());
 
     verify(resources).loadSounds(new String[] {CLICK});
@@ -289,7 +448,7 @@ class AudioServiceTest {
     Actor notAButton = new Actor();
     root.addActor(notAButton);
 
-    AudioService.onScreenChanged(ScreenType.SETTINGS);
+    AudioService.onScreenShown(ScreenType.SETTINGS);
     notAButton.fire(new ChangeEvent());
 
     assertFalse(sounds.containsKey(CLICK));
@@ -299,8 +458,8 @@ class AudioServiceTest {
   void gameplayScreensDoNotAddClicks() {
     Group root = stageRoot();
 
-    AudioService.onScreenChanged(ScreenType.MAP);
-    AudioService.onScreenChanged(ScreenType.BATTLE_SCREEN);
+    AudioService.onScreenShown(ScreenType.MAP);
+    AudioService.onScreenShown(ScreenType.BATTLE_SCREEN);
 
     assertEquals(0, root.getListeners().size);
   }
@@ -311,6 +470,7 @@ class AudioServiceTest {
     UserSettings.set(volumes(0.6f, 1f), false);
 
     AudioService.onScreenChanged(ScreenType.MAP);
+    finishFades();
 
     verify(tracks.get(lastStarted())).setVolume(0.3f);
   }
@@ -338,13 +498,16 @@ class AudioServiceTest {
   @Test
   void muteSilencesMusicAndSoundEffects() {
     AudioService.onScreenChanged(ScreenType.MAP);
+    finishFades();
+    Music track = tracks.get(lastStarted());
+    clearInvocations(track);
     Settings muted = new Settings();
     muted.muted = true;
 
     UserSettings.applyAudioSettings(muted);
     AudioService.playSound(SoundId.ERROR, 0.8f);
 
-    verify(tracks.get(lastStarted())).setVolume(0f);
+    verify(track).setVolume(0f);
     verify(sounds.get(ERROR)).play(0f);
   }
 
@@ -364,7 +527,9 @@ class AudioServiceTest {
   @Test
   void volumeStaysBetweenZeroAndOne() {
     AudioService.onScreenChanged(ScreenType.MAP);
+    finishFades();
     Music track = tracks.get(lastStarted());
+    clearInvocations(track);
 
     AudioService.setMusicVolume(1.5f);
     AudioService.setMusicVolume(-1f);
@@ -379,34 +544,32 @@ class AudioServiceTest {
   }
 
   @Test
-  void soundEffectsCanBeSwitchedOff() {
-    AudioService.setSoundEffectsOn(false);
-
-    AudioService.playSound(SoundId.ERROR, 0.5f);
-
-    assertFalse(AudioService.areSoundEffectsOn());
-    assertTrue(sounds.isEmpty());
-  }
-
-  @Test
-  void musicStillPlaysWithSoundEffectsOff() {
-    AudioService.setSoundEffectsOn(false);
-
-    AudioService.onScreenChanged(ScreenType.MAIN_MENU);
-
-    verify(tracks.get(lastStarted())).play();
-  }
-
-  @Test
   void pausingSwapsToThePauseMusic() {
     AudioService.onScreenChanged(ScreenType.MAP);
     Music mapTrack = tracks.get(lastStarted());
 
     AudioService.onGamePaused();
 
-    verify(mapTrack).pause();
+    verify(mapTrack, never()).pause();
     assertEquals(PAUSE, lastStarted());
     verify(tracks.get(PAUSE)).play();
+    finishFades();
+    verify(mapTrack).pause();
+  }
+
+  @Test
+  void resumingBeforeTheSongHasFadedOutDoesNotPauseIt() {
+    AudioService.onScreenChanged(ScreenType.MAP);
+    finishFades();
+    Music mapTrack = tracks.get(lastStarted());
+
+    AudioService.onGamePaused();
+    AudioService.updateFades(0.3f);
+    AudioService.onGameResumed();
+    finishFades();
+
+    verify(mapTrack, never()).pause();
+    verify(tracks.get(PAUSE)).stop();
   }
 
   @Test
@@ -415,7 +578,9 @@ class AudioServiceTest {
     Music mapTrack = tracks.get(lastStarted());
 
     AudioService.onGamePaused();
+    finishFades();
     AudioService.onGameResumed();
+    finishFades();
 
     verify(tracks.get(PAUSE)).stop();
     verify(mapTrack, times(2)).play();
@@ -450,6 +615,7 @@ class AudioServiceTest {
     AudioService.onGamePaused();
 
     AudioService.onScreenChanged(ScreenType.MAIN_MENU);
+    finishFades();
 
     verify(tracks.get(PAUSE)).stop();
     verify(mapTrack).stop();
@@ -464,6 +630,7 @@ class AudioServiceTest {
 
     UserSettings.applyAudioSettings(volumes(0.4f, 1f));
     AudioService.onGameResumed();
+    finishFades();
 
     verify(tracks.get(PAUSE)).setVolume(0.2f);
     verify(mapTrack).setVolume(0.2f);
@@ -551,6 +718,7 @@ class AudioServiceTest {
     AudioService.onGamePaused();
     Music pauseTrack = tracks.get(PAUSE);
     SettingsPanel panel = settingsPanel();
+    clearInvocations(pauseTrack);
 
     panel.<Slider>findActor("master-volume").setValue(0.5f);
     panel.<Slider>findActor("music-volume").setValue(0.4f);
@@ -559,8 +727,10 @@ class AudioServiceTest {
     verify(pauseTrack).setVolume(0f);
 
     AudioService.onGameResumed();
+    finishFades();
 
-    verify(mapTrack).setVolume(0f);
+    // once when the map song first faded in, and again when it faded back in while muted
+    verify(mapTrack, times(2)).setVolume(0f);
     verify(mapTrack, times(2)).play();
     verify(pauseTrack).stop();
     panel.<CheckBox>findActor("mute").setChecked(false);
@@ -588,10 +758,13 @@ class AudioServiceTest {
     verify(track, never()).play();
     assertEquals(1, started.size());
     AudioService.reset();
+    AudioService.useMusicStore(resources);
+    AudioService.fadeManually();
     ServiceLocator.clear();
     ServiceLocator.registerResourceService(resources);
     tracks.clear();
     AudioService.onScreenChanged(ScreenType.MAIN_MENU);
+    finishFades();
     verify(tracks.get(lastStarted())).setVolume(0.15f);
     SettingsPanel reopened = settingsPanel();
     assertEquals(0.5f, reopened.<Slider>findActor("master-volume").getValue());
@@ -612,6 +785,8 @@ class AudioServiceTest {
     panel.<Slider>findActor("sound-effects-volume").setValue(0.4f);
     panel.<CheckBox>findActor("mute").setChecked(true);
     AudioService.reset();
+    AudioService.useMusicStore(resources);
+    AudioService.fadeManually();
     ServiceLocator.clear();
     ServiceLocator.registerResourceService(resources);
     tracks.clear();
@@ -687,14 +862,22 @@ class AudioServiceTest {
     return started.get(started.size() - 1);
   }
 
+  private static void finishFades() {
+    AudioService.updateFades(LONGER_THAN_A_FADE);
+  }
+
   /** Stands in for the current screen's stage, with a real root so events can be fired at it. */
   private Group stageRoot() {
     Group root = new Group();
+    ServiceLocator.registerRenderService(renderingTo(root));
+    return root;
+  }
+
+  private static RenderService renderingTo(Group root) {
     Stage stage = mock(Stage.class);
     when(stage.getRoot()).thenReturn(root);
     RenderService render = mock(RenderService.class);
     when(render.getStage()).thenReturn(stage);
-    ServiceLocator.registerRenderService(render);
-    return root;
+    return render;
   }
 }

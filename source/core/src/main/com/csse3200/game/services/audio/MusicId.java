@@ -1,7 +1,6 @@
 package com.csse3200.game.services.audio;
 
 public enum MusicId {
-  DEFAULT_BGM, // TODO: remove
   MENU_HEARTHLIGHT,
   MENU_STORYBOOK,
   MENU_HEROES_GATE,

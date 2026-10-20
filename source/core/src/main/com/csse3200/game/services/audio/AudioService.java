@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.Timer;
 import com.csse3200.game.GdxGame.ScreenType;
 import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.RoomType;
@@ -14,7 +15,9 @@ import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -27,15 +30,21 @@ public class AudioService {
   private static final float DEFEAT_VOLUME = 0.7f;
   private static final float CLICK_VOLUME = 0.5f;
   private static final float FULL_MUSIC_VOLUME = 0.5f; // music volume with the sliders at 100%
+  private static final float CROSSFADE_SECONDS = 1f;
+  private static final float FADE_STEP_SECONDS = 1f / 60f;
   private static Music playing;
   private static SoundId lastSound = SoundId.MENU_HOVER;
   private static long cooldownTimestamp;
   private static float musicVolume = 0.5f;
-  private static boolean soundEffectsOn = true;
   private static float soundEffectsVolume = 1f;
   private static Playlist nowPlaying;
   private static Music heldTrack;
   private static boolean gamePaused;
+  private static ResourceService musicStore;
+  private static final List<Fade> fades = new ArrayList<>();
+  private static Timer.Task fadeTask;
+  private static long lastFadeTick;
+  private static boolean fadesOnTimer = true;
   private static final Random pitchModifier = new Random();
   private static final Random shuffle = new Random();
 
@@ -47,6 +56,7 @@ public class AudioService {
           ScreenType.SAVE_LOAD,
           ScreenType.LIBRARY,
           ScreenType.CARD_LIBRARY,
+          ScreenType.ITEM_LIBRARY,
           ScreenType.BESTIARY);
 
   // this may appear to be a lot to load into ram, but these files are kilobytes big
@@ -75,7 +85,6 @@ public class AudioService {
     "sounds/cardClick.mp3"
   };
   private static final String[] musicPaths = {
-    "music/BGM_03_mp3.mp3",
     "music/menuHearthlight.ogg",
     "music/menuStorybook.ogg",
     "music/menuHeroesGate.ogg",
@@ -122,15 +131,47 @@ public class AudioService {
     }
   }
 
+  /** A song getting louder or quieter over {@link #CROSSFADE_SECONDS}. */
+  private static final class Fade {
+    private final Music music;
+    private final boolean fadingIn;
+    private final Runnable whenDone;
+    private final float from;
+    private float elapsed;
+
+    private Fade(Music music, boolean fadingIn, Runnable whenDone) {
+      this.music = music;
+      this.fadingIn = fadingIn;
+      this.whenDone = whenDone;
+      this.from = music.getVolume();
+    }
+
+    /**
+     * Moves the fade on. Fading in heads for the current music volume rather than a fixed one, so
+     * moving the slider mid-fade still works.
+     *
+     * @return true once the fade has finished
+     */
+    private boolean update(float seconds) {
+      elapsed = Math.min(CROSSFADE_SECONDS, elapsed + seconds);
+      float to = fadingIn ? musicVolume : 0f;
+      boolean done = elapsed >= CROSSFADE_SECONDS;
+      music.setVolume(done ? to : from + (to - from) * elapsed / CROSSFADE_SECONDS);
+      if (done && whenDone != null) {
+        whenDone.run();
+      }
+      return done;
+    }
+  }
+
   /**
-   * Loads all the audio files defined in their respective path arrays. Called once in GdxGame at
-   * game start.
+   * Loads all the sound effects into the current screen's resources. Music isn't loaded here, see
+   * {@link #playMusic(MusicId)}.
    */
   public static void load() {
 
     cooldownTimestamp = System.currentTimeMillis();
     ServiceLocator.getResourceService().loadSounds(soundPaths);
-    ServiceLocator.getResourceService().loadMusic(musicPaths);
   }
 
   /**
@@ -142,10 +183,6 @@ public class AudioService {
    * @param volume Floating point value that sets the volume. Likely varies between sfx.
    */
   public static void playSound(SoundId soundID, float volume) {
-
-    if (!soundEffectsOn) {
-      return;
-    }
 
     // No resource service (as in tests) or the sound isn't loaded: skip rather than crash.
     ResourceService resources = ServiceLocator.getResourceService();
@@ -187,6 +224,10 @@ public class AudioService {
    * Plays a chosen song where it is called. Uses the ordinal of the MusicID enum parameter to find
    * the music index from array. Functions within AudioService can control and configure the music.
    *
+   * <p>Songs are kept in AudioService's own store rather than the screen's ResourceService, and
+   * each one is loaded the first time it plays. Some screens throw their resources away when they
+   * close, which would cut off the song that's playing if it lived there.
+   *
    * @param musicID Enumerator type code that translates to an index of the music path array.
    */
   public static void playMusic(MusicId musicID) {
@@ -195,34 +236,35 @@ public class AudioService {
       playing.stop();
     }
 
-    playing =
-        ServiceLocator.getResourceService().getAsset(musicPaths[musicID.ordinal()], Music.class);
+    playing = music(musicID);
     playing.setVolume(musicVolume);
     playing.setLooping(true);
     playing.play();
   }
 
-  /** Pauses the currently playing music track. */
-  public static void pauseMusic() {
-
-    playing.pause();
+  private static Music music(MusicId musicID) {
+    String path = musicPaths[musicID.ordinal()];
+    if (musicStore == null) {
+      musicStore = new ResourceService();
+    }
+    if (!musicStore.containsAsset(path, Music.class)) {
+      musicStore.loadMusic(new String[] {path});
+      musicStore.loadAll();
+    }
+    return musicStore.getAsset(path, Music.class);
   }
 
-  /**
-   * Stops the music completely, unlike {@link #pauseMusic()} which can carry on from the same spot.
-   */
+  /** Stops the music completely. Songs that are still fading out stop straight away too. */
   public static void stopMusic() {
     if (playing != null) {
       playing.stop();
       playing = null;
     }
+    for (Fade fade : fades) {
+      fade.music.stop();
+    }
+    fades.clear();
     nowPlaying = null;
-  }
-
-  /** Sets whether the currently playing song is looping. */
-  public static void setMusicLooping(boolean looping) {
-
-    playing.setLooping(looping);
   }
 
   /**
@@ -240,33 +282,19 @@ public class AudioService {
   }
 
   /**
-   * Switches all sound effects on or off. Music isn't affected, it has its own volume.
-   *
-   * @param on true to play sound effects
-   */
-  public static void setSoundEffectsOn(boolean on) {
-    soundEffectsOn = on;
-  }
-
-  /**
-   * Whether sound effects are switched on.
-   *
-   * @return false if they have been turned off in the settings
-   */
-  public static boolean areSoundEffectsOn() {
-    return soundEffectsOn;
-  }
-
-  /**
-   * Called by GdxGame every time the screen changes. Starts the music for the screen, plays the
-   * victory or defeat sound when a battle ends, makes the buttons on menu screens click and keeps
-   * the volume settings connected.
+   * Called by GdxGame every time the screen changes, before the new screen is built. Starts the
+   * music for the screen, plays the victory or defeat sound when a battle ends and keeps the volume
+   * settings connected.
    *
    * <p>Battles check the room they were entered from, so elite fights and the final boss get their
    * own tracks, and the encounter screen only switches to shop music when it is a shop. The
-   * library, card library and bestiary share one set of tracks, so moving between them keeps the
-   * same song going. Screens without their own music (settings, events, the save screen and so on)
-   * leave the current track playing, so going into the settings and back doesn't restart it.
+   * tutorial battle isn't part of a run, so it always gets the normal battle tracks. The music
+   * stops for the victory sound, so the elite portal and temple screens after an elite win start
+   * the map music again, which then carries on when the player gets back to the map. The library
+   * screens share one set of tracks, so moving between them keeps the same song going. Screens
+   * without their own music (settings, events, the save screen and so on) leave the current track
+   * playing, so going into the settings and back doesn't restart it. When the song does change, the
+   * old one fades out while the new one fades in, instead of cutting straight over.
    *
    * @param screen the screen that just opened
    * @param run the current run, used to tell what kind of room the player has walked into
@@ -276,29 +304,27 @@ public class AudioService {
     leavePauseMenu();
     switch (screen) {
       case MAIN_MENU -> startPlaylist(Playlist.MENU);
-      case MAP -> startPlaylist(Playlist.MAP);
+      case MAP, ELITE_PORTAL, ANCIENT_TEMPLE, TEMPLE_CARD_SELECTION -> startPlaylist(Playlist.MAP);
       case BATTLE_SCREEN -> startPlaylist(battlePlaylist(currentRoom(run)));
+      case TUTORIAL_BATTLE -> startPlaylist(Playlist.BATTLE);
       case ENCOUNTER -> {
         // events keep the map music, only shops change it
         if (currentRoom(run) == RoomType.SHOP) {
           startPlaylist(Playlist.SHOP);
         }
       }
-      case LIBRARY, CARD_LIBRARY, BESTIARY -> startPlaylist(Playlist.LIBRARY);
+      case LIBRARY, CARD_LIBRARY, ITEM_LIBRARY, BESTIARY -> startPlaylist(Playlist.LIBRARY);
       case VICTORY -> {
-        stopMusic();
+        fadeOutMusic();
         playLoadedSound(SoundId.VICTORY, VICTORY_VOLUME);
       }
       case DEFEAT -> {
-        stopMusic();
+        fadeOutMusic();
         playLoadedSound(SoundId.DEFEAT, DEFEAT_VOLUME);
       }
       default -> {
         // keep whatever is already playing
       }
-    }
-    if (MENU_SCREENS.contains(screen)) {
-      addButtonClicks();
     }
   }
 
@@ -308,8 +334,21 @@ public class AudioService {
   }
 
   /**
-   * Called when the pause menu opens. The song that was playing is paused so it can carry on from
-   * the same spot, and the pause menu music plays instead.
+   * Called by GdxGame once the new screen has been built, and makes the buttons on menu screens
+   * click. This can't be done in onScreenChanged, because the new screen's stage doesn't exist yet
+   * at that point.
+   *
+   * @param screen the screen that just opened
+   */
+  public static void onScreenShown(ScreenType screen) {
+    if (MENU_SCREENS.contains(screen)) {
+      addButtonClicks();
+    }
+  }
+
+  /**
+   * Called when the pause menu opens. The song that was playing fades out and pauses, so it can
+   * carry on from the same spot, while the pause menu music fades in.
    */
   public static void onGamePaused() {
     if (gamePaused) {
@@ -319,27 +358,30 @@ public class AudioService {
     heldTrack = playing;
     playing = null;
     if (heldTrack != null) {
-      heldTrack.pause();
+      Music held = heldTrack;
+      fade(held, false, held::pause);
     }
-    if (ensureLoaded(musicPaths[MusicId.PAUSE_MENU.ordinal()], Music.class)) {
-      playMusic(MusicId.PAUSE_MENU);
-    }
+    fadeInTrack(MusicId.PAUSE_MENU);
   }
 
-  /** Called when the game is resumed. Stops the pause menu music and carries on the held song. */
+  /**
+   * Called when the game is resumed. The pause menu music fades out and the held song fades back in
+   * from where it stopped.
+   */
   public static void onGameResumed() {
     if (!gamePaused) {
       return;
     }
     gamePaused = false;
     if (playing != null) {
-      playing.stop();
+      Music pauseTrack = playing;
+      fade(pauseTrack, false, pauseTrack::stop);
     }
     playing = heldTrack;
     heldTrack = null;
     if (playing != null) {
-      playing.setVolume(musicVolume);
       playing.play();
+      fade(playing, true, null);
     }
   }
 
@@ -349,8 +391,9 @@ public class AudioService {
       return;
     }
     gamePaused = false;
-    stopMusic();
+    fadeOutMusic();
     if (heldTrack != null) {
+      cancelFade(heldTrack);
       heldTrack.stop();
       heldTrack = null;
     }
@@ -394,42 +437,98 @@ public class AudioService {
     return node == null ? null : node.getRoomType();
   }
 
+  /** Crossfades to a track from the playlist, unless that playlist is already playing. */
   private static void startPlaylist(Playlist list) {
     if (list == nowPlaying) {
       return;
     }
-    stopMusic();
-    MusicId track = list.next();
-    if (ensureLoaded(musicPaths[track.ordinal()], Music.class)) {
-      playMusic(track);
-    }
+    fadeOutMusic();
+    fadeInTrack(list.next());
     nowPlaying = list;
+  }
+
+  /** Starts a song from silence and fades it in. */
+  private static void fadeInTrack(MusicId musicID) {
+    Music music = music(musicID);
+    cancelFade(music);
+    music.setVolume(0f);
+    music.setLooping(true);
+    music.play();
+    playing = music;
+    fade(music, true, null);
+  }
+
+  /** Fades out whatever is playing, then stops it. */
+  private static void fadeOutMusic() {
+    if (playing != null) {
+      Music old = playing;
+      fade(old, false, old::stop);
+      playing = null;
+    }
+    nowPlaying = null;
+  }
+
+  /**
+   * Starts fading a song in or out, replacing any fade it already had. While anything is fading, a
+   * timer moves the fades along about 60 times a second.
+   */
+  private static void fade(Music music, boolean fadingIn, Runnable whenDone) {
+    cancelFade(music);
+    fades.add(new Fade(music, fadingIn, whenDone));
+    if (fadesOnTimer && fadeTask == null) {
+      lastFadeTick = System.nanoTime();
+      fadeTask =
+          Timer.schedule(
+              new Timer.Task() {
+                @Override
+                public void run() {
+                  long now = System.nanoTime();
+                  updateFades(Math.min(0.1f, (now - lastFadeTick) / 1e9f));
+                  lastFadeTick = now;
+                }
+              },
+              FADE_STEP_SECONDS,
+              FADE_STEP_SECONDS);
+    }
+  }
+
+  private static void cancelFade(Music music) {
+    fades.removeIf(fade -> fade.music == music);
+  }
+
+  /**
+   * Moves every fade along, and stops the timer once nothing is fading.
+   *
+   * @param seconds time since the last update
+   */
+  static void updateFades(float seconds) {
+    fades.removeIf(fade -> fade.update(seconds));
+    if (fades.isEmpty() && fadeTask != null) {
+      fadeTask.cancel();
+      fadeTask = null;
+    }
   }
 
   /** Plays one of the sounds added for screens, loading it first if this screen hasn't. */
   private static void playLoadedSound(SoundId soundID, float volume) {
-    if (ensureLoaded(soundPaths[soundID.ordinal()], Sound.class)) {
+    if (ensureLoaded(soundPaths[soundID.ordinal()])) {
       playSound(soundID, volume);
     }
   }
 
   /**
-   * Makes sure a file is loaded before it plays. The save screen sets up its own resource service
+   * Makes sure a sound is loaded before it plays. The save screen sets up its own resource service
    * without loading any audio, so a button click there used to crash the game.
    *
    * @return false if there is no resource service to load into, as in tests
    */
-  private static boolean ensureLoaded(String path, Class<?> type) {
+  private static boolean ensureLoaded(String path) {
     ResourceService resources = ServiceLocator.getResourceService();
     if (resources == null) {
       return false;
     }
-    if (!resources.containsAsset(path, type)) {
-      if (type == Music.class) {
-        resources.loadMusic(new String[] {path});
-      } else {
-        resources.loadSounds(new String[] {path});
-      }
+    if (!resources.containsAsset(path, Sound.class)) {
+      resources.loadSounds(new String[] {path});
       resources.loadAll();
     }
     return true;
@@ -460,12 +559,27 @@ public class AudioService {
   /** Puts everything back to how the game starts. The state here is static, so tests need this. */
   static void reset() {
     stopMusic();
+    if (fadeTask != null) {
+      fadeTask.cancel();
+      fadeTask = null;
+    }
+    fadesOnTimer = true;
     lastSound = SoundId.MENU_HOVER;
     cooldownTimestamp = 0;
     musicVolume = 0.5f;
-    soundEffectsOn = true;
     soundEffectsVolume = 1f;
     heldTrack = null;
     gamePaused = false;
+    musicStore = null;
+  }
+
+  /** Lets tests swap in their own store for the music. */
+  static void useMusicStore(ResourceService store) {
+    musicStore = store;
+  }
+
+  /** Lets tests move the fades along themselves with {@link #updateFades(float)}. */
+  static void fadeManually() {
+    fadesOnTimer = false;
   }
 }
