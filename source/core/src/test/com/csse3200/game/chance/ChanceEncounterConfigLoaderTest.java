@@ -80,15 +80,13 @@ class ChanceEncounterConfigLoaderTest {
     assertEncounter(
         encounters.get(0),
         "mysterious-shrine",
-        "A cracked sanctum shrine burns with a god's spoiled light. Offer your light or accept a Curse for Gold. Curses persist and stack in future battles.",
-        new ExpectedChoice("make-offering", "Make an Offering: -10 HP, +25 Gold.", -10, 25),
+        "A cracked sanctum shrine still burns with a god's spoiled light.",
+        new ExpectedChoice("make-offering", "Make an Offering.", -10, 25),
+        new ExpectedChoice(
+            "accept-brand", "Accept the Brand.", 0, 50, null, List.of("BRAND_OF_THE_DAMNED")),
+        new ExpectedChoice(
+            "swear-blood-oath", "Swear the Blood Oath.", 0, 70, null, List.of("BLOOD_OATH_SIGIL")),
         new ExpectedChoice("leave", "Leave the Shrine.", 0, 0));
-    assertEquals(
-        "Accept the Brand: +50 Gold; Curse reduces future Strength gains by 1.",
-        encounters.get(0).getChoices().get(2).getDescription());
-    assertEquals(
-        "Swear the Blood Oath: +70 Gold; Curse drains 2 HP each player turn in battle (min 1 HP).",
-        encounters.get(0).getChoices().get(3).getDescription());
     assertEncounter(
         encounters.get(1),
         "wandering-healer",
@@ -107,12 +105,8 @@ class ChanceEncounterConfigLoaderTest {
     assertEncounter(
         encounters.get(3),
         "abandoned-mine",
-        "Beneath the sanctum, fallen relics lie in abandoned workings. A random Curse can weaken Strength or Block gains, drain HP at player turn-start, or reduce maximum Energy in future battles.",
-        new ExpectedChoice(
-            "search-tunnels",
-            "Explore the Mine: +60 Gold; 50% chance of one lasting Curse.",
-            0,
-            60),
+        "Beneath the sanctum, old workings still hold relics of the fallen.",
+        new ExpectedChoice("search-tunnels", "Explore the Mine.", 0, 60),
         new ExpectedChoice("leave", "Leave the Mine.", 0, 0));
     assertEncounter(
         encounters.get(4),
@@ -351,8 +345,7 @@ class ChanceEncounterConfigLoaderTest {
       ExpectedChoice... expectedChoices) {
     assertEquals(expectedId, encounter.getId());
     assertEquals(expectedDescription, encounter.getDescription());
-    int addedChoices = "mysterious-shrine".equals(expectedId) ? 2 : 0;
-    assertEquals(expectedChoices.length + addedChoices, encounter.getChoices().size());
+    assertEquals(expectedChoices.length, encounter.getChoices().size());
 
     for (int i = 0; i < expectedChoices.length; i++) {
       ExpectedChoice expected = expectedChoices[i];
@@ -364,15 +357,25 @@ class ChanceEncounterConfigLoaderTest {
       assertEquals(expected.healthDelta(), outcome.getHealthDelta());
       assertEquals(expected.currencyDelta(), outcome.getCurrencyDelta());
       assertEquals(expected.cardRewardId(), outcome.getCardRewardId());
-      assertTrue(outcome.getItemRewardIds().isEmpty());
+      assertEquals(expected.itemRewardIds(), outcome.getItemRewardIds());
       assertSame(outcome, encounter.resolveChoice(expected.id()));
     }
   }
 
   private record ExpectedChoice(
-      String id, String description, int healthDelta, int currencyDelta, String cardRewardId) {
+      String id,
+      String description,
+      int healthDelta,
+      int currencyDelta,
+      String cardRewardId,
+      List<String> itemRewardIds) {
     private ExpectedChoice(String id, String description, int healthDelta, int currencyDelta) {
-      this(id, description, healthDelta, currencyDelta, null);
+      this(id, description, healthDelta, currencyDelta, null, List.of());
+    }
+
+    private ExpectedChoice(
+        String id, String description, int healthDelta, int currencyDelta, String cardRewardId) {
+      this(id, description, healthDelta, currencyDelta, cardRewardId, List.of());
     }
   }
 
