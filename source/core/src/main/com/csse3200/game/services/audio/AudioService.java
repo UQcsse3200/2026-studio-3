@@ -307,12 +307,7 @@ public class AudioService {
       case MAP, ELITE_PORTAL, ANCIENT_TEMPLE, TEMPLE_CARD_SELECTION -> startPlaylist(Playlist.MAP);
       case BATTLE_SCREEN -> startPlaylist(battlePlaylist(currentRoom(run)));
       case TUTORIAL_BATTLE -> startPlaylist(Playlist.BATTLE);
-      case ENCOUNTER -> {
-        // events keep the map music, only shops change it
-        if (currentRoom(run) == RoomType.SHOP) {
-          startPlaylist(Playlist.SHOP);
-        }
-      }
+      case ENCOUNTER -> handleEncounterMusic(run);
       case LIBRARY, CARD_LIBRARY, ITEM_LIBRARY, BESTIARY -> startPlaylist(Playlist.LIBRARY);
       case VICTORY -> {
         fadeOutMusic();
@@ -325,6 +320,12 @@ public class AudioService {
       default -> {
         // keep whatever is already playing
       }
+    }
+  }
+
+  private static void handleEncounterMusic(RunState run) {
+    if (currentRoom(run) == RoomType.SHOP) {
+      startPlaylist(Playlist.SHOP);
     }
   }
 
