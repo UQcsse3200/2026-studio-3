@@ -139,7 +139,7 @@ class BattleActionsTest {
   }
 
   @Test
-  void shouldWaitThreeSecondsAfterEnemyEffectsBeforeReturningTheHand() {
+  void shouldWaitOneAndAHalfSecondsAfterEnemyEffectsBeforeReturningTheHand() {
     CardBattle battle = cardBattle(new EffectConfig(EffectType.BLOCK, 1));
     AtomicBoolean handVisible = observeHand(battle.ui());
     List<String> reveals = new ArrayList<>();
@@ -153,6 +153,7 @@ class BattleActionsTest {
         .getEvents()
         .addListener("playerTurnStarted", (Integer turn) -> reveals.add("playerTurn"));
     BattleActions actions = battle.ui().getComponent(BattleActions.class);
+    when(ServiceLocator.getTimeSource().getDeltaTime()).thenReturn(0.75f);
 
     battle.ui().getEvents().trigger("endTurn");
     assertFalse(handVisible.get());
@@ -164,10 +165,10 @@ class BattleActionsTest {
     assertFalse(reveals.contains("playerTurn"));
     assertFalse(handVisible.get());
 
-    battle.ui().update(); // 1.5 seconds after the enemy action.
+    battle.ui().update(); // 0.75 seconds after the enemy action.
     assertFalse(handVisible.get());
     assertTrue(actions.hasPendingEnemyReveals());
-    battle.ui().update(); // 3 seconds after the enemy action.
+    battle.ui().update(); // 1.5 seconds after the enemy action.
     assertTrue(handVisible.get());
     assertEquals("playerTurn", reveals.get(reveals.size() - 1));
     assertFalse(actions.hasPendingEnemyReveals());
@@ -179,7 +180,7 @@ class BattleActionsTest {
     Graphics previousGraphics = Gdx.graphics;
     try {
       Gdx.graphics = mock(Graphics.class);
-      when(Gdx.graphics.getDeltaTime()).thenReturn(1.5f);
+      when(Gdx.graphics.getDeltaTime()).thenReturn(0.75f);
       CardBattle battle = cardBattle(new EffectConfig(EffectType.BLOCK, 1));
       AtomicBoolean handVisible = observeHand(battle.ui());
       GameTime time = new GameTime();
@@ -196,7 +197,7 @@ class BattleActionsTest {
       assertFalse(handVisible.get());
 
       pause.resume();
-      when(Gdx.graphics.getDeltaTime()).thenReturn(1.5f);
+      when(Gdx.graphics.getDeltaTime()).thenReturn(0.75f);
       battle.ui().update();
       assertTrue(handVisible.get());
     } finally {
