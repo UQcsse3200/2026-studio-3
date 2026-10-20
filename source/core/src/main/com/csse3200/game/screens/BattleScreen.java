@@ -930,7 +930,7 @@ public class BattleScreen extends ScreenAdapter {
       instancesById.put(instance.instanceId(), instance);
     }
 
-    for (Clickable clickable : uiFactory.getByTrigger(HAND_TRIGGER)) {
+    for (Clickable clickable : uiFactory.getByTrigger(PLAY_CARD_TRIGGER)) {
       clickable
           .getBtn()
           .addListener(
