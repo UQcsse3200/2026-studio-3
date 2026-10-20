@@ -160,7 +160,7 @@ public class TutorialVictoryScreen extends ScreenAdapter {
     // Navigation may dispose this screen, so wait until Stage input/actions have finished.
     if (continueRequested && !disposed) {
       continuing = true;
-      game.startNewRun();
+      game.startRunAfterTutorial();
     }
   }
 

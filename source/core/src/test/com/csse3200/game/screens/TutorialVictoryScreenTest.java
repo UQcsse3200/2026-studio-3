@@ -23,7 +23,6 @@ import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,7 +77,7 @@ class TutorialVictoryScreenTest {
   }
 
   @Test
-  void waitsForContinueAndStartsANewRunOnlyOnceOutsideInputDispatch() {
+  void waitsForContinueAndStartsRunAfterTutorialOnlyOnceOutsideInputDispatch() {
     GdxGame game = mock(GdxGame.class);
     screen = new TutorialVictoryScreen(game);
     screen.render(0f);
@@ -92,7 +91,7 @@ class TutorialVictoryScreenTest {
     screen.render(0f);
     screen.render(0f);
     continueButton().fire(new ChangeEvent());
-    verify(game, times(1)).startNewRun();
+    verify(game, times(1)).startRunAfterTutorial();
     verifyNoMoreInteractions(game);
   }
 
@@ -111,7 +110,7 @@ class TutorialVictoryScreenTest {
   }
 
   @Test
-  void continueUsesTheExistingResetAndOpeningNarrationBeforeTheMap() {
+  void continueResetsRunAndOpensMapWithoutRepeatingNarration() {
     GdxGame game = new GdxGame();
     game.getRunState()
         .restoreRun(new MapGraph(Map.of(7, new MapNode(7, RoomType.COMBAT)), false), 7);
@@ -121,31 +120,22 @@ class TutorialVictoryScreenTest {
     game.getRunState().setPendingEliteTempleReward(true);
     screen = new TutorialVictoryScreen(game);
     game.setScreen(screen);
-    AtomicReference<Runnable> finishOpening = new AtomicReference<>();
 
-    try (MockedConstruction<NarrationScreen> narrations =
-            mockConstruction(
-                NarrationScreen.class,
-                (narration, context) -> {
-                  assertEquals("opening", context.arguments().get(0));
-                  finishOpening.set((Runnable) context.arguments().get(1));
-                });
+    try (MockedConstruction<NarrationScreen> narrations = mockConstruction(NarrationScreen.class);
         MockedConstruction<MapScreen> maps = mockConstruction(MapScreen.class)) {
       continueButton().fire(new ChangeEvent());
       assertSame(screen, game.getScreen());
       screen.render(0f);
 
-      assertSame(narrations.constructed().get(0), game.getScreen());
-      assertTrue(maps.constructed().isEmpty());
+      assertTrue(narrations.constructed().isEmpty());
+      assertEquals(1, maps.constructed().size());
+      assertSame(maps.constructed().get(0), game.getScreen());
       assertFalse(game.getRunState().isRunActive());
       assertNull(game.getRunState().getActiveNodeId());
       assertNull(game.getRunState().getPendingReward());
       assertFalse(game.getRunState().hasPendingEliteTempleReward());
       assertNotSame(oldPlayer, game.getRunState().getOrCreatePlayerState());
       assertNotEquals(999, game.getRunState().getOrCreatePlayerState().getGold());
-
-      finishOpening.get().run();
-      assertSame(maps.constructed().get(0), game.getScreen());
     }
   }
 
