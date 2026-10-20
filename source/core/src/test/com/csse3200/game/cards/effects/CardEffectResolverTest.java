@@ -111,6 +111,11 @@ class CardEffectResolverTest {
   @Test
   void shouldRejectInvalidResolverInputs() {
     CardEffectResolver resolver = new CardEffectResolver();
+    CardEffectResolver withLibrary = new CardEffectResolver(new CardLibrary());
+    PlayerEffectState playerEffectState = new PlayerEffectState();
+    CardEffectResolutionContext cardEffectResolutionContext =
+        new CardEffectResolutionContext(0, 0, 0);
+
     CardConfig strike =
         card("strike", TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
 
@@ -118,22 +123,19 @@ class CardEffectResolverTest {
         IllegalArgumentException.class, () -> resolver.resolve(strike, (PlayerEffectState) null));
     assertThrows(
         IllegalArgumentException.class,
-        () -> resolver.resolve((CardConfig) null, new PlayerEffectState()));
+        () -> resolver.resolve((CardConfig) null, playerEffectState));
+    assertThrows(IllegalStateException.class, () -> resolver.resolve("strike", playerEffectState));
     assertThrows(
-        IllegalStateException.class, () -> resolver.resolve("strike", new PlayerEffectState()));
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            new CardEffectResolver(new CardLibrary()).resolve("missing", new PlayerEffectState()));
+        IllegalArgumentException.class, () -> withLibrary.resolve("missing", playerEffectState));
     assertThrows(
         IllegalArgumentException.class,
         () -> resolver.resolve(strike, (CardEffectResolutionContext) null));
     assertThrows(
         IllegalArgumentException.class,
-        () -> resolver.resolve((ResolvedCard) null, new PlayerEffectState()));
+        () -> resolver.resolve((ResolvedCard) null, playerEffectState));
     assertThrows(
         IllegalArgumentException.class,
-        () -> resolver.resolve((ResolvedCard) null, new CardEffectResolutionContext(0, 0, 0)));
+        () -> resolver.resolve((ResolvedCard) null, cardEffectResolutionContext));
   }
 
   private static CardConfig card(String id, TargetType target, EffectConfig... effects) {

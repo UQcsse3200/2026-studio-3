@@ -18,38 +18,42 @@ class CardPlayRequestTest {
 
   @Test
   void shouldRejectNullInstanceId() {
-    assertThrows(
-        IllegalArgumentException.class, () -> new CardPlayRequest(null, CardPlayTarget.self()));
+    CardPlayTarget cardPlayTarget = CardPlayTarget.self();
+
+    assertThrows(IllegalArgumentException.class, () -> new CardPlayRequest(null, cardPlayTarget));
   }
 
   @Test
   void shouldRejectBlankInstanceId() {
-    assertThrows(
-        IllegalArgumentException.class, () -> new CardPlayRequest("", CardPlayTarget.self()));
+    CardPlayTarget cardPlayTarget = CardPlayTarget.self();
 
-    assertThrows(
-        IllegalArgumentException.class, () -> new CardPlayRequest("   ", CardPlayTarget.self()));
+    assertThrows(IllegalArgumentException.class, () -> new CardPlayRequest("", cardPlayTarget));
+
+    assertThrows(IllegalArgumentException.class, () -> new CardPlayRequest("   ", cardPlayTarget));
   }
 
   @Test
   void shouldRejectInstanceIdWithLeadingWhitespace() {
+    CardPlayTarget cardPlayTarget = CardPlayTarget.self();
+
     assertThrows(
-        IllegalArgumentException.class,
-        () -> new CardPlayRequest(" strike", CardPlayTarget.self()));
+        IllegalArgumentException.class, () -> new CardPlayRequest(" strike", cardPlayTarget));
   }
 
   @Test
   void shouldRejectInstanceIdWithTrailingWhitespace() {
+    CardPlayTarget cardPlayTarget = CardPlayTarget.self();
+
     assertThrows(
-        IllegalArgumentException.class,
-        () -> new CardPlayRequest("strike ", CardPlayTarget.self()));
+        IllegalArgumentException.class, () -> new CardPlayRequest("strike ", cardPlayTarget));
   }
 
   @Test
   void shouldRejectInstanceIdWithLeadingAndTrailingWhitespace() {
+    CardPlayTarget cardPlayTarget = CardPlayTarget.self();
+
     assertThrows(
-        IllegalArgumentException.class,
-        () -> new CardPlayRequest(" strike ", CardPlayTarget.self()));
+        IllegalArgumentException.class, () -> new CardPlayRequest(" strike ", cardPlayTarget));
   }
 
   @Test

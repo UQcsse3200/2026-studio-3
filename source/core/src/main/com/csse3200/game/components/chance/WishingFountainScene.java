@@ -82,11 +82,6 @@ final class WishingFountainScene extends Group {
     return wish.state;
   }
 
-  void complete() {
-    wish.cancel();
-    wish.state = WishState.COMPLETE;
-  }
-
   void cancel() {
     wish.cancel();
     wish.state = WishState.COMPLETE;

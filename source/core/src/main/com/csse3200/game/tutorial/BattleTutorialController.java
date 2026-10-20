@@ -53,17 +53,14 @@ public final class BattleTutorialController implements AutoCloseable {
   private final boolean referenceSequence;
   private String demonstrationCardId;
   private int enemyHealthBefore;
-  private int playerHealthBefore;
 
   /** Initial snapshots are supplied only by the isolated tutorial owner. */
-  public void observeInitialHealth(int enemyHealth, int playerHealth) {
+  public void observeInitialHealth(int enemyHealth) {
     enemyHealthBefore = enemyHealth;
-    playerHealthBefore = playerHealth;
   }
 
   /** Polls real resolution and visual completion; never applies damage or advances a turn. */
-  public void observeResolution(
-      int enemyHealth, int playerHealth, boolean settled, BattlePhase phase) {
+  public void observeResolution(int enemyHealth, boolean settled, BattlePhase phase) {
     if (closed || !referenceSequence || !settled || phase != BattlePhase.PLAYER_TURN) return;
     if (currentStep == Step.CARD_ANIMATION && enemyHealth < enemyHealthBefore) {
       show(Step.ENEMY_STATS);
@@ -214,7 +211,7 @@ public final class BattleTutorialController implements AutoCloseable {
     if (closed || currentStep == null || outcome != null || won == null) {
       return;
     }
-    finish(Boolean.TRUE.equals(won) ? Outcome.WON : Outcome.LOST, Step.BATTLE_ENDED);
+    finish(won ? Outcome.WON : Outcome.LOST, Step.BATTLE_ENDED);
   }
 
   /** Stops the guide when its owning battle is exited. */
@@ -228,14 +225,14 @@ public final class BattleTutorialController implements AutoCloseable {
   private void show(Step next) {
     currentStep = next;
     for (Consumer<Step> listener : List.copyOf(stepListeners)) {
-      if (closed || currentStep != next) {
+      if (closed) {
         return;
       }
       listener.accept(next);
     }
 
     // Actions performed while the player was reading earlier prompts still count.
-    if (closed || currentStep != next) {
+    if (closed) {
       return;
     }
     if (!referenceSequence && next == Step.PLAY_A_CARD && cardPlayed) {

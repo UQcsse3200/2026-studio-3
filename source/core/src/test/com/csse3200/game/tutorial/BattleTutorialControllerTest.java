@@ -40,7 +40,7 @@ class BattleTutorialControllerTest {
   void referenceSequenceRequiresTheExactDemonstrationCopyAtStepSix() {
     BattleTutorialController tutorial = new BattleTutorialController(true);
     tutorial.setDemonstrationCardId("demo-strike");
-    tutorial.observeInitialHealth(32, 100);
+    tutorial.observeInitialHealth(32);
     tutorial.start();
     assertEquals(BattleTutorialController.Step.HAND, tutorial.getCurrentStep().orElseThrow());
     tutorial.onSuccessfulCardPlay("demo-strike");
@@ -54,13 +54,13 @@ class BattleTutorialControllerTest {
     tutorial.onSuccessfulCardPlay("demo-strike");
     assertEquals(
         BattleTutorialController.Step.CARD_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(32, 100, true, BattlePhase.PLAYER_TURN);
+    tutorial.observeResolution(32, true, BattlePhase.PLAYER_TURN);
     assertEquals(
         BattleTutorialController.Step.CARD_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(26, 100, false, BattlePhase.PLAYER_TURN);
+    tutorial.observeResolution(26, false, BattlePhase.PLAYER_TURN);
     assertEquals(
         BattleTutorialController.Step.CARD_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(26, 100, true, BattlePhase.PLAYER_TURN);
+    tutorial.observeResolution(26, true, BattlePhase.PLAYER_TURN);
     assertEquals(
         BattleTutorialController.Step.ENEMY_STATS, tutorial.getCurrentStep().orElseThrow());
     tutorial.onSuccessfulCardPlay("demo-strike");
@@ -76,7 +76,7 @@ class BattleTutorialControllerTest {
     tutorial.onPhaseChanged(BattlePhase.PLAYER_END);
     assertEquals(
         BattleTutorialController.Step.ENEMY_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(26, 100, true, BattlePhase.PLAYER_TURN);
+    tutorial.observeResolution(26, true, BattlePhase.PLAYER_TURN);
     assertEquals(BattleTutorialController.Step.FREE_PLAY, tutorial.getCurrentStep().orElseThrow());
     assertTrue(tutorial.getOutcome().isEmpty());
   }
@@ -85,20 +85,20 @@ class BattleTutorialControllerTest {
   void endTurnRequiresTheRealTurnAndSettledReturn() {
     var tutorial = new BattleTutorialController(true);
     tutorial.setDemonstrationCardId("strike");
-    tutorial.observeInitialHealth(32, 100);
+    tutorial.observeInitialHealth(32);
     tutorial.start();
     for (int i = 0; i < 5; i++) tutorial.continueInformation();
     tutorial.onSuccessfulCardPlay("strike");
-    tutorial.observeResolution(28, 100, true, BattlePhase.PLAYER_TURN);
+    tutorial.observeResolution(28, true, BattlePhase.PLAYER_TURN);
     tutorial.continueInformation();
     tutorial.continueInformation();
     tutorial.continueInformation();
     assertEquals(BattleTutorialController.Step.END_TURN, tutorial.getCurrentStep().orElseThrow());
     tutorial.onPhaseChanged(BattlePhase.PLAYER_END);
-    tutorial.observeResolution(28, 100, false, BattlePhase.PLAYER_TURN);
+    tutorial.observeResolution(28, false, BattlePhase.PLAYER_TURN);
     assertEquals(
         BattleTutorialController.Step.ENEMY_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(28, 100, true, BattlePhase.PLAYER_TURN);
+    tutorial.observeResolution(28, true, BattlePhase.PLAYER_TURN);
     assertEquals(BattleTutorialController.Step.FREE_PLAY, tutorial.getCurrentStep().orElseThrow());
   }
 

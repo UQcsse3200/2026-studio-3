@@ -62,11 +62,11 @@ public final class EncounterComposer {
 
   private List<EncounterConfig> usableCandidates(RoomType type, int progression) {
     List<EncounterConfig> usable = new ArrayList<>();
-    for (EncounterConfig candidate : table.matching(type, progression)) {
-      if (referencesOnlyKnownEnemies(candidate)) {
-        usable.add(candidate);
-      }
-    }
+
+    table.matching(type, progression).stream()
+        .filter(this::referencesOnlyKnownEnemies)
+        .forEach(usable::add);
+
     return usable;
   }
 

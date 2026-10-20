@@ -11,7 +11,7 @@ public final class TurnEffectStore implements CardEffectResultStore {
   private final List<CardEffectResolution> resolutions = new ArrayList<>();
 
   @Override
-  public void record(CardEffectResolution resolution) {
+  public void recordResult(CardEffectResolution resolution) {
     if (resolution == null) {
       throw new IllegalArgumentException("Card effect resolution cannot be null");
     }

@@ -97,7 +97,7 @@ public class UserSettings {
     if (!Float.isFinite(volume)) {
       return DEFAULT_VOLUME;
     }
-    return Math.max(0f, Math.min(1f, volume));
+    return Math.clamp(volume, 0f, 1f);
   }
 
   private static DisplayMode findMatching(DisplaySettings desiredSettings) {

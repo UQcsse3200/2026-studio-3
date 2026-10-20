@@ -158,11 +158,12 @@ class EnemyStatusEffectVisualComponentTest {
 
   @Test
   void restoresBatchColourEvenWhenDrawingFails() {
+    EnemyStatusEffectVisualComponent visualComponent = visual(EffectType.VULNERABLE, 0f);
+
     doThrow(new IllegalStateException("draw failed"))
         .when(batch)
         .draw(any(TextureRegion.class), anyFloat(), anyFloat(), anyFloat(), anyFloat());
-    assertThrows(
-        IllegalStateException.class, () -> visual(EffectType.VULNERABLE, 0f).render(batch));
+    assertThrows(IllegalStateException.class, () -> visualComponent.render(batch));
     verify(batch).setPackedColor(42f);
   }
 
@@ -371,7 +372,7 @@ class EnemyStatusEffectVisualComponentTest {
   private float firstAlpha() {
     ArgumentCaptor<Float> alphas = ArgumentCaptor.forClass(Float.class);
     verify(batch, atLeastOnce()).setColor(anyFloat(), anyFloat(), anyFloat(), alphas.capture());
-    return alphas.getAllValues().get(0);
+    return alphas.getAllValues().getFirst();
   }
 
   @Test
@@ -570,16 +571,6 @@ class EnemyStatusEffectVisualComponentTest {
           bottom = Math.max(bottom, y % h);
         }
       }
-      System.out.println(
-          types[index]
-              + " sheet visible union: "
-              + left
-              + ","
-              + top
-              + " to "
-              + right
-              + ","
-              + bottom);
       Texture sheet = new Texture(Gdx.files.internal(paths[index]));
       try {
         stats.applyStatusEffect(types[index].name(), 1, 3);

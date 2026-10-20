@@ -591,7 +591,7 @@ public class ChanceEncounterDisplay extends UIComponent {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
-            fountainScene.complete();
+            fountainScene.cancel();
             completeEncounter();
           }
         });

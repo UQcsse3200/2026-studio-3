@@ -93,17 +93,18 @@ public final class ShopInventoryGenerator {
       return candidates;
     }
 
-    for (CardConfig card : cards) {
-      if (card != null
-          && card.id != null
-          && !card.id.isBlank()
-          && card.name != null
-          && !card.name.isBlank()
-          && card.rarity != null
-          && cardService.getCard(card.id).isPresent()) {
-        candidates.add(card);
-      }
-    }
+    cards.stream()
+        .filter(
+            card ->
+                card != null
+                    && card.id != null
+                    && !card.id.isBlank()
+                    && card.name != null
+                    && !card.name.isBlank()
+                    && card.rarity != null
+                    && cardService.getCard(card.id).isPresent())
+        .forEach(candidates::add);
+
     candidates.sort(Comparator.comparing(card -> card.id));
     return candidates;
   }
@@ -118,19 +119,12 @@ public final class ShopInventoryGenerator {
   }
 
   private int generatePrice(Rarity rarity) {
-    int basePrice;
-    switch (rarity) {
-      case RARE:
-        basePrice = RARE_PRICE;
-        break;
-      case UNCOMMON:
-        basePrice = UNCOMMON_PRICE;
-        break;
-      case COMMON:
-      default:
-        basePrice = COMMON_PRICE;
-        break;
-    }
+    int basePrice =
+        switch (rarity) {
+          case RARE -> RARE_PRICE;
+          case UNCOMMON -> UNCOMMON_PRICE;
+          default -> COMMON_PRICE;
+        };
     return Math.max(0, basePrice + randomBetween(-PRICE_VARIANCE, PRICE_VARIANCE));
   }
 

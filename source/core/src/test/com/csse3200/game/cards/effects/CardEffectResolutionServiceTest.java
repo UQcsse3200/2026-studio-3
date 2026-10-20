@@ -54,7 +54,7 @@ class CardEffectResolutionServiceTest {
     CardEffectResolution nextTurnStrike = service.resolve("strike");
 
     assertEquals(1, service.getResolutions().size());
-    assertEquals(8, nextTurnStrike.enemyEffects().get(0).value());
+    assertEquals(8, nextTurnStrike.enemyEffects().getFirst().value());
   }
 
   @Test
@@ -82,22 +82,20 @@ class CardEffectResolutionServiceTest {
 
   @Test
   void shouldRejectMissingDependencies() {
+    TurnEffectStore turnEffectStore = new TurnEffectStore();
+    PlayerEffectState playerEffectState = new PlayerEffectState();
+    CardEffectResolver cardEffectResolver = new CardEffectResolver();
+
+    assertThrows(IllegalArgumentException.class, () -> new CardEffectResolutionService(null));
     assertThrows(
         IllegalArgumentException.class,
-        () -> new CardEffectResolutionService((com.csse3200.game.cards.CardService) null));
+        () -> new CardEffectResolutionService(null, playerEffectState, turnEffectStore));
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            new CardEffectResolutionService(null, new PlayerEffectState(), new TurnEffectStore()));
+        () -> new CardEffectResolutionService(cardEffectResolver, null, turnEffectStore));
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            new CardEffectResolutionService(new CardEffectResolver(), null, new TurnEffectStore()));
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            new CardEffectResolutionService(
-                new CardEffectResolver(), new PlayerEffectState(), null));
+        () -> new CardEffectResolutionService(cardEffectResolver, playerEffectState, null));
   }
 
   private static CardConfig card(String id, TargetType target, EffectConfig... effects) {

@@ -18,8 +18,8 @@ class TurnEffectStoreTest {
         effect("poison_dagger", EffectType.POISON, TargetType.SINGLE_ENEMY, 3, 3, 1);
     ResolvedCardEffect block = effect("defend", EffectType.BLOCK, TargetType.SELF, 5, 0, 0);
 
-    store.record(new CardEffectResolution("poison_dagger", List.of(damage, poison)));
-    store.record(new CardEffectResolution("defend", List.of(block)));
+    store.recordResult(new CardEffectResolution("poison_dagger", List.of(damage, poison)));
+    store.recordResult(new CardEffectResolution("defend", List.of(block)));
 
     assertEquals(List.of(damage, poison), store.getEnemyEffects());
     assertEquals(List.of(block), store.getPlayerEffects());
@@ -32,15 +32,15 @@ class TurnEffectStoreTest {
   @Test
   void shouldReturnImmutableSnapshotsAndClearTheStore() {
     TurnEffectStore store = new TurnEffectStore();
-    store.record(
+    CardEffectResolution cardEffectResolution = new CardEffectResolution("empty", List.of());
+
+    store.recordResult(
         new CardEffectResolution(
             "strike",
             List.of(effect("strike", EffectType.DAMAGE, TargetType.SINGLE_ENEMY, 6, 0, 0))));
     List<CardEffectResolution> snapshot = store.getResolutions();
 
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> snapshot.add(new CardEffectResolution("empty", List.of())));
+    assertThrows(UnsupportedOperationException.class, () -> snapshot.add(cardEffectResolution));
 
     store.clear();
 
@@ -53,7 +53,7 @@ class TurnEffectStoreTest {
   void shouldRejectInvalidQueriesAndRecords() {
     TurnEffectStore store = new TurnEffectStore();
 
-    assertThrows(IllegalArgumentException.class, () -> store.record(null));
+    assertThrows(IllegalArgumentException.class, () -> store.recordResult(null));
     assertThrows(IllegalArgumentException.class, () -> store.getEffectsOfType(null));
   }
 
