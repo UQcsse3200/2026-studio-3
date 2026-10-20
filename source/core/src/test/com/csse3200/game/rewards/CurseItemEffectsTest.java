@@ -130,9 +130,12 @@ class CurseItemEffectsTest {
   @Test
   void curseEffectsRequireCombatStats() {
     Entity player = new Entity();
+    BrandOfTheDamnedEffect brand = new BrandOfTheDamnedEffect();
+    ShatteredAegisEffect aegis = new ShatteredAegisEffect();
+    BloodOathSigilEffect sigil = new BloodOathSigilEffect();
 
-    assertThrows(IllegalArgumentException.class, () -> new BrandOfTheDamnedEffect().apply(player));
-    assertThrows(IllegalArgumentException.class, () -> new ShatteredAegisEffect().apply(player));
-    assertThrows(IllegalArgumentException.class, () -> new BloodOathSigilEffect().apply(player));
+    assertThrows(IllegalArgumentException.class, () -> brand.apply(player));
+    assertThrows(IllegalArgumentException.class, () -> aegis.apply(player));
+    assertThrows(IllegalArgumentException.class, () -> sigil.apply(player));
   }
 }

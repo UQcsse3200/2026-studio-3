@@ -47,6 +47,8 @@ import java.util.function.IntFunction;
  */
 public class InventoryPopupComponent extends UIComponent {
 
+  private record UseFeedbackDetails(Color colour, String title, String detail) {}
+
   private static final String PANEL_TEXTURE = "images/ui/inventory-panel.png";
   private static final float WINDOW_WIDTH = 590f;
   private static final float CONTENT_WIDTH = 530f;
@@ -86,7 +88,7 @@ public class InventoryPopupComponent extends UIComponent {
     ITEM_DESCRIPTIONS.put(
         ItemType.MERCHANTS_FAVOR,
         count -> {
-          int discount = Math.min(count * 10, 50);
+          int discount = Math.clamp(count, 0, 5) * 10;
           return new ItemText("+" + discount + "% SHOP DISCOUNT");
         });
 
@@ -302,7 +304,14 @@ public class InventoryPopupComponent extends UIComponent {
   }
 
   private Table createStatusBadge(ItemType item) {
-    String status = statusBadgeText(item);
+    String status;
+    if (item.isCurse()) {
+      status = "CURSE";
+    } else if (item == ItemType.LUCKY_COIN) {
+      status = "ON GOLD";
+    } else {
+      status = "PASSIVE";
+    }
     Color statusColour = item.isCurse() ? CURSE_COLOUR : GOLD_COLOUR;
 
     Table border = new Table();
@@ -315,13 +324,6 @@ public class InventoryPopupComponent extends UIComponent {
 
     border.add(badge).grow();
     return border;
-  }
-
-  private static String statusBadgeText(ItemType item) {
-    if (item.isCurse()) {
-      return "CURSE";
-    }
-    return item == ItemType.LUCKY_COIN ? "ON GOLD" : "PASSIVE";
   }
 
   private Table createCountBadge(int count) {
@@ -418,29 +420,25 @@ public class InventoryPopupComponent extends UIComponent {
       useFeedback = null;
     }
 
-    Color effectColour;
-    String title;
-    String detail;
-    switch (itemId) {
-      case IRON_AEGIS -> {
-        effectColour = AEGIS_EFFECT_COLOUR;
-        title = "IRON AEGIS USED";
-        detail = "+" + actualGain + " ARMOUR";
-      }
-      case WARRIORS_CREST -> {
-        effectColour = CREST_EFFECT_COLOUR;
-        title = "WARRIOR'S CREST USED";
-        detail = "+" + actualGain + " STRENGTH";
-        if (actualGain < 1) {
-          detail += " (BRAND -" + (1 - actualGain) + ")";
-        }
-      }
-      default -> {
-        effectColour = AMBROSIA_EFFECT_COLOUR;
-        title = "AMBROSIA USED";
-        detail = "+" + actualGain + " HEALTH";
-      }
-    }
+    UseFeedbackDetails feedback =
+        switch (itemId) {
+          case IRON_AEGIS ->
+              new UseFeedbackDetails(
+                  AEGIS_EFFECT_COLOUR, "IRON AEGIS USED", "+" + actualGain + " ARMOUR");
+          case WARRIORS_CREST -> {
+            String detail = "+" + actualGain + " STRENGTH";
+            if (actualGain < 1) {
+              detail += " (BRAND -" + (1 - actualGain) + ")";
+            }
+            yield new UseFeedbackDetails(CREST_EFFECT_COLOUR, "WARRIOR'S CREST USED", detail);
+          }
+          default ->
+              new UseFeedbackDetails(
+                  AMBROSIA_EFFECT_COLOUR, "AMBROSIA USED", "+" + actualGain + " HEALTH");
+        };
+    Color effectColour = feedback.colour();
+    String title = feedback.title();
+    String detail = feedback.detail();
 
     Table border = new Table();
     border.setTransform(true);

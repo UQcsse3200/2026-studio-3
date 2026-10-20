@@ -3,9 +3,7 @@ package com.csse3200.game.rewards;
 import com.csse3200.game.entities.Entity;
 
 public class ItemEffectApplier {
-  private ItemEffectApplier() {
-    // prevents instantiation
-  }
+  private ItemEffectApplier() {}
 
   public static void applyItemEffect(ItemType itemId, Entity player) {
     switch (itemId) {
