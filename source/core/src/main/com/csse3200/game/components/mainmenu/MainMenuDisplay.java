@@ -36,6 +36,7 @@ public class MainMenuDisplay extends UIComponent {
   private static final float Z_INDEX = 2f;
   private static final float TITLE_WIDTH = 510f;
   private static final float TITLE_HEIGHT = 170f;
+  private static final float BUTTON_FONT_SCALE = 0.85f;
 
   public static final String BACKGROUND_TEXTURE = "images/main_menu_background.png";
   public static final String BUTTON_FRAME_TEXTURE = "images/main_menu_button_frame.png";
@@ -130,11 +131,13 @@ public class MainMenuDisplay extends UIComponent {
 
   private TextButton createButton(String text, String eventName, Texture buttonFrameTexture) {
     TextButton button = new TextButton(text, MenuTheme.createButtonStyle(skin, buttonFrameTexture));
+    button.getLabel().setFontScale(BUTTON_FONT_SCALE);
     button.setName(eventName);
     button.addListener(
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent changeEvent, Actor actor) {
+            AudioService.playSound(SoundId.BUTTON_CLICK, 0.5f);
             logger.debug("{} button clicked", text);
             if (START_EVENT.equals(eventName)) {
               showTutorialChoice();

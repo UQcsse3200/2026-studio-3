@@ -33,8 +33,6 @@ class NodePoolGeneratorTest {
 
   @Test
   void assignsOneCampfireToHighLayerAfterRebalance() {
-    MapGenerationConfig config = new MapGenerationConfig(70, 60, 20, 10, 10, 1234L);
-
     MapGraph map = new MapGenerationController(70, 60, 20, 10, 10).getMap();
 
     long campfireCount =

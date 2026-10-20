@@ -1,0 +1,144 @@
+package com.csse3200.game.components.enemy.enemyai;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.csse3200.game.components.enemy.EnemyIntent;
+import com.csse3200.game.components.enemy.IntentType;
+import com.csse3200.game.components.enemy.memory.PlayerMemory;
+import org.junit.jupiter.api.Test;
+
+class EnrageLowHealthAITest {
+  private static final int BASE_ATTACK = 16;
+  private final EnrageLowHealthAI ai = new EnrageLowHealthAI();
+
+  @Test
+  void shouldDealNormalDamageAboveHalfHealth() {
+    EnemyIntent intent = ai.decide(createContext(30, 40, 0, 1));
+
+    assertEquals(IntentType.ATTACK, intent.getType());
+    assertEquals(BASE_ATTACK, intent.getValue());
+  }
+
+  @Test
+  void shouldNotEnrageAtExactlyHalfHealth() {
+    EnemyIntent intent = ai.decide(createContext(20, 40, 0, 1));
+
+    assertEquals(IntentType.ATTACK, intent.getType());
+    assertEquals(BASE_ATTACK, intent.getValue());
+  }
+
+  @Test
+  void shouldDealDoubleDamageBelowHalfHealth() {
+    EnemyIntent intent = ai.decide(createContext(19, 40, 0, 1));
+
+    assertEquals(IntentType.ATTACK, intent.getType());
+    assertEquals(BASE_ATTACK * 2, intent.getValue());
+  }
+
+  @Test
+  void shouldStillDefendOnDefenceTurnWhileEnraged() {
+    EnemyIntent intent = ai.decide(createContext(10, 40, 0, 2));
+
+    assertEquals(IntentType.DEFEND, intent.getType());
+    assertEquals(4, intent.getValue());
+  }
+
+  @Test
+  void shouldAttackOnFourthTurnWhenArmourRemains() {
+    EnemyIntent intent = ai.decide(createContext(40, 40, 3, 4));
+
+    assertEquals(IntentType.ATTACK, intent.getType());
+    assertEquals(BASE_ATTACK, intent.getValue());
+  }
+
+  @Test
+  void shouldDefendOnFourthTurnWhenArmourIsBroken() {
+    EnemyIntent intent = ai.decide(createContext(40, 40, 0, 4));
+
+    assertEquals(IntentType.DEFEND, intent.getType());
+    assertEquals(4, intent.getValue());
+  }
+
+  @Test
+  void shouldEnrageFourthTurnAttackWhenArmourRemains() {
+    EnemyIntent intent = ai.decide(createContext(10, 40, 3, 4));
+
+    assertEquals(IntentType.ATTACK, intent.getType());
+    assertEquals(BASE_ATTACK * 2, intent.getValue());
+  }
+
+  @Test
+  void shouldEnrageEarlyWhenPlayerIsUndefended() {
+    PlayerMemory undefendedMemory = new PlayerMemory(0, 0, 3, 0);
+
+    EnemyIntent intent = ai.decide(createContext(30, 40, 0, 1, undefendedMemory));
+
+    assertEquals(IntentType.ATTACK, intent.getType());
+
+    assertEquals(BASE_ATTACK * 2, intent.getValue());
+  }
+
+  @Test
+  void shouldNotEnrageBeforeUndefendedThreshold() {
+    PlayerMemory insufficientMemory = new PlayerMemory(0, 0, 2, 0);
+
+    EnemyIntent intent = ai.decide(createContext(30, 40, 0, 1, insufficientMemory));
+
+    assertEquals(IntentType.ATTACK, intent.getType());
+
+    assertEquals(BASE_ATTACK, intent.getValue());
+  }
+
+  @Test
+  void shouldStillDefendWhenMemoryTriggersEnrage() {
+    PlayerMemory undefendedMemory = new PlayerMemory(0, 0, 3, 0);
+
+    EnemyIntent intent = ai.decide(createContext(30, 40, 0, 2, undefendedMemory));
+
+    assertEquals(IntentType.DEFEND, intent.getType());
+
+    assertEquals(4, intent.getValue());
+  }
+
+  @Test
+  void shouldEnrageWhenEitherConditionIsSatisfied() {
+    PlayerMemory undefendedMemory = new PlayerMemory(0, 0, 3, 0);
+
+    EnemyIntent highHealthButUndefended = ai.decide(createContext(30, 40, 0, 1, undefendedMemory));
+
+    EnemyIntent lowHealthWithEmptyMemory =
+        ai.decide(createContext(10, 40, 0, 1, PlayerMemory.empty()));
+
+    assertEquals(BASE_ATTACK * 2, highHealthButUndefended.getValue());
+
+    assertEquals(BASE_ATTACK * 2, lowHealthWithEmptyMemory.getValue());
+  }
+
+  @Test
+  void shouldExposeCurrentEnrageStateForPresentation() {
+    assertFalse(ai.isEnraged());
+    ai.decide(createContext(19, 40, 0, 1));
+    assertTrue(ai.isEnraged());
+    ai.decide(createContext(30, 40, 0, 2));
+    assertFalse(ai.isEnraged());
+  }
+
+  private EnemyAIContext createContext(int health, int maxHealth, int armour, int turnNumber) {
+    return createContext(health, maxHealth, armour, turnNumber, PlayerMemory.empty());
+  }
+
+  private EnemyAIContext createContext(
+      int health, int maxHealth, int armour, int turnNumber, PlayerMemory playerMemory) {
+    return new EnemyAIContext(
+        100,
+        health,
+        maxHealth,
+        BASE_ATTACK,
+        armour,
+        EnemyIntent.unknown(),
+        turnNumber,
+        playerMemory);
+  }
+}

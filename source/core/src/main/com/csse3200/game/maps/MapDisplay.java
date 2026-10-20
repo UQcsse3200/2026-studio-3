@@ -60,12 +60,12 @@ public class MapDisplay extends UIComponent {
   private static final float UI_HEIGHT = 800f;
 
   private float mapHeight;
-  private float mapWidth = UI_WIDTH;
   private float nodeWidth;
 
   private Table playerTable;
   private Table legendTable;
   private MapIntroduction mapIntroduction;
+  private Table levelTable;
   // to store positions
   private final Map<Integer, Vector2> nodePositions = new HashMap<>();
   // Node-id labels, shown only while debug rendering is active — same toggle 'debug on'
@@ -93,7 +93,7 @@ public class MapDisplay extends UIComponent {
 
   /** Calculates the dimensions */
   private void updateDimensions() {
-    nodeWidth = mapWidth / 13f;
+    nodeWidth = UI_WIDTH / 13f;
     mapHeight = (MapGenerationConfig.MAP_HEIGHT + 1) * 2f * nodeWidth;
   }
 
@@ -121,7 +121,7 @@ public class MapDisplay extends UIComponent {
     loadMapAssets();
 
     group = new Group();
-    group.setSize(mapWidth - 512, mapHeight);
+    group.setSize(UI_WIDTH - 512, mapHeight);
     addBackground();
     addNodes();
     addConnections();
@@ -140,11 +140,15 @@ public class MapDisplay extends UIComponent {
     scrollPane.setFillParent(true);
     scrollPane.setScrollingDisabled(true, false);
     scrollPane.setOverscroll(false, false);
-
     stage.addActor(scrollPane);
 
     scrollPane.layout();
-    scrollPane.setScrollPercentY(1f);
+    if (mapGraph.getCurrentNode().getHeight() == 0) {
+      scrollPane.setScrollPercentY(1f);
+    } else {
+      int activeNodeHeight = mapGraph.getCurrentNode().getHeight();
+      scrollPane.setScrollY(stage.getWidth() - getNodeY(activeNodeHeight - 1));
+    }
 
     addPlayerStats();
     addLegend();
@@ -171,7 +175,7 @@ public class MapDisplay extends UIComponent {
       mapInputHandler.attach(nodeActor);
       float x =
           (node.getRoomType() == RoomType.FINAL || node.getRoomType() == RoomType.START)
-              ? mapWidth / 2f - nodeActor.getNodeSize() / 2f
+              ? UI_WIDTH / 2f - nodeActor.getNodeSize() / 2f
               : getNodeX(node.getNodeId(), nodeWidth);
       float y = getNodeY(node);
 
@@ -201,7 +205,7 @@ public class MapDisplay extends UIComponent {
    */
   private float getNodeX(int nodeId, float nodeWidth) {
     float mapStart = 352f;
-    float mapEnd = mapWidth - 352f;
+    float mapEnd = UI_WIDTH - 352f;
 
     float spacing = (mapEnd - mapStart - nodeWidth) / 6f;
 
@@ -216,6 +220,16 @@ public class MapDisplay extends UIComponent {
    */
   private float getNodeY(MapNode node) {
     return node.getHeight() * 1.5f * nodeWidth + 2.5f * nodeWidth;
+  }
+
+  /**
+   * Calculates the y position for a height
+   *
+   * @param height height needed to find it's layer
+   * @return float y value to position the scrollpane
+   */
+  private float getNodeY(int height) {
+    return height * 1.5f * nodeWidth + 2.5f * nodeWidth;
   }
 
   /**
@@ -264,7 +278,7 @@ public class MapDisplay extends UIComponent {
     table.padLeft(10f);
     table.padTop(5f);
 
-    Table levelTable = new Table();
+    levelTable = new Table();
 
     // Image size
     float imageSideLength = 20f;
@@ -348,8 +362,6 @@ public class MapDisplay extends UIComponent {
     levelTable.add(levelImage).size(imageSideLength).pad(5);
     levelTable.add(levelLabel).left().pad(10);
     levelTable.pack();
-    levelTable.setPosition(
-        (mapWidth - levelTable.getWidth()) / 2f, (50f - levelTable.getHeight()) / 2f);
     playerTable.addActor(levelTable);
 
     playerTable.add(table);
@@ -391,6 +403,9 @@ public class MapDisplay extends UIComponent {
 
       playerTable.invalidateHierarchy();
       playerTable.layout();
+
+      levelTable.setPosition(
+          (width - levelTable.getWidth()) / 2f, (50f - levelTable.getHeight()) / 2f);
     }
 
     if (legendTable != null) {

@@ -193,15 +193,7 @@ public class EncounterGameArea extends GameArea {
       PlayerRunState sharedPlayerState,
       PlayerDeck sharedPlayerDeck,
       RunState runState) {
-    this(
-        terrainFactory,
-        nodeId,
-        roomType,
-        completionCallback,
-        sharedPlayerState,
-        sharedPlayerDeck,
-        runState,
-        null);
+    this(terrainFactory, nodeId, roomType, completionCallback, sharedPlayerDeck, runState, null);
   }
 
   /** Selects a specific catalogue Event when requested; normal map selection stays random. */
@@ -210,7 +202,6 @@ public class EncounterGameArea extends GameArea {
       Integer nodeId,
       RoomType roomType,
       EncounterCallback completionCallback,
-      PlayerRunState sharedPlayerState,
       PlayerDeck sharedPlayerDeck,
       RunState runState,
       String forcedEventId) {
@@ -269,16 +260,9 @@ public class EncounterGameArea extends GameArea {
 
   private void displayEncounter() {
     switch (encounterTypeFor(roomType)) {
-      case CHANCE:
-        displayChanceEncounter();
-        break;
-
-      case SHOP:
-        displayShop();
-        break;
-
-      default:
-        throw new IllegalStateException("Unhandled non-combat encounter type");
+      case CHANCE -> displayChanceEncounter();
+      case SHOP -> displayShop();
+      default -> throw new IllegalStateException("Unhandled non-combat encounter type");
     }
   }
 

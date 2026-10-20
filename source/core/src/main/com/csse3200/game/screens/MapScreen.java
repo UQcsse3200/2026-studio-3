@@ -1,6 +1,5 @@
 package com.csse3200.game.screens;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -16,6 +15,7 @@ import com.csse3200.game.GdxGame;
 import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.components.battle.InventoryPopupComponent;
+import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuFactory;
 import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
@@ -24,7 +24,12 @@ import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
 import com.csse3200.game.input.InputDecorator;
 import com.csse3200.game.input.InputService;
-import com.csse3200.game.maps.*;
+import com.csse3200.game.maps.MapDisplay;
+import com.csse3200.game.maps.MapGenerationController;
+import com.csse3200.game.maps.MapGraph;
+import com.csse3200.game.maps.MapNode;
+import com.csse3200.game.maps.RoomType;
+import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.GameTime;
@@ -62,6 +67,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
   private ImageButton exitButton;
   private MapDisplay mapDisplay;
   private ImageTextButton inventoryButton;
+  private Entity uiEntity;
 
   public MapScreen(GdxGame game) {
     this.game = game;
@@ -144,8 +150,9 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         "preview a narration sequence and return to the map",
         new PlayNarrationCommand(game));
 
-    Entity ui = new Entity();
-    ui.addComponent(new InputDecorator(ServiceLocator.getRenderService().getStage(), 10))
+    uiEntity = new Entity();
+    uiEntity
+        .addComponent(new InputDecorator(ServiceLocator.getRenderService().getStage(), 10))
         .addComponent(mapDisplay)
         .addComponent(terminal)
         .addComponent(new KeyboardTerminalInputComponent())
@@ -153,11 +160,11 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
 
     // Pause menu + in-place save/load overlay (the map is the natural place to save a run).
     // No on-screen pause button here (it didn't fit the map HUD); Escape still opens the menu.
-    SaveLoadPanel savePanel = PauseMenuFactory.attachWithoutButton(ui, game);
-    ServiceLocator.getEntityService().register(ui);
+    SaveLoadPanel savePanel = PauseMenuFactory.attachWithoutButton(uiEntity, game);
+    ServiceLocator.getEntityService().register(uiEntity);
     savePanel.hide(); // save overlay starts hidden, opened by the Save & Load button
 
-    createExitButton(game);
+    createMenuButton();
     createInventoryButton(runState);
   }
 
@@ -266,10 +273,11 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
    *
    * @param game the GdxGame required to change the game screen.
    */
-  private void createExitButton(GdxGame game) {
+  private void createMenuButton() {
     Stage stage = ServiceLocator.getRenderService().getStage();
-    // not hover
-    Texture buttonTexture = new Texture(Gdx.files.internal("images/map/main_menu_btn.png"));
+    // not hover, already loaded by MapDisplay
+    Texture buttonTexture =
+        ServiceLocator.getResourceService().getAsset("images/map/main_menu_btn.png", Texture.class);
 
     // hover stuff
     TextureRegionDrawable buttonDrawable =
@@ -290,7 +298,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent event, Actor actor) {
-            game.setScreen(GdxGame.ScreenType.MAIN_MENU);
+            uiEntity.getEvents().trigger(PauseMenuDisplay.PAUSE_EVENT);
           }
         });
 
@@ -337,7 +345,6 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
   public void dispose() {
     logger.debug("Disposing map screen");
     renderer.dispose();
-    mapDisplay.dispose();
     ServiceLocator.getEntityService().dispose();
     ServiceLocator.getRenderService().dispose();
     ScreenUtils.clear(new Color(248f / 255f, 249f / 255f, 178f / 255f, 1f));

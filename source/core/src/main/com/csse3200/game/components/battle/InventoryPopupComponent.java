@@ -29,6 +29,8 @@ import com.csse3200.game.rewards.ItemFormatting;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
+import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.ui.ItemArtwork;
 import com.csse3200.game.ui.ItemIconView;
 import com.csse3200.game.ui.PopupDisplay;
@@ -174,6 +176,7 @@ public class InventoryPopupComponent extends UIComponent {
   /** Opens the popup with the inventory refreshed from the current run state. */
   public void open() {
     refresh();
+    AudioService.playSound(SoundId.ITEM_PICKUP, 0.8f);
     popup.show();
   }
 
@@ -378,6 +381,7 @@ public class InventoryPopupComponent extends UIComponent {
             boolean used = runState.getOrCreatePlayerState().useBattleItem(item, player);
 
             if (used) {
+              AudioService.playSound(SoundId.ITEM_PICKUP, 0.7f);
               useActionInProgress = true;
               showUseFeedback(item, effectValue(item, stats) - before);
               refresh();
