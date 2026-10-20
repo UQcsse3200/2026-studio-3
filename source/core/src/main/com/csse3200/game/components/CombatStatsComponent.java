@@ -586,9 +586,7 @@ public class CombatStatsComponent extends Component {
    */
   public void clearNegativeStatusEffects() {
     List<String> toRemove = new ArrayList<>();
-    statusEffects.keySet().stream()
-            .filter(this::isNegativeStatusKey)
-            .forEach(toRemove::add);
+    statusEffects.keySet().stream().filter(this::isNegativeStatusKey).forEach(toRemove::add);
     for (String type : toRemove) {
       removeStatusEffect(type);
     }

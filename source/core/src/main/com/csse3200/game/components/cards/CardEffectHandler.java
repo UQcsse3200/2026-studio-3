@@ -137,12 +137,14 @@ public class CardEffectHandler {
     }
     List<Entity> targets = new ArrayList<>();
     enemies.stream()
-            .filter(enemy -> !enemy.getComponent(CombatStatsComponent.class).isDead()
+        .filter(
+            enemy ->
+                !enemy.getComponent(CombatStatsComponent.class).isDead()
                     && (request.target().type() == TargetType.ALL_ENEMIES
-                    || (enemyTargets.isEmpty()
-                    ? Integer.toString(enemy.getId()).equals(request.target().targetId())
-                    : enemy == enemyTargets.get(request.target().targetId()))))
-            .forEach(targets::add);
+                        || (enemyTargets.isEmpty()
+                            ? Integer.toString(enemy.getId()).equals(request.target().targetId())
+                            : enemy == enemyTargets.get(request.target().targetId()))))
+        .forEach(targets::add);
     return targets;
   }
 }

@@ -64,8 +64,8 @@ public final class EncounterComposer {
     List<EncounterConfig> usable = new ArrayList<>();
 
     table.matching(type, progression).stream()
-            .filter(this::referencesOnlyKnownEnemies)
-            .forEach(usable::add);
+        .filter(this::referencesOnlyKnownEnemies)
+        .forEach(usable::add);
 
     return usable;
   }
