@@ -108,11 +108,11 @@ public class ClickableFactory extends UIComponent {
    */
   public List<Clickable> getByTrigger(String trigger) {
     List<Clickable> result = new ArrayList<>();
-    for (Clickable clickable : clickables) {
-      if (trigger.equals(clickable.getTrigger())) {
-        result.add(clickable);
-      }
-    }
+
+    clickables.stream()
+        .filter(clickable -> trigger.equals(clickable.getTrigger()))
+        .forEach(result::add);
+
     return List.copyOf(result);
   }
 

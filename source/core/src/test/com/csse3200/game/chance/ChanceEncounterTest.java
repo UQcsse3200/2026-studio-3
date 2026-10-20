@@ -42,12 +42,13 @@ class ChanceEncounterTest {
 
   @Test
   void shouldRejectNonPositiveEncounterWeight() {
+    List<ChanceChoice> list = List.of(leaveChoice());
+
+    assertThrows(
+        IllegalArgumentException.class, () -> new ChanceEncounter("zero", "Zero weight.", list, 0));
     assertThrows(
         IllegalArgumentException.class,
-        () -> new ChanceEncounter("zero", "Zero weight.", List.of(leaveChoice()), 0));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new ChanceEncounter("negative", "Negative weight.", List.of(leaveChoice()), -1));
+        () -> new ChanceEncounter("negative", "Negative weight.", list, -1));
   }
 
   @Test
@@ -76,8 +77,9 @@ class ChanceEncounterTest {
   @Test
   void shouldExposeReadOnlyChoices() {
     ChanceEncounter encounter = createShrineEncounter();
+    List<ChanceChoice> choices = encounter.getChoices();
 
-    assertThrows(UnsupportedOperationException.class, () -> encounter.getChoices().clear());
+    assertThrows(UnsupportedOperationException.class, choices::clear);
   }
 
   @Test

@@ -36,15 +36,15 @@ public class Renderer implements Disposable {
    * @param camera camera to render to
    */
   public Renderer(CameraComponent camera) {
-    SpriteBatch spriteBatch = new SpriteBatch();
-    DebugRenderer debugRenderer = new DebugRenderer();
+    batch = new SpriteBatch();
+    debugRenderer = new DebugRenderer();
     debugRenderer.setActive(false);
 
     init(
         camera,
         GAME_SCREEN_WIDTH,
-        spriteBatch,
-        new Stage(new ExtendViewport(UI_WIDTH, UI_HEIGHT), spriteBatch),
+        batch,
+        new Stage(new ExtendViewport(UI_WIDTH, UI_HEIGHT), batch),
         ServiceLocator.getRenderService(),
         debugRenderer);
   }

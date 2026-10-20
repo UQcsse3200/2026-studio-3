@@ -74,10 +74,17 @@ public final class CardAimController implements AimSession {
     Rectangle box = targetType == TargetType.SINGLE_ENEMY ? bounds.get(selected) : null;
     Vector2 destination =
         box == null ? pointer : new Vector2(box.x + box.width / 2f, box.y + box.height / 2f);
-    Set<String> highlighted =
-        selected == null
-            ? Set.of()
-            : targetType == TargetType.ALL_ENEMIES ? bounds.keySet() : Set.of(selected);
+
+    Set<String> highlighted;
+
+    if (selected == null) {
+      highlighted = Set.of();
+    } else if (targetType == TargetType.ALL_ENEMIES) {
+      highlighted = bounds.keySet();
+    } else {
+      highlighted = Set.of(selected);
+    }
+
     arrow.show(
         source,
         destination,

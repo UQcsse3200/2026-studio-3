@@ -41,7 +41,7 @@ class BattleTutorialControllerTest {
     BattleTutorialController tutorial = new BattleTutorialController(true);
     tutorial.setDemonstrationCardId("demo-strike");
     tutorial.setPoisonCardId("demo-poison");
-    tutorial.observeInitialHealth(32, 100);
+    tutorial.observeInitialHealth(32);
     tutorial.start();
     assertEquals(BattleTutorialController.Step.HAND, tutorial.getCurrentStep().orElseThrow());
     tutorial.onSuccessfulCardPlay("demo-strike");
@@ -55,13 +55,13 @@ class BattleTutorialControllerTest {
     tutorial.onSuccessfulCardPlay("demo-strike");
     assertEquals(
         BattleTutorialController.Step.CARD_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(32, 100, true, BattlePhase.PLAYER_TURN, false);
+    tutorial.observeResolution(32, true, BattlePhase.PLAYER_TURN, false);
     assertEquals(
         BattleTutorialController.Step.CARD_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(26, 100, false, BattlePhase.PLAYER_TURN, false);
+    tutorial.observeResolution(26, false, BattlePhase.PLAYER_TURN, false);
     assertEquals(
         BattleTutorialController.Step.CARD_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(26, 100, true, BattlePhase.PLAYER_TURN, false);
+    tutorial.observeResolution(26, true, BattlePhase.PLAYER_TURN, false);
     assertEquals(
         BattleTutorialController.Step.ENEMY_STATS, tutorial.getCurrentStep().orElseThrow());
     tutorial.onSuccessfulCardPlay("demo-strike");
@@ -78,14 +78,14 @@ class BattleTutorialControllerTest {
     tutorial.onSuccessfulCardPlay("demo-poison");
     assertEquals(
         BattleTutorialController.Step.POISON_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(22, 100, true, BattlePhase.PLAYER_TURN, false);
-    tutorial.observeResolution(22, 100, false, BattlePhase.PLAYER_TURN, true);
+    tutorial.observeResolution(22, true, BattlePhase.PLAYER_TURN, false);
+    tutorial.observeResolution(22, false, BattlePhase.PLAYER_TURN, true);
     assertEquals(
         BattleTutorialController.Step.POISON_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(22, 100, true, BattlePhase.ENEMY_TURN, true);
+    tutorial.observeResolution(22, true, BattlePhase.ENEMY_TURN, true);
     assertEquals(
         BattleTutorialController.Step.POISON_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(22, 100, true, BattlePhase.PLAYER_TURN, true);
+    tutorial.observeResolution(22, true, BattlePhase.PLAYER_TURN, true);
     assertEquals(
         BattleTutorialController.Step.STATUS_EFFECTS, tutorial.getCurrentStep().orElseThrow());
     assertTrue(tutorial.continueInformation());
@@ -98,7 +98,7 @@ class BattleTutorialControllerTest {
     tutorial.onPhaseChanged(BattlePhase.PLAYER_END);
     assertEquals(
         BattleTutorialController.Step.ENEMY_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(26, 100, true, BattlePhase.PLAYER_TURN, false);
+    tutorial.observeResolution(26, true, BattlePhase.PLAYER_TURN, false);
     assertEquals(BattleTutorialController.Step.FREE_PLAY, tutorial.getCurrentStep().orElseThrow());
     assertTrue(tutorial.getOutcome().isEmpty());
   }
@@ -108,23 +108,23 @@ class BattleTutorialControllerTest {
     var tutorial = new BattleTutorialController(true);
     tutorial.setDemonstrationCardId("strike");
     tutorial.setPoisonCardId("poison");
-    tutorial.observeInitialHealth(32, 100);
+    tutorial.observeInitialHealth(32);
     tutorial.start();
     for (int i = 0; i < 5; i++) tutorial.continueInformation();
     tutorial.onSuccessfulCardPlay("strike");
-    tutorial.observeResolution(28, 100, true, BattlePhase.PLAYER_TURN, false);
+    tutorial.observeResolution(28, true, BattlePhase.PLAYER_TURN, false);
     tutorial.continueInformation();
     tutorial.onSuccessfulCardPlay("poison");
-    tutorial.observeResolution(24, 100, true, BattlePhase.PLAYER_TURN, true);
+    tutorial.observeResolution(24, true, BattlePhase.PLAYER_TURN, true);
     tutorial.continueInformation();
     tutorial.continueInformation();
     tutorial.continueInformation();
     assertEquals(BattleTutorialController.Step.END_TURN, tutorial.getCurrentStep().orElseThrow());
     tutorial.onPhaseChanged(BattlePhase.PLAYER_END);
-    tutorial.observeResolution(28, 100, false, BattlePhase.PLAYER_TURN, false);
+    tutorial.observeResolution(28, false, BattlePhase.PLAYER_TURN, false);
     assertEquals(
         BattleTutorialController.Step.ENEMY_ANIMATION, tutorial.getCurrentStep().orElseThrow());
-    tutorial.observeResolution(28, 100, true, BattlePhase.PLAYER_TURN, false);
+    tutorial.observeResolution(28, true, BattlePhase.PLAYER_TURN, false);
     assertEquals(BattleTutorialController.Step.FREE_PLAY, tutorial.getCurrentStep().orElseThrow());
   }
 

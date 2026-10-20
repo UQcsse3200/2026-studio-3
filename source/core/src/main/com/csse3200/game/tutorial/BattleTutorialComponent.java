@@ -77,7 +77,7 @@ public final class BattleTutorialComponent extends Component {
     view.bindActions(() -> tutorial.continueInformation(), tutorial::cancel);
     if (observation != null) {
       initialEnemyHealth = observation.enemyHealth().getAsInt();
-      tutorial.observeInitialHealth(initialEnemyHealth, observation.playerHealth().getAsInt());
+      tutorial.observeInitialHealth(initialEnemyHealth);
     }
     tutorial.start();
   }
@@ -88,7 +88,6 @@ public final class BattleTutorialComponent extends Component {
     if (!disposed && tutorialReferenceSequence && observation != null) {
       tutorial.observeResolution(
           observation.enemyHealth().getAsInt(),
-          observation.playerHealth().getAsInt(),
           observation.visualsSettled().getAsBoolean() && view.areTransientEffectsFinished(),
           battle.getCurrentPhase(),
           observation.enemyHasPoison().getAsBoolean());

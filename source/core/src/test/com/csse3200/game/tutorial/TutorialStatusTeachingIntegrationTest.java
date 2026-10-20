@@ -60,14 +60,13 @@ class TutorialStatusTeachingIntegrationTest {
     try (var tutorial = new BattleTutorialController(true)) {
       tutorial.setDemonstrationCardId(strike);
       tutorial.setPoisonCardId(poison);
-      tutorial.observeInitialHealth(32, 100);
+      tutorial.observeInitialHealth(32);
       tutorial.bindTo(battle);
       tutorial.start();
       battle.start();
       for (int i = 0; i < 5; i++) assertTrue(tutorial.continueInformation());
       assertTrue(battle.submitCardPlayRequest(CardPlayRequest.singleEnemy(strike, "enemy")));
-      tutorial.observeResolution(
-          enemyStats.getHealth(), playerStats.getHealth(), true, battle.getCurrentPhase(), false);
+      tutorial.observeResolution(enemyStats.getHealth(), true, battle.getCurrentPhase(), false);
       assertEquals(
           BattleTutorialController.Step.ENEMY_STATS, tutorial.getCurrentStep().orElseThrow());
       assertTrue(tutorial.continueInformation());
@@ -81,7 +80,6 @@ class TutorialStatusTeachingIntegrationTest {
       assertEquals(1, energy.getCurrentEnergy());
       tutorial.observeResolution(
           enemyStats.getHealth(),
-          playerStats.getHealth(),
           true,
           battle.getCurrentPhase(),
           enemyStats.hasStatusEffect("POISON"));

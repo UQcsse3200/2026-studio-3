@@ -38,13 +38,13 @@ class CardResolverTest {
     assertAll(
         () -> assertEquals("Strike", base.name()),
         () -> assertEquals(1, base.cost()),
-        () -> assertEquals(6, base.effects().get(0).value),
+        () -> assertEquals(6, base.effects().getFirst().value),
         () -> assertFalse(base.upgraded()),
         () -> assertEquals("Strike+", upgraded.name()),
         () -> assertEquals("Deal 12 damage.", upgraded.description()),
         () -> assertEquals(1, upgraded.cost()),
         () -> assertEquals(Rarity.COMMON, upgraded.rarity()),
-        () -> assertEquals(12, upgraded.effects().get(0).value),
+        () -> assertEquals(12, upgraded.effects().getFirst().value),
         () -> assertTrue(upgraded.upgraded()),
         () -> assertEquals(CardType.ATTACK, upgraded.type()),
         () -> assertEquals(TargetType.SINGLE_ENEMY, upgraded.target()),
@@ -156,17 +156,18 @@ class CardResolverTest {
         resolver.resolve(
             strike, new CardInstance("strike-upgrade", "strike", CardInstance.UPGRADED_LEVEL));
 
+    List<EffectConfig> effects = upgraded.effects();
+    EffectConfig damage = new EffectConfig(EffectType.DAMAGE, 99);
+
     assertEquals(6, sourceBaseEffect.value);
     assertEquals(12, sourceUpgradeEffect.value);
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> upgraded.effects().add(new EffectConfig(EffectType.DAMAGE, 99)));
+    assertThrows(UnsupportedOperationException.class, () -> effects.add(damage));
 
     List<EffectConfig> consumerCopy = upgraded.effects();
-    consumerCopy.get(0).value = 99;
+    consumerCopy.getFirst().value = 99;
     strike.upgrade.effects[0].value = 20;
 
-    assertEquals(12, upgraded.effects().get(0).value);
+    assertEquals(12, upgraded.effects().getFirst().value);
     assertEquals(6, strike.effects[0].value);
     assertEquals(20, strike.upgrade.effects[0].value);
   }
@@ -184,8 +185,9 @@ class CardResolverTest {
   @Test
   void shouldRejectMismatchedCardIds() {
     CardInstance wrongInstance = new CardInstance("copy-1", "defend", CardInstance.BASE_LEVEL);
+    CardConfig strike = strike();
 
-    assertThrows(IllegalArgumentException.class, () -> resolver.resolve(strike(), wrongInstance));
+    assertThrows(IllegalArgumentException.class, () -> resolver.resolve(strike, wrongInstance));
   }
 
   @Test

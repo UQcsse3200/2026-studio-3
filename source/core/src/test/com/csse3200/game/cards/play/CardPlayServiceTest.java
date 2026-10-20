@@ -311,11 +311,9 @@ class CardPlayServiceTest {
     EnergyComponent energyComponent = new EnergyComponent(3);
     CardPlayService playService = new CardPlayService(cardLibrary, failingDeck, energyComponent);
 
-    assertThrows(
-        IllegalStateException.class,
-        () ->
-            playService.playCard(
-                CardPlayRequest.singleEnemy(id(failingDeck, "strike"), "enemy-1")));
+    CardPlayRequest singleEnemy = CardPlayRequest.singleEnemy(id(failingDeck, "strike"), "enemy-1");
+
+    assertThrows(IllegalStateException.class, () -> playService.playCard(singleEnemy));
     assertEquals(3, energyComponent.getCurrentEnergy());
   }
 
