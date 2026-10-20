@@ -93,17 +93,18 @@ public final class ShopInventoryGenerator {
       return candidates;
     }
 
-    for (CardConfig card : cards) {
-      if (card != null
-          && card.id != null
-          && !card.id.isBlank()
-          && card.name != null
-          && !card.name.isBlank()
-          && card.rarity != null
-          && cardService.getCard(card.id).isPresent()) {
-        candidates.add(card);
-      }
-    }
+    cards.stream()
+        .filter(
+            card ->
+                card != null
+                    && card.id != null
+                    && !card.id.isBlank()
+                    && card.name != null
+                    && !card.name.isBlank()
+                    && card.rarity != null
+                    && cardService.getCard(card.id).isPresent())
+        .forEach(candidates::add);
+
     candidates.sort(Comparator.comparing(card -> card.id));
     return candidates;
   }

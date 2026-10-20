@@ -14,7 +14,7 @@ public class MapNodeActor extends Group {
 
   private final MapNode node;
   public float size;
-  private Image nodeIcon;
+  private final Image nodeIcon;
   private NodeState lastRenderedState;
 
   /**
@@ -166,24 +166,16 @@ public class MapNodeActor extends Group {
    * @return the path of the correct node image
    */
   private String getNodeIcon() {
-    switch (node.getRoomType()) {
-      case COMBAT:
-        return "images/map/combat.png";
-      case SHOP:
-        return "images/map/shop.png";
-      case EVENT:
-        return "images/map/event.png";
-      case CAMPFIRE:
-        return "images/map/campfire.png";
-      case FINAL:
-        return "images/map/boss.png";
-      case START:
-        return "images/map/start.png";
-      case ELITE:
-        return "images/map/combat_elite.png";
-      default:
-        return "images/event_icon.png";
-    }
+    return switch (node.getRoomType()) {
+      case COMBAT -> "images/map/combat.png";
+      case SHOP -> "images/map/shop.png";
+      case EVENT -> "images/map/event.png";
+      case CAMPFIRE -> "images/map/campfire.png";
+      case FINAL -> "images/map/boss.png";
+      case START -> "images/map/start.png";
+      case ELITE -> "images/map/combat_elite.png";
+      default -> "images/event_icon.png";
+    };
   }
 
   /** Modifies the node based on the NodeState to visually indicate the player */

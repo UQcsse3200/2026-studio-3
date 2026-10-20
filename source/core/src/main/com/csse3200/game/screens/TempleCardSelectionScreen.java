@@ -403,11 +403,10 @@ public class TempleCardSelectionScreen extends ScreenAdapter {
   private static String[] collectCardTextures(List<CardConfig> cards) {
     Set<String> paths = new LinkedHashSet<>();
 
-    for (CardConfig card : cards) {
-      if (card.texturePath != null && !card.texturePath.isBlank()) {
-        paths.add(card.texturePath);
-      }
-    }
+    cards.stream()
+        .filter(cardConfig -> cardConfig.texturePath != null && !cardConfig.texturePath.isBlank())
+        .map(cardConfig -> cardConfig.texturePath)
+        .forEach(paths::add);
 
     return paths.toArray(new String[0]);
   }

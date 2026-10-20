@@ -147,6 +147,6 @@ final class CampfireChoiceDecoration extends Group {
   }
 
   private void dot(Batch batch, float x, float y, float width, float height) {
-    pixel.draw(batch, Math.round(x), Math.round(y), width, height);
+    pixel.draw(batch, (float) Math.round(x), (float) Math.round(y), width, height);
   }
 }

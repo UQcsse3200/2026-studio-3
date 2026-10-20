@@ -36,9 +36,9 @@ public class MapSelectionController {
    */
   public List<Integer> getSelectableNodeIds() {
     List<Integer> ids = new ArrayList<>();
-    for (MapNode node : mapGraph.getNodesByState(NodeState.AVAILABLE)) {
-      ids.add(node.getNodeId());
-    }
+    mapGraph.getNodesByState(NodeState.AVAILABLE).stream()
+        .map(MapNode::getNodeId)
+        .forEach(ids::add);
     return ids;
   }
 
