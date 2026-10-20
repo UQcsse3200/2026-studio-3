@@ -368,7 +368,7 @@ class BestiaryDisplayTest {
   void shouldShowDefeatedEnemyDetails() {
     assertEquals("Enemy description", BestiaryDisplay.descriptionFor(defeated));
     assertEquals(
-        "HP  24     ATTACK  6     ARMOUR  2\nBEHAVIOUR  CYCLE ATTACK DEFEND",
+        String.format("HP  24     ATTACK  6     ARMOUR  2%nBEHAVIOUR  CYCLE ATTACK DEFEND"),
         BestiaryDisplay.statsFor(defeated));
   }
 

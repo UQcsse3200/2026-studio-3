@@ -1203,66 +1203,103 @@ public class ChanceEncounterDisplay extends UIComponent {
   }
 
   private void addChoiceButton(ChanceChoice choice, int choiceNumber) {
-    String buttonText = String.format("%d.  %s", choiceNumber, choice.getDescription());
-    if (scenicShrine || scenicFlooded) buttonText = choice.getDescription();
-    if (scenicFountain) {
-      buttonText =
-          WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID.equals(choice.getId())
-              ? "Make a Wish"
-              : "Leave >";
-    }
-    final String originalButtonText = buttonText;
-    TextButton choiceButton = new TextButton(buttonText, choiceStyle);
-    choiceButton
-        .getLabel()
-        .setFontScale(
-            scenicDiceGame
-                    || scenicAbandonedMine
-                    || scenicCardFusion
-                    || scenicShrine
-                    || scenicFlooded
-                    || scenicHealer
-                ? 1.02f
-                : 1.3f);
+    final String originalButtonText = resolveChoiceButtonText(choice, choiceNumber);
+    TextButton choiceButton = new TextButton(originalButtonText, choiceStyle);
+    choiceButton.getLabel().setFontScale(isScenicEncounter() ? 1.02f : 1.3f);
     choiceButton.getLabel().setWrap(true);
     choiceButton.addListener(
         new ChangeListener() {
           @Override
           public void changed(ChangeEvent changeEvent, Actor actor) {
-            if (scenicShrine) {
-              if (shrineScene.isResponding() || choiceResolved) return;
-              if ("make-offering".equals(choice.getId())) {
-                if (shrineScene.playResponse(
-                    () -> resolveChoice(choice, choiceButton, originalButtonText))) {
-                  for (TextButton button : choiceButtons) button.setDisabled(true);
-                }
-              } else {
-                shrineScene.leave();
-                resolveChoice(choice, choiceButton, originalButtonText);
-              }
-              return;
-            }
-            if (scenicFountain && fountainScene.isPlayingWish()) {
-              return;
-            }
-            if (scenicFountain
-                && WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID.equals(choice.getId())) {
-              if (fountainScene.isPlayingWish() || choiceResolved) {
-                return;
-              }
-              if (fountainScene.playWishAnimation(
-                  () -> resolveChoice(choice, choiceButton, originalButtonText))) {
-                for (TextButton button : choiceButtons) {
-                  button.setDisabled(true);
-                }
-              }
-            } else {
-              resolveChoice(choice, choiceButton, originalButtonText);
-            }
+            handleChoiceClicked(choice, choiceButton, originalButtonText);
           }
         });
 
     choiceButtons.add(choiceButton);
+    layoutChoiceButton(choice, choiceNumber, choiceButton);
+  }
+
+  private boolean isScenicEncounter() {
+    return scenicDiceGame
+        || scenicAbandonedMine
+        || scenicCardFusion
+        || scenicShrine
+        || scenicFlooded
+        || scenicHealer;
+  }
+
+  private boolean hasScenicResultOverlay() {
+    return scenicAbandonedMine
+        || scenicCardFusion
+        || scenicFountain
+        || scenicShrine
+        || scenicFlooded
+        || scenicHealer;
+  }
+
+  private String resolveChoiceButtonText(ChanceChoice choice, int choiceNumber) {
+    if (scenicFountain) {
+      return WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID.equals(choice.getId())
+          ? "Make a Wish"
+          : "Leave >";
+    }
+    if (scenicShrine || scenicFlooded) {
+      return choice.getDescription();
+    }
+    return String.format("%d.  %s", choiceNumber, choice.getDescription());
+  }
+
+  private void handleChoiceClicked(
+      ChanceChoice choice, TextButton choiceButton, String originalButtonText) {
+    if (scenicShrine) {
+      handleShrineChoiceClicked(choice, choiceButton, originalButtonText);
+      return;
+    }
+    if (scenicFountain) {
+      handleFountainChoiceClicked(choice, choiceButton, originalButtonText);
+      return;
+    }
+    resolveChoice(choice, choiceButton, originalButtonText);
+  }
+
+  private void handleShrineChoiceClicked(
+      ChanceChoice choice, TextButton choiceButton, String originalButtonText) {
+    if (shrineScene.isResponding() || choiceResolved) {
+      return;
+    }
+    if ("make-offering".equals(choice.getId())) {
+      if (shrineScene.playResponse(() -> resolveChoice(choice, choiceButton, originalButtonText))) {
+        for (TextButton button : choiceButtons) {
+          button.setDisabled(true);
+        }
+      }
+    } else {
+      shrineScene.leave();
+      resolveChoice(choice, choiceButton, originalButtonText);
+    }
+  }
+
+  private void handleFountainChoiceClicked(
+      ChanceChoice choice, TextButton choiceButton, String originalButtonText) {
+    if (fountainScene.isPlayingWish()) {
+      return;
+    }
+    if (WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID.equals(choice.getId())) {
+      if (choiceResolved) {
+        return;
+      }
+      if (fountainScene.playWishAnimation(
+          () -> resolveChoice(choice, choiceButton, originalButtonText))) {
+        for (TextButton button : choiceButtons) {
+          button.setDisabled(true);
+        }
+      }
+    } else {
+      resolveChoice(choice, choiceButton, originalButtonText);
+    }
+  }
+
+  private void layoutChoiceButton(ChanceChoice choice, int choiceNumber, TextButton choiceButton) {
     if (scenicHealer) {
       choiceButton.setStyle(shrineButtonStyle(false));
       choicesTable
@@ -1279,46 +1316,9 @@ public class ChanceEncounterDisplay extends UIComponent {
           .height(94)
           .pad(0, 8, 0, 8);
     } else if (scenicShrine) {
-      choiceButton.setStyle(shrineButtonStyle(choiceNumber == 2));
-      if ("make-offering".equals(choice.getId()))
-        choiceButton.addListener(
-            new com.badlogic.gdx.scenes.scene2d.InputListener() {
-              @Override
-              public void enter(
-                  com.badlogic.gdx.scenes.scene2d.InputEvent event,
-                  float x,
-                  float y,
-                  int pointer,
-                  Actor from) {
-                if (pointer == -1 && !choiceResolved && !choiceButton.isDisabled())
-                  shrineScene.setOfferingHovered(true);
-              }
-
-              @Override
-              public void exit(
-                  com.badlogic.gdx.scenes.scene2d.InputEvent event,
-                  float x,
-                  float y,
-                  int pointer,
-                  Actor to) {
-                if (pointer == -1) shrineScene.setOfferingHovered(false);
-              }
-            });
-      choicesTable.add(choiceButton).width(650).height(64).padBottom(12);
-      choicesTable.row();
+      layoutShrineChoiceButton(choice, choiceNumber, choiceButton);
     } else if (scenicFountain) {
-      boolean wish = WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID.equals(choice.getId());
-      choiceButton.setStyle(fountainButtonStyle(wish));
-      choiceButton.getLabel().setFontScale(1.02f);
-      Table anchor = new Table();
-      anchor.setFillParent(true);
-      if (wish) {
-        anchor.bottom().padBottom(38f);
-      } else {
-        anchor.bottom().right().pad(38f);
-      }
-      anchor.add(choiceButton).width(wish ? 320f : 170f).height(wish ? 74f : 58f);
-      choicesTable.addActor(anchor);
+      layoutFountainChoiceButton(choice, choiceButton);
     } else if (scenicDiceGame) {
       choicesTable.add(choiceButton).width(455f).height(76f).padRight(30f);
     } else if (scenicAbandonedMine) {
@@ -1335,6 +1335,56 @@ public class ChanceEncounterDisplay extends UIComponent {
       choicesTable.add(choiceButton).left().width(CONTENT_WIDTH).minHeight(80f).padBottom(14f);
       choicesTable.row();
     }
+  }
+
+  private void layoutShrineChoiceButton(
+      ChanceChoice choice, int choiceNumber, TextButton choiceButton) {
+    choiceButton.setStyle(shrineButtonStyle(choiceNumber == 2));
+    if ("make-offering".equals(choice.getId())) {
+      choiceButton.addListener(
+          new com.badlogic.gdx.scenes.scene2d.InputListener() {
+            @Override
+            public void enter(
+                com.badlogic.gdx.scenes.scene2d.InputEvent event,
+                float x,
+                float y,
+                int pointer,
+                Actor from) {
+              if (pointer == -1 && !choiceResolved && !choiceButton.isDisabled()) {
+                shrineScene.setOfferingHovered(true);
+              }
+            }
+
+            @Override
+            public void exit(
+                com.badlogic.gdx.scenes.scene2d.InputEvent event,
+                float x,
+                float y,
+                int pointer,
+                Actor to) {
+              if (pointer == -1) {
+                shrineScene.setOfferingHovered(false);
+              }
+            }
+          });
+    }
+    choicesTable.add(choiceButton).width(650).height(64).padBottom(12);
+    choicesTable.row();
+  }
+
+  private void layoutFountainChoiceButton(ChanceChoice choice, TextButton choiceButton) {
+    boolean wish = WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID.equals(choice.getId());
+    choiceButton.setStyle(fountainButtonStyle(wish));
+    choiceButton.getLabel().setFontScale(1.02f);
+    Table anchor = new Table();
+    anchor.setFillParent(true);
+    if (wish) {
+      anchor.bottom().padBottom(38f);
+    } else {
+      anchor.bottom().right().pad(38f);
+    }
+    anchor.add(choiceButton).width(wish ? 320f : 170f).height(wish ? 74f : 58f);
+    choicesTable.addActor(anchor);
   }
 
   private void resolveChoice(
@@ -1383,45 +1433,31 @@ public class ChanceEncounterDisplay extends UIComponent {
       return;
     }
     if (!resolution.isSuccess()) {
-      for (TextButton button : choiceButtons) {
-        button.setDisabled(false);
-      }
-      resultLabel.setStyle(createLabelStyle(STYLE_NAME_DEFAULT, new Color(0.9f, 0.35f, 0.3f, 1f)));
-      resultLabel.setText(
-          (scenicCardFusion || scenicFountain ? "" : OUTCOME_TEXT) + resolution.getMessage());
-      if (scenicShrine) choicesTable.padBottom(155);
-      if (scenicAbandonedMine
-          || scenicCardFusion
-          || scenicFountain
-          || scenicShrine
-          || scenicFlooded
-          || scenicHealer) {
-        resultLabel.getParent().setVisible(true);
-      }
+      showResolutionFailure(resolution.getMessage());
       return;
     }
     showOutcome(resolution.getOutcome(), selectedButton, originalButtonText);
   }
 
+  private void showResolutionFailure(String errorMessage) {
+    for (TextButton button : choiceButtons) {
+      button.setDisabled(false);
+    }
+    resultLabel.setStyle(createLabelStyle(STYLE_NAME_DEFAULT, new Color(0.9f, 0.35f, 0.3f, 1f)));
+    String prefix = (scenicCardFusion || scenicFountain) ? "" : OUTCOME_TEXT;
+    resultLabel.setText(prefix + errorMessage);
+    if (scenicShrine) {
+      choicesTable.padBottom(155);
+    }
+    if (hasScenicResultOverlay()) {
+      resultLabel.getParent().setVisible(true);
+    }
+  }
+
   private void showOutcome(
       ChanceOutcome outcome, TextButton selectedButton, String originalButtonText) {
     if (outcome == null) {
-      for (TextButton button : choiceButtons) {
-        button.setDisabled(false);
-      }
-      resultLabel.setStyle(createLabelStyle(STYLE_NAME_DEFAULT, new Color(0.9f, 0.35f, 0.3f, 1f)));
-      resultLabel.setText(
-          (scenicCardFusion || scenicFountain ? "" : OUTCOME_TEXT)
-              + "This choice could not be resolved. Please select another option.");
-      if (scenicShrine) choicesTable.padBottom(155);
-      if (scenicAbandonedMine
-          || scenicCardFusion
-          || scenicFountain
-          || scenicShrine
-          || scenicFlooded
-          || scenicHealer) {
-        resultLabel.getParent().setVisible(true);
-      }
+      showResolutionFailure("This choice could not be resolved. Please select another option.");
       return;
     }
 
@@ -1433,27 +1469,29 @@ public class ChanceEncounterDisplay extends UIComponent {
     selectedButton.setText("SELECTED  -  " + originalButtonText);
 
     resultLabel.setStyle(createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
-    resultLabel.setText(
-        scenicCardFusion
-            ? (outcome.isNoEffect()
-                ? "You leave the forge without fusing any cards."
-                : formatOutcome(outcome))
-            : (scenicFountain ? "" : OUTCOME_TEXT) + formatOutcome(outcome));
+    resultLabel.setText(resolveOutcomeDisplayText(outcome));
     if (scenicCardFusion && fusionIntroContent != null) {
       fusionIntroContent.setVisible(false);
     }
     recordVisibleCard(outcome);
-    if (scenicShrine) shrineScene.setOfferingHovered(false);
-    if (scenicAbandonedMine
-        || scenicCardFusion
-        || scenicFountain
-        || scenicShrine
-        || scenicFlooded
-        || scenicHealer) {
+    if (scenicShrine) {
+      shrineScene.setOfferingHovered(false);
+    }
+    if (hasScenicResultOverlay()) {
       resultLabel.getParent().setVisible(true);
       choicesTable.setVisible(false);
     }
     continueButton.setVisible(true);
+  }
+
+  private String resolveOutcomeDisplayText(ChanceOutcome outcome) {
+    if (scenicCardFusion) {
+      return outcome.isNoEffect()
+          ? "You leave the forge without fusing any cards."
+          : formatOutcome(outcome);
+    }
+    String prefix = scenicFountain ? "" : OUTCOME_TEXT;
+    return prefix + formatOutcome(outcome);
   }
 
   private void recordVisibleCard(ChanceOutcome outcome) {

@@ -58,6 +58,7 @@ public class EncounterGameArea extends GameArea {
     "images/energy.png",
     "images/level.png",
     "images/money.png",
+    "images/effects/shield.png",
     // PlayerStatsDisplay's armour icon; the player HUD is also shown in shops and events.
     "images/armour.png",
     ShopDisplay.BACKGROUND_TEXTURE,
@@ -104,8 +105,9 @@ public class EncounterGameArea extends GameArea {
         terrainFactory,
         ShopEncounter.DEFAULT_NODE_ID,
         RoomType.SHOP,
-        (nodeId, success) ->
-            logger.debug("Standalone shop completed for node {} with success={}", nodeId, success),
+        (completedNodeId, success) ->
+            logger.debug(
+                "Standalone shop completed for node {} with success={}", completedNodeId, success),
         null,
         null,
         runState);

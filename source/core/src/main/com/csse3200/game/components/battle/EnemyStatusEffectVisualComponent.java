@@ -167,7 +167,7 @@ public class EnemyStatusEffectVisualComponent extends RenderComponent {
   }
 
   private void drawBurst(SpriteBatch batch, Rectangle visibleBounds) {
-    float t = Math.max(0f, Math.min(1f, (elapsed - startDelay) / style.duration()));
+    float t = Math.clamp((elapsed - startDelay) / style.duration(), 0f, 1f);
     int frame = Math.min(3, (int) (t * 4f));
     float eased = 1f - (1f - t) * (1f - t);
     Vector2 scale = target.getScale();
@@ -180,12 +180,10 @@ public class EnemyStatusEffectVisualComponent extends RenderComponent {
         statusType != null
             ? baseSize * (1.05f + 0.2f * eased)
             : baseSize * (style.startScale() + (style.endScale() - style.startScale()) * eased);
-    float x = centre.x - size / 2f;
-    float y = centre.y - size / 2f;
     // Keep the complete third frame readable; fade only during the dissipation frame.
     float fade = t < 0.75f ? 1f : (1f - t) * 4f;
     float alpha = style.color().a * fade * fade * (3f - 2f * fade);
-    drawFittedFrame(batch, frames[frame], visibleBounds, x, y, size, size, alpha);
+    drawFittedFrame(batch, frames[frame], visibleBounds, centre, size, size, alpha);
   }
 
   private void drawPersistent(SpriteBatch batch, Rectangle visibleBounds) {
@@ -218,23 +216,14 @@ public class EnemyStatusEffectVisualComponent extends RenderComponent {
       centre.x += visibleBounds.width * ORBIT_RADIUS_X * (float) Math.cos(angle);
       centre.y += visibleBounds.height * ORBIT_RADIUS_Y * (float) Math.sin(angle);
     }
-    drawFittedFrame(
-        batch,
-        frames[frame],
-        visibleBounds,
-        centre.x - width / 2f,
-        centre.y - height / 2f,
-        width,
-        height,
-        PERSISTENT_ALPHA);
+    drawFittedFrame(batch, frames[frame], visibleBounds, centre, width, height, PERSISTENT_ALPHA);
   }
 
   private void drawFittedFrame(
       SpriteBatch batch,
       TextureRegion image,
       Rectangle visibleBounds,
-      float x,
-      float y,
+      Vector2 centre,
       float width,
       float height,
       float alpha) {
@@ -244,8 +233,8 @@ public class EnemyStatusEffectVisualComponent extends RenderComponent {
     float fit = Math.min(maxWidth / image.getRegionWidth(), maxHeight / image.getRegionHeight());
     float fittedWidth = image.getRegionWidth() * fit;
     float fittedHeight = image.getRegionHeight() * fit;
-    x += (width - fittedWidth) / 2f;
-    y += (height - fittedHeight) / 2f;
+    float x = centre.x - width / 2f + (width - fittedWidth) / 2f;
+    float y = centre.y - height / 2f + (height - fittedHeight) / 2f;
     ensureEffectBounds();
     x += (0.5f - effectBounds.x - effectBounds.width / 2f) * fittedWidth;
     y += (0.5f - effectBounds.y - effectBounds.height / 2f) * fittedHeight;

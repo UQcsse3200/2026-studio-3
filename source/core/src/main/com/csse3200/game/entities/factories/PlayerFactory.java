@@ -3,6 +3,7 @@ package com.csse3200.game.entities.factories;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.StatsDisplay;
 import com.csse3200.game.components.battle.FloatingDamageDisplay;
 import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
@@ -73,7 +74,7 @@ public class PlayerFactory {
             .addComponent(new PlayerBehaviourComponent())
             .addComponent(inputComponent)
             .addComponent(new EnergyComponent(resolveMaxEnergy(runState)))
-            .addComponent(new PlayerStatsDisplay())
+            .addComponent(new StatsDisplay())
             .addComponent(new PlayerStatsTopDisplay(runState))
             .addComponent(new PlayerEnergyDisplay())
             .addComponent(new EnemyMemoryComponent())
@@ -123,7 +124,7 @@ public class PlayerFactory {
             .addComponent(new PlayerBehaviourComponent())
             .addComponent(inputComponent)
             .addComponent(new EnergyComponent(resolveMaxEnergy(runState)))
-            .addComponent(new PlayerStatsDisplay())
+            .addComponent(new StatsDisplay())
             // Status icons sit just under the health bar, which is anchored 1.25 units below.
             .addComponent(new StatusIconDisplay(-1.25f, false))
             .addComponent(new PlayerStatsTopDisplay(runState))

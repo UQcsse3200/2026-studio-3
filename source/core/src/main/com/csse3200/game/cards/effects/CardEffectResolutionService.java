@@ -47,34 +47,34 @@ public final class CardEffectResolutionService {
 
   /** Resolves a card by ID and records the successful result for current-turn consumers. */
   public CardEffectResolution resolve(String cardId) {
-    return record(resolver.resolve(cardId, playerEffectState));
+    return recordCardEffect(resolver.resolve(cardId, playerEffectState));
   }
 
   /** Resolves a card by ID with read-only combat state and records the successful result. */
   public CardEffectResolution resolve(String cardId, CardEffectResolutionContext context) {
-    return record(resolver.resolve(cardId, context));
+    return recordCardEffect(resolver.resolve(cardId, context));
   }
 
   /** Resolves an already retrieved Team 6 card config and records the successful result. */
   public CardEffectResolution resolve(CardConfig card) {
-    return record(resolver.resolve(card, playerEffectState));
+    return recordCardEffect(resolver.resolve(card, playerEffectState));
   }
 
   /** Resolves an already retrieved card config with read-only combat state. */
   public CardEffectResolution resolve(CardConfig card, CardEffectResolutionContext context) {
-    return record(resolver.resolve(card, context));
+    return recordCardEffect(resolver.resolve(card, context));
   }
 
   /**
    * Resolves the exact base/upgraded instance values without looking up a base definition again.
    */
   public CardEffectResolution resolve(ResolvedCard card) {
-    return record(resolver.resolve(card, playerEffectState));
+    return recordCardEffect(resolver.resolve(card, playerEffectState));
   }
 
   /** Resolves instance values with externally supplied modifiers. */
   public CardEffectResolution resolve(ResolvedCard card, CardEffectResolutionContext context) {
-    return record(resolver.resolve(card, context));
+    return recordCardEffect(resolver.resolve(card, context));
   }
 
   /**
@@ -112,7 +112,7 @@ public final class CardEffectResolutionService {
     resultStore.clear();
   }
 
-  private CardEffectResolution record(CardEffectResolution resolution) {
+  private CardEffectResolution recordCardEffect(CardEffectResolution resolution) {
     resultStore.record(resolution);
     return resolution;
   }

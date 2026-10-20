@@ -144,8 +144,8 @@ public class MapGenerationController {
     List<MapNode> firstRow = map.getNodesByHeight(1);
 
     for (int i = 0; i < pathCount; i++) {
-
-      firstRow.remove(rand.nextInt(1, firstRow.size() - 1));
+      int index = rand.nextInt(1, firstRow.size() - 1);
+      firstRow.remove(index);
     }
 
     for (MapNode node : firstRow) {
