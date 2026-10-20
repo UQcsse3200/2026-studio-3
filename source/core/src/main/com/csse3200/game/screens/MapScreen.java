@@ -1,6 +1,5 @@
 package com.csse3200.game.screens;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -262,8 +261,9 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
    */
   private void createExitButton(GdxGame game) {
     Stage stage = ServiceLocator.getRenderService().getStage();
-    // not hover
-    Texture buttonTexture = new Texture(Gdx.files.internal("images/map/main_menu_btn.png"));
+    // not hover, already loaded by MapDisplay
+    Texture buttonTexture =
+        ServiceLocator.getResourceService().getAsset("images/map/main_menu_btn.png", Texture.class);
 
     // hover stuff
     TextureRegionDrawable buttonDrawable =
