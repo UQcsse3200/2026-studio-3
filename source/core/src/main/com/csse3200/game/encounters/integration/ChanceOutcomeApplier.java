@@ -111,6 +111,37 @@ public final class ChanceOutcomeApplier {
     }
 
     List<String> addedCardIds = new ArrayList<>();
+    List<String> attemptedItemIds = new ArrayList<>();
+    ChanceResolution addCardsFailure = addCards(outcome, cardRewardIds, addedCardIds);
+    if (addCardsFailure != null) return addCardsFailure;
+    ChanceResolution addItemsFailure =
+        addItems(outcome, itemRewardIds, attemptedItemIds, addedCardIds);
+    if (addItemsFailure != null) return addItemsFailure;
+    ChanceResolution updateCurrencyFailure =
+        updateCurrency(outcome, currencyTarget, currencyBefore, addedCardIds, attemptedItemIds);
+    if (updateCurrencyFailure != null) return updateCurrencyFailure;
+    ChanceResolution updateHealthFailure =
+        updateHealth(
+            outcome,
+            appliedHealthDelta,
+            healthTarget,
+            healthBefore,
+            currencyBefore,
+            addedCardIds,
+            attemptedItemIds);
+    if (updateHealthFailure != null) return updateHealthFailure;
+    ChanceResolution commitCardsFailure =
+        commitCards(outcome, healthBefore, currencyBefore, addedCardIds, attemptedItemIds);
+    if (commitCardsFailure != null) return commitCardsFailure;
+    ChanceResolution commitItemsFailure =
+        commitItems(outcome, healthBefore, currencyBefore, addedCardIds, attemptedItemIds);
+    if (commitItemsFailure != null) return commitItemsFailure;
+    return ChanceResolution.applied(
+        outcome, healthBefore, player.getHealth(), currencyBefore, player.getCurrency());
+  }
+
+  private ChanceResolution addCards(
+      ChanceOutcome outcome, List<String> cardRewardIds, List<String> addedCardIds) {
     for (String cardRewardId : cardRewardIds) {
       boolean cardAdded;
       try {
@@ -132,8 +163,14 @@ public final class ChanceOutcomeApplier {
       }
       addedCardIds.add(cardRewardId);
     }
+    return null;
+  }
 
-    List<String> attemptedItemIds = new ArrayList<>();
+  private ChanceResolution addItems(
+      ChanceOutcome outcome,
+      List<String> itemRewardIds,
+      List<String> attemptedItemIds,
+      List<String> addedCardIds) {
     for (String itemRewardId : itemRewardIds) {
       attemptedItemIds.add(itemRewardId);
       boolean added;
@@ -155,7 +192,15 @@ public final class ChanceOutcomeApplier {
                 : "Item acquisition or reward rollback failed; manual recovery is required.");
       }
     }
+    return null;
+  }
 
+  private ChanceResolution updateCurrency(
+      ChanceOutcome outcome,
+      int currencyTarget,
+      int currencyBefore,
+      List<String> addedCardIds,
+      List<String> attemptedItemIds) {
     try {
       if (outcome.getCurrencyDelta() != 0) {
         player.setCurrency(currencyTarget);
@@ -176,7 +221,17 @@ public final class ChanceOutcomeApplier {
               : "The outcome could not update currency or fully roll back; manual recovery is"
                   + " required.");
     }
+    return null;
+  }
 
+  private ChanceResolution updateHealth(
+      ChanceOutcome outcome,
+      int appliedHealthDelta,
+      int healthTarget,
+      int healthBefore,
+      int currencyBefore,
+      List<String> addedCardIds,
+      List<String> attemptedItemIds) {
     try {
       if (appliedHealthDelta != 0) {
         player.applyDirectHealthChange(appliedHealthDelta);
@@ -212,7 +267,15 @@ public final class ChanceOutcomeApplier {
           "The direct health update failed after health changed; earlier outcome changes were "
               + "kept because rollback may be unsafe after health events began.");
     }
+    return null;
+  }
 
+  private ChanceResolution commitCards(
+      ChanceOutcome outcome,
+      int healthBefore,
+      int currencyBefore,
+      List<String> addedCardIds,
+      List<String> attemptedItemIds) {
     if (!addedCardIds.isEmpty()) {
       try {
         commitCardAdditions(addedCardIds);
@@ -241,7 +304,15 @@ public final class ChanceOutcomeApplier {
                 + "skipped because health events may be irreversible.");
       }
     }
+    return null;
+  }
 
+  private ChanceResolution commitItems(
+      ChanceOutcome outcome,
+      int healthBefore,
+      int currencyBefore,
+      List<String> addedCardIds,
+      List<String> attemptedItemIds) {
     try {
       commitItemAdditions(attemptedItemIds);
     } catch (RuntimeException exception) {
@@ -264,9 +335,7 @@ public final class ChanceOutcomeApplier {
           player.getCurrency(),
           "Item commit failed after health changed; automatic rollback is unsafe.");
     }
-
-    return ChanceResolution.applied(
-        outcome, healthBefore, player.getHealth(), currencyBefore, player.getCurrency());
+    return null;
   }
 
   ChanceResolution failure(ChanceResolution.Status status, ChanceOutcome outcome, String message) {

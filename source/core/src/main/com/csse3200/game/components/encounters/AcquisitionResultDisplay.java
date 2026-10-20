@@ -38,6 +38,8 @@ import java.util.Objects;
 
 /** A read-only result overlay for confirmed Shop and Event acquisitions. */
 public final class AcquisitionResultDisplay implements AcquisitionView {
+  private static final String WHITE = "white";
+  private static final String SMALL = "small";
   private static final Color INK = new Color(0.94f, 0.86f, 0.72f, 1f);
   private static final Color GOLD = new Color(0.96f, 0.73f, 0.34f, 1f);
   private static final Color LOSS = new Color(0.95f, 0.53f, 0.50f, 1f);
@@ -89,6 +91,56 @@ public final class AcquisitionResultDisplay implements AcquisitionView {
     if (overlay != null) {
       throw new IllegalStateException("An acquisition result is already visible");
     }
+    loadResultTextures(result);
+    visibleResult = result;
+    cardAssets = null;
+    continuing = false;
+    sources.clear();
+    destinations.clear();
+
+    Table blocker = new Table();
+    blocker.setName("acquisition-result-overlay");
+    blocker.setFillParent(true);
+    blocker.setTouchable(Touchable.enabled);
+    // This is only a translucent overlay: the live event/shop scene remains underneath.
+    blocker.setBackground(skin.newDrawable(WHITE, new Color(0.015f, 0.01f, 0.025f, 0.48f)));
+
+    Table panel = new Table();
+    resultPanel = panel;
+    panel.setName("acquisition-result-panel");
+    panel.setBackground(art(0));
+    panel.pad(145f, 140f, 110f, 140f);
+    panel.top();
+    Label heading = new Label(headingText, labelStyle("large", GOLD));
+    heading.setName("acquisition-heading");
+    heading.setFontScale(1.6f);
+    heading.setAlignment(Align.center);
+    panel.add(heading).height(50f).center().padBottom(10f);
+    panel.row();
+
+    Table entries = resultEntries(result);
+    ScrollPane scroll = new ScrollPane(entries, skin);
+    scroll.setFadeScrollBars(false);
+    scroll.setScrollingDisabled(true, false);
+    panel.add(scroll).grow().minHeight(0f);
+    panel.row();
+
+    Table buttons = new Table();
+    buttons.defaults().width(360f).height(84f).pad(4f);
+    buttons.add(
+        button("Continue", "acquisition-continue", () -> continueWithFeedback(result, onContinue)));
+    panel.add(buttons).center().padTop(8f);
+
+    float width = Math.min(1120f, stage.getWidth() * .88f);
+    float height = Math.min(740f, stage.getHeight() * .94f);
+    blocker.add(panel).width(width).height(height);
+    overlay = blocker;
+    stage.addActor(blocker);
+    blocker.toFront();
+    addDestinations();
+  }
+
+  private void loadResultTextures(AcquisitionResult result) {
     if (resources != null) {
       resources.loadTextures(ART);
       resources.loadAll();
@@ -104,50 +156,32 @@ public final class AcquisitionResultDisplay implements AcquisitionView {
         }
       }
       resources.loadAll();
-      if (cards != null) {
-        List<CardConfig> configs =
-            result.entries().stream()
-                .filter(entry -> entry.kind() == AcquisitionResult.Kind.CARD)
-                .map(entry -> cards.getCard(entry.id()).orElse(null))
-                .filter(Objects::nonNull)
-                .toList();
-        if (!configs.isEmpty()) {
-          for (String path : CardWidgetAssets.collectTexturePaths(configs)) {
-            if (!itemTextures.contains(path)) {
-              resources.loadTextures(new String[] {path});
-              itemTextures.add(path);
-            }
+      loadCardTextures(result);
+      resources.loadAll();
+    }
+  }
+
+  private void loadCardTextures(AcquisitionResult result) {
+    if (resources == null) return;
+    if (cards != null) {
+      List<CardConfig> configs =
+          result.entries().stream()
+              .filter(entry -> entry.kind() == AcquisitionResult.Kind.CARD)
+              .map(entry -> cards.getCard(entry.id()).orElse(null))
+              .filter(Objects::nonNull)
+              .toList();
+      if (!configs.isEmpty()) {
+        for (String path : CardWidgetAssets.collectTexturePaths(configs)) {
+          if (!itemTextures.contains(path)) {
+            resources.loadTextures(new String[] {path});
+            itemTextures.add(path);
           }
         }
       }
-      resources.loadAll();
     }
-    visibleResult = result;
-    cardAssets = null;
-    continuing = false;
-    sources.clear();
-    destinations.clear();
+  }
 
-    Table blocker = new Table();
-    blocker.setName("acquisition-result-overlay");
-    blocker.setFillParent(true);
-    blocker.setTouchable(Touchable.enabled);
-    // This is only a translucent overlay: the live event/shop scene remains underneath.
-    blocker.setBackground(skin.newDrawable("white", new Color(0.015f, 0.01f, 0.025f, 0.48f)));
-
-    Table panel = new Table();
-    resultPanel = panel;
-    panel.setName("acquisition-result-panel");
-    panel.setBackground(art(0));
-    panel.pad(145f, 140f, 110f, 140f);
-    panel.top();
-    Label heading = new Label(headingText, labelStyle("large", GOLD));
-    heading.setName("acquisition-heading");
-    heading.setFontScale(1.6f);
-    heading.setAlignment(Align.center);
-    panel.add(heading).height(50f).center().padBottom(10f);
-    panel.row();
-
+  private Table resultEntries(AcquisitionResult result) {
     Table entries = new Table();
     entries.center();
     int displayedCount =
@@ -172,25 +206,33 @@ public final class AcquisitionResultDisplay implements AcquisitionView {
       entries.add(tile).width(tileWidth).height(330f).pad(7f).fillY();
       if (++index % columns == 0) entries.row();
     }
-    ScrollPane scroll = new ScrollPane(entries, skin);
-    scroll.setFadeScrollBars(false);
-    scroll.setScrollingDisabled(true, false);
-    panel.add(scroll).grow().minHeight(0f);
-    panel.row();
+    return entries;
+  }
 
-    Table buttons = new Table();
-    buttons.defaults().width(360f).height(84f).pad(4f);
-    buttons.add(
-        button("Continue", "acquisition-continue", () -> continueWithFeedback(result, onContinue)));
-    panel.add(buttons).center().padTop(8f);
+  private void addEntryDescription(Table text, AcquisitionResult.Entry entry) {
+    if (!entry.description().isBlank() || entry.kind() == AcquisitionResult.Kind.CARD) {
+      String descriptionText = descriptionText(entry);
+      Label description = new Label(descriptionText, labelStyle(SMALL, INK));
+      description.setFontScale(entry.kind() == AcquisitionResult.Kind.CARD ? 1f : .88f);
+      description.setWrap(true);
+      description.setAlignment(Align.center);
+      description.setName("acquisition-description-" + entry.id());
+      // Fit long item rules inside their reserved area, rather than drawing over the frame.
+      description.setWidth(206f);
+      while (description.getPrefHeight() > 100f && description.getFontScaleX() > .72f) {
+        description.setFontScale(description.getFontScaleX() - .02f);
+      }
+      text.add(description).growX().height(100f).padTop(2f);
+      text.row();
+    }
+  }
 
-    float width = Math.min(1120f, stage.getWidth() * .88f);
-    float height = Math.min(740f, stage.getHeight() * .94f);
-    blocker.add(panel).width(width).height(height);
-    overlay = blocker;
-    stage.addActor(blocker);
-    blocker.toFront();
-    addDestinations();
+  private static String descriptionText(AcquisitionResult.Entry entry) {
+    if (entry.kind() == AcquisitionResult.Kind.CARD) return "click to check";
+    if (entry.kind() == AcquisitionResult.Kind.GOLD) {
+      return entry.delta() > 0 ? "Added to your run" : "Spent during this event";
+    }
+    return entry.description();
   }
 
   private Table entryRow(AcquisitionResult.Entry entry) {
@@ -231,28 +273,9 @@ public final class AcquisitionResultDisplay implements AcquisitionView {
     } else {
       sources.add(title);
     }
-    if (!entry.description().isBlank() || entry.kind() == AcquisitionResult.Kind.CARD) {
-      String descriptionText =
-          entry.kind() == AcquisitionResult.Kind.CARD
-              ? "click to check"
-              : entry.kind() == AcquisitionResult.Kind.GOLD
-                  ? (entry.delta() > 0 ? "Added to your run" : "Spent during this event")
-                  : entry.description();
-      Label description = new Label(descriptionText, labelStyle("small", INK));
-      description.setFontScale(entry.kind() == AcquisitionResult.Kind.CARD ? 1f : .88f);
-      description.setWrap(true);
-      description.setAlignment(Align.center);
-      description.setName("acquisition-description-" + entry.id());
-      // Fit long item rules inside their reserved area, rather than drawing over the frame.
-      description.setWidth(206f);
-      while (description.getPrefHeight() > 100f && description.getFontScaleX() > .72f) {
-        description.setFontScale(description.getFontScaleX() - .02f);
-      }
-      text.add(description).growX().height(100f).padTop(2f);
-      text.row();
-    }
+    addEntryDescription(text, entry);
     if (entry.durationTurns() != null) {
-      text.add(new Label(entry.durationTurns() + " turn(s)", labelStyle("small", accent)))
+      text.add(new Label(entry.durationTurns() + " turn(s)", labelStyle(SMALL, accent)))
           .left()
           .padTop(5f);
     }
@@ -277,7 +300,7 @@ public final class AcquisitionResultDisplay implements AcquisitionView {
     cardDetails = new Table();
     cardDetails.setName("acquisition-card-details");
     cardDetails.setFillParent(true);
-    cardDetails.setBackground(skin.newDrawable("white", new Color(0.01f, 0.008f, 0.018f, .78f)));
+    cardDetails.setBackground(skin.newDrawable(WHITE, new Color(0.01f, 0.008f, 0.018f, .78f)));
     cardDetails.setTouchable(Touchable.enabled);
     cardDetails.pad(60f, 100f, 30f, 50f);
     Table grid = new Table();
@@ -295,7 +318,7 @@ public final class AcquisitionResultDisplay implements AcquisitionView {
         Actor card = cardPreview(entry);
         if (card == null) {
           Label fallback =
-              new Label(entry.name() + "\n" + entry.description(), labelStyle("small", INK));
+              new Label(entry.name() + "\n" + entry.description(), labelStyle(SMALL, INK));
           fallback.setWrap(true);
           card = fallback;
         }
@@ -399,7 +422,7 @@ public final class AcquisitionResultDisplay implements AcquisitionView {
     resultPanel = null;
     cardAssets = null;
     destinations.clear();
-    if (loadedArt) {
+    if (resources != null && loadedArt) {
       if (!itemTextures.isEmpty()) resources.unloadAssets(itemTextures.toArray(String[]::new));
       itemTextures.clear();
       resources.unloadAssets(ART);
@@ -408,9 +431,10 @@ public final class AcquisitionResultDisplay implements AcquisitionView {
   }
 
   private Drawable art(int index) {
-    if (!loadedArt) return skin.newDrawable("white", new Color(.08f, .08f, .10f, 1f));
+    if (resources == null || !loadedArt)
+      return skin.newDrawable(WHITE, new Color(.08f, .08f, .10f, 1f));
     Texture texture = resources.getAsset(ART[index], Texture.class);
-    if (texture == null) return skin.newDrawable("white", new Color(.08f, .08f, .10f, 1f));
+    if (texture == null) return skin.newDrawable(WHITE, new Color(.08f, .08f, .10f, 1f));
     texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     TextureRegionDrawable drawable = new TextureRegionDrawable(new TextureRegion(texture));
     if (index <= 2) {
@@ -421,7 +445,7 @@ public final class AcquisitionResultDisplay implements AcquisitionView {
   }
 
   private Drawable destinationIcon(int index) {
-    if (!loadedArt || index == 2) return art(5);
+    if (resources == null || !loadedArt || index == 2) return art(5);
     Texture texture = resources.getAsset(ART[4], Texture.class);
     if (texture == null) return art(5);
     int cell = texture.getWidth() / 3;
@@ -430,7 +454,10 @@ public final class AcquisitionResultDisplay implements AcquisitionView {
   }
 
   private Drawable entryIcon(AcquisitionResult.Entry entry) {
-    if (entry.kind() == AcquisitionResult.Kind.CARD && cards != null && loadedArt) {
+    if (entry.kind() == AcquisitionResult.Kind.CARD
+        && cards != null
+        && resources != null
+        && loadedArt) {
       CardConfig config = cards.getCard(entry.id()).orElse(null);
       if (config != null && config.texturePath != null && !config.texturePath.isBlank()) {
         Texture texture = resources.getAsset(config.texturePath, Texture.class);
@@ -438,7 +465,7 @@ public final class AcquisitionResultDisplay implements AcquisitionView {
       }
     }
     ItemType item = itemType(entry);
-    if (item != null && loadedArt) {
+    if (item != null && resources != null && loadedArt) {
       Texture texture = resources.getAsset(ItemArtwork.cutoutPath(item), Texture.class);
       if (texture != null) return new TextureRegionDrawable(new TextureRegion(texture));
     }
@@ -545,7 +572,7 @@ public final class AcquisitionResultDisplay implements AcquisitionView {
               Actions.run(
                   () -> {
                     if (overlay == null) return;
-                    Image dot = new Image(skin.newDrawable("white", colour));
+                    Image dot = new Image(skin.newDrawable(WHITE, colour));
                     dot.setTouchable(Touchable.disabled);
                     dot.setBounds(flying.getX() + 24f, flying.getY() + 24f, 4f, 4f);
                     overlay.addActor(dot);

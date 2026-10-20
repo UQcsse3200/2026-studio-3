@@ -266,25 +266,26 @@ class AcquisitionResultDisplayTest {
                       2)));
       AcquisitionResultDisplay view =
           new AcquisitionResultDisplay(stage, UIComponent.getSharedSkin(), null, null);
-      AcquisitionPresentation presentation = new AcquisitionPresentation(view);
-      List<AcquisitionPresentation.Dismissal> reasons = new ArrayList<>();
+      try (AcquisitionPresentation presentation = new AcquisitionPresentation(view)) {
+        List<AcquisitionPresentation.Dismissal> reasons = new ArrayList<>();
 
-      presentation.show(result, reasons::add);
-      Table overlay = stage.getRoot().findActor("acquisition-result-overlay");
-      assertNotNull(overlay);
-      assertNotNull(overlay.findActor("acquisition-continue"));
-      assertNull(overlay.findActor("acquisition-close"));
-      assertEquals(3, result.entries().size());
+        presentation.show(result, reasons::add);
+        Table overlay = stage.getRoot().findActor("acquisition-result-overlay");
+        assertNotNull(overlay);
+        assertNotNull(overlay.findActor("acquisition-continue"));
+        assertNull(overlay.findActor("acquisition-close"));
+        assertEquals(3, result.entries().size());
 
-      overlay.findActor("acquisition-continue").fire(new ChangeEvent());
-      overlay.findActor("acquisition-continue").fire(new ChangeEvent());
-      assertNotNull(stage.getRoot().findActor("acquisition-result-overlay"));
-      for (int i = 0; i < 30; i++) stage.act(.1f);
-      assertNull(stage.getRoot().findActor("acquisition-result-overlay"));
-      assertEquals(List.of(AcquisitionPresentation.Dismissal.CONTINUE), reasons);
-      assertEquals(eventBackground, stage.getRoot().findActor("original-event-background"));
-      presentation.close();
-      assertEquals(3, result.entries().size());
+        overlay.findActor("acquisition-continue").fire(new ChangeEvent());
+        overlay.findActor("acquisition-continue").fire(new ChangeEvent());
+        assertNotNull(stage.getRoot().findActor("acquisition-result-overlay"));
+        for (int i = 0; i < 30; i++) stage.act(.1f);
+        assertNull(stage.getRoot().findActor("acquisition-result-overlay"));
+        assertEquals(List.of(AcquisitionPresentation.Dismissal.CONTINUE), reasons);
+        assertEquals(eventBackground, stage.getRoot().findActor("original-event-background"));
+        presentation.close();
+        assertEquals(3, result.entries().size());
+      }
     } finally {
       stage.dispose();
     }
@@ -300,26 +301,27 @@ class AcquisitionResultDisplayTest {
               List.of(AcquisitionResult.Entry.gold(60), AcquisitionResult.Entry.hp(-8)));
       AcquisitionResultDisplay view =
           new AcquisitionResultDisplay(stage, UIComponent.getSharedSkin(), null, null);
-      AcquisitionPresentation presentation = new AcquisitionPresentation(view);
-      List<AcquisitionPresentation.Dismissal> reasons = new ArrayList<>();
-      assertTrue(presentation.show(result, reasons::add));
-      Table overlay = stage.getRoot().findActor("acquisition-result-overlay");
-      assertEquals(
-          "Gold +60",
-          ((com.badlogic.gdx.scenes.scene2d.ui.Label) overlay.findActor("acquisition-entry-gold"))
-              .getText()
-              .toString());
-      assertEquals(
-          "HP -8",
-          ((com.badlogic.gdx.scenes.scene2d.ui.Label) overlay.findActor("acquisition-entry-hp"))
-              .getText()
-              .toString());
-      presentation.close();
-      assertTrue(reasons.isEmpty());
-      assertNull(stage.getRoot().findActor("acquisition-result-overlay"));
-      assertEquals(
-          List.of(AcquisitionResult.Entry.gold(60), AcquisitionResult.Entry.hp(-8)),
-          result.entries());
+      try (AcquisitionPresentation presentation = new AcquisitionPresentation(view)) {
+        List<AcquisitionPresentation.Dismissal> reasons = new ArrayList<>();
+        assertTrue(presentation.show(result, reasons::add));
+        Table overlay = stage.getRoot().findActor("acquisition-result-overlay");
+        assertEquals(
+            "Gold +60",
+            ((com.badlogic.gdx.scenes.scene2d.ui.Label) overlay.findActor("acquisition-entry-gold"))
+                .getText()
+                .toString());
+        assertEquals(
+            "HP -8",
+            ((com.badlogic.gdx.scenes.scene2d.ui.Label) overlay.findActor("acquisition-entry-hp"))
+                .getText()
+                .toString());
+        presentation.close();
+        assertTrue(reasons.isEmpty());
+        assertNull(stage.getRoot().findActor("acquisition-result-overlay"));
+        assertEquals(
+            List.of(AcquisitionResult.Entry.gold(60), AcquisitionResult.Entry.hp(-8)),
+            result.entries());
+      }
     } finally {
       stage.dispose();
     }
