@@ -601,7 +601,10 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
     itemInventory.setMinSize(ITEM_INVENTORY_MIN_WIDTH, ITEM_INVENTORY_MIN_HEIGHT);
     InventoryPopupComponent inventoryPopup =
         new InventoryPopupComponent(
-            game.getRunState(), itemInventory, gameArea.getPlayer(), controller::isPlayerTurn);
+            game.getRunState(),
+            itemInventory,
+            gameArea.getPlayer(),
+            () -> battleActions != null && battleActions.isPlayerTurn());
 
     Entity itemInventoryEntity =
         new Entity()
@@ -631,7 +634,7 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
             .addComponent(uiFactory)
             .addComponent(displays)
             .addComponent(battleActions)
-            .addComponent(new CardActions(controller, gameArea.getPlayer()))
+            .addComponent(new CardActions())
             .addComponent(new Team3CardPlayAdapter(cardPlayService, controller))
             .addComponent(cardInventory)
             .addComponent(new PopupInputComponent(cardInventory))
