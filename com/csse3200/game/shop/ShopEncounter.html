@@ -163,13 +163,22 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#completedSuccessfully()" class="member-name-link">completedSuccessfully</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrency()" class="member-name-link">getCurrency</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#enableRefresh(com.csse3200.game.shop.ShopRefreshPolicy,java.util.function.Supplier)" class="member-name-link">enableRefresh</a><wbr>(<a href="ShopRefreshPolicy.html" title="class in com.csse3200.game.shop">ShopRefreshPolicy</a>&nbsp;policy,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;<a href="ShopService.html" title="class in com.csse3200.game.shop">ShopService</a>&gt;&nbsp;factory)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Installs the generator once, without replacing the discounted initial inventory.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrency()" class="member-name-link">getCurrency</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the current currency shown by the Shop UI.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collection.html" title="class or interface in java.util" class="external-link">Collection</a><wbr>&lt;<a href="ShopItem.html" title="class in com.csse3200.game.shop">ShopItem</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getItems()" class="member-name-link">getItems</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collection.html" title="class or interface in java.util" class="external-link">Collection</a><wbr>&lt;<a href="ShopItem.html" title="class in com.csse3200.game.shop">ShopItem</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getItems()" class="member-name-link">getItems</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/OptionalInt.html" title="class or interface in java.util" class="external-link">OptionalInt</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getNextRefreshCost()" class="member-name-link">getNextRefreshCost</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getNodeId()" class="member-name-link">getNodeId</a>()</code></div>
@@ -177,7 +186,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Float.html" title="class or interface in java.lang" class="external-link">Float</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getShopDiscount()" class="member-name-link">getShopDiscount</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the player's current shop discount, as a fraction (e.g.</div>
+<div class="block">Returns this stock batch's effective discount, or null when no Player integration is available.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isCompleted()" class="member-name-link">isCompleted</a>()</code></div>
@@ -189,6 +198,27 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="PurchaseResult.html" title="class in com.csse3200.game.shop">PurchaseResult</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#purchase(java.lang.String)" class="member-name-link">purchase</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;itemId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ShopPurchaseReceipt.html" title="class in com.csse3200.game.shop">ShopPurchaseReceipt</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#purchase(java.lang.String,long,java.lang.String)" class="member-name-link">purchase</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;itemId,
+ long&nbsp;expectedRevision,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;actionId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Versioned, idempotent UI command.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ShopRefreshResult.html" title="class in com.csse3200.game.shop">ShopRefreshResult</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#refresh(long,java.lang.String)" class="member-name-link">refresh</a><wbr>(long&nbsp;expectedRevision,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;actionId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Generates and validates all three offers before charging an undiscounted fee.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setFirstPaidRefreshFee(int)" class="member-name-link">setFirstPaidRefreshFee</a><wbr>(int&nbsp;fee)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Supplies the approved paid fee later; it never resets the already-used free refresh.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ShopSnapshot.html" title="class in com.csse3200.game.shop">ShopSnapshot</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#snapshot()" class="member-name-link">snapshot</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
@@ -283,6 +313,50 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="purchase(java.lang.String,long,java.lang.String)">
+<h3>purchase</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ShopPurchaseReceipt.html" title="class in com.csse3200.game.shop">ShopPurchaseReceipt</a></span>&nbsp;<span class="element-name">purchase</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;itemId,
+ long&nbsp;expectedRevision,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;actionId)</span></div>
+<div class="block">Versioned, idempotent UI command. A new click uses a new action ID and the displayed revision.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="enableRefresh(com.csse3200.game.shop.ShopRefreshPolicy,java.util.function.Supplier)">
+<h3>enableRefresh</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">enableRefresh</span><wbr><span class="parameters">(<a href="ShopRefreshPolicy.html" title="class in com.csse3200.game.shop">ShopRefreshPolicy</a>&nbsp;policy,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;<a href="ShopService.html" title="class in com.csse3200.game.shop">ShopService</a>&gt;&nbsp;factory)</span></div>
+<div class="block">Installs the generator once, without replacing the discounted initial inventory.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setFirstPaidRefreshFee(int)">
+<h3>setFirstPaidRefreshFee</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setFirstPaidRefreshFee</span><wbr><span class="parameters">(int&nbsp;fee)</span></div>
+<div class="block">Supplies the approved paid fee later; it never resets the already-used free refresh.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getNextRefreshCost()">
+<h3>getNextRefreshCost</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/OptionalInt.html" title="class or interface in java.util" class="external-link">OptionalInt</a></span>&nbsp;<span class="element-name">getNextRefreshCost</span>()</div>
+</section>
+</li>
+<li>
+<section class="detail" id="refresh(long,java.lang.String)">
+<h3>refresh</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ShopRefreshResult.html" title="class in com.csse3200.game.shop">ShopRefreshResult</a></span>&nbsp;<span class="element-name">refresh</span><wbr><span class="parameters">(long&nbsp;expectedRevision,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;actionId)</span></div>
+<div class="block">Generates and validates all three offers before charging an undiscounted fee.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="snapshot()">
+<h3>snapshot</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ShopSnapshot.html" title="class in com.csse3200.game.shop">ShopSnapshot</a></span>&nbsp;<span class="element-name">snapshot</span>()</div>
+</section>
+</li>
+<li>
 <section class="detail" id="canPurchase(java.lang.String)">
 <h3>canPurchase</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="PurchaseResult.html" title="class in com.csse3200.game.shop">PurchaseResult</a></span>&nbsp;<span class="element-name">canPurchase</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;itemId)</span></div>
@@ -315,8 +389,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getShopDiscount()">
 <h3>getShopDiscount</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Float.html" title="class or interface in java.lang" class="external-link">Float</a></span>&nbsp;<span class="element-name">getShopDiscount</span>()</div>
-<div class="block">Returns the player's current shop discount, as a fraction (e.g. 0.05f for 5% off), or null when
- no Player integration is available.</div>
+<div class="block">Returns this stock batch's effective discount, or null when no Player integration is available.
+ Refreshed batches return zero without removing the player's permanent discount items.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>current shop discount, or null</dd>

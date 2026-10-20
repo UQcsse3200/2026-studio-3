@@ -114,6 +114,13 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color">
 <div class="block">Creates an outcome applier with production card-catalog and persistent-deck boundaries.</div>
 </div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.encounters.integration.PlayerStateGateway,com.csse3200.game.encounters.integration.CardCatalogGateway,com.csse3200.game.encounters.integration.DeckGateway,com.csse3200.game.encounters.integration.ItemRewardGateway)" class="member-name-link">ChanceOutcomeApplier</a><wbr>(<a href="PlayerStateGateway.html" title="interface in com.csse3200.game.encounters.integration">PlayerStateGateway</a>&nbsp;player,
+ <a href="CardCatalogGateway.html" title="interface in com.csse3200.game.encounters.integration">CardCatalogGateway</a>&nbsp;cardCatalog,
+ <a href="DeckGateway.html" title="interface in com.csse3200.game.encounters.integration">DeckGateway</a>&nbsp;deck,
+ <a href="ItemRewardGateway.html" title="interface in com.csse3200.game.encounters.integration">ItemRewardGateway</a>&nbsp;items)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Creates an outcome applier with persistent card and ownership-only item boundaries.</div>
+</div>
 </div>
 </section>
 </li>
@@ -131,7 +138,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ChanceResolution.html" title="class in com.csse3200.game.encounters.integration">ChanceResolution</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#apply(com.csse3200.game.chance.ChanceOutcome)" class="member-name-link">apply</a><wbr>(<a href="../../chance/ChanceOutcome.html" title="class in com.csse3200.game.chance">ChanceOutcome</a>&nbsp;outcome)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Applies card, currency, and health changes as one logical operation.</div>
+<div class="block">Applies card rewards, item ownership, currency and health as one logical operation.</div>
 </div>
 </div>
 </div>
@@ -176,6 +183,23 @@ loadScripts(document, 'script');</script>
 </dl>
 </section>
 </li>
+<li>
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.encounters.integration.PlayerStateGateway,com.csse3200.game.encounters.integration.CardCatalogGateway,com.csse3200.game.encounters.integration.DeckGateway,com.csse3200.game.encounters.integration.ItemRewardGateway)">
+<h3>ChanceOutcomeApplier</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ChanceOutcomeApplier</span><wbr><span class="parameters">(<a href="PlayerStateGateway.html" title="interface in com.csse3200.game.encounters.integration">PlayerStateGateway</a>&nbsp;player,
+ <a href="CardCatalogGateway.html" title="interface in com.csse3200.game.encounters.integration">CardCatalogGateway</a>&nbsp;cardCatalog,
+ <a href="DeckGateway.html" title="interface in com.csse3200.game.encounters.integration">DeckGateway</a>&nbsp;deck,
+ <a href="ItemRewardGateway.html" title="interface in com.csse3200.game.encounters.integration">ItemRewardGateway</a>&nbsp;items)</span></div>
+<div class="block">Creates an outcome applier with persistent card and ownership-only item boundaries.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>player</code> - live player state receiving health and currency changes</dd>
+<dd><code>cardCatalog</code> - authoritative card catalogue</dd>
+<dd><code>deck</code> - persistent deck receiving cards</dd>
+<dd><code>items</code> - item ownership boundary, or null when item rewards are unavailable</dd>
+</dl>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -188,7 +212,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="apply(com.csse3200.game.chance.ChanceOutcome)">
 <h3>apply</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ChanceResolution.html" title="class in com.csse3200.game.encounters.integration">ChanceResolution</a></span>&nbsp;<span class="element-name">apply</span><wbr><span class="parameters">(<a href="../../chance/ChanceOutcome.html" title="class in com.csse3200.game.chance">ChanceOutcome</a>&nbsp;outcome)</span></div>
-<div class="block">Applies card, currency, and health changes as one logical operation.
+<div class="block">Applies card rewards, item ownership, currency and health as one logical operation.
 
  <p>Currency is never allowed to become negative. Currency is committed and verified before the
  direct health delta is applied. Health is the final mutation because lethal direct health loss

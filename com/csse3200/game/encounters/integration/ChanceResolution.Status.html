@@ -167,13 +167,29 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">No choice with the supplied identifier exists.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#INVALID_OUTCOME" class="member-name-link">INVALID_OUTCOME</a></code></div>
+<div class="col-first odd-row-color"><code><a href="#INVALID_ITEM_REWARD" class="member-name-link">INVALID_ITEM_REWARD</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">The configured item identifier is blank or otherwise invalid.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#INVALID_OUTCOME" class="member-name-link">INVALID_OUTCOME</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">The selected choice did not contain an outcome.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#PLAYER_UPDATE_FAILED" class="member-name-link">PLAYER_UPDATE_FAILED</a></code></div>
+<div class="col-first odd-row-color"><code><a href="#ITEM_ADD_FAILED" class="member-name-link">ITEM_ADD_FAILED</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Persistent item ownership could not be added.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#ITEM_NOT_FOUND" class="member-name-link">ITEM_NOT_FOUND</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">The item ID is not registered, or ownership services are unavailable.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#PLAYER_UPDATE_FAILED" class="member-name-link">PLAYER_UPDATE_FAILED</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">A Player update failed and all original values were restored.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#RESOLUTION_IN_PROGRESS" class="member-name-link">RESOLUTION_IN_PROGRESS</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Another resolution is currently applying mutations for this session.</div>
 </div>
 <div class="col-first odd-row-color"><code><a href="#ROLLBACK_FAILED" class="member-name-link">ROLLBACK_FAILED</a></code></div>
 <div class="col-last odd-row-color">
@@ -246,6 +262,13 @@ the order they are declared.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="RESOLUTION_IN_PROGRESS">
+<h3>RESOLUTION_IN_PROGRESS</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></span>&nbsp;<span class="element-name">RESOLUTION_IN_PROGRESS</span></div>
+<div class="block">Another resolution is currently applying mutations for this session.</div>
+</section>
+</li>
+<li>
 <section class="detail" id="ENCOUNTER_CLOSED">
 <h3>ENCOUNTER_CLOSED</h3>
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></span>&nbsp;<span class="element-name">ENCOUNTER_CLOSED</span></div>
@@ -306,6 +329,27 @@ the order they are declared.</div>
 <h3>CARD_ADD_FAILED</h3>
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></span>&nbsp;<span class="element-name">CARD_ADD_FAILED</span></div>
 <div class="block">The persistent deck rejected the reward card.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="INVALID_ITEM_REWARD">
+<h3>INVALID_ITEM_REWARD</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></span>&nbsp;<span class="element-name">INVALID_ITEM_REWARD</span></div>
+<div class="block">The configured item identifier is blank or otherwise invalid.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="ITEM_NOT_FOUND">
+<h3>ITEM_NOT_FOUND</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></span>&nbsp;<span class="element-name">ITEM_NOT_FOUND</span></div>
+<div class="block">The item ID is not registered, or ownership services are unavailable.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="ITEM_ADD_FAILED">
+<h3>ITEM_ADD_FAILED</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></span>&nbsp;<span class="element-name">ITEM_ADD_FAILED</span></div>
+<div class="block">Persistent item ownership could not be added.</div>
 </section>
 </li>
 <li>

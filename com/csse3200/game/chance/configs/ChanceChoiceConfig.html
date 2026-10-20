@@ -105,20 +105,25 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Field</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#description" class="member-name-link">description</a></code></div>
+<div class="col-first even-row-color"><code><a href="ChanceCurseRiskConfig.html" title="class in com.csse3200.game.chance.configs">ChanceCurseRiskConfig</a></code></div>
+<div class="col-second even-row-color"><code><a href="#curseRisk" class="member-name-link">curseRisk</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">Player-facing choice description.</div>
+<div class="block">Optional runtime Curse risk, currently supported only by the Mine exploration choice.</div>
 </div>
 <div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#id" class="member-name-link">id</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#description" class="member-name-link">description</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">Player-facing choice description.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#id" class="member-name-link">id</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Stable choice identifier within its encounter.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="ChanceOutcomeConfig.html" title="class in com.csse3200.game.chance.configs">ChanceOutcomeConfig</a></code></div>
-<div class="col-second even-row-color"><code><a href="#outcome" class="member-name-link">outcome</a></code></div>
-<div class="col-last even-row-color">
-<div class="block">Required outcome produced by selecting this choice.</div>
+<div class="col-first odd-row-color"><code><a href="ChanceOutcomeConfig.html" title="class in com.csse3200.game.chance.configs">ChanceOutcomeConfig</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#outcome" class="member-name-link">outcome</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Required base outcome, before runtime risk is resolved.</div>
 </div>
 </div>
 </section>
@@ -174,7 +179,14 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="outcome">
 <h3>outcome</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ChanceOutcomeConfig.html" title="class in com.csse3200.game.chance.configs">ChanceOutcomeConfig</a></span>&nbsp;<span class="element-name">outcome</span></div>
-<div class="block">Required outcome produced by selecting this choice.</div>
+<div class="block">Required base outcome, before runtime risk is resolved.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="curseRisk">
+<h3>curseRisk</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ChanceCurseRiskConfig.html" title="class in com.csse3200.game.chance.configs">ChanceCurseRiskConfig</a></span>&nbsp;<span class="element-name">curseRisk</span></div>
+<div class="block">Optional runtime Curse risk, currently supported only by the Mine exploration choice.</div>
 </section>
 </li>
 </ul>

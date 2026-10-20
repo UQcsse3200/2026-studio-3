@@ -183,9 +183,10 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <div class="block">Initial snapshots are supplied only by the isolated tutorial owner.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#observeResolution(int,boolean,com.csse3200.game.components.combat.BattlePhase)" class="member-name-link">observeResolution</a><wbr>(int&nbsp;enemyHealth,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#observeResolution(int,boolean,com.csse3200.game.components.combat.BattlePhase,boolean)" class="member-name-link">observeResolution</a><wbr>(int&nbsp;enemyHealth,
  boolean&nbsp;settled,
- <a href="../components/combat/BattlePhase.html" title="enum class in com.csse3200.game.components.combat">BattlePhase</a>&nbsp;phase)</code></div>
+ <a href="../components/combat/BattlePhase.html" title="enum class in com.csse3200.game.components.combat">BattlePhase</a>&nbsp;phase,
+ boolean&nbsp;enemyHasPoison)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Polls real resolution and visual completion; never applies damage or advances a turn.</div>
 </div>
@@ -212,9 +213,14 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Exact tutorial copy, not a definition ID shared by duplicate cards.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#start()" class="member-name-link">start</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setPoisonCardId(java.lang.String)" class="member-name-link">setPoisonCardId</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Exact Poison Dagger copy reserved for the status lesson.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#start()" class="member-name-link">start</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Starts the guide once.</div>
 </div>
 </div>
@@ -262,11 +268,12 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 </section>
 </li>
 <li>
-<section class="detail" id="observeResolution(int,boolean,com.csse3200.game.components.combat.BattlePhase)">
+<section class="detail" id="observeResolution(int,boolean,com.csse3200.game.components.combat.BattlePhase,boolean)">
 <h3>observeResolution</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">observeResolution</span><wbr><span class="parameters">(int&nbsp;enemyHealth,
  boolean&nbsp;settled,
- <a href="../components/combat/BattlePhase.html" title="enum class in com.csse3200.game.components.combat">BattlePhase</a>&nbsp;phase)</span></div>
+ <a href="../components/combat/BattlePhase.html" title="enum class in com.csse3200.game.components.combat">BattlePhase</a>&nbsp;phase,
+ boolean&nbsp;enemyHasPoison)</span></div>
 <div class="block">Polls real resolution and visual completion; never applies damage or advances a turn.</div>
 </section>
 </li>
@@ -275,6 +282,13 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <h3>setDemonstrationCardId</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setDemonstrationCardId</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</span></div>
 <div class="block">Exact tutorial copy, not a definition ID shared by duplicate cards.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setPoisonCardId(java.lang.String)">
+<h3>setPoisonCardId</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setPoisonCardId</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;instanceId)</span></div>
+<div class="block">Exact Poison Dagger copy reserved for the status lesson.</div>
 </section>
 </li>
 <li>

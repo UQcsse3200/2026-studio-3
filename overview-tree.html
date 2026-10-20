@@ -75,6 +75,7 @@ loadScripts(document, 'script');</script>
 <li><a href="com/csse3200/game/components/cards/package-tree.html">com.csse3200.game.components.cards</a>, </li>
 <li><a href="com/csse3200/game/components/chance/package-tree.html">com.csse3200.game.components.chance</a>, </li>
 <li><a href="com/csse3200/game/components/combat/package-tree.html">com.csse3200.game.components.combat</a>, </li>
+<li><a href="com/csse3200/game/components/encounters/package-tree.html">com.csse3200.game.components.encounters</a>, </li>
 <li><a href="com/csse3200/game/components/enemy/package-tree.html">com.csse3200.game.components.enemy</a>, </li>
 <li><a href="com/csse3200/game/components/enemy/enemyai/package-tree.html">com.csse3200.game.components.enemy.enemyai</a>, </li>
 <li><a href="com/csse3200/game/components/enemy/memory/package-tree.html">com.csse3200.game.components.enemy.memory</a>, </li>
@@ -96,6 +97,7 @@ loadScripts(document, 'script');</script>
 <li><a href="com/csse3200/game/components/tasks/package-tree.html">com.csse3200.game.components.tasks</a>, </li>
 <li><a href="com/csse3200/game/concurrency/package-tree.html">com.csse3200.game.concurrency</a>, </li>
 <li><a href="com/csse3200/game/encounters/integration/package-tree.html">com.csse3200.game.encounters.integration</a>, </li>
+<li><a href="com/csse3200/game/encounters/results/package-tree.html">com.csse3200.game.encounters.results</a>, </li>
 <li><a href="com/csse3200/game/entities/package-tree.html">com.csse3200.game.entities</a>, </li>
 <li><a href="com/csse3200/game/entities/configs/package-tree.html">com.csse3200.game.entities.configs</a>, </li>
 <li><a href="com/csse3200/game/entities/factories/package-tree.html">com.csse3200.game.entities.factories</a>, </li>
@@ -128,11 +130,15 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">java.lang.<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" class="type-name-link external-link" title="class or interface in java.lang">Object</a>
 <ul>
+<li class="circle">com.csse3200.game.chance.<a href="com/csse3200/game/chance/AbandonedMineEncounterBehaviour.html" class="type-name-link" title="class in com.csse3200.game.chance">AbandonedMineEncounterBehaviour</a> (implements com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceEncounterBehaviour.html" title="interface in com.csse3200.game.chance">ChanceEncounterBehaviour</a>)</li>
+<li class="circle">com.csse3200.game.encounters.results.<a href="com/csse3200/game/encounters/results/AcquisitionPresentation.html" class="type-name-link" title="class in com.csse3200.game.encounters.results">AcquisitionPresentation</a> (implements java.lang.<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/AutoCloseable.html" title="class or interface in java.lang" class="external-link">AutoCloseable</a>)</li>
+<li class="circle">com.csse3200.game.components.encounters.<a href="com/csse3200/game/components/encounters/AcquisitionResultDisplay.html" class="type-name-link" title="class in com.csse3200.game.components.encounters">AcquisitionResultDisplay</a> (implements com.csse3200.game.encounters.results.<a href="com/csse3200/game/encounters/results/AcquisitionView.html" title="interface in com.csse3200.game.encounters.results">AcquisitionView</a>)</li>
 <li class="circle">com.badlogic.gdx.scenes.scene2d.Actor
 <ul>
 <li class="circle">com.badlogic.gdx.scenes.scene2d.Group (implements com.badlogic.gdx.scenes.scene2d.utils.Cullable)
 <ul>
 <li class="circle">com.csse3200.game.maps.<a href="com/csse3200/game/maps/MapConnectionGroup.html" class="type-name-link" title="class in com.csse3200.game.maps">MapConnectionGroup</a></li>
+<li class="circle">com.csse3200.game.maps.<a href="com/csse3200/game/maps/MapIntroduction.html" class="type-name-link" title="class in com.csse3200.game.maps">MapIntroduction</a></li>
 <li class="circle">com.csse3200.game.maps.<a href="com/csse3200/game/maps/MapNodeActor.html" class="type-name-link" title="class in com.csse3200.game.maps">MapNodeActor</a></li>
 <li class="circle">com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup (implements com.badlogic.gdx.scenes.scene2d.utils.Layout)
 <ul>
@@ -144,6 +150,7 @@ loadScripts(document, 'script');</script>
 </li>
 <li class="circle">com.badlogic.gdx.scenes.scene2d.ui.Table
 <ul>
+<li class="circle">com.csse3200.game.components.cards.<a href="com/csse3200/game/components/cards/CardKeywordTooltip.html" class="type-name-link" title="class in com.csse3200.game.components.cards">CardKeywordTooltip</a></li>
 <li class="circle">com.csse3200.game.components.settingsmenu.<a href="com/csse3200/game/components/settingsmenu/SettingsPanel.html" class="type-name-link" title="class in com.csse3200.game.components.settingsmenu">SettingsPanel</a></li>
 <li class="circle">com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusTooltip.html" class="type-name-link" title="class in com.csse3200.game.components.status">StatusTooltip</a></li>
 </ul>
@@ -219,10 +226,14 @@ loadScripts(document, 'script');</script>
 <li class="circle">com.csse3200.game.cards.<a href="com/csse3200/game/cards/CardValidator.html" class="type-name-link" title="class in com.csse3200.game.cards">CardValidator</a></li>
 <li class="circle">com.csse3200.game.components.cards.<a href="com/csse3200/game/components/cards/CardWidgetAssets.html" class="type-name-link" title="class in com.csse3200.game.components.cards">CardWidgetAssets</a></li>
 <li class="circle">com.csse3200.game.components.spritedisplay.clickable.<a href="com/csse3200/game/components/spritedisplay/clickable/CardWidgetInstaller.html" class="type-name-link" title="class in com.csse3200.game.components.spritedisplay.clickable">CardWidgetInstaller</a></li>
+<li class="circle">com.csse3200.game.encounters.results.<a href="com/csse3200/game/encounters/results/ChanceAcquisitionResults.html" class="type-name-link" title="class in com.csse3200.game.encounters.results">ChanceAcquisitionResults</a></li>
+<li class="circle">com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceAcquisitionSession.html" class="type-name-link" title="class in com.csse3200.game.encounters.integration">ChanceAcquisitionSession</a> (implements java.lang.<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/AutoCloseable.html" title="class or interface in java.lang" class="external-link">AutoCloseable</a>)</li>
 <li class="circle">com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceBehaviourResult.html" class="type-name-link" title="class in com.csse3200.game.chance">ChanceBehaviourResult</a></li>
 <li class="circle">com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceChoice.html" class="type-name-link" title="class in com.csse3200.game.chance">ChanceChoice</a></li>
 <li class="circle">com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceChoiceConfig.html" class="type-name-link" title="class in com.csse3200.game.chance.configs">ChanceChoiceConfig</a></li>
 <li class="circle">com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceConfig.html" class="type-name-link" title="class in com.csse3200.game.chance.configs">ChanceConfig</a></li>
+<li class="circle">com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceCurseRiskConfig.html" class="type-name-link" title="class in com.csse3200.game.chance.configs">ChanceCurseRiskConfig</a></li>
+<li class="circle">com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceCurseRiskConfig.Item.html" class="type-name-link" title="class in com.csse3200.game.chance.configs">ChanceCurseRiskConfig.Item</a></li>
 <li class="circle">com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceEncounter.html" class="type-name-link" title="class in com.csse3200.game.chance">ChanceEncounter</a></li>
 <li class="circle">com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceEncounterBehaviourFactory.html" class="type-name-link" title="class in com.csse3200.game.chance">ChanceEncounterBehaviourFactory</a></li>
 <li class="circle">com.csse3200.game.chance.configs.<a href="com/csse3200/game/chance/configs/ChanceEncounterConfig.html" class="type-name-link" title="class in com.csse3200.game.chance.configs">ChanceEncounterConfig</a></li>
@@ -511,6 +522,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/PlayerEffectVisuals.html" class="type-name-link" title="class in com.csse3200.game.components.battle">PlayerEffectVisuals</a></li>
 <li class="circle">com.csse3200.game.entities.factories.<a href="com/csse3200/game/entities/factories/PlayerFactory.html" class="type-name-link" title="class in com.csse3200.game.entities.factories">PlayerFactory</a></li>
 <li class="circle">com.csse3200.game.maps.<a href="com/csse3200/game/maps/PlayerRunState.html" class="type-name-link" title="class in com.csse3200.game.maps">PlayerRunState</a></li>
+<li class="circle">com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/PlayerRunStateItemAdapter.html" class="type-name-link" title="class in com.csse3200.game.encounters.integration">PlayerRunStateItemAdapter</a> (implements com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ItemRewardGateway.html" title="interface in com.csse3200.game.encounters.integration">ItemRewardGateway</a>)</li>
 <li class="circle">com.csse3200.game.save.<a href="com/csse3200/game/save/PlayerSaveData.html" class="type-name-link" title="class in com.csse3200.game.save">PlayerSaveData</a> (implements com.badlogic.gdx.utils.Json.Serializable)</li>
 <li class="circle">com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/PlayNarrationCommand.html" class="type-name-link" title="class in com.csse3200.game.ui.terminal.commands">PlayNarrationCommand</a> (implements com.csse3200.game.ui.terminal.commands.<a href="com/csse3200/game/ui/terminal/commands/Command.html" title="interface in com.csse3200.game.ui.terminal.commands">Command</a>)</li>
 <li class="circle">com.csse3200.game.save.<a href="com/csse3200/game/save/ProgressSaveData.html" class="type-name-link" title="class in com.csse3200.game.save">ProgressSaveData</a></li>
@@ -542,8 +554,6 @@ loadScripts(document, 'script');</script>
 </ul>
 </li>
 <li class="circle">com.csse3200.game.screens.<a href="com/csse3200/game/screens/CardLibraryScreen.html" class="type-name-link" title="class in com.csse3200.game.screens">CardLibraryScreen</a></li>
-<li class="circle">com.csse3200.game.screens.<a href="com/csse3200/game/screens/DemoEventScreen.html" class="type-name-link" title="class in com.csse3200.game.screens">DemoEventScreen</a></li>
-<li class="circle">com.csse3200.game.screens.<a href="com/csse3200/game/screens/DemoShopScreen.html" class="type-name-link" title="class in com.csse3200.game.screens">DemoShopScreen</a></li>
 <li class="circle">com.csse3200.game.screens.<a href="com/csse3200/game/screens/ElitePortalScreen.html" class="type-name-link" title="class in com.csse3200.game.screens">ElitePortalScreen</a></li>
 <li class="circle">com.csse3200.game.screens.<a href="com/csse3200/game/screens/EncounterScreen.html" class="type-name-link" title="class in com.csse3200.game.screens">EncounterScreen</a> (implements com.csse3200.game.screens.<a href="com/csse3200/game/screens/LoadedSaveTransitionAware.html" title="interface in com.csse3200.game.screens">LoadedSaveTransitionAware</a>)</li>
 <li class="circle">com.csse3200.game.screens.<a href="com/csse3200/game/screens/EndBattleScreen.html" class="type-name-link" title="class in com.csse3200.game.screens">EndBattleScreen</a></li>
@@ -557,6 +567,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">com.csse3200.game.screens.<a href="com/csse3200/game/screens/SettingsScreen.html" class="type-name-link" title="class in com.csse3200.game.screens">SettingsScreen</a></li>
 <li class="circle">com.csse3200.game.screens.<a href="com/csse3200/game/screens/StoryLibraryScreen.html" class="type-name-link" title="class in com.csse3200.game.screens">StoryLibraryScreen</a></li>
 <li class="circle">com.csse3200.game.screens.<a href="com/csse3200/game/screens/TempleCardSelectionScreen.html" class="type-name-link" title="class in com.csse3200.game.screens">TempleCardSelectionScreen</a></li>
+<li class="circle">com.csse3200.game.screens.<a href="com/csse3200/game/screens/TutorialVictoryScreen.html" class="type-name-link" title="class in com.csse3200.game.screens">TutorialVictoryScreen</a></li>
 </ul>
 </li>
 <li class="circle">com.csse3200.game.services.<a href="com/csse3200/game/services/ServiceLocator.html" class="type-name-link" title="class in com.csse3200.game.services">ServiceLocator</a></li>
@@ -612,6 +623,7 @@ loadScripts(document, 'script');</script>
 <section class="hierarchy">
 <h2 title="Interface Hierarchy">Interface Hierarchy</h2>
 <ul>
+<li class="circle">com.csse3200.game.encounters.results.<a href="com/csse3200/game/encounters/results/AcquisitionView.html" class="type-name-link" title="interface in com.csse3200.game.encounters.results">AcquisitionView</a></li>
 <li class="circle">com.csse3200.game.components.spritedisplay.clickable.<a href="com/csse3200/game/components/spritedisplay/clickable/AimSession.html" class="type-name-link" title="interface in com.csse3200.game.components.spritedisplay.clickable">AimSession</a></li>
 <li class="circle">com.csse3200.game.services.<a href="com/csse3200/game/services/AudioSettingsApplier.html" class="type-name-link" title="interface in com.csse3200.game.services">AudioSettingsApplier</a></li>
 <li class="circle">com.csse3200.game.tutorial.<a href="com/csse3200/game/tutorial/BattleTutorialView.html" class="type-name-link" title="interface in com.csse3200.game.tutorial">BattleTutorialView</a></li>
@@ -641,6 +653,7 @@ loadScripts(document, 'script');</script>
 </ul>
 </li>
 <li class="circle">com.csse3200.game.rewards.<a href="com/csse3200/game/rewards/ItemEffect.html" class="type-name-link" title="interface in com.csse3200.game.rewards">ItemEffect</a></li>
+<li class="circle">com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ItemRewardGateway.html" class="type-name-link" title="interface in com.csse3200.game.encounters.integration">ItemRewardGateway</a></li>
 <li class="circle">com.csse3200.game.screens.<a href="com/csse3200/game/screens/LoadedSaveTransitionAware.html" class="type-name-link" title="interface in com.csse3200.game.screens">LoadedSaveTransitionAware</a></li>
 <li class="circle">com.csse3200.game.ai.movement.<a href="com/csse3200/game/ai/movement/MovementController.html" class="type-name-link" title="interface in com.csse3200.game.ai.movement">MovementController</a></li>
 <li class="circle">com.csse3200.game.cards.play.integration.<a href="com/csse3200/game/cards/play/integration/PlayerEffectConsumer.html" class="type-name-link" title="interface in com.csse3200.game.cards.play.integration">PlayerEffectConsumer</a></li>
@@ -664,6 +677,8 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">java.lang.<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Enum.html" class="type-name-link external-link" title="class or interface in java.lang">Enum</a>&lt;E&gt; (implements java.lang.<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Comparable.html" title="class or interface in java.lang" class="external-link">Comparable</a>&lt;T&gt;, java.lang.constant.<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/constant/Constable.html" title="class or interface in java.lang.constant" class="external-link">Constable</a>, java.io.<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/Serializable.html" title="class or interface in java.io" class="external-link">Serializable</a>)
 <ul>
+<li class="circle">com.csse3200.game.encounters.results.<a href="com/csse3200/game/encounters/results/AcquisitionPresentation.Dismissal.html" class="type-name-link" title="enum class in com.csse3200.game.encounters.results">AcquisitionPresentation.Dismissal</a></li>
+<li class="circle">com.csse3200.game.encounters.results.<a href="com/csse3200/game/encounters/results/AcquisitionResult.Kind.html" class="type-name-link" title="enum class in com.csse3200.game.encounters.results">AcquisitionResult.Kind</a></li>
 <li class="circle">com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleEvent.html" class="type-name-link" title="enum class in com.csse3200.game.components.combat">BattleEvent</a></li>
 <li class="circle">com.csse3200.game.components.spritedisplay.clickable.<a href="com/csse3200/game/components/spritedisplay/clickable/BattleMenuSkins.Icon.html" class="type-name-link" title="enum class in com.csse3200.game.components.spritedisplay.clickable">BattleMenuSkins.Icon</a></li>
 <li class="circle">com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattlePhase.html" class="type-name-link" title="enum class in com.csse3200.game.components.combat">BattlePhase</a></li>
@@ -675,6 +690,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">com.csse3200.game.components.enemy.enemyai.<a href="com/csse3200/game/components/enemy/enemyai/BossAI.BossPhase.html" class="type-name-link" title="enum class in com.csse3200.game.components.enemy.enemyai">BossAI.BossPhase</a></li>
 <li class="circle">com.csse3200.game.components.enemy.enemyai.<a href="com/csse3200/game/components/enemy/enemyai/BossAI.PressureLevel.html" class="type-name-link" title="enum class in com.csse3200.game.components.enemy.enemyai">BossAI.PressureLevel</a></li>
 <li class="circle">com.csse3200.game.cards.fusion.<a href="com/csse3200/game/cards/fusion/CardFusionFailureReason.html" class="type-name-link" title="enum class in com.csse3200.game.cards.fusion">CardFusionFailureReason</a></li>
+<li class="circle">com.csse3200.game.cards.<a href="com/csse3200/game/cards/CardKeyword.html" class="type-name-link" title="enum class in com.csse3200.game.cards">CardKeyword</a></li>
 <li class="circle">com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayFailureReason.html" class="type-name-link" title="enum class in com.csse3200.game.cards.play">CardPlayFailureReason</a></li>
 <li class="circle">com.csse3200.game.rewards.<a href="com/csse3200/game/rewards/CardRewardProfile.html" class="type-name-link" title="enum class in com.csse3200.game.rewards">CardRewardProfile</a></li>
 <li class="circle">com.csse3200.game.cards.<a href="com/csse3200/game/cards/CardType.html" class="type-name-link" title="enum class in com.csse3200.game.cards">CardType</a></li>
@@ -708,6 +724,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">com.csse3200.game.maps.<a href="com/csse3200/game/maps/RoomType.html" class="type-name-link" title="enum class in com.csse3200.game.maps">RoomType</a></li>
 <li class="circle">com.csse3200.game.save.<a href="com/csse3200/game/save/SaveError.html" class="type-name-link" title="enum class in com.csse3200.game.save">SaveError</a></li>
 <li class="circle">com.csse3200.game.components.save.<a href="com/csse3200/game/components/save/SaveLoadMode.html" class="type-name-link" title="enum class in com.csse3200.game.components.save">SaveLoadMode</a></li>
+<li class="circle">com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopRefreshResult.Status.html" class="type-name-link" title="enum class in com.csse3200.game.shop">ShopRefreshResult.Status</a></li>
 <li class="circle">com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ShopTransactionStatus.html" class="type-name-link" title="enum class in com.csse3200.game.encounters.integration">ShopTransactionStatus</a></li>
 <li class="circle">com.csse3200.game.services.audio.<a href="com/csse3200/game/services/audio/SoundId.html" class="type-name-link" title="enum class in com.csse3200.game.services.audio">SoundId</a></li>
 <li class="circle">com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusInfo.html" class="type-name-link" title="enum class in com.csse3200.game.components.status">StatusInfo</a></li>
@@ -728,6 +745,8 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">java.lang.<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Record.html" class="type-name-link external-link" title="class or interface in java.lang">Record</a>
 <ul>
+<li class="circle">com.csse3200.game.encounters.results.<a href="com/csse3200/game/encounters/results/AcquisitionResult.html" class="type-name-link" title="class in com.csse3200.game.encounters.results">AcquisitionResult</a></li>
+<li class="circle">com.csse3200.game.encounters.results.<a href="com/csse3200/game/encounters/results/AcquisitionResult.Entry.html" class="type-name-link" title="class in com.csse3200.game.encounters.results">AcquisitionResult.Entry</a></li>
 <li class="circle">com.csse3200.game.tutorial.<a href="com/csse3200/game/tutorial/BattleTutorialObservation.html" class="type-name-link" title="class in com.csse3200.game.tutorial">BattleTutorialObservation</a></li>
 <li class="circle">com.csse3200.game.tutorial.<a href="com/csse3200/game/tutorial/BattleTutorialPrompt.html" class="type-name-link" title="class in com.csse3200.game.tutorial">BattleTutorialPrompt</a></li>
 <li class="circle">com.csse3200.game.bestiary.<a href="com/csse3200/game/bestiary/BestiaryEntry.html" class="type-name-link" title="class in com.csse3200.game.bestiary">BestiaryEntry</a></li>
@@ -746,6 +765,8 @@ loadScripts(document, 'script');</script>
 <li class="circle">com.csse3200.game.rewards.<a href="com/csse3200/game/rewards/CardRewardPolicy.RarityWeights.html" class="type-name-link" title="class in com.csse3200.game.rewards">CardRewardPolicy.RarityWeights</a></li>
 <li class="circle">com.csse3200.game.rewards.<a href="com/csse3200/game/rewards/CardRewardSelection.html" class="type-name-link" title="class in com.csse3200.game.rewards">CardRewardSelection</a></li>
 <li class="circle">com.csse3200.game.components.cards.<a href="com/csse3200/game/components/cards/CardUpgradeSelection.UpgradeOption.html" class="type-name-link" title="class in com.csse3200.game.components.cards">CardUpgradeSelection.UpgradeOption</a></li>
+<li class="circle">com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceCurseRisk.html" class="type-name-link" title="class in com.csse3200.game.chance">ChanceCurseRisk</a></li>
+<li class="circle">com.csse3200.game.chance.<a href="com/csse3200/game/chance/ChanceCurseRisk.WeightedItem.html" class="type-name-link" title="class in com.csse3200.game.chance">ChanceCurseRisk.WeightedItem</a></li>
 <li class="circle">com.csse3200.game.components.spritedisplay.clickable.<a href="com/csse3200/game/components/spritedisplay/clickable/ClickableRecord.html" class="type-name-link" title="class in com.csse3200.game.components.spritedisplay.clickable">ClickableRecord</a></li>
 <li class="circle">com.csse3200.game.rewards.<a href="com/csse3200/game/rewards/CursePenalties.GainReduction.html" class="type-name-link" title="class in com.csse3200.game.rewards">CursePenalties.GainReduction</a></li>
 <li class="circle">com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/DamageTakenEvent.html" class="type-name-link" title="class in com.csse3200.game.components.combat">DamageTakenEvent</a></li>
@@ -761,6 +782,11 @@ loadScripts(document, 'script');</script>
 <li class="circle">com.csse3200.game.save.<a href="com/csse3200/game/save/RestoreResult.html" class="type-name-link" title="class in com.csse3200.game.save">RestoreResult</a></li>
 <li class="circle">com.csse3200.game.save.<a href="com/csse3200/game/save/SaveResult.html" class="type-name-link" title="class in com.csse3200.game.save">SaveResult</a></li>
 <li class="circle">com.csse3200.game.save.<a href="com/csse3200/game/save/SaveSlotListResult.html" class="type-name-link" title="class in com.csse3200.game.save">SaveSlotListResult</a></li>
+<li class="circle">com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopPurchaseReceipt.html" class="type-name-link" title="class in com.csse3200.game.shop">ShopPurchaseReceipt</a></li>
+<li class="circle">com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopRefreshPolicy.html" class="type-name-link" title="class in com.csse3200.game.shop">ShopRefreshPolicy</a></li>
+<li class="circle">com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopRefreshResult.html" class="type-name-link" title="class in com.csse3200.game.shop">ShopRefreshResult</a></li>
+<li class="circle">com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopSnapshot.html" class="type-name-link" title="class in com.csse3200.game.shop">ShopSnapshot</a></li>
+<li class="circle">com.csse3200.game.shop.<a href="com/csse3200/game/shop/ShopSnapshot.Offer.html" class="type-name-link" title="class in com.csse3200.game.shop">ShopSnapshot.Offer</a></li>
 <li class="circle">com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusTooltip.Content.html" class="type-name-link" title="class in com.csse3200.game.components.status">StatusTooltip.Content</a></li>
 <li class="circle">com.csse3200.game.story.<a href="com/csse3200/game/story/StoryEntry.html" class="type-name-link" title="class in com.csse3200.game.story">StoryEntry</a></li>
 <li class="circle">com.csse3200.game.components.spritedisplay.clickable.<a href="com/csse3200/game/components/spritedisplay/clickable/TriggerPayload.html" class="type-name-link" title="class in com.csse3200.game.components.spritedisplay.clickable">TriggerPayload</a></li>

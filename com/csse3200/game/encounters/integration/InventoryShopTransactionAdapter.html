@@ -127,26 +127,31 @@ implements <a href="ShopTransactionGateway.html" title="interface in com.csse320
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrency()" class="member-name-link">getCurrency</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ShopTransactionStatus.html" title="enum class in com.csse3200.game.encounters.integration">ShopTransactionStatus</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#chargeServiceFee(int)" class="member-name-link">chargeServiceFee</a><wbr>(int&nbsp;amount)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Charges an undiscounted service fee without granting a card.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrency()" class="member-name-link">getCurrency</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the current spendable Player currency.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>float</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getShopDiscount()" class="member-name-link">getShopDiscount</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>float</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getShopDiscount()" class="member-name-link">getShopDiscount</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the player's current permanent shop discount, as a fraction (e.g.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ShopTransactionStatus.html" title="enum class in com.csse3200.game.encounters.integration">ShopTransactionStatus</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#purchaseCard(java.lang.String,int)" class="member-name-link">purchaseCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId,
- int&nbsp;price)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Attempts the player, card-library, and deck parts of a purchase as one logical transaction.</div>
-</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ShopTransactionStatus.html" title="enum class in com.csse3200.game.encounters.integration">ShopTransactionStatus</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#validatePurchase(java.lang.String,int)" class="member-name-link">validatePurchase</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#purchaseCard(java.lang.String,int)" class="member-name-link">purchaseCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId,
  int&nbsp;price)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Attempts the player, card-library, and deck parts of a purchase as one logical transaction.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ShopTransactionStatus.html" title="enum class in com.csse3200.game.encounters.integration">ShopTransactionStatus</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#validatePurchase(java.lang.String,int)" class="member-name-link">validatePurchase</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cardId,
+ int&nbsp;price)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Validates a purchase without changing player or deck state.</div>
 </div>
 </div>
@@ -246,6 +251,18 @@ implements <a href="ShopTransactionGateway.html" title="interface in com.csse320
 <dd><code><a href="ShopTransactionGateway.html#getShopDiscount()">getShopDiscount</a></code>&nbsp;in interface&nbsp;<code><a href="ShopTransactionGateway.html" title="interface in com.csse3200.game.encounters.integration">ShopTransactionGateway</a></code></dd>
 <dt>Returns:</dt>
 <dd>the current shop discount rate</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="chargeServiceFee(int)">
+<h3>chargeServiceFee</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ShopTransactionStatus.html" title="enum class in com.csse3200.game.encounters.integration">ShopTransactionStatus</a></span>&nbsp;<span class="element-name">chargeServiceFee</span><wbr><span class="parameters">(int&nbsp;amount)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="ShopTransactionGateway.html#chargeServiceFee(int)">ShopTransactionGateway</a></code></span></div>
+<div class="block">Charges an undiscounted service fee without granting a card. Unsupported adapters fail closed.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="ShopTransactionGateway.html#chargeServiceFee(int)">chargeServiceFee</a></code>&nbsp;in interface&nbsp;<code><a href="ShopTransactionGateway.html" title="interface in com.csse3200.game.encounters.integration">ShopTransactionGateway</a></code></dd>
 </dl>
 </section>
 </li>

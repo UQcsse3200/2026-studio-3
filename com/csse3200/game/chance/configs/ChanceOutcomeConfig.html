@@ -92,7 +92,7 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">ChanceOutcomeConfig</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Configuration data for the health, currency, and optional card effects of a Chance choice.</div>
+<div class="block">Configuration data for the health, currency, card, and item rewards of a Chance choice.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -119,6 +119,11 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color"><code><a href="#healthDelta" class="member-name-link">healthDelta</a></code></div>
 <div class="col-last even-row-color">
 <div class="block">Required signed health change.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]</code></div>
+<div class="col-second odd-row-color"><code><a href="#itemRewardIds" class="member-name-link">itemRewardIds</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Optional ordered item IDs; repeated IDs grant separate copies without applying effects.</div>
 </div>
 </div>
 </section>
@@ -175,6 +180,13 @@ loadScripts(document, 'script');</script>
 <h3>cardRewardId</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">cardRewardId</span></div>
 <div class="block">Optional stable Card Service identifier rewarded by this outcome.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="itemRewardIds">
+<h3>itemRewardIds</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]</span>&nbsp;<span class="element-name">itemRewardIds</span></div>
+<div class="block">Optional ordered item IDs; repeated IDs grant separate copies without applying effects.</div>
 </section>
 </li>
 </ul>

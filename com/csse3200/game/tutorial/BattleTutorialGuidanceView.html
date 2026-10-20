@@ -189,13 +189,20 @@ implements <a href="BattleTutorialView.html" title="interface in com.csse3200.ga
 <div class="block">Bind current UI components, not presentation strings or screenshot coordinates.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#show(com.csse3200.game.tutorial.BattleTutorialPrompt)" class="member-name-link">show</a><wbr>(<a href="BattleTutorialPrompt.html" title="class in com.csse3200.game.tutorial">BattleTutorialPrompt</a>&nbsp;prompt)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setStatusTargets(java.util.function.Supplier,java.util.function.Supplier,java.util.function.Supplier)" class="member-name-link">setStatusTargets</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.Actor&gt;&nbsp;poisonCard,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.Actor&gt;&nbsp;enemyStatuses,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.Actor&gt;&nbsp;statusTooltip)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Shows text and highlights the named live actor, enabling Continue only when allowed.</div>
+<div class="block">Binds the exact Poison Dagger copy and Team 1's live status actors.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#showResolvedDamage(int)" class="member-name-link">showResolvedDamage</a><wbr>(int&nbsp;amount)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#show(com.csse3200.game.tutorial.BattleTutorialPrompt)" class="member-name-link">show</a><wbr>(<a href="BattleTutorialPrompt.html" title="class in com.csse3200.game.tutorial">BattleTutorialPrompt</a>&nbsp;prompt)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Shows text and highlights the named live actor, enabling Continue only when allowed.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#showResolvedDamage(int)" class="member-name-link">showResolvedDamage</a><wbr>(int&nbsp;amount)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Optional local damage-number presentation from a real HP difference, never simulated damage.</div>
 </div>
 </div>
@@ -249,6 +256,15 @@ implements <a href="BattleTutorialView.html" title="interface in com.csse3200.ga
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.ui.Label&gt;&nbsp;health,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.Actor&gt;&nbsp;enemyStats)</span></div>
 <div class="block">Bind current UI components, not presentation strings or screenshot coordinates.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setStatusTargets(java.util.function.Supplier,java.util.function.Supplier,java.util.function.Supplier)">
+<h3>setStatusTargets</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setStatusTargets</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.Actor&gt;&nbsp;poisonCard,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.Actor&gt;&nbsp;enemyStatuses,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;com.badlogic.gdx.scenes.scene2d.Actor&gt;&nbsp;statusTooltip)</span></div>
+<div class="block">Binds the exact Poison Dagger copy and Team 1's live status actors.</div>
 </section>
 </li>
 <li>

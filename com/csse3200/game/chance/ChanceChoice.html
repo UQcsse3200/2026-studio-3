@@ -110,6 +110,13 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Creates a Chance Encounter choice.</div>
 </div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(java.lang.String,java.lang.String,com.csse3200.game.chance.ChanceOutcome,com.csse3200.game.chance.ChanceCurseRisk)" class="member-name-link">ChanceChoice</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;id,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;description,
+ <a href="ChanceOutcome.html" title="class in com.csse3200.game.chance">ChanceOutcome</a>&nbsp;outcome,
+ <a href="ChanceCurseRisk.html" title="class in com.csse3200.game.chance">ChanceCurseRisk</a>&nbsp;curseRisk)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a choice with base rewards and optional risk resolved by its runtime behaviour.</div>
+</div>
 </div>
 </section>
 </li>
@@ -124,20 +131,25 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDescription()" class="member-name-link">getDescription</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="ChanceCurseRisk.html" title="class in com.csse3200.game.chance">ChanceCurseRisk</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurseRisk()" class="member-name-link">getCurseRisk</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Gets the player-facing choice description.</div>
+<div class="block">Returns the optional immutable Curse pool without drawing a random result.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getId()" class="member-name-link">getId</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDescription()" class="member-name-link">getDescription</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Gets the player-facing choice description.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getId()" class="member-name-link">getId</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Gets the stable choice identifier.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ChanceOutcome.html" title="class in com.csse3200.game.chance">ChanceOutcome</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolve()" class="member-name-link">resolve</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Resolves this choice to its associated outcome.</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ChanceOutcome.html" title="class in com.csse3200.game.chance">ChanceOutcome</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolve()" class="member-name-link">resolve</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns this choice's configured base outcome.</div>
 </div>
 </div>
 </div>
@@ -167,8 +179,18 @@ loadScripts(document, 'script');</script>
 <dt>Parameters:</dt>
 <dd><code>id</code> - stable choice identifier</dd>
 <dd><code>description</code> - player-facing choice description</dd>
-<dd><code>outcome</code> - outcome produced when this choice is resolved</dd>
+<dd><code>outcome</code> - configured base reward, before any runtime behaviour adds random rewards</dd>
 </dl>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(java.lang.String,java.lang.String,com.csse3200.game.chance.ChanceOutcome,com.csse3200.game.chance.ChanceCurseRisk)">
+<h3>ChanceChoice</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ChanceChoice</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;id,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;description,
+ <a href="ChanceOutcome.html" title="class in com.csse3200.game.chance">ChanceOutcome</a>&nbsp;outcome,
+ <a href="ChanceCurseRisk.html" title="class in com.csse3200.game.chance">ChanceCurseRisk</a>&nbsp;curseRisk)</span></div>
+<div class="block">Creates a choice with base rewards and optional risk resolved by its runtime behaviour.</div>
 </section>
 </li>
 </ul>
@@ -179,6 +201,13 @@ loadScripts(document, 'script');</script>
 <section class="method-details" id="method-detail">
 <h2>Method Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="getCurseRisk()">
+<h3>getCurseRisk</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="ChanceCurseRisk.html" title="class in com.csse3200.game.chance">ChanceCurseRisk</a>&gt;</span>&nbsp;<span class="element-name">getCurseRisk</span>()</div>
+<div class="block">Returns the optional immutable Curse pool without drawing a random result.</div>
+</section>
+</li>
 <li>
 <section class="detail" id="getId()">
 <h3>getId</h3>
@@ -205,7 +234,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="resolve()">
 <h3>resolve</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ChanceOutcome.html" title="class in com.csse3200.game.chance">ChanceOutcome</a></span>&nbsp;<span class="element-name">resolve</span>()</div>
-<div class="block">Resolves this choice to its associated outcome.</div>
+<div class="block">Returns this choice's configured base outcome. Runtime behaviour resolves optional Curse risk.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>associated Chance Encounter outcome</dd>

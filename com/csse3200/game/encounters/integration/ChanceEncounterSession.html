@@ -148,6 +148,17 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Completes an encounter that handed control to a delegated flow.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../results/AcquisitionResult.html" title="class in com.csse3200.game.encounters.results">AcquisitionResult</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAcquisitionResult(com.csse3200.game.cards.CardService)" class="member-name-link">getAcquisitionResult</a><wbr>(<a href="../../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cards)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Maps only the saved successful resolution and caches its immutable result, including an empty
+ result for a no-effect choice.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ChanceAcquisitionSession.html" title="class in com.csse3200.game.encounters.integration">ChanceAcquisitionSession</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAcquisitionSession(com.csse3200.game.cards.CardService)" class="member-name-link">getAcquisitionSession</a><wbr>(<a href="../../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cards)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the single optional display adapter retained across UI rebuilds for this session.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../../chance/ChanceChoice.html" title="class in com.csse3200.game.chance">ChanceChoice</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAvailableChoices()" class="member-name-link">getAvailableChoices</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -268,6 +279,21 @@ loadScripts(document, 'script');</script>
 <section class="method-details" id="method-detail">
 <h2>Method Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="getAcquisitionResult(com.csse3200.game.cards.CardService)">
+<h3>getAcquisitionResult</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../results/AcquisitionResult.html" title="class in com.csse3200.game.encounters.results">AcquisitionResult</a>&gt;</span>&nbsp;<span class="element-name">getAcquisitionResult</span><wbr><span class="parameters">(<a href="../../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cards)</span></div>
+<div class="block">Maps only the saved successful resolution and caches its immutable result, including an empty
+ result for a no-effect choice. Metadata failures leave settlement untouched and may be retried.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getAcquisitionSession(com.csse3200.game.cards.CardService)">
+<h3>getAcquisitionSession</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ChanceAcquisitionSession.html" title="class in com.csse3200.game.encounters.integration">ChanceAcquisitionSession</a></span>&nbsp;<span class="element-name">getAcquisitionSession</span><wbr><span class="parameters">(<a href="../../cards/CardService.html" title="interface in com.csse3200.game.cards">CardService</a>&nbsp;cards)</span></div>
+<div class="block">Returns the single optional display adapter retained across UI rebuilds for this session.</div>
+</section>
+</li>
 <li>
 <section class="detail" id="resolveChoice(java.lang.String)">
 <h3>resolveChoice</h3>

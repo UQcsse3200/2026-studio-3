@@ -95,7 +95,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Loads and validates Chance Encounter definitions from a JSON configuration file.
 
  <p>Catalog-less entry points validate JSON structure and reward-ID syntax. Use a catalog-aware
- entry point when reward IDs must also be checked against registered card definitions.</div>
+ entry point when reward IDs must also be checked against registered card definitions. Item IDs
+ are checked for enum-name syntax here and against the authoritative item API before settlement.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">

@@ -21,6 +21,7 @@ com.csse3200.game.components.bestiary
 com.csse3200.game.components.cards
 com.csse3200.game.components.chance
 com.csse3200.game.components.combat
+com.csse3200.game.components.encounters
 com.csse3200.game.components.enemy
 com.csse3200.game.components.enemy.enemyai
 com.csse3200.game.components.enemy.memory
@@ -42,6 +43,7 @@ com.csse3200.game.components.status
 com.csse3200.game.components.tasks
 com.csse3200.game.concurrency
 com.csse3200.game.encounters.integration
+com.csse3200.game.encounters.results
 com.csse3200.game.entities
 com.csse3200.game.entities.configs
 com.csse3200.game.entities.factories

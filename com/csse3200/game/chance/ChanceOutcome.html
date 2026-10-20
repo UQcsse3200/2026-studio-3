@@ -152,17 +152,37 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Gets the signed health change.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isNoEffect()" class="member-name-link">isNoEffect</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getItemRewardIds()" class="member-name-link">getItemRewardIds</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Checks whether this outcome changes neither health nor currency.</div>
+<div class="block">Returns immutable ordered item IDs, possibly empty and containing duplicate copies.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ChanceOutcome.html" title="class in com.csse3200.game.chance">ChanceOutcome</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#withCardRewards(int,int,java.util.List)" class="member-name-link">withCardRewards</a><wbr>(int&nbsp;healthDelta,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isNoEffect()" class="member-name-link">isNoEffect</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Checks whether this outcome changes no statistics and grants no cards or items.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ChanceOutcome.html" title="class in com.csse3200.game.chance">ChanceOutcome</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#withCardRewards(int,int,java.util.List)" class="member-name-link">withCardRewards</a><wbr>(int&nbsp;healthDelta,
  int&nbsp;currencyDelta,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;cardRewardIds)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Creates a Chance Encounter outcome containing zero or more ordered card rewards.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ChanceOutcome.html" title="class in com.csse3200.game.chance">ChanceOutcome</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#withItemRewards(int,int,java.util.List)" class="member-name-link">withItemRewards</a><wbr>(int&nbsp;healthDelta,
+ int&nbsp;currencyDelta,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;itemRewardIds)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Creates an outcome granting ordered item IDs, retaining duplicate copies.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ChanceOutcome.html" title="class in com.csse3200.game.chance">ChanceOutcome</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#withRewards(int,int,java.util.List,java.util.List)" class="member-name-link">withRewards</a><wbr>(int&nbsp;healthDelta,
+ int&nbsp;currencyDelta,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;cardRewardIds,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;itemRewardIds)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Creates an outcome with ordered card and item rewards, retaining duplicate copies.</div>
 </div>
 </div>
 </div>
@@ -217,6 +237,45 @@ loadScripts(document, 'script');</script>
 <section class="method-details" id="method-detail">
 <h2>Method Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="withItemRewards(int,int,java.util.List)">
+<h3>withItemRewards</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="ChanceOutcome.html" title="class in com.csse3200.game.chance">ChanceOutcome</a></span>&nbsp;<span class="element-name">withItemRewards</span><wbr><span class="parameters">(int&nbsp;healthDelta,
+ int&nbsp;currencyDelta,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;itemRewardIds)</span></div>
+<div class="block">Creates an outcome granting ordered item IDs, retaining duplicate copies.
+
+ <p>IDs use the authoritative ItemType names. Acquisition records ownership only; the Item
+ system owns effect application when creating the player, starting battle or using an item.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>healthDelta</code> - signed change in health</dd>
+<dd><code>currencyDelta</code> - signed change in currency</dd>
+<dd><code>itemRewardIds</code> - stable item identifiers</dd>
+<dt>Returns:</dt>
+<dd>immutable outcome containing item rewards</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="withRewards(int,int,java.util.List,java.util.List)">
+<h3>withRewards</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="ChanceOutcome.html" title="class in com.csse3200.game.chance">ChanceOutcome</a></span>&nbsp;<span class="element-name">withRewards</span><wbr><span class="parameters">(int&nbsp;healthDelta,
+ int&nbsp;currencyDelta,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;cardRewardIds,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;itemRewardIds)</span></div>
+<div class="block">Creates an outcome with ordered card and item rewards, retaining duplicate copies.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>healthDelta</code> - signed change in health</dd>
+<dd><code>currencyDelta</code> - signed change in currency</dd>
+<dd><code>cardRewardIds</code> - stable card identifiers</dd>
+<dd><code>itemRewardIds</code> - stable item identifiers</dd>
+<dt>Returns:</dt>
+<dd>immutable combined outcome</dd>
+</dl>
+</section>
+</li>
 <li>
 <section class="detail" id="withCardRewards(int,int,java.util.List)">
 <h3>withCardRewards</h3>
@@ -282,13 +341,20 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="getItemRewardIds()">
+<h3>getItemRewardIds</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">getItemRewardIds</span>()</div>
+<div class="block">Returns immutable ordered item IDs, possibly empty and containing duplicate copies.</div>
+</section>
+</li>
+<li>
 <section class="detail" id="isNoEffect()">
 <h3>isNoEffect</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isNoEffect</span>()</div>
-<div class="block">Checks whether this outcome changes neither health nor currency.</div>
+<div class="block">Checks whether this outcome changes no statistics and grants no cards or items.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>true when both deltas are zero</dd>
+<dd>true when both deltas are zero and both reward lists are empty</dd>
 </dl>
 </section>
 </li>

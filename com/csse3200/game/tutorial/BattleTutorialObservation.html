@@ -92,7 +92,7 @@ loadScripts(document, 'script');</script>
 </div>
 <section class="class-description" id="class-description">
 <hr>
-<div class="type-signature"><span class="modifiers">public record </span><span class="element-name type-name-label">BattleTutorialObservation</span>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/IntSupplier.html" title="class or interface in java.util.function" class="external-link">IntSupplier</a>&nbsp;enemyHealth, <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/IntSupplier.html" title="class or interface in java.util.function" class="external-link">IntSupplier</a>&nbsp;playerHealth, <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;visualsSettled)
+<div class="type-signature"><span class="modifiers">public record </span><span class="element-name type-name-label">BattleTutorialObservation</span>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/IntSupplier.html" title="class or interface in java.util.function" class="external-link">IntSupplier</a>&nbsp;enemyHealth, <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/IntSupplier.html" title="class or interface in java.util.function" class="external-link">IntSupplier</a>&nbsp;playerHealth, <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;visualsSettled, <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enemyHasPoison)
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a></span></div>
 <div class="block">Read-only tutorial probes. The battle and animation owners retain all timing and rules.</div>
 </section>
@@ -106,9 +106,10 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.util.function.IntSupplier,java.util.function.IntSupplier,java.util.function.BooleanSupplier)" class="member-name-link">BattleTutorialObservation</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/IntSupplier.html" title="class or interface in java.util.function" class="external-link">IntSupplier</a>&nbsp;enemyHealth,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.util.function.IntSupplier,java.util.function.IntSupplier,java.util.function.BooleanSupplier,java.util.function.BooleanSupplier)" class="member-name-link">BattleTutorialObservation</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/IntSupplier.html" title="class or interface in java.util.function" class="external-link">IntSupplier</a>&nbsp;enemyHealth,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/IntSupplier.html" title="class or interface in java.util.function" class="external-link">IntSupplier</a>&nbsp;playerHealth,
- <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;visualsSettled)</code></div>
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;visualsSettled,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enemyHasPoison)</code></div>
 <div class="col-last even-row-color">
 <div class="block">Creates an instance of a <code>BattleTutorialObservation</code> record class.</div>
 </div>
@@ -126,34 +127,39 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/IntSupplier.html" title="class or interface in java.util.function" class="external-link">IntSupplier</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#enemyHealth()" class="member-name-link">enemyHealth</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#enemyHasPoison()" class="member-name-link">enemyHasPoison</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>enemyHealth</code> record component.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Indicates whether some other object is "equal to" this one.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns a hash code value for this object.</div>
+<div class="block">Returns the value of the <code>enemyHasPoison</code> record component.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/IntSupplier.html" title="class or interface in java.util.function" class="external-link">IntSupplier</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#playerHealth()" class="member-name-link">playerHealth</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#enemyHealth()" class="member-name-link">enemyHealth</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the value of the <code>enemyHealth</code> record component.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns a hash code value for this object.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/IntSupplier.html" title="class or interface in java.util.function" class="external-link">IntSupplier</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#playerHealth()" class="member-name-link">playerHealth</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <code>playerHealth</code> record component.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a string representation of this record class.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#visualsSettled()" class="member-name-link">visualsSettled</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#visualsSettled()" class="member-name-link">visualsSettled</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <code>visualsSettled</code> record component.</div>
 </div>
 </div>
@@ -174,17 +180,19 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(java.util.function.IntSupplier,java.util.function.IntSupplier,java.util.function.BooleanSupplier)">
+<section class="detail" id="&lt;init&gt;(java.util.function.IntSupplier,java.util.function.IntSupplier,java.util.function.BooleanSupplier,java.util.function.BooleanSupplier)">
 <h3>BattleTutorialObservation</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">BattleTutorialObservation</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/IntSupplier.html" title="class or interface in java.util.function" class="external-link">IntSupplier</a>&nbsp;enemyHealth,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/IntSupplier.html" title="class or interface in java.util.function" class="external-link">IntSupplier</a>&nbsp;playerHealth,
- <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;visualsSettled)</span></div>
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;visualsSettled,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enemyHasPoison)</span></div>
 <div class="block">Creates an instance of a <code>BattleTutorialObservation</code> record class.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>enemyHealth</code> - the value for the <code>enemyHealth</code> record component</dd>
 <dd><code>playerHealth</code> - the value for the <code>playerHealth</code> record component</dd>
 <dd><code>visualsSettled</code> - the value for the <code>visualsSettled</code> record component</dd>
+<dd><code>enemyHasPoison</code> - the value for the <code>enemyHasPoison</code> record component</dd>
 </dl>
 </section>
 </li>
@@ -267,6 +275,17 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>the value of the <code>visualsSettled</code> record component</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="enemyHasPoison()">
+<h3>enemyHasPoison</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a></span>&nbsp;<span class="element-name">enemyHasPoison</span>()</div>
+<div class="block">Returns the value of the <code>enemyHasPoison</code> record component.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>the value of the <code>enemyHasPoison</code> record component</dd>
 </dl>
 </section>
 </li>
