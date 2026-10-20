@@ -6,12 +6,14 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
@@ -355,6 +357,9 @@ public class PauseMenuDisplay extends UIComponent {
   }
 
   private void showSettings() {
+    if (settingsPanel != null) {
+      return;
+    }
     settingsTable = buildSettingsTable();
     table.clearChildren();
     table.add(settingsTable);
@@ -362,11 +367,24 @@ public class PauseMenuDisplay extends UIComponent {
   }
 
   private void showPauseButtons() {
+    flushSettingsAudio();
+    if (settingsPanel != null
+        && stage.getKeyboardFocus() != null
+        && stage.getKeyboardFocus().isDescendantOf(settingsPanel)) {
+      stage.setKeyboardFocus(null);
+    }
     table.clearChildren();
     table.add(menuTable);
     settingsTable = null;
     settingsPanel = null;
     setFocus(pauseFocusables());
+  }
+
+  private void flushSettingsAudio() {
+    if (settingsPanel != null) {
+      // Resume and disposal cannot stay open on failure; the panel logs unsuccessful saves.
+      settingsPanel.flushPendingAudioChanges();
+    }
   }
 
   /** The buttons the player can keyboard-navigate on the root pause view, top to bottom. */
@@ -431,13 +449,18 @@ public class PauseMenuDisplay extends UIComponent {
     }
   }
 
-  /** Backs out of the settings subview or confirm dialog; does nothing on the root menu. */
+  /**
+   * Backs out one level: closes an open confirm dialog or settings subview, or, when already on the
+   * root menu, closes the pause menu (fires {@link #RESUME_EVENT}) so Escape toggles the menu.
+   */
   private void navigateBack() {
     if (confirmDialog.getStage() != null) {
       confirmDialog.hide(null);
       setFocus(pauseFocusables());
     } else if (settingsTable != null) {
-      showPauseButtons();
+      settingsPanel.requestBack();
+    } else {
+      entity.getEvents().trigger(RESUME_EVENT);
     }
   }
 
@@ -472,12 +495,15 @@ public class PauseMenuDisplay extends UIComponent {
 
   @Override
   public void dispose() {
+    flushSettingsAudio();
     if (confirmDialog != null) {
       confirmDialog.remove();
     }
     if (table != null) {
       table.clear();
     }
+    settingsPanel = null;
+    settingsTable = null;
     super.dispose();
   }
 
@@ -541,5 +567,17 @@ public class PauseMenuDisplay extends UIComponent {
 
   SettingsPanel getSettingsPanel() {
     return settingsPanel;
+  }
+
+  // Returns the stage only when a visible pause-settings text field owns keyboard focus.
+  Stage getSettingsInputStage() {
+    Actor focus = stage.getKeyboardFocus();
+    return table.isVisible()
+            && settingsPanel != null
+            && confirmDialog.getStage() == null
+            && focus instanceof TextField
+            && focus.isDescendantOf(settingsPanel)
+        ? stage
+        : null;
   }
 }
