@@ -39,9 +39,23 @@ class BattleRewardProfileTest {
   void tutorialKeepsItsOwnCompletionFlowInsteadOfOpeningPostBattleRewards() {
     GdxGame game = mock(GdxGame.class);
     BattleController controller = mock(BattleController.class);
-    new Entity().addComponent(new BattleActions(controller, game, true)).create();
-    verify(controller, never()).addBattleEndListener(any());
-    verify(game, never()).showBattleResult(anyBoolean(), any());
+    Entity entity = new Entity().addComponent(new BattleActions(controller, game, true));
+    Application original = Gdx.app;
+    Gdx.app = null;
+    try {
+      entity.create();
+      @SuppressWarnings("unchecked")
+      ArgumentCaptor<EventListener1<Boolean>> listener =
+          ArgumentCaptor.forClass(EventListener1.class);
+      verify(controller).addBattleEndListener(listener.capture());
+      listener.getValue().handle(true);
+      verify(game).setScreen(GdxGame.ScreenType.TUTORIAL_VICTORY);
+      verify(game, never()).showBattleResult(anyBoolean(), any());
+      verify(game, never()).requestAutosaveAfterEncounter();
+    } finally {
+      entity.getComponent(BattleActions.class).dispose();
+      Gdx.app = original;
+    }
   }
 
   private void assertTransition(

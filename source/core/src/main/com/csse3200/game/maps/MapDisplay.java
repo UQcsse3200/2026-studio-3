@@ -50,7 +50,8 @@ public class MapDisplay extends UIComponent {
     "images/map/cross.png",
     "images/map/legend.png",
     "images/map/main_menu_btn.png",
-    "images/map/campfire.png"
+    "images/map/campfire.png",
+    "images/ui/inventory-panel.png"
   };
 
   private Group group;
@@ -63,6 +64,7 @@ public class MapDisplay extends UIComponent {
 
   private Table playerTable;
   private Table legendTable;
+  private MapIntroduction mapIntroduction;
   private Table levelTable;
   // to store positions
   private final Map<Integer, Vector2> nodePositions = new HashMap<>();
@@ -150,6 +152,16 @@ public class MapDisplay extends UIComponent {
 
     addPlayerStats();
     addLegend();
+    if (runState != null) {
+      mapIntroduction =
+          new MapIntroduction(
+              skin,
+              runState,
+              ServiceLocator.getResourceService()
+                  .getAsset("images/ui/inventory-panel.png", Texture.class));
+      mapIntroduction.resize(stage.getWidth(), stage.getHeight());
+      stage.addActor(mapIntroduction);
+    }
   }
 
   /**
@@ -376,6 +388,9 @@ public class MapDisplay extends UIComponent {
   public void resizeHud() {
     float width = stage.getWidth();
     float height = stage.getHeight();
+    if (mapIntroduction != null) {
+      mapIntroduction.resize(width, height);
+    }
     float extraWidth = width - UI_WIDTH;
     if (playerTable != null) {
       float sideExtension = extraWidth / 2f;
@@ -436,6 +451,9 @@ public class MapDisplay extends UIComponent {
   /** Closes the MapUI */
   @Override
   public void dispose() {
+    if (mapIntroduction != null) {
+      mapIntroduction.remove();
+    }
     scrollPane.remove();
     ServiceLocator.getResourceService().unloadAssets(mapAssets);
   }

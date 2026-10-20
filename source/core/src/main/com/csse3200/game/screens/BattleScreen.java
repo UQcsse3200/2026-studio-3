@@ -54,6 +54,7 @@ import com.csse3200.game.components.battle.OffensiveEffectVisuals;
 import com.csse3200.game.components.battle.PlayerEffectVisuals;
 import com.csse3200.game.components.cards.CardEffectHandler;
 import com.csse3200.game.components.cards.CardInspectionController;
+import com.csse3200.game.components.cards.CardKeywordTooltip;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.combat.BattleController;
@@ -155,6 +156,7 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
           "images/armour.png",
           "images/enemy_release/heavens_grace.png",
           "images/ui/inventory-panel.png",
+          "images/main_menu_button_frame.png",
           BATTLE_TITLE_TEXTURE,
           "images/effects/shield.png",
           "images/effects/fortify.png",
@@ -185,6 +187,7 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
   private final Skin cardWidgetSkin;
   private final Skin cardInteractionSkin;
   private final CardWidgetAssets cardWidgetAssets;
+  private final CardKeywordTooltip cardKeywordTooltip;
   private final CardEffectResolutionService cardEffects;
   private final CardPlayService cardPlayService;
   private final CardAimController enemyCardAim;
@@ -277,6 +280,7 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
     cardWidgetSkin = new Skin(Gdx.files.internal(CARD_WIDGET_SKIN));
     cardWidgetAssets =
         CardWidgetAssets.fromManagedResources(cardWidgetSkin, ServiceLocator.getResourceService());
+    cardKeywordTooltip = new CardKeywordTooltip(cardWidgetSkin);
     cardInteractionSkin = createCardInteractionSkin();
 
     PlayerDeck playerDeck = prepareBattleDeckSource();
@@ -416,11 +420,14 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
     }
     var openingOrder = new ArrayList<>(playerDeck.getCards());
     java.util.Collections.shuffle(openingOrder);
-    for (int i = 0; i < openingOrder.size(); i++) {
-      if ("strike".equals(openingOrder.get(i).cardId())) {
-        java.util.Collections.swap(
-            openingOrder, Math.min(AMOUNT_OF_CARDS_IN_DECK, openingOrder.size()) / 2, i);
-        break;
+    int middle = Math.min(AMOUNT_OF_CARDS_IN_DECK, openingOrder.size()) / 2;
+    for (int offset = 0; offset < 2; offset++) {
+      String cardId = offset == 0 ? "strike" : "poison_dagger";
+      for (int i = 0; i < openingOrder.size(); i++) {
+        if (cardId.equals(openingOrder.get(i).cardId())) {
+          java.util.Collections.swap(openingOrder, middle + offset, i);
+          break;
+        }
       }
     }
     return PlayerDeck.fromInstances(library, openingOrder);
@@ -429,6 +436,7 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
   private void setupTutorialGuidance(
       BattleGameArea forestGameArea, Entity player, Entity animationCoordinatorEntity) {
     String demonstrationId = handRowOrder.get(handRowOrder.size() / 2).instanceId();
+    String poisonId = handRowOrder.get(handRowOrder.size() / 2 + 1).instanceId();
     tutorialView =
         new BattleTutorialGuidanceView(
             ServiceLocator.getRenderService().getStage(),
@@ -488,6 +496,20 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
                 .map(com.csse3200.game.components.StatsDisplay::getTutorialArmourActor)
                 .findFirst()
                 .orElse(null));
+    var statusDisplay =
+        forestGameArea
+            .getEnemies()
+            .getFirst()
+            .getComponent(com.csse3200.game.components.status.StatusIconDisplay.class);
+    tutorialView.setStatusTargets(
+        () ->
+            uiFactory.getByTrigger(PLAY_CARD_TRIGGER).stream()
+                .filter(c -> c.getArgs().length > 0 && poisonId.equals(c.getArgs()[0]))
+                .map(Clickable::getBtn)
+                .findFirst()
+                .orElse(null),
+        statusDisplay::getStatusActor,
+        statusDisplay::getTooltipActor);
     tutorialView.setEnemyBounds(
         () -> forestGameArea.getEnemies().stream().map(this::battleEntityBounds).toList());
     tutorialView.setDragActor(
@@ -511,7 +533,7 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
         animationCoordinatorEntity.getComponent(BattleAnimationCoordinator.class);
     BattleTutorialComponent guidance =
         new BattleTutorialComponent(
-            controller, tutorialView, this::onTutorialFinished, demonstrationId);
+            controller, tutorialView, this::onTutorialFinished, demonstrationId, poisonId);
     guidance.setObservation(
         new BattleTutorialObservation(
             () ->
@@ -519,7 +541,12 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
                     .mapToInt(e -> e.getComponent(CombatStatsComponent.class).getHealth())
                     .sum(),
             () -> player.getComponent(CombatStatsComponent.class).getHealth(),
-            () -> isTutorialVisualStateSettled(forestGameArea, player, visuals)));
+            () -> isTutorialVisualStateSettled(forestGameArea, player, visuals),
+            () ->
+                forestGameArea.getEnemies().stream()
+                    .anyMatch(
+                        e ->
+                            e.getComponent(CombatStatsComponent.class).hasStatusEffect("POISON"))));
     ServiceLocator.getEntityService().register(new Entity().addComponent(guidance));
     // Remains after guidance cleans itself up: existing tutorial battle completion is unchanged.
     controller.addBattleEndListener(
@@ -567,11 +594,8 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
   }
 
   private void onTutorialFinished(BattleTutorialController.Outcome outcome) {
-    // Tutorial changes stay in this screen's disposable run. Reset the persistent run and open
-    // the map on victory or voluntary exit; the opening story was already shown before battle.
-    if (outcome == BattleTutorialController.Outcome.LOST) {
-      game.setScreen(GdxGame.ScreenType.MAIN_MENU);
-    } else {
+    // BattleActions handles real outcomes after the release animation; voluntary exit skips it.
+    if (outcome == BattleTutorialController.Outcome.CANCELLED) {
       game.startRunAfterTutorial();
     }
   }
@@ -834,15 +858,18 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
   @Override
   public void pause() {
     cardInspection.reset();
+    cardKeywordTooltip.hide();
   }
 
   @Override
   public void hide() {
     cardInspection.reset();
+    cardKeywordTooltip.hide();
   }
 
   @Override
   public void dispose() {
+    cardKeywordTooltip.hide();
     cardInspection.reset();
     if (!suppressPlayerCaptureOnDispose) {
       playerState.captureFrom(gameArea.getPlayer());
@@ -994,6 +1021,7 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
   }
 
   private void installHandCardWidgets() {
+    cardKeywordTooltip.hide();
     Map<String, CardInstance> instancesById = new HashMap<>();
     for (CardInstance instance : handRowOrder) {
       instancesById.put(instance.instanceId(), instance);
@@ -1032,6 +1060,7 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
     try {
       ResolvedCard resolved = cardResolver.resolve(config.get(), instance);
       clickable.setVisualContent(() -> new CardWidget(resolved, cardWidgetAssets));
+      cardKeywordTooltip.attachTo(clickable.getBtn(), resolved.description());
       cardInspection.registerSource(clickable.getBtn(), () -> resolveInspectionCard(instanceId));
     } catch (IllegalArgumentException | IllegalStateException exception) {
       logger.warn("Could not install card widget for instance {}", instanceId, exception);

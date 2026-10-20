@@ -10,7 +10,6 @@ import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardDiscoveryStore;
 import com.csse3200.game.cards.CardLibrary;
-import com.csse3200.game.chance.CardFusionEncounterBehaviour;
 import com.csse3200.game.chance.ChanceEncounterFactory;
 import com.csse3200.game.chance.ChanceEncounterSelector;
 import com.csse3200.game.files.UserSettings;
@@ -33,8 +32,6 @@ import com.csse3200.game.screens.BestiaryScreen;
 import com.csse3200.game.screens.CampfireScreen;
 import com.csse3200.game.screens.CardLibraryScreen;
 import com.csse3200.game.screens.DemoCampfireScreen;
-import com.csse3200.game.screens.DemoEventScreen;
-import com.csse3200.game.screens.DemoShopScreen;
 import com.csse3200.game.screens.ElitePortalScreen;
 import com.csse3200.game.screens.EncounterScreen;
 import com.csse3200.game.screens.EndBattleScreen;
@@ -49,6 +46,7 @@ import com.csse3200.game.screens.SaveLoadScreen;
 import com.csse3200.game.screens.SettingsScreen;
 import com.csse3200.game.screens.StoryLibraryScreen;
 import com.csse3200.game.screens.TempleCardSelectionScreen;
+import com.csse3200.game.screens.TutorialVictoryScreen;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.ui.BackOnEscape;
@@ -331,35 +329,10 @@ public class GdxGame extends Game {
     setScreen(new EncounterScreen(this, eventId));
   }
 
-  /** Temporary map-free Event preview; completion returns directly to the main menu. */
-  public void openDemoEvent() {
-    openDemoEvent(null);
-  }
-
-  /** Opens the Card Fusion catalogue Event directly for UI work. */
-  public void openDemoCardFusion() {
-    openDemoEvent(CardFusionEncounterBehaviour.ENCOUNTER_ID);
-  }
-
-  private void openDemoEvent(String previewEncounterId) {
-    prepareScreenTransition(ScreenType.ENCOUNTER);
-    setScreen(new DemoEventScreen(this, previewEncounterId));
-  }
-
   /** Temporary map-free shortcut; reuses Campfire UI and returns directly to the menu. */
   public void openDemoCampfire() {
     prepareScreenTransition(ScreenType.CAMPFIRE);
     setScreen(new DemoCampfireScreen(this));
-  }
-
-  /** Opens a temporary Shop preview using isolated player state and no map node. */
-  public void openDemoShop() {
-    Screen currentScreen = getScreen();
-    if (currentScreen != null) {
-      currentScreen.dispose();
-    }
-    ServiceLocator.registerBestiaryService(bestiaryService);
-    setScreen(new DemoShopScreen(this));
   }
 
   /** Temporary development shortcut for previewing the Elite portal flow. */
@@ -397,6 +370,7 @@ public class GdxGame extends Game {
       case ANCIENT_TEMPLE -> new AncientTempleScreen(this);
       case TEMPLE_CARD_SELECTION -> new TempleCardSelectionScreen(this);
       case TUTORIAL_BATTLE -> new BattleScreen(this, true);
+      case TUTORIAL_VICTORY -> new TutorialVictoryScreen(this);
       case DEFEAT -> new EndBattleScreen(this, false);
       case BESTIARY -> new BestiaryScreen(this);
       case ITEM_LIBRARY -> new ItemLibraryScreen(this);
@@ -416,6 +390,7 @@ public class GdxGame extends Game {
     CAMPFIRE,
     BATTLE_SCREEN,
     TUTORIAL_BATTLE,
+    TUTORIAL_VICTORY,
     VICTORY,
     DEFEAT,
     ELITE_PORTAL,

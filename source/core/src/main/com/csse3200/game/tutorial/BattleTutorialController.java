@@ -28,6 +28,9 @@ public final class BattleTutorialController implements AutoCloseable {
     BATTLE_OUTCOME_RULES,
     PLAY_A_CARD,
     CARD_ANIMATION,
+    PLAY_POISON_CARD,
+    POISON_ANIMATION,
+    STATUS_EFFECTS,
     ENEMY_ANIMATION,
     END_TURN,
     FREE_PLAY,
@@ -52,6 +55,7 @@ public final class BattleTutorialController implements AutoCloseable {
   private BattleController battle;
   private final boolean referenceSequence;
   private String demonstrationCardId;
+  private String poisonCardId;
   private int enemyHealthBefore;
 
   /** Initial snapshots are supplied only by the isolated tutorial owner. */
@@ -60,10 +64,13 @@ public final class BattleTutorialController implements AutoCloseable {
   }
 
   /** Polls real resolution and visual completion; never applies damage or advances a turn. */
-  public void observeResolution(int enemyHealth, boolean settled, BattlePhase phase) {
+  public void observeResolution(
+      int enemyHealth, boolean settled, BattlePhase phase, boolean enemyHasPoison) {
     if (closed || !referenceSequence || !settled || phase != BattlePhase.PLAYER_TURN) return;
     if (currentStep == Step.CARD_ANIMATION && enemyHealth < enemyHealthBefore) {
       show(Step.ENEMY_STATS);
+    } else if (currentStep == Step.POISON_ANIMATION && enemyHasPoison) {
+      show(Step.STATUS_EFFECTS);
     } else if (currentStep == Step.ENEMY_ANIMATION) {
       show(Step.FREE_PLAY);
     }
@@ -82,13 +89,17 @@ public final class BattleTutorialController implements AutoCloseable {
     demonstrationCardId = instanceId;
   }
 
+  /** Exact Poison Dagger copy reserved for the status lesson. */
+  public void setPoisonCardId(String instanceId) {
+    poisonCardId = instanceId;
+  }
+
   private final EventListener2<String, String> cardListener =
       (instanceId, targetId) -> onSuccessfulCardPlay(instanceId);
 
   public void onSuccessfulCardPlay(String instanceId) {
-    if (!referenceSequence
-        || demonstrationCardId == null
-        || demonstrationCardId.equals(instanceId)) {
+    String expected = currentStep == Step.PLAY_POISON_CARD ? poisonCardId : demonstrationCardId;
+    if (!referenceSequence || (expected != null && expected.equals(instanceId))) {
       onSuccessfulCardPlay();
     }
   }
@@ -152,7 +163,8 @@ public final class BattleTutorialController implements AutoCloseable {
               case ITEM_INVENTORY -> Step.ENERGY;
               case ENERGY -> Step.CARD_COST;
               case CARD_COST -> Step.PLAY_A_CARD;
-              case ENEMY_STATS -> Step.ENEMY_ARMOUR;
+              case ENEMY_STATS -> Step.PLAY_POISON_CARD;
+              case STATUS_EFFECTS -> Step.ENEMY_ARMOUR;
               case ENEMY_ARMOUR -> Step.HEALTH;
               case END_TURN -> Step.FREE_PLAY;
               case USED_CARD -> Step.END_TURN;
@@ -184,10 +196,14 @@ public final class BattleTutorialController implements AutoCloseable {
     if (closed || currentStep == null || outcome != null) {
       return;
     }
-    if (referenceSequence && currentStep != Step.PLAY_A_CARD) return;
+    if (referenceSequence
+        && currentStep != Step.PLAY_A_CARD
+        && currentStep != Step.PLAY_POISON_CARD) return;
     cardPlayed = true;
     if (currentStep == Step.PLAY_A_CARD) {
       show(referenceSequence ? Step.CARD_ANIMATION : Step.END_TURN);
+    } else if (currentStep == Step.PLAY_POISON_CARD) {
+      show(Step.POISON_ANIMATION);
     }
   }
 

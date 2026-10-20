@@ -81,6 +81,8 @@ class MainMenuDisplayTest {
         display.getMenuButtons().stream().map(TextButton::getName).toList());
     assertInstanceOf(Image.class, display.getRootStack().getChild(0));
     assertEquals(3, display.getRootStack().getChildren().size);
+    assertNull(display.getRootStack().findActor("demoShop"));
+    assertNull(display.getRootStack().findActor("demoEvent"));
     assertNull(display.getRootStack().findActor("demo-shortcuts"));
     verify(resourceService).getAsset(MainMenuDisplay.BACKGROUND_TEXTURE, Texture.class);
     verify(resourceService).getAsset(MainMenuDisplay.TITLE_LOGO_TEXTURE, Texture.class);

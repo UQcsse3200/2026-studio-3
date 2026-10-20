@@ -6,10 +6,36 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ChanceOutcomeTest {
+  @Test
+  void shouldKeepItemRewardsImmutableAndRetainDuplicateCopies() {
+    List<String> items = new ArrayList<>(List.of("ENERGY_CRYSTAL", "ENERGY_CRYSTAL"));
+    ChanceOutcome outcome = ChanceOutcome.withItemRewards(0, 0, items);
+    items.clear();
+
+    assertEquals(List.of("ENERGY_CRYSTAL", "ENERGY_CRYSTAL"), outcome.getItemRewardIds());
+    assertFalse(outcome.isNoEffect());
+    assertTrue(outcome.getCardRewardIds().isEmpty());
+    assertThrows(UnsupportedOperationException.class, () -> outcome.getItemRewardIds().clear());
+  }
+
+  @Test
+  void shouldRepresentCombinedRewardsWithoutChangingLegacyConstructors() {
+    ChanceOutcome outcome =
+        ChanceOutcome.withRewards(-5, 10, List.of("bandage"), List.of("LUCKY_COIN"));
+    assertEquals(-5, outcome.getHealthDelta());
+    assertEquals(10, outcome.getCurrencyDelta());
+    assertEquals("bandage", outcome.getCardRewardId());
+    assertEquals(List.of("LUCKY_COIN"), outcome.getItemRewardIds());
+    assertTrue(new ChanceOutcome(1, 2, "bandage").getItemRewardIds().isEmpty());
+    assertTrue(ChanceOutcome.withItemRewards(0, 0, List.of()).isNoEffect());
+    assertThrows(NullPointerException.class, () -> ChanceOutcome.withItemRewards(0, 0, null));
+  }
+
   @Test
   void shouldRepresentPositiveHealthChange() {
     ChanceOutcome outcome = new ChanceOutcome(10, 0);

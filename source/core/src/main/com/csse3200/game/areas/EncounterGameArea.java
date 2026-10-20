@@ -19,6 +19,7 @@ import com.csse3200.game.components.shop.ShopDisplay;
 import com.csse3200.game.encounters.integration.CardCatalogGateway;
 import com.csse3200.game.encounters.integration.CardFusionEncounterFlow;
 import com.csse3200.game.encounters.integration.CardServiceCatalogAdapter;
+import com.csse3200.game.encounters.integration.ChanceAcquisitionSession;
 import com.csse3200.game.encounters.integration.ChanceEncounterSession;
 import com.csse3200.game.encounters.integration.ComponentPlayerStateAdapter;
 import com.csse3200.game.encounters.integration.DeckGateway;
@@ -26,6 +27,7 @@ import com.csse3200.game.encounters.integration.EncounterFlowController;
 import com.csse3200.game.encounters.integration.IntegratedShopTransactionGateway;
 import com.csse3200.game.encounters.integration.InventoryDeckAdapter;
 import com.csse3200.game.encounters.integration.PlayerDeckAdapter;
+import com.csse3200.game.encounters.integration.PlayerRunStateItemAdapter;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.factories.PlayerFactory;
 import com.csse3200.game.maps.EncounterCallback;
@@ -36,6 +38,7 @@ import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.shop.ShopEncounter;
 import com.csse3200.game.shop.ShopInventoryGenerator;
+import com.csse3200.game.shop.ShopRefreshPolicy;
 import com.csse3200.game.shop.ShopService;
 import java.util.List;
 import java.util.Objects;
@@ -62,17 +65,36 @@ public class EncounterGameArea extends GameArea {
     // PlayerStatsDisplay's armour icon; the player HUD is also shown in shops and events.
     "images/armour.png",
     ShopDisplay.BACKGROUND_TEXTURE,
+    ShopDisplay.ENCOUNTER_TEXTURE,
+    ShopDisplay.CLOSE_SHOP_TEXTURE,
     ShopDisplay.MERCHANT_TEXTURE,
     ShopDisplay.PANEL_FRAME_TEXTURE,
     ShopDisplay.CARD_FRAME_TEXTURE,
     ShopDisplay.PLAQUE_FRAME_TEXTURE,
     ChanceEncounterDisplay.DICE_GAME_BACKGROUND_TEXTURE,
+    ChanceEncounterDisplay.DICE_LOW_BUTTON_TEXTURE,
+    ChanceEncounterDisplay.DICE_HIGH_BUTTON_TEXTURE,
+    ChanceEncounterDisplay.DICE_CONTINUE_BUTTON_TEXTURE,
     ChanceEncounterDisplay.ABANDONED_MINE_BACKGROUND_TEXTURE,
     ChanceEncounterDisplay.FUSION_BACKGROUND_TEXTURE,
+    ChanceEncounterDisplay.FUSION_FORGE_BUTTON_TEXTURE,
+    ChanceEncounterDisplay.FUSION_QUIET_BUTTON_TEXTURE,
     ChanceEncounterDisplay.FOUNTAIN_BACKGROUND_TEXTURE,
+    ChanceEncounterDisplay.FOUNTAIN_WISH_BUTTON_TEXTURE,
+    ChanceEncounterDisplay.FOUNTAIN_LEAVE_BUTTON_TEXTURE,
     ChanceEncounterDisplay.SHRINE_BACKGROUND_TEXTURE,
+    ChanceEncounterDisplay.SHRINE_OFFERING_BUTTON_TEXTURE,
+    ChanceEncounterDisplay.SHRINE_LEAVE_BUTTON_TEXTURE,
+    ChanceEncounterDisplay.SHRINE_BRAND_BUTTON_TEXTURE,
+    ChanceEncounterDisplay.SHRINE_BLOOD_BUTTON_TEXTURE,
     ChanceEncounterDisplay.FLOODED_BACKGROUND_TEXTURE,
+    ChanceEncounterDisplay.CROSSING_FERRY_BUTTON_TEXTURE,
+    ChanceEncounterDisplay.CROSSING_WADE_BUTTON_TEXTURE,
+    ChanceEncounterDisplay.MINE_EXPLORE_BUTTON_TEXTURE,
+    ChanceEncounterDisplay.MINE_LEAVE_BUTTON_TEXTURE,
     ChanceEncounterDisplay.HEALER_BACKGROUND_TEXTURE,
+    ChanceEncounterDisplay.HEALER_HEALING_BUTTON_TEXTURE,
+    ChanceEncounterDisplay.HEALER_LEAVE_BUTTON_TEXTURE,
     ChanceEncounterDisplay.SHRINE_FLAME_TEXTURE,
     ChanceEncounterDisplay.FUSION_CARD_BACK_TEXTURE,
     "images/context_help_icon.png",
@@ -92,6 +114,7 @@ public class EncounterGameArea extends GameArea {
   private final String forcedEventId;
   private CardFusionEncounterFlow cardFusionEncounterFlow;
   private ChanceEncounterDisplay chanceDisplay;
+  private ChanceAcquisitionSession chanceAcquisitions;
   private boolean capturePlayerStateOnDispose = true;
 
   /**
@@ -258,6 +281,8 @@ public class EncounterGameArea extends GameArea {
   private void displayShop() {
     ShopService shopService = createMapShop(ServiceLocator.getCardLibrary());
     ShopEncounter shopEncounter = encounterFlow.startShop(nodeId, shopService);
+    shopEncounter.enableRefresh(
+        ShopRefreshPolicy.standard(), () -> createMapShop(ServiceLocator.getCardLibrary()));
 
     Entity shopUi = new Entity();
     shopUi.addComponent(
@@ -278,6 +303,7 @@ public class EncounterGameArea extends GameArea {
     ChanceEncounterBehaviour behaviour =
         ChanceEncounterBehaviourFactory.create(encounter, new Random(), cardService);
     ChanceEncounterSession session = encounterFlow.startChance(nodeId, encounter, behaviour);
+    chanceAcquisitions = session.getAcquisitionSession(cardService);
     cardFusionEncounterFlow =
         createCardFusionEncounterFlow(encounter, session, runState, cardService);
 
@@ -330,7 +356,12 @@ public class EncounterGameArea extends GameArea {
 
     encounterFlow =
         new EncounterFlowController(
-            playerState, cardCatalog, deck, shopTransactions, completionCallback);
+            playerState,
+            cardCatalog,
+            deck,
+            shopTransactions,
+            new PlayerRunStateItemAdapter(runState.getOrCreatePlayerState()),
+            completionCallback);
   }
 
   private void loadAssets() {
@@ -358,6 +389,7 @@ public class EncounterGameArea extends GameArea {
    */
   @Override
   public void dispose() {
+    if (chanceAcquisitions != null) chanceAcquisitions.close();
     if (capturePlayerStateOnDispose && player != null) {
       runState.getOrCreatePlayerState().captureFrom(player);
     }

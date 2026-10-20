@@ -29,11 +29,13 @@ class BattleTutorialComponentTest {
     var enemyHealth = new java.util.concurrent.atomic.AtomicInteger(32);
     var playerHealth = new java.util.concurrent.atomic.AtomicInteger(100);
     var settled = new java.util.concurrent.atomic.AtomicBoolean(false);
+    var poisoned = new java.util.concurrent.atomic.AtomicBoolean(false);
     org.mockito.Mockito.when(battle.getCurrentPhase()).thenReturn(BattlePhase.PLAYER_TURN);
     BattleTutorialComponent reference =
-        new BattleTutorialComponent(battle, view, outcomes::add, "strike-copy");
+        new BattleTutorialComponent(battle, view, outcomes::add, "strike-copy", "poison-copy");
     reference.setObservation(
-        new BattleTutorialObservation(enemyHealth::get, playerHealth::get, settled::get));
+        new BattleTutorialObservation(
+            enemyHealth::get, playerHealth::get, settled::get, poisoned::get));
     reference.create();
     for (int i = 0; i < 5; i++) view.continueAction.run();
     enemyHealth.set(28);
@@ -43,6 +45,15 @@ class BattleTutorialComponentTest {
     settled.set(true);
     reference.update();
     assertEquals(BattleTutorialController.Step.ENEMY_STATS, view.last().step());
+    view.continueAction.run();
+    assertEquals(BattleTutorialController.Step.PLAY_POISON_CARD, view.last().step());
+    cardListener().handle("poison-copy", "enemy");
+    reference.update();
+    assertEquals(BattleTutorialController.Step.POISON_ANIMATION, view.last().step());
+    enemyHealth.set(24);
+    poisoned.set(true);
+    reference.update();
+    assertEquals(BattleTutorialController.Step.STATUS_EFFECTS, view.last().step());
     view.continueAction.run();
     assertEquals(BattleTutorialController.Step.ENEMY_ARMOUR, view.last().step());
     view.continueAction.run();

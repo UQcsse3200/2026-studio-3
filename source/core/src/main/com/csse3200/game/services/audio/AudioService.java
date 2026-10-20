@@ -309,7 +309,7 @@ public class AudioService {
       case TUTORIAL_BATTLE -> startPlaylist(Playlist.BATTLE);
       case ENCOUNTER -> handleEncounterMusic(run);
       case LIBRARY, CARD_LIBRARY, ITEM_LIBRARY, BESTIARY -> startPlaylist(Playlist.LIBRARY);
-      case VICTORY -> {
+      case VICTORY, TUTORIAL_VICTORY -> {
         fadeOutMusic();
         playLoadedSound(SoundId.VICTORY, VICTORY_VOLUME);
       }

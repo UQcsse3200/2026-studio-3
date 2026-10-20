@@ -86,7 +86,7 @@ public final class BattleMenuSkins {
     return skin;
   }
 
-  /** The drawn frame (no icon) as a text button style, used by the {@link Framed} variant. */
+  /** Shared icon-free frame style for text buttons, including the {@link Framed} variant. */
   public static TextButton.TextButtonStyle frameStyle(BitmapFont font) {
     ensureFrames();
     TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();

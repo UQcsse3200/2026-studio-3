@@ -2,20 +2,38 @@
   "encounters": [
     {
       "id": "mysterious-shrine",
-      "description": "A cracked sanctum shrine still burns with a god's spoiled light. An angel might leave an offering here to learn what the fallen still demand.",
+      "description": "A cracked sanctum shrine still burns with a god's spoiled light.",
       "weight": 1,
       "choices": [
         {
           "id": "make-offering",
-          "description": "Bleed a little of your light into the shrine.",
+          "description": "Make an Offering.",
           "outcome": {
             "healthDelta": -10,
             "currencyDelta": 25
           }
         },
         {
+          "id": "accept-brand",
+          "description": "Accept the Brand.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 50,
+            "itemRewardIds": ["BRAND_OF_THE_DAMNED"]
+          }
+        },
+        {
+          "id": "swear-blood-oath",
+          "description": "Swear the Blood Oath.",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 70,
+            "itemRewardIds": ["BLOOD_OATH_SIGIL"]
+          }
+        },
+        {
           "id": "leave",
-          "description": "Pass without kneeling.",
+          "description": "Leave the Shrine.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0
@@ -80,20 +98,41 @@
     },
     {
       "id": "abandoned-mine",
-      "description": "Beneath the sanctum, old workings still hold relics of the fallen. An angel might risk the dark for tools of release.",
+      "description": "Beneath the sanctum, old workings still hold relics of the fallen.",
       "weight": 1,
       "choices": [
         {
           "id": "search-tunnels",
-          "description": "Search the unstable tunnels for valuables.",
+          "description": "Explore the Mine.",
           "outcome": {
-            "healthDelta": -12,
-            "currencyDelta": 30
+            "healthDelta": 0,
+            "currencyDelta": 60
+          },
+          "curseRisk": {
+            "triggerChance": 0.5,
+            "items": [
+              {
+                "id": "BRAND_OF_THE_DAMNED",
+                "weight": 1
+              },
+              {
+                "id": "BLOOD_OATH_SIGIL",
+                "weight": 1
+              },
+              {
+                "id": "SHATTERED_AEGIS",
+                "weight": 1
+              },
+              {
+                "id": "ASHEN_EMBER",
+                "weight": 1
+              }
+            ]
           }
         },
         {
           "id": "leave",
-          "description": "Leave the workings closed.",
+          "description": "Leave the Mine.",
           "outcome": {
             "healthDelta": 0,
             "currencyDelta": 0

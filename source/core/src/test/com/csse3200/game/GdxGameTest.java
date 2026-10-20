@@ -31,11 +31,11 @@ import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.screens.BattleScreen;
 import com.csse3200.game.screens.DemoCampfireScreen;
-import com.csse3200.game.screens.DemoEventScreen;
 import com.csse3200.game.screens.EndBattleScreen;
 import com.csse3200.game.screens.LoadedSaveTransitionAware;
 import com.csse3200.game.screens.MapScreen;
 import com.csse3200.game.screens.NarrationScreen;
+import com.csse3200.game.screens.TutorialVictoryScreen;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
@@ -44,6 +44,28 @@ import org.mockito.MockedConstruction;
 
 @ExtendWith(GameExtension.class)
 class GdxGameTest {
+  @Test
+  void tutorialVictoryOpensItsOwnScreenWithoutResettingTheRunBeforeContinue() {
+    GdxGame game = gameWithActiveNode(RoomType.COMBAT);
+    Screen oldScreen = mock(Screen.class);
+    game.setScreen(oldScreen);
+
+    try (MockedConstruction<TutorialVictoryScreen> victories =
+            mockConstruction(
+                TutorialVictoryScreen.class,
+                (victory, context) -> assertSame(game, context.arguments().get(0)));
+        MockedConstruction<NarrationScreen> narrations = mockConstruction(NarrationScreen.class)) {
+      game.setScreen(GdxGame.ScreenType.TUTORIAL_VICTORY);
+
+      assertEquals(1, victories.constructed().size());
+      assertSame(victories.constructed().get(0), game.getScreen());
+      verify(oldScreen).dispose();
+      verify(victories.constructed().get(0)).show();
+      assertEquals(7, game.getRunState().getActiveNodeId());
+      assertTrue(narrations.constructed().isEmpty());
+    }
+  }
+
   @Test
   void battleResultPassesExplicitProfilesWithoutLeakingAnEliteContextIntoTheNextScreen() {
     GdxGame game = new GdxGame();
@@ -163,11 +185,6 @@ class GdxGameTest {
   }
 
   @Test
-  void eventShortcutUsesIsolatedPreviewWithoutChangingMap() {
-    assertDemoNode(RoomType.EVENT);
-  }
-
-  @Test
   void campfireShortcutUsesIsolatedPreviewWithoutChangingMap() {
     assertDemoNode(RoomType.CAMPFIRE);
   }
@@ -179,19 +196,12 @@ class GdxGameTest {
     Integer originalNode = game.getRunState().getActiveNodeId();
     Screen oldScreen = mock(Screen.class);
     game.setScreen(oldScreen);
-    try (MockedConstruction<DemoEventScreen> encounters = mockConstruction(DemoEventScreen.class);
-        MockedConstruction<DemoCampfireScreen> campfires =
+    try (MockedConstruction<DemoCampfireScreen> campfires =
             mockConstruction(DemoCampfireScreen.class);
         MockedConstruction<MapScreen> maps = mockConstruction(MapScreen.class)) {
-      if (roomType == RoomType.EVENT) {
-        game.openDemoEvent();
-        assertSame(encounters.constructed().get(0), game.getScreen());
-        assertTrue(campfires.constructed().isEmpty());
-      } else {
-        game.openDemoCampfire();
-        assertSame(campfires.constructed().get(0), game.getScreen());
-        assertTrue(encounters.constructed().isEmpty());
-      }
+      game.openDemoCampfire();
+      assertSame(campfires.constructed().get(0), game.getScreen());
+
       verify(oldScreen).dispose();
       RunState run = game.getRunState();
       assertTrue(run.isRunActive());

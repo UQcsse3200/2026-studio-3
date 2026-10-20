@@ -109,6 +109,7 @@ class ShopDisplayTest {
     ShopDisplay display = new ShopDisplay(openShop(), cardService);
     entity = new Entity().addComponent(display);
     entity.create();
+    display.openMerchant();
 
     CardWidget widget = findCardWidget(stage.getRoot());
     assertNotNull(widget);
@@ -147,15 +148,294 @@ class ShopDisplayTest {
     entity = new Entity().addComponent(display);
 
     entity.create();
+    display.openMerchant();
 
     assertEquals(CardUnlockState.SEEN, discovery.getProgressSnapshot().get("strike"));
     assertEquals(CardUnlockState.SEEN, discovery.getProgressSnapshot().get("bandage"));
+  }
+
+  @Test
+  void leavingWithoutPurchasesCompletesWithoutResults() {
+    ServiceLocator.registerResourceService(mock(ResourceService.class));
+    ShopEncounter encounter = openShop();
+    ShopDisplay display = new ShopDisplay(encounter, mock(CardService.class));
+    entity = new Entity().addComponent(display);
+    entity.create();
+    display.openMerchant();
+    stage
+        .getRoot()
+        .findActor("merchant-leave")
+        .fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    assertNull(stage.getRoot().findActor("acquisition-result-overlay"));
+    assertEquals(100, encounter.getCurrency());
+    assertEquals(true, encounter.snapshot().completed());
+  }
+
+  @Test
+  void successfulPurchaseShowsConfirmedResultWithoutGrantingTwice() {
+    ServiceLocator.registerResourceService(mock(ResourceService.class));
+    ShopEncounter encounter = openShop();
+    CardService cards = mock(CardService.class);
+    when(cards.getCard("card")).thenReturn(Optional.empty());
+    ShopDisplay display = new ShopDisplay(encounter, cards);
+    entity = new Entity().addComponent(display);
+    entity.create();
+    display.openMerchant();
+
+    Actor purchase = stage.getRoot().findActor("purchase-offer");
+    purchase.fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    assertEquals(80, encounter.getCurrency());
+    assertEquals(
+        "GOLD  80",
+        ((com.badlogic.gdx.scenes.scene2d.ui.Label)
+                stage.getRoot().findActor("merchant-gold-balance"))
+            .getText()
+            .toString());
+    assertNull(stage.getRoot().findActor("acquisition-result-overlay"));
+    stage
+        .getRoot()
+        .findActor("merchant-leave")
+        .fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    assertNotNull(stage.getRoot().findActor("acquisition-result-overlay"));
+    assertEquals(
+        "SHOP RESULTS",
+        ((com.badlogic.gdx.scenes.scene2d.ui.Label)
+                stage.getRoot().findActor("acquisition-heading"))
+            .getText()
+            .toString());
+
+    stage
+        .getRoot()
+        .findActor("acquisition-continue")
+        .fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    for (int frame = 0; frame < 90; frame++) stage.act(1f / 30f);
+    assertNull(stage.getRoot().findActor("acquisition-result-overlay"));
+    assertEquals(80, encounter.getCurrency());
   }
 
   private ShopEncounter openShop() {
     InventoryComponent inventory = new InventoryComponent(100);
     ShopService shopService = new ShopService(new ShopItem[] {item});
     return new ShopEncounter(inventory, shopService);
+  }
+
+  @Test
+  void encounterStartsWithoutCardsAndApproachPreservesTheShopSession() {
+    ServiceLocator.registerResourceService(mock(ResourceService.class));
+    ShopEncounter encounter = openShop();
+    var before = encounter.snapshot();
+    ShopDisplay display = new ShopDisplay(encounter, mock(CardService.class));
+    entity = new Entity().addComponent(display);
+    entity.create();
+    assertNull(findCardWidget(stage.getRoot()));
+    Actor target = stage.getRoot().findActor("merchant-approach");
+    org.junit.jupiter.api.Assertions.assertTrue(target.getWidth() < 80);
+    org.junit.jupiter.api.Assertions.assertTrue(target.getHeight() < 80);
+    Actor stall = stage.getRoot().findActor("merchant-stall-hover");
+    for (var listener : stall.getListeners()) {
+      org.junit.jupiter.api.Assertions.assertFalse(
+          listener instanceof com.badlogic.gdx.scenes.scene2d.utils.ClickListener);
+    }
+    Actor frame = stage.getRoot().findActor("merchant-title");
+    Actor narration = stage.getRoot().findActor("merchant-encounter-narration");
+    assertNotNull(narration);
+    assertEquals(com.badlogic.gdx.scenes.scene2d.Touchable.disabled, narration.getTouchable());
+    com.badlogic.gdx.scenes.scene2d.ui.Label narrationText =
+        stage.getRoot().findActor("merchant-narration-text");
+    assertEquals("There is a wandering merchant...", narrationText.getText().toString());
+    org.junit.jupiter.api.Assertions.assertInstanceOf(
+        MerchantShopFrame.class,
+        ((com.badlogic.gdx.scenes.scene2d.ui.Table) frame).getBackground());
+    com.badlogic.gdx.scenes.scene2d.ui.Label encounterTitle =
+        stage.getRoot().findActor("merchant-title-text");
+    com.badlogic.gdx.scenes.scene2d.ui.Label encounterSubtitle =
+        stage.getRoot().findActor("merchant-subtitle-text");
+    assertEquals(com.badlogic.gdx.utils.Align.center, encounterTitle.getLabelAlign());
+    assertEquals(com.badlogic.gdx.utils.Align.center, encounterSubtitle.getLabelAlign());
+    com.badlogic.gdx.scenes.scene2d.ui.TextButton encounterLeave =
+        stage.getRoot().findActor("merchant-encounter-leave");
+    org.junit.jupiter.api.Assertions.assertInstanceOf(
+        MerchantShopFrame.class, encounterLeave.getStyle().up);
+    assertEquals(com.badlogic.gdx.utils.Align.center, encounterLeave.getLabel().getLabelAlign());
+    display.openMerchant();
+    org.junit.jupiter.api.Assertions.assertFalse(narration.getParent().isVisible());
+    org.junit.jupiter.api.Assertions.assertSame(frame, stage.getRoot().findActor("merchant-title"));
+    assertEquals(before, encounter.snapshot());
+  }
+
+  @Test
+  void purchaseShowsGreySoldAndRedUnaffordableWithoutChangingPrices() {
+    ServiceLocator.registerResourceService(mock(ResourceService.class));
+    ShopEncounter encounter =
+        new ShopEncounter(
+            new InventoryComponent(30),
+            new ShopService(
+                new ShopItem[] {
+                  new ShopItem("first", "a", "A", 20, 1), new ShopItem("second", "b", "B", 20, 1)
+                }));
+    ShopDisplay display = new ShopDisplay(encounter, mock(CardService.class));
+    entity = new Entity().addComponent(display);
+    entity.create();
+    display.openMerchant();
+    com.badlogic.gdx.scenes.scene2d.ui.TextButton first =
+        stage.getRoot().findActor("purchase-first");
+    first.fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    com.badlogic.gdx.scenes.scene2d.ui.TextButton second =
+        stage.getRoot().findActor("purchase-second");
+    assertEquals("Sold", first.getText().toString());
+    assertEquals("Not enough gold", second.getText().toString());
+    org.junit.jupiter.api.Assertions.assertTrue(first.isDisabled());
+    org.junit.jupiter.api.Assertions.assertTrue(second.isDisabled());
+    var red = second.getStyle().disabledFontColor;
+    org.junit.jupiter.api.Assertions.assertTrue(red.r > red.g * 2f);
+    var grey = first.getStyle().disabledFontColor;
+    org.junit.jupiter.api.Assertions.assertTrue(Math.abs(grey.r - grey.g) < 0.08f);
+    assertEquals(10, encounter.getCurrency());
+    com.badlogic.gdx.scenes.scene2d.ui.Label dialogue =
+        stage.getRoot().findActor("merchant-dialogue-text");
+    assertEquals("A fine choice.", dialogue.getText().toString());
+    org.junit.jupiter.api.Assertions.assertInstanceOf(
+        MerchantDialogueFrame.class,
+        ((com.badlogic.gdx.scenes.scene2d.ui.Table) dialogue.getParent()).getBackground());
+    com.badlogic.gdx.scenes.scene2d.ui.Label title =
+        stage.getRoot().findActor("merchant-title-text");
+    assertEquals(com.badlogic.gdx.utils.Align.center, title.getLabelAlign());
+  }
+
+  @Test
+  void refreshPreservesWoodenSlotsAndUsesBackendFees() {
+    ServiceLocator.registerResourceService(mock(ResourceService.class));
+    ShopEncounter encounter = openShop();
+    encounter.enableRefresh(
+        com.csse3200.game.shop.ShopRefreshPolicy.standard(),
+        () ->
+            new ShopService(
+                new ShopItem[] {
+                  new ShopItem("a", "a", "A", 20, 1),
+                  new ShopItem("b", "b", "B", 20, 1),
+                  new ShopItem("c", "c", "C", 20, 1)
+                }));
+    ShopDisplay display = new ShopDisplay(encounter, mock(CardService.class));
+    entity = new Entity().addComponent(display);
+    entity.create();
+    display.openMerchant();
+    Actor root = stage.getRoot().findActor("merchant-scene");
+    CardDisplaySlot slot = stage.getRoot().findActor("shop-slot-0");
+    Actor counter = stage.getRoot().findActor("merchant-products");
+    assertEquals(com.badlogic.gdx.scenes.scene2d.Touchable.childrenOnly, counter.getTouchable());
+    Actor backing = slot.getChildren().first();
+    Actor purchase = slot.purchaseButton();
+    var refresh =
+        (com.badlogic.gdx.scenes.scene2d.ui.TextButton) stage.getRoot().findActor("shop-refresh");
+    assertEquals("Refresh (Free)", refresh.getText().toString());
+    refresh.fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    assertEquals(100, encounter.getCurrency());
+    assertEquals("Refresh (2 GOLD)", refresh.getText().toString());
+    org.junit.jupiter.api.Assertions.assertSame(slot, stage.getRoot().findActor("shop-slot-0"));
+    org.junit.jupiter.api.Assertions.assertSame(backing, slot.getChildren().first());
+    org.junit.jupiter.api.Assertions.assertSame(purchase, slot.purchaseButton());
+    org.junit.jupiter.api.Assertions.assertSame(
+        counter, stage.getRoot().findActor("merchant-products"));
+    CardDisplaySlot middle = stage.getRoot().findActor("shop-slot-1");
+    CardDisplaySlot right = stage.getRoot().findActor("shop-slot-2");
+    org.junit.jupiter.api.Assertions.assertSame(counter, slot.getParent());
+    org.junit.jupiter.api.Assertions.assertSame(slot.getParent(), middle.getParent());
+    org.junit.jupiter.api.Assertions.assertSame(slot.getParent(), right.getParent());
+    assertEquals(3, slot.getParent().getChildren().size);
+    assertNull(stage.getRoot().findActor("shop-continuous-card-channel"));
+    assertEquals(3, slot.getChildren().size);
+    assertNull(slot.findActor("offer-thin-base"));
+    assertNull(
+        ((com.badlogic.gdx.scenes.scene2d.ui.Table) slot.getChildren().get(1)).getBackground());
+    assertEquals(slot.getY(), middle.getY());
+    assertEquals(slot.getY(), right.getY());
+    assertEquals(middle.getX() - slot.getX(), right.getX() - middle.getX());
+    assertEquals(slot.purchaseButton().getY(), middle.purchaseButton().getY());
+    assertEquals(slot.purchaseButton().getWidth(), right.purchaseButton().getWidth());
+    var pricePanel = slot.getChildren().get(1);
+    var cardLayer = slot.getChildren().first();
+    assertEquals(458f, slot.getHeight());
+    org.junit.jupiter.api.Assertions.assertTrue(refresh.getY() > 4f);
+    // The face texture has transparent padding below its visible lower edge.
+    org.junit.jupiter.api.Assertions.assertTrue(
+        pricePanel.getY() + pricePanel.getHeight() < cardLayer.getY() + 12f);
+    assertEquals(18f, cardLayer.getX());
+    assertEquals(15f, middle.getChildren().first().getX());
+    assertEquals(12f, right.getChildren().first().getX());
+    assertEquals(94f, cardLayer.getY());
+    assertEquals(78f, pricePanel.getY());
+    assertEquals(264f, slot.purchaseButton().getWidth());
+    assertEquals(46f, slot.purchaseButton().getHeight());
+    assertEquals(
+        pricePanel.getX() + pricePanel.getWidth() / 2f,
+        slot.purchaseButton().getX() + slot.purchaseButton().getWidth() / 2f);
+    org.junit.jupiter.api.Assertions.assertTrue(
+        slot.purchaseButton().getY() + slot.purchaseButton().getHeight() < pricePanel.getY());
+    org.junit.jupiter.api.Assertions.assertTrue(
+        refresh.getY() + refresh.getHeight() < counter.getY());
+    org.junit.jupiter.api.Assertions.assertSame(root, stage.getRoot().findActor("merchant-scene"));
+    org.junit.jupiter.api.Assertions.assertSame(refresh, stage.getRoot().findActor("shop-refresh"));
+    refresh.fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    assertEquals(98, encounter.getCurrency());
+    assertEquals(
+        "GOLD  98",
+        ((com.badlogic.gdx.scenes.scene2d.ui.Label)
+                stage.getRoot().findActor("merchant-gold-balance"))
+            .getText()
+            .toString());
+    assertEquals("Refresh (4 GOLD)", refresh.getText().toString());
+    var buy =
+        (com.badlogic.gdx.scenes.scene2d.ui.TextButton) stage.getRoot().findActor("purchase-a");
+    buy.fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    assertEquals(78, encounter.getCurrency());
+    buy.fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    assertEquals(78, encounter.getCurrency());
+    var second =
+        (com.badlogic.gdx.scenes.scene2d.ui.TextButton) stage.getRoot().findActor("purchase-b");
+    second.fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    assertEquals(58, encounter.getCurrency());
+    org.junit.jupiter.api.Assertions.assertSame(slot, stage.getRoot().findActor("shop-slot-0"));
+    org.junit.jupiter.api.Assertions.assertSame(purchase, slot.purchaseButton());
+    org.junit.jupiter.api.Assertions.assertSame(root, stage.getRoot().findActor("merchant-scene"));
+  }
+
+  @Test
+  void goodsRowContainsNoSharedFurnitureOrForegroundSceneCrop() {
+    MerchantDisplayCounter row = new MerchantDisplayCounter();
+    assertEquals(0, row.getChildren().size);
+    assertEquals(com.badlogic.gdx.scenes.scene2d.Touchable.childrenOnly, row.getTouchable());
+    assertEquals(98f, row.getY());
+  }
+
+  @Test
+  void sceneKeepsSharedCoordinatesAtDifferentWindowShapes() {
+    MerchantSceneLayout layout = new MerchantSceneLayout();
+    layout.setSize(1600, 1000);
+    layout.validate();
+    assertEquals(1.25f, layout.scene.getScaleX());
+    assertEquals(0f, layout.scene.getX());
+    layout.setSize(1600, 900);
+    layout.validate();
+    assertEquals(1.125f, layout.scene.getScaleX());
+    assertEquals(80f, layout.scene.getX());
+    assertEquals(0f, layout.scene.getY());
+  }
+
+  @Test
+  void runeHoverDoesNotApproachUntilClicked() {
+    var calls = new java.util.concurrent.atomic.AtomicInteger();
+    var marker =
+        new MerchantInteractionMarker(
+            mock(com.badlogic.gdx.scenes.scene2d.utils.Drawable.class), calls::incrementAndGet);
+    var click = (com.badlogic.gdx.scenes.scene2d.utils.ClickListener) marker.getListeners().first();
+    var event = new com.badlogic.gdx.scenes.scene2d.InputEvent();
+    click.enter(event, 10, 10, -1, null);
+    marker.act(0.4f);
+    assertEquals(0, calls.get());
+    click.exit(event, 10, 10, -1, null);
+    assertEquals(0, calls.get());
+    click.clicked(event, 10, 10);
+    assertEquals(1, calls.get());
   }
 
   private static CardConfig offerCard() {

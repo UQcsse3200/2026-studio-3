@@ -1,5 +1,6 @@
 package com.csse3200.game.encounters.integration;
 
+import com.csse3200.game.cards.CardService;
 import com.csse3200.game.chance.ChanceBehaviourResult;
 import com.csse3200.game.chance.ChanceChoice;
 import com.csse3200.game.chance.ChanceEncounter;
@@ -7,10 +8,13 @@ import com.csse3200.game.chance.ChanceEncounterBehaviour;
 import com.csse3200.game.chance.ChanceOutcome;
 import com.csse3200.game.chance.DiceRoll;
 import com.csse3200.game.chance.FixedChanceEncounterBehaviour;
+import com.csse3200.game.encounters.results.AcquisitionResult;
+import com.csse3200.game.encounters.results.ChanceAcquisitionResults;
 import com.csse3200.game.maps.EncounterCallback;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 /** Coordinates choice resolution, player updates, and map completion for one Chance Encounter. */
 public final class ChanceEncounterSession {
@@ -23,6 +27,36 @@ public final class ChanceEncounterSession {
   private ChanceResolution resolution;
   private boolean awaitingDelegatedCompletion;
   private boolean completed;
+  private boolean resolving;
+  private ChanceResolution blockedItemResolution;
+  private final String acquisitionResultId = "event:" + UUID.randomUUID();
+  private Optional<AcquisitionResult> acquisitionResult = Optional.empty();
+  private boolean acquisitionResultMapped;
+  private ChanceAcquisitionSession acquisitionSession;
+
+  /**
+   * Maps only the saved successful resolution and caches its immutable result, including an empty
+   * result for a no-effect choice. Metadata failures leave settlement untouched and may be retried.
+   */
+  public Optional<AcquisitionResult> getAcquisitionResult(CardService cards) {
+    if (resolution == null) return Optional.empty();
+    if (!acquisitionResultMapped) {
+      acquisitionResult =
+          ChanceAcquisitionResults.fromApplied(resolution, acquisitionResultId, cards);
+      acquisitionResultMapped = true;
+    }
+    return acquisitionResult;
+  }
+
+  /** Returns the single optional display adapter retained across UI rebuilds for this session. */
+  public ChanceAcquisitionSession getAcquisitionSession(CardService cards) {
+    if (acquisitionSession == null) acquisitionSession = new ChanceAcquisitionSession(this, cards);
+    return acquisitionSession;
+  }
+
+  private void closeAcquisition() {
+    if (acquisitionSession != null) acquisitionSession.close();
+  }
 
   /**
    * Creates one Chance Encounter lifecycle session.
@@ -85,6 +119,13 @@ public final class ChanceEncounterSession {
       return outcomeApplier.failure(
           ChanceResolution.Status.ENCOUNTER_CLOSED, null, "This encounter has already ended.");
     }
+    if (resolving) {
+      return outcomeApplier.failure(
+          ChanceResolution.Status.RESOLUTION_IN_PROGRESS, null, "A choice is being applied.");
+    }
+    if (blockedItemResolution != null) {
+      return blockedItemResolution;
+    }
     if (resolution != null && resolution.isSuccess()) {
       return outcomeApplier.failure(
           ChanceResolution.Status.ALREADY_RESOLVED,
@@ -98,37 +139,47 @@ public final class ChanceEncounterSession {
           "This encounter is awaiting completion from a delegated flow.");
     }
 
-    ChanceBehaviourResult behaviourResult = behaviour.resolveChoice(choiceId);
-    if (behaviourResult == null) {
-      return outcomeApplier.failure(
-          ChanceResolution.Status.INVALID_OUTCOME,
-          null,
-          "The encounter behaviour did not provide a resolution result.");
-    }
-    if (behaviourResult.getType() == ChanceBehaviourResult.Type.INVALID_CHOICE) {
-      return outcomeApplier.failure(
-          ChanceResolution.Status.INVALID_CHOICE, null, "The selected choice does not exist.");
-    }
-    if (behaviourResult.getType() == ChanceBehaviourResult.Type.AWAITING_CHOICE) {
-      return outcomeApplier.failure(
-          ChanceResolution.Status.AWAITING_CHOICE,
-          null,
-          "The encounter advanced and is awaiting another choice.");
-    }
-    if (behaviourResult.getType() == ChanceBehaviourResult.Type.DELEGATED) {
-      awaitingDelegatedCompletion = true;
-      return outcomeApplier.failure(
-          ChanceResolution.Status.DELEGATED,
-          null,
-          "The selected choice is continuing in a delegated flow.");
-    }
+    resolving = true;
+    try {
+      ChanceBehaviourResult behaviourResult = behaviour.resolveChoice(choiceId);
+      if (behaviourResult == null) {
+        return outcomeApplier.failure(
+            ChanceResolution.Status.INVALID_OUTCOME,
+            null,
+            "The encounter behaviour did not provide a resolution result.");
+      }
+      if (behaviourResult.getType() == ChanceBehaviourResult.Type.INVALID_CHOICE) {
+        return outcomeApplier.failure(
+            ChanceResolution.Status.INVALID_CHOICE, null, "The selected choice does not exist.");
+      }
+      if (behaviourResult.getType() == ChanceBehaviourResult.Type.AWAITING_CHOICE) {
+        return outcomeApplier.failure(
+            ChanceResolution.Status.AWAITING_CHOICE,
+            null,
+            "The encounter advanced and is awaiting another choice.");
+      }
+      if (behaviourResult.getType() == ChanceBehaviourResult.Type.DELEGATED) {
+        awaitingDelegatedCompletion = true;
+        return outcomeApplier.failure(
+            ChanceResolution.Status.DELEGATED,
+            null,
+            "The selected choice is continuing in a delegated flow.");
+      }
 
-    ChanceOutcome outcome = behaviourResult.getOutcome();
-    ChanceResolution attempt = outcomeApplier.apply(outcome);
-    if (attempt.isSuccess()) {
-      resolution = attempt;
+      ChanceOutcome outcome = behaviourResult.getOutcome();
+      ChanceResolution attempt = outcomeApplier.apply(outcome);
+      if (attempt.isSuccess()) {
+        resolution = attempt;
+      } else if (attempt.getStatus() == ChanceResolution.Status.ROLLBACK_FAILED
+          && outcome != null
+          && !outcome.getItemRewardIds().isEmpty()) {
+        // Retrying a partially applied item outcome could grant the same ownership again.
+        blockedItemResolution = attempt;
+      }
+      return attempt;
+    } finally {
+      resolving = false;
     }
-    return attempt;
   }
 
   /**
@@ -141,6 +192,7 @@ public final class ChanceEncounterSession {
       return false;
     }
     completed = true;
+    closeAcquisition();
     if (completionCallback != null) {
       completionCallback.onEncounterComplete(nodeId, true);
     }
@@ -162,6 +214,7 @@ public final class ChanceEncounterSession {
     }
     awaitingDelegatedCompletion = false;
     completed = true;
+    closeAcquisition();
     if (completionCallback != null) {
       completionCallback.onEncounterComplete(nodeId, true);
     }
@@ -178,6 +231,7 @@ public final class ChanceEncounterSession {
       return false;
     }
     completed = true;
+    closeAcquisition();
     if (completionCallback != null) {
       completionCallback.onEncounterComplete(nodeId, false);
     }

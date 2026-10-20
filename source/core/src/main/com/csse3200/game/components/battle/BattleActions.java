@@ -116,9 +116,7 @@ public class BattleActions extends Component {
         message -> dispatch(() -> entity.getEvents().trigger(BATTLE_LOG_EVENT, message)));
     controller.addEnemyEffectsListener(effects -> dispatch(() -> onEnemyEffects(effects)));
     controller.addPlayerEffectsListener(this::onPlayerEffects);
-    if (!tutorialBattle) {
-      controller.addBattleEndListener(this::onBattleEnd);
-    }
+    controller.addBattleEndListener(this::onBattleEnd);
     controller.addHandChangedListener(hand -> entity.getEvents().trigger(HAND_CHANGED_EVENT, hand));
   }
 
@@ -220,6 +218,7 @@ public class BattleActions extends Component {
   }
 
   private void recordRunOutcome(boolean win) {
+    if (tutorialBattle) return;
     // Report the result to the run so the map node is marked done (win) or the run stays put
     // (loss). The end screen reads this to decide whether to go back to the map or the menu.
     RunState runState = game.getRunState();
@@ -315,10 +314,18 @@ public class BattleActions extends Component {
       Gdx.app.postRunnable(
           () -> {
             if (!released) {
-              game.showBattleResult(won, profile);
+              showResult(won, profile);
             }
           });
     } else if (!released) {
+      showResult(won, profile);
+    }
+  }
+
+  private void showResult(boolean won, CardRewardProfile profile) {
+    if (tutorialBattle) {
+      game.setScreen(won ? GdxGame.ScreenType.TUTORIAL_VICTORY : GdxGame.ScreenType.MAIN_MENU);
+    } else {
       game.showBattleResult(won, profile);
     }
   }

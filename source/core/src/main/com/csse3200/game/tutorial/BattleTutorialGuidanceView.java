@@ -35,6 +35,9 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
   private Supplier<Label> health = () -> null;
   private Supplier<Actor> enemyStats = () -> null;
   private Supplier<Actor> enemyArmour = () -> null;
+  private Supplier<Actor> poisonCard = () -> null;
+  private Supplier<Actor> enemyStatuses = () -> null;
+  private Supplier<Actor> statusTooltip = () -> null;
   private Supplier<Rectangle> energyBounds;
 
   public void setDetailedTargets(Supplier<Rectangle> energyBounds, Supplier<Actor> enemyArmour) {
@@ -52,6 +55,26 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
     this.energy = Objects.requireNonNull(energy);
     this.health = Objects.requireNonNull(health);
     this.enemyStats = Objects.requireNonNull(enemyStats);
+  }
+
+  /** Binds the exact Poison Dagger copy and Team 1's live status actors. */
+  public void setStatusTargets(
+      Supplier<Actor> poisonCard, Supplier<Actor> enemyStatuses, Supplier<Actor> statusTooltip) {
+    this.poisonCard = Objects.requireNonNull(poisonCard);
+    this.enemyStatuses = Objects.requireNonNull(enemyStatuses);
+    this.statusTooltip = Objects.requireNonNull(statusTooltip);
+  }
+
+  private boolean isCardPlayStep() {
+    return prompt != null
+        && (prompt.step() == BattleTutorialController.Step.PLAY_A_CARD
+            || prompt.step() == BattleTutorialController.Step.PLAY_POISON_CARD);
+  }
+
+  private Actor cardToPlay() {
+    return prompt != null && prompt.step() == BattleTutorialController.Step.PLAY_POISON_CARD
+        ? poisonCard.get()
+        : demonstration.get();
   }
 
   private Supplier<List<Rectangle>> enemies = List::of;
@@ -85,8 +108,7 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
         public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
           if (prompt == null || isWithin(event.getTarget(), exit)) return false;
           if (prompt.step() == BattleTutorialController.Step.FREE_PLAY) return false;
-          if (prompt.step() == BattleTutorialController.Step.PLAY_A_CARD
-              && isWithin(event.getTarget(), demonstration.get())) return false;
+          if (isCardPlayStep() && isWithin(event.getTarget(), cardToPlay())) return false;
           if (prompt.step() == BattleTutorialController.Step.END_TURN
               && isWithin(event.getTarget(), endTurn.get())) return false;
           tapArmed = prompt.canContinue() && pointer == 0;
@@ -233,9 +255,8 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
     if (!attached) throw new IllegalStateException("Bind tutorial actions first");
     this.prompt = Objects.requireNonNull(prompt);
     restoreCardOrder();
-    if (prompt.step() == BattleTutorialController.Step.PLAY_A_CARD
-        || prompt.step() == BattleTutorialController.Step.USED_CARD) {
-      raisedCard = demonstration.get();
+    if (isCardPlayStep() || prompt.step() == BattleTutorialController.Step.USED_CARD) {
+      raisedCard = cardToPlay();
       if (raisedCard != null) {
         originalCardZ = raisedCard.getZIndex();
         raisedCard.toFront();
@@ -324,7 +345,12 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
       case HEALTH -> add(health.get() == null ? null : health.get().getParent());
       case ENEMIES, ENEMY_STATS -> add(enemyStats.get());
       case ENEMY_ARMOUR -> add(enemyArmour.get());
-      case STATUS_EFFECTS -> add(findStat("Energy:", true));
+      case STATUS_EFFECTS -> {
+        add(enemyStatuses.get());
+        Actor tooltip = statusTooltip.get();
+        if (tooltip != null && tooltip.getStage() == stage && tooltip.isVisible())
+          brightActors.add(tooltip);
+      }
       case NONE -> {
         // No highlight target for this step.
       }
@@ -341,9 +367,9 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
   }
 
   private void collectHandTargets() {
-    if (prompt.step() == BattleTutorialController.Step.PLAY_A_CARD) {
+    if (isCardPlayStep()) {
       Actor dragging = dragActor.get();
-      add(dragging != null ? dragging : demonstration.get());
+      add(dragging != null ? dragging : cardToPlay());
       highlights.addAll(enemies.get());
       Actor stats = findEnemyStats();
       if (stats != null) brightActors.add(stats);
@@ -393,7 +419,7 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
   }
 
   private Rectangle resolveNarrationBounds(float width, float height, float w, float h) {
-    if (prompt.step() == BattleTutorialController.Step.PLAY_A_CARD) {
+    if (isCardPlayStep()) {
       if (dragPrompt == null) dragPrompt = new Rectangle((w - width) / 2, h * 0.72f, width, height);
       return clamp(new Rectangle(dragPrompt), w, h);
     }
@@ -405,7 +431,7 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
     Placement preferred =
         switch (prompt.highlight()) {
           case CARD_INVENTORY, ITEM_INVENTORY, END_TURN, ENERGY, HEALTH -> Placement.RIGHT;
-          case ENEMY_STATS, ENEMY_ARMOUR, ENEMIES -> Placement.LEFT;
+          case ENEMY_STATS, ENEMY_ARMOUR, ENEMIES, STATUS_EFFECTS -> Placement.LEFT;
           default -> Placement.ABOVE;
         };
     Rectangle box = place(target, width, height, w, h, preferred);
@@ -498,6 +524,15 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
       stage.screenToStageCoordinates(anchor);
       group.setPosition(anchor.x - group.getWidth() / 2f, anchor.y);
     }
+    Actor statuses = enemyStatuses.get();
+    if (statuses != null) {
+      Vector2 anchor =
+          new Vector2(
+              statuses.getX() + statuses.getWidth() / 2f,
+              com.badlogic.gdx.Gdx.graphics.getHeight() - statuses.getY());
+      stage.screenToStageCoordinates(anchor);
+      statuses.setPosition(anchor.x - statuses.getWidth() / 2f, anchor.y);
+    }
   }
 
   private static List<Actor> descendants(Group group) {
@@ -547,11 +582,12 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
     Color original = new Color(batch.getColor());
     // During actual resolution leave damage visuals unobscured, retaining only the Exit button.
     if (prompt.step() != BattleTutorialController.Step.CARD_ANIMATION
+        && prompt.step() != BattleTutorialController.Step.POISON_ANIMATION
         && prompt.step() != BattleTutorialController.Step.ENEMY_ANIMATION) drawDim(batch);
     brightActors.stream()
         .sorted(java.util.Comparator.comparingInt(Actor::getZIndex))
         .forEach(actor -> redrawTarget(batch, actor));
-    if (prompt.step() == BattleTutorialController.Step.PLAY_A_CARD) enemyRenderer.accept(batch);
+    if (isCardPlayStep()) enemyRenderer.accept(batch);
     for (Rectangle r : highlights) {
       batch.setColor(GOLD.r, GOLD.g, GOLD.b, 0.15f + 0.05f * (float) Math.sin(pulse * 3));
       outline(batch, r, 6);
@@ -579,8 +615,7 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
         rect(batch, base.x - direction.y * i * 2f, base.y + direction.x * i * 2f, 3, 3);
         rect(batch, base.x + direction.y * i * 2f, base.y - direction.x * i * 2f, 3, 3);
       }
-      if (prompt.step() == BattleTutorialController.Step.PLAY_A_CARD && highlights.size() > 1)
-        drawDragArc(batch, target, highlights.get(1));
+      if (isCardPlayStep() && highlights.size() > 1) drawDragArc(batch, target, highlights.get(1));
     }
     batch.setColor(original);
   }

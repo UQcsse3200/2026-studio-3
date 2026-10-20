@@ -1,0 +1,45 @@
+{
+  "encounters": [
+    {
+      "id": "item-test",
+      "description": "Item rewards",
+      "weight": 1,
+      "choices": [
+        {
+          "id": "accept",
+          "description": "Accept",
+          "outcome": {
+            "healthDelta": 10,
+            "currencyDelta": 5,
+            "cardRewardId": "bandage",
+            "itemRewardIds": [
+              "ENERGY_CRYSTAL",
+              "ENERGY_CRYSTAL"
+            ]
+          }
+        },
+        {
+          "id": "empty",
+          "description": "Leave",
+          "outcome": {
+            "healthDelta": 0,
+            "currencyDelta": 0,
+            "itemRewardIds": []
+          }
+        },
+        {
+          "id": "unknown",
+          "description": "Unknown",
+          "outcome": {
+            "healthDelta": 10,
+            "currencyDelta": 5,
+            "cardRewardId": "bandage",
+            "itemRewardIds": [
+              "UNKNOWN_ITEM"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

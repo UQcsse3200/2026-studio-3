@@ -100,6 +100,36 @@ class CardFusionSelectionViewTest {
   }
 
   @Test
+  void additionalOwnedCommonCopiesUsePagesAndKeepSelection() {
+    var deck = runState.getOrCreatePlayerDeck(cardLibrary);
+    deck.addCard("strike");
+    deck.addCard("bandage");
+    display.getCardFusionView().dispose();
+    var flow = new CardFusionEncounterFlow(session, runState, new CardFusionService(cardLibrary));
+    var view =
+        new CardFusionSelectionView(
+            flow, cardLibrary, com.csse3200.game.ui.UIComponent.getSharedSkin(), stage);
+    try {
+      view.show();
+      assertEquals(flow.getEligibleCards().size(), view.getCardButtons().size());
+      assertEquals(10, view.getCardButtons().size());
+      assertEquals(8, view.getCardsGrid().getChildren().size);
+      String first = flow.getEligibleCards().get(0).instanceId();
+      select(view.getCardButtons().get(first));
+      stage.getRoot().findActor("fusion-next-page").fire(new ChangeEvent());
+      assertEquals(2, view.getCardsGrid().getChildren().size);
+      String last = flow.getEligibleCards().get(9).instanceId();
+      select(view.getCardButtons().get(last));
+      stage.getRoot().findActor("fusion-previous-page").fire(new ChangeEvent());
+      assertEquals(8, view.getCardsGrid().getChildren().size);
+      assertEquals(List.of(first, last), view.getSelectedInstanceIds());
+      assertTrue(view.isCardGlowVisible(first));
+    } finally {
+      view.dispose();
+    }
+  }
+
+  @Test
   void subtitleStaysOnOneLine() {
     Label subtitle = display.getCardFusionView().getInstructionLabel();
     GlyphLayout measured = new GlyphLayout(subtitle.getStyle().font, subtitle.getText());
