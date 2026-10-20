@@ -735,8 +735,8 @@ class ArmourAndStatusEffectTest {
     Entity entity = new Entity().addComponent(stats);
     List<String> applied = new ArrayList<>();
     List<String> removed = new ArrayList<>();
-    entity.getEvents().addListener("statusEffectApplied", (String type) -> applied.add(type));
-    entity.getEvents().addListener("statusEffectRemoved", (String type) -> removed.add(type));
+    entity.getEvents().<String>addListener("statusEffectApplied", applied::add);
+    entity.getEvents().<String>addListener("statusEffectRemoved", removed::add);
 
     stats.applyStatusEffect("VULNERABLE", 3, 3);
     assertEquals(List.of("VULNERABLE"), applied);

@@ -112,6 +112,24 @@ public class BestiaryService {
         .toList();
   }
 
+  /** Returns the complete configured roster for the archive UI without changing saved progress. */
+  public List<BestiaryEntryView> getCatalogueEntries() {
+    return entries.values().stream()
+        .map(entry -> BestiaryEntryView.from(entry, BestiaryUnlockState.DEFEATED))
+        .toList();
+  }
+
+  /** Returns complete archive records for one tier without changing saved progress. */
+  public List<BestiaryEntryView> getCatalogueEntriesByTier(EnemyTier tier) {
+    if (tier == null) {
+      return List.of();
+    }
+    return entries.values().stream()
+        .filter(entry -> entry.tier() == tier)
+        .map(entry -> BestiaryEntryView.from(entry, BestiaryUnlockState.DEFEATED))
+        .toList();
+  }
+
   /**
    * Returns discovered entries belonging to one enemy tier.
    *

@@ -238,7 +238,7 @@ class BattleActionsTest {
 
       when(release.isFinished()).thenReturn(true);
       battleUI.update();
-      verify(game).setScreen(GdxGame.ScreenType.VICTORY);
+      verify(game).showBattleResult(true, com.csse3200.game.rewards.CardRewardProfile.NORMAL);
     } finally {
       Gdx.app = previousApp;
     }

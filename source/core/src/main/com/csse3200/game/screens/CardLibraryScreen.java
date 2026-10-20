@@ -11,14 +11,8 @@ import com.csse3200.game.components.cards.UncommonCardLibraryWidget;
 import com.csse3200.game.components.library.CardLibraryDisplay;
 import com.csse3200.game.components.mainmenu.MainMenuDisplay;
 import com.csse3200.game.entities.Entity;
-import com.csse3200.game.entities.EntityService;
-import com.csse3200.game.entities.factories.RenderFactory;
 import com.csse3200.game.input.InputDecorator;
-import com.csse3200.game.input.InputService;
-import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
-import com.csse3200.game.services.GameTime;
-import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -41,20 +35,13 @@ public class CardLibraryScreen extends ScreenAdapter {
     this.cardLibraryTextures = collectTexturePaths();
 
     logger.debug("Initialising card library screen services");
-    ServiceLocator.registerInputService(new InputService());
-    ServiceLocator.registerEntityService(new EntityService());
-    ServiceLocator.registerRenderService(new RenderService());
-    ServiceLocator.registerTimeSource(new GameTime());
-
-    renderer = RenderFactory.createRenderer();
+    renderer = LibraryScreenHelper.createRenderer();
     loadAssets();
     createUI();
   }
 
   private void loadAssets() {
-    ResourceService resourceService = ServiceLocator.getResourceService();
-    resourceService.loadTextures(cardLibraryTextures);
-    resourceService.loadAll();
+    LibraryScreenHelper.loadTextures(cardLibraryTextures);
   }
 
   private void createUI() {
@@ -67,8 +54,7 @@ public class CardLibraryScreen extends ScreenAdapter {
 
   @Override
   public void render(float delta) {
-    ServiceLocator.getEntityService().update();
-    renderer.render();
+    LibraryScreenHelper.render(renderer);
   }
 
   @Override
@@ -79,10 +65,7 @@ public class CardLibraryScreen extends ScreenAdapter {
   @Override
   public void dispose() {
     logger.debug("Disposing card library screen");
-    renderer.dispose();
-    ServiceLocator.getRenderService().dispose();
-    ServiceLocator.getEntityService().dispose();
-    ServiceLocator.getResourceService().unloadAssets(cardLibraryTextures);
+    LibraryScreenHelper.dispose(renderer, cardLibraryTextures);
   }
 
   static String[] collectTexturePaths() {
