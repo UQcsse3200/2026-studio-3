@@ -20,19 +20,16 @@ class CardPlayRequestTest {
   void shouldRejectNullInstanceId() {
     CardPlayTarget cardPlayTarget = CardPlayTarget.self();
 
-    assertThrows(
-        IllegalArgumentException.class, () -> new CardPlayRequest(null, cardPlayTarget));
+    assertThrows(IllegalArgumentException.class, () -> new CardPlayRequest(null, cardPlayTarget));
   }
 
   @Test
   void shouldRejectBlankInstanceId() {
     CardPlayTarget cardPlayTarget = CardPlayTarget.self();
 
-    assertThrows(
-        IllegalArgumentException.class, () -> new CardPlayRequest("", cardPlayTarget));
+    assertThrows(IllegalArgumentException.class, () -> new CardPlayRequest("", cardPlayTarget));
 
-    assertThrows(
-        IllegalArgumentException.class, () -> new CardPlayRequest("   ", cardPlayTarget));
+    assertThrows(IllegalArgumentException.class, () -> new CardPlayRequest("   ", cardPlayTarget));
   }
 
   @Test
@@ -40,8 +37,7 @@ class CardPlayRequestTest {
     CardPlayTarget cardPlayTarget = CardPlayTarget.self();
 
     assertThrows(
-        IllegalArgumentException.class,
-        () -> new CardPlayRequest(" strike", cardPlayTarget));
+        IllegalArgumentException.class, () -> new CardPlayRequest(" strike", cardPlayTarget));
   }
 
   @Test
@@ -49,8 +45,7 @@ class CardPlayRequestTest {
     CardPlayTarget cardPlayTarget = CardPlayTarget.self();
 
     assertThrows(
-        IllegalArgumentException.class,
-        () -> new CardPlayRequest("strike ", cardPlayTarget));
+        IllegalArgumentException.class, () -> new CardPlayRequest("strike ", cardPlayTarget));
   }
 
   @Test
@@ -58,8 +53,7 @@ class CardPlayRequestTest {
     CardPlayTarget cardPlayTarget = CardPlayTarget.self();
 
     assertThrows(
-        IllegalArgumentException.class,
-        () -> new CardPlayRequest(" strike ", cardPlayTarget));
+        IllegalArgumentException.class, () -> new CardPlayRequest(" strike ", cardPlayTarget));
   }
 
   @Test

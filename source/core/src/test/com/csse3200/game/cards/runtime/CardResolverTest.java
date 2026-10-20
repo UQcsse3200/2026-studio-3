@@ -161,9 +161,7 @@ class CardResolverTest {
 
     assertEquals(6, sourceBaseEffect.value);
     assertEquals(12, sourceUpgradeEffect.value);
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> effects.add(damage));
+    assertThrows(UnsupportedOperationException.class, () -> effects.add(damage));
 
     List<EffectConfig> consumerCopy = upgraded.effects();
     consumerCopy.getFirst().value = 99;

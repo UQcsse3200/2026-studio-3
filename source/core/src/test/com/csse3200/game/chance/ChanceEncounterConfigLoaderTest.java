@@ -11,7 +11,6 @@ import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.encounters.integration.CardServiceCatalogAdapter;
 import com.csse3200.game.extensions.GameExtension;
-
 import java.io.Serial;
 import java.util.List;
 import java.util.Random;
@@ -197,15 +196,15 @@ class ChanceEncounterConfigLoaderTest {
 
   @Test
   void shouldRejectUnknownCardRewardThroughCatalogBoundary() {
-    CardServiceCatalogAdapter catalogAdapter = new CardServiceCatalogAdapter(new CardLibrary(CardConfigLoader.loadCards()));
+    CardServiceCatalogAdapter catalogAdapter =
+        new CardServiceCatalogAdapter(new CardLibrary(CardConfigLoader.loadCards()));
 
     ChanceEncounterLoadingException exception =
         assertThrows(
             ChanceEncounterLoadingException.class,
             () ->
                 ChanceEncounterConfigLoader.loadEncounters(
-                    TEST_DIRECTORY + "unknown_card_reward.json",
-                    catalogAdapter));
+                    TEST_DIRECTORY + "unknown_card_reward.json", catalogAdapter));
 
     assertMessageContains(exception, "unknown cardRewardId 'missing-card'");
   }
@@ -341,8 +340,7 @@ class ChanceEncounterConfigLoaderTest {
   }
 
   private static final class SequenceRandom extends Random {
-    @Serial
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     private final int[] values;
     private int index;

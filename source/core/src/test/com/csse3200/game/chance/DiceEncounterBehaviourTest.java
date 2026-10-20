@@ -364,9 +364,7 @@ class DiceEncounterBehaviourTest {
     Random random = new Random(266L);
     CardService cards = TestCardService.withCards();
 
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new DiceEncounterBehaviour(random, cards));
+    assertThrows(IllegalArgumentException.class, () -> new DiceEncounterBehaviour(random, cards));
   }
 
   @Test

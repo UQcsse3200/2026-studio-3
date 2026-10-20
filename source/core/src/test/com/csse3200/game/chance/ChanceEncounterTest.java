@@ -45,8 +45,7 @@ class ChanceEncounterTest {
     List<ChanceChoice> list = List.of(leaveChoice());
 
     assertThrows(
-        IllegalArgumentException.class,
-        () -> new ChanceEncounter("zero", "Zero weight.", list, 0));
+        IllegalArgumentException.class, () -> new ChanceEncounter("zero", "Zero weight.", list, 0));
     assertThrows(
         IllegalArgumentException.class,
         () -> new ChanceEncounter("negative", "Negative weight.", list, -1));

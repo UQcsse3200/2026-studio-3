@@ -150,8 +150,7 @@ class PlayerDeckTest {
     assertThrows(IllegalArgumentException.class, () -> deck.addCard("  "));
     assertThrows(IllegalArgumentException.class, () -> deck.addCard("unknown_card"));
     assertThrows(IllegalArgumentException.class, () -> deck.addCards(null));
-    assertThrows(
-        IllegalArgumentException.class, () -> new PlayerDeck(CARDS, list));
+    assertThrows(IllegalArgumentException.class, () -> new PlayerDeck(CARDS, list));
   }
 
   @Test

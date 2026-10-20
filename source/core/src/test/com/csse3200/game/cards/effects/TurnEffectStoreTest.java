@@ -40,9 +40,7 @@ class TurnEffectStoreTest {
             List.of(effect("strike", EffectType.DAMAGE, TargetType.SINGLE_ENEMY, 6, 0, 0))));
     List<CardEffectResolution> snapshot = store.getResolutions();
 
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> snapshot.add(cardEffectResolution));
+    assertThrows(UnsupportedOperationException.class, () -> snapshot.add(cardEffectResolution));
 
     store.clear();
 

@@ -163,8 +163,7 @@ class EnemyStatusEffectVisualComponentTest {
     doThrow(new IllegalStateException("draw failed"))
         .when(batch)
         .draw(any(TextureRegion.class), anyFloat(), anyFloat(), anyFloat(), anyFloat());
-    assertThrows(
-        IllegalStateException.class, () -> visualComponent.render(batch));
+    assertThrows(IllegalStateException.class, () -> visualComponent.render(batch));
     verify(batch).setPackedColor(42f);
   }
 
@@ -576,21 +575,21 @@ class EnemyStatusEffectVisualComponentTest {
       try {
         stats.applyStatusEffect(types[index].name(), 1, 3);
         EnemyStatusEffectVisualComponent visual =
-                new EnemyStatusEffectVisualComponent(
-                        sheet, registry.lookup(types[index]), target, 0f, types[index]);
-        for (boolean persistent : new boolean[]{false, true}) {
+            new EnemyStatusEffectVisualComponent(
+                sheet, registry.lookup(types[index]), target, 0f, types[index]);
+        for (boolean persistent : new boolean[] {false, true}) {
           if (persistent) visual.showPersistent();
-          for (float x : new float[]{2f, 1.5f, 2f}) {
+          for (float x : new float[] {2f, 1.5f, 2f}) {
             target.setPosition(x, 4f);
             float[] bounds = renderedBounds(visual);
             assertEquals(
-                    target.getCenterPosition().x,
-                    bounds[0] + (left + right + 1) / (2f * w) * bounds[2],
-                    0.0001f);
+                target.getCenterPosition().x,
+                bounds[0] + (left + right + 1) / (2f * w) * bounds[2],
+                0.0001f);
             assertEquals(
-                    target.getCenterPosition().y,
-                    bounds[1] + (1f - (top + bottom + 1) / (2f * h)) * bounds[3],
-                    0.0001f);
+                target.getCenterPosition().y,
+                bounds[1] + (1f - (top + bottom + 1) / (2f * h)) * bounds[3],
+                0.0001f);
           }
         }
         stats.removeStatusEffect(types[index].name());

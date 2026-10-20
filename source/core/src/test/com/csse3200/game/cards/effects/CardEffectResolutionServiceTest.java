@@ -86,22 +86,16 @@ class CardEffectResolutionServiceTest {
     PlayerEffectState playerEffectState = new PlayerEffectState();
     CardEffectResolver cardEffectResolver = new CardEffectResolver();
 
+    assertThrows(IllegalArgumentException.class, () -> new CardEffectResolutionService(null));
     assertThrows(
         IllegalArgumentException.class,
-        () -> new CardEffectResolutionService(null));
+        () -> new CardEffectResolutionService(null, playerEffectState, turnEffectStore));
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            new CardEffectResolutionService(null, playerEffectState, turnEffectStore));
+        () -> new CardEffectResolutionService(cardEffectResolver, null, turnEffectStore));
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            new CardEffectResolutionService(cardEffectResolver, null, turnEffectStore));
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            new CardEffectResolutionService(
-                cardEffectResolver, playerEffectState, null));
+        () -> new CardEffectResolutionService(cardEffectResolver, playerEffectState, null));
   }
 
   private static CardConfig card(String id, TargetType target, EffectConfig... effects) {

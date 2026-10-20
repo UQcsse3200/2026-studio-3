@@ -103,8 +103,7 @@ class Team1EnemyStateAdapterTest {
     CardPlayTarget singleEnemy = CardPlayTarget.singleEnemy("missing");
 
     assertThrows(
-        IllegalArgumentException.class,
-        () -> adapter.applyEnemyEffects(singleEnemy, effects));
+        IllegalArgumentException.class, () -> adapter.applyEnemyEffects(singleEnemy, effects));
     assertEquals(10, available.getHealth());
   }
 

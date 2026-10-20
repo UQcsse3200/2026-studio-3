@@ -113,7 +113,8 @@ class CardEffectResolverTest {
     CardEffectResolver resolver = new CardEffectResolver();
     CardEffectResolver withLibrary = new CardEffectResolver(new CardLibrary());
     PlayerEffectState playerEffectState = new PlayerEffectState();
-    CardEffectResolutionContext cardEffectResolutionContext = new CardEffectResolutionContext(0, 0, 0);
+    CardEffectResolutionContext cardEffectResolutionContext =
+        new CardEffectResolutionContext(0, 0, 0);
 
     CardConfig strike =
         card("strike", TargetType.SINGLE_ENEMY, new EffectConfig(EffectType.DAMAGE, 6));
@@ -123,12 +124,9 @@ class CardEffectResolverTest {
     assertThrows(
         IllegalArgumentException.class,
         () -> resolver.resolve((CardConfig) null, playerEffectState));
+    assertThrows(IllegalStateException.class, () -> resolver.resolve("strike", playerEffectState));
     assertThrows(
-        IllegalStateException.class, () -> resolver.resolve("strike", playerEffectState));
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            withLibrary.resolve("missing", playerEffectState));
+        IllegalArgumentException.class, () -> withLibrary.resolve("missing", playerEffectState));
     assertThrows(
         IllegalArgumentException.class,
         () -> resolver.resolve(strike, (CardEffectResolutionContext) null));
