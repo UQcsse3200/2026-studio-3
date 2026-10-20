@@ -2938,7 +2938,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/components/battle/PlayerEffectVisuals.html#createBurstComponent(com.csse3200.game.cards.EffectType,com.csse3200.game.components.battle.EffectVisualStyle,float,float)" class="member-name-link">createBurstComponent(EffectType, EffectVisualStyle, float, float)</a> - Static method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/PlayerEffectVisuals.html" title="class in com.csse3200.game.components.battle">PlayerEffectVisuals</a></dt>
 <dd>
-<div class="block">Check which type effect it is and change the component accordingly.</div>
+<div class="block">Build burst depending on the type of effect.</div>
 </dd>
 <dt><a href="com/csse3200/game/ui/MenuTheme.html#createButtonStyle(com.badlogic.gdx.scenes.scene2d.ui.Skin,com.badlogic.gdx.graphics.Texture)" class="member-name-link">createButtonStyle(Skin, Texture)</a> - Static method in class com.csse3200.game.ui.<a href="com/csse3200/game/ui/MenuTheme.html" title="class in com.csse3200.game.ui">MenuTheme</a></dt>
 <dd>
@@ -3989,8 +3989,12 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Renders an impact burst: several small particles fly outward from the target and fade out.</div>
 </dd>
-<dt><a href="com/csse3200/game/components/battle/EffectBurstComponent.html#%3Cinit%3E(com.csse3200.game.components.battle.EffectVisualStyle,float,float,boolean,com.csse3200.game.components.battle.EffectBurstComponent.ParticleShape)" class="member-name-link">EffectBurstComponent(EffectVisualStyle, float, float, boolean, EffectBurstComponent.ParticleShape)</a> - Constructor for class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/EffectBurstComponent.html" title="class in com.csse3200.game.components.battle">EffectBurstComponent</a></dt>
+<dt><a href="com/csse3200/game/components/battle/EffectBurstComponent.html#%3Cinit%3E(com.csse3200.game.components.battle.EffectVisualStyle,float,float,com.csse3200.game.components.battle.EffectBurstComponent.ParticleMotion,com.csse3200.game.components.battle.EffectBurstComponent.ParticleShape)" class="member-name-link">EffectBurstComponent(EffectVisualStyle, float, float, EffectBurstComponent.ParticleMotion, EffectBurstComponent.ParticleShape)</a> - Constructor for class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/EffectBurstComponent.html" title="class in com.csse3200.game.components.battle">EffectBurstComponent</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/battle/EffectBurstComponent.ParticleMotion.html" class="type-name-link" title="enum class in com.csse3200.game.components.battle">EffectBurstComponent.ParticleMotion</a> - Enum Class in <a href="com/csse3200/game/components/battle/package-summary.html">com.csse3200.game.components.battle</a></dt>
+<dd>
+<div class="block">Particle motion.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/battle/EffectBurstComponent.ParticleShape.html" class="type-name-link" title="enum class in com.csse3200.game.components.battle">EffectBurstComponent.ParticleShape</a> - Enum Class in <a href="com/csse3200/game/components/battle/package-summary.html">com.csse3200.game.components.battle</a></dt>
 <dd>
 <div class="block">Particle appearance: a round dot, or a jagged triangular shard that spins as it flies.</div>
@@ -4904,6 +4908,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the value of the <code>failureReason</code> record component.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/battle/EffectBurstComponent.ParticleMotion.html#FALL" class="member-name-link">FALL</a> - Enum constant in enum class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/EffectBurstComponent.ParticleMotion.html" title="enum class in com.csse3200.game.components.battle">EffectBurstComponent.ParticleMotion</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/entities/configs/PlayerConfig.html#favouriteColour" class="member-name-link">favouriteColour</a> - Variable in class com.csse3200.game.entities.configs.<a href="com/csse3200/game/entities/configs/PlayerConfig.html" title="class in com.csse3200.game.entities.configs">PlayerConfig</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/memory/PlayerMemory.html#favoursAttack()" class="member-name-link">favoursAttack()</a> - Method in record class com.csse3200.game.components.enemy.memory.<a href="com/csse3200/game/components/enemy/memory/PlayerMemory.html" title="class in com.csse3200.game.components.enemy.memory">PlayerMemory</a></dt>
@@ -10142,6 +10148,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the value of the <a href="./com/csse3200/game/components/battle/EffectVisualStyle.html#param-rise"><code>rise</code></a> record component.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/battle/EffectBurstComponent.ParticleMotion.html#RISE" class="member-name-link">RISE</a> - Enum constant in enum class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/EffectBurstComponent.ParticleMotion.html" title="enum class in com.csse3200.game.components.battle">EffectBurstComponent.ParticleMotion</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/encounters/integration/ChanceResolution.Status.html#ROLLBACK_FAILED" class="member-name-link">ROLLBACK_FAILED</a> - Enum constant in enum class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceResolution.Status.html" title="enum class in com.csse3200.game.encounters.integration">ChanceResolution.Status</a></dt>
 <dd>
 <div class="block">A Player update failed and at least one original value could not be restored.</div>
@@ -10389,6 +10397,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Set the entity's width and scale the height to maintain aspect ratio.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/battle/EffectBurstComponent.ParticleMotion.html#SCATTER" class="member-name-link">SCATTER</a> - Enum constant in enum class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/EffectBurstComponent.ParticleMotion.html" title="enum class in com.csse3200.game.components.battle">EffectBurstComponent.ParticleMotion</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/save/SaveGameData.html#schemaVersion" class="member-name-link">schemaVersion</a> - Variable in class com.csse3200.game.save.<a href="com/csse3200/game/save/SaveGameData.html" title="class in com.csse3200.game.save">SaveGameData</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ui/MenuTheme.html#SCREEN_PADDING" class="member-name-link">SCREEN_PADDING</a> - Static variable in class com.csse3200.game.ui.<a href="com/csse3200/game/ui/MenuTheme.html" title="class in com.csse3200.game.ui">MenuTheme</a></dt>
@@ -12570,9 +12580,7 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/battle/OffensiveEffectVisuals.html#usesBurst(com.csse3200.game.cards.EffectType)" class="member-name-link">usesBurst(EffectType)</a> - Static method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/OffensiveEffectVisuals.html" title="class in com.csse3200.game.components.battle">OffensiveEffectVisuals</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/battle/PlayerEffectVisuals.html#usesBurst(com.csse3200.game.cards.EffectType)" class="member-name-link">usesBurst(EffectType)</a> - Static method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/PlayerEffectVisuals.html" title="class in com.csse3200.game.components.battle">PlayerEffectVisuals</a></dt>
-<dd>
-<div class="block">Check if the effect type need to use Burst</div>
-</dd>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/EffectType.html#usesDuration()" class="member-name-link">usesDuration()</a> - Method in enum class com.csse3200.game.cards.<a href="com/csse3200/game/cards/EffectType.html" title="enum class in com.csse3200.game.cards">EffectType</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/battle/OffensiveEffectVisuals.html#usesProjectile(com.csse3200.game.cards.EffectType)" class="member-name-link">usesProjectile(EffectType)</a> - Static method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/OffensiveEffectVisuals.html" title="class in com.csse3200.game.components.battle">OffensiveEffectVisuals</a></dt>
@@ -12667,6 +12675,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
 <dt><a href="com/csse3200/game/chance/DiceEncounterBehaviour.Stage.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class com.csse3200.game.chance.<a href="com/csse3200/game/chance/DiceEncounterBehaviour.Stage.html" title="enum class in com.csse3200.game.chance">DiceEncounterBehaviour.Stage</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/battle/EffectBurstComponent.ParticleMotion.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/EffectBurstComponent.ParticleMotion.html" title="enum class in com.csse3200.game.components.battle">EffectBurstComponent.ParticleMotion</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
@@ -12901,6 +12913,11 @@ the order they are declared.</div>
 the order they are declared.</div>
 </dd>
 <dt><a href="com/csse3200/game/chance/DiceEncounterBehaviour.Stage.html#values()" class="member-name-link">values()</a> - Static method in enum class com.csse3200.game.chance.<a href="com/csse3200/game/chance/DiceEncounterBehaviour.Stage.html" title="enum class in com.csse3200.game.chance">DiceEncounterBehaviour.Stage</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
+</dd>
+<dt><a href="com/csse3200/game/components/battle/EffectBurstComponent.ParticleMotion.html#values()" class="member-name-link">values()</a> - Static method in enum class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/EffectBurstComponent.ParticleMotion.html" title="enum class in com.csse3200.game.components.battle">EffectBurstComponent.ParticleMotion</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum class, in
 the order they are declared.</div>

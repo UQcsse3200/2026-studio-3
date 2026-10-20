@@ -102,10 +102,11 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="../../rendering/RenderComponent.html" title="class in com.csse3200.game.rendering">RenderComponent</a></span></div>
 <div class="block">Renders an impact burst: several small particles fly outward from the target and fade out.
 
- <p>Two independent choices, set per registration: <code>hasGravity</code> (an even outward scatter vs
- one that curves downward, reading as falling debris) and <code>shape</code> (a round dot vs a jagged
- triangular shard, with the shard also spinning as it flies). Existing registrations are
- unaffected by new combinations — e.g. Damage keeps using <code>DOT</code> with no gravity.
+ <p>Two independent choices, set per registration: <code>particleMotion </code> (Scatter will make the
+ particle do an outward disperse, fall will make the particle fall and rise will make the particle
+ rise) and <code>shape</code> (a round dot vs a jagged triangular shard, with the shard also spinning
+ as it flies). Existing registrations are unaffected by new combinations — e.g. Damage keeps using
+ <code>SCATTER</code> with no gravity.
 
  <p>Reuses <a href="EffectVisualStyle.html" title="class in com.csse3200.game.components.battle"><code>EffectVisualStyle</code></a>'s colour, duration and start/end scale (the latter repurposed
  here as particle size); particle count and spread are fixed constants for a consistent look.</div>
@@ -122,8 +123,13 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Class</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code>static enum&nbsp;</code></div>
-<div class="col-second even-row-color"><code><a href="EffectBurstComponent.ParticleShape.html" class="type-name-link" title="enum class in com.csse3200.game.components.battle">EffectBurstComponent.ParticleShape</a></code></div>
+<div class="col-second even-row-color"><code><a href="EffectBurstComponent.ParticleMotion.html" class="type-name-link" title="enum class in com.csse3200.game.components.battle">EffectBurstComponent.ParticleMotion</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Particle motion.</div>
+</div>
+<div class="col-first odd-row-color"><code>static enum&nbsp;</code></div>
+<div class="col-second odd-row-color"><code><a href="EffectBurstComponent.ParticleShape.html" class="type-name-link" title="enum class in com.csse3200.game.components.battle">EffectBurstComponent.ParticleShape</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Particle appearance: a round dot, or a jagged triangular shard that spins as it flies.</div>
 </div>
 </div>
@@ -146,10 +152,10 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.components.battle.EffectVisualStyle,float,float,boolean,com.csse3200.game.components.battle.EffectBurstComponent.ParticleShape)" class="member-name-link">EffectBurstComponent</a><wbr>(<a href="EffectVisualStyle.html" title="class in com.csse3200.game.components.battle">EffectVisualStyle</a>&nbsp;style,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.components.battle.EffectVisualStyle,float,float,com.csse3200.game.components.battle.EffectBurstComponent.ParticleMotion,com.csse3200.game.components.battle.EffectBurstComponent.ParticleShape)" class="member-name-link">EffectBurstComponent</a><wbr>(<a href="EffectVisualStyle.html" title="class in com.csse3200.game.components.battle">EffectVisualStyle</a>&nbsp;style,
  float&nbsp;baseSize,
  float&nbsp;startDelay,
- boolean&nbsp;hasGravity,
+ <a href="EffectBurstComponent.ParticleMotion.html" title="enum class in com.csse3200.game.components.battle">EffectBurstComponent.ParticleMotion</a>&nbsp;motion,
  <a href="EffectBurstComponent.ParticleShape.html" title="enum class in com.csse3200.game.components.battle">EffectBurstComponent.ParticleShape</a>&nbsp;shape)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
@@ -208,20 +214,20 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(com.csse3200.game.components.battle.EffectVisualStyle,float,float,boolean,com.csse3200.game.components.battle.EffectBurstComponent.ParticleShape)">
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.components.battle.EffectVisualStyle,float,float,com.csse3200.game.components.battle.EffectBurstComponent.ParticleMotion,com.csse3200.game.components.battle.EffectBurstComponent.ParticleShape)">
 <h3>EffectBurstComponent</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">EffectBurstComponent</span><wbr><span class="parameters">(<a href="EffectVisualStyle.html" title="class in com.csse3200.game.components.battle">EffectVisualStyle</a>&nbsp;style,
  float&nbsp;baseSize,
  float&nbsp;startDelay,
- boolean&nbsp;hasGravity,
+ <a href="EffectBurstComponent.ParticleMotion.html" title="enum class in com.csse3200.game.components.battle">EffectBurstComponent.ParticleMotion</a>&nbsp;motion,
  <a href="EffectBurstComponent.ParticleShape.html" title="enum class in com.csse3200.game.components.battle">EffectBurstComponent.ParticleShape</a>&nbsp;shape)</span></div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>style</code> - colour, duration and particle size</dd>
 <dd><code>baseSize</code> - size, in world units, the burst's spread and particle size are relative to</dd>
 <dd><code>startDelay</code> - seconds to wait before this visual starts (set by the coordinator)</dd>
-<dd><code>hasGravity</code> - false for an even outward scatter; true for particles that curve downward as
-     they fly out, reading as falling debris</dd>
+<dd><code>motion</code> - Scatter will make the particle do an outward disperse, fall will make the
+     particle fall and rise will make the particle rise</dd>
 <dd><code>shape</code> - DOT for a round particle (e.g. Damage), SHARD for a spinning jagged fragment (e.g.
      Sunder's broken armour)</dd>
 </dl>

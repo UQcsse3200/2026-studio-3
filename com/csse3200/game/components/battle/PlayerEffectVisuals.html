@@ -112,7 +112,7 @@ loadScripts(document, 'script');</script>
  float&nbsp;baseSize,
  float&nbsp;startDelay)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Check which type effect it is and change the component accordingly.</div>
+<div class="block">Build burst depending on the type of effect.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#registerAll(com.csse3200.game.components.battle.EffectVisualRegistry)" class="member-name-link">registerAll</a><wbr>(<a href="EffectVisualRegistry.html" title="class in com.csse3200.game.components.battle">EffectVisualRegistry</a>&nbsp;registry)</code></div>
@@ -121,9 +121,7 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#usesBurst(com.csse3200.game.cards.EffectType)" class="member-name-link">usesBurst</a><wbr>(<a href="../../cards/EffectType.html" title="enum class in com.csse3200.game.cards">EffectType</a>&nbsp;type)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Check if the effect type need to use Burst</div>
-</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -156,8 +154,9 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="usesBurst(com.csse3200.game.cards.EffectType)">
 <h3>usesBurst</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">usesBurst</span><wbr><span class="parameters">(<a href="../../cards/EffectType.html" title="enum class in com.csse3200.game.cards">EffectType</a>&nbsp;type)</span></div>
-<div class="block">Check if the effect type need to use Burst</div>
 <dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>type</code> - check the type of the effect and return accordingly</dd>
 <dt>Returns:</dt>
 <dd>true if the effect type are either energy gain or cleanse. Else false</dd>
 </dl>
@@ -170,8 +169,13 @@ loadScripts(document, 'script');</script>
  <a href="EffectVisualStyle.html" title="class in com.csse3200.game.components.battle">EffectVisualStyle</a>&nbsp;style,
  float&nbsp;baseSize,
  float&nbsp;startDelay)</span></div>
-<div class="block">Check which type effect it is and change the component accordingly.</div>
+<div class="block">Build burst depending on the type of effect. Change only the shape and the motion.</div>
 <dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>type</code> - type of effect that will use the component</dd>
+<dd><code>style</code> - the style of the effect</dd>
+<dd><code>baseSize</code> - The size of the effect</dd>
+<dd><code>startDelay</code> - delay value before the animation start</dd>
 <dt>Returns:</dt>
 <dd>EffectBurstComponent</dd>
 </dl>
