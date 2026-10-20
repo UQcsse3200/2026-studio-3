@@ -325,7 +325,9 @@ public class AudioService {
    *
    * <p>Battles check the room they were entered from, so elite fights and the final boss get their
    * own tracks, and the encounter screen only switches to shop music when it is a shop. The
-   * tutorial battle isn't part of a run, so it always gets the normal battle tracks. The library
+   * tutorial battle isn't part of a run, so it always gets the normal battle tracks. The music
+   * stops for the victory sound, so the elite portal and temple screens after an elite win start
+   * the map music again, which then carries on when the player gets back to the map. The library
    * screens share one set of tracks, so moving between them keeps the same song going. Screens
    * without their own music (settings, events, the save screen and so on) leave the current track
    * playing, so going into the settings and back doesn't restart it. When the song does change, the
@@ -339,7 +341,7 @@ public class AudioService {
     leavePauseMenu();
     switch (screen) {
       case MAIN_MENU -> startPlaylist(Playlist.MENU);
-      case MAP -> startPlaylist(Playlist.MAP);
+      case MAP, ELITE_PORTAL, ANCIENT_TEMPLE, TEMPLE_CARD_SELECTION -> startPlaylist(Playlist.MAP);
       case BATTLE_SCREEN -> startPlaylist(battlePlaylist(currentRoom(run)));
       case TUTORIAL_BATTLE -> startPlaylist(Playlist.BATTLE);
       case ENCOUNTER -> {

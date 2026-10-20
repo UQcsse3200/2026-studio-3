@@ -183,6 +183,28 @@ class AudioServiceTest {
     assertTrue(BATTLE_TRACKS.contains(lastStarted()));
   }
 
+  /** The music stops for the victory sound, so the portal after an elite win has to start it. */
+  @Test
+  void theElitePortalStartsTheMapMusicAfterTheVictorySound() {
+    AudioService.onScreenChanged(ScreenType.BATTLE_SCREEN, runIn(RoomType.ELITE));
+    AudioService.onScreenChanged(ScreenType.VICTORY);
+
+    AudioService.onScreenChanged(ScreenType.ELITE_PORTAL);
+
+    assertTrue(MAP_TRACKS.contains(lastStarted()));
+  }
+
+  @Test
+  void theSameSongCarriesOnThroughTheTempleAndBackToTheMap() {
+    AudioService.onScreenChanged(ScreenType.ELITE_PORTAL);
+    AudioService.onScreenChanged(ScreenType.ANCIENT_TEMPLE);
+    AudioService.onScreenChanged(ScreenType.TEMPLE_CARD_SELECTION);
+    AudioService.onScreenChanged(ScreenType.MAP);
+
+    assertEquals(1, started.size());
+    assertTrue(MAP_TRACKS.contains(lastStarted()));
+  }
+
   @Test
   void theLibraryScreensShareOneTrack() {
     AudioService.onScreenChanged(ScreenType.LIBRARY);
