@@ -59,6 +59,10 @@ final class CardFusionSelectionView {
   private Group selectionLayer;
   private Group sequenceLayer;
   private Table cardsGrid;
+  private final List<Actor> cardSlots = new ArrayList<>();
+  private int cardPage;
+  private TextButton previousPage;
+  private TextButton nextPage;
   private Table selectedPreview;
   private Image statusPanel;
   private Label instructionLabel;
@@ -174,6 +178,34 @@ final class CardFusionSelectionView {
     scrollPane.setScrollingDisabled(true, false);
     scrollPane.setBounds(200f, 205f, 880f, 374f);
     selectionLayer.addActor(scrollPane);
+    previousPage = new TextButton("<", createActionStyle(false));
+    nextPage = new TextButton(">", createActionStyle(false));
+    previousPage.setName("fusion-previous-page");
+    nextPage.setName("fusion-next-page");
+    previousPage.setBounds(152f, 358f, 46f, 64f);
+    nextPage.setBounds(1082f, 358f, 46f, 64f);
+    previousPage.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            if (cardPage > 0) {
+              cardPage--;
+              renderCardPage();
+            }
+          }
+        });
+    nextPage.addListener(
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent event, Actor actor) {
+            if ((cardPage + 1) * 8 < cardSlots.size()) {
+              cardPage++;
+              renderCardPage();
+            }
+          }
+        });
+    selectionLayer.addActor(previousPage);
+    selectionLayer.addActor(nextPage);
 
     statusPanel =
         new Image(
@@ -264,6 +296,8 @@ final class CardFusionSelectionView {
     cardButtons.clear();
     cardGlows.clear();
     cardsGrid.clearChildren();
+    cardSlots.clear();
+    cardPage = 0;
     List<CardInstance> eligibleCards = flow.getEligibleCards();
     Map<String, Integer> copyNumbers = new LinkedHashMap<>();
     TextButtonStyle cardStyle = createCardStyle();
@@ -319,15 +353,26 @@ final class CardFusionSelectionView {
       slot.add(inset);
       cardGlows.put(card.instanceId(), glow);
       // Four 220px cells fit the viewport; two 184px rows leave vertical breathing room.
-      cardsGrid.add(slot).size(204f, 168f).pad(8f);
-      if ((i + 1) % 4 == 0) {
-        cardsGrid.row();
-      }
+      cardSlots.add(slot);
     }
+    renderCardPage();
     updateSelectionLabel();
     if (eligibleCards.size() < REQUIRED_CARDS) {
       feedbackLabel.setText("You need at least three Common cards. You can leave the forge.");
     }
+  }
+
+  private void renderCardPage() {
+    cardsGrid.clearChildren();
+    int first = cardPage * 8;
+    for (int i = first; i < Math.min(first + 8, cardSlots.size()); i++) {
+      cardsGrid.add(cardSlots.get(i)).size(204f, 168f).pad(8f);
+      if ((i - first + 1) % 4 == 0) cardsGrid.row();
+    }
+    previousPage.setVisible(cardSlots.size() > 8);
+    nextPage.setVisible(cardSlots.size() > 8);
+    previousPage.setDisabled(cardPage == 0);
+    nextPage.setDisabled((cardPage + 1) * 8 >= cardSlots.size());
   }
 
   private TextButtonStyle createCardStyle() {
@@ -705,6 +750,8 @@ final class CardFusionSelectionView {
     shadow.setAlignment(Align.center);
     shadow.setWrap(true);
     shadow.setBounds(222f, messageY - 2f, 840f, 58f);
+    shadow.getStyle().background =
+        new EncounterResultShade(shadow, skin.getDrawable(STYLE_NAME_WHITE), .60f);
     sequenceLayer.addActor(shadow);
     if (highlightRare) {
       String[] parts = {"A new ", "Rare", " card joins your deck."};

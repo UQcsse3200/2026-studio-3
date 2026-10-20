@@ -9,7 +9,6 @@ public class EnergyComponent extends Component {
   private static final Logger logger = LoggerFactory.getLogger(EnergyComponent.class);
 
   private static final String EVT_UPDATE_ENERGY = "updateEnergy";
-  private static final String EVT_UPDATE_MAX_ENERGY = "updateMaxEnergy";
 
   /** Highest max energy the player can reach from any source. */
   public static final int MAX_ENERGY_CAP = 5;

@@ -128,7 +128,7 @@ class CardsEndToEndTest {
         () -> assertEquals(Rarity.UNCOMMON, expose.rarity),
         () -> assertEquals(TargetType.ALL_ENEMIES, expose.target),
         () -> assertEquals(1, expose.effects.length),
-        () -> assertEffect(expose.effects[0], EffectType.VULNERABLE, 2, 2),
+        () -> assertEffect(expose.effects[0], EffectType.VULNERABLE, 1, 2),
         () -> assertEquals("images/cards/expose.png", expose.texturePath));
 
     assertAll(

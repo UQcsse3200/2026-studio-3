@@ -23,7 +23,9 @@ import com.csse3200.game.cards.runtime.CardResolver;
 import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
+import com.csse3200.game.components.encounters.AcquisitionResultDisplay;
 import com.csse3200.game.components.player.InventoryComponent;
+import com.csse3200.game.encounters.results.AcquisitionPresentation;
 import com.csse3200.game.maps.EncounterCallback;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.rewards.ItemFormatting;
@@ -107,6 +109,10 @@ public class ShopDisplay extends UIComponent {
   private com.badlogic.gdx.scenes.scene2d.Group approachControls;
   private long displayedRevision;
   private CardWidgetAssets cardWidgetAssets;
+  private AcquisitionPresentation acquisitionPresentation;
+  private final java.util.List<com.csse3200.game.encounters.results.AcquisitionResult.Entry>
+      purchasedResults = new java.util.ArrayList<>();
+  private boolean leaving;
 
   private Stack rootStack;
   private Table titleFrame;
@@ -209,6 +215,14 @@ public class ShopDisplay extends UIComponent {
   @Override
   public void create() {
     super.create();
+    acquisitionPresentation =
+        new AcquisitionPresentation(
+            new AcquisitionResultDisplay(
+                stage,
+                skin,
+                resolveCardService(),
+                ServiceLocator.getResourceService(),
+                "SHOP RESULTS"));
     createStyles();
     addActors();
   }
@@ -330,6 +344,7 @@ public class ShopDisplay extends UIComponent {
       purse.add(coin).size(24).padRight(8);
     }
     goldLabel = new Label("", createLabelStyle(DEFAULT, GOLD_COLOUR));
+    goldLabel.setName("merchant-gold-balance");
     purse.add(goldLabel).pad(10);
     purse.setBounds(1020, 684, 220, 56);
     shopControls.addActor(purse);
@@ -570,8 +585,8 @@ public class ShopDisplay extends UIComponent {
   }
 
   private void buyItem(String itemId, long revision) {
-    PurchaseResult result =
-        shopEncounter.purchase(itemId, revision, java.util.UUID.randomUUID().toString()).result();
+    var receipt = shopEncounter.purchase(itemId, revision, java.util.UUID.randomUUID().toString());
+    PurchaseResult result = receipt.result();
     logger.debug("Purchase result for {}: {}", itemId, result.getStatus());
 
     if (result.isSuccess()) {
@@ -590,6 +605,9 @@ public class ShopDisplay extends UIComponent {
       rebuildProducts();
       statusLabel.setText(message);
       setMerchantDialogue("A fine choice.");
+      if (receipt.acquisition() != null) {
+        purchasedResults.addAll(receipt.acquisition().entries());
+      }
     } else {
       refresh();
     }
@@ -615,6 +633,20 @@ public class ShopDisplay extends UIComponent {
   }
 
   private void leaveShop() {
+    if (leaving) return;
+    leaving = true;
+    if (!purchasedResults.isEmpty()) {
+      acquisitionPresentation.show(
+          new com.csse3200.game.encounters.results.AcquisitionResult(
+              "shop-" + shopEncounter.getNodeId(), purchasedResults),
+          dismissal -> finishLeavingShop());
+      return;
+    }
+    finishLeavingShop();
+  }
+
+  private void finishLeavingShop() {
+    acquisitionPresentation.close();
     logger.debug("Shop encounter completed for node {}", shopEncounter.getNodeId());
     AudioService.playSound(SoundId.LEAVE_SHOP, 0.3f);
     shopEncounter.leave();
@@ -728,6 +760,9 @@ public class ShopDisplay extends UIComponent {
 
   @Override
   public void dispose() {
+    if (acquisitionPresentation != null) {
+      acquisitionPresentation.close();
+    }
     if (rootStack != null) {
       rootStack.remove();
     }

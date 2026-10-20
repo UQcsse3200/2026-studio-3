@@ -10,7 +10,6 @@ import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardDiscoveryService;
 import com.csse3200.game.cards.CardDiscoveryStore;
 import com.csse3200.game.cards.CardLibrary;
-import com.csse3200.game.chance.CardFusionEncounterBehaviour;
 import com.csse3200.game.chance.ChanceEncounterFactory;
 import com.csse3200.game.chance.ChanceEncounterSelector;
 import com.csse3200.game.files.UserSettings;
@@ -19,6 +18,10 @@ import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.narration.NarrationConfigLoader;
 import com.csse3200.game.narration.NarrationLoadingException;
+import com.csse3200.game.rewards.CardRewardProfile;
+import com.csse3200.game.rewards.ItemAcquisitionService;
+import com.csse3200.game.rewards.ItemDiscoveryService;
+import com.csse3200.game.rewards.ItemDiscoveryStore;
 import com.csse3200.game.save.AutosaveCoordinator;
 import com.csse3200.game.save.GameStateSnapshotProvider;
 import com.csse3200.game.save.JsonSaveGameRepository;
@@ -29,19 +32,19 @@ import com.csse3200.game.screens.BestiaryScreen;
 import com.csse3200.game.screens.CampfireScreen;
 import com.csse3200.game.screens.CardLibraryScreen;
 import com.csse3200.game.screens.DemoCampfireScreen;
-import com.csse3200.game.screens.DemoEventScreen;
-import com.csse3200.game.screens.DemoShopScreen;
 import com.csse3200.game.screens.ElitePortalScreen;
 import com.csse3200.game.screens.EncounterScreen;
 import com.csse3200.game.screens.EndBattleScreen;
 import com.csse3200.game.screens.ItemLibraryScreen;
 import com.csse3200.game.screens.LibraryScreen;
+import com.csse3200.game.screens.LoadedSaveTransitionAware;
 import com.csse3200.game.screens.MainGameScreen;
 import com.csse3200.game.screens.MainMenuScreen;
 import com.csse3200.game.screens.MapScreen;
 import com.csse3200.game.screens.NarrationScreen;
 import com.csse3200.game.screens.SaveLoadScreen;
 import com.csse3200.game.screens.SettingsScreen;
+import com.csse3200.game.screens.StoryLibraryScreen;
 import com.csse3200.game.screens.TempleCardSelectionScreen;
 import com.csse3200.game.screens.TutorialVictoryScreen;
 import com.csse3200.game.services.ServiceLocator;
@@ -72,6 +75,8 @@ public class GdxGame extends Game {
       };
   private BestiaryService bestiaryService;
   private CardDiscoveryService cardDiscoveryService;
+  private ItemDiscoveryService itemDiscoveryService;
+  private ItemAcquisitionService itemAcquisitionService;
 
   /**
    * Gets discovery progress shared by all screens in this game session.
@@ -102,6 +107,16 @@ public class GdxGame extends Game {
    */
   public CardDiscoveryService getCardDiscoveryService() {
     return cardDiscoveryService;
+  }
+
+  /** Returns item discovery progress shared by all screens in this game session. */
+  public ItemDiscoveryService getItemDiscoveryService() {
+    return itemDiscoveryService;
+  }
+
+  /** Returns the shared item-grant gateway for rewards and Chance Event outcomes. */
+  public ItemAcquisitionService getItemAcquisitionService() {
+    return itemAcquisitionService;
   }
 
   // Lives here rather than on a screen, since setScreen() disposes the outgoing screen.
@@ -141,7 +156,8 @@ public class GdxGame extends Game {
             runState.getOrCreatePlayerDeck(cardLibrary),
             runState,
             bestiaryService,
-            cardDiscoveryService));
+            cardDiscoveryService,
+            itemDiscoveryService));
   }
 
   @Override
@@ -157,6 +173,15 @@ public class GdxGame extends Game {
         .addListener(
             CardDiscoveryService.ENTRY_UPDATED_EVENT,
             ignored -> cardDiscoveryStore.save(cardDiscoveryService.getProgressSnapshot()));
+    itemDiscoveryService = new ItemDiscoveryService();
+    ItemDiscoveryStore itemDiscoveryStore = ItemDiscoveryStore.defaultStore();
+    itemDiscoveryService.mergeProgress(itemDiscoveryStore.load());
+    itemDiscoveryService
+        .getEvents()
+        .addListener(
+            ItemDiscoveryService.ENTRY_UPDATED_EVENT,
+            ignored -> itemDiscoveryStore.save(itemDiscoveryService.getProgressSnapshot()));
+    itemAcquisitionService = new ItemAcquisitionService(itemDiscoveryService);
 
     // Sets background to light yellow
     Gdx.gl.glClearColor(162f / 255f, 73 / 255f, 54 / 255f, 1);
@@ -180,6 +205,26 @@ public class GdxGame extends Game {
     logger.info("Setting game screen to {}", screenType);
     prepareScreenTransition(screenType);
     setScreen(newScreen(screenType));
+  }
+
+  /** Opens a battle result with explicit reward context, without retaining it across encounters. */
+  public void showBattleResult(boolean won, CardRewardProfile profile) {
+    prepareScreenTransition(won ? ScreenType.VICTORY : ScreenType.DEFEAT);
+    setScreen(new EndBattleScreen(this, won, profile));
+  }
+
+  /**
+   * Leaves the current activity after a save has been restored and opens the restored map.
+   *
+   * <p>Battle and encounter screens normally capture their live player while being disposed. They
+   * are notified first so that stale pre-load values cannot overwrite the restored player state.
+   */
+  public void resumeLoadedRun() {
+    Screen currentScreen = getScreen();
+    if (currentScreen instanceof LoadedSaveTransitionAware transitionAware) {
+      transitionAware.prepareForLoadedSaveTransition();
+    }
+    setScreen(ScreenType.MAP);
   }
 
   /**
@@ -218,6 +263,19 @@ public class GdxGame extends Game {
    * cannot carry tutorial progress into the new run.
    */
   public void startNewRun() {
+    resetRunState();
+    showNarration("opening", ScreenType.MAP);
+  }
+
+  /**
+   * Opens a fresh map without repeating the opening narration already shown before the tutorial.
+   */
+  public void startRunAfterTutorial() {
+    resetRunState();
+    setScreen(ScreenType.MAP);
+  }
+
+  private void resetRunState() {
     logger.info("Starting a fresh run");
 
     Screen currentScreen = getScreen();
@@ -227,7 +285,6 @@ public class GdxGame extends Game {
     super.setScreen(null);
 
     runState.endRun();
-    showNarration("opening", ScreenType.MAP);
   }
 
   /** Opens the battle screen. */
@@ -237,7 +294,7 @@ public class GdxGame extends Game {
 
   /** Opens an isolated teaching battle without entering or completing a map node. */
   public void startTutorialBattle() {
-    setScreen(ScreenType.TUTORIAL_BATTLE);
+    showNarration("opening", ScreenType.TUTORIAL_BATTLE);
   }
 
   /**
@@ -269,36 +326,10 @@ public class GdxGame extends Game {
     setScreen(new EncounterScreen(this, eventId));
   }
 
-  /** Temporary map-free Event preview; completion returns directly to the main menu. */
-  public void openDemoEvent() {
-    openDemoEvent(null);
-  }
-
-  /** Opens the Card Fusion catalogue Event directly for UI work. */
-  public void openDemoCardFusion() {
-    openDemoEvent(CardFusionEncounterBehaviour.ENCOUNTER_ID);
-  }
-
-  /** Opens an isolated demo only; null retains the existing weighted random selection. */
-  public void openDemoEvent(String previewEncounterId) {
-    prepareScreenTransition(ScreenType.ENCOUNTER);
-    setScreen(new DemoEventScreen(this, previewEncounterId));
-  }
-
   /** Temporary map-free shortcut; reuses Campfire UI and returns directly to the menu. */
   public void openDemoCampfire() {
     prepareScreenTransition(ScreenType.CAMPFIRE);
     setScreen(new DemoCampfireScreen(this));
-  }
-
-  /** Opens a temporary Shop preview using isolated player state and no map node. */
-  public void openDemoShop() {
-    Screen currentScreen = getScreen();
-    if (currentScreen != null) {
-      currentScreen.dispose();
-    }
-    ServiceLocator.registerBestiaryService(bestiaryService);
-    setScreen(new DemoShopScreen(this));
   }
 
   /** Temporary development shortcut for previewing the Elite portal flow. */
@@ -340,6 +371,7 @@ public class GdxGame extends Game {
       case DEFEAT -> new EndBattleScreen(this, false);
       case BESTIARY -> new BestiaryScreen(this);
       case ITEM_LIBRARY -> new ItemLibraryScreen(this);
+      case STORY_LIBRARY -> new StoryLibraryScreen(this);
     };
   }
 
@@ -362,7 +394,8 @@ public class GdxGame extends Game {
     ANCIENT_TEMPLE,
     TEMPLE_CARD_SELECTION,
     BESTIARY,
-    ITEM_LIBRARY
+    ITEM_LIBRARY,
+    STORY_LIBRARY
   }
 
   /** Exit the game. */

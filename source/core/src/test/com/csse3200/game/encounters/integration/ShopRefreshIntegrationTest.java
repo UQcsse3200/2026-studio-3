@@ -51,15 +51,24 @@ class ShopRefreshIntegrationTest {
     assertTrue(bought.result().isSuccess());
     assertTrue(shop.refresh(shop.snapshot().revision(), "free").isSuccess());
     assertTrue(shop.refresh(shop.snapshot().revision(), "paid").isSuccess());
+    var secondOffer = shop.snapshot().offers().getFirst();
+    long secondRevision = shop.snapshot().revision();
+    var secondPurchase = shop.purchase(secondOffer.id(), secondRevision, "buy-after-refresh");
+    assertTrue(secondPurchase.result().isSuccess());
+    assertSame(
+        secondPurchase, shop.purchase(secondOffer.id(), secondRevision, "buy-after-refresh"));
     assertTrue(
         shop.snapshot().offers().stream().allMatch(offer -> offer.price() == offer.basePrice()));
-    assertEquals(deckSize + 1, deck.size());
+    assertEquals(deckSize + 2, deck.size());
+    int expectedGold = 1000 - bought.chargedGold() - 2 - secondPurchase.chargedGold();
+    assertEquals(expectedGold, shop.getCurrency());
+    shop.leave();
+    shop.leave();
+    assertEquals(expectedGold, shop.getCurrency());
     persistent.captureFrom(player);
     Entity nextPlayer = newPlayer();
     persistent.applyTo(nextPlayer);
-    assertEquals(
-        1000 - bought.chargedGold() - 10,
-        nextPlayer.getComponent(InventoryComponent.class).getGold());
+    assertEquals(expectedGold, nextPlayer.getComponent(InventoryComponent.class).getGold());
     assertEquals(1, persistent.getOwnedItemCount(ItemType.MERCHANTS_FAVOR));
     assertEquals(
         0.1f, nextPlayer.getComponent(InventoryComponent.class).getShopDiscount(), 0.0001f);

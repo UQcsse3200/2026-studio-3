@@ -57,8 +57,7 @@ public final class CardResolver {
           config.description,
           config.cost,
           config.rarity,
-          config.effects,
-          false);
+          config.effects);
     }
 
     CardUpgradeConfig upgrade = config.upgrade;
@@ -73,8 +72,7 @@ public final class CardResolver {
         upgrade.description,
         upgrade.cost,
         upgrade.rarity,
-        upgrade.effects,
-        true);
+        upgrade.effects);
   }
 
   private static ResolvedCard resolvedCard(
@@ -84,8 +82,7 @@ public final class CardResolver {
       String description,
       int cost,
       com.csse3200.game.cards.Rarity rarity,
-      EffectConfig[] effects,
-      boolean upgraded) {
+      EffectConfig[] effects) {
     List<EffectConfig> effectList = effects == null ? null : Arrays.asList(effects);
     return new ResolvedCard(
         instance.instanceId(),
@@ -98,6 +95,6 @@ public final class CardResolver {
         config.target,
         effectList,
         config.texturePath,
-        upgraded);
+        instance.isUpgraded());
   }
 }

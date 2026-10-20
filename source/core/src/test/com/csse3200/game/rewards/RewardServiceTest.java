@@ -1,8 +1,10 @@
 package com.csse3200.game.rewards;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.cards.CardAcquisitionPool;
 import com.csse3200.game.cards.CardConfigLoader;
@@ -20,6 +22,50 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(GameExtension.class)
 class RewardServiceTest {
+  @Test
+  void explicitProfilesChangeOnlyCardRarityAndOmitUnselectableCardOptions() {
+    CardService cards = new CardLibrary(CardConfigLoader.loadCards());
+    CardAcquisitionPool pool = new CardAcquisitionPool(cards, List.of("strike", "resurrection"));
+    CardRewardPolicy policy =
+        new CardRewardPolicy(
+            new CardRewardPolicy.RarityWeights(1, 0, 0),
+            new CardRewardPolicy.RarityWeights(0, 0, 1));
+    List<RewardOption> normal =
+        new RewardService(
+                new RewardGenerator(new Random(1)),
+                cards,
+                pool,
+                policy,
+                CardRewardProfile.NORMAL,
+                new Random(2))
+            .generateRewardOptions();
+    List<RewardOption> elite =
+        new RewardService(
+                new RewardGenerator(new Random(1)),
+                cards,
+                pool,
+                policy,
+                CardRewardProfile.ELITE,
+                new Random(2))
+            .generateRewardOptions();
+    assertEquals(List.of("strike"), normal.get(2).cardSelection.cardIds());
+    assertEquals(List.of("resurrection"), elite.get(2).cardSelection.cardIds());
+    assertEquals(normal.get(0).goldAmount, elite.get(0).goldAmount);
+    assertEquals(normal.get(1).itemId, elite.get(1).itemId);
+    CardAcquisitionPool commonOnly = new CardAcquisitionPool(cards, List.of("strike"));
+    List<RewardOption> unavailable =
+        new RewardService(
+                new RewardGenerator(new Random(1)),
+                cards,
+                commonOnly,
+                policy,
+                CardRewardProfile.ELITE,
+                new Random(2))
+            .generateRewardOptions();
+    assertEquals(
+        List.of(RewardType.GOLD, RewardType.ITEM),
+        unavailable.stream().map(option -> option.type).toList());
+  }
 
   @Test
   void shouldGenerateOneGoldOneItemAndOneCardOption() {
@@ -135,6 +181,23 @@ class RewardServiceTest {
     assertEquals(List.of(), goldRun.getOrCreatePlayerState().getOwnedItems());
     assertEquals(
         List.of(ItemType.ENERGY_CRYSTAL), itemRun.getOrCreatePlayerState().getOwnedItems());
+  }
+
+  @Test
+  void claimingAnItemRunRewardDiscoversItWithoutChangingDirectEffectClaims() {
+    CardService cards = new CardLibrary(CardConfigLoader.loadCards());
+    ItemDiscoveryService discovery = new ItemDiscoveryService();
+    RewardService service =
+        new RewardService(
+            new RewardGenerator(new Random(1)),
+            cards,
+            new Random(2),
+            new ItemAcquisitionService(discovery));
+
+    service.claimRunReward(new RunState(), RewardOption.item(ItemType.ENERGY_CRYSTAL), null);
+
+    assertTrue(discovery.isDiscovered(ItemType.ENERGY_CRYSTAL));
+    assertFalse(discovery.isDiscovered(ItemType.IRON_AEGIS));
   }
 
   @Test

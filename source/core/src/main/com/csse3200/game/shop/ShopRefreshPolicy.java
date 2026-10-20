@@ -4,7 +4,7 @@ import java.util.OptionalInt;
 
 /** First refresh is free; subsequent fees double from the team's configured first paid fee. */
 public record ShopRefreshPolicy(Integer firstPaidFee) {
-  public static final int DEFAULT_FIRST_PAID_FEE = 10;
+  public static final int DEFAULT_FIRST_PAID_FEE = 2;
 
   public ShopRefreshPolicy {
     if (firstPaidFee != null && firstPaidFee <= 0) {
@@ -12,7 +12,7 @@ public record ShopRefreshPolicy(Integer firstPaidFee) {
     }
   }
 
-  /** Approved map-Shop fees: free, then 10, 20, 40, 80 gold and so on. */
+  /** Approved map-Shop fees: free, then 2, 4, 8, 16 gold and so on. */
   public static ShopRefreshPolicy standard() {
     return new ShopRefreshPolicy(DEFAULT_FIRST_PAID_FEE);
   }

@@ -8,7 +8,7 @@ class ShopRefreshPolicyTest {
   @Test
   void standardMapShopPolicyUsesTheApprovedFees() {
     ShopRefreshPolicy policy = ShopRefreshPolicy.standard();
-    int[] expected = {0, 10, 20, 40, 80, 160};
+    int[] expected = {0, 2, 4, 8, 16, 32};
     for (int completed = 0; completed < expected.length; completed++) {
       assertEquals(expected[completed], policy.costAfter(completed).orElseThrow());
     }

@@ -133,18 +133,18 @@ class Team7PlayerStateAdapterTest {
         new Entity()
             .addComponent(new EnergyComponent(3))
             .addComponent(new CombatStatsComponent(10, 1));
+    Entity withoutComponents = new Entity();
+    Entity energyOnly = new Entity().addComponent(new EnergyComponent(3));
+    CombatStatsComponent combatStats = new CombatStatsComponent(10, 1);
+    EnergyComponent energy = new EnergyComponent(3);
     assertEquals(3, new Team7PlayerStateAdapter(complete).currentEnergy());
     assertThrows(IllegalArgumentException.class, () -> new Team7PlayerStateAdapter((Entity) null));
-    assertThrows(IllegalArgumentException.class, () -> new Team7PlayerStateAdapter(new Entity()));
     assertThrows(
-        IllegalArgumentException.class,
-        () -> new Team7PlayerStateAdapter(new Entity().addComponent(new EnergyComponent(3))));
+        IllegalArgumentException.class, () -> new Team7PlayerStateAdapter(withoutComponents));
+    assertThrows(IllegalArgumentException.class, () -> new Team7PlayerStateAdapter(energyOnly));
     assertThrows(
-        IllegalArgumentException.class,
-        () -> new Team7PlayerStateAdapter(null, new CombatStatsComponent(10, 1)));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new Team7PlayerStateAdapter(new EnergyComponent(3), null));
+        IllegalArgumentException.class, () -> new Team7PlayerStateAdapter(null, combatStats));
+    assertThrows(IllegalArgumentException.class, () -> new Team7PlayerStateAdapter(energy, null));
   }
 
   @Test
@@ -157,14 +157,11 @@ class Team7PlayerStateAdapterTest {
     assertThrows(
         IllegalArgumentException.class,
         () -> adapter.applyPlayerEffects(Collections.singletonList(null)));
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            adapter.applyPlayerEffects(
-                List.of(
-                    effect(EffectType.BLOCK, 5, 0, 0),
-                    new ResolvedCardEffect(
-                        "strike", EffectType.DAMAGE, TargetType.SINGLE_ENEMY, 2, 0, 1))));
+    List<ResolvedCardEffect> mixedEffects =
+        List.of(
+            effect(EffectType.BLOCK, 5, 0, 0),
+            new ResolvedCardEffect("strike", EffectType.DAMAGE, TargetType.SINGLE_ENEMY, 2, 0, 1));
+    assertThrows(IllegalArgumentException.class, () -> adapter.applyPlayerEffects(mixedEffects));
     assertEquals(0, stats.getBlock());
   }
 

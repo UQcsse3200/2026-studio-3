@@ -17,6 +17,9 @@ import com.csse3200.game.services.ServiceLocator;
 final class WishingFountainScene extends Group {
   static final String BACKGROUND_TEXTURE = "images/chance/wishing_fountain_scene_v1.png";
   static final float WISH_DURATION = 1.65f;
+  // Both the idle cross and release flash use the same intersection in artwork coordinates.
+  static final float CROSS_X = 640f;
+  static final float CROSS_Y = 511f;
 
   enum WishState {
     IDLE,
@@ -65,6 +68,8 @@ final class WishingFountainScene extends Group {
     water = new WaterAnimation(pixel);
     cross = new CrossGlow(pixel);
     wish = new WishEffect(pixel, cross, water);
+    cross.setName("fountain-cross");
+    wish.setName("fountain-wish-effect");
     addActor(water);
     addActor(cross);
     addActor(wish);
@@ -229,17 +234,17 @@ final class WishingFountainScene extends Group {
       for (int i = 3; i >= 1; i--) {
         rect(
             batch,
-            640f - i * 7f,
-            504f - i * 7f,
+            CROSS_X - i * 7f,
+            CROSS_Y - i * 7f,
             i * 14f,
             i * 14f,
             GOLD,
             (0.025f + charge * 0.045f) * brightness * parentAlpha);
       }
-      rect(batch, 638, 486, 4, 38, GOLD, brightness * parentAlpha);
-      rect(batch, 626, 509, 28, 4, GOLD, brightness * parentAlpha);
-      rect(batch, 639, 490, 2, 31, CORE, brightness * 0.8f * parentAlpha);
-      rect(batch, 629, 510, 22, 2, CORE, brightness * 0.8f * parentAlpha);
+      rect(batch, CROSS_X - 2, CROSS_Y - 25, 4, 38, GOLD, brightness * parentAlpha);
+      rect(batch, CROSS_X - 14, CROSS_Y - 2, 28, 4, GOLD, brightness * parentAlpha);
+      rect(batch, CROSS_X - 1, CROSS_Y - 21, 2, 31, CORE, brightness * 0.8f * parentAlpha);
+      rect(batch, CROSS_X - 11, CROSS_Y - 1, 22, 2, CORE, brightness * 0.8f * parentAlpha);
       // Sparse halo glints, deliberately weaker than the chest cross.
       for (int i = 0; i < 38; i++) {
         float angle = i * (float) Math.PI * 2 / 38;
@@ -333,8 +338,8 @@ final class WishingFountainScene extends Group {
                 : 16 + (elapsed - 1.1f) * 90;
         rect(
             batch,
-            640 + (float) Math.cos(angle) * radius,
-            504 + (float) Math.sin(angle) * radius,
+            CROSS_X + (float) Math.cos(angle) * radius,
+            CROSS_Y + (float) Math.sin(angle) * radius,
             2,
             2,
             CrossGlow.GOLD,
@@ -348,15 +353,15 @@ final class WishingFountainScene extends Group {
           float angle = i * (float) Math.PI * 2 / 36;
           rect(
               batch,
-              640 + (float) Math.cos(angle) * radius,
-              504 + (float) Math.sin(angle) * radius,
+              CROSS_X + (float) Math.cos(angle) * radius,
+              CROSS_Y + (float) Math.sin(angle) * radius,
               3,
               3,
               CrossGlow.GOLD,
               alpha * 0.45f);
         }
-        rect(batch, 638, 469, 4, 74, CrossGlow.CORE, alpha * 0.55f);
-        rect(batch, 606, 502, 68, 4, CrossGlow.CORE, alpha * 0.55f);
+        rect(batch, CROSS_X - 2, CROSS_Y - 37, 4, 74, CrossGlow.CORE, alpha * 0.55f);
+        rect(batch, CROSS_X - 34, CROSS_Y - 2, 68, 4, CrossGlow.CORE, alpha * 0.55f);
       }
       batch.setColor(original);
     }

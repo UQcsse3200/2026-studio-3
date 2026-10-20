@@ -186,7 +186,9 @@ public final class CardWidget extends Stack {
     costLabel.setText(Integer.toString(card.cost()));
     typeLabel.setText(FramedCardFace.formatType(card.type()));
     targetLabel.setText(FramedCardFace.formatTarget(card.target()));
-    descriptionLabel.setText(card.description());
+    descriptionLabel.setText(
+        CardWidgetAssets.formatDescription(card.description(), card.upgraded()));
+    CardWidgetAssets.styleUpgradeText(nameLabel, costLabel, card.upgraded());
     frame.setBackground(assets.frameFor(card.rarity()));
     artworkFrame.setBackground(assets.frameFor(card.rarity()));
     descriptionFrame.setBackground(assets.frameFor(card.rarity()));
@@ -276,9 +278,7 @@ public final class CardWidget extends Stack {
   }
 
   String displayedDescription() {
-    return usesAuthoredFrame()
-        ? authoredFace.displayedDescription()
-        : descriptionLabel.getText().toString();
+    return usesAuthoredFrame() ? authoredFace.displayedDescription() : card.description();
   }
 
   Drawable displayedArtwork() {

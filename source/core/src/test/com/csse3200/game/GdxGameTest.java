@@ -26,11 +26,13 @@ import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.PlayerRunState;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.CardRewardProfile;
 import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.screens.BattleScreen;
 import com.csse3200.game.screens.DemoCampfireScreen;
-import com.csse3200.game.screens.DemoEventScreen;
+import com.csse3200.game.screens.EndBattleScreen;
+import com.csse3200.game.screens.LoadedSaveTransitionAware;
 import com.csse3200.game.screens.MapScreen;
 import com.csse3200.game.screens.NarrationScreen;
 import com.csse3200.game.screens.TutorialVictoryScreen;
@@ -65,19 +67,59 @@ class GdxGameTest {
   }
 
   @Test
+  void battleResultPassesExplicitProfilesWithoutLeakingAnEliteContextIntoTheNextScreen() {
+    GdxGame game = new GdxGame();
+    java.util.List<CardRewardProfile> profiles = new java.util.ArrayList<>();
+    try (MockedConstruction<EndBattleScreen> screens =
+        mockConstruction(
+            EndBattleScreen.class,
+            (screen, context) -> {
+              assertSame(game, context.arguments().get(0));
+              profiles.add((CardRewardProfile) context.arguments().get(2));
+            })) {
+      game.showBattleResult(true, CardRewardProfile.NORMAL);
+      game.showBattleResult(true, CardRewardProfile.ELITE);
+      game.showBattleResult(true, CardRewardProfile.NORMAL);
+      game.showBattleResult(false, CardRewardProfile.NORMAL);
+      assertEquals(
+          java.util.List.of(
+              CardRewardProfile.NORMAL,
+              CardRewardProfile.ELITE,
+              CardRewardProfile.NORMAL,
+              CardRewardProfile.NORMAL),
+          profiles);
+      assertSame(screens.constructed().get(3), game.getScreen());
+      verify(screens.constructed().get(0)).dispose();
+    }
+  }
+
+  @Test
   void tutorialLaunchUsesItsOwnScreenWithoutCompletingAMapNode() {
     GdxGame game = gameWithActiveNode(RoomType.COMBAT);
     Screen oldScreen = mock(Screen.class);
     game.setScreen(oldScreen);
 
-    try (MockedConstruction<BattleScreen> battles =
-        mockConstruction(
-            BattleScreen.class,
-            (battle, context) -> {
-              assertSame(game, context.arguments().get(0));
-              assertEquals(true, context.arguments().get(1));
-            })) {
+    AtomicReference<Runnable> finishOpening = new AtomicReference<>();
+    try (MockedConstruction<NarrationScreen> narrations =
+            mockConstruction(
+                NarrationScreen.class,
+                (narration, context) -> {
+                  assertEquals("opening", context.arguments().get(0));
+                  finishOpening.set((Runnable) context.arguments().get(1));
+                });
+        MockedConstruction<BattleScreen> battles =
+            mockConstruction(
+                BattleScreen.class,
+                (battle, context) -> {
+                  assertSame(game, context.arguments().get(0));
+                  assertEquals(true, context.arguments().get(1));
+                })) {
       game.startTutorialBattle();
+
+      assertEquals(1, narrations.constructed().size());
+      assertSame(narrations.constructed().get(0), game.getScreen());
+      assertTrue(battles.constructed().isEmpty());
+      finishOpening.get().run();
 
       assertEquals(1, battles.constructed().size());
       verify(oldScreen).dispose();
@@ -87,29 +129,58 @@ class GdxGameTest {
   }
 
   @Test
-  void eventShortcutUsesIsolatedPreviewWithoutChangingMap() {
-    assertDemoNode(RoomType.EVENT);
+  void afterTutorialResetsRunAndOpensMapWithoutNarration() {
+    GdxGame game = gameWithActiveNode(RoomType.COMBAT);
+    RunState run = game.getRunState();
+    PlayerRunState oldPlayer = run.getOrCreatePlayerState();
+    run.markCardFusionUsed();
+    Screen oldScreen = mock(Screen.class);
+    game.setScreen(oldScreen);
+    doAnswer(
+            invocation -> {
+              assertSame(oldPlayer, run.getOrCreatePlayerState());
+              return null;
+            })
+        .when(oldScreen)
+        .dispose();
+
+    try (MockedConstruction<NarrationScreen> narrations = mockConstruction(NarrationScreen.class);
+        MockedConstruction<MapScreen> maps =
+            mockConstruction(
+                MapScreen.class,
+                (map, context) -> {
+                  verify(oldScreen).dispose();
+                  assertFalse(run.isRunActive());
+                  assertNull(run.getMapGraph());
+                  assertNull(run.getActiveNodeId());
+                  assertFalse(run.hasUsedCardFusion());
+                  assertNotSame(oldPlayer, run.getOrCreatePlayerState());
+                })) {
+      game.startRunAfterTutorial();
+
+      assertTrue(narrations.constructed().isEmpty());
+      assertEquals(1, maps.constructed().size());
+      assertSame(maps.constructed().get(0), game.getScreen());
+      verify(maps.constructed().get(0)).show();
+    }
   }
 
   @Test
-  void selectedDemoIdIsUsedOnceWithoutChangingTheRealRun() {
-    GdxGame game = gameWithActiveNode(RoomType.COMBAT);
-    RunState originalRun = game.getRunState();
-    MapGraph originalMap = originalRun.getMapGraph();
-    Integer originalNode = originalRun.getActiveNodeId();
-    java.util.List<Object> requestedIds = new java.util.ArrayList<>();
-    try (MockedConstruction<DemoEventScreen> previews =
-        mockConstruction(
-            DemoEventScreen.class,
-            (screen, context) -> requestedIds.add(context.arguments().get(1)))) {
-      game.openDemoEvent("dice-game");
-      game.openDemoEvent();
-      assertEquals(2, previews.constructed().size());
-      assertEquals("dice-game", requestedIds.get(0));
-      assertEquals(null, requestedIds.get(1));
-      assertSame(originalRun, game.getRunState());
-      assertSame(originalMap, originalRun.getMapGraph());
-      assertEquals(originalNode, originalRun.getActiveNodeId());
+  void resumingLoadedRunProtectsRestoredStateBeforeDisposingCurrentScreen() {
+    GdxGame game = new GdxGame();
+    LoadedSaveTransitionAware current =
+        mock(
+            LoadedSaveTransitionAware.class,
+            org.mockito.Mockito.withSettings().extraInterfaces(Screen.class));
+    game.setScreen((Screen) current);
+
+    try (MockedConstruction<MapScreen> maps = mockConstruction(MapScreen.class)) {
+      game.resumeLoadedRun();
+
+      verify(current).prepareForLoadedSaveTransition();
+      verify((Screen) current).dispose();
+      assertEquals(1, maps.constructed().size());
+      assertSame(maps.constructed().get(0), game.getScreen());
     }
   }
 
@@ -125,19 +196,12 @@ class GdxGameTest {
     Integer originalNode = game.getRunState().getActiveNodeId();
     Screen oldScreen = mock(Screen.class);
     game.setScreen(oldScreen);
-    try (MockedConstruction<DemoEventScreen> encounters = mockConstruction(DemoEventScreen.class);
-        MockedConstruction<DemoCampfireScreen> campfires =
+    try (MockedConstruction<DemoCampfireScreen> campfires =
             mockConstruction(DemoCampfireScreen.class);
         MockedConstruction<MapScreen> maps = mockConstruction(MapScreen.class)) {
-      if (roomType == RoomType.EVENT) {
-        game.openDemoEvent();
-        assertSame(encounters.constructed().get(0), game.getScreen());
-        assertTrue(campfires.constructed().isEmpty());
-      } else {
-        game.openDemoCampfire();
-        assertSame(campfires.constructed().get(0), game.getScreen());
-        assertTrue(encounters.constructed().isEmpty());
-      }
+      game.openDemoCampfire();
+      assertSame(campfires.constructed().get(0), game.getScreen());
+
       verify(oldScreen).dispose();
       RunState run = game.getRunState();
       assertTrue(run.isRunActive());

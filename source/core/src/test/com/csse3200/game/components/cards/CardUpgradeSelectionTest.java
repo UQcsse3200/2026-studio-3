@@ -10,6 +10,7 @@ import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.TestCardService;
+import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.cards.deck.PlayerDeck;
 import com.csse3200.game.cards.runtime.CardInstance;
 import com.csse3200.game.components.cards.CardUpgradeSelection.UpgradeOption;
@@ -28,7 +29,15 @@ class CardUpgradeSelectionTest {
 
   @BeforeEach
   void setUp() {
-    cardService = new CardLibrary(CardConfigLoader.loadCards());
+    // Keep Strike as the only upgradable card so this fixture does not change as catalogue cards
+    // gain upgrade data.
+    List<CardConfig> cards = CardConfigLoader.loadCards();
+    for (CardConfig card : cards) {
+      if (!"strike".equals(card.id)) {
+        card.upgrade = null;
+      }
+    }
+    cardService = new CardLibrary(cards);
     deck =
         List.of(
             instance("strike-1", "strike"),

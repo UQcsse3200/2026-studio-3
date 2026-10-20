@@ -2,6 +2,7 @@ package com.csse3200.game.components.cards;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -59,6 +60,8 @@ public final class CardWidgetAssets {
   private static final Color RARE_FRAME = new Color(0.93f, 0.61f, 0.14f, 1f);
   private static final Color LIGHT_TEXT = new Color(0.94f, 0.87f, 0.70f, 1f);
   private static final Color DARK_TEXT = new Color(0.10f, 0.065f, 0.045f, 1f);
+  private static final Color UPGRADED_TEXT = Color.valueOf("80ED99");
+  private static final Color UPGRADED_RULES_TEXT = Color.valueOf("195C32");
 
   private final Drawable cardFace;
   private final Drawable innerRim;
@@ -99,7 +102,18 @@ public final class CardWidgetAssets {
     nameStyle = copyLabelStyle(skin, SMALL, LIGHT_TEXT);
     costStyle = copyLabelStyle(skin, "default", Color.WHITE);
     targetStyle = copyLabelStyle(skin, SMALL, LIGHT_TEXT);
-    descriptionStyle = copyLabelStyle(skin, SMALL, DARK_TEXT);
+    // Label multiplies its font colour into every markup run at draw time. Use a white tint
+    // and put the normal rules-text colour in markup so keywords retain their brown colour.
+    descriptionStyle = copyLabelStyle(skin, SMALL, Color.WHITE);
+    // Markup must not change the skin font used by names, menus or other UI labels. Reuse the
+    // screen-owned texture regions, but keep description font data and caches independent.
+    BitmapFont sourceFont = descriptionStyle.font;
+    BitmapFont.BitmapFontData descriptionData =
+        new BitmapFont.BitmapFontData(sourceFont.getData().fontFile, sourceFont.isFlipped());
+    descriptionData.setScale(sourceFont.getScaleX(), sourceFont.getScaleY());
+    descriptionData.markupEnabled = true;
+    descriptionStyle.font =
+        new BitmapFont(descriptionData, sourceFont.getRegions(), sourceFont.usesIntegerPositions());
     upgradeStyle = copyLabelStyle(skin, "default", Color.WHITE);
   }
 
@@ -212,6 +226,21 @@ public final class CardWidgetAssets {
 
   Label.LabelStyle descriptionStyle() {
     return descriptionStyle;
+  }
+
+  static String formatDescription(String description) {
+    return formatDescription(description, false);
+  }
+
+  static String formatDescription(String description, boolean upgraded) {
+    Color colour = upgraded ? UPGRADED_RULES_TEXT : DARK_TEXT;
+    return "[#" + colour + "]" + CardKeywordHighlighter.highlight(description) + "[]";
+  }
+
+  static void styleUpgradeText(Label name, Label cost, boolean upgraded) {
+    // Tint only these actors, never shared styles or fonts. Keywords keep their own markup.
+    name.setColor(upgraded ? UPGRADED_TEXT : Color.WHITE);
+    cost.setColor(upgraded ? UPGRADED_TEXT : Color.WHITE);
   }
 
   Label.LabelStyle upgradeStyle() {
