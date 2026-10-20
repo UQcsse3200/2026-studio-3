@@ -22,9 +22,10 @@ public final class ChanceAcquisitionResults {
   }
 
   /**
-   * Maps settled resources and acquired goods. Choice copy is a fallback for other item
-   * descriptions; Curse descriptions explain their authoritative future lifecycle rather than
-   * immediate effects.
+   * Maps display amounts and acquired goods. Positive healing advertises its configured amount,
+   * while actual health remains capped in the committed resolution. Choice copy is a fallback for
+   * other item descriptions; Curse descriptions explain their authoritative future lifecycle rather
+   * than immediate effects.
    *
    * @param resolution committed snapshot; unsuccessful or absent resolutions produce no result
    * @param resultId stable ID retained by the owning session
@@ -40,6 +41,10 @@ public final class ChanceAcquisitionResults {
     List<AcquisitionResult.Entry> entries = new ArrayList<>();
     int gold = Math.subtractExact(resolution.getCurrencyAfter(), resolution.getCurrencyBefore());
     int hp = Math.subtractExact(resolution.getHealthAfter(), resolution.getHealthBefore());
+    // Healing copy advertises the configured amount; settlement still uses the real HP cap.
+    if (resolution.getOutcome().getHealthDelta() > 0) {
+      hp = resolution.getOutcome().getHealthDelta();
+    }
     if (gold != 0) entries.add(AcquisitionResult.Entry.gold(gold));
     if (hp != 0) entries.add(AcquisitionResult.Entry.hp(hp));
     counts(resolution.getOutcome().getCardRewardIds())

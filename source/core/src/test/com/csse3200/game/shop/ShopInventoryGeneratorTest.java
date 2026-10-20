@@ -96,20 +96,24 @@ class ShopInventoryGeneratorTest {
   }
 
   private void assertPriceMatchesRarity(ShopItem item, Rarity rarity) {
-    int expectedBasePrice;
+    int minimum;
+    int maximum;
     switch (rarity) {
       case RARE:
-        expectedBasePrice = 50;
+        minimum = 25;
+        maximum = 30;
         break;
       case UNCOMMON:
-        expectedBasePrice = 35;
+        minimum = 15;
+        maximum = 20;
         break;
       case COMMON:
       default:
-        expectedBasePrice = 20;
+        minimum = 8;
+        maximum = 12;
         break;
     }
-    assertTrue(item.price >= expectedBasePrice - 5);
-    assertTrue(item.price <= expectedBasePrice + 5);
+    assertTrue(item.price >= minimum);
+    assertTrue(item.price <= maximum);
   }
 }

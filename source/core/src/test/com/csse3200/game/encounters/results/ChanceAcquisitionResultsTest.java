@@ -133,11 +133,12 @@ class ChanceAcquisitionResultsTest {
   }
 
   @Test
-  void shouldMapActualCappedHealingAndGoldLoss() {
+  void shouldDisplayConfiguredHealingWhileKeepingActualCappedHealthAndGoldLoss() {
     ChanceEncounterSession session = session(new ChanceOutcome(20, -15));
     assertTrue(session.resolveChoice("accept").isSuccess());
     AcquisitionResult result = session.getAcquisitionResult(null).orElseThrow();
-    assertEquals(5, entry(result, AcquisitionResult.Kind.HP, "hp").delta());
+    assertEquals(20, entry(result, AcquisitionResult.Kind.HP, "hp").delta());
+    assertEquals(player.getMaxHealth(), player.getHealth());
     assertEquals(-15, entry(result, AcquisitionResult.Kind.GOLD, "gold").delta());
     assertEquals(2, result.entries().size());
   }
@@ -189,7 +190,10 @@ class ChanceAcquisitionResultsTest {
     player.setHealth(50);
     ChanceEncounterSession capped = session(new ChanceOutcome(20, 0));
     assertTrue(capped.resolveChoice("accept").isSuccess());
-    assertTrue(capped.getAcquisitionResult(null).isEmpty());
+    assertEquals(
+        20,
+        entry(capped.getAcquisitionResult(null).orElseThrow(), AcquisitionResult.Kind.HP, "hp")
+            .delta());
     ChanceEncounterSession leave = session(new ChanceOutcome(0, 0));
     assertTrue(leave.resolveChoice("accept").isSuccess());
     assertTrue(leave.getAcquisitionResult(null).isEmpty());

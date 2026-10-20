@@ -47,9 +47,7 @@ public class MainMenuDisplay extends UIComponent {
   public static final String BESTIARY_EVENT = "bestiary";
   public static final String SETTINGS_EVENT = "settings";
   public static final String EXIT_EVENT = "exit";
-  public static final String DEMO_EVENT = "demoEvent";
   public static final String DEMO_CAMPFIRE_EVENT = "demoCampfire";
-  public static final String DEMO_SHOP_EVENT = "demoShop";
 
   private Stack rootStack;
   private Table menuTable;
@@ -59,7 +57,6 @@ public class MainMenuDisplay extends UIComponent {
   private TextButton settingsButton;
   private TextButton exitButton;
   private Dialog tutorialChoiceDialog;
-  private DemoEventPicker demoEventPicker;
 
   @Override
   public void create() {
@@ -86,20 +83,6 @@ public class MainMenuDisplay extends UIComponent {
     Texture buttonFrameTexture = getTexture(BUTTON_FRAME_TEXTURE);
     buttonFrameTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     rootStack.add(buildContent(buttonFrameTexture));
-    Table demoControls = new Table();
-    demoControls.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.childrenOnly);
-    demoControls.top().right().pad(18f);
-    demoControls
-        .add(createButton("Demo Shop", DEMO_SHOP_EVENT, buttonFrameTexture))
-        .width(200f)
-        .height(50f);
-    demoControls.row();
-    demoControls
-        .add(createButton("Demo Event", DEMO_EVENT, buttonFrameTexture))
-        .width(200f)
-        .height(50f)
-        .padTop(8f);
-    rootStack.add(demoControls);
     stage.addActor(rootStack);
   }
 
@@ -155,8 +138,6 @@ public class MainMenuDisplay extends UIComponent {
             logger.debug("{} button clicked", text);
             if (START_EVENT.equals(eventName)) {
               showTutorialChoice();
-            } else if (DEMO_EVENT.equals(eventName)) {
-              showDemoEventPicker(buttonFrameTexture);
             } else {
               entity.getEvents().trigger(eventName);
             }
@@ -173,18 +154,6 @@ public class MainMenuDisplay extends UIComponent {
           }
         });
     return button;
-  }
-
-  /** Temporary chooser attached exclusively to the main-menu Demo Event button. */
-  private void showDemoEventPicker(Texture buttonFrameTexture) {
-    if (demoEventPicker == null || !demoEventPicker.hasParent()) {
-      demoEventPicker =
-          new DemoEventPicker(
-              skin,
-              buttonFrameTexture,
-              id -> entity.getEvents().trigger(DemoEventPicker.SELECT_EVENT, id));
-      demoEventPicker.show(stage);
-    }
   }
 
   /** Shows the choice between the battle tutorial and a normal new run. */
@@ -308,10 +277,6 @@ public class MainMenuDisplay extends UIComponent {
 
   @Override
   public void dispose() {
-    if (demoEventPicker != null) {
-      demoEventPicker.remove();
-      demoEventPicker = null;
-    }
     if (tutorialChoiceDialog != null) {
       tutorialChoiceDialog.remove();
       tutorialChoiceDialog = null;

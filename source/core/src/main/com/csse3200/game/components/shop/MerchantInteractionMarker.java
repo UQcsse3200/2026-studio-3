@@ -51,33 +51,38 @@ final class MerchantInteractionMarker extends Actor {
     float pulse = 0.5f + 0.5f * (float) Math.sin(animationTime * 2f);
     float x = getX() + getWidth() / 2f;
     // Animate only the painted symbol; the transparent click target remains fixed.
-    float y = getY() + 36 + (float) Math.sin(animationTime * 1.8f) * 1.5f + (hovered ? 2f : 0f);
+    float y = getY() + 58 + (float) Math.sin(animationTime * 1.8f) * 1.5f + (hovered ? 2f : 0f);
     batch.setColor(1f, 0.65f, 0.16f, alpha * (hovered ? 0.20f : 0.08f) * (0.7f + pulse * 0.3f));
-    diamond(batch, x, y, 20, 4);
+    diamond(batch, x, y, 29, 7);
     batch.setColor(0.19f, 0.08f, 0.015f, alpha * 0.8f);
-    diamond(batch, x + 1, y - 1, 17, 3);
+    diamond(batch, x, y, 26, 6);
     batch.setColor(
         1f, hovered ? 0.91f : 0.79f, hovered ? 0.57f : 0.32f, alpha * (0.85f + pulse * 0.15f));
-    diamond(batch, x, y, 16, 2);
-    for (int row = -3; row <= 3; row++) {
-      int halfWidth = 3 - Math.abs(row);
-      pixel.draw(batch, x - halfWidth, y + row, halfWidth * 2 + 1, 1);
+    diamond(batch, x, y, 24, hovered ? 5 : 4);
+    for (int row = -5; row <= 5; row++) {
+      int halfWidth = 5 - Math.abs(row);
+      pixel.draw(batch, x - halfWidth - .5f, y + row - .5f, halfWidth * 2 + 1, 1);
     }
     for (int i = 0; i < 6; i++) {
-      pixel.draw(batch, x - 10 + i * 2, y - 23 - i * 2, 2, 2);
-      pixel.draw(batch, x + 10 - i * 2, y - 23 - i * 2, 2, 2);
+      int offset = 15 - i * 3;
+      pixel.draw(batch, x - offset - 2, y - 34 - i * 3, 4, 4);
+      if (offset != 0) pixel.draw(batch, x + offset - 2, y - 34 - i * 3, 4, 4);
     }
     batch.setColor(1f, 0.94f, 0.7f, alpha * (0.65f + pulse * 0.35f));
-    pixel.draw(batch, x, y + 16, 2, 2);
+    pixel.draw(batch, x - 2, y + 24, 4, 4);
     pixel.draw(batch, x - 1, y - 1, 2, 2);
     batch.setColor(old);
   }
 
   private void diamond(Batch batch, float x, float y, int radius, int stroke) {
-    for (int i = 0; i <= radius; i += 2) {
-      for (int direction : new int[] {-1, 1}) {
-        pixel.draw(batch, x + direction * i, y + radius - i, stroke, stroke);
-        pixel.draw(batch, x + direction * i, y - radius + i, stroke, stroke);
+    for (int row = -radius; row <= radius; row++) {
+      int halfWidth = radius - Math.abs(row);
+      int width = halfWidth * 2 + 1;
+      if (width <= stroke * 2) {
+        pixel.draw(batch, x - width / 2f, y + row - .5f, width, 1);
+      } else {
+        pixel.draw(batch, x - width / 2f, y + row - .5f, stroke, 1);
+        pixel.draw(batch, x + width / 2f - stroke, y + row - .5f, stroke, 1);
       }
     }
   }

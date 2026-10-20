@@ -155,6 +155,23 @@ class ShopDisplayTest {
   }
 
   @Test
+  void leavingWithoutPurchasesCompletesWithoutResults() {
+    ServiceLocator.registerResourceService(mock(ResourceService.class));
+    ShopEncounter encounter = openShop();
+    ShopDisplay display = new ShopDisplay(encounter, mock(CardService.class));
+    entity = new Entity().addComponent(display);
+    entity.create();
+    display.openMerchant();
+    stage
+        .getRoot()
+        .findActor("merchant-leave")
+        .fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    assertNull(stage.getRoot().findActor("acquisition-result-overlay"));
+    assertEquals(100, encounter.getCurrency());
+    assertEquals(true, encounter.snapshot().completed());
+  }
+
+  @Test
   void successfulPurchaseShowsConfirmedResultWithoutGrantingTwice() {
     ServiceLocator.registerResourceService(mock(ResourceService.class));
     ShopEncounter encounter = openShop();
@@ -168,12 +185,30 @@ class ShopDisplayTest {
     Actor purchase = stage.getRoot().findActor("purchase-offer");
     purchase.fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
     assertEquals(80, encounter.getCurrency());
+    assertEquals(
+        "GOLD  80",
+        ((com.badlogic.gdx.scenes.scene2d.ui.Label)
+                stage.getRoot().findActor("merchant-gold-balance"))
+            .getText()
+            .toString());
+    assertNull(stage.getRoot().findActor("acquisition-result-overlay"));
+    stage
+        .getRoot()
+        .findActor("merchant-leave")
+        .fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
     assertNotNull(stage.getRoot().findActor("acquisition-result-overlay"));
+    assertEquals(
+        "SHOP RESULTS",
+        ((com.badlogic.gdx.scenes.scene2d.ui.Label)
+                stage.getRoot().findActor("acquisition-heading"))
+            .getText()
+            .toString());
 
     stage
         .getRoot()
         .findActor("acquisition-continue")
         .fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    for (int frame = 0; frame < 90; frame++) stage.act(1f / 30f);
     assertNull(stage.getRoot().findActor("acquisition-result-overlay"));
     assertEquals(80, encounter.getCurrency());
   }
@@ -295,7 +330,7 @@ class ShopDisplayTest {
     assertEquals("Refresh (Free)", refresh.getText().toString());
     refresh.fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
     assertEquals(100, encounter.getCurrency());
-    assertEquals("Refresh (10 GOLD)", refresh.getText().toString());
+    assertEquals("Refresh (2 GOLD)", refresh.getText().toString());
     org.junit.jupiter.api.Assertions.assertSame(slot, stage.getRoot().findActor("shop-slot-0"));
     org.junit.jupiter.api.Assertions.assertSame(backing, slot.getChildren().first());
     org.junit.jupiter.api.Assertions.assertSame(purchase, slot.purchaseButton());
@@ -341,18 +376,24 @@ class ShopDisplayTest {
     org.junit.jupiter.api.Assertions.assertSame(root, stage.getRoot().findActor("merchant-scene"));
     org.junit.jupiter.api.Assertions.assertSame(refresh, stage.getRoot().findActor("shop-refresh"));
     refresh.fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
-    assertEquals(90, encounter.getCurrency());
-    assertEquals("Refresh (20 GOLD)", refresh.getText().toString());
+    assertEquals(98, encounter.getCurrency());
+    assertEquals(
+        "GOLD  98",
+        ((com.badlogic.gdx.scenes.scene2d.ui.Label)
+                stage.getRoot().findActor("merchant-gold-balance"))
+            .getText()
+            .toString());
+    assertEquals("Refresh (4 GOLD)", refresh.getText().toString());
     var buy =
         (com.badlogic.gdx.scenes.scene2d.ui.TextButton) stage.getRoot().findActor("purchase-a");
     buy.fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
-    assertEquals(70, encounter.getCurrency());
+    assertEquals(78, encounter.getCurrency());
     buy.fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
-    assertEquals(70, encounter.getCurrency());
+    assertEquals(78, encounter.getCurrency());
     var second =
         (com.badlogic.gdx.scenes.scene2d.ui.TextButton) stage.getRoot().findActor("purchase-b");
     second.fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
-    assertEquals(50, encounter.getCurrency());
+    assertEquals(58, encounter.getCurrency());
     org.junit.jupiter.api.Assertions.assertSame(slot, stage.getRoot().findActor("shop-slot-0"));
     org.junit.jupiter.api.Assertions.assertSame(purchase, slot.purchaseButton());
     org.junit.jupiter.api.Assertions.assertSame(root, stage.getRoot().findActor("merchant-scene"));

@@ -16,7 +16,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.csse3200.game.chance.ChanceEncounterConfigLoader;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.extensions.GameExtension;
@@ -25,7 +24,6 @@ import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,46 +80,13 @@ class MainMenuDisplayTest {
         List.of("start", "load", "bestiary", "settings", "exit"),
         display.getMenuButtons().stream().map(TextButton::getName).toList());
     assertInstanceOf(Image.class, display.getRootStack().getChild(0));
-    assertEquals(4, display.getRootStack().getChildren().size);
-    assertInstanceOf(
-        TextButton.class, display.getRootStack().findActor(MainMenuDisplay.DEMO_SHOP_EVENT));
-    assertInstanceOf(
-        TextButton.class, display.getRootStack().findActor(MainMenuDisplay.DEMO_EVENT));
+    assertEquals(3, display.getRootStack().getChildren().size);
+    assertNull(display.getRootStack().findActor("demoShop"));
+    assertNull(display.getRootStack().findActor("demoEvent"));
     assertNull(display.getRootStack().findActor("demo-shortcuts"));
     verify(resourceService).getAsset(MainMenuDisplay.BACKGROUND_TEXTURE, Texture.class);
     verify(resourceService).getAsset(MainMenuDisplay.TITLE_LOGO_TEXTURE, Texture.class);
     verify(resourceService).getAsset(MainMenuDisplay.BUTTON_FRAME_TEXTURE, Texture.class);
-  }
-
-  @Test
-  void demoPickerListsCatalogueWithoutLaunchingAndOnlyEmitsSelectedId() {
-    AtomicReference<String> selected = new AtomicReference<>();
-    menu.getEvents().addListener(DemoEventPicker.SELECT_EVENT, (String id) -> selected.set(id));
-    display.getRootStack().findActor(MainMenuDisplay.DEMO_EVENT).fire(new ChangeEvent());
-    Dialog picker = stage.getRoot().findActor("demo-event-picker");
-    assertNotNull(picker);
-    assertNull(selected.get());
-    for (var encounter : ChanceEncounterConfigLoader.loadEncounters()) {
-      assertNotNull(picker.findActor("demo-event-" + encounter.getId()));
-    }
-    picker.findActor("demo-event-dice-game").fire(new ChangeEvent());
-    assertEquals("dice-game", selected.get());
-    assertNull(stage.getRoot().findActor("demo-event-picker"));
-  }
-
-  @Test
-  void demoPickerCancelDoesNotLaunchAndRandomDoesNotReusePreviousSelection() {
-    AtomicReference<String> selected = new AtomicReference<>();
-    menu.getEvents().addListener(DemoEventPicker.SELECT_EVENT, (String id) -> selected.set(id));
-    display.getRootStack().findActor(MainMenuDisplay.DEMO_EVENT).fire(new ChangeEvent());
-    Dialog picker = stage.getRoot().findActor("demo-event-picker");
-    picker.findActor("demo-event-back").fire(new ChangeEvent());
-    assertNull(selected.get());
-    assertNull(stage.getRoot().findActor("demo-event-picker"));
-    display.getRootStack().findActor(MainMenuDisplay.DEMO_EVENT).fire(new ChangeEvent());
-    picker = stage.getRoot().findActor("demo-event-picker");
-    picker.findActor("demo-event-random").fire(new ChangeEvent());
-    assertEquals("", selected.get());
   }
 
   @Test

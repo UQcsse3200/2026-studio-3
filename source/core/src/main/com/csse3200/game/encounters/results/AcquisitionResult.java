@@ -27,7 +27,9 @@ public record AcquisitionResult(String resultId, List<Entry> entries) {
 
   /**
    * Quantity is a positive count for goods or absolute magnitude for effects. For GOLD and HP,
-   * quantity is the signed, already-applied change, not the requested amount or final balance.
+   * quantity is a signed display amount, not a final balance. Positive Event HP displays the
+   * configured healing amount; actual health is independently capped by settlement. Other resource
+   * entries display the committed change.
    */
   public record Entry(
       Kind kind, String id, int quantity, String name, String description, Integer durationTurns) {

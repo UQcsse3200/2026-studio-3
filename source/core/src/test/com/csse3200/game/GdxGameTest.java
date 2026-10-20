@@ -31,7 +31,6 @@ import com.csse3200.game.rewards.ItemType;
 import com.csse3200.game.rewards.RewardOption;
 import com.csse3200.game.screens.BattleScreen;
 import com.csse3200.game.screens.DemoCampfireScreen;
-import com.csse3200.game.screens.DemoEventScreen;
 import com.csse3200.game.screens.EndBattleScreen;
 import com.csse3200.game.screens.LoadedSaveTransitionAware;
 import com.csse3200.game.screens.MapScreen;
@@ -186,33 +185,6 @@ class GdxGameTest {
   }
 
   @Test
-  void eventShortcutUsesIsolatedPreviewWithoutChangingMap() {
-    assertDemoNode(RoomType.EVENT);
-  }
-
-  @Test
-  void selectedDemoIdIsUsedOnceWithoutChangingTheRealRun() {
-    GdxGame game = gameWithActiveNode(RoomType.COMBAT);
-    RunState originalRun = game.getRunState();
-    MapGraph originalMap = originalRun.getMapGraph();
-    Integer originalNode = originalRun.getActiveNodeId();
-    java.util.List<Object> requestedIds = new java.util.ArrayList<>();
-    try (MockedConstruction<DemoEventScreen> previews =
-        mockConstruction(
-            DemoEventScreen.class,
-            (screen, context) -> requestedIds.add(context.arguments().get(1)))) {
-      game.openDemoEvent("dice-game");
-      game.openDemoEvent();
-      assertEquals(2, previews.constructed().size());
-      assertEquals("dice-game", requestedIds.get(0));
-      assertEquals(null, requestedIds.get(1));
-      assertSame(originalRun, game.getRunState());
-      assertSame(originalMap, originalRun.getMapGraph());
-      assertEquals(originalNode, originalRun.getActiveNodeId());
-    }
-  }
-
-  @Test
   void campfireShortcutUsesIsolatedPreviewWithoutChangingMap() {
     assertDemoNode(RoomType.CAMPFIRE);
   }
@@ -224,19 +196,12 @@ class GdxGameTest {
     Integer originalNode = game.getRunState().getActiveNodeId();
     Screen oldScreen = mock(Screen.class);
     game.setScreen(oldScreen);
-    try (MockedConstruction<DemoEventScreen> encounters = mockConstruction(DemoEventScreen.class);
-        MockedConstruction<DemoCampfireScreen> campfires =
+    try (MockedConstruction<DemoCampfireScreen> campfires =
             mockConstruction(DemoCampfireScreen.class);
         MockedConstruction<MapScreen> maps = mockConstruction(MapScreen.class)) {
-      if (roomType == RoomType.EVENT) {
-        game.openDemoEvent();
-        assertSame(encounters.constructed().get(0), game.getScreen());
-        assertTrue(campfires.constructed().isEmpty());
-      } else {
-        game.openDemoCampfire();
-        assertSame(campfires.constructed().get(0), game.getScreen());
-        assertTrue(encounters.constructed().isEmpty());
-      }
+      game.openDemoCampfire();
+      assertSame(campfires.constructed().get(0), game.getScreen());
+
       verify(oldScreen).dispose();
       RunState run = game.getRunState();
       assertTrue(run.isRunActive());

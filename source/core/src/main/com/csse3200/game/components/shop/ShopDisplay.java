@@ -110,6 +110,9 @@ public class ShopDisplay extends UIComponent {
   private long displayedRevision;
   private CardWidgetAssets cardWidgetAssets;
   private AcquisitionPresentation acquisitionPresentation;
+  private final java.util.List<com.csse3200.game.encounters.results.AcquisitionResult.Entry>
+      purchasedResults = new java.util.ArrayList<>();
+  private boolean leaving;
 
   private Stack rootStack;
   private Table titleFrame;
@@ -215,7 +218,11 @@ public class ShopDisplay extends UIComponent {
     acquisitionPresentation =
         new AcquisitionPresentation(
             new AcquisitionResultDisplay(
-                stage, skin, resolveCardService(), ServiceLocator.getResourceService()));
+                stage,
+                skin,
+                resolveCardService(),
+                ServiceLocator.getResourceService(),
+                "SHOP RESULTS"));
     createStyles();
     addActors();
   }
@@ -337,6 +344,7 @@ public class ShopDisplay extends UIComponent {
       purse.add(coin).size(24).padRight(8);
     }
     goldLabel = new Label("", createLabelStyle(DEFAULT, GOLD_COLOUR));
+    goldLabel.setName("merchant-gold-balance");
     purse.add(goldLabel).pad(10);
     purse.setBounds(1020, 684, 220, 56);
     shopControls.addActor(purse);
@@ -598,7 +606,7 @@ public class ShopDisplay extends UIComponent {
       statusLabel.setText(message);
       setMerchantDialogue("A fine choice.");
       if (receipt.acquisition() != null) {
-        acquisitionPresentation.show(receipt.acquisition(), dismissal -> refresh());
+        purchasedResults.addAll(receipt.acquisition().entries());
       }
     } else {
       refresh();
@@ -625,6 +633,19 @@ public class ShopDisplay extends UIComponent {
   }
 
   private void leaveShop() {
+    if (leaving) return;
+    leaving = true;
+    if (!purchasedResults.isEmpty()) {
+      acquisitionPresentation.show(
+          new com.csse3200.game.encounters.results.AcquisitionResult(
+              "shop-" + shopEncounter.getNodeId(), purchasedResults),
+          dismissal -> finishLeavingShop());
+      return;
+    }
+    finishLeavingShop();
+  }
+
+  private void finishLeavingShop() {
     acquisitionPresentation.close();
     logger.debug("Shop encounter completed for node {}", shopEncounter.getNodeId());
     AudioService.playSound(SoundId.LEAVE_SHOP, 0.3f);

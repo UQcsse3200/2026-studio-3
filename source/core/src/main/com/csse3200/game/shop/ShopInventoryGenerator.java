@@ -17,10 +17,12 @@ public final class ShopInventoryGenerator {
   public static final int DEFAULT_MIN_STOCK = 1;
   public static final int DEFAULT_MAX_STOCK = 3;
 
-  private static final int COMMON_PRICE = 20;
-  private static final int UNCOMMON_PRICE = 35;
-  private static final int RARE_PRICE = 50;
-  private static final int PRICE_VARIANCE = 5;
+  private static final int COMMON_MIN_PRICE = 8;
+  private static final int COMMON_MAX_PRICE = 12;
+  private static final int UNCOMMON_MIN_PRICE = 15;
+  private static final int UNCOMMON_MAX_PRICE = 20;
+  private static final int RARE_MIN_PRICE = 25;
+  private static final int RARE_MAX_PRICE = 30;
 
   private final CardService cardService;
   private final CardAcquisitionPool acquisitionPool;
@@ -118,20 +120,15 @@ public final class ShopInventoryGenerator {
   }
 
   private int generatePrice(Rarity rarity) {
-    int basePrice;
     switch (rarity) {
       case RARE:
-        basePrice = RARE_PRICE;
-        break;
+        return randomBetween(RARE_MIN_PRICE, RARE_MAX_PRICE);
       case UNCOMMON:
-        basePrice = UNCOMMON_PRICE;
-        break;
+        return randomBetween(UNCOMMON_MIN_PRICE, UNCOMMON_MAX_PRICE);
       case COMMON:
       default:
-        basePrice = COMMON_PRICE;
-        break;
+        return randomBetween(COMMON_MIN_PRICE, COMMON_MAX_PRICE);
     }
-    return Math.max(0, basePrice + randomBetween(-PRICE_VARIANCE, PRICE_VARIANCE));
   }
 
   private int randomBetween(int minimum, int maximum) {

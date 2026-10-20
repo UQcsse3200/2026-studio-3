@@ -93,7 +93,7 @@ class ChanceCurseChoiceDispatchTest {
       assertNull(overlay.findActor("acquisition-entry-BRAND_OF_THE_DAMNED"));
       assertEquals(1, session.getAcquisitionResult(null).orElseThrow().entries().size());
       overlay.findActor("acquisition-continue").fire(new ChangeEvent());
-      for (int frame = 0; frame < 10; frame++) {
+      for (int frame = 0; frame < 90; frame++) {
         stage.act(1f / 30f);
       }
       assertTrue(session.isCompleted());
@@ -144,6 +144,27 @@ class ChanceCurseChoiceDispatchTest {
     try {
       entity.create();
       assertEquals(encounter.getChoices().size(), display.getChoiceButtons().size());
+      if ("mysterious-shrine".equals(eventId)) {
+        float longest = 0f;
+        for (var button : display.getChoiceButtons()) {
+          var label = button.getLabel();
+          var measured =
+              new com.badlogic.gdx.graphics.g2d.GlyphLayout(label.getStyle().font, label.getText());
+          longest = Math.max(longest, measured.width * label.getFontScaleX());
+        }
+        for (var button : display.getChoiceButtons()) {
+          Table parent = (Table) button.getParent();
+          assertEquals(
+              (float) Math.ceil(longest + 96f), parent.getCell(button).getPrefWidth(), .01f);
+        }
+        var buttons = display.getChoiceButtons();
+        Table layout = (Table) buttons.get(0).getParent();
+        assertEquals(0, layout.getCell(buttons.get(0)).getRow());
+        assertEquals(0, layout.getCell(buttons.get(1)).getRow());
+        assertEquals(0, layout.getCell(buttons.get(2)).getRow());
+        assertEquals(1, layout.getCell(buttons.get(3)).getRow());
+        assertEquals(3, layout.getCell(buttons.get(3)).getColspan());
+      }
       int choiceIndex =
           encounter.getChoices().stream().map(choice -> choice.getId()).toList().indexOf(choiceId);
       display.getChoiceButtons().get(choiceIndex).fire(new ChangeEvent());
@@ -161,9 +182,14 @@ class ChanceCurseChoiceDispatchTest {
       assertNotNull(overlay.findActor("acquisition-entry-" + itemId));
       display.getChoiceButtons().get(choiceIndex).fire(new ChangeEvent());
       verify(items, times(1)).addItem(itemId);
-      overlay.findActor("acquisition-close").fire(new ChangeEvent());
+      overlay.findActor("acquisition-continue").fire(new ChangeEvent());
+      assertNotNull(overlay.findActor("acquisition-flight-gold"));
+      assertNotNull(overlay.findActor("acquisition-flight-" + itemId));
+      for (int frame = 0; frame < 90; frame++) stage.act(1f / 30f);
       assertNull(stage.getRoot().findActor("acquisition-result-overlay"));
-      assertTrue(display.getContinueButton().isVisible());
+      assertTrue(session.isCompleted());
+      assertEquals(35 + gold, player.getCurrency());
+      verify(items, times(1)).addItem(itemId);
     } finally {
       entity.dispose();
       stage.dispose();

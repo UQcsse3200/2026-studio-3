@@ -41,6 +41,54 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(GameExtension.class)
 class ChanceEncounterDisplayTest {
+  @Test
+  void fountainHealingShowsHeartResultImmediatelyAndRespectsHealthCap() {
+    for (int[] sample :
+        List.of(
+            new int[] {50, 100},
+            new int[] {97, 100},
+            new int[] {100, 100},
+            new int[] {117, 120},
+            new int[] {97, 120},
+            new int[] {120, 120})) {
+      int health = sample[0];
+      int maxHealth = sample[1];
+      ChanceEncounter encounter =
+          new ChanceEncounter(
+              "wishing-fountain",
+              "A fountain",
+              List.of(new ChanceChoice("make-wish", "Make a wish", new ChanceOutcome(20, 0))));
+      MockPlayerStateGateway player = new MockPlayerStateGateway(health, maxHealth, 0);
+      ChanceEncounterSession session =
+          new ChanceEncounterSession(
+              7, encounter, new ChanceOutcomeApplier(player), (node, success) -> {});
+      ChanceEncounterDisplay display = new ChanceEncounterDisplay(session);
+      Entity current = new Entity().addComponent(display);
+      current.create();
+      try {
+        display.getChoiceButtons().get(0).fire(new ChangeEvent());
+        assertFalse(session.isResolved());
+        stage.act(1.8f);
+        assertTrue(session.isResolved());
+        assertEquals(Math.min(maxHealth, health + 20), player.getHealth());
+        Table overlay = stage.getRoot().findActor("acquisition-result-overlay");
+        assertTrue(overlay != null);
+        String id = "hp";
+        var label =
+            (com.badlogic.gdx.scenes.scene2d.ui.Label) overlay.findActor("acquisition-entry-" + id);
+        assertEquals("HP +20", label.getText().toString());
+        display.getChoiceButtons().get(0).fire(new ChangeEvent());
+        assertEquals(Math.min(maxHealth, health + 20), player.getHealth());
+        overlay.findActor("acquisition-continue").fire(new ChangeEvent());
+        for (int frame = 0; frame < 30; frame++) stage.act(.1f);
+        assertTrue(session.isCompleted());
+        assertEquals(Math.min(maxHealth, health + 20), player.getHealth());
+      } finally {
+        current.dispose();
+      }
+    }
+  }
+
   private Stage stage;
   private Entity entity;
 
@@ -62,14 +110,14 @@ class ChanceEncounterDisplayTest {
   }
 
   @Test
-  void fountainWaitsForReleaseAndCompletesOnlyOnce() {
+  void fountainWaitsForAlignedWishAnimationAndCompletesOnlyOnce() {
     AtomicInteger completions = new AtomicInteger();
     ChanceEncounterDisplay display = createFountain(completions);
     assertEquals("Make a Wish", display.getChoiceButtons().get(0).getText().toString());
     assertEquals("Leave >", display.getChoiceButtons().get(1).getText().toString());
     display.getChoiceButtons().get(0).fire(new ChangeEvent());
     assertTrue(display.getChoiceButtons().get(1).isDisabled());
-    stage.act(0.8f);
+    stage.act(.8f);
     assertFalse(display.getContinueButton().isVisible());
     display.getChoiceButtons().get(1).fire(new ChangeEvent());
     display.getChoiceButtons().get(0).fire(new ChangeEvent());
@@ -91,19 +139,11 @@ class ChanceEncounterDisplayTest {
             "mysterious-shrine",
             "A cracked shrine offers a risky trade.",
             List.of(
-                new ChanceChoice(
-                    "make-offering",
-                    "Make an Offering: -10 HP, +25 Gold.",
-                    new ChanceOutcome(-10, 25)),
+                new ChanceChoice("make-offering", "Make an Offering.", new ChanceOutcome(-10, 25)),
                 new ChanceChoice("leave", "Leave the Shrine.", new ChanceOutcome(0, 0)),
+                new ChanceChoice("accept-brand", "Accept the Brand.", new ChanceOutcome(0, 50)),
                 new ChanceChoice(
-                    "accept-brand",
-                    "Accept the Brand: +50 Gold; Curse reduces future Strength gains by 1.",
-                    new ChanceOutcome(0, 50)),
-                new ChanceChoice(
-                    "swear-blood-oath",
-                    "Swear the Blood Oath: +70 Gold; Curse drains 2 HP each player turn in battle (min 1 HP).",
-                    new ChanceOutcome(0, 70))));
+                    "swear-blood-oath", "Swear the Blood Oath.", new ChanceOutcome(0, 70))));
     ChanceEncounterDisplay display = new ChanceEncounterDisplay(encounter);
     entity = new Entity().addComponent(display);
     entity.create();
@@ -112,10 +152,12 @@ class ChanceEncounterDisplayTest {
     ((Table) stage.getActors().get(0)).validate();
     List<TextButton> buttons = display.getChoiceButtons();
     assertEquals(4, buttons.size());
-    for (int i = 1; i < buttons.size(); i++) {
-      assertEquals(buttons.get(0).getX(), buttons.get(i).getX(), .01f);
-      assertTrue(buttons.get(i - 1).getY() >= buttons.get(i).getY() + buttons.get(i).getHeight());
-    }
+    assertEquals(buttons.get(0).getY(), buttons.get(2).getY(), .01f);
+    assertEquals(buttons.get(0).getY(), buttons.get(3).getY(), .01f);
+    assertTrue(buttons.get(0).getX() < buttons.get(2).getX());
+    assertTrue(buttons.get(2).getX() < buttons.get(3).getX());
+    assertTrue(buttons.get(1).getY() + buttons.get(1).getHeight() <= buttons.get(0).getY());
+    assertEquals(buttons.get(2).getX(), buttons.get(1).getX(), .01f);
     assertTrue(buttons.get(0).getY() + buttons.get(0).getHeight() < 600f);
     assertTrue(buttons.get(3).getY() >= 0f);
   }
@@ -136,7 +178,7 @@ class ChanceEncounterDisplayTest {
     assertTrue(display.getContinueButton().isVisible());
     assertTrue(display.getResultText().contains("lose 10 health"));
     assertTrue(display.getResultText().contains("gain 25 gold"));
-    assertTrue(display.getResultText().contains("OUTCOME"));
+    assertFalse(display.getResultText().contains("OUTCOME"));
     assertFalse(display.getChoiceButtons().get(0).getParent().isVisible());
     display.getContinueButton().fire(new ChangeEvent());
     display.getContinueButton().fire(new ChangeEvent());
@@ -194,10 +236,10 @@ class ChanceEncounterDisplayTest {
     assertTrue(left.getX() < right.getX());
     left.fire(new ChangeEvent());
     assertTrue(display.getContinueButton().isVisible());
-    assertEquals("OUTCOME\nYou lose 8 gold.", display.getResultText());
+    assertEquals("You lose 8 gold.", display.getResultText());
     assertFalse(left.getParent().isVisible());
     right.fire(new ChangeEvent());
-    assertEquals("OUTCOME\nYou lose 8 gold.", display.getResultText());
+    assertEquals("You lose 8 gold.", display.getResultText());
     display.getContinueButton().fire(new ChangeEvent());
     assertEquals(1, completions.get());
     assertNull(display.getContinueButton().getStage());
@@ -210,7 +252,7 @@ class ChanceEncounterDisplayTest {
     ChanceEncounterDisplay display = createFlooded(new AtomicInteger());
     display.getChoiceButtons().get(1).fire(new ChangeEvent());
     assertTrue(display.getContinueButton().isVisible());
-    assertEquals("OUTCOME\nYou lose 8 health.", display.getResultText());
+    assertEquals("You lose 8 health.", display.getResultText());
   }
 
   private ChanceEncounterDisplay createFlooded(AtomicInteger completions) {
@@ -244,9 +286,10 @@ class ChanceEncounterDisplayTest {
     assertTrue(first.getY() > second.getY());
     assertEquals(first.getX(), second.getX(), .01f);
     assertTrue(first.getWidth() < 1280 * .55f);
-    assertTrue(first.getText().toString().startsWith("1."));
+    assertFalse(first.getText().toString().startsWith("1."));
+    assertEquals(com.badlogic.gdx.utils.Align.center, first.getLabel().getLabelAlign());
     first.fire(new ChangeEvent());
-    assertEquals("OUTCOME\nYou recover 20 health.\nYou lose 10 gold.", display.getResultText());
+    assertEquals("You recover 20 health.\nYou lose 10 gold.", display.getResultText());
     assertTrue(display.getContinueButton().isVisible());
     assertFalse(first.getParent().isVisible());
     display.getContinueButton().fire(new ChangeEvent());
@@ -259,12 +302,12 @@ class ChanceEncounterDisplayTest {
   void healerBandageAndDeclineKeepTheirOriginalOutcomes() {
     ChanceEncounterDisplay display = createHealer(new AtomicInteger());
     display.getChoiceButtons().get(1).fire(new ChangeEvent());
-    assertEquals("OUTCOME\nYou receive the Bandage card.", display.getResultText());
+    assertEquals("You receive the Bandage card.", display.getResultText());
     entity.dispose();
     entity = null;
     display = createHealer(new AtomicInteger());
     display.getChoiceButtons().get(2).fire(new ChangeEvent());
-    assertEquals("OUTCOME\nNothing happens. You continue on your way.", display.getResultText());
+    assertEquals("Nothing happens. You continue on your way.", display.getResultText());
   }
 
   private ChanceEncounterDisplay createHealer(AtomicInteger completions) {
@@ -360,17 +403,21 @@ class ChanceEncounterDisplayTest {
       assertEquals(2, display.getChoiceButtons().size());
       assertNull(display.getHelpButton());
       assertEquals(
-          "1.  Search the unstable tunnels for valuables.",
+          "Search the unstable tunnels for valuables.",
           display.getChoiceButtons().get(0).getText().toString());
       assertEquals(
-          "2.  Leave the mine undisturbed.",
-          display.getChoiceButtons().get(1).getText().toString());
+          "Leave the mine undisturbed.", display.getChoiceButtons().get(1).getText().toString());
       ((Table) display.getChoiceButtons().get(0).getParent()).layout();
       assertTrue(
           display.getChoiceButtons().get(0).getX() < display.getChoiceButtons().get(1).getX());
 
       display.getChoiceButtons().get(0).fire(new ChangeEvent());
-      assertEquals("OUTCOME\nYou lose 12 health.\nYou gain 30 gold.", display.getResultText());
+      assertEquals("You lose 12 health.\nYou gain 30 gold.", display.getResultText());
+      com.badlogic.gdx.scenes.scene2d.ui.Label narration =
+          sceneStage.getRoot().findActor("encounter-result-text");
+      assertTrue(narration.getStyle().background instanceof EncounterResultShade);
+      assertNull(((Table) narration.getParent()).getBackground());
+      assertEquals(.9f, narration.getFontScaleX(), .001f);
       assertTrue(display.getContinueButton().isVisible());
       assertTrue(display.getChoiceButtons().get(0).isDisabled());
       assertEquals(0, completions.get());
@@ -510,7 +557,7 @@ class ChanceEncounterDisplayTest {
   private static List<String> choiceIds(ChanceEncounterDisplay display) {
     return display.getChoiceButtons().stream()
         .map(TextButton::getText)
-        .map(text -> text.toString().substring(4))
+        .map(Object::toString)
         .toList();
   }
 
