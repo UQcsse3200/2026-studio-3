@@ -177,50 +177,47 @@ public final class ChanceEncounterConfigLoader {
     for (JsonValue encounter = encounterArray.child;
         encounter != null;
         encounter = encounter.next, encounterIndex++) {
-      if (!encounter.isObject()) {
-        continue;
-      }
+      if (!encounter.isObject()) continue;
+      String label = "encounter[" + encounterIndex + "]";
+      validateInteger(encounter.get("weight"), label + ".weight", errors);
+      validateChoices(encounter.get("choices"), label, errors);
+    }
+  }
 
-      validateInteger(encounter.get("weight"), "encounter[" + encounterIndex + "].weight", errors);
+  private static void validateChoices(JsonValue choices, String label, List<String> errors) {
+    if (choices == null || !choices.isArray()) return;
+    int choiceIndex = 0;
+    for (JsonValue choice = choices.child; choice != null; choice = choice.next, choiceIndex++) {
+      if (!choice.isObject()) continue;
+      String choiceLabel = label + ".choice[" + choiceIndex + "]";
+      validateCurseRisk(choice.get("curseRisk"), choiceLabel + ".curseRisk", errors);
+      validateOutcomeFields(choice.get("outcome"), choiceLabel, errors);
+    }
+  }
 
-      JsonValue choices = encounter.get("choices");
-      if (choices == null || !choices.isArray()) {
-        continue;
-      }
+  private static void validateOutcomeFields(
+      JsonValue outcome, String choiceLabel, List<String> errors) {
+    if (outcome == null || outcome.isNull()) return;
+    if (!outcome.isObject()) {
+      errors.add(choiceLabel + ": outcome must be a JSON object");
+      return;
+    }
+    String label = choiceLabel + ".outcome";
+    validateInteger(outcome.get("healthDelta"), label + ".healthDelta", errors);
+    validateInteger(outcome.get("currencyDelta"), label + ".currencyDelta", errors);
+    validateOptionalString(outcome.get("cardRewardId"), label + ".cardRewardId", errors);
+    validateItemRewardIds(outcome.get("itemRewardIds"), label, errors);
+  }
 
-      int choiceIndex = 0;
-      for (JsonValue choice = choices.child; choice != null; choice = choice.next, choiceIndex++) {
-        if (!choice.isObject()) {
-          continue;
-        }
-
-        String choiceLabel = "encounter[" + encounterIndex + "].choice[" + choiceIndex + "]";
-        validateCurseRisk(choice.get("curseRisk"), choiceLabel + ".curseRisk", errors);
-        JsonValue outcome = choice.get("outcome");
-        if (outcome == null || outcome.isNull()) {
-          continue;
-        }
-        if (!outcome.isObject()) {
-          errors.add(choiceLabel + ": outcome must be a JSON object");
-          continue;
-        }
-
-        String label = choiceLabel + ".outcome";
-        validateInteger(outcome.get("healthDelta"), label + ".healthDelta", errors);
-        validateInteger(outcome.get("currencyDelta"), label + ".currencyDelta", errors);
-        validateOptionalString(outcome.get("cardRewardId"), label + ".cardRewardId", errors);
-        JsonValue items = outcome.get("itemRewardIds");
-        if (items != null) {
-          if (!items.isArray()) {
-            errors.add(label + ".itemRewardIds must be an array when present");
-          } else {
-            int itemIndex = 0;
-            for (JsonValue item = items.child; item != null; item = item.next, itemIndex++) {
-              validateOptionalString(item, label + ".itemRewardIds[" + itemIndex + "]", errors);
-            }
-          }
-        }
-      }
+  private static void validateItemRewardIds(JsonValue items, String label, List<String> errors) {
+    if (items == null) return;
+    if (!items.isArray()) {
+      errors.add(label + ".itemRewardIds must be an array when present");
+      return;
+    }
+    int itemIndex = 0;
+    for (JsonValue item = items.child; item != null; item = item.next, itemIndex++) {
+      validateOptionalString(item, label + ".itemRewardIds[" + itemIndex + "]", errors);
     }
   }
 
@@ -278,7 +275,10 @@ public final class ChanceEncounterConfigLoader {
     }
 
     try {
-      new BigDecimal(value.asString()).intValueExact();
+      // bitLength excludes the sign bit, so both signed int endpoints fit in 31 bits.
+      if (new BigDecimal(value.asString()).toBigIntegerExact().bitLength() > Integer.SIZE - 1) {
+        throw new ArithmeticException("Integer out of range");
+      }
     } catch (ArithmeticException | NumberFormatException exception) {
       errors.add(label + " must be an exact 32-bit integer, was " + value.asString());
     }

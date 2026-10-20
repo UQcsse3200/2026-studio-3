@@ -2,6 +2,7 @@ package com.csse3200.game.chance;
 
 import com.csse3200.game.chance.configs.ChanceChoiceConfig;
 import com.csse3200.game.chance.configs.ChanceConfig;
+import com.csse3200.game.chance.configs.ChanceCurseRiskConfig;
 import com.csse3200.game.chance.configs.ChanceEncounterConfig;
 import com.csse3200.game.encounters.integration.CardCatalogGateway;
 import java.util.ArrayList;
@@ -121,6 +122,12 @@ final class ChanceEncounterConfigValidator {
       errors.add(label + ".outcome: currencyDelta must be present");
     }
 
+    validateItemRewards(choice, label, errors);
+    validateCardReward(choice.outcome.cardRewardId, label, cardCatalog, errors);
+  }
+
+  private static void validateItemRewards(
+      ChanceChoiceConfig choice, String label, List<String> errors) {
     if (choice.outcome.itemRewardIds != null) {
       for (String itemId : choice.outcome.itemRewardIds) {
         if (itemId == null || !itemId.matches("[A-Z][A-Z0-9_]*")) {
@@ -128,8 +135,10 @@ final class ChanceEncounterConfigValidator {
         }
       }
     }
+  }
 
-    String cardRewardId = choice.outcome.cardRewardId;
+  private static void validateCardReward(
+      String cardRewardId, String label, CardCatalogGateway cardCatalog, List<String> errors) {
     if (cardRewardId != null && cardRewardId.isBlank()) {
       errors.add(label + ".outcome: cardRewardId must not be blank when present");
     } else if (cardRewardId != null && cardCatalog != null) {
@@ -166,6 +175,12 @@ final class ChanceEncounterConfigValidator {
       errors.add(label + ": Curse item pool must not be empty");
       return;
     }
+    validateCursePool(risk, label, errors);
+    validateFixedCurseRewards(choice, label, errors);
+  }
+
+  private static void validateCursePool(
+      ChanceCurseRiskConfig risk, String label, List<String> errors) {
     Set<String> ids = new HashSet<>();
     long total = 0;
     for (var item : risk.items) {
@@ -179,6 +194,10 @@ final class ChanceEncounterConfigValidator {
       } else total += item.weight;
     }
     if (total > Integer.MAX_VALUE) errors.add(label + ": Curse weight total exceeds integer range");
+  }
+
+  private static void validateFixedCurseRewards(
+      ChanceChoiceConfig choice, String label, List<String> errors) {
     if (choice.outcome != null
         && (choice.outcome.cardRewardId != null
             || (choice.outcome.itemRewardIds != null && choice.outcome.itemRewardIds.length > 0))) {

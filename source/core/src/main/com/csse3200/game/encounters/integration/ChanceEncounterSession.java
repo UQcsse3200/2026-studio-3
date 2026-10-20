@@ -30,7 +30,8 @@ public final class ChanceEncounterSession {
   private boolean resolving;
   private ChanceResolution blockedItemResolution;
   private final String acquisitionResultId = "event:" + UUID.randomUUID();
-  private Optional<AcquisitionResult> acquisitionResult;
+  private Optional<AcquisitionResult> acquisitionResult = Optional.empty();
+  private boolean acquisitionResultMapped;
   private ChanceAcquisitionSession acquisitionSession;
 
   /**
@@ -39,9 +40,10 @@ public final class ChanceEncounterSession {
    */
   public Optional<AcquisitionResult> getAcquisitionResult(CardService cards) {
     if (resolution == null) return Optional.empty();
-    if (acquisitionResult == null) {
+    if (!acquisitionResultMapped) {
       acquisitionResult =
           ChanceAcquisitionResults.fromApplied(resolution, acquisitionResultId, cards);
+      acquisitionResultMapped = true;
     }
     return acquisitionResult;
   }

@@ -654,6 +654,25 @@ public class ShopDisplay extends UIComponent {
   }
 
   private void refresh() {
+    updateRefreshButton();
+    Integer currency = shopEncounter.getCurrency();
+    goldLabel.setText(currency == null ? "GOLD  --" : String.format("GOLD  %d", currency));
+
+    refreshMerchantsFavor();
+
+    for (ShopItem item : shopEncounter.getItems()) {
+      ItemWidgets widgets = itemWidgets.get(item.id);
+      if (widgets == null) {
+        continue;
+      }
+
+      PurchaseResult availability = shopEncounter.canPurchase(item.id);
+      ShopItemState state = getItemState(availability, purchasedItemIds.contains(item.id));
+      applyItemState(widgets, item, state);
+    }
+  }
+
+  private void updateRefreshButton() {
     var quote = shopEncounter.snapshot();
     if (refreshButton != null) {
       var fee = quote.nextRefreshCost();
@@ -674,9 +693,9 @@ public class ShopDisplay extends UIComponent {
           MerchantShopFrame.buttonStyle(
               skin.getDrawable(WHITE), refreshButton.getStyle(), refreshTone));
     }
-    Integer currency = shopEncounter.getCurrency();
-    goldLabel.setText(currency == null ? "GOLD  --" : String.format("GOLD  %d", currency));
+  }
 
+  private void refreshMerchantsFavor() {
     if (merchantsFavorLabel != null) {
       int favorCount =
           playerRunState == null ? 0 : playerRunState.getOwnedItemCount(ItemType.MERCHANTS_FAVOR);
@@ -689,17 +708,6 @@ public class ShopDisplay extends UIComponent {
                   favorCount,
                   (shopEncounter.getShopDiscount() == null ? 0f : shopEncounter.getShopDiscount())
                       * 100f));
-    }
-
-    for (ShopItem item : shopEncounter.getItems()) {
-      ItemWidgets widgets = itemWidgets.get(item.id);
-      if (widgets == null) {
-        continue;
-      }
-
-      PurchaseResult availability = shopEncounter.canPurchase(item.id);
-      ShopItemState state = getItemState(availability, purchasedItemIds.contains(item.id));
-      applyItemState(widgets, item, state);
     }
   }
 

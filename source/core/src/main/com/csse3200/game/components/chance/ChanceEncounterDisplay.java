@@ -55,6 +55,11 @@ import java.util.Objects;
  * encounter has finished.
  */
 public class ChanceEncounterDisplay extends UIComponent {
+  private static final String MAKE_OFFERING = "make-offering";
+  private static final String ACCEPT_BRAND = "accept-brand";
+  private static final String SWEAR_BLOOD_OATH = "swear-blood-oath";
+  private static final List<String> SHRINE_ACTION_IDS =
+      List.of(MAKE_OFFERING, ACCEPT_BRAND, SWEAR_BLOOD_OATH);
   public static final String DICE_GAME_BACKGROUND_TEXTURE = "images/chance/dice_game_scene_v1.png";
   public static final String DICE_LOW_BUTTON_TEXTURE = "images/chance/dice_low_button_v2.png";
   public static final String DICE_HIGH_BUTTON_TEXTURE = "images/chance/dice_high_button_v2.png";
@@ -1466,44 +1471,136 @@ public class ChanceEncounterDisplay extends UIComponent {
       addChoiceButton(choice, choiceNumber);
       choiceNumber++;
     }
-    if (scenicShrine) {
-      float longestText = 0f;
-      for (TextButton button : choiceButtons) {
-        var label = button.getLabel();
-        var measured =
-            new com.badlogic.gdx.graphics.g2d.GlyphLayout(label.getStyle().font, label.getText());
-        longestText = Math.max(longestText, measured.width * label.getFontScaleX());
-      }
-      // Share one compact width, with room for the illustrated end caps on both sides.
-      for (TextButton button : choiceButtons) {
-        choicesTable.getCell(button).width((float) Math.ceil(longestText + 96f));
-      }
-      if (choiceButtons.size() == 4) {
-        float width = (float) Math.ceil(longestText + 96f);
-        choicesTable.clearChildren();
-        for (String id : List.of("make-offering", "accept-brand", "swear-blood-oath")) {
-          for (int i = 0; i < availableChoices.size(); i++) {
-            if (id.equals(availableChoices.get(i).getId())) {
-              choicesTable.add(choiceButtons.get(i)).width(width).height(82f).pad(0f, 8f, 8f, 8f);
-            }
+    if (scenicShrine) refreshShrineChoices(availableChoices);
+    choicesTable.invalidateHierarchy();
+  }
+
+  private void refreshShrineChoices(List<ChanceChoice> availableChoices) {
+    float longestText = 0f;
+    for (TextButton button : choiceButtons) {
+      var label = button.getLabel();
+      var measured =
+          new com.badlogic.gdx.graphics.g2d.GlyphLayout(label.getStyle().font, label.getText());
+      longestText = Math.max(longestText, measured.width * label.getFontScaleX());
+    }
+    // Share one compact width, with room for the illustrated end caps on both sides.
+    for (TextButton button : choiceButtons) {
+      choicesTable.getCell(button).width((float) Math.ceil(longestText + 96f));
+    }
+    layoutShrineRows(availableChoices, (float) Math.ceil(longestText + 96f));
+  }
+
+  private void layoutShrineRows(List<ChanceChoice> availableChoices, float width) {
+    if (choiceButtons.size() == 4) {
+      choicesTable.clearChildren();
+      for (String id : SHRINE_ACTION_IDS) {
+        for (int i = 0; i < availableChoices.size(); i++) {
+          if (id.equals(availableChoices.get(i).getId())) {
+            choicesTable.add(choiceButtons.get(i)).width(width).height(82f).pad(0f, 8f, 8f, 8f);
           }
         }
-        choicesTable.row();
-        for (int i = 0; i < availableChoices.size(); i++) {
-          if (!List.of("make-offering", "accept-brand", "swear-blood-oath")
-              .contains(availableChoices.get(i).getId())) {
-            choicesTable
-                .add(choiceButtons.get(i))
-                .colspan(3)
-                .width(width)
-                .height(82f)
-                .padBottom(8f)
-                .center();
-          }
+      }
+      choicesTable.row();
+      for (int i = 0; i < availableChoices.size(); i++) {
+        if (!SHRINE_ACTION_IDS.contains(availableChoices.get(i).getId())) {
+          choicesTable
+              .add(choiceButtons.get(i))
+              .colspan(3)
+              .width(width)
+              .height(82f)
+              .padBottom(8f)
+              .center();
         }
       }
     }
-    choicesTable.invalidateHierarchy();
+  }
+
+  private void layoutDiceChoiceButton(ChanceChoice choice, TextButton choiceButton) {
+    String choiceId = choice.getId();
+    if (DiceEncounterBehaviour.LOW_CHOICE_ID.equals(choiceId)
+        || DiceEncounterBehaviour.HIGH_CHOICE_ID.equals(choiceId)) {
+      choiceButton.setStyle(
+          illustratedButtonStyle(
+              DiceEncounterBehaviour.HIGH_CHOICE_ID.equals(choiceId)
+                  ? DICE_HIGH_BUTTON_TEXTURE
+                  : DICE_LOW_BUTTON_TEXTURE));
+    } else if (DiceEncounterBehaviour.TAKE_CHOICE_ID.equals(choiceId)
+        || DiceEncounterBehaviour.CASH_OUT_CHOICE_ID.equals(choiceId)) {
+      choiceButton.setStyle(createDiceDecisionStyle(false));
+    } else if (DiceEncounterBehaviour.DOUBLE_DOWN_CHOICE_ID.equals(choiceId)
+        || DiceEncounterBehaviour.CONTINUE_CHOICE_ID.equals(choiceId)) {
+      choiceButton.setStyle(createDiceDecisionStyle(true));
+    }
+    choicesTable.add(choiceButton).width(455f).height(76f).padRight(30f);
+  }
+
+  private float choiceOpticalOffset(ChanceChoice choice) {
+    float opticalOffset = 0f;
+    if (scenicShrine) {
+      opticalOffset = shrineOpticalOffset(choice.getId());
+    } else if (scenicFountain) {
+      opticalOffset =
+          WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID.equals(choice.getId())
+              ? -.075f
+              : 0f;
+    } else if (scenicFlooded) {
+      opticalOffset = .04f;
+    } else if (scenicAbandonedMine) {
+      opticalOffset = .025f;
+    } else if (scenicHealer) {
+      opticalOffset = "decline".equals(choice.getId()) ? .025f : .05f;
+    } else if (scenicDiceGame
+        && (DiceEncounterBehaviour.LOW_CHOICE_ID.equals(choice.getId())
+            || DiceEncounterBehaviour.HIGH_CHOICE_ID.equals(choice.getId()))) {
+      opticalOffset = .04f;
+    }
+    return opticalOffset;
+  }
+
+  private float shrineOpticalOffset(String choiceId) {
+    return switch (choiceId) {
+      case MAKE_OFFERING -> -.045f;
+      case ACCEPT_BRAND -> .055f;
+      case SWEAR_BLOOD_OATH -> .085f;
+      default -> .10f;
+    };
+  }
+
+  private void setOutcomeNarration(ChanceOutcome outcome) {
+    resultLabel.setStyle(createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
+    resultLabel.setText(resolveOutcomeDisplayText(outcome));
+    LabelStyle outcomeStyle = new LabelStyle(resultLabel.getStyle());
+    outcomeStyle.background =
+        new EncounterResultShade(
+            resultLabel,
+            skin.getDrawable(STYLE_NAME_WHITE),
+            scenicHealer ? .30f : scenicFountain ? .38f : .60f);
+    resultLabel.setStyle(outcomeStyle);
+    resultLabel.setName("encounter-result-text");
+    resultLabel.setFontScale(.9f);
+    resultLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
+  }
+
+  private void markSelectedChoice(TextButton selectedButton, String originalButtonText) {
+    centerButtonText(
+        continueButton,
+        scenicFountain
+            ? -.075f
+            : scenicHealer
+                ? .05f
+                : selectedButton.getUserObject() instanceof Float offset ? offset : 0f);
+    for (TextButton button : choiceButtons) {
+      button.setDisabled(true);
+    }
+    if (scenicDiceGame) {
+      TextButtonStyle selectedStyle = new TextButtonStyle(selectedButton.getStyle());
+      selectedStyle.disabled = selectedStyle.up;
+      selectedStyle.disabledFontColor = Color.WHITE;
+      selectedButton.setStyle(selectedStyle);
+    } else {
+      selectedButton.setStyle(selectedChoiceStyle);
+    }
+    selectedButton.setText("SELECTED  -  " + originalButtonText);
   }
 
   List<TextButton> getChoiceButtons() {
@@ -1602,7 +1699,7 @@ public class ChanceEncounterDisplay extends UIComponent {
     if (shrineScene.isResponding() || choiceResolved) {
       return;
     }
-    if ("make-offering".equals(choice.getId())) {
+    if (MAKE_OFFERING.equals(choice.getId())) {
       if (shrineScene.playResponse(() -> resolveChoice(choice, choiceButton, originalButtonText))) {
         for (TextButton button : choiceButtons) {
           button.setDisabled(true);
@@ -1636,53 +1733,17 @@ public class ChanceEncounterDisplay extends UIComponent {
 
   private void layoutChoiceButton(ChanceChoice choice, int choiceNumber, TextButton choiceButton) {
     if (scenicHealer) {
-      choiceButton.setStyle(healerButtonStyle("decline".equals(choice.getId())));
-      choicesTable
-          .add(choiceButton)
-          .width(com.badlogic.gdx.scenes.scene2d.ui.Value.percentWidth(.52f, rootTable))
-          .height(66)
-          .padBottom(8);
-      choicesTable.row();
+      layoutHealerChoiceButton(choice, choiceButton);
     } else if (scenicFlooded) {
-      choiceButton.setStyle(
-          illustratedButtonStyle(
-              "hire-ferryman".equals(choice.getId())
-                  ? CROSSING_FERRY_BUTTON_TEXTURE
-                  : CROSSING_WADE_BUTTON_TEXTURE));
-      choicesTable
-          .add(choiceButton)
-          .width(
-              com.badlogic.gdx.scenes.scene2d.ui.Value.percentWidth(
-                  "hire-ferryman".equals(choice.getId()) ? .42f : .34f, rootTable))
-          .height(94)
-          .pad(0, 8, 0, 8);
+      layoutFloodedChoiceButton(choice, choiceButton);
     } else if (scenicShrine) {
       layoutShrineChoiceButton(choice, choiceButton);
     } else if (scenicFountain) {
       layoutFountainChoiceButton(choice, choiceButton);
     } else if (scenicDiceGame) {
-      String choiceId = choice.getId();
-      if (DiceEncounterBehaviour.LOW_CHOICE_ID.equals(choiceId)
-          || DiceEncounterBehaviour.HIGH_CHOICE_ID.equals(choiceId)) {
-        choiceButton.setStyle(
-            illustratedButtonStyle(
-                DiceEncounterBehaviour.HIGH_CHOICE_ID.equals(choiceId)
-                    ? DICE_HIGH_BUTTON_TEXTURE
-                    : DICE_LOW_BUTTON_TEXTURE));
-      } else if (DiceEncounterBehaviour.TAKE_CHOICE_ID.equals(choiceId)
-          || DiceEncounterBehaviour.CASH_OUT_CHOICE_ID.equals(choiceId)) {
-        choiceButton.setStyle(createDiceDecisionStyle(false));
-      } else if (DiceEncounterBehaviour.DOUBLE_DOWN_CHOICE_ID.equals(choiceId)
-          || DiceEncounterBehaviour.CONTINUE_CHOICE_ID.equals(choiceId)) {
-        choiceButton.setStyle(createDiceDecisionStyle(true));
-      }
-      choicesTable.add(choiceButton).width(455f).height(76f).padRight(30f);
+      layoutDiceChoiceButton(choice, choiceButton);
     } else if (scenicAbandonedMine) {
-      boolean explore = "search-tunnels".equals(choice.getId());
-      choiceButton.setStyle(
-          illustratedButtonStyle(
-              explore ? MINE_EXPLORE_BUTTON_TEXTURE : MINE_LEAVE_BUTTON_TEXTURE));
-      choicesTable.add(choiceButton).width(560f).height(100f).padRight(25f);
+      layoutMineChoiceButton(choice, choiceButton);
     } else if (scenicCardFusion) {
       if (choiceNumber == 2) {
         choiceButton.setStyle(FusionSceneAssets.buttonStyle(skin, false));
@@ -1692,31 +1753,39 @@ public class ChanceEncounterDisplay extends UIComponent {
       choicesTable.add(choiceButton).left().width(CONTENT_WIDTH).minHeight(80f).padBottom(14f);
       choicesTable.row();
     }
-    float opticalOffset = 0f;
-    if (scenicShrine) {
-      opticalOffset =
-          "make-offering".equals(choice.getId())
-              ? -.045f
-              : "accept-brand".equals(choice.getId())
-                  ? .055f
-                  : "swear-blood-oath".equals(choice.getId()) ? .085f : .10f;
-    } else if (scenicFountain) {
-      opticalOffset =
-          WishingFountainEncounterBehaviour.MAKE_WISH_CHOICE_ID.equals(choice.getId())
-              ? -.075f
-              : 0f;
-    } else if (scenicFlooded) {
-      opticalOffset = .04f;
-    } else if (scenicAbandonedMine) {
-      opticalOffset = .025f;
-    } else if (scenicHealer) {
-      opticalOffset = "decline".equals(choice.getId()) ? .025f : .05f;
-    } else if (scenicDiceGame
-        && (DiceEncounterBehaviour.LOW_CHOICE_ID.equals(choice.getId())
-            || DiceEncounterBehaviour.HIGH_CHOICE_ID.equals(choice.getId()))) {
-      opticalOffset = .04f;
-    }
-    centerButtonText(choiceButton, opticalOffset);
+    centerButtonText(choiceButton, choiceOpticalOffset(choice));
+  }
+
+  private void layoutHealerChoiceButton(ChanceChoice choice, TextButton choiceButton) {
+    choiceButton.setStyle(healerButtonStyle("decline".equals(choice.getId())));
+    choicesTable
+        .add(choiceButton)
+        .width(com.badlogic.gdx.scenes.scene2d.ui.Value.percentWidth(.52f, rootTable))
+        .height(66)
+        .padBottom(8);
+    choicesTable.row();
+  }
+
+  private void layoutFloodedChoiceButton(ChanceChoice choice, TextButton choiceButton) {
+    choiceButton.setStyle(
+        illustratedButtonStyle(
+            "hire-ferryman".equals(choice.getId())
+                ? CROSSING_FERRY_BUTTON_TEXTURE
+                : CROSSING_WADE_BUTTON_TEXTURE));
+    choicesTable
+        .add(choiceButton)
+        .width(
+            com.badlogic.gdx.scenes.scene2d.ui.Value.percentWidth(
+                "hire-ferryman".equals(choice.getId()) ? .42f : .34f, rootTable))
+        .height(94)
+        .pad(0, 8, 0, 8);
+  }
+
+  private void layoutMineChoiceButton(ChanceChoice choice, TextButton choiceButton) {
+    boolean explore = "search-tunnels".equals(choice.getId());
+    choiceButton.setStyle(
+        illustratedButtonStyle(explore ? MINE_EXPLORE_BUTTON_TEXTURE : MINE_LEAVE_BUTTON_TEXTURE));
+    choicesTable.add(choiceButton).width(560f).height(100f).padRight(25f);
   }
 
   private void centerButtonText(TextButton button, float verticalOffset) {
@@ -1734,12 +1803,12 @@ public class ChanceEncounterDisplay extends UIComponent {
 
   private void layoutShrineChoiceButton(ChanceChoice choice, TextButton choiceButton) {
     choiceButton.setStyle(
-        "accept-brand".equals(choice.getId())
+        ACCEPT_BRAND.equals(choice.getId())
             ? illustratedButtonStyle(SHRINE_BRAND_BUTTON_TEXTURE)
-            : "swear-blood-oath".equals(choice.getId())
+            : SWEAR_BLOOD_OATH.equals(choice.getId())
                 ? illustratedButtonStyle(SHRINE_BLOOD_BUTTON_TEXTURE)
-                : shrineScenicButtonStyle(!"make-offering".equals(choice.getId())));
-    if ("make-offering".equals(choice.getId()))
+                : shrineScenicButtonStyle(!MAKE_OFFERING.equals(choice.getId())));
+    if (MAKE_OFFERING.equals(choice.getId()))
       choiceButton.addListener(
           new com.badlogic.gdx.scenes.scene2d.InputListener() {
             @Override
@@ -1875,38 +1944,9 @@ public class ChanceEncounterDisplay extends UIComponent {
     if (scenicShrine || scenicFlooded || scenicAbandonedMine) {
       continueButton.setStyle(new TextButtonStyle(selectedButton.getStyle()));
     }
-    centerButtonText(
-        continueButton,
-        scenicFountain
-            ? -.075f
-            : scenicHealer
-                ? .05f
-                : selectedButton.getUserObject() instanceof Float offset ? offset : 0f);
-    for (TextButton button : choiceButtons) {
-      button.setDisabled(true);
-    }
-    if (scenicDiceGame) {
-      TextButtonStyle selectedStyle = new TextButtonStyle(selectedButton.getStyle());
-      selectedStyle.disabled = selectedStyle.up;
-      selectedStyle.disabledFontColor = Color.WHITE;
-      selectedButton.setStyle(selectedStyle);
-    } else {
-      selectedButton.setStyle(selectedChoiceStyle);
-    }
-    selectedButton.setText("SELECTED  -  " + originalButtonText);
+    markSelectedChoice(selectedButton, originalButtonText);
 
-    resultLabel.setStyle(createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
-    resultLabel.setText(resolveOutcomeDisplayText(outcome));
-    LabelStyle outcomeStyle = new LabelStyle(resultLabel.getStyle());
-    outcomeStyle.background =
-        new EncounterResultShade(
-            resultLabel,
-            skin.getDrawable(STYLE_NAME_WHITE),
-            scenicHealer ? .30f : scenicFountain ? .38f : .60f);
-    resultLabel.setStyle(outcomeStyle);
-    resultLabel.setName("encounter-result-text");
-    resultLabel.setFontScale(.9f);
-    resultLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
+    setOutcomeNarration(outcome);
     if (scenicCardFusion && fusionIntroContent != null) {
       fusionIntroContent.setVisible(false);
     }

@@ -236,4 +236,51 @@ class ChanceAcquisitionResultsTest {
     assertTrue(next.resolveChoice("accept").isSuccess());
     assertNotEquals(result.resultId(), next.getAcquisitionResult(null).orElseThrow().resultId());
   }
+
+  @Test
+  void shouldRetryMetadataFailureWithoutSettlingRewardsAgain() {
+    CardService cards = mock(CardService.class);
+    CardConfig bandage = new CardConfig();
+    bandage.name = "Bandage";
+    when(cards.getCard("bandage"))
+        .thenThrow(new IllegalStateException("Metadata unavailable"))
+        .thenReturn(Optional.of(bandage));
+    ChanceEncounterSession session = session(new ChanceOutcome(0, 5, "bandage"));
+    assertTrue(session.resolveChoice("accept").isSuccess());
+
+    assertThrows(IllegalStateException.class, () -> session.getAcquisitionResult(cards));
+    AcquisitionResult result = session.getAcquisitionResult(cards).orElseThrow();
+    assertEquals("Bandage", entry(result, AcquisitionResult.Kind.CARD, "bandage").name());
+    assertSame(result, session.getAcquisitionResult(cards).orElseThrow());
+    verify(cards, times(2)).getCard("bandage");
+    assertEquals(List.of("bandage"), deck.getCardIds());
+    assertEquals(40, player.getCurrency());
+  }
+
+  @Test
+  void shouldKeepFallbackMetadataWhenServiceReturnsNullInsteadOfOptional() {
+    CardService cards = mock(CardService.class);
+    when(cards.getCard("bandage")).thenReturn(null);
+    ChanceEncounterSession session = session(new ChanceOutcome(0, 0, "bandage"));
+    assertTrue(session.resolveChoice("accept").isSuccess());
+    AcquisitionResult result = session.getAcquisitionResult(cards).orElseThrow();
+    AcquisitionResult.Entry card = entry(result, AcquisitionResult.Kind.CARD, "bandage");
+    assertEquals("bandage", card.name());
+    assertEquals("Added to your deck.", card.description());
+    assertSame(result, session.getAcquisitionResult(cards).orElseThrow());
+    verify(cards).getCard("bandage");
+    assertEquals(List.of("bandage"), deck.getCardIds());
+  }
+
+  @Test
+  void shouldNotCacheAnUnresolvedSessionAsAnEmptyResult() {
+    ChanceEncounterSession session = session(new ChanceOutcome(0, 5));
+    assertTrue(session.getAcquisitionResult(null).isEmpty());
+    assertTrue(session.resolveChoice("accept").isSuccess());
+    assertEquals(
+        5,
+        entry(session.getAcquisitionResult(null).orElseThrow(), AcquisitionResult.Kind.GOLD, "gold")
+            .delta());
+    assertEquals(40, player.getCurrency());
+  }
 }

@@ -50,8 +50,10 @@ public final class ChanceAcquisitionResults {
     counts(resolution.getOutcome().getCardRewardIds())
         .forEach(
             (id, count) -> {
-              Optional<CardConfig> card = cards == null ? Optional.empty() : cards.getCard(id);
-              if (card == null) card = Optional.empty();
+              Optional<CardConfig> card =
+                  Optional.ofNullable(cards)
+                      .map(service -> service.getCard(id))
+                      .orElseGet(Optional::empty);
               entries.add(
                   new AcquisitionResult.Entry(
                       AcquisitionResult.Kind.CARD,
