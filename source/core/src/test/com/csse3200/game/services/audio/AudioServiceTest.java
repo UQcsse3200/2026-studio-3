@@ -291,6 +291,7 @@ class AudioServiceTest {
   /** The old song fades out while the new one fades in, instead of cutting straight over. */
   @Test
   void changingSongsCrossfades() {
+    UserSettings.set(volumes(1f, 1f), false);
     AudioService.onScreenChanged(ScreenType.MAP);
     finishFades();
     Music mapTrack = tracks.get(lastStarted());

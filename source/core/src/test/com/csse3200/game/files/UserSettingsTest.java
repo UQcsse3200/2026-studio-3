@@ -33,7 +33,7 @@ class UserSettingsTest {
     Settings settings = new Settings();
 
     assertEquals(1f, settings.masterVolume);
-    assertEquals(1f, settings.musicVolume);
+    assertEquals(0.6f, settings.musicVolume);
     assertEquals(1f, settings.soundEffectsVolume);
     assertFalse(settings.muted);
   }
@@ -79,7 +79,7 @@ class UserSettingsTest {
           ServiceLocator.registerAudioSettingsApplier(applier);
           return null;
         });
-    verify(applier).applyVolumes(1f, 1f);
+    verify(applier).applyVolumes(0.6f, 1f);
     clearInvocations(applier);
     Settings settings = new Settings();
     settings.masterVolume = 0.5f;
@@ -129,7 +129,7 @@ class UserSettingsTest {
           Settings loaded = UserSettings.get();
 
           assertEquals(1f, loaded.masterVolume);
-          assertEquals(1f, loaded.musicVolume);
+          assertEquals(0.6f, loaded.musicVolume);
           assertEquals(1f, loaded.soundEffectsVolume);
           assertFalse(loaded.muted);
           assertEquals(75, loaded.fps);

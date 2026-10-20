@@ -117,7 +117,7 @@ class SettingsPanelTest {
     click(panel.getResetButton());
 
     assertEquals(1f, panel.getMasterVolumeSlider().getValue());
-    assertEquals(1f, panel.getMusicVolumeSlider().getValue());
+    assertEquals(0.6f, panel.getMusicVolumeSlider().getValue(), 0.001f);
     assertEquals(1f, panel.getSoundEffectsVolumeSlider().getValue());
     assertFalse(panel.getMuteCheck().isChecked());
     assertEquals("60", panel.getFpsText().getText());
@@ -170,7 +170,7 @@ class SettingsPanelTest {
     Settings saved = written.get();
     assertEquals(60, saved.fps);
     assertEquals(1f, saved.masterVolume);
-    assertEquals(1f, saved.musicVolume);
+    assertEquals(0.6f, saved.musicVolume, 0.001f);
     assertEquals(1f, saved.soundEffectsVolume);
     assertFalse(saved.muted);
     assertFalse(saved.fullscreen);
