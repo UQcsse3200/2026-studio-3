@@ -729,7 +729,9 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
     List<ClickableRecord> deckEditorClickables =
         ClickableFactory.loadRecordsFromJson(deckEditorUiJson);
     ClickableFactory deckPoolFactory = new ClickableFactory(deckEditorClickables);
-    savePanel.hide();
+    if (savePanel != null) {
+      savePanel.hide();
+    }
 
     List<DisplayingRecord> deckEditorDisplayRecords =
         DisplayingFactory.loadRecordsFromJson(deckEditorUiJson);
