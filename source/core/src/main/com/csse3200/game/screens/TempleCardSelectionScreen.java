@@ -163,7 +163,7 @@ public class TempleCardSelectionScreen extends ScreenAdapter {
     stage.addActor(sceneRoot);
 
     if (!cards.isEmpty()) {
-      showCard(cards.get(0));
+      showCard(cards.getFirst());
     }
   }
 

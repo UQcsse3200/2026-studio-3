@@ -67,10 +67,11 @@ class EncounterGameAreaTest {
   @Test
   void shouldRejectUnknownForcedEventId() {
     List<ChanceEncounter> encounters = ChanceEncounterFactory.createInitialEncounters();
+    Random random = new Random();
 
     assertThrows(
         IllegalArgumentException.class,
-        () -> EncounterGameArea.selectChanceEncounter(encounters, new Random(), "healing-spring"));
+        () -> EncounterGameArea.selectChanceEncounter(encounters, random, "healing-spring"));
   }
 
   @Test
