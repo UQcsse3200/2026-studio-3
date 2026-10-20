@@ -8022,11 +8022,11 @@ loadScripts(document, 'script');</script>
 <dl class="index">
 <dt><a href="com/csse3200/game/utils/StringDecorator.html#object" class="member-name-link">object</a> - Variable in class com.csse3200.game.utils.<a href="com/csse3200/game/utils/StringDecorator.html" title="class in com.csse3200.game.utils">StringDecorator</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/csse3200/game/tutorial/BattleTutorialController.html#observeInitialHealth(int,int)" class="member-name-link">observeInitialHealth(int, int)</a> - Method in class com.csse3200.game.tutorial.<a href="com/csse3200/game/tutorial/BattleTutorialController.html" title="class in com.csse3200.game.tutorial">BattleTutorialController</a></dt>
+<dt><a href="com/csse3200/game/tutorial/BattleTutorialController.html#observeInitialHealth(int)" class="member-name-link">observeInitialHealth(int)</a> - Method in class com.csse3200.game.tutorial.<a href="com/csse3200/game/tutorial/BattleTutorialController.html" title="class in com.csse3200.game.tutorial">BattleTutorialController</a></dt>
 <dd>
 <div class="block">Initial snapshots are supplied only by the isolated tutorial owner.</div>
 </dd>
-<dt><a href="com/csse3200/game/tutorial/BattleTutorialController.html#observeResolution(int,int,boolean,com.csse3200.game.components.combat.BattlePhase)" class="member-name-link">observeResolution(int, int, boolean, BattlePhase)</a> - Method in class com.csse3200.game.tutorial.<a href="com/csse3200/game/tutorial/BattleTutorialController.html" title="class in com.csse3200.game.tutorial">BattleTutorialController</a></dt>
+<dt><a href="com/csse3200/game/tutorial/BattleTutorialController.html#observeResolution(int,boolean,com.csse3200.game.components.combat.BattlePhase)" class="member-name-link">observeResolution(int, boolean, BattlePhase)</a> - Method in class com.csse3200.game.tutorial.<a href="com/csse3200/game/tutorial/BattleTutorialController.html" title="class in com.csse3200.game.tutorial">BattleTutorialController</a></dt>
 <dd>
 <div class="block">Polls real resolution and visual completion; never applies damage or advances a turn.</div>
 </dd>
@@ -8896,12 +8896,6 @@ loadScripts(document, 'script');</script>
 <div class="block">Rebuilds every widget with the given trigger name: drops the old ones and builds fresh ones
  from <code>records</code>, leaving every other widget this factory owns untouched.</div>
 </dd>
-<dt><a href="com/csse3200/game/cards/effects/CardEffectResultStore.html#record(com.csse3200.game.cards.effects.CardEffectResolution)" class="member-name-link">record(CardEffectResolution)</a> - Method in interface com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResultStore.html" title="interface in com.csse3200.game.cards.effects">CardEffectResultStore</a></dt>
-<dd>
-<div class="block">Records the immutable result produced for one played card.</div>
-</dd>
-<dt><a href="com/csse3200/game/cards/effects/TurnEffectStore.html#record(com.csse3200.game.cards.effects.CardEffectResolution)" class="member-name-link">record(CardEffectResolution)</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/TurnEffectStore.html" title="class in com.csse3200.game.cards.effects">TurnEffectStore</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/Memory/EnemyMemoryComponent.html#recordCardPlayed(com.csse3200.game.cards.CardType,boolean)" class="member-name-link">recordCardPlayed(CardType, boolean)</a> - Method in class com.csse3200.game.components.enemy.Memory.<a href="com/csse3200/game/components/enemy/Memory/EnemyMemoryComponent.html" title="class in com.csse3200.game.components.enemy.Memory">EnemyMemoryComponent</a></dt>
 <dd>
 <div class="block">Records one card successfully played by the player.</div>
@@ -8918,6 +8912,12 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Records that the player has encountered an enemy.</div>
 </dd>
+<dt><a href="com/csse3200/game/cards/effects/CardEffectResultStore.html#recordResult(com.csse3200.game.cards.effects.CardEffectResolution)" class="member-name-link">recordResult(CardEffectResolution)</a> - Method in interface com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/CardEffectResultStore.html" title="interface in com.csse3200.game.cards.effects">CardEffectResultStore</a></dt>
+<dd>
+<div class="block">Records the immutable result produced for one played card.</div>
+</dd>
+<dt><a href="com/csse3200/game/cards/effects/TurnEffectStore.html#recordResult(com.csse3200.game.cards.effects.CardEffectResolution)" class="member-name-link">recordResult(CardEffectResolution)</a> - Method in class com.csse3200.game.cards.effects.<a href="com/csse3200/game/cards/effects/TurnEffectStore.html" title="class in com.csse3200.game.cards.effects">TurnEffectStore</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/CardDiscoveryService.html#recordSeen(java.lang.String)" class="member-name-link">recordSeen(String)</a> - Method in class com.csse3200.game.cards.<a href="com/csse3200/game/cards/CardDiscoveryService.html" title="class in com.csse3200.game.cards">CardDiscoveryService</a></dt>
 <dd>
 <div class="block">Records that the player has seen a card.</div>
