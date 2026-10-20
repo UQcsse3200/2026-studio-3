@@ -45,6 +45,7 @@ import com.csse3200.game.screens.SettingsScreen;
 import com.csse3200.game.screens.TempleCardSelectionScreen;
 import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.services.audio.AudioService;
+import com.csse3200.game.ui.BackOnEscape;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -180,6 +181,7 @@ public class GdxGame extends Game {
     prepareScreenTransition(screenType);
     setScreen(newScreen(screenType));
     AudioService.onScreenShown(screenType);
+    BackOnEscape.attach(screenType);
   }
 
   /**
