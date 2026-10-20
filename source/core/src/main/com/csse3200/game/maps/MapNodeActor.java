@@ -50,7 +50,7 @@ public class MapNodeActor extends Group {
    */
   public MapNodeActor(MapNode node, int size) {
     this.node = node;
-    this.size = size;
+    this.size = (float) size;
 
     nodeIcon =
         new Image(ServiceLocator.getResourceService().getAsset(getNodeIcon(), Texture.class));

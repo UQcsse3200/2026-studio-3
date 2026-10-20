@@ -47,11 +47,11 @@ public class EncounterConfigs {
    */
   public List<EncounterConfig> matching(RoomType type, int progression) {
     List<EncounterConfig> result = new ArrayList<>();
-    for (EncounterConfig config : index().values()) {
-      if (config.matches(type, progression)) {
-        result.add(config);
-      }
-    }
+
+    index().values().stream()
+        .filter(config -> config.matches(type, progression))
+        .forEach(result::add);
+
     return result;
   }
 
