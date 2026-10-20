@@ -199,7 +199,9 @@ implements <a href="EncounterCallback.html" title="interface in com.csse3200.gam
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRelativeNodePos(com.csse3200.game.maps.MapNode,com.csse3200.game.maps.MapNode)" class="member-name-link">getRelativeNodePos</a><wbr>(<a href="MapNode.html" title="class in com.csse3200.game.maps">MapNode</a>&nbsp;node1,
  <a href="MapNode.html" title="class in com.csse3200.game.maps">MapNode</a>&nbsp;node2)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns a signed integer of the difference in X positions of nodes.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#moveToNode(java.lang.Integer)" class="member-name-link">moveToNode</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -347,6 +349,15 @@ implements <a href="EncounterCallback.html" title="interface in com.csse3200.gam
 <h3>getRelativeNodePos</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getRelativeNodePos</span><wbr><span class="parameters">(<a href="MapNode.html" title="class in com.csse3200.game.maps">MapNode</a>&nbsp;node1,
  <a href="MapNode.html" title="class in com.csse3200.game.maps">MapNode</a>&nbsp;node2)</span></div>
+<div class="block">Returns a signed integer of the difference in X positions of nodes. Only really relevant for
+ nodes on neighbouring or same layer.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>node1</code> - first node</dd>
+<dd><code>node2</code> - second node</dd>
+<dt>Returns:</dt>
+<dd>difference in x positions</dd>
+</dl>
 </section>
 </li>
 <li>

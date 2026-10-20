@@ -94,10 +94,7 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">CardActions</span>
 <span class="extends-implements">extends <a href="../Component.html" title="class in com.csse3200.game.components">Component</a></span></div>
-<div class="block">Watches the player's energy and ends their turn automatically once it hits zero, and re-shows the
- hand ("up") when a fresh player turn starts with energy still available. Lives alongside <a href="BattleActions.html" title="class in com.csse3200.game.components.battle"><code>BattleActions</code></a> on the battle UI entity rather than extending it, since it only needs the
- phase-change signal and the player's own energy events, not any of BattleActions's UI-wiring
- responsibilities (End Turn button, battle log, enemy/player effects, etc).</div>
+<div class="block">Keeps the hand visible until the turn ends and restores it after enemy reveals finish.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -118,8 +115,7 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.components.combat.BattleController,com.csse3200.game.entities.Entity)" class="member-name-link">CardActions</a><wbr>(<a href="../combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a>&nbsp;controller,
- <a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player)</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">CardActions</a>()</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
@@ -161,10 +157,9 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(com.csse3200.game.components.combat.BattleController,com.csse3200.game.entities.Entity)">
+<section class="detail" id="&lt;init&gt;()">
 <h3>CardActions</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">CardActions</span><wbr><span class="parameters">(<a href="../combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a>&nbsp;controller,
- <a href="../../entities/Entity.html" title="class in com.csse3200.game.entities">Entity</a>&nbsp;player)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">CardActions</span>()</div>
 </section>
 </li>
 </ul>

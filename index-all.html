@@ -1327,10 +1327,9 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/components/battle/CardActions.html" class="type-name-link" title="class in com.csse3200.game.components.battle">CardActions</a> - Class in <a href="com/csse3200/game/components/battle/package-summary.html">com.csse3200.game.components.battle</a></dt>
 <dd>
-<div class="block">Watches the player's energy and ends their turn automatically once it hits zero, and re-shows the
- hand ("up") when a fresh player turn starts with energy still available.</div>
+<div class="block">Keeps the hand visible until the turn ends and restores it after enemy reveals finish.</div>
 </dd>
-<dt><a href="com/csse3200/game/components/battle/CardActions.html#%3Cinit%3E(com.csse3200.game.components.combat.BattleController,com.csse3200.game.entities.Entity)" class="member-name-link">CardActions(BattleController, Entity)</a> - Constructor for class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/CardActions.html" title="class in com.csse3200.game.components.battle">CardActions</a></dt>
+<dt><a href="com/csse3200/game/components/battle/CardActions.html#%3Cinit%3E()" class="member-name-link">CardActions()</a> - Constructor for class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/CardActions.html" title="class in com.csse3200.game.components.battle">CardActions</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/clickable/CardAimController.html" class="type-name-link" title="class in com.csse3200.game.components.spritedisplay.clickable">CardAimController</a> - Class in <a href="com/csse3200/game/components/spritedisplay/clickable/package-summary.html">com.csse3200.game.components.spritedisplay.clickable</a></dt>
 <dd>
@@ -1391,11 +1390,15 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/CardDisplay.html" class="type-name-link" title="class in com.csse3200.game.components.spritedisplay.displaying">CardDisplay</a> - Class in <a href="com/csse3200/game/components/spritedisplay/displaying/package-summary.html">com.csse3200.game.components.spritedisplay.displaying</a></dt>
 <dd>
-<div class="deprecation-block"><span class="deprecated-label">Deprecated.</span></div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated.</span>
+<div class="deprecation-comment">Legacy demo card display superseded by the battle card UI.</div>
+</div>
 </dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/CardDisplay.html#%3Cinit%3E(com.csse3200.game.components.spritedisplay.displaying.DisplayingRecord)" class="member-name-link">CardDisplay(DisplayingRecord)</a> - Constructor for class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/CardDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">CardDisplay</a></dt>
 <dd>
-<div class="deprecation-block"><span class="deprecated-label">Deprecated.</span></div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated.</span>
+<div class="deprecation-comment">Legacy demo card display constructor superseded by the battle card UI.</div>
+</div>
 </dd>
 <dt><a href="com/csse3200/game/cards/debug/CardEffectDebugComponent.html" class="type-name-link" title="class in com.csse3200.game.cards.debug">CardEffectDebugComponent</a> - Class in <a href="com/csse3200/game/cards/debug/package-summary.html">com.csse3200.game.cards.debug</a></dt>
 <dd>
@@ -2576,8 +2579,6 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyStatsComponent.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsComponent.html" title="class in com.csse3200.game.components.enemy">EnemyStatsComponent</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyStatsDisplay</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/Memory/PlayerTrackerComponent.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.enemy.Memory.<a href="com/csse3200/game/components/enemy/Memory/PlayerTrackerComponent.html" title="class in com.csse3200.game.components.enemy.Memory">PlayerTrackerComponent</a></dt>
 <dd>
 <div class="block">Finds the EnemyMemoryComponent attached to the same player entity.</div>
@@ -2615,10 +2616,6 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/player/PlayerAnimationController.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerAnimationController.html" title="class in com.csse3200.game.components.player">PlayerAnimationController</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/player/PlayerEnergyDisplay.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerEnergyDisplay.html" title="class in com.csse3200.game.components.player">PlayerEnergyDisplay</a></dt>
-<dd>
-<div class="block">Creates reusable ui styles and adds actors to the stage.</div>
-</dd>
-<dt><a href="com/csse3200/game/components/player/PlayerStatsDisplay.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsDisplay</a></dt>
 <dd>
 <div class="block">Creates reusable ui styles and adds actors to the stage.</div>
 </dd>
@@ -2665,6 +2662,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/RewardDisplay.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/RewardDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">RewardDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/reactive/EnemyDropTargetComponent.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.spritedisplay.reactive.<a href="com/csse3200/game/components/spritedisplay/reactive/EnemyDropTargetComponent.html" title="class in com.csse3200.game.components.spritedisplay.reactive">EnemyDropTargetComponent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/StatsDisplay.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatsDisplay.html" title="class in com.csse3200.game.components">StatsDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/status/StatusIconDisplay.html#create()" class="member-name-link">create()</a> - Method in class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusIconDisplay.html" title="class in com.csse3200.game.components.status">StatusIconDisplay</a></dt>
 <dd>&nbsp;</dd>
@@ -3449,8 +3448,6 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyIntentDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyIntentDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyIntentDisplay</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyStatsDisplay</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/gamearea/GameAreaDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.gamearea.<a href="com/csse3200/game/components/gamearea/GameAreaDisplay.html" title="class in com.csse3200.game.components.gamearea">GameAreaDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/gamearea/PerformanceDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.gamearea.<a href="com/csse3200/game/components/gamearea/PerformanceDisplay.html" title="class in com.csse3200.game.components.gamearea">PerformanceDisplay</a></dt>
@@ -3472,8 +3469,6 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/pausemenu/PauseMenuDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.pausemenu.<a href="com/csse3200/game/components/pausemenu/PauseMenuDisplay.html" title="class in com.csse3200.game.components.pausemenu">PauseMenuDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/player/PlayerEnergyDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerEnergyDisplay.html" title="class in com.csse3200.game.components.player">PlayerEnergyDisplay</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="com/csse3200/game/components/player/PlayerStatsDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/player/PlayerStatsTopDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsTopDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsTopDisplay</a></dt>
 <dd>&nbsp;</dd>
@@ -3502,6 +3497,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/RewardDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/RewardDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">RewardDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/reactive/EnemyDropTargetComponent.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.spritedisplay.reactive.<a href="com/csse3200/game/components/spritedisplay/reactive/EnemyDropTargetComponent.html" title="class in com.csse3200.game.components.spritedisplay.reactive">EnemyDropTargetComponent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/StatsDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatsDisplay.html" title="class in com.csse3200.game.components">StatsDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/status/StatusIconDisplay.html#dispose()" class="member-name-link">dispose()</a> - Method in class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusIconDisplay.html" title="class in com.csse3200.game.components.status">StatusIconDisplay</a></dt>
 <dd>&nbsp;</dd>
@@ -3639,8 +3636,6 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyIntentDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyIntentDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyIntentDisplay</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyStatsDisplay</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/gamearea/CombatBackgroundComponent.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.gamearea.<a href="com/csse3200/game/components/gamearea/CombatBackgroundComponent.html" title="class in com.csse3200.game.components.gamearea">CombatBackgroundComponent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/gamearea/GameAreaDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.gamearea.<a href="com/csse3200/game/components/gamearea/GameAreaDisplay.html" title="class in com.csse3200.game.components.gamearea">GameAreaDisplay</a></dt>
@@ -3664,8 +3659,6 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/pausemenu/PauseMenuDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.pausemenu.<a href="com/csse3200/game/components/pausemenu/PauseMenuDisplay.html" title="class in com.csse3200.game.components.pausemenu">PauseMenuDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/player/PlayerEnergyDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerEnergyDisplay.html" title="class in com.csse3200.game.components.player">PlayerEnergyDisplay</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="com/csse3200/game/components/player/PlayerStatsDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/player/PlayerStatsTopDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsTopDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsTopDisplay</a></dt>
 <dd>&nbsp;</dd>
@@ -3698,6 +3691,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/PopupTextDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/PopupTextDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">PopupTextDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/displaying/RewardDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.spritedisplay.displaying.<a href="com/csse3200/game/components/spritedisplay/displaying/RewardDisplay.html" title="class in com.csse3200.game.components.spritedisplay.displaying">RewardDisplay</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/StatsDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatsDisplay.html" title="class in com.csse3200.game.components">StatsDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/status/StatusIconDisplay.html#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch)" class="member-name-link">draw(SpriteBatch)</a> - Method in class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusIconDisplay.html" title="class in com.csse3200.game.components.status">StatusIconDisplay</a></dt>
 <dd>&nbsp;</dd>
@@ -4263,12 +4258,6 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/components/enemy/EnemyStatsComponent.html#%3Cinit%3E()" class="member-name-link">EnemyStatsComponent()</a> - Constructor for class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsComponent.html" title="class in com.csse3200.game.components.enemy">EnemyStatsComponent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyStatsComponent.html#%3Cinit%3E(java.lang.String)" class="member-name-link">EnemyStatsComponent(String)</a> - Constructor for class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsComponent.html" title="class in com.csse3200.game.components.enemy">EnemyStatsComponent</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html" class="type-name-link" title="class in com.csse3200.game.components.enemy">EnemyStatsDisplay</a> - Class in <a href="com/csse3200/game/components/enemy/package-summary.html">com.csse3200.game.components.enemy</a></dt>
-<dd>
-<div class="block">A UI component for displaying enemy stats</div>
-</dd>
-<dt><a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html#%3Cinit%3E()" class="member-name-link">EnemyStatsDisplay()</a> - Constructor for class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyStatsDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/battle/EnemyStatusEffectVisualComponent.html" class="type-name-link" title="class in com.csse3200.game.components.battle">EnemyStatusEffectVisualComponent</a> - Class in <a href="com/csse3200/game/components/battle/package-summary.html">com.csse3200.game.components.battle</a></dt>
 <dd>
@@ -5037,6 +5026,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the entity's current armour value.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/StatsDisplay.html#getArmourLabel()" class="member-name-link">getArmourLabel()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatsDisplay.html" title="class in com.csse3200.game.components">StatsDisplay</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ui/ItemIconView.html#getArtwork()" class="member-name-link">getArtwork()</a> - Method in class com.csse3200.game.ui.<a href="com/csse3200/game/ui/ItemIconView.html" title="class in com.csse3200.game.ui">ItemIconView</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/services/ResourceService.html#getAsset(java.lang.String,java.lang.Class)" class="member-name-link">getAsset(String, Class&lt;T&gt;)</a> - Method in class com.csse3200.game.services.<a href="com/csse3200/game/services/ResourceService.html" title="class in com.csse3200.game.services">ResourceService</a></dt>
@@ -5086,6 +5077,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the entity's current block value.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/StatsDisplay.html#getBlockLabel()" class="member-name-link">getBlockLabel()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatsDisplay.html" title="class in com.csse3200.game.components">StatsDisplay</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/physics/components/PhysicsComponent.html#getBody()" class="member-name-link">getBody()</a> - Method in class com.csse3200.game.physics.components.<a href="com/csse3200/game/physics/components/PhysicsComponent.html" title="class in com.csse3200.game.physics.components">PhysicsComponent</a></dt>
 <dd>
 <div class="block">Get the physics body.</div>
@@ -5508,7 +5501,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the player's current health.</div>
 </dd>
-<dt><a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html#getHealthActor()" class="member-name-link">getHealthActor()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyStatsDisplay</a></dt>
+<dt><a href="com/csse3200/game/components/StatsDisplay.html#getHealthActor()" class="member-name-link">getHealthActor()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatsDisplay.html" title="class in com.csse3200.game.components">StatsDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/encounters/integration/ChanceResolution.html#getHealthAfter()" class="member-name-link">getHealthAfter()</a> - Method in class com.csse3200.game.encounters.integration.<a href="com/csse3200/game/encounters/integration/ChanceResolution.html" title="class in com.csse3200.game.encounters.integration">ChanceResolution</a></dt>
 <dd>
@@ -5522,7 +5515,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Gets the signed health change.</div>
 </dd>
-<dt><a href="com/csse3200/game/components/player/PlayerStatsDisplay.html#getHealthLabel()" class="member-name-link">getHealthLabel()</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsDisplay</a></dt>
+<dt><a href="com/csse3200/game/components/StatsDisplay.html#getHealthLabel()" class="member-name-link">getHealthLabel()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatsDisplay.html" title="class in com.csse3200.game.components">StatsDisplay</a></dt>
 <dd>
 <div class="block">Read-only live health display for tutorial anchoring and resolution observation.</div>
 </dd>
@@ -5871,7 +5864,9 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/csse3200/game/services/GameTime.html#getRawDeltaTime()" class="member-name-link">getRawDeltaTime()</a> - Method in class com.csse3200.game.services.<a href="com/csse3200/game/services/GameTime.html" title="class in com.csse3200.game.services">GameTime</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/maps/MapGraph.html#getRelativeNodePos(com.csse3200.game.maps.MapNode,com.csse3200.game.maps.MapNode)" class="member-name-link">getRelativeNodePos(MapNode, MapNode)</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/MapGraph.html" title="class in com.csse3200.game.maps">MapGraph</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Returns a signed integer of the difference in X positions of nodes.</div>
+</dd>
 <dt><a href="com/csse3200/game/rendering/AnimationRenderComponent.html#getRenderedFrame()" class="member-name-link">getRenderedFrame()</a> - Method in class com.csse3200.game.rendering.<a href="com/csse3200/game/rendering/AnimationRenderComponent.html" title="class in com.csse3200.game.rendering">AnimationRenderComponent</a></dt>
 <dd>
 <div class="block">Last drawn frame, or the initial frame before the first draw; does not advance playback.</div>
@@ -5974,10 +5969,6 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/maps/MapNode.html#getState()" class="member-name-link">getState()</a> - Method in class com.csse3200.game.maps.<a href="com/csse3200/game/maps/MapNode.html" title="class in com.csse3200.game.maps">MapNode</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html#getStatsActor()" class="member-name-link">getStatsActor()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyStatsDisplay</a></dt>
-<dd>
-<div class="block">Live health/armour group; combat remains owned by the existing systems.</div>
-</dd>
 <dt><a href="com/csse3200/game/ai/tasks/DefaultTask.html#getStatus()" class="member-name-link">getStatus()</a> - Method in class com.csse3200.game.ai.tasks.<a href="com/csse3200/game/ai/tasks/DefaultTask.html" title="class in com.csse3200.game.ai.tasks">DefaultTask</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ai/tasks/Task.html#getStatus()" class="member-name-link">getStatus()</a> - Method in interface com.csse3200.game.ai.tasks.<a href="com/csse3200/game/ai/tasks/Task.html" title="interface in com.csse3200.game.ai.tasks">Task</a></dt>
@@ -6024,7 +6015,7 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html#getTurnNumber()" class="member-name-link">getTurnNumber()</a> - Method in class com.csse3200.game.components.enemy.EnemyAI.<a href="com/csse3200/game/components/enemy/EnemyAI/EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIContext</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html#getTutorialArmourActor()" class="member-name-link">getTutorialArmourActor()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyStatsDisplay</a></dt>
+<dt><a href="com/csse3200/game/components/StatsDisplay.html#getTutorialArmourActor()" class="member-name-link">getTutorialArmourActor()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatsDisplay.html" title="class in com.csse3200.game.components">StatsDisplay</a></dt>
 <dd>
 <div class="block">Show zero armour during teaching without changing combat state.</div>
 </dd>
@@ -6410,7 +6401,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/components/battle/BattleActions.html#hasPendingEnemyReveals()" class="member-name-link">hasPendingEnemyReveals()</a> - Method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/BattleActions.html" title="class in com.csse3200.game.components.battle">BattleActions</a></dt>
 <dd>
-<div class="block">Read-only presentation timing probe for tutorial guidance.</div>
+<div class="block">Whether enemy reveals or the following pause are still holding back player controls.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/clickable/ClickableRecord.html#hasSize()" class="member-name-link">hasSize()</a> - Method in record class com.csse3200.game.components.spritedisplay.clickable.<a href="com/csse3200/game/components/spritedisplay/clickable/ClickableRecord.html" title="class in com.csse3200.game.components.spritedisplay.clickable">ClickableRecord</a></dt>
 <dd>&nbsp;</dd>
@@ -6916,6 +6907,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/services/GamePauseService.html#isPaused()" class="member-name-link">isPaused()</a> - Method in class com.csse3200.game.services.<a href="com/csse3200/game/services/GamePauseService.html" title="class in com.csse3200.game.services">GamePauseService</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/combat/BattleController.html#isPlayerEnergyDepleted()" class="member-name-link">isPlayerEnergyDepleted()</a> - Method in class com.csse3200.game.components.combat.<a href="com/csse3200/game/components/combat/BattleController.html" title="class in com.csse3200.game.components.combat">BattleController</a></dt>
+<dd>
+<div class="block">Whether the player has an energy pool and has used all of it.</div>
+</dd>
 <dt><a href="com/csse3200/game/tutorial/BattleTutorialGuidanceView.html#isPlayerHealthDisplayed(int)" class="member-name-link">isPlayerHealthDisplayed(int)</a> - Method in class com.csse3200.game.tutorial.<a href="com/csse3200/game/tutorial/BattleTutorialGuidanceView.html" title="class in com.csse3200.game.tutorial">BattleTutorialGuidanceView</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/battle/BattleActions.html#isPlayerTurn()" class="member-name-link">isPlayerTurn()</a> - Method in class com.csse3200.game.components.battle.<a href="com/csse3200/game/components/battle/BattleActions.html" title="class in com.csse3200.game.components.battle">BattleActions</a></dt>
@@ -8601,12 +8596,6 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Read-only Team 5 boundary for player values that can affect card resolution.</div>
 </dd>
-<dt><a href="com/csse3200/game/components/player/PlayerStatsDisplay.html" class="type-name-link" title="class in com.csse3200.game.components.player">PlayerStatsDisplay</a> - Class in <a href="com/csse3200/game/components/player/package-summary.html">com.csse3200.game.components.player</a></dt>
-<dd>
-<div class="block">A ui component for displaying player stats, e.g.</div>
-</dd>
-<dt><a href="com/csse3200/game/components/player/PlayerStatsDisplay.html#%3Cinit%3E()" class="member-name-link">PlayerStatsDisplay()</a> - Constructor for class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsDisplay</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/player/PlayerStatsTopDisplay.html" class="type-name-link" title="class in com.csse3200.game.components.player">PlayerStatsTopDisplay</a> - Class in <a href="com/csse3200/game/components/player/package-summary.html">com.csse3200.game.components.player</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/player/PlayerStatsTopDisplay.html#%3Cinit%3E(com.csse3200.game.maps.RunState)" class="member-name-link">PlayerStatsTopDisplay(RunState)</a> - Constructor for class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsTopDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsTopDisplay</a></dt>
@@ -10725,6 +10714,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/csse3200/game/save/MapNodeSaveData.html#state" class="member-name-link">state</a> - Variable in class com.csse3200.game.save.<a href="com/csse3200/game/save/MapNodeSaveData.html" title="class in com.csse3200.game.save">MapNodeSaveData</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/StatsDisplay.html" class="type-name-link" title="class in com.csse3200.game.components">StatsDisplay</a> - Class in <a href="com/csse3200/game/components/package-summary.html">com.csse3200.game.components</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/StatsDisplay.html#%3Cinit%3E()" class="member-name-link">StatsDisplay()</a> - Constructor for class com.csse3200.game.components.<a href="com/csse3200/game/components/StatsDisplay.html" title="class in com.csse3200.game.components">StatsDisplay</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/ai/tasks/DefaultTask.html#status" class="member-name-link">status</a> - Variable in class com.csse3200.game.ai.tasks.<a href="com/csse3200/game/ai/tasks/DefaultTask.html" title="class in com.csse3200.game.ai.tasks">DefaultTask</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/cards/CardType.html#STATUS" class="member-name-link">STATUS</a> - Enum constant in enum class com.csse3200.game.cards.<a href="com/csse3200/game/cards/CardType.html" title="enum class in com.csse3200.game.cards">CardType</a></dt>
@@ -11697,8 +11690,6 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/enemy/EnemyAnimationController.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyAnimationController.html" title="class in com.csse3200.game.components.enemy">EnemyAnimationController</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyStatsDisplay</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/library/CardLibraryDisplay.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.library.<a href="com/csse3200/game/components/library/CardLibraryDisplay.html" title="class in com.csse3200.game.components.library">CardLibraryDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/library/ItemLibraryDisplay.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.library.<a href="com/csse3200/game/components/library/ItemLibraryDisplay.html" title="class in com.csse3200.game.components.library">ItemLibraryDisplay</a></dt>
@@ -11711,9 +11702,9 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/player/PlayerAnimationController.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerAnimationController.html" title="class in com.csse3200.game.components.player">PlayerAnimationController</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/csse3200/game/components/player/PlayerStatsDisplay.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsDisplay</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/reactive/EnemyDropTargetComponent.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.spritedisplay.reactive.<a href="com/csse3200/game/components/spritedisplay/reactive/EnemyDropTargetComponent.html" title="class in com.csse3200.game.components.spritedisplay.reactive">EnemyDropTargetComponent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/csse3200/game/components/StatsDisplay.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatsDisplay.html" title="class in com.csse3200.game.components">StatsDisplay</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/status/StatusIconDisplay.html#update()" class="member-name-link">update()</a> - Method in class com.csse3200.game.components.status.<a href="com/csse3200/game/components/status/StatusIconDisplay.html" title="class in com.csse3200.game.components.status">StatusIconDisplay</a></dt>
 <dd>&nbsp;</dd>
@@ -11745,17 +11736,17 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/csse3200/game/components/spritedisplay/clickable/CardAimController.html#update(com.badlogic.gdx.math.Vector2)" class="member-name-link">update(Vector2)</a> - Method in class com.csse3200.game.components.spritedisplay.clickable.<a href="com/csse3200/game/components/spritedisplay/clickable/CardAimController.html" title="class in com.csse3200.game.components.spritedisplay.clickable">CardAimController</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/csse3200/game/components/player/PlayerStatsDisplay.html#updateArmourUI(int)" class="member-name-link">updateArmourUI(int)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsDisplay</a></dt>
+<dt><a href="com/csse3200/game/components/StatsDisplay.html#updateArmourUI(int)" class="member-name-link">updateArmourUI(int)</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatsDisplay.html" title="class in com.csse3200.game.components">StatsDisplay</a></dt>
 <dd>
-<div class="block">Updates the player's armour on the UI</div>
+<div class="block">Updates the entity's armour on the UI</div>
 </dd>
-<dt><a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html#updateArmourVisibility(int)" class="member-name-link">updateArmourVisibility(int)</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyStatsDisplay</a></dt>
+<dt><a href="com/csse3200/game/components/StatsDisplay.html#updateArmourVisibility(int)" class="member-name-link">updateArmourVisibility(int)</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatsDisplay.html" title="class in com.csse3200.game.components">StatsDisplay</a></dt>
 <dd>
 <div class="block">Makes the armour cell visible if entity has armour</div>
 </dd>
-<dt><a href="com/csse3200/game/components/player/PlayerStatsDisplay.html#updateArmourVisibility(int)" class="member-name-link">updateArmourVisibility(int)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsDisplay</a></dt>
+<dt><a href="com/csse3200/game/components/StatsDisplay.html#updateBlockVisibility(int)" class="member-name-link">updateBlockVisibility(int)</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatsDisplay.html" title="class in com.csse3200.game.components">StatsDisplay</a></dt>
 <dd>
-<div class="block">Makes the armour cell visible if entity has armour</div>
+<div class="block">Makes the block cell visible if entity has block</div>
 </dd>
 <dt><a href="com/csse3200/game/cards/play/CardPlayResult.html#updatedDiscardPile()" class="member-name-link">updatedDiscardPile()</a> - Method in record class com.csse3200.game.cards.play.<a href="com/csse3200/game/cards/play/CardPlayResult.html" title="class in com.csse3200.game.cards.play">CardPlayResult</a></dt>
 <dd>&nbsp;</dd>
@@ -11775,19 +11766,11 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the value of the <code>updatedHand</code> record component.</div>
 </dd>
-<dt><a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html#updateEnemyArmourUI(int)" class="member-name-link">updateEnemyArmourUI(int)</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyStatsDisplay</a></dt>
+<dt><a href="com/csse3200/game/components/StatsDisplay.html#updateEnemyBlockUI(int)" class="member-name-link">updateEnemyBlockUI(int)</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatsDisplay.html" title="class in com.csse3200.game.components">StatsDisplay</a></dt>
 <dd>
-<div class="block">Updates the enemy's armour on the UI</div>
+<div class="block">Updates the entity's block on the UI</div>
 </dd>
-<dt><a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html#updateEnemyHealthUI(int,int)" class="member-name-link">updateEnemyHealthUI(int, int)</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyStatsDisplay</a></dt>
-<dd>
-<div class="block">Updates the enemy's health on the ui.</div>
-</dd>
-<dt><a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html#updateHealthBarColour()" class="member-name-link">updateHealthBarColour()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyStatsDisplay</a></dt>
-<dd>
-<div class="block">Updates the colour of the health bar.</div>
-</dd>
-<dt><a href="com/csse3200/game/components/player/PlayerStatsDisplay.html#updateHealthBarColour()" class="member-name-link">updateHealthBarColour()</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsDisplay</a></dt>
+<dt><a href="com/csse3200/game/components/StatsDisplay.html#updateHealthBarColour()" class="member-name-link">updateHealthBarColour()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatsDisplay.html" title="class in com.csse3200.game.components">StatsDisplay</a></dt>
 <dd>
 <div class="block">Updates the colour of the health bar.</div>
 </dd>
@@ -11795,29 +11778,25 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Updates the player's energy on the ui.</div>
 </dd>
-<dt><a href="com/csse3200/game/components/player/PlayerStatsDisplay.html#updatePlayerHealthUI(int,int)" class="member-name-link">updatePlayerHealthUI(int, int)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsDisplay</a></dt>
-<dd>
-<div class="block">Updates the player's health on the ui.</div>
-</dd>
 <dt><a href="com/csse3200/game/components/player/PlayerStatsTopDisplay.html#updatePlayerHealthUI(int,int)" class="member-name-link">updatePlayerHealthUI(int, int)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsTopDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsTopDisplay</a></dt>
 <dd>
 <div class="block">Updates the player's health on the ui.</div>
 </dd>
+<dt><a href="com/csse3200/game/components/StatsDisplay.html#updatePlayerHealthUI(int,int)" class="member-name-link">updatePlayerHealthUI(int, int)</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatsDisplay.html" title="class in com.csse3200.game.components">StatsDisplay</a></dt>
+<dd>
+<div class="block">Updates the entity's health on the ui.</div>
+</dd>
 <dt><a href="com/csse3200/game/components/player/PlayerStatsTopDisplay.html#updatePlayerLevelUI(int)" class="member-name-link">updatePlayerLevelUI(int)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsTopDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsTopDisplay</a></dt>
 <dd>
-<div class="block">s* Updates the player's level on the ui.</div>
+<div class="block">Updates the player's level on the ui.</div>
 </dd>
 <dt><a href="com/csse3200/game/components/player/PlayerStatsTopDisplay.html#updatePlayerMoneyUI(int)" class="member-name-link">updatePlayerMoneyUI(int)</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsTopDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsTopDisplay</a></dt>
 <dd>
 <div class="block">Updates the player's money on the ui.</div>
 </dd>
-<dt><a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html#updatePosition()" class="member-name-link">updatePosition()</a> - Method in class com.csse3200.game.components.enemy.<a href="com/csse3200/game/components/enemy/EnemyStatsDisplay.html" title="class in com.csse3200.game.components.enemy">EnemyStatsDisplay</a></dt>
+<dt><a href="com/csse3200/game/components/StatsDisplay.html#updatePosition()" class="member-name-link">updatePosition()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/StatsDisplay.html" title="class in com.csse3200.game.components">StatsDisplay</a></dt>
 <dd>
-<div class="block">Updates the position of the enemy's stats, so they are displayed directly below the enemy</div>
-</dd>
-<dt><a href="com/csse3200/game/components/player/PlayerStatsDisplay.html#updatePosition()" class="member-name-link">updatePosition()</a> - Method in class com.csse3200.game.components.player.<a href="com/csse3200/game/components/player/PlayerStatsDisplay.html" title="class in com.csse3200.game.components.player">PlayerStatsDisplay</a></dt>
-<dd>
-<div class="block">Updates the position of the player's stats, so they are displayed directly below the player</div>
+<div class="block">Updates the position of the entity's stats, so they are displayed directly below the entity</div>
 </dd>
 <dt><a href="com/csse3200/game/components/CombatStatsComponent.html#updateStatusEffects()" class="member-name-link">updateStatusEffects()</a> - Method in class com.csse3200.game.components.<a href="com/csse3200/game/components/CombatStatsComponent.html" title="class in com.csse3200.game.components">CombatStatsComponent</a></dt>
 <dd>
