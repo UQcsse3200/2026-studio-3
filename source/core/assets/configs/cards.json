@@ -319,12 +319,12 @@
         "texturePath": "images/cards/rift_lance.png",
         "upgrade": {
           "name": "Rift Lance+",
-          "description": "A shaft of starlight loosens corruption's hold. Deal 6 damage. Apply 2 Vulnerable for 2 turns.",
+          "description": "A shaft of starlight loosens corruption's hold. Deal 6 damage. Apply Vulnerable for 3 turns.",
           "cost": 1,
           "rarity": "UNCOMMON",
           "effects": [
             { "type": "DAMAGE", "value": 6, "duration": 0 },
-            { "type": "VULNERABLE", "value": 2, "duration": 2 }
+            { "type": "VULNERABLE", "value": 1, "duration": 3 }
           ]
         }
       },

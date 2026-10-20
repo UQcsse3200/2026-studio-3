@@ -68,12 +68,12 @@ class CardResolverTest {
     assertApprovedUpgrade(
         "rift_lance",
         "Rift Lance+",
-        "A shaft of starlight loosens corruption's hold. Deal 6 damage. Apply 2 Vulnerable for 2 turns.",
+        "A shaft of starlight loosens corruption's hold. Deal 6 damage. Apply Vulnerable for 3 turns.",
         1,
         Rarity.UNCOMMON,
         List.of(
             new EffectConfig(EffectType.DAMAGE, 6, 0),
-            new EffectConfig(EffectType.VULNERABLE, 2, 2)));
+            new EffectConfig(EffectType.VULNERABLE, 1, 3)));
   }
 
   @Test

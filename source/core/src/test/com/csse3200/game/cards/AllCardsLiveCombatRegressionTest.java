@@ -359,7 +359,7 @@ class AllCardsLiveCombatRegressionTest {
     assertEnemyHealth(battle, 494, 500);
     assertEquals(initialEnergy - 1, battle.energy.getCurrentEnergy());
     // Combat normalizes Vulnerable to one non-stacking intensity, keeping its duration.
-    assertStatus(battle.firstEnemyStats, EffectType.VULNERABLE, 1, 2);
+    assertStatus(battle.firstEnemyStats, EffectType.VULNERABLE, 1, 3);
     assertNull(battle.secondEnemyStats.getStatusEffect(EffectType.VULNERABLE.name()));
 
     assertTrue(
