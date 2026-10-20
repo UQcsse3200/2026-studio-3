@@ -1,9 +1,8 @@
 package com.csse3200.game.components.enemy.enemyai;
 
-import java.util.Objects;
-
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.enemy.IntentType;
+import java.util.Objects;
 
 /**
  * Tutorial enemy AI that follows a fixed attack, defend and buff cycle.

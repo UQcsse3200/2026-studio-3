@@ -1,4 +1,4 @@
-package com.csse3200.game.components.enemy.EnemyAI;
+package com.csse3200.game.components.enemy.enemyai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.enemy.IntentEffectType;
 import com.csse3200.game.components.enemy.IntentType;
-import com.csse3200.game.components.enemy.Memory.PlayerMemory;
+import com.csse3200.game.components.enemy.memory.PlayerMemory;
 import com.csse3200.game.events.listeners.EventListener1;
 import java.util.ArrayList;
 import java.util.List;

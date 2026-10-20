@@ -107,7 +107,6 @@ public class EncounterScreen extends ScreenAdapter implements LoadedSaveTransiti
             activeNode.getNodeId(),
             roomType,
             this::onEncounterComplete,
-            runState.getOrCreatePlayerState(),
             playerDeck,
             runState,
             forcedEventId);

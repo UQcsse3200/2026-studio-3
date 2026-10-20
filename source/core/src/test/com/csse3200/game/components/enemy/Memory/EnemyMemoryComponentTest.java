@@ -1,4 +1,4 @@
-package com.csse3200.game.components.enemy.Memory;
+package com.csse3200.game.components.enemy.memory;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -93,7 +93,6 @@ public class DemoEventScreen extends ScreenAdapter {
             DEMO_NODE_ID,
             RoomType.EVENT,
             (nodeId, success) -> returnToMainMenu(),
-            demoPlayerState,
             demoPlayerDeck,
             demoRunState,
             previewEncounterId);

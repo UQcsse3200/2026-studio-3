@@ -5,10 +5,10 @@ import com.csse3200.game.cards.effects.CardEffectResolutionContext;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.Component;
 import com.csse3200.game.components.StatusEffect;
-import com.csse3200.game.components.StatusEffectCalculator;
 import com.csse3200.game.components.enemy.enemyai.EnemyAI;
 import com.csse3200.game.components.enemy.enemyai.EnemyAIContext;
 import com.csse3200.game.components.enemy.enemyai.EnemyAIFactory;
+import com.csse3200.game.components.enemy.enemyai.TutorialEnemyAI;
 import com.csse3200.game.components.enemy.memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.memory.PlayerMemory;
 import com.csse3200.game.entities.Entity;
@@ -122,7 +122,7 @@ public class EnemyBehaviourComponent extends Component {
     CombatStatsComponent stats = entity.getComponent(CombatStatsComponent.class);
     currentIntent = stats == null ? EnemyIntent.unknown() : ai.decide(buildContext(stats));
 
-    if (ai instanceof com.csse3200.game.components.enemy.EnemyAI.EnrageLowHealthAI enrageAi
+    if (ai instanceof com.csse3200.game.components.enemy.enemyai.EnrageLowHealthAI enrageAi
         && enrageFormActive != enrageAi.isEnraged()) {
       enrageFormActive = enrageAi.isEnraged();
       entity.getEvents().trigger("enemyFormChanged", enrageFormActive ? "enraged" : "normal");

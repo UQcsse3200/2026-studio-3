@@ -56,9 +56,9 @@ import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.combat.BattleController;
 import com.csse3200.game.components.enemy.BossDialogueComponent;
 import com.csse3200.game.components.enemy.BossDialogueConfig;
+import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.enemyai.BossAI;
 import com.csse3200.game.components.enemy.enemyai.TutorialEnemyAI;
-import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.memory.PlayerTrackerComponent;
 import com.csse3200.game.components.pausemenu.PauseMenuFactory;
@@ -253,13 +253,7 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
     forestGameArea.create();
 
     if (tutorialBattle) {
-      for (Entity enemy : forestGameArea.getEnemies()) {
-        EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
-
-        if (behaviour != null) {
-          behaviour.setAI(new TutorialEnemyAI());
-        }
-      }
+      setupTutorialEnemies(forestGameArea);
     }
 
     playerState = runState.getOrCreatePlayerState();
@@ -341,13 +335,7 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
             player.getComponent(EnemyMemoryComponent.class),
             "Player entity must contain EnemyMemoryComponent");
 
-    for (Entity enemy : forestGameArea.getEnemies()) {
-      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
-
-      if (behaviour != null) {
-        behaviour.setEnemyMemory(enemyMemory);
-      }
-    }
+    setupEnemyMemory(forestGameArea, enemyMemory);
 
     controller.addBattleEndListener(
         won -> {
@@ -407,6 +395,26 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
       }
     }
     return PlayerDeck.fromInstances(library, openingOrder);
+  }
+
+  private void setupTutorialEnemies(ForestGameArea forestGameArea) {
+    for (Entity enemy : forestGameArea.getEnemies()) {
+      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+
+      if (behaviour != null) {
+        behaviour.setAI(new TutorialEnemyAI());
+      }
+    }
+  }
+
+  private void setupEnemyMemory(ForestGameArea forestGameArea, EnemyMemoryComponent enemyMemory) {
+    for (Entity enemy : forestGameArea.getEnemies()) {
+      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+
+      if (behaviour != null) {
+        behaviour.setEnemyMemory(enemyMemory);
+      }
+    }
   }
 
   private void setupTutorialGuidance(
@@ -538,7 +546,8 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
 
   private Rectangle battleEntityBounds(Entity enemy) {
     Stage stage = ServiceLocator.getRenderService().getStage();
-    Vector2 pos = enemy.getPosition(), scale = enemy.getScale();
+    Vector2 pos = enemy.getPosition();
+    Vector2 scale = enemy.getScale();
     Vector3 a = ServiceLocator.getCamera().project(new Vector3(pos.x, pos.y, 0));
     Vector3 b =
         ServiceLocator.getCamera().project(new Vector3(pos.x + scale.x, pos.y + scale.y, 0));
