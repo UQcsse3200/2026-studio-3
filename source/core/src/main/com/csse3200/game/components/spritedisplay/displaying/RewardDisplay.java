@@ -1,5 +1,12 @@
 package com.csse3200.game.components.spritedisplay.displaying;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -10,8 +17,12 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
@@ -37,11 +48,6 @@ import com.csse3200.game.services.audio.AudioService;
 import com.csse3200.game.services.audio.SoundId;
 import com.csse3200.game.ui.ItemArtwork;
 import com.csse3200.game.ui.ItemIconView;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RewardDisplay extends Displaying {
   public static final String REWARD_CLAIMED_EVENT = "rewardClaimed";
@@ -723,12 +729,9 @@ public class RewardDisplay extends Displaying {
         type, new TextureRegion(art), source, amount, () -> feedbackFinished = true);
 
     switch (type) {
-      case CARD:
-        AudioService.playSound(SoundId.CARD_SHUFFLE, 0.5f);
-      case GOLD:
-        AudioService.playSound(SoundId.ITEM_PURCHASE, 0.5f);
-      case ITEM:
-        AudioService.playSound(SoundId.ITEM_PICKUP, 0.5f);
+      case CARD -> AudioService.playSound(SoundId.CARD_SHUFFLE, 0.5f);
+      case GOLD -> AudioService.playSound(SoundId.ITEM_PURCHASE, 0.5f);
+      case ITEM -> AudioService.playSound(SoundId.ITEM_PICKUP, 0.5f);
     }
   }
 
