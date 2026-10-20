@@ -129,8 +129,6 @@ public class BattleScreen extends ScreenAdapter {
           "images/ui/inventory-panel.png",
           BATTLE_TITLE_TEXTURE,
           "images/effects/shield.png",
-          "images/effects/fortify.png",
-          "images/effects/heal.png",
           "images/enemies/intents/buff.png");
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 

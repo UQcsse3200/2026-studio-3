@@ -42,12 +42,15 @@ public final class OffensiveEffectVisuals {
   /** Builds the burst entity for Damage (even scatter) or Sunder (falling debris). */
   public static EffectBurstComponent createBurstComponent(
       EffectType type, EffectVisualStyle style, float baseSize, float startDelay) {
-    boolean hasGravity = type == EffectType.SUNDER;
+    EffectBurstComponent.ParticleMotion motion =
+        type == EffectType.SUNDER
+            ? EffectBurstComponent.ParticleMotion.FALL
+            : EffectBurstComponent.ParticleMotion.SCATTER;
     EffectBurstComponent.ParticleShape shape =
         type == EffectType.SUNDER
             ? EffectBurstComponent.ParticleShape.SHARD
             : EffectBurstComponent.ParticleShape.DOT;
-    return new EffectBurstComponent(style, baseSize, startDelay, hasGravity, shape);
+    return new EffectBurstComponent(style, baseSize, startDelay, motion, shape);
   }
 
   /** Builds the Pierce slash entity. Tune direction/reach here — not in the coordinator. */
