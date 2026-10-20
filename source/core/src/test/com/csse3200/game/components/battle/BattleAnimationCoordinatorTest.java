@@ -140,7 +140,7 @@ class BattleAnimationCoordinatorTest {
         mockConstruction(
             Texture.class,
             (texture, context) -> {
-              Pixmap pixels = (Pixmap) context.arguments().get(0);
+              Pixmap pixels = (Pixmap) context.arguments().getFirst();
               assertEquals(64, pixels.getWidth());
               assertEquals(64, pixels.getHeight());
               Color centre = new Color(pixels.getPixel(32, 32));
@@ -149,9 +149,9 @@ class BattleAnimationCoordinatorTest {
               assertEquals(0f, edge.a);
               assertEquals(1f, centre.r);
             })) {
-      playerEffects.handle(List.of(effect(EffectType.HEAL), effect(EffectType.BLOCK)));
+      playerEffects.handle(List.of(effect(EffectType.POISON), effect(EffectType.BLOCK)));
       assertEquals(1, textures.constructed().size());
-      Texture glow = textures.constructed().get(0);
+      Texture glow = textures.constructed().getFirst();
       verify(glow).setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
       ArgumentCaptor<Entity> visuals = ArgumentCaptor.forClass(Entity.class);
       verify(entities, times(2)).register(visuals.capture());
@@ -192,19 +192,19 @@ class BattleAnimationCoordinatorTest {
   void shouldUseGeneratedGlowWhenRegisteredIconIsNotLoaded() {
     EffectVisualRegistry registry = new EffectVisualRegistry();
     registry.register(
-        EffectType.HEAL, new EffectVisualStyle("missing-icon.png", Color.GREEN, 0.4f, 1f, 1f, 0f));
+        EffectType.BLOCK, new EffectVisualStyle("missing-icon.png", Color.GREEN, 0.4f, 1f, 1f, 0f));
     createCoordinator(registry);
     when(resources.getAsset(anyString(), eq(Texture.class)))
         .thenThrow(new GdxRuntimeException("Asset not loaded"));
 
     try (MockedConstruction<Texture> textures = mockConstruction(Texture.class)) {
-      playerEffects.handle(List.of(effect(EffectType.HEAL)));
+      playerEffects.handle(List.of(effect(EffectType.BLOCK)));
 
       assertEquals(1, textures.constructed().size());
       SpriteBatch batch = mock(SpriteBatch.class);
       spawnedVisual().getComponent(EffectVisualComponent.class).render(batch);
       verify(batch)
-          .draw(eq(textures.constructed().get(0)), anyFloat(), anyFloat(), anyFloat(), anyFloat());
+          .draw(eq(textures.constructed().getFirst()), anyFloat(), anyFloat(), anyFloat(), anyFloat());
       verify(batch).setColor(0f, 1f, 0f, 1f);
     }
   }
@@ -219,7 +219,7 @@ class BattleAnimationCoordinatorTest {
     when(resources.getAsset(anyString(), eq(Texture.class))).thenReturn(icon);
 
     try (MockedConstruction<Texture> textures = mockConstruction(Texture.class)) {
-      playerEffects.handle(List.of(effect(EffectType.HEAL)));
+      playerEffects.handle(List.of(effect(EffectType.BLOCK)));
 
       assertTrue(textures.constructed().isEmpty());
       SpriteBatch batch = mock(SpriteBatch.class);
