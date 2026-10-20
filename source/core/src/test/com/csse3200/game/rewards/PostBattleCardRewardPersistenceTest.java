@@ -37,15 +37,23 @@ class PostBattleCardRewardPersistenceTest {
   @TempDir Path saveDirectory;
 
   @Test
-  void acquiredCardShouldSurviveSaveRestoreAndEnterTheNextBattleDeck() {
+  void
+      acquiredBaseCopyShouldSurviveSaveRestoreAlongsideAnUpgradedSiblingAndEnterTheNextBattleDeck() {
     CardService cards = new CardLibrary(CardConfigLoader.loadCards());
     RunState run = activeRun();
     PlayerDeck persistentDeck = run.getOrCreatePlayerDeck(cards);
+    CardInstance upgradedSibling =
+        persistentDeck.upgradeCard(
+            persistentDeck.getCards().stream()
+                .filter(card -> card.cardId().equals("strike"))
+                .findFirst()
+                .orElseThrow()
+                .instanceId());
     RewardService rewards =
         new RewardService(new RewardGenerator(new Random(1)), cards, new Random(2));
-    RewardOption option = RewardOption.cards(new CardRewardSelection(List.of("bandage")));
+    RewardOption option = RewardOption.cards(new CardRewardSelection(List.of("strike")));
 
-    rewards.claimRunReward(run, option, "bandage");
+    rewards.claimRunReward(run, option, "strike");
     CardInstance acquired = persistentDeck.getCards().get(persistentDeck.size() - 1);
 
     CardDiscoveryService discovery = CardDiscoveryService.loadDefault();
@@ -73,8 +81,10 @@ class PostBattleCardRewardPersistenceTest {
 
     assertTrue(restored.success());
     CardInstance restoredCard = restoredDeck.getCard(acquired.instanceId()).orElseThrow();
-    assertEquals("bandage", restoredCard.cardId());
+    assertEquals("strike", restoredCard.cardId());
     assertEquals(CardInstance.BASE_LEVEL, restoredCard.upgradeLevel());
+    assertEquals(upgradedSibling, restoredDeck.getCard(upgradedSibling.instanceId()).orElseThrow());
+    assertEquals(persistentDeck.getCards(), restoredDeck.getCards());
 
     BattleDeck nextBattleDeck = new BattleDeck(restoredDeck);
     assertTrue(

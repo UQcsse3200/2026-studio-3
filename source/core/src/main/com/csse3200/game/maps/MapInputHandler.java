@@ -38,18 +38,10 @@ public class MapInputHandler {
             } else {
 
               switch (actor.getNode().getRoomType()) {
-                case SHOP -> {
-                  AudioService.playSound(SoundId.ENTER_SHOP, 0.5f);
-                }
-                case COMBAT -> {
-                  AudioService.playSound(SoundId.ENTER_COMBAT, 0.4f);
-                }
-                case EVENT -> {
-                  AudioService.playSound(SoundId.ENTER_ENCOUNTER, 0.4f);
-                }
-                case ELITE, FINAL -> {
-                  AudioService.playSound(SoundId.ENTER_ELITE, 0.6f);
-                }
+                case SHOP -> AudioService.playSound(SoundId.ENTER_SHOP, 0.5f);
+                case COMBAT -> AudioService.playSound(SoundId.ENTER_COMBAT, 0.4f);
+                case EVENT -> AudioService.playSound(SoundId.ENTER_ENCOUNTER, 0.4f);
+                case ELITE, FINAL -> AudioService.playSound(SoundId.ENTER_ELITE, 0.6f);
                 default -> {
                   // Start or other room types without a dedicated entry sound.
                 }

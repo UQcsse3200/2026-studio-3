@@ -6,8 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.cards.configs.CardConfig;
 import com.csse3200.game.extensions.GameExtension;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /** Loads Guardian cards from the production configuration and checks their library contracts. */
@@ -44,13 +47,6 @@ class GuardianCardsIntegrationTest {
   }
 
   @Test
-  void shouldValidateLoadedWardingSweep() {
-    CardConfig card = library.getCard("warding_sweep").orElseThrow();
-
-    assertTrue(CardValidator.validate(card).isEmpty());
-  }
-
-  @Test
   void shouldLoadSentinelsRebukeWithExpectedFields() {
     CardConfig card = library.getCard("sentinels_rebuke").orElseThrow();
 
@@ -77,13 +73,6 @@ class GuardianCardsIntegrationTest {
   }
 
   @Test
-  void shouldValidateLoadedSentinelsRebuke() {
-    CardConfig card = library.getCard("sentinels_rebuke").orElseThrow();
-
-    assertTrue(CardValidator.validate(card).isEmpty());
-  }
-
-  @Test
   void shouldLoadWardensJudgementWithExpectedFields() {
     CardConfig card = library.getCard("wardens_judgement").orElseThrow();
 
@@ -103,13 +92,6 @@ class GuardianCardsIntegrationTest {
         () -> assertEquals(EffectType.DAMAGE, card.effects[0].type),
         () -> assertEquals(9, card.effects[0].value),
         () -> assertEquals(0, card.effects[0].duration));
-  }
-
-  @Test
-  void shouldValidateLoadedWardensJudgement() {
-    CardConfig card = library.getCard("wardens_judgement").orElseThrow();
-
-    assertTrue(CardValidator.validate(card).isEmpty());
   }
 
   @Test
@@ -138,10 +120,20 @@ class GuardianCardsIntegrationTest {
         () -> assertEquals(0, card.effects[1].duration));
   }
 
-  @Test
-  void shouldValidateLoadedUnsealTheBreach() {
-    CardConfig card = library.getCard("unseal_the_breach").orElseThrow();
+  @TestFactory
+  Stream<DynamicTest> shouldValidateLoadedGuardianCards() {
+    return Stream.of("warding_sweep", "sentinels_rebuke", "wardens_judgement", "unseal_the_breach")
+        .map(GuardianCardsIntegrationTest::validationTest);
+  }
 
-    assertTrue(CardValidator.validate(card).isEmpty());
+  private static DynamicTest validationTest(String cardId) {
+    return DynamicTest.dynamicTest(
+        cardId,
+        () -> {
+          CardLibrary caseLibrary = new CardLibrary(CardConfigLoader.loadCards());
+          CardConfig card = caseLibrary.getCard(cardId).orElseThrow();
+
+          assertTrue(CardValidator.validate(card).isEmpty());
+        });
   }
 }

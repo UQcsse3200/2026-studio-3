@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.csse3200.game.components.save.SaveLoadMode;
 import com.csse3200.game.entities.Entity;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.rendering.RenderService;
@@ -220,6 +221,15 @@ class PauseMenuDisplayTest {
 
     assertFalse(noSave.hasSaveLoadButton());
     assertNull(noSave.getSaveLoadButton());
+  }
+
+  @Test
+  void loadOnlyModeUsesLoadGameLabel() {
+    PauseMenuDisplay loadOnly = new PauseMenuDisplay(SaveLoadMode.LOAD_ONLY);
+    new Entity().addComponent(loadOnly).create();
+
+    assertTrue(loadOnly.hasSaveLoadButton());
+    assertEquals("Load Game", loadOnly.getSaveLoadButton().getText().toString());
   }
 
   /** Fires a keyboard-navigation event on the display's entity. */

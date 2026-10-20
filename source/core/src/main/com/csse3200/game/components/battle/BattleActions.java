@@ -11,6 +11,9 @@ import com.csse3200.game.entities.Entity;
 import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
+import com.csse3200.game.rewards.CardRewardProfile;
+import com.csse3200.game.services.GameTime;
+import com.csse3200.game.services.ServiceLocator;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +43,10 @@ public class BattleActions extends Component {
   /** How long the enemy "thinks" before its action, log line and effects are revealed. */
   private static final float ENEMY_TURN_DELAY = 1.2f;
 
+  private static final float POST_ENEMY_TURN_DELAY = 1.5f;
+  private float postEnemyTurnTime;
+  private Runnable pendingPlayerTurnReveal;
+
   public static final String ENEMY_TURN_EVENT = "enemyTurn";
 
   private final BattleController controller;
@@ -47,22 +54,22 @@ public class BattleActions extends Component {
   private final boolean tutorialBattle;
   private final List<Entity> enemies;
 
-  // While true, reveals (log, effects, phase changes, the hand coming back up) are queued instead
-  // of fired immediately, so the enemy's whole turn can be held back and replayed together after
-  // ENEMY_TURN_DELAY. This is the one point the "enemy thinks" pause lives — see dispatch() and
-  // flushDeferredReveals().
+  // Queue enemy log, effects and phases for the existing "enemy thinks" pause. After these
+  // reveals play together, pendingPlayerTurnReveal holds back the hand and player-turn message
+  // for the separate pause after the enemy turn.
   private boolean deferringEnemyTurn = false;
   private int pendingRevealBatches;
 
-  /** Read-only presentation timing probe for tutorial guidance. */
+  /** Whether enemy reveals or the following pause are still holding back player controls. */
   public boolean hasPendingEnemyReveals() {
-    return deferringEnemyTurn || pendingRevealBatches > 0;
+    return deferringEnemyTurn || pendingRevealBatches > 0 || pendingPlayerTurnReveal != null;
   }
 
   private final List<Runnable> queuedReveals = new ArrayList<>();
   private final List<EnemyReleaseComponent> releaseAnimations = new ArrayList<>();
   private boolean awaitingRelease;
   private boolean released;
+  private CardRewardProfile rewardProfile = CardRewardProfile.NORMAL;
 
   public BattleActions(BattleController controller, GdxGame game) {
     this(controller, game, List.of(), false);
@@ -90,14 +97,14 @@ public class BattleActions extends Component {
    * @return true only during the player turn, excluding card resolution and all other phases
    */
   public boolean isPlayerTurn() {
-    return controller.isPlayerTurn();
+    return !released && !hasPendingEnemyReveals() && controller.isPlayerTurn();
   }
 
   @Override
   public void create() {
     entity.getEvents().addListener("battle", this::onStart);
 
-    entity.getEvents().addListener(END_TURN_SELECTED_EVENT, controller::endPlayerTurn);
+    entity.getEvents().addListener(END_TURN_SELECTED_EVENT, this::triggerEndTurn);
     controller.addPhaseChangeListener(this::onPhaseChange);
     entity.getEvents().addListener("endTurn", this::triggerEndTurn);
 
@@ -116,6 +123,12 @@ public class BattleActions extends Component {
   }
 
   private void onPhaseChange(BattlePhase previousPhase, BattlePhase nextPhase) {
+    if (nextPhase == BattlePhase.SETUP
+        || nextPhase == BattlePhase.VICTORY
+        || nextPhase == BattlePhase.DEFEAT) {
+      pendingPlayerTurnReveal = null;
+      postEnemyTurnTime = 0f;
+    }
     // Entering the enemy's turn fires immediately — no delay on ending your own turn — and starts
     // holding back every reveal that follows until the whole enemy turn is done.
     if (nextPhase == BattlePhase.ENEMY_TURN && previousPhase == BattlePhase.PLAYER_END) {
@@ -125,11 +138,13 @@ public class BattleActions extends Component {
       return;
     }
 
-    if (nextPhase == BattlePhase.PLAYER_TURN
-        && previousPhase == BattlePhase.PLAYER_START
-        && controller.getPlayerTurnNumber() > 1) {
-      dispatch(
-          () -> entity.getEvents().trigger("playerTurnStarted", controller.getPlayerTurnNumber()));
+    if (deferringEnemyTurn
+        && nextPhase == BattlePhase.PLAYER_TURN
+        && previousPhase == BattlePhase.PLAYER_START) {
+      int turnNumber = controller.getPlayerTurnNumber();
+      dispatch(() -> beginPlayerTurnDelay(turnNumber));
+      flushDeferredReveals();
+      return;
     }
 
     dispatch(() -> entity.getEvents().trigger(PHASE_CHANGED_EVENT, nextPhase));
@@ -166,7 +181,9 @@ public class BattleActions extends Component {
           @Override
           public void run() {
             try {
-              reveals.forEach(Runnable::run);
+              if (!released) {
+                reveals.forEach(Runnable::run);
+              }
             } finally {
               pendingRevealBatches--;
             }
@@ -206,6 +223,7 @@ public class BattleActions extends Component {
     // Report the result to the run so the map node is marked done (win) or the run stays put
     // (loss). The end screen reads this to decide whether to go back to the map or the menu.
     RunState runState = game.getRunState();
+    rewardProfile = win ? rewardProfileFor(runState) : CardRewardProfile.NORMAL;
     if (runState == null) {
       return;
     }
@@ -232,11 +250,15 @@ public class BattleActions extends Component {
   }
 
   private void triggerEndTurn() {
-    controller.endPlayerTurn();
+    if (!released && !hasPendingEnemyReveals()) {
+      controller.endPlayerTurn();
+    }
   }
 
   @Override
   public void update() {
+    updatePlayerTurnReturn();
+    updateAutoEndTurn();
     if (!awaitingRelease) {
       return;
     }
@@ -250,18 +272,54 @@ public class BattleActions extends Component {
     }
   }
 
-  private void openResultScreen(boolean won) {
-    GdxGame.ScreenType target = won ? GdxGame.ScreenType.VICTORY : GdxGame.ScreenType.DEFEAT;
+  /** Starts the pause after enemy effects have been shown, before returning the hand. */
+  private void beginPlayerTurnDelay(int turnNumber) {
+    if (released || !controller.isPlayerTurn()) {
+      return;
+    }
+    postEnemyTurnTime = 0f;
+    pendingPlayerTurnReveal =
+        () -> {
+          entity.getEvents().trigger("playerTurnStarted", turnNumber);
+          entity.getEvents().trigger(PHASE_CHANGED_EVENT, BattlePhase.PLAYER_TURN);
+        };
+  }
 
+  private void updatePlayerTurnReturn() {
+    if (released || pendingPlayerTurnReveal == null) {
+      return;
+    }
+    GameTime time = ServiceLocator.getTimeSource();
+    if (time == null) {
+      return;
+    }
+    postEnemyTurnTime += Math.max(0f, time.getDeltaTime());
+    if (postEnemyTurnTime >= POST_ENEMY_TURN_DELAY) {
+      Runnable reveal = pendingPlayerTurnReveal;
+      pendingPlayerTurnReveal = null;
+      postEnemyTurnTime = 0f;
+      reveal.run();
+    }
+  }
+
+  /** End an empty player turn on the next update, after its last card has resolved. */
+  private void updateAutoEndTurn() {
+    if (isPlayerTurn() && controller.isPlayerEnergyDepleted()) {
+      controller.endPlayerTurn();
+    }
+  }
+
+  private void openResultScreen(boolean won) {
+    CardRewardProfile profile = rewardProfile;
     if (Gdx.app != null) {
       Gdx.app.postRunnable(
           () -> {
             if (!released) {
-              game.setScreen(target);
+              game.showBattleResult(won, profile);
             }
           });
     } else if (!released) {
-      game.setScreen(target);
+      game.showBattleResult(won, profile);
     }
   }
 
@@ -290,9 +348,25 @@ public class BattleActions extends Component {
     return healthRatio >= 0.8f;
   }
 
+  private CardRewardProfile rewardProfileFor(RunState runState) {
+    if (tutorialBattle
+        || runState == null
+        || runState.getActiveNodeId() == null
+        || runState.getMapGraph() == null) {
+      return CardRewardProfile.NORMAL;
+    }
+    MapNode active = runState.getMapGraph().getNode(runState.getActiveNodeId());
+    return active != null
+            && (active.getRoomType() == RoomType.ELITE || active.getRoomType() == RoomType.FINAL)
+        ? CardRewardProfile.ELITE
+        : CardRewardProfile.NORMAL;
+  }
+
   @Override
   public void dispose() {
     released = true;
+    pendingPlayerTurnReveal = null;
+    postEnemyTurnTime = 0f;
     awaitingRelease = false;
     releaseAnimations.clear();
     super.dispose();

@@ -18,6 +18,7 @@ public class RewardService {
   private final CardRewardSelectionGenerator cardRewardGenerator;
   private final CardService cardService;
   private final CardAcquisitionPool acquisitionPool;
+  private final ItemAcquisitionService itemAcquisitionService;
 
   public RewardService() {
     this(new RewardGenerator(), createDefaultCardService(), new Random());
@@ -29,7 +30,63 @@ public class RewardService {
 
   /** Creates a reward service with deterministic injectable generation dependencies. */
   public RewardService(RewardGenerator generator, CardService cardService, Random cardRandom) {
-    this(generator, cardService, CardAcquisitionPoolLoader.loadDefault(cardService), cardRandom);
+    this(
+        generator,
+        cardService,
+        CardAcquisitionPoolLoader.loadDefault(cardService),
+        CardRewardPolicyLoader.loadDefault(),
+        CardRewardProfile.NORMAL,
+        cardRandom,
+        null);
+  }
+
+  /** Creates a reward service that grants items through the shared acquisition gateway. */
+  public RewardService(
+      RewardGenerator generator,
+      CardService cardService,
+      Random cardRandom,
+      ItemAcquisitionService itemAcquisitionService) {
+    this(
+        generator,
+        cardService,
+        CardAcquisitionPoolLoader.loadDefault(cardService),
+        CardRewardPolicyLoader.loadDefault(),
+        CardRewardProfile.NORMAL,
+        cardRandom,
+        itemAcquisitionService);
+  }
+
+  /** Production victory context; standalone/preview constructors default to normal. */
+  public RewardService(
+      RewardGenerator generator,
+      CardService cardService,
+      CardRewardProfile profile,
+      Random cardRandom) {
+    this(
+        generator,
+        cardService,
+        CardAcquisitionPoolLoader.loadDefault(cardService),
+        CardRewardPolicyLoader.loadDefault(),
+        profile,
+        cardRandom,
+        null);
+  }
+
+  /** Production victory context with source-aware item acquisition. */
+  public RewardService(
+      RewardGenerator generator,
+      CardService cardService,
+      CardRewardProfile profile,
+      Random cardRandom,
+      ItemAcquisitionService itemAcquisitionService) {
+    this(
+        generator,
+        cardService,
+        CardAcquisitionPoolLoader.loadDefault(cardService),
+        CardRewardPolicyLoader.loadDefault(),
+        profile,
+        cardRandom,
+        itemAcquisitionService);
   }
 
   /** Creates a reward service with an explicit shared acquisition policy. */
@@ -38,13 +95,69 @@ public class RewardService {
       CardService cardService,
       CardAcquisitionPool acquisitionPool,
       Random cardRandom) {
+    this(
+        generator,
+        cardService,
+        acquisitionPool,
+        CardRewardPolicyLoader.loadDefault(),
+        CardRewardProfile.NORMAL,
+        cardRandom,
+        null);
+  }
+
+  /** Creates a reward service with explicit card and item acquisition policies. */
+  public RewardService(
+      RewardGenerator generator,
+      CardService cardService,
+      CardAcquisitionPool acquisitionPool,
+      Random cardRandom,
+      ItemAcquisitionService itemAcquisitionService) {
+    this(
+        generator,
+        cardService,
+        acquisitionPool,
+        CardRewardPolicyLoader.loadDefault(),
+        CardRewardProfile.NORMAL,
+        cardRandom,
+        itemAcquisitionService);
+  }
+
+  /**
+   * Injects eligibility, validated rarity weights and immutable encounter context independently.
+   */
+  public RewardService(
+      RewardGenerator generator,
+      CardService cardService,
+      CardAcquisitionPool acquisitionPool,
+      CardRewardPolicy policy,
+      CardRewardProfile profile,
+      Random cardRandom) {
+    this(generator, cardService, acquisitionPool, policy, profile, cardRandom, null);
+  }
+
+  /**
+   * Injects eligibility, validated rarity weights, immutable encounter context and item discovery
+   * behaviour independently.
+   */
+  public RewardService(
+      RewardGenerator generator,
+      CardService cardService,
+      CardAcquisitionPool acquisitionPool,
+      CardRewardPolicy policy,
+      CardRewardProfile profile,
+      Random cardRandom,
+      ItemAcquisitionService itemAcquisitionService) {
     this.generator = Objects.requireNonNull(generator, "generator must not be null");
     this.cardService = Objects.requireNonNull(cardService, "cardService must not be null");
     this.acquisitionPool =
         Objects.requireNonNull(acquisitionPool, "acquisitionPool must not be null");
     this.cardRewardGenerator =
         new CardRewardSelectionGenerator(
-            acquisitionPool, Objects.requireNonNull(cardRandom, "cardRandom must not be null"));
+            acquisitionPool,
+            Objects.requireNonNull(policy, "policy must not be null"),
+            Objects.requireNonNull(profile, "profile must not be null"),
+            Objects.requireNonNull(cardRandom, "cardRandom must not be null"));
+    this.itemAcquisitionService = itemAcquisitionService;
   }
 
   /** Generates rewards for a player without a gold bonus. */
@@ -56,7 +169,7 @@ public class RewardService {
    * Generates mutually exclusive Gold, Item and (when eligible) Card options.
    *
    * @param goldBonusMultiplier current Lucky Coin multiplier
-   * @return Gold and Item options, followed by a Card option when the acquisition pool is non-empty
+   * @return Gold and Item options, followed by a Card option when a weighted candidate is available
    */
   public List<RewardOption> generateRewardOptions(float goldBonusMultiplier) {
     List<RewardOption> options = new ArrayList<>();
@@ -83,7 +196,16 @@ public class RewardService {
         playerState.claimGoldReward(
             selected.goldAmount, playerState.hasOwnedItem(ItemType.LUCKY_COIN));
       }
-      case ITEM -> runState.getOrCreatePlayerState().addOwnedItem(selected.itemId);
+      case ITEM -> {
+        if (itemAcquisitionService == null) {
+          runState.getOrCreatePlayerState().addOwnedItem(selected.itemId);
+        } else {
+          itemAcquisitionService.grant(
+              runState.getOrCreatePlayerState(),
+              selected.itemId,
+              ItemAcquisitionSource.NORMAL_REWARD);
+        }
+      }
       case CARD -> {
         if (!selected.cardSelection.contains(selectedCardId)) {
           throw new IllegalArgumentException("selected card is not part of this reward");

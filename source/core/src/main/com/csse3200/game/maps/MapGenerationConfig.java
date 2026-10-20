@@ -33,7 +33,7 @@ public final class MapGenerationConfig {
    */
   public MapGenerationConfig(
       int normalNodeCount, int combatWeight, int eventWeight, int shopWeight, int eliteWeight) {
-    this(normalNodeCount, combatWeight, eliteWeight, eventWeight, shopWeight, System.nanoTime());
+    this(normalNodeCount, combatWeight, eventWeight, shopWeight, eliteWeight, System.nanoTime());
   }
 
   /**

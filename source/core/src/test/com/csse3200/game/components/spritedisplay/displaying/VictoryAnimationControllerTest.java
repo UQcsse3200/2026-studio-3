@@ -125,11 +125,13 @@ class VictoryAnimationControllerTest {
             scrim,
             panel,
             title,
-            List.of(firstLetter, secondLetter),
-            subtitle,
-            sunPulse,
-            List.of(),
-            List.of());
+            new VictoryAnimationController.AnimationElements(
+                List.of(firstLetter, secondLetter),
+                subtitle,
+                sunPulse,
+                List.of(),
+                List.of(),
+                List.of()));
 
     controller.playEntrance();
     advance(0.26f, background, scrim, panel, firstLetter, secondLetter, subtitle, sunPulse);
@@ -157,11 +159,8 @@ class VictoryAnimationControllerTest {
             scrim,
             panel,
             title,
-            List.of(title),
-            actor(),
-            crest,
-            List.of(),
-            List.of(card));
+            new VictoryAnimationController.AnimationElements(
+                List.of(title), actor(), crest, List.of(), List.of(), List.of(card)));
 
     controller.playEntrance();
     float largestScale = crest.getScaleX();
@@ -193,12 +192,13 @@ class VictoryAnimationControllerTest {
             scrim,
             panel,
             title,
-            List.of(firstLetter, secondLetter),
-            actor(),
-            actor(),
-            List.of(leftWing, rightWing),
-            List.of(),
-            List.of(card));
+            new VictoryAnimationController.AnimationElements(
+                List.of(firstLetter, secondLetter),
+                actor(),
+                actor(),
+                List.of(leftWing, rightWing),
+                List.of(),
+                List.of(card)));
 
     controller.playEntrance();
     assertEquals(-42f, leftWing.getRotation(), 0.001f);

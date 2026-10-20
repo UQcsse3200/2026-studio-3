@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Array;
 import com.csse3200.game.bestiary.BestiaryService;
 import com.csse3200.game.bestiary.BestiaryTrackingComponent;
 import com.csse3200.game.components.CombatStatsComponent;
+import com.csse3200.game.components.StatsDisplay;
 import com.csse3200.game.components.battle.EnemyReleaseComponent;
 import com.csse3200.game.components.battle.FloatingDamageDisplay;
 import com.csse3200.game.components.enemy.*;
@@ -153,7 +154,7 @@ public class EnemyFactory {
             .addComponent(new EnemyBehaviourComponent(config.behaviour))
             .addComponent(animator)
             .addComponent(new EnemyAnimationController())
-            .addComponent(new EnemyStatsDisplay())
+            .addComponent(new StatsDisplay())
             // Status icons sit just under the health bar, which is anchored 0.6 units below.
             .addComponent(new StatusIconDisplay(-0.6f, false))
             .addComponent(new EnemyCombatEffectsComponent())

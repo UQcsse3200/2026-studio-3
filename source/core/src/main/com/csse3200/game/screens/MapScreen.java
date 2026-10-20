@@ -39,6 +39,7 @@ import com.csse3200.game.ui.terminal.TerminalDisplay;
 import com.csse3200.game.ui.terminal.commands.DiscoverAllCardsCommand;
 import com.csse3200.game.ui.terminal.commands.GotoCommand;
 import com.csse3200.game.ui.terminal.commands.ListNodesCommand;
+import com.csse3200.game.ui.terminal.commands.PlayNarrationCommand;
 import com.csse3200.game.ui.terminal.commands.UnlockNodeCommand;
 import java.util.Comparator;
 import org.slf4j.Logger;
@@ -136,6 +137,11 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         "discoverallcards",
         "mark every card as discovered",
         new DiscoverAllCardsCommand(game.getCardDiscoveryService()));
+    terminal.addCommand(
+        "playnarration",
+        "playnarration <opening|pre_boss|victory|defeat>",
+        "preview a narration sequence and return to the map",
+        new PlayNarrationCommand(game));
 
     Entity ui = new Entity();
     ui.addComponent(new InputDecorator(ServiceLocator.getRenderService().getStage(), 10))

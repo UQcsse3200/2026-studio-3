@@ -362,6 +362,12 @@ public class BattleController {
     return true;
   }
 
+  /** Whether the player has an energy pool and has used all of it. */
+  public boolean isPlayerEnergyDepleted() {
+    EnergyComponent energy = playerEnergy();
+    return energy != null && energy.getCurrentEnergy() == 0;
+  }
+
   /** Player decides to end their turn */
   public void endPlayerTurn() {
     if (canHandle(BattleEvent.PLAYER_END_REQUESTED)) {

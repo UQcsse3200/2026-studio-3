@@ -98,14 +98,12 @@ public class MapGraph implements EncounterCallback {
     return this.nodes;
   }
 
-  /*
-   * Returns a signed integer of the difference in X positions of nodes.
-   * Only really relevant for nodes on neighbouring or same layer.
+  /**
+   * Returns a signed integer of the difference in X positions of nodes. Only really relevant for
+   * nodes on neighbouring or same layer.
    *
-   * @param node1
-   *
-   * @param node2
-   *
+   * @param node1 first node
+   * @param node2 second node
    * @return difference in x positions
    */
   public int getRelativeNodePos(MapNode node1, MapNode node2) {
@@ -123,25 +121,15 @@ public class MapGraph implements EncounterCallback {
    * @return all map nodes in the given row
    */
   public List<MapNode> getNodesByHeight(int height) {
-
-    List<MapNode> result = new ArrayList<>();
-    for (MapNode node : nodes.values()) {
-      if (node.getHeight() == height) {
-        result.add(node);
-      }
-    }
-    return result;
+    return nodes.values().stream()
+        .filter(node -> node.getHeight() == height)
+        .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
   }
 
   public List<MapNode> getNodesByType(RoomType type) {
-
-    List<MapNode> result = new ArrayList<>();
-    for (MapNode node : nodes.values()) {
-      if (node.getRoomType() == type) {
-        result.add(node);
-      }
-    }
-    return result;
+    return nodes.values().stream()
+        .filter(node -> node.getRoomType() == type)
+        .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
   }
 
   /** Connects two nodes. */
@@ -200,15 +188,9 @@ public class MapGraph implements EncounterCallback {
    * @return nodes with the specified state
    */
   public List<MapNode> getNodesByState(NodeState state) {
-    List<MapNode> result = new ArrayList<>();
-
-    for (MapNode node : nodes.values()) {
-      if (node.getState() == state) {
-        result.add(node);
-      }
-    }
-
-    return result;
+    return nodes.values().stream()
+        .filter(node -> node.getState() == state)
+        .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
   }
 
   /**

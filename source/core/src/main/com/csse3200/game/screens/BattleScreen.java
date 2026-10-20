@@ -35,6 +35,7 @@ import com.csse3200.game.cards.runtime.ResolvedCard;
 import com.csse3200.game.components.CombatStatsComponent;
 import com.csse3200.game.components.battle.*;
 import com.csse3200.game.components.cards.CardEffectHandler;
+import com.csse3200.game.components.cards.CardInspectionController;
 import com.csse3200.game.components.cards.CardWidget;
 import com.csse3200.game.components.cards.CardWidgetAssets;
 import com.csse3200.game.components.combat.BattleController;
@@ -45,10 +46,7 @@ import com.csse3200.game.components.enemy.EnemyAI.TutorialEnemyAI;
 import com.csse3200.game.components.enemy.EnemyBehaviourComponent;
 import com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent;
 import com.csse3200.game.components.enemy.Memory.PlayerTrackerComponent;
-import com.csse3200.game.components.pausemenu.PauseMenuActions;
-import com.csse3200.game.components.pausemenu.PauseMenuDisplay;
 import com.csse3200.game.components.pausemenu.PauseMenuFactory;
-import com.csse3200.game.components.pausemenu.PauseMenuInput;
 import com.csse3200.game.components.player.EnergyComponent;
 import com.csse3200.game.components.save.SaveLoadPanel;
 import com.csse3200.game.components.spritedisplay.clickable.BattleMenuSkins;
@@ -107,12 +105,13 @@ import org.slf4j.LoggerFactory;
  * The battle screen: the forest arena plus the card-hand UI, driven by {@link BattleController}.
  * Entered from a combat/boss map node (or the debug shortcut).
  */
-public class BattleScreen extends ScreenAdapter {
+public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionAware {
   private final GdxGame game;
   private final RunState runState;
   private final boolean tutorialBattle;
   private BattleTutorialGuidanceView tutorialView;
   private BattleActions battleActions;
+  private boolean suppressPlayerCaptureOnDispose;
   private static final Logger logger = LoggerFactory.getLogger(BattleScreen.class);
   private static final String BATTLE_TITLE_TEXTURE = "images/ui/battle-title-wordmark.png";
   private final Renderer renderer;
@@ -164,6 +163,7 @@ public class BattleScreen extends ScreenAdapter {
   private final CardAimController playerCardAim;
   private final CardAimController allEnemiesCardAim;
   private ClickableFactory uiFactory;
+  private CardInspectionController cardInspection;
   private final PlayerRunState playerState;
   private final BossDialogueConfig bossDialogueConfig;
   private List<ClickableRecord> staticUiRecords;
@@ -233,13 +233,7 @@ public class BattleScreen extends ScreenAdapter {
     forestGameArea.create();
 
     if (tutorialBattle) {
-      for (Entity enemy : forestGameArea.getEnemies()) {
-        EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
-
-        if (behaviour != null) {
-          behaviour.setAI(new TutorialEnemyAI());
-        }
-      }
+      applyTutorialEnemyAI(forestGameArea);
     }
 
     playerState = runState.getOrCreatePlayerState();
@@ -321,21 +315,42 @@ public class BattleScreen extends ScreenAdapter {
             player.getComponent(EnemyMemoryComponent.class),
             "Player entity must contain EnemyMemoryComponent");
 
-    for (Entity enemy : forestGameArea.getEnemies()) {
-      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+    wireEnemyMemories(forestGameArea, enemyMemory);
+    registerVictoryHealthSync(forestGameArea);
+    createUI();
+    installBossDialogue(forestGameArea);
+    if (tutorialBattle) {
+      setupTutorialGuidance(forestGameArea, player, animationCoordinatorEntity);
+    }
+    controller.start();
+  }
 
+  private void applyTutorialEnemyAI(BattleGameArea battleArea) {
+    for (Entity enemy : battleArea.getEnemies()) {
+      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
+      if (behaviour != null) {
+        behaviour.setAI(new TutorialEnemyAI());
+      }
+    }
+  }
+
+  private void wireEnemyMemories(BattleGameArea battleArea, EnemyMemoryComponent enemyMemory) {
+    for (Entity enemy : battleArea.getEnemies()) {
+      EnemyBehaviourComponent behaviour = enemy.getComponent(EnemyBehaviourComponent.class);
       if (behaviour != null) {
         behaviour.setEnemyMemory(enemyMemory);
       }
     }
+  }
 
+  private void registerVictoryHealthSync(BattleGameArea battleArea) {
     controller.addBattleEndListener(
         won -> {
           if (Boolean.TRUE.equals(won)) {
             int currentHealth =
-                forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getHealth();
+                battleArea.getPlayer().getComponent(CombatStatsComponent.class).getHealth();
             int maxHealth =
-                forestGameArea.getPlayer().getComponent(CombatStatsComponent.class).getMaxHealth();
+                battleArea.getPlayer().getComponent(CombatStatsComponent.class).getMaxHealth();
 
             // Max energy is deliberately not saved here: the entity value already includes item
             // effects, which are re-derived from the inventory at the start of every battle.
@@ -343,12 +358,6 @@ public class BattleScreen extends ScreenAdapter {
             runState.setPlayerMaxHealth(maxHealth);
           }
         });
-    createUI();
-    installBossDialogue(forestGameArea);
-    if (tutorialBattle) {
-      setupTutorialGuidance(forestGameArea, player, animationCoordinatorEntity);
-    }
-    controller.start();
   }
 
   /** Installs dialogue only for an enemy whose active AI is the Boss AI. */
@@ -431,16 +440,12 @@ public class BattleScreen extends ScreenAdapter {
             player
                 .getComponent(com.csse3200.game.components.player.PlayerEnergyDisplay.class)
                 .getEnergyActor(),
-        () ->
-            player
-                .getComponent(com.csse3200.game.components.player.PlayerStatsDisplay.class)
-                .getHealthLabel(),
+        () -> player.getComponent(com.csse3200.game.components.StatsDisplay.class).getHealthLabel(),
         () ->
             forestGameArea.getEnemies().stream()
-                .map(
-                    e -> e.getComponent(com.csse3200.game.components.enemy.EnemyStatsDisplay.class))
+                .map(e -> e.getComponent(com.csse3200.game.components.StatsDisplay.class))
                 .filter(java.util.Objects::nonNull)
-                .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getHealthActor)
+                .map(com.csse3200.game.components.StatsDisplay::getHealthActor)
                 .findFirst()
                 .orElse(null));
     tutorialView.setDetailedTargets(
@@ -450,10 +455,9 @@ public class BattleScreen extends ScreenAdapter {
                 .getEnergyVisualBounds(),
         () ->
             forestGameArea.getEnemies().stream()
-                .map(
-                    e -> e.getComponent(com.csse3200.game.components.enemy.EnemyStatsDisplay.class))
+                .map(e -> e.getComponent(com.csse3200.game.components.StatsDisplay.class))
                 .filter(java.util.Objects::nonNull)
-                .map(com.csse3200.game.components.enemy.EnemyStatsDisplay::getTutorialArmourActor)
+                .map(com.csse3200.game.components.StatsDisplay::getTutorialArmourActor)
                 .findFirst()
                 .orElse(null));
     tutorialView.setEnemyBounds(
@@ -534,12 +538,12 @@ public class BattleScreen extends ScreenAdapter {
   }
 
   private void onTutorialFinished(BattleTutorialController.Outcome outcome) {
-    // All tutorial changes live in this screen's disposable run. Joel's shared new-run path resets
-    // the persistent run and opens the story/map on victory or voluntary exit.
+    // Tutorial changes stay in this screen's disposable run. Reset the persistent run and open
+    // the map on victory or voluntary exit; the opening story was already shown before battle.
     if (outcome == BattleTutorialController.Outcome.LOST) {
       game.setScreen(GdxGame.ScreenType.MAIN_MENU);
     } else {
-      game.startNewRun();
+      game.startRunAfterTutorial();
     }
   }
 
@@ -587,7 +591,8 @@ public class BattleScreen extends ScreenAdapter {
         "giveowneditem",
         "giveowneditem <ITEM_TYPE>",
         "add an item straight to the inventory",
-        new GiveOwnedItemCommand(game.getRunState().getOrCreatePlayerState()));
+        new GiveOwnedItemCommand(
+            game.getRunState().getOrCreatePlayerState(), game.getItemAcquisitionService()));
 
     // Untitled: DeckEditorComponent draws its own "CARD INVENTORY" header, like the item inventory.
     PopupDisplay cardInventory = new PopupDisplay("");
@@ -597,7 +602,10 @@ public class BattleScreen extends ScreenAdapter {
     itemInventory.setMinSize(ITEM_INVENTORY_MIN_WIDTH, ITEM_INVENTORY_MIN_HEIGHT);
     InventoryPopupComponent inventoryPopup =
         new InventoryPopupComponent(
-            game.getRunState(), itemInventory, gameArea.getPlayer(), controller::isPlayerTurn);
+            game.getRunState(),
+            itemInventory,
+            gameArea.getPlayer(),
+            () -> battleActions != null && battleActions.isPlayerTurn());
 
     Entity itemInventoryEntity =
         new Entity()
@@ -607,14 +615,27 @@ public class BattleScreen extends ScreenAdapter {
     ServiceLocator.getEntityService().register(itemInventoryEntity);
 
     Stage stage = ServiceLocator.getRenderService().getStage();
+    cardInspection =
+        new CardInspectionController(
+            stage,
+            cardWidgetSkin,
+            cardWidgetAssets,
+            () ->
+                cardInventory.isShowing()
+                    || itemInventory.isShowing()
+                    || terminal.isOpen()
+                    || ServiceLocator.getPauseService().isPaused()
+                    || (tutorialView != null && tutorialView.isBlockingInput()),
+            () -> ServiceLocator.getDragAndDropService().getDragAndDrop().isDragging());
     battleActions = new BattleActions(controller, game, gameArea.getEnemies(), tutorialBattle);
     Entity battleUi =
         new Entity()
             .addComponent(new InputDecorator(stage, 10))
+            .addComponent(cardInspection)
             .addComponent(uiFactory)
             .addComponent(displays)
             .addComponent(battleActions)
-            .addComponent(new CardActions(controller, gameArea.getPlayer()))
+            .addComponent(new CardActions())
             .addComponent(new Team3CardPlayAdapter(cardPlayService, controller))
             .addComponent(cardInventory)
             .addComponent(new PopupInputComponent(cardInventory))
@@ -635,15 +656,7 @@ public class BattleScreen extends ScreenAdapter {
         .addListener(
             BattleActions.HAND_CHANGED_EVENT, (List<CardInstance> hand) -> rebuildHandWidgets());
     // Pause menu + in-place save/load overlay (added before the entity is created).
-    SaveLoadPanel savePanel = null;
-    if (tutorialBattle) {
-      battleUi
-          .addComponent(new PauseMenuDisplay())
-          .addComponent(new PauseMenuInput())
-          .addComponent(new PauseMenuActions(game, true));
-    } else {
-      savePanel = PauseMenuFactory.attach(battleUi, game);
-    }
+    SaveLoadPanel savePanel = PauseMenuFactory.attachLoadOnly(battleUi, game, tutorialBattle);
 
     gameArea.displayUI(battleUi);
     setBattleMenuFontScale();
@@ -655,7 +668,7 @@ public class BattleScreen extends ScreenAdapter {
     List<ClickableRecord> deckEditorClickables =
         ClickableFactory.loadRecordsFromJson(deckEditorUiJson);
     ClickableFactory deckPoolFactory = new ClickableFactory(deckEditorClickables);
-    if (savePanel != null) savePanel.hide(); // Tutorial previews must not save the real run.
+    savePanel.hide();
 
     List<DisplayingRecord> deckEditorDisplayRecords =
         DisplayingFactory.loadRecordsFromJson(deckEditorUiJson);
@@ -741,6 +754,7 @@ public class BattleScreen extends ScreenAdapter {
 
   /** Replaces the on-screen hand with widgets for {@link #handRowOrder}. */
   private void rebuildHandWidgets() {
+    cardInspection.clearSources();
     uiFactory.rebuildByTrigger(PLAY_CARD_TRIGGER, buildHandRecords());
     snapHandToVisibility();
     installHandCardWidgets();
@@ -781,8 +795,21 @@ public class BattleScreen extends ScreenAdapter {
   }
 
   @Override
+  public void pause() {
+    cardInspection.reset();
+  }
+
+  @Override
+  public void hide() {
+    cardInspection.reset();
+  }
+
+  @Override
   public void dispose() {
-    playerState.captureFrom(gameArea.getPlayer());
+    cardInspection.reset();
+    if (!suppressPlayerCaptureOnDispose) {
+      playerState.captureFrom(gameArea.getPlayer());
+    }
     enemyCardAim.dispose();
     playerCardAim.dispose();
     allEnemiesCardAim.dispose();
@@ -794,6 +821,11 @@ public class BattleScreen extends ScreenAdapter {
     cardInteractionSkin.dispose();
     cardWidgetSkin.dispose();
     ServiceLocator.getResourceService().unloadAssets(mainGameTextures);
+  }
+
+  @Override
+  public void prepareForLoadedSaveTransition() {
+    suppressPlayerCaptureOnDispose = true;
   }
 
   private void loadAssets() {
@@ -963,9 +995,20 @@ public class BattleScreen extends ScreenAdapter {
     try {
       ResolvedCard resolved = cardResolver.resolve(config.get(), instance);
       clickable.setVisualContent(() -> new CardWidget(resolved, cardWidgetAssets));
+      cardInspection.registerSource(clickable.getBtn(), () -> resolveInspectionCard(instanceId));
     } catch (IllegalArgumentException | IllegalStateException exception) {
       logger.warn("Could not install card widget for instance {}", instanceId, exception);
     }
+  }
+
+  private ResolvedCard resolveInspectionCard(String instanceId) {
+    return battleDeck.getHand().stream()
+        .filter(card -> instanceId.equals(card.instanceId()))
+        .findFirst()
+        .flatMap(
+            card ->
+                library.getCard(card.cardId()).map(config -> cardResolver.resolve(config, card)))
+        .orElse(null);
   }
 
   /** Applies curse items that take effect at the start of every battle. */

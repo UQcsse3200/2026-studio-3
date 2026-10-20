@@ -112,8 +112,9 @@ class BattleAnimationCoordinatorTest {
     verify(controller).addEnemyEffectsListener(listener.capture());
     enemyEffects = listener.getValue();
 
-    when(resources.getAsset(eq(OffensiveEffectVisuals.BLOCKED_ICON_PATH), eq(Texture.class)))
-        .thenReturn(mock(Texture.class));
+    Texture blockedIcon = mock(Texture.class);
+    when(resources.getAsset(OffensiveEffectVisuals.BLOCKED_ICON_PATH, Texture.class))
+        .thenReturn(blockedIcon);
     return stats;
   }
 
@@ -290,8 +291,9 @@ class BattleAnimationCoordinatorTest {
             player,
             new EffectVisualRegistry());
     coordinator.create();
-    when(resources.getAsset(eq(OffensiveEffectVisuals.BLOCKED_ICON_PATH), eq(Texture.class)))
-        .thenReturn(mock(Texture.class));
+    Texture blockedIcon = mock(Texture.class);
+    when(resources.getAsset(OffensiveEffectVisuals.BLOCKED_ICON_PATH, Texture.class))
+        .thenReturn(blockedIcon);
     return enemy;
   }
 
