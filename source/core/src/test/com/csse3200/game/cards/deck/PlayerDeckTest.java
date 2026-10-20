@@ -143,6 +143,7 @@ class PlayerDeckTest {
   @Test
   void shouldRejectInvalidCardIds() {
     PlayerDeck deck = new PlayerDeck(CARDS);
+    List<String> list = List.of("strike", "");
 
     assertThrows(IllegalArgumentException.class, () -> deck.addCard((String) null));
     assertThrows(IllegalArgumentException.class, () -> deck.addCard(""));
@@ -150,7 +151,7 @@ class PlayerDeckTest {
     assertThrows(IllegalArgumentException.class, () -> deck.addCard("unknown_card"));
     assertThrows(IllegalArgumentException.class, () -> deck.addCards(null));
     assertThrows(
-        IllegalArgumentException.class, () -> new PlayerDeck(CARDS, List.of("strike", "")));
+        IllegalArgumentException.class, () -> new PlayerDeck(CARDS, list));
   }
 
   @Test

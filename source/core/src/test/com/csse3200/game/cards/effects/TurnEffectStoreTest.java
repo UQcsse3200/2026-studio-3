@@ -32,6 +32,8 @@ class TurnEffectStoreTest {
   @Test
   void shouldReturnImmutableSnapshotsAndClearTheStore() {
     TurnEffectStore store = new TurnEffectStore();
+    CardEffectResolution cardEffectResolution = new CardEffectResolution("empty", List.of());
+
     store.recordResult(
         new CardEffectResolution(
             "strike",
@@ -40,7 +42,7 @@ class TurnEffectStoreTest {
 
     assertThrows(
         UnsupportedOperationException.class,
-        () -> snapshot.add(new CardEffectResolution("empty", List.of())));
+        () -> snapshot.add(cardEffectResolution));
 
     store.clear();
 

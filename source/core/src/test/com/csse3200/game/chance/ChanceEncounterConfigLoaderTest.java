@@ -11,6 +11,8 @@ import com.csse3200.game.cards.CardConfigLoader;
 import com.csse3200.game.cards.CardLibrary;
 import com.csse3200.game.encounters.integration.CardServiceCatalogAdapter;
 import com.csse3200.game.extensions.GameExtension;
+
+import java.io.Serial;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -102,9 +104,10 @@ class ChanceEncounterConfigLoaderTest {
   @Test
   void shouldReturnImmutableDomainCollections() {
     List<ChanceEncounter> encounters = ChanceEncounterConfigLoader.loadEncounters();
+    List<ChanceChoice> choices = encounters.getFirst().getChoices();
 
     assertThrows(UnsupportedOperationException.class, encounters::clear);
-    assertThrows(UnsupportedOperationException.class, encounters.get(0).getChoices()::clear);
+    assertThrows(UnsupportedOperationException.class, choices::clear);
   }
 
   @Test
@@ -194,13 +197,15 @@ class ChanceEncounterConfigLoaderTest {
 
   @Test
   void shouldRejectUnknownCardRewardThroughCatalogBoundary() {
+    CardServiceCatalogAdapter catalogAdapter = new CardServiceCatalogAdapter(new CardLibrary(CardConfigLoader.loadCards()));
+
     ChanceEncounterLoadingException exception =
         assertThrows(
             ChanceEncounterLoadingException.class,
             () ->
                 ChanceEncounterConfigLoader.loadEncounters(
                     TEST_DIRECTORY + "unknown_card_reward.json",
-                    new CardServiceCatalogAdapter(new CardLibrary(CardConfigLoader.loadCards()))));
+                    catalogAdapter));
 
     assertMessageContains(exception, "unknown cardRewardId 'missing-card'");
   }
@@ -234,7 +239,7 @@ class ChanceEncounterConfigLoaderTest {
         ChanceEncounterConfigLoader.loadEncounters(
             TEST_DIRECTORY + "valid_outcome_boundaries.json");
 
-    ChanceEncounter encounter = encounters.get(0);
+    ChanceEncounter encounter = encounters.getFirst();
     ChanceOutcome noEffect = encounter.resolveChoice("no-effect");
     ChanceOutcome boundaries = encounter.resolveChoice("integer-boundaries");
 
@@ -336,6 +341,7 @@ class ChanceEncounterConfigLoaderTest {
   }
 
   private static final class SequenceRandom extends Random {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final int[] values;

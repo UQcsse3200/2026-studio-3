@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.csse3200.game.extensions.GameExtension;
+
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -122,10 +124,11 @@ class ChanceEncounterSelectorTest {
   void shouldRejectPoolWhoseTotalWeightExceedsIntegerRange() {
     List<ChanceEncounter> encounters =
         List.of(createEncounter("maximum", Integer.MAX_VALUE), createEncounter("overflow", 1));
+    Random random = new Random(148L);
 
     assertThrows(
         IllegalArgumentException.class,
-        () -> new ChanceEncounterSelector(encounters, new Random(148L)));
+        () -> new ChanceEncounterSelector(encounters, random));
   }
 
   private static List<String> selectIds(
@@ -145,6 +148,7 @@ class ChanceEncounterSelectorTest {
   }
 
   private static final class SequenceRandom extends Random {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final int[] values;

@@ -100,9 +100,11 @@ class Team1EnemyStateAdapterTest {
     List<ResolvedCardEffect> effects =
         List.of(enemyEffect(EffectType.DAMAGE, TargetType.SINGLE_ENEMY, 4, 0, 0));
 
+    CardPlayTarget singleEnemy = CardPlayTarget.singleEnemy("missing");
+
     assertThrows(
         IllegalArgumentException.class,
-        () -> adapter.applyEnemyEffects(CardPlayTarget.singleEnemy("missing"), effects));
+        () -> adapter.applyEnemyEffects(singleEnemy, effects));
     assertEquals(10, available.getHealth());
   }
 

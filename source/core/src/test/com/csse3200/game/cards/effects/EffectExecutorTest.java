@@ -91,12 +91,14 @@ class EffectExecutorTest {
 
   @Test
   void shouldRejectSunderTargetingSelf() {
+    EffectConfig effectConfig = new EffectConfig(EffectType.SUNDER, 3);
+
     assertThrows(
         IllegalArgumentException.class,
         () ->
             executor.resolve(
                 "unseal_the_breach",
-                new EffectConfig(EffectType.SUNDER, 3),
+                effectConfig,
                 TargetType.SELF,
                 0,
                 playerState));
@@ -162,6 +164,7 @@ class EffectExecutorTest {
   @Test
   void shouldRejectEnergyGainForEnemyTargets() {
     EffectConfig energyGain = new EffectConfig(EffectType.ENERGY_GAIN, 1);
+    CardEffectResolutionContext cardEffectResolutionContext = new CardEffectResolutionContext(0, 0, 0);
 
     assertThrows(
         IllegalArgumentException.class,
@@ -176,7 +179,7 @@ class EffectExecutorTest {
                 energyGain,
                 TargetType.ALL_ENEMIES,
                 0,
-                new CardEffectResolutionContext(0, 0, 0)));
+                cardEffectResolutionContext));
   }
 
   @Test
@@ -218,12 +221,14 @@ class EffectExecutorTest {
 
   @Test
   void shouldRejectFortifyOnEnemyTargets() {
+    EffectConfig effectConfig = new EffectConfig(EffectType.FORTIFY, 4);
+
     assertThrows(
         IllegalArgumentException.class,
         () ->
             executor.resolve(
                 "iron_oath",
-                new EffectConfig(EffectType.FORTIFY, 4),
+                effectConfig,
                 TargetType.SINGLE_ENEMY,
                 0,
                 playerState));
@@ -259,12 +264,15 @@ class EffectExecutorTest {
 
   @Test
   void shouldRejectUnsupportedTargetCombinations() {
+    EffectConfig damage = new EffectConfig(EffectType.DAMAGE, 1);
+    EffectConfig heal = new EffectConfig(EffectType.HEAL, 1);
+
     assertThrows(
         IllegalArgumentException.class,
         () ->
             executor.resolve(
                 "self_damage",
-                new EffectConfig(EffectType.DAMAGE, 1),
+                damage,
                 TargetType.SELF,
                 0,
                 playerState));
@@ -273,7 +281,7 @@ class EffectExecutorTest {
         () ->
             executor.resolve(
                 "enemy_heal",
-                new EffectConfig(EffectType.HEAL, 1),
+                heal,
                 TargetType.SINGLE_ENEMY,
                 0,
                 playerState));
@@ -281,12 +289,14 @@ class EffectExecutorTest {
 
   @Test
   void shouldRejectInvalidArguments() {
+    EffectConfig damage = new EffectConfig(EffectType.DAMAGE, 1);
+
     assertThrows(
         IllegalArgumentException.class,
         () ->
             executor.resolve(
                 "",
-                new EffectConfig(EffectType.DAMAGE, 1),
+                damage,
                 TargetType.SINGLE_ENEMY,
                 0,
                 playerState));
@@ -297,13 +307,13 @@ class EffectExecutorTest {
         IllegalArgumentException.class,
         () ->
             executor.resolve(
-                "strike", new EffectConfig(EffectType.DAMAGE, 1), null, 0, playerState));
+                "strike", damage, null, 0, playerState));
     assertThrows(
         IllegalArgumentException.class,
         () ->
             executor.resolve(
                 "strike",
-                new EffectConfig(EffectType.DAMAGE, 1),
+                damage,
                 TargetType.SINGLE_ENEMY,
                 -1,
                 playerState));
@@ -312,7 +322,7 @@ class EffectExecutorTest {
         () ->
             executor.resolve(
                 "strike",
-                new EffectConfig(EffectType.DAMAGE, 1),
+                damage,
                 TargetType.SINGLE_ENEMY,
                 0,
                 (PlayerEffectState) null));
@@ -343,12 +353,14 @@ class EffectExecutorTest {
 
   @Test
   void shouldResolvePierceWithLiteralValueAndRejectSelfTarget() {
+    EffectConfig pierce = new EffectConfig(EffectType.PIERCE, 10);
+
     playerState.addStrength(5);
 
     ResolvedCardEffect playerStateResult =
         executor.resolve(
             "poison_blade",
-            new EffectConfig(EffectType.PIERCE, 10),
+            pierce,
             TargetType.SINGLE_ENEMY,
             0,
             playerState);
@@ -362,7 +374,7 @@ class EffectExecutorTest {
     ResolvedCardEffect contextResult =
         executor.resolve(
             "poison_blade",
-            new EffectConfig(EffectType.PIERCE, 10),
+            pierce,
             TargetType.SINGLE_ENEMY,
             0,
             context);
@@ -377,7 +389,7 @@ class EffectExecutorTest {
         () ->
             executor.resolve(
                 "poison_blade",
-                new EffectConfig(EffectType.PIERCE, 10),
+                pierce,
                 TargetType.SELF,
                 0,
                 playerState));

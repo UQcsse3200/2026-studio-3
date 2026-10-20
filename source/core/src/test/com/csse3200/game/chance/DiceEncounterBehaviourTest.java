@@ -361,9 +361,12 @@ class DiceEncounterBehaviourTest {
 
   @Test
   void shouldRejectEmptyEligibleCardPool() {
+    Random random = new Random(266L);
+    CardService cards = TestCardService.withCards();
+
     assertThrows(
         IllegalArgumentException.class,
-        () -> new DiceEncounterBehaviour(new Random(266L), TestCardService.withCards()));
+        () -> new DiceEncounterBehaviour(random, cards));
   }
 
   @Test
