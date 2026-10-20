@@ -1,4 +1,4 @@
-package com.csse3200.game.components.enemy.Memory;
+package com.csse3200.game.components.enemy.memory;
 
 /**
  * Immutable snapshot of the player's recent combat behaviour.

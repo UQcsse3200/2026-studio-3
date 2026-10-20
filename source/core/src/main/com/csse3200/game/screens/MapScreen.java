@@ -25,7 +25,12 @@ import com.csse3200.game.entities.EntityService;
 import com.csse3200.game.entities.factories.RenderFactory;
 import com.csse3200.game.input.InputDecorator;
 import com.csse3200.game.input.InputService;
-import com.csse3200.game.maps.*;
+import com.csse3200.game.maps.MapDisplay;
+import com.csse3200.game.maps.MapGenerationController;
+import com.csse3200.game.maps.MapGraph;
+import com.csse3200.game.maps.MapNode;
+import com.csse3200.game.maps.RoomType;
+import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.RenderService;
 import com.csse3200.game.rendering.Renderer;
 import com.csse3200.game.services.GameTime;
@@ -131,7 +136,8 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
         "discoverallcards", new DiscoverAllCardsCommand(game.getCardDiscoveryService()));
 
     uiEntity = new Entity();
-    uiEntity.addComponent(new InputDecorator(ServiceLocator.getRenderService().getStage(), 10))
+    uiEntity
+        .addComponent(new InputDecorator(ServiceLocator.getRenderService().getStage(), 10))
         .addComponent(mapDisplay)
         .addComponent(terminal)
         .addComponent(new KeyboardTerminalInputComponent())
@@ -143,7 +149,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
     ServiceLocator.getEntityService().register(uiEntity);
     savePanel.hide(); // save overlay starts hidden, opened by the Save & Load button
 
-    createMenuButton(game);
+    createMenuButton();
     createInventoryButton(runState);
   }
 
@@ -252,7 +258,7 @@ public class MapScreen extends com.badlogic.gdx.ScreenAdapter {
    *
    * @param game the GdxGame required to change the game screen.
    */
-  private void createMenuButton(GdxGame game) {
+  private void createMenuButton() {
     Stage stage = ServiceLocator.getRenderService().getStage();
     // not hover
     Texture buttonTexture = new Texture(Gdx.files.internal("images/map/main_menu_btn.png"));

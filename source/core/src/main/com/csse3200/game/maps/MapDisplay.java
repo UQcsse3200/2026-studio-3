@@ -59,7 +59,7 @@ public class MapDisplay extends UIComponent {
   private static final float UI_HEIGHT = 800f;
 
   private float mapHeight;
-  private float mapWidth = UI_WIDTH;
+  private final float mapWidth = UI_WIDTH;
   private float nodeWidth;
 
   private Table playerTable;
@@ -143,12 +143,11 @@ public class MapDisplay extends UIComponent {
     scrollPane.layout();
     if (mapGraph.getCurrentNode().getHeight() == 0) {
       scrollPane.setScrollPercentY(1f);
-    }
-    else {
+    } else {
       int activeNodeHeight = mapGraph.getCurrentNode().getHeight();
       scrollPane.setScrollY(stage.getWidth() - getNodeY(activeNodeHeight - 1));
     }
-    
+
     addPlayerStats();
     addLegend();
   }
