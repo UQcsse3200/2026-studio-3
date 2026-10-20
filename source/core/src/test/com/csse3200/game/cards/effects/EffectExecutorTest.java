@@ -91,15 +91,11 @@ class EffectExecutorTest {
 
   @Test
   void shouldRejectSunderTargetingSelf() {
+    EffectConfig effectConfig = new EffectConfig(EffectType.SUNDER, 3);
+
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            executor.resolve(
-                "unseal_the_breach",
-                new EffectConfig(EffectType.SUNDER, 3),
-                TargetType.SELF,
-                0,
-                playerState));
+        () -> executor.resolve("unseal_the_breach", effectConfig, TargetType.SELF, 0, playerState));
   }
 
   @Test
@@ -162,6 +158,8 @@ class EffectExecutorTest {
   @Test
   void shouldRejectEnergyGainForEnemyTargets() {
     EffectConfig energyGain = new EffectConfig(EffectType.ENERGY_GAIN, 1);
+    CardEffectResolutionContext cardEffectResolutionContext =
+        new CardEffectResolutionContext(0, 0, 0);
 
     assertThrows(
         IllegalArgumentException.class,
@@ -176,7 +174,7 @@ class EffectExecutorTest {
                 energyGain,
                 TargetType.ALL_ENEMIES,
                 0,
-                new CardEffectResolutionContext(0, 0, 0)));
+                cardEffectResolutionContext));
   }
 
   @Test
@@ -218,15 +216,11 @@ class EffectExecutorTest {
 
   @Test
   void shouldRejectFortifyOnEnemyTargets() {
+    EffectConfig effectConfig = new EffectConfig(EffectType.FORTIFY, 4);
+
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            executor.resolve(
-                "iron_oath",
-                new EffectConfig(EffectType.FORTIFY, 4),
-                TargetType.SINGLE_ENEMY,
-                0,
-                playerState));
+        () -> executor.resolve("iron_oath", effectConfig, TargetType.SINGLE_ENEMY, 0, playerState));
   }
 
   @Test
@@ -259,63 +253,38 @@ class EffectExecutorTest {
 
   @Test
   void shouldRejectUnsupportedTargetCombinations() {
+    EffectConfig damage = new EffectConfig(EffectType.DAMAGE, 1);
+    EffectConfig heal = new EffectConfig(EffectType.HEAL, 1);
+
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            executor.resolve(
-                "self_damage",
-                new EffectConfig(EffectType.DAMAGE, 1),
-                TargetType.SELF,
-                0,
-                playerState));
+        () -> executor.resolve("self_damage", damage, TargetType.SELF, 0, playerState));
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            executor.resolve(
-                "enemy_heal",
-                new EffectConfig(EffectType.HEAL, 1),
-                TargetType.SINGLE_ENEMY,
-                0,
-                playerState));
+        () -> executor.resolve("enemy_heal", heal, TargetType.SINGLE_ENEMY, 0, playerState));
   }
 
   @Test
   void shouldRejectInvalidArguments() {
+    EffectConfig damage = new EffectConfig(EffectType.DAMAGE, 1);
+
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            executor.resolve(
-                "",
-                new EffectConfig(EffectType.DAMAGE, 1),
-                TargetType.SINGLE_ENEMY,
-                0,
-                playerState));
+        () -> executor.resolve("", damage, TargetType.SINGLE_ENEMY, 0, playerState));
     assertThrows(
         IllegalArgumentException.class,
         () -> executor.resolve("strike", null, TargetType.SINGLE_ENEMY, 0, playerState));
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            executor.resolve(
-                "strike", new EffectConfig(EffectType.DAMAGE, 1), null, 0, playerState));
+        () -> executor.resolve("strike", damage, null, 0, playerState));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> executor.resolve("strike", damage, TargetType.SINGLE_ENEMY, -1, playerState));
     assertThrows(
         IllegalArgumentException.class,
         () ->
             executor.resolve(
-                "strike",
-                new EffectConfig(EffectType.DAMAGE, 1),
-                TargetType.SINGLE_ENEMY,
-                -1,
-                playerState));
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            executor.resolve(
-                "strike",
-                new EffectConfig(EffectType.DAMAGE, 1),
-                TargetType.SINGLE_ENEMY,
-                0,
-                (PlayerEffectState) null));
+                "strike", damage, TargetType.SINGLE_ENEMY, 0, (PlayerEffectState) null));
   }
 
   @Test
@@ -343,15 +312,12 @@ class EffectExecutorTest {
 
   @Test
   void shouldResolvePierceWithLiteralValueAndRejectSelfTarget() {
+    EffectConfig pierce = new EffectConfig(EffectType.PIERCE, 10);
+
     playerState.addStrength(5);
 
     ResolvedCardEffect playerStateResult =
-        executor.resolve(
-            "poison_blade",
-            new EffectConfig(EffectType.PIERCE, 10),
-            TargetType.SINGLE_ENEMY,
-            0,
-            playerState);
+        executor.resolve("poison_blade", pierce, TargetType.SINGLE_ENEMY, 0, playerState);
 
     assertEquals(
         new ResolvedCardEffect(
@@ -360,12 +326,7 @@ class EffectExecutorTest {
 
     CardEffectResolutionContext context = new CardEffectResolutionContext(5, 1, 1);
     ResolvedCardEffect contextResult =
-        executor.resolve(
-            "poison_blade",
-            new EffectConfig(EffectType.PIERCE, 10),
-            TargetType.SINGLE_ENEMY,
-            0,
-            context);
+        executor.resolve("poison_blade", pierce, TargetType.SINGLE_ENEMY, 0, context);
 
     assertEquals(
         new ResolvedCardEffect(
@@ -374,12 +335,6 @@ class EffectExecutorTest {
 
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            executor.resolve(
-                "poison_blade",
-                new EffectConfig(EffectType.PIERCE, 10),
-                TargetType.SELF,
-                0,
-                playerState));
+        () -> executor.resolve("poison_blade", pierce, TargetType.SELF, 0, playerState));
   }
 }

@@ -112,9 +112,11 @@ class WishingFountainEncounterBehaviourTest {
 
   @Test
   void shouldRequireAtLeastOneEligibleCard() {
+    Random random = new Random(266L);
+
     assertThrows(
         IllegalArgumentException.class,
-        () -> new WishingFountainEncounterBehaviour(new Random(266L), cards()));
+        () -> new WishingFountainEncounterBehaviour(random, cards()));
   }
 
   private static ChanceEncounterSession session(
