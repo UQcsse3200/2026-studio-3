@@ -15,7 +15,6 @@ public class UserSettings {
   private static final int WINDOW_WIDTH = 1280;
   private static final int WINDOW_HEIGHT = 800;
   private static final float DEFAULT_VOLUME = 1f;
-  private static final float DEFAULT_MUSIC_VOLUME = 0.6f;
 
   /**
    * Get the stored user settings
@@ -128,7 +127,7 @@ public class UserSettings {
     public float masterVolume = DEFAULT_VOLUME;
 
     /** Music volume before the master volume is applied. */
-    public float musicVolume = DEFAULT_MUSIC_VOLUME;
+    public float musicVolume = DEFAULT_VOLUME;
 
     /** Sound-effects volume before the master volume is applied. */
     public float soundEffectsVolume = DEFAULT_VOLUME;
