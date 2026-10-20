@@ -13,7 +13,6 @@ import com.csse3200.game.components.player.PlayerActions;
 import com.csse3200.game.components.player.PlayerAnimationController;
 import com.csse3200.game.components.player.PlayerBehaviourComponent;
 import com.csse3200.game.components.player.PlayerEnergyDisplay;
-import com.csse3200.game.components.player.PlayerStatsDisplay;
 import com.csse3200.game.components.player.PlayerStatsTopDisplay;
 import com.csse3200.game.components.status.StatusIconDisplay;
 import com.csse3200.game.entities.Entity;

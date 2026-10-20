@@ -1,13 +1,5 @@
 package com.csse3200.game.areas;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.csse3200.game.areas.terrain.TerrainFactory;
 import com.csse3200.game.cards.CardAcquisitionPoolLoader;
 import com.csse3200.game.cards.CardService;
@@ -45,6 +37,12 @@ import com.csse3200.game.services.ServiceLocator;
 import com.csse3200.game.shop.ShopEncounter;
 import com.csse3200.game.shop.ShopInventoryGenerator;
 import com.csse3200.game.shop.ShopService;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Non-combat encounter area used to host Team 2 Chance and Shop encounter content.
