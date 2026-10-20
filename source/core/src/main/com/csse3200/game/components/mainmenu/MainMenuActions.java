@@ -54,7 +54,7 @@ public class MainMenuActions extends Component {
     game.setScreen(GdxGame.ScreenType.LIBRARY);
   }
 
-  /** Opens the library screen. Not currently reachable from the main menu*/
+  /** Opens the library screen. Not currently reachable from the main menu */
   private void onLibrary() {
     logger.info("Opening library screen");
     game.setScreen(GdxGame.ScreenType.LIBRARY);

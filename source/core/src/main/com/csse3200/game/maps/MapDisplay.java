@@ -388,7 +388,7 @@ public class MapDisplay extends UIComponent {
       playerTable.layout();
 
       levelTable.setPosition(
-        (width - levelTable.getWidth()) / 2f, (50f - levelTable.getHeight()) / 2f);
+          (width - levelTable.getWidth()) / 2f, (50f - levelTable.getHeight()) / 2f);
     }
 
     if (legendTable != null) {

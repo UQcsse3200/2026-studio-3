@@ -139,9 +139,9 @@ public class PlayerStatsDisplay extends UIComponent {
       return;
     }
     camera.project(screenPosition); // converts coordinates
-    // use stage position instead so the window size changes it remains in the same coordinate 
-    Vector2 stagePosition = stage.screenToStageCoordinates(
-      new Vector2 (screenPosition.x, screenPosition.y));
+    // use stage position instead so the window size changes it remains in the same coordinate
+    Vector2 stagePosition =
+        stage.screenToStageCoordinates(new Vector2(screenPosition.x, screenPosition.y));
 
     table.setPosition(stagePosition.x - table.getWidth() / 2f, stagePosition.y);
   }

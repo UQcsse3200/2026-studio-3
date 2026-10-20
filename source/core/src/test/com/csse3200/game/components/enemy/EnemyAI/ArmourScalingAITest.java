@@ -2,11 +2,11 @@ package com.csse3200.game.components.enemy.enemyai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import org.junit.jupiter.api.Test;
 
 import com.csse3200.game.components.enemy.EnemyIntent;
 import com.csse3200.game.components.enemy.IntentType;
 import com.csse3200.game.components.enemy.memory.PlayerMemory;
+import org.junit.jupiter.api.Test;
 
 class ArmourScalingAITest {
   private static final int BASE_ATTACK = 7;
