@@ -113,7 +113,7 @@ public final class CardEffectResolutionService {
   }
 
   private CardEffectResolution recordCardEffect(CardEffectResolution resolution) {
-    resultStore.record(resolution);
+    resultStore.recordResult(resolution);
     return resolution;
   }
 
