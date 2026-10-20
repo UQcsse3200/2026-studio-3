@@ -179,6 +179,7 @@ public class GdxGame extends Game {
     logger.info("Setting game screen to {}", screenType);
     prepareScreenTransition(screenType);
     setScreen(newScreen(screenType));
+    AudioService.onScreenShown(screenType);
   }
 
   /**

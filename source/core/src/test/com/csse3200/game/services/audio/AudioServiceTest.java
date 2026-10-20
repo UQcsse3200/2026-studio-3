@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -28,6 +29,7 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
+import com.csse3200.game.GdxGame;
 import com.csse3200.game.GdxGame.ScreenType;
 import com.csse3200.game.extensions.GameExtension;
 import com.csse3200.game.files.UserSettings;
@@ -37,6 +39,7 @@ import com.csse3200.game.maps.MapNode;
 import com.csse3200.game.maps.RoomType;
 import com.csse3200.game.maps.RunState;
 import com.csse3200.game.rendering.RenderService;
+import com.csse3200.game.screens.SettingsScreen;
 import com.csse3200.game.services.ResourceService;
 import com.csse3200.game.services.ServiceLocator;
 import java.nio.file.Path;
@@ -49,6 +52,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.MockedConstruction;
 
 /** Covers the music, sounds, button clicks, volume settings and pause music in AudioService. */
 @ExtendWith(GameExtension.class)
@@ -224,7 +228,7 @@ class AudioServiceTest {
     Button button = new Button(new Button.ButtonStyle());
     root.addActor(button);
 
-    AudioService.onScreenChanged(ScreenType.ITEM_LIBRARY);
+    AudioService.onScreenShown(ScreenType.ITEM_LIBRARY);
     button.fire(new ChangeEvent());
 
     verify(sounds.get(CLICK)).play(anyFloat());
@@ -367,10 +371,39 @@ class AudioServiceTest {
     Button button = new Button(new Button.ButtonStyle());
     root.addActor(button);
 
-    AudioService.onScreenChanged(ScreenType.SETTINGS);
+    AudioService.onScreenShown(ScreenType.SETTINGS);
     button.fire(new ChangeEvent());
 
     assertTrue(sounds.containsKey(CLICK));
+    verify(sounds.get(CLICK)).play(anyFloat());
+  }
+
+  /** The music changes before GdxGame builds the new screen, so the old screen's stage is there. */
+  @Test
+  void changingScreenDoesNotAddClicksToTheOldScreen() {
+    Group oldRoot = stageRoot();
+
+    AudioService.onScreenChanged(ScreenType.SETTINGS);
+
+    assertEquals(0, oldRoot.getListeners().size);
+  }
+
+  @Test
+  void buttonsClickOnTheScreenGdxGameJustBuilt() {
+    Group root = new Group();
+    RenderService newScreen = renderingTo(root);
+    try (MockedConstruction<SettingsScreen> screens =
+        mockConstruction(
+            SettingsScreen.class,
+            (screen, context) -> ServiceLocator.registerRenderService(newScreen))) {
+      new GdxGame().setScreen(ScreenType.SETTINGS);
+      assertEquals(1, screens.constructed().size());
+    }
+    Button button = new Button(new Button.ButtonStyle());
+    root.addActor(button);
+
+    button.fire(new ChangeEvent());
+
     verify(sounds.get(CLICK)).play(anyFloat());
   }
 
@@ -383,7 +416,7 @@ class AudioServiceTest {
     Button button = new Button(new Button.ButtonStyle());
     root.addActor(button);
 
-    AudioService.onScreenChanged(ScreenType.SAVE_LOAD);
+    AudioService.onScreenShown(ScreenType.SAVE_LOAD);
     button.fire(new ChangeEvent());
 
     verify(resources).loadSounds(new String[] {CLICK});
@@ -396,7 +429,7 @@ class AudioServiceTest {
     Actor notAButton = new Actor();
     root.addActor(notAButton);
 
-    AudioService.onScreenChanged(ScreenType.SETTINGS);
+    AudioService.onScreenShown(ScreenType.SETTINGS);
     notAButton.fire(new ChangeEvent());
 
     assertFalse(sounds.containsKey(CLICK));
@@ -406,8 +439,8 @@ class AudioServiceTest {
   void gameplayScreensDoNotAddClicks() {
     Group root = stageRoot();
 
-    AudioService.onScreenChanged(ScreenType.MAP);
-    AudioService.onScreenChanged(ScreenType.BATTLE_SCREEN);
+    AudioService.onScreenShown(ScreenType.MAP);
+    AudioService.onScreenShown(ScreenType.BATTLE_SCREEN);
 
     assertEquals(0, root.getListeners().size);
   }
@@ -654,11 +687,15 @@ class AudioServiceTest {
   /** Stands in for the current screen's stage, with a real root so events can be fired at it. */
   private Group stageRoot() {
     Group root = new Group();
+    ServiceLocator.registerRenderService(renderingTo(root));
+    return root;
+  }
+
+  private static RenderService renderingTo(Group root) {
     Stage stage = mock(Stage.class);
     when(stage.getRoot()).thenReturn(root);
     RenderService render = mock(RenderService.class);
     when(render.getStage()).thenReturn(stage);
-    ServiceLocator.registerRenderService(render);
-    return root;
+    return render;
   }
 }

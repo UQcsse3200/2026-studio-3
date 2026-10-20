@@ -319,9 +319,9 @@ public class AudioService {
   }
 
   /**
-   * Called by GdxGame every time the screen changes. Starts the music for the screen, plays the
-   * victory or defeat sound when a battle ends, makes the buttons on menu screens click and keeps
-   * the volume settings connected.
+   * Called by GdxGame every time the screen changes, before the new screen is built. Starts the
+   * music for the screen, plays the victory or defeat sound when a battle ends and keeps the volume
+   * settings connected.
    *
    * <p>Battles check the room they were entered from, so elite fights and the final boss get their
    * own tracks, and the encounter screen only switches to shop music when it is a shop. The
@@ -363,14 +363,24 @@ public class AudioService {
         // keep whatever is already playing
       }
     }
-    if (MENU_SCREENS.contains(screen)) {
-      addButtonClicks();
-    }
   }
 
   /** The same as {@link #onScreenChanged(ScreenType, RunState)} for screens outside a run. */
   static void onScreenChanged(ScreenType screen) {
     onScreenChanged(screen, null);
+  }
+
+  /**
+   * Called by GdxGame once the new screen has been built, and makes the buttons on menu screens
+   * click. This can't be done in onScreenChanged, because the new screen's stage doesn't exist yet
+   * at that point.
+   *
+   * @param screen the screen that just opened
+   */
+  public static void onScreenShown(ScreenType screen) {
+    if (MENU_SCREENS.contains(screen)) {
+      addButtonClicks();
+    }
   }
 
   /**
