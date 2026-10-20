@@ -30,7 +30,6 @@ class BattleScreenEffectVisualRegistryTest {
   void shouldRetainPlayerEffectVisualsFromAnimationBranch() {
     EffectVisualStyle style = BattleScreen.createEffectVisualRegistry().lookup(EffectType.HEAL);
 
-    assertEquals("images/effects/heal.png", style.iconPath());
-    assertEquals(Color.WHITE, style.color());
+    assertEquals(Color.GREEN, style.color());
   }
 }

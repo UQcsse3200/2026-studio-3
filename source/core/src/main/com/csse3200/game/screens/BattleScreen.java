@@ -159,8 +159,6 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
           "images/main_menu_button_frame.png",
           BATTLE_TITLE_TEXTURE,
           "images/effects/shield.png",
-          "images/effects/fortify.png",
-          "images/effects/heal.png",
           "images/enemies/intents/buff.png");
   private static final Vector2 CAMERA_POSITION = new Vector2(7.5f, 8.5f);
 

@@ -15,10 +15,11 @@ import java.util.Map;
 /**
  * Renders an impact burst: several small particles fly outward from the target and fade out.
  *
- * <p>Two independent choices, set per registration: {@code hasGravity} (an even outward scatter vs
- * one that curves downward, reading as falling debris) and {@code shape} (a round dot vs a jagged
- * triangular shard, with the shard also spinning as it flies). Existing registrations are
- * unaffected by new combinations — e.g. Damage keeps using {@code DOT} with no gravity.
+ * <p>Two independent choices, set per registration: {@code particleMotion } (Scatter will make the
+ * particle do an outward disperse, fall will make the particle fall and rise will make the particle
+ * rise) and {@code shape} (a round dot vs a jagged triangular shard, with the shard also spinning
+ * as it flies). Existing registrations are unaffected by new combinations — e.g. Damage keeps using
+ * {@code SCATTER} with no gravity.
  *
  * <p>Reuses {@link EffectVisualStyle}'s colour, duration and start/end scale (the latter repurposed
  * here as particle size); particle count and spread are fixed constants for a consistent look.
@@ -30,6 +31,16 @@ public class EffectBurstComponent extends RenderComponent {
     SHARD
   }
 
+  /**
+   * Particle motion. Scatter will make the particle do an outward disperse, fall will make the
+   * particle fall and rise will make the particle rise
+   */
+  public enum ParticleMotion {
+    SCATTER,
+    FALL,
+    RISE
+  }
+
   private static final int PARTICLE_COUNT = 8;
   private static final float SPREAD_FACTOR = 1.4f;
   private static final float GRAVITY_DROP_FACTOR = 1.1f;
@@ -39,7 +50,7 @@ public class EffectBurstComponent extends RenderComponent {
   private final EffectVisualStyle style;
   private final float baseSize;
   private final float startDelay;
-  private final boolean hasGravity;
+  private final ParticleMotion motion;
   private final ParticleShape shape;
   private final float[] angles = new float[PARTICLE_COUNT];
   private final float[] spinDeg = new float[PARTICLE_COUNT];
@@ -49,8 +60,8 @@ public class EffectBurstComponent extends RenderComponent {
    * @param style colour, duration and particle size
    * @param baseSize size, in world units, the burst's spread and particle size are relative to
    * @param startDelay seconds to wait before this visual starts (set by the coordinator)
-   * @param hasGravity false for an even outward scatter; true for particles that curve downward as
-   *     they fly out, reading as falling debris
+   * @param motion Scatter will make the particle do an outward disperse, fall will make the
+   *     particle fall and rise will make the particle rise
    * @param shape DOT for a round particle (e.g. Damage), SHARD for a spinning jagged fragment (e.g.
    *     Sunder's broken armour)
    */
@@ -58,12 +69,12 @@ public class EffectBurstComponent extends RenderComponent {
       EffectVisualStyle style,
       float baseSize,
       float startDelay,
-      boolean hasGravity,
+      ParticleMotion motion,
       ParticleShape shape) {
     this.style = style;
     this.baseSize = baseSize;
     this.startDelay = Math.max(0f, startDelay);
-    this.hasGravity = hasGravity;
+    this.motion = motion;
     this.shape = shape;
     for (int i = 0; i < PARTICLE_COUNT; i++) {
       angles[i] = (360f / PARTICLE_COUNT) * i + MathUtils.random(-15f, 15f);
@@ -103,10 +114,14 @@ public class EffectBurstComponent extends RenderComponent {
       float angle = angles[i];
       float x = centre.x + MathUtils.cosDeg(angle) * distance - size / 2f;
       float y = centre.y + MathUtils.sinDeg(angle) * distance - size / 2f;
-      if (hasGravity) {
-        // Accelerating downward drop, on top of the outward scatter, so particles arc down like
-        // falling debris instead of flying out evenly in every direction.
-        y -= baseSize * GRAVITY_DROP_FACTOR * t * t;
+      switch (motion) {
+        case FALL -> y -= baseSize * GRAVITY_DROP_FACTOR * t * t;
+
+        case RISE -> y += baseSize * GRAVITY_DROP_FACTOR * t * t;
+
+        default -> {}
+          // Accelerating downward drop, on top of the outward scatter, so particles arc down like
+          // falling debris instead of flying out evenly in every direction.
       }
       float rotation = shape == ParticleShape.SHARD ? spinDeg[i] * t : 0f;
       batch.draw(particle, x, y, size / 2f, size / 2f, size, size, 1f, 1f, rotation);
