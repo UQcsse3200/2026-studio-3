@@ -12,7 +12,7 @@ final class FpsValidator {
 
     String value = input.trim();
 
-    if (!value.matches("[0-9]+")) {
+    if (!value.matches("\\d+")) {
       return null;
     }
 

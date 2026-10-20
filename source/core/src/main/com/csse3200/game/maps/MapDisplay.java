@@ -59,11 +59,12 @@ public class MapDisplay extends UIComponent {
   private static final float UI_HEIGHT = 800f;
 
   private float mapHeight;
-  private float mapWidth = UI_WIDTH;
+  private final float mapWidth = UI_WIDTH;
   private float nodeWidth;
 
   private Table playerTable;
   private Table legendTable;
+  private Table levelTable;
   // to store positions
   private final Map<Integer, Vector2> nodePositions = new HashMap<>();
   // Node-id labels, shown only while debug rendering is active — same toggle 'debug on'
@@ -138,11 +139,15 @@ public class MapDisplay extends UIComponent {
     scrollPane.setFillParent(true);
     scrollPane.setScrollingDisabled(true, false);
     scrollPane.setOverscroll(false, false);
-
     stage.addActor(scrollPane);
 
     scrollPane.layout();
-    scrollPane.setScrollPercentY(1f);
+    if (mapGraph.getCurrentNode().getHeight() == 0) {
+      scrollPane.setScrollPercentY(1f);
+    } else {
+      int activeNodeHeight = mapGraph.getCurrentNode().getHeight();
+      scrollPane.setScrollY(stage.getWidth() - getNodeY(activeNodeHeight - 1));
+    }
 
     addPlayerStats();
     addLegend();
@@ -207,6 +212,16 @@ public class MapDisplay extends UIComponent {
   }
 
   /**
+   * Calculates the y position for a height
+   *
+   * @param height height needed to find it's layer
+   * @return float y value to position the scrollpane
+   */
+  private float getNodeY(int height) {
+    return height * 1.5f * nodeWidth + 2.5f * nodeWidth;
+  }
+
+  /**
    * Adds connections between nodes that have a link. Iterates through each node to find it's
    * connections and iterates through each one to find a start and end Vector 2 position to
    * calculate length and angle to draw a line
@@ -252,7 +267,7 @@ public class MapDisplay extends UIComponent {
     table.padLeft(10f);
     table.padTop(5f);
 
-    Table levelTable = new Table();
+    levelTable = new Table();
 
     // Image size
     float imageSideLength = 20f;
@@ -333,8 +348,6 @@ public class MapDisplay extends UIComponent {
     levelTable.add(levelImage).size(imageSideLength).pad(5);
     levelTable.add(levelLabel).left().pad(10);
     levelTable.pack();
-    levelTable.setPosition(
-        (mapWidth - levelTable.getWidth()) / 2f, (50f - levelTable.getHeight()) / 2f);
     playerTable.addActor(levelTable);
 
     playerTable.add(table);
@@ -373,6 +386,9 @@ public class MapDisplay extends UIComponent {
 
       playerTable.invalidateHierarchy();
       playerTable.layout();
+
+      levelTable.setPosition(
+          (width - levelTable.getWidth()) / 2f, (50f - levelTable.getHeight()) / 2f);
     }
 
     if (legendTable != null) {

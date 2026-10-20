@@ -126,6 +126,24 @@ public class PlayerStatsTopDisplay extends UIComponent {
   }
 
   @Override
+  // method to scale the top background on resize, cannot use resize() because
+  // this class was not created in a screen but in playerfactory
+  public void update() {
+    super.update();
+
+    float stageWidth =
+        stage.getViewport() == null ? Gdx.graphics.getWidth() : stage.getViewport().getWorldWidth();
+
+    float stageHeight =
+        stage.getViewport() == null
+            ? Gdx.graphics.getHeight()
+            : stage.getViewport().getWorldHeight();
+
+    table.setSize(stageWidth, 50);
+    table.setPosition(0, stageHeight - 50);
+  }
+
+  @Override
   public void draw(SpriteBatch batch) {
     // draw is handled by the stage
   }

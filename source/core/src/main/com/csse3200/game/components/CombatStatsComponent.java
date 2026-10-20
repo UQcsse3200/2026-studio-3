@@ -77,7 +77,7 @@ public class CombatStatsComponent extends Component {
    *
    * @return is player dead
    */
-  public Boolean isDead() {
+  public boolean isDead() {
     return this.health == 0;
   }
 

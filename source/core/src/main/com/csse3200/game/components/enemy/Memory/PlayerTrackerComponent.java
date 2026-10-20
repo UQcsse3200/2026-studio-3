@@ -1,4 +1,4 @@
-package com.csse3200.game.components.enemy.Memory;
+package com.csse3200.game.components.enemy.memory;
 
 import com.csse3200.game.cards.CardService;
 import com.csse3200.game.cards.EffectType;

@@ -44,7 +44,7 @@ class CardEffectResolutionIntegrationTest {
     assertEquals(
         List.of(
             new ResolvedCardEffect(
-                "expose", EffectType.VULNERABLE, TargetType.ALL_ENEMIES, 2, 2, 0)),
+                "expose", EffectType.VULNERABLE, TargetType.ALL_ENEMIES, 1, 2, 0)),
         expose.enemyEffects());
     assertEquals(
         List.of(

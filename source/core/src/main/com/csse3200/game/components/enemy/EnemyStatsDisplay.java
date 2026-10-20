@@ -133,7 +133,7 @@ public class EnemyStatsDisplay extends UIComponent {
     Vector2 scale = entity.getScale();
 
     float enemyX = position.x + scale.x / 2f;
-    float enemyY = position.y - 0.6f;
+    float enemyY = position.y + scale.y / 2f;
 
     Vector3 screenPosition = new Vector3(enemyX, enemyY, 0);
 
@@ -142,8 +142,11 @@ public class EnemyStatsDisplay extends UIComponent {
       return;
     }
     camera.project(screenPosition); // converts coordinates
+    // use stage position instead so the window size changes it remains in the same coordinate
+    Vector2 stagePosition =
+        stage.screenToStageCoordinates(new Vector2(screenPosition.x, screenPosition.y));
 
-    table.setPosition(screenPosition.x - table.getWidth() / 2f, screenPosition.y);
+    table.setPosition(stagePosition.x - table.getWidth() / 2f, stagePosition.y);
   }
 
   /**
@@ -200,13 +203,14 @@ public class EnemyStatsDisplay extends UIComponent {
    * @param armour the amount of armour the entity has
    */
   public void updateArmourVisibility(int armour) {
+    armourCell.size(60f);
+
     if (armour > 0) {
       armourCell.setActor(armourStack);
-      armourCell.size(60f);
     } else {
       armourCell.setActor(null);
-      armourCell.size(0f);
     }
+
     table.pack();
   }
 

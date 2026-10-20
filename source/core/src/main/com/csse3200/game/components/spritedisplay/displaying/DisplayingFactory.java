@@ -99,12 +99,6 @@ public class DisplayingFactory extends UIComponent {
    * @return every matching instance, in the order they were created; empty if none exist
    */
   public <T extends Displaying> List<T> getDisplayings(Class<T> type) {
-    List<T> matches = new ArrayList<>();
-    for (Displaying displaying : displayings) {
-      if (type.isInstance(displaying)) {
-        matches.add(type.cast(displaying));
-      }
-    }
-    return matches;
+    return displayings.stream().filter(type::isInstance).map(type::cast).toList();
   }
 }
