@@ -1,4 +1,4 @@
-package com.csse3200.game.components.enemy.EnemyAI;
+package com.csse3200.game.components.enemy.enemyai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
