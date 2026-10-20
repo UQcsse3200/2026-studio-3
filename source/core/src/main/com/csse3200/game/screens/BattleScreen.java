@@ -849,13 +849,16 @@ public class BattleScreen extends ScreenAdapter {
     }
 
     for (Clickable clickable : uiFactory.getByTrigger(HAND_TRIGGER)) {
-      clickable.getBtn().addListener(
+      clickable
+          .getBtn()
+          .addListener(
               new InputListener() {
                 @Override
-                public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                public void enter(
+                    InputEvent event, float x, float y, int pointer, Actor fromActor) {
                   AudioService.playSound(SoundId.CARD_HOVER, 0.5f);
-                }}
-      );
+                }
+              });
       installHandCardWidget(clickable, instancesById);
     }
   }

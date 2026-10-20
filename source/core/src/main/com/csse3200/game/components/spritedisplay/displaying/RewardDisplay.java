@@ -721,9 +721,12 @@ public class RewardDisplay extends Displaying {
         type, new TextureRegion(art), source, amount, () -> feedbackFinished = true);
 
     switch (type) {
-      case CARD: AudioService.playSound(SoundId.CARD_SHUFFLE, 0.5f);
-      case GOLD: AudioService.playSound(SoundId.ITEM_PURCHASE, 0.5f);
-      case ITEM: AudioService.playSound(SoundId.ITEM_PICKUP, 0.5f);
+      case CARD:
+        AudioService.playSound(SoundId.CARD_SHUFFLE, 0.5f);
+      case GOLD:
+        AudioService.playSound(SoundId.ITEM_PURCHASE, 0.5f);
+      case ITEM:
+        AudioService.playSound(SoundId.ITEM_PICKUP, 0.5f);
     }
   }
 

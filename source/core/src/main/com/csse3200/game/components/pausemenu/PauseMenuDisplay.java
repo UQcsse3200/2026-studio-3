@@ -299,21 +299,20 @@ public class PauseMenuDisplay extends UIComponent {
     TextButton button = new TextButton(text, buttonStyle());
 
     button.addListener(
-            new ChangeListener() {
-              @Override
-              public void changed(ChangeEvent changeEvent, Actor actor) {
-                AudioService.playSound(SoundId.BUTTON_CLICK, 0.5f);
-              }
-            });
+        new ChangeListener() {
+          @Override
+          public void changed(ChangeEvent changeEvent, Actor actor) {
+            AudioService.playSound(SoundId.BUTTON_CLICK, 0.5f);
+          }
+        });
 
     button.addListener(
-            new InputListener() {
-              @Override
-              public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
-              }
-            }
-    );
+        new InputListener() {
+          @Override
+          public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+            AudioService.playSound(SoundId.MENU_HOVER, 0.5f);
+          }
+        });
 
     if (eventName != null) {
       button.addListener(
