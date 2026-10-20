@@ -5,7 +5,7 @@
 <title>BossAI (core 1.0 API)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta name="description" content="declaration: package: com.csse3200.game.components.enemy.EnemyAI, class: BossAI">
+<meta name="description" content="declaration: package: com.csse3200.game.components.enemy.enemyai, class: BossAI">
 <meta name="generator" content="javadoc/ClassWriterImpl">
 <link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
 <link rel="stylesheet" type="text/css" href="../../../../../../script-dir/jquery-ui.min.css" title="Style">
@@ -82,21 +82,21 @@ loadScripts(document, 'script');</script>
 <main role="main">
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
-<div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">com.csse3200.game.components.enemy.EnemyAI</a></div>
+<div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">com.csse3200.game.components.enemy.enemyai</a></div>
 <h1 title="Class BossAI" class="title">Class BossAI</h1>
 </div>
 <div class="inheritance" title="Inheritance Tree"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">java.lang.Object</a>
-<div class="inheritance">com.csse3200.game.components.enemy.EnemyAI.BossAI</div>
+<div class="inheritance">com.csse3200.game.components.enemy.enemyai.BossAI</div>
 </div>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code><a href="EnemyAI.html" title="interface in com.csse3200.game.components.enemy.EnemyAI">EnemyAI</a></code></dd>
+<dd><code><a href="EnemyAI.html" title="interface in com.csse3200.game.components.enemy.enemyai">EnemyAI</a></code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">BossAI</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
-implements <a href="EnemyAI.html" title="interface in com.csse3200.game.components.enemy.EnemyAI">EnemyAI</a></span></div>
+implements <a href="EnemyAI.html" title="interface in com.csse3200.game.components.enemy.enemyai">EnemyAI</a></span></div>
 <div class="block">Boss AI controlled by a phase state machine, per-phase action weights, a global pressure level
  and the player's observed combat behaviour.</div>
 </section>
@@ -112,17 +112,17 @@ implements <a href="EnemyAI.html" title="interface in com.csse3200.game.componen
 <div class="table-header col-second">Class</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code>static enum&nbsp;</code></div>
-<div class="col-second even-row-color"><code><a href="BossAI.BossMove.html" class="type-name-link" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.BossMove</a></code></div>
+<div class="col-second even-row-color"><code><a href="BossAI.BossMove.html" class="type-name-link" title="enum class in com.csse3200.game.components.enemy.enemyai">BossAI.BossMove</a></code></div>
 <div class="col-last even-row-color">
 <div class="block">Actions currently supported by the battle execution system.</div>
 </div>
 <div class="col-first odd-row-color"><code>static enum&nbsp;</code></div>
-<div class="col-second odd-row-color"><code><a href="BossAI.BossPhase.html" class="type-name-link" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.BossPhase</a></code></div>
+<div class="col-second odd-row-color"><code><a href="BossAI.BossPhase.html" class="type-name-link" title="enum class in com.csse3200.game.components.enemy.enemyai">BossAI.BossPhase</a></code></div>
 <div class="col-last odd-row-color">
 <div class="block">High-level states of the Boss fight.</div>
 </div>
 <div class="col-first even-row-color"><code>static enum&nbsp;</code></div>
-<div class="col-second even-row-color"><code><a href="BossAI.PressureLevel.html" class="type-name-link" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.PressureLevel</a></code></div>
+<div class="col-second even-row-color"><code><a href="BossAI.PressureLevel.html" class="type-name-link" title="enum class in com.csse3200.game.components.enemy.enemyai">BossAI.PressureLevel</a></code></div>
 <div class="col-last even-row-color">
 <div class="block">Global aggression level applied on top of the current phase table.</div>
 </div>
@@ -171,29 +171,29 @@ implements <a href="EnemyAI.html" title="interface in com.csse3200.game.componen
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addPhaseChangeListener(com.csse3200.game.events.listeners.EventListener1)" class="member-name-link">addPhaseChangeListener</a><wbr>(<a href="../../../events/listeners/EventListener1.html" title="interface in com.csse3200.game.events.listeners">EventListener1</a>&lt;<a href="BossAI.BossPhase.html" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.BossPhase</a>&gt;&nbsp;listener)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addPhaseChangeListener(com.csse3200.game.events.listeners.EventListener1)" class="member-name-link">addPhaseChangeListener</a><wbr>(<a href="../../../events/listeners/EventListener1.html" title="interface in com.csse3200.game.events.listeners">EventListener1</a>&lt;<a href="BossAI.BossPhase.html" title="enum class in com.csse3200.game.components.enemy.enemyai">BossAI.BossPhase</a>&gt;&nbsp;listener)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adds a listener notified when the Boss advances to a later phase.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#decide(com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext)" class="member-name-link">decide</a><wbr>(<a href="EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIContext</a>&nbsp;context)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#decide(com.csse3200.game.components.enemy.enemyai.EnemyAIContext)" class="member-name-link">decide</a><wbr>(<a href="EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.enemyai">EnemyAIContext</a>&nbsp;context)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">* Selects the enemy's next intent.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getConsecutiveAttacks()" class="member-name-link">getConsecutiveAttacks</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="BossAI.BossPhase.html" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.BossPhase</a></code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="BossAI.BossPhase.html" title="enum class in com.csse3200.game.components.enemy.enemyai">BossAI.BossPhase</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentPhase()" class="member-name-link">getCurrentPhase</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDebuffCooldownRemaining()" class="member-name-link">getDebuffCooldownRemaining</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="BossAI.BossMove.html" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.BossMove</a></code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="BossAI.BossMove.html" title="enum class in com.csse3200.game.components.enemy.enemyai">BossAI.BossMove</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPreviousMove()" class="member-name-link">getPreviousMove</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removePhaseChangeListener(com.csse3200.game.events.listeners.EventListener1)" class="member-name-link">removePhaseChangeListener</a><wbr>(<a href="../../../events/listeners/EventListener1.html" title="interface in com.csse3200.game.events.listeners">EventListener1</a>&lt;<a href="BossAI.BossPhase.html" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.BossPhase</a>&gt;&nbsp;listener)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removePhaseChangeListener(com.csse3200.game.events.listeners.EventListener1)" class="member-name-link">removePhaseChangeListener</a><wbr>(<a href="../../../events/listeners/EventListener1.html" title="interface in com.csse3200.game.events.listeners">EventListener1</a>&lt;<a href="BossAI.BossPhase.html" title="enum class in com.csse3200.game.components.enemy.enemyai">BossAI.BossPhase</a>&gt;&nbsp;listener)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Removes a previously registered phase listener.</div>
 </div>
@@ -222,7 +222,7 @@ implements <a href="EnemyAI.html" title="interface in com.csse3200.game.componen
 <dt>See Also:</dt>
 <dd>
 <ul class="tag-list">
-<li><a href="../../../../../../constant-values.html#com.csse3200.game.components.enemy.EnemyAI.BossAI.PHASE_CHANGED_EVENT">Constant Field Values</a></li>
+<li><a href="../../../../../../constant-values.html#com.csse3200.game.components.enemy.enemyai.BossAI.PHASE_CHANGED_EVENT">Constant Field Values</a></li>
 </ul>
 </dd>
 </dl>
@@ -252,42 +252,42 @@ implements <a href="EnemyAI.html" title="interface in com.csse3200.game.componen
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="decide(com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext)">
+<section class="detail" id="decide(com.csse3200.game.components.enemy.enemyai.EnemyAIContext)">
 <h3>decide</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></span>&nbsp;<span class="element-name">decide</span><wbr><span class="parameters">(<a href="EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIContext</a>&nbsp;context)</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="EnemyAI.html#decide(com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext)">EnemyAI</a></code></span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></span>&nbsp;<span class="element-name">decide</span><wbr><span class="parameters">(<a href="EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.enemyai">EnemyAIContext</a>&nbsp;context)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="EnemyAI.html#decide(com.csse3200.game.components.enemy.enemyai.EnemyAIContext)">EnemyAI</a></code></span></div>
 <div class="block">* Selects the enemy's next intent. * * @param context read-only information about the current
  battle state * @return the selected enemy intent</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="EnemyAI.html#decide(com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext)">decide</a></code>&nbsp;in interface&nbsp;<code><a href="EnemyAI.html" title="interface in com.csse3200.game.components.enemy.EnemyAI">EnemyAI</a></code></dd>
+<dd><code><a href="EnemyAI.html#decide(com.csse3200.game.components.enemy.enemyai.EnemyAIContext)">decide</a></code>&nbsp;in interface&nbsp;<code><a href="EnemyAI.html" title="interface in com.csse3200.game.components.enemy.enemyai">EnemyAI</a></code></dd>
 </dl>
 </section>
 </li>
 <li>
 <section class="detail" id="addPhaseChangeListener(com.csse3200.game.events.listeners.EventListener1)">
 <h3>addPhaseChangeListener</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addPhaseChangeListener</span><wbr><span class="parameters">(<a href="../../../events/listeners/EventListener1.html" title="interface in com.csse3200.game.events.listeners">EventListener1</a>&lt;<a href="BossAI.BossPhase.html" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.BossPhase</a>&gt;&nbsp;listener)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addPhaseChangeListener</span><wbr><span class="parameters">(<a href="../../../events/listeners/EventListener1.html" title="interface in com.csse3200.game.events.listeners">EventListener1</a>&lt;<a href="BossAI.BossPhase.html" title="enum class in com.csse3200.game.components.enemy.enemyai">BossAI.BossPhase</a>&gt;&nbsp;listener)</span></div>
 <div class="block">Adds a listener notified when the Boss advances to a later phase.</div>
 </section>
 </li>
 <li>
 <section class="detail" id="removePhaseChangeListener(com.csse3200.game.events.listeners.EventListener1)">
 <h3>removePhaseChangeListener</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">removePhaseChangeListener</span><wbr><span class="parameters">(<a href="../../../events/listeners/EventListener1.html" title="interface in com.csse3200.game.events.listeners">EventListener1</a>&lt;<a href="BossAI.BossPhase.html" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.BossPhase</a>&gt;&nbsp;listener)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">removePhaseChangeListener</span><wbr><span class="parameters">(<a href="../../../events/listeners/EventListener1.html" title="interface in com.csse3200.game.events.listeners">EventListener1</a>&lt;<a href="BossAI.BossPhase.html" title="enum class in com.csse3200.game.components.enemy.enemyai">BossAI.BossPhase</a>&gt;&nbsp;listener)</span></div>
 <div class="block">Removes a previously registered phase listener.</div>
 </section>
 </li>
 <li>
 <section class="detail" id="getCurrentPhase()">
 <h3>getCurrentPhase</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="BossAI.BossPhase.html" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.BossPhase</a></span>&nbsp;<span class="element-name">getCurrentPhase</span>()</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="BossAI.BossPhase.html" title="enum class in com.csse3200.game.components.enemy.enemyai">BossAI.BossPhase</a></span>&nbsp;<span class="element-name">getCurrentPhase</span>()</div>
 </section>
 </li>
 <li>
 <section class="detail" id="getPreviousMove()">
 <h3>getPreviousMove</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="BossAI.BossMove.html" title="enum class in com.csse3200.game.components.enemy.EnemyAI">BossAI.BossMove</a></span>&nbsp;<span class="element-name">getPreviousMove</span>()</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="BossAI.BossMove.html" title="enum class in com.csse3200.game.components.enemy.enemyai">BossAI.BossMove</a></span>&nbsp;<span class="element-name">getPreviousMove</span>()</div>
 </section>
 </li>
 <li>

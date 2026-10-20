@@ -134,26 +134,25 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color">
 <div class="block">Creates an isolated encounter area.</div>
 </div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback,com.csse3200.game.maps.PlayerRunState,com.csse3200.game.cards.deck.PlayerDeck,com.csse3200.game.maps.RunState)" class="member-name-link">EncounterGameArea</a><wbr>(<a href="terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback,com.csse3200.game.cards.deck.PlayerDeck,com.csse3200.game.maps.RunState,java.lang.String)" class="member-name-link">EncounterGameArea</a><wbr>(<a href="terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
+ <a href="../maps/RoomType.html" title="enum class in com.csse3200.game.maps">RoomType</a>&nbsp;roomType,
+ <a href="../maps/EncounterCallback.html" title="interface in com.csse3200.game.maps">EncounterCallback</a>&nbsp;completionCallback,
+ <a href="../cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a>&nbsp;sharedPlayerDeck,
+ <a href="../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;forcedEventId)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Selects a specific catalogue Event when requested; normal map selection stays random.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback,com.csse3200.game.maps.PlayerRunState,com.csse3200.game.cards.deck.PlayerDeck,com.csse3200.game.maps.RunState)" class="member-name-link">EncounterGameArea</a><wbr>(<a href="terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
  <a href="../maps/RoomType.html" title="enum class in com.csse3200.game.maps">RoomType</a>&nbsp;roomType,
  <a href="../maps/EncounterCallback.html" title="interface in com.csse3200.game.maps">EncounterCallback</a>&nbsp;completionCallback,
  <a href="../maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a>&nbsp;sharedPlayerState,
  <a href="../cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a>&nbsp;sharedPlayerDeck,
  <a href="../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState)</code></div>
-<div class="col-last even-row-color">
-<div class="block">Creates a map encounter area using the run that owns the shared deck and Fusion allowance.</div>
-</div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback,com.csse3200.game.maps.PlayerRunState,com.csse3200.game.cards.deck.PlayerDeck,com.csse3200.game.maps.RunState,java.lang.String)" class="member-name-link">EncounterGameArea</a><wbr>(<a href="terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory,
- <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
- <a href="../maps/RoomType.html" title="enum class in com.csse3200.game.maps">RoomType</a>&nbsp;roomType,
- <a href="../maps/EncounterCallback.html" title="interface in com.csse3200.game.maps">EncounterCallback</a>&nbsp;completionCallback,
- <a href="../maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a>&nbsp;sharedPlayerState,
- <a href="../cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a>&nbsp;sharedPlayerDeck,
- <a href="../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState,
- <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;forcedEventId)</code></div>
 <div class="col-last odd-row-color">
-<div class="block">Selects a specific catalogue Event when requested; normal map selection stays random.</div>
+<div class="block">Creates a map encounter area using the run that owns the shared deck and Fusion allowance.</div>
 </div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback,com.csse3200.game.maps.RunState,com.csse3200.game.cards.deck.PlayerDeck)" class="member-name-link">EncounterGameArea</a><wbr>(<a href="terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
@@ -303,13 +302,12 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="&lt;init&gt;(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback,com.csse3200.game.maps.PlayerRunState,com.csse3200.game.cards.deck.PlayerDeck,com.csse3200.game.maps.RunState,java.lang.String)">
+<section class="detail" id="&lt;init&gt;(com.csse3200.game.areas.terrain.TerrainFactory,java.lang.Integer,com.csse3200.game.maps.RoomType,com.csse3200.game.maps.EncounterCallback,com.csse3200.game.cards.deck.PlayerDeck,com.csse3200.game.maps.RunState,java.lang.String)">
 <h3>EncounterGameArea</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">EncounterGameArea</span><wbr><span class="parameters">(<a href="terrain/TerrainFactory.html" title="class in com.csse3200.game.areas.terrain">TerrainFactory</a>&nbsp;terrainFactory,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;nodeId,
  <a href="../maps/RoomType.html" title="enum class in com.csse3200.game.maps">RoomType</a>&nbsp;roomType,
  <a href="../maps/EncounterCallback.html" title="interface in com.csse3200.game.maps">EncounterCallback</a>&nbsp;completionCallback,
- <a href="../maps/PlayerRunState.html" title="class in com.csse3200.game.maps">PlayerRunState</a>&nbsp;sharedPlayerState,
  <a href="../cards/deck/PlayerDeck.html" title="class in com.csse3200.game.cards.deck">PlayerDeck</a>&nbsp;sharedPlayerDeck,
  <a href="../maps/RunState.html" title="class in com.csse3200.game.maps">RunState</a>&nbsp;runState,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;forcedEventId)</span></div>

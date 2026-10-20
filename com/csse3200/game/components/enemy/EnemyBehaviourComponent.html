@@ -96,7 +96,7 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="../Component.html" title="class in com.csse3200.game.components">Component</a></span></div>
 <div class="block">Decides and telegraphs an enemy's action each round, then resolves it.
 
- <p>The action for each round is chosen by an <a href="EnemyAI/EnemyAI.html" title="interface in com.csse3200.game.components.enemy.EnemyAI"><code>EnemyAI</code></a> resolved from the enemy's behaviour
+ <p>The action for each round is chosen by an <a href="enemyai/EnemyAI.html" title="interface in com.csse3200.game.components.enemy.enemyai"><code>EnemyAI</code></a> resolved from the enemy's behaviour
  id. Player health is not yet visible to this component.</div>
 </section>
 <section class="summary">
@@ -146,7 +146,7 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Replaces only the already-telegraphed action; the next roll still uses the normal AI.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="EnemyAI/EnemyAI.html" title="interface in com.csse3200.game.components.enemy.EnemyAI">EnemyAI</a></code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="enemyai/EnemyAI.html" title="interface in com.csse3200.game.components.enemy.enemyai">EnemyAI</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAI()" class="member-name-link">getAI</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the independent AI instance owned by this enemy.</div>
@@ -168,12 +168,12 @@ loadScripts(document, 'script');</script>
 <div class="block">Decides the action for the coming round and telegraphs it.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAI(com.csse3200.game.components.enemy.EnemyAI.EnemyAI)" class="member-name-link">setAI</a><wbr>(<a href="EnemyAI/EnemyAI.html" title="interface in com.csse3200.game.components.enemy.EnemyAI">EnemyAI</a>&nbsp;ai)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAI(com.csse3200.game.components.enemy.enemyai.EnemyAI)" class="member-name-link">setAI</a><wbr>(<a href="enemyai/EnemyAI.html" title="interface in com.csse3200.game.components.enemy.enemyai">EnemyAI</a>&nbsp;ai)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Replaces the AI used by this enemy.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setEnemyMemory(com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent)" class="member-name-link">setEnemyMemory</a><wbr>(<a href="Memory/EnemyMemoryComponent.html" title="class in com.csse3200.game.components.enemy.Memory">EnemyMemoryComponent</a>&nbsp;enemyMemory)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setEnemyMemory(com.csse3200.game.components.enemy.memory.EnemyMemoryComponent)" class="member-name-link">setEnemyMemory</a><wbr>(<a href="memory/EnemyMemoryComponent.html" title="class in com.csse3200.game.components.enemy.memory">EnemyMemoryComponent</a>&nbsp;enemyMemory)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Supplies the shared enemy-memory component attached to the player.</div>
 </div>
@@ -230,14 +230,14 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="getAI()">
 <h3>getAI</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="EnemyAI/EnemyAI.html" title="interface in com.csse3200.game.components.enemy.EnemyAI">EnemyAI</a></span>&nbsp;<span class="element-name">getAI</span>()</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="enemyai/EnemyAI.html" title="interface in com.csse3200.game.components.enemy.enemyai">EnemyAI</a></span>&nbsp;<span class="element-name">getAI</span>()</div>
 <div class="block">Returns the independent AI instance owned by this enemy.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="setAI(com.csse3200.game.components.enemy.EnemyAI.EnemyAI)">
+<section class="detail" id="setAI(com.csse3200.game.components.enemy.enemyai.EnemyAI)">
 <h3>setAI</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setAI</span><wbr><span class="parameters">(<a href="EnemyAI/EnemyAI.html" title="interface in com.csse3200.game.components.enemy.EnemyAI">EnemyAI</a>&nbsp;ai)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setAI</span><wbr><span class="parameters">(<a href="enemyai/EnemyAI.html" title="interface in com.csse3200.game.components.enemy.enemyai">EnemyAI</a>&nbsp;ai)</span></div>
 <div class="block">Replaces the AI used by this enemy.
 
  <p>This is intended for specialised battles that reuse an existing enemy entity with different
@@ -263,9 +263,9 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="setEnemyMemory(com.csse3200.game.components.enemy.Memory.EnemyMemoryComponent)">
+<section class="detail" id="setEnemyMemory(com.csse3200.game.components.enemy.memory.EnemyMemoryComponent)">
 <h3>setEnemyMemory</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setEnemyMemory</span><wbr><span class="parameters">(<a href="Memory/EnemyMemoryComponent.html" title="class in com.csse3200.game.components.enemy.Memory">EnemyMemoryComponent</a>&nbsp;enemyMemory)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setEnemyMemory</span><wbr><span class="parameters">(<a href="memory/EnemyMemoryComponent.html" title="class in com.csse3200.game.components.enemy.memory">EnemyMemoryComponent</a>&nbsp;enemyMemory)</span></div>
 <div class="block">Supplies the shared enemy-memory component attached to the player.
 
  <p>All enemies may read the same memory component, but each enemy still owns an independent AI

@@ -5,7 +5,7 @@
 <title>EnemyAI (core 1.0 API)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta name="description" content="declaration: package: com.csse3200.game.components.enemy.EnemyAI, interface: EnemyAI">
+<meta name="description" content="declaration: package: com.csse3200.game.components.enemy.enemyai, interface: EnemyAI">
 <meta name="generator" content="javadoc/ClassWriterImpl">
 <link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
 <link rel="stylesheet" type="text/css" href="../../../../../../script-dir/jquery-ui.min.css" title="Style">
@@ -82,13 +82,13 @@ loadScripts(document, 'script');</script>
 <main role="main">
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
-<div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">com.csse3200.game.components.enemy.EnemyAI</a></div>
+<div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">com.csse3200.game.components.enemy.enemyai</a></div>
 <h1 title="Interface EnemyAI" class="title">Interface EnemyAI</h1>
 </div>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Known Implementing Classes:</dt>
-<dd><code><a href="ArmourScalingAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">ArmourScalingAI</a></code>, <code><a href="BossAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">BossAI</a></code>, <code><a href="CycleAttackDefendAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">CycleAttackDefendAI</a></code>, <code><a href="CycleFourStanceAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">CycleFourStanceAI</a></code>, <code><a href="DefensiveStanceAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">DefensiveStanceAI</a></code>, <code><a href="EnrageLowHealthAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnrageLowHealthAI</a></code>, <code><a href="RandomStanceAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">RandomStanceAI</a></code>, <code><a href="ShieldBreakRetaliationAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">ShieldBreakRetaliationAI</a></code>, <code><a href="TutorialEnemyAI.html" title="class in com.csse3200.game.components.enemy.EnemyAI">TutorialEnemyAI</a></code></dd>
+<dd><code><a href="ArmourScalingAI.html" title="class in com.csse3200.game.components.enemy.enemyai">ArmourScalingAI</a></code>, <code><a href="BossAI.html" title="class in com.csse3200.game.components.enemy.enemyai">BossAI</a></code>, <code><a href="CycleAttackDefendAI.html" title="class in com.csse3200.game.components.enemy.enemyai">CycleAttackDefendAI</a></code>, <code><a href="CycleFourStanceAI.html" title="class in com.csse3200.game.components.enemy.enemyai">CycleFourStanceAI</a></code>, <code><a href="DefensiveStanceAI.html" title="class in com.csse3200.game.components.enemy.enemyai">DefensiveStanceAI</a></code>, <code><a href="EnrageLowHealthAI.html" title="class in com.csse3200.game.components.enemy.enemyai">EnrageLowHealthAI</a></code>, <code><a href="RandomStanceAI.html" title="class in com.csse3200.game.components.enemy.enemyai">RandomStanceAI</a></code>, <code><a href="ShieldBreakRetaliationAI.html" title="class in com.csse3200.game.components.enemy.enemyai">ShieldBreakRetaliationAI</a></code>, <code><a href="TutorialEnemyAI.html" title="class in com.csse3200.game.components.enemy.enemyai">TutorialEnemyAI</a></code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">EnemyAI</span></div>
@@ -108,7 +108,7 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="../EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#decide(com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext)" class="member-name-link">decide</a><wbr>(<a href="EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIContext</a>&nbsp;context)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#decide(com.csse3200.game.components.enemy.enemyai.EnemyAIContext)" class="member-name-link">decide</a><wbr>(<a href="EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.enemyai">EnemyAIContext</a>&nbsp;context)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">* Selects the enemy's next intent.</div>
 </div>
@@ -127,9 +127,9 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="decide(com.csse3200.game.components.enemy.EnemyAI.EnemyAIContext)">
+<section class="detail" id="decide(com.csse3200.game.components.enemy.enemyai.EnemyAIContext)">
 <h3>decide</h3>
-<div class="member-signature"><span class="return-type"><a href="../EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></span>&nbsp;<span class="element-name">decide</span><wbr><span class="parameters">(<a href="EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.EnemyAI">EnemyAIContext</a>&nbsp;context)</span></div>
+<div class="member-signature"><span class="return-type"><a href="../EnemyIntent.html" title="class in com.csse3200.game.components.enemy">EnemyIntent</a></span>&nbsp;<span class="element-name">decide</span><wbr><span class="parameters">(<a href="EnemyAIContext.html" title="class in com.csse3200.game.components.enemy.enemyai">EnemyAIContext</a>&nbsp;context)</span></div>
 <div class="block">* Selects the enemy's next intent. * * @param context read-only information about the current
  battle state * @return the selected enemy intent</div>
 </section>
