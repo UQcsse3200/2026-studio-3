@@ -343,10 +343,10 @@ class CardFusionSelectionViewTest {
           cardRarity = label;
         }
         hasType |= label.getText().toString().equals(reward.type.toString());
-      } else if (actor instanceof Image image && image.getWidth() == 316f) {
-        if (image.getHeight() == 260f) {
-          largeArtworkCount++;
-        }
+      } else if (actor instanceof Image image
+          && image.getWidth() == 316f
+          && image.getHeight() == 260f) {
+        largeArtworkCount++;
       }
     }
     assertTrue(hasEnergy);
@@ -368,7 +368,9 @@ class CardFusionSelectionViewTest {
           case "A new " -> prefix = label;
           case "Rare" -> highlightedRare = label;
           case " card joins your deck." -> suffix = label;
-          default -> {}
+          default -> {
+            // Other labels are unrelated to the reward sentence.
+          }
         }
       }
     }

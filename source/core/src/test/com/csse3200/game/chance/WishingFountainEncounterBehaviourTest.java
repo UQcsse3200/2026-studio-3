@@ -114,9 +114,10 @@ class WishingFountainEncounterBehaviourTest {
   void shouldRequireAtLeastOneEligibleCard() {
     Random random = new Random(266L);
 
+    CardService emptyCards = cards();
     assertThrows(
         IllegalArgumentException.class,
-        () -> new WishingFountainEncounterBehaviour(random, cards()));
+        () -> new WishingFountainEncounterBehaviour(random, emptyCards));
   }
 
   private static ChanceEncounterSession session(

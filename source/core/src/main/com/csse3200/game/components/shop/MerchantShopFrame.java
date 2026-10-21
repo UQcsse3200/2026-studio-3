@@ -110,7 +110,7 @@ final class MerchantShopFrame extends BaseDrawable {
   private void diamond(Batch batch, float x, float y, int radius) {
     for (int row = -radius; row < radius; row += 2) {
       int halfWidth = radius - Math.abs(row);
-      pixel.draw(batch, x - halfWidth, y + row, Math.max(2, halfWidth * 2), 2);
+      pixel.draw(batch, x - halfWidth, y + row, Math.max(2f, halfWidth * 2f), 2);
     }
   }
 

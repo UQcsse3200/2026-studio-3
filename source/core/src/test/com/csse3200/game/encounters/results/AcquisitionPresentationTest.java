@@ -105,8 +105,8 @@ class AcquisitionPresentationTest {
   @Test
   void failedOpeningCanBeRetriedWithoutDuplicatingBusinessEffects() {
     view.failShow = true;
-    assertThrows(
-        IllegalStateException.class, () -> presentation.show(result("first"), reason -> {}));
+    AcquisitionResult first = result("first");
+    assertThrows(IllegalStateException.class, () -> presentation.show(first, reason -> {}));
     Runnable failedCallback = view.onContinue;
     view.failShow = false;
     AtomicInteger completed = new AtomicInteger();
@@ -158,7 +158,7 @@ class AcquisitionPresentationTest {
     entries.clear();
     assertEquals(4, result.entries().size());
     assertEquals(2, result.entries().getLast().durationTurns());
-    assertThrows(UnsupportedOperationException.class, () -> result.entries().clear());
+    assertThrows(UnsupportedOperationException.class, result.entries()::clear);
   }
 
   @Test

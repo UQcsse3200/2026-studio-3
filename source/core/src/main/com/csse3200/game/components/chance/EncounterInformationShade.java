@@ -17,7 +17,7 @@ final class EncounterInformationShade extends BaseDrawable {
   }
 
   static float opacity(float fraction) {
-    float t = Math.max(0f, Math.min(1f, fraction));
+    float t = Math.clamp(fraction, 0f, 1f);
     // Seven connected stops keep the outer fade gradual rather than dropping off early.
     int last = OPACITY_STOPS.length - 1;
     int segment = Math.min(last - 1, (int) (t * last));
@@ -37,7 +37,7 @@ final class EncounterInformationShade extends BaseDrawable {
   }
 
   private static float smooth(float value) {
-    float t = Math.max(0f, Math.min(1f, value));
+    float t = Math.clamp(value, 0f, 1f);
     return t * t * (3f - 2f * t);
   }
 
@@ -62,7 +62,7 @@ final class EncounterInformationShade extends BaseDrawable {
     float parentAlpha = batch.getColor().a;
     float shadeWidth = width * .56f;
     float shadeHeight = Math.min(height * .65f, information.getPrefHeight() + 160f);
-    float topFade = Math.max(24f, Math.min(56f, information.getPadTop()));
+    float topFade = Math.clamp(information.getPadTop(), 24f, 56f);
     float bottom = y + height - shadeHeight;
     // Sample a two-dimensional field, not a horizontal ramp multiplied by a box mask.
     for (int column = 0; column < 96; column++) {

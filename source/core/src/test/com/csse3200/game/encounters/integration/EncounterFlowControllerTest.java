@@ -170,8 +170,8 @@ class EncounterFlowControllerTest {
 
     flow.startChance(1, createChanceEncounter());
 
-    assertThrows(
-        IllegalStateException.class, () -> flow.startShop(2, new ShopService(new ShopItem[0])));
+    ShopService shop = new ShopService(new ShopItem[0]);
+    assertThrows(IllegalStateException.class, () -> flow.startShop(2, shop));
   }
 
   @Test
@@ -200,11 +200,10 @@ class EncounterFlowControllerTest {
     EncounterFlowController flow =
         new EncounterFlowController(player, transactions, (nodeId, success) -> {});
 
-    assertThrows(
-        IllegalArgumentException.class, () -> flow.startChance(null, createChanceEncounter()));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> flow.startShop(null, new ShopService(new ShopItem[0])));
+    ChanceEncounter chance = createChanceEncounter();
+    ShopService shop = new ShopService(new ShopItem[0]);
+    assertThrows(IllegalArgumentException.class, () -> flow.startChance(null, chance));
+    assertThrows(IllegalArgumentException.class, () -> flow.startShop(null, shop));
 
     assertFalse(flow.isEncounterActive());
     assertNull(flow.getActiveNodeId());

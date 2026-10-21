@@ -19,7 +19,7 @@ final class EncounterResultShade extends BaseDrawable {
 
   static float opacity(float horizontal, float vertical) {
     float distance = (float) Math.sqrt(Math.pow(horizontal, 4) + vertical * vertical);
-    float t = Math.max(0f, Math.min(1f, (distance - .28f) / .72f));
+    float t = Math.clamp((distance - .28f) / .72f, 0f, 1f);
     return 1f - t * t * (3f - 2f * t);
   }
 

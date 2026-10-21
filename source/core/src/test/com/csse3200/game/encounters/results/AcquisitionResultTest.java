@@ -140,7 +140,7 @@ class AcquisitionResultTest {
     assertEquals(expected, result.entries());
     assertEquals(AcquisitionResult.Kind.ITEM, result.entries().get(1).kind());
     assertEquals(-10, result.entries().get(2).delta());
-    assertThrows(UnsupportedOperationException.class, () -> result.entries().clear());
+    assertThrows(UnsupportedOperationException.class, result.entries()::clear);
   }
 
   @Test

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.csse3200.game.components.player.InventoryComponent;
 import com.csse3200.game.extensions.GameExtension;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -149,9 +150,9 @@ class ShopServiceTest {
     ShopService shop =
         new ShopService(new ShopItem[] {new ShopItem("heal", "card_heal", "Heal", 20, 1)});
 
-    assertThrows(UnsupportedOperationException.class, () -> shop.getItems().clear());
-    assertThrows(
-        UnsupportedOperationException.class, () -> shop.getValidationErrors().add("mutate"));
+    assertThrows(UnsupportedOperationException.class, shop.getItems()::clear);
+    List<String> errors = shop.getValidationErrors();
+    assertThrows(UnsupportedOperationException.class, () -> errors.add("mutate"));
   }
 
   @Test

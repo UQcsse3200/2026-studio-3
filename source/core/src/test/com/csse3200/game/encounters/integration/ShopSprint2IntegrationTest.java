@@ -110,7 +110,7 @@ class ShopSprint2IntegrationTest {
     MockPlayerStateGateway player = new MockPlayerStateGateway(100, 50);
     ShopItem offer = new ShopItem("future-offer", "future-card", "Future", 20, 1);
     ShopService shop = new ShopService(new ShopItem[] {offer});
-    CardCatalogGateway futureCatalog = cardId -> "future-card".equals(cardId);
+    CardCatalogGateway futureCatalog = "future-card"::equals;
     IntegratedShopTransactionGateway transactions =
         new IntegratedShopTransactionGateway(
             player, futureCatalog, new PlayerDeckAdapter(playerDeck));

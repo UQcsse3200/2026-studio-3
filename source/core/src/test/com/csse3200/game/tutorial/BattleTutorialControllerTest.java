@@ -221,7 +221,8 @@ class BattleTutorialControllerTest {
     verify(battle, times(1)).addPhaseChangeListener(any());
     verify(battle, times(1)).addBattleEndListener(any());
     assertThrows(IllegalStateException.class, () -> tutorial.bindTo(battle));
-    assertThrows(NullPointerException.class, () -> new BattleTutorialController().bindTo(null));
+    BattleTutorialController unbound = new BattleTutorialController();
+    assertThrows(NullPointerException.class, () -> unbound.bindTo(null));
   }
 
   @Test

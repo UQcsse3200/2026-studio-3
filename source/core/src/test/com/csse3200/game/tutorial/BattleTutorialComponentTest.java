@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
@@ -30,7 +31,7 @@ class BattleTutorialComponentTest {
     var playerHealth = new java.util.concurrent.atomic.AtomicInteger(100);
     var settled = new java.util.concurrent.atomic.AtomicBoolean(false);
     var poisoned = new java.util.concurrent.atomic.AtomicBoolean(false);
-    org.mockito.Mockito.when(battle.getCurrentPhase()).thenReturn(BattlePhase.PLAYER_TURN);
+    when(battle.getCurrentPhase()).thenReturn(BattlePhase.PLAYER_TURN);
     BattleTutorialComponent reference =
         new BattleTutorialComponent(battle, view, outcomes::add, "strike-copy", "poison-copy");
     reference.setObservation(

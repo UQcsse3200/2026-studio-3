@@ -79,10 +79,10 @@ final class MerchantInteractionMarker extends Actor {
       int halfWidth = radius - Math.abs(row);
       int width = halfWidth * 2 + 1;
       if (width <= stroke * 2) {
-        pixel.draw(batch, x - width / 2f, y + row - .5f, width, 1);
+        pixel.draw(batch, x - width / 2f, y + row - .5f, (float) width, 1);
       } else {
-        pixel.draw(batch, x - width / 2f, y + row - .5f, stroke, 1);
-        pixel.draw(batch, x + width / 2f - stroke, y + row - .5f, stroke, 1);
+        pixel.draw(batch, x - width / 2f, y + row - .5f, (float) stroke, 1);
+        pixel.draw(batch, x + width / 2f - stroke, y + row - .5f, (float) stroke, 1);
       }
     }
   }

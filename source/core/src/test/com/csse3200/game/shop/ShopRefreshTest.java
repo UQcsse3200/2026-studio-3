@@ -38,8 +38,8 @@ class ShopRefreshTest {
   @Test
   void invalidConfigurationDoesNotPartiallyEnableRefresh() {
     ShopEncounter shop = new ShopEncounter(7, stock("old"), gateway, null);
-    assertThrows(
-        NullPointerException.class, () -> shop.enableRefresh(new ShopRefreshPolicy(10), null));
+    ShopRefreshPolicy policy = new ShopRefreshPolicy(10);
+    assertThrows(NullPointerException.class, () -> shop.enableRefresh(policy, null));
     assertTrue(shop.getNextRefreshCost().isEmpty());
     shop.enableRefresh(new ShopRefreshPolicy(10), () -> stock("new"));
     assertTrue(shop.refresh(0, "free").isSuccess());
@@ -258,7 +258,7 @@ class ShopRefreshTest {
     assertEquals(49, shop.snapshot().offers().getFirst().price());
     shop.purchase("news", 1, "buy");
     assertEquals(2, snapshot.offers().getFirst().stock());
-    assertThrows(UnsupportedOperationException.class, () -> snapshot.offers().clear());
+    assertThrows(UnsupportedOperationException.class, snapshot.offers()::clear);
   }
 
   @Test

@@ -29,7 +29,9 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
 
   private final Stage stage;
   private final Supplier<List<Actor>> hand;
-  private final Supplier<Actor> demonstration, inventory, endTurn;
+  private final Supplier<Actor> demonstration;
+  private final Supplier<Actor> inventory;
+  private final Supplier<Actor> endTurn;
   private Supplier<Actor> itemInventory = () -> null;
   private Supplier<Actor> energy = () -> null;
   private Supplier<Label> health = () -> null;
@@ -85,12 +87,16 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
   private int originalCardZ;
   private final List<Rectangle> highlights = new ArrayList<>();
   private final Table narration = new Table();
-  private final Label message, advanceHint;
+  private final Label message;
+  private final Label advanceHint;
   private final TextButton exit;
   private final TextureRegion pixel;
-  private boolean finalPass, attached, tapArmed;
+  private boolean finalPass;
+  private boolean attached;
+  private boolean tapArmed;
   private float pulse;
-  private Runnable continueAction, exitAction;
+  private Runnable continueAction;
+  private Runnable exitAction;
   private BattleTutorialPrompt prompt;
   private Rectangle dragPrompt;
   private final Label damageNumber;
@@ -304,7 +310,8 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
   }
 
   private void layoutCues() {
-    float w = stage.getWidth(), h = stage.getHeight();
+    float w = stage.getWidth();
+    float h = stage.getHeight();
     overlay.setSize(w, h);
     List<Rectangle> enemyBoxes = enemies.get();
     if (!enemyBoxes.isEmpty()) {
@@ -452,7 +459,8 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
       if (!order.contains(direction)) order.add(direction);
     Rectangle first = null;
     for (Placement direction : order) {
-      float x = target.x + (target.width - width) / 2, y = target.y + (target.height - height) / 2;
+      float x = target.x + (target.width - width) / 2;
+      float y = target.y + (target.height - height) / 2;
       switch (direction) {
         case ABOVE -> y = target.y + target.height + 26;
         case BELOW -> y = target.y - height - 26;
@@ -480,23 +488,6 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
       if (actor instanceof Label l
           && l.getText().toString().startsWith("Armour:")
           && !isWithin(actor, overlay)) return actor.getParent();
-    return null;
-  }
-
-  private Actor findStat(String prefix, boolean parent) {
-    for (Actor actor : descendants(stage.getRoot())) {
-      if (actor instanceof Label label
-          && !isWithin(actor, overlay)
-          && label.getText().toString().startsWith(prefix)) {
-        if (prefix.equals("Health:")
-            && actor.getParent() instanceof Group group
-            && descendants(group).stream()
-                .noneMatch(
-                    a -> a instanceof Label l && l.getText().toString().startsWith("Energy:")))
-          continue;
-        return parent ? actor.getParent() : actor;
-      }
-    }
     return null;
   }
 
@@ -552,10 +543,10 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
   }
 
   static Rectangle bounds(Actor actor) {
-    float minX = Float.MAX_VALUE,
-        minY = Float.MAX_VALUE,
-        maxX = -Float.MAX_VALUE,
-        maxY = -Float.MAX_VALUE;
+    float minX = Float.MAX_VALUE;
+    float minY = Float.MAX_VALUE;
+    float maxX = -Float.MAX_VALUE;
+    float maxY = -Float.MAX_VALUE;
     for (Vector2 corner :
         List.of(
             new Vector2(),
@@ -621,10 +612,10 @@ public final class BattleTutorialGuidanceView implements BattleTutorialView {
   }
 
   private void drawDragArc(Batch batch, Rectangle card, Rectangle enemy) {
-    float sx = card.x + card.width / 2,
-        sy = card.y + card.height,
-        ex = enemy.x + enemy.width / 2,
-        ey = enemy.y + enemy.height / 2;
+    float sx = card.x + card.width / 2;
+    float sy = card.y + card.height;
+    float ex = enemy.x + enemy.width / 2;
+    float ey = enemy.y + enemy.height / 2;
     for (int i = 0; i <= 35; i++) {
       float t = i / 35f;
       rect(batch, sx + (ex - sx) * t, sy + (ey - sy) * t + 360 * t * (1 - t), 4, 4);

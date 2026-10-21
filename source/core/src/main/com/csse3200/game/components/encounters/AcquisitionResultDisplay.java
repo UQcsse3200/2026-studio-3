@@ -189,9 +189,8 @@ public final class AcquisitionResultDisplay implements AcquisitionView {
             + (result.entries().stream().anyMatch(e -> e.kind() == AcquisitionResult.Kind.CARD)
                 ? 1
                 : 0);
-    int columns = Math.max(1, Math.min(3, displayedCount));
-    float tileWidth =
-        Math.min(250f, Math.max(140f, (stage.getWidth() * .88f - 300f) / columns - 18f));
+    int columns = Math.clamp(displayedCount, 1, 3);
+    float tileWidth = Math.clamp((stage.getWidth() * .88f - 300f) / columns - 18f, 140f, 250f);
     int index = 0;
     Actor cardSource = null;
     for (AcquisitionResult.Entry entry : result.entries()) {

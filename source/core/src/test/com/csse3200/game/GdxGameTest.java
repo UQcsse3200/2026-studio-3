@@ -186,10 +186,10 @@ class GdxGameTest {
 
   @Test
   void campfireShortcutUsesIsolatedPreviewWithoutChangingMap() {
-    assertDemoNode(RoomType.CAMPFIRE);
+    assertDemoNode();
   }
 
-  private void assertDemoNode(RoomType roomType) {
+  private void assertDemoNode() {
     GdxGame game = gameWithActiveNode(RoomType.COMBAT);
     game.getRunState().markCardFusionUsed();
     MapGraph originalMap = game.getRunState().getMapGraph();

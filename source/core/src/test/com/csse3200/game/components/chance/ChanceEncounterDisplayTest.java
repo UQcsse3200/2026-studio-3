@@ -3,6 +3,7 @@ package com.csse3200.game.components.chance;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -72,7 +73,7 @@ class ChanceEncounterDisplayTest {
         assertTrue(session.isResolved());
         assertEquals(Math.min(maxHealth, health + 20), player.getHealth());
         Table overlay = stage.getRoot().findActor("acquisition-result-overlay");
-        assertTrue(overlay != null);
+        assertNotNull(overlay);
         String id = "hp";
         var label =
             (com.badlogic.gdx.scenes.scene2d.ui.Label) overlay.findActor("acquisition-entry-" + id);

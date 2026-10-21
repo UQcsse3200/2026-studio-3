@@ -668,7 +668,7 @@ public class ShopDisplay extends UIComponent {
 
       PurchaseResult availability = shopEncounter.canPurchase(item.id);
       ShopItemState state = getItemState(availability, purchasedItemIds.contains(item.id));
-      applyItemState(widgets, item, state);
+      applyItemState(widgets, state);
     }
   }
 
@@ -711,7 +711,7 @@ public class ShopDisplay extends UIComponent {
     }
   }
 
-  private void applyItemState(ItemWidgets widgets, ShopItem item, ShopItemState state) {
+  private void applyItemState(ItemWidgets widgets, ShopItemState state) {
     MerchantShopFrame.Tone tone =
         switch (state) {
           case AVAILABLE -> MerchantShopFrame.Tone.NORMAL;

@@ -181,16 +181,16 @@ class ChanceAcquisitionSessionTest {
                 deck,
                 new PlayerRunStateItemAdapter(state)),
             (node, success) -> completed.incrementAndGet());
-    ChanceAcquisitionSession acquisitions = active.getAcquisitionSession(cards);
+    ChanceAcquisitionSession activeAcquisitions = active.getAcquisitionSession(cards);
     assertTrue(active.resolveChoice("accept").isSuccess());
     when(cards.getCard("bandage")).thenThrow(new IllegalStateException("Metadata unavailable"));
-    assertFalse(acquisitions.show(view, active::complete, () -> {}));
+    assertFalse(activeAcquisitions.show(view, active::complete, () -> {}));
     assertEquals(0, view.shown);
     assertFalse(active.isCompleted());
     assertRewardsOnce();
     doReturn(Optional.empty()).when(cards).getCard("bandage");
-    assertTrue(acquisitions.show(view, active::complete, () -> {}));
-    assertSame(view.result, acquisitions.getResult().orElseThrow());
+    assertTrue(activeAcquisitions.show(view, active::complete, () -> {}));
+    assertSame(view.result, activeAcquisitions.getResult().orElseThrow());
     view.onContinue.run();
     assertEquals(1, completed.get());
     assertRewardsOnce();

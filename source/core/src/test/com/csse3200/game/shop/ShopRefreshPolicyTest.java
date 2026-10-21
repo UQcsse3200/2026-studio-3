@@ -33,7 +33,8 @@ class ShopRefreshPolicyTest {
   void rejectsInvalidSettingsAndNeverWrapsToFreeOrNegativeFees() {
     assertThrows(IllegalArgumentException.class, () -> new ShopRefreshPolicy(0));
     assertThrows(IllegalArgumentException.class, () -> new ShopRefreshPolicy(-1));
-    assertThrows(IllegalArgumentException.class, () -> new ShopRefreshPolicy(1).costAfter(-1));
+    ShopRefreshPolicy policy = new ShopRefreshPolicy(1);
+    assertThrows(IllegalArgumentException.class, () -> policy.costAfter(-1));
     assertEquals(
         Integer.MAX_VALUE, new ShopRefreshPolicy(Integer.MAX_VALUE).costAfter(1).orElseThrow());
     assertTrue(new ShopRefreshPolicy(Integer.MAX_VALUE).costAfter(2).isEmpty());
