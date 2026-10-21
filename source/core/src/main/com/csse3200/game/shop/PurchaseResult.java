@@ -29,7 +29,7 @@ public class PurchaseResult {
 
   public static PurchaseResult success(ShopItem item) {
     String name = item == null ? "item" : item.getDisplayName();
-    return new PurchaseResult(Status.SUCCESS, item, String.format("Bought %s.", name));
+    return new PurchaseResult(Status.SUCCESS, item, "Bought " + name + ".");
   }
 
   public static PurchaseResult available(ShopItem item) {

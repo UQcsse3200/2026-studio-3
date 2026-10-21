@@ -303,22 +303,8 @@ class ShopDisplayTest {
   }
 
   @Test
-  void refreshPreservesWoodenSlotsAndUsesBackendFees() {
-    ServiceLocator.registerResourceService(mock(ResourceService.class));
-    ShopEncounter encounter = openShop();
-    encounter.enableRefresh(
-        com.csse3200.game.shop.ShopRefreshPolicy.standard(),
-        () ->
-            new ShopService(
-                new ShopItem[] {
-                  new ShopItem("a", "a", "A", 20, 1),
-                  new ShopItem("b", "b", "B", 20, 1),
-                  new ShopItem("c", "c", "C", 20, 1)
-                }));
-    ShopDisplay display = new ShopDisplay(encounter, mock(CardService.class));
-    entity = new Entity().addComponent(display);
-    entity.create();
-    display.openMerchant();
+  void refreshPreservesActorsAndUsesBackendFees() {
+    ShopEncounter encounter = openRefreshableShop();
     Actor root = stage.getRoot().findActor("merchant-scene");
     CardDisplaySlot slot = stage.getRoot().findActor("shop-slot-0");
     Actor counter = stage.getRoot().findActor("merchant-products");
@@ -336,43 +322,6 @@ class ShopDisplayTest {
     org.junit.jupiter.api.Assertions.assertSame(purchase, slot.purchaseButton());
     org.junit.jupiter.api.Assertions.assertSame(
         counter, stage.getRoot().findActor("merchant-products"));
-    CardDisplaySlot middle = stage.getRoot().findActor("shop-slot-1");
-    CardDisplaySlot right = stage.getRoot().findActor("shop-slot-2");
-    org.junit.jupiter.api.Assertions.assertSame(counter, slot.getParent());
-    org.junit.jupiter.api.Assertions.assertSame(slot.getParent(), middle.getParent());
-    org.junit.jupiter.api.Assertions.assertSame(slot.getParent(), right.getParent());
-    assertEquals(3, slot.getParent().getChildren().size);
-    assertNull(stage.getRoot().findActor("shop-continuous-card-channel"));
-    assertEquals(3, slot.getChildren().size);
-    assertNull(slot.findActor("offer-thin-base"));
-    assertNull(
-        ((com.badlogic.gdx.scenes.scene2d.ui.Table) slot.getChildren().get(1)).getBackground());
-    assertEquals(slot.getY(), middle.getY());
-    assertEquals(slot.getY(), right.getY());
-    assertEquals(middle.getX() - slot.getX(), right.getX() - middle.getX());
-    assertEquals(slot.purchaseButton().getY(), middle.purchaseButton().getY());
-    assertEquals(slot.purchaseButton().getWidth(), right.purchaseButton().getWidth());
-    var pricePanel = slot.getChildren().get(1);
-    var cardLayer = slot.getChildren().first();
-    assertEquals(458f, slot.getHeight());
-    org.junit.jupiter.api.Assertions.assertTrue(refresh.getY() > 4f);
-    // The face texture has transparent padding below its visible lower edge.
-    org.junit.jupiter.api.Assertions.assertTrue(
-        pricePanel.getY() + pricePanel.getHeight() < cardLayer.getY() + 12f);
-    assertEquals(18f, cardLayer.getX());
-    assertEquals(15f, middle.getChildren().first().getX());
-    assertEquals(12f, right.getChildren().first().getX());
-    assertEquals(94f, cardLayer.getY());
-    assertEquals(78f, pricePanel.getY());
-    assertEquals(264f, slot.purchaseButton().getWidth());
-    assertEquals(46f, slot.purchaseButton().getHeight());
-    assertEquals(
-        pricePanel.getX() + pricePanel.getWidth() / 2f,
-        slot.purchaseButton().getX() + slot.purchaseButton().getWidth() / 2f);
-    org.junit.jupiter.api.Assertions.assertTrue(
-        slot.purchaseButton().getY() + slot.purchaseButton().getHeight() < pricePanel.getY());
-    org.junit.jupiter.api.Assertions.assertTrue(
-        refresh.getY() + refresh.getHeight() < counter.getY());
     org.junit.jupiter.api.Assertions.assertSame(root, stage.getRoot().findActor("merchant-scene"));
     org.junit.jupiter.api.Assertions.assertSame(refresh, stage.getRoot().findActor("shop-refresh"));
     refresh.fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
@@ -397,6 +346,84 @@ class ShopDisplayTest {
     org.junit.jupiter.api.Assertions.assertSame(slot, stage.getRoot().findActor("shop-slot-0"));
     org.junit.jupiter.api.Assertions.assertSame(purchase, slot.purchaseButton());
     org.junit.jupiter.api.Assertions.assertSame(root, stage.getRoot().findActor("merchant-scene"));
+  }
+
+  @Test
+  void refreshedGoodsRemainInThreeAlignedSlots() {
+    openRefreshableShop();
+    var refresh =
+        (com.badlogic.gdx.scenes.scene2d.ui.TextButton) stage.getRoot().findActor("shop-refresh");
+    refresh.fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    CardDisplaySlot slot = stage.getRoot().findActor("shop-slot-0");
+    CardDisplaySlot middle = stage.getRoot().findActor("shop-slot-1");
+    CardDisplaySlot right = stage.getRoot().findActor("shop-slot-2");
+    Actor counter = stage.getRoot().findActor("merchant-products");
+    org.junit.jupiter.api.Assertions.assertSame(counter, slot.getParent());
+    org.junit.jupiter.api.Assertions.assertSame(slot.getParent(), middle.getParent());
+    org.junit.jupiter.api.Assertions.assertSame(slot.getParent(), right.getParent());
+    assertEquals(3, slot.getParent().getChildren().size);
+    assertNull(stage.getRoot().findActor("shop-continuous-card-channel"));
+    assertEquals(3, slot.getChildren().size);
+    assertNull(slot.findActor("offer-thin-base"));
+    assertNull(
+        ((com.badlogic.gdx.scenes.scene2d.ui.Table) slot.getChildren().get(1)).getBackground());
+    assertEquals(slot.getY(), middle.getY());
+    assertEquals(slot.getY(), right.getY());
+    assertEquals(middle.getX() - slot.getX(), right.getX() - middle.getX());
+    assertEquals(slot.purchaseButton().getY(), middle.purchaseButton().getY());
+    assertEquals(slot.purchaseButton().getWidth(), right.purchaseButton().getWidth());
+  }
+
+  @Test
+  void refreshedPurchaseControlsStayBelowCardFaces() {
+    openRefreshableShop();
+    var refresh =
+        (com.badlogic.gdx.scenes.scene2d.ui.TextButton) stage.getRoot().findActor("shop-refresh");
+    refresh.fire(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent());
+    CardDisplaySlot slot = stage.getRoot().findActor("shop-slot-0");
+    CardDisplaySlot middle = stage.getRoot().findActor("shop-slot-1");
+    CardDisplaySlot right = stage.getRoot().findActor("shop-slot-2");
+    Actor counter = stage.getRoot().findActor("merchant-products");
+    var pricePanel = slot.getChildren().get(1);
+    var cardLayer = slot.getChildren().first();
+    assertEquals(458f, slot.getHeight());
+    org.junit.jupiter.api.Assertions.assertTrue(refresh.getY() > 4f);
+    // The face texture has transparent padding below its visible lower edge.
+    org.junit.jupiter.api.Assertions.assertTrue(
+        pricePanel.getY() + pricePanel.getHeight() < cardLayer.getY() + 12f);
+    assertEquals(18f, cardLayer.getX());
+    assertEquals(15f, middle.getChildren().first().getX());
+    assertEquals(12f, right.getChildren().first().getX());
+    assertEquals(94f, cardLayer.getY());
+    assertEquals(78f, pricePanel.getY());
+    assertEquals(264f, slot.purchaseButton().getWidth());
+    assertEquals(46f, slot.purchaseButton().getHeight());
+    assertEquals(
+        pricePanel.getX() + pricePanel.getWidth() / 2f,
+        slot.purchaseButton().getX() + slot.purchaseButton().getWidth() / 2f);
+    org.junit.jupiter.api.Assertions.assertTrue(
+        slot.purchaseButton().getY() + slot.purchaseButton().getHeight() < pricePanel.getY());
+    org.junit.jupiter.api.Assertions.assertTrue(
+        refresh.getY() + refresh.getHeight() < counter.getY());
+  }
+
+  private ShopEncounter openRefreshableShop() {
+    ServiceLocator.registerResourceService(mock(ResourceService.class));
+    ShopEncounter encounter = openShop();
+    encounter.enableRefresh(
+        com.csse3200.game.shop.ShopRefreshPolicy.standard(),
+        () ->
+            new ShopService(
+                new ShopItem[] {
+                  new ShopItem("a", "a", "A", 20, 1),
+                  new ShopItem("b", "b", "B", 20, 1),
+                  new ShopItem("c", "c", "C", 20, 1)
+                }));
+    ShopDisplay display = new ShopDisplay(encounter, mock(CardService.class));
+    entity = new Entity().addComponent(display);
+    entity.create();
+    display.openMerchant();
+    return encounter;
   }
 
   @Test

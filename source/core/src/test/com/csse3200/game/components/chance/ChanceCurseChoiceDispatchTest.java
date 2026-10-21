@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.csse3200.game.cards.TestCardService;
+import com.csse3200.game.chance.ChanceChoice;
 import com.csse3200.game.chance.ChanceEncounterBehaviourFactory;
 import com.csse3200.game.chance.ChanceEncounterConfigLoader;
 import com.csse3200.game.chance.TestMineRandom;
@@ -166,7 +167,7 @@ class ChanceCurseChoiceDispatchTest {
         assertEquals(3, layout.getCell(buttons.get(3)).getColspan());
       }
       int choiceIndex =
-          encounter.getChoices().stream().map(choice -> choice.getId()).toList().indexOf(choiceId);
+          encounter.getChoices().stream().map(ChanceChoice::getId).toList().indexOf(choiceId);
       display.getChoiceButtons().get(choiceIndex).fire(new ChangeEvent());
       assertTrue(session.isResolved());
       assertEquals(35 + gold, player.getCurrency());

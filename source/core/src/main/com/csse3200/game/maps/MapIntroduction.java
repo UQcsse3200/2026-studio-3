@@ -51,10 +51,14 @@ public final class MapIntroduction extends Group {
 
     Label body =
         new Label(
-            "Reach the Boss at the top of the map.\n\n"
-                + "Start by selecting an available node connected to the starting point.\n\n"
-                + "Complete its encounter, then choose your next connected node. "
-                + "At each fork, follow one path. You don't need to explore every branch.",
+            """
+            Reach the Boss at the top of the map.
+
+            Start by selecting an available node connected to the starting point.
+
+            Complete its encounter, then choose your next connected node. \
+            At each fork, follow one path. You don't need to explore every branch.\
+            """,
             skin,
             "popup");
     body.setName("map-introduction-text");

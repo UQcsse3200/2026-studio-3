@@ -74,7 +74,7 @@ public final class BattleTutorialComponent extends Component {
           else view.clear(); // The existing tutorial battle owner handles victory/defeat.
         });
     tutorial.bindTo(battle);
-    view.bindActions(() -> tutorial.continueInformation(), tutorial::cancel);
+    view.bindActions(tutorial::continueInformation, tutorial::cancel);
     if (observation != null) {
       initialEnemyHealth = observation.enemyHealth().getAsInt();
       tutorial.observeInitialHealth(initialEnemyHealth);

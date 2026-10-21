@@ -857,12 +857,15 @@ public class BattleScreen extends ScreenAdapter implements LoadedSaveTransitionA
 
   @Override
   public void pause() {
-    cardInspection.reset();
-    cardKeywordTooltip.hide();
+    resetCardInteraction();
   }
 
   @Override
   public void hide() {
+    resetCardInteraction();
+  }
+
+  private void resetCardInteraction() {
     cardInspection.reset();
     cardKeywordTooltip.hide();
   }

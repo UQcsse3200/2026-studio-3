@@ -3,6 +3,7 @@ package com.csse3200.game.components.chance;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -72,7 +73,7 @@ class ChanceEncounterDisplayTest {
         assertTrue(session.isResolved());
         assertEquals(Math.min(maxHealth, health + 20), player.getHealth());
         Table overlay = stage.getRoot().findActor("acquisition-result-overlay");
-        assertTrue(overlay != null);
+        assertNotNull(overlay);
         String id = "hp";
         var label =
             (com.badlogic.gdx.scenes.scene2d.ui.Label) overlay.findActor("acquisition-entry-" + id);
@@ -433,7 +434,91 @@ class ChanceEncounterDisplayTest {
   }
 
   @Test
-  void shouldRefreshDiceButtonsAfterEachStagedChoice() {
+  void dicePredictionShowsRulesAndSettlesBeforeOfferingDecisions() {
+    try (DiceDisplayFixture scene = createDiceDisplay()) {
+      Stage sceneStage = scene.stage();
+      ChanceEncounterDisplay display = scene.display();
+      ChanceEncounterSession session = scene.session();
+      assertEquals(List.of("low", "high"), choiceIds(display));
+      assertEquals(
+          "Dice Game Rules",
+          display.getHelpDialog().getDialog().getTitleLabel().getText().toString());
+      assertTrue(display.getHelpDialog().getBodyLabel().getText().toString().contains("Low (2-6)"));
+      display.getHelpButton().fire(new ChangeEvent());
+      assertEquals(sceneStage, display.getHelpDialog().getDialog().getStage());
+      display.getHelpDialog().getCloseButton().fire(new ChangeEvent());
+      finishDialogClose(sceneStage);
+      assertNull(display.getHelpDialog().getDialog().getStage());
+      assertEquals(List.of("low", "high"), choiceIds(display));
+      assertFalse(session.isResolved());
+      assertEquals("TOTAL  ?", display.getDiceRollDisplay().getTotalText());
+      assertEquals("?", display.getDiceRollDisplay().getDisplayedTotalValue());
+      ((Table) display.getChoiceButtons().get(0).getParent()).layout();
+      assertTrue(
+          display.getChoiceButtons().get(0).getX() < display.getChoiceButtons().get(1).getX());
+      display.getChoiceButtons().get(0).fire(new ChangeEvent());
+      assertTrue(display.getDiceRollDisplay().isRolling());
+      assertEquals("ROLLING...", display.getResultText());
+      display.getChoiceButtons().get(1).fire(new ChangeEvent());
+      for (int frame = 0; frame < 42; frame++) {
+        sceneStage.act(1f / 60f);
+      }
+      assertTrue(display.getDiceRollDisplay().isRolling());
+      assertEquals(1, display.getDiceRollDisplay().getFirstValue());
+      assertEquals(6, display.getDiceRollDisplay().getSecondValue());
+      assertEquals("ROLLING...", display.getDiceRollDisplay().getTotalText());
+      for (int frame = 0; frame < 18; frame++) {
+        sceneStage.act(1f / 60f);
+      }
+      assertFalse(display.getDiceRollDisplay().isRolling());
+      assertEquals(1, display.getDiceRollDisplay().getFirstValue());
+      assertEquals(6, display.getDiceRollDisplay().getSecondValue());
+      assertEquals("TOTAL  7", display.getDiceRollDisplay().getTotalText());
+      assertEquals("7", display.getDiceRollDisplay().getDisplayedTotalValue());
+      assertEquals(List.of("take", "double-down"), choiceIds(display));
+    }
+  }
+
+  @Test
+  void diceDecisionsReplaceButtonsAndKeepHelpUntilCompletion() {
+    try (DiceDisplayFixture scene = createDiceDisplay()) {
+      Stage sceneStage = scene.stage();
+      ChanceEncounterDisplay display = scene.display();
+      ChanceEncounterSession session = scene.session();
+      List<TextButton> initialChoiceButtons = display.getChoiceButtons();
+      TextButton persistentHelpButton = display.getHelpButton();
+      display.getChoiceButtons().get(0).fire(new ChangeEvent());
+      for (int frame = 0; frame < 60; frame++) {
+        sceneStage.act(1f / 60f);
+      }
+      for (TextButton oldChoice : initialChoiceButtons) {
+        assertNull(oldChoice.getStage());
+      }
+      assertEquals(persistentHelpButton, display.getHelpButton());
+      assertEquals(sceneStage, persistentHelpButton.getStage());
+      display.getHelpButton().fire(new ChangeEvent());
+      assertEquals(sceneStage, display.getHelpDialog().getDialog().getStage());
+      display.getHelpDialog().getCloseButton().fire(new ChangeEvent());
+      finishDialogClose(sceneStage);
+      assertNull(display.getHelpDialog().getDialog().getStage());
+      assertEquals(List.of("take", "double-down"), choiceIds(display));
+      assertTrue(display.getResultText().contains("LUCKY SEVEN!"));
+      assertTrue(display.getResultText().contains("dice total is 7"));
+      assertFalse(session.isResolved());
+
+      display.getChoiceButtons().get(0).fire(new ChangeEvent());
+      assertFalse(display.getDiceRollDisplay().isRolling());
+      assertEquals("TOTAL  7", display.getDiceRollDisplay().getTotalText());
+      assertEquals(List.of("cash-out", "continue"), choiceIds(display));
+      assertTrue(display.getResultText().contains("10 gold"));
+      assertFalse(session.isResolved());
+
+      display.getChoiceButtons().get(0).fire(new ChangeEvent());
+      assertTrue(session.isResolved());
+    }
+  }
+
+  private DiceDisplayFixture createDiceDisplay() {
     Stage sceneStage = new Stage(new FitViewport(1280f, 800f), mock(Batch.class));
     RenderService renderService = new RenderService();
     renderService.setStage(sceneStage);
@@ -472,74 +557,16 @@ class ChanceEncounterDisplayTest {
     ChanceEncounterDisplay display = new ChanceEncounterDisplay(session);
     Entity sceneEntity = new Entity().addComponent(display);
     entities.register(sceneEntity);
+    return new DiceDisplayFixture(sceneStage, sceneEntity, session, display);
+  }
 
-    try {
-      assertEquals(List.of("low", "high"), choiceIds(display));
-      List<TextButton> initialChoiceButtons = display.getChoiceButtons();
-      TextButton persistentHelpButton = display.getHelpButton();
-      assertEquals(
-          "Dice Game Rules",
-          display.getHelpDialog().getDialog().getTitleLabel().getText().toString());
-      assertTrue(display.getHelpDialog().getBodyLabel().getText().toString().contains("Low (2-6)"));
-      display.getHelpButton().fire(new ChangeEvent());
-      assertEquals(sceneStage, display.getHelpDialog().getDialog().getStage());
-      display.getHelpDialog().getCloseButton().fire(new ChangeEvent());
-      finishDialogClose(sceneStage);
-      assertNull(display.getHelpDialog().getDialog().getStage());
-      assertEquals(List.of("low", "high"), choiceIds(display));
-      assertFalse(session.isResolved());
-      assertEquals("TOTAL  ?", display.getDiceRollDisplay().getTotalText());
-      assertEquals("?", display.getDiceRollDisplay().getDisplayedTotalValue());
-      ((Table) display.getChoiceButtons().get(0).getParent()).layout();
-      assertTrue(
-          display.getChoiceButtons().get(0).getX() < display.getChoiceButtons().get(1).getX());
-      display.getChoiceButtons().get(0).fire(new ChangeEvent());
-      assertTrue(display.getDiceRollDisplay().isRolling());
-      assertEquals("ROLLING...", display.getResultText());
-      display.getChoiceButtons().get(1).fire(new ChangeEvent());
-      for (int frame = 0; frame < 42; frame++) {
-        sceneStage.act(1f / 60f);
-      }
-      assertTrue(display.getDiceRollDisplay().isRolling());
-      assertEquals(1, display.getDiceRollDisplay().getFirstValue());
-      assertEquals(6, display.getDiceRollDisplay().getSecondValue());
-      assertEquals("ROLLING...", display.getDiceRollDisplay().getTotalText());
-      for (int frame = 0; frame < 18; frame++) {
-        sceneStage.act(1f / 60f);
-      }
-      assertFalse(display.getDiceRollDisplay().isRolling());
-      assertEquals(1, display.getDiceRollDisplay().getFirstValue());
-      assertEquals(6, display.getDiceRollDisplay().getSecondValue());
-      assertEquals("TOTAL  7", display.getDiceRollDisplay().getTotalText());
-      assertEquals("7", display.getDiceRollDisplay().getDisplayedTotalValue());
-      assertEquals(List.of("take", "double-down"), choiceIds(display));
-      for (TextButton oldChoice : initialChoiceButtons) {
-        assertNull(oldChoice.getStage());
-      }
-      assertEquals(persistentHelpButton, display.getHelpButton());
-      assertEquals(sceneStage, persistentHelpButton.getStage());
-      display.getHelpButton().fire(new ChangeEvent());
-      assertEquals(sceneStage, display.getHelpDialog().getDialog().getStage());
-      display.getHelpDialog().getCloseButton().fire(new ChangeEvent());
-      finishDialogClose(sceneStage);
-      assertNull(display.getHelpDialog().getDialog().getStage());
-      assertEquals(List.of("take", "double-down"), choiceIds(display));
-      assertTrue(display.getResultText().contains("LUCKY SEVEN!"));
-      assertTrue(display.getResultText().contains("dice total is 7"));
-      assertFalse(session.isResolved());
-
-      display.getChoiceButtons().get(0).fire(new ChangeEvent());
-      assertFalse(display.getDiceRollDisplay().isRolling());
-      assertEquals("TOTAL  7", display.getDiceRollDisplay().getTotalText());
-      assertEquals(List.of("cash-out", "continue"), choiceIds(display));
-      assertTrue(display.getResultText().contains("10 gold"));
-      assertFalse(session.isResolved());
-
-      display.getChoiceButtons().get(0).fire(new ChangeEvent());
-      assertTrue(session.isResolved());
-    } finally {
-      sceneEntity.dispose();
-      sceneStage.dispose();
+  private record DiceDisplayFixture(
+      Stage stage, Entity entity, ChanceEncounterSession session, ChanceEncounterDisplay display)
+      implements AutoCloseable {
+    @Override
+    public void close() {
+      entity.dispose();
+      stage.dispose();
     }
   }
 

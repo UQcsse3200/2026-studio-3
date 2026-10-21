@@ -55,7 +55,6 @@ final class CardFusionSelectionView {
   private final Map<String, Image> cardGlows = new LinkedHashMap<>();
 
   private Table root;
-  private Group scene;
   private Group selectionLayer;
   private Group sequenceLayer;
   private Table cardsGrid;
@@ -93,7 +92,7 @@ final class CardFusionSelectionView {
     root = new Table();
     root.setFillParent(true);
     root.setBackground(skin.newDrawable(STYLE_NAME_WHITE, new Color(0.02f, 0.02f, 0.03f, 1f)));
-    scene = new Group();
+    Group scene = new Group();
     scene.setSize(FusionSceneAssets.WIDTH, FusionSceneAssets.HEIGHT);
     Image background = FusionSceneAssets.background(skin);
     background.setColor(0.82f, 0.80f, 0.84f, 1f);

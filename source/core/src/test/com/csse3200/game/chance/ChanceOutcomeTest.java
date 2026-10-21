@@ -20,7 +20,7 @@ class ChanceOutcomeTest {
     assertEquals(List.of("ENERGY_CRYSTAL", "ENERGY_CRYSTAL"), outcome.getItemRewardIds());
     assertFalse(outcome.isNoEffect());
     assertTrue(outcome.getCardRewardIds().isEmpty());
-    assertThrows(UnsupportedOperationException.class, () -> outcome.getItemRewardIds().clear());
+    assertThrows(UnsupportedOperationException.class, outcome.getItemRewardIds()::clear);
   }
 
   @Test

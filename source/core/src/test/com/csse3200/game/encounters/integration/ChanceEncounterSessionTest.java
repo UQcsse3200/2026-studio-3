@@ -24,7 +24,7 @@ class ChanceEncounterSessionTest {
 
     assertEquals(
         List.of("accept", "leave"),
-        session.getAvailableChoices().stream().map(choice -> choice.getId()).toList());
+        session.getAvailableChoices().stream().map(ChanceChoice::getId).toList());
     assertEquals("CHOOSE YOUR RESPONSE", session.getChoicePrompt());
   }
 

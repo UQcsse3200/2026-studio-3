@@ -107,7 +107,14 @@ public class TutorialVictoryScreen extends ScreenAdapter {
           @Override
           public void draw(Batch batch, float parentAlpha) {
             // Match the frame scaling supplied by PixelButtonStyles.
-            float scale = isDisabled() ? 1f : isPressed() ? 0.9375f : isOver() ? 1.125f : 1f;
+            float scale = 1f;
+            if (!isDisabled()) {
+              if (isPressed()) {
+                scale = 0.9375f;
+              } else if (isOver()) {
+                scale = 1.125f;
+              }
+            }
             if (getLabel().getFontScaleX() != scale) {
               getLabel().setFontScale(scale);
             }

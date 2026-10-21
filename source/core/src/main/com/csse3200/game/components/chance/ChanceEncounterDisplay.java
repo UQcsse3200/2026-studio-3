@@ -1288,33 +1288,6 @@ public class ChanceEncounterDisplay extends UIComponent {
     return style;
   }
 
-  /** Distinguishes the two predictions from the later dice decisions. */
-  private TextButtonStyle createDicePredictionStyle(boolean high) {
-    TextButtonStyle style = new TextButtonStyle(choiceStyle);
-    Color accent;
-    if (high) {
-      accent = new Color(0.78f, 0.58f, 1f, 1f);
-      style.up = createDicePredictionDrawable(new Color(0.61f, 0.43f, 0.83f, 1f), accent, true);
-      style.over = createDicePredictionDrawable(new Color(0.78f, 0.58f, 1f, 1f), accent, true);
-      style.down = createDicePredictionDrawable(new Color(0.42f, 0.29f, 0.63f, 1f), accent, true);
-      style.disabled =
-          createDicePredictionDrawable(new Color(0.43f, 0.34f, 0.53f, 0.92f), accent, true);
-      style.fontColor = new Color(0.89f, 0.79f, 1f, 1f);
-    } else {
-      accent = new Color(1f, 0.78f, 0.32f, 1f);
-      style.up = createDicePredictionDrawable(new Color(0.95f, 0.68f, 0.31f, 1f), accent, false);
-      style.over = createDicePredictionDrawable(new Color(1f, 0.83f, 0.44f, 1f), accent, false);
-      style.down = createDicePredictionDrawable(new Color(0.66f, 0.44f, 0.19f, 1f), accent, false);
-      style.disabled =
-          createDicePredictionDrawable(new Color(0.56f, 0.42f, 0.27f, 0.92f), accent, false);
-      style.fontColor = new Color(1f, 0.88f, 0.57f, 1f);
-    }
-    style.overFontColor = Color.WHITE;
-    style.downFontColor = Color.WHITE;
-    style.disabledFontColor = MUTED_COLOUR;
-    return style;
-  }
-
   /** Take and cash out secure a reward; double down and continue risk it. */
   private TextButtonStyle createDiceDecisionStyle(boolean risk) {
     TextButtonStyle style = new TextButtonStyle(choiceStyle);
@@ -1344,26 +1317,6 @@ public class ChanceEncounterDisplay extends UIComponent {
     style.downFontColor = Color.WHITE;
     style.disabledFontColor = MUTED_COLOUR;
     return style;
-  }
-
-  /** The result-screen Continue button keeps the same style for every dice outcome. */
-  private TextButtonStyle createDiceContinueStyle() {
-    TextButtonStyle style = new TextButtonStyle(choiceStyle);
-    Color accent = new Color(0.95f, 0.72f, 0.34f, 1f);
-    style.up = createDiceButtonDrawable(new Color(0.73f, 0.52f, 0.43f, 1f), accent, 0);
-    style.over = createDiceButtonDrawable(new Color(0.90f, 0.65f, 0.51f, 1f), accent, 0);
-    style.down = createDiceButtonDrawable(new Color(0.53f, 0.36f, 0.32f, 1f), accent, 0);
-    style.disabled =
-        createDiceButtonDrawable(
-            new Color(0.42f, 0.34f, 0.33f, 0.92f), new Color(0.53f, 0.44f, 0.32f, 1f), 0);
-    style.fontColor = BODY_COLOUR;
-    style.overFontColor = Color.WHITE;
-    style.downFontColor = Color.WHITE;
-    return style;
-  }
-
-  private Drawable createDicePredictionDrawable(Color tint, Color accent, boolean high) {
-    return createDiceButtonDrawable(tint, accent, high ? 1 : -1);
   }
 
   private Drawable createDiceButtonDrawable(Color tint, Color accent, int arrowDirection) {
@@ -1570,11 +1523,14 @@ public class ChanceEncounterDisplay extends UIComponent {
     resultLabel.setStyle(createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
     resultLabel.setText(resolveOutcomeDisplayText(outcome));
     LabelStyle outcomeStyle = new LabelStyle(resultLabel.getStyle());
+    float shadeOpacity = .60f;
+    if (scenicHealer) {
+      shadeOpacity = .30f;
+    } else if (scenicFountain) {
+      shadeOpacity = .38f;
+    }
     outcomeStyle.background =
-        new EncounterResultShade(
-            resultLabel,
-            skin.getDrawable(STYLE_NAME_WHITE),
-            scenicHealer ? .30f : scenicFountain ? .38f : .60f);
+        new EncounterResultShade(resultLabel, skin.getDrawable(STYLE_NAME_WHITE), shadeOpacity);
     resultLabel.setStyle(outcomeStyle);
     resultLabel.setName("encounter-result-text");
     resultLabel.setFontScale(.9f);
@@ -1582,13 +1538,15 @@ public class ChanceEncounterDisplay extends UIComponent {
   }
 
   private void markSelectedChoice(TextButton selectedButton, String originalButtonText) {
-    centerButtonText(
-        continueButton,
-        scenicFountain
-            ? -.075f
-            : scenicHealer
-                ? .05f
-                : selectedButton.getUserObject() instanceof Float offset ? offset : 0f);
+    float verticalOffset = 0f;
+    if (scenicFountain) {
+      verticalOffset = -.075f;
+    } else if (scenicHealer) {
+      verticalOffset = .05f;
+    } else if (selectedButton.getUserObject() instanceof Float offset) {
+      verticalOffset = offset;
+    }
+    centerButtonText(continueButton, verticalOffset);
     for (TextButton button : choiceButtons) {
       button.setDisabled(true);
     }
@@ -1802,36 +1760,13 @@ public class ChanceEncounterDisplay extends UIComponent {
   }
 
   private void layoutShrineChoiceButton(ChanceChoice choice, TextButton choiceButton) {
-    choiceButton.setStyle(
-        ACCEPT_BRAND.equals(choice.getId())
-            ? illustratedButtonStyle(SHRINE_BRAND_BUTTON_TEXTURE)
-            : SWEAR_BLOOD_OATH.equals(choice.getId())
-                ? illustratedButtonStyle(SHRINE_BLOOD_BUTTON_TEXTURE)
-                : shrineScenicButtonStyle(!MAKE_OFFERING.equals(choice.getId())));
-    if (MAKE_OFFERING.equals(choice.getId()))
-      choiceButton.addListener(
-          new com.badlogic.gdx.scenes.scene2d.InputListener() {
-            @Override
-            public void enter(
-                com.badlogic.gdx.scenes.scene2d.InputEvent event,
-                float x,
-                float y,
-                int pointer,
-                Actor from) {
-              if (pointer == -1 && !choiceResolved && !choiceButton.isDisabled())
-                shrineScene.setOfferingHovered(true);
-            }
-
-            @Override
-            public void exit(
-                com.badlogic.gdx.scenes.scene2d.InputEvent event,
-                float x,
-                float y,
-                int pointer,
-                Actor to) {
-              if (pointer == -1) shrineScene.setOfferingHovered(false);
-            }
-          });
+    if (ACCEPT_BRAND.equals(choice.getId())) {
+      choiceButton.setStyle(illustratedButtonStyle(SHRINE_BRAND_BUTTON_TEXTURE));
+    } else if (SWEAR_BLOOD_OATH.equals(choice.getId())) {
+      choiceButton.setStyle(illustratedButtonStyle(SHRINE_BLOOD_BUTTON_TEXTURE));
+    } else {
+      choiceButton.setStyle(shrineScenicButtonStyle(!MAKE_OFFERING.equals(choice.getId())));
+    }
     if (visibleChoiceCount >= 4) {
       choiceButton.getLabel().setFontScale(.87f);
       choicesTable.add(choiceButton).width(600f).height(82f).padBottom(8f);
@@ -1951,9 +1886,6 @@ public class ChanceEncounterDisplay extends UIComponent {
       fusionIntroContent.setVisible(false);
     }
     recordVisibleCard(outcome);
-    if (scenicShrine) {
-      shrineScene.setOfferingHovered(false);
-    }
     if (hasScenicResultOverlay()) {
       resultLabel.getParent().setVisible(true);
       choicesTable.setVisible(false);

@@ -37,7 +37,7 @@ public record AcquisitionResult(String resultId, List<Entry> entries) {
       Objects.requireNonNull(kind, "kind");
       requireText(id, "id");
       requireText(name, "name");
-      description = Objects.requireNonNull(description, "description");
+      Objects.requireNonNull(description, "description");
       if (kind == Kind.GOLD || kind == Kind.HP) {
         if (quantity == 0 || durationTurns != null) {
           throw new IllegalArgumentException(

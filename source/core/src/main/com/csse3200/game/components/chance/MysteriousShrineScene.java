@@ -40,10 +40,6 @@ final class MysteriousShrineScene extends Group {
     if (background != null) background.setBounds(0, 0, getWidth(), getHeight());
   }
 
-  void setOfferingHovered(boolean hovered) {
-    // Static artwork deliberately does not react to button hover.
-  }
-
   boolean isResponding() {
     return response >= 0;
   }

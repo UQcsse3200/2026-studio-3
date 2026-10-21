@@ -264,15 +264,8 @@ class CardFusionSelectionViewTest {
   }
 
   @Test
-  void fusionPresentationFlashesDirectlyToACompleteRewardCard() {
-    PlayerDeck deck = runState.getOrCreatePlayerDeck(cardLibrary);
-    CardFusionSelectionView view = display.getCardFusionView();
-    deck.getCards().stream()
-        .filter(card -> card.cardId().equals("strike"))
-        .limit(3)
-        .map(CardInstance::instanceId)
-        .forEach(id -> select(view.getCardButtons().get(id)));
-    view.getFuseButton().fire(new ChangeEvent());
+  void fusionPresentationStartsWithThreeCardsAndCenteredFlash() {
+    CardFusionSelectionView view = startFusion();
 
     Group sequence = view.getSequenceLayer();
     List<Group> floatingCards = new ArrayList<>();
@@ -308,7 +301,13 @@ class CardFusionSelectionViewTest {
     assertEquals(12f, floatingCards.get(0).getRotation());
     assertEquals(0f, floatingCards.get(1).getRotation());
     assertEquals(-12f, floatingCards.get(2).getRotation());
+  }
 
+  @Test
+  void fusionPresentationShowsCompleteRewardAndCenteredCaption() {
+    PlayerDeck deck = runState.getOrCreatePlayerDeck(cardLibrary);
+    CardFusionSelectionView view = startFusion();
+    Group sequence = view.getSequenceLayer();
     advanceFusionAnimation();
     assertNotNull(view.getContinueButton());
     assertTrue(sequence.getChildren().contains(view.getContinueButton(), true));
@@ -343,10 +342,10 @@ class CardFusionSelectionViewTest {
           cardRarity = label;
         }
         hasType |= label.getText().toString().equals(reward.type.toString());
-      } else if (actor instanceof Image image && image.getWidth() == 316f) {
-        if (image.getHeight() == 260f) {
-          largeArtworkCount++;
-        }
+      } else if (actor instanceof Image image
+          && image.getWidth() == 316f
+          && image.getHeight() == 260f) {
+        largeArtworkCount++;
       }
     }
     assertTrue(hasEnergy);
@@ -368,7 +367,9 @@ class CardFusionSelectionViewTest {
           case "A new " -> prefix = label;
           case "Rare" -> highlightedRare = label;
           case " card joins your deck." -> suffix = label;
-          default -> {}
+          default -> {
+            // Other labels are unrelated to the reward sentence.
+          }
         }
       }
     }
@@ -383,6 +384,18 @@ class CardFusionSelectionViewTest {
             / 2f,
         highlightedRare.getY() + highlightedRare.getHeight() / 2f);
     assertEquals(cardRarity.getStyle().fontColor, highlightedRare.getStyle().fontColor);
+  }
+
+  private CardFusionSelectionView startFusion() {
+    PlayerDeck deck = runState.getOrCreatePlayerDeck(cardLibrary);
+    CardFusionSelectionView view = display.getCardFusionView();
+    deck.getCards().stream()
+        .filter(card -> card.cardId().equals("strike"))
+        .limit(3)
+        .map(CardInstance::instanceId)
+        .forEach(id -> select(view.getCardButtons().get(id)));
+    view.getFuseButton().fire(new ChangeEvent());
+    return view;
   }
 
   @Test
