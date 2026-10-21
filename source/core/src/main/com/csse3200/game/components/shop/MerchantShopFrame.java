@@ -28,10 +28,17 @@ final class MerchantShopFrame extends BaseDrawable {
   MerchantShopFrame(Drawable pixel, Color fill, Tone tone) {
     this.pixel = pixel;
     this.fill = new Color(fill);
-    metal =
-        Color.valueOf(tone == Tone.MUTED ? "70695E" : tone == Tone.DANGER ? "8F3427" : "90652D");
-    highlight =
-        Color.valueOf(tone == Tone.MUTED ? "A49D8F" : tone == Tone.DANGER ? "ED6250" : "D9B16B");
+    String metalColor = "90652D";
+    String highlightColor = "D9B16B";
+    if (tone == Tone.MUTED) {
+      metalColor = "70695E";
+      highlightColor = "A49D8F";
+    } else if (tone == Tone.DANGER) {
+      metalColor = "8F3427";
+      highlightColor = "ED6250";
+    }
+    metal = Color.valueOf(metalColor);
+    highlight = Color.valueOf(highlightColor);
   }
 
   static TextButtonStyle buttonStyle(Drawable pixel, TextButtonStyle base, Tone tone) {

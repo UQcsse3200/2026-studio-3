@@ -29,21 +29,16 @@ public class ShopService {
     for (ShopItem item : shopItems) {
       if (item == null) {
         validationErrors.add("Shop item entry is null.");
-        continue;
-      }
-      if (item.id == null || item.id.isBlank()) {
+      } else if (item.id == null || item.id.isBlank()) {
         validationErrors.add("Shop item is missing an id.");
-        continue;
-      }
-      if (items.containsKey(item.id)) {
+      } else if (items.containsKey(item.id)) {
         validationErrors.add(String.format("Duplicate shop item id ignored: %s.", item.id));
-        continue;
+      } else {
+        if (!item.isValid()) {
+          validationErrors.add(String.format("Invalid shop item data: %s.", item.id));
+        }
+        items.put(item.id, item);
       }
-      if (!item.isValid()) {
-        validationErrors.add(String.format("Invalid shop item data: %s.", item.id));
-      }
-
-      items.put(item.id, item);
     }
   }
 

@@ -502,9 +502,11 @@ public final class AcquisitionResultDisplay implements AcquisitionView {
           && entry.kind() != AcquisitionResult.Kind.ITEM
           && !(entry.kind() == AcquisitionResult.Kind.GOLD && entry.delta() != 0)) continue;
       int target =
-          entry.kind() == AcquisitionResult.Kind.CARD
-              ? 0
-              : entry.kind() == AcquisitionResult.Kind.ITEM ? 1 : 2;
+          switch (entry.kind()) {
+            case CARD -> 0;
+            case ITEM -> 1;
+            default -> 2;
+          };
       Vector2 start =
           sources
               .get(i)

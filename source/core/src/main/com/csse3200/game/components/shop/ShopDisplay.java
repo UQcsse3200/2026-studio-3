@@ -676,19 +676,22 @@ public class ShopDisplay extends UIComponent {
     var quote = shopEncounter.snapshot();
     if (refreshButton != null) {
       var fee = quote.nextRefreshCost();
-      refreshButton.setText(
-          fee.isPresent()
-              ? (fee.getAsInt() == 0 ? "Refresh (Free)" : "Refresh (" + fee.getAsInt() + " GOLD)")
-              : "Refresh unavailable");
+      String refreshText = "Refresh unavailable";
+      if (fee.isPresent()) {
+        refreshText =
+            fee.getAsInt() == 0 ? "Refresh (Free)" : "Refresh (" + fee.getAsInt() + " GOLD)";
+      }
+      refreshButton.setText(refreshText);
       refreshButton.setDisabled(
           quote.completed()
               || fee.isEmpty()
               || quote.gold() == null
               || (fee.isPresent() && quote.gold() < fee.getAsInt()));
-      MerchantShopFrame.Tone refreshTone =
-          fee.isEmpty() || quote.completed()
-              ? MerchantShopFrame.Tone.MUTED
-              : fee.getAsInt() == 0 ? MerchantShopFrame.Tone.FREE : MerchantShopFrame.Tone.PRIMARY;
+      MerchantShopFrame.Tone refreshTone = MerchantShopFrame.Tone.MUTED;
+      if (fee.isPresent() && !quote.completed()) {
+        refreshTone =
+            fee.getAsInt() == 0 ? MerchantShopFrame.Tone.FREE : MerchantShopFrame.Tone.PRIMARY;
+      }
       refreshButton.setStyle(
           MerchantShopFrame.buttonStyle(
               skin.getDrawable(WHITE), refreshButton.getStyle(), refreshTone));
@@ -699,15 +702,18 @@ public class ShopDisplay extends UIComponent {
     if (merchantsFavorLabel != null) {
       int favorCount =
           playerRunState == null ? 0 : playerRunState.getOwnedItemCount(ItemType.MERCHANTS_FAVOR);
-      merchantsFavorLabel.setText(
-          favorCount == 0
-              ? ""
-              : String.format(
-                  "%s x%d  |  %.0f%% off all offers",
-                  ItemFormatting.formatItemName(ItemType.MERCHANTS_FAVOR),
-                  favorCount,
-                  (shopEncounter.getShopDiscount() == null ? 0f : shopEncounter.getShopDiscount())
-                      * 100f));
+      if (favorCount == 0) {
+        merchantsFavorLabel.setText("");
+      } else {
+        float discount =
+            shopEncounter.getShopDiscount() == null ? 0f : shopEncounter.getShopDiscount();
+        merchantsFavorLabel.setText(
+            String.format(
+                "%s x%d  |  %.0f%% off all offers",
+                ItemFormatting.formatItemName(ItemType.MERCHANTS_FAVOR),
+                favorCount,
+                discount * 100f));
+      }
     }
   }
 

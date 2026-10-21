@@ -10,7 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.csse3200.game.components.cards.CardWidget;
-import java.util.function.BiConsumer;
+import java.util.function.ObjLongConsumer;
 
 /** Live tabletop offer: readable card, slim price plaque and purchase button, no cabinet. */
 final class CardDisplaySlot extends Group {
@@ -27,7 +27,7 @@ final class CardDisplaySlot extends Group {
       Drawable pixel,
       Label.LabelStyle priceStyle,
       TextButton.TextButtonStyle buttonStyle,
-      BiConsumer<String, Long> purchase) {
+      ObjLongConsumer<String> purchase) {
     setSize(270, SLOT_HEIGHT);
     setTouchable(Touchable.childrenOnly);
     // Account for transparent margins in the authored face, so visible pixels fill the wood

@@ -1523,11 +1523,14 @@ public class ChanceEncounterDisplay extends UIComponent {
     resultLabel.setStyle(createLabelStyle(STYLE_NAME_DEFAULT, BODY_COLOUR));
     resultLabel.setText(resolveOutcomeDisplayText(outcome));
     LabelStyle outcomeStyle = new LabelStyle(resultLabel.getStyle());
+    float shadeOpacity = .60f;
+    if (scenicHealer) {
+      shadeOpacity = .30f;
+    } else if (scenicFountain) {
+      shadeOpacity = .38f;
+    }
     outcomeStyle.background =
-        new EncounterResultShade(
-            resultLabel,
-            skin.getDrawable(STYLE_NAME_WHITE),
-            scenicHealer ? .30f : scenicFountain ? .38f : .60f);
+        new EncounterResultShade(resultLabel, skin.getDrawable(STYLE_NAME_WHITE), shadeOpacity);
     resultLabel.setStyle(outcomeStyle);
     resultLabel.setName("encounter-result-text");
     resultLabel.setFontScale(.9f);
@@ -1535,13 +1538,15 @@ public class ChanceEncounterDisplay extends UIComponent {
   }
 
   private void markSelectedChoice(TextButton selectedButton, String originalButtonText) {
-    centerButtonText(
-        continueButton,
-        scenicFountain
-            ? -.075f
-            : scenicHealer
-                ? .05f
-                : selectedButton.getUserObject() instanceof Float offset ? offset : 0f);
+    float verticalOffset = 0f;
+    if (scenicFountain) {
+      verticalOffset = -.075f;
+    } else if (scenicHealer) {
+      verticalOffset = .05f;
+    } else if (selectedButton.getUserObject() instanceof Float offset) {
+      verticalOffset = offset;
+    }
+    centerButtonText(continueButton, verticalOffset);
     for (TextButton button : choiceButtons) {
       button.setDisabled(true);
     }
@@ -1755,12 +1760,13 @@ public class ChanceEncounterDisplay extends UIComponent {
   }
 
   private void layoutShrineChoiceButton(ChanceChoice choice, TextButton choiceButton) {
-    choiceButton.setStyle(
-        ACCEPT_BRAND.equals(choice.getId())
-            ? illustratedButtonStyle(SHRINE_BRAND_BUTTON_TEXTURE)
-            : SWEAR_BLOOD_OATH.equals(choice.getId())
-                ? illustratedButtonStyle(SHRINE_BLOOD_BUTTON_TEXTURE)
-                : shrineScenicButtonStyle(!MAKE_OFFERING.equals(choice.getId())));
+    if (ACCEPT_BRAND.equals(choice.getId())) {
+      choiceButton.setStyle(illustratedButtonStyle(SHRINE_BRAND_BUTTON_TEXTURE));
+    } else if (SWEAR_BLOOD_OATH.equals(choice.getId())) {
+      choiceButton.setStyle(illustratedButtonStyle(SHRINE_BLOOD_BUTTON_TEXTURE));
+    } else {
+      choiceButton.setStyle(shrineScenicButtonStyle(!MAKE_OFFERING.equals(choice.getId())));
+    }
     if (visibleChoiceCount >= 4) {
       choiceButton.getLabel().setFontScale(.87f);
       choicesTable.add(choiceButton).width(600f).height(82f).padBottom(8f);
