@@ -37,12 +37,8 @@ class BattleTutorialControllerTest {
   }
 
   @Test
-  void referenceSequenceRequiresTheExactDemonstrationCopyAtStepSix() {
-    BattleTutorialController tutorial = new BattleTutorialController(true);
-    tutorial.setDemonstrationCardId("demo-strike");
-    tutorial.setPoisonCardId("demo-poison");
-    tutorial.observeInitialHealth(32);
-    tutorial.start();
+  void referenceStrikeRequiresExactCopyAndSettledDamage() {
+    BattleTutorialController tutorial = referenceTutorial();
     assertEquals(BattleTutorialController.Step.HAND, tutorial.getCurrentStep().orElseThrow());
     tutorial.onSuccessfulCardPlay("demo-strike");
     for (int i = 0; i < 5; i++) assertTrue(tutorial.continueInformation());
@@ -67,6 +63,14 @@ class BattleTutorialControllerTest {
     tutorial.onSuccessfulCardPlay("demo-strike");
     assertEquals(
         BattleTutorialController.Step.ENEMY_STATS, tutorial.getCurrentStep().orElseThrow());
+  }
+
+  @Test
+  void referencePoisonRequiresExactCopyAndSettledStatusBeforeFreePlay() {
+    BattleTutorialController tutorial = referenceTutorial();
+    for (int i = 0; i < 5; i++) tutorial.continueInformation();
+    tutorial.onSuccessfulCardPlay("demo-strike");
+    tutorial.observeResolution(26, true, BattlePhase.PLAYER_TURN, false);
     assertTrue(tutorial.continueInformation());
     assertEquals(
         BattleTutorialController.Step.PLAY_POISON_CARD, tutorial.getCurrentStep().orElseThrow());
@@ -101,6 +105,15 @@ class BattleTutorialControllerTest {
     tutorial.observeResolution(26, true, BattlePhase.PLAYER_TURN, false);
     assertEquals(BattleTutorialController.Step.FREE_PLAY, tutorial.getCurrentStep().orElseThrow());
     assertTrue(tutorial.getOutcome().isEmpty());
+  }
+
+  private BattleTutorialController referenceTutorial() {
+    BattleTutorialController tutorial = new BattleTutorialController(true);
+    tutorial.setDemonstrationCardId("demo-strike");
+    tutorial.setPoisonCardId("demo-poison");
+    tutorial.observeInitialHealth(32);
+    tutorial.start();
+    return tutorial;
   }
 
   @Test

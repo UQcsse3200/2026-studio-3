@@ -259,7 +259,45 @@ class GdxGameTest {
   }
 
   @Test
-  void newRunDisposesOldScreenBeforeResettingPlayerAndDeck() {
+  void newRunDisposesOldScreenBeforeClearingRunProgress() {
+    verifyNewRunReset(
+        reset -> {
+          assertFalse(reset.runState().isRunActive());
+          assertNull(reset.runState().getMapGraph());
+          assertNull(reset.runState().getActiveNodeId());
+          assertNull(reset.runState().getEncounterSeed());
+          assertEquals(0, reset.runState().getPlayerHealth());
+          assertEquals(0, reset.runState().getPlayerMaxHealth());
+          assertEquals(0, reset.runState().getPlayerMaxEnergy());
+          assertFalse(reset.runState().hasUsedCardFusion());
+          assertFalse(reset.runState().hasPendingEliteTempleReward());
+          assertNull(reset.runState().getPendingReward());
+        });
+  }
+
+  @Test
+  void newRunReplacesPlayerAndDeckAfterDisposingOldScreen() {
+    verifyNewRunReset(
+        reset -> {
+          PlayerRunState newPlayer = reset.runState().getOrCreatePlayerState();
+          PlayerRunState defaults = PlayerFactory.createInitialRunState();
+
+          assertNotSame(reset.oldPlayer(), newPlayer);
+          assertEquals(defaults.getCurrentHealth(), newPlayer.getCurrentHealth());
+          assertEquals(defaults.getMaxHealth(), newPlayer.getMaxHealth());
+          assertEquals(defaults.getGold(), newPlayer.getGold());
+          assertTrue(newPlayer.getOwnedItems().isEmpty());
+
+          PlayerDeck newDeck = reset.runState().getOrCreatePlayerDeck(reset.cards());
+          assertNotSame(reset.oldDeck(), newDeck);
+          assertEquals(PlayerDeckFactory.getStarterDeckCardIds(), newDeck.getCardIds());
+        });
+  }
+
+  private record NewRunReset(
+      RunState runState, CardService cards, PlayerRunState oldPlayer, PlayerDeck oldDeck) {}
+
+  private void verifyNewRunReset(java.util.function.Consumer<NewRunReset> checkReset) {
     GdxGame game = gameWithActiveNode(RoomType.COMBAT);
     RunState runState = game.getRunState();
     CardService cards = new CardLibrary(CardConfigLoader.loadCards());
@@ -303,29 +341,7 @@ class GdxGameTest {
                 (map, context) -> {
                   verify(oldScreen).dispose();
 
-                  assertFalse(runState.isRunActive());
-                  assertNull(runState.getMapGraph());
-                  assertNull(runState.getActiveNodeId());
-                  assertNull(runState.getEncounterSeed());
-                  assertEquals(0, runState.getPlayerHealth());
-                  assertEquals(0, runState.getPlayerMaxHealth());
-                  assertEquals(0, runState.getPlayerMaxEnergy());
-                  assertFalse(runState.hasUsedCardFusion());
-                  assertFalse(runState.hasPendingEliteTempleReward());
-                  assertNull(runState.getPendingReward());
-
-                  PlayerRunState newPlayer = runState.getOrCreatePlayerState();
-                  PlayerRunState defaults = PlayerFactory.createInitialRunState();
-
-                  assertNotSame(oldPlayer, newPlayer);
-                  assertEquals(defaults.getCurrentHealth(), newPlayer.getCurrentHealth());
-                  assertEquals(defaults.getMaxHealth(), newPlayer.getMaxHealth());
-                  assertEquals(defaults.getGold(), newPlayer.getGold());
-                  assertTrue(newPlayer.getOwnedItems().isEmpty());
-
-                  PlayerDeck newDeck = runState.getOrCreatePlayerDeck(cards);
-                  assertNotSame(oldDeck, newDeck);
-                  assertEquals(PlayerDeckFactory.getStarterDeckCardIds(), newDeck.getCardIds());
+                  checkReset.accept(new NewRunReset(runState, cards, oldPlayer, oldDeck));
                 })) {
       game.startNewRun();
 
