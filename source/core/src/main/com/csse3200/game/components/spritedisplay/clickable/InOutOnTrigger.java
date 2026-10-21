@@ -30,10 +30,13 @@ public class InOutOnTrigger extends Clickable {
   private static final String HOVER_EVENT = "handCardHover";
 
   // How far a sibling slides away from a hovered card, so its overlapped edge becomes visible.
-  private static final float SIBLING_SPREAD_PX = 70f;
+  private static final float SIBLING_SPREAD_PX = 120f;
 
   // Duration of the sibling-spread slide, snappier than the full up/down slide.
   private static final float SPREAD_DURATION = 0.2f;
+
+  private static final float RAISE_PX = 140f;
+  private static final float RAISE_DURATION = 0.3f;
 
   public InOutOnTrigger(ClickableRecord rec) {
     super(rec);
@@ -153,7 +156,8 @@ public class InOutOnTrigger extends Clickable {
 
     // Move up by 10 pixels from current position
     // Using "moveBy" with a curved easing (slow in, fast out)
-    btn.addAction(Actions.moveTo(targetX, targetY + 120, 0.3f, Interpolation.sineOut));
+    btn.addAction(
+        Actions.moveTo(targetX, targetY + RAISE_PX, RAISE_DURATION, Interpolation.sineOut));
 
     entity.getEvents().trigger(HOVER_EVENT, this, true);
   }

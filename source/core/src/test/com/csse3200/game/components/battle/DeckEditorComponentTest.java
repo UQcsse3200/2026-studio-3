@@ -749,17 +749,15 @@ class DeckEditorComponentTest {
   }
 
   private void recordEvents(Entity target) {
-    target.getEvents().addListener(DeckEditorEvents.ERROR, (String text) -> errors.add(text));
-    target.getEvents().addListener(DeckEditorEvents.SUMMARY, (String text) -> summaries.add(text));
+    // Explicit type witnesses pick the one-argument overload; List::add also matches add(int, E).
+    target.getEvents().<String>addListener(DeckEditorEvents.ERROR, errors::add);
+    target.getEvents().<String>addListener(DeckEditorEvents.SUMMARY, summaries::add);
     target
         .getEvents()
-        .addListener(
-            DeckEditorEvents.PREVIEW,
-            (CardPreviewDisplay.Content preview) -> previews.add(preview));
+        .<CardPreviewDisplay.Content>addListener(DeckEditorEvents.PREVIEW, previews::add);
     target
         .getEvents()
-        .addListener(
-            DeckEditorEvents.BADGES, (List<CardBadgesDisplay.Badge> shown) -> badges.add(shown));
+        .<List<CardBadgesDisplay.Badge>>addListener(DeckEditorEvents.BADGES, badges::add);
     for (String name :
         List.of(
             DeckEditorEvents.OPENED,
