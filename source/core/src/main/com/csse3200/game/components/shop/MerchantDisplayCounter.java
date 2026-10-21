@@ -12,7 +12,7 @@ final class MerchantDisplayCounter extends Group {
   }
 
   void addSlot(CardDisplaySlot slot, int index) {
-    slot.setBounds(45 + index * 290, 0, 270, CardDisplaySlot.SLOT_HEIGHT);
+    slot.setBounds(45f + index * 290f, 0, 270, CardDisplaySlot.SLOT_HEIGHT);
     slot.alignWithFrame(index);
     addActor(slot);
   }

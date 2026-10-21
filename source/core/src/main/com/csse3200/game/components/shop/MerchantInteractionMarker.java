@@ -61,7 +61,7 @@ final class MerchantInteractionMarker extends Actor {
     diamond(batch, x, y, 24, hovered ? 5 : 4);
     for (int row = -5; row <= 5; row++) {
       int halfWidth = 5 - Math.abs(row);
-      pixel.draw(batch, x - halfWidth - .5f, y + row - .5f, halfWidth * 2 + 1, 1);
+      pixel.draw(batch, x - halfWidth - .5f, y + row - .5f, halfWidth * 2f + 1f, 1);
     }
     for (int i = 0; i < 6; i++) {
       int offset = 15 - i * 3;
