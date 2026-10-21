@@ -82,16 +82,6 @@ class EnemyAnimationControllerTest {
     verify(animator).startAnimation("hurt");
   }
 
-  // An enemy whose atlas has death frames should play death when it dies, not fall back to hurt
-  @Test
-  void shouldPlayDeathWhenDeathAnimationAvailable() {
-    when(animator.hasAnimation("death")).thenReturn(true);
-
-    enemy.getEvents().trigger("enemyDefeated");
-
-    verify(animator).startAnimation("death");
-  }
-
   @Test
   void shouldPlayDeathWhenAvailable() {
     when(animator.hasAnimation("death")).thenReturn(true);
