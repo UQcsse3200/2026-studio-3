@@ -38,6 +38,17 @@ class EnemyRosterContentTest {
     }
   }
 
+  // The bestiary's pixel font has no glyph for these dashes, so they would render as boxes
+  @Test
+  void descriptionsAvoidDashesThePixelFontCannotDraw() {
+    for (String id : roster.ids()) {
+      String description = roster.get(id).description;
+      assertFalse(
+          description.contains("—") || description.contains("–"),
+          "Enemy '" + id + "' description uses a dash the pixel font cannot draw");
+    }
+  }
+
   @Test
   void descriptionsAvoidRetiredStoryWording() {
     for (String id : roster.ids()) {
